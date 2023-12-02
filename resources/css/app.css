@@ -1,0 +1,147 @@
+@import url(font.css);
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+.text-input__loading {
+    height: 100%;
+    width: 100%;
+  }
+  .text-input__loading--line {
+    height: 15px;
+    margin: 15px;
+    -webkit-animation: pulse 2s infinite ease-in-out;
+            animation: pulse 2s infinite ease-in-out;
+  }
+  .text-input__loading div:nth-child(3) {
+    width: 150px;
+  }
+  .text-input__loading div:nth-child(5) {
+    width: 150px;
+  }
+  .text-input__loading div:nth-child(6) {
+    width: 250px;
+  }
+  .text-input__loading div:nth-child(7) {
+    width: 250px;
+  }
+  .text-input__loading div:nth-child(1) {
+    width: 50px;
+  }
+  .text-input__loading div:nth-child(2) {
+    width: 100px;
+  }
+  .text-input__loading div:nth-child(4) {
+    width: 100px;
+  }
+  
+  @-webkit-keyframes pulse {
+    0% {
+      background-color: rgba(61, 79, 153, 0.07);
+    }
+    50% {
+      background-color: rgba(61, 79, 153, 0.13);
+    }
+    100% {
+      background-color: rgba(61, 79, 153, 0.07);
+    }
+  }
+  
+  @keyframes pulse {
+    0% {
+      background-color: rgba(61, 79, 153, 0.07);
+    }
+    50% {
+      background-color: rgba(61, 79, 153, 0.13);
+    }
+    100% {
+      background-color: rgba(61, 79, 153, 0.07);
+    }
+  }
+  
+
+  .label__checkbox {
+    display: none;
+  }
+  
+  .label__check {
+    display: inline-block;
+    border-radius: 50%;
+    border: 3px solid rgba(0, 0, 0, 0.1);
+    background: white;
+    vertical-align: middle;
+    margin-right: 20px;
+    width: 2em;
+    height: 2em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border .3s ease;
+  }
+  
+  svg.icon {
+    opacity: 0.2;
+    font-size: calc(1rem + 1vw);
+    color: gray;
+    transition: opacity .3s .1s ease;
+  }
+  
+  .label__checkbox:checked + .label__text .label__check {
+    animation: check .5s cubic-bezier(0.895, 0.030, 0.685, 0.220) forwards;
+  }
+  
+  .label__checkbox:checked + .label__text .label__check  .icon {
+    opacity: 1;
+    transform: scale(0);
+    color: white ;
+    animation: icon .3s cubic-bezier(1.000, 0.008, 0.565, 1.650) .1s 1 forwards;
+  }
+  
+  @keyframes icon {
+    from {
+        opacity: 0;
+        transform: scale(0.3);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+  }
+  
+  @keyframes check {
+    0% {
+        width: 1.5em;
+        height: 1.5em;
+        border-width: 5px;
+    }
+    10% {
+        width: 1.5em;
+        height: 1.5em;
+        opacity: 0.1;
+        background: rgba(0,0,0,0.2);
+        border-width: 15px;
+    }
+    12% {
+        width: 1.5em;
+        height: 1.5em;
+        opacity: 0.4;
+        background: rgba(0,0,0,0.1);
+        border-width: 0;
+    }
+    50% {
+        width: 2em;
+        height: 2em;
+        background: #00d478;
+        border: 0;
+        opacity: 0.6;
+    }
+    100% {
+        width: 2em;
+        height: 2em;
+        background: #00d478;
+        border: 0;
+        opacity: 1;
+    }
+  }

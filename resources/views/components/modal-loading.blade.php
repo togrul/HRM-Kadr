@@ -1,0 +1,1 @@
+<img src="{{asset('/assets/images/modal-loader.gif')}}" class="w-56" alt="loader">

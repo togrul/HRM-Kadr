@@ -1,0 +1,380 @@
+<div class="w-full rounded-xl px-4 py-3 bg-gray-100 font-semibold text-xl flex justify-center">
+    <h1>{{ __('Languages') }}</h1>
+</div>
+
+<div class="grid grid-cols-2 gap-2">
+    <div class="flex flex-col">
+        <x-select-list class="w-full" :title="__('Languages')" mode="gray" :selected="$languageName" name="languageId">            
+            <x-select-list-item wire:click="setData('language','language_id','language','---',null)" :selected="'---' == $languageName"
+              wire:model='language.language_id.id'>
+              ---
+            </x-select-list-item>
+                @foreach($languageModel as $lng)
+                <x-select-list-item wire:click="setData('language','language_id','language','{{ $lng->name }}',{{ $lng->id }})"
+                :selected="$lng->id === $languageId" wire:model='language.language_id.id'>
+                    {{ $lng->name }}
+                </x-select-list-item>
+                @endforeach
+        </x-select-list>
+        @error('language.language_id.id')
+        <x-validation> {{ $message }} </x-validation>
+        @enderror
+    </div>
+    <div class="flex flex-col space-y-1">
+        <x-label for="language.knowledge_status">{{ __('Knowledge status') }}</x-label>
+        <div class="flex flex-row">
+            @foreach($knowledges as $key => $knw)
+          <label class="inline-flex items-center bg-gray-100 rounded shadow-sm py-2 px-2">
+            <input type="radio" class="form-radio" name="language.knowledge_status" wire:model="language.knowledge_status" value="{{ __($knw) }}">
+            <span class="ml-2 text-sm font-normal">{{ __($knw) }}</span>
+          </label>
+          @endforeach
+        </div>
+        @error('language.knowledge_status')
+        <x-validation> {{ $message }} </x-validation>
+        @enderror
+      </div>
+</div>
+<div class="flex justify-end">
+    <x-button  mode="black" wire:click="addLanguage">{{ __('Add') }}</x-button>
+</div>
+
+<div class="relative -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+    <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+    <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
+        <x-table.tbl :headers="[__('Language'),__('Knowledge status'),'action']">
+            @forelse ($language_list as $key => $lng)
+            <tr>
+                <x-table.td>
+                    <span class="text-sm font-medium text-gray-700">
+                        {{ $lng['language_id']['name'] }} 
+                   </span>
+                </x-table.td>
+                <x-table.td>
+                   <span class="text-sm font-medium text-gray-700">
+                        {{ $lng['knowledge_status'] }} 
+                    </span>
+                </x-table.td>
+                <x-table.td :isButton="true">
+                     <button
+                        onclick="confirm('Are you sure you want to remove this data?') || event.stopImmediatePropagation()"
+                        wire:click="forceDeleteLanguage({{ $key }})"
+                        class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-50 hover:text-gray-700"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-red-500">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m6 4.125l2.25 2.25m0 0l2.25 2.25M12 13.875l2.25-2.25M12 13.875l-2.25 2.25M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                        </svg>
+                    </button>
+                </x-table.td>
+            </tr>
+            @empty
+            <tr>
+                <td colspan="5">
+                   <div class="flex justify-center items-center py-4">
+                    <span class="font-medium">{{ __('No information added') }}</span>
+                   </div>
+                </td>
+            </tr>
+            @endforelse
+        </x-table.tbl>
+
+
+    </div>
+    </div>
+</div>
+
+<hr>
+
+<div class="w-full rounded-xl px-4 py-3 bg-gray-100 font-semibold text-xl flex justify-center">
+    <h1>{{ __('Participation events') }}</h1>
+</div>
+
+<div class="grid grid-cols-3 gap-2">
+    <div class="flex flex-col">
+        <x-label for="event.event_type">{{ __('Event type') }}</x-label>
+        <x-livewire-input mode="gray" name="event.event_type" wire:model="event.event_type"></x-livewire-input>
+        @error('event.event_type')
+        <x-validation> {{ $message }} </x-validation>
+        @enderror
+    </div>
+    <div class="flex flex-col">
+        <x-label for="event.event_name">{{ __('Event name') }}</x-label>
+        <x-livewire-input mode="gray" name="event.event_name" wire:model="event.event_name"></x-livewire-input>
+        @error('event.event_name')
+        <x-validation> {{ $message }} </x-validation>
+        @enderror
+    </div>
+    <div class="flex flex-col">
+        <x-label for="event.event_date">{{ __('Event date') }}</x-label>
+        <x-pikaday-input mode="gray" name="event.event_date" format="Y-MM-DD" wire:model.live="event.event_date">
+            <x-slot name="script">
+              $el.onchange = function () {
+              @this.set('event.event_date', $el.value);
+              }
+            </x-slot>
+          </x-pikaday-input>
+          @error('event.event_date')
+          <x-validation> {{ $message }} </x-validation>
+          @enderror
+    </div>
+</div>
+<div class="flex justify-end">
+    <x-button  mode="black" wire:click="addEvent">{{ __('Add') }}</x-button>
+</div>
+
+<div class="relative -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+    <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+    <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
+        <x-table.tbl :headers="[__('Event name'),__('Event type'),__('Date'),'action']">
+            @forelse ($event_list as $key => $evnt)
+            <tr>
+                <x-table.td>
+                    <span class="text-sm font-medium text-gray-700">
+                        {{ $evnt['event_name'] }} 
+                   </span>
+                </x-table.td>
+                <x-table.td>
+                   <span class="text-sm font-medium text-gray-700">
+                         {{ $evnt['event_type'] }} 
+                    </span>
+                </x-table.td>
+                <x-table.td>
+                    <span class="text-sm font-medium text-gray-700">
+                          {{ $evnt['event_date'] }} 
+                     </span>
+                 </x-table.td>
+                <x-table.td :isButton="true">
+                     <button
+                        onclick="confirm('Are you sure you want to remove this data?') || event.stopImmediatePropagation()"
+                        wire:click="forceDeleteEvent({{ $key }})"
+                        class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-50 hover:text-gray-700"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-red-500">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m6 4.125l2.25 2.25m0 0l2.25 2.25M12 13.875l2.25-2.25M12 13.875l-2.25 2.25M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                        </svg>
+                    </button>
+                </x-table.td>
+            </tr>
+            @empty
+            <tr>
+                <td colspan="5">
+                   <div class="flex justify-center items-center py-4">
+                    <span class="font-medium">{{ __('No information added') }}</span>
+                   </div>
+                </td>
+            </tr>
+            @endforelse
+        </x-table.tbl>
+
+
+    </div>
+    </div>
+</div>
+
+<hr>
+
+<div class="w-full rounded-xl px-4 py-3 bg-gray-100 font-semibold text-xl flex justify-center">
+    <h1>{{ __('Scientific degree and names') }}</h1>
+</div>
+
+<div class="grid grid-cols-3 gap-2">
+    <div class="flex flex-col">
+        <x-select-list class="w-full" :title="__('Degree')" mode="gray" :selected="$degreeName" name="degreeId">            
+            <x-select-list-item wire:click="setData('degree','degree_and_name_id','degree','---',null)" :selected="'---' == $degreeName"
+              wire:model='degree.degree_and_name_id.id'>
+              ---
+            </x-select-list-item>
+                @foreach($degrees as $edu_dg)
+                <x-select-list-item wire:click="setData('degree','degree_and_name_id','degree','{{ $edu_dg->name }}',{{ $edu_dg->id }})"
+                :selected="$edu_dg->id === $degreeId" wire:model='degree.degree_and_name_id.id'>
+                    {{ $edu_dg->name }}
+                </x-select-list-item>
+                @endforeach
+        </x-select-list>
+        @error('degree.degree_and_name_id.id')
+        <x-validation> {{ $message }} </x-validation>
+        @enderror
+    </div>
+    <div class="flex flex-col">
+        <x-label for="degree.science">{{ __('Science') }}</x-label>
+        <x-livewire-input mode="gray" name="degree.science" wire:model="degree.science"></x-livewire-input>
+        @error('degree.science')
+        <x-validation> {{ $message }} </x-validation>
+        @enderror
+    </div>
+    <div class="flex flex-col">
+        <x-label for="degree.given_date">{{ __('Given date') }}</x-label>
+        <x-pikaday-input mode="gray" name="degree.given_date" format="Y-MM-DD" wire:model.live="degree.given_date">
+            <x-slot name="script">
+              $el.onchange = function () {
+              @this.set('degree.given_date', $el.value);
+              }
+            </x-slot>
+          </x-pikaday-input>
+          @error('degree.given_date')
+          <x-validation> {{ $message }} </x-validation>
+          @enderror
+    </div>
+</div>
+<div class="grid grid-cols-2 gap-2">
+    <div class="flex flex-col">
+        <x-label for="degree.subject">{{ __('Subject') }}</x-label>
+        <x-livewire-input mode="gray" name="degree.subject" wire:model="degree.subject"></x-livewire-input>
+        @error('degree.subject')
+        <x-validation> {{ $message }} </x-validation>
+        @enderror
+    </div>
+    <div class="flex flex-col">
+        <x-select-list class="w-full" :title="__('Education document')" mode="gray" :selected="$eduDocName" name="eduDocId">            
+            <x-select-list-item wire:click="setData('degree','edu_doc_type_id','eduDoc','---',null)" :selected="'---' == $eduDocName"
+              wire:model='degree.edu_doc_type_id.id'>
+              ---
+            </x-select-list-item>
+                @foreach($educationDocs as $ed)
+                <x-select-list-item wire:click="setData('degree','edu_doc_type_id','eduDoc','{{ $ed->name }}',{{ $ed->id }})"
+                :selected="$ed->id === $eduDocId" wire:model='degree.edu_doc_type_id.id'>
+                    {{ $ed->name }}
+                </x-select-list-item>
+                @endforeach
+        </x-select-list>
+        @error('degree.edu_doc_type_id.id')
+        <x-validation> {{ $message }} </x-validation>
+        @enderror
+    </div>
+</div>
+<div class="grid grid-cols-4 gap-2">
+    <div class="flex flex-col">
+        <x-label for="degree.diplom_serie">{{ __('Diplom serie') }}</x-label>
+        <x-livewire-input mode="gray" name="degree.diplom_serie" wire:model="degree.diplom_serie"></x-livewire-input>
+        @error('degree.diplom_serie')
+        <x-validation> {{ $message }} </x-validation>
+        @enderror
+    </div>
+    <div class="flex flex-col">
+        <x-label for="degree.diplom_no">{{ __('Diplom') }}#</x-label>
+        <x-livewire-input mode="gray" type="number" name="degree.diplom_no" wire:model="degree.diplom_no"></x-livewire-input>
+        @error('degree.diplom_no')
+        <x-validation> {{ $message }} </x-validation>
+        @enderror
+    </div>
+    <div class="flex flex-col">
+        <x-label for="degree.diplom_given_date">{{ __('Given date') }}</x-label>
+        <x-pikaday-input mode="gray" name="degree.diplom_given_date" format="Y-MM-DD" wire:model.live="degree.diplom_given_date">
+            <x-slot name="script">
+              $el.onchange = function () {
+              @this.set('degree.diplom_given_date', $el.value);
+              }
+            </x-slot>
+          </x-pikaday-input>
+          @error('degree.diplom_given_date')
+          <x-validation> {{ $message }} </x-validation>
+          @enderror
+    </div>
+    <div class="flex flex-col">
+        <x-label for="degree.document_issued_by">{{ __('Issued by') }}</x-label>
+        <x-livewire-input mode="gray" name="degree.document_issued_by" wire:model="degree.document_issued_by"></x-livewire-input>
+        @error('degree.document_issued_by')
+        <x-validation> {{ $message }} </x-validation>
+        @enderror
+    </div>
+</div>
+
+<div class="flex justify-end">
+    <x-button  mode="black" wire:click="addDegree">{{ __('Add') }}</x-button>
+</div>
+
+<div class="relative -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+    <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+    <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
+        <x-table.tbl :headers="[__('Degree'),__('Document'),__('Date'),'action']">
+            @forelse ($degree_list as $key => $degreeModel)
+            <tr>
+                <x-table.td>
+                    <div class="flex flex-col">
+                        <div class="flex space-x-2">
+                            <span class="text-sm text-gray-500 font-medium">{{ __('Degree') }}:</span>
+                            <span class="text-sm font-medium text-gray-700">
+                                {{ $degreeModel['degree_and_name_id']['name'] }} 
+                           </span>
+                        </div>
+                        <div class="flex space-x-2">
+                            <span class="text-sm text-gray-500 font-medium">{{ __('Science') }}:</span>
+                            <span class="text-sm font-medium text-gray-700">
+                                {{ $degreeModel['science'] }} 
+                           </span>
+                        </div>
+                        <div class="flex space-x-2">
+                            <span class="text-sm text-gray-500 font-medium">{{ __('Given date') }}:</span>
+                            <span class="text-sm font-medium text-gray-700">
+                                {{ $degreeModel['given_date'] }} 
+                           </span>
+                        </div>
+                    </div>
+                </x-table.td>
+                <x-table.td>
+                    <div class="flex flex-col">
+                        <div class="flex space-x-2">
+                            <span class="text-sm text-gray-500 font-medium">{{ __('Subject') }}:</span>
+                            <span class="text-sm font-medium text-gray-700">
+                                {{ $degreeModel['subject'] }} 
+                           </span>
+                        </div>
+                        <div class="flex space-x-2">
+                            <span class="text-sm text-gray-500 font-medium">{{ __('Document type') }}:</span>
+                            <span class="text-sm font-medium text-gray-700">
+                                {{ $degreeModel['edu_doc_type_id']['name'] }} 
+                           </span>
+                        </div>
+                    </div>
+                </x-table.td>
+
+                <x-table.td>
+                    <div class="flex flex-col">
+                        <div class="flex space-x-2">
+                            <span class="text-sm text-gray-500 font-medium">{{ __('Diplom serie') }}:</span>
+                            <span class="text-sm font-medium text-gray-700">
+                                {{ $degreeModel['diplom_serie'] }}   {{ $degreeModel['diplom_no'] }} 
+                           </span>
+                        </div>
+                        <div class="flex space-x-2">
+                            <span class="text-sm text-gray-500 font-medium">{{ __('Given date') }}:</span>
+                            <span class="text-sm font-medium text-gray-700">
+                                {{ $degreeModel['diplom_given_date'] }} 
+                           </span>
+                        </div>
+                        <div class="flex space-x-2">
+                            <span class="text-sm text-gray-500 font-medium">{{ __('Issued by') }}:</span>
+                            <span class="text-sm font-medium text-gray-700">
+                                {{ $degreeModel['document_issued_by'] }} 
+                           </span>
+                        </div>
+                    </div>
+                </x-table.td>
+            
+                <x-table.td :isButton="true">
+                     <button
+                        onclick="confirm('Are you sure you want to remove this data?') || event.stopImmediatePropagation()"
+                        wire:click="forceDeleteDegree({{ $key }})"
+                        class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-50 hover:text-gray-700"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-red-500">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m6 4.125l2.25 2.25m0 0l2.25 2.25M12 13.875l2.25-2.25M12 13.875l-2.25 2.25M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                        </svg>
+                    </button>
+                </x-table.td>
+            </tr>
+            @empty
+            <tr>
+                <td colspan="5">
+                   <div class="flex justify-center items-center py-4">
+                    <span class="font-medium">{{ __('No information added') }}</span>
+                   </div>
+                </td>
+            </tr>
+            @endforelse
+        </x-table.tbl>
+
+
+    </div>
+    </div>
+</div>
