@@ -15,7 +15,7 @@ return new class extends Migration
         Schema::create('staff_schedules', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(Structure::class)->constrained();
-            $table->integer('position_id');
+            $table->integer('position_id')->nullable();
             $table->foreign('position_id')->references('id')->on('positions');
             $table->double('total',8,2);
             $table->double('filled',8,2);

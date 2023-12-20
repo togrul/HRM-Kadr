@@ -269,8 +269,12 @@
             </x-select-list>
         </div>
     </div>
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-2">
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-2">
         <div class="flex flex-col">
+            <x-label for="filter.punishment_reason">{{ __('Punishment reason') }}</x-label>
+            <x-livewire-input mode="gray" name="filter.punishment_reason" wire:model.defer="filter.punishment_reason"></x-livewire-input>
+        </div>
+        <div class="flex flex-col lg:col-span-2">
             <x-label for="filter.join_work_date">{{ __('Join work date') }}</x-label>
             <div class="flex space-x-1 items-center">
                 <x-pikaday-input mode="gray" name="filter.join_work_date.min" format="Y-MM-DD" wire:model.live="filter.join_work_date.min">
@@ -290,7 +294,7 @@
                   </x-pikaday-input>
             </div>
         </div>
-        <div class="flex flex-col">
+        <div class="flex flex-col lg:col-span-2">
             <x-label for="filter.rank">{{ __('Leave work date') }}</x-label>
             <div class="flex space-x-1 items-center">
                 <x-pikaday-input mode="gray" name="filter.leave_work_date.min" format="Y-MM-DD" wire:model.live="filter.leave_work_date.min">

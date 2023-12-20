@@ -12,7 +12,6 @@ use App\Exports\VacancyExport;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Livewire\Traits\SideModalAction;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Support\Facades\DB;
 
 class Staffs extends Component
 {
@@ -90,7 +89,6 @@ class Staffs extends Component
     public function render()
     {
         $staffs = $this->returnData();
-        // dd($staffs);
 
         return view('livewire.staff-schedule.staffs',compact('staffs'));
     }

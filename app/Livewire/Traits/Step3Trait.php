@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Traits;
 
+use Illuminate\Support\Facades\View;
+
 trait Step3Trait
 {
     public $education = [];
@@ -19,6 +21,30 @@ trait Step3Trait
     public $extraInstitutionId,$extraInstitutionName,$searchExtraInstitution;
     public $extraEducationFormId,$extraEducationFormName,$searchExtraEducationForm;
     public $educationDocumentTypeId,$educationDocumentTypeName,$searchDocumentTyoe;
+
+    public function updatedEducation($value,$name)
+    {
+        if($value && $name == "calculate_as_seniority")
+        {
+            $this->education['coefficient'] = cache('settings')['Education coefficient'];
+        }
+        else if(!$value && $name == "calculate_as_seniority")
+        {
+            $this->education['coefficient'] = null;
+        }
+    }
+
+    public function updatedExtraEducation($value,$name)
+    {
+        if($value && $name == "calculate_as_seniority")
+        {
+            $this->extra_education['coefficient'] = cache('settings')['Education coefficient'];
+        }
+        else if(!$value && $name == "calculate_as_seniority")
+        {
+            $this->extra_education['coefficient'] = null;
+        }
+    }
 
     public function addEducation()
     {
@@ -57,6 +83,8 @@ trait Step3Trait
                     'diplom_serie' => $updateEducation['diplom_serie'],
                     'diplom_no' => $updateEducation['diplom_no'],
                     'diplom_given_date' => $updateEducation['diplom_given_date'],
+                    'coefficient' => $updateEducation['coefficient'],
+                    'calculate_as_seniority' => $updateEducation['calculate_as_seniority'] == 1 ? true : false,
                 ];
         
                 if(!empty($updateEducation['educational_institution_id']))
@@ -99,6 +127,8 @@ trait Step3Trait
                     'diplom_serie' => $xtraEdu['diplom_serie'],
                     'diplom_no' => $xtraEdu['diplom_no'],
                     'diplom_given_date' => $xtraEdu['diplom_given_date'],
+                    'coefficient' => $xtraEdu['coefficient'],
+                    'calculate_as_seniority' => $xtraEdu['calculate_as_seniority'] == 1 ? true : false,
                 ];
                 if(!empty($xtraEdu['educational_institution_id']))
                 {

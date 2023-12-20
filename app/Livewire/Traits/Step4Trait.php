@@ -59,6 +59,7 @@ trait Step4Trait
                 $this->labor_activities_list[] = [
                     'company_name' => $uptLabor['company_name'],
                     'position' => $uptLabor['position'],
+                    'coefficient' => $uptLabor['coefficient'],
                     'join_date' => $uptLabor['join_date'],
                     'leave_date' => $uptLabor['leave_date'],
                 ];

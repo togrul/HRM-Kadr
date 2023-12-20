@@ -1,4 +1,6 @@
-<div class="grid grid-cols-4 gap-2">
+@inject('calculateSeniority', 'App\Services\CalculateSeniorityService')
+
+<div class="grid grid-cols-5 gap-2">
     <div class="flex flex-col">
         <x-label for="labor_activities.company_name">{{ __('Company name') }}</x-label>
         <x-livewire-input mode="gray" name="labor_activities.company_name" wire:model="labor_activities.company_name"></x-livewire-input>
@@ -39,6 +41,10 @@
         <x-validation> {{ $message }} </x-validation>
         @enderror
     </div>
+    <div class="flex flex-col">
+        <x-label for="labor_activities.coefficient">{{ __('Coefficient') }}</x-label>
+        <x-livewire-input mode="gray" type="number" name="labor_activities.coefficient" wire:model="labor_activities.coefficient"></x-livewire-input>
+    </div>
 </div>
 <div class="flex justify-end">
     <x-button  mode="black" wire:click="addLaborActivity">{{ __('Add') }}</x-button>
@@ -47,7 +53,10 @@
 <div class="relative -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
     <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
     <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
-        <x-table.tbl :headers="[__('Company'),__('Position'),__('Join date'),__('Leave date'),'action']">
+        <x-table.tbl :headers="[__('Company'),__('Position'),__('Date'),__('Total'),'action']">
+            @php
+                $total_duration = 0;
+            @endphp
             @forelse ($labor_activities_list as $key => $laModel)
             <tr>
                 <x-table.td>
@@ -61,14 +70,59 @@
                    </span>
                 </x-table.td>
                 <x-table.td>
-                    <span class="text-sm font-medium text-gray-700">
-                        {{ $laModel['join_date']}}
-                   </span>
+                    <div class="flex flex-col">
+                        <div class="flex space-x-2 items-center">
+                            <span class="text-sm font-medium text-gray-500">
+                                {{ __('Join date') }}:
+                            </span>
+                            <span class="text-sm font-medium text-gray-700">
+                                {{ $laModel['join_date']}}
+                            </span>
+                        </div>
+                        <div class="flex space-x-2 items-center">
+                            <span class="text-sm font-medium text-gray-500">
+                                {{ __('Leave date') }}:
+                            </span>
+                            <span class="text-sm font-medium text-rose-500">
+                                {{ $laModel['leave_date']}}
+                            </span>
+                        </div>
+                    </div>
+                   
                 </x-table.td>
                 <x-table.td>
-                    <span class="text-sm font-medium text-gray-700">
-                        {{ $laModel['leave_date']}}
-                   </span>
+                   <div class="flex flex-col">
+                    <div class="flex space-x-2 items-center">               
+                        @php
+                            $data = $calculateSeniority->calculate($laModel['join_date'],$laModel['leave_date'],$laModel['coefficient'],$total_duration);
+                            $total_duration = $data['total_duration'];
+                        @endphp
+                        <span class="text-sm font-medium text-gray-500">
+                            {{ __('Duration') }}: 
+                        </span>
+                        <span class="text-sm font-medium text-gray-800">
+                            {{ $data['year'] }} {{ __('year') }} {{ $data['month'] }} {{ __('month') }}  ({{ $data['diff'] }} {{ __('month') }})
+                        </span>
+                    </div>
+                    @if(!empty($laModel['coefficient']))
+                    <div class="flex space-x-2 items-center">
+                        <span class="text-sm font-medium text-gray-500">
+                            {{ __('Coefficient') }}:
+                        </span>
+                        <span class="text-sm font-medium text-blue-500">
+                            {{ $laModel['coefficient'] }}
+                        </span>
+                    </div>
+                    <div class="flex space-x-2 items-center">
+                        <span class="text-sm font-medium text-gray-500">
+                            {{ __('Total') }}:
+                        </span>
+                        <span class="text-sm font-medium text-green-500">
+                            {{ $data['duration'] }} {{ __('month') }} 
+                        </span>
+                    </div>
+                    @endif
+                   </div>
                 </x-table.td>
                 <x-table.td :isButton="true">
                      <button
@@ -92,9 +146,51 @@
             </tr>
             @endforelse
         </x-table.tbl>
-
-
     </div>
+
+    
+    <div class="my-2 flex justify-between items-center border border-gray-300 p-2 shadow-sm bg-gray-50 rounded-lg">
+        @if (!empty($laModel))
+        <div class="flex flex-col space-y-1">
+            <div class="flex space-x-2 items-center">
+                <span class="font-medium text-gray-500">{{ __('Old seniority (month)') }}:</span>
+                <span class="font-medium text-gray-900">{{ $data['total_duration'] }} {{ __('month') }}</span>
+            </div>
+            <div class="flex space-x-2 items-center">
+                <span class="font-medium text-gray-500">{{ __('Old seniority') }}:</span>
+                <span class="font-medium text-gray-900">{{  $data['total_year_old'] }} {{ __('year') }} {{ $data['total_month_old'] }} {{ __('month') }}</span>
+            </div>
+        </div>
+        @endif
+        @php
+            $currentData = $calculateSeniority->calculate($personnel['join_work_date'],$personnel['leave_work_date'],$_settings['Work coefficient'],$total_duration);
+            $total_year = floor(($total_duration  + $currentData['duration']) / 12);
+            $total_month = ($total_duration  + $currentData['duration']) % 12;
+        @endphp
+        <div class="flex flex-col space-y-1">
+            <div class="flex space-x-2 items-center">
+                <span class="font-medium text-gray-500">{{ __('Current seniority(month)') }}:</span>
+                <span class="font-medium text-gray-900">{{ $currentData['duration'] }} {{ __('month') }}</span>
+            </div>
+            <div class="flex space-x-2 items-center">
+                <span class="font-medium text-gray-500">{{ __('Current seniority') }}:</span>
+                <span class="font-medium text-gray-900">{{ $currentData['year'] }} {{ __('year') }} {{ $currentData['month'] }} {{ __('month') }}</span>
+            </div>
+        </div>
+        @if (!empty($laModel))
+        <div class="flex flex-col space-y-1">
+            <div class="flex space-x-2 items-center">
+                <span class="font-medium text-gray-500">{{ __('Total seniority(month)') }}:</span>
+                <span class="font-medium text-blue-500">{{ $data['total_duration'] +  $currentData['duration']   }} {{ __('month') }}</span>
+            </div>
+            <div class="flex space-x-2 items-center">
+                <span class="font-medium text-gray-500">{{ __('Total seniority') }}:</span>
+                <span class="font-medium text-blue-500">{{ $total_year }} {{ __('year') }} {{ $total_month }} {{ __('month') }}</span>
+            </div>
+        </div>
+        @endif
+    </div>
+
     </div>
 </div>
 

@@ -147,6 +147,11 @@
                                <span class="text-sm font-medium text-teal-500 bg-teal-50 rounded-xl px-3 py-1 w-max">
                                      {{ $personnel->pin }}
                                 </span>
+                                @if(!empty($personnel->latestRank))
+                                <span class="text-sm font-medium text-rose-500 rounded-xl px-3 py-1 shadow-sm w-max bg-rose-50">
+                                    {{ $personnel->latestRank?->rank->name }}
+                               </span>
+                               @endif
                                </div>
                             </div>
                         </x-table.td>
@@ -156,7 +161,6 @@
                                 {{ $personnel->gender ? __('Man') : __('Woman') }}
                            </span>
                         </x-table.td>
-
 
                         <x-table.td>
                             <div class="flex flex-col space-y-1">

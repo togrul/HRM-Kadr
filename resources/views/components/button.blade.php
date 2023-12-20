@@ -19,15 +19,16 @@
         'light-red' => 'bg-red-100 border border-red-500 hover:bg-red-200 active:bg-red-100 focus:bg-red-100 text-red-500',
         'light-blue' => 'bg-blue-100 border border-blue-500 hover:bg-blue-200 active:bg-blue-100 focus:bg-blue-100 text-blue-500',
         'black' => 'bg-black border border-gray-900 hover:bg-gray-800 active:bg-gray-800 focus:bg-gray-800 text-gray-100',
+        'rose' => 'bg-rose-50 border border-rose-500 hover:bg-rose-100 active:bg-rose-100 focus:bg-rose-100 text-rose-500',
     }
 @endphp
 
 @if($type == 'button')
-    <button @disabled($disabled) {{ $attributes->merge(['type' => 'submit', 'class' => 'camelcase inline-flex justify-center items-center px-4 py-2 border border-transparent rounded-xl font-medium shadow-sm text-sm focus:outline-none focus:ring ring-gray-300 disabled:opacity-25 transition ease-in-out duration-150 '.$extraClasses]) }}>
+    <button @disabled($disabled) {{ $attributes->merge(['type' => 'submit', 'class' => 'camelcase inline-flex justify-center items-center px-4 py-2 border border-transparent rounded-xl font-semibold shadow-sm text-sm focus:outline-none focus:ring ring-gray-300 disabled:opacity-25 transition-all ease-in-out duration-150 '.$extraClasses]) }}>
         {{ $slot }}
     </button>
 @else
-    <a {{ $attributes->merge(['type' => 'submit', 'class' => 'camelcase inline-flex justify-center items-center px-4 py-2 border border-transparent rounded-xl font-medium shadow-sm text-sm focus:outline-none focus:ring ring-gray-300 disabled:opacity-25 transition ease-in-out duration-150 '.$extraClasses]) }}>
+    <a {{ $attributes->merge(['type' => 'submit', 'class' => 'camelcase inline-flex justify-center items-center px-4 py-2 border border-transparent rounded-xl font-semibold shadow-sm text-sm focus:outline-none focus:ring ring-gray-300 disabled:opacity-25 transition-all ease-in-out duration-150 '.$extraClasses]) }}>
         {{ $slot }}
     </a>
 @endif

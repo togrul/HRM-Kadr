@@ -17,7 +17,13 @@ class PersonnelPunishment extends Model
         'tabel_no',
         'punishment_id',
         'reason',
-        'given_date'
+        'given_date',
+        'expired_date'
+    ];
+
+    protected $dates = [
+        'given_date',
+        'expired_date'
     ];
 
     public function punishment() : BelongsTo

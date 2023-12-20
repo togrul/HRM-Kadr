@@ -16,6 +16,7 @@ class PersonnelLaborActivity extends Model
         'tabel_no',
         'company_name',
         'position',
+        'coefficient',
         'join_date',
         'leave_date'
     ];

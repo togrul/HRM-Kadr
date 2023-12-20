@@ -27,6 +27,12 @@
     </div>
     @endif
 
+    @if($selectedService == 'general')
+    <section class="" wire:target="selectService" wire:loading.remove>
+        @livewire('services.settings.settings-list')
+    </section>
+    @endif
+
     @if($selectedService == 'menus')
     <section class="" wire:target="selectService" wire:loading.remove>
         @livewire('services.menus.all-menus')

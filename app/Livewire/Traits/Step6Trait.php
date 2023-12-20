@@ -48,6 +48,7 @@ trait Step6Trait
         $validator1 = $this->exceptArray('award');
         $validator2 = $this->exceptArray('criminal');
         $this->validate(array_intersect_assoc($validator1,$validator2));
+        $this->punishment['expired_date'] = $this->punishment['expired_date'] ?? null;
         $this->punishment_list[] = $this->punishment;
         $this->punishmentName = '---';
         $this->reset('punishmentId');
@@ -110,6 +111,7 @@ trait Step6Trait
                 $this->punishment_list[] = [
                     'reason' => $uptPunishment['reason'],
                     'given_date' => $uptPunishment['given_date'],
+                    'expired_date' => $uptPunishment['expired_date'],
                 ];
 
                 if(!empty($uptPunishment['punishment_id']))

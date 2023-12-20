@@ -25,7 +25,8 @@ class ShowStaff extends Component
 
     public function render()
     {
-        $staffs = Personnel::whereNull('leave_work_date')
+        $staffs = Personnel::with('structure')
+                    ->whereNull('leave_work_date')
                     ->where('structure_id',$this->structureModel)
                     ->where('position_id',$this->positionModel)
                     ->paginate(20);

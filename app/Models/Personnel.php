@@ -241,6 +241,13 @@ class Personnel extends Model
                 });
                 continue;
             }
+            if($field == 'punishment_reason')
+            {
+                $query->whereHas('punishments',function($q) use($value){
+                    $q->where('reason','LIKE',"%{$value}%");
+                });
+                continue;
+            }
             if($field == 'educational_institution_id' || $field == 'specialty')
             {
                 $query->whereHas('education',function($q) use($value,$field){

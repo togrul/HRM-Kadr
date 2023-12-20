@@ -100,7 +100,7 @@
 <div class="w-full rounded-xl px-4 py-3 bg-gray-100 font-semibold text-xl flex justify-center">
     <h1>{{ __('Punishments') }}</h1>
 </div>
-<div class="grid grid-cols-3 gap-2">
+<div class="grid grid-cols-2 gap-2">
     <div class="flex flex-col">
         <x-select-list class="w-full" :title="__('Punishments')" mode="gray" :selected="$punishmentName" name="punishmentId">
             <x-livewire-input  @click.stop="open = true" mode="gray" name="searchPunishment" wire:model.live="searchPunishment"></x-livewire-input>
@@ -127,6 +127,9 @@
         <x-validation> {{ $message }} </x-validation>
         @enderror
     </div>
+</div>
+
+<div class="grid grid-cols-2 gap-2">
     <div class="flex flex-col">
         <x-label for="punishment.given_date">{{ __('Given date') }}</x-label>
         <x-pikaday-input mode="gray" name="punishment.given_date" format="Y-MM-DD" wire:model.live="punishment.given_date">
@@ -139,6 +142,16 @@
           @error('punishment.given_date')
           <x-validation> {{ $message }} </x-validation>
           @enderror
+    </div>
+    <div class="flex flex-col">
+        <x-label for="punishment.expired_date">{{ __('Expired date') }}</x-label>
+        <x-pikaday-input mode="gray" name="punishment.expired_date" format="Y-MM-DD" wire:model.live="punishment.expired_date">
+            <x-slot name="script">
+              $el.onchange = function () {
+              @this.set('punishment.expired_date', $el.value);
+              }
+            </x-slot>
+          </x-pikaday-input>
     </div>
 </div>
 
@@ -163,9 +176,21 @@
                     </span>
                 </x-table.td>
                 <x-table.td>
-                    <span class="text-sm font-medium text-gray-700">
-                        {{ $pnshModel['given_date'] }} 
-                    </span>
+                    <div class="flex flex-col">
+                        <div class="flex space-x-1 items-center">
+                            <span class="text-sm font-medium text-gray-500">{{ __('Given date') }}:</span>
+                            <span class="text-sm font-medium text-gray-700">
+                                {{ $pnshModel['given_date'] }} 
+                            </span>
+                        </div>
+                        <div class="flex space-x-1 items-center">
+                            <span class="text-sm font-medium text-gray-500">{{ __('Expired date') }}:</span>
+                            <span class="text-sm font-medium text-rose-500">
+                                {{ $pnshModel['expired_date'] }} 
+                            </span>
+                        </div>
+                    </div>
+                   
                 </x-table.td>
                 <x-table.td :isButton="true">
                      <button

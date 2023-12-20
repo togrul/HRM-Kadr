@@ -24,7 +24,9 @@ class PersonnelEducation extends Model
         'profession_by_document',
         'diplom_serie',
         'diplom_no',
-        'diplom_given_date'
+        'diplom_given_date',
+        'coefficient',
+        'calculate_as_seniority'
     ];
 
     public function institution() : BelongsTo

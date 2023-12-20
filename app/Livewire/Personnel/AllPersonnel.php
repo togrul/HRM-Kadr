@@ -39,7 +39,6 @@ class AllPersonnel extends Component
     public function exportExcel()
     {
          $report['data'] = $this->returnData(type:"excel");
-        //  dd($report)
          $report['filter'] = $this->filters;
          $name = Carbon::now()->format('d.m.Y H:i');
          
@@ -117,6 +116,7 @@ class AllPersonnel extends Component
             'idDocuments',
             'educationDegree',
             'education',
+            'latestRank.rank',
             'awards',
             'punishments',
             'structure',

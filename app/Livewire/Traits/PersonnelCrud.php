@@ -88,8 +88,8 @@ trait PersonnelCrud
             'education.education_form_id.id' => 'required|int|exists:education_forms,id',
             'education.education_language' => 'required|min:2',
             'education.specialty' => 'required|min:2',
-            'education.admission_year' => 'required|int',
-            'education.graduated_year' => 'required|int|gt:education.admission_year',
+            'education.admission_year' => 'required|date',
+            'education.graduated_year' => 'required|date|after:education.admission_year',
             'education.profession_by_document' => 'required|min:2',
             'education.diplom_serie' => 'required|min:1',
             'education.diplom_no' => 'required|int',
@@ -101,8 +101,8 @@ trait PersonnelCrud
             'extra_education.shortname' => $this->hasExtraEducation ? 'required|min:2' : '',
             'extra_education.education_language' => $this->hasExtraEducation ? 'required|min:2' : '',
             'extra_education.education_program_name' => $this->hasExtraEducation ? 'required|min:2' : '',
-            'extra_education.admission_year' =>  $this->hasExtraEducation ? 'required|int' : '',
-            'extra_education.graduated_year' =>   $this->hasExtraEducation ?'required|int|gt:extra_education.admission_year' : '',
+            'extra_education.admission_year' =>  $this->hasExtraEducation ? 'required|date' : '',
+            'extra_education.graduated_year' =>   $this->hasExtraEducation ?'required|date|after:extra_education.admission_year' : '',
             'extra_education.education_document_type_id.id' => $this->hasExtraEducation ? 'required|int|exists:education_document_types,id' : '',
             'extra_education.diplom_serie' => $this->hasExtraEducation ? 'required|min:1' : '',
             'extra_education.diplom_no' => $this->hasExtraEducation ? 'required|int|unique:personnel_extra_education,diplom_no' : '',
@@ -480,7 +480,7 @@ trait PersonnelCrud
                     })
                     ->get();
 
-        $rankModel = Rank::select('id',DB::raw('name_'.config('app.locale').' as name'),'is_active')
+        $rankModel = Rank::query()
                     ->when(!empty($this->searchRank),function($q){
                         $q->where('name_'.config('app.locale'),'LIKE',"%{$this->searchRank}%");
                     })

@@ -110,7 +110,7 @@ class Detail extends Component
                 })
                 ->get();
 
-        $rankModel = Rank::select('id',DB::raw('name_'.config('app.locale').' as name'),'is_active')
+        $rankModel = Rank::query()
                 ->when(!empty($this->searchRank),function($q){
                     $q->where('name_'.config('app.locale'),'LIKE',"%{$this->searchRank}%");
                 })

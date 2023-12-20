@@ -77,9 +77,24 @@
                          isError = false
                          showNotification(message)
                     })
+
+                    Livewire.on('staffScheduleError',message => {
+                         isError = true
+                         showNotification(message)
+                    })
+
+                    Livewire.on('settingsUpdated',message => {
+                         isError = false
+                         showNotification(message)
+                    })
+
+                    Livewire.on('settingsWasDeleted',message => {
+                         isError = false
+                         showNotification(message)
+                    })
                @endif
           "
-     class="fixed top-0 right-0 z-20 flex justify-between w-full max-w-xs px-6 py-5 mx-2 my-8 bg-white border shadow-lg sm:mx-6 sm:max-w-sm rounded-xl"
+     class="fixed top-0 right-0 z-[99999] flex justify-between w-full max-w-xs px-6 py-5 mx-2 my-8 bg-white border shadow-lg sm:mx-6 sm:max-w-sm rounded-xl"
      style="display: none;">
      <div class="flex items-center justify-center text-sm font-normal text-gray-500 sm:text-base">
 

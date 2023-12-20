@@ -3,7 +3,6 @@
 namespace App\Livewire\StaffSchedule;
 
 use App\Livewire\Traits\StaffCrud;
-use App\Models\Personnel;
 use Livewire\Component;
 use App\Models\StaffSchedule;
 
@@ -11,19 +10,32 @@ class AddStaff extends Component
 {
     use StaffCrud;
 
-    public function updatingStaff($value,$name)
-    {
-        if($name == 'total')
-        {
-            $this->staff['vacant'] = $value - $this->staff['filled'];
-        }
-    }
+    public $structureData;
     
+    protected function checkStructure()
+    {
+        return StaffSchedule::where('structure_id',$this->structureData[0]['structure_id'])->first();
+    }
+
     public function store()
     {
+        if(empty($this->staff))
+            return;
+
+        if(!empty($this->checkStructure()))
+        {
+            $this->dispatch('staffScheduleError',__('This structure has already been added!'));
+            return;
+        }
+            
         $this->validate();
 
-        StaffSchedule::create($this->staff);
+        foreach($this->staff as $sta)
+        {
+            $data = $sta;
+            unset($data['position']);
+            StaffSchedule::create($data);
+        }
 
         $this->dispatch('staffAdded',__('Staff was added successfully!'));
     }
@@ -31,11 +43,14 @@ class AddStaff extends Component
     public function mount()
     {
         $this->title = __('New staff');
-        $this->structureName = $this->positionName = '---';
-        $this->staff = [
-            'total' => 0,
-            'filled' => 0,
-            'vacant' => 0,
+        $this->structureData = [
+            [
+                'structure_id' => -1,
+                'structure' => [
+                    'id' => -1,
+                    'name' => '---'
+                ]
+            ]
         ];
     }
 }

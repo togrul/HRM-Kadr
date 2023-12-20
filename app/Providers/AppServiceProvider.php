@@ -3,6 +3,9 @@
 namespace App\Providers;
 
 use App\Models\Menu;
+use App\Models\Setting;
+use App\Observers\SettingsObserver;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -20,11 +23,21 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Setting::observe(SettingsObserver::class);
         view()->composer('includes.header', function($view)
         {
             $menus = Menu::orderBy('order')->where('is_active',1)->get();
 
             $view->with('menus', $menus);
+        });
+
+        view()->composer('*',function($view)
+        {
+            $_settings = Cache::rememberForever('settings',function () {
+                return Setting::pluck('value','name')->toArray();
+            });
+
+            $view->with(compact('_settings'));
         });
     }
 }

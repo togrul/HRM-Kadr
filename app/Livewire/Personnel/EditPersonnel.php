@@ -105,11 +105,10 @@ class EditPersonnel extends Component
                 {
                     $rnkData = $this->modfiyArray($rankList);
                     $rnkDataList[] = $rnkData;
-                    $this->personnelModelData->ranks()->updateOrCreate(['rank_id' => $rankList['rank_id'],'given_date' => $rankList['given_date']],$rnkData);
+                    $this->personnelModelData->ranks()->updateOrCreate(['tabel_no' => $this->personnelModelData->tabel_no,'given_date' => $rankList['given_date']],$rnkData);
                 }
-                $rankIdKeep = collect($rnkDataList)->pluck('rank_id');
                 $givenDataKeep = collect($rnkDataList)->pluck('given_date');
-                $this->personnelModelData->ranks()->whereNotIn('rank_id', $rankIdKeep)->orWhereNotIn('given_date', $givenDataKeep)->delete();
+                $this->personnelModelData->ranks()->whereNotIn('given_date', $givenDataKeep)->delete();
             }
             else
             {
@@ -121,7 +120,7 @@ class EditPersonnel extends Component
                 {
                     $militaryData = $this->modfiyArray($militaryList);
                     $militaryDataList[] = $militaryData;
-                    $this->personnelModelData->military()->updateOrCreate(['start_date' => $militaryList['start_date']],$militaryData);
+                    $this->personnelModelData->military()->updateOrCreate(['tabel_no' => $this->personnelModelData->tabel_no,'start_date' => $militaryList['start_date']],$militaryData);
                 }
                 $idToKeep = collect($militaryDataList)->pluck('start_date');
                 $this->personnelModelData->military()->whereNotIn('start_date', $idToKeep)->delete();
@@ -137,11 +136,22 @@ class EditPersonnel extends Component
                 {
                     $awardData = $this->modfiyArray($awardList);
                     $awardDataList[] = $awardData;
-                    $this->personnelModelData->awards()->updateOrCreate(['award_id' => $awardList['award_id'],'given_date' => $awardList['given_date']],$awardData);
+                    $this->personnelModelData->awards()
+                            ->updateOrCreate(
+                                [
+                                'tabel_no' => $this->personnelModelData->tabel_no,
+                                'award_id' => $awardList['award_id']['id'],
+                                'given_date' => $awardList['given_date']
+                                ],
+                                $awardData
+                            );
                 }
                 $awardIdKeep = collect($awardDataList)->pluck('award_id');
                 $givenDataKeep = collect($awardDataList)->pluck('given_date');
-                $this->personnelModelData->awards()->whereNotIn('award_id', $awardIdKeep)->orWhereNotIn('given_date', $givenDataKeep)->delete();
+                $this->personnelModelData->awards()
+                            ->whereNotIn('award_id', $awardIdKeep)
+                            ->whereNotIn('given_date', $givenDataKeep)
+                            ->delete();
             }
             else
             {
@@ -157,7 +167,7 @@ class EditPersonnel extends Component
                 }
                 $punishmentIdKeep = collect($punishmentDataList)->pluck('punishment_id');
                 $givenDataKeep = collect($punishmentDataList)->pluck('given_date');
-                $this->personnelModelData->punishments()->whereNotIn('punishment_id', $punishmentIdKeep)->orWhereNotIn('given_date', $givenDataKeep)->delete();
+                $this->personnelModelData->punishments()->whereNotIn('punishment_id', $punishmentIdKeep)->whereNotIn('given_date', $givenDataKeep)->delete();
             }
             else
             {
@@ -173,7 +183,7 @@ class EditPersonnel extends Component
                 }
                 $punishmentIdKeep = collect($criminalDataList)->pluck('punishment_id');
                 $givenDataKeep = collect($criminalDataList)->pluck('given_date');
-                $this->personnelModelData->criminals()->whereNotIn('punishment_id', $punishmentIdKeep)->orWhereNotIn('given_date', $givenDataKeep)->delete();
+                $this->personnelModelData->criminals()->whereNotIn('punishment_id', $punishmentIdKeep)->whereNotIn('given_date', $givenDataKeep)->delete();
             }
             else
             {

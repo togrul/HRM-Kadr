@@ -27,7 +27,9 @@ class PersonnelExtraEducation extends Model
         'education_document_type_id',
         'diplom_serie',
         'diplom_no',
-        'diplom_given_date'
+        'diplom_given_date',
+        'coefficient',
+        'calculate_as_seniority'
     ];
 
     public function type() : BelongsTo
