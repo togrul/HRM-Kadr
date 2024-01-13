@@ -1,11 +1,11 @@
 <div class="w-full rounded-xl px-4 py-3 bg-gray-100 font-semibold text-xl flex justify-center">
     <h1>{{ __('Awards') }}</h1>
 </div>
-<div class="grid grid-cols-3 gap-2">
-    <div class="flex flex-col">
+<div class="grid grid-cols-6 gap-2">
+    <div class="flex flex-col col-span-2">
         <x-select-list class="w-full" :title="__('Awards')" mode="gray" :selected="$awardName" name="awardId">
             <x-livewire-input  @click.stop="open = true" mode="gray" name="searchAward" wire:model.live="searchAward"></x-livewire-input>
-            
+
             <x-select-list-item wire:click="setData('award','award_id','award','---',null)" :selected="'---' == $awardName"
               wire:model='award.award_id.id'>
               ---
@@ -21,7 +21,7 @@
         <x-validation> {{ $message }} </x-validation>
         @enderror
     </div>
-    <div class="flex flex-col">
+    <div class="flex flex-col col-span-2">
         <x-label for="award.reason">{{ __('Reason') }}</x-label>
         <x-livewire-input mode="gray" name="award.reason" wire:model="award.reason"></x-livewire-input>
         @error('award.reason')
@@ -41,6 +41,10 @@
           <x-validation> {{ $message }} </x-validation>
           @enderror
     </div>
+    <div class="flex flex-row-reverse items-end">
+        <x-label for="award.is_old">{{ __('Is old?') }}</x-label>
+        <x-checkbox name="award.is_old" model="award.is_old"></x-checkbox>
+    </div>
 </div>
 
 <div class="flex justify-end">
@@ -50,22 +54,30 @@
 <div class="relative -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
     <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
     <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
-        <x-table.tbl :headers="[__('Award'),__('Reason'),__('Date'),'action']">
+        <x-table.tbl :headers="[__('Award'),__('Reason'),__('Date'),'action','action']">
             @forelse ($award_list as $key => $awdModel)
             <tr>
                 <x-table.td>
                     <span class="text-sm font-medium text-gray-700">
-                        {{ $awdModel['award_id']['name'] }} 
+                        {{ $awdModel['award_id']['name'] }}
                    </span>
                 </x-table.td>
                 <x-table.td>
                    <span class="text-sm font-medium text-gray-700">
-                        {{ $awdModel['reason'] }} 
+                        {{ $awdModel['reason'] }}
                     </span>
                 </x-table.td>
                 <x-table.td>
                     <span class="text-sm font-medium text-gray-700">
-                        {{ $awdModel['given_date'] }} 
+                        {{ $awdModel['given_date'] }}
+                    </span>
+                </x-table.td>
+                <x-table.td>
+                    <span @class([
+                        'w-3 h-3 rounded-full shadow-sm flex',
+                        'bg-gray-300' => $awdModel['is_old'],
+                        'bg-green-400' => !$awdModel['is_old']
+                    ])>
                     </span>
                 </x-table.td>
                 <x-table.td :isButton="true">
@@ -104,7 +116,7 @@
     <div class="flex flex-col">
         <x-select-list class="w-full" :title="__('Punishments')" mode="gray" :selected="$punishmentName" name="punishmentId">
             <x-livewire-input  @click.stop="open = true" mode="gray" name="searchPunishment" wire:model.live="searchPunishment"></x-livewire-input>
-            
+
             <x-select-list-item wire:click="setData('punishment','punishment_id','punishment','---',null)" :selected="'---' == $awardName"
               wire:model='punishment.punishment_id.id'>
               ---
@@ -167,12 +179,12 @@
             <tr>
                 <x-table.td>
                     <span class="text-sm font-medium text-gray-700">
-                        {{ $pnshModel['punishment_id']['name'] }} 
+                        {{ $pnshModel['punishment_id']['name'] }}
                    </span>
                 </x-table.td>
                 <x-table.td>
                    <span class="text-sm font-medium text-gray-700">
-                        {{ $pnshModel['reason'] }} 
+                        {{ $pnshModel['reason'] }}
                     </span>
                 </x-table.td>
                 <x-table.td>
@@ -180,17 +192,17 @@
                         <div class="flex space-x-1 items-center">
                             <span class="text-sm font-medium text-gray-500">{{ __('Given date') }}:</span>
                             <span class="text-sm font-medium text-gray-700">
-                                {{ $pnshModel['given_date'] }} 
+                                {{ $pnshModel['given_date'] }}
                             </span>
                         </div>
                         <div class="flex space-x-1 items-center">
                             <span class="text-sm font-medium text-gray-500">{{ __('Expired date') }}:</span>
                             <span class="text-sm font-medium text-rose-500">
-                                {{ $pnshModel['expired_date'] }} 
+                                {{ $pnshModel['expired_date'] }}
                             </span>
                         </div>
                     </div>
-                   
+
                 </x-table.td>
                 <x-table.td :isButton="true">
                      <button
@@ -230,7 +242,7 @@
     <div class="flex flex-col">
         <x-select-list class="w-full" :title="__('Criminals')" mode="gray" :selected="$criminalName" name="criminalId">
             <x-livewire-input  @click.stop="open = true" mode="gray" name="searchCriminal" wire:model.live="searchCriminal"></x-livewire-input>
-            
+
             <x-select-list-item wire:click="setData('criminal','criminal_id','criminal','---',null)" :selected="'---' == $criminalName"
               wire:model='criminal.criminal_id.id'>
               ---
@@ -280,17 +292,17 @@
             <tr>
                 <x-table.td>
                     <span class="text-sm font-medium text-gray-700">
-                        {{ $crmModel['criminal_id']['name'] }} 
+                        {{ $crmModel['criminal_id']['name'] }}
                    </span>
                 </x-table.td>
                 <x-table.td>
                    <span class="text-sm font-medium text-gray-700">
-                        {{ $crmModel['reason'] }} 
+                        {{ $crmModel['reason'] }}
                     </span>
                 </x-table.td>
                 <x-table.td>
                     <span class="text-sm font-medium text-gray-700">
-                        {{ $crmModel['given_date'] }} 
+                        {{ $crmModel['given_date'] }}
                     </span>
                 </x-table.td>
                 <x-table.td :isButton="true">

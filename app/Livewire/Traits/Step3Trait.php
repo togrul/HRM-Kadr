@@ -53,7 +53,7 @@ trait Step3Trait
 
         $this->extra_education = array();
         $this->educationTypeName = $this->extraInstitutionName = $this->educationDocumentTypeName = $this->extraEducationFormName = '---';
-        $this->reset(['educationTypeId','extraInstitutionId','educationDocumentTypeId','extraEducationFormId']);        
+        $this->reset(['educationTypeId','extraInstitutionId','educationDocumentTypeId','extraEducationFormId']);
     }
 
     public function forceDeleteData($key)
@@ -61,7 +61,7 @@ trait Step3Trait
         unset($this->extra_education_list[$key]);
     }
 
-    public function mountStep3Trait() { 
+    public function mountStep3Trait() {
         $this->institutionName = $this->educationFormName = $this->extraInstitutionName = $this->educationTypeName = $this->extraEducationFormName = $this->educationDocumentTypeName = '---';
         !empty($this->personnelModel) && $this->fillEducation();
     }
@@ -85,8 +85,9 @@ trait Step3Trait
                     'diplom_given_date' => $updateEducation['diplom_given_date'],
                     'coefficient' => $updateEducation['coefficient'],
                     'calculate_as_seniority' => $updateEducation['calculate_as_seniority'] == 1 ? true : false,
+                    'is_military' => $updateEducation['is_military'] == 1 ? true : false,
                 ];
-        
+
                 if(!empty($updateEducation['educational_institution_id']))
                 {
                     $this->education['educational_institution_id'] = [
@@ -96,7 +97,7 @@ trait Step3Trait
                     $this->institutionId = $updateEducation['institution']['id'];
                     $this->institutionName = $updateEducation['institution']['name'];
                 }
-        
+
                 if(!empty($updateEducation['education_form_id']))
                 {
                     $this->education['education_form_id'] = [
@@ -108,7 +109,7 @@ trait Step3Trait
                 }
             }
         }
-      
+
 
         $updateExtraEducation = $this->personnelModelData->extraEducations->load(['type','institution','form','documentType'])->toArray();
 
@@ -129,6 +130,7 @@ trait Step3Trait
                     'diplom_given_date' => $xtraEdu['diplom_given_date'],
                     'coefficient' => $xtraEdu['coefficient'],
                     'calculate_as_seniority' => $xtraEdu['calculate_as_seniority'] == 1 ? true : false,
+                    'is_military' => $xtraEdu['is_military'] == 1 ? true : false,
                 ];
                 if(!empty($xtraEdu['educational_institution_id']))
                 {
@@ -137,7 +139,7 @@ trait Step3Trait
                         'name' => $xtraEdu['institution']['name'],
                     ];
                 }
-        
+
                 if(!empty($xtraEdu['education_form_id']))
                 {
                     $this->extra_education_list[$key]['education_form_id'] =  [

@@ -13,7 +13,7 @@
                     <x-label for="personnel.surname">{{ __('Surname') }}</x-label>
                     <x-checkbox name="addManual" model="personnel.has_changed_initials">{{ __('changed?') }}</x-checkbox>
                 </div>
-                
+
                 <x-livewire-input mode="gray" name="personnel.surname" wire:model="personnel.surname"></x-livewire-input>
                 @error('personnel.surname')
                 <x-validation> {{ $message }} </x-validation>
@@ -110,7 +110,7 @@
                         <x-checkbox name="hasChangedNationality" model="personnel.has_changed_nationality">{{ __('changed?') }}</x-checkbox>
                     </x-slot>
                     <x-livewire-input  @click.stop="open = true" mode="gray" name="searchNationality" wire:model.live="searchNationality"></x-livewire-input>
-                    
+
                     <x-select-list-item wire:click="setData('personnel','nationality_id','nationality','---',null)" :selected="'---' == $nationalityName"
                       wire:model='personnel.nationality_id.id'>
                       ---
@@ -132,7 +132,7 @@
             <div class="flex flex-col">
                 <x-select-list  class="w-full" :title="__('Previous nationality')" mode="gray" :selected="$previousNationalityName" name="previousNationalityId">
                     <x-livewire-input  @click.stop="open = true" mode="gray" name="searchPreviousNationality" wire:model.live="searchPreviousNationality"></x-livewire-input>
-                    
+
                     <x-select-list-item wire:click="setData('personnel','previous_nationality_id','previousNationality','---',null)" :selected="'---' == $previousNationalityName"
                       wire:model='previousNationalityId'>
                       ---
@@ -170,7 +170,7 @@
             </div>
         </div>
         @endif
-        <div class="grid grid-cols-3 gap-2">
+        <div class="grid grid-cols-4 gap-2">
             <div class="flex flex-col">
                 <x-label for="personnel.phone">{{ __('Phone') }}</x-label>
                 <x-livewire-input mode="gray" name="personnel.phone" wire:model="personnel.phone"></x-livewire-input>
@@ -192,15 +192,33 @@
                 <x-validation> {{ $message }} </x-validation>
                 @enderror
             </div>
-        </div>
-
-        <div class="grid grid-cols-3 gap-2">
             <div class="flex flex-col">
                 <x-label for="personnel.pin">{{ __('PIN') }}</x-label>
                 <x-livewire-input mode="gray" name="personnel.pin" wire:model="personnel.pin"></x-livewire-input>
                 @error('personnel.pin')
                 <x-validation> {{ $message }} </x-validation>
                 @enderror
+            </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2">
+            <div class="flex flex-col">
+                <x-select-list class="w-full" :title="__('Social origin')" mode="gray" :selected="$socialOriginName" name="socialOriginId">
+                    <x-livewire-input  @click.stop="open = true" mode="gray" name="searchSocialOrigin" wire:model.live="searchSocialOrigin"></x-livewire-input>
+
+                    <x-select-list-item wire:click="setData('personnel','social_origin_id','socialOrigin','---',null)" :selected="'---' == $socialOriginName"
+                                        wire:model='personnel.social_origin_id.id'>
+                        ---
+                    </x-select-list-item>
+                    @if(!empty($_social_origins))
+                        @foreach($_social_origins as $_origin)
+                            <x-select-list-item wire:click="setData('personnel','social_origin_id','socialOrigin','{{ $_origin->name }}',{{ $_origin->id }})"
+                                                :selected="$_origin->id === $socialOriginId" wire:model='personnel.social_origin_id.id'>
+                                {{ $_origin->name }}
+                            </x-select-list-item>
+                        @endforeach
+                    @endif
+                </x-select-list>
             </div>
             <div class="flex flex-col">
                 <x-label for="personnel.residental_address">{{ __('Residental address') }}</x-label>
@@ -221,7 +239,7 @@
             <div class="flex flex-col">
                 <x-select-list class="w-full" :title="__('Education degree')" mode="gray" :selected="$educationDegreeName" name="educationDegreeId">
                     <x-livewire-input  @click.stop="open = true" mode="gray" name="searchEducationDegree" wire:model.live="searchEducationDegree"></x-livewire-input>
-                    
+
                     <x-select-list-item wire:click="setData('personnel','education_degree_id','educationDegree','---',null)" :selected="'---' == $educationDegreeName"
                       wire:model='personnel.education_degree_id.id'>
                       ---
@@ -240,7 +258,7 @@
               <div class="flex flex-col">
                 <x-select-list class="w-full" :title="__('Structure')" mode="gray" :selected="$structureName" name="structureId">
                     <x-livewire-input  @click.stop="open = true" mode="gray" name="searchStructure" wire:model.live="searchStructure"></x-livewire-input>
-                    
+
                     <x-select-list-item wire:click="setData('personnel','structure_id','structure','---',null)" :selected="'---' == $structureName"
                       wire:model='personnel.structure_id.id'>
                       ---
@@ -259,7 +277,7 @@
               <div class="flex flex-col">
                 <x-select-list class="w-full" :title="__('Position')" mode="gray" :selected="$positionName" name="positionId">
                     <x-livewire-input  @click.stop="open = true" mode="gray" name="searchPosition" wire:model.live="searchPosition"></x-livewire-input>
-                    
+
                     <x-select-list-item wire:click="setData('personnel','position_id','position','---',null)" :selected="'---' == $positionName"
                       wire:model='personnel.position_id.id'>
                       ---
@@ -280,7 +298,7 @@
             <div class="flex flex-col">
                 <x-select-list class="w-full" :title="__('Work norms')" mode="gray" :selected="$workNormName" name="workNormId">
                     <x-livewire-input  @click.stop="open = true" mode="gray" name="searchWorkNorm" wire:model.live="searchWorkNorm"></x-livewire-input>
-                    
+
                     <x-select-list-item wire:click="setData('personnel','work_norm_id','workNorm','---',null)" :selected="'---' == $workNormName"
                       wire:model='personnel.work_norm_id.id'>
                       ---
@@ -326,7 +344,7 @@
             <div class="flex flex-col">
                 <x-select-list class="w-full" :title="__('Disability')" mode="gray" :selected="$disabilityName" name="disabilityId">
                     <x-livewire-input  @click.stop="open = true" mode="gray" name="searchDisability" wire:model.live="searchDisability"></x-livewire-input>
-                    
+
                     <x-select-list-item wire:click="setData('personnel','disability_id','disability','---',null)" :selected="'---' == $disabilityName"
                       wire:model='personnel.disability_id.id'>
                       ---
@@ -406,12 +424,12 @@
                         <progress max="100" x-bind:value="progress"></progress>
                       </div>
                     </div>
-            
+
                     @error('avatar') <span class="error">{{ $message }}</span> @enderror
                 </div>
-              
+
             </div>
         </div>
-      
+
     </div>
 </div>

@@ -1,46 +1,20 @@
 <?php
 
 namespace App\Livewire\Traits;
-use App\Models\City;
-use App\Models\Rank;
-use App\Models\Award;
-use App\Models\Country;
-use App\Models\Kinship;
-use App\Models\Language;
-use App\Models\Position;
-use App\Models\WorkNorm;
-use App\Models\Structure;
-use App\Models\Disability;
-use App\Models\Punishment;
+use App\Services\CallPersonnelInfo;
 use Illuminate\Support\Arr;
-use Livewire\Attributes\On; 
-use App\Models\EducationForm;
-use App\Models\EducationType;
+use Livewire\Attributes\On;
 use Livewire\WithFileUploads;
-use App\Models\EducationDegree;
-use App\Enums\KnowledgeStatusEnum;
-use Illuminate\Support\Facades\DB;
-use App\Livewire\Traits\Step1Trait;
-use App\Livewire\Traits\Step2Trait;
-use App\Livewire\Traits\Step3Trait;
-use App\Livewire\Traits\Step4Trait;
-use App\Livewire\Traits\Step5Trait;
-use App\Livewire\Traits\Step6Trait;
-use App\Livewire\Traits\Step7Trait;
-use App\Livewire\Traits\Step8Trait;
-use App\Models\EducationDocumentType;
-use App\Models\EducationalInstitution;
-use App\Models\ScientificDegreeAndName;
 
 trait PersonnelCrud
 {
     use WithFileUploads,Step1Trait,Step2Trait,Step3Trait,Step4Trait,Step5Trait,Step6Trait,Step7Trait,Step8Trait;
-    public $title; 
+    public $title;
 
     public $step;
     public array $completedSteps;
 
-    public function validationRules() 
+    public function validationRules()
     {
         return [
            1 => [
@@ -113,6 +87,9 @@ trait PersonnelCrud
             'labor_activities.position' => 'required|min:2',
             'labor_activities.join_date' => 'required|date',
             'labor_activities.leave_date' => 'required|date',
+            'labor_activities.order_given_by' => $this->isSpecialService ? 'required|min:2' : '',
+            'labor_activities.order_no' => $this->isSpecialService ? 'required|min:2' : '',
+            'labor_activities.order_date' => $this->isSpecialService ? 'required|date' : '',
             'ranks.rank_id.id' => $this->isAddedRank ? 'required|int|exists:ranks,id' : '',
             'ranks.name' => $this->isAddedRank ? 'required|min:2' : '',
             'ranks.given_date' => $this->isAddedRank ? 'required|date' : '',
@@ -121,6 +98,12 @@ trait PersonnelCrud
             'military.rank_id.id' => 'required|int|exists:ranks,id',
             'military.attitude_to_military_service' => 'required|min:2',
             'military.given_date' => 'required|date',
+            'injuries.injury_type' => 'required',
+            'injuries.location' => 'required|min:2',
+            'injuries.date_time' => 'required|date',
+            'captivity.location' => 'required|min:2',
+            'captivity.condition' => 'required|min:2',
+            'captivity.taken_captive_date' => 'required|date'
            ],
            6 => [
             'award.award_id.id' => 'required|int|exists:awards,id',
@@ -155,10 +138,13 @@ trait PersonnelCrud
             'degree.diplom_no' => 'required|int',
             'degree.diplom_given_date' => 'required|date',
             'degree.document_issued_by' => 'required|min:2',
+               'elections.election_type' => $this->hasElectedElectorals ? 'required|min:1' : '',
+               'elections.location' => $this->hasElectedElectorals ? 'required|min:2' : '',
+               'elections.elected_date' => $this->hasElectedElectorals ? 'required|date' : '',
            ]
         ];
     }
- 
+
     protected function validationAttributes()
     {
         return [
@@ -225,12 +211,21 @@ trait PersonnelCrud
             'labor_activities.position' => __('Position'),
             'labor_activities.join_date' => __('Join date'),
             'labor_activities.leave_date' => __('Leave date'),
+            'labor_activities.order_given_by' => __('Order issued by'),
+            'labor_activities.order_no' => __('Order number'),
+            'labor_activities.order_date' => __('Order date'),
             'ranks.rank_id.id' => __('Rank'),
             'ranks.name' => __('Name'),
             'ranks.given_date' => __('Given date'),
             'military.rank_id.id' => __('Rank'),
             'military.attitude_to_military_service' => __('Attitude'),
             'military.given_date' => __('Given date'),
+            'injuries.injury_type' => __('Injury type'),
+            'injuries.location' => __('Location'),
+            'injuries.date_time' => __('Date'),
+            'captivity.condition' => __('Condition'),
+            'captivity.location' => __('Location'),
+            'captivity.taken_captive_date' => __('Taken date'),
             'award.award_id.id' => __('Award'),
             'award.reason' => __('Reason'),
             'award.given_date' => __('Given date'),
@@ -259,18 +254,25 @@ trait PersonnelCrud
             'degree.diplom_no' => __('Diplom number'),
             'degree.diplom_given_date' => __('Given date'),
             'degree.document_issued_by' => __('Issued by'),
+            'elections.election_type' => __('Election type'),
+            'elections.location' => __('Location'),
+            'elections.elected_date' => __('Election date'),
         ];
     }
 
     public function previousStep()
     {
         if($this->step > 1)
+        {
             $this->step --;
+        }
         else
+        {
             $this->step = 1;
-        
+        }
+
     }
-   
+
     public function exceptArray($arrayKey)
     {
         $filtered = array_filter($this->validationRules()[$this->step], function ($key) use($arrayKey) {
@@ -280,11 +282,13 @@ trait PersonnelCrud
         return Arr::except($this->validationRules()[$this->step],array_keys($filtered));
     }
 
-  
+
     public function selectStep($step)
     {
         if($this->step == 1)
-          $this->validate($this->validationRules()[$this->step]);
+        {
+            $this->validate($this->validationRules()[$this->step]);
+        }
         $this->step = $step;
     }
 
@@ -298,7 +302,8 @@ trait PersonnelCrud
         };
        if(count($this->{$stepName}) > 0)
        {
-            $this->validate($this->validationRules()[$this->step]);
+            $validator = !empty($this->extra_education_list) ? $this->exceptArray('extra_education') : $this->validationRules()[$this->step];
+            $this->validate($validator);
             !in_array($stepName,$this->completedSteps)  &&  $this->completedSteps[] = $stepName;
        }
     }
@@ -322,71 +327,70 @@ trait PersonnelCrud
             $this->validate($this->validationRules()[$this->step]);
         }
 
-        if($this->step == 2 || $this->step == 3)
-        {
-            $this->completeStep();
-        }
-
         $this->step++;
-       
+
     }
 
     public function setData($model,$key,$content,$name,$id)
     {
-        $this->{$content.'Id'} = $id;
-        $this->{$content.'Name'} = $name;
-        
-        if(!empty($id))
-        {
-            if(array_key_exists($key,$this->{$model}))
-            {
-                $this->{$model}[$key] =  [
-                    'id' => $id,
-                    'name' => $name
-                ];
-            }
-            else
-            {
-                $this->{$model} += [
-                    $key => [
-                        'id' => $id,
-                        'name' => $name
-                    ]
-                ];
-            }
-           
-            if($model == 'extra_education' && $key == 'educational_institution_id')
-            {
+        $this->setAttributes($model, $key, $content, $name, $id);
+
+        $this->updateExtraEducationData($model, $key, $id, $name);
+
+        $this->clearSearchFields($content);
+    }
+
+    private function setAttributes($model, $key, $content, $name, $id)
+    {
+        $this->{$content . 'Id'} = $id;
+        $this->{$content . 'Name'} = $name;
+
+        if (array_key_exists($key, $this->{$model})) {
+            $this->{$model}[$key] = ['id' => $id, 'name' => $name];
+        } else {
+            $this->{$model} += [$key => ['id' => $id, 'name' => $name]];
+        }
+    }
+
+    private function updateExtraEducationData($model, $key, $id, $name)
+    {
+        if (!empty($id)) {
+            if ($model == 'extra_education' && $key == 'educational_institution_id') {
                 $this->extra_education['name'] = $name;
                 $this->extra_education['shortname'] = EducationalInstitution::find($id)->value('shortname');
             }
-        }
-        else
-        {
-            unset($this->{$model}[$key]);
-            if($model == 'extra_education' && $key == 'educational_institution_id')
-            {
+        } else {
+            if ($model == 'extra_education' && $key == 'educational_institution_id') {
                 unset($this->{$model}['name']);
                 unset($this->{$model}['shortname']);
             }
         }
-
-        if($content == 'nationality' || $content == 'previousNationality') 
-            $this->searchPreviousNationality = $this->searchNationality ='';
-        if($content == 'institution' || $content == 'extraInstitution') 
-            $this->searchExtraInstitution = $this->searchInstitution ='';
-        if($content == 'educationForm' || $content == 'extraEducationForm') 
-            $this->searchExtraEducationForm = $this->searchEducationForm ='';
-        if($content == 'ranks' || $content == 'militaryRank') 
-            $this->searchMilitaryRank = $this->searchRank ='';
     }
 
-    protected function modfiyArray($array)
+    private function clearSearchFields($content)
+    {
+        $searchFields = match ($content)
+        {
+            'previousNationality','nationality' => ['searchPreviousNationality', 'searchNationality'],
+            'extraInstitution','institution' => ['searchExtraInstitution', 'searchInstitution'],
+            'extraEducationForm','educationForm' => ['searchExtraEducationForm', 'searchEducationForm'],
+            'ranks' , 'militaryRank' => ['searchMilitaryRank', 'searchRank'],
+            default => []
+        };
+
+        if (isset($searchFields)) {
+            foreach ($searchFields as $field) {
+                $this->{$field} = '';
+            }
+        }
+    }
+
+    protected function modifyArray($array)
     {
         $filteredArray = array_filter($array, function($key) {
 
            return stripos($key, "_id") !== false;
-       
+
        }, ARRAY_FILTER_USE_KEY);
 
        foreach($filteredArray as $key => $value)
@@ -398,9 +402,9 @@ trait PersonnelCrud
        return $array;
     }
 
-    public function render()
+    private function getSteps()
     {
-        $steps = [
+        return [
             1 => __('Personal Information'),
             2 => __('ID document'),
             3 => __('Education'),
@@ -410,153 +414,18 @@ trait PersonnelCrud
             7 => __('Kinships'),
             8 => __('Other')
         ];
+    }
 
-        $nationalities = Country::whereHas('currentCountryTranslations',function($query){
-                            $query->when(!empty($this->searchNationality),function($q){
-                                $q->where('title','LIKE',"%{$this->searchNationality}%");
-                            })
-                            ->when(!empty($this->searchPreviousNationality),function($q){
-                                $q->where('title','LIKE',"%{$this->searchPreviousNationality}%");
-                            });
-                        })
-                        ->with('currentCountryTranslations')
-                        ->get()
-                        ->sortBy('currentCountryTranslations.title')->all();
-        
-        $education_degrees = EducationDegree::select('id',DB::raw('title_'.config('app.locale').' as title'))
-                            ->when(!empty($this->searchEducationDegree),function($q){
-                                $q->where('title_'.config('app.locale'),'LIKE',"%{$this->searchEducationDegree}%");
-                            })
-                            ->get();
+    public function render()
+    {
+        $steps = ['steps' => $this->getSteps()];
 
-        $structures = Structure::when(!empty($this->searchStructure),function($q){
-                            $q->where('name','LIKE',"%{$this->searchStructure}%");
-                        })
-                        ->get();
-        
-        $positions = Position::when(!empty($this->searchPosition),function($q){
-                            $q->where('name','LIKE',"%{$this->searchPosition}%");
-                        })
-                        ->get();
+        $view_data = resolve(CallPersonnelInfo::class)->getAll($this->isDisability,$this);
 
-        $work_norms = WorkNorm::select('id',DB::raw('name_'.config('app.locale').' as name'))
-                        ->when(!empty($this->searchWorkNorm),function($q){
-                            $q->where('name_'.config('app.locale'),'LIKE',"%{$this->searchWorkNorm}%");
-                        })
-                        ->get();
+        $view_name = !empty($this->personnelModel)
+                    ? 'livewire.personnel.edit-personnel'
+                    : 'livewire.personnel.add-personnel';
 
-        $disabilities = $this->isDisability 
-                ? Disability::when(!empty($this->searchDisability),function($q){
-                    $q->where('name','LIKE',"%{$this->searchDisability}%");
-                })
-                ->get()
-                : [];
-
-        $institutions = EducationalInstitution::when(!empty($this->searchInstitution),function($q){
-                            $q->where('name','LIKE',"%{$this->searchInstitution}%");
-                        })
-                        ->when(!empty($this->searchExtraInstitution),function($q){
-                            $q->where('name','LIKE',"%{$this->searchExtraInstitution}%");
-                        })
-                        ->get();        
-        
-        $education_forms = EducationForm::select('id',DB::raw('name_'.config('app.locale').' as name'))
-                        ->when(!empty($this->searchEducationForm),function($q){
-                            $q->where('name_'.config('app.locale'),'LIKE',"%{$this->searchEducationForm}%");
-                        })
-                        ->when(!empty($this->searchExtraEducationForm),function($q){
-                            $q->where('name_'.config('app.locale'),'LIKE',"%{$this->searchExtraEducationForm}%");
-                        })
-                        ->get();
-
-        $education_types = EducationType::when(!empty($this->searchEducationType),function($q){
-                        $q->where('name','LIKE',"%{$this->searchEducationType}%");
-                    })
-                    ->get();
-
-
-        $document_types = EducationDocumentType::when(!empty($this->searchDocumentTyoe),function($q){
-                        $q->where('name','LIKE',"%{$this->searchDocumentTyoe}%");
-                    })
-                    ->get();
-
-        $rankModel = Rank::query()
-                    ->when(!empty($this->searchRank),function($q){
-                        $q->where('name_'.config('app.locale'),'LIKE',"%{$this->searchRank}%");
-                    })
-                    ->when(!empty($this->searchMilitaryRank),function($q){
-                        $q->where('name_'.config('app.locale'),'LIKE',"%{$this->searchMilitaryRank}%");
-                    })
-                    ->where('is_active',1)
-                    ->get();
-
-        $awardModel = Award::when(!empty($this->searchAward),function($q){
-                    $q->where('name','LIKE',"%{$this->searchAward}%");
-                })
-                ->get();
-        
-        $punishmentModel = Punishment::when(!empty($this->searchPunishment),function($q){
-                    $q->where('name','LIKE',"%{$this->searchPunishment}%");
-                })
-                ->criminalType('other')
-                ->orderBy('name')
-                ->get();
-
-        $criminalModel = Punishment::when(!empty($this->searchCriminal),function($q){
-                    $q->where('name','LIKE',"%{$this->searchCriminal}%");
-                })
-                ->criminalType('criminal')
-                ->orderBy('name')
-                ->get();
-
-        $kinshipModel = Kinship::select('id',DB::raw('name_'.config('app.locale').' as name'),'is_active')
-                    ->when(!empty($this->searchKinship),function($q){
-                        $q->where('name_'.config('app.locale'),'LIKE',"%{$this->searchKinship}%");
-                    })
-                    ->where('is_active',1)
-                    ->get();
-
-        $languageModel = Language::all();
-
-        $knowledges = KnowledgeStatusEnum::values();
-
-        $educationDocs  =  EducationDocumentType::all();
-
-        $cities = City::select('id','name','country_id')
-            ->when(!empty($this->searchCity),function($q){
-                $q->where('name','LIKE',"%{$this->searchCity}%");
-            })
-            ->when(!empty($this->documentBornCountryId),function($q){
-                $q->where('country_id',$this->documentBornCountryId);
-            })
-            ->get();
-
-        $degrees = ScientificDegreeAndName::all();
-
-        $view_name =  !empty($this->personnelModel) ? 'livewire.personnel.edit-personnel' : 'livewire.personnel.add-personnel';
-
-        return view($view_name,compact(
-            'steps',
-            'nationalities',
-            'education_degrees',
-            'structures',
-            'positions',
-            'work_norms',
-            'disabilities',
-            'institutions',
-            'education_forms',
-            'education_types',
-            'document_types',
-            'rankModel',
-            'awardModel',
-            'punishmentModel',
-            'criminalModel',
-            'kinshipModel',
-            'languageModel',
-            'knowledges',
-            'educationDocs',
-            'cities',
-            'degrees'
-        ));
+        return view($view_name,array_merge($steps,$view_data));
     }
 }

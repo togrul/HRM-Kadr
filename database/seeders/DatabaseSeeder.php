@@ -20,6 +20,7 @@ use App\Models\Position;
 use App\Models\Punishment;
 use App\Models\PunishmentType;
 use App\Models\ScientificDegreeAndName;
+use App\Models\SocialOrigin;
 use App\Models\WorkNorm;
 use Illuminate\Database\Seeder;
 
@@ -89,7 +90,7 @@ class DatabaseSeeder extends Seeder
         {
             Language::firstOrCreate($lang);
         }
-        
+
 
         $kinships = [
             [
@@ -100,7 +101,7 @@ class DatabaseSeeder extends Seeder
                 'id' => '91',
                 'name_az' => 'Əmi',
                 'is_active' => false
-            ], 
+            ],
             [
                 'id' => '92',
                 'name_az' => 'Bibi',
@@ -186,7 +187,7 @@ class DatabaseSeeder extends Seeder
         {
             EducationForm::firstOrCreate($ef);
         }
-     
+
         AwardType::firstOrCreate([
             'id' => 10,
             'name' => 'dövlət təltifi'
@@ -423,12 +424,12 @@ class DatabaseSeeder extends Seeder
             'shortname' => 'BDU',
         ]);
 
-        OrderCategory::firstOrCreate([
-            'id' => 10,
-            'name_az' => 'Əmək müqaviləsi əmrləri',
-            'name_en' => 'Employment contract orders',
-            'name_ru' => 'Приказы о трудовом договоре',
-        ]);
+//        OrderCategory::firstOrCreate([
+//            'id' => 10,
+//            'name_az' => 'Əmək müqaviləsi əmrləri',
+//            'name_en' => 'Employment contract orders',
+//            'name_ru' => 'Приказы о трудовом договоре',
+//        ]);
 
         Order::firstOrCreate([
             'id' => 1010,
@@ -457,6 +458,110 @@ class DatabaseSeeder extends Seeder
             'name_ru' => 'Увольнение',
         ]);
 
+        SocialOrigin::firstOrCreate([
+            'id' => 10,
+            'name' => 'Fəhlə'
+        ]);
+
+        SocialOrigin::firstOrCreate([
+            'id' => 20,
+            'name' => 'Kəndli'
+        ]);
+
+        SocialOrigin::firstOrCreate([
+            'id' => 30,
+            'name' => 'Qulluqçu'
+        ]);
+
+
+       $medals =  array (
+            0 => '"Heydər Əliyev" ordeni',
+            1 => '"Zəfər" ordeni',
+            2 => '"Qarabağ" ordeni',
+            3 => '"İstiqlal" ordeni',
+            4 => '"Şah İsmayıl" ordeni',
+            5 => '"Azərbaycan Bayrağı" ordeni',
+            6 => '"Rəşadət" ordeni I dərəcə',
+            7 => '"Rəşadət" ordeni II dərəcə',
+            8 => '"Rəşadət" ordeni III dərəcə',
+            9 => '"Şərəf" ordeni',
+            10 => '"Şöhrət" ordeni',
+            11 => '"Dostluq" ordeni',
+            12 => '"Vətənə xidmətə görə" ordeni I dərəcə',
+            13 => '"Vətənə xidmətə görə" ordeni II dərəcə',
+            14 => '"Vətənə xidmətə görə" ordeni III dərəcə',
+            15 => '"Əmək" ordeni I dərəcə',
+            16 => '"Əmək" ordeni II dərəcə',
+            17 => '"Əmək" ordeni III dərəcə',
+            18 => '"Qızıl Ulduz" medalı',
+            19 => '"Vətən uğrunda" medalı',
+            20 => '"İgidliyə görə" medalı',
+            21 => '"Tərəqqi" medalı',
+            22 => '"Azərbaycan Respublikasının dövlət müstəqilliyinin bərpasının 20 illiyi" yubiley medalı',
+            23 => '"Azərbaycan Xalq Cümhuriyyətinin 100 illiyi (1918-2018)" yubiley medalı',
+            24 => '"Hərbi xidmətlərə görə" medalı',
+            25 => '"Hərbi xidmətdə fərqlənməyə görə" medalı',
+            26 => '"Şücaətə görə" medalı',
+            27 => '"Sərhəddə fərqlənməyə görə" medalı',
+            28 => '"Hərbi əməkdaşlıq sahəsində xidmətlərə görə" medalı',
+            29 => '"Silahlı Qüvvələr Veteranı" medalı',
+            30 => '"Azərbaycan Respublikası Silahlı Qüvvələrinin 10 illiyi (1991-2001)" yubiley medalı',
+            31 => '"Azərbaycan Respublikası Silahlı Qüvvələrinin 90 illiyi (1918-2008)" yubiley medalı',
+            32 => '"Azərbaycan Respublikası Silahlı Qüvvələrinin 95 illiyi (1918-2013)" yubiley medalı',
+            33 => '"Azərbaycan Ordusunun 100 illiyi (1918-2018)" yubiley medalı',
+            34 => '"Qüsursuz xidmətə görə" medalı',
+            35 => '"Dövlət qulluğunda fərqlənməyə görə" medalı',
+            36 => '"Daxili işlər orqanlarında qüsursuz xidmətə görə" medalı',
+            37 => '"Polis veteranı" medalı',
+            38 => '"Azərbaycan Polisinin 90 illiyi" yubiley medalı',
+            39 => '"Azərbaycan Polisinin 95 illiyi" yubiley medalı',
+            40 => '"Azərbaycan Polisinin 100 illiyi (1918-2018)" yubiley medalı',
+            41 => '"Azərbaycan Prokurorluğunun 100 illiyi (1918-2018)" yubiley medalı',
+            42 => '"Azərbaycan Respublikası milli təhlükəsizlik orqanlarının 90 illiyi (1919-2009)" yubiley medalı',
+            43 => '"Azərbaycan Respublikası milli təhlükəsizlik orqanlarının 95 illiyi (1919-2014)" yubiley medalı',
+            44 => '"Azərbaycan Sərhəd Mühafizəsinin 90 illiyi (1919-2009)" yubiley medalı',
+            45 => '"Azərbaycan Sərhəd Mühafizəsinin 95 illiyi (1919-2014)" yubiley medalı',
+            46 => '"Azərbaycan Sərhəd Mühafizəsinin 100 illiyi (1919-2019)" yubiley medalı',
+            47 => '"Diplomatik xidmətdə fərqlənməyə görə" medalı',
+            48 => '"Azərbaycan Respublikası diplomatik xidmət orqanlarının 90 illiyi (1919-2009)" yubiley medalı',
+            49 => '"Azərbaycan Respublikası diplomatik xidmət orqanlarının 100 illiyi (1919-2019)" yubiley medalı',
+            50 => '"Diplomatik xidmətdə fərqlənməyə görə" medalı',
+            51 => '"Vergi orqanlarında xidmətdə fərqlənməyə görə" medalı',
+            52 => '"Vergi orqanları ilə səmərəli əməkdaşlığa görə" medalı',
+            53 => '"Azərbaycan Respublikası Vergilər Nazirliyinin 10 illiyi (2000-2010)" yubiley medalı',
+            54 => '"Azərbaycan Respublikası Fövqəladə Hallar Nazirliyinin 5 illiyi (2005-2010)" yubiley medalı',
+            55 => '"Azərbaycan Respublikası Fövqəladə Hallar Nazirliyinin 10 illiyi (2005-2015)" yubiley medalı',
+            56 => '"Fövqəladə hallar orqanlarında xidmətdə fərqlənməyə görə" medalı',
+            57 => '"Fövqəladə hallar orqanlarında qüsursuz xidmətə görə" medalı',
+            58 => '"Fövqəladə hallar orqanları ilə səmərəli əməkdaşlığa görə" medalı',
+            59 => '"Azərbaycan Respublikası Dövlət Gömrük Komitəsinin 20 illiyi (1992-2012)" yubiley medalı',
+            60 => '"Azərbaycan Respublikası Dövlət Gömrük Komitəsinin 25 illiyi (1992-2017)" yubiley medalı',
+            61 => '"Ədliyyə sahəsində fərqlənməyə görə" medalı',
+            62 => '"Azərbaycan Ədliyyəsinin 100 illiyi (1918-2018)" yubiley medalı',
+            63 => '"Azərbaycan Respublikası Xüsusi Dövlət Mühafizə Xidmətinin 20 illiyi (1993-2013)" yubiley medalı',
+            64 => '"Azərbaycan Respublikası Xüsusi Dövlət Mühafizə Xidmətinin 25 illiyi (1993-2018)" yubiley medalı',
+            65 => '"Miqrasiya orqanlarında qulluqda fərqlənməyə görə" medalı',
+            66 => '"Miqrasiya orqanları ilə səmərəli əməkdaşlığa görə" medalı',
+            67 => '"Miqrasiya orqanlarında qüsursuz qulluğa görə" medalı',
+            68 => '"Dövlət Miqrasiya Xidmətinin 10 illiyi" yubiley medalı',
+            69 => '"Mülki aviasiya sahəsində xidmətlərə görə" medalı',
+            70 => '"Azərbaycan Respublikası Mülki Aviasiyasının 75 illiyi (1938-2013)" yubiley medalı',
+            71 => '"Hərbi vətənpərvərlik tərbiyəsində xidmətlərə görə" medalı',
+            72 => '"Azərbaycan avtomobil yolları – 100 il (1918-2018)" yubiley medalı',
+            73 => '"Gəmiçilik sahəsində xidmətlərə görə" medalı',
+            74 => '"Azərbaycan Xəzər Dəniz Gəmiçiliyinin 160 illiyi (1858-2018)" yubiley medalı',
+            75 => '"Bakı Dövlət Universitetinin 100 illiyi (1919-2019)" yubiley medalı',
+            76 => 'Nizami Gəncəvi adına Qızıl medal',
+        );
+
+        foreach ($medals as $key => $medal)
+        {
+            Award::firstOrCreate([
+                'id' => 1000 + ($key + 1),
+                'award_type_id' => 10,
+                'name' => $medal
+            ]);
+        }
 
         // \App\Models\User::factory(10)->create();
 

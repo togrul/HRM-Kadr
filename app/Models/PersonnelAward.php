@@ -17,7 +17,8 @@ class PersonnelAward extends Model
         'tabel_no',
         'award_id',
         'reason',
-        'given_date'
+        'given_date',
+        'is_old'
     ];
 
     public function award() : BelongsTo

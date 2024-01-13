@@ -14,9 +14,17 @@ trait Step4Trait
 
     public $rankId,$rankName,$searchRank;
 
+    public $isSpecialService;
+
     public function addLaborActivity()
     {
         $this->validate($this->exceptArray('ranks'));
+        if($this->isSpecialService && array_key_exists('time',$this->labor_activities))
+        {
+            $this->labor_activities['is_special_service'] = $this->isSpecialService ? 1 : 0;
+            $this->labor_activities['order_date'] .= " {$this->labor_activities['time']}";
+            unset($this->labor_activities['time']);
+        }
         $this->labor_activities_list[] = $this->labor_activities;
         $this->labor_activities = array();
     }
@@ -24,13 +32,13 @@ trait Step4Trait
     public function addRank()
     {
         //property qoy add methoddusa onda yoxla validation yoxsa yoxlama
-        $this->isAddedRank = true; 
+        $this->isAddedRank = true;
         $this->validate($this->exceptArray('labor_activities'));
         $this->rank_list[] = $this->ranks;
         $this->rankName = '---';
         $this->reset('rankId');
         $this->ranks = [];;
-        $this->isAddedRank = false; 
+        $this->isAddedRank = false;
     }
 
     public function forceDeleteLaborActivity($key)
@@ -43,10 +51,11 @@ trait Step4Trait
         unset($this->rank_list[$key]);
     }
 
-    public function mountStep4Trait() { 
+    public function mountStep4Trait() {
         $this->isAddedRank = false;
         $this->rankName ="---";
         !empty($this->personnelModel) && $this->fillStep4();
+        $this->isSpecialService = false;
     }
 
     protected function fillStep4()
@@ -62,6 +71,10 @@ trait Step4Trait
                     'coefficient' => $uptLabor['coefficient'],
                     'join_date' => $uptLabor['join_date'],
                     'leave_date' => $uptLabor['leave_date'],
+                    'is_special_service' => $uptLabor['is_special_service'] == 1 ? true : false,
+                    'order_given_by' => $uptLabor['order_given_by'],
+                    'order_no' => $uptLabor['order_no'],
+                    'order_date' => $uptLabor['order_date'],
                 ];
             }
         }

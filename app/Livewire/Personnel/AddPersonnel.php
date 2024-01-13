@@ -12,12 +12,12 @@ use Illuminate\Support\Facades\Http;
 class AddPersonnel extends Component
 {
     use PersonnelCrud;
-     
+
     public function store()
     {
         $this->step == 1 && $this->validate($this->validationRules()[$this->step]);
 
-        $personnelData = $this->modfiyArray($this->personnel);
+        $personnelData = $this->modifyArray($this->personnel);
 
         if(!empty($this->avatar))
             $this->personnel['photo'] = $this->avatar->store('personnel','public');
@@ -28,19 +28,19 @@ class AddPersonnel extends Component
             $personnel = Personnel::create($personnelData);
             if(in_array('document',$this->completedSteps))
             {
-                $documentData = $this->modfiyArray($this->document);
-                $personnel->idDocuments()->create($documentData);   
+                $documentData = $this->modifyArray($this->document);
+                $personnel->idDocuments()->create($documentData);
             }
             if(in_array('education',$this->completedSteps))
             {
-                $educationData = $this->modfiyArray($this->education);
-                $personnel->education()->create($educationData);   
+                $educationData = $this->modifyArray($this->education);
+                $personnel->education()->create($educationData);
             }
             if(!empty($this->extra_education_list))
             {
                 foreach($this->extra_education_list as $ext)
                 {
-                    $extData = $this->modfiyArray($ext);
+                    $extData = $this->modifyArray($ext);
                     $personnel->extraEducations()->create($extData);
                 }
             }
@@ -48,7 +48,7 @@ class AddPersonnel extends Component
             {
                 foreach($this->labor_activities_list as $lbr)
                 {
-                    $lbrData = $this->modfiyArray($lbr);
+                    $lbrData = $this->modifyArray($lbr);
                     $personnel->laborActivities()->create($lbrData);
                 }
             }
@@ -56,7 +56,7 @@ class AddPersonnel extends Component
             {
                 foreach($this->rank_list as $rankList)
                 {
-                    $rnkData = $this->modfiyArray($rankList);
+                    $rnkData = $this->modifyArray($rankList);
                     $personnel->ranks()->create($rnkData);
                 }
             }
@@ -64,15 +64,31 @@ class AddPersonnel extends Component
             {
                 foreach($this->military_list as $militaryList)
                 {
-                    $militaryData = $this->modfiyArray($militaryList);
+                    $militaryData = $this->modifyArray($militaryList);
                     $personnel->military()->create($militaryData);
+                }
+            }
+            if(!empty($this->injury_list))
+            {
+                foreach($this->injury_list as $injuryList)
+                {
+                    $injuryData = $this->modifyArray($injuryList);
+                    $personnel->injuries()->create($injuryData);
+                }
+            }
+            if(!empty($this->captivity_list))
+            {
+                foreach($this->captivity_list as $captivityList)
+                {
+                    $captivityData = $this->modifyArray($captivityList);
+                    $personnel->captives()->create($captivityData);
                 }
             }
             if(!empty($this->award_list))
             {
                 foreach($this->award_list as $awardList)
                 {
-                    $awardData = $this->modfiyArray($awardList);
+                    $awardData = $this->modifyArray($awardList);
                     $personnel->awards()->create($awardData);
                 }
             }
@@ -80,7 +96,7 @@ class AddPersonnel extends Component
             {
                 foreach($this->punishment_list as $punishmentList)
                 {
-                    $punishmentData = $this->modfiyArray($punishmentList);
+                    $punishmentData = $this->modifyArray($punishmentList);
                     $personnel->punishments()->create($punishmentData);
                 }
             }
@@ -88,7 +104,7 @@ class AddPersonnel extends Component
             {
                 foreach($this->criminal_list as $criminalList)
                 {
-                    $criminalData = $this->modfiyArray($criminalList);
+                    $criminalData = $this->modifyArray($criminalList);
                     $personnel->criminals()->create($criminalData);
                 }
             }
@@ -96,7 +112,7 @@ class AddPersonnel extends Component
             {
                 foreach($this->kinship_list as $kinshipList)
                 {
-                    $kinshipData = $this->modfiyArray($kinshipList);
+                    $kinshipData = $this->modifyArray($kinshipList);
                     $personnel->kinships()->create($kinshipData);
                 }
             }
@@ -104,7 +120,7 @@ class AddPersonnel extends Component
             {
                 foreach($this->language_list as $languageList)
                 {
-                    $languageData = $this->modfiyArray($languageList);
+                    $languageData = $this->modifyArray($languageList);
                     $personnel->foreignLanguages()->create($languageData);
                 }
             }
@@ -112,7 +128,7 @@ class AddPersonnel extends Component
             {
                 foreach($this->event_list as $eventList)
                 {
-                    $eventData = $this->modfiyArray($eventList);
+                    $eventData = $this->modifyArray($eventList);
                     $personnel->participations()->create($eventData);
                 }
             }
@@ -120,14 +136,23 @@ class AddPersonnel extends Component
             {
                 foreach($this->degree_list as $degreeList)
                 {
-                    $degreeData = $this->modfiyArray($degreeList);
+                    $degreeData = $this->modifyArray($degreeList);
                     $personnel->degreeAndNames()->create($degreeData);
                 }
             }
+            if(!empty($this->election_list))
+            {
+                foreach($this->election_list as $electionList)
+                {
+                    $electionData = $this->modifyArray($electionList);
+                    $personnel->elections()->create($electionData);
+                }
+            }
+
         });
         $this->dispatch('personnelAdded',__('Personnel was added successfully!'));
     }
-    
+
     public function mount()
     {
         $this->title = __('New personnel');

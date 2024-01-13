@@ -73,6 +73,11 @@
                          showNotification(message)
                     })
 
+                    Livewire.on('fileAdded',message => {
+                         isError = false
+                         showNotification(message)
+                    })
+
                     Livewire.on('menuWasDeleted',message => {
                          isError = false
                          showNotification(message)

@@ -17,7 +17,7 @@ trait Step6Trait
     public $criminal = [];
     public $criminal_list = [];
 
-    public function mountStep6Trait() { 
+    public function mountStep6Trait() {
         $this->awardName = $this->punishmentName = $this->criminalName = '---';
         if(!empty($this->personnelModel))
         {
@@ -78,7 +78,7 @@ trait Step6Trait
 
     protected function fillAwards()
     {
-        $updateAward = $this->personnelModelData->awards->load('award')->toArray();
+        $updateAward = $this->personnelModelData->awards->load(['award','award.type'])->toArray();
 
         if(!empty($updateAward))
         {
@@ -87,6 +87,7 @@ trait Step6Trait
                 $this->award_list[] = [
                     'reason' => $uptAward['reason'],
                     'given_date' => $uptAward['given_date'],
+                    'is_old' =>  $uptAward['is_old']
                 ];
 
                 if(!empty($uptAward['award_id']))

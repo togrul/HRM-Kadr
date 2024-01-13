@@ -2,7 +2,7 @@
         <div class="flex flex-col">
             <x-select-list class="w-full" :title="__('Kinship')" mode="gray" :selected="$kinshipName" name="kinshipId">
                 <x-livewire-input  @click.stop="open = true" mode="gray" name="searchKinship" wire:model.live="searchKinship"></x-livewire-input>
-                
+
                 <x-select-list-item wire:click="setData('kinship','kinship_id','kinship','---',null)" :selected="'---' == $kinshipName"
                   wire:model='kinship.kinship_id.id'>
                   ---
@@ -69,6 +69,17 @@
     </div>
 </div>
 
+<div class="grid grid-cols-2 gap-2">
+    <div class="flex flex-col">
+        <x-label for="kinship.birth_certificate_number">{{ __('Birth certificate number') }}</x-label>
+        <x-livewire-input mode="gray" name="kinship.birth_certificate_number" wire:model="kinship.birth_certificate_number"></x-livewire-input>
+    </div>
+    <div class="flex flex-col">
+        <x-label for="kinship.marriage_certificate_number">{{ __('Marriage certificate number') }}</x-label>
+        <x-livewire-input mode="gray" name="kinship.marriage_certificate_number" wire:model="kinship.marriage_certificate_number"></x-livewire-input>
+    </div>
+</div>
+
 <div class="flex justify-end">
     <x-button  mode="black" wire:click="addKinship">{{ __('Add') }}</x-button>
 </div>
@@ -84,27 +95,35 @@
                         <div class="flex space-x-2">
                             <span class="text-sm text-gray-500 font-medium">{{ __('Kinship') }}:</span>
                             <span class="text-sm font-medium text-gray-700">
-                                {{ $knshModel['kinship_id']['name'] }} 
+                                {{ $knshModel['kinship_id']['name'] }}
                            </span>
                         </div>
                         <div class="flex space-x-2">
                             <span class="text-sm text-gray-500 font-medium">{{ __('Fullname') }}:</span>
                             <span class="text-sm font-medium text-gray-700">
-                                {{ $knshModel['fullname'] }} 
+                                {{ $knshModel['fullname'] }}
                            </span>
                         </div>
                         <div class="flex space-x-2">
                             <span class="text-sm text-gray-500 font-medium">{{ __('Birth date') }}:</span>
                             <span class="text-sm font-medium text-gray-700">
-                                {{ $knshModel['birthdate'] }} 
+                                {{ $knshModel['birthdate'] }}
                            </span>
                         </div>
                         <div class="flex space-x-2">
                             <span class="text-sm text-gray-500 font-medium">{{ __('Birth place') }}:</span>
                             <span class="text-sm font-medium text-gray-700">
-                                {{ $knshModel['birth_place'] }} 
+                                {{ $knshModel['birth_place'] }}
                            </span>
                         </div>
+                        @if(!empty($knshModel['birth_certificate_number']))
+                        <div class="flex space-x-2">
+                            <span class="text-sm text-gray-500 font-medium">{{ __('Birth certificate number') }}:</span>
+                            <span class="text-sm font-medium text-gray-700">
+                                {{ $knshModel['birth_certificate_number'] }}
+                           </span>
+                        </div>
+                        @endif
                     </div>
                 </x-table.td>
                 <x-table.td>
@@ -112,30 +131,38 @@
                         <div class="flex space-x-2">
                             <span class="text-sm text-gray-500 font-medium">{{ __('Registered address') }}:</span>
                             <span class="text-sm font-medium text-gray-700">
-                                {{ $knshModel['registered_address'] }} 
+                                {{ $knshModel['registered_address'] }}
                            </span>
                         </div>
                         <div class="flex space-x-2">
                             <span class="text-sm text-gray-500 font-medium">{{ __('Residental address') }}:</span>
                             <span class="text-sm font-medium text-gray-700">
-                                {{ $knshModel['residental_address'] }} 
+                                {{ $knshModel['residental_address'] }}
                            </span>
                         </div>
                         <div class="flex space-x-2">
                             <span class="text-sm text-gray-500 font-medium">{{ __('Company') }}:</span>
                             <span class="text-sm font-medium text-gray-700">
-                                {{ $knshModel['company_name'] }} 
+                                {{ $knshModel['company_name'] }}
                            </span>
                         </div>
                         <div class="flex space-x-2">
                             <span class="text-sm text-gray-500 font-medium">{{ __('Position') }}:</span>
                             <span class="text-sm font-medium text-gray-700">
-                                {{ $knshModel['position'] }} 
+                                {{ $knshModel['position'] }}
                            </span>
                         </div>
+                        @if(!empty($knshModel['marriage_certificate_number']))
+                        <div class="flex space-x-2">
+                            <span class="text-sm text-gray-500 font-medium">{{ __('Marriage certificate number') }}:</span>
+                            <span class="text-sm font-medium text-gray-700">
+                                {{ $knshModel['marriage_certificate_number'] }}
+                           </span>
+                        </div>
+                        @endif
                     </div>
                 </x-table.td>
-            
+
                 <x-table.td :isButton="true">
                      <button
                         onclick="confirm('Are you sure you want to remove this data?') || event.stopImmediatePropagation()"

@@ -34,15 +34,20 @@ class AllPersonnel extends Component
         ];
     }
 
-    protected $listeners = ['personnelAdded' => '$refresh','selectStructure','filterSelected','personnelWasDeleted' => '$refresh'];
+    protected $listeners = ['personnelAdded' => '$refresh','fileAdded' => '$refresh','selectStructure','filterSelected','personnelWasDeleted' => '$refresh'];
 
     public function exportExcel()
     {
          $report['data'] = $this->returnData(type:"excel");
          $report['filter'] = $this->filters;
          $name = Carbon::now()->format('d.m.Y H:i');
-         
-         return Excel::download( new PersonnelExport( $report ), "personnel-{$name}.xlsx"); 
+
+         return Excel::download( new PersonnelExport( $report ), "personnel-{$name}.xlsx");
+    }
+
+    public function printInfo($personnelId)
+    {
+        redirect()->route('print.personnel',$personnelId);
     }
 
 
@@ -81,7 +86,7 @@ class AllPersonnel extends Component
             $this->structure = $structureModel->getAllNestedIds();
         }
     }
-  
+
     public function setStatus($newStatus)
     {
         $this->status = $newStatus;
@@ -143,7 +148,7 @@ class AllPersonnel extends Component
             ->orderBy('position_id')
             ->orderBy('structure_id');
 
-        return $type == "normal" 
+        return $type == "normal"
             ? $result->paginate(10)->withQueryString()
             : $result->get()->toArray();
     }

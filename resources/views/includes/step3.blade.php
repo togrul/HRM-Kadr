@@ -3,7 +3,7 @@
     <div class="flex flex-col">
         <x-select-list class="w-full" :title="__('Education place')" mode="gray" :selected="$institutionName" name="educational_institution_id">
             <x-livewire-input  @click.stop="open = true" mode="gray" name="searchInstitution" wire:model.live="searchInstitution"></x-livewire-input>
-            
+
             <x-select-list-item wire:click="setData('education','educational_institution_id','institution','---',null)" :selected="'---' == $institutionName"
               wire:model='education.educational_institution_id.id'>
               ---
@@ -22,7 +22,7 @@
     <div class="flex flex-col">
         <x-select-list class="w-full" :title="__('Education form')" mode="gray" :selected="$educationFormName" name="educationFormId">
             <x-livewire-input  @click.stop="open = true" mode="gray" name="searchEducationForm" wire:model.live="searchEducationForm"></x-livewire-input>
-            
+
             <x-select-list-item wire:click="setData('education','education_form_id','educationForm','---',null)" :selected="'---' == $educationFormName"
               wire:model='education.education_form_id.id'>
               ---
@@ -105,7 +105,7 @@
             @enderror
         </div>
     </div>
- 
+
     <div class="flex flex-col">
         <x-label for="education.diplom_given_date">{{ __('Diplom given date') }}</x-label>
         <x-pikaday-input mode="gray" name="education.diplom_given_date" format="Y-MM-DD" wire:model.live="education.diplom_given_date">
@@ -125,13 +125,20 @@
             <x-label for="education.coefficient">{{ __('Coefficient') }}</x-label>
             <x-livewire-input mode="gray" type="number" name="education.coefficient" wire:model.live="education.coefficient"></x-livewire-input>
         </div>
-        <div class="flex flex-row-reverse">
-            <x-label for="education.calculate_as_seniority">{{ __('Calculate as seniority') }}</x-label>
-            <x-checkbox name="education.calculate_as_seniority" model="education.calculate_as_seniority"></x-checkbox>
+        <div class="flex flex-col items-start space-y-1">
+            <div class="flex flex-row-reverse">
+                <x-label for="education.calculate_as_seniority">{{ __('Calculate as seniority') }}</x-label>
+                <x-checkbox name="education.calculate_as_seniority" model="education.calculate_as_seniority"></x-checkbox>
+            </div>
+            <div class="flex flex-row-reverse">
+                <x-label for="education.is_military">{{ __('Is military?') }}</x-label>
+                <x-checkbox name="education.is_military" model="education.is_military"></x-checkbox>
+            </div>
         </div>
+
     </div>
 
-   
+
 </div>
 @if(Arr::has($education,['admission_year']) && !empty($education['admission_year']))
 <div class="my-2 flex justify-between items-center border border-gray-200 p-2 shadow-sm bg-gray-50 rounded-lg">
@@ -144,12 +151,12 @@
             <span class="font-medium text-gray-900">
                 {{ $_calculateEducationSeniority['duration'] }} {{ __('month') }} ({{ $_calculateEducationSeniority['year'] }} {{ __('year') }} {{ $_calculateEducationSeniority['month'] }} {{ __('month') }} )
             </span>
-        </div> 
+        </div>
         @if($education['coefficient'] > 0)
         <div class="flex space-x-2 items-center">
             <span class="font-medium text-gray-500">{{ __('Coefficient') }}:</span>
             <span class="font-medium text-teal-500">{{ $education['coefficient'] }}</span>
-        </div> 
+        </div>
         <div class="flex space-x-2 items-center">
             <span class="font-medium text-gray-500">{{ __('Extra seniority') }}:</span>
             <span class="font-medium text-rose-500">
@@ -157,7 +164,7 @@
                 ({{ floor($_calculateEducationSeniority['duration'] * $education['coefficient'] / 12) }} {{ __('year') }}
                 {{ $_calculateEducationSeniority['duration'] * $education['coefficient'] % 12 }} {{ __('month') }})
             </span>
-        </div> 
+        </div>
         @endif
 </div>
 @endif
@@ -172,7 +179,7 @@
     <div class="flex flex-col">
         <x-select-list class="w-full" :title="__('Education type')" mode="gray" :selected="$educationTypeName" name="educationTypeId">
             <x-livewire-input  @click.stop="open = true" mode="gray" name="searchEducationType" wire:model.live="searchEducationType"></x-livewire-input>
-            
+
             <x-select-list-item wire:click="setData('extra_education','education_type_id','educationType','---',null)" :selected="'---' == $educationTypeName"
               wire:model='extra_education.education_type_id'>
               ---
@@ -191,7 +198,7 @@
     <div class="flex flex-col">
         <x-select-list class="w-full" :title="__('Education place')" mode="gray" :selected="$extraInstitutionName" name="extraInstitutionId">
             <x-livewire-input  @click.stop="open = true" mode="gray" name="searchExtraInstitution" wire:model.live="searchExtraInstitution"></x-livewire-input>
-            
+
             <x-select-list-item wire:click="setData('extra_education','educational_institution_id','extraInstitution','---',null)" :selected="'---' == $extraInstitutionName"
               wire:model='extra_education.educational_institution_id.id'>
               ---
@@ -210,7 +217,7 @@
     <div class="flex flex-col">
         <x-select-list class="w-full" :title="__('Education form')" mode="gray" :selected="$extraEducationFormName" name="extraEducationFormId">
             <x-livewire-input  @click.stop="open = true" mode="gray" name="searchExtraEducationForm" wire:model.live="searchExtraEducationForm"></x-livewire-input>
-            
+
             <x-select-list-item wire:click="setData('extra_education','education_form_id','extraEducationForm','---',null)" :selected="'---' == $extraEducationFormName"
               wire:model='extra_education.education_form_id.id'>
               ---
@@ -226,7 +233,7 @@
         <x-validation> {{ $message }} </x-validation>
         @enderror
     </div>
-    
+
 </div>
 
 <div class="grid grid-cols-3 gap-2">
@@ -290,7 +297,7 @@
     <div class="flex flex-col">
         <x-select-list class="w-full" :title="__('Document type')" mode="gray" :selected="$educationDocumentTypeName" name="educationDocumentTypeId">
             <x-livewire-input  @click.stop="open = true" mode="gray" name="searchDocumentTyoe" wire:model.live="searchDocumentTyoe"></x-livewire-input>
-            
+
             <x-select-list-item wire:click="setData('extra_education','education_document_type_id','educationDocumentType','---',null)" :selected="'---' == $extraEducationFormName"
               wire:model='extra_education.education_document_type_id.id'>
               ---
@@ -345,9 +352,16 @@
             <x-label for="extra_education.coefficient">{{ __('Coefficient') }}</x-label>
             <x-livewire-input mode="gray" type="number" name="extra_education.coefficient" wire:model.live="extra_education.coefficient"></x-livewire-input>
         </div>
-        <div class="flex flex-row-reverse">
-            <x-label for="extra_education.calculate_as_seniority">{{ __('Calculate as seniority') }}</x-label>
-            <x-checkbox name="extra_education.calculate_as_seniority" model="extra_education.calculate_as_seniority"></x-checkbox>
+
+        <div class="flex flex-col items-start space-y-1">
+            <div class="flex flex-row-reverse">
+                <x-label for="extra_education.calculate_as_seniority">{{ __('Calculate as seniority') }}</x-label>
+                <x-checkbox name="extra_education.calculate_as_seniority" model="extra_education.calculate_as_seniority"></x-checkbox>
+            </div>
+            <div class="flex flex-row-reverse">
+                <x-label for="extra_education.is_military">{{ __('Is military?') }}</x-label>
+                <x-checkbox name="extra_education.is_military" model="extra_education.is_military"></x-checkbox>
+            </div>
         </div>
     </div>
 </div>
@@ -361,6 +375,7 @@
         <x-table.tbl :headers="[__('Education place'),__('Info'),__('Duration'),'action']">
              @php
                 $total_duration_edu = 0;
+                $extra_seniority = 0;
             @endphp
             @forelse ($extra_education_list as $key => $eeModel)
             <tr>
@@ -390,15 +405,25 @@
                                 {{ $eeModel['education_language']}}
                            </span>
                         </div>
+                        <div class="flex space-x-2">
+                            <span class="text-sm text-gray-500 font-medium">{{ __('Category') }}:</span>
+                            <span @class([
+                                    'text-sm font-medium',
+                                    'text-emerald-500' => !$eeModel['is_military'],
+                                    'text-rose-500' => $eeModel['is_military']
+                            ])>
+                                {{ $eeModel['is_military'] ? __('Military') : __('Property')}}
+                           </span>
+                        </div>
                     </div>
-               
+
                 </x-table.td>
                 <x-table.td>
                     <div class="flex flex-col">
-                        <div class="flex space-x-1 items-center">  
+                        <div class="flex space-x-1 items-center">
                             <span class="text-sm font-medium text-gray-500">
-                                {{ __('Program') }}: 
-                            </span>   
+                                {{ __('Program') }}:
+                            </span>
                             <span class="text-sm font-medium text-gray-700">
                                 {{ $eeModel['education_program_name']}}
                            </span>
@@ -428,7 +453,8 @@
                         @php
                             $_end_date_edu = empty($eeModel['graduated_year']) ? \Carbon\Carbon::now()->format('Y-m-d') : $eeModel['graduated_year'];
                             $dataExtraEdu = $calculateSeniority->calculate($eeModel['admission_year'],$_end_date_edu,$eeModel['coefficient'],$total_duration_edu);
-                            $total_duration_edu = $dataExtraEdu['total_duration'];
+                            $total_duration_edu += $dataExtraEdu['diff'];
+                            $extra_seniority += $eeModel['calculate_as_seniority'] ? $dataExtraEdu['duration'] : 0;
                         @endphp
 
                     <div class="flex space-x-2">
@@ -446,7 +472,7 @@
 
                     <div class="flex space-x-1 items-center">
                         <span class="text-sm font-medium text-gray-500">
-                            {{ __('Duration') }}: 
+                            {{ __('Duration') }}:
                         </span>
                         <span class="text-sm font-medium text-gray-800">
                             {{ $dataExtraEdu['year'] }} {{ __('year') }} {{ $dataExtraEdu['month'] }} {{ __('month') }}  ({{ $dataExtraEdu['diff'] }} {{ __('month') }})
@@ -466,9 +492,9 @@
                             {{ __('Extra seniority') }}:
                         </span>
                         <span class="text-sm font-medium text-blue-500">
-                            {{ $dataExtraEdu['diff'] * $eeModel['coefficient'] }} {{ __('month') }}
-                            ({{ floor($dataExtraEdu['diff'] * $education['coefficient'] / 12) }} {{ __('year') }}
-                            {{ $dataExtraEdu['diff'] * $eeModel['coefficient'] % 12 }} {{ __('month') }})   
+                            {{ floor($dataExtraEdu['diff'] * $education['coefficient'] / 12) }} {{ __('year') }}
+                            {{ $dataExtraEdu['diff'] * $eeModel['coefficient'] % 12 }} {{ __('month')  }}
+                            ({{ $dataExtraEdu['diff'] * $eeModel['coefficient'] }} {{ __('month') }})
                         </span>
                     </div>
                     @endif
@@ -500,7 +526,20 @@
 
     </div>
         <div class="my-2 flex justify-between items-center border border-gray-300 p-2 shadow-sm bg-gray-50 rounded-lg">
-            {{ collect($extra_education_list)->pluck('diplom_no')->sum() }}
+            <div class="flex space-x-2 items-center">
+                <span class="font-medium text-gray-500">{{ __('Total duration') }}:</span>
+                <span class="font-medium text-gray-900">
+                    {{ $total_duration_edu }} {{ __('month') }} ( {{ floor($total_duration_edu / 12) }} {{ __('year') }}
+                    {{ $total_duration_edu % 12 }} {{ __('month')  }})</span>
+            </div>
+            <div class="flex space-x-2 items-center">
+                <span class="font-medium text-gray-500">{{ __('Extra seniority') }}:</span>
+                <span class="font-medium text-rose-500">
+                    {{ $extra_seniority }} {{ __('month') }} ( {{ floor($extra_seniority / 12) }} {{ __('year') }}
+                    {{ $extra_seniority % 12 }} {{ __('month')  }})
+                </span>
+            </div>
+
         </div>
 
     </div>

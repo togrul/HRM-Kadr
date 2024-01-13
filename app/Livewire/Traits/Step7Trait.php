@@ -8,7 +8,7 @@ trait Step7Trait
     public $kinship_list = [];
     public $kinshipId,$kinshipName,$searchKinship;
 
-    public function mountStep7Trait() { 
+    public function mountStep7Trait() {
         $this->kinshipName = '---';
         !empty($this->personnelModel) && $this->fillKinship();
     }
@@ -43,6 +43,8 @@ trait Step7Trait
                     'position' => $uptKinship['position'],
                     'registered_address' => $uptKinship['registered_address'],
                     'residental_address' => $uptKinship['residental_address'],
+                    'birth_certificate_number' => $uptKinship['birth_certificate_number'],
+                    'marriage_certificate_number' => $uptKinship['marriage_certificate_number'],
                 ];
 
                 if(!empty($uptKinship['kinship_id']))

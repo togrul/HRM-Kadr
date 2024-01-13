@@ -29,7 +29,8 @@ class PersonnelExtraEducation extends Model
         'diplom_no',
         'diplom_given_date',
         'coefficient',
-        'calculate_as_seniority'
+        'calculate_as_seniority',
+        'is_military'
     ];
 
     public function type() : BelongsTo

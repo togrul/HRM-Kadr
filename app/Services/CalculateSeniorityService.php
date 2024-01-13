@@ -6,26 +6,31 @@ use Carbon\Carbon;
 
 class CalculateSeniorityService
 {
-    public function calculate(   
-        $join_date, 
+    public function calculate(
+        $join_date,
         $leave_date,
-        $coefficient,
-        $total_duration
+        $coefficient
     )
     {
         $data['diff'] = Carbon::parse($join_date)
-                        ->diffInMonths(Carbon::parse($leave_date));                
-        $data['duration'] = !empty($coefficient) 
-                            ? $coefficient * $data['diff'] 
-                            : $data['diff'];
-        $data['total_duration'] = $total_duration;
-        $data['total_duration'] += $data['duration']; 
+            ->diffInMonths(Carbon::parse($leave_date));
 
-        $data['year'] = floor($data['diff'] / 12);
-        $data['month'] = $data['diff'] % 12;
-        $data['total_year_old'] = floor($data['total_duration'] / 12);
-        $data['total_month_old'] = $data['total_duration'] % 12;
+        $data['duration'] = !empty($coefficient)
+            ? $coefficient * $data['diff']
+            : $data['diff'];
+
+        $y_m = $this->calculateYearAndMonth($data['diff']);
+        $data['year'] = $y_m['year'];
+        $data['month'] = $y_m['month'];
 
         return $data;
+     }
+
+     public function calculateYearAndMonth($total_month)
+     {
+         $calculate['year'] = floor($total_month / 12);
+         $calculate['month'] = $total_month % 12;
+
+         return $calculate;
      }
 }

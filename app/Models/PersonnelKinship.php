@@ -22,7 +22,9 @@ class PersonnelKinship extends Model
         'company_name',
         'position',
         'registered_address',
-        'residental_address'
+        'residental_address',
+        'birth_certificate_number',
+        'marriage_certificate_number'
     ];
 
     public function kinship() : BelongsTo

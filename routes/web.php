@@ -35,6 +35,8 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
+    Route::get('/print/personnel/{id?}',[\App\Http\Controllers\PrintController::class,'personnel_service_book'])->name('print.personnel');
+
     // Livewire::setUpdateRoute(function ($handle) {
     //     return Route::post('/livewire/update', $handle);
     // });

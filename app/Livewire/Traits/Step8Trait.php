@@ -14,13 +14,19 @@ trait Step8Trait
     public $degreeId,$degreeName;
     public $eduDocId,$eduDocName;
 
-    public function mountStep8Trait() { 
+    public $hasElectedElectorals;
+    public $elections = [];
+    public $election_list = [];
+    public function mountStep8Trait() {
+        $this->hasElectedElectorals = false;
         $this->languageName  = $this->degreeName = $this->eduDocName = '---';
         if(!empty($this->personnelModel))
         {
             $this->fillLanguage();
             $this->fillEvents();
             $this->fillDegree();
+            $this->fillElections();
+            $this->hasElectedElectorals = count($this->personnelModelData->elections) > 0;
         }
     }
 
@@ -28,7 +34,8 @@ trait Step8Trait
     {
         $validator1 = $this->exceptArray('event');
         $validator2 = $this->exceptArray('degree');
-        $this->validate(array_intersect_assoc($validator1,$validator2));
+        $validator3 = $this->exceptArray('elections');
+        $this->validate(array_intersect_assoc(array_intersect_assoc($validator1,$validator2),$validator3));
         $this->language_list[] = $this->language;
         $this->languageName = $this->knowledgeName = '---';
         $this->reset(['languageId']);
@@ -44,7 +51,8 @@ trait Step8Trait
     {
         $validator1 = $this->exceptArray('language');
         $validator2 = $this->exceptArray('degree');
-        $this->validate(array_intersect_assoc($validator1,$validator2));
+        $validator3 = $this->exceptArray('elections');
+        $this->validate(array_intersect_assoc(array_intersect_assoc($validator1,$validator2),$validator3));
         $this->event_list[] = $this->event;
         $this->event = [];;
     }
@@ -58,16 +66,32 @@ trait Step8Trait
     {
         $validator1 = $this->exceptArray('event');
         $validator2 = $this->exceptArray('language');
-        $this->validate(array_intersect_assoc($validator1,$validator2));
+        $validator3 = $this->exceptArray('elections');
+        $this->validate(array_intersect_assoc(array_intersect_assoc($validator1,$validator2),$validator3));
         $this->degree_list[] = $this->degree;
         $this->degreeName = $this->eduDocName = '---';
         $this->reset(['eduDocId','eduDocId']);
-        $this->degree = []; 
+        $this->degree = [];
     }
 
     public function forceDeleteDegree($key)
     {
         unset($this->degree_list[$key]);
+    }
+
+    public function addElection()
+    {
+        $validator1 = $this->exceptArray('language');
+        $validator2 = $this->exceptArray('event');
+        $validator3 = $this->exceptArray('degree');
+        $this->validate(array_intersect_assoc(array_intersect_assoc($validator1,$validator2),$validator3));
+        $this->election_list[] = $this->elections;
+        $this->elections = [];
+    }
+
+    public function forceDeleteElection($key)
+    {
+        unset($this->election_list[$key]);
     }
 
     protected function fillLanguage()
@@ -135,6 +159,20 @@ trait Step8Trait
                     'name' => $uptDegree['document_type']['name'],
                 ];
             }
+        }
+    }
+
+    protected function fillElections()
+    {
+        $updateElections = $this->personnelModelData->elections->toArray();
+
+        foreach($updateElections  as $key => $uptElection)
+        {
+            $this->election_list[] = [
+                'election_type' => $uptElection['election_type'],
+                'location' => $uptElection['location'],
+                'elected_date' => $uptElection['elected_date'],
+            ];
         }
     }
 }

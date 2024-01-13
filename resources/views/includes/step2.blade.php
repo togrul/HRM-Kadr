@@ -6,9 +6,9 @@
             <x-validation> {{ $message }} </x-validation>
             @enderror
         </div>
-     
+
         <x-livewire-input mode="gray" name="document.pin" wire:model="document.pin"></x-livewire-input>
-     
+
     </div>
     <div class="flex">
         <x-button  mode="black" wire:click="getDataByPin">{{ __('Get data by PIN') }}</x-button>
@@ -29,7 +29,7 @@
     <div class="flex flex-col">
         <x-select-list  class="w-full" :title="__('Nationality')" mode="gray" :selected="$documentNationalityName" name="documentNationalityId">
             <x-livewire-input  @click.stop="open = true" mode="gray" name="searchPreviousNationality" wire:model.live="searchPreviousNationality"></x-livewire-input>
-            
+
             <x-select-list-item wire:click="setData('document','nationality_id','documentNationality','---',null)" :selected="'---' == $documentNationalityName"
               wire:model='documentNationalityId'>
               ---
@@ -62,7 +62,7 @@
     <div class="flex flex-col">
         <x-select-list  class="w-full" :title="__('Born country')" mode="gray" :selected="$documentBornCountryName" name="documentBornCountryId">
             <x-livewire-input  @click.stop="open = true" mode="gray" name="searchPreviousNationality" wire:model.live="searchPreviousNationality"></x-livewire-input>
-            
+
             <x-select-list-item wire:click="setData('document','born_country_id','documentBornCountry','---',null)" :selected="'---' == $documentBornCountryName"
               wire:model='documentBornCountryId'>
               ---
@@ -81,7 +81,7 @@
     <div class="flex flex-col">
         <x-select-list  class="w-full" :title="__('City')" mode="gray" :selected="$documentBornCityName" name="documentBornCityId">
             <x-livewire-input  @click.stop="open = true" mode="gray" name="searchCity" wire:model.live="searchCity"></x-livewire-input>
-            
+
             <x-select-list-item wire:click="setData('document','born_city_id','documentBornCity','---',null)" :selected="'---' == $documentBornCityName"
               wire:model='documentBornCityId'>
               ---

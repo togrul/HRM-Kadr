@@ -45,10 +45,12 @@ class Personnel extends Model
         'work_norm_id',
         'join_work_date',
         'leave_work_date',
+        'social_origin_id',
         'disability_id',
         'disability_given_date',
         'extra_important_information',
         'computer_knowledge',
+        'scientific_works_inventions',
         'added_by',
         'deleted_by'
     ];
@@ -62,16 +64,10 @@ class Personnel extends Model
         'surname','name','patronymic','tabel_no','pin'
     ];
 
-    public function getFullnameAttribute()
+    public function getFullnameAttribute() : string
     {
         return "{$this->surname} {$this->name} {$this->patronymic}";
     }
-
-    // public function nationality() : BelongsTo
-    // {
-    //     return $this->belongsTo(Country::class,'nationality_id','id');
-    // }
-
 
     public function personDidDelete() : BelongsTo
     {
@@ -125,12 +121,12 @@ class Personnel extends Model
 
     public function awards() : HasMany
     {
-        return $this->hasMany(PersonnelAward::class,'tabel_no','tabel_no');
+        return $this->hasMany(PersonnelAward::class,'tabel_no','tabel_no')->orderByDesc('given_date');
     }
 
     public function criminals() : HasMany
     {
-        return $this->hasMany(PersonnelCriminal::class,'tabel_no','tabel_no');
+        return $this->hasMany(PersonnelCriminal::class,'tabel_no','tabel_no')->orderByDesc('given_date');
     }
 
     public function idDocuments() : HasOne
@@ -145,7 +141,7 @@ class Personnel extends Model
 
     public function extraEducations() : HasMany
     {
-        return $this->hasMany(PersonnelExtraEducation::class,'tabel_no','tabel_no');
+        return $this->hasMany(PersonnelExtraEducation::class,'tabel_no','tabel_no')->orderByDesc('graduated_year');
     }
 
     public function foreignLanguages() : HasMany
@@ -153,34 +149,54 @@ class Personnel extends Model
         return $this->hasMany(PersonnelForeignLanguage::class,'tabel_no','tabel_no');
     }
 
+    public function files() : HasMany
+    {
+        return $this->hasMany(PersonnelDocument::class,'tabel_no','tabel_no');
+    }
+
     public function kinships() : HasMany
     {
-        return $this->hasMany(PersonnelKinship::class,'tabel_no','tabel_no');
+        return $this->hasMany(PersonnelKinship::class,'tabel_no','tabel_no')->orderBy('kinship_id');
+    }
+
+    public function fatherMother() : HasMany
+    {
+        return $this->hasMany(PersonnelKinship::class,'tabel_no','tabel_no')->whereBetween('kinship_id',[11,12])->orderBy('kinship_id');
+    }
+
+    public function wifeChildren() : HasMany
+    {
+        return $this->hasMany(PersonnelKinship::class,'tabel_no','tabel_no')->whereBetween('kinship_id',[21,29])->orderBy('kinship_id');
     }
 
     public function laborActivities() : HasMany
     {
-        return $this->hasMany(PersonnelLaborActivity::class,'tabel_no','tabel_no');
+        return $this->hasMany(PersonnelLaborActivity::class,'tabel_no','tabel_no')->orderByDesc('leave_date');
+    }
+
+    public function specialServices() : HasMany
+    {
+        return $this->hasMany(PersonnelLaborActivity::class,'tabel_no','tabel_no')->where('is_special_service',1)->orderByDesc('leave_date');
     }
 
     public function military() : HasMany
     {
-        return $this->hasMany(PersonnelMilitaryService::class,'tabel_no','tabel_no');
+        return $this->hasMany(PersonnelMilitaryService::class,'tabel_no','tabel_no')->orderByDesc('end_date');
     }
 
     public function participations() : HasMany
     {
-        return $this->hasMany(PersonnelParticipationEvent::class,'tabel_no','tabel_no');
+        return $this->hasMany(PersonnelParticipationEvent::class,'tabel_no','tabel_no')->orderByDesc('event_date');
     }
 
     public function punishments() : HasMany
     {
-        return $this->hasMany(PersonnelPunishment::class,'tabel_no','tabel_no');
+        return $this->hasMany(PersonnelPunishment::class,'tabel_no','tabel_no')->orderByDesc('given_date');
     }
 
     public function ranks() : HasMany
     {
-        return $this->hasMany(PersonnelRank::class,'tabel_no','tabel_no');
+        return $this->hasMany(PersonnelRank::class,'tabel_no','tabel_no')->orderByDesc('given_date');
     }
 
     public function latestRank() : HasOne
@@ -190,11 +206,31 @@ class Personnel extends Model
 
     public function degreeAndNames() : HasMany
     {
-        return $this->hasMany(PersonnelScientificDegreeAndName::class,'tabel_no','tabel_no');
+        return $this->hasMany(PersonnelScientificDegreeAndName::class,'tabel_no','tabel_no')->orderByDesc('given_date');
+    }
+
+    public function elections() : HasMany
+    {
+        return $this->hasMany(PersonnelElectedElectoral::class,'tabel_no','tabel_no')->orderByDesc('elected_date');
+    }
+
+    public function injuries() : HasMany
+    {
+        return $this->hasMany(PersonnelInjury::class,'tabel_no','tabel_no')->orderByDesc('date_time');
+    }
+
+    public function captives() : HasMany
+    {
+        return $this->hasMany(PersonnelTakenCaptive::class,'tabel_no','tabel_no')->orderByDesc('taken_captive_date');
+    }
+
+    public function socialOrigin() : BelongsTo
+    {
+        return $this->belongsTo(SocialOrigin::class,'social_origin_id','id');
     }
 
     public function getAgeAttribute() {
-        return Carbon::parse($this->birthdate)->diffInYears(\Carbon\Carbon::now());
+        return Carbon::parse($this->birthdate)->age;
     }
 
     public function scopeFilter($query, array $filters)
@@ -277,8 +313,8 @@ class Personnel extends Model
             {
                 $query->whereBetween($field,[$value['min'],$value['max']]);
                 continue;
-            } 
-            else if (in_array($field, $this->fillable) && $value != null) 
+            }
+            else if (in_array($field, $this->fillable) && $value != null)
             {
                 if($field == 'structure_id')
                 {

@@ -21,6 +21,8 @@ trait Step1Trait
 
     public $disabilityId,$disabilityName,$searchDisability;
 
+    public $socialOriginId,$socialOriginName,$searchSocialOrigin;
+
     public $isDisability;
     public $avatar;
 
@@ -31,13 +33,13 @@ trait Step1Trait
         ]);
     }
 
-    public function mountStep1Trait() { 
+    public function mountStep1Trait() {
         $this->isDisability = false;
         $this->personnel = [
             'has_changed_initials' => false,
             'has_changed_nationality' => false
         ];
-        $this->nationalityName = $this->previousNationalityName = $this->structureName = $this->educationDegreeName = $this->positionName = $this->workNormName = $this->disabilityName = '---';
+        $this->nationalityName = $this->previousNationalityName = $this->structureName = $this->educationDegreeName = $this->positionName = $this->workNormName = $this->disabilityName = $this->socialOriginName = '---';
 
         !empty($this->personnelModel) && $this->fillPersonnel();
 
@@ -73,6 +75,7 @@ trait Step1Trait
             'leave_work_date' => $this->updatePersonnel['leave_work_date'],
             'extra_important_information' => $this->updatePersonnel['extra_important_information'],
             'computer_knowledge' => $this->updatePersonnel['computer_knowledge'],
+            'scientific_works_inventions' => $this->updatePersonnel['scientific_works_inventions'],
         ];
 
         if(!empty($this->updatePersonnel['nationality_id']))
@@ -139,6 +142,16 @@ trait Step1Trait
             $this->disabilityName = $this->updatePersonnel['disability']['name'];
             $this->personnel['disability_given_date'] = $this->updatePersonnel['disability_given_date'];
             $this->isDisability = true;
+        }
+
+        if(!empty($this->updatePersonnel['social_origin_id']))
+        {
+            $this->personnel['social_origin_id'] = [
+                'id' => $this->updatePersonnel['social_origin']['id'],
+                'name' => $this->updatePersonnel['social_origin']['name'],
+            ];
+            $this->socialOriginId = $this->updatePersonnel['social_origin']['id'];
+            $this->socialOriginName = $this->updatePersonnel['social_origin']['name'];
         }
     }
 

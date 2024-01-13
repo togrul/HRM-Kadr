@@ -1,13 +1,13 @@
-<div x-data="{ isOpen: false }" 
-     class="fixed inset-0 z-50 overflow-hidden"  
-     aria-labelledby="slide-over-title" 
-     role="dialog" 
+<div x-data="{ isOpen: false }"
+     class="fixed inset-0 z-50 overflow-hidden"
+     aria-labelledby="slide-over-title"
+     role="dialog"
      aria-modal="true"
      x-show="isOpen"
      @keydown.escape.window="isOpen = false;$wire.call('closeSideMenu');document.body.classList.remove('overflow-hidden');"
      x-init="
       @php
-        $arrEvents = ['personnelAdded','permissionSet','staffAdded','userAdded','menuAdded'];
+        $arrEvents = ['personnelAdded','permissionSet','staffAdded','userAdded','menuAdded','fileAdded'];
       @endphp
           Livewire.on('openSideMenu',() => {
                isOpen = true
@@ -24,8 +24,8 @@
      style="display: none;margin-top:0 !important"
 >
      <div class="absolute inset-0 overflow-hidden">
-    
-       <div 
+
+       <div
           class="absolute inset-0 transition-opacity bg-gray-500 bg-opacity-75"
           aria-hidden="true"
           x-show="isOpen"
@@ -37,9 +37,9 @@
           x-transition:leave-end="transform opacity-0"
           style="display: none;"
      ></div>
-   
+
        <div class="fixed inset-y-0 right-0 flex max-w-full pl-10">
-        
+
          <div class="relative w-screen md:max-w-3xl lg:max-w-4xl"
                x-show="isOpen"
                x-transition:enter="transform transition ease-in-out duration-500 sm:duration-700"
@@ -50,7 +50,7 @@
                x-transition:leave-end="transform translate-x-full"
                style="display: none;"
          >
-        
+
            <div class="absolute top-0 right-0 flex pt-5 pr-2 sm:pr-4"
                x-show="isOpen"
                x-transition:enter="transition ease-in-out duration-500"
@@ -68,9 +68,9 @@
                </svg>
              </button>
            </div>
-   
+
            <div class="flex flex-col h-full py-6 overflow-y-scroll bg-white shadow-xl rounded-tl-2xl rounded-bl-2xl">
-            
+
              <div class="relative flex-1 px-4 sm:px-6" wire:loading.remove>
               {{ $slot }}
              </div>
@@ -80,7 +80,7 @@
                   <x-modal-loading />
                 </div>
              </div>
-             
+
            </div>
          </div>
        </div>

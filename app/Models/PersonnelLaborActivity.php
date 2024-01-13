@@ -18,7 +18,11 @@ class PersonnelLaborActivity extends Model
         'position',
         'coefficient',
         'join_date',
-        'leave_date'
+        'leave_date',
+        'is_special_service',
+        'order_given_by',
+        'order_no',
+        'order_date'
     ];
 
     protected $dates = [

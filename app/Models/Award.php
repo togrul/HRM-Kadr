@@ -13,13 +13,14 @@ class Award extends Model
     protected $fillable = [
         'id',
         'award_type_id',
-        'name'
+        'name',
+        'is_foreign'
     ];
 
     public $timestamps = false;
 
     public function type() : BelongsTo
     {
-        return $this->belongsTo(AwardType::class);
+        return $this->belongsTo(AwardType::class,'award_type_id','id');
     }
 }
