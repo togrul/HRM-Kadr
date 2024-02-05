@@ -20,11 +20,23 @@
 
         table { page-break-inside:auto }
         tr    { page-break-inside:avoid; page-break-after:auto }
-        thead { display:table-header-group }
+        thead { display:table-header-group; }
 
         table, th, td {
-            border: 1px solid black;
             border-collapse: collapse;
+        }
+
+        table th:not(.caption-table),
+        table td
+        {
+            border: 1px solid black;
+        }
+
+        table th.caption-table{
+            padding: 10px 0;
+            font-size: 16px;
+            text-align: left;
+
         }
 
         th,td{
@@ -113,38 +125,6 @@
     {{--START PAGE 4--}}
     @include('prints.partials.page4-personnel')
     {{--END PAGE 4--}}
-
-{{--    --}}{{--START PAGE 5--}}
-{{--    @include('prints.partials.page4-personnel',['page' => 5])--}}
-{{--    --}}{{--END PAGE 5--}}
-
-{{--    --}}{{--START PAGE 6--}}
-{{--    @include('prints.partials.page4-personnel',['page' => 6])--}}
-{{--    --}}{{--END PAGE 6--}}
-
-{{--    --}}{{--START PAGE 7--}}
-{{--    @include('prints.partials.page4-personnel',['page' => 7])--}}
-{{--    --}}{{--END PAGE 7--}}
-
-{{--    --}}{{--START PAGE 8--}}
-{{--    @include('prints.partials.page4-personnel',['page' => 8])--}}
-{{--    --}}{{--END PAGE 8--}}
-
-{{--    --}}{{--START PAGE 9--}}
-{{--    @include('prints.partials.page4-personnel',['page' => 9])--}}
-{{--    --}}{{--END PAGE 9--}}
-
-{{--    --}}{{--START PAGE 10--}}
-{{--    @include('prints.partials.page4-personnel',['page' => 10])--}}
-{{--    --}}{{--END PAGE 10--}}
-
-{{--    --}}{{--START PAGE 11--}}
-{{--    @include('prints.partials.page4-personnel',['page' => 11])--}}
-{{--    --}}{{--END PAGE 11--}}
-
-{{--    --}}{{--START PAGE 12--}}
-{{--    @include('prints.partials.page4-personnel',['page' => 12])--}}
-{{--    --}}{{--END PAGE 12--}}
 
     {{--START PAGE 13--}}
     @include('prints.partials.page5-personnel')

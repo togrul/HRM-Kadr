@@ -4,6 +4,7 @@ namespace App\Livewire\Personnel;
 
 use App\Models\Personnel;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -35,6 +36,8 @@ class Files extends Component
 
     public function deleteFile($key)
     {
+        $path = $this->file_list[$key]['file'];
+        Storage::disk('public')->delete($path);
         unset($this->file_list[$key]);
     }
 
@@ -47,13 +50,17 @@ class Files extends Component
                 $_existingFile = $this->personnelFiles->files()->where('filename',$fileList['filename'])->firstOrNew();
                 if(empty($_existingFile->file))
                 {
-                    $fileList['file'] = $fileList['file']->store('files','uploads');
+                    $fileList['file'] = $fileList['file']->store('files','public');
                 }
                 $_existingFile->fill($fileList);
                 $_existingFile->save();
             }
             $fileNameList = collect($this->file_list)->pluck('filename');
             $this->personnelFiles->files()->whereNotIn('filename', $fileNameList)->delete();
+        }
+        else
+        {
+            $this->personnelFiles->files()->delete();
         }
         $this->dispatch('fileAdded', __('File has added successfully!'));
     }

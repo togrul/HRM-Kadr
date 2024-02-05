@@ -15,7 +15,8 @@ class Structure extends Model
         'id',
         'parent_id',
         'name',
-        'shortname'
+        'shortname',
+        'coefficient'
     ];
 
     public $timestamps = false;

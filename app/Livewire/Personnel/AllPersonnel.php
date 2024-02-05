@@ -45,6 +45,12 @@ class AllPersonnel extends Component
          return Excel::download( new PersonnelExport( $report ), "personnel-{$name}.xlsx");
     }
 
+    public function printPage($personnel, $headers = null)
+    {
+        $headers = [__('#'),__('Tabel'),__('Fullname'),__('Gender'),__('Position'),'action','action','action','action'];
+        redirect()->route('print.page',['model' => $personnel , 'headers' => $headers]);
+    }
+
     public function printInfo($personnelId)
     {
         redirect()->route('print.personnel',$personnelId);

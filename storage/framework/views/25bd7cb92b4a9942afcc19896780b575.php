@@ -20,11 +20,23 @@
 
         table { page-break-inside:auto }
         tr    { page-break-inside:avoid; page-break-after:auto }
-        thead { display:table-header-group }
+        thead { display:table-header-group; }
 
         table, th, td {
-            border: 1px solid black;
             border-collapse: collapse;
+        }
+
+        table th:not(.caption-table),
+        table td
+        {
+            border: 1px solid black;
+        }
+
+        table th.caption-table{
+            padding: 10px 0;
+            font-size: 16px;
+            text-align: left;
+
         }
 
         th,td{
@@ -113,38 +125,6 @@
     
     <?php echo $__env->make('prints.partials.page4-personnel', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
     
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     
     <?php echo $__env->make('prints.partials.page5-personnel', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>

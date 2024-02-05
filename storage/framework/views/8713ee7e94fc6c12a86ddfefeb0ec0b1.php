@@ -1,23 +1,24 @@
-<div style="display: flex;justify-content: start">
-    <h3 style="font-size: 16px;">14. Xarici ezamiyyətlər</h3>
-</div>
-
 <table style="width: 100%;">
     <thead>
-        <th>Harada, nə məqsədlə olub</th>
-        <th style="width: 80px;">Kimin əmri ilə <br> <span style="font-weight: 400;">(əmrin №-si və tarixi)</span></th>
-        <th style="width: 90px;">
-            <div style="padding: 5px;">
-                <p style="margin: 0;">Nə vaxtdan</p>
-                <span style="font-weight: 400;font-size:11px;">(gün,ay,il)</span>
-            </div>
-        </th>
-        <th style="width: 90px;">
-            <div style="padding: 5px;">
-                <p style="margin: 0;">Nə vaxtadək</p>
-                <span style="font-weight: 400;font-size:11px;">(gün,ay,il)</span>
-            </div>
-        </th>
+        <tr>
+            <th class="caption-table" colspan="4">14. Xarici ezamiyyətlər</th>
+        </tr>
+       <tr>
+           <th>Harada, nə məqsədlə olub</th>
+           <th style="width: 80px;">Kimin əmri ilə <br> <span style="font-weight: 400;">(əmrin №-si və tarixi)</span></th>
+           <th style="width: 90px;">
+               <div style="padding: 5px;">
+                   <p style="margin: 0;">Nə vaxtdan</p>
+                   <span style="font-weight: 400;font-size:11px;">(gün,ay,il)</span>
+               </div>
+           </th>
+           <th style="width: 90px;">
+               <div style="padding: 5px;">
+                   <p style="margin: 0;">Nə vaxtadək</p>
+                   <span style="font-weight: 400;font-size:11px;">(gün,ay,il)</span>
+               </div>
+           </th>
+       </tr>
     </thead>
     <tbody>
     <?php for($i = 0;$i < 21;$i++): ?>

@@ -4,8 +4,13 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
+use App\Enums\AttitudeMilitaryEnum;
+use App\Enums\MilitaryStatusEnum;
+use App\Enums\ResearchResultEnum;
+use App\Models\AppealStatus;
 use App\Models\Award;
 use App\Models\AwardType;
+use App\Models\Candidate;
 use App\Models\EducationalInstitution;
 use App\Models\EducationDegree;
 use App\Models\EducationDocumentType;
@@ -22,6 +27,7 @@ use App\Models\PunishmentType;
 use App\Models\ScientificDegreeAndName;
 use App\Models\SocialOrigin;
 use App\Models\WorkNorm;
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -562,6 +568,53 @@ class DatabaseSeeder extends Seeder
                 'name' => $medal
             ]);
         }
+
+        $statuses = [
+            10 => 'Baxılır',
+            20 => 'İcrada',
+            30 => 'Əmrə hazır',
+            70 => 'Qəbul olundu',
+            90 => 'Dayandırıldı'
+        ];
+
+        foreach ($statuses as $key => $status)
+        {
+            AppealStatus::firstOrCreate([
+                'id' => $key,
+                'name' => $status
+            ]);
+        }
+
+        Candidate::firstOrCreate([
+            'surname' => 'Memmedov',
+            'name' => 'Orxan',
+            'patronymic' => 'Mustafa'
+        ],
+        [
+            'structure_id' => 3,
+            'height' => 186,
+            'military_service' => 'DQ',
+            'status_id' => 10,
+            'phone' => '+99450245xxxx',
+            'knowledge_test' => 4,
+            'physical_fitness_exam' => 3,
+            'research_date' => Carbon::now(),
+            'research_result' => ResearchResultEnum::Positive,
+            'discrediting_information' => 'yoxdur',
+            'examination_date' => Carbon::now()->subDays(14),
+            'appeal_date' => Carbon::now()->subMonth(),
+            'application_date' => Carbon::now()->subDays(11),
+            'requisition_date' => Carbon::now()->subDays(2),
+            'initial_documents' => 'yoxdur',
+            'documents_completeness' => 'tamdir',
+            'attitude_to_military' => AttitudeMilitaryEnum::Hm,
+            'characteristics' => 'musbet',
+            'hhk_date' => Carbon::now()->subDays(18),
+            'hhk_result' => MilitaryStatusEnum::Useful,
+            'note' => 'qeyd',
+            'presented_by' => 'KI',
+            'creator_id' => 1
+        ]);
 
         // \App\Models\User::factory(10)->create();
 

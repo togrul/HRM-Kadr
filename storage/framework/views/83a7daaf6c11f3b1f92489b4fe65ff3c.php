@@ -1,24 +1,24 @@
-<div style="display: flex;justify-content: start;padding: 5px 0;">
-    <h3 style="margin: 4px 0;font-size: 16px;">11. Pensiya təyin edilərkən xidmət illərinin güzəştli hesablanmasına hüquq verən xidmət dövrləri</h3>
-</div>
-
 <div class="flex-col">
     <table>
         <thead>
-        <th>Sənədin adı, №-si və tarixi</th>
-        <th  style="width:40px;">əmsal</th>
-        <th  style="width:90px;">
-            <div style="padding: 5px;">
-                <p style="margin: 0;">Nə vaxtdan</p>
-                <span style="font-weight: 400;font-size:11px;">(gün,ay,il)</span>
-            </div>
-        </th>
-        <th style="width:90px;">
-            <div style="padding: 5px;">
-                <p style="margin: 0;">Nə vaxtadək</p>
-                <span style="font-weight: 400;font-size:11px;">(gün,ay,il)</span>
-            </div>
-        </th>
+           <tr>
+               <th class="caption-table" colspan="4">11. Pensiya təyin edilərkən xidmət illərinin güzəştli hesablanmasına hüquq verən xidmət dövrləri</th>
+           </tr>
+            <tr>
+                <th>Sənədin adı, №-si və tarixi</th>
+                <th  style="width:40px;">əmsal</th>
+                <th  style="width:90px;">
+                    <div style="padding: 5px;">
+                        <p style="margin: 0;">Nə vaxtdan</p>
+                        <span style="font-weight: 400;font-size:11px;">(gün,ay,il)</span>
+                    </div>
+                </th>
+                <th style="width:90px;">
+                    <div style="padding: 5px;">
+                        <p style="margin: 0;">Nə vaxtadək</p>
+                        <span style="font-weight: 400;font-size:11px;">(gün,ay,il)</span>
+                    </div>
+                </th></tr>
         </thead>
         <tbody>
         <?php for($i = 0;$i < 26;$i++): ?>

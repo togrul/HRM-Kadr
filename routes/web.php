@@ -30,12 +30,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/staffs',Staffs::class)->name('staffs');
     Route::get('/services',Service::class)->name('services');
     Route::get('/orders',AllOrders::class)->name('orders');
+    Route::get('/candidates',\App\Livewire\Candidates\CandidateList::class)->name('candidates');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('/print/personnel/{id?}',[\App\Http\Controllers\PrintController::class,'personnel_service_book'])->name('print.personnel');
+    Route::get('/print/page/{model?}',[\App\Http\Controllers\PrintController::class,'print_page'])->name('print.page');
 
     // Livewire::setUpdateRoute(function ($handle) {
     //     return Route::post('/livewire/update', $handle);

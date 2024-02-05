@@ -7,7 +7,7 @@
      @keydown.escape.window="isOpen = false;$wire.call('closeSideMenu');document.body.classList.remove('overflow-hidden');"
      x-init="
       @php
-        $arrEvents = ['personnelAdded','permissionSet','staffAdded','userAdded','menuAdded','fileAdded'];
+        $arrEvents = ['personnelAdded','permissionSet','staffAdded','userAdded','menuAdded','fileAdded','candidateAdded'];
       @endphp
           Livewire.on('openSideMenu',() => {
                isOpen = true
