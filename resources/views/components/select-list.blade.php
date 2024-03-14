@@ -16,7 +16,7 @@
 @endphp
 
 <div x-data="{open : false}" class="w-full"
-> 
+>
      @if($hasCheckbox)
       <div class="flex items-center space-x-2 justify-between">
         <x-label id="listbox-label" for="listbox-label">{{ $title }}</x-label>
@@ -26,17 +26,17 @@
       <x-label id="listbox-label" for="listbox-label">{{ $title }}</x-label>
      @endif
      <div class="relative mt-1">
-       <button type="button" 
-               class="relative w-full py-2 pl-3 pr-10 text-left {{ $extraClass }} rounded-lg shadow-sm cursor-default focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm {{ $isError }}" 
-               aria-haspopup="listbox" 
-               aria-expanded="true" 
+       <button type="button"
+               class="relative w-full py-2 pl-3 pr-10 text-left {{ $extraClass }} rounded-lg shadow-sm cursor-default focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm {{ $isError }}"
+               aria-haspopup="listbox"
+               aria-expanded="true"
                aria-labelledby="listbox-label"
                @click="open = !open"
                @click.away="open = false"
                @keydown.escape.window="open = false"
           >
          <span class="flex items-center">
-           <span class="block ml-3 font-normal text-gray-900 truncate" 
+           <span class="block ml-3 font-normal text-gray-900 truncate"
            >
              {{ $selected }}
            </span>
@@ -51,9 +51,9 @@
 
        <ul
           {{ $attributes->merge(['class' => 'absolute z-10 w-full px-3 py-2 mt-1 space-y-2 overflow-auto text-base bg-white rounded-md shadow-xl max-h-56 focus:outline-none sm:text-sm']) }}
-          tabindex="-1" 
-          role="listbox" 
-          aria-labelledby="listbox-label" 
+          tabindex="-1"
+          role="listbox"
+          aria-labelledby="listbox-label"
           aria-activedescendant="listbox-option-3"
           x-show="open"
           x-transition:enter="transition ease-in duration-100"

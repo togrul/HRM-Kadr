@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\DateCastTrait;
 use App\Traits\PersonnelTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class PersonnelPunishment extends Model
 {
-    use HasFactory,PersonnelTrait;
+    use HasFactory,PersonnelTrait,DateCastTrait;
 
     public $timestamps = false;
 
@@ -24,6 +25,11 @@ class PersonnelPunishment extends Model
     protected $dates = [
         'given_date',
         'expired_date'
+    ];
+
+    protected $casts = [
+        'given_date' => 'date:d.m.Y',
+        'expired_date' => 'date:d.m.Y'
     ];
 
     public function punishment() : BelongsTo

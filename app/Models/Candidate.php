@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Traits\CreateDeleteTrait;
+use App\Traits\DateCastTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,7 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Candidate extends Model
 {
-    use HasFactory,SoftDeletes;
+    use HasFactory,SoftDeletes,CreateDeleteTrait,DateCastTrait;
 
     protected $fillable = [
         'name',
@@ -19,6 +21,8 @@ class Candidate extends Model
         'height',
         'military_service',
         'phone',
+        'birthdate',
+        'gender',
         'status_id',
         'knowledge_test',
         'physical_fitness_exam',
@@ -42,19 +46,34 @@ class Candidate extends Model
         'deleted_by'
     ];
 
+    protected $dates = [
+        'research_date',
+        'examination_date',
+        'appeal_date',
+        'application_date',
+        'requisition_date',
+        'hhk_date',
+        'birthdate'
+    ];
+
+    protected $casts = [
+        'research_date' => 'date:d.m.Y',
+        'examination_date' => 'date:d.m.Y',
+        'appeal_date' => 'date:d.m.Y',
+        'application_date' => 'date:d.m.Y',
+        'requisition_date' => 'date:d.m.Y',
+        'hhk_date' => 'date:d.m.Y',
+        'birthdate' => 'datetime:d.m.Y'
+    ];
+
     public function getFullnameAttribute() : string
     {
         return "{$this->surname} {$this->name} {$this->patronymic}";
     }
 
-    public function creator() : BelongsTo
+    public function getFullnameMaxAttribute() : string
     {
-        return $this->belongsTo(User::class,'creator_id','id');
-    }
-
-    public function personDidDelete() : BelongsTo
-    {
-        return $this->belongsTo(User::class,'deleted_by','id');
+        return $this->fullname . ' ' . ($this->gender == 2 ? 'qızı' : 'oğlu');
     }
 
     public function structure() : BelongsTo
@@ -65,17 +84,5 @@ class Candidate extends Model
     public function status() : BelongsTo
     {
         return $this->belongsTo(AppealStatus::class,'status_id','id');
-    }
-
-    protected static function boot()
-    {
-        parent::boot();
-        static::creating(function ($model) {
-            $model->creator_id = auth()->user()->id;
-        });
-        static::deleting(function ($model) {
-            $model->deleted_by = auth()->user()->id;
-            $model->save();
-        });
     }
 }

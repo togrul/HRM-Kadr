@@ -40,12 +40,14 @@
           'gray' => "bg-gray-100"
      };
      $isError = $errors->has($name)?'bg-red-50':'';
+
+     $format = "Y-MM-DD" ? 'DD.MM.Y' : $format;
 ?>
 
-<input 
-     type="<?php echo e($type); ?>" 
-     id="<?php echo e($name); ?>" 
-     name="<?php echo e($name); ?>"  
+<input
+     type="<?php echo e($type); ?>"
+     id="<?php echo e($name); ?>"
+     name="<?php echo e($name); ?>"
      x-data
      x-ref="input"
      x-on:change="$dispatch('input', $el.value)"
@@ -63,4 +65,5 @@
      <?php echo $attributes->merge(['class' => "block border-none font-normal w-full mt-1 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition duration-100 ease-in-out transform {$extraClass} {$isError} "]); ?>
 
 
-><?php /**PATH /Users/togruljalalli/Desktop/projects/HR-CRM/resources/views/components/pikaday-input.blade.php ENDPATH**/ ?>
+>
+<?php /**PATH /Users/togruljalalli/Desktop/projects/HR-CRM/resources/views/components/pikaday-input.blade.php ENDPATH**/ ?>

@@ -78,7 +78,7 @@
                                 <x-table.td>
                                     <div class="flex flex-col space-y-1">
                                         <span class="text-sm font-medium text-slate-900">
-                                            {{ $_candidate->fullname }}
+                                            {{ $_candidate->fullname_max }}
                                        </span>
                                         @if(!empty($_candidate->deleted_at))
                                             <div class="flex flex-col text-xs font-medium">

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\DateCastTrait;
 use App\Traits\PersonnelTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class PersonnelScientificDegreeAndName extends Model
 {
-    use HasFactory,PersonnelTrait;
+    use HasFactory,PersonnelTrait,DateCastTrait;
 
     public $timestamps = false;
 
@@ -24,6 +25,16 @@ class PersonnelScientificDegreeAndName extends Model
         'diplom_no',
         'diplom_given_date',
         'document_issued_by'
+    ];
+
+    protected $dates = [
+        'diplom_given_date',
+        'given_date',
+    ];
+
+    protected $casts = [
+        'diplom_given_date' => 'date:d.m.Y',
+        'given_date' => 'date:d.m.Y'
     ];
 
     public function degreeAndName() : BelongsTo

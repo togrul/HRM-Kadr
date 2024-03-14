@@ -40,8 +40,8 @@
 ?>
 
 <div x-data="{open : false}" class="w-full"
-> 
-     <?php if($hasCheckbox): ?>
+>
+     <!--[if BLOCK]><![endif]--><?php if($hasCheckbox): ?>
       <div class="flex items-center space-x-2 justify-between">
         <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['id' => 'listbox-label','for' => 'listbox-label']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
@@ -75,19 +75,19 @@
 <?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
 <?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
 <?php endif; ?>
-     <?php endif; ?>
+     <?php endif; ?> <!--[if ENDBLOCK]><![endif]-->
      <div class="relative mt-1">
-       <button type="button" 
-               class="relative w-full py-2 pl-3 pr-10 text-left <?php echo e($extraClass); ?> rounded-lg shadow-sm cursor-default focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm <?php echo e($isError); ?>" 
-               aria-haspopup="listbox" 
-               aria-expanded="true" 
+       <button type="button"
+               class="relative w-full py-2 pl-3 pr-10 text-left <?php echo e($extraClass); ?> rounded-lg shadow-sm cursor-default focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm <?php echo e($isError); ?>"
+               aria-haspopup="listbox"
+               aria-expanded="true"
                aria-labelledby="listbox-label"
                @click="open = !open"
                @click.away="open = false"
                @keydown.escape.window="open = false"
           >
          <span class="flex items-center">
-           <span class="block ml-3 font-normal text-gray-900 truncate" 
+           <span class="block ml-3 font-normal text-gray-900 truncate"
            >
              <?php echo e($selected); ?>
 
@@ -104,9 +104,9 @@
        <ul
           <?php echo e($attributes->merge(['class' => 'absolute z-10 w-full px-3 py-2 mt-1 space-y-2 overflow-auto text-base bg-white rounded-md shadow-xl max-h-56 focus:outline-none sm:text-sm'])); ?>
 
-          tabindex="-1" 
-          role="listbox" 
-          aria-labelledby="listbox-label" 
+          tabindex="-1"
+          role="listbox"
+          aria-labelledby="listbox-label"
           aria-activedescendant="listbox-option-3"
           x-show="open"
           x-transition:enter="transition ease-in duration-100"
@@ -121,4 +121,5 @@
 
        </ul>
      </div>
-   </div><?php /**PATH /Users/togruljalalli/Desktop/projects/HR-CRM/resources/views/components/select-list.blade.php ENDPATH**/ ?>
+   </div>
+<?php /**PATH /Users/togruljalalli/Desktop/projects/HR-CRM/resources/views/components/select-list.blade.php ENDPATH**/ ?>

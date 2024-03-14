@@ -2,15 +2,15 @@
 
 namespace App\Livewire\Roles;
 
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Spatie\Permission\Models\Permission;
 
+#[On('permissionWasDeleted')]
 class Permissions extends Component
 {
     public $permission_id;
     public $permission_name;
-
-    protected $listeners = ['permissionWasDeleted' => '$refresh'];
 
     protected $rules = [
         'permission_name' => 'required|unique:permissions,name'

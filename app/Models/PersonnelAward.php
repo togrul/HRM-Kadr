@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\DateCastTrait;
 use App\Traits\PersonnelTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PersonnelAward extends Model
 {
-    use HasFactory,PersonnelTrait;
+    use HasFactory,PersonnelTrait,DateCastTrait;
 
     public $timestamps = false;
 
@@ -19,6 +20,14 @@ class PersonnelAward extends Model
         'reason',
         'given_date',
         'is_old'
+    ];
+
+    protected $dates = [
+        'given_date',
+    ];
+
+    protected $casts = [
+        'given_date' => 'date:d.m.Y',
     ];
 
     public function award() : BelongsTo

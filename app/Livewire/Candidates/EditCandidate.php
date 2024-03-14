@@ -18,6 +18,7 @@ class EditCandidate extends Component
                             ->where('id',$this->candidateModel)
                             ->first();
 
+
         $updatedData = $this->candidateModelData->toArray();
 
         $this->candidate = [
@@ -27,6 +28,8 @@ class EditCandidate extends Component
             'height' => $updatedData['height'],
             'military_service' => $updatedData['military_service'],
             'phone' => $updatedData['phone'],
+            'birthdate' => $updatedData['birthdate'],
+            'gender' => $updatedData['gender'],
             'knowledge_test' => $updatedData['knowledge_test'],
             'physical_fitness_exam' => $updatedData['physical_fitness_exam'],
             'research_date' => $updatedData['research_date'],
@@ -72,7 +75,7 @@ class EditCandidate extends Component
     {
         $this->validate();
 
-        $this->candidateModelData->update($this->modifyArray($this->candidate));
+        $this->candidateModelData->update($this->modifyArray($this->candidate,$this->candidateModelData->dateList()));
 
         $this->dispatch('candidateAdded',__('Candidate was updated successfully!'));
     }

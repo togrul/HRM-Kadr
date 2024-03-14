@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\DateCastTrait;
 use App\Traits\PersonnelTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,10 +10,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class PersonnelIdentityDocument extends Model
 {
-    use HasFactory,PersonnelTrait;
+    use HasFactory,PersonnelTrait,DateCastTrait;
 
     public $timestamps = false;
-    
+
     protected $fillable = [
         'tabel_no',
         'nationality_id',
@@ -35,6 +36,9 @@ class PersonnelIdentityDocument extends Model
         'document_issued_date'
     ];
 
+    protected $casts = [
+        'document_issued_date' => 'date:d.m.Y'
+    ];
 
     public function nationality() : BelongsTo
     {

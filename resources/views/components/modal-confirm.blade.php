@@ -10,11 +10,11 @@
 
 <div
     x-init="
-        Livewire.on('{{ $eventToCloseModal }}',() => {
+        $wire.on('{{ $eventToCloseModal }}',() => {
             openDeleteModal = false
         })
         @if( $livewireEventToOpenModal)
-        Livewire.on('{{ $livewireEventToOpenModal }}',() => {
+        $wire.on('{{ $livewireEventToOpenModal }}',() => {
             openDeleteModal = true
             $nextTick(() => $refs.confirmButton.focus())
           })

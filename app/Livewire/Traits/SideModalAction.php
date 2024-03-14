@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Livewire\Traits;
-use Livewire\Attributes\On; 
+use Livewire\Attributes\On;
 
 trait SideModalAction
 {
@@ -9,15 +9,15 @@ trait SideModalAction
      public $modelName;
      public $secondModel;
 
-     public function openSideMenu($showSideMenu,$modelName = null,$secondModel = null)
+    public function openSideMenu($showSideMenu,$modelName = null,$secondModel = null)
      {
          $this->showSideMenu = $showSideMenu;
          $this->modelName = $modelName;
          $this->secondModel = $secondModel;
          $this->dispatch('openSideMenu',showSideMenu: $showSideMenu);
      }
- 
-     #[On('closeSideMenu')] 
+
+     #[On('closeSideMenu')]
      public function closeSideMenu()
      {
          $this->showSideMenu = '';

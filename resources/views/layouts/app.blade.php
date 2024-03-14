@@ -26,17 +26,17 @@
                     {{ $sidebar }}
                 </div>
                 @endif
-            
+
                 <div class="relative" :class="collapsed ? 'md:col-span-3' : 'md:col-span-2'">
                     {{ $slot }}
                     @if(isset($sidebar))
                     <button @click="collapsed=!collapsed" class="absolute bottom-0 left-0 rounded flex items-center p-1 shadow-sm z-10 bg-teal-100">
                         <svg x-show="!collapsed" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                        </svg>     
+                        </svg>
                         <svg x-show="collapsed" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                        </svg>                       
+                        </svg>
                     </button>
                     @endif
                 </div>

@@ -3,10 +3,13 @@
 namespace App\Livewire\Roles;
 
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Spatie\Permission\Models\Role;
 use App\Livewire\Traits\SideModalAction;
 
+
+#[On(['permissionSet','roleWasDeleted'])]
 class ManageRoles extends Component
 {
     use SideModalAction,AuthorizesRequests;
@@ -14,8 +17,6 @@ class ManageRoles extends Component
     public $role_name;
     public $role_id;
     public $isUpdate;
-
-    protected $listeners = ['permissionSet' => '$refresh','roleWasDeleted' => '$refresh'];
 
     protected $rules = [
         'role_name' => 'required|unique:roles,name',

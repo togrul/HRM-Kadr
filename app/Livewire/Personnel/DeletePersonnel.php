@@ -3,14 +3,14 @@
 namespace App\Livewire\Personnel;
 
 use App\Models\Personnel;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class DeletePersonnel extends Component
 {
     public ?Personnel $personnel;
 
-    protected $listeners = ['setDeletePersonnel'];
-
+    #[On('setDeletePersonnel')]
     public function setDeletePersonnel($personnelId)
     {
         $this->personnel = Personnel::where('tabel_no',$personnelId)->first();

@@ -3,14 +3,14 @@
 namespace App\Livewire\Services\Settings;
 
 use App\Models\Setting;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class DeleteSettings extends Component
 {
     public ?Setting $setting;
 
-    protected $listeners = ['setDeleteSettings'];
-
+    #[On('setDeleteSettings')]
     public function setDeleteSettings($settingId)
     {
         $this->setting = Setting::findOrFail($settingId);

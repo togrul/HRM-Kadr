@@ -3,6 +3,7 @@
 namespace App\Livewire\StaffSchedule;
 
 use Carbon\Carbon;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use App\Models\Structure;
 use Livewire\Attributes\Url;
@@ -13,6 +14,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Livewire\Traits\SideModalAction;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
+#[On(['staffAdded','staffWasDeleted'])]
 class Staffs extends Component
 {
     use WithPagination,SideModalAction,AuthorizesRequests;
@@ -21,8 +23,6 @@ class Staffs extends Component
 
     #[Url]
     public $selectedPage;
-
-    protected $listeners = ['staffAdded' => '$refresh','selectStructure','staffWasDeleted' => '$refresh'];
 
     protected function queryString()
     {
@@ -37,8 +37,8 @@ class Staffs extends Component
     {
          $report = $this->returnData(type:"excel");
          $name = Carbon::now()->format('d.m.Y H:i');
-         
-         return Excel::download( new VacancyExport( $report ), "vakansiyalar-{$name}.xlsx"); 
+
+         return Excel::download( new VacancyExport( $report ), "vakansiyalar-{$name}.xlsx");
     }
 
     public function showPage($page)
@@ -46,6 +46,7 @@ class Staffs extends Component
         $this->selectedPage = $page;
     }
 
+    #[On('selectStructure')]
     public function selectStructure($id)
     {
         $structureModel = Structure::with('subs')->find($id);
@@ -78,14 +79,14 @@ class Staffs extends Component
                         $qq->whereNotNull('parent_id');
                     });
                 })
-                ->orderBy('structure_id') 
+                ->orderBy('structure_id')
                 ->get();
 
-        return $type == 'normal' 
+        return $type == 'normal'
                 ? ($this->selectedPage == 'all' ? $result->groupBy('structure.name') : $result)
                 : $result->toArray();
     }
-    
+
     public function render()
     {
         $staffs = $this->returnData();

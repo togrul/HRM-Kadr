@@ -14,12 +14,14 @@
           'gray' => "bg-gray-100"
      };
      $isError = $errors->has($name)?'bg-red-50':'';
+
+     $format = "Y-MM-DD" ? 'DD.MM.Y' : $format;
 @endphp
 
-<input 
-     type="{{ $type }}" 
-     id="{{ $name }}" 
-     name="{{ $name }}"  
+<input
+     type="{{ $type }}"
+     id="{{ $name }}"
+     name="{{ $name }}"
      x-data
      x-ref="input"
      x-on:change="$dispatch('input', $el.value)"

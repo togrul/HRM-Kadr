@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\DateCastTrait;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Personnel extends Model
 {
-    use HasFactory,SoftDeletes;
+    use HasFactory,SoftDeletes,DateCastTrait;
 
     protected $fillable = [
         'tabel_no',
@@ -52,12 +53,20 @@ class Personnel extends Model
         'computer_knowledge',
         'scientific_works_inventions',
         'added_by',
-        'deleted_by'
+        'deleted_by',
+        'is_pending'
     ];
 
     protected $dates = [
         'join_work_date',
-        'leave_work_date'
+        'leave_work_date',
+        'birthdate'
+    ];
+
+    protected $casts = [
+        'birthdate' => 'date:d.m.Y',
+        'join_work_date' => 'date:d.m.Y',
+        'leave_work_date' => 'date:d.m.Y',
     ];
 
     protected $likeFilterFields = [
@@ -67,6 +76,11 @@ class Personnel extends Model
     public function getFullnameAttribute() : string
     {
         return "{$this->surname} {$this->name} {$this->patronymic}";
+    }
+
+    public function getFullnameMaxAttribute() : string
+    {
+        return $this->fullname . ' ' . ($this->gender == 2 ? 'qızı' : 'oğlu');
     }
 
     public function personDidDelete() : BelongsTo
@@ -311,7 +325,9 @@ class Personnel extends Model
             }
             else if(in_array($field, $this->fillable) && is_array($value))
             {
-                $query->whereBetween($field,[$value['min'],$value['max']]);
+                $_min = empty($value['min']) ? '1990-01-01' : Carbon::parse($value['min'])->format('Y-m-d');
+                $_max = empty($value['max']) ? Carbon::now()->format('Y-m-d') : Carbon::parse($value['max'])->format('Y-m-d');
+                $query->whereBetween($field,[$_min,$_max]);
                 continue;
             }
             else if (in_array($field, $this->fillable) && $value != null)

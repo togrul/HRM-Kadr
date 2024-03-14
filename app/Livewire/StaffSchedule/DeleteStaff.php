@@ -3,14 +3,14 @@
 namespace App\Livewire\StaffSchedule;
 
 use App\Models\StaffSchedule;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class DeleteStaff extends Component
 {
     public $staff;
 
-    protected $listeners = ['setDeleteStaff'];
-
+    #[On('setDeleteStaff')]
     public function setDeleteStaff($staffId)
     {
         $this->staff = StaffSchedule::where('structure_id',$staffId)->pluck('id');

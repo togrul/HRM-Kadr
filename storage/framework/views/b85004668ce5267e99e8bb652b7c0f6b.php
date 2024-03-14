@@ -73,6 +73,11 @@
                          showNotification(message)
                     })
 
+                    Livewire.on('permissionSet',message => {
+                         isError = false
+                         showNotification(message)
+                    })
+
                     Livewire.on('permissionWasDeleted',message => {
                          isError = false
                          showNotification(message)
@@ -124,6 +129,41 @@
                     })
 
                     Livewire.on('candidateWasDeleted',message => {
+                         isError = false
+                         showNotification(message)
+                    })
+
+                      Livewire.on('templateAdded',message => {
+                         isError = false
+                         showNotification(message)
+                    })
+
+                    Livewire.on('templateWasDeleted',message => {
+                         isError = false
+                         showNotification(message)
+                    })
+
+                    Livewire.on('candidateAdded',message => {
+                         isError = false
+                         showNotification(message)
+                    })
+
+                    Livewire.on('componentWasDeleted',message => {
+                         isError = false
+                         showNotification(message)
+                    })
+
+                    Livewire.on('orderAdded',message => {
+                         isError = false
+                         showNotification(message)
+                    })
+
+                    Livewire.on('orderWasDeleted',message => {
+                         isError = false
+                         showNotification(message)
+                    })
+
+                     Livewire.on('typesUpdated',message => {
                          isError = false
                          showNotification(message)
                     })

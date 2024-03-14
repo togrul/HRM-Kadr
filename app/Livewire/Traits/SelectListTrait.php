@@ -2,26 +2,51 @@
 
 namespace App\Livewire\Traits;
 
+use Carbon\Carbon;
+
 trait SelectListTrait
 {
-    public function setData($model,$key,$content,$name,$id)
+    public function setData($model,$key,$content,$name,$id,$multiple = null)
     {
-        $this->setAttributes($model, $key, $content, $name, $id);
+        $this->setAttributes($model, $key, $content, $name, $id,$multiple);
 
         $this->updateExtraEducationData($model, $key, $id, $name);
 
         $this->clearSearchFields($content);
     }
 
-    private function setAttributes($model, $key, $content, $name, $id)
+    private function setAttributes($model, $key, $content, $name, $id,$multiple = null)
     {
-        $this->{$content . 'Id'} = $id;
-        $this->{$content . 'Name'} = $name;
+        if(!empty($content))
+        {
+            $this->{$content . 'Id'} = $id;
+            $this->{$content . 'Name'} = $name;
+        }
 
-        if (array_key_exists($key, $this->{$model})) {
-            $this->{$model}[$key] = ['id' => $id, 'name' => $name];
-        } else {
-            $this->{$model} += [$key => ['id' => $id, 'name' => $name]];
+        if(!is_null($multiple))
+        {
+            if(array_key_exists($multiple, $this->{$model}))
+            {
+                if (array_key_exists($key, $this->{$model}[$multiple]))
+                {
+                    $this->{$model}[$multiple][$key] = ['id' => $id, 'name' => $name];
+                }
+            }
+            else
+            {
+                $this->{$model} += [$multiple => [$key => ['id' => $id, 'name' => $name]]];
+            }
+        }
+        else
+        {
+            if (array_key_exists($key, $this->{$model}))
+            {
+                $this->{$model}[$key] = ['id' => $id, 'name' => $name];
+            }
+            else
+            {
+                $this->{$model} += [$key => ['id' => $id, 'name' => $name]];
+            }
         }
     }
 
@@ -48,6 +73,7 @@ trait SelectListTrait
             'extraInstitution','institution' => ['searchExtraInstitution', 'searchInstitution'],
             'extraEducationForm','educationForm' => ['searchExtraEducationForm', 'searchEducationForm'],
             'ranks' , 'militaryRank' => ['searchMilitaryRank', 'searchRank'],
+            null => ['searchPersonnel'],
             default => []
         };
 
@@ -58,7 +84,7 @@ trait SelectListTrait
         }
     }
 
-    protected function modifyArray($array)
+    protected function modifyArray($array,$_castedDates = null)
     {
         $filteredArray = array_filter($array, function($key) {
 
@@ -70,6 +96,21 @@ trait SelectListTrait
         {
             unset($array[$key]);
             $array[$key] = $value['id'];
+        }
+
+        if(!empty($_castedDates))
+        {
+            foreach($_castedDates as $_dates)
+            {
+                if(!empty($array[$_dates]))
+                {
+                    $array[$_dates] = Carbon::parse($array[$_dates])->format('Y-m-d');
+                }
+                else
+                {
+                    $array[$_dates] = null;
+                }
+            }
         }
 
         return $array;

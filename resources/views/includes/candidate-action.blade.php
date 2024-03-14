@@ -155,27 +155,38 @@
         <x-label for="candidate.documents_completeness">{{ __('Documents completeness') }}</x-label>
         <x-livewire-input mode="gray" name="candidate.documents_completeness" wire:model="candidate.documents_completeness"></x-livewire-input>
     </div>
-    <div class="flex flex-col space-y-1">
-        <x-label for="candidate.attitude_to_military">{{ __('Attitude to military') }}</x-label>
-        <div class="flex flex-row">
-            @foreach(\App\Enums\AttitudeMilitaryEnum::values() as $attitude)
-                <label class="inline-flex items-center bg-gray-100 rounded shadow-sm py-2 px-2">
-                    <input type="radio" class="form-radio" name="candidate.attitude_to_military" wire:model="candidate.attitude_to_military" value="{{ $attitude }}">
-                    <span class="ml-2 text-sm font-normal">{{ $attitude }}</span>
-                </label>
-            @endforeach
-        </div>
-        @error('candidate.attitude_to_military')
+    <div class="flex flex-col">
+        <x-label for="candidate.birthdate">{{ __('Birthdate') }}</x-label>
+        <x-pikaday-input mode="gray" name="candidate.birthdate" format="Y-MM-DD" wire:model.live="candidate.birthdate">
+            <x-slot name="script">
+                $el.onchange = function () {
+                @this.set('candidate.birthdate', $el.value);
+                }
+            </x-slot>
+        </x-pikaday-input>
+        @error('candidate.birthdate')
         <x-validation> {{ $message }} </x-validation>
         @enderror
     </div>
-    <div class="flex flex-col">
-        <x-label for="candidate.characteristics">{{ __('Characteristics') }}</x-label>
-        <x-livewire-input mode="gray" name="candidate.characteristics" wire:model="candidate.characteristics"></x-livewire-input>
+    <div class="flex flex-col space-y-1">
+        <x-label for="candidate.gender">{{ __('Gender') }}</x-label>
+        <div class="flex flex-row">
+            <label class="inline-flex items-center bg-gray-100 rounded shadow-sm py-2 px-2">
+                <input type="radio" class="form-radio" name="candidate.gender" wire:model="candidate.gender" value="2">
+                <span class="ml-2 text-sm font-normal">{{__('Woman')}}</span>
+            </label>
+            <label class="inline-flex items-center ml-4 bg-gray-100 rounded shadow-sm py-2 px-2">
+                <input type="radio" class="form-radio" name="candidate.gender" wire:model="candidate.gender" value="1">
+                <span class="ml-2 text-sm font-normal">{{__('Man')}}</span>
+            </label>
+        </div>
+        @error('candidate.gender')
+        <x-validation> {{ $message }} </x-validation>
+        @enderror
     </div>
 </div>
 
-<div class="grid grid-cols-3 gap-2">
+<div class="grid grid-cols-4 gap-2">
     <div class="flex flex-col">
         <x-label for="candidate.hhk_date">{{ __('HHK date') }}</x-label>
         <x-pikaday-input mode="gray" name="candidate.hhk_date" format="Y-MM-DD" wire:model.live="candidate.hhk_date">
@@ -204,6 +215,25 @@
             <x-livewire-input mode="gray" name="candidate.useless_info" wire:model="candidate.useless_info"></x-livewire-input>
         </div>
     @endif
+
+    <div class="flex flex-col space-y-1">
+        <x-label for="candidate.attitude_to_military">{{ __('Attitude to military') }}</x-label>
+        <div class="flex flex-row">
+            @foreach(\App\Enums\AttitudeMilitaryEnum::values() as $attitude)
+                <label class="inline-flex items-center bg-gray-100 rounded shadow-sm py-2 px-2">
+                    <input type="radio" class="form-radio" name="candidate.attitude_to_military" wire:model="candidate.attitude_to_military" value="{{ $attitude }}">
+                    <span class="ml-2 text-sm font-normal">{{ $attitude }}</span>
+                </label>
+            @endforeach
+        </div>
+        @error('candidate.attitude_to_military')
+        <x-validation> {{ $message }} </x-validation>
+        @enderror
+    </div>
+    <div class="flex flex-col">
+        <x-label for="candidate.characteristics">{{ __('Characteristics') }}</x-label>
+        <x-livewire-input mode="gray" name="candidate.characteristics" wire:model="candidate.characteristics"></x-livewire-input>
+    </div>
 </div>
 
 <div class="grid grid-cols-3 gap-2">

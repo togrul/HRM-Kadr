@@ -163,7 +163,7 @@
 <?php $component->withAttributes([]); ?>
                                     <div class="flex flex-col space-y-1">
                                         <span class="text-sm font-medium text-slate-900">
-                                            <?php echo e($_candidate->fullname); ?>
+                                            <?php echo e($_candidate->fullname_max); ?>
 
                                        </span>
                                         <!--[if BLOCK]><![endif]--><?php if(!empty($_candidate->deleted_at)): ?>
@@ -403,7 +403,7 @@ $__split = function ($name, $params = []) {
 };
 [$__name, $__params] = $__split('candidates.add-candidate');
 
-$__html = app('livewire')->mount($__name, $__params, 'irxmelT', $__slots ?? [], get_defined_vars());
+$__html = app('livewire')->mount($__name, $__params, 'lw-1273034855-0', $__slots ?? [], get_defined_vars());
 
 echo $__html;
 
@@ -422,7 +422,7 @@ $__split = function ($name, $params = []) {
 };
 [$__name, $__params] = $__split('candidates.edit-candidate', ['candidateModel' => $modelName]);
 
-$__html = app('livewire')->mount($__name, $__params, '4URxIgL', $__slots ?? [], get_defined_vars());
+$__html = app('livewire')->mount($__name, $__params, 'lw-1273034855-1', $__slots ?? [], get_defined_vars());
 
 echo $__html;
 
@@ -448,7 +448,7 @@ $__split = function ($name, $params = []) {
 };
 [$__name, $__params] = $__split('candidates.delete-candidate');
 
-$__html = app('livewire')->mount($__name, $__params, 'JfAQQSh', $__slots ?? [], get_defined_vars());
+$__html = app('livewire')->mount($__name, $__params, 'lw-1273034855-2', $__slots ?? [], get_defined_vars());
 
 echo $__html;
 

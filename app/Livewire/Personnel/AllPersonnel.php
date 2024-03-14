@@ -4,6 +4,7 @@ namespace App\Livewire\Personnel;
 
 use App\Exports\PersonnelExport;
 use Carbon\Carbon;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use App\Models\Personnel;
 use App\Models\Structure;
@@ -13,6 +14,7 @@ use App\Livewire\Traits\SideModalAction;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Maatwebsite\Excel\Facades\Excel;
 
+#[On(['personnelAdded','fileAdded','personnelWasDeleted'])]
 class AllPersonnel extends Component
 {
     use WithPagination,SideModalAction,AuthorizesRequests;
@@ -33,8 +35,6 @@ class AllPersonnel extends Component
             ],
         ];
     }
-
-    protected $listeners = ['personnelAdded' => '$refresh','fileAdded' => '$refresh','selectStructure','filterSelected','personnelWasDeleted' => '$refresh'];
 
     public function exportExcel()
     {
@@ -57,6 +57,7 @@ class AllPersonnel extends Component
     }
 
 
+    #[On('filterSelected')]
     public function filterSelected(array $filter)
     {
         $this->filters = $filter;
@@ -85,6 +86,7 @@ class AllPersonnel extends Component
         $this->dispatch('personnelWasDeleted' , __('Personnel was deleted!'));
     }
 
+    #[On('selectStructure')]
     public function selectStructure($id)
     {
         $structureModel = Structure::with('subs')->find($id);
@@ -149,6 +151,14 @@ class AllPersonnel extends Component
             ->when($this->status == 'deleted',function($q)
             {
                 $q->onlyTrashed();
+            })
+            ->when($this->status == 'pending',function($q)
+            {
+                return $q->where('is_pending',true);
+            })
+            ->when($this->status != 'pending',function($q)
+            {
+                return $q->where('is_pending',false);
             })
             ->filter($this->filters ?? [])
             ->orderBy('position_id')

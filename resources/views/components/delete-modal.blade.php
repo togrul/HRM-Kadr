@@ -1,13 +1,13 @@
-<div 
+<div
     x-cloak
     x-init="
-        Livewire.on('cannotDelete',message => {
+        $wire.on('cannotDelete',message => {
           openDelete = true
           showNotification(message)
         })
     "
-    x-data="{ 
-     openDelete:false,    
+    x-data="{
+     openDelete:false,
      messageToDisplay:'',
      showNotification(message) {
           this.messageToDisplay = message
@@ -17,15 +17,15 @@
     @cannotDelete.window="
         openDelete = true
     "
-    class="fixed inset-0 z-50 overflow-y-auto" 
-    aria-labelledby="modal-title" 
-    role="dialog" 
+    class="fixed inset-0 z-50 overflow-y-auto"
+    aria-labelledby="modal-title"
+    role="dialog"
     aria-modal="true"
   >
     <div class="flex items-end justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-    
+
       <div  x-show.transition.opacity="openDelete"
-            class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" 
+            class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"
             aria-hidden="true"
       ></div>
 
@@ -39,7 +39,7 @@
       >
 
         <div class="absolute top-0 right-0 pt-4 pr-4">
-            <button 
+            <button
                 @click="openDelete = false"
                 class="text-gray-400 hover:text-gray-500"
             >
@@ -70,7 +70,7 @@
                {{ __('Cancel') }}
             </button>
           </div>
-       
+
       </div>
     </div>
   </div>

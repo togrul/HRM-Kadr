@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\DateCastTrait;
 use App\Traits\PersonnelTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class PersonnelInjury extends Model
 {
-    use HasFactory,PersonnelTrait;
+    use HasFactory,PersonnelTrait,DateCastTrait;
 
     protected $fillable = [
         'tabel_no',
@@ -16,6 +17,14 @@ class PersonnelInjury extends Model
         'location',
         'date_time',
         'description'
+    ];
+
+    protected $dates = [
+        'date_time',
+    ];
+
+    protected $casts = [
+        'date_time' => 'date:d.m.Y',
     ];
 
     public $timestamps = false;

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\DateCastTrait;
 use App\Traits\PersonnelTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class PersonnelExtraEducation extends Model
 {
-    use HasFactory,PersonnelTrait;
+    use HasFactory,PersonnelTrait,DateCastTrait;
 
     public $timestamps = false;
 
@@ -31,6 +32,18 @@ class PersonnelExtraEducation extends Model
         'coefficient',
         'calculate_as_seniority',
         'is_military'
+    ];
+
+    protected $dates = [
+        'diplom_given_date',
+        'admission_year',
+        'graduated_year',
+    ];
+
+    protected $casts = [
+        'diplom_given_date' => 'date:d.m.Y',
+        'admission_year' => 'date:d.m.Y',
+        'graduated_year' => 'date:d.m.Y'
     ];
 
     public function type() : BelongsTo

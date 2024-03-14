@@ -3,6 +3,7 @@
 namespace App\Livewire\Roles;
 
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Spatie\Permission\Models\Permission;
 
@@ -11,8 +12,7 @@ class DeletePermission extends Component
     use AuthorizesRequests;
     public ?Permission $permission;
 
-    protected $listeners = ['setDeletePermission'];
-
+    #[On('setDeletePermission')]
     public function setDeletePermission($permissionId)
     {
         $this->permission = Permission::findOrFail($permissionId);

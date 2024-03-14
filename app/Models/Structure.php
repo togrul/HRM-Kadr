@@ -16,7 +16,8 @@ class Structure extends Model
         'parent_id',
         'name',
         'shortname',
-        'coefficient'
+        'coefficient',
+        'code'
     ];
 
     public $timestamps = false;
@@ -28,7 +29,7 @@ class Structure extends Model
 
     public function subs() : HasMany
     {
-        return $this->hasMany(self::class,'parent_id','id');
+        return $this->hasMany(self::class,'parent_id','id')->orderBy('code');
     }
 
     public function getAllNestedIds()

@@ -28,7 +28,7 @@ $__split = function ($name, $params = []) {
 };
 [$__name, $__params] = $__split('structure.sidebar');
 
-$__html = app('livewire')->mount($__name, $__params, 'wfBrHkh', $__slots ?? [], get_defined_vars());
+$__html = app('livewire')->mount($__name, $__params, 'lw-3935985241-0', $__slots ?? [], get_defined_vars());
 
 echo $__html;
 
@@ -117,6 +117,23 @@ if (isset($__slots)) unset($__slots);
 <?php endif; ?>
 <?php $component->withAttributes(['wire:click.prevent' => 'setStatus(\'deleted\')','active' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($status === 'deleted')]); ?>
                         <?php echo e(__('Deleted')); ?>
+
+                     <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
+<?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
+<?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
+<?php endif; ?>
+                    <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.filter.item','data' => ['wire:click.prevent' => 'setStatus(\'pending\')','active' => $status === 'pending']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('filter.item'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['wire:click.prevent' => 'setStatus(\'pending\')','active' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($status === 'pending')]); ?>
+                        <?php echo e(__('Pending')); ?>
 
                      <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
@@ -360,7 +377,7 @@ if (isset($__slots)) unset($__slots);
                                 <a href="#" wire:click="openSideMenu('edit-personnel',<?php echo e($personnel->id); ?>)" class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase rounded-lg text-gray-500 bg-gray-100 hover:bg-gray-200 hover:text-gray-700">
                                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-gray-400">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5zm6-10.125a1.875 1.875 0 11-3.75 0 1.875 1.875 0 013.75 0zm1.294 6.336a6.721 6.721 0 01-3.17.789 6.721 6.721 0 01-3.168-.789 3.376 3.376 0 016.338 0z" />
-                                     4 </svg>
+                                      </svg>
                                 </a>
                             
                             <?php else: ?>
@@ -492,7 +509,7 @@ $__split = function ($name, $params = []) {
 };
 [$__name, $__params] = $__split('filter.detail');
 
-$__html = app('livewire')->mount($__name, $__params, 'thzCsYg', $__slots ?? [], get_defined_vars());
+$__html = app('livewire')->mount($__name, $__params, 'lw-3935985241-1', $__slots ?? [], get_defined_vars());
 
 echo $__html;
 
@@ -519,7 +536,7 @@ $__split = function ($name, $params = []) {
 };
 [$__name, $__params] = $__split('personnel.add-personnel', []);
 
-$__html = app('livewire')->mount($__name, $__params, 'G4gmqDz', $__slots ?? [], get_defined_vars());
+$__html = app('livewire')->mount($__name, $__params, 'lw-3935985241-2', $__slots ?? [], get_defined_vars());
 
 echo $__html;
 
@@ -538,7 +555,7 @@ $__split = function ($name, $params = []) {
 };
 [$__name, $__params] = $__split('personnel.edit-personnel', ['personnelModel' => $modelName]);
 
-$__html = app('livewire')->mount($__name, $__params, '0q0iOB6', $__slots ?? [], get_defined_vars());
+$__html = app('livewire')->mount($__name, $__params, 'lw-3935985241-3', $__slots ?? [], get_defined_vars());
 
 echo $__html;
 
@@ -557,7 +574,7 @@ $__split = function ($name, $params = []) {
 };
 [$__name, $__params] = $__split('personnel.files', ['personnelModel' => $modelName]);
 
-$__html = app('livewire')->mount($__name, $__params, 'f3M32KZ', $__slots ?? [], get_defined_vars());
+$__html = app('livewire')->mount($__name, $__params, 'lw-3935985241-4', $__slots ?? [], get_defined_vars());
 
 echo $__html;
 
@@ -582,7 +599,7 @@ $__split = function ($name, $params = []) {
 };
 [$__name, $__params] = $__split('personnel.delete-personnel', []);
 
-$__html = app('livewire')->mount($__name, $__params, 'B4bsfBV', $__slots ?? [], get_defined_vars());
+$__html = app('livewire')->mount($__name, $__params, 'lw-3935985241-5', $__slots ?? [], get_defined_vars());
 
 echo $__html;
 

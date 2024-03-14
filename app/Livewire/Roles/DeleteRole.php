@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Roles;
 
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Spatie\Permission\Models\Role;
 
@@ -9,8 +10,7 @@ class DeleteRole extends Component
 {
     public ?Role $role;
 
-    protected $listeners = ['setDeleteRole'];
-
+    #[On('setDeleteRole')]
     public function setDeleteRole($roleId)
     {
         $this->role = Role::findOrFail($roleId);

@@ -5,10 +5,12 @@ namespace App\Livewire\Services\Users;
 use App\Livewire\Traits\SideModalAction;
 use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Url;
 
+#[On(['userAdded','userWasDeleted'])]
 class AllUsers extends Component
 {
     use WithPagination,SideModalAction,AuthorizesRequests;
@@ -18,8 +20,6 @@ class AllUsers extends Component
 
     #[Url]
     public $q;
-
-    protected $listeners = ['restoreData','userAdded' => '$refresh','userWasDeleted' => '$refresh'];
 
     public function updatingQ()
     {
@@ -56,6 +56,7 @@ class AllUsers extends Component
         $this->dispatch('userWasDeleted' , __('User was deleted!'));
     }
 
+    #[On('restoreData')]
     public function restoreData($id)
     {
         $user = User::withTrashed()->find($id);

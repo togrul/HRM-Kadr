@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\DateCastTrait;
 use App\Traits\PersonnelTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class PersonnelLaborActivity extends Model
 {
-    use HasFactory,PersonnelTrait;
+    use HasFactory,PersonnelTrait,DateCastTrait;
 
     public $timestamps = false;
 
@@ -28,5 +29,10 @@ class PersonnelLaborActivity extends Model
     protected $dates = [
         'join_date',
         'leave_date'
+    ];
+
+    protected $casts = [
+        'join_date' => 'date:d.m.Y',
+        'leave_date' => 'date:d.m.Y'
     ];
 }

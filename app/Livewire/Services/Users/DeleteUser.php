@@ -3,14 +3,14 @@
 namespace App\Livewire\Services\Users;
 
 use App\Models\User;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class DeleteUser extends Component
 {
     public ?User $user;
 
-    protected $listeners = ['setDeleteUser'];
-
+    #[On('setDeleteUser')]
     public function setDeleteUser($userId)
     {
         $this->user = User::findOrFail($userId);

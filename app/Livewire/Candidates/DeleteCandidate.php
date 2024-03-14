@@ -3,14 +3,14 @@
 namespace App\Livewire\Candidates;
 
 use App\Models\Candidate;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class DeleteCandidate extends Component
 {
     public ?Candidate $candidate;
 
-    protected $listeners = ['setDeleteCandidate'];
-
+    #[On('setDeleteCandidate')]
     public function setDeleteCandidate($candidateId)
     {
         $this->candidate = Candidate::where('id',$candidateId)->first();

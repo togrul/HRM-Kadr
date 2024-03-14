@@ -21,7 +21,7 @@ class Setting extends Model
     protected function value(): Attribute
     {
         return Attribute::make(
-            get: fn (mixed $value, array $attributes) => ("{$attributes['type']}val")($value)
+            get: fn (mixed $value, array $attributes) => !is_string($value) ? ("{$attributes['type']}val")($value) : $value
         );
     }
 }

@@ -16,10 +16,10 @@ return new class extends Migration
             $table->integer('id')->primary();
             $table->integer('order_category_id');
             $table->foreign('order_category_id')->references('id')->on('order_categories');
-            $table->string('shortname');
-            $table->string('name_az');
-            $table->string('name_en')->nullable();
-            $table->string('name_ru')->nullable();
+            $table->string('name');
+            $table->string('content');
+            $table->string('order_model');
+            $table->softDeletes();
         });
     }
 

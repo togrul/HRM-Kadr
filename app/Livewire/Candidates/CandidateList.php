@@ -8,19 +8,19 @@ use App\Models\AppealStatus;
 use App\Models\Candidate;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Maatwebsite\Excel\Facades\Excel;
 
+#[On(['candidateAdded','filterSelected','candidateWasDeleted'])]
 class CandidateList extends Component
 {
     use WithPagination,SideModalAction,AuthorizesRequests;
 
     #[Url]
     public $status;
-
-    protected $listeners = ['candidateAdded' => '$refresh','filterSelected','candidateWasDeleted' => '$refresh'];
 
     public function exportExcel()
     {

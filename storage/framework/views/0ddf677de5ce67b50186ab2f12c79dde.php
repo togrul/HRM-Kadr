@@ -4,19 +4,19 @@
      role="dialog"
      aria-modal="true"
      x-show="isOpen"
-     @keydown.escape.window="isOpen = false;$wire.call('closeSideMenu');document.body.classList.remove('overflow-hidden');"
+     @keydown.escape.window="isOpen = false;$wire.dispatch('closeSideMenu');document.body.classList.remove('overflow-hidden');"
      x-init="
       <?php
-        $arrEvents = ['personnelAdded','permissionSet','staffAdded','userAdded','menuAdded','fileAdded','candidateAdded'];
+        $arrEvents = ['personnelAdded','permissionSet','staffAdded','userAdded','menuAdded','fileAdded','candidateAdded','templateAdded','componentAdded','orderAdded'];
       ?>
-          Livewire.on('openSideMenu',() => {
+          $wire.on('openSideMenu',() => {
                isOpen = true
                document.body.classList.add('overflow-hidden')
           })
           <?php $__currentLoopData = $arrEvents; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $event): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-          Livewire.on('<?php echo e($event); ?>',() => {
+          $wire.on('<?php echo e($event); ?>',() => {
             isOpen = false
-            $wire.call('closeSideMenu')
+            $wire.dispatch('closeSideMenu')
             document.body.classList.remove('overflow-hidden')
           })
         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>

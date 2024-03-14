@@ -4,15 +4,15 @@ namespace App\Livewire\Services\Settings;
 
 use App\Models\Setting;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
+#[On(['settingsUpdated','settingsWasDeleted'])]
 class SettingsList extends Component
 {
     use AuthorizesRequests;
 
     public $setting = [];
-
-    protected $listeners = ['settingsUpdated' => '$refresh','settingsWasDeleted' => '$refresh'];
 
     public function updatedSetting($value,$name)
     {

@@ -38,11 +38,11 @@
 
 <div
     x-init="
-        Livewire.on('<?php echo e($eventToCloseModal); ?>',() => {
+        $wire.on('<?php echo e($eventToCloseModal); ?>',() => {
             openDeleteModal = false
         })
         <?php if( $livewireEventToOpenModal): ?>
-        Livewire.on('<?php echo e($livewireEventToOpenModal); ?>',() => {
+        $wire.on('<?php echo e($livewireEventToOpenModal); ?>',() => {
             openDeleteModal = true
             $nextTick(() => $refs.confirmButton.focus())
           })

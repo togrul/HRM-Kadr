@@ -3,14 +3,14 @@
 namespace App\Livewire\Services\Menus;
 
 use App\Models\Menu;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class DeleteMenu extends Component
 {
     public ?Menu $menu;
 
-    protected $listeners = ['setDeleteMenu'];
-
+    #[On('setDeleteMenu')]
     public function setDeleteMenu($menuId)
     {
         $this->menu = Menu::findOrFail($menuId);

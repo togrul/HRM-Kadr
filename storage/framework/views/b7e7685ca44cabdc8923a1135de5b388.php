@@ -39,15 +39,15 @@
 <div
     x-cloak
     x-init="
-        Livewire.on('<?php echo e($eventToCloseModal); ?>',() => {
+        $wire.on('<?php echo e($eventToCloseModal); ?>',() => {
             openDeleteModal = false
         })
-        Livewire.on('closeModalEvent',() => {
+        $wire.on('closeModalEvent',() => {
             openDeleteModal = false
         })
 
         <?php if( $livewireEventToOpenModal): ?>
-          Livewire.on('<?php echo e($livewireEventToOpenModal); ?>',() => {
+          $wire.on('<?php echo e($livewireEventToOpenModal); ?>',() => {
             openDeleteModal = true
             $nextTick(() => $refs.confirmButton.focus())
           })
@@ -126,4 +126,5 @@
 
       </div>
     </div>
-  </div><?php /**PATH /Users/togruljalalli/Desktop/projects/HR-CRM/resources/views/components/modal-delete.blade.php ENDPATH**/ ?>
+  </div>
+<?php /**PATH /Users/togruljalalli/Desktop/projects/HR-CRM/resources/views/components/modal-delete.blade.php ENDPATH**/ ?>

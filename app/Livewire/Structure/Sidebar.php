@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Structure;
 
+use Livewire\Attributes\On;
 use Livewire\Component;
 use App\Models\Structure;
 use Livewire\Attributes\Url;
@@ -11,8 +12,7 @@ class Sidebar extends Component
     #[Url]
     public $selectedStructure;
 
-    protected $listeners = ['filterSelected'];
-
+    #[On('filterSelected')]
     public function filterSelected()
     {
         $this->selectedStructure = null;

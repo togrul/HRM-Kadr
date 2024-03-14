@@ -4,19 +4,19 @@
      role="dialog"
      aria-modal="true"
      x-show="isOpen"
-     @keydown.escape.window="isOpen = false;$wire.call('closeSideMenu');document.body.classList.remove('overflow-hidden');"
+     @keydown.escape.window="isOpen = false;$wire.dispatch('closeSideMenu');document.body.classList.remove('overflow-hidden');"
      x-init="
       @php
-        $arrEvents = ['personnelAdded','permissionSet','staffAdded','userAdded','menuAdded','fileAdded','candidateAdded'];
+        $arrEvents = ['personnelAdded','permissionSet','staffAdded','userAdded','menuAdded','fileAdded','candidateAdded','templateAdded','componentAdded','orderAdded'];
       @endphp
-          Livewire.on('openSideMenu',() => {
+          $wire.on('openSideMenu',() => {
                isOpen = true
                document.body.classList.add('overflow-hidden')
           })
           @foreach ($arrEvents as $event)
-          Livewire.on('{{$event}}',() => {
+          $wire.on('{{$event}}',() => {
             isOpen = false
-            $wire.call('closeSideMenu')
+            $wire.dispatch('closeSideMenu')
             document.body.classList.remove('overflow-hidden')
           })
         @endforeach
