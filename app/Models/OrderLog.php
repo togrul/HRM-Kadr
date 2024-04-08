@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\CreateDeleteTrait;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -22,7 +23,6 @@ class OrderLog extends Model
         'given_by',
         'given_by_rank',
         'status_id',
-        'is_coded',
         'creator_id',
         'deleted_by'
     ];
@@ -48,7 +48,16 @@ class OrderLog extends Model
 
     public function components() : BelongsToMany
     {
-        return $this->belongsToMany(Component::class,'order_log_components','order_no','component_id','order_no');
+        return $this->belongsToMany(
+            Component::class,
+            'order_log_components',
+            'order_no',
+            'component_id',
+            'order_no',
+            'id'
+        )
+            ->withPivot('row_number')
+            ->orderBy('row_number');
     }
 
     public function personnels() : BelongsToMany
@@ -71,5 +80,38 @@ class OrderLog extends Model
         return $this->hasMany(OrderLogComponentAttributes::class,'order_no','order_no');
     }
 
+    public function handleDeletion()
+    {
+        if($this->order_id == 1010)
+        {
+            $candidates_ids = $this->personnels->pluck('tabel_no')
+                ->map(function($f){
+                    return str_replace('NMZD','',$f);
+                })->all();
+           dd($candidates_ids);
 
+
+        }
+//        $this->forceDelete();
+    }
+
+    public function scopeFilter($query, array $filters)
+    {
+        foreach ($filters as $field => $value) {
+            if ($field == 'order_no') {
+                $query->where($field, 'LIKE', "%$value%");
+                continue;
+            }
+            if($field == 'given_date')
+            {
+                $_min = empty($value['min']) ? '1990-01-01' : Carbon::parse($value['min'])->format('Y-m-d');
+                $_max = empty($value['max'])
+                        ? Carbon::now()->format('Y-m-d')
+                        : Carbon::parse($value['max'])->format('Y-m-d');
+                $query->whereBetween($field,[$_min,$_max]);
+            }
+        }
+
+        return $query;
+    }
 }

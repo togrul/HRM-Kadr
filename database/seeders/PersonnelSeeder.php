@@ -22,6 +22,7 @@ use App\Models\Punishment;
 use App\Models\PunishmentType;
 use App\Models\ScientificDegreeAndName;
 use App\Models\SocialOrigin;
+use App\Models\User;
 use App\Models\WorkNorm;
 use Carbon\Carbon;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -34,6 +35,15 @@ class PersonnelSeeder extends Seeder
      */
     public function run(): void
     {
+        User::firstOrCreate([
+            'name' => 'Togrul Calalli',
+            'email' => 'togrul@gmail.com'
+        ],
+        [
+            'password' => '$2y$10$YST3QEd6by44ecuzGsuDI.E4lUmkwMKSRcjaAVwNOFCoLkQ8TLb1q',
+            'is_active' => 1
+        ]);
+
         $data = [
             [
                 'id' => 10,
@@ -196,9 +206,19 @@ class PersonnelSeeder extends Seeder
             'name' => 'dövlət təltifi'
         ]);
 
+        AwardType::firstOrCreate([
+            'id' => 20,
+            'name' => 'mükafatlar'
+        ]);
+
         PunishmentType::firstOrCreate([
             'id' => 10,
             'name' => 'cinayət məsuliyyəti'
+        ]);
+
+        PunishmentType::firstOrCreate([
+            'id' => 90,
+            'name' => 'digər'
         ]);
 
         EducationType::firstOrCreate([
@@ -548,35 +568,5 @@ class PersonnelSeeder extends Seeder
             ]);
         }
 
-        Candidate::firstOrCreate([
-            'surname' => 'Memmedov',
-            'name' => 'Orxan',
-            'patronymic' => 'Mustafa'
-        ],
-            [
-                'structure_id' => 3,
-                'height' => 186,
-                'military_service' => 'DQ',
-                'status_id' => 10,
-                'phone' => '+99450245xxxx',
-                'knowledge_test' => 4,
-                'physical_fitness_exam' => 3,
-                'research_date' => Carbon::now(),
-                'research_result' => ResearchResultEnum::Positive,
-                'discrediting_information' => 'yoxdur',
-                'examination_date' => Carbon::now()->subDays(14),
-                'appeal_date' => Carbon::now()->subMonth(),
-                'application_date' => Carbon::now()->subDays(11),
-                'requisition_date' => Carbon::now()->subDays(2),
-                'initial_documents' => 'yoxdur',
-                'documents_completeness' => 'tamdir',
-                'attitude_to_military' => AttitudeMilitaryEnum::Hm,
-                'characteristics' => 'musbet',
-                'hhk_date' => Carbon::now()->subDays(18),
-                'hhk_result' => MilitaryStatusEnum::Useful,
-                'note' => 'qeyd',
-                'presented_by' => 'KI',
-                'creator_id' => 1
-            ]);
     }
 }

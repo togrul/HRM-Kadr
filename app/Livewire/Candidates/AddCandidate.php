@@ -14,7 +14,9 @@ class AddCandidate extends Component
     {
         $this->validate();
 
-        Candidate::create($this->modifyArray($this->candidate));
+        $modelInstance = new Candidate;
+
+        Candidate::create($this->modifyArray($this->candidate,$modelInstance->dateList()));
 
         $this->dispatch('candidateAdded',__('Candidate was added successfully!'));
     }

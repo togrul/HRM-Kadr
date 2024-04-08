@@ -136,6 +136,113 @@ if (isset($__slots)) unset($__slots);
             </div>
         </div>
 
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 lg:grid-cols-4">
+            <div class="flex flex-col">
+                <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'search.order_no']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('label'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['for' => 'search.order_no']); ?><?php echo e(__('Search')); ?> <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
+<?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
+<?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
+<?php endif; ?>
+                <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.livewire-input','data' => ['mode' => 'gray','name' => 'search.order_no','wire:model.live' => 'search.order_no']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('livewire-input'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['mode' => 'gray','name' => 'search.order_no','wire:model.live' => 'search.order_no']); ?> <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
+<?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
+<?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
+<?php endif; ?>
+            </div>
+            <div class="flex flex-col lg:col-span-2">
+                <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'search.given_date']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('label'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['for' => 'search.given_date']); ?><?php echo e(__('Given date')); ?> <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
+<?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
+<?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
+<?php endif; ?>
+                <div class="flex space-x-1 items-center">
+                    <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.pikaday-input','data' => ['mode' => 'gray','name' => 'search.given_date.min','format' => 'Y-MM-DD','wire:model.live' => 'search.given_date.min']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('pikaday-input'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['mode' => 'gray','name' => 'search.given_date.min','format' => 'Y-MM-DD','wire:model.live' => 'search.given_date.min']); ?>
+                         <?php $__env->slot('script', null, []); ?> 
+                            $el.onchange = function () {
+                            window.Livewire.find('<?php echo e($_instance->getId()); ?>').set('search.given_date.min', $el.value);
+                            }
+                         <?php $__env->endSlot(); ?>
+                     <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
+<?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
+<?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
+<?php endif; ?>
+                    <span>-</span>
+                    <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.pikaday-input','data' => ['mode' => 'gray','name' => 'search.given_date.max','format' => 'Y-MM-DD','wire:model.live' => 'search.given_date.max']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('pikaday-input'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['mode' => 'gray','name' => 'search.given_date.max','format' => 'Y-MM-DD','wire:model.live' => 'search.given_date.max']); ?>
+                         <?php $__env->slot('script', null, []); ?> 
+                            $el.onchange = function () {
+                            window.Livewire.find('<?php echo e($_instance->getId()); ?>').set('search.given_date.max', $el.value);
+                            }
+                         <?php $__env->endSlot(); ?>
+                     <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
+<?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
+<?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
+<?php endif; ?>
+                </div>
+            </div>
+            <div class="flex items-end">
+                <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.button','data' => ['mode' => 'black','wire:click' => 'resetFilter']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('button'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['mode' => 'black','wire:click' => 'resetFilter']); ?><?php echo e(__('Reset')); ?> <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
+<?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
+<?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
+<?php endif; ?>
+            </div>
+        </div>
 
         <div class="relative min-h-[300px] -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
@@ -183,10 +290,25 @@ if (isset($__slots)) unset($__slots);
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
 <?php $component->withAttributes([]); ?>
-                                    <span class="text-sm font-medium text-blue-500">
-                                        <?php echo e($_order->order_no); ?>
+                                    <div class="flex flex-col space-y-1">
+                                        <span class="text-sm font-medium text-blue-500">
+                                            <?php echo e($_order->order_no); ?>
 
-                                   </span>
+                                        </span>
+                                        <!--[if BLOCK]><![endif]--><?php if($status == 'deleted'): ?>
+                                            <div class="flex flex-col text-xs font-medium">
+                                                <div class="flex items-center space-x-1">
+                                                    <span class="text-gray-500"><?php echo e(__('Deleted date')); ?>:</span>
+                                                    <span class="text-black"><?php echo e(\Carbon\Carbon::parse($_order->deleted_at)->format('d.m.Y H:i')); ?></span>
+                                                </div>
+                                                <div class="flex items-center space-x-1">
+                                                    <span class="text-gray-500"><?php echo e(__('Deleted by')); ?>:</span>
+                                                    <span class="text-black"><?php echo e($_order->personDidDelete->name); ?></span>
+                                                </div>
+                                            </div>
+                                        <?php endif; ?> <!--[if ENDBLOCK]><![endif]-->
+                                    </div>
+
                                  <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
@@ -223,10 +345,16 @@ if (isset($__slots)) unset($__slots);
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
 <?php $component->withAttributes([]); ?>
-                                    <span class="text-sm font-semibold text-gray-900">
-                                        <?php echo e($_order->given_by); ?>
+                                    <div class="flex flex-col space-y-1">
+                                        <span class="text-sm font-semibold text-gray-900">
+                                            <?php echo e($_order->given_by); ?>
 
-                                   </span>
+                                       </span>
+                                        <span class="text-sm font-medium text-gray-500">
+                                            <?php echo e($_order->given_by_rank); ?>
+
+                                       </span>
+                                    </div>
                                  <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
@@ -301,7 +429,7 @@ if (isset($__slots)) unset($__slots);
                                         
                                     <?php else: ?>
                                         <button
-                                            wire:click="restoreData('<?php echo e($_order->id); ?>')"
+                                            wire:click="restoreData('<?php echo e($_order->order_no); ?>')"
                                             class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-teal-50 hover:text-gray-700"
                                         >
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-teal-500">
@@ -431,6 +559,7 @@ if (isset($__slots)) unset($__slots);
 <?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
 <?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
 <?php endif; ?>
+
     
     <div>
         <?php

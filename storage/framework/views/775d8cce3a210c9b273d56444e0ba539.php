@@ -17,14 +17,14 @@
     if (array_key_exists($__key, $__defined_vars)) unset($$__key);
 } ?>
 <?php unset($__defined_vars); ?>
-<li class="py-1" x-data="{openSub:true}"> 
+<li class="py-1" x-data="{openSub:true}">
     <a class="flex items-center space-x-2">
         <?php if(count($model->subs) > 0): ?>
         <button @click="openSub = !openSub" class="rounded-lg bg-blue-100 text-blue-500 p-1 shadow-sm">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                <path x-show="openSub" 
-                    stroke-linecap="round" 
-                    stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" 
+                <path x-show="openSub"
+                    stroke-linecap="round"
+                    stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"
                     x-transition:enter="transition ease-out duration-300"
                     x-transition:enter-start="opacity-0 scale-90"
                     x-transition:enter-end="opacity-100 scale-100"
@@ -32,10 +32,10 @@
                     x-transition:leave-start="opacity-100 scale-100"
                     x-transition:leave-end="opacity-0 scale-90"
                 />
-                <path 
-                    x-show="!openSub" 
-                    stroke-linecap="round" 
-                    stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" 
+                <path
+                    x-show="!openSub"
+                    stroke-linecap="round"
+                    stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"
                     x-transition:enter="transition ease-out duration-300"
                     x-transition:enter-start="opacity-0 scale-90"
                     x-transition:enter-end="opacity-100 scale-100"
@@ -43,25 +43,25 @@
                     x-transition:leave-start="opacity-100 scale-100"
                     x-transition:leave-end="opacity-0 scale-90"
                 />
-              </svg>                 
+              </svg>
         </button>
         <?php else: ?>
         <span class="w-7 h-7"></span>
-        <?php endif; ?>
+        <?php endif; ?> <!--[if ENDBLOCK]><![endif]-->
         <button
             wire:click.prevent="selectStructure(<?php echo e($model->id); ?>)"
             class="<?php echo \Illuminate\Support\Arr::toCssClasses([
-                'font-medium appearance-none transition-all duration-300',
+                'font-medium appearance-none transition-all duration-300 text-left',
                 'text-blue-500' => $model->id == $this->selectedStructure
             ]); ?>"
             >
             <?php echo e($slot); ?>
 
-        </button>                            
+        </button>
     </a>
     <?php if(count($model->subs) > 0): ?>
     <ul class="ml-4 flex-col flex" x-show="openSub">
-        <?php $__currentLoopData = $model->subs; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $sub): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+        <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $model->subs; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $sub): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
              <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.tree.item','data' => ['model' => $sub]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('tree.item'); ?>
@@ -76,7 +76,8 @@
 <?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
 <?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
 <?php endif; ?>
-        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?> <!--[if ENDBLOCK]><![endif]-->
     </ul>
-    <?php endif; ?>
-</li><?php /**PATH /Users/togruljalalli/Desktop/projects/HR-CRM/resources/views/components/tree/item.blade.php ENDPATH**/ ?>
+    <?php endif; ?> <!--[if ENDBLOCK]><![endif]-->
+</li>
+<?php /**PATH /Users/togruljalalli/Desktop/projects/HR-CRM/resources/views/components/tree/item.blade.php ENDPATH**/ ?>

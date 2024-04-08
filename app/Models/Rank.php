@@ -27,3 +27,4 @@ class Rank extends Model
         return $this->attributes[$localeColumn] ?? null;
     }
 }
+

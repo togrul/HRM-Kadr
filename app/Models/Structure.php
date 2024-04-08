@@ -17,7 +17,8 @@ class Structure extends Model
         'name',
         'shortname',
         'coefficient',
-        'code'
+        'code',
+        'level'
     ];
 
     public $timestamps = false;
@@ -44,5 +45,18 @@ class Structure extends Model
         }
 
         return $ids;
+    }
+
+    public function getAllParentIds()
+    {
+        $parentIds = [$this->id];
+        $parent = $this->parent;
+
+        while ($parent && $parent->code > 0) {
+            $parentIds[] = $parent->id;
+            $parent = $parent->parent;
+        }
+
+        return array_reverse($parentIds);
     }
 }

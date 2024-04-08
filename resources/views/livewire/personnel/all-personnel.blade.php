@@ -124,7 +124,7 @@
                                 <div class="flex flex-col text-xs font-medium">
                                     <div class="flex items-center space-x-1">
                                         <span class="text-gray-500">{{__('Deleted date')}}:</span>
-                                        <span class="text-black">{{ \Carbon\Carbon::parse($personnel->deleted_at)->format('d-m-Y H:i') }}</span>
+                                        <span class="text-black">{{ \Carbon\Carbon::parse($personnel->deleted_at)->format('d.m.Y H:i') }}</span>
                                     </div>
                                     <div class="flex items-center space-x-1">
                                         <span class="text-gray-500">{{__('Deleted by')}}:</span>
@@ -161,7 +161,7 @@
 
                         <x-table.td>
                             <span class="text-sm font-medium text-gray-500 rounded-xl px-3 py-1 shadow-sm bg-gray-100">
-                                {{ $personnel->gender ? __('Man') : __('Woman') }}
+                                {{ $personnel->gender == 1 ? __('Man') : __('Woman') }}
                            </span>
                         </x-table.td>
 

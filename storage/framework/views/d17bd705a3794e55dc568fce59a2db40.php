@@ -4,7 +4,8 @@
      'selected',
      'mode' => 'default',
      'name' => '',
-     'hasCheckbox' => false
+     'hasCheckbox' => false,
+     'disabled' => false
 ]) as $__key => $__value) {
     $$__key = $$__key ?? $__value;
 } ?>
@@ -13,14 +14,16 @@
      'selected',
      'mode' => 'default',
      'name' => '',
-     'hasCheckbox' => false
+     'hasCheckbox' => false,
+     'disabled' => false
 ]); ?>
 <?php foreach (array_filter(([
      'title',
      'selected',
      'mode' => 'default',
      'name' => '',
-     'hasCheckbox' => false
+     'hasCheckbox' => false,
+     'disabled' => false
 ]), 'is_string', ARRAY_FILTER_USE_KEY) as $__key => $__value) {
     $$__key = $$__key ?? $__value;
 } ?>
@@ -101,25 +104,27 @@
          </span>
        </button>
 
-       <ul
-          <?php echo e($attributes->merge(['class' => 'absolute z-10 w-full px-3 py-2 mt-1 space-y-2 overflow-auto text-base bg-white rounded-md shadow-xl max-h-56 focus:outline-none sm:text-sm'])); ?>
+         <!--[if BLOCK]><![endif]--><?php if(!$disabled): ?>
+           <ul
+              <?php echo e($attributes->merge(['class' => 'absolute z-10 w-full px-3 py-2 mt-1 space-y-2 overflow-auto text-base bg-white rounded-md shadow-xl max-h-56 focus:outline-none sm:text-sm'])); ?>
 
-          tabindex="-1"
-          role="listbox"
-          aria-labelledby="listbox-label"
-          aria-activedescendant="listbox-option-3"
-          x-show="open"
-          x-transition:enter="transition ease-in duration-100"
-          x-transition:enter-start="opacity-0"
-          x-transition:enter-end="opacity-100"
-          x-transition:leave="transition ease-in duration-100"
-          x-transition:leave-start="opacity-100"
-          x-transition:leave-end="opacity-0"
-          style="display: none;"
-        >
-               <?php echo e($slot); ?>
+              tabindex="-1"
+              role="listbox"
+              aria-labelledby="listbox-label"
+              aria-activedescendant="listbox-option-3"
+              x-show="open"
+              x-transition:enter="transition ease-in duration-100"
+              x-transition:enter-start="opacity-0"
+              x-transition:enter-end="opacity-100"
+              x-transition:leave="transition ease-in duration-100"
+              x-transition:leave-start="opacity-100"
+              x-transition:leave-end="opacity-0"
+              style="display: none;"
+            >
+                   <?php echo e($slot); ?>
 
-       </ul>
+           </ul>
+         <?php endif; ?> <!--[if ENDBLOCK]><![endif]-->
      </div>
    </div>
 <?php /**PATH /Users/togruljalalli/Desktop/projects/HR-CRM/resources/views/components/select-list.blade.php ENDPATH**/ ?>

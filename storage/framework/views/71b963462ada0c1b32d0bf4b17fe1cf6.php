@@ -5,7 +5,7 @@
     </h2>
 </div>
 
-<div class="grid grid-cols-1 gap-2 sm:grid-cols-2 mt-4">
+<div class="grid grid-cols-1 gap-2 sm:grid-cols-3 mt-4">
     <div class="flex flex-col">
         <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list','data' => ['class' => 'w-full','title' => __('Order'),'mode' => 'gray','selected' => $orderName,'name' => 'orderId']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
@@ -77,7 +77,7 @@ $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?>
-        <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
+            <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.validation','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('validation'); ?>
 <?php if ($component->shouldRender()): ?>
@@ -96,6 +96,64 @@ if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?> <!--[if ENDBLOCK]><![endif]-->
     </div>
+
+    <div class="flex flex-col">
+        <?php
+            $selectedName = array_key_exists('rank_id',$this->component) ? $this->component['rank_id']['name'] : '---';
+            $selectedId = array_key_exists('rank_id',$this->component) ? $this->component['rank_id']['id'] : -1;
+        ?>
+        <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list','data' => ['class' => 'w-full','title' => __('Given rank'),'mode' => 'gray','selected' => $selectedName,'name' => 'rankId']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('select-list'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['class' => 'w-full','title' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(__('Given rank')),'mode' => 'gray','selected' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($selectedName),'name' => 'rankId']); ?>
+            <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list-item','data' => ['wire:click' => 'setData(\'component\',\'rank_id\',null,\'---\',null)','selected' => '---' ==  $selectedName,'wire:model' => 'component.rank_id.id']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('select-list-item'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['wire:click' => 'setData(\'component\',\'rank_id\',null,\'---\',null)','selected' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute('---' ==  $selectedName),'wire:model' => 'component.rank_id.id']); ?>
+                ---
+             <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
+<?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
+<?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
+<?php endif; ?>
+            <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $_ranks; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $_rank): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list-item','data' => ['wire:click' => 'setData(\'component\',\'rank_id\',null,\''.e(trim($_rank->name)).'\','.e($_rank->id).')','selected' => $_rank->id === $selectedId,'wire:model' => 'component.rank_id.id']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('select-list-item'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['wire:click' => 'setData(\'component\',\'rank_id\',null,\''.e(trim($_rank->name)).'\','.e($_rank->id).')','selected' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($_rank->id === $selectedId),'wire:model' => 'component.rank_id.id']); ?>
+                    <?php echo e($_rank->name); ?>
+
+                 <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
+<?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
+<?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
+<?php endif; ?>
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?> <!--[if ENDBLOCK]><![endif]-->
+         <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
+<?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
+<?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
+<?php endif; ?>
+    </div>
+
     <div class="">
         <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'component.name']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>

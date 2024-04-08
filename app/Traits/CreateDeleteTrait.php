@@ -21,7 +21,7 @@ trait CreateDeleteTrait
     {
         parent::boot();
         static::creating(function ($model) {
-            $model->creator_id = auth()->user()->id;
+            $model->creator_id = auth()->user()->id ?? 1;
         });
         static::deleting(function ($model) {
             $model->deleted_by = auth()->user()->id;

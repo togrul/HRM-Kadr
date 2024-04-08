@@ -3,7 +3,8 @@
      'selected',
      'mode' => 'default',
      'name' => '',
-     'hasCheckbox' => false
+     'hasCheckbox' => false,
+     'disabled' => false
 ])
 
 @php
@@ -49,22 +50,24 @@
          </span>
        </button>
 
-       <ul
-          {{ $attributes->merge(['class' => 'absolute z-10 w-full px-3 py-2 mt-1 space-y-2 overflow-auto text-base bg-white rounded-md shadow-xl max-h-56 focus:outline-none sm:text-sm']) }}
-          tabindex="-1"
-          role="listbox"
-          aria-labelledby="listbox-label"
-          aria-activedescendant="listbox-option-3"
-          x-show="open"
-          x-transition:enter="transition ease-in duration-100"
-          x-transition:enter-start="opacity-0"
-          x-transition:enter-end="opacity-100"
-          x-transition:leave="transition ease-in duration-100"
-          x-transition:leave-start="opacity-100"
-          x-transition:leave-end="opacity-0"
-          style="display: none;"
-        >
-               {{ $slot }}
-       </ul>
+         @if(!$disabled)
+           <ul
+              {{ $attributes->merge(['class' => 'absolute z-10 w-full px-3 py-2 mt-1 space-y-2 overflow-auto text-base bg-white rounded-md shadow-xl max-h-56 focus:outline-none sm:text-sm']) }}
+              tabindex="-1"
+              role="listbox"
+              aria-labelledby="listbox-label"
+              aria-activedescendant="listbox-option-3"
+              x-show="open"
+              x-transition:enter="transition ease-in duration-100"
+              x-transition:enter-start="opacity-0"
+              x-transition:enter-end="opacity-100"
+              x-transition:leave="transition ease-in duration-100"
+              x-transition:leave-start="opacity-100"
+              x-transition:leave-end="opacity-0"
+              style="display: none;"
+            >
+                   {{ $slot }}
+           </ul>
+         @endif
      </div>
    </div>

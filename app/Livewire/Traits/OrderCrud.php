@@ -2,13 +2,18 @@
 
 namespace App\Livewire\Traits;
 
+use App\Enums\StructureEnum;
+use App\Helpers\UsefulHelpers;
 use App\Models\Candidate;
 use App\Models\OrderStatus;
 use App\Models\OrderType;
 use App\Models\Personnel;
 use App\Models\Position;
 use App\Models\Rank;
+use App\Models\StaffSchedule;
 use App\Models\Structure;
+use App\Services\CheckVacancyService;
+use App\Services\WordSuffixService;
 use Livewire\Attributes\On;
 
 trait OrderCrud
@@ -16,9 +21,9 @@ trait OrderCrud
     use SelectListTrait;
 
     //esas cedvelin listi
-    public $order = [];
+    public array $order = [];
     public $searchTemplate,$searchPersonnel,$searchStructure,$searchPosition;
-    public $title;
+    public string $title;
 
     //edited data model
     public $orderModel;
@@ -30,7 +35,7 @@ trait OrderCrud
     public $showComponent = false;
 
     //dinamik componentlerin secildiyi list
-    public $components = [];
+    public array $components = [];
 
     //add row hissede dinamik listin generasiya olunmasi
     public $componentRows;
@@ -39,14 +44,18 @@ trait OrderCrud
     public $selectedTemplate;
 
     //secilen component - dinamik fieldleri generasiya elemek ucun
-    public $selectedComponents = [];
+    public array $selectedComponents = [];
+
+    public array $coded_list;
+    public array $vacancy_list;
+    public array $originalComponents = [];
 
     public function validationRules()
     {
         return [
             'main' => [
                 'order.order_type_id.id' => 'required|int|exists:order_types,id',
-                'order.order_no' => 'required|min:3|unique:order_logs,order_no'. (!empty($this->orderModel) ? ','.$this->orderModel : ''),
+                'order.order_no' => 'required|min:3|unique:order_logs,order_no'. (!empty($this->orderModel) ? ','.$this->orderModelData->id : ''),
                 'order.given_date' => 'required',
                 'order.status_id' => 'required|exists:order_statuses,id'
             ],
@@ -87,6 +96,32 @@ trait OrderCrud
         ];
     }
 
+    public function setStructure($id,$list,$field,$key,$isCoded)
+    {
+        $model = Structure::find($id);
+
+        $models = Structure::find($model->getAllParentIds());
+        $value = "";
+
+        $suffixService = new WordSuffixService();
+
+        foreach ($models as $parent)
+        {
+            $level_name = __(strtolower((collect(StructureEnum::cases())->pluck('name','value')[$parent->level])));
+            $level_with_suffix = $parent->level > 1
+                                ? $suffixService->getMultiSuffix($level_name)
+                                : $suffixService->getStructureSuffix($level_name);
+            $data = $isCoded
+                    ? $parent->code. $suffixService->getNumberSuffix($parent->code) . " " . $level_with_suffix . " "
+                    : $suffixService->getStructureSuffix($parent->name) . " ";
+            $value .= $data;
+        }
+        $this->{$list}[$key][$field] = [
+                'id' => $id,
+                'name' => $value
+        ];
+    }
+
     #[On('componentSelected')]
     public function componentSelected(?\App\Models\Component $value, $rowKey = null)
     {
@@ -101,7 +136,9 @@ trait OrderCrud
         $this->resetFields();
         $this->fillEmptyComponent();
         if(empty($this->selectedOrder))
+        {
             $this->order['order_id'] = OrderType::where('id',$value)->value('order_id');
+        }
     }
 
     #[On('dynamicSelectChanged')]
@@ -109,19 +146,15 @@ trait OrderCrud
     {
         if($field == 'personnel_id')
         {
-            $personnelModel = null;
-            if($this->order['order_id'] == 1010)
-            {
-                $personnelModel = Candidate::find($value);
-            }
-            else
-            {
-                $personnelModel = Personnel::find($value);
-            }
+            $personnelModel = $this->order['order_id'] == 1010
+                            ? Candidate::find($value)
+                            : Personnel::find($value);
 
             $this->components[$rowKey]['name'] = $personnelModel->name;
             $this->components[$rowKey]['surname'] = $personnelModel->surname;
         }
+
+        $this->coded_list[$rowKey] = $field == 'structure_main_id' && $value == 1;
     }
 
     protected function resetFields()
@@ -158,6 +191,8 @@ trait OrderCrud
                 'name' => '---'
             ]
         ];
+
+        $this->coded_list[] = false;
     }
 
     public function addRow()
@@ -181,7 +216,6 @@ trait OrderCrud
     protected function modifyComponentList(array $components)
     {
         $_modified_component = [];
-//        data_forget($components,'*.component_id');
         foreach ($components as $key => $component)
         {
             foreach ($component as $keyComponent => $valueComponent)
@@ -197,8 +231,8 @@ trait OrderCrud
                     default => "$".$keyComponent
                 };
 
-                $_modified_component[$key][$_edit_key] = is_array($valueComponent)
-                    ? $keyComponent == 'component_id' ? $valueComponent['id'] : $valueComponent['name']
+                $_modified_component[$key][$_edit_key] = $keyComponent == 'component_id'
+                    ? $valueComponent['id']
                     : $valueComponent;
             }
         }
@@ -206,12 +240,71 @@ trait OrderCrud
         return $_modified_component;
     }
 
+    public function updateVacancy()
+    {
+        $staff_schedule = StaffSchedule::where('structure_id', $this->vacancy_list['structure_id'])
+                                    ->where('position_id' , $this->vacancy_list['position_id'])
+                                    ->first();
+
+        if(!$staff_schedule)
+        {
+           StaffSchedule::create([
+               'structure_id' => $this->vacancy_list['structure_id'],
+               'position_id' => $this->vacancy_list['position_id'],
+               'total' => $this->vacancy_list['count'],
+               'filled' => 0,
+               'vacant' => $this->vacancy_list['count']
+           ]);
+        }
+        else
+        {
+            $staff_schedule->update([
+                'total' => $staff_schedule->total + $this->vacancy_list['count'],
+                'vacant' => $staff_schedule->vacant + $this->vacancy_list['count']
+            ]);
+        }
+
+        $this->dispatch('vacancyUpdated',__('Vacancy was added successfully!'));
+    }
+
+    private function modifyCodedList()
+    {
+        $this->coded_list = array_map(function ($value){
+            return $value === 1 ? true : false;
+        },collect($this->components)->pluck('structure_main_id.id')->toArray());
+    }
+
+    private function prepareToCrud() : array
+    {
+        $_attributes = $this->modifyComponentList($this->components);
+        $_personnel_ids = collect($this->components)->pluck('personnel_id.id')->toArray();
+        $_component_ids = collect($this->components)->pluck('component_id.id')->toArray();
+
+        $this->validate($this->validationRules()['main']);
+        $this->validate($this->validationRules()['dynamic']);
+
+        /** secilen vezifelerin bos olub olmadigin yoxlayir yoxdursa vakansiya yaratmaga imkan verir **/
+        $list_for_vacancy = !empty($this->originalComponents)
+                            ? UsefulHelpers::compareMultidimensionalArrays($this->components,$this->originalComponents)
+                            : $this->components;
+
+        $this->vacancy_list = resolve(CheckVacancyService::class)->handle($list_for_vacancy);
+
+        return [
+            'attributes' => $_attributes,
+            'personnel_ids' => $_personnel_ids,
+            'component_ids' => $_component_ids,
+            'vacancy_list' => $list_for_vacancy,
+            'message' => !empty($this->vacancy_list) ? $this->vacancy_list['message'] : ""
+        ];
+    }
+
     public function mount()
     {
         if(!empty($this->orderModel))
         {
-//            $this->fillOrder();
             $this->title = __('Edit order');
+            $this->fillOrder();
         }
         else
         {
@@ -219,13 +312,13 @@ trait OrderCrud
             $this->order['given_by'] = cache('settings')['Chief'];
             $this->order['given_by_rank'] = cache('settings')['Chief rank'];
             $this->order['order_id'] = $this->selectedOrder;
-            $this->order['is_coded'] = false;
             $this->componentRows = 1;
         }
     }
 
     public function render()
     {
+        $this->modifyCodedList();
         // template secimnidede type i secmek cunki order_id onsuzda qiraqdan gelir auto bilinir
         // duzeltmek lazimdir.yalniz 1 id var ve onlari ortaq eden hecne yoxdur.
         // db duzelishler
@@ -241,6 +334,13 @@ trait OrderCrud
             ->where('order_type_id',$this->selectedTemplate)
             ->get();
 
+        $_personnel_id_list = array_filter(
+            collect($this->components)->pluck('personnel_id.id')->toArray(), function ($value)
+            {
+                return $value !== null;
+            }
+        );
+
         if(array_key_exists('order_id',$this->order) && $this->order['order_id'] == 1010)
         {
             //yalniz emre hazir statusunda olan namizedlerin siyahisi cixsin
@@ -250,6 +350,7 @@ trait OrderCrud
                         ->orWhere('surname','LIKE',"%{$this->searchPersonnel}%");
                 });
             })
+                ->whereNotIn('id',$_personnel_id_list)
                 ->where('status_id',30)
                 ->get();
         }
@@ -261,6 +362,7 @@ trait OrderCrud
                         ->orWhere('surname','LIKE',"%{$this->searchPersonnel}%");
                 });
             })
+                ->whereNotIn('id',$_personnel_id_list)
                 ->whereNull('leave_work_date')
                 ->orderBy('position_id')
                 ->orderBy('structure_id')
@@ -270,13 +372,14 @@ trait OrderCrud
         $_ranks = Rank::where('is_active',true)->get();
 
         $_main_structures = Structure::where('code',0)->orderBy('id')->get();
-        $_structures = Structure::when(!empty($this->searchStructure),function ($q){
-            $q->where('name','LIKE',"%{$this->searchStructure}%");
-        })
-            ->whereNotNull('parent_id')
-            ->where('code','<>',0)
-            ->orderBy('code')
-            ->get();
+        $_structures = Structure::with('subs')
+                            ->when(!empty($this->searchStructure),function ($q){
+                                $q->where('name','LIKE',"%{$this->searchStructure}%");
+                            })
+                                ->whereNotNull('parent_id')
+                                ->where('code','<>',0)
+                                ->orderBy('code')
+                                ->get();
 
         $_positions = Position::when(!empty($this->searchPosition),function ($q){
             $q->where('name','LIKE',"%{$this->searchPosition}%");
@@ -287,6 +390,7 @@ trait OrderCrud
         $view_name = !empty($this->orderModel)
                     ? 'livewire.orders.edit-order'
                     : 'livewire.orders.add-order';
+
 
         return view($view_name,compact('_templates','_components','_personnels','_main_structures','_structures','_positions','_ranks','_statuses'));
     }

@@ -16,20 +16,19 @@ class AddOrder extends Component
     use OrderCrud;
     public function store()
     {
-        $_attributes = $this->modifyComponentList($this->components);
-        $_personnel_ids = collect($this->components)->pluck('personnel_id.id')->toArray();
-        $_component_ids = collect($this->components)->pluck('component_id.id')->toArray();
-        $_converted_component_ids = [];
-        foreach($_component_ids as $key => $component_id)
+        $data = $this->prepareToCrud();
+        $message = $data['message'];
+
+        if(!empty($message))
         {
-            $_converted_component_ids[$component_id] = ['row_number' => $key];
+            return $this->dispatch('checkVacancyWasSet',$message);
         }
 
-        $this->validate($this->validationRules()['main']);
-        $this->validate($this->validationRules()['dynamic']);
+        $_attributes = $data['attributes'];
+        $_personnel_ids = $data['personnel_ids'];
+        $_component_ids = $data['component_ids'];
 
-        DB::transaction(function () use($_converted_component_ids,$_attributes,$_personnel_ids,$_component_ids){
-
+        DB::transaction(function () use($_attributes,$_personnel_ids,$_component_ids){
             //create order logs
             $order_log = OrderLog::create([
                 'order_type_id' => $this->order['order_type_id']['id'],
@@ -38,15 +37,19 @@ class AddOrder extends Component
                 'given_date' => Carbon::parse($this->order['given_date'])->format('Y-m-d'),
                 'given_by' => $this->order['given_by'],
                 'given_by_rank' => $this->order['given_by_rank'],
-                'is_coded' => $this->order['is_coded'],
                 'status_id' => $this->order['status_id'],
             ]);
 
             //insert log components
-            $order_log->components()->attach($_converted_component_ids);
+            foreach($_component_ids as $key => $_component)
+            {
+                $order_log->components()->attach([
+                    $_component => ['row_number' => $key]
+                ]);
+            }
 
-            // get attributes and insert to attributes table
-            foreach ($_attributes as $_attr)
+            //get attributes and insert to attributes table
+            foreach ($_attributes as $k => $_attr)
             {
                 $component_id = $_attr['component_id'];
                 unset($_attr['component_id']);
@@ -55,14 +58,16 @@ class AddOrder extends Component
                     $order_log->attributes()->create([
                         'component_id' => $component_id,
                         'attribute_key' => $key,
-                        'attribute_value' => $value
+                        'attribute_id' => is_array($value) ? $value['id'] : null,
+                        'attribute_value' => is_array($value) ? $value['name'] : $value,
+                        'row_number' => $k
                     ]);
                 }
             }
 
             //insert order log personnels eger candidate dirse.Service cagir
             $tabel_no_list = $this->order['order_id'] == 1010
-                            ? resolve(ImportCandidateToPersonnel::class)->handle($_personnel_ids,$this->order['status_id'])
+                            ? resolve(ImportCandidateToPersonnel::class)->handle($this->components,$this->order['status_id'])
                             : Personnel::find($_personnel_ids)->pluck('tabel_no')->toArray();
 
             //insert

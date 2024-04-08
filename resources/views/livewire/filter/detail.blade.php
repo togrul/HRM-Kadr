@@ -1,4 +1,4 @@
-<x-modal-confirm
+<x-modal-confirm-lg
     livewire-event-to-open-modal="openFilterWasSet"
     event-to-close-modal="filterSelected"
     :modal-title="__('All filters')"
@@ -21,7 +21,7 @@
         <div class="flex flex-col">
             <x-select-list class="w-full" :title="__('Structure')" mode="gray" :selected="$structureName" name="structureId">
                 <x-livewire-input  @click.stop="open = true" mode="gray" name="searchStructure" wire:model.live="searchStructure"></x-livewire-input>
-                
+
                 <x-select-list-item wire:click="setData('filter','structure_id','structure','---',null)" :selected="'---' == $structureName"
                   wire:model='filter.structure_id'>
                   ---
@@ -37,7 +37,7 @@
           <div class="flex flex-col">
             <x-select-list class="w-full" :title="__('Position')" mode="gray" :selected="$positionName" name="positionId">
                 <x-livewire-input  @click.stop="open = true" mode="gray" name="searchPosition" wire:model.live="searchPosition"></x-livewire-input>
-                
+
                 <x-select-list-item wire:click="setData('filter','position_id','position','---',null)" :selected="'---' == $positionName"
                   wire:model='filter.position_id'>
                   ---
@@ -111,7 +111,7 @@
         <div class="flex flex-col">
             <x-select-list  class="w-full" :title="__('Nationality')" mode="gray" :selected="$nationalityName" name="nationalityId">
                 <x-livewire-input  @click.stop="open = true" mode="gray" name="searchNationality" wire:model.live="searchNationality"></x-livewire-input>
-                
+
                 <x-select-list-item wire:click="setData('filter','nationality_id','nationality','---',null)" :selected="'---' == $nationalityName"
                   wire:model='nationalityId'>
                   ---
@@ -127,7 +127,7 @@
         <div class="flex flex-col">
             <x-select-list  class="w-full" :title="__('Born country')" mode="gray" :selected="$bornCountryName" name="bornCountryId">
                 <x-livewire-input  @click.stop="open = true" mode="gray" name="searchPreviousNationality" wire:model.live="searchPreviousNationality"></x-livewire-input>
-                
+
                 <x-select-list-item wire:click="setData('filter','born_country_id','bornCountry','---',null)" :selected="'---' == $bornCountryName"
                   wire:model='bornCountryId'>
                   ---
@@ -143,7 +143,7 @@
         <div class="flex flex-col">
             <x-select-list  class="w-full" :title="__('City')" mode="gray" :selected="$bornCityName" name="bornCityId">
                 <x-livewire-input  @click.stop="open = true" mode="gray" name="searchCity" wire:model.live="searchCity"></x-livewire-input>
-                
+
                 <x-select-list-item wire:click="setData('filter','born_city_id','bornCity','---',null)" :selected="'---' == $bornCityName"
                   wire:model='bornCityId'>
                   ---
@@ -183,7 +183,7 @@
         <div class="flex flex-col">
             <x-select-list class="w-full" :title="__('Ranks')" mode="gray" :selected="$rankName" name="rankId">
                 <x-livewire-input  @click.stop="open = true" mode="gray" name="searchRank" wire:model.live="searchRank"></x-livewire-input>
-                
+
                 <x-select-list-item wire:click="setData('filter','rank_id','rank','---',null)" :selected="'---' == $rankName"
                   wire:model='filter.rank_id'>
                   ---
@@ -203,7 +203,7 @@
         <div class="flex flex-col">
             <x-select-list class="w-full" :title="__('Education degree')" mode="gray" :selected="$educationDegreeName" name="educationDegreeId">
                 <x-livewire-input  @click.stop="open = true" mode="gray" name="searchEducationDegree" wire:model.live="searchEducationDegree"></x-livewire-input>
-                
+
                 <x-select-list-item wire:click="setData('filter','education_degree_id','educationDegree','---',null)" :selected="'---' == $educationDegreeName"
                   wire:model='filter.education_degree_id.id'>
                   ---
@@ -223,7 +223,7 @@
         <div class="flex flex-col">
             <x-select-list class="w-full" :title="__('Education place')" mode="gray" :selected="$institutionName" name="educational_institution_id">
                 <x-livewire-input  @click.stop="open = true" mode="gray" name="searchInstitution" wire:model.live="searchInstitution"></x-livewire-input>
-                
+
                 <x-select-list-item wire:click="setData('filter','educational_institution_id','institution','---',null)" :selected="'---' == $institutionName"
                   wire:model='filter.educational_institution_id.id'>
                   ---
@@ -239,7 +239,7 @@
         <div class="flex flex-col">
             <x-select-list class="w-full" :title="__('Awards')" mode="gray" :selected="$awardName" name="awardId">
                 <x-livewire-input  @click.stop="open = true" mode="gray" name="searchAward" wire:model.live="searchAward"></x-livewire-input>
-                
+
                 <x-select-list-item wire:click="setData('filter','award_id','award','---',null)" :selected="'---' == $awardName"
                   wire:model='filter.award_id'>
                   ---
@@ -255,7 +255,7 @@
         <div class="flex flex-col">
             <x-select-list class="w-full" :title="__('Punishments')" mode="gray" :selected="$punishmentName" name="punishmentId">
                 <x-livewire-input  @click.stop="open = true" mode="gray" name="searchPunishment" wire:model.live="searchPunishment"></x-livewire-input>
-                
+
                 <x-select-list-item wire:click="setData('filter','punishment_id','punishment','---',null)" :selected="'---' == $awardName"
                   wire:model='filter.punishment_id'>
                   ---
@@ -315,4 +315,4 @@
             </div>
         </div>
     </div>
-</x-modal-confirm>
+</x-modal-confirm-lg>

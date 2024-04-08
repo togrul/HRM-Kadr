@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\StructureEnum;
 use App\Models\Structure;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -14,6 +15,13 @@ class StructureSeeder extends Seeder
     public function run(): void
     {
         $structures = [
+            [
+                'id' => 1,
+                'parent_id' => null,
+                'name' => 'Azərbaycan Respublikası Prezidentinin Təhlükəsizlik Xidməti',
+                'shortname' => 'PTX',
+                'code' => 0
+            ],
             [
                 'id' => 18,
                 'parent_id' => 1,
@@ -166,14 +174,14 @@ class StructureSeeder extends Seeder
                 'parent_id' => 21,
                 'name' => 'Avtomobil parkı',
                 'shortname' => 'MTTİ AP',
-                'code' => null
+                'code' => 1
             ],
             [
                 'id' => 26,
                 'parent_id' => 10,
                 'name' => 'Təlim Tədris Mərkəzi',
                 'shortname' => 'PHİ TTM',
-                'code' => null
+                'code' => 1
             ],
             [
                 'id' => 19,
@@ -187,7 +195,7 @@ class StructureSeeder extends Seeder
                 'parent_id' => 21,
                 'name' => 'Ulduz istirahət mərkəzi',
                 'shortname' => 'MTTİ Ulduz',
-                'code' => null
+                'code' => 2
             ],
             [
                 'id' => 3,
@@ -215,7 +223,7 @@ class StructureSeeder extends Seeder
                 'parent_id' => 14,
                 'name' => 'Səfərlərin təşkili şöbəsi',
                 'shortname' => 'MTİ-STŞ',
-                'code' => null
+                'code' => 1
             ],
             [
                 'id' => 4,
@@ -226,8 +234,47 @@ class StructureSeeder extends Seeder
             ],
         ];
 
+        $structures_new = [
+            [
+                'id' => 31,
+                'parent_id' => 2,
+                'name' => 'Mühafizə taboru',
+                'shortname' => 'MT',
+                'code' => '1',
+                'level' => StructureEnum::TABOR->value
+            ],
+            [
+                'id' => 32,
+                'parent_id' => 31,
+                'name' => '1-ci mühafizə bölüyü',
+                'shortname' => '1MB',
+                'code' => '2',
+                'level' => StructureEnum::BOLUK->value
+            ],
+            [
+                'id' => 33,
+                'parent_id' => 31,
+                'name' => '1-ci mühafizə taqımı',
+                'shortname' => '1MT',
+                'code' => '3',
+                'level' => StructureEnum::TAQIM->value
+            ],
+            [
+                'id' => 34,
+                'parent_id' => 31,
+                'name' => '2-ci mühafizə taqımı',
+                'shortname' => '2MT',
+                'code' => '3',
+                'level' => StructureEnum::TAQIM->value
+            ]
+        ];
+
         foreach ($structures as $structure) {
             Structure::updateOrCreate(['id' => $structure['id']],$structure);
+        }
+
+        foreach ($structures_new as $structuren) {
+            Structure::updateOrCreate(['id' => $structuren['id']],$structuren);
         }
     }
 }

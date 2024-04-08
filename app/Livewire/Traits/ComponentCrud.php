@@ -4,6 +4,7 @@ namespace App\Livewire\Traits;
 
 use App\Models\Order;
 use App\Models\OrderType;
+use App\Models\Rank;
 use Illuminate\Support\Str;
 
 trait ComponentCrud
@@ -41,7 +42,7 @@ trait ComponentCrud
             return Str::startsWith($string, '$');
         });
 
-        $this->component['dynamic_fields'] = implode(',',$dollarStrings);
+        $this->component['dynamic_fields'] = implode(',',array_unique($dollarStrings));
     }
 
     public function mount()
@@ -65,10 +66,14 @@ trait ComponentCrud
         })
             ->get();
 
+        $_ranks =  Rank::query()
+            ->where('is_active',1)
+            ->get();
+
         $view_name = !empty($this->candidateModel)
             ? 'livewire.services.components.edit-component'
             : 'livewire.services.components.add-component';
 
-        return view($view_name, compact('_orders'));
+        return view($view_name, compact('_orders','_ranks'));
     }
 }

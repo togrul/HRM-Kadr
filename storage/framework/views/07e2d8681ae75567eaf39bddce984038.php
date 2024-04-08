@@ -107,6 +107,9 @@ if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?> <!--[if ENDBLOCK]><![endif]-->
         </div>
+
+
+
         <div class="">
             <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'order.order_no']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
@@ -223,9 +226,8 @@ unset($__errorArgs, $__bag); ?> <!--[if ENDBLOCK]><![endif]-->
 <?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
 <?php endif; ?>
         </div>
-        <div class="flex justify-between space-x-2 items-center">
-            <div class="">
-                <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
+        <div class="">
+            <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'order.given_date']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('label'); ?>
 <?php if ($component->shouldRender()): ?>
@@ -239,7 +241,7 @@ unset($__errorArgs, $__bag); ?> <!--[if ENDBLOCK]><![endif]-->
 <?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
 <?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
 <?php endif; ?>
-                <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
+            <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.pikaday-input','data' => ['mode' => 'gray','name' => 'order.given_date','format' => 'Y-MM-DD','wire:model.live' => 'order.given_date']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('pikaday-input'); ?>
 <?php if ($component->shouldRender()): ?>
@@ -248,18 +250,18 @@ unset($__errorArgs, $__bag); ?> <!--[if ENDBLOCK]><![endif]-->
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
 <?php $component->withAttributes(['mode' => 'gray','name' => 'order.given_date','format' => 'Y-MM-DD','wire:model.live' => 'order.given_date']); ?>
-                     <?php $__env->slot('script', null, []); ?> 
-                        $el.onchange = function () {
-                        window.Livewire.find('<?php echo e($_instance->getId()); ?>').set('order.given_date', $el.value);
-                        }
-                     <?php $__env->endSlot(); ?>
-                 <?php echo $__env->renderComponent(); ?>
+                 <?php $__env->slot('script', null, []); ?> 
+                    $el.onchange = function () {
+                    window.Livewire.find('<?php echo e($_instance->getId()); ?>').set('order.given_date', $el.value);
+                    }
+                 <?php $__env->endSlot(); ?>
+             <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
 <?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
 <?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
 <?php endif; ?>
-                <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['order.given_date'];
+            <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['order.given_date'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -278,37 +280,23 @@ $message = $__bag->first($__errorArgs[0]); ?>
 <?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
 <?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
 <?php endif; ?>
-                <?php unset($message);
+            <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?> <!--[if ENDBLOCK]><![endif]-->
-            </div>
-            <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.checkbox','data' => ['name' => 'isCoded','model' => 'order.is_coded']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
-<?php $component->withName('checkbox'); ?>
-<?php if ($component->shouldRender()): ?>
-<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
-<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
-<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
-<?php endif; ?>
-<?php $component->withAttributes(['name' => 'isCoded','model' => 'order.is_coded']); ?><?php echo e(__('Structure with code?')); ?> <?php echo $__env->renderComponent(); ?>
-<?php endif; ?>
-<?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
-<?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
-<?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
-<?php endif; ?>
         </div>
-
     </div>
 
     <!--[if BLOCK]><![endif]--><?php if($showComponent): ?>
         <!--[if BLOCK]><![endif]--><?php for($i = 0; $i < $componentRows; $i++): ?>
             <div class="grid grid-cols-1 gap-2 border-2 border-slate-200 border-dashed px-4 py-3 rounded-lg relative">
+                <?php if(($i+1) > count($originalComponents)): ?>
                 <button class="flex justify-center items-center rounded-lg p-1 shadow-sm absolute right-0 top-0 bg-slate-50 text-rose-500" wire:click="deleteRow">
                     <svg data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="w-5 h-5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"></path>
                     </svg>
                 </button>
+                <?php endif; ?> <!--[if ENDBLOCK]><![endif]-->
                 <div class="flex flex-col space-y-2">
                     <div class="flex flex-col w-1/2">
                         <?php
@@ -370,7 +358,7 @@ $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?>
-                        <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
+                            <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.validation','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('validation'); ?>
 <?php if ($component->shouldRender()): ?>
@@ -393,16 +381,16 @@ unset($__errorArgs, $__bag); ?> <!--[if ENDBLOCK]><![endif]-->
                 <div class="flex flex-col space-y-2">
                     <!--[if BLOCK]><![endif]--><?php if(!empty($selectedComponents[$i])): ?>
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 w-full sm:col-span-2 mt-3">
-                            <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $selectedComponents[$i]; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $_field): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $selectedComponents[$i]; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $row => $_field): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.dynamic-input','data' => ['list' => $components,'field' => $service[$_field]['field'],'title' => $service[$_field]['title'],'type' => $_field,'model' => array_key_exists('model',$service[$_field]) ? ${$service[$_field]['model']} : null,'key' => $i,'selectedName' => array_key_exists('selectedName',$service[$_field]) ? $service[$_field]['selectedName'] : null,'searchField' => array_key_exists('searchField',$service[$_field]) ? $service[$_field]['searchField'] : null,'isCoded' => $order['is_coded']]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.dynamic-input','data' => ['list' => $components,'field' => $service[$_field]['field'],'title' => $service[$_field]['title'],'type' => $_field,'model' => array_key_exists('model',$service[$_field]) ? ${$service[$_field]['model']} : null,'key' => $i,'selectedName' => array_key_exists('selectedName',$service[$_field]) ? $service[$_field]['selectedName'] : null,'searchField' => array_key_exists('searchField',$service[$_field]) ? $service[$_field]['searchField'] : null,'isCoded' => $coded_list[$i],'row' => $row,'disabled' => ($i+1) <= count($originalComponents)]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('dynamic-input'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['list' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($components),'field' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($service[$_field]['field']),'title' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($service[$_field]['title']),'type' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($_field),'model' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(array_key_exists('model',$service[$_field]) ? ${$service[$_field]['model']} : null),'key' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($i),'selectedName' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(array_key_exists('selectedName',$service[$_field]) ? $service[$_field]['selectedName'] : null),'searchField' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(array_key_exists('searchField',$service[$_field]) ? $service[$_field]['searchField'] : null),'isCoded' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($order['is_coded'])]); ?> <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['list' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($components),'field' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($service[$_field]['field']),'title' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($service[$_field]['title']),'type' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($_field),'model' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(array_key_exists('model',$service[$_field]) ? ${$service[$_field]['model']} : null),'key' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($i),'selectedName' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(array_key_exists('selectedName',$service[$_field]) ? $service[$_field]['selectedName'] : null),'searchField' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(array_key_exists('searchField',$service[$_field]) ? $service[$_field]['searchField'] : null),'isCoded' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($coded_list[$i]),'row' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($row),'disabled' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(($i+1) <= count($originalComponents))]); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
 <?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
@@ -491,6 +479,27 @@ unset($__errorArgs, $__bag); ?> <!--[if ENDBLOCK]><![endif]-->
 <?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
 <?php endif; ?>
     </div>
+
+
+    <div>
+        <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.modal-confirm','data' => ['eventToCloseModal' => 'vacancyUpdated','livewireEventToOpenModal' => 'checkVacancyWasSet','modalTitle' => __('Vacancy error'),'modalConfirmButtonText' => __('Update'),'wireClick' => 'updateVacancy']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('modal-confirm'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['event-to-close-modal' => 'vacancyUpdated','livewire-event-to-open-modal' => 'checkVacancyWasSet','modal-title' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(__('Vacancy error')),'modal-confirm-button-text' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(__('Update')),'wire-click' => 'updateVacancy']); ?>
+
+         <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
+<?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
+<?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
+<?php endif; ?>
+    </div>
 </div>
+
 
 <?php /**PATH /Users/togruljalalli/Desktop/projects/HR-CRM/resources/views/includes/order-action.blade.php ENDPATH**/ ?>

@@ -9,22 +9,22 @@ use Carbon\Carbon;
 
 class ImportCandidateToPersonnel
 {
-    public function handle(array $candidates,$status)
+    public function handle(array $components,$status)
     {
-        $candidateList = Candidate::find($candidates);
         $tabel_no_list = [];
-
-        foreach ($candidateList as $candidate)
+        foreach ($components as $component)
         {
-           $personnel = Personnel::create([
+            $candidate = Candidate::find($component['personnel_id']['id']);
+
+            $personnel = Personnel::create([
                 'surname' => $candidate->surname,
                 'name' => $candidate->name,
                 'patronymic' => $candidate->patronymic,
                 'phone' => $candidate->phone,
-                'structure_id' => $candidate->structure_id,
-                'position_id' => 21,
+                'structure_id' => $component['structure_id']['id'],
+                'position_id' => $component['position_id']['id'],
                 'gender' => $candidate->gender,
-                'birthdate' => $candidate->birthdate,
+                'birthdate' => Carbon::parse($candidate->birthdate)->format('Y-m-d'),
                 'is_pending' => $status != OrderStatusEnum::APPROVED->value,
                 'tabel_no' => "NMZD{$candidate->id}",
                 'mobile' => '1234567',
@@ -39,6 +39,7 @@ class ImportCandidateToPersonnel
             ]);
             $tabel_no_list[] = $personnel->tabel_no;
         }
+
         return $tabel_no_list;
     }
 }

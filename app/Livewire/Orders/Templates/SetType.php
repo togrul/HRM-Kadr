@@ -54,7 +54,7 @@ class SetType extends Component
     {
         $this->selectedType = $_typeId;
         $this->selectedModel = OrderType::find($_typeId);
-        $this->types['name'] =  $this->selectedModel->value('name');
+        $this->types['name'] =  $this->selectedModel->name;
     }
 
     public function updateModel()

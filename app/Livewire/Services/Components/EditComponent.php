@@ -13,26 +13,34 @@ class EditComponent extends Component
 
     protected function fillComponent()
     {
-        $this->componentModelData = \App\Models\Component::with('orderType')
+        $this->componentModelData = \App\Models\Component::with('orderType','rank')
                                         ->where('id',$this->componentModel)
                                         ->first();
 
-        $updatedData = $this->componentModelData->toArray();
-
         $this->component = [
-            'name' => $updatedData['name'],
-            'content' => $updatedData['content'],
-            'dynamic_fields' => $updatedData['dynamic_fields']
+            'name' => $this->componentModelData->name,
+            'content' => $this->componentModelData->content,
+            'dynamic_fields' => $this->componentModelData->dynamic_fields
         ];
 
-        if(!empty($updatedData['order_type_id']))
+        if(!empty($this->componentModelData->rank_id))
+        {
+            $this->component['rank_id'] = [
+                'id' => $this->componentModelData->rank->id,
+                'name' => $this->componentModelData->rank->name,
+            ];
+            $this->orderId = $this->component['rank_id']['id'];
+            $this->orderName = $this->component['rank_id']['name'];
+        }
+
+        if(!empty($this->componentModelData->order_type_id))
         {
             $this->component['order_type_id'] = [
-                'id' => $updatedData['order_type']['id'],
-                'name' => $updatedData['order_type']['name'],
+                'id' => $this->componentModelData->orderType->id,
+                'name' => $this->componentModelData->orderType->name,
             ];
-            $this->orderId = $updatedData['order_type']['id'];
-            $this->orderName = $updatedData['order_type']['name'];
+            $this->orderId = $this->component['order_type_id']['id'];
+            $this->orderName = $this->component['order_type_id']['name'];
         }
     }
 

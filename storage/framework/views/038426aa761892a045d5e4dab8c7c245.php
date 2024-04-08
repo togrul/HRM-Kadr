@@ -1,6 +1,6 @@
 <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.modal-confirm','data' => ['livewireEventToOpenModal' => 'openFilterWasSet','eventToCloseModal' => 'filterSelected','modalTitle' => __('All filters'),'modalConfirmButtonText' => __('Search'),'wireClick' => 'search']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
-<?php $component->withName('modal-confirm'); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.modal-confirm-lg','data' => ['livewireEventToOpenModal' => 'openFilterWasSet','eventToCloseModal' => 'filterSelected','modalTitle' => __('All filters'),'modalConfirmButtonText' => __('Search'),'wireClick' => 'search']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('modal-confirm-lg'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
@@ -122,7 +122,7 @@
 <?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
 <?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
 <?php endif; ?>
-                
+
                 <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list-item','data' => ['wire:click' => 'setData(\'filter\',\'structure_id\',\'structure\',\'---\',null)','selected' => '---' == $structureName,'wire:model' => 'filter.structure_id']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('select-list-item'); ?>
@@ -139,7 +139,7 @@
 <?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
 <?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
 <?php endif; ?>
-                <?php $__currentLoopData = $structures; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $structure): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $structures; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $structure): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list-item','data' => ['wire:click' => 'setData(\'filter\',\'structure_id\',\'structure\',\''.e($structure->name).'\','.e($structure->id).')','selected' => $structure->id === $structureId,'wire:model' => 'filter.structure_id']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('select-list-item'); ?>
@@ -157,7 +157,7 @@
 <?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
 <?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
 <?php endif; ?>
-                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?> <!--[if ENDBLOCK]><![endif]-->
              <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
@@ -189,7 +189,7 @@
 <?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
 <?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
 <?php endif; ?>
-                
+
                 <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list-item','data' => ['wire:click' => 'setData(\'filter\',\'position_id\',\'position\',\'---\',null)','selected' => '---' == $positionName,'wire:model' => 'filter.position_id']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('select-list-item'); ?>
@@ -206,7 +206,7 @@
 <?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
 <?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
 <?php endif; ?>
-                <?php $__currentLoopData = $positions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $position): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $positions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $position): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list-item','data' => ['wire:click' => 'setData(\'filter\',\'position_id\',\'position\',\''.e($position->name).'\','.e($position->id).')','selected' => $position->id === $positionId,'wire:model' => 'filter.position_id']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('select-list-item'); ?>
@@ -224,7 +224,7 @@
 <?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
 <?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
 <?php endif; ?>
-                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?> <!--[if ENDBLOCK]><![endif]-->
              <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
@@ -444,7 +444,7 @@
 <?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
 <?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
 <?php endif; ?>
-                
+
                 <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list-item','data' => ['wire:click' => 'setData(\'filter\',\'nationality_id\',\'nationality\',\'---\',null)','selected' => '---' == $nationalityName,'wire:model' => 'nationalityId']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('select-list-item'); ?>
@@ -461,7 +461,7 @@
 <?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
 <?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
 <?php endif; ?>
-                <?php $__currentLoopData = $nationalities; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $nationality): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $nationalities; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $nationality): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list-item','data' => ['wire:click' => 'setData(\'filter\',\'nationality_id\',\'nationality\',\''.e($nationality->currentCountryTranslations->title).'\','.e($nationality->currentCountryTranslations->id).')','selected' => $nationality->currentCountryTranslations->id === $nationalityId,'wire:model' => 'nationalityId']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('select-list-item'); ?>
@@ -479,7 +479,7 @@
 <?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
 <?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
 <?php endif; ?>
-                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?> <!--[if ENDBLOCK]><![endif]-->
                <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
@@ -511,7 +511,7 @@
 <?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
 <?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
 <?php endif; ?>
-                
+
                 <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list-item','data' => ['wire:click' => 'setData(\'filter\',\'born_country_id\',\'bornCountry\',\'---\',null)','selected' => '---' == $bornCountryName,'wire:model' => 'bornCountryId']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('select-list-item'); ?>
@@ -528,7 +528,7 @@
 <?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
 <?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
 <?php endif; ?>
-                <?php $__currentLoopData = $nationalities; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $nationality): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $nationalities; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $nationality): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list-item','data' => ['wire:click' => 'setData(\'filter\',\'born_country_id\',\'bornCountry\',\''.e($nationality->currentCountryTranslations->title).'\','.e($nationality->currentCountryTranslations->id).')','selected' => $nationality->currentCountryTranslations->id === $bornCountryId,'wire:model' => 'bornCountryId']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('select-list-item'); ?>
@@ -546,7 +546,7 @@
 <?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
 <?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
 <?php endif; ?>
-                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?> <!--[if ENDBLOCK]><![endif]-->
                <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
@@ -578,7 +578,7 @@
 <?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
 <?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
 <?php endif; ?>
-                
+
                 <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list-item','data' => ['wire:click' => 'setData(\'filter\',\'born_city_id\',\'bornCity\',\'---\',null)','selected' => '---' == $bornCityName,'wire:model' => 'bornCityId']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('select-list-item'); ?>
@@ -595,7 +595,7 @@
 <?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
 <?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
 <?php endif; ?>
-                <?php $__currentLoopData = $cities; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $city): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $cities; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $city): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list-item','data' => ['wire:click' => 'setData(\'filter\',\'born_city_id\',\'bornCity\',\''.e($city->name).'\','.e($city->id).')','selected' => $city->id === $bornCityId,'wire:model' => 'bornCityId']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('select-list-item'); ?>
@@ -613,7 +613,7 @@
 <?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
 <?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
 <?php endif; ?>
-                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?> <!--[if ENDBLOCK]><![endif]-->
                <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
@@ -734,7 +734,7 @@
 <?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
 <?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
 <?php endif; ?>
-                
+
                 <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list-item','data' => ['wire:click' => 'setData(\'filter\',\'rank_id\',\'rank\',\'---\',null)','selected' => '---' == $rankName,'wire:model' => 'filter.rank_id']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('select-list-item'); ?>
@@ -751,7 +751,7 @@
 <?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
 <?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
 <?php endif; ?>
-                <?php $__currentLoopData = $rankModel; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $rnk): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $rankModel; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $rnk): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list-item','data' => ['wire:click' => 'setData(\'filter\',\'rank_id\',\'rank\',\''.e($rnk->name).'\','.e($rnk->id).')','selected' => $rnk->id === $rankId,'wire:model' => 'filter.rank_id']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('select-list-item'); ?>
@@ -769,7 +769,7 @@
 <?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
 <?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
 <?php endif; ?>
-                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?> <!--[if ENDBLOCK]><![endif]-->
              <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
@@ -831,7 +831,7 @@
 <?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
 <?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
 <?php endif; ?>
-                
+
                 <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list-item','data' => ['wire:click' => 'setData(\'filter\',\'education_degree_id\',\'educationDegree\',\'---\',null)','selected' => '---' == $educationDegreeName,'wire:model' => 'filter.education_degree_id.id']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('select-list-item'); ?>
@@ -848,7 +848,7 @@
 <?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
 <?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
 <?php endif; ?>
-                <?php $__currentLoopData = $education_degrees; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $eduDegree): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $education_degrees; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $eduDegree): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list-item','data' => ['wire:click' => 'setData(\'filter\',\'education_degree_id\',\'educationDegree\',\''.e($eduDegree->title).'\','.e($eduDegree->id).')','selected' => $eduDegree->id === $educationDegreeId,'wire:model' => 'filter.education_degree_id.id']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('select-list-item'); ?>
@@ -866,7 +866,7 @@
 <?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
 <?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
 <?php endif; ?>
-                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?> <!--[if ENDBLOCK]><![endif]-->
              <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
@@ -928,7 +928,7 @@
 <?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
 <?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
 <?php endif; ?>
-                
+
                 <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list-item','data' => ['wire:click' => 'setData(\'filter\',\'educational_institution_id\',\'institution\',\'---\',null)','selected' => '---' == $institutionName,'wire:model' => 'filter.educational_institution_id.id']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('select-list-item'); ?>
@@ -945,7 +945,7 @@
 <?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
 <?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
 <?php endif; ?>
-                <?php $__currentLoopData = $institutions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $institution): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $institutions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $institution): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list-item','data' => ['wire:click' => 'setData(\'filter\',\'educational_institution_id\',\'institution\',\''.e($institution->name).'\','.e($institution->id).')','selected' => $institution->id === $institutionId,'wire:model' => 'filter.educational_institution_id.id']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('select-list-item'); ?>
@@ -963,7 +963,7 @@
 <?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
 <?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
 <?php endif; ?>
-                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?> <!--[if ENDBLOCK]><![endif]-->
              <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
@@ -995,7 +995,7 @@
 <?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
 <?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
 <?php endif; ?>
-                
+
                 <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list-item','data' => ['wire:click' => 'setData(\'filter\',\'award_id\',\'award\',\'---\',null)','selected' => '---' == $awardName,'wire:model' => 'filter.award_id']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('select-list-item'); ?>
@@ -1012,7 +1012,7 @@
 <?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
 <?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
 <?php endif; ?>
-                    <?php $__currentLoopData = $awardModel; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $awd): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $awardModel; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $awd): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list-item','data' => ['wire:click' => 'setData(\'filter\',\'award_id\',\'award\',\''.e($awd->name).'\','.e($awd->id).')','selected' => $awd->id === $awardId,'wire:model' => 'filter.award_id']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('select-list-item'); ?>
@@ -1030,7 +1030,7 @@
 <?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
 <?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
 <?php endif; ?>
-                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?> <!--[if ENDBLOCK]><![endif]-->
              <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
@@ -1062,7 +1062,7 @@
 <?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
 <?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
 <?php endif; ?>
-                
+
                 <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list-item','data' => ['wire:click' => 'setData(\'filter\',\'punishment_id\',\'punishment\',\'---\',null)','selected' => '---' == $awardName,'wire:model' => 'filter.punishment_id']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('select-list-item'); ?>
@@ -1079,7 +1079,7 @@
 <?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
 <?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
 <?php endif; ?>
-                    <?php $__currentLoopData = $punishmentModel; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $pnsh): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $punishmentModel; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $pnsh): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list-item','data' => ['wire:click' => 'setData(\'filter\',\'punishment_id\',\'punishment\',\''.e($pnsh->name).'\','.e($pnsh->id).')','selected' => $pnsh->id === $punishmentId,'wire:model' => 'filter.punishment_id']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('select-list-item'); ?>
@@ -1097,7 +1097,7 @@
 <?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
 <?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
 <?php endif; ?>
-                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?> <!--[if ENDBLOCK]><![endif]-->
              <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>

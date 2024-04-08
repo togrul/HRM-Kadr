@@ -1,36 +1,59 @@
-@props([
-    'eventToOpenModal' => null,
-    'livewireEventToOpenModal' => null,
-    'event-to-close-modal',
-    'modal-title',
-    'modal-confirm-button-text',
-    'wire-click',
-    'bodyMessage'
-])
+<?php $attributes ??= new \Illuminate\View\ComponentAttributeBag; ?>
+<?php foreach($attributes->onlyProps([
+'eventToOpenModal' => null,
+'livewireEventToOpenModal' => null,
+'event-to-close-modal',
+'modal-title',
+'modal-confirm-button-text',
+'wire-click'
+]) as $__key => $__value) {
+    $$__key = $$__key ?? $__value;
+} ?>
+<?php $attributes = $attributes->exceptProps([
+'eventToOpenModal' => null,
+'livewireEventToOpenModal' => null,
+'event-to-close-modal',
+'modal-title',
+'modal-confirm-button-text',
+'wire-click'
+]); ?>
+<?php foreach (array_filter(([
+'eventToOpenModal' => null,
+'livewireEventToOpenModal' => null,
+'event-to-close-modal',
+'modal-title',
+'modal-confirm-button-text',
+'wire-click'
+]), 'is_string', ARRAY_FILTER_USE_KEY) as $__key => $__value) {
+    $$__key = $$__key ?? $__value;
+} ?>
+<?php $__defined_vars = get_defined_vars(); ?>
+<?php foreach ($attributes as $__key => $__value) {
+    if (array_key_exists($__key, $__defined_vars)) unset($$__key);
+} ?>
+<?php unset($__defined_vars); ?>
 
 <div
     x-init="
-        $wire.on('{{ $eventToCloseModal }}',() => {
+        $wire.on('<?php echo e($eventToCloseModal); ?>',() => {
             openDeleteModal = false
         })
-        @if( $livewireEventToOpenModal)
-        $wire.on('{{ $livewireEventToOpenModal }}',message => {
+        <?php if( $livewireEventToOpenModal): ?>
+        $wire.on('<?php echo e($livewireEventToOpenModal); ?>',() => {
             openDeleteModal = true
             $nextTick(() => $refs.confirmButton.focus())
-            this.bodyMessage = message
           })
-        @endif
+        <?php endif; ?>
         "
     x-data={openDeleteModal:false}
     x-show="openDeleteModal"
     @keydown.escape.window="openDeleteModal = false"
-    @if( $eventToOpenModal)
-    {{ '@'.$eventToOpenModal }}.window="
+    <?php if( $eventToOpenModal): ?>
+        <?php echo e('@'.$eventToOpenModal); ?>.window="
         openDeleteModal = true
         $nextTick(() => $refs.confirmButton.focus())
-        this.bodyMessage = message
     "
-    @endif
+    <?php endif; ?>
     class="fixed inset-0 z-50 overflow-y-auto"
     aria-labelledby="modal-title"
     role="dialog"
@@ -62,7 +85,7 @@
               x-transition:leave="transition origin-top ease-out duration-300"
               x-transition:leave-start="transform translate-y-0 opacity-100"
               x-transition:leave-end="transform translate-y-full opacity-0"
-              class="inline-block overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
+              class="inline-block  text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:align-middle w-full sm:max-w-xl md:max-w-2xl lg:max-w-4xl"
         >
 
             <div class="absolute top-0 right-0 py-2 pr-4">
@@ -73,33 +96,26 @@
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
-            <div class="px-4 pt-5 pb-4 bg-white sm:p-6 sm:pb-4 rounded-lg">
-                <div class="sm:flex sm:items-start">
-                    <div class="flex items-center justify-center flex-shrink-0 w-12 h-12 mx-auto bg-red-100 rounded-full sm:mx-0 sm:h-10 sm:w-10">
-                        <!-- Heroicon name: outline/exclamation -->
-                        <svg class="w-6 h-6 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                        </svg>
-                    </div>
-                    <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                        <h3 class="text-xl font-medium leading-6 text-gray-900" id="modal-title">
-                            {{ $modalTitle }}
-                        </h3>
-                        <div class="flex flex-col py-2 space-y-2 text-gray-600" x-html="bodyMessage">
-                            {{ $slot }}
-                        </div>
-                    </div>
-                </div>
+            <div class="px-4 py-2 border-b border-gray-300 flex justify-center text-lg items-center font-medium">
+                <?php echo e($modalTitle); ?>
+
             </div>
-            <div class="px-4 py-3 bg-gray-50 sm:px-6 sm:flex sm:flex-row-reverse rounded-lg">
-                <button wire:click='{{ $wireClick }}' x-ref="confirmButton" type="button" class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-white bg-rose-500 border border-transparent rounded-xl shadow-sm hover:bg-rose-600 sm:ml-3 sm:w-auto">
-                    {{ $modalConfirmButtonText }}
+            <div class="flex flex-col px-4 py-2 space-y-2">
+                <?php echo e($slot); ?>
+
+            </div>
+            <div class="px-4 py-3 bg-gray-50 sm:px-6 sm:flex sm:flex-row-reverse">
+                <button wire:click='<?php echo e($wireClick); ?>' x-ref="confirmButton" type="button" class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-white bg-rose-500 border border-transparent rounded-xl shadow-sm hover:bg-rose-600 sm:ml-3 sm:w-auto">
+                    <?php echo e($modalConfirmButtonText); ?>
+
                 </button>
                 <button @click="openDeleteModal = false" type="button" class="inline-flex justify-center w-full px-4 py-2 mt-3 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-xl shadow-sm hover:bg-gray-50  sm:mt-0 sm:ml-3 sm:w-auto">
-                    {{ __('Cancel') }}
+                    <?php echo e(__('Cancel')); ?>
+
                 </button>
             </div>
 
         </div>
     </div>
 </div>
+<?php /**PATH /Users/togruljalalli/Desktop/projects/HR-CRM/resources/views/components/modal-confirm-lg.blade.php ENDPATH**/ ?>

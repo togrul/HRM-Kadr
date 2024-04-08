@@ -16,6 +16,7 @@ class Component extends Model
 
     protected $fillable = [
         'order_type_id',
+        'rank_id',
         'name',
         'content',
         'dynamic_fields'
@@ -28,6 +29,11 @@ class Component extends Model
     public function orderType() : BelongsTo
     {
         return $this->belongsTo(OrderType::class);
+    }
+
+    public function rank() : BelongsTo
+    {
+        return $this->belongsTo(Rank::class);
     }
 
     public function orders() : BelongsToMany

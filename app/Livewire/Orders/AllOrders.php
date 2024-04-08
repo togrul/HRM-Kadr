@@ -6,7 +6,6 @@ use App\Livewire\Traits\SideModalAction;
 use App\Models\OrderLog;
 use App\Models\OrderStatus;
 use App\Services\WordSuffixService;
-use App\Services\YearSuffixService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\On;
@@ -22,6 +21,8 @@ class AllOrders extends Component
     public $selectedOrder;
     #[Url]
     public $status;
+    #[Url]
+    public $search = [];
 
     #[On('selectOrder')]
     public function selectOrder($id)
@@ -42,6 +43,39 @@ class AllOrders extends Component
             : 'all';
     }
 
+    public function resetFilter()
+    {
+        $this->reset('search');
+        $this->resetPage();
+    }
+
+    public function setDeleteOrder($order_no)
+    {
+        $this->dispatch('setDeleteOrder',$order_no);
+    }
+
+    public function restoreData($order_no)
+    {
+        $orderLog = OrderLog::withTrashed()->where('order_no',$order_no)->first();
+        $orderLog->restore();
+        $orderLog->update([
+            'deleted_by' => null
+        ]);
+        $this->dispatch('orderAdded',__('Order was updated successfully!'));
+    }
+
+    public function forceDeleteData($order_no)
+    {
+        $model = OrderLog::withTrashed()->where('order_no',$order_no)->first();
+        //force delete den sonra diger silinmeleri et. Ve ya status deyisib legv edilme olandada eynileri et.
+        //personnels cedvelinden hemin adami sil
+        //vacancy yenile. bos yerleri coxalt dolunu azalt
+        //candidatesde statusu yeniden qaytar emre hazir statusuna
+        $model->handleDeletion();
+
+        $this->dispatch('orderWasDeleted' , __('Order was deleted!'));
+    }
+
     public function printOrder(string $order_no)
     {
         $order = OrderLog::with(['order','components','attributes'])->where('order_no',$order_no)->first();
@@ -60,25 +94,24 @@ class AllOrders extends Component
         foreach ($order->components as $k => $_component)
         {
             $_replace_texts[] = $order->attributes->where('component_id',$_component->id)->pluck('attribute_value','attribute_key')->toArray();
-            $_replace_texts[$k]['$year'] .= resolve(YearSuffixService::class)->handle($_replace_texts[$k]['$year']);
+            $_replace_texts[$k]['$year'] .= $suffixService->getNumberSuffix($_replace_texts[$k]['$year']);
             $_replace_texts[$k]['$surname'] = $suffixService->getSurnameSuffix( $_replace_texts[$k]['$surname']);
             $_replace_texts[$k]['$structure_main'] = $suffixService->getStructureSuffix( $_replace_texts[$k]['$structure_main']);
-            $_replace_texts[$k]['$structure'] = $suffixService->getStructureSuffix( $_replace_texts[$k]['$structure']);
-
-//            $_replace_texts[$k]['$fullname'] = "<w:rPr><w:b/><w:t>" .  $_replace_texts[$k]['$fullname'] . "</w:t></w:rPr>";
-//            $_replace_texts[$k]['$fullname'] = "<w:rPr><w:t>$before</w:t></w:rPr><w:rPr><w:b/><w:t>$wordToBold</w:t></w:rPr><w:rPr><w:t>$after</w:t></w:rPr>";
-
+//            $_replace_texts[$k]['$fullname'] = '<w:r><w:rPr><w:b/></w:rPr><w:t>' . htmlspecialchars($_replace_texts[$k]['$fullname']) . '</w:t></w:r>';
+//            $_replace_texts[$k]['$fullname'] = "<w:rPr></w:rPr>" .  $_replace_texts[$k]['$fullname'] ."<w:rPr></w:b></w:rPr>";
         }
 
         foreach ($_component_texts as $key => &$text)
         {
+//            $text = "<w:r><w:rPr></w:rPr><w:t>{$text}</w:t></w:r>";
+
             $text = str_replace(array_keys($_replace_texts[$key]), array_values($_replace_texts[$key]), $text);
 
-//            $text = str_replace($_replace_texts[$key]['$fullname'], '<w:rPr><w:b/><w:t>' .  $_replace_texts[$key]['$fullname'] . '</w:t></w:rPr>', $text);
             $replacements[] = [
-                'content_text' => ( $key + 1 ). '. '.$text,
+                'content_text' => ( $key + 1 ). '. '.str_replace("\n","<w:br/>", $text),
             ];
         }
+
         $templateProcessor->replaceBlock('newline',PHP_EOL);
         $templateProcessor->cloneBlock('content',0,true,false,$replacements);
         // end export to word file
@@ -91,6 +124,7 @@ class AllOrders extends Component
     protected function returnData($type = "normal")
     {
         $result = OrderLog::with(['components','status','personDidDelete','creator'])
+            ->filter($this->search ?? [])
             ->when(!empty($this->selectedOrder),function ($q){
                 $q->where('order_id',$this->selectedOrder);
             })

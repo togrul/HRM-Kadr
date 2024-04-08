@@ -4,7 +4,7 @@
     </h2>
 </div>
 
-<div class="grid grid-cols-1 gap-2 sm:grid-cols-2 mt-4">
+<div class="grid grid-cols-1 gap-2 sm:grid-cols-3 mt-4">
     <div class="flex flex-col">
         <x-select-list class="w-full" :title="__('Order')" mode="gray" :selected="$orderName" name="orderId">
             <x-livewire-input  @click.stop="open = true" mode="gray" name="searchOrder" wire:model.live="searchOrder"></x-livewire-input>
@@ -21,9 +21,29 @@
             @endforeach
         </x-select-list>
         @error('component.order_type_id.id')
-        <x-validation> {{ $message }} </x-validation>
+            <x-validation> {{ $message }} </x-validation>
         @enderror
     </div>
+
+    <div class="flex flex-col">
+        @php
+            $selectedName = array_key_exists('rank_id',$this->component) ? $this->component['rank_id']['name'] : '---';
+            $selectedId = array_key_exists('rank_id',$this->component) ? $this->component['rank_id']['id'] : -1;
+        @endphp
+        <x-select-list class="w-full" :title="__('Given rank')" mode="gray" :selected="$selectedName" name="rankId">
+            <x-select-list-item wire:click="setData('component','rank_id',null,'---',null)" :selected="'---' ==  $selectedName"
+                                wire:model='component.rank_id.id'>
+                ---
+            </x-select-list-item>
+            @foreach($_ranks as $_rank)
+                <x-select-list-item wire:click="setData('component','rank_id',null,'{{ trim($_rank->name) }}',{{ $_rank->id }})"
+                                    :selected="$_rank->id === $selectedId" wire:model='component.rank_id.id'>
+                    {{ $_rank->name }}
+                </x-select-list-item>
+            @endforeach
+        </x-select-list>
+    </div>
+
     <div class="">
         <x-label for="component.name">{{ __('Name') }}</x-label>
         <x-livewire-input mode="gray"  name="component.name" wire:model="component.name"></x-livewire-input>

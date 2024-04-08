@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('order_logs', function (Blueprint $table) {
-            $table->boolean('is_coded')->after('status_id')->default(false);
+        Schema::table('order_log_component_attributes', function (Blueprint $table) {
+            $table->integer('row_number')->default(0);
         });
     }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('order_logs', function (Blueprint $table) {
-            $table->dropColumn('is_coded');
+        Schema::table('order_log_component_attributes', function (Blueprint $table) {
+            $table->dropColumn('row_number');
         });
     }
 };

@@ -35,6 +35,9 @@
             <x-validation> {{ $message }} </x-validation>
             @enderror
         </div>
+
+
+
         <div class="">
             <x-label for="order.order_no">{{ __('Order #') }}</x-label>
             <x-livewire-input mode="gray"  name="order.order_no" wire:model="order.order_no"></x-livewire-input>
@@ -53,33 +56,31 @@
             <x-label for="order.given_by_rank">{{ __('Rank') }}</x-label>
             <x-livewire-input mode="gray" disabled="true" name="order.given_by_rank" wire:model="order.given_by_rank"></x-livewire-input>
         </div>
-        <div class="flex justify-between space-x-2 items-center">
-            <div class="">
-                <x-label for="order.given_date">{{ __('Given date') }}</x-label>
-                <x-pikaday-input mode="gray" name="order.given_date" format="Y-MM-DD" wire:model.live="order.given_date">
-                    <x-slot name="script">
-                        $el.onchange = function () {
-                        @this.set('order.given_date', $el.value);
-                        }
-                    </x-slot>
-                </x-pikaday-input>
-                @error('order.given_date')
+        <div class="">
+            <x-label for="order.given_date">{{ __('Given date') }}</x-label>
+            <x-pikaday-input mode="gray" name="order.given_date" format="Y-MM-DD" wire:model.live="order.given_date">
+                <x-slot name="script">
+                    $el.onchange = function () {
+                    @this.set('order.given_date', $el.value);
+                    }
+                </x-slot>
+            </x-pikaday-input>
+            @error('order.given_date')
                 <x-validation> {{ $message }} </x-validation>
-                @enderror
-            </div>
-            <x-checkbox name="isCoded" model="order.is_coded">{{ __('Structure with code?') }}</x-checkbox>
+            @enderror
         </div>
-
     </div>
 
     @if($showComponent)
         @for($i = 0; $i < $componentRows; $i++)
             <div class="grid grid-cols-1 gap-2 border-2 border-slate-200 border-dashed px-4 py-3 rounded-lg relative">
+                @if(($i+1) > count($originalComponents))
                 <button class="flex justify-center items-center rounded-lg p-1 shadow-sm absolute right-0 top-0 bg-slate-50 text-rose-500" wire:click="deleteRow">
                     <svg data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="w-5 h-5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"></path>
                     </svg>
                 </button>
+                @endif
                 <div class="flex flex-col space-y-2">
                     <div class="flex flex-col w-1/2">
                         @php
@@ -99,14 +100,14 @@
                             @endforeach
                         </x-select-list>
                         @error("components.{$i}.component_id.id")
-                        <x-validation> {{ $message }} </x-validation>
+                            <x-validation> {{ $message }} </x-validation>
                         @enderror
                     </div>
                 </div>
                 <div class="flex flex-col space-y-2">
                     @if(!empty($selectedComponents[$i]))
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 w-full sm:col-span-2 mt-3">
-                            @foreach($selectedComponents[$i] as $_field)
+                            @foreach($selectedComponents[$i] as $row => $_field)
                                 <x-dynamic-input
                                     :list="$components"
                                     :field="$service[$_field]['field']"
@@ -116,7 +117,9 @@
                                     :key="$i"
                                     :selectedName="array_key_exists('selectedName',$service[$_field]) ? $service[$_field]['selectedName'] : null"
                                     :searchField="array_key_exists('searchField',$service[$_field]) ? $service[$_field]['searchField'] : null"
-                                    :isCoded="$order['is_coded']"
+                                    :isCoded="$coded_list[$i]"
+                                    :$row
+                                    :disabled="($i+1) <= count($originalComponents)"
                                 ></x-dynamic-input>
                             @endforeach
                         </div>
@@ -155,5 +158,19 @@
     <div class="flex justify-between items-end w-full">
         <x-modal-button>{{ __('Save') }}</x-modal-button>
     </div>
+
+
+    <div>
+        <x-modal-confirm
+            event-to-close-modal="vacancyUpdated"
+            livewire-event-to-open-modal="checkVacancyWasSet"
+            :modal-title="__('Vacancy error')"
+            :modal-confirm-button-text="__('Update')"
+            wire-click="updateVacancy"
+        >
+
+        </x-modal-confirm>
+    </div>
 </div>
+
 

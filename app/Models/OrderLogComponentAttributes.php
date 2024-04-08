@@ -17,7 +17,9 @@ class OrderLogComponentAttributes extends Model
         'order_no',
         'component_id',
         'attribute_key',
-        'attribute_value'
+        'attribute_id',
+        'attribute_value',
+        'row_number'
     ];
 
     public function component() : BelongsTo
