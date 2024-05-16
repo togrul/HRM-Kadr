@@ -2,6 +2,21 @@
 
 namespace App\Livewire\Personnel;
 
+use App\Models\PersonnelAward;
+use App\Models\PersonnelCriminal;
+use App\Models\PersonnelEducation;
+use App\Models\PersonnelElectedElectoral;
+use App\Models\PersonnelExtraEducation;
+use App\Models\PersonnelIdentityDocument;
+use App\Models\PersonnelInjury;
+use App\Models\PersonnelKinship;
+use App\Models\PersonnelLaborActivity;
+use App\Models\PersonnelMilitaryService;
+use App\Models\PersonnelParticipationEvent;
+use App\Models\PersonnelPunishment;
+use App\Models\PersonnelRank;
+use App\Models\PersonnelScientificDegreeAndName;
+use App\Models\PersonnelTakenCaptive;
 use Livewire\Component;
 use App\Models\Personnel;
 use Illuminate\Support\Facades\DB;
@@ -28,7 +43,7 @@ class EditPersonnel extends Component
             'disability',
             'workNorm',
             'awards',
-            'criminals',
+//            'criminals',
             'idDocuments',
             'education',
             'extraEducations',
@@ -63,19 +78,22 @@ class EditPersonnel extends Component
             $this->personnelModelData->update($personnelData);
             if(in_array('document',$this->completedSteps))
             {
-                $documentData = $this->modifyArray($this->document,$this->personnelModelData->idDocuments->dateList());
+                $documentInstance = new PersonnelIdentityDocument;
+                $documentData = $this->modifyArray($this->document,$documentInstance->dateList());
                 $this->personnelModelData->idDocuments()->updateOrCreate(['tabel_no' => $this->personnelModelData->tabel_no],$documentData);
             }
             if(in_array('education',$this->completedSteps))
             {
-                $educationData = $this->modifyArray($this->education,$this->personnelModelData->education->dateList());
+                $educationInstance = new PersonnelEducation;
+                $educationData = $this->modifyArray($this->education,$educationInstance->dateList());
                 $this->personnelModelData->education()->updateOrCreate(['tabel_no' => $this->personnelModelData->tabel_no],$educationData);
             }
             if(!empty($this->extra_education_list))
             {
                 foreach($this->extra_education_list as $ext)
                 {
-                    $extData = $this->modifyArray($ext,$this->personnelModelData->extraEducations->first()->dateList());
+                    $extraEducationInstance = new PersonnelExtraEducation;
+                    $extData = $this->modifyArray($ext,$extraEducationInstance->dateList());
                     $extDataList[] = $extData;
                     $this->personnelModelData->extraEducations()->updateOrCreate(['diplom_no' => $ext['diplom_no']],$extData);
                 }
@@ -90,7 +108,8 @@ class EditPersonnel extends Component
             {
                 foreach($this->labor_activities_list as $lbr)
                 {
-                    $lbrData = $this->modifyArray($lbr,$this->personnelModelData->laborActivities->first()->dateList());
+                    $laborActivityInstance = new PersonnelLaborActivity;
+                    $lbrData = $this->modifyArray($lbr,$laborActivityInstance->dateList());
                     $lbrDataList[] =  $lbrData;
                     $this->personnelModelData->laborActivities()->updateOrCreate(['join_date' => $lbrData['join_date']],$lbrData);
                 }
@@ -105,7 +124,8 @@ class EditPersonnel extends Component
             {
                 foreach($this->rank_list as $rankList)
                 {
-                    $rnkData = $this->modifyArray($rankList,$this->personnelModelData->ranks->first()->dateList());
+                    $rankInstance = new PersonnelRank;
+                    $rnkData = $this->modifyArray($rankList,$rankInstance->dateList());
                     $rnkDataList[] = $rnkData;
                     $this->personnelModelData->ranks()->updateOrCreate(['tabel_no' => $this->personnelModelData->tabel_no,'given_date' => $rnkData['given_date']],$rnkData);
                 }
@@ -120,7 +140,8 @@ class EditPersonnel extends Component
             {
                 foreach($this->military_list as $militaryList)
                 {
-                    $militaryData = $this->modifyArray($militaryList,$this->personnelModelData->military->first()->dateList());
+                    $militaryInstance = new PersonnelMilitaryService();
+                    $militaryData = $this->modifyArray($militaryList,$militaryInstance->dateList());
                     $militaryDataList[] = $militaryData;
                     $this->personnelModelData->military()->updateOrCreate(['tabel_no' => $this->personnelModelData->tabel_no,'start_date' => $militaryData['start_date']],$militaryData);
                 }
@@ -136,7 +157,8 @@ class EditPersonnel extends Component
             {
                 foreach ($this->injury_list as $injuryList)
                 {
-                    $injuryData = $this->modifyArray($injuryList,$this->personnelModelData->injuries->first()->dateList());
+                    $injuryInstance = new PersonnelInjury();
+                    $injuryData = $this->modifyArray($injuryList,$injuryInstance->dateList());
                     $injuryDataList[] = $injuryData;
                     $this->personnelModelData->injuries()->updateOrCreate([
                         'tabel_no' => $this->personnelModelData->tabel_no,
@@ -160,7 +182,8 @@ class EditPersonnel extends Component
              {
                  foreach ($this->captivity_list as $captivityList)
                  {
-                     $captivityData = $this->modifyArray($captivityList,$this->personnelModelData->captives->first()->dateList());
+                     $captivityInstance = new PersonnelTakenCaptive();
+                     $captivityData = $this->modifyArray($captivityList,$captivityInstance->dateList());
                      $captivityDataList[] = $captivityData;
                      $this->personnelModelData->captives()->updateOrCreate([
                          'tabel_no' => $this->personnelModelData->tabel_no,
@@ -179,7 +202,8 @@ class EditPersonnel extends Component
             {
                 foreach($this->award_list as $awardList)
                 {
-                    $awardData = $this->modifyArray($awardList,$this->personnelModelData->awards->first()->dateList());
+                    $awardInstance = new PersonnelAward();
+                    $awardData = $this->modifyArray($awardList,$awardInstance->dateList());
                     $awardDataList[] = $awardData;
                     $this->personnelModelData->awards()
                             ->updateOrCreate(
@@ -206,7 +230,8 @@ class EditPersonnel extends Component
             {
                 foreach($this->punishment_list as $punishmentList)
                 {
-                    $punishmentData = $this->modifyArray($punishmentList,$this->personnelModelData->punishments->first()->dateList());
+                    $punishmentInstance = new PersonnelPunishment();
+                    $punishmentData = $this->modifyArray($punishmentList,$punishmentInstance->dateList());
                     $punishmentDataList[] = $punishmentData;
                     $this->personnelModelData->punishments()->updateOrCreate(['punishment_id' => $punishmentList['punishment_id'],'given_date' => $punishmentData['given_date']],$punishmentData);
                 }
@@ -218,27 +243,29 @@ class EditPersonnel extends Component
             {
                 $this->personnelModelData->punishments()->delete();
             }
-            if(!empty($this->criminal_list))
-            {
-                foreach($this->criminal_list as $criminalList)
-                {
-                    $criminalData = $this->modifyArray($criminalList,$this->personnelModelData->criminals->first()->dateList());
-                    $criminalDataList[] = $criminalData;
-                    $this->personnelModelData->criminals()->updateOrCreate(['punishment_id' => $criminalList['punishment_id'],'given_date' => $criminalData['given_date']],$criminalData);
-                }
-                $punishmentIdKeep = collect($criminalDataList)->pluck('punishment_id');
-                $givenDataKeep = collect($criminalDataList)->pluck('given_date');
-                $this->personnelModelData->criminals()->whereNotIn('punishment_id', $punishmentIdKeep)->whereNotIn('given_date', $givenDataKeep)->delete();
-            }
-            else
-            {
-                $this->personnelModelData->criminals()->delete();
-            }
+//            if(!empty($this->criminal_list))
+//            {
+//                foreach($this->criminal_list as $criminalList)
+//                {
+//                    $criminalInstance = new PersonnelCriminal();
+//                    $criminalData = $this->modifyArray($criminalList,$criminalInstance->dateList());
+//                    $criminalDataList[] = $criminalData;
+//                    $this->personnelModelData->criminals()->updateOrCreate(['punishment_id' => $criminalData['punishment_id'],'given_date' => $criminalData['given_date']],$criminalData);
+//                }
+//                $punishmentIdKeep = collect($criminalDataList)->pluck('punishment_id');
+//                $givenDataKeep = collect($criminalDataList)->pluck('given_date');
+//                $this->personnelModelData->criminals()->whereNotIn('punishment_id', $punishmentIdKeep)->whereNotIn('given_date', $givenDataKeep)->delete();
+//            }
+//            else
+//            {
+//                $this->personnelModelData->criminals()->delete();
+//            }
             if(!empty($this->kinship_list))
             {
                 foreach($this->kinship_list as $kinshipList)
                 {
-                    $kinshipData = $this->modifyArray($kinshipList,$this->personnelModelData->kinships->first()->dateList());
+                    $kinshipInstance = new PersonnelKinship();
+                    $kinshipData = $this->modifyArray($kinshipList,$kinshipInstance->dateList());
                     $kinshipDataList[] = $kinshipData;
                     $this->personnelModelData->kinships()->updateOrCreate(['kinship_id' => $kinshipList['kinship_id']],$kinshipData);
                 }
@@ -268,7 +295,8 @@ class EditPersonnel extends Component
             {
                 foreach($this->event_list as $eventList)
                 {
-                    $eventData = $this->modifyArray($eventList,$this->personnelModelData->participations->first()->dateList());
+                    $eventInstance = new PersonnelParticipationEvent();
+                    $eventData = $this->modifyArray($eventList,$eventInstance->dateList());
                     $eventDataList[] = $eventData;
                     $this->personnelModelData->participations()->updateOrCreate(['event_name' => $eventList['event_name']],$eventData);
                 }
@@ -283,7 +311,8 @@ class EditPersonnel extends Component
             {
                 foreach($this->degree_list as $degreeList)
                 {
-                    $degreeData = $this->modifyArray($degreeList,$this->personnelModelData->degreeAndNames->first()->dateList());
+                    $degreeInstance = new PersonnelScientificDegreeAndName();
+                    $degreeData = $this->modifyArray($degreeList,$degreeInstance->dateList());
                     $degreeDataList[] = $degreeData;
                     $this->personnelModelData->degreeAndNames()->updateOrCreate(['degree_and_name_id' =>$degreeData['degree_and_name_id']],$degreeData);
                 }
@@ -298,7 +327,8 @@ class EditPersonnel extends Component
             {
                 foreach ($this->election_list as $electionList)
                 {
-                    $electedData = $this->modifyArray($electionList,$this->personnelModelData->elections->first()->dateList());
+                    $electionInstance = new PersonnelElectedElectoral();
+                    $electedData = $this->modifyArray($electionList,$electionInstance->dateList());
                     $electedDataList[] = $electedData;
                     $this->personnelModelData->elections()->updateOrCreate(['elected_date' => $electedData['elected_date']],$electedData);
                     $IdToKeep = collect($electedDataList)->pluck('elected_date');
@@ -310,6 +340,11 @@ class EditPersonnel extends Component
             {
                 $this->personnelModelData->elections()->delete();
             }
+
+             if(!empty($this->personnel_extra))
+             {
+                 $this->personnelModelData->update($this->personnel_extra);
+             }
          });
 
          $this->dispatch('personnelAdded',__('Personnel was updated successfully!'));

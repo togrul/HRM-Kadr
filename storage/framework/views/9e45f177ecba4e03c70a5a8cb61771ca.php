@@ -1,4 +1,4 @@
-<div class="w-full rounded-xl px-4 py-3 bg-gray-100 font-semibold text-xl flex justify-center">
+<div class="step-section__title">
     <h1><?php echo e(__('Languages')); ?></h1>
 </div>
 
@@ -243,7 +243,7 @@ unset($__errorArgs, $__bag); ?> <!--[if ENDBLOCK]><![endif]-->
 
 <hr>
 
-<div class="w-full rounded-xl px-4 py-3 bg-gray-100 font-semibold text-xl flex justify-center">
+<div class="step-section__title">
     <h1><?php echo e(__('Participation events')); ?></h1>
 </div>
 
@@ -550,7 +550,7 @@ unset($__errorArgs, $__bag); ?> <!--[if ENDBLOCK]><![endif]-->
 
 <hr>
 
-<div class="w-full rounded-xl px-4 py-3 bg-gray-100 font-semibold text-xl flex justify-center">
+<div class="step-section__title">
     <h1><?php echo e(__('Scientific degree and names')); ?></h1>
 </div>
 

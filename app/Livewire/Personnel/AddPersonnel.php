@@ -125,15 +125,15 @@ class AddPersonnel extends Component
                     $personnel->punishments()->create($punishmentData);
                 }
             }
-            if(!empty($this->criminal_list))
-            {
-                foreach($this->criminal_list as $criminalList)
-                {
-                    $criminalInstance = new PersonnelCriminal();
-                    $criminalData = $this->modifyArray($criminalList,$criminalInstance->dateList());
-                    $personnel->criminals()->create($criminalData);
-                }
-            }
+//            if(!empty($this->criminal_list))
+//            {
+//                foreach($this->criminal_list as $criminalList)
+//                {
+//                    $criminalInstance = new PersonnelCriminal();
+//                    $criminalData = $this->modifyArray($criminalList,$criminalInstance->dateList());
+//                    $personnel->criminals()->create($criminalData);
+//                }
+//            }
             if(!empty($this->kinship_list))
             {
                 foreach($this->kinship_list as $kinshipList)
@@ -174,11 +174,14 @@ class AddPersonnel extends Component
                 foreach($this->election_list as $electionList)
                 {
                     $electionInstance = new PersonnelElectedElectoral();
-                    $electionData = $this->modifyArray($electionList.$electionInstance->dateList());
+                    $electionData = $this->modifyArray($electionList,$electionInstance->dateList());
                     $personnel->elections()->create($electionData);
                 }
             }
-
+            if(!empty($this->personnel_extra))
+            {
+                $personnel->update($this->personnel_extra);
+            }
         });
         $this->dispatch('personnelAdded',__('Personnel was added successfully!'));
     }

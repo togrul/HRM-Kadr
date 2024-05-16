@@ -8,7 +8,17 @@ use Livewire\WithFileUploads;
 
 trait PersonnelCrud
 {
-    use WithFileUploads,SelectListTrait,Step1Trait,Step2Trait,Step3Trait,Step4Trait,Step5Trait,Step6Trait,Step7Trait,Step8Trait;
+    use WithFileUploads,
+        SelectListTrait,
+        Step1Trait,
+        Step2Trait,
+        Step3Trait,
+        Step4Trait,
+        Step5Trait,
+        Step6Trait,
+        Step7Trait,
+        Step8Trait;
+
     public $title;
 
     public $step;
@@ -86,7 +96,7 @@ trait PersonnelCrud
             'labor_activities.company_name' => 'required|min:2',
             'labor_activities.position' => 'required|min:2',
             'labor_activities.join_date' => 'required|date',
-            'labor_activities.leave_date' => 'required|date',
+            'labor_activities.coefficient' =>  $this->isSpecialService ? 'required|int|min:1' : '',
             'labor_activities.order_given_by' => $this->isSpecialService ? 'required|min:2' : '',
             'labor_activities.order_no' => $this->isSpecialService ? 'required|min:2' : '',
             'labor_activities.order_date' => $this->isSpecialService ? 'required|date' : '',
@@ -112,9 +122,9 @@ trait PersonnelCrud
             'punishment.punishment_id.id' => 'required|int|exists:punishments,id',
             'punishment.reason' => 'required|min:2',
             'punishment.given_date' => 'required|date',
-            'criminal.criminal_id.id' => 'required|int|exists:punishments,id',
-            'criminal.reason' => 'required|min:2',
-            'criminal.given_date' => 'required|date',
+//            'criminal.punishment_id.id' => 'required|int|exists:punishments,id',
+//            'criminal.reason' => 'required|min:2',
+//            'criminal.given_date' => 'required|date',
            ],
            7 => [
             'kinship.kinship_id.id' => 'required|int|exists:kinships,id',
@@ -210,7 +220,7 @@ trait PersonnelCrud
             'labor_activities.company_name' => __('Company'),
             'labor_activities.position' => __('Position'),
             'labor_activities.join_date' => __('Join date'),
-            'labor_activities.leave_date' => __('Leave date'),
+            'labor_activities.coefficient' => __('Coefficient'),
             'labor_activities.order_given_by' => __('Order issued by'),
             'labor_activities.order_no' => __('Order number'),
             'labor_activities.order_date' => __('Order date'),
@@ -232,9 +242,9 @@ trait PersonnelCrud
             'punishment.punishment_id.id' => __('Punishment'),
             'punishment.reason' => __('Reason'),
             'punishment.given_date' => __('Given date'),
-            'criminal.criminal_id.id' => __('Criminal'),
-            'criminal.reason' => __('Reason'),
-            'criminal.given_date' => __('Given date'),
+//            'criminal.punishment_id.id' => __('Criminal'),
+//            'criminal.reason' => __('Reason'),
+//            'criminal.given_date' => __('Given date'),
             'kinship.kinship_id.id' => __('Kinship'),
             'kinship.fullname' => __('Fullname'),
             'kinship.birthdate' => __('Birthdate'),

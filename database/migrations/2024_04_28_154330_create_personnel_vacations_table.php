@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('personnel_labor_activities', function (Blueprint $table) {
+        Schema::create('personnel_vacations', function (Blueprint $table) {
             $table->id();
             $table->string('tabel_no');
             $table->foreign('tabel_no')
@@ -19,15 +19,18 @@ return new class extends Migration
                     ->on('personnels')
                     ->onDelete('cascade')
                     ->onUpdate('cascade');
-            $table->string('company_name');
-            $table->string('position');
-            $table->double('coefficient',4,2)->nullable();
-            $table->date('join_date');
-            $table->date('leave_date')->nullable();
-            $table->boolean('is_special_service')->default(false);
-            $table->string('order_given_by')->nullable();
+            $table->text('vacation_places');
+            $table->integer('duration');
+            $table->date('start_date');
+            $table->date('end_date');
+            $table->date('return_work_date');
+            $table->string('order_given_by');
             $table->string('order_no')->nullable();
             $table->dateTime('order_date')->nullable();
+            $table->foreignId('added_by')->references('id')->on('users');
+            $table->foreignId('deleted_by')->nullable()->references('id')->on('users');
+            $table->softDeletes();
+            $table->timestamps();
         });
     }
 
@@ -36,6 +39,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('personnel_labor_activities');
+        Schema::dropIfExists('personnel_vacations');
     }
 };

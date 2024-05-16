@@ -6,7 +6,7 @@ trait Step6Trait
 {
     public $awardId,$awardName,$searchAward;
     public $punishmentId,$punishmentName,$searchPunishment;
-    public $criminalId,$criminalName,$searchCriminal;
+//    public $criminalId,$criminalName,$searchCriminal;
 
     public $award = [];
     public $award_list = [];
@@ -14,24 +14,28 @@ trait Step6Trait
     public $punishment = [];
     public $punishment_list = [];
 
-    public $criminal = [];
-    public $criminal_list = [];
+//    public $criminal = [];
+//    public $criminal_list = [];
 
     public function mountStep6Trait() {
-        $this->awardName = $this->punishmentName = $this->criminalName = '---';
+            $this->awardName =
+            $this->punishmentName =
+//            $this->criminalName =
+                '---';
         if(!empty($this->personnelModel))
         {
             $this->fillAwards();
             $this->fillPunishments();
-            $this->fillCriminals();
+//            $this->fillCriminals();
         }
     }
 
     public function addAward()
     {
         $validator1 = $this->exceptArray('punishment');
-        $validator2 = $this->exceptArray('criminal');
-        $this->validate(array_intersect_assoc($validator1,$validator2));
+//        $validator2 = $this->exceptArray('criminal');
+//        $this->validate(array_intersect_assoc($validator1,$validator2));
+        $this->validate($validator1);
         $this->award_list[] = $this->award;
         $this->awardName = '---';
         $this->reset('awardId');
@@ -46,8 +50,9 @@ trait Step6Trait
     public function addPunishment()
     {
         $validator1 = $this->exceptArray('award');
-        $validator2 = $this->exceptArray('criminal');
-        $this->validate(array_intersect_assoc($validator1,$validator2));
+//        $validator2 = $this->exceptArray('criminal');
+//        $this->validate(array_intersect_assoc($validator1,$validator2));
+        $this->validate($validator1);
         $this->punishment['expired_date'] = $this->punishment['expired_date'] ?? null;
         $this->punishment_list[] = $this->punishment;
         $this->punishmentName = '---';
@@ -60,21 +65,21 @@ trait Step6Trait
         unset($this->punishment_list[$key]);
     }
 
-    public function addCriminal()
-    {
-        $validator1 = $this->exceptArray('award');
-        $validator2 = $this->exceptArray('punishment');
-        $this->validate(array_intersect_assoc($validator1,$validator2));
-        $this->criminal_list[] = $this->criminal;
-        $this->criminalName = '---';
-        $this->reset('criminalId');
-        $this->criminal = [];
-    }
-
-    public function forceDeleteCriminal($key)
-    {
-        unset($this->criminal_list[$key]);
-    }
+//    public function addCriminal()
+//    {
+//        $validator1 = $this->exceptArray('award');
+//        $validator2 = $this->exceptArray('punishment');
+//        $this->validate(array_intersect_assoc($validator1,$validator2));
+//        $this->criminal_list[] = $this->criminal;
+//        $this->criminalName = '---';
+//        $this->reset('criminalId');
+//        $this->criminal = [];
+//    }
+//
+//    public function forceDeleteCriminal($key)
+//    {
+//        unset($this->criminal_list[$key]);
+//    }
 
     protected function fillAwards()
     {
@@ -126,27 +131,27 @@ trait Step6Trait
         }
     }
 
-    protected function fillCriminals()
-    {
-        $updatePunishmentCriminal = $this->personnelModelData->criminals->load('punishment')->toArray();
-
-        if(!empty($updatePunishmentCriminal))
-        {
-            foreach($updatePunishmentCriminal  as $key => $uptCriminal)
-            {
-                $this->criminal_list[] = [
-                    'reason' => $uptCriminal['reason'],
-                    'given_date' => $uptCriminal['given_date'],
-                ];
-
-                if(!empty($uptCriminal['punishment_id']))
-                {
-                    $this->criminal_list[$key][ 'punishment_id'] = [
-                        'id' => $uptCriminal['punishment']['id'],
-                        'name' => $uptCriminal['punishment']['name'],
-                    ];
-                }
-            }
-        }
-    }
+//    protected function fillCriminals()
+//    {
+//        $updatePunishmentCriminal = $this->personnelModelData->criminals->load('punishment')->toArray();
+//
+//        if(!empty($updatePunishmentCriminal))
+//        {
+//            foreach($updatePunishmentCriminal  as $key => $uptCriminal)
+//            {
+//                $this->criminal_list[] = [
+//                    'reason' => $uptCriminal['reason'],
+//                    'given_date' => $uptCriminal['given_date'],
+//                ];
+//
+//                if(!empty($uptCriminal['punishment_id']))
+//                {
+//                    $this->criminal_list[$key][ 'punishment_id'] = [
+//                        'id' => $uptCriminal['punishment']['id'],
+//                        'name' => $uptCriminal['punishment']['name'],
+//                    ];
+//                }
+//            }
+//        }
+//    }
 }

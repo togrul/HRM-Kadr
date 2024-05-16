@@ -196,19 +196,43 @@ if (isset($__slots)) unset($__slots);
             </div>
         </div>
 
+        
+        <div class="flex justify-start items-center space-x-3">
+            <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $_positions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $position): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <button
+                    wire:click.prevent="setPosition(<?php echo e($position->id); ?>)"
+                    class="appearance-none w-max text-sm font-medium bg-slate-900 text-yellow-400 rounded-2xl px-3 py-1 transition-all duration-300 hover:bg-slate-700"
+                >
+                    <?php echo e($position->name); ?>
+
+                </button>
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?> <!--[if ENDBLOCK]><![endif]-->
+
+            <!--[if BLOCK]><![endif]--><?php if(!empty($selectedPosition)): ?>
+                    <button
+                        wire:click.prevent="resetFilter"
+                        class="appearance-none w-max text-sm font-medium bg-slate-100 text-rose-500 rounded-2xl px-3 py-1 transition-all duration-300 hover:bg-slate-200"
+                    >
+                        <?php echo e(__('Reset')); ?>
+
+                    </button>
+            <?php endif; ?> <!--[if ENDBLOCK]><![endif]-->
+
+        </div>
+
         <div class="relative min-h-[300px] -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
             <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
 
                 <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table.tbl','data' => ['headers' => [__('#'),__('Tabel'),__('Fullname'),__('Gender'),__('Position'),'action','action','action','action']]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table.tbl','data' => ['headers' => [__('#'),__('Tabel'),__('Fullname'),__('Position'),'action','action','action','action']]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('table.tbl'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['headers' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute([__('#'),__('Tabel'),__('Fullname'),__('Gender'),__('Position'),'action','action','action','action'])]); ?>
+<?php $component->withAttributes(['headers' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute([__('#'),__('Tabel'),__('Fullname'),__('Position'),'action','action','action','action'])]); ?>
                     <!--[if BLOCK]><![endif]--><?php $__empty_1 = true; $__currentLoopData = $personnels; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $personnel): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                     <tr class="<?php echo \Illuminate\Support\Arr::toCssClasses([
                         'bg-white' => empty($personnel->leave_work_date),
@@ -278,7 +302,7 @@ if (isset($__slots)) unset($__slots);
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
 <?php $component->withAttributes([]); ?>
-                            <div class="flex items-center space-x-2">
+                            <div class="flex items-center space-x-2 px-2">
                                 <!--[if BLOCK]><![endif]--><?php if(!empty($personnel->photo)): ?>
                                     <img src="<?php echo e(asset('/storage/'.$personnel->photo)); ?>" alt="" class="flex-none rounded-xl object-cover w-14 h-14 border-4 border-gray-200">
                                 <?php else: ?>
@@ -289,10 +313,10 @@ if (isset($__slots)) unset($__slots);
                                     <?php echo e($personnel->fullname); ?>
 
                                </span>
-                               <span class="text-sm font-medium text-teal-500 bg-teal-50 rounded-xl px-3 py-1 w-max">
-                                     <?php echo e($personnel->pin); ?>
+                               <span class="text-sm w-max font-medium text-gray-600 rounded-xl px-3 py-1 shadow-sm bg-gray-100">
+                                    <?php echo e($personnel->gender == 1 ? __('Man') : __('Woman')); ?>
 
-                                </span>
+                               </span>
                                 <!--[if BLOCK]><![endif]--><?php if(!empty($personnel->latestRank)): ?>
                                 <span class="text-sm font-medium text-rose-500 rounded-xl px-3 py-1 shadow-sm w-max bg-rose-50">
                                     <?php echo e($personnel->latestRank?->rank->name); ?>
@@ -301,26 +325,6 @@ if (isset($__slots)) unset($__slots);
                                <?php endif; ?> <!--[if ENDBLOCK]><![endif]-->
                                </div>
                             </div>
-                         <?php echo $__env->renderComponent(); ?>
-<?php endif; ?>
-<?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
-<?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
-<?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
-<?php endif; ?>
-
-                        <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table.td','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
-<?php $component->withName('table.td'); ?>
-<?php if ($component->shouldRender()): ?>
-<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
-<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
-<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
-<?php endif; ?>
-<?php $component->withAttributes([]); ?>
-                            <span class="text-sm font-medium text-gray-500 rounded-xl px-3 py-1 shadow-sm bg-gray-100">
-                                <?php echo e($personnel->gender == 1 ? __('Man') : __('Woman')); ?>
-
-                           </span>
                          <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>

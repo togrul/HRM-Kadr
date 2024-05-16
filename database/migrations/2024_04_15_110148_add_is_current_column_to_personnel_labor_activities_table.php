@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('personnel_labor_activities', function (Blueprint $table) {
-            $table->double('coefficient',4,2)->nullable()->after('position');
+            $table->boolean('is_current')->default(false);
         });
     }
 
@@ -22,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('personnel_labor_activities', function (Blueprint $table) {
-            $table->dropColumn('coefficient');
+            $table->dropColumn('is_current');
         });
     }
 };

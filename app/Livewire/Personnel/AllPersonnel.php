@@ -3,6 +3,7 @@
 namespace App\Livewire\Personnel;
 
 use App\Exports\PersonnelExport;
+use App\Models\Position;
 use Carbon\Carbon;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -26,6 +27,9 @@ class AllPersonnel extends Component
 
     // #[Url]
     public $structure;
+
+    #[Url(as: 'position')]
+    public $selectedPosition;
 
     protected function queryString()
     {
@@ -101,6 +105,18 @@ class AllPersonnel extends Component
         $this->resetPage();
     }
 
+    public function setPosition($new)
+    {
+        $this->selectedPosition = $new;
+        $this->resetPage();
+    }
+
+    public function resetFilter()
+    {
+        $this->reset('selectedPosition');
+        $this->resetPage();
+    }
+
     public function resetSelectedFilter()
     {
         $this->filters = [];
@@ -140,6 +156,9 @@ class AllPersonnel extends Component
             ->when(!empty($this->structure),function($q) {
                 $q->whereIn('structure_id', $this->structure);
             })
+            ->when(!empty($this->selectedPosition),function($q) {
+                $q->where('position_id', $this->selectedPosition);
+            })
             ->when($this->status == 'current',function($q)
             {
                 return $q->whereNull('leave_work_date');
@@ -173,6 +192,8 @@ class AllPersonnel extends Component
     {
         $personnels = $this->returnData();
 
-        return view('livewire.personnel.all-personnel',compact('personnels'));
+        $_positions = Position::orderBy('id')->get();
+
+        return view('livewire.personnel.all-personnel',compact('personnels','_positions'));
     }
 }

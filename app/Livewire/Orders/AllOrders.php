@@ -67,10 +67,7 @@ class AllOrders extends Component
     public function forceDeleteData($order_no)
     {
         $model = OrderLog::withTrashed()->where('order_no',$order_no)->first();
-        //force delete den sonra diger silinmeleri et. Ve ya status deyisib legv edilme olandada eynileri et.
-        //personnels cedvelinden hemin adami sil
-        //vacancy yenile. bos yerleri coxalt dolunu azalt
-        //candidatesde statusu yeniden qaytar emre hazir statusuna
+
         $model->handleDeletion();
 
         $this->dispatch('orderWasDeleted' , __('Order was deleted!'));
@@ -93,18 +90,19 @@ class AllOrders extends Component
         $suffixService = new WordSuffixService();
         foreach ($order->components as $k => $_component)
         {
-            $_replace_texts[] = $order->attributes->where('component_id',$_component->id)->pluck('attribute_value','attribute_key')->toArray();
+            $_replace_texts[] = $order->attributes
+                                ->where('component_id',$_component->id)
+                                ->pluck('attribute_value','attribute_key')
+                                ->toArray();
             $_replace_texts[$k]['$year'] .= $suffixService->getNumberSuffix($_replace_texts[$k]['$year']);
             $_replace_texts[$k]['$surname'] = $suffixService->getSurnameSuffix( $_replace_texts[$k]['$surname']);
             $_replace_texts[$k]['$structure_main'] = $suffixService->getStructureSuffix( $_replace_texts[$k]['$structure_main']);
-//            $_replace_texts[$k]['$fullname'] = '<w:r><w:rPr><w:b/></w:rPr><w:t>' . htmlspecialchars($_replace_texts[$k]['$fullname']) . '</w:t></w:r>';
-//            $_replace_texts[$k]['$fullname'] = "<w:rPr></w:rPr>" .  $_replace_texts[$k]['$fullname'] ."<w:rPr></w:b></w:rPr>";
+            //bold text
+            $_replace_texts[$k]['$fullname'] = $this->convertWordIntoBold($_replace_texts[$k]['$fullname']);
         }
 
         foreach ($_component_texts as $key => &$text)
         {
-//            $text = "<w:r><w:rPr></w:rPr><w:t>{$text}</w:t></w:r>";
-
             $text = str_replace(array_keys($_replace_texts[$key]), array_values($_replace_texts[$key]), $text);
 
             $replacements[] = [
@@ -119,6 +117,13 @@ class AllOrders extends Component
         $filename = "{$order->order->name}_".Carbon::now()->format('d.m.Y H:i:s');
         $templateProcessor->saveAs($filename. '.docx');
         return response()->download($filename. '.docx')->deleteFileAfterSend(true);
+    }
+
+    private function convertWordIntoBold(string $word)
+    {
+        return '<w:rPr><w:b w:val="true"/></w:rPr>'
+            . $word
+            . '<w:rPr><w:b w:val="false"/></w:rPr>';
     }
 
     protected function returnData($type = "normal")

@@ -1,4 +1,3 @@
-@inject('calculateSeniority', 'App\Services\CalculateSeniorityService')
 <div class="grid grid-cols-3 gap-2">
     <div class="flex flex-col">
         <x-select-list class="w-full" :title="__('Education place')" mode="gray" :selected="$institutionName" name="educational_institution_id">
@@ -142,14 +141,12 @@
 </div>
 @if(Arr::has($education,['admission_year']) && !empty($education['admission_year']))
 <div class="my-2 flex justify-between items-center border border-gray-200 p-2 shadow-sm bg-gray-50 rounded-lg">
-        @php
-            $_end_date = empty($education['graduated_year']) ? \Carbon\Carbon::now()->format('Y-m-d') : $education['graduated_year'];
-            $_calculateEducationSeniority = $calculateSeniority->calculate($education['admission_year'],$_end_date,1,0);
-        @endphp
         <div class="flex space-x-2 items-center">
             <span class="font-medium text-gray-500">{{ __('Duration') }}:</span>
             <span class="font-medium text-gray-900">
-                {{ $_calculateEducationSeniority['duration'] }} {{ __('month') }} ({{ $_calculateEducationSeniority['year'] }} {{ __('year') }} {{ $_calculateEducationSeniority['month'] }} {{ __('month') }} )
+                {{ $calculatedDataEducation['diff'] }} {{ __('month') }}
+                ({{ $calculatedDataEducation['year'] }} {{ __('year') }}
+                {{ $calculatedDataEducation['month'] }} {{ __('month') }} )
             </span>
         </div>
         @if($education['coefficient'] > 0)
@@ -160,9 +157,9 @@
         <div class="flex space-x-2 items-center">
             <span class="font-medium text-gray-500">{{ __('Extra seniority') }}:</span>
             <span class="font-medium text-rose-500">
-                {{ $_calculateEducationSeniority['duration'] * $education['coefficient'] }} {{ __('month') }}
-                ({{ floor($_calculateEducationSeniority['duration'] * $education['coefficient'] / 12) }} {{ __('year') }}
-                {{ $_calculateEducationSeniority['duration'] * $education['coefficient'] % 12 }} {{ __('month') }})
+                {{ $calculatedDataEducation['duration'] }} {{ __('month') }}
+                ({{ $calculatedDataEducation['year_coefficient'] }} {{ __('year') }}
+                {{ $calculatedDataEducation['month_coefficient'] }} {{ __('month') }})
             </span>
         </div>
         @endif
@@ -373,10 +370,6 @@
     <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
     <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
         <x-table.tbl :headers="[__('Education place'),__('Info'),__('Duration'),'action']">
-             @php
-                $total_duration_edu = 0;
-                $extra_seniority = 0;
-            @endphp
             @forelse ($extra_education_list as $key => $eeModel)
             <tr>
                 <x-table.td>
@@ -450,54 +443,49 @@
                 </x-table.td>
                 <x-table.td>
                     <div class="flex flex-col">
-                        @php
-                            $_end_date_edu = empty($eeModel['graduated_year']) ? \Carbon\Carbon::now()->format('Y-m-d') : $eeModel['graduated_year'];
-                            $dataExtraEdu = $calculateSeniority->calculate($eeModel['admission_year'],$_end_date_edu,$eeModel['coefficient'],$total_duration_edu);
-                            $total_duration_edu += $dataExtraEdu['diff'];
-                            $extra_seniority += $eeModel['calculate_as_seniority'] ? $dataExtraEdu['duration'] : 0;
-                        @endphp
+                        <div class="flex space-x-2">
+                            <span class="text-sm text-gray-500 font-medium">{{ __('Admission year') }}:</span>
+                            <span class="text-sm font-medium text-gray-700">
+                                {{ $eeModel['admission_year'] }}
+                           </span>
+                        </div>
+                        <div class="flex space-x-2">
+                            <span class="text-sm text-gray-500 font-medium">{{ __('Graduated year') }}:</span>
+                            <span class="text-sm font-medium text-gray-700">
+                                {{ $eeModel['graduated_year'] }}
+                           </span>
+                        </div>
 
-                    <div class="flex space-x-2">
-                        <span class="text-sm text-gray-500 font-medium">{{ __('Admission year') }}:</span>
-                        <span class="text-sm font-medium text-gray-700">
-                            {{ $eeModel['admission_year'] }}
-                       </span>
-                    </div>
-                    <div class="flex space-x-2">
-                        <span class="text-sm text-gray-500 font-medium">{{ __('Graduated year') }}:</span>
-                        <span class="text-sm font-medium text-gray-700">
-                            {{ $eeModel['graduated_year'] }}
-                       </span>
-                    </div>
-
-                    <div class="flex space-x-1 items-center">
-                        <span class="text-sm font-medium text-gray-500">
-                            {{ __('Duration') }}:
-                        </span>
-                        <span class="text-sm font-medium text-gray-800">
-                            {{ $dataExtraEdu['year'] }} {{ __('year') }} {{ $dataExtraEdu['month'] }} {{ __('month') }}  ({{ $dataExtraEdu['diff'] }} {{ __('month') }})
-                        </span>
-                    </div>
-                    @if(!empty($eeModel['coefficient']))
-                    <div class="flex space-x-2 items-center">
-                        <span class="text-sm font-medium text-gray-500">
-                            {{ __('Coefficient') }}:
-                        </span>
-                        <span class="text-sm font-medium text-blue-500">
-                            {{ $eeModel['coefficient'] }}
-                        </span>
-                    </div>
-                    <div class="flex space-x-2 items-center">
-                        <span class="text-sm font-medium text-gray-500">
-                            {{ __('Extra seniority') }}:
-                        </span>
-                        <span class="text-sm font-medium text-blue-500">
-                            {{ floor($dataExtraEdu['diff'] * $education['coefficient'] / 12) }} {{ __('year') }}
-                            {{ $dataExtraEdu['diff'] * $eeModel['coefficient'] % 12 }} {{ __('month')  }}
-                            ({{ $dataExtraEdu['diff'] * $eeModel['coefficient'] }} {{ __('month') }})
-                        </span>
-                    </div>
-                    @endif
+                        <div class="flex space-x-1 items-center">
+                            <span class="text-sm font-medium text-gray-500">
+                                {{ __('Duration') }}:
+                            </span>
+                            <span class="text-sm font-medium text-gray-800">
+                                {{ $calculatedDataExtraEducation['data'][$key]['duration']['year'] }} {{ __('year') }}
+                                {{ $calculatedDataExtraEducation['data'][$key]['duration']['month'] }} {{ __('month') }}
+                                ({{ $calculatedDataExtraEducation['data'][$key]['duration']['diff'] }} {{ __('month') }})
+                            </span>
+                        </div>
+                        @if(!empty($eeModel['coefficient']))
+                        <div class="flex space-x-2 items-center">
+                            <span class="text-sm font-medium text-gray-500">
+                                {{ __('Coefficient') }}:
+                            </span>
+                            <span class="text-sm font-medium text-blue-500">
+                                {{ $eeModel['coefficient'] }}
+                            </span>
+                        </div>
+                        <div class="flex space-x-2 items-center">
+                            <span class="text-sm font-medium text-gray-500">
+                                {{ __('Extra seniority') }}:
+                            </span>
+                            <span class="text-sm font-medium text-blue-500">
+                                {{ $calculatedDataExtraEducation['data'][$key]['coefficient']['year'] }} {{ __('year') }}
+                                {{ $calculatedDataExtraEducation['data'][$key]['coefficient']['month'] }} {{ __('month') }}
+                                ({{$calculatedDataExtraEducation['data'][$key]['duration']['duration'] }} {{ __('month')}})
+                            </span>
+                        </div>
+                        @endif
                     </div>
                 </x-table.td>
                 <x-table.td :isButton="true">
@@ -525,23 +513,27 @@
 
 
     </div>
+        @if(count($extra_education_list) > 0)
         <div class="my-2 flex justify-between items-center border border-gray-300 p-2 shadow-sm bg-gray-50 rounded-lg">
             <div class="flex space-x-2 items-center">
                 <span class="font-medium text-gray-500">{{ __('Total duration') }}:</span>
                 <span class="font-medium text-gray-900">
-                    {{ $total_duration_edu }} {{ __('month') }} ( {{ floor($total_duration_edu / 12) }} {{ __('year') }}
-                    {{ $total_duration_edu % 12 }} {{ __('month')  }})</span>
+                    {{ $calculatedDataExtraEducation['total_duration'] }} {{ __('month') }}
+                    ( {{ $calculatedDataExtraEducation['total_duration_diff']['year'] }} {{ __('year') }}
+                    {{ $calculatedDataExtraEducation['total_duration_diff']['month'] }} {{ __('month')  }})
+                </span>
             </div>
             <div class="flex space-x-2 items-center">
                 <span class="font-medium text-gray-500">{{ __('Extra seniority') }}:</span>
                 <span class="font-medium text-rose-500">
-                    {{ $extra_seniority }} {{ __('month') }} ( {{ floor($extra_seniority / 12) }} {{ __('year') }}
-                    {{ $extra_seniority % 12 }} {{ __('month')  }})
+                    {{ $calculatedDataExtraEducation['extra_seniority'] }} {{ __('month') }}
+                    ( {{ $calculatedDataExtraEducation['extra_seniority_full']['year'] }} {{ __('year') }}
+                    {{ $calculatedDataExtraEducation['extra_seniority_full']['month'] }} {{ __('month')  }})
                 </span>
             </div>
 
         </div>
-
+        @endif
     </div>
 </div>
 

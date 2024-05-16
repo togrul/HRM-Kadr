@@ -15,12 +15,15 @@ trait Step5Trait
     public $captivity = [];
     public $captivity_list = [];
 
+    public $personnel_extra = [];
+
     public function mountStep5Trait() {
         $this->militaryRankName = '---';
         if(!empty($this->personnelModel))
         {
             $this->fillMilitary();
             $this->fillInjury();
+            $this->fillCaptivity();
         };
     }
 

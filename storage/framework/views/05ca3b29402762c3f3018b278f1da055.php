@@ -1,4 +1,3 @@
-<?php $calculateSeniority = app('App\Services\CalculateSeniorityService'); ?>
 <div class="grid grid-cols-3 gap-2">
     <div class="flex flex-col">
         <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
@@ -730,14 +729,14 @@ unset($__errorArgs, $__bag); ?> <!--[if ENDBLOCK]><![endif]-->
 </div>
 <!--[if BLOCK]><![endif]--><?php if(Arr::has($education,['admission_year']) && !empty($education['admission_year'])): ?>
 <div class="my-2 flex justify-between items-center border border-gray-200 p-2 shadow-sm bg-gray-50 rounded-lg">
-        <?php
-            $_end_date = empty($education['graduated_year']) ? \Carbon\Carbon::now()->format('Y-m-d') : $education['graduated_year'];
-            $_calculateEducationSeniority = $calculateSeniority->calculate($education['admission_year'],$_end_date,1,0);
-        ?>
         <div class="flex space-x-2 items-center">
             <span class="font-medium text-gray-500"><?php echo e(__('Duration')); ?>:</span>
             <span class="font-medium text-gray-900">
-                <?php echo e($_calculateEducationSeniority['duration']); ?> <?php echo e(__('month')); ?> (<?php echo e($_calculateEducationSeniority['year']); ?> <?php echo e(__('year')); ?> <?php echo e($_calculateEducationSeniority['month']); ?> <?php echo e(__('month')); ?> )
+                <?php echo e($calculatedDataEducation['diff']); ?> <?php echo e(__('month')); ?>
+
+                (<?php echo e($calculatedDataEducation['year']); ?> <?php echo e(__('year')); ?>
+
+                <?php echo e($calculatedDataEducation['month']); ?> <?php echo e(__('month')); ?> )
             </span>
         </div>
         <?php if($education['coefficient'] > 0): ?>
@@ -748,11 +747,11 @@ unset($__errorArgs, $__bag); ?> <!--[if ENDBLOCK]><![endif]-->
         <div class="flex space-x-2 items-center">
             <span class="font-medium text-gray-500"><?php echo e(__('Extra seniority')); ?>:</span>
             <span class="font-medium text-rose-500">
-                <?php echo e($_calculateEducationSeniority['duration'] * $education['coefficient']); ?> <?php echo e(__('month')); ?>
+                <?php echo e($calculatedDataEducation['duration']); ?> <?php echo e(__('month')); ?>
 
-                (<?php echo e(floor($_calculateEducationSeniority['duration'] * $education['coefficient'] / 12)); ?> <?php echo e(__('year')); ?>
+                (<?php echo e($calculatedDataEducation['year_coefficient']); ?> <?php echo e(__('year')); ?>
 
-                <?php echo e($_calculateEducationSeniority['duration'] * $education['coefficient'] % 12); ?> <?php echo e(__('month')); ?>)
+                <?php echo e($calculatedDataEducation['month_coefficient']); ?> <?php echo e(__('month')); ?>)
             </span>
         </div>
         <?php endif; ?> <!--[if ENDBLOCK]><![endif]-->
@@ -1773,10 +1772,6 @@ unset($__errorArgs, $__bag); ?> <!--[if ENDBLOCK]><![endif]-->
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
 <?php $component->withAttributes(['headers' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute([__('Education place'),__('Info'),__('Duration'),'action'])]); ?>
-             <?php
-                $total_duration_edu = 0;
-                $extra_seniority = 0;
-            ?>
             <!--[if BLOCK]><![endif]--><?php $__empty_1 = true; $__currentLoopData = $extra_education_list; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $eeModel): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
             <tr>
                 <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
@@ -1892,59 +1887,56 @@ unset($__errorArgs, $__bag); ?> <!--[if ENDBLOCK]><![endif]-->
 <?php endif; ?>
 <?php $component->withAttributes([]); ?>
                     <div class="flex flex-col">
-                        <?php
-                            $_end_date_edu = empty($eeModel['graduated_year']) ? \Carbon\Carbon::now()->format('Y-m-d') : $eeModel['graduated_year'];
-                            $dataExtraEdu = $calculateSeniority->calculate($eeModel['admission_year'],$_end_date_edu,$eeModel['coefficient'],$total_duration_edu);
-                            $total_duration_edu += $dataExtraEdu['diff'];
-                            $extra_seniority += $eeModel['calculate_as_seniority'] ? $dataExtraEdu['duration'] : 0;
-                        ?>
+                        <div class="flex space-x-2">
+                            <span class="text-sm text-gray-500 font-medium"><?php echo e(__('Admission year')); ?>:</span>
+                            <span class="text-sm font-medium text-gray-700">
+                                <?php echo e($eeModel['admission_year']); ?>
 
-                    <div class="flex space-x-2">
-                        <span class="text-sm text-gray-500 font-medium"><?php echo e(__('Admission year')); ?>:</span>
-                        <span class="text-sm font-medium text-gray-700">
-                            <?php echo e($eeModel['admission_year']); ?>
+                           </span>
+                        </div>
+                        <div class="flex space-x-2">
+                            <span class="text-sm text-gray-500 font-medium"><?php echo e(__('Graduated year')); ?>:</span>
+                            <span class="text-sm font-medium text-gray-700">
+                                <?php echo e($eeModel['graduated_year']); ?>
 
-                       </span>
-                    </div>
-                    <div class="flex space-x-2">
-                        <span class="text-sm text-gray-500 font-medium"><?php echo e(__('Graduated year')); ?>:</span>
-                        <span class="text-sm font-medium text-gray-700">
-                            <?php echo e($eeModel['graduated_year']); ?>
+                           </span>
+                        </div>
 
-                       </span>
-                    </div>
+                        <div class="flex space-x-1 items-center">
+                            <span class="text-sm font-medium text-gray-500">
+                                <?php echo e(__('Duration')); ?>:
+                            </span>
+                            <span class="text-sm font-medium text-gray-800">
+                                <?php echo e($calculatedDataExtraEducation['data'][$key]['duration']['year']); ?> <?php echo e(__('year')); ?>
 
-                    <div class="flex space-x-1 items-center">
-                        <span class="text-sm font-medium text-gray-500">
-                            <?php echo e(__('Duration')); ?>:
-                        </span>
-                        <span class="text-sm font-medium text-gray-800">
-                            <?php echo e($dataExtraEdu['year']); ?> <?php echo e(__('year')); ?> <?php echo e($dataExtraEdu['month']); ?> <?php echo e(__('month')); ?>  (<?php echo e($dataExtraEdu['diff']); ?> <?php echo e(__('month')); ?>)
-                        </span>
-                    </div>
-                    <!--[if BLOCK]><![endif]--><?php if(!empty($eeModel['coefficient'])): ?>
-                    <div class="flex space-x-2 items-center">
-                        <span class="text-sm font-medium text-gray-500">
-                            <?php echo e(__('Coefficient')); ?>:
-                        </span>
-                        <span class="text-sm font-medium text-blue-500">
-                            <?php echo e($eeModel['coefficient']); ?>
+                                <?php echo e($calculatedDataExtraEducation['data'][$key]['duration']['month']); ?> <?php echo e(__('month')); ?>
 
-                        </span>
-                    </div>
-                    <div class="flex space-x-2 items-center">
-                        <span class="text-sm font-medium text-gray-500">
-                            <?php echo e(__('Extra seniority')); ?>:
-                        </span>
-                        <span class="text-sm font-medium text-blue-500">
-                            <?php echo e(floor($dataExtraEdu['diff'] * $education['coefficient'] / 12)); ?> <?php echo e(__('year')); ?>
+                                (<?php echo e($calculatedDataExtraEducation['data'][$key]['duration']['diff']); ?> <?php echo e(__('month')); ?>)
+                            </span>
+                        </div>
+                        <!--[if BLOCK]><![endif]--><?php if(!empty($eeModel['coefficient'])): ?>
+                        <div class="flex space-x-2 items-center">
+                            <span class="text-sm font-medium text-gray-500">
+                                <?php echo e(__('Coefficient')); ?>:
+                            </span>
+                            <span class="text-sm font-medium text-blue-500">
+                                <?php echo e($eeModel['coefficient']); ?>
 
-                            <?php echo e($dataExtraEdu['diff'] * $eeModel['coefficient'] % 12); ?> <?php echo e(__('month')); ?>
+                            </span>
+                        </div>
+                        <div class="flex space-x-2 items-center">
+                            <span class="text-sm font-medium text-gray-500">
+                                <?php echo e(__('Extra seniority')); ?>:
+                            </span>
+                            <span class="text-sm font-medium text-blue-500">
+                                <?php echo e($calculatedDataExtraEducation['data'][$key]['coefficient']['year']); ?> <?php echo e(__('year')); ?>
 
-                            (<?php echo e($dataExtraEdu['diff'] * $eeModel['coefficient']); ?> <?php echo e(__('month')); ?>)
-                        </span>
-                    </div>
-                    <?php endif; ?> <!--[if ENDBLOCK]><![endif]-->
+                                <?php echo e($calculatedDataExtraEducation['data'][$key]['coefficient']['month']); ?> <?php echo e(__('month')); ?>
+
+                                (<?php echo e($calculatedDataExtraEducation['data'][$key]['duration']['duration']); ?> <?php echo e(__('month')); ?>)
+                            </span>
+                        </div>
+                        <?php endif; ?> <!--[if ENDBLOCK]><![endif]-->
                     </div>
                  <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
@@ -1995,25 +1987,31 @@ unset($__errorArgs, $__bag); ?> <!--[if ENDBLOCK]><![endif]-->
 
 
     </div>
+        <?php if(count($extra_education_list) > 0): ?>
         <div class="my-2 flex justify-between items-center border border-gray-300 p-2 shadow-sm bg-gray-50 rounded-lg">
             <div class="flex space-x-2 items-center">
                 <span class="font-medium text-gray-500"><?php echo e(__('Total duration')); ?>:</span>
                 <span class="font-medium text-gray-900">
-                    <?php echo e($total_duration_edu); ?> <?php echo e(__('month')); ?> ( <?php echo e(floor($total_duration_edu / 12)); ?> <?php echo e(__('year')); ?>
+                    <?php echo e($calculatedDataExtraEducation['total_duration']); ?> <?php echo e(__('month')); ?>
 
-                    <?php echo e($total_duration_edu % 12); ?> <?php echo e(__('month')); ?>)</span>
+                    ( <?php echo e($calculatedDataExtraEducation['total_duration_diff']['year']); ?> <?php echo e(__('year')); ?>
+
+                    <?php echo e($calculatedDataExtraEducation['total_duration_diff']['month']); ?> <?php echo e(__('month')); ?>)
+                </span>
             </div>
             <div class="flex space-x-2 items-center">
                 <span class="font-medium text-gray-500"><?php echo e(__('Extra seniority')); ?>:</span>
                 <span class="font-medium text-rose-500">
-                    <?php echo e($extra_seniority); ?> <?php echo e(__('month')); ?> ( <?php echo e(floor($extra_seniority / 12)); ?> <?php echo e(__('year')); ?>
+                    <?php echo e($calculatedDataExtraEducation['extra_seniority']); ?> <?php echo e(__('month')); ?>
 
-                    <?php echo e($extra_seniority % 12); ?> <?php echo e(__('month')); ?>)
+                    ( <?php echo e($calculatedDataExtraEducation['extra_seniority_full']['year']); ?> <?php echo e(__('year')); ?>
+
+                    <?php echo e($calculatedDataExtraEducation['extra_seniority_full']['month']); ?> <?php echo e(__('month')); ?>)
                 </span>
             </div>
 
         </div>
-
+        <?php endif; ?> <!--[if ENDBLOCK]><![endif]-->
     </div>
 </div>
 

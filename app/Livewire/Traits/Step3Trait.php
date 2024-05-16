@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Traits;
 
-use Illuminate\Support\Facades\View;
+use App\Services\CalculateSeniorityService;
 
 trait Step3Trait
 {
@@ -22,27 +22,26 @@ trait Step3Trait
     public $extraEducationFormId,$extraEducationFormName,$searchExtraEducationForm;
     public $educationDocumentTypeId,$educationDocumentTypeName,$searchDocumentTyoe;
 
+    public $calculatedDataEducation = [];
+    public $calculatedDataExtraEducation = [];
+
     public function updatedEducation($value,$name)
     {
-        if($value && $name == "calculate_as_seniority")
+        if($name == "calculate_as_seniority")
         {
-            $this->education['coefficient'] = cache('settings')['Education coefficient'];
-        }
-        else if(!$value && $name == "calculate_as_seniority")
-        {
-            $this->education['coefficient'] = null;
+            $this->education['coefficient'] = $value
+                            ? cache('settings')['Education coefficient']
+                            : null;
         }
     }
 
     public function updatedExtraEducation($value,$name)
     {
-        if($value && $name == "calculate_as_seniority")
+        if($name == "calculate_as_seniority")
         {
-            $this->extra_education['coefficient'] = cache('settings')['Education coefficient'];
-        }
-        else if(!$value && $name == "calculate_as_seniority")
-        {
-            $this->extra_education['coefficient'] = null;
+            $this->extra_education['coefficient'] = $value
+                            ? cache('settings')['Education coefficient']
+                            : null;
         }
     }
 
@@ -54,17 +53,33 @@ trait Step3Trait
         $this->extra_education = array();
         $this->educationTypeName = $this->extraInstitutionName = $this->educationDocumentTypeName = $this->extraEducationFormName = '---';
         $this->reset(['educationTypeId','extraInstitutionId','educationDocumentTypeId','extraEducationFormId']);
+        $this->calculateSeniorityEducation();
     }
 
     public function forceDeleteData($key)
     {
         unset($this->extra_education_list[$key]);
+        $this->calculateSeniorityEducation();
     }
 
     public function mountStep3Trait() {
         $this->institutionName = $this->educationFormName = $this->extraInstitutionName = $this->educationTypeName = $this->extraEducationFormName = $this->educationDocumentTypeName = '---';
         !empty($this->personnelModel) && $this->fillEducation();
+        $this->calculateSeniorityEducation();
+
     }
+
+    private function calculateSeniorityEducation()
+    {
+        $this->calculateService = resolve(CalculateSeniorityService::class);
+        $this->calculatedDataEducation = !empty($this->education)
+                    ? $this->calculateService->calculateEducation($this->education)
+                    : [];
+        $this->calculatedDataExtraEducation = !empty($this->extra_education_list)
+                    ? $this->calculateService->calculateMultiEducation($this->extra_education_list)
+                    : [];
+    }
+
 
     protected function fillEducation()
     {
@@ -110,8 +125,10 @@ trait Step3Trait
             }
         }
 
-
-        $updateExtraEducation = $this->personnelModelData->extraEducations->load(['type','institution','form','documentType'])->toArray();
+        $updateExtraEducation = $this->personnelModelData
+                                ->extraEducations
+                                ->load(['type','institution','form','documentType'])
+                                ->toArray();
 
         if(!empty($updateExtraEducation))
         {

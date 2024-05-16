@@ -78,6 +78,11 @@ trait Step1Trait
             'scientific_works_inventions' => $this->updatePersonnel['scientific_works_inventions'],
         ];
 
+        $this->personnel_extra = [
+            'participation_in_war' => $this->updatePersonnel['participation_in_war'],
+            'discrediting_information' => $this->updatePersonnel['discrediting_information'],
+        ];
+
         if(!empty($this->updatePersonnel['nationality_id']))
         {
             $this->personnel['nationality_id'] = [

@@ -36,8 +36,6 @@
             @enderror
         </div>
 
-
-
         <div class="">
             <x-label for="order.order_no">{{ __('Order #') }}</x-label>
             <x-livewire-input mode="gray"  name="order.order_no" wire:model="order.order_no"></x-livewire-input>
@@ -93,8 +91,13 @@
                                 ---
                             </x-select-list-item>
                             @foreach($_components as $_component_item)
-                                <x-select-list-item wire:click="setData('components','component_id',null,'{{ $_component_item->name }}',{{ $_component_item->id }},{{ $i }});$dispatch('componentSelected',{ value: {{  $_component_item }}, rowKey: {{ $i }} })"
-                                                    :selected="$_component_item->id === $componentId" wire:model='components.component_id.id'>
+                                <x-select-list-item wire:click="
+                                                        setData('components','component_id',null,'{{ $_component_item->name }}',{{ $_component_item->id }},{{ $i }});
+                                                        $dispatch('componentSelected',{ value: {{  $_component_item }}, rowKey: {{ $i }} })
+                                                    "
+                                                    :selected="$_component_item->id === $componentId"
+                                                    wire:model='components.component_id.id'
+                                >
                                     {{ $_component_item->name }}
                                 </x-select-list-item>
                             @endforeach
@@ -105,7 +108,7 @@
                     </div>
                 </div>
                 <div class="flex flex-col space-y-2">
-                    @if(!empty($selectedComponents[$i]))
+                    @if(!empty($selectedComponents[$i]))e
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 w-full sm:col-span-2 mt-3">
                             @foreach($selectedComponents[$i] as $row => $_field)
                                 <x-dynamic-input
@@ -161,15 +164,10 @@
 
 
     <div>
-        <x-modal-confirm
-            event-to-close-modal="vacancyUpdated"
+        <x-modal-info
             livewire-event-to-open-modal="checkVacancyWasSet"
             :modal-title="__('Vacancy error')"
-            :modal-confirm-button-text="__('Update')"
-            wire-click="updateVacancy"
-        >
-
-        </x-modal-confirm>
+        ></x-modal-info>
     </div>
 </div>
 

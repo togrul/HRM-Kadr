@@ -29,4 +29,27 @@ class StaffSchedule extends Model
     {
         return $this->belongsTo(Position::class,'position_id','id');
     }
+
+    protected static function updateMainStructureVacancy() : void
+    {
+        $_mainStructure = StaffSchedule::where('structure_id',1)->first();
+        $filled = Personnel::active()->count();
+        $_mainStructure->filled = $filled;
+        $_mainStructure->vacant = $_mainStructure->total - $filled;
+        $_mainStructure->save();
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+        static::created(function ($model) {
+            self::updateMainStructureVacancy();
+        });
+        static::updated(function ($model) {
+            self::updateMainStructureVacancy();
+        });
+        static::deleted(function ($model) {
+            self::updateMainStructureVacancy();
+        });
+    }
 }

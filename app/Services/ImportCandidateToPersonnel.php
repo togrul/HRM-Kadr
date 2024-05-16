@@ -32,8 +32,8 @@ class ImportCandidateToPersonnel
                 'nationality_id' => 11,
                 'education_degree_id' => 100,
                 'pin' => '1234567',
-                'residental_address' => ' ',
-                'registered_address' => ' ',
+                'residental_address' => 'yoxdur',
+                'registered_address' => 'yoxdur',
                 'work_norm_id' => 10,
                 'join_work_date' => Carbon::now()->format('Y-m-d')
             ]);

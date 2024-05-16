@@ -138,7 +138,7 @@
     </div>
 </div>
 
-<div class="w-full rounded-xl px-4 py-3 bg-gray-100 font-semibold text-xl flex justify-center">
+<div class="step-section__title">
     <h1>{{ __('Injuries') }}</h1>
 </div>
 
@@ -249,7 +249,22 @@
     </div>
 </div>
 
-<div class="w-full rounded-xl px-4 py-3 bg-gray-100 font-semibold text-xl flex justify-center">
+<hr>
+<div class="step-section__title">
+    <h1>{{ __('Participation in war') }}</h1>
+</div>
+
+<div class="grid grid-cols-1">
+    <div class="flex flex-col">
+        <x-label for="personnel_extra.participation_in_war">{{ __('Description') }}</x-label>
+        <x-textarea mode="gray" name="personnel_extra.participation_in_war" placeholder="{{__('')}}"
+                    wire:model="personnel_extra.participation_in_war"></x-textarea>
+    </div>
+</div>
+
+<hr>
+
+<div class="step-section__title">
     <h1>{{ __('Been captivity') }}</h1>
 </div>
 

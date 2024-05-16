@@ -1,5 +1,5 @@
-<div class="flex flex-col space-y-4" x-data wire:key="roles"> 
-    <?php if(!$isUpdate): ?>
+<div class="flex flex-col space-y-4" x-data wire:key="roles">
+    <!--[if BLOCK]><![endif]--><?php if(!$isUpdate): ?>
     
         <div>
             <form wire:submit.prevent="store">
@@ -68,7 +68,7 @@
             </form>
         </div>
         
-    <?php endif; ?>
+    <?php endif; ?> <!--[if ENDBLOCK]><![endif]-->
 
     <div class="relative min-h-[300px] overflow-x-auto">
         <div class="inline-block min-w-full py-2 align-middle">
@@ -83,7 +83,7 @@
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
 <?php $component->withAttributes(['headers' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute([__('Name'),'action','action','action'])]); ?>
-        <?php $__currentLoopData = $roles; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $role): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+        <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $roles; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $role): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
             <tr wire:key=<?php echo e($role->id); ?>>
                 <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table.td','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
@@ -104,7 +104,7 @@
                             <?php echo e($role->name); ?>
 
                         </span>
-                        <?php if($isUpdate && $role_id==$role->id): ?>
+                        <!--[if BLOCK]><![endif]--><?php if($isUpdate && $role_id==$role->id): ?>
                         <div class="flex flex-col">
                             <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.livewire-input','data' => ['id' => 'role_name','name' => 'role_name','mode' => 'gray','class' => 'flex w-auto sm:text-sm outline-none font-normal h-auto dark:bg-gray-700 dark:border-black dark:text-white '.e($errors->any()?'border-red-600':'').'','type' => 'text','value' => old('role_name'),'wire:model' => 'role_name','autofocus' => true]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
@@ -128,7 +128,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                                           </svg>
                                     </button>
-        
+
                                     <button  wire:click.prevent="cancel" class="flex items-center justify-center w-8 h-8 transition duration-300 ease-in-out rounded-lg bg-red-50 hover:bg-red-100 focus:outline-none">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-red-500">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -136,7 +136,7 @@
                                     </button>
                                 </div>
                         </div>
-                        <?php endif; ?>
+                        <?php endif; ?> <!--[if ENDBLOCK]><![endif]-->
                     </div>
 
                  <?php echo $__env->renderComponent(); ?>
@@ -180,7 +180,7 @@
 <?php $component->withAttributes(['class' => 'max-w-[50px]']); ?>
                     
                     <button
-                    wire:click.prevent=" openSideMenu('set-permission',<?php echo e($role->id); ?>)"
+                    wire:click.prevent="openSideMenu('set-permission',<?php echo e($role->id); ?>)"
                     wire:key="edit_<?php echo e($role_id); ?>"
                         class="flex flex-row items-center space-x-1 text-teal-500  hover:text-teal-600  focus:outline-none w-8 h-8"
                     >
@@ -224,7 +224,7 @@
 
             </tr>
 
-        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?> <!--[if ENDBLOCK]><![endif]-->
      <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
@@ -245,14 +245,14 @@
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
 <?php $component->withAttributes([]); ?>
-            <?php if($showSideMenu == 'set-permission'): ?>
+            <!--[if BLOCK]><![endif]--><?php if($showSideMenu == 'set-permission'): ?>
                 <?php
 $__split = function ($name, $params = []) {
     return [$name, $params];
 };
 [$__name, $__params] = $__split('roles.set-permission',['roleModel' => $modelName]);
 
-$__html = app('livewire')->mount($__name, $__params, '3xM9UuJ', $__slots ?? [], get_defined_vars());
+$__html = app('livewire')->mount($__name, $__params, 'lw-2097012372-0', $__slots ?? [], get_defined_vars());
 
 echo $__html;
 
@@ -262,7 +262,7 @@ unset($__params);
 unset($__split);
 if (isset($__slots)) unset($__slots);
 ?>
-            <?php endif; ?>
+            <?php endif; ?> <!--[if ENDBLOCK]><![endif]-->
          <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
@@ -271,14 +271,14 @@ if (isset($__slots)) unset($__slots);
 <?php endif; ?>
     
     <div>
-        <?php if(auth()->guard()->check()): ?>
+        <!--[if BLOCK]><![endif]--><?php if(auth()->guard()->check()): ?>
             <?php
 $__split = function ($name, $params = []) {
     return [$name, $params];
 };
 [$__name, $__params] = $__split('roles.delete-role');
 
-$__html = app('livewire')->mount($__name, $__params, 'fRFc3Jk', $__slots ?? [], get_defined_vars());
+$__html = app('livewire')->mount($__name, $__params, 'lw-2097012372-1', $__slots ?? [], get_defined_vars());
 
 echo $__html;
 
@@ -287,8 +287,8 @@ unset($__name);
 unset($__params);
 unset($__split);
 if (isset($__slots)) unset($__slots);
-?> 
-        <?php endif; ?>
+?>
+        <?php endif; ?> <!--[if ENDBLOCK]><![endif]-->
     </div>
 </div>
 <?php /**PATH /Users/togruljalalli/Desktop/projects/HR-CRM/resources/views/livewire/roles/manage-roles.blade.php ENDPATH**/ ?>

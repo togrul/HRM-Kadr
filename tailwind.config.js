@@ -21,6 +21,8 @@ export default {
         'border-emerald-400',
         'border-cyan-400',
         'border-orange-400',
+        'text-yellow-500',
+        'text-yellow-400',
       ],
     darkMode: 'class',
     theme: {

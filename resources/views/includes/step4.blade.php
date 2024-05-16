@@ -1,18 +1,16 @@
-@inject('calculateSeniority', 'App\Services\CalculateSeniorityService')
-
 <div class="grid grid-cols-5 gap-2">
     <div class="flex flex-col">
         <x-label for="labor_activities.company_name">{{ __('Company name') }}</x-label>
         <x-livewire-input mode="gray" name="labor_activities.company_name" wire:model="labor_activities.company_name"></x-livewire-input>
         @error('labor_activities.company_name')
-        <x-validation> {{ $message }} </x-validation>
+            <x-validation> {{ $message }} </x-validation>
         @enderror
     </div>
     <div class="flex flex-col">
         <x-label for="labor_activities.position">{{ __('Position') }}</x-label>
         <x-livewire-input mode="gray" name="labor_activities.position" wire:model="labor_activities.position"></x-livewire-input>
         @error('labor_activities.position')
-        <x-validation> {{ $message }} </x-validation>
+            <x-validation> {{ $message }} </x-validation>
         @enderror
     </div>
     <div class="flex flex-col">
@@ -25,7 +23,7 @@
             </x-slot>
           </x-pikaday-input>
         @error('labor_activities.join_date')
-        <x-validation> {{ $message }} </x-validation>
+            <x-validation> {{ $message }} </x-validation>
         @enderror
     </div>
     <div class="flex flex-col">
@@ -38,12 +36,15 @@
             </x-slot>
           </x-pikaday-input>
         @error('labor_activities.leave_date')
-        <x-validation> {{ $message }} </x-validation>
+            <x-validation> {{ $message }} </x-validation>
         @enderror
     </div>
     <div class="flex flex-col">
         <x-label for="labor_activities.coefficient">{{ __('Coefficient') }}</x-label>
         <x-livewire-input mode="gray" type="number" name="labor_activities.coefficient" wire:model="labor_activities.coefficient"></x-livewire-input>
+        @error('labor_activities.coefficient')
+         <x-validation> {{ $message }} </x-validation>
+        @enderror
     </div>
 </div>
 
@@ -53,14 +54,14 @@
         <x-label for="labor_activities.order_given_by">{{ __('Order issued by') }}</x-label>
         <x-livewire-input mode="gray" name="labor_activities.order_given_by" wire:model="labor_activities.order_given_by"></x-livewire-input>
         @error('labor_activities.order_given_by')
-        <x-validation> {{ $message }} </x-validation>
+            <x-validation> {{ $message }} </x-validation>
         @enderror
     </div>
     <div class="flex flex-col">
         <x-label for="labor_activities.order_no">{{ __('Order number') }}</x-label>
         <x-livewire-input mode="gray" name="labor_activities.order_no" wire:model="labor_activities.order_no"></x-livewire-input>
         @error('labor_activities.order_no')
-        <x-validation> {{ $message }} </x-validation>
+            <x-validation> {{ $message }} </x-validation>
         @enderror
     </div>
     <div class="flex items-start justify-between w-full">
@@ -74,11 +75,11 @@
                 </x-slot>
             </x-pikaday-input>
             @error('labor_activities.order_date')
-            <x-validation> {{ $message }} </x-validation>
+                <x-validation> {{ $message }} </x-validation>
             @enderror
         </div>
         <div class="flex flex-col w-20">
-            <x-label for="labor_activities.order_no">{{ __('Time') }}</x-label>
+            <x-label for="labor_activities.time">{{ __('Time') }}</x-label>
             <x-livewire-input mode="gray" name="labor_activities.time" wire:model="labor_activities.time" placeholder="12:00"></x-livewire-input>
         </div>
     </div>
@@ -87,24 +88,36 @@
 @endif
 
 <div class="flex justify-end space-x-4">
-    <x-checkbox name="isSpecialService" model="isSpecialService">{{ __('Military forces or law enforcement?') }}</x-checkbox>
+    <x-checkbox name="labor_activities.is_current"
+                model="labor_activities.is_current">
+        {{ __('Is current?') }}
+    </x-checkbox>
+    <x-checkbox
+        name="isSpecialService"
+        model="isSpecialService"
+    >{{ __('Military forces or law enforcement?') }}</x-checkbox>
     <x-button  mode="black" wire:click="addLaborActivity">{{ __('Add') }}</x-button>
 </div>
+
 
 <div class="relative -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
     <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
     <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
         <x-table.tbl :headers="[__('Info'),__('Date'),__('Total'),__('Order'),'action']">
-            @php
-                $total_duration = 0;
-            @endphp
             @forelse ($labor_activities_list as $key => $laModel)
             <tr>
                 <x-table.td standartWidth="true">
                     <div class="flex flex-col space-y-1">
-                        <p class="text-sm font-medium text-gray-700">
-                            {{ $laModel['company_name'] }}
-                        </p>
+                        <div class="flex items-center space-x-2">
+                            <p class="text-sm font-medium text-gray-700">
+                                {{ $laModel['company_name'] }}
+                            </p>
+                            @if($laModel['is_current'])
+                                <span class="flex items-center justify-center rounded-full w-4 h-4 bg-green-500 border-4 border-green-200">
+                                </span>
+                            @endif
+                        </div>
+
                         <span class="text-sm font-medium text-emerald-500 bg-slate-100 rounded-lg px-3 py-1 w-max flex justify-center items-center">
                             {{ $laModel['position'] }}
                        </span>
@@ -112,22 +125,28 @@
                 </x-table.td>
 
                 <x-table.td>
-                    <div class="flex flex-col">
+                    <div class="flex flex-col space-y-1">
                         <div class="flex space-x-2 items-center">
                             <span class="text-sm font-medium text-gray-500">
                                 {{ __('Join date') }}:
                             </span>
                             <span class="text-sm font-medium text-gray-700">
-                                {{ $laModel['join_date']}}
+                                {{ \Carbon\Carbon::parse($laModel['join_date'])->format('d.m.Y') }}
                             </span>
                         </div>
                         <div class="flex space-x-2 items-center">
                             <span class="text-sm font-medium text-gray-500">
                                 {{ __('Leave date') }}:
                             </span>
-                            <span class="text-sm font-medium text-rose-500">
-                                {{ $laModel['leave_date']}}
-                            </span>
+                            <div class="text-sm font-medium text-rose-500">
+                                @if(!empty($laModel['leave_date']))
+                                    {{ \Carbon\Carbon::parse($laModel['leave_date'])->format('d.m.Y') }}
+                                @else
+                                    <span class="flex items-center justify-center w-max px-2 py-1 text-sm font-medium bg-green-100 text-green-500 rounded-lg">
+                                        {{ __('active') }}
+                                    </span>
+                                @endif
+                            </div>
                         </div>
                     </div>
 
@@ -135,15 +154,13 @@
                 <x-table.td>
                    <div class="flex flex-col">
                     <div class="flex space-x-2 items-center">
-                        @php
-                            $data = $calculateSeniority->calculate($laModel['join_date'],$laModel['leave_date'],$laModel['coefficient']);
-                            $total_duration += $data['duration'];
-                        @endphp
                         <span class="text-sm font-medium text-gray-500">
                             {{ __('Duration') }}:
                         </span>
                         <span class="text-sm font-medium text-gray-800">
-                            {{ $data['year'] }} {{ __('year') }} {{ $data['month'] }} {{ __('month') }}  ({{ $data['diff'] }} {{ __('month') }})
+                            {{ $calculatedData['data'][$key]['duration']['year'] }} {{ __('year') }}
+                            {{ $calculatedData['data'][$key]['duration']['month'] }} {{ __('month') }}
+                            ({{ $calculatedData['data'][$key]['duration']['diff'] }} {{ __('month') }})
                         </span>
                     </div>
                     @if(!empty($laModel['coefficient']))
@@ -160,14 +177,14 @@
                             {{ __('Total') }}:
                         </span>
                         <span class="text-sm font-medium text-green-500">
-                            {{ $data['duration'] }} {{ __('month') }}
+                            {{ $calculatedData['data'][$key]['duration']['duration'] }} {{ __('month') }}
                         </span>
                     </div>
                     @endif
                    </div>
                 </x-table.td>
                 <x-table.td>
-                    @if($laModel['is_special_service'])
+                    @if(array_key_exists('is_special_service',$laModel) && $laModel['is_special_service'])
                         <div class="flex flex-col space-y-1">
                             <div class="flex space-x-2 items-center">
                                 <span class="text-sm font-medium text-gray-500">
@@ -222,40 +239,69 @@
 
 
     <div class="my-2 flex justify-between items-center border border-gray-100 p-2 shadow-sm bg-gray-50 rounded-lg">
-            @php
-                $calc_year_month_old = $calculateSeniority->calculateYearAndMonth($total_duration);
-            @endphp
             @if (!empty($laModel))
                 <div class="flex flex-col space-y-1 items-center">
-                    <span class="font-medium text-gray-600 bg-gray-200 px-3 py-1 rounded-lg">{{ __('Old seniority') }}</span>
-                    <span class="font-medium text-gray-900">{{ $total_duration }} {{ __('month') }}</span>
-                    <span class="font-medium text-gray-900">{{  $calc_year_month_old['year'] }} {{ __('year') }} {{ $calc_year_month_old['month'] }} {{ __('month') }}</span>
+                    <span class="font-medium text-gray-600 bg-gray-200 px-3 py-1 rounded-lg">
+                        {{ __('Old seniority') }}
+                    </span>
+                    <div class="flex items-center space-x-2 text-sm self-start">
+                        <span class="font-medium text-teal-500">{{ __('Property') }}:</span>
+                        <span class="font-medium text-gray-900">
+                            {{ $calculatedData['sum_month_old'] }} {{ __('month') }}
+                            ({{ $calculatedData['sum_old']['year'] }} {{ __('year') }}
+                            {{ $calculatedData['sum_old']['month'] }} {{ __('month') }})
+                        </span>
+                    </div>
+                    <div class="flex items-center space-x-2 text-sm self-start">
+                        <span class="font-medium text-rose-500">{{ __('Military') }}:</span>
+                        <span class="font-medium text-gray-900">
+                            {{ $calculatedData['sum_month_military_old'] }} {{ __('month') }}
+                            ({{ $calculatedData['sum_old_military']['year'] }} {{ __('year') }}
+                            {{ $calculatedData['sum_old_military']['month'] }} {{ __('month') }})
+                        </span>
+                    </div>
                 </div>
             @endif
-            @php
-                $currentData = $calculateSeniority->calculate($personnel['join_work_date'],$personnel['leave_work_date'],$_settings['Work coefficient']);
-                $calc_current_year_month = $calculateSeniority->calculateYearAndMonth($currentData['duration']);
-                $calc_year_month = $calculateSeniority->calculateYearAndMonth($total_duration  + $currentData['duration']);
-            @endphp
             <div class="flex flex-col space-y-1 items-center">
                 <span class="font-medium text-gray-600 bg-gray-200 px-3 py-1 rounded-lg">{{ __('Current seniority') }}</span>
-                <div class="flex space-x-1 items-center">
-                    <span class="font-medium text-gray-600">{{ $currentData['diff'] }} {{ __('month') }}</span>
-                    (<span class="font-medium text-rose-500">x2</span>
-                    <span class="font-medium text-gray-900">{{ $currentData['duration'] }} {{ __('month') }}</span>)
+                <div class="flex items-center space-x-2 text-sm self-start">
+                    <span class="font-medium text-teal-500">{{ __('Standart') }}:</span>
+                    <span class="font-medium text-gray-900">
+                            {{ $calculatedData['sum_month_current_diff'] }} {{ __('month') }}
+                            ({{ $calculatedData['sum_current_diff']['year'] }} {{ __('year') }}
+                            {{ $calculatedData['sum_current_diff']['month'] }} {{ __('month') }})
+                    </span>
                 </div>
-
-                <div class="flex space-x-1 items-center">
-                    <span class="font-medium text-gray-600">{{ $currentData['year'] }} {{ __('year') }} {{ $currentData['month'] }} {{ __('month') }}</span>
-                    (<span class="font-medium text-rose-500">x2</span>
-                    <span class="font-medium text-gray-900">{{ $calc_current_year_month['year'] }} {{ __('year') }} {{ $calc_current_year_month['month'] }} {{ __('month') }}</span>)
+                <div class="flex items-center space-x-2 text-sm self-start">
+                    <span class="font-medium text-blue-500">{{ __('Coefficient') }}:</span>
+                    <span class="font-medium text-gray-900">
+                            {{ $calculatedData['sum_month_current'] }} {{ __('month') }}
+                            ({{ $calculatedData['sum_current']['year'] }} {{ __('year') }}
+                            {{ $calculatedData['sum_current']['month'] }} {{ __('month') }})
+                    </span>
                 </div>
             </div>
             @if (!empty($laModel))
                 <div class="flex flex-col space-y-1 items-center">
-                    <span class="font-medium text-gray-600 bg-gray-200 px-3 py-1 rounded-lg">{{ __('Total seniority') }}</span>
-                    <span class="font-medium text-blue-500">{{ $total_duration +  $currentData['duration']   }} {{ __('month') }}</span>
-                    <span class="font-medium text-blue-500">{{ $calc_year_month['year'] }} {{ __('year') }} {{ $calc_year_month['month'] }} {{ __('month') }}</span>
+                    <span class="font-medium text-gray-600 bg-gray-200 px-3 py-1 rounded-lg">
+                        {{ __('Total seniority') }}
+                    </span>
+                    <div class="flex items-center space-x-2 text-sm self-start">
+                        <span class="font-medium text-teal-500">{{ __('Property') }}:</span>
+                        <span class="font-medium text-gray-900">
+                            {{ $calculatedData['sum_total'] }} {{ __('month') }}
+                            ({{ $calculatedData['sum_total_full']['year'] }} {{ __('year') }}
+                            {{ $calculatedData['sum_total_full']['month'] }} {{ __('month') }})
+                        </span>
+                    </div>
+                    <div class="flex items-center space-x-2 text-sm self-start">
+                        <span class="font-medium text-rose-500">{{ __('Military') }}:</span>
+                        <span class="font-medium text-gray-900">
+                            {{ $calculatedData['sum_total_military'] }} {{ __('month') }}
+                            ({{ $calculatedData['sum_total_military_full']['year'] }} {{ __('year') }}
+                            {{ $calculatedData['sum_total_military_full']['month'] }} {{ __('month') }})
+                        </span>
+                    </div>
                 </div>
            @endif
     </div>
@@ -265,7 +311,7 @@
 
 <hr>
 
-<div class="w-full rounded-xl px-4 py-3 bg-gray-100 font-semibold text-xl flex justify-center">
+<div class="step-section__title">
     <h1>{{ __('Ranks') }}</h1>
 </div>
 
@@ -318,7 +364,7 @@
     <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
     <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
         <x-table.tbl :headers="[__('Rank'),__('Name'),__('Given date'),'action']">
-            @forelse ($rank_list as $key => $rModel)
+            @forelse ($rank_list as $keyRank => $rModel)
             <tr>
                 <x-table.td>
                     <span class="text-sm font-medium text-gray-700">
@@ -338,7 +384,7 @@
                 <x-table.td :isButton="true">
                      <button
                         onclick="confirm('Are you sure you want to remove this data?') || event.stopImmediatePropagation()"
-                        wire:click="forceDeleteRank({{ $key }})"
+                        wire:click="forceDeleteRank({{ $keyRank }})"
                         class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-50 hover:text-gray-700"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-red-500">
@@ -357,8 +403,6 @@
             </tr>
             @endforelse
         </x-table.tbl>
-
-
     </div>
     </div>
 </div>

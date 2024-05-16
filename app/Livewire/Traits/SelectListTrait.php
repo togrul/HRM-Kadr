@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Traits;
 
+use App\Models\EducationalInstitution;
 use Carbon\Carbon;
 
 trait SelectListTrait

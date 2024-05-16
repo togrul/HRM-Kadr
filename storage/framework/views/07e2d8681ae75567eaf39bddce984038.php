@@ -108,8 +108,6 @@ endif;
 unset($__errorArgs, $__bag); ?> <!--[if ENDBLOCK]><![endif]-->
         </div>
 
-
-
         <div class="">
             <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'order.order_no']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
@@ -330,14 +328,20 @@ unset($__errorArgs, $__bag); ?> <!--[if ENDBLOCK]><![endif]-->
 <?php endif; ?>
                             <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $_components; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $_component_item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list-item','data' => ['wire:click' => 'setData(\'components\',\'component_id\',null,\''.e($_component_item->name).'\','.e($_component_item->id).','.e($i).');$dispatch(\'componentSelected\',{ value: '.e($_component_item).', rowKey: '.e($i).' })','selected' => $_component_item->id === $componentId,'wire:model' => 'components.component_id.id']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list-item','data' => ['wire:click' => '
+                                                        setData(\'components\',\'component_id\',null,\''.e($_component_item->name).'\','.e($_component_item->id).','.e($i).');
+                                                        $dispatch(\'componentSelected\',{ value: '.e($_component_item).', rowKey: '.e($i).' })
+                                                    ','selected' => $_component_item->id === $componentId,'wire:model' => 'components.component_id.id']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('select-list-item'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['wire:click' => 'setData(\'components\',\'component_id\',null,\''.e($_component_item->name).'\','.e($_component_item->id).','.e($i).');$dispatch(\'componentSelected\',{ value: '.e($_component_item).', rowKey: '.e($i).' })','selected' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($_component_item->id === $componentId),'wire:model' => 'components.component_id.id']); ?>
+<?php $component->withAttributes(['wire:click' => '
+                                                        setData(\'components\',\'component_id\',null,\''.e($_component_item->name).'\','.e($_component_item->id).','.e($i).');
+                                                        $dispatch(\'componentSelected\',{ value: '.e($_component_item).', rowKey: '.e($i).' })
+                                                    ','selected' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($_component_item->id === $componentId),'wire:model' => 'components.component_id.id']); ?>
                                     <?php echo e($_component_item->name); ?>
 
                                  <?php echo $__env->renderComponent(); ?>
@@ -379,7 +383,7 @@ unset($__errorArgs, $__bag); ?> <!--[if ENDBLOCK]><![endif]-->
                     </div>
                 </div>
                 <div class="flex flex-col space-y-2">
-                    <!--[if BLOCK]><![endif]--><?php if(!empty($selectedComponents[$i])): ?>
+                    <!--[if BLOCK]><![endif]--><?php if(!empty($selectedComponents[$i])): ?>e
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 w-full sm:col-span-2 mt-3">
                             <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $selectedComponents[$i]; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $row => $_field): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
@@ -483,16 +487,14 @@ unset($__errorArgs, $__bag); ?> <!--[if ENDBLOCK]><![endif]-->
 
     <div>
         <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.modal-confirm','data' => ['eventToCloseModal' => 'vacancyUpdated','livewireEventToOpenModal' => 'checkVacancyWasSet','modalTitle' => __('Vacancy error'),'modalConfirmButtonText' => __('Update'),'wireClick' => 'updateVacancy']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
-<?php $component->withName('modal-confirm'); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.modal-info','data' => ['livewireEventToOpenModal' => 'checkVacancyWasSet','modalTitle' => __('Vacancy error')]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('modal-info'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['event-to-close-modal' => 'vacancyUpdated','livewire-event-to-open-modal' => 'checkVacancyWasSet','modal-title' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(__('Vacancy error')),'modal-confirm-button-text' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(__('Update')),'wire-click' => 'updateVacancy']); ?>
-
-         <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['livewire-event-to-open-modal' => 'checkVacancyWasSet','modal-title' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(__('Vacancy error'))]); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
 <?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>

@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use function Laravel\Prompts\search;
 
 class OrderLog extends Model
 {
@@ -62,12 +63,20 @@ class OrderLog extends Model
 
     public function personnels() : BelongsToMany
     {
-        return $this->belongsToMany(Personnel::class,'order_log_personnels','order_no','tabel_no','order_no','tabel_no');
+        return $this->belongsToMany(
+            Personnel::class,
+            'order_log_personnels',
+            'order_no',
+            'tabel_no',
+            'order_no',
+            'tabel_no'
+        );
     }
 
     public function status() : BelongsTo
     {
-        return $this->belongsTo(OrderStatus::class,'status_id','id')->where('locale',config('app.locale'));
+        return $this->belongsTo(OrderStatus::class,'status_id','id')
+        ->where('locale',config('app.locale'));
     }
 
     public function orderType() : BelongsTo
@@ -80,19 +89,41 @@ class OrderLog extends Model
         return $this->hasMany(OrderLogComponentAttributes::class,'order_no','order_no');
     }
 
-    public function handleDeletion()
+    public function handleDeletion() : void
     {
         if($this->order_id == 1010)
         {
-            $candidates_ids = $this->personnels->pluck('tabel_no')
-                ->map(function($f){
-                    return str_replace('NMZD','',$f);
-                })->all();
-           dd($candidates_ids);
+            // emre hazir statusuna qaytarmaq
+            //vacancy yenile. bos yerleri coxalt dolunu azalt
+            foreach ($this->personnels as $personnel)
+            {
+                $candidate_id = str_replace('NMZD','',$personnel->tabel_no);
+                Candidate::find($candidate_id)->update([
+                    'status_id' => 30
+                ]);
+                $staff_schedule = StaffSchedule::query()
+                                ->where('structure_id',$personnel->structure_id)
+                                ->where('position_id',$personnel->position_id)
+                                ->first();
 
+                $updatedData = [
+                    'total' => $staff_schedule->total > 0 ? $staff_schedule->total - 1 : $staff_schedule->total
+                ];
 
+                if($personnel->is_pending)
+                {
+                    $updatedData['vacant'] = max(0, $staff_schedule->vacant - 1);
+                }
+                else
+                {
+                    $updateData['filled'] = max(0, $staff_schedule->filled - 1);
+                }
+
+                $staff_schedule->update($updatedData);
+                $personnel->delete();
+            }
         }
-//        $this->forceDelete();
+        $this->forceDelete();
     }
 
     public function scopeFilter($query, array $filters)

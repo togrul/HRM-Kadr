@@ -82,8 +82,14 @@ class Staffs extends Component
                 ->orderBy('structure_id')
                 ->get();
 
+
         return $type == 'normal'
-                ? ($this->selectedPage == 'all' ? $result->groupBy('structure.name') : $result)
+                ?
+                (
+                    $this->selectedPage == 'all'
+                    ? $result->groupBy('structure.name_with_parent')
+                    : $result
+                )
                 : $result->toArray();
     }
 

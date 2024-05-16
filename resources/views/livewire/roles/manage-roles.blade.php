@@ -1,4 +1,4 @@
-<div class="flex flex-col space-y-4" x-data wire:key="roles"> 
+<div class="flex flex-col space-y-4" x-data wire:key="roles">
     @if(!$isUpdate)
     {{-- @can('manage-settings') --}}
         <div>
@@ -57,7 +57,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                                           </svg>
                                     </button>
-        
+
                                     <button  wire:click.prevent="cancel" class="flex items-center justify-center w-8 h-8 transition duration-300 ease-in-out rounded-lg bg-red-50 hover:bg-red-100 focus:outline-none">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-red-500">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -83,7 +83,7 @@
                 <x-table.td class="max-w-[50px]">
                     {{-- @can('manage-settings') --}}
                     <button
-                    wire:click.prevent=" openSideMenu('set-permission',{{ $role->id }})"
+                    wire:click.prevent="openSideMenu('set-permission',{{ $role->id }})"
                     wire:key="edit_{{ $role_id }}"
                         class="flex flex-row items-center space-x-1 text-teal-500  hover:text-teal-600  focus:outline-none w-8 h-8"
                     >
@@ -124,7 +124,7 @@
     {{-- @endcan --}}
     <div>
         @auth
-            @livewire('roles.delete-role') 
+            @livewire('roles.delete-role')
         @endauth
     </div>
 </div>

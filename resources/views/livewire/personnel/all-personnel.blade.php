@@ -99,11 +99,33 @@
             </div>
         </div>
 
+        {{-- filter position--}}
+        <div class="flex justify-start items-center space-x-3">
+            @foreach($_positions as $position)
+                <button
+                    wire:click.prevent="setPosition({{ $position->id }})"
+                    class="appearance-none w-max text-sm font-medium bg-slate-900 text-yellow-400 rounded-2xl px-3 py-1 transition-all duration-300 hover:bg-slate-700"
+                >
+                    {{ $position->name }}
+                </button>
+            @endforeach
+
+            @if(!empty($selectedPosition))
+                    <button
+                        wire:click.prevent="resetFilter"
+                        class="appearance-none w-max text-sm font-medium bg-slate-100 text-rose-500 rounded-2xl px-3 py-1 transition-all duration-300 hover:bg-slate-200"
+                    >
+                        {{ __('Reset') }}
+                    </button>
+            @endif
+
+        </div>
+
         <div class="relative min-h-[300px] -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
             <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
 
-                <x-table.tbl :headers="[__('#'),__('Tabel'),__('Fullname'),__('Gender'),__('Position'),'action','action','action','action']">
+                <x-table.tbl :headers="[__('#'),__('Tabel'),__('Fullname'),__('Position'),'action','action','action','action']">
                     @forelse ($personnels as $key => $personnel)
                     <tr @class([
                         'bg-white' => empty($personnel->leave_work_date),
@@ -137,7 +159,7 @@
                         </x-table.td>
 
                         <x-table.td>
-                            <div class="flex items-center space-x-2">
+                            <div class="flex items-center space-x-2 px-2">
                                 @if(!empty($personnel->photo))
                                     <img src="{{ asset('/storage/'.$personnel->photo) }}" alt="" class="flex-none rounded-xl object-cover w-14 h-14 border-4 border-gray-200">
                                 @else
@@ -147,9 +169,9 @@
                                 <span class="text-sm font-medium text-gray-600">
                                     {{ $personnel->fullname }}
                                </span>
-                               <span class="text-sm font-medium text-teal-500 bg-teal-50 rounded-xl px-3 py-1 w-max">
-                                     {{ $personnel->pin }}
-                                </span>
+                               <span class="text-sm w-max font-medium text-gray-600 rounded-xl px-3 py-1 shadow-sm bg-gray-100">
+                                    {{ $personnel->gender == 1 ? __('Man') : __('Woman') }}
+                               </span>
                                 @if(!empty($personnel->latestRank))
                                 <span class="text-sm font-medium text-rose-500 rounded-xl px-3 py-1 shadow-sm w-max bg-rose-50">
                                     {{ $personnel->latestRank?->rank->name }}
@@ -157,12 +179,6 @@
                                @endif
                                </div>
                             </div>
-                        </x-table.td>
-
-                        <x-table.td>
-                            <span class="text-sm font-medium text-gray-500 rounded-xl px-3 py-1 shadow-sm bg-gray-100">
-                                {{ $personnel->gender == 1 ? __('Man') : __('Woman') }}
-                           </span>
                         </x-table.td>
 
                         <x-table.td>

@@ -52,6 +52,8 @@ class Personnel extends Model
         'extra_important_information',
         'computer_knowledge',
         'scientific_works_inventions',
+        'participation_in_war',
+        'discrediting_information',
         'added_by',
         'deleted_by',
         'is_pending'
@@ -138,10 +140,10 @@ class Personnel extends Model
         return $this->hasMany(PersonnelAward::class,'tabel_no','tabel_no')->orderByDesc('given_date');
     }
 
-    public function criminals() : HasMany
-    {
-        return $this->hasMany(PersonnelCriminal::class,'tabel_no','tabel_no')->orderByDesc('given_date');
-    }
+//    public function criminals() : HasMany
+//    {
+//        return $this->hasMany(PersonnelCriminal::class,'tabel_no','tabel_no')->orderByDesc('given_date');
+//    }
 
     public function idDocuments() : HasOne
     {
@@ -185,12 +187,15 @@ class Personnel extends Model
 
     public function laborActivities() : HasMany
     {
-        return $this->hasMany(PersonnelLaborActivity::class,'tabel_no','tabel_no')->orderByDesc('leave_date');
+        return $this->hasMany(PersonnelLaborActivity::class,'tabel_no','tabel_no')
+            ->orderByRaw('leave_date IS NULL DESC, leave_date DESC');;
     }
 
     public function specialServices() : HasMany
     {
-        return $this->hasMany(PersonnelLaborActivity::class,'tabel_no','tabel_no')->where('is_special_service',1)->orderByDesc('leave_date');
+        return $this->hasMany(PersonnelLaborActivity::class,'tabel_no','tabel_no')
+                    ->where('is_special_service',1)
+                    ->orderByDesc('leave_date');
     }
 
     public function military() : HasMany
@@ -245,6 +250,12 @@ class Personnel extends Model
 
     public function getAgeAttribute() {
         return Carbon::parse($this->birthdate)->age;
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_pending',false)
+                     ->whereNull('leave_work_date');
     }
 
     public function scopeFilter($query, array $filters)

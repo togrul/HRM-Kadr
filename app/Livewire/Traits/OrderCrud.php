@@ -240,33 +240,6 @@ trait OrderCrud
         return $_modified_component;
     }
 
-    public function updateVacancy()
-    {
-        $staff_schedule = StaffSchedule::where('structure_id', $this->vacancy_list['structure_id'])
-                                    ->where('position_id' , $this->vacancy_list['position_id'])
-                                    ->first();
-
-        if(!$staff_schedule)
-        {
-           StaffSchedule::create([
-               'structure_id' => $this->vacancy_list['structure_id'],
-               'position_id' => $this->vacancy_list['position_id'],
-               'total' => $this->vacancy_list['count'],
-               'filled' => 0,
-               'vacant' => $this->vacancy_list['count']
-           ]);
-        }
-        else
-        {
-            $staff_schedule->update([
-                'total' => $staff_schedule->total + $this->vacancy_list['count'],
-                'vacant' => $staff_schedule->vacant + $this->vacancy_list['count']
-            ]);
-        }
-
-        $this->dispatch('vacancyUpdated',__('Vacancy was added successfully!'));
-    }
-
     private function modifyCodedList()
     {
         $this->coded_list = array_map(function ($value){
@@ -316,6 +289,34 @@ trait OrderCrud
         }
     }
 
+    private function getPersonnelsStatusReady($_personnel_id_list)
+    {
+        return Candidate::when(!empty($this->searchPersonnel), function ($q) {
+            $q->where(function ($query) {
+                $query->where('name', 'LIKE', "%{$this->searchPersonnel}%")
+                    ->orWhere('surname', 'LIKE', "%{$this->searchPersonnel}%");
+            });
+        })
+            ->whereNotIn('id', $_personnel_id_list)
+            ->where('status_id', 30)
+            ->get();
+    }
+
+    private function getPersonnelsList($_personnel_id_list)
+    {
+        return Personnel::when(!empty($this->searchPersonnel), function ($q) {
+            $q->where(function ($query) {
+                $query->where('name', 'LIKE', "%{$this->searchPersonnel}%")
+                    ->orWhere('surname', 'LIKE', "%{$this->searchPersonnel}%");
+            });
+        })
+            ->whereNotIn('id', $_personnel_id_list)
+            ->whereNull('leave_work_date')
+            ->orderBy('position_id')
+            ->orderBy('structure_id')
+            ->get();
+    }
+
     public function render()
     {
         $this->modifyCodedList();
@@ -341,33 +342,10 @@ trait OrderCrud
             }
         );
 
-        if(array_key_exists('order_id',$this->order) && $this->order['order_id'] == 1010)
-        {
-            //yalniz emre hazir statusunda olan namizedlerin siyahisi cixsin
-            $_personnels = Candidate::when(!empty($this->searchPersonnel),function ($q){
-                $q->where(function ($query){
-                    $query->where('name','LIKE',"%{$this->searchPersonnel}%")
-                        ->orWhere('surname','LIKE',"%{$this->searchPersonnel}%");
-                });
-            })
-                ->whereNotIn('id',$_personnel_id_list)
-                ->where('status_id',30)
-                ->get();
-        }
-        else
-        {
-            $_personnels = Personnel::when(!empty($this->searchPersonnel),function ($q){
-                $q->where(function ($query){
-                    $query->where('name','LIKE',"%{$this->searchPersonnel}%")
-                        ->orWhere('surname','LIKE',"%{$this->searchPersonnel}%");
-                });
-            })
-                ->whereNotIn('id',$_personnel_id_list)
-                ->whereNull('leave_work_date')
-                ->orderBy('position_id')
-                ->orderBy('structure_id')
-                ->get();
-        }
+        $_personnels = array_key_exists('order_id',$this->order) && $this->order['order_id'] == 1010
+                        ? $this->getPersonnelsStatusReady($_personnel_id_list)
+                        : $this->getPersonnelsList($_personnel_id_list);
+
 
         $_ranks = Rank::where('is_active',true)->get();
 
@@ -392,6 +370,14 @@ trait OrderCrud
                     : 'livewire.orders.add-order';
 
 
-        return view($view_name,compact('_templates','_components','_personnels','_main_structures','_structures','_positions','_ranks','_statuses'));
+        return view($view_name,compact(
+            '_templates',
+            '_components',
+            '_personnels',
+            '_main_structures',
+            '_structures',
+            '_positions',
+            '_ranks',
+            '_statuses'));
     }
 }

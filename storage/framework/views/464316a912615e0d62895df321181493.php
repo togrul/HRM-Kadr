@@ -1,5 +1,3 @@
-<?php $calculateSeniority = app('App\Services\CalculateSeniorityService'); ?>
-
 <div class="grid grid-cols-5 gap-2">
     <div class="flex flex-col">
         <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
@@ -35,7 +33,7 @@ $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?>
-        <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
+            <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.validation','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('validation'); ?>
 <?php if ($component->shouldRender()): ?>
@@ -88,7 +86,7 @@ $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?>
-        <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
+            <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.validation','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('validation'); ?>
 <?php if ($component->shouldRender()): ?>
@@ -147,7 +145,7 @@ $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?>
-        <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
+            <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.validation','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('validation'); ?>
 <?php if ($component->shouldRender()): ?>
@@ -206,7 +204,7 @@ $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?>
-        <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
+            <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.validation','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('validation'); ?>
 <?php if ($component->shouldRender()): ?>
@@ -254,6 +252,29 @@ unset($__errorArgs, $__bag); ?> <!--[if ENDBLOCK]><![endif]-->
 <?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
 <?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
 <?php endif; ?>
+        <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['labor_activities.coefficient'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+         <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.validation','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('validation'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?> <?php echo e($message); ?>  <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
+<?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
+<?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
+<?php endif; ?>
+        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?> <!--[if ENDBLOCK]><![endif]-->
     </div>
 </div>
 
@@ -293,7 +314,7 @@ $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?>
-        <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
+            <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.validation','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('validation'); ?>
 <?php if ($component->shouldRender()): ?>
@@ -346,7 +367,7 @@ $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?>
-        <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
+            <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.validation','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('validation'); ?>
 <?php if ($component->shouldRender()): ?>
@@ -406,7 +427,7 @@ $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?>
-            <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
+                <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.validation','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('validation'); ?>
 <?php if ($component->shouldRender()): ?>
@@ -427,14 +448,14 @@ unset($__errorArgs, $__bag); ?> <!--[if ENDBLOCK]><![endif]-->
         </div>
         <div class="flex flex-col w-20">
             <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'labor_activities.order_no']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'labor_activities.time']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('label'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['for' => 'labor_activities.order_no']); ?><?php echo e(__('Time')); ?> <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['for' => 'labor_activities.time']); ?><?php echo e(__('Time')); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
 <?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
@@ -461,6 +482,20 @@ unset($__errorArgs, $__bag); ?> <!--[if ENDBLOCK]><![endif]-->
 <?php endif; ?> <!--[if ENDBLOCK]><![endif]-->
 
 <div class="flex justify-end space-x-4">
+    <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.checkbox','data' => ['name' => 'labor_activities.is_current','model' => 'labor_activities.is_current']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('checkbox'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['name' => 'labor_activities.is_current','model' => 'labor_activities.is_current']); ?><?php echo e(__('Is current?')); ?> <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
+<?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
+<?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
+<?php endif; ?>
     <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.checkbox','data' => ['name' => 'isSpecialService','model' => 'isSpecialService']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('checkbox'); ?>
@@ -491,6 +526,8 @@ unset($__errorArgs, $__bag); ?> <!--[if ENDBLOCK]><![endif]-->
 <?php endif; ?>
 </div>
 
+
+
 <div class="relative -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
     <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
     <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
@@ -503,9 +540,6 @@ unset($__errorArgs, $__bag); ?> <!--[if ENDBLOCK]><![endif]-->
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
 <?php $component->withAttributes(['headers' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute([__('Info'),__('Date'),__('Total'),__('Order'),'action'])]); ?>
-            <?php
-                $total_duration = 0;
-            ?>
             <!--[if BLOCK]><![endif]--><?php $__empty_1 = true; $__currentLoopData = $labor_activities_list; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $laModel): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
             <tr>
                 <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
@@ -518,10 +552,17 @@ unset($__errorArgs, $__bag); ?> <!--[if ENDBLOCK]><![endif]-->
 <?php endif; ?>
 <?php $component->withAttributes(['standartWidth' => 'true']); ?>
                     <div class="flex flex-col space-y-1">
-                        <p class="text-sm font-medium text-gray-700">
-                            <?php echo e($laModel['company_name']); ?>
+                        <div class="flex items-center space-x-2">
+                            <p class="text-sm font-medium text-gray-700">
+                                <?php echo e($laModel['company_name']); ?>
 
-                        </p>
+                            </p>
+                            <!--[if BLOCK]><![endif]--><?php if($laModel['is_current']): ?>
+                                <span class="flex items-center justify-center rounded-full w-4 h-4 bg-green-500 border-4 border-green-200">
+                                </span>
+                            <?php endif; ?> <!--[if ENDBLOCK]><![endif]-->
+                        </div>
+
                         <span class="text-sm font-medium text-emerald-500 bg-slate-100 rounded-lg px-3 py-1 w-max flex justify-center items-center">
                             <?php echo e($laModel['position']); ?>
 
@@ -543,13 +584,13 @@ unset($__errorArgs, $__bag); ?> <!--[if ENDBLOCK]><![endif]-->
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
 <?php $component->withAttributes([]); ?>
-                    <div class="flex flex-col">
+                    <div class="flex flex-col space-y-1">
                         <div class="flex space-x-2 items-center">
                             <span class="text-sm font-medium text-gray-500">
                                 <?php echo e(__('Join date')); ?>:
                             </span>
                             <span class="text-sm font-medium text-gray-700">
-                                <?php echo e($laModel['join_date']); ?>
+                                <?php echo e(\Carbon\Carbon::parse($laModel['join_date'])->format('d.m.Y')); ?>
 
                             </span>
                         </div>
@@ -557,10 +598,17 @@ unset($__errorArgs, $__bag); ?> <!--[if ENDBLOCK]><![endif]-->
                             <span class="text-sm font-medium text-gray-500">
                                 <?php echo e(__('Leave date')); ?>:
                             </span>
-                            <span class="text-sm font-medium text-rose-500">
-                                <?php echo e($laModel['leave_date']); ?>
+                            <div class="text-sm font-medium text-rose-500">
+                                <!--[if BLOCK]><![endif]--><?php if(!empty($laModel['leave_date'])): ?>
+                                    <?php echo e(\Carbon\Carbon::parse($laModel['leave_date'])->format('d.m.Y')); ?>
 
-                            </span>
+                                <?php else: ?>
+                                    <span class="flex items-center justify-center w-max px-2 py-1 text-sm font-medium bg-green-100 text-green-500 rounded-lg">
+                                        <?php echo e(__('active')); ?>
+
+                                    </span>
+                                <?php endif; ?> <!--[if ENDBLOCK]><![endif]-->
+                            </div>
                         </div>
                     </div>
 
@@ -581,15 +629,15 @@ unset($__errorArgs, $__bag); ?> <!--[if ENDBLOCK]><![endif]-->
 <?php $component->withAttributes([]); ?>
                    <div class="flex flex-col">
                     <div class="flex space-x-2 items-center">
-                        <?php
-                            $data = $calculateSeniority->calculate($laModel['join_date'],$laModel['leave_date'],$laModel['coefficient']);
-                            $total_duration += $data['duration'];
-                        ?>
                         <span class="text-sm font-medium text-gray-500">
                             <?php echo e(__('Duration')); ?>:
                         </span>
                         <span class="text-sm font-medium text-gray-800">
-                            <?php echo e($data['year']); ?> <?php echo e(__('year')); ?> <?php echo e($data['month']); ?> <?php echo e(__('month')); ?>  (<?php echo e($data['diff']); ?> <?php echo e(__('month')); ?>)
+                            <?php echo e($calculatedData['data'][$key]['duration']['year']); ?> <?php echo e(__('year')); ?>
+
+                            <?php echo e($calculatedData['data'][$key]['duration']['month']); ?> <?php echo e(__('month')); ?>
+
+                            (<?php echo e($calculatedData['data'][$key]['duration']['diff']); ?> <?php echo e(__('month')); ?>)
                         </span>
                     </div>
                     <!--[if BLOCK]><![endif]--><?php if(!empty($laModel['coefficient'])): ?>
@@ -607,7 +655,7 @@ unset($__errorArgs, $__bag); ?> <!--[if ENDBLOCK]><![endif]-->
                             <?php echo e(__('Total')); ?>:
                         </span>
                         <span class="text-sm font-medium text-green-500">
-                            <?php echo e($data['duration']); ?> <?php echo e(__('month')); ?>
+                            <?php echo e($calculatedData['data'][$key]['duration']['duration']); ?> <?php echo e(__('month')); ?>
 
                         </span>
                     </div>
@@ -628,7 +676,7 @@ unset($__errorArgs, $__bag); ?> <!--[if ENDBLOCK]><![endif]-->
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
 <?php $component->withAttributes([]); ?>
-                    <!--[if BLOCK]><![endif]--><?php if($laModel['is_special_service']): ?>
+                    <!--[if BLOCK]><![endif]--><?php if(array_key_exists('is_special_service',$laModel) && $laModel['is_special_service']): ?>
                         <div class="flex flex-col space-y-1">
                             <div class="flex space-x-2 items-center">
                                 <span class="text-sm font-medium text-gray-500">
@@ -709,40 +757,83 @@ unset($__errorArgs, $__bag); ?> <!--[if ENDBLOCK]><![endif]-->
 
 
     <div class="my-2 flex justify-between items-center border border-gray-100 p-2 shadow-sm bg-gray-50 rounded-lg">
-            <?php
-                $calc_year_month_old = $calculateSeniority->calculateYearAndMonth($total_duration);
-            ?>
             <!--[if BLOCK]><![endif]--><?php if(!empty($laModel)): ?>
                 <div class="flex flex-col space-y-1 items-center">
-                    <span class="font-medium text-gray-600 bg-gray-200 px-3 py-1 rounded-lg"><?php echo e(__('Old seniority')); ?></span>
-                    <span class="font-medium text-gray-900"><?php echo e($total_duration); ?> <?php echo e(__('month')); ?></span>
-                    <span class="font-medium text-gray-900"><?php echo e($calc_year_month_old['year']); ?> <?php echo e(__('year')); ?> <?php echo e($calc_year_month_old['month']); ?> <?php echo e(__('month')); ?></span>
+                    <span class="font-medium text-gray-600 bg-gray-200 px-3 py-1 rounded-lg">
+                        <?php echo e(__('Old seniority')); ?>
+
+                    </span>
+                    <div class="flex items-center space-x-2 text-sm self-start">
+                        <span class="font-medium text-teal-500"><?php echo e(__('Property')); ?>:</span>
+                        <span class="font-medium text-gray-900">
+                            <?php echo e($calculatedData['sum_month_old']); ?> <?php echo e(__('month')); ?>
+
+                            (<?php echo e($calculatedData['sum_old']['year']); ?> <?php echo e(__('year')); ?>
+
+                            <?php echo e($calculatedData['sum_old']['month']); ?> <?php echo e(__('month')); ?>)
+                        </span>
+                    </div>
+                    <div class="flex items-center space-x-2 text-sm self-start">
+                        <span class="font-medium text-rose-500"><?php echo e(__('Military')); ?>:</span>
+                        <span class="font-medium text-gray-900">
+                            <?php echo e($calculatedData['sum_month_military_old']); ?> <?php echo e(__('month')); ?>
+
+                            (<?php echo e($calculatedData['sum_old_military']['year']); ?> <?php echo e(__('year')); ?>
+
+                            <?php echo e($calculatedData['sum_old_military']['month']); ?> <?php echo e(__('month')); ?>)
+                        </span>
+                    </div>
                 </div>
             <?php endif; ?> <!--[if ENDBLOCK]><![endif]-->
-            <?php
-                $currentData = $calculateSeniority->calculate($personnel['join_work_date'],$personnel['leave_work_date'],$_settings['Work coefficient']);
-                $calc_current_year_month = $calculateSeniority->calculateYearAndMonth($currentData['duration']);
-                $calc_year_month = $calculateSeniority->calculateYearAndMonth($total_duration  + $currentData['duration']);
-            ?>
             <div class="flex flex-col space-y-1 items-center">
                 <span class="font-medium text-gray-600 bg-gray-200 px-3 py-1 rounded-lg"><?php echo e(__('Current seniority')); ?></span>
-                <div class="flex space-x-1 items-center">
-                    <span class="font-medium text-gray-600"><?php echo e($currentData['diff']); ?> <?php echo e(__('month')); ?></span>
-                    (<span class="font-medium text-rose-500">x2</span>
-                    <span class="font-medium text-gray-900"><?php echo e($currentData['duration']); ?> <?php echo e(__('month')); ?></span>)
-                </div>
+                <div class="flex items-center space-x-2 text-sm self-start">
+                    <span class="font-medium text-teal-500"><?php echo e(__('Standart')); ?>:</span>
+                    <span class="font-medium text-gray-900">
+                            <?php echo e($calculatedData['sum_month_current_diff']); ?> <?php echo e(__('month')); ?>
 
-                <div class="flex space-x-1 items-center">
-                    <span class="font-medium text-gray-600"><?php echo e($currentData['year']); ?> <?php echo e(__('year')); ?> <?php echo e($currentData['month']); ?> <?php echo e(__('month')); ?></span>
-                    (<span class="font-medium text-rose-500">x2</span>
-                    <span class="font-medium text-gray-900"><?php echo e($calc_current_year_month['year']); ?> <?php echo e(__('year')); ?> <?php echo e($calc_current_year_month['month']); ?> <?php echo e(__('month')); ?></span>)
+                            (<?php echo e($calculatedData['sum_current_diff']['year']); ?> <?php echo e(__('year')); ?>
+
+                            <?php echo e($calculatedData['sum_current_diff']['month']); ?> <?php echo e(__('month')); ?>)
+                    </span>
+                </div>
+                <div class="flex items-center space-x-2 text-sm self-start">
+                    <span class="font-medium text-blue-500"><?php echo e(__('Coefficient')); ?>:</span>
+                    <span class="font-medium text-gray-900">
+                            <?php echo e($calculatedData['sum_month_current']); ?> <?php echo e(__('month')); ?>
+
+                            (<?php echo e($calculatedData['sum_current']['year']); ?> <?php echo e(__('year')); ?>
+
+                            <?php echo e($calculatedData['sum_current']['month']); ?> <?php echo e(__('month')); ?>)
+                    </span>
                 </div>
             </div>
             <!--[if BLOCK]><![endif]--><?php if(!empty($laModel)): ?>
                 <div class="flex flex-col space-y-1 items-center">
-                    <span class="font-medium text-gray-600 bg-gray-200 px-3 py-1 rounded-lg"><?php echo e(__('Total seniority')); ?></span>
-                    <span class="font-medium text-blue-500"><?php echo e($total_duration +  $currentData['duration']); ?> <?php echo e(__('month')); ?></span>
-                    <span class="font-medium text-blue-500"><?php echo e($calc_year_month['year']); ?> <?php echo e(__('year')); ?> <?php echo e($calc_year_month['month']); ?> <?php echo e(__('month')); ?></span>
+                    <span class="font-medium text-gray-600 bg-gray-200 px-3 py-1 rounded-lg">
+                        <?php echo e(__('Total seniority')); ?>
+
+                    </span>
+                    <div class="flex items-center space-x-2 text-sm self-start">
+                        <span class="font-medium text-teal-500"><?php echo e(__('Property')); ?>:</span>
+                        <span class="font-medium text-gray-900">
+                            <?php echo e($calculatedData['sum_total']); ?> <?php echo e(__('month')); ?>
+
+                            (<?php echo e($calculatedData['sum_total_full']['year']); ?> <?php echo e(__('year')); ?>
+
+                            <?php echo e($calculatedData['sum_total_full']['month']); ?> <?php echo e(__('month')); ?>)
+                        </span>
+                    </div>
+                    <div class="flex items-center space-x-2 text-sm self-start">
+                        <span class="font-medium text-rose-500"><?php echo e(__('Military')); ?>:</span>
+                        <span class="font-medium text-gray-900">
+                            <?php echo e($calculatedData['sum_total_military']); ?> <?php echo e(__('month')); ?>
+
+                            (<?php echo e($calculatedData['sum_total_military_full']['year']); ?> <?php echo e(__('year')); ?>
+
+                            <?php echo e($calculatedData['sum_total_military_full']['month']); ?> <?php echo e(__('month')); ?>)
+                        </span>
+                    </div>
                 </div>
            <?php endif; ?> <!--[if ENDBLOCK]><![endif]-->
     </div>
@@ -752,7 +843,7 @@ unset($__errorArgs, $__bag); ?> <!--[if ENDBLOCK]><![endif]-->
 
 <hr>
 
-<div class="w-full rounded-xl px-4 py-3 bg-gray-100 font-semibold text-xl flex justify-center">
+<div class="step-section__title">
     <h1><?php echo e(__('Ranks')); ?></h1>
 </div>
 
@@ -989,7 +1080,7 @@ unset($__errorArgs, $__bag); ?> <!--[if ENDBLOCK]><![endif]-->
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
 <?php $component->withAttributes(['headers' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute([__('Rank'),__('Name'),__('Given date'),'action'])]); ?>
-            <!--[if BLOCK]><![endif]--><?php $__empty_1 = true; $__currentLoopData = $rank_list; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $rModel): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+            <!--[if BLOCK]><![endif]--><?php $__empty_1 = true; $__currentLoopData = $rank_list; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $keyRank => $rModel): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
             <tr>
                 <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table.td','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
@@ -1059,7 +1150,7 @@ unset($__errorArgs, $__bag); ?> <!--[if ENDBLOCK]><![endif]-->
 <?php $component->withAttributes(['isButton' => true]); ?>
                      <button
                         onclick="confirm('Are you sure you want to remove this data?') || event.stopImmediatePropagation()"
-                        wire:click="forceDeleteRank(<?php echo e($key); ?>)"
+                        wire:click="forceDeleteRank(<?php echo e($keyRank); ?>)"
                         class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-50 hover:text-gray-700"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-red-500">
@@ -1088,8 +1179,6 @@ unset($__errorArgs, $__bag); ?> <!--[if ENDBLOCK]><![endif]-->
 <?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
 <?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
 <?php endif; ?>
-
-
     </div>
     </div>
 </div>
