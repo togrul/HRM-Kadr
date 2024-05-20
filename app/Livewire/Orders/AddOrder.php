@@ -16,17 +16,12 @@ class AddOrder extends Component
     use OrderCrud;
     public function store()
     {
-        $data = $this->prepareToCrud();
-        $message = $data['message'];
-
-        if(!empty($message))
+        $data = $this->fillCrudData();
+        if(!is_array($data))
         {
-            return $this->dispatch('checkVacancyWasSet',$message);
+           return $data;
         }
-
-        $_attributes = $data['attributes'];
-        $_personnel_ids = $data['personnel_ids'];
-        $_component_ids = $data['component_ids'];
+        [$_attributes,$_personnel_ids,$_component_ids] = [$data['attributes'],$data['personnel_ids'],$data['component_ids']];
 
         DB::transaction(function () use($_attributes,$_personnel_ids,$_component_ids){
             //create order logs
@@ -55,14 +50,17 @@ class AddOrder extends Component
                 unset($_attr['component_id']);
 
                 foreach ($_attr as $key => $value) {
-                    $order_log->attributes()->create([
-                        'component_id' => $component_id,
-                        'attribute_key' => $key,
-                        'attribute_id' => is_array($value) ? $value['id'] : null,
-                        'attribute_value' => is_array($value) ? $value['name'] : $value,
-                        'row_number' => $k
-                    ]);
+                    $attr_data[$key] = [
+                        'id' =>  is_array($value) ? $value['id'] : null,
+                        'value' => is_array($value) ? $value['name'] : $value
+                    ];
                 }
+
+                $order_log->attributes()->create([
+                    'component_id' => $component_id,
+                    'attributes' => $attr_data,
+                    'row_number' => $k
+                ]);
             }
 
             //insert order log personnels eger candidate dirse.Service cagir

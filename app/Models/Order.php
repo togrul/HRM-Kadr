@@ -20,7 +20,8 @@ class Order extends Model
         'order_category_id',
         'name',
         'content',
-        'order_model'
+        'order_model',
+        'blade'
     ];
 
     public function category() : BelongsTo

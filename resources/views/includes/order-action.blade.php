@@ -70,6 +70,7 @@
     </div>
 
     @if($showComponent)
+        @if($selectedBlade == 'default')
         @for($i = 0; $i < $componentRows; $i++)
             <div class="grid grid-cols-1 gap-2 border-2 border-slate-200 border-dashed px-4 py-3 rounded-lg relative">
                 @if(($i+1) > count($originalComponents))
@@ -108,7 +109,7 @@
                     </div>
                 </div>
                 <div class="flex flex-col space-y-2">
-                    @if(!empty($selectedComponents[$i]))e
+                    @if(!empty($selectedComponents[$i]))
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 w-full sm:col-span-2 mt-3">
                             @foreach($selectedComponents[$i] as $row => $_field)
                                 <x-dynamic-input
@@ -139,6 +140,7 @@
                 <span class="uppercase">{{ __('Add') }}</span>
             </button>
         </div>
+        @endif
     @endif
 
     <div class="grid grid-cols-1">

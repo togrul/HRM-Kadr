@@ -16,10 +16,12 @@ class OrderLogComponentAttributes extends Model
     protected $fillable = [
         'order_no',
         'component_id',
-        'attribute_key',
-        'attribute_id',
-        'attribute_value',
+        'attributes',
         'row_number'
+    ];
+
+    protected $casts = [
+        'attributes' => 'array'
     ];
 
     public function component() : BelongsTo

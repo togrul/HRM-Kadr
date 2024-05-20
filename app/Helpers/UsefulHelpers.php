@@ -51,4 +51,10 @@ class UsefulHelpers
 
         return $months[$monthName];
     }
+
+
+    public static function modifyArrayToKeyValuePair($array)
+    {
+        return array_combine(array_keys($array),array_column($array,'value'));
+    }
 }

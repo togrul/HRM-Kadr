@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Orders;
 
+use App\Helpers\UsefulHelpers;
 use App\Livewire\Traits\SideModalAction;
 use App\Models\OrderLog;
 use App\Models\OrderStatus;
@@ -90,14 +91,15 @@ class AllOrders extends Component
         $suffixService = new WordSuffixService();
         foreach ($order->components as $k => $_component)
         {
-            $_replace_texts[] = $order->attributes
+            $attr_list = $order->attributes
                                 ->where('component_id',$_component->id)
-                                ->pluck('attribute_value','attribute_key')
-                                ->toArray();
+                                ->value('attributes');
+
+            $_replace_texts[] = UsefulHelpers::modifyArrayToKeyValuePair($attr_list);
             $_replace_texts[$k]['$year'] .= $suffixService->getNumberSuffix($_replace_texts[$k]['$year']);
             $_replace_texts[$k]['$surname'] = $suffixService->getSurnameSuffix( $_replace_texts[$k]['$surname']);
             $_replace_texts[$k]['$structure_main'] = $suffixService->getStructureSuffix( $_replace_texts[$k]['$structure_main']);
-            //bold text
+            // **** her hansi bir hisseni bold etmek ucun
             $_replace_texts[$k]['$fullname'] = $this->convertWordIntoBold($_replace_texts[$k]['$fullname']);
         }
 

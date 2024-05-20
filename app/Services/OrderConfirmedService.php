@@ -28,35 +28,37 @@ class OrderConfirmedService
                         return "NMZD{$x}";
                     },$personnelIds);
 
+
                     $personnelModel = $action == 'create'
                         ? $orderLog->personnels
                         : Personnel::whereIn('tabel_no',$convertedIds)
                             ->where('is_pending',true)
+                            ->with(['ranks','structure','position','laborActivities'])
                             ->get();
 
                     foreach($personnelModel as $key => $_personnel)
                     {
-                        $_attr = $orderLog->personnels()
-                            ->join('order_log_component_attributes', 'order_log_personnels.component_id', '=', 'order_log_component_attributes.component_id')
-                            ->where('order_log_personnels.tabel_no', $_personnel->tabel_no)
-                            ->select('order_log_component_attributes.attribute_key', 'order_log_component_attributes.attribute_value')
-                            ->pluck('attribute_value', 'attribute_key')
-                            ->toArray();
+                        $component_id = $orderLog->personnels()
+                            ->where('order_log_personnels.tabel_no',$_personnel->tabel_no)
+                            ->value('component_id');
 
+                        $_attr = $orderLog->attributes()
+                            ->where('component_id', $component_id)
+                            ->value('attributes');
 
-                        $month = UsefulHelpers::convertToMonthNumber($_attr['$month'],config('app.locale'));
+                        $month = UsefulHelpers::convertToMonthNumber($_attr['$month']['value'],config('app.locale'));
 
-                        $date = "{$_attr['$year']}-{$month}-{$_attr['$day']}";
+                        $date = "{$_attr['$year']['value']}-{$month}-{$_attr['$day']['value']}";
 
                         $_personnel->update([
-                            'join_work_date' => $orderLog->given_date,
+                            'join_work_date' => $date,
                             'is_pending' => false
                         ]);
 
                         $_personnel->ranks()->create([
-                            'rank_id' => $orderLog->components[$key]['rank_id'],
+                            'rank_id' => $_attr['$rank']['id'] ?? 10,
                             'name' => 'İşə qəbul',
-                            'given_date' => $orderLog->given_date
+                            'given_date' => $date
                         ]);
 
                         $staff = StaffSchedule::where('structure_id',$_personnel->structure_id)
@@ -76,7 +78,7 @@ class OrderConfirmedService
                         if($has_active_work)
                         {
                             $has_active_work->update([
-                                'leave_date' => $orderLog->given_date,
+                                'leave_date' => $date,
                                 'is_current' => false
                             ]);
                         }
@@ -85,7 +87,7 @@ class OrderConfirmedService
                             'company_name' => config('app.company'),
                             'position' => $_personnel->position->name,
                             'coefficient' => $_personnel->structure->coefficient,
-                            'join_date' => $orderLog->given_date,
+                            'join_date' => $date,
                             'is_special_service' => true,
                             'order_given_by' => "{$orderLog->given_by_rank} {$orderLog->given_by}",
                             'order_no' => $orderLog->order_no,

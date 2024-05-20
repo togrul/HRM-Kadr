@@ -490,7 +490,10 @@ unset($__errorArgs, $__bag); ?> <!--[if ENDBLOCK]><![endif]-->
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['name' => 'labor_activities.is_current','model' => 'labor_activities.is_current']); ?><?php echo e(__('Is current?')); ?> <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['name' => 'labor_activities.is_current','model' => 'labor_activities.is_current']); ?>
+        <?php echo e(__('Is current?')); ?>
+
+     <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
 <?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
@@ -525,7 +528,6 @@ unset($__errorArgs, $__bag); ?> <!--[if ENDBLOCK]><![endif]-->
 <?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
 <?php endif; ?>
 </div>
-
 
 
 <div class="relative -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">

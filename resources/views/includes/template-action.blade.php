@@ -51,6 +51,10 @@
 </div>
 
 <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+    <div class="">
+        <x-label for="template_data.blade">{{ __('Page') }}</x-label>
+        <x-livewire-input mode="gray" name="template_data.blade" wire:model="template_data.blade"></x-livewire-input>
+    </div>
     <div class="flex flex-col space-y-4 ">
         <x-label for="template_data.content">{{ __('File') }}</x-label>
         <div class="bg-gray-100 rounded-lg shadow-sm p-1">

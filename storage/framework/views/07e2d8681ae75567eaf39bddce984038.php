@@ -286,6 +286,7 @@ unset($__errorArgs, $__bag); ?> <!--[if ENDBLOCK]><![endif]-->
     </div>
 
     <!--[if BLOCK]><![endif]--><?php if($showComponent): ?>
+        <!--[if BLOCK]><![endif]--><?php if($selectedBlade == 'default'): ?>
         <!--[if BLOCK]><![endif]--><?php for($i = 0; $i < $componentRows; $i++): ?>
             <div class="grid grid-cols-1 gap-2 border-2 border-slate-200 border-dashed px-4 py-3 rounded-lg relative">
                 <?php if(($i+1) > count($originalComponents)): ?>
@@ -383,7 +384,7 @@ unset($__errorArgs, $__bag); ?> <!--[if ENDBLOCK]><![endif]-->
                     </div>
                 </div>
                 <div class="flex flex-col space-y-2">
-                    <!--[if BLOCK]><![endif]--><?php if(!empty($selectedComponents[$i])): ?>e
+                    <!--[if BLOCK]><![endif]--><?php if(!empty($selectedComponents[$i])): ?>
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 w-full sm:col-span-2 mt-3">
                             <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $selectedComponents[$i]; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $row => $_field): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
@@ -415,6 +416,7 @@ unset($__errorArgs, $__bag); ?> <!--[if ENDBLOCK]><![endif]-->
                 <span class="uppercase"><?php echo e(__('Add')); ?></span>
             </button>
         </div>
+        <?php endif; ?> <!--[if ENDBLOCK]><![endif]-->
     <?php endif; ?> <!--[if ENDBLOCK]><![endif]-->
 
     <div class="grid grid-cols-1">

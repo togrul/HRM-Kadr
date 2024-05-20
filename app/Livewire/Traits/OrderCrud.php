@@ -50,6 +50,8 @@ trait OrderCrud
     public array $vacancy_list;
     public array $originalComponents = [];
 
+    public $selectedBlade;
+
     public function validationRules()
     {
         return [
@@ -137,7 +139,12 @@ trait OrderCrud
         $this->fillEmptyComponent();
         if(empty($this->selectedOrder))
         {
-            $this->order['order_id'] = OrderType::where('id',$value)->value('order_id');
+            $order = OrderType::with('order')
+                        ->where('id',$value)
+                        ->first();
+
+            $this->order['order_id'] = $order->order_id;
+            $this->selectedBlade = $order->order->blade;
         }
     }
 
@@ -243,8 +250,26 @@ trait OrderCrud
     private function modifyCodedList()
     {
         $this->coded_list = array_map(function ($value){
-            return $value === 1 ? true : false;
+            return $value === 1;
         },collect($this->components)->pluck('structure_main_id.id')->toArray());
+    }
+
+    private function fillCrudData()
+    {
+        $data = $this->prepareToCrud();
+        $message = $data['message'];
+
+        if(!empty($message))
+        {
+            return $this->dispatch('checkVacancyWasSet',$message);
+        }
+
+       return [
+           'attributes' => $data['attributes'],
+           'personnel_ids' => $data['personnel_ids'],
+           'component_ids' => $data['component_ids'],
+           'vacancy_list' => $data['vacancy_list'],
+       ];
     }
 
     private function prepareToCrud() : array
@@ -260,6 +285,7 @@ trait OrderCrud
         $list_for_vacancy = !empty($this->originalComponents)
                             ? UsefulHelpers::compareMultidimensionalArrays($this->components,$this->originalComponents)
                             : $this->components;
+
 
         $this->vacancy_list = resolve(CheckVacancyService::class)->handle($list_for_vacancy);
 
@@ -330,6 +356,7 @@ trait OrderCrud
                 $q->where('order_id',$this->selectedOrder);
             })
             ->get();
+
 
         $_components = \App\Models\Component::with('orderType')
             ->where('order_type_id',$this->selectedTemplate)

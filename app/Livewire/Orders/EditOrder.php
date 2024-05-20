@@ -43,30 +43,33 @@ class EditOrder extends Component
 
         $componentsList = $this->orderModelData->components;
 
-        foreach ($this->orderModelData->attributes->groupBy('row_number') as $key => $attributes)
+        foreach ($this->orderModelData->attributes as $key => $attributes)
         {
-            $this->selectedComponents[$key] = $attributes->pluck('attribute_key');
+            $attr_list = $attributes->attributes;
+
+            $this->selectedComponents[$key] = array_keys($attr_list);
+
             $this->components[$key]['component_id'] = [
                 'id' => $componentsList[$key]->id,
                 'name' => $componentsList[$key]->name,
             ];
-            foreach ($attributes as $attr)
+            foreach ($attr_list as $ka => $attr)
             {
-                $_replacedKey = str_replace( '$', '', $attr['attribute_key']);
+                $_replacedKey = str_replace( '$', '', $ka);
                 $_replacedKey = $_replacedKey == 'fullname' ? 'personnel' : $_replacedKey;
 
-                if(!empty($attr->attribute_id) || $attr->attribute_value == '---')
+                if(!empty($attr['id']) || $attr['value'] == '---')
                 {
                     $_colName = "{$_replacedKey}_id";
                     $_colValue = [
-                        'id' => $attr->attribute_id,
-                        'name' => $attr->attribute_value,
+                        'id' => $attr['id'],
+                        'name' => $attr['value'],
                     ];
                 }
                 else
                 {
                     $_colName = $_replacedKey;
-                    $_colValue = $attr->attribute_value;
+                    $_colValue = $attr['value'];
                 }
 
                 $this->components[$key][$_colName] = $_colValue;
@@ -78,18 +81,13 @@ class EditOrder extends Component
 
     public function store()
     {
-        $data = $this->prepareToCrud();
-        $message = $data['message'];
-
-        if(!empty($message))
+        $data = $this->fillCrudData();
+        if(!is_array($data))
         {
-            return $this->dispatch('checkVacancyWasSet',$message);
+            return $data;
         }
 
-        $_attributes = $data['attributes'];
-        $_personnel_ids = $data['personnel_ids'];
-        $_component_ids = $data['component_ids'];
-        $_new_component_list = $data['vacancy_list'];
+        [$_attributes,$_personnel_ids,$_component_ids, $_new_component_list] = [$data['attributes'],$data['personnel_ids'],$data['component_ids'],$data['vacancy_list']];
 
         DB::transaction(function () use($_attributes,$_personnel_ids,$_component_ids,$_new_component_list){
             $this->orderModelData->update([
@@ -102,18 +100,16 @@ class EditOrder extends Component
                 'status_id' => $this->order['status_id'],
             ]);
 
-            foreach($_component_ids as $key => $_component)
-            {
-                $component_exists = $this->orderModelData->components()
+            foreach($_component_ids as $key => $_component) {
+                    $component_exists = $this->orderModelData->components()
                                     ->where('row_number' , $key)
                                     ->where('component_id', $_component)
                                     ->first();
 
-                if(!$component_exists)
-                {
-                    $this->orderModelData->components()->attach([
-                        $_component => ['row_number' => $key]
-                    ]);
+                    if(!$component_exists) {
+                        $this->orderModelData->components()->attach([
+                            $_component => ['row_number' => $key]
+                        ]);
                 }
             }
 
@@ -124,18 +120,22 @@ class EditOrder extends Component
                 unset($_attr['component_id']);
 
                 foreach ($_attr as $key => $value) {
-                    $this->orderModelData->attributes()->updateOrCreate(
-                        [
-                            'component_id' => $component_id,
-                            'attribute_key' => $key,
-                            'row_number' => $k
-                        ],
-                        [
-                            'attribute_id' => is_array($value) ? $value['id'] : null,
-                            'attribute_value' => is_array($value) ? $value['name'] : $value,
-                        ]
-                    );
+                    $attr_data[$key] = [
+                        'id' =>  is_array($value) ? $value['id'] : null,
+                        'value' => is_array($value) ? $value['name'] : $value
+                    ];
                 }
+
+                $this->orderModelData->attributes()->updateOrCreate(
+                    [
+                        'component_id' => $component_id,
+                        'order_no' => $this->orderModelData->order_no,
+                        'row_number' => $k
+                    ],
+                    [
+                        'attributes' => $attr_data
+                    ]
+                );
             }
             //insert order log personnels eger candidate dirse.Service cagir
             if(!empty($_new_component_list))

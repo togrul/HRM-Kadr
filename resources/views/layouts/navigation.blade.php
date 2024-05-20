@@ -15,6 +15,9 @@
                     <x-nav-link  wire:navigate :href="route('candidates')" :active="request()->routeIs('candidates')">
                         {{ __('Candidates') }}
                     </x-nav-link>
+                    <x-nav-link  wire:navigate :href="route('candidates')" :active="request()->routeIs('candidates')">
+                        {{ __('Vacations') }}
+                    </x-nav-link>
                 </div>
             </div>
 
