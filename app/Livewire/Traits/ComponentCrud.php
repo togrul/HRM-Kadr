@@ -38,7 +38,8 @@ trait ComponentCrud
 
     public function updated($name,$value)
     {
-        $dollarStrings = array_filter(explode(' ', str_replace(['“','”'],'',$value)), function ($string) {
+        $data = $this->component['title'] . ' ' . $this->component['content'];
+        $dollarStrings = array_filter(explode(' ', str_replace(['“','”'],'',$data)), function ($string) {
             return Str::startsWith($string, '$');
         });
 

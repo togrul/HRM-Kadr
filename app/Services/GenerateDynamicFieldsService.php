@@ -60,6 +60,26 @@ class GenerateDynamicFieldsService
                 'selectedName' => 'position',
                 'searchField' => 'searchPosition'
             ],
+
+            '$start_date' => [
+                'field' => 'start_date',
+                'title' => __('Start date')
+            ],
+
+            '$end_date' => [
+                'field' => 'end_date',
+                'title' => __('End date')
+            ],
+
+            '$days' => [
+                'field' => 'days',
+                'title' => __('Day')
+            ],
+
+            '$location' => [
+                'field' => 'location',
+                'title' => __('Location')
+            ],
         ];
     }
 }

@@ -27,29 +27,37 @@
             </div>
         @else
             <section class="" wire:target="selectService" wire:loading.remove>
-                @if($selectedService == 'general')
-                    @livewire('services.settings.settings-list',key('settings'))
-                @elseif($selectedService == 'menus')
-                    @livewire('services.menus.all-menus',key('menus'))
-                @elseif($selectedService == 'roles')
-                    <div class="grid grid-cols-1 sm:grid-cols-5 gap-3">
-                        <div class="sm:col-span-2" wire:key="roles-section">
-                            @livewire('roles.manage-roles',key('roles'))
+                @switch($selectedService)
+                    @case('general')
+                        @livewire('services.settings.settings-list', key('settings'))
+                        @break
+                    @case('menus')
+                        @livewire('services.menus.all-menus', key('menus'))
+                        @break
+                    @case('roles')
+                        <div class="grid grid-cols-1 sm:grid-cols-5 gap-3">
+                            <div class="sm:col-span-2" wire:key="roles-section">
+                                @livewire('roles.manage-roles', key('roles'))
+                            </div>
+                            <div class="sm:col-span-3" wire:key="permission-section">
+                                @livewire('roles.permissions', key('permissions'))
+                            </div>
                         </div>
+                        @break
+                    @case('users')
+                        @livewire('services.users.all-users', key('users'))
+                        @break
+                    @case('ranks')
+                        @livewire('services.ranks.all-ranks', key('ranks'))
+                        @break
+                    @case('order-documents')
+                        @livewire('orders.templates.all-templates', key('templates'))
+                        @break
+                    @case('components')
+                        @livewire('services.components.all-components', key('components'))
+                        @break
+                @endswitch
 
-                        <div class="sm:col-span-3" wire:key="permission-section">
-                            @livewire('roles.permissions',key('permissions'))
-                        </div>
-                    </div>
-                @elseif($selectedService == 'users')
-                    @livewire('services.users.all-users',key('users'))
-                @elseif($selectedService == 'ranks')
-                    ranks
-                @elseif($selectedService == 'order-documents')
-                    @livewire('orders.templates.all-templates',key('templates'))
-                @elseif($selectedService == 'components')
-                    @livewire('services.components.all-components',key('components'))
-                @endif
             </section>
         @endif
     </div>

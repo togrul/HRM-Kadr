@@ -31,13 +31,19 @@ Route::middleware('auth')->group(function () {
     Route::get('/services',Service::class)->name('services');
     Route::get('/orders',AllOrders::class)->name('orders');
     Route::get('/candidates',\App\Livewire\Candidates\CandidateList::class)->name('candidates');
+    Route::get('/vacations',\App\Livewire\Vacation\Vacations::class)->name('vacations.list');
+    Route::get('/business-trips',\App\Livewire\Outside\BusinessTrips::class)->name('business-trips.list');
 
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::prefix('/profile')->controller(ProfileController::class)->group(function () {
+        Route::get('/', 'edit')->name('profile.edit');
+        Route::patch('/', 'update')->name('profile.update');
+        Route::delete('/', 'destroy')->name('profile.destroy');
+    });
 
-    Route::get('/print/personnel/{id?}',[\App\Http\Controllers\PrintController::class,'personnel_service_book'])->name('print.personnel');
-    Route::get('/print/page/{model?}',[\App\Http\Controllers\PrintController::class,'print_page'])->name('print.page');
+    Route::prefix('print')->controller(\App\Http\Controllers\PrintController::class)->group(function () {
+        Route::get('personnel/{id?}', 'personnel_service_book')->name('print.personnel');
+        Route::get('page/{model?}', 'print_page')->name('print.page');
+    });
 
     // Livewire::setUpdateRoute(function ($handle) {
     //     return Route::post('/livewire/update', $handle);

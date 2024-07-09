@@ -15,8 +15,11 @@
                     <x-nav-link  wire:navigate :href="route('candidates')" :active="request()->routeIs('candidates')">
                         {{ __('Candidates') }}
                     </x-nav-link>
-                    <x-nav-link  wire:navigate :href="route('candidates')" :active="request()->routeIs('candidates')">
+                    <x-nav-link  wire:navigate :href="route('vacations.list')" :active="request()->routeIs('vacations.list')">
                         {{ __('Vacations') }}
+                    </x-nav-link>
+                    <x-nav-link  wire:navigate :href="route('business-trips.list')" :active="request()->routeIs('business-trips.list')">
+                        {{ __('Business trips') }}
                     </x-nav-link>
                 </div>
             </div>
@@ -72,6 +75,9 @@
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link wire:navigate :href="route('candidates')" :active="request()->routeIs('candidates')">
                 {{ __('Candidates') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link wire:navigate :href="route('vacations.list')" :active="request()->routeIs('vacations.list')">
+                {{ __('Vacations') }}
             </x-responsive-nav-link>
         </div>
 

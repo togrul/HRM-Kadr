@@ -16,9 +16,10 @@
     $input = match ($type)
     {
         '$structure_main','$position','$fullname','$rank' => 'select',
-        '$month','$name','$surname' => 'text-input',
+        '$month','$name','$surname','$days','$location' => 'text-input',
         '$day','$year' => 'numeric-input',
-        '$structure' => 'radio-list'
+        '$structure' => 'radio-list',
+        '$start_date','$end_date' => 'date-input'
     };
 
     $list_string = 'components';
@@ -113,7 +114,19 @@
         </div>
 
     </div>
+    @elseif($input == 'date-input')
+    <div class="flex flex-col">
+        <x-label for="{{ $list_string }}.{{ $key }}.{{ $field }}">{{ $title }}</x-label>
+        <x-pikaday-input mode="gray" name="{{ $list_string }}.{{ $key }}.{{ $field }}" format="Y-MM-DD" wire:model.live="{{ $list_string }}.{{ $key }}.{{ $field }}">
+            <x-slot name="script">
+                $el.onchange = function () {
+                @this.set('{{ $list_string }}.{{ $key }}.{{ $field }}', $el.value);
+                }
+            </x-slot>
+        </x-pikaday-input>
+        @error("{{ $list_string }}.{{ $key }}.{{ $field }}")
+        <x-validation> {{ $message }} </x-validation>
+        @enderror
+    </div>
+
 @endif
-
-
-

@@ -4,7 +4,7 @@
     $service = $getDynamicFieldOptions->handle();
 @endphp
 
-<div class="flex flex-col space-y-4">
+<div class="flex flex-col space-y-4" x-data="{showPersonnelList : -1}">
     <div class="sidemenu-title">
         <h2 class="text-2xl font-title font-semibold text-gray-500" id="slide-over-title">
             {{ $title ?? ''}}
@@ -17,7 +17,7 @@
                 $selectedName = array_key_exists('order_type_id',$order) ? $order['order_type_id']['name'] : '---';
                 $selectedId = array_key_exists('order_type_id',$order) ? $order['order_type_id']['id'] : -1;
             @endphp
-            <x-select-list class="w-full" :title="__('Template')" mode="gray" :selected="$selectedName" name="templateId">
+            <x-select-list class="w-full" :title="__('Template')" mode="gray" :selected="$selectedName" name="templateId" :disabled="$orderModel">
                 <x-livewire-input  @click.stop="open = true" mode="gray" name="searchTemplate" wire:model.live="searchTemplate"></x-livewire-input>
 
                 <x-select-list-item wire:click="setData('order','order_type_id',null,'---',null);$dispatch('templateSelected',{value: -1})" :selected="'---' ==  $selectedName"
@@ -70,11 +70,13 @@
     </div>
 
     @if($showComponent)
-        @if($selectedBlade == 'default')
+
         @for($i = 0; $i < $componentRows; $i++)
             <div class="grid grid-cols-1 gap-2 border-2 border-slate-200 border-dashed px-4 py-3 rounded-lg relative">
-                @if(($i+1) > count($originalComponents))
-                <button class="flex justify-center items-center rounded-lg p-1 shadow-sm absolute right-0 top-0 bg-slate-50 text-rose-500" wire:click="deleteRow">
+                @if(($i+1) > count($selectedBlade == 'default' ? $originalComponents : Arr::except($this->originalComponents,'personnels')))
+                <button class="flex justify-center items-center rounded-lg p-1 shadow-sm absolute right-0 top-0 bg-slate-50 text-rose-500"
+                        wire:click="deleteRow"
+                >
                     <svg data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="w-5 h-5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"></path>
                     </svg>
@@ -108,27 +110,8 @@
                         @enderror
                     </div>
                 </div>
-                <div class="flex flex-col space-y-2">
-                    @if(!empty($selectedComponents[$i]))
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 w-full sm:col-span-2 mt-3">
-                            @foreach($selectedComponents[$i] as $row => $_field)
-                                <x-dynamic-input
-                                    :list="$components"
-                                    :field="$service[$_field]['field']"
-                                    :title="$service[$_field]['title']"
-                                    :type="$_field"
-                                    :model="array_key_exists('model',$service[$_field]) ? ${$service[$_field]['model']} : null"
-                                    :key="$i"
-                                    :selectedName="array_key_exists('selectedName',$service[$_field]) ? $service[$_field]['selectedName'] : null"
-                                    :searchField="array_key_exists('searchField',$service[$_field]) ? $service[$_field]['searchField'] : null"
-                                    :isCoded="$coded_list[$i]"
-                                    :$row
-                                    :disabled="($i+1) <= count($originalComponents)"
-                                ></x-dynamic-input>
-                            @endforeach
-                        </div>
-                    @endif
-                </div>
+                    {{--secilen emre gore doldurululan fieldleri auto generasiya etmek--}}
+                    @include("includes.order-templates.{$selectedBlade}")
             </div>
         @endfor
 
@@ -141,7 +124,7 @@
             </button>
         </div>
         @endif
-    @endif
+
 
     <div class="grid grid-cols-1">
         <div class="flex flex-col space-y-1">
@@ -155,7 +138,7 @@
                 @endforeach
             </div>
             @error('order.status_id')
-            <x-validation> {{ $message }} </x-validation>
+                <x-validation> {{ $message }} </x-validation>
             @enderror
         </div>
     </div>

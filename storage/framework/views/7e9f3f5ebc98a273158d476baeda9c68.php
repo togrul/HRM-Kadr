@@ -259,7 +259,7 @@ if (isset($__slots)) unset($__slots);
                         <!--[if BLOCK]><![endif]--><?php $__empty_1 = true; $__currentLoopData = $orders; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $_order): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                             <tr class="<?php echo \Illuminate\Support\Arr::toCssClasses([
                                 'bg-white' => $_order->status_id != 30,
-                                'bg-red-100' => $_order->status_id == 30
+                                'bg-rose-50' => $_order->status_id == 30
                             ]); ?>">
                                 <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table.td','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
@@ -295,20 +295,22 @@ if (isset($__slots)) unset($__slots);
                                             <?php echo e($_order->order_no); ?>
 
                                         </span>
-                                        <!--[if BLOCK]><![endif]--><?php if($status == 'deleted'): ?>
-                                            <div class="flex flex-col text-xs font-medium">
-                                                <div class="flex items-center space-x-1">
-                                                    <span class="text-gray-500"><?php echo e(__('Deleted date')); ?>:</span>
-                                                    <span class="text-black"><?php echo e(\Carbon\Carbon::parse($_order->deleted_at)->format('d.m.Y H:i')); ?></span>
-                                                </div>
-                                                <div class="flex items-center space-x-1">
-                                                    <span class="text-gray-500"><?php echo e(__('Deleted by')); ?>:</span>
-                                                    <span class="text-black"><?php echo e($_order->personDidDelete->name); ?></span>
-                                                </div>
-                                            </div>
-                                        <?php endif; ?> <!--[if ENDBLOCK]><![endif]-->
-                                    </div>
+                                        <div class="flex space-x-1 items-center">
+                                             <span class="text-sm shadow-sm font-medium px-3 py-1 rounded-lg bg-teal-100 text-teal-600 flex justify-center items-center">
+                                              <?php echo e($_order->order->name); ?>
 
+                                            </span>
+                                            <span>
+                                                <svg class="w-4 h-4" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                                  <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"></path>
+                                                </svg>
+                                            </span>
+                                            <span class="text-sm shadow-sm font-medium px-2 py-1 rounded-lg bg-slate-100 text-slate-500 flex justify-center items-center">
+                                              <?php echo e($_order->orderType->name); ?>
+
+                                            </span>
+                                        </div>
+                                    </div>
                                  <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
@@ -325,10 +327,24 @@ if (isset($__slots)) unset($__slots);
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
 <?php $component->withAttributes([]); ?>
-                                    <span class="text-sm font-medium text-gray-600">
-                                        <?php echo e(\Carbon\Carbon::parse($_order->given_date)->format('d.m.Y')); ?>
+                                    <div class="flex flex-col space-y-1">
+                                        <span class="text-sm font-medium text-gray-600">
+                                            <?php echo e(\Carbon\Carbon::parse($_order->given_date)->format('d.m.Y')); ?>
 
-                                   </span>
+                                       </span>
+                                        <!--[if BLOCK]><![endif]--><?php if($status == 'deleted'): ?>
+                                            <div class="flex flex-col text-xs font-medium">
+                                                <div class="flex items-center space-x-1">
+                                                    <span class="text-gray-500"><?php echo e(__('Deleted date')); ?>:</span>
+                                                    <span class="text-black"><?php echo e(\Carbon\Carbon::parse($_order->deleted_at)->format('d.m.Y H:i')); ?></span>
+                                                </div>
+                                                <div class="flex items-center space-x-1">
+                                                    <span class="text-gray-500"><?php echo e(__('Deleted by')); ?>:</span>
+                                                    <span class="text-black"><?php echo e($_order->personDidDelete->name); ?></span>
+                                                </div>
+                                            </div>
+                                        <?php endif; ?> <!--[if ENDBLOCK]><![endif]-->
+                                    </div>
                                  <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>

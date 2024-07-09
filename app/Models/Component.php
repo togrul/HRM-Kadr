@@ -19,7 +19,8 @@ class Component extends Model
         'rank_id',
         'name',
         'content',
-        'dynamic_fields'
+        'dynamic_fields',
+        'title'
     ];
 
     protected $casts = [

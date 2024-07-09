@@ -420,26 +420,6 @@ class PersonnelSeeder extends Seeder
         ];
 
 
-        $positions = [
-            [
-                'id' => 10,
-                'name' => 'Şöbə müdiri'
-            ],
-            [
-                'id' => 21,
-                'name' => 'Proqramçı'
-            ],
-            [
-                'id' => 31,
-                'name' => 'Şəbəkə inzibatçısı'
-            ]
-        ];
-
-        foreach($positions as $ps)
-        {
-            Position::firstOrCreate($ps);
-        }
-
         EducationalInstitution::firstOrCreate([
             'id' => 10,
             'name' => 'Bakı Dövlət Universiteti',

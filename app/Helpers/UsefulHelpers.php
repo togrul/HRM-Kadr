@@ -29,6 +29,13 @@ class UsefulHelpers
         return $difference;
     }
 
+    public static function searchInsideMultiDimensionalArray($array,$search,$key,$secondKey = null)
+    {
+        return array_filter($array,function($v,$k) use ($search,$key,$secondKey){
+            return (!empty($secondKey) ? $v[$key][$secondKey] : $v[$key]) == $search;
+        },ARRAY_FILTER_USE_BOTH);
+    }
+
     public static function convertToMonthNumber($monthName,$locale = 'az')
     {
         if($locale == 'az')

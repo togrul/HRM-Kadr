@@ -100,7 +100,7 @@
         </div>
 
         {{-- filter position--}}
-        <div class="flex justify-start items-center space-x-3">
+        <div class="flex justify-start items-center space-x-3 flex-wrap gap-1">
             @foreach($_positions as $position)
                 <button
                     wire:click.prevent="setPosition({{ $position->id }})"
@@ -125,7 +125,7 @@
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
             <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
 
-                <x-table.tbl :headers="[__('#'),__('Tabel'),__('Fullname'),__('Position'),'action','action','action','action']">
+                <x-table.tbl :headers="[__('#'),__('Tabel'),__('Fullname'),__('Position'),'action','action','action']">
                     @forelse ($personnels as $key => $personnel)
                     <tr @class([
                         'bg-white' => empty($personnel->leave_work_date),
@@ -224,20 +224,39 @@
                             @endif
                         </x-table.td>
 
-                        <x-table.td :isButton="true">
-                            <a href="#" wire:click="openSideMenu('show-files','{{ $personnel->tabel_no }}')" class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase rounded-lg bg-blue-50 hover:bg-blue-100">
-                                <svg class="w-6 h-6 text-blue-500" data-slot="icon" fill="none" stroke-width="1.7" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75"></path>
-                                </svg>
-                            </a>
-                        </x-table.td>
+                        <x-table.td :isButton="true" style="text-align: center !important;">
+                            <div class="relative inline-block text-left" x-data="{showContextMenu:false}">
+                                <div>
+                                    <button @click="showContextMenu = !showContextMenu" class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase rounded-lg bg-blue-50 hover:bg-blue-100">
+                                        <svg class="w-5 h-5" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div x-show="showContextMenu"
+                                     x-transition:enter="transition ease-out duration-200"
+                                     x-transition:enter-start="opacity-0 scale-90"
+                                     x-transition:enter-end="opacity-100 scale-100"
+                                     x-transition:leave="transition ease-in duration-100"
+                                     x-transition:leave-start="opacity-100 scale-100"
+                                     x-transition:leave-end="opacity-0 scale-90"
+                                     @click.outside="showContextMenu = false"
+                                     class="absolute right-0 z-10 mt-2 w-max origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
+                                    <div class="flex flex-col" role="none">
+                                        <!-- Active: "bg-gray-100 text-gray-900", Not Active: "text-gray-700" -->
+                                        <a href="#" wire:click="openSideMenu('show-files','{{ $personnel->tabel_no }}')" class="appearance-none w-full flex items-center justify-start space-x-2 px-4 py-2 text-sm font-medium rounded-md  hover:bg-slate-100">
+                                            <span class="text-slate-500">{{ __('Files') }}</span>
+                                        </a>
+                                        <button wire:click="printInfo('{{ $personnel->id }}')" class="appearance-none w-full flex items-center justify-start space-x-2 px-4 py-2 text-sm font-medium rounded-md  hover:bg-slate-100">
+                                            <span class="text-slate-500">{{ __('Print') }}</span>
+                                        </button>
+                                        <button wire:click="printInfo('{{ $personnel->id }}')" class="appearance-none w-full flex items-center justify-start space-x-2 px-4 py-2 text-sm font-medium rounded-md  hover:bg-slate-100">
+                                            <span class="text-slate-500">{{ __('Orders') }}</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
 
-                        <x-table.td :isButton="true">
-                            <button wire:click="printInfo('{{ $personnel->id }}')" class="appearance-none flex items-center justify-center w-8 h-8 text-xs font-medium uppercase rounded-lg bg-teal-50 hover:bg-teal-100">
-                                <svg class="w-6 h-6 text-teal-500" data-slot="icon" fill="none" stroke-width="1.7" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5Zm-3 0h.008v.008H15V10.5Z"></path>
-                                </svg>
-                            </button>
                         </x-table.td>
 
                         <x-table.td :isButton="true">

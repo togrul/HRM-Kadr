@@ -76,7 +76,7 @@ class OrderLog extends Model
     public function status() : BelongsTo
     {
         return $this->belongsTo(OrderStatus::class,'status_id','id')
-        ->where('locale',config('app.locale'));
+                    ->where('locale',config('app.locale'));
     }
 
     public function orderType() : BelongsTo
@@ -89,12 +89,17 @@ class OrderLog extends Model
         return $this->hasMany(OrderLogComponentAttributes::class,'order_no','order_no');
     }
 
+    public function vacations() : HasMany
+    {
+        return $this->hasMany(PersonnelVacation::class,'order_no','order_no');
+    }
+
     public function handleDeletion() : void
     {
         if($this->order_id == 1010)
         {
             // emre hazir statusuna qaytarmaq
-            //vacancy yenile. bos yerleri coxalt dolunu azalt
+            // vacancy yenile. bos yerleri coxalt dolunu azalt
             foreach ($this->personnels as $personnel)
             {
                 $candidate_id = str_replace('NMZD','',$personnel->tabel_no);
@@ -122,6 +127,10 @@ class OrderLog extends Model
                 $staff_schedule->update($updatedData);
                 $personnel->delete();
             }
+        }
+        elseif($this->order->blade == 'vacation')
+        {
+            $this->vacations()->forceDelete();
         }
         $this->forceDelete();
     }

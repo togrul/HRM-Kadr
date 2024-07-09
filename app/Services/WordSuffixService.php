@@ -4,7 +4,7 @@ namespace App\Services;
 
 class WordSuffixService
 {
-    public function getNumberSuffix($year)
+    public function getNumberSuffix(int $year)
     {
         $lastDigit = $year % 10;
 
@@ -22,7 +22,7 @@ class WordSuffixService
         return $this->getSuffix($lastDigit);
     }
 
-    public function getMultiSuffix($text)
+    public function getMultiSuffix($text,$multi = true)
     {
         if (!$text) {
             return '';
@@ -55,7 +55,9 @@ class WordSuffixService
             };
         }
 
-        return $text . $suffix . $this->getStructureSuffix($text,true);
+        return $multi
+                ? $text . $suffix . $this->getStructureSuffix($text,true)
+                : $text. $suffix;
     }
 
     public function getSurnameSuffix($text)
@@ -90,7 +92,7 @@ class WordSuffixService
         return $text . $suffix;
     }
 
-    public function getStructureSuffix($text , $onlySuffix = false)
+    public function getStructureSuffix($text , $onlySuffix = false,$mainStructure = false)
     {
         if (!$text) {
             return '';
@@ -98,11 +100,11 @@ class WordSuffixService
 
         if(is_numeric($text))
         {
-           $suffix = $this->getNumberSuffix($text) . " idarəsinin";
+           $suffix = $this->getNumberSuffix($text) . ($mainStructure ? " idarənin"  : " idarəsinin");
         }
         else
         {
-            $_char_list = ['a','ı','u','o','i','ə','ü','e','ö'];
+            $_char_list = ['a','ı','u','o','i','ə','ü','e','ö','1','2','3'];
 
             // eger son herf sait deilse 2 ci herfi gotur ona uygun elave et.
             $lastChar = mb_substr($text, -1);
@@ -127,9 +129,11 @@ class WordSuffixService
                 $suffix = match($lastChar)
                 {
                     'a','ı' => 'nın',
-                    'i','ə','e' => 'nin',
+                    'i','ə','e','2' => 'nin',
                     'u','o' => 'nun',
-                    'ü','ö' => 'nün'
+                    'ü','ö' => 'nün',
+                    '1' => 'in',
+                    '3' => 'ün'
                 };
             }
         }

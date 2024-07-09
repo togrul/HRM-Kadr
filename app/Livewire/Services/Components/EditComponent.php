@@ -20,7 +20,8 @@ class EditComponent extends Component
         $this->component = [
             'name' => $this->componentModelData->name,
             'content' => $this->componentModelData->content,
-            'dynamic_fields' => $this->componentModelData->dynamic_fields
+            'dynamic_fields' => $this->componentModelData->dynamic_fields,
+            'title' => $this->componentModelData->title
         ];
 
         if(!empty($this->componentModelData->rank_id))

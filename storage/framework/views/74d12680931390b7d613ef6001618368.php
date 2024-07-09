@@ -42,8 +42,9 @@ if (isset($__slots)) unset($__slots);
             </div>
         <?php else: ?>
             <section class="" wire:target="selectService" wire:loading.remove>
-                <!--[if BLOCK]><![endif]--><?php if($selectedService == 'general'): ?>
-                    <?php
+                <!--[if BLOCK]><![endif]--><?php switch($selectedService):
+                    case ('general'): ?>
+                        <?php
 $__split = function ($name, $params = []) {
     return [$name, $params];
 };
@@ -59,8 +60,9 @@ unset($__params);
 unset($__split);
 if (isset($__slots)) unset($__slots);
 ?>
-                <?php elseif($selectedService == 'menus'): ?>
-                    <?php
+                        <?php break; ?>
+                    <?php case ('menus'): ?>
+                        <?php
 $__split = function ($name, $params = []) {
     return [$name, $params];
 };
@@ -76,10 +78,11 @@ unset($__params);
 unset($__split);
 if (isset($__slots)) unset($__slots);
 ?>
-                <?php elseif($selectedService == 'roles'): ?>
-                    <div class="grid grid-cols-1 sm:grid-cols-5 gap-3">
-                        <div class="sm:col-span-2" wire:key="roles-section">
-                            <?php
+                        <?php break; ?>
+                    <?php case ('roles'): ?>
+                        <div class="grid grid-cols-1 sm:grid-cols-5 gap-3">
+                            <div class="sm:col-span-2" wire:key="roles-section">
+                                <?php
 $__split = function ($name, $params = []) {
     return [$name, $params];
 };
@@ -95,10 +98,9 @@ unset($__params);
 unset($__split);
 if (isset($__slots)) unset($__slots);
 ?>
-                        </div>
-
-                        <div class="sm:col-span-3" wire:key="permission-section">
-                            <?php
+                            </div>
+                            <div class="sm:col-span-3" wire:key="permission-section">
+                                <?php
 $__split = function ($name, $params = []) {
     return [$name, $params];
 };
@@ -114,10 +116,11 @@ unset($__params);
 unset($__split);
 if (isset($__slots)) unset($__slots);
 ?>
+                            </div>
                         </div>
-                    </div>
-                <?php elseif($selectedService == 'users'): ?>
-                    <?php
+                        <?php break; ?>
+                    <?php case ('users'): ?>
+                        <?php
 $__split = function ($name, $params = []) {
     return [$name, $params];
 };
@@ -133,10 +136,27 @@ unset($__params);
 unset($__split);
 if (isset($__slots)) unset($__slots);
 ?>
-                <?php elseif($selectedService == 'ranks'): ?>
-                    ranks
-                <?php elseif($selectedService == 'order-documents'): ?>
-                    <?php
+                        <?php break; ?>
+                    <?php case ('ranks'): ?>
+                        <?php
+$__split = function ($name, $params = []) {
+    return [$name, $params];
+};
+[$__name, $__params] = $__split('services.ranks.all-ranks');
+
+$__html = app('livewire')->mount($__name, $__params, 'ranks', $__slots ?? [], get_defined_vars());
+
+echo $__html;
+
+unset($__html);
+unset($__name);
+unset($__params);
+unset($__split);
+if (isset($__slots)) unset($__slots);
+?>
+                        <?php break; ?>
+                    <?php case ('order-documents'): ?>
+                        <?php
 $__split = function ($name, $params = []) {
     return [$name, $params];
 };
@@ -152,8 +172,9 @@ unset($__params);
 unset($__split);
 if (isset($__slots)) unset($__slots);
 ?>
-                <?php elseif($selectedService == 'components'): ?>
-                    <?php
+                        <?php break; ?>
+                    <?php case ('components'): ?>
+                        <?php
 $__split = function ($name, $params = []) {
     return [$name, $params];
 };
@@ -169,7 +190,9 @@ unset($__params);
 unset($__split);
 if (isset($__slots)) unset($__slots);
 ?>
-                <?php endif; ?> <!--[if ENDBLOCK]><![endif]-->
+                        <?php break; ?>
+                <?php endswitch; ?> <!--[if ENDBLOCK]><![endif]-->
+
             </section>
         <?php endif; ?> <!--[if ENDBLOCK]><![endif]-->
     </div>

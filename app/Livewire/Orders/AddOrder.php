@@ -17,6 +17,7 @@ class AddOrder extends Component
     public function store()
     {
         $data = $this->fillCrudData();
+
         if(!is_array($data))
         {
            return $data;
@@ -35,47 +36,24 @@ class AddOrder extends Component
                 'status_id' => $this->order['status_id'],
             ]);
 
-            //insert log components
-            foreach($_component_ids as $key => $_component)
-            {
-                $order_log->components()->attach([
-                    $_component => ['row_number' => $key]
-                ]);
-            }
+            // insert log components
+            $this->attachComponents($order_log,$_component_ids,'create');
 
-            //get attributes and insert to attributes table
-            foreach ($_attributes as $k => $_attr)
-            {
-                $component_id = $_attr['component_id'];
-                unset($_attr['component_id']);
+            // get attributes and insert to attributes table
+            $this->saveAttribute($order_log,$_attributes,'create');
 
-                foreach ($_attr as $key => $value) {
-                    $attr_data[$key] = [
-                        'id' =>  is_array($value) ? $value['id'] : null,
-                        'value' => is_array($value) ? $value['name'] : $value
-                    ];
-                }
-
-                $order_log->attributes()->create([
-                    'component_id' => $component_id,
-                    'attributes' => $attr_data,
-                    'row_number' => $k
-                ]);
-            }
 
             //insert order log personnels eger candidate dirse.Service cagir
             $tabel_no_list = $this->order['order_id'] == 1010
                             ? resolve(ImportCandidateToPersonnel::class)->handle($this->components,$this->order['status_id'])
-                            : Personnel::find($_personnel_ids)->pluck('tabel_no')->toArray();
+                            : $_personnel_ids;
 
             //insert
-            $_order_personnels = array_map(function($value){
-                                    return ['component_id' => $value];
-                                },array_combine($tabel_no_list,$_component_ids));
+            $_order_personnels = $this->formatOrderPersonnels($tabel_no_list,$_component_ids);
 
             $order_log->personnels()->attach($_order_personnels);
 
-            resolve(OrderConfirmedService::class)->handle($order_log,$_personnel_ids);
+            (new OrderConfirmedService($order_log))->handle($_personnel_ids);
         });
 
         $this->dispatch('orderAdded',__('Order was added successfully!'));

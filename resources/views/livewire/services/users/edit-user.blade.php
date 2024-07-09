@@ -4,8 +4,8 @@
             {{ $title ?? ''}}
           </h2>
     </div>
-    
-    <div 
+
+    <div
         class="flex flex-col w-full p-10 px-0 mx-auto my-3 mb-4 space-y-8 transition duration-500 ease-in-out transform bg-white"
     >
 
@@ -25,8 +25,8 @@
         @enderror
       </div>
        <div>
-            <x-select-list 
-                :title="__('Role')" 
+            <x-select-list
+                :title="__('Role')"
                 mode="gray"
                 :selected="$roleName"
                 name="roleId"
@@ -39,8 +39,8 @@
                   ---
               </x-select-list-item>
               @foreach ($roles as $role)
-              <x-select-list-item 
-                  wire:click="selectRole('{{ $role->name }}',{{ $role->id }})" 
+              <x-select-list-item
+                  wire:click="selectRole('{{ $role->name }}',{{ $role->id }})"
                   :selected="$role->name === $roleName"
                   wire:model='roleId'
               >
@@ -53,7 +53,7 @@
         @enderror
         </div>
     </div>
- 
+
     <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
         <div class="">
           <x-label for="user.password">{{ __('Password') }}</x-label>
@@ -70,7 +70,10 @@
           @enderror
         </div>
     </div>
- 
+        <div class="grid grid-cols-1">
+            <x-checkbox name="user.is_active"  model="user.is_active">{{ __('Is active?') }}</x-checkbox>
+        </div>
+
       <x-modal-button>{{ __('Save user') }}</x-modal-button>
 </div>
 </div>

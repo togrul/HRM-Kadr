@@ -86,13 +86,14 @@ class Structure extends Model
         return array_reverse($parentIds);
     }
 
-    public function getAllParentName()
+    public function getAllParentName($isCoded = false)
     {
-        $parentNames = [$this->name];
         $parent = $this->parent;
 
+        $parentNames = (is_null($parent?->parent_id) && $isCoded) ? [$this->code] : [$this->name];
+
         while ($parent && !is_null($parent->parent_id)) {
-            $parentNames[] = $parent->name;
+            $parentNames[] = ($isCoded && $parent->level === 1) ? $parent->code  : $parent->name;
             $parent = $parent->parent;
         }
 

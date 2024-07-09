@@ -23,6 +23,11 @@ class EditOrder extends Component
                                 ->where('order_no',$this->orderModel)
                                 ->first();
 
+        if (!$this->orderModelData) {
+            abort(403);
+            return;
+        }
+
         $this->order = [
             'order_id' => $this->orderModelData->order_id,
             'order_no' => $this->orderModelData->order_no,
@@ -30,33 +35,41 @@ class EditOrder extends Component
             'given_by' => $this->orderModelData->given_by,
             'given_by_rank' => $this->orderModelData->given_by_rank,
             'status_id' => $this->orderModelData->status_id,
-        ];
-
-        $this->order['order_type_id'] = [
-            'id' => $this->orderModelData->order_type_id,
-            'name' => $this->orderModelData->orderType->name,
+            'order_type_id' => [
+                'id' => $this->orderModelData->order_type_id,
+                'name' => $this->orderModelData->orderType->name,
+            ],
         ];
 
         $this->showComponent = $this->orderModelData->order_type_id > 0;
         $this->selectedTemplate = $this->orderModelData->order_type_id;
         $this->componentRows = $this->orderModelData->components->count();
+        $this->selectedBlade = $this->orderModelData->order->blade;
 
         $componentsList = $this->orderModelData->components;
 
-        foreach ($this->orderModelData->attributes as $key => $attributes)
+        $orderModelAttributes = $this->orderModelData->attributes;
+
+        foreach ($orderModelAttributes as $key => $attributes)
         {
             $attr_list = $attributes->attributes;
 
             $this->selectedComponents[$key] = array_keys($attr_list);
 
-            $this->components[$key]['component_id'] = [
-                'id' => $componentsList[$key]->id,
-                'name' => $componentsList[$key]->name,
+            $this->components[$attributes->row_number]['component_id'] = [
+                'id' => $componentsList[$attributes->row_number]->id,
+                'name' => $componentsList[$attributes->row_number]->name,
             ];
+
+
             foreach ($attr_list as $ka => $attr)
             {
                 $_replacedKey = str_replace( '$', '', $ka);
-                $_replacedKey = $_replacedKey == 'fullname' ? 'personnel' : $_replacedKey;
+
+                if($this->selectedBlade == 'default')
+                {
+                    $_replacedKey = $_replacedKey == 'fullname' ? 'personnel' : $_replacedKey;
+                }
 
                 if(!empty($attr['id']) || $attr['value'] == '---')
                 {
@@ -72,11 +85,50 @@ class EditOrder extends Component
                     $_colValue = $attr['value'];
                 }
 
-                $this->components[$key][$_colName] = $_colValue;
+                if($this->selectedBlade == 'default')
+                {
+                    $this->components[$attributes->row_number][$_colName] = $_colValue;
+                }
+                else
+                {
+                    if(in_array($_colName,['start_date', 'end_date','days']))
+                    {
+                        $this->components[$attributes->row_number][$_colName] = $_colValue;
+                    }
+                }
+            }
+
+            if($this->selectedBlade == 'vacation')
+            {
+                $this->selected_personnel_list = $orderModelAttributes
+                    ->groupBy('row_number')
+                    ->map(function ($items,$rowIndex) use($attr_list) {
+                        return $items->pluck('attributes')->map(function ($att) use($attr_list,$rowIndex) {
+
+                            $transformed = collect($att)
+                                ->except(['$start_date', '$end_date','$days'])
+                                ->mapWithKeys(function ($value, $key) {
+                                    return [str_replace( '$', '', $key) => $value['value']];
+                                })->toArray();
+
+                            $transformed['row'] = $rowIndex;
+                            $transformed['key'] = Personnel::whereRaw("CONCAT(surname,' ',name,' ',patronymic) = ?",[$transformed['fullname']])->value('tabel_no');
+
+                            return $transformed;
+                        });
+                    })
+                    ->toArray();
             }
         }
 
-        $this->originalComponents = $this->components;
+        if($this->selectedBlade == 'vacation')
+        {
+            $this->selected_personnel_list['personnels'] = $this->orderModelData->personnels->pluck('tabel_no')->all();
+        }
+        $this->originalComponents = match($this->selectedBlade){
+            'default' => $this->components,
+            'vacation' => $this->selected_personnel_list,
+        };
     }
 
     public function store()
@@ -100,58 +152,40 @@ class EditOrder extends Component
                 'status_id' => $this->order['status_id'],
             ]);
 
-            foreach($_component_ids as $key => $_component) {
-                    $component_exists = $this->orderModelData->components()
-                                    ->where('row_number' , $key)
-                                    ->where('component_id', $_component)
-                                    ->first();
-
-                    if(!$component_exists) {
-                        $this->orderModelData->components()->attach([
-                            $_component => ['row_number' => $key]
-                        ]);
-                }
-            }
+            $this->attachComponents($this->orderModelData,$_component_ids,'update');
 
             //get attributes and insert to attributes table
-            foreach ($_attributes as $k => $_attr)
-            {
-                $component_id = $_attr['component_id'];
-                unset($_attr['component_id']);
+            $this->saveAttribute($this->orderModelData,$_attributes,'update');
 
-                foreach ($_attr as $key => $value) {
-                    $attr_data[$key] = [
-                        'id' =>  is_array($value) ? $value['id'] : null,
-                        'value' => is_array($value) ? $value['name'] : $value
-                    ];
+            //insert order log personnels eger candidate-dirse. Service cagir
+
+            if($this->selectedBlade == 'default')
+            {
+                if(!empty($_new_component_list))
+                {
+                    $tabel_no_list = $this->order['order_id'] == 1010
+                        ? resolve(ImportCandidateToPersonnel::class)->handle($_new_component_list,$this->order['status_id'])
+                        : Personnel::find(collect($_new_component_list)->pluck('personnel_id.id'))->pluck('tabel_no')->toArray();
+                    $component_ids = collect($_new_component_list)->pluck('component_id.id')->toArray();
+
+                    $_order_personnels = $this->formatOrderPersonnels($tabel_no_list,$component_ids);
+                    // insert
+                    $this->orderModelData->personnels()->attach($_order_personnels);
                 }
-
-                $this->orderModelData->attributes()->updateOrCreate(
-                    [
-                        'component_id' => $component_id,
-                        'order_no' => $this->orderModelData->order_no,
-                        'row_number' => $k
-                    ],
-                    [
-                        'attributes' => $attr_data
-                    ]
-                );
             }
-            //insert order log personnels eger candidate dirse.Service cagir
-            if(!empty($_new_component_list))
+            else
             {
-                $tabel_no_list = $this->order['order_id'] == 1010
-                    ? resolve(ImportCandidateToPersonnel::class)->handle($_new_component_list,$this->order['status_id'])
-                    : Personnel::find($_new_component_list)->pluck('tabel_no')->toArray();
-                //insert
-                $_order_personnels = array_map(function($value){
-                    return ['component_id' => $value];
-                },array_combine($tabel_no_list,collect($_new_component_list)->pluck('component_id.id')->toArray()));
+                $component_ids = collect($this->fillVacationPersonnelsToComponents())
+                    ->values()
+                    ->pluck('component_id.id')
+                    ->all();
 
-                $this->orderModelData->personnels()->attach($_order_personnels);
+                $_order_personnels = $this->formatOrderPersonnels($this->selected_personnel_list['personnels'], $component_ids);
+
+                $this->orderModelData->personnels()->sync($_order_personnels);
             }
 
-            resolve(OrderConfirmedService::class)->handle($this->orderModelData,$_personnel_ids,'update');
+            (new OrderConfirmedService($this->orderModelData))->handle($_personnel_ids,'update');
         });
 
         $this->dispatch('orderAdded',__('Order was updated successfully!'));

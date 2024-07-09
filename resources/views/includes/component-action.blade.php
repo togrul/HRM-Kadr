@@ -67,6 +67,11 @@
         <x-textarea mode="gray" name="component.dynamic_fields" placeholder="{{__('')}}"
                     wire:model="component.dynamic_fields"></x-textarea>
     </div>
+    <div class="flex flex-col">
+        <x-label for="component.title">{{ __('Title') }}</x-label>
+        <x-textarea mode="gray" name="component.title" placeholder="{{__('')}}"
+                    wire:model.live="component.title"></x-textarea>
+    </div>
 </div>
 
 <div class="flex justify-between items-end w-full">

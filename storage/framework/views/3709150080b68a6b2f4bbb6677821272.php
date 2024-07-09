@@ -31,7 +31,7 @@
             </div>
         </div>
         <div class="flex flex-col space-y-4 py-10 px-8 justify-center">
-           <h1 class="text-black font-bold text-2xl text-center"><?php echo e(__('Human Resources Management system')); ?></h1>
+           <h1 class="text-black font-title font-bold text-2xl text-center"><?php echo e(__('Human Resources Management system')); ?></h1>
             <div class="">
                 <!-- Session Status -->
           <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
@@ -49,10 +49,10 @@
 <?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
 <?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
 <?php endif; ?>
-      
+
           <form method="POST" action="<?php echo e(route('login')); ?>">
               <?php echo csrf_field(); ?>
-      
+
               <!-- Email Address -->
               <div>
                   <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
@@ -86,7 +86,7 @@
 <?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
 <?php endif; ?>
               </div>
-      
+
               <!-- Password -->
               <div class="mt-4">
                   <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
@@ -104,7 +104,7 @@
 <?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
 <?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
 <?php endif; ?>
-      
+
                   <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.input-error','data' => ['messages' => $errors->get('password'),'class' => 'mt-2']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('input-error'); ?>
@@ -121,9 +121,9 @@
 <?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
 <?php endif; ?>
               </div>
-      
+
               <!-- Remember Me -->
-      
+
               <div class="flex items-center justify-between mt-4">
                   <label for="remember_me" class="inline-flex items-center">
                       <input id="remember_me" type="checkbox" class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:focus:ring-offset-gray-800" name="remember">
@@ -136,7 +136,7 @@
                       </a>
                   <?php endif; ?>
               </div>
-      
+
               <div class="block mt-4">
                   <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.button','data' => ['class' => 'flex transition w-full py-3 duration-300 justify-center items-center font-medium text-base','mode' => 'success']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
@@ -159,9 +159,9 @@
           </form>
           </div>
         </div>
-      
+
     </div>
-  
+
  <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__componentOriginal69dc84650370d1d4dc1b42d016d7226b)): ?>

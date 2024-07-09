@@ -2,6 +2,7 @@
 
 namespace App\Traits;
 
+use App\Models\Personnel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 trait PersonnelTrait

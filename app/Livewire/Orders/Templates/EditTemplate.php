@@ -32,7 +32,8 @@ class EditTemplate extends Component
             'id' => $updatedData['id'],
             'name' => $updatedData['name'],
             'content' => $updatedData['content'],
-            'order_model' => $updatedData['order_model']
+            'order_model' => $updatedData['order_model'],
+            'blade' => $updatedData['blade']
         ];
 
         if(!empty($updatedData['order_category_id']))

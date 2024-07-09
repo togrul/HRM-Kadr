@@ -310,8 +310,21 @@
     "Order number" : "Əmrin nömrəsi",
     "Order date" : "Əmrin tarixi",
     "Time" : "Saat",
-    "Page" : "Səhifə"
-
+    "Page" : "Səhifə",
+    "Date range" : "Tarix aralığı",
+    "Locations" : "Bölgələr",
+    "At work" : "İşdə",
+    "In vacation" : "Məzuniyyətdə",
+    "Start date" : "Başlama tarixi",
+    "End date" : "Bitmə tarixi",
+    "Return work date" : "İşə qayıtma tarixi",
+    "Vacations" : "Məzuniyyətlər",
+    "Search personnel" : "Kadrı axtar",
+    "Days" : "Günlər",
+    "Please search personnel" : "Zəhmət olmasa kadrı daxil edin",
+    "Human Resources Management system" : "Kadrlar şöbəsinin idarəetmə sistemi",
+    "Business trips" : "Ezamiyyətlər",
+    "Rank was added successfully!" : "Rütbə uğurla əlavə edildi!"
 }
 
 

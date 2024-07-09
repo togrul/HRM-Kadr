@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\Menu;
 use App\Models\Setting;
 use App\Observers\SettingsObserver;
+use App\Services\NumberToWordsService;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\ServiceProvider;
 
@@ -15,7 +16,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(NumberToWordsService::class, function ($app) {
+            return new NumberToWordsService();
+        });
     }
 
     /**

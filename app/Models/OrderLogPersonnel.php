@@ -24,4 +24,21 @@ class OrderLogPersonnel extends Model
     {
         return $this->belongsTo(Component::class);
     }
+
+    protected static function boot()
+    {
+        parent::boot();
+        static::creating(function($model){
+            dd($model);
+        });
+        static::deleted(function ($model) {
+            dd($model);
+        });
+        static::saving(function ($item) {
+            dd('syncing event has been fired!');
+        });
+        static::updating(function ($item) {
+            dd('syncing event has been fired!');
+        });
+    }
 }

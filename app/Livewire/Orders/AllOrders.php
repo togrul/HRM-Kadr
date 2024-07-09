@@ -6,6 +6,7 @@ use App\Helpers\UsefulHelpers;
 use App\Livewire\Traits\SideModalAction;
 use App\Models\OrderLog;
 use App\Models\OrderStatus;
+use App\Models\Structure;
 use App\Services\WordSuffixService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -77,38 +78,81 @@ class AllOrders extends Component
     public function printOrder(string $order_no)
     {
         $order = OrderLog::with(['order','components','attributes'])->where('order_no',$order_no)->first();
+        $givenDate = Carbon::parse($order->given_date);
 
         $templateProcessor = new TemplateProcessor('storage/'.$order->order->content);
-        $templateProcessor->setValue('day', Carbon::parse($order->given_date)->format('d'));
-        $templateProcessor->setValue('month', Carbon::parse($order->given_date)->locale('AZ')->monthName);
-        $templateProcessor->setValue('year', Carbon::parse($order->given_date)->format('Y'));
+        $templateProcessor->setValue('day', $givenDate->format('d'));
+        $templateProcessor->setValue('month',$givenDate->locale('AZ')->monthName);
+        $templateProcessor->setValue('year', $givenDate->format('Y'));
         $templateProcessor->setValue('rank_director', $order->given_by_rank);
         $templateProcessor->setValue('name_director', $order->given_by);
-
         // export to word file
-        $_component_texts = $order->components->pluck('content')->toArray();
+        $_component_texts = $order->attributes->load('component')->groupBy('row_number')->map(function ($group) {
+            $component = $group->first()->component;
+            return [
+                'title' => $component->title,
+                'content' => $group->pluck('component.content')->toArray(),
+            ];
+        })->toArray();
+
         $replacements = [];
         $suffixService = new WordSuffixService();
-        foreach ($order->components as $k => $_component)
-        {
-            $attr_list = $order->attributes
-                                ->where('component_id',$_component->id)
-                                ->value('attributes');
+        $_replace_texts = [];
 
-            $_replace_texts[] = UsefulHelpers::modifyArrayToKeyValuePair($attr_list);
-            $_replace_texts[$k]['$year'] .= $suffixService->getNumberSuffix($_replace_texts[$k]['$year']);
-            $_replace_texts[$k]['$surname'] = $suffixService->getSurnameSuffix( $_replace_texts[$k]['$surname']);
-            $_replace_texts[$k]['$structure_main'] = $suffixService->getStructureSuffix( $_replace_texts[$k]['$structure_main']);
-            // **** her hansi bir hisseni bold etmek ucun
-            $_replace_texts[$k]['$fullname'] = $this->convertWordIntoBold($_replace_texts[$k]['$fullname']);
+        foreach ($order->components as $componentIndex => $_component) {
+            $attr_list = $order->attributes
+                        ->where('component_id', $_component->id)
+                        ->where('row_number', $componentIndex)
+                        ->pluck('attributes')
+                        ->toArray();
+
+            // pluck edib dovre salmaq olar.
+            foreach ($attr_list as $attrIndex => $attr) {
+                $keyReplaced = $componentIndex + $attrIndex;
+                $_replace_texts[] = UsefulHelpers::modifyArrayToKeyValuePair($attr);
+
+                if ($order->order->blade == 'default') {
+                    $_replace_texts[$keyReplaced]['$year'] .= $suffixService->getNumberSuffix((int)$_replace_texts[$keyReplaced]['$year']);
+                    $_replace_texts[$keyReplaced]['$surname'] = $suffixService->getSurnameSuffix($_replace_texts[$keyReplaced]['$surname']);
+                    $_replace_texts[$keyReplaced]['$structure_main'] = $suffixService->getStructureSuffix($_replace_texts[$keyReplaced]['$structure_main']);
+                    $_replace_texts[$keyReplaced]['$fullname'] = $this->convertWordIntoBold($_replace_texts[$keyReplaced]['$fullname']);
+                } elseif ($order->order->blade == 'vacation') {
+                    $_replace_texts[$keyReplaced]['$start_date'] .= $suffixService->getNumberSuffix(Carbon::parse($_replace_texts[$keyReplaced]['$start_date'])->year);
+                    $_replace_texts[$keyReplaced]['$end_date'] .= $suffixService->getNumberSuffix(Carbon::parse($_replace_texts[$keyReplaced]['$end_date'])->year);
+                    $_replace_texts[$keyReplaced]['$structure'] = $this->getFullStructureNameWithSuffixes($_replace_texts[$keyReplaced]['$structure'],$suffixService);
+                    $_replace_texts[$keyReplaced]['$position'] = $suffixService->getMultiSuffix($_replace_texts[$keyReplaced]['$position'],multi:false);
+                }
+            }
         }
 
         foreach ($_component_texts as $key => &$text)
         {
-            $text = str_replace(array_keys($_replace_texts[$key]), array_values($_replace_texts[$key]), $text);
+            $title = str_replace(array_keys($_replace_texts[$key]), array_values($_replace_texts[$key]), $text['title']);
+            $content = '';
+            foreach ($text['content'] as $keyContent => $contentData) {
+                $replaceKey = $key + $keyContent;
+                $replacedContent = str_replace(
+                    array_keys($_replace_texts[$replaceKey]),
+                    array_values($_replace_texts[$replaceKey]),
+                    $contentData
+                );
+
+                $replacedContent = $order->order->blade == 'vacation'
+                                ?  '<w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/></w:rPr>' . $replacedContent . '<w:br/>'
+                                :  $replacedContent;
+
+                $content .= $replacedContent;
+            }
+
+            $content = str_replace("<w:br/>", '</w:t><w:br/><w:tab/><w:t xml:space="preserve">', $content );
+
+            $text = !empty($title) ? $this->convertWordIntoBold($title)  . PHP_EOL . "<w:p/>"  . $content  : $content;
 
             $replacements[] = [
-                'content_text' => ( $key + 1 ). '. '.str_replace("\n","<w:br/>", $text),
+                    'content_text' => match($order->order->blade) {
+                    'vacation' => str_replace("\n", "<w:br/>", $text),
+                    'default' => ($key + 1) . '. ' . str_replace("\n", "<w:br/>", $text),
+                },
             ];
         }
 
@@ -121,6 +165,17 @@ class AllOrders extends Component
         return response()->download($filename. '.docx')->deleteFileAfterSend(true);
     }
 
+    protected function getFullStructureNameWithSuffixes($name,$service)
+    {
+        $structureModel = Structure::where('name',$name)->first();
+        $structureFullName = $structureModel->getAllParentName(isCoded: true);
+        $result = '';
+        foreach ($structureFullName as $structure) {
+            $result.= ($service->getStructureSuffix($structure,mainStructure:true) . ' ');
+        }
+        return rtrim($result);
+    }
+
     private function convertWordIntoBold(string $word)
     {
         return '<w:rPr><w:b w:val="true"/></w:rPr>'
@@ -130,7 +185,7 @@ class AllOrders extends Component
 
     protected function returnData($type = "normal")
     {
-        $result = OrderLog::with(['components','status','personDidDelete','creator'])
+        $result = OrderLog::with(['components','status','personDidDelete','creator','orderType'])
             ->filter($this->search ?? [])
             ->when(!empty($this->selectedOrder),function ($q){
                 $q->where('order_id',$this->selectedOrder);

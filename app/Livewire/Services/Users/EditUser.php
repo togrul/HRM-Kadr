@@ -80,10 +80,10 @@ class EditUser extends Component
             $this->roleName = '---';
             $this->roleId = -1;
         }
-       
+
         $this->user['name'] = $this->userModel->name;
         $this->user['email'] = $this->userModel->email;
-        $this->user['is_active'] = $this->userModel->is_active;
+        $this->user['is_active'] = (bool)$this->userModel->is_active;
     }
 
     public function store()

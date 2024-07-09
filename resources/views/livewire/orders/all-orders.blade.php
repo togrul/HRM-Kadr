@@ -103,7 +103,7 @@
                         @forelse ($orders as $key => $_order)
                             <tr @class([
                                 'bg-white' => $_order->status_id != 30,
-                                'bg-red-100' => $_order->status_id == 30
+                                'bg-rose-50' => $_order->status_id == 30
                             ])>
                                 <x-table.td>
                                     <span class="text-sm font-medium text-gray-700">
@@ -116,6 +116,27 @@
                                         <span class="text-sm font-medium text-blue-500">
                                             {{ $_order->order_no }}
                                         </span>
+                                        <div class="flex space-x-1 items-center">
+                                             <span class="text-sm shadow-sm font-medium px-3 py-1 rounded-lg bg-teal-100 text-teal-600 flex justify-center items-center">
+                                              {{ $_order->order->name }}
+                                            </span>
+                                            <span>
+                                                <svg class="w-4 h-4" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                                  <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"></path>
+                                                </svg>
+                                            </span>
+                                            <span class="text-sm shadow-sm font-medium px-2 py-1 rounded-lg bg-slate-100 text-slate-500 flex justify-center items-center">
+                                              {{ $_order->orderType->name }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </x-table.td>
+
+                                <x-table.td>
+                                    <div class="flex flex-col space-y-1">
+                                        <span class="text-sm font-medium text-gray-600">
+                                            {{  \Carbon\Carbon::parse($_order->given_date)->format('d.m.Y') }}
+                                       </span>
                                         @if($status == 'deleted')
                                             <div class="flex flex-col text-xs font-medium">
                                                 <div class="flex items-center space-x-1">
@@ -129,13 +150,6 @@
                                             </div>
                                         @endif
                                     </div>
-
-                                </x-table.td>
-
-                                <x-table.td>
-                                    <span class="text-sm font-medium text-gray-600">
-                                        {{  \Carbon\Carbon::parse($_order->given_date)->format('d.m.Y') }}
-                                   </span>
                                 </x-table.td>
 
                                 <x-table.td>

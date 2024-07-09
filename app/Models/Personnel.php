@@ -223,6 +223,16 @@ class Personnel extends Model
         return $this->hasOne(PersonnelRank::class,'tabel_no','tabel_no')->latestOfMany('given_date');
     }
 
+    public function vacations() : HasMany
+    {
+        return $this->hasMany(PersonnelVacation::class,'tabel_no','tabel_no')->orderByDesc('return_work_date');
+    }
+
+    public function latestVacation() : HasOne
+    {
+        return $this->hasOne(PersonnelVacation::class,'tabel_no','tabel_no')->latestOfMany('return_work_date');
+    }
+
     public function degreeAndNames() : HasMany
     {
         return $this->hasMany(PersonnelScientificDegreeAndName::class,'tabel_no','tabel_no')->orderByDesc('given_date');
@@ -248,6 +258,14 @@ class Personnel extends Model
         return $this->belongsTo(SocialOrigin::class,'social_origin_id','id');
     }
 
+    public function inActiveVacation() : HasOne
+    {
+        return $this->hasMany(PersonnelVacation::class,'tabel_no','tabel_no')
+                    ->where('end_date' ,'>', Carbon::now())
+                    ->where('return_work_date' ,'>', Carbon::now())
+                    ->one();
+    }
+
     public function getAgeAttribute() {
         return Carbon::parse($this->birthdate)->age;
     }
@@ -260,7 +278,6 @@ class Personnel extends Model
 
     public function scopeFilter($query, array $filters)
     {
-        // dd($filters);
         foreach ($filters as $field => $value) {
             if($field == 'age')
             {
