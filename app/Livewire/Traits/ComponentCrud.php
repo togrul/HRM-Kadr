@@ -13,7 +13,10 @@ trait ComponentCrud
 
     public $component = [];
 
-    public $orderId,$orderName,$searchOrder;
+    public $orderId;
+    public $orderName;
+    public $searchOrder;
+
     public $title;
 
     public $componentModel;
@@ -38,7 +41,9 @@ trait ComponentCrud
 
     public function updated($name,$value)
     {
-        $data = $this->component['title'] . ' ' . $this->component['content'];
+        $data = isset($this->component['title'])
+            ? "{$this->component['title']} {$this->component['content']}"
+            : $this->component['content'];
         $dollarStrings = array_filter(explode(' ', str_replace(['“','”'],'',$data)), function ($string) {
             return Str::startsWith($string, '$');
         });
@@ -67,7 +72,7 @@ trait ComponentCrud
         })
             ->get();
 
-        $_ranks =  Rank::query()
+        $_ranks = Rank::query()
             ->where('is_active',1)
             ->get();
 

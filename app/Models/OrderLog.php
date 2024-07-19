@@ -96,7 +96,7 @@ class OrderLog extends Model
 
     public function handleDeletion() : void
     {
-        if($this->order_id == 1010)
+        if($this->order_id == Order::IG_EMR)
         {
             // emre hazir statusuna qaytarmaq
             // vacancy yenile. bos yerleri coxalt dolunu azalt
@@ -128,7 +128,7 @@ class OrderLog extends Model
                 $personnel->delete();
             }
         }
-        elseif($this->order->blade == 'vacation')
+        elseif($this->order->blade == Order::BLADE_VACATION)
         {
             $this->vacations()->forceDelete();
         }

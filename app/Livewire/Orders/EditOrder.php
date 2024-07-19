@@ -3,6 +3,7 @@
 namespace App\Livewire\Orders;
 
 use App\Livewire\Traits\OrderCrud;
+use App\Models\Order;
 use App\Models\OrderLog;
 use App\Models\Personnel;
 use App\Services\ImportCandidateToPersonnel;
@@ -66,7 +67,7 @@ class EditOrder extends Component
             {
                 $_replacedKey = str_replace( '$', '', $ka);
 
-                if($this->selectedBlade == 'default')
+                if($this->selectedBlade == Order::BLADE_DEFAULT)
                 {
                     $_replacedKey = $_replacedKey == 'fullname' ? 'personnel' : $_replacedKey;
                 }
@@ -85,7 +86,7 @@ class EditOrder extends Component
                     $_colValue = $attr['value'];
                 }
 
-                if($this->selectedBlade == 'default')
+                if($this->selectedBlade == Order::BLADE_DEFAULT)
                 {
                     $this->components[$attributes->row_number][$_colName] = $_colValue;
                 }
@@ -98,7 +99,7 @@ class EditOrder extends Component
                 }
             }
 
-            if($this->selectedBlade == 'vacation')
+            if($this->selectedBlade == Order::BLADE_VACATION)
             {
                 $this->selected_personnel_list = $orderModelAttributes
                     ->groupBy('row_number')
@@ -121,7 +122,7 @@ class EditOrder extends Component
             }
         }
 
-        if($this->selectedBlade == 'vacation')
+        if($this->selectedBlade == Order::BLADE_VACATION)
         {
             $this->selected_personnel_list['personnels'] = $this->orderModelData->personnels->pluck('tabel_no')->all();
         }
@@ -159,11 +160,11 @@ class EditOrder extends Component
 
             //insert order log personnels eger candidate-dirse. Service cagir
 
-            if($this->selectedBlade == 'default')
+            if($this->selectedBlade == Order::BLADE_DEFAULT)
             {
                 if(!empty($_new_component_list))
                 {
-                    $tabel_no_list = $this->order['order_id'] == 1010
+                    $tabel_no_list = $this->order['order_id'] == Order::IG_EMR
                         ? resolve(ImportCandidateToPersonnel::class)->handle($_new_component_list,$this->order['status_id'])
                         : Personnel::find(collect($_new_component_list)->pluck('personnel_id.id'))->pluck('tabel_no')->toArray();
                     $component_ids = collect($_new_component_list)->pluck('component_id.id')->toArray();

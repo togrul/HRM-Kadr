@@ -3,6 +3,7 @@
 namespace App\Livewire\Orders;
 
 use App\Livewire\Traits\OrderCrud;
+use App\Models\Order;
 use App\Models\OrderLog;
 use App\Models\Personnel;
 use App\Services\ImportCandidateToPersonnel;
@@ -44,7 +45,7 @@ class AddOrder extends Component
 
 
             //insert order log personnels eger candidate dirse.Service cagir
-            $tabel_no_list = $this->order['order_id'] == 1010
+            $tabel_no_list = $this->order['order_id'] == Order::IG_EMR
                             ? resolve(ImportCandidateToPersonnel::class)->handle($this->components,$this->order['status_id'])
                             : $_personnel_ids;
 

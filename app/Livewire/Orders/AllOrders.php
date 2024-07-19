@@ -4,6 +4,7 @@ namespace App\Livewire\Orders;
 
 use App\Helpers\UsefulHelpers;
 use App\Livewire\Traits\SideModalAction;
+use App\Models\Order;
 use App\Models\OrderLog;
 use App\Models\OrderStatus;
 use App\Models\Structure;
@@ -111,12 +112,12 @@ class AllOrders extends Component
                 $keyReplaced = $componentIndex + $attrIndex;
                 $_replace_texts[] = UsefulHelpers::modifyArrayToKeyValuePair($attr);
 
-                if ($order->order->blade == 'default') {
+                if ($order->order->blade == Order::BLADE_DEFAULT) {
                     $_replace_texts[$keyReplaced]['$year'] .= $suffixService->getNumberSuffix((int)$_replace_texts[$keyReplaced]['$year']);
                     $_replace_texts[$keyReplaced]['$surname'] = $suffixService->getSurnameSuffix($_replace_texts[$keyReplaced]['$surname']);
                     $_replace_texts[$keyReplaced]['$structure_main'] = $suffixService->getStructureSuffix($_replace_texts[$keyReplaced]['$structure_main']);
                     $_replace_texts[$keyReplaced]['$fullname'] = $this->convertWordIntoBold($_replace_texts[$keyReplaced]['$fullname']);
-                } elseif ($order->order->blade == 'vacation') {
+                } elseif ($order->order->blade == Order::BLADE_VACATION) {
                     $_replace_texts[$keyReplaced]['$start_date'] .= $suffixService->getNumberSuffix(Carbon::parse($_replace_texts[$keyReplaced]['$start_date'])->year);
                     $_replace_texts[$keyReplaced]['$end_date'] .= $suffixService->getNumberSuffix(Carbon::parse($_replace_texts[$keyReplaced]['$end_date'])->year);
                     $_replace_texts[$keyReplaced]['$structure'] = $this->getFullStructureNameWithSuffixes($_replace_texts[$keyReplaced]['$structure'],$suffixService);
@@ -137,7 +138,7 @@ class AllOrders extends Component
                     $contentData
                 );
 
-                $replacedContent = $order->order->blade == 'vacation'
+                $replacedContent = $order->order->blade == Order::BLADE_VACATION
                                 ?  '<w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/></w:rPr>' . $replacedContent . '<w:br/>'
                                 :  $replacedContent;
 

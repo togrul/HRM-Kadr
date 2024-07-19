@@ -16,7 +16,7 @@ class AllTemplates extends Component
     use SideModalAction,AuthorizesRequests,WithPagination;
 
     #[Url]
-    public $status;
+    public $status = 'active';
 
     public function setDeleteTemplate($templateId)
     {

@@ -29,6 +29,12 @@ class AllRanks extends Component
         $this->resetPage();
     }
 
+    public function mount()
+    {
+        $this->status = request()->query('status')
+                ? (int)request()->query('status')
+                : 1;
+    }
 
     public function render()
     {

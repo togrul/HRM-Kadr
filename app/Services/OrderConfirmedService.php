@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\OrderStatusEnum;
 use App\Helpers\UsefulHelpers;
 use App\Models\Candidate;
+use App\Models\Order;
 use App\Models\OrderLog;
 use App\Models\Personnel;
 use App\Models\StaffSchedule;
@@ -19,19 +20,19 @@ class OrderConfirmedService
         if($this->orderLog->status_id == OrderStatusEnum::APPROVED->value)
         {
             // eger ise girme emridirse ve statusu tesdiqlenmisdirse
-            if($this->orderLog->order_id == 1010)
+            if($this->orderLog->order_id == Order::IG_EMR)
             {
                 // personnel cedvelinde ise girme tarixin duzeltmek
                 $this->approveEmploymentOrder($personnelIds, $this->orderLog, $action);
             }
-            if($this->orderLog->order->blade == 'vacation')
+            if($this->orderLog->order->blade == Order::BLADE_VACATION)
             {
                 $this->processVacationOrder($this->orderLog);
             }
         }
         elseif($this->orderLog->status_id == OrderStatusEnum::CANCELLED->value)
         {
-            if($this->orderLog->order->blade == 'vacation')
+            if($this->orderLog->order->blade == Order::BLADE_VACATION)
             {
                 // remove all personnels from vacation table
                 $this->removeVacationPersonnels($this->orderLog);

@@ -5,18 +5,17 @@ namespace App\Livewire\Traits;
 use App\Enums\StructureEnum;
 use App\Helpers\UsefulHelpers;
 use App\Models\Candidate;
+use App\Models\Order;
 use App\Models\OrderStatus;
 use App\Models\OrderType;
 use App\Models\Personnel;
 use App\Models\PersonnelVacation;
 use App\Models\Position;
 use App\Models\Rank;
-use App\Models\StaffSchedule;
 use App\Models\Structure;
 use App\Services\CheckVacancyService;
 use App\Services\WordSuffixService;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\On;
 
 trait OrderCrud
@@ -69,19 +68,19 @@ trait OrderCrud
             ],
             'dynamic' => [
                 'components.*.component_id.id' => 'required|int|exists:components,id',
-                'components.*.rank_id.id' => $this->selectedBlade == 'default' ? 'nullable|int|exists:ranks,id' : '',
-                'components.*.personnel_id.id' => $this->selectedBlade == 'default' ? 'required|int' : '',
-                'components.*.day' => $this->selectedBlade == 'default' ? 'required' : '',
-                'components.*.month' => $this->selectedBlade == 'default' ? 'required|string|min:1' : '',
-                'components.*.year' => $this->selectedBlade == 'default' ? 'required' : '',
-                'components.*.structure_main_id.id' => $this->selectedBlade == 'default' ? 'required|int|exists:structures,id' : '',
-                'components.*.structure_id.id' => $this->selectedBlade == 'default' ? 'required|int|exists:structures,id' : '',
-                'components.*.position_id.id' => $this->selectedBlade == 'default' ? 'required|int|exists:positions,id' : '',
-                'components.*.name' =>  $this->selectedBlade == 'default' ? 'required|string' : '',
-                'components.*.surname' =>  $this->selectedBlade == 'default' ? 'required|string' : '',
-                'components.*.start_date' => $this->selectedBlade == 'vacation' ? 'required|date' : '',
-                'components.*.end_date' => $this->selectedBlade == 'vacation' ? 'required|date|after:start_date' : '',
-                'components.*.days' => $this->selectedBlade == 'vacation' ? 'required|int|min:0' : ''
+                'components.*.rank_id.id' => $this->selectedBlade == Order::BLADE_DEFAULT ? 'nullable|int|exists:ranks,id' : '',
+                'components.*.personnel_id.id' => $this->selectedBlade == Order::BLADE_DEFAULT ? 'required|int' : '',
+                'components.*.day' => $this->selectedBlade == Order::BLADE_DEFAULT ? 'required' : '',
+                'components.*.month' => $this->selectedBlade == Order::BLADE_DEFAULT ? 'required|string|min:1' : '',
+                'components.*.year' => $this->selectedBlade == Order::BLADE_DEFAULT ? 'required' : '',
+                'components.*.structure_main_id.id' => $this->selectedBlade == Order::BLADE_DEFAULT ? 'required|int|exists:structures,id' : '',
+                'components.*.structure_id.id' => $this->selectedBlade == Order::BLADE_DEFAULT ? 'required|int|exists:structures,id' : '',
+                'components.*.position_id.id' => $this->selectedBlade == Order::BLADE_DEFAULT ? 'required|int|exists:positions,id' : '',
+                'components.*.name' =>  $this->selectedBlade == Order::BLADE_DEFAULT ? 'required|string' : '',
+                'components.*.surname' =>  $this->selectedBlade == Order::BLADE_DEFAULT ? 'required|string' : '',
+                'components.*.start_date' => $this->selectedBlade == Order::BLADE_VACATION ? 'required|date' : '',
+                'components.*.end_date' => $this->selectedBlade == Order::BLADE_VACATION ? 'required|date|after:start_date' : '',
+                'components.*.days' => $this->selectedBlade == Order::BLADE_VACATION ? 'required|int|min:0' : ''
             ]
         ];
     }
@@ -186,7 +185,8 @@ trait OrderCrud
 
     protected function updatePersonnelName($value, $rowKey)
     {
-        $personnelModel = $this->order['order_id'] == 1010
+        // yoxlamaq lazimdir acilan kimi gorur order table i yoxsa yox.
+        $personnelModel = $this->order['order_id'] == Order::IG_EMR
             ? Candidate::find($value)
             : Personnel::find($value);
 
@@ -202,7 +202,7 @@ trait OrderCrud
 
     protected function fillEmptyComponent()
     {
-        $list = $this->selectedBlade == 'vacation'
+        $list = $this->selectedBlade == Order::BLADE_VACATION
                 ? ['component_id']
                 : ['rank_id','component_id','personnel_id','structure_main_id','structure_id','position_id'];
 
@@ -223,7 +223,7 @@ trait OrderCrud
         }
         array_push($this->components,$data);
 
-        if($this->selectedBlade == 'vacation' && ($this->componentRows > 0 && !empty($this->components[0]['component_id']['id'])))
+        if($this->selectedBlade == Order::BLADE_VACATION && ($this->componentRows > 0 && !empty($this->components[0]['component_id']['id'])))
         {
             $this->components[$this->componentRows]['component_id'] = $this->components[0]['component_id'];
         }
@@ -344,7 +344,7 @@ trait OrderCrud
 
     private function prepareToCrud() : array
     {
-        if($this->selectedBlade == 'default')
+        if($this->selectedBlade == Order::BLADE_DEFAULT)
         {
             $_attrData = $this->components;
 
@@ -369,7 +369,7 @@ trait OrderCrud
 
         $list_for_vacancy = [];
         $message = '';
-        if($this->order['order_id'] == 1010)
+        if($this->order['order_id'] == Order::IG_EMR)
         {
             /** secilen vezifelerin bos olub olmadigin yoxlayir yoxdursa vakansiya yaratmaga imkan verir **/
             $list_for_vacancy = !empty($this->originalComponents)
@@ -379,7 +379,7 @@ trait OrderCrud
             $this->vacancy_list = resolve(CheckVacancyService::class)->handle($list_for_vacancy);
             $message = !empty($this->vacancy_list) ? $this->vacancy_list['message']  : '';
         }
-        elseif($this->selectedBlade == 'vacation')
+        elseif($this->selectedBlade == Order::BLADE_VACATION)
         {
             $list_for_vacancy = !empty($this->originalComponents)
                 ? UsefulHelpers::compareMultidimensionalArrays($this->selected_personnel_list,$this->originalComponents)
@@ -535,7 +535,7 @@ trait OrderCrud
                 );
             }
         }
-        if($method == 'update' && $this->selectedBlade == 'vacation')
+        if($method == 'update' && $this->selectedBlade == Order::BLADE_VACATION)
         {
             $deletedPersonnels = array_diff(
                 $this->orderModelData->personnels->pluck('tabel_no')->all(),
@@ -581,7 +581,7 @@ trait OrderCrud
             }
         );
 
-        $_personnels = array_key_exists('order_id',$this->order) && $this->order['order_id'] == 1010
+        $_personnels = array_key_exists('order_id',$this->order) && $this->order['order_id'] == Order::IG_EMR
                         ? $this->getPersonnelsStatusReady($_personnel_id_list)
                         : $this->getPersonnelsList($_personnel_id_list);
 
