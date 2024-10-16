@@ -9,11 +9,10 @@ use Carbon\Carbon;
 
 class ImportCandidateToPersonnel
 {
-    public function handle(array $components,$status)
+    public function handle(array $components, $status): array
     {
         $tabel_no_list = [];
-        foreach ($components as $component)
-        {
+        foreach ($components as $component) {
             $candidate = Candidate::find($component['personnel_id']['id']);
 
             $personnel = Personnel::create([
@@ -35,7 +34,7 @@ class ImportCandidateToPersonnel
                 'residental_address' => 'yoxdur',
                 'registered_address' => 'yoxdur',
                 'work_norm_id' => 10,
-                'join_work_date' => Carbon::now()->format('Y-m-d')
+                'join_work_date' => Carbon::now()->format('Y-m-d'),
             ]);
             $tabel_no_list[] = $personnel->tabel_no;
         }

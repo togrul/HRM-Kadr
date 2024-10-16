@@ -5,12 +5,19 @@ namespace App\Livewire\Traits;
 trait Step7Trait
 {
     public $kinship = [];
-    public $kinship_list = [];
-    public $kinshipId,$kinshipName,$searchKinship;
 
-    public function mountStep7Trait() {
+    public $kinship_list = [];
+
+    public $kinshipId;
+
+    public $kinshipName;
+
+    public $searchKinship;
+
+    public function mountStep7Trait()
+    {
         $this->kinshipName = '---';
-        !empty($this->personnelModel) && $this->fillKinship();
+        ! empty($this->personnelModel) && $this->fillKinship();
     }
 
     public function addKinship()
@@ -19,7 +26,7 @@ trait Step7Trait
         $this->kinship_list[] = $this->kinship;
         $this->kinshipName = '---';
         $this->reset('kinshipId');
-        $this->kinship = [];;
+        $this->kinship = [];
     }
 
     public function forceDeleteKinship($key)
@@ -31,29 +38,25 @@ trait Step7Trait
     {
         $updateKinship = $this->personnelModelData->kinships->load('kinship')->toArray();
 
-        if(!empty($updateKinship))
-        {
-            foreach($updateKinship  as $key => $uptKinship)
-            {
-                $this->kinship_list[] = [
-                    'fullname' => $uptKinship['fullname'],
-                    'birthdate' => $uptKinship['birthdate'],
-                    'birth_place' => $uptKinship['birth_place'],
-                    'company_name' => $uptKinship['company_name'],
-                    'position' => $uptKinship['position'],
-                    'registered_address' => $uptKinship['registered_address'],
-                    'residental_address' => $uptKinship['residental_address'],
-                    'birth_certificate_number' => $uptKinship['birth_certificate_number'],
-                    'marriage_certificate_number' => $uptKinship['marriage_certificate_number'],
-                ];
+        if (! empty($updateKinship)) {
+            foreach ($updateKinship as $key => $uptKinship) {
+                $this->kinship_list[] = $this->mapAttributes(
+                    attributes: [
+                        'fullname', 'birthdate', 'birth_place', 'company_name', 'position',
+                        'residental_address', 'registered_address', 'birth_certificate_number', 'marriage_certificate_number',
+                    ],
+                    getFrom: $uptKinship
+                );
 
-                if(!empty($uptKinship['kinship_id']))
-                {
-                    $this->kinship_list[$key]['kinship_id'] = [
-                        'id' => $uptKinship['kinship']['id'],
-                        'name' => $uptKinship['kinship']['name_'.config('app.locale')],
-                    ];
-                }
+                $this->handleRelatedEntitiesMultiDimensional(
+                    entity: 'kinship',
+                    field: 'kinship_id',
+                    key: $key,
+                    fillTo: 'kinship_list',
+                    getFrom: $uptKinship,
+                    titleField: 'name',
+                    hasLocale: true
+                );
             }
         }
     }

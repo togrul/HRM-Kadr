@@ -9,6 +9,7 @@ use Livewire\Form;
 class RankForm extends Form
 {
     public ?Rank $rank;
+
     #[Validate('required|integer|min:1')]
     public $id;
 
@@ -16,14 +17,17 @@ class RankForm extends Form
     public $name_az;
 
     public $name_en;
+
     public $name_ru;
+
     public $duration;
+
     public $is_active = true;
 
     protected function validationAttributes()
     {
         return [
-            'name_az'=>__('Name'),
+            'name_az' => __('Name'),
         ];
     }
 
@@ -36,7 +40,7 @@ class RankForm extends Form
         $this->name_en = $rank->name_en;
         $this->name_ru = $rank->name_ru;
         $this->duration = $rank->duration;
-        $this->is_active = (bool)$rank->is_active ;
+        $this->is_active = (bool) $rank->is_active;
     }
 
     public function create()

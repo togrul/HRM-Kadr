@@ -7,8 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 trait PersonnelTrait
 {
-    public function personnel() : BelongsTo
+    public function personnel(): BelongsTo
     {
-        return $this->belongsTo(Personnel::class,'tabel_no','tabel_no');
+        return $this->belongsTo(Personnel::class, 'tabel_no', 'tabel_no');
     }
 }

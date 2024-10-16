@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PersonnelMilitaryService extends Model
 {
-    use HasFactory,PersonnelTrait,DateCastTrait;
+    use DateCastTrait,HasFactory,PersonnelTrait;
 
     public $timestamps = false;
 
@@ -20,22 +20,22 @@ class PersonnelMilitaryService extends Model
         'rank_id',
         'given_date',
         'start_date',
-        'end_date'
+        'end_date',
     ];
 
     protected $dates = [
         'given_date',
         'start_date',
-        'end_date'
+        'end_date',
     ];
 
     protected $casts = [
         'given_date' => 'date:d.m.Y',
         'start_date' => 'date:d.m.Y',
-        'end_date' => 'date:d.m.Y'
+        'end_date' => 'date:d.m.Y',
     ];
 
-    public function rank() : BelongsTo
+    public function rank(): BelongsTo
     {
         return $this->belongsTo(Rank::class);
     }

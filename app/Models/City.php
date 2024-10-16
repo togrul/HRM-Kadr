@@ -16,16 +16,16 @@ class City extends Model
         'id',
         'country_id',
         'parent_id',
-        'name'
+        'name',
     ];
 
-    public function country() : BelongsTo
+    public function country(): BelongsTo
     {
         return $this->belongsTo(Country::class);
     }
 
-    public function parent() : BelongsTo
+    public function parent(): BelongsTo
     {
-        return $this->belongsTo(self::class,'parent_id','id');
+        return $this->belongsTo(self::class, 'parent_id', 'id');
     }
 }

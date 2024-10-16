@@ -33,13 +33,13 @@
                     <x-filter.item  wire:click.prevent="setStatus('all')" :active="$status === 'all'">
                         {{ __('All') }}
                     </x-filter.item>
-                    @foreach($statuses as $_status)
-                        <x-filter.item  wire:click.prevent="setStatus({{$_status->id}})" :active="$_status->id === intval($status)">
+                    @foreach($this->statuses as $_status)
+                        <x-filter.item wire:click.prevent="setStatus({{$_status->id}})" :active="$_status->id === intval($status)">
                             {{ $_status->name  }}
                         </x-filter.item>
                     @endforeach
                     {{-- @can('manage-orders') --}}
-                    <x-filter.item  wire:click.prevent="setStatus('deleted')" :active="$status === 'deleted'">
+                    <x-filter.item wire:click.prevent="setStatus('deleted')" :active="$status === 'deleted'">
                         {{ __('Deleted') }}
                     </x-filter.item>
                     {{-- @endcan --}}

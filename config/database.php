@@ -169,7 +169,7 @@ return [
             'staff_schedules',
             'structures',
             'users',
-            'work_norms'
+            'work_norms',
             // 'bar',
         ],
     ],

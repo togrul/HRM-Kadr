@@ -15,13 +15,13 @@ return new class extends Migration
             $table->id();
             $table->string('tabel_no');
             $table->foreign('tabel_no')
-                    ->references('tabel_no')
-                    ->on('personnels')
-                    ->onDelete('cascade')
-                    ->onUpdate('cascade');
+                ->references('tabel_no')
+                ->on('personnels')
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
             $table->string('company_name');
             $table->string('position');
-            $table->double('coefficient',4,2)->nullable();
+            $table->double('coefficient', 4, 2)->nullable();
             $table->date('join_date');
             $table->date('leave_date')->nullable();
             $table->boolean('is_special_service')->default(false);

@@ -13,7 +13,7 @@ class DeletePersonnel extends Component
     #[On('setDeletePersonnel')]
     public function setDeletePersonnel($personnelId)
     {
-        $this->personnel = Personnel::where('tabel_no',$personnelId)->first();
+        $this->personnel = Personnel::where('tabel_no', $personnelId)->first();
 
         $this->dispatch('deletePersonnelWasSet');
     }
@@ -26,7 +26,7 @@ class DeletePersonnel extends Component
 
         $this->personnel = null;
 
-        $this->dispatch('personnelWasDeleted' , __('Personnel was deleted!'));
+        $this->dispatch('personnelWasDeleted', __('Personnel was deleted!'));
     }
 
     public function render()

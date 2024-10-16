@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Candidate extends Model
 {
-    use HasFactory,SoftDeletes,CreateDeleteTrait,DateCastTrait;
+    use CreateDeleteTrait,DateCastTrait,HasFactory,SoftDeletes;
 
     protected $fillable = [
         'name',
@@ -43,7 +43,7 @@ class Candidate extends Model
         'note',
         'presented_by',
         'creator_id',
-        'deleted_by'
+        'deleted_by',
     ];
 
     protected $dates = [
@@ -53,7 +53,7 @@ class Candidate extends Model
         'application_date',
         'requisition_date',
         'hhk_date',
-        'birthdate'
+        'birthdate',
     ];
 
     protected $casts = [
@@ -63,26 +63,26 @@ class Candidate extends Model
         'application_date' => 'date:d.m.Y',
         'requisition_date' => 'date:d.m.Y',
         'hhk_date' => 'date:d.m.Y',
-        'birthdate' => 'datetime:d.m.Y'
+        'birthdate' => 'datetime:d.m.Y',
     ];
 
-    public function getFullnameAttribute() : string
+    public function getFullnameAttribute(): string
     {
-        return "{$this->surname} {$this->name} {$this->patronymic}";
+        return "$this->surname $this->name $this->patronymic";
     }
 
-    public function getFullnameMaxAttribute() : string
+    public function getFullnameMaxAttribute(): string
     {
-        return $this->fullname . ' ' . ($this->gender == 2 ? 'qızı' : 'oğlu');
+        return $this->fullname.' '.($this->gender == 2 ? 'qızı' : 'oğlu');
     }
 
-    public function structure() : BelongsTo
+    public function structure(): BelongsTo
     {
         return $this->belongsTo(Structure::class);
     }
 
-    public function status() : BelongsTo
+    public function status(): BelongsTo
     {
-        return $this->belongsTo(AppealStatus::class,'status_id','id');
+        return $this->belongsTo(AppealStatus::class, 'status_id', 'id');
     }
 }

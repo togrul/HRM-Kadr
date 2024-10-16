@@ -1,8 +1,9 @@
 <?php
-  
+
 namespace App\Enums;
- 
-enum KnowledgeStatusEnum : string {
+
+enum KnowledgeStatusEnum: string
+{
     case Poor = 'zəif';
     case Good = 'yaxşı';
     case Fluent = 'sərbəst';

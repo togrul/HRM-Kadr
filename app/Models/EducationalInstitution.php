@@ -17,6 +17,6 @@ class EducationalInstitution extends Model
         'shortname',
         'old_name_1',
         'old_name_2',
-        'old_name_3'
+        'old_name_3',
     ];
 }

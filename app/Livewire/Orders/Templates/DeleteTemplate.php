@@ -3,8 +3,8 @@
 namespace App\Livewire\Orders\Templates;
 
 use App\Models\Order;
-use Livewire\Component;
 use Livewire\Attributes\On;
+use Livewire\Component;
 
 class DeleteTemplate extends Component
 {
@@ -13,7 +13,7 @@ class DeleteTemplate extends Component
     #[On('setDeleteTemplate')]
     public function setDeleteTemplate($templateId)
     {
-        $this->template = Order::where('id',$templateId)->first();
+        $this->template = Order::where('id', $templateId)->first();
 
         $this->dispatch('deleteTemplateWasSet');
     }

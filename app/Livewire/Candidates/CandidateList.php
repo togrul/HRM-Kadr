@@ -14,21 +14,22 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Maatwebsite\Excel\Facades\Excel;
 
-#[On(['candidateAdded','filterSelected','candidateWasDeleted'])]
+#[On(['candidateAdded', 'filterSelected', 'candidateWasDeleted'])]
 class CandidateList extends Component
 {
-    use WithPagination,SideModalAction,AuthorizesRequests;
+    use AuthorizesRequests,SideModalAction,WithPagination;
 
     #[Url]
     public $status;
 
     public function exportExcel()
     {
-        $report = $this->returnData(type:"excel");
+        $report = $this->returnData(type: 'excel');
         $name = Carbon::now()->format('d.m.Y H:i');
 
-        return Excel::download( new CandidateExport( $report ), "candidate-{$name}.xlsx");
+        return Excel::download(new CandidateExport($report), "candidate-$name.xlsx");
     }
+
     public function setStatus($newStatus)
     {
         $this->status = $newStatus;
@@ -37,40 +38,38 @@ class CandidateList extends Component
 
     public function setDeleteCandidate($candidateId)
     {
-        $this->dispatch('setDeleteCandidate',$candidateId);
+        $this->dispatch('setDeleteCandidate', $candidateId);
     }
 
     public function restoreData($id)
     {
-        $candidate = Candidate::withTrashed()->where('id',$id)->first();
+        $candidate = Candidate::withTrashed()->where('id', $id)->first();
         $candidate->restore();
         $candidate->update([
-            'deleted_by' => null
+            'deleted_by' => null,
         ]);
-        $this->dispatch('candidateAdded',__('Candidate was updated successfully!'));
+        $this->dispatch('candidateAdded', __('Candidate was updated successfully!'));
     }
 
     public function forceDeleteData($id)
     {
-        $model = Candidate::withTrashed()->where('id',$id)->first();
+        $model = Candidate::withTrashed()->where('id', $id)->first();
         $model->forceDelete();
-        $this->dispatch('candidateWasDeleted' , __('Candidate was deleted!'));
+        $this->dispatch('candidateWasDeleted', __('Candidate was deleted!'));
     }
 
-    protected function returnData($type = "normal")
+    protected function returnData($type = 'normal')
     {
-        $result = Candidate::with(['structure', 'status','creator','personDidDelete'])
-            ->when(is_int($this->status),function($q)
-            {
-                return $q->where('status_id',$this->status);
+        $result = Candidate::with(['structure', 'status', 'creator', 'personDidDelete'])
+            ->when(is_int($this->status), function ($q) {
+                return $q->where('status_id', $this->status);
             })
-            ->when($this->status == 'deleted',function($q)
-            {
+            ->when($this->status == 'deleted', function ($q) {
                 $q->onlyTrashed();
             })
             ->orderByDesc('appeal_date');
 
-        return $type == "normal"
+        return $type == 'normal'
             ? $result->paginate(15)->withQueryString()
             : $result->get()->toArray();
     }
@@ -84,10 +83,10 @@ class CandidateList extends Component
 
     public function render()
     {
-        $_appeal_statuses = AppealStatus::where('locale',config('app.locale'))->get();
+        $_appeal_statuses = AppealStatus::where('locale', config('app.locale'))->get();
 
         $_candidates = $this->returnData();
 
-        return view('livewire.candidates.candidate-list',compact('_appeal_statuses','_candidates'));
+        return view('livewire.candidates.candidate-list', compact('_appeal_statuses', '_candidates'));
     }
 }

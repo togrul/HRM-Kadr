@@ -10,17 +10,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class OrderLogPersonnel extends Model
 {
-    use HasFactory,PersonnelTrait,OrderNumberTrait;
+    use HasFactory,OrderNumberTrait,PersonnelTrait;
 
     public $timestamps = false;
 
     protected $fillable = [
         'order_no',
         'tabel_no',
-        'component_id'
+        'component_id',
     ];
 
-    public function component() : BelongsTo
+    public function component(): BelongsTo
     {
         return $this->belongsTo(Component::class);
     }
@@ -28,7 +28,7 @@ class OrderLogPersonnel extends Model
     protected static function boot()
     {
         parent::boot();
-        static::creating(function($model){
+        static::creating(function ($model) {
             dd($model);
         });
         static::deleted(function ($model) {

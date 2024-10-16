@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class PersonnelElectedElectoral extends Model
 {
-    use HasFactory,PersonnelTrait,DateCastTrait;
+    use DateCastTrait,HasFactory,PersonnelTrait;
 
     protected $fillable = [
         'election_type',
@@ -18,7 +18,7 @@ class PersonnelElectedElectoral extends Model
     ];
 
     protected $dates = [
-        'elected_date'
+        'elected_date',
     ];
 
     protected $casts = [

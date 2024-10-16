@@ -4,13 +4,13 @@ namespace App\Models;
 
 use App\Traits\DateCastTrait;
 use App\Traits\PersonnelTrait;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class PersonnelCriminal extends Model
 {
-    use HasFactory,PersonnelTrait,DateCastTrait;
+    use DateCastTrait,HasFactory,PersonnelTrait;
 
     public $timestamps = false;
 
@@ -18,7 +18,7 @@ class PersonnelCriminal extends Model
         'tabel_no',
         'punishment_id',
         'reason',
-        'given_date'
+        'given_date',
     ];
 
     protected $dates = [
@@ -29,7 +29,7 @@ class PersonnelCriminal extends Model
         'given_date' => 'date:d.m.Y',
     ];
 
-    public function punishment() : BelongsTo
+    public function punishment(): BelongsTo
     {
         return $this->belongsTo(Punishment::class);
     }

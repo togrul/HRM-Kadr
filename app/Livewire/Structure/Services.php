@@ -11,7 +11,7 @@ class Services extends Component
     public function selectService($service)
     {
         $this->selectedService = $service;
-        $this->dispatch('selectService',$service);
+        $this->dispatch('selectService', $service);
     }
 
     public function mount()

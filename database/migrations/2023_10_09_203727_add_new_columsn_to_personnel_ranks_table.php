@@ -23,7 +23,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('personnel_military_services', function (Blueprint $table) {
-            $table->dropColumn(['start_date','end_date']);
+            $table->dropColumn(['start_date', 'end_date']);
         });
     }
 };

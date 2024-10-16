@@ -4,13 +4,13 @@ namespace App\Models;
 
 use App\Traits\DateCastTrait;
 use App\Traits\PersonnelTrait;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class PersonnelExtraEducation extends Model
 {
-    use HasFactory,PersonnelTrait,DateCastTrait;
+    use DateCastTrait,HasFactory,PersonnelTrait;
 
     public $timestamps = false;
 
@@ -31,7 +31,7 @@ class PersonnelExtraEducation extends Model
         'diplom_given_date',
         'coefficient',
         'calculate_as_seniority',
-        'is_military'
+        'is_military',
     ];
 
     protected $dates = [
@@ -43,26 +43,26 @@ class PersonnelExtraEducation extends Model
     protected $casts = [
         'diplom_given_date' => 'date:d.m.Y',
         'admission_year' => 'date:d.m.Y',
-        'graduated_year' => 'date:d.m.Y'
+        'graduated_year' => 'date:d.m.Y',
     ];
 
-    public function type() : BelongsTo
+    public function type(): BelongsTo
     {
-        return $this->belongsTo(EducationType::class,'education_type_id','id');
+        return $this->belongsTo(EducationType::class, 'education_type_id', 'id');
     }
 
-    public function institution() : BelongsTo
+    public function institution(): BelongsTo
     {
-        return $this->belongsTo(EducationalInstitution::class,'educational_institution_id','id');
+        return $this->belongsTo(EducationalInstitution::class, 'educational_institution_id', 'id');
     }
 
-    public function form() : BelongsTo
+    public function form(): BelongsTo
     {
-        return $this->belongsTo(EducationForm::class,'education_form_id','id');
+        return $this->belongsTo(EducationForm::class, 'education_form_id', 'id');
     }
 
-    public function documentType() : BelongsTo
+    public function documentType(): BelongsTo
     {
-        return $this->belongsTo(EducationDocumentType::class,'education_document_type_id','id');
+        return $this->belongsTo(EducationDocumentType::class, 'education_document_type_id', 'id');
     }
 }

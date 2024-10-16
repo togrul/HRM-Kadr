@@ -10,17 +10,17 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-#[On(['templateAdded','templateWasDeleted'])]
+#[On(['templateAdded', 'templateWasDeleted'])]
 class AllTemplates extends Component
 {
-    use SideModalAction,AuthorizesRequests,WithPagination;
+    use AuthorizesRequests,SideModalAction,WithPagination;
 
     #[Url]
     public $status = 'active';
 
     public function setDeleteTemplate($templateId)
     {
-        $this->dispatch('setDeleteTemplate',$templateId);
+        $this->dispatch('setDeleteTemplate', $templateId);
     }
 
     public function setStatus($newStatus)
@@ -31,36 +31,36 @@ class AllTemplates extends Component
 
     public function restoreData($id)
     {
-        $template = Order::withTrashed()->where('id',$id)->first();
+        $template = Order::withTrashed()->where('id', $id)->first();
         $template->restore();
         $template->update([
-            'deleted_by' => null
+            'deleted_by' => null,
         ]);
-        $this->dispatch('templateAdded',__('Template was updated successfully!'));
+        $this->dispatch('templateAdded', __('Template was updated successfully!'));
     }
 
     public function forceDeleteData($id)
     {
-        $model = Order::withTrashed()->where('id',$id)->first();
+        $model = Order::withTrashed()->where('id', $id)->first();
         $model->forceDelete();
-        $this->dispatch('templateWasDeleted' , __('Template was deleted!'));
+        $this->dispatch('templateWasDeleted', __('Template was deleted!'));
     }
 
     public function fillFilter()
     {
         $this->status = request()->query('status')
-            ? request()->query('status')
-            : 'active';
+                        ? request()->query('status')
+                        : 'active';
     }
 
     public function render()
     {
         $templates = Order::with('category')
-                        ->when($this->status == 'deleted',function($q)
-                        {
-                            $q->onlyTrashed();
-                        })
-                        ->paginate(24);
-        return view('livewire.orders.templates.all-templates',compact('templates'));
+            ->when($this->status == 'deleted', function ($q) {
+                $q->onlyTrashed();
+            })
+            ->paginate(24);
+
+        return view('livewire.orders.templates.all-templates', compact('templates'));
     }
 }

@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('structures', function (Blueprint $table) {
-            $table->double('coefficient',4,2)->nullable();
+            $table->double('coefficient', 4, 2)->nullable();
         });
     }
 

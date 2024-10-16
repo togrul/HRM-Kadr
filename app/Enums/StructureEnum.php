@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum StructureEnum : int
+enum StructureEnum: int
 {
     case ESAS = 0;
     case IDARE = 1;

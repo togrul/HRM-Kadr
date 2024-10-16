@@ -23,7 +23,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('personnel_kinships', function (Blueprint $table) {
-            $table->dropColumn(['birth_certificate_number','marriage_certificate_number']);
+            $table->dropColumn(['birth_certificate_number', 'marriage_certificate_number']);
         });
     }
 };

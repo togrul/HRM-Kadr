@@ -4,13 +4,13 @@ namespace App\Models;
 
 use App\Traits\DateCastTrait;
 use App\Traits\PersonnelTrait;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class PersonnelScientificDegreeAndName extends Model
 {
-    use HasFactory,PersonnelTrait,DateCastTrait;
+    use DateCastTrait,HasFactory,PersonnelTrait;
 
     public $timestamps = false;
 
@@ -24,7 +24,7 @@ class PersonnelScientificDegreeAndName extends Model
         'diplom_serie',
         'diplom_no',
         'diplom_given_date',
-        'document_issued_by'
+        'document_issued_by',
     ];
 
     protected $dates = [
@@ -34,16 +34,16 @@ class PersonnelScientificDegreeAndName extends Model
 
     protected $casts = [
         'diplom_given_date' => 'date:d.m.Y',
-        'given_date' => 'date:d.m.Y'
+        'given_date' => 'date:d.m.Y',
     ];
 
-    public function degreeAndName() : BelongsTo
+    public function degreeAndName(): BelongsTo
     {
-        return $this->belongsTo(ScientificDegreeAndName::class,'degree_and_name_id','id');
+        return $this->belongsTo(ScientificDegreeAndName::class, 'degree_and_name_id', 'id');
     }
 
-    public function documentType() : BelongsTo
+    public function documentType(): BelongsTo
     {
-        return $this->belongsTo(EducationDocumentType::class,'edu_doc_type_id','id');
+        return $this->belongsTo(EducationDocumentType::class, 'edu_doc_type_id', 'id');
     }
 }

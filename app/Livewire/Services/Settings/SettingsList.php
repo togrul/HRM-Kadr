@@ -7,27 +7,27 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
-#[On(['settingsUpdated','settingsWasDeleted'])]
+#[On(['settingsUpdated', 'settingsWasDeleted'])]
 class SettingsList extends Component
 {
     use AuthorizesRequests;
 
     public $setting = [];
 
-    public function updatedSetting($value,$name)
+    public function updatedSetting($value, $name)
     {
-        $_key = explode('.',$name)[0];
-        $_setting = Setting::where('id',$this->setting[$_key]['id'])->firstOrFail();
+        $_key = explode('.', $name)[0];
+        $_setting = Setting::where('id', $this->setting[$_key]['id'])->firstOrFail();
         $_setting->update([
-            'value' => $value
+            'value' => $value,
         ]);
 
-        $this->dispatch('settingsUpdated',__('Setting was added successfully!'));
+        $this->dispatch('settingsUpdated', __('Setting was added successfully!'));
     }
 
     public function setDeleteSettings($settingsId)
     {
-        $this->dispatch('setDeleteSettings',$settingsId);
+        $this->dispatch('setDeleteSettings', $settingsId);
     }
 
     public function render()
@@ -36,6 +36,6 @@ class SettingsList extends Component
 
         $this->setting = $settings->toArray();
 
-        return view('livewire.services.settings.settings-list',compact('settings'));
+        return view('livewire.services.settings.settings-list', compact('settings'));
     }
 }

@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class PersonnelParticipationEvent extends Model
 {
-    use HasFactory,PersonnelTrait,DateCastTrait;
+    use DateCastTrait,HasFactory,PersonnelTrait;
 
     public $timestamps = false;
 
@@ -17,7 +17,7 @@ class PersonnelParticipationEvent extends Model
         'tabel_no',
         'event_type',
         'event_name',
-        'event_date'
+        'event_date',
     ];
 
     protected $dates = [

@@ -3,7 +3,6 @@
 namespace App\Livewire\Traits;
 
 use App\Enums\AttitudeMilitaryEnum;
-use App\Enums\MilitaryStatusEnum;
 use App\Models\AppealStatus;
 use App\Models\Structure;
 use Illuminate\Validation\Rule;
@@ -11,10 +10,21 @@ use Illuminate\Validation\Rule;
 trait CandidateCrud
 {
     use SelectListTrait;
+
     public $candidate = [];
-    public $structureId,$structureName,$searchStructure;
-    public $statusId,$statusName;
+
+    public $structureId;
+
+    public $structureName;
+
+    public $searchStructure;
+
+    public $statusId;
+
+    public $statusName;
+
     public $title;
+
     public $candidateModel;
 
     public function rules()
@@ -29,7 +39,7 @@ trait CandidateCrud
             'candidate.height' => 'required|int',
             'candidate.knowledge_test' => 'required|int',
             'candidate.physical_fitness_exam' => 'required|int',
-            'candidate.attitude_to_military' => ['required',Rule::in(AttitudeMilitaryEnum::values())],
+            'candidate.attitude_to_military' => ['required', Rule::in(AttitudeMilitaryEnum::values())],
             'candidate.status_id.id' => 'required|int|exists:appeal_statuses,id',
         ];
     }
@@ -54,30 +64,27 @@ trait CandidateCrud
     public function mount()
     {
         $this->structureName = $this->statusName = '---';
-        if(!empty($this->candidateModel))
-        {
+        if (! empty($this->candidateModel)) {
             $this->fillCandidate();
             $this->title = __('Edit candidate');
-        }
-        else
-        {
+        } else {
             $this->title = __('Add candidate');
         }
     }
 
     public function render()
     {
-        $structures = Structure::when(!empty($this->searchStructure),function($q){
-            $q->where('name','LIKE',"%{$this->searchStructure}%");
+        $structures = Structure::when(! empty($this->searchStructure), function ($q) {
+            $q->where('name', 'LIKE', "%$this->searchStructure%");
         })
             ->get();
 
-        $statuses = AppealStatus::where('locale',config('app.locale'))->get();
+        $statuses = AppealStatus::where('locale', config('app.locale'))->get();
 
-        $view_name = !empty($this->candidateModel)
+        $view_name = ! empty($this->candidateModel)
             ? 'livewire.candidates.edit-candidate'
             : 'livewire.candidates.add-candidate';
 
-        return view($view_name,compact('structures','statuses'));
+        return view($view_name, compact('structures', 'statuses'));
     }
 }

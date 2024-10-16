@@ -9,12 +9,12 @@ class AddComponent extends Component
 {
     use ComponentCrud;
 
-    public function store()
+    public function store() : void
     {
         $this->validate();
 
         \App\Models\Component::create($this->modifyArray($this->component));
 
-        $this->dispatch('candidateAdded',__('Candidate was added successfully!'));
+        $this->dispatch('candidateAdded', __('Candidate was added successfully!'));
     }
 }

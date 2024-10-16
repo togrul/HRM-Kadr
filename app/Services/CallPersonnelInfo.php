@@ -25,134 +25,125 @@ use Illuminate\Support\Facades\DB;
 
 class CallPersonnelInfo
 {
-    public function getAll($isDisability,$_this)
+    public function getAll($isDisability, $_this): array
     {
-        $nationalities = Country::whereHas('currentCountryTranslations',function($query) use($_this){
+        $nationalities = Country::withWhereHas('currentCountryTranslations', function ($query) use ($_this) {
             $query
-                ->when(!empty($_this->searchNationality),function($q) use($_this) {
-                    $q->where('title','LIKE',"%{$_this->searchNationality}%");
+                ->when(! empty($_this->searchNationality), function ($q) use ($_this) {
+                    $q->where('title', 'LIKE', "%$_this->searchNationality%");
                 })
-                ->when(!empty($_this->searchPreviousNationality),function($q) use($_this){
-                    $q->where('title','LIKE',"%{$_this->searchPreviousNationality}%");
+                ->when(! empty($_this->searchPreviousNationality), function ($q) use ($_this) {
+                    $q->where('title', 'LIKE', "%$_this->searchPreviousNationality%");
                 });
         })
-            ->with('currentCountryTranslations')
             ->get()
-            ->sortBy('currentCountryTranslations.title')->all();
+            ->sortBy('currentCountryTranslations.title')
+            ->all();
 
-        $education_degrees = EducationDegree::select('id',DB::raw('title_'.config('app.locale').' as title'))
-            ->when(!empty($_this->searchEducationDegree),function($q) use($_this){
-                $q->where('title_'.config('app.locale'),'LIKE',"%{$_this->searchEducationDegree}%");
+        $education_degrees = EducationDegree::select('id', DB::raw('title_'.config('app.locale').' as title'))
+            ->when(! empty($_this->searchEducationDegree), function ($q) use ($_this) {
+                $q->where('title_'.config('app.locale'), 'LIKE', "%$_this->searchEducationDegree%");
             })
             ->get();
 
-        $structures = Structure::when(!empty($_this->searchStructure),function($q) use($_this){
-            $q->where('name','LIKE',"%{$_this->searchStructure}%");
+        $structures = Structure::when(! empty($_this->searchStructure), function ($q) use ($_this) {
+            $q->where('name', 'LIKE', "%$_this->searchStructure%");
         })
             ->get();
 
-        $positions = Position::when(!empty($_this->searchPosition),function($q) use($_this){
-            $q->where('name','LIKE',"%{$_this->searchPosition}%");
+        $positions = Position::when(! empty($_this->searchPosition), function ($q) use ($_this) {
+            $q->where('name', 'LIKE', "%$_this->searchPosition%");
         })
             ->get();
 
-        $work_norms = WorkNorm::select('id',DB::raw('name_'.config('app.locale').' as name'))
-            ->when(!empty($_this->searchWorkNorm),function($q) use($_this){
-                $q->where('name_'.config('app.locale'),'LIKE',"%{$_this->searchWorkNorm}%");
+        $work_norms = WorkNorm::select('id', DB::raw('name_'.config('app.locale').' as name'))
+            ->when(! empty($_this->searchWorkNorm), function ($q) use ($_this) {
+                $q->where('name_'.config('app.locale'), 'LIKE', "%$_this->searchWorkNorm%");
             })
             ->get();
 
         $disabilities = $isDisability
-            ? Disability::when(!empty($_this->searchDisability),function($q) use($_this){
-                $q->where('name','LIKE',"%{$_this->searchDisability}%");
+            ? Disability::when(! empty($_this->searchDisability), function ($q) use ($_this) {
+                $q->where('name', 'LIKE', "%$_this->searchDisability%");
             })
                 ->get()
             : [];
 
-        $institutions = EducationalInstitution::when(!empty($_this->searchInstitution),function($q) use($_this){
-            $q->where('name','LIKE',"%{$_this->searchInstitution}%");
+        $institutions = EducationalInstitution::when(! empty($_this->searchInstitution), function ($q) use ($_this) {
+            $q->where('name', 'LIKE', "%$_this->searchInstitution%");
         })
-            ->when(!empty($_this->searchExtraInstitution),function($q) use($_this){
-                $q->where('name','LIKE',"%{$_this->searchExtraInstitution}%");
+            ->when(! empty($_this->searchExtraInstitution), function ($q) use ($_this) {
+                $q->where('name', 'LIKE', "%$_this->searchExtraInstitution%");
             })
             ->get();
 
-        $education_forms = EducationForm::select('id',DB::raw('name_'.config('app.locale').' as name'))
-            ->when(!empty($_this->searchEducationForm),function($q) use($_this){
-                $q->where('name_'.config('app.locale'),'LIKE',"%{$_this->searchEducationForm}%");
+        $education_forms = EducationForm::select('id', DB::raw('name_'.config('app.locale').' as name'))
+            ->when(! empty($_this->searchEducationForm), function ($q) use ($_this) {
+                $q->where('name_'.config('app.locale'), 'LIKE', "%$_this->searchEducationForm%");
             })
-            ->when(!empty($_this->searchExtraEducationForm),function($q) use($_this){
-                $q->where('name_'.config('app.locale'),'LIKE',"%{$_this->searchExtraEducationForm}%");
+            ->when(! empty($_this->searchExtraEducationForm), function ($q) use ($_this) {
+                $q->where('name_'.config('app.locale'), 'LIKE', "%$_this->searchExtraEducationForm%");
             })
             ->get();
 
-        $education_types = EducationType::when(!empty($_this->searchEducationType),function($q) use($_this){
-            $q->where('name','LIKE',"%{$_this->searchEducationType}%");
+        $education_types = EducationType::when(! empty($_this->searchEducationType), function ($q) use ($_this) {
+            $q->where('name', 'LIKE', "%$_this->searchEducationType%");
         })
             ->get();
 
-
-        $document_types = EducationDocumentType::when(!empty($_this->searchDocumentTyoe),function($q) use($_this){
-            $q->where('name','LIKE',"%{$_this->searchDocumentTyoe}%");
+        $document_types = EducationDocumentType::when(! empty($_this->searchDocumentTyoe), function ($q) use ($_this) {
+            $q->where('name', 'LIKE', "%$_this->searchDocumentTyoe%");
         })
             ->get();
 
         $rankModel = Rank::query()
-            ->when(!empty($_this->searchRank),function($q) use($_this){
-                $q->where('name_'.config('app.locale'),'LIKE',"%{$_this->searchRank}%");
+            ->when(! empty($_this->searchRank), function ($q) use ($_this) {
+                $q->where('name_'.config('app.locale'), 'LIKE', "%$_this->searchRank%");
             })
-            ->when(!empty($_this->searchMilitaryRank),function($q) use($_this){
-                $q->where('name_'.config('app.locale'),'LIKE',"%{$_this->searchMilitaryRank}%");
+            ->when(! empty($_this->searchMilitaryRank), function ($q) use ($_this) {
+                $q->where('name_'.config('app.locale'), 'LIKE', "%$_this->searchMilitaryRank%");
             })
-            ->where('is_active',1)
+            ->where('is_active', 1)
             ->get();
 
-        $awardModel = Award::when(!empty($_this->searchAward),function($q) use($_this){
-            $q->where('name','LIKE',"%{$_this->searchAward}%");
+        $awardModel = Award::when(! empty($_this->searchAward), function ($q) use ($_this) {
+            $q->where('name', 'LIKE', "%$_this->searchAward%");
         })
             ->get();
 
-        $punishmentModel = Punishment::when(!empty($_this->searchPunishment),function($q) use($_this){
-            $q->where('name','LIKE',"%{$_this->searchPunishment}%");
+        $punishmentModel = Punishment::when(! empty($_this->searchPunishment), function ($q) use ($_this) {
+            $q->where('name', 'LIKE', "%$_this->searchPunishment%");
         })
             ->criminalType('other')
             ->orderBy('name')
             ->get();
 
-        $criminalModel = Punishment::when(!empty($_this->searchCriminal),function($q) use($_this){
-            $q->where('name','LIKE',"%{$_this->searchCriminal}%");
+        $criminalModel = Punishment::when(! empty($_this->searchCriminal), function ($q) use ($_this) {
+            $q->where('name', 'LIKE', "%$_this->searchCriminal%");
         })
             ->criminalType('criminal')
             ->orderBy('name')
             ->get();
 
-        $kinshipModel = Kinship::select('id',DB::raw('name_'.config('app.locale').' as name'),'is_active')
-            ->when(!empty($_this->searchKinship),function($q) use($_this){
-                $q->where('name_'.config('app.locale'),'LIKE',"%{$_this->searchKinship}%");
+        $kinshipModel = Kinship::select('id', DB::raw('name_'.config('app.locale').' as name'), 'is_active')
+            ->when(! empty($_this->searchKinship), function ($q) use ($_this) {
+                $q->where('name_'.config('app.locale'), 'LIKE', "%$_this->searchKinship%");
             })
-            ->where('is_active',1)
+            ->where('is_active', 1)
             ->get();
 
-        $languageModel = Language::all();
-
-        $knowledges = KnowledgeStatusEnum::values();
-
-        $educationDocs  =  EducationDocumentType::all();
-
-        $cities = City::select('id','name','country_id')
-            ->when(!empty($_this->searchCity),function($q) use($_this){
-                $q->where('name','LIKE',"%{$_this->searchCity}%");
+        $cities = City::select('id', 'name', 'country_id')
+            ->when(! empty($_this->searchCity), function ($q) use ($_this) {
+                $q->where('name', 'LIKE', "%$_this->searchCity%");
             })
-            ->when(!empty($_this->documentBornCountryId),function($q) use($_this){
-                $q->where('country_id',$_this->documentBornCountryId);
+            ->when(! empty($_this->documentBornCountryId), function ($q) use ($_this) {
+                $q->where('country_id', $_this->documentBornCountryId);
             })
             ->get();
 
-        $degrees = ScientificDegreeAndName::all();
-
-        $_social_origins = SocialOrigin::when(!empty($_this->searchSocialOrigin),function($q) use($_this){
-                    $q->where('name','LIKE',"%{$_this->searchSocialOrigin}%");
-                })->get();
+        $_social_origins = SocialOrigin::when(! empty($_this->searchSocialOrigin), function ($q) use ($_this) {
+            $q->where('name', 'LIKE', "%$_this->searchSocialOrigin%");
+        })->get();
 
         return [
             'nationalities' => $nationalities,
@@ -170,12 +161,8 @@ class CallPersonnelInfo
             'punishmentModel' => $punishmentModel,
             'criminalModel' => $criminalModel,
             'kinshipModel' => $kinshipModel,
-            'languageModel' => $languageModel,
-            'knowledges' => $knowledges,
-            'educationDocs' => $educationDocs,
             'cities' => $cities,
-            'degrees' => $degrees,
-            '_social_origins' => $_social_origins
+            '_social_origins' => $_social_origins,
         ];
     }
 }

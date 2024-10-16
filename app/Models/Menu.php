@@ -17,8 +17,6 @@ class Menu extends Model
         'color',
         'order',
         'is_active',
-        'url'
+        'url',
     ];
-
-    
 }

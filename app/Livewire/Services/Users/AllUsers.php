@@ -6,14 +6,14 @@ use App\Livewire\Traits\SideModalAction;
 use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\On;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Livewire\Attributes\Url;
 
-#[On(['userAdded','userWasDeleted'])]
+#[On(['userAdded', 'userWasDeleted'])]
 class AllUsers extends Component
 {
-    use WithPagination,SideModalAction,AuthorizesRequests;
+    use AuthorizesRequests,SideModalAction,WithPagination;
 
     #[Url]
     public $status;
@@ -28,7 +28,7 @@ class AllUsers extends Component
 
     public function setDeleteUser($userId)
     {
-        $this->dispatch('setDeleteUser',$userId);
+        $this->dispatch('setDeleteUser', $userId);
     }
 
     public function resetFilter()
@@ -40,7 +40,7 @@ class AllUsers extends Component
 
     public function fillFilter()
     {
-        $this->status = request()->query('status') ? (int)request()->query('status') : 1;
+        $this->status = request()->query('status') ? (int) request()->query('status') : 1;
     }
 
     public function setStatus($newStatus)
@@ -53,7 +53,7 @@ class AllUsers extends Component
     {
         $model = User::withTrashed()->find($id);
         $model->forceDelete();
-        $this->dispatch('userWasDeleted' , __('User was deleted!'));
+        $this->dispatch('userWasDeleted', __('User was deleted!'));
     }
 
     #[On('restoreData')]
@@ -63,9 +63,9 @@ class AllUsers extends Component
         $user->restore();
         $user->update([
             'deleted_by' => null,
-            'is_active' => true
+            'is_active' => true,
         ]);
-        $this->dispatch('userAdded',__('User was updated successfully!'));
+        $this->dispatch('userAdded', __('User was updated successfully!'));
     }
 
     public function mount()
@@ -76,21 +76,19 @@ class AllUsers extends Component
     public function render()
     {
         $_users = User::with('roles')
-                ->when(!empty($this->q),function($q) {
-                    return $q->where('name','LIKE',"%{$this->q}%")
-                        ->orWhere('email','LIKE',"%{$this->q}%");
-                })
-                ->when($this->status != 2,function($q)
-                {
-                    $q->where('is_active',$this->status);
-                })
-                ->when($this->status == 2,function($q)
-                {
-                    $q->onlyTrashed();
-                })
-                ->paginate(15)
-                ->withQueryString();
+            ->when(! empty($this->q), function ($q) {
+                return $q->where('name', 'LIKE', "%$this->q%")
+                    ->orWhere('email', 'LIKE', "%$this->q%");
+            })
+            ->when($this->status != 2, function ($q) {
+                $q->where('is_active', $this->status);
+            })
+            ->when($this->status == 2, function ($q) {
+                $q->onlyTrashed();
+            })
+            ->paginate(15)
+            ->withQueryString();
 
-        return view('livewire.services.users.all-users',compact('_users'));
+        return view('livewire.services.users.all-users', compact('_users'));
     }
 }

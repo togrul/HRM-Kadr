@@ -25,7 +25,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->dropForeign('deleted_by');
-            $table->dropColumn(['deleted_by','is_active']);
+            $table->dropColumn(['deleted_by', 'is_active']);
         });
     }
 };

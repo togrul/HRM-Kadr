@@ -9,14 +9,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class PersonnelInjury extends Model
 {
-    use HasFactory,PersonnelTrait,DateCastTrait;
+    use DateCastTrait,HasFactory,PersonnelTrait;
 
     protected $fillable = [
         'tabel_no',
         'injury_type',
         'location',
         'date_time',
-        'description'
+        'description',
     ];
 
     protected $dates = [

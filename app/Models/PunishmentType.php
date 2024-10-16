@@ -11,7 +11,7 @@ class PunishmentType extends Model
 
     protected $fillable = [
         'id',
-        'name'
+        'name',
     ];
 
     public $timestamps = false;

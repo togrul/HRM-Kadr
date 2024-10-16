@@ -25,7 +25,11 @@
     <div class='text-input__loading--line'></div>
 </div>
 
-<div wire:loading.remove wire:target="getDataByPin" class="grid grid-cols-4 gap-2">
+<div
+    wire:loading.remove
+    wire:target="getDataByPin"
+    class="grid grid-cols-4 gap-2"
+>
     <div class="flex flex-col">
         <x-select-list  class="w-full" :title="__('Nationality')" mode="gray" :selected="$documentNationalityName" name="documentNationalityId">
             <x-livewire-input  @click.stop="open = true" mode="gray" name="searchPreviousNationality" wire:model.live="searchPreviousNationality"></x-livewire-input>
@@ -35,28 +39,28 @@
               ---
             </x-select-list-item>
             @foreach($nationalities as $nationality)
-            <x-select-list-item wire:click="setData('document','nationality_id','documentNationality','{{ $nationality->currentCountryTranslations->title }}',{{ $nationality->currentCountryTranslations->id }})"
-              :selected="$nationality->currentCountryTranslations->id === $documentNationalityId" wire:model='documentNationalityId'>
-              {{ $nationality->currentCountryTranslations->title }}
-            </x-select-list-item>
+                <x-select-list-item wire:click="setData('document','nationality_id','documentNationality','{{ $nationality->currentCountryTranslations->title }}',{{ $nationality->currentCountryTranslations->id }})"
+                  :selected="$nationality->currentCountryTranslations->id === $documentNationalityId" wire:model='documentNationalityId'>
+                    {{ $nationality->currentCountryTranslations->title }}
+                </x-select-list-item>
             @endforeach
           </x-select-list>
           @error('document.nationality_id.id')
-          <x-validation> {{ $message }} </x-validation>
+            <x-validation> {{ $message }} </x-validation>
           @enderror
     </div>
     <div class="flex flex-col">
         <x-label for="document.series">{{ __('Series') }}</x-label>
         <x-livewire-input mode="gray" name="document.series" wire:model="document.series"></x-livewire-input>
         @error('document.series')
-        <x-validation> {{ $message }} </x-validation>
+            <x-validation> {{ $message }} </x-validation>
         @enderror
     </div>
     <div class="flex flex-col">
         <x-label for="document.number">{{ __('Number') }}</x-label>
         <x-livewire-input mode="gray" type="number" name="document.number" wire:model="document.number"></x-livewire-input>
         @error('document.number')
-        <x-validation> {{ $message }} </x-validation>
+            <x-validation> {{ $message }} </x-validation>
         @enderror
     </div>
     <div class="flex flex-col">

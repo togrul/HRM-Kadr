@@ -2,10 +2,9 @@
 
 namespace App\Livewire\Structure;
 
-use Livewire\Component;
-use Livewire\Attributes\Url;
 use App\Models\OrderCategory;
-use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\Url;
+use Livewire\Component;
 
 class Orders extends Component
 {
@@ -15,7 +14,7 @@ class Orders extends Component
     public function selectOrder($orderKey)
     {
         $this->selectedOrder = $orderKey;
-        $this->dispatch('selectOrder',$orderKey);
+        $this->dispatch('selectOrder', $orderKey);
     }
 
     public function render()
@@ -23,6 +22,6 @@ class Orders extends Component
         $_order_categories = OrderCategory::with('orders')
             ->get();
 
-        return view('livewire.structure.orders',compact('_order_categories'));
+        return view('livewire.structure.orders', compact('_order_categories'));
     }
 }

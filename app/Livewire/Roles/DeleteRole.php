@@ -25,9 +25,8 @@ class DeleteRole extends Component
 
         $this->role = null;
 
-        $this->dispatch('roleWasDeleted' , __('Role was deleted!'));
+        $this->dispatch('roleWasDeleted', __('Role was deleted!'));
     }
-
 
     public function render()
     {

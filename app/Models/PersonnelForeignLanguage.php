@@ -16,10 +16,10 @@ class PersonnelForeignLanguage extends Model
     protected $fillable = [
         'tabel_no',
         'language_id',
-        'knowledge_status'
+        'knowledge_status',
     ];
 
-    public function language() : BelongsTo
+    public function language(): BelongsTo
     {
         return $this->belongsTo(Language::class);
     }

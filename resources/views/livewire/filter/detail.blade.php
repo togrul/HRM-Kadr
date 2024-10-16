@@ -54,7 +54,11 @@
             <x-label for="filter.gender">{{ __('Gender') }}</x-label>
             <div class="flex flex-col">
               <label class="inline-flex items-center bg-gray-100 rounded shadow-sm py-2 px-2">
-                <input type="radio" class="form-radio" name="filter.gender" wire:model="filter.gender" value="2">
+                  <input type="radio"
+                         class="form-radio"
+                         name="filter.gender"
+                         wire:model="filter.gender"
+                         value="2">
                 <span class="ml-2 text-sm font-normal">{{__('Woman')}}</span>
               </label>
               <label class="inline-flex items-center bg-gray-100 rounded shadow-sm py-2 px-2">
@@ -117,10 +121,11 @@
                   ---
                 </x-select-list-item>
                 @foreach($nationalities as $nationality)
-                <x-select-list-item wire:click="setData('filter','nationality_id','nationality','{{ $nationality->currentCountryTranslations->title }}',{{ $nationality->currentCountryTranslations->id }})"
-                  :selected="$nationality->currentCountryTranslations->id === $nationalityId" wire:model='nationalityId'>
-                  {{ $nationality->currentCountryTranslations->title }}
-                </x-select-list-item>
+                    <x-select-list-item
+                        wire:click="setData('filter','nationality_id','nationality','{{ $nationality->currentCountryTranslations->title }}',{{ $nationality->currentCountryTranslations->id }})"
+                        :selected="$nationality->currentCountryTranslations->id === $nationalityId" wire:model='nationalityId'>
+                      {{ $nationality->currentCountryTranslations->title }}
+                    </x-select-list-item>
                 @endforeach
               </x-select-list>
         </div>
@@ -133,10 +138,10 @@
                   ---
                 </x-select-list-item>
                 @foreach($nationalities as $nationality)
-                <x-select-list-item wire:click="setData('filter','born_country_id','bornCountry','{{ $nationality->currentCountryTranslations->title }}',{{ $nationality->currentCountryTranslations->id }})"
-                  :selected="$nationality->currentCountryTranslations->id === $bornCountryId" wire:model='bornCountryId'>
-                  {{ $nationality->currentCountryTranslations->title }}
-                </x-select-list-item>
+                    <x-select-list-item wire:click="setData('filter','born_country_id','bornCountry','{{ $nationality->currentCountryTranslations->title }}',{{ $nationality->currentCountryTranslations->id }})"
+                      :selected="$nationality->currentCountryTranslations->id === $bornCountryId" wire:model='bornCountryId'>
+                      {{ $nationality->currentCountryTranslations->title }}
+                    </x-select-list-item>
                 @endforeach
               </x-select-list>
         </div>
@@ -315,4 +320,5 @@
             </div>
         </div>
     </div>
+
 </x-modal-confirm-lg>

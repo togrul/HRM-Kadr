@@ -2,13 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Enums\AttitudeMilitaryEnum;
-use App\Enums\MilitaryStatusEnum;
-use App\Enums\ResearchResultEnum;
 use App\Models\AppealStatus;
 use App\Models\Award;
 use App\Models\AwardType;
-use App\Models\Candidate;
 use App\Models\EducationalInstitution;
 use App\Models\EducationDegree;
 use App\Models\EducationDocumentType;
@@ -16,16 +12,12 @@ use App\Models\EducationForm;
 use App\Models\EducationType;
 use App\Models\Kinship;
 use App\Models\Language;
-use App\Models\Order;
-use App\Models\Position;
 use App\Models\Punishment;
 use App\Models\PunishmentType;
 use App\Models\ScientificDegreeAndName;
 use App\Models\SocialOrigin;
 use App\Models\User;
 use App\Models\WorkNorm;
-use Carbon\Carbon;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class PersonnelSeeder extends Seeder
@@ -37,234 +29,228 @@ class PersonnelSeeder extends Seeder
     {
         User::firstOrCreate([
             'name' => 'Togrul Calalli',
-            'email' => 'togrul@gmail.com'
+            'email' => 'togrul@gmail.com',
         ],
-        [
-            'password' => '$2y$10$YST3QEd6by44ecuzGsuDI.E4lUmkwMKSRcjaAVwNOFCoLkQ8TLb1q',
-            'is_active' => 1
-        ]);
+            [
+                'password' => '$2y$10$YST3QEd6by44ecuzGsuDI.E4lUmkwMKSRcjaAVwNOFCoLkQ8TLb1q',
+                'is_active' => 1,
+            ]);
 
         $data = [
             [
                 'id' => 10,
-                'title_az' => 'natamam orta'
+                'title_az' => 'natamam orta',
             ],
             [
                 'id' => 20,
-                'title_az' => 'ümumi orta'
+                'title_az' => 'ümumi orta',
             ],
             [
                 'id' => 30,
-                'title_az' => 'tam orta'
+                'title_az' => 'tam orta',
             ],
             [
                 'id' => 40,
-                'title_az' => 'ilk peşə'
+                'title_az' => 'ilk peşə',
             ],
             [
                 'id' => 50,
-                'title_az' => 'orta ixtisas'
+                'title_az' => 'orta ixtisas',
             ],
             [
                 'id' => 90,
-                'title_az' => 'natamam ali'
+                'title_az' => 'natamam ali',
             ],
             [
                 'id' => 100,
-                'title_az' => 'ali'
+                'title_az' => 'ali',
             ],
         ];
 
-        foreach($data  as $ed)
-        {
+        foreach ($data as $ed) {
             EducationDegree::firstOrCreate($ed);
         }
 
         $languages = [
             [
                 'id' => '10',
-                'name' => 'Azərbaycan'
+                'name' => 'Azərbaycan',
             ],
             [
                 'id' => '20',
-                'name' => 'Rus'
+                'name' => 'Rus',
             ],
             [
                 'id' => '30',
-                'name' => 'İngilis'
+                'name' => 'İngilis',
             ],
             [
                 'id' => '40',
-                'name' => 'Gürcü'
-            ]
+                'name' => 'Gürcü',
+            ],
         ];
 
-        foreach ($languages as $lang)
-        {
+        foreach ($languages as $lang) {
             Language::firstOrCreate($lang);
         }
-
 
         $kinships = [
             [
                 'id' => '11',
-                'name_az' => 'Ata'
+                'name_az' => 'Ata',
             ],
             [
                 'id' => '91',
                 'name_az' => 'Əmi',
-                'is_active' => false
+                'is_active' => false,
             ],
             [
                 'id' => '92',
                 'name_az' => 'Bibi',
-                'is_active' => false
+                'is_active' => false,
             ],
             [
                 'id' => '12',
-                'name_az' => 'Ana'
+                'name_az' => 'Ana',
             ],
             [
                 'id' => '93',
                 'name_az' => 'Dayı',
-                'is_active' => false
+                'is_active' => false,
             ],
             [
                 'id' => '94',
                 'name_az' => 'Xala',
-                'is_active' => false
+                'is_active' => false,
             ],
             [
                 'id' => '14',
-                'name_az' => 'Bacı'
+                'name_az' => 'Bacı',
             ],
             [
                 'id' => '13',
-                'name_az' => 'Qardaş'
+                'name_az' => 'Qardaş',
             ],
             [
                 'id' => '21',
-                'name_az' => 'Ər'
+                'name_az' => 'Ər',
             ],
             [
                 'id' => '22',
-                'name_az' => 'Arvad'
+                'name_az' => 'Arvad',
             ],
             [
                 'id' => '23',
-                'name_az' => 'Oğul'
+                'name_az' => 'Oğul',
             ],
             [
                 'id' => '24',
-                'name_az' => 'Qız'
+                'name_az' => 'Qız',
             ],
             [
                 'id' => '31',
-                'name_az' => 'Qayınata'
+                'name_az' => 'Qayınata',
             ],
             [
                 'id' => '32',
-                'name_az' => 'Qayınana'
+                'name_az' => 'Qayınana',
             ],
             [
                 'id' => '33',
-                'name_az' => 'Qayın'
+                'name_az' => 'Qayın',
             ],
             [
                 'id' => '34',
-                'name_az' => 'Baldız'
-            ]
+                'name_az' => 'Baldız',
+            ],
         ];
 
-        foreach($kinships as $ks)
-        {
+        foreach ($kinships as $ks) {
             Kinship::firstOrCreate($ks);
         }
 
         $educationForms = [
             [
                 'id' => '10',
-                'name_az' => 'əyani'
+                'name_az' => 'əyani',
             ],
             [
                 'id' => '20',
-                'name_az' => 'qiyabi'
+                'name_az' => 'qiyabi',
             ],
             [
                 'id' => '30',
-                'name_az' => 'distant'
-            ]
+                'name_az' => 'distant',
+            ],
         ];
 
-        foreach ($educationForms as $ef)
-        {
+        foreach ($educationForms as $ef) {
             EducationForm::firstOrCreate($ef);
         }
 
         AwardType::firstOrCreate([
             'id' => 10,
-            'name' => 'dövlət təltifi'
+            'name' => 'dövlət təltifi',
         ]);
 
         AwardType::firstOrCreate([
             'id' => 20,
-            'name' => 'mükafatlar'
+            'name' => 'mükafatlar',
         ]);
 
         PunishmentType::firstOrCreate([
             'id' => 10,
-            'name' => 'cinayət məsuliyyəti'
+            'name' => 'cinayət məsuliyyəti',
         ]);
 
         PunishmentType::firstOrCreate([
             'id' => 90,
-            'name' => 'digər'
+            'name' => 'digər',
         ]);
 
         EducationType::firstOrCreate([
             'id' => 10,
-            'name' => 'ikinci ali təhsil'
+            'name' => 'ikinci ali təhsil',
         ]);
 
         EducationType::firstOrCreate([
             'id' => 20,
-            'name' => 'ixtisasartırma'
+            'name' => 'ixtisasartırma',
         ]);
 
         EducationDocumentType::firstOrCreate([
             'id' => 10,
-            'name' => 'diplom'
+            'name' => 'diplom',
         ]);
 
         EducationDocumentType::firstOrCreate([
             'id' => 20,
-            'name' => 'sertifikat'
+            'name' => 'sertifikat',
         ]);
 
         EducationDocumentType::firstOrCreate([
             'id' => 30,
-            'name' => 'arayış'
+            'name' => 'arayış',
         ]);
-
 
         ScientificDegreeAndName::firstOrCreate([
             'id' => 10,
-            'name' => 'fəlsəfə doktoru'
+            'name' => 'fəlsəfə doktoru',
         ]);
 
         ScientificDegreeAndName::firstOrCreate([
             'id' => 20,
-            'name' => 'elmlər doktoru'
+            'name' => 'elmlər doktoru',
         ]);
 
         ScientificDegreeAndName::firstOrCreate([
             'id' => 30,
-            'name' => 'dosent'
+            'name' => 'dosent',
         ]);
 
         ScientificDegreeAndName::firstOrCreate([
             'id' => 40,
-            'name' => 'professor'
+            'name' => 'professor',
         ]);
 
         $criminals = [
@@ -280,12 +266,11 @@ class PersonnelSeeder extends Seeder
             'Ədalət mühakiməsi əleyhinə cinayət',
         ];
 
-        foreach ($criminals as $key => $crim)
-        {
+        foreach ($criminals as $key => $crim) {
             Punishment::firstOrCreate([
                 'id' => 1000 + ($key + 1),
                 'punishment_type_id' => 10,
-                'name' => $crim
+                'name' => $crim,
             ]);
         }
 
@@ -330,12 +315,11 @@ class PersonnelSeeder extends Seeder
             'Etibarsız xidməti vəsiqədən istifadə etdiyinə görə',
         ];
 
-        foreach ($punishments as $key => $punish)
-        {
+        foreach ($punishments as $key => $punish) {
             Punishment::firstOrCreate([
                 'id' => 9000 + ($key + 1),
                 'punishment_type_id' => 90,
-                'name' => $punish
+                'name' => $punish,
             ]);
         }
 
@@ -372,25 +356,23 @@ class PersonnelSeeder extends Seeder
             'Tədris müddətində fəal iştirak etdiyinə, əla və yaxşı qiymətlərlə oxuduğuna görə',
         ];
 
-        foreach ($awards as $key => $award)
-        {
+        foreach ($awards as $key => $award) {
             Award::firstOrCreate([
                 'id' => 2000 + ($key + 1),
                 'award_type_id' => 20,
-                'name' => $award
+                'name' => $award,
             ]);
         }
 
         $work_norms = [
             'ştat',
-            'saathesabı'
+            'saathesabı',
         ];
 
-        foreach ($work_norms as $key => $wn)
-        {
+        foreach ($work_norms as $key => $wn) {
             WorkNorm::firstOrCreate([
                 'id' => 10 * ($key + 1),
-                'name_az' => $wn
+                'name_az' => $wn,
             ]);
         }
 
@@ -419,31 +401,28 @@ class PersonnelSeeder extends Seeder
             'Müəssisə ləğv edilib',
         ];
 
-
         EducationalInstitution::firstOrCreate([
             'id' => 10,
             'name' => 'Bakı Dövlət Universiteti',
             'shortname' => 'BDU',
         ]);
 
-
         SocialOrigin::firstOrCreate([
             'id' => 10,
-            'name' => 'Fəhlə'
+            'name' => 'Fəhlə',
         ]);
 
         SocialOrigin::firstOrCreate([
             'id' => 20,
-            'name' => 'Kəndli'
+            'name' => 'Kəndli',
         ]);
 
         SocialOrigin::firstOrCreate([
             'id' => 30,
-            'name' => 'Qulluqçu'
+            'name' => 'Qulluqçu',
         ]);
 
-
-        $medals =  array (
+        $medals = [
             0 => '"Heydər Əliyev" ordeni',
             1 => '"Zəfər" ordeni',
             2 => '"Qarabağ" ordeni',
@@ -521,14 +500,13 @@ class PersonnelSeeder extends Seeder
             74 => '"Azərbaycan Xəzər Dəniz Gəmiçiliyinin 160 illiyi (1858-2018)" yubiley medalı',
             75 => '"Bakı Dövlət Universitetinin 100 illiyi (1919-2019)" yubiley medalı',
             76 => 'Nizami Gəncəvi adına Qızıl medal',
-        );
+        ];
 
-        foreach ($medals as $key => $medal)
-        {
+        foreach ($medals as $key => $medal) {
             Award::firstOrCreate([
                 'id' => 1000 + ($key + 1),
                 'award_type_id' => 10,
-                'name' => $medal
+                'name' => $medal,
             ]);
         }
 
@@ -537,14 +515,13 @@ class PersonnelSeeder extends Seeder
             20 => 'İcrada',
             30 => 'Əmrə hazır',
             70 => 'Qəbul olundu',
-            90 => 'Dayandırıldı'
+            90 => 'Dayandırıldı',
         ];
 
-        foreach ($statuses as $key => $status)
-        {
+        foreach ($statuses as $key => $status) {
             AppealStatus::firstOrCreate([
                 'id' => $key,
-                'name' => $status
+                'name' => $status,
             ]);
         }
 

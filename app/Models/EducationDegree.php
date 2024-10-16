@@ -13,7 +13,7 @@ class EducationDegree extends Model
         'id',
         'title_az',
         'title_en',
-        'title_ru'
+        'title_ru',
     ];
 
     public $timestamps = false;

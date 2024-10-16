@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Position;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class PositionSeeder extends Seeder
@@ -16,71 +15,70 @@ class PositionSeeder extends Seeder
         $positions = [
             [
                 'id' => 1,
-                'name' => 'Xidmət rəisi'
+                'name' => 'Xidmət rəisi',
             ],
             [
                 'id' => 2,
-                'name' => 'Xidmət rəisinin 1-ci müavini'
+                'name' => 'Xidmət rəisinin 1-ci müavini',
             ],
             [
                 'id' => 3,
-                'name' => 'Xidmət rəisinin 2-ci müavini'
+                'name' => 'Xidmət rəisinin 2-ci müavini',
             ],
             [
                 'id' => 10,
-                'name' => 'İdarə rəisi'
+                'name' => 'İdarə rəisi',
             ],
             [
                 'id' => 11,
-                'name' => 'İdarə rəisinin müavini'
+                'name' => 'İdarə rəisinin müavini',
             ],
             [
                 'id' => 12,
-                'name' => 'İdarə rəisinin 2-ci müavini'
+                'name' => 'İdarə rəisinin 2-ci müavini',
             ],
             [
                 'id' => 20,
-                'name' => 'Tabor komandiri'
+                'name' => 'Tabor komandiri',
             ],
             [
                 'id' => 100,
-                'name' => 'Şöbə müdiri'
+                'name' => 'Şöbə müdiri',
             ],
             [
                 'id' => 200,
-                'name' => 'Bölük komandiri'
+                'name' => 'Bölük komandiri',
             ],
             [
                 'id' => 110,
-                'name' => 'Bölmə rəisi'
+                'name' => 'Bölmə rəisi',
             ],
             [
                 'id' => 210,
-                'name' => 'Taqım komandiri'
+                'name' => 'Taqım komandiri',
             ],
             [
                 'id' => 220,
-                'name' => 'Manqa komandiri'
+                'name' => 'Manqa komandiri',
             ],
             [
                 'id' => 1000,
-                'name' => 'Proqramçı'
+                'name' => 'Proqramçı',
             ],
             [
                 'id' => 1010,
-                'name' => 'Şəbəkə inzibatçısı'
+                'name' => 'Şəbəkə inzibatçısı',
             ],
             [
                 'id' => 1010,
-                'name' => 'Əməliyyatçı'
-            ]
+                'name' => 'Əməliyyatçı',
+            ],
         ];
 
-        foreach($positions as $ps)
-        {
+        foreach ($positions as $ps) {
             Position::updateOrCreate([
-                'id' => $ps['id']
-            ],$ps);
+                'id' => $ps['id'],
+            ], $ps);
         }
     }
 }

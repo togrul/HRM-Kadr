@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PersonnelEducation extends Model
 {
-    use HasFactory,PersonnelTrait,DateCastTrait;
+    use DateCastTrait,HasFactory,PersonnelTrait;
 
     public $timestamps = false;
 
@@ -28,7 +28,7 @@ class PersonnelEducation extends Model
         'diplom_given_date',
         'coefficient',
         'calculate_as_seniority',
-        'is_military'
+        'is_military',
     ];
 
     protected $dates = [
@@ -40,17 +40,16 @@ class PersonnelEducation extends Model
     protected $casts = [
         'diplom_given_date' => 'date:d.m.Y',
         'admission_year' => 'date:d.m.Y',
-        'graduated_year' => 'date:d.m.Y'
+        'graduated_year' => 'date:d.m.Y',
     ];
 
-
-    public function institution() : BelongsTo
+    public function institution(): BelongsTo
     {
-        return $this->belongsTo(EducationalInstitution::class,'educational_institution_id','id');
+        return $this->belongsTo(EducationalInstitution::class, 'educational_institution_id', 'id');
     }
 
-    public function form() : BelongsTo
+    public function form(): BelongsTo
     {
-        return $this->belongsTo(EducationForm::class,'education_form_id','id');
+        return $this->belongsTo(EducationForm::class, 'education_form_id', 'id');
     }
 }

@@ -13,6 +13,6 @@ class EducationDocumentType extends Model
 
     protected $fillable = [
         'id',
-        'name'
+        'name',
     ];
 }

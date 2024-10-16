@@ -9,22 +9,22 @@ use Illuminate\Database\Eloquent\Model;
 
 class PersonnelTakenCaptive extends Model
 {
-    use HasFactory,PersonnelTrait,DateCastTrait;
+    use DateCastTrait,HasFactory,PersonnelTrait;
 
     protected $fillable = [
         'location',
         'condition',
         'taken_captive_date',
-        'release_date'
+        'release_date',
     ];
 
     protected $dates = [
         'taken_captive_date',
-        'release_date'
+        'release_date',
     ];
 
     protected $casts = [
         'taken_captive_date' => 'date:d.m.Y',
-        'release_date' => 'date:d.m.Y'
+        'release_date' => 'date:d.m.Y',
     ];
 }

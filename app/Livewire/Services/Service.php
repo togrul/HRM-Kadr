@@ -1,9 +1,9 @@
 <?php
 
 namespace App\Livewire\Services;
+
 use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
-
 use Livewire\Component;
 
 class Service extends Component

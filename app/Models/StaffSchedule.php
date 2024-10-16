@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class StaffSchedule extends Model
 {
@@ -17,22 +17,22 @@ class StaffSchedule extends Model
         'position_id',
         'total',
         'filled',
-        'vacant'
+        'vacant',
     ];
 
-    public function structure() : BelongsTo
+    public function structure(): BelongsTo
     {
         return $this->belongsTo(Structure::class);
     }
 
-    public function position() : BelongsTo
+    public function position(): BelongsTo
     {
-        return $this->belongsTo(Position::class,'position_id','id');
+        return $this->belongsTo(Position::class, 'position_id', 'id');
     }
 
-    protected static function updateMainStructureVacancy() : void
+    protected static function updateMainStructureVacancy(): void
     {
-        $_mainStructure = StaffSchedule::where('structure_id',1)->first();
+        $_mainStructure = StaffSchedule::where('structure_id', 1)->first();
         $filled = Personnel::active()->count();
         $_mainStructure->filled = $filled;
         $_mainStructure->vacant = $_mainStructure->total - $filled;

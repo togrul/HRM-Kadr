@@ -13,7 +13,7 @@ class WorkNorm extends Model
         'id',
         'name_az',
         'name_en',
-        'name_ru'
+        'name_ru',
     ];
 
     public $timestamps = false;

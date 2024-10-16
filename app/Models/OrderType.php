@@ -14,10 +14,10 @@ class OrderType extends Model
 
     protected $fillable = [
         'order_id',
-        'name'
+        'name',
     ];
 
-    public function order() : BelongsTo
+    public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
     }

@@ -2,7 +2,6 @@
 
 namespace App\Livewire\Traits;
 
-use App\Models\Order;
 use App\Models\OrderType;
 use App\Models\Rank;
 use Illuminate\Support\Str;
@@ -14,7 +13,9 @@ trait ComponentCrud
     public $component = [];
 
     public $orderId;
+
     public $orderName;
+
     public $searchOrder;
 
     public $title;
@@ -39,47 +40,48 @@ trait ComponentCrud
         ];
     }
 
-    public function updated($name,$value)
+    public function updated($name, $value)
     {
-        $data = isset($this->component['title'])
-            ? "{$this->component['title']} {$this->component['content']}"
-            : $this->component['content'];
-        $dollarStrings = array_filter(explode(' ', str_replace(['“','”'],'',$data)), function ($string) {
-            return Str::startsWith($string, '$');
-        });
+        $data = ($this->component['title'] ?? '').' '.($this->component['content'] ?? '');
 
-        $this->component['dynamic_fields'] = implode(',',array_unique($dollarStrings));
+        $dollarStrings = array_filter(
+            array_map(
+                function ($string) {
+                    return Str::startsWith($string, '$') ? $string : null;
+                },
+                explode(' ', str_replace(['“', '”'], '', trim($data)))
+            )
+        );
+
+        $this->component['dynamic_fields'] = implode(',', array_unique($dollarStrings));
     }
 
     public function mount()
     {
         $this->orderName = '---';
-        if(!empty($this->componentModel))
-        {
+        if (! empty($this->componentModel)) {
             $this->fillComponent();
             $this->title = __('Edit component');
-        }
-        else
-        {
+        } else {
             $this->title = __('Add component');
         }
     }
 
     public function render()
     {
-        $_orders = OrderType::when(!empty($this->searchOrder), function ($q) {
-            $q->where('name', 'LIKE', "%{$this->searchOrder}%");
+        $_orders = OrderType::when(! empty($this->searchOrder), function ($q) {
+            $q->where('name', 'LIKE', "%$this->searchOrder%");
         })
             ->get();
 
         $_ranks = Rank::query()
-            ->where('is_active',1)
+            ->where('is_active', 1)
             ->get();
 
-        $view_name = !empty($this->candidateModel)
+        $view_name = ! empty($this->candidateModel)
             ? 'livewire.services.components.edit-component'
             : 'livewire.services.components.add-component';
 
-        return view($view_name, compact('_orders','_ranks'));
+        return view($view_name, compact('_orders', '_ranks'));
     }
 }

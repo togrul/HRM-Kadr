@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('ranks', function (Blueprint $table) {
-            $table->double('duration',4,2)->nullable()->after('name_ru');
+            $table->double('duration', 4, 2)->nullable()->after('name_ru');
         });
     }
 

@@ -13,7 +13,7 @@ class DeleteCandidate extends Component
     #[On('setDeleteCandidate')]
     public function setDeleteCandidate($candidateId)
     {
-        $this->candidate = Candidate::where('id',$candidateId)->first();
+        $this->candidate = Candidate::where('id', $candidateId)->first();
 
         $this->dispatch('deleteCandidateWasSet');
     }
@@ -26,7 +26,7 @@ class DeleteCandidate extends Component
 
         $this->candidate = null;
 
-        $this->dispatch('candidateWasDeleted' , __('Candidate was deleted!'));
+        $this->dispatch('candidateWasDeleted', __('Candidate was deleted!'));
     }
 
     public function render()

@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -21,26 +20,29 @@ class Order extends Model
         'name',
         'content',
         'order_model',
-        'blade'
+        'blade',
     ];
 
     const BLADE_VACATION = 'vacation';
+
+    const BLADE_BUSINESS_TRIP = 'business-trips';
+
     const BLADE_DEFAULT = 'default';
 
     // ishe girme emrine id verilir ve her yerde rahat yoxlamaq ucun manual olaraq modele daxil edilir.
     const IG_EMR = 1010;
 
-    public function category() : BelongsTo
+    public function category(): BelongsTo
     {
-        return $this->belongsTo(OrderCategory::class,'order_category_id');
+        return $this->belongsTo(OrderCategory::class, 'order_category_id');
     }
 
-    public function orderLogs() : HasMany
+    public function orderLogs(): HasMany
     {
         return $this->hasMany(OrderLog::class);
     }
 
-    public function types() : HasMany
+    public function types(): HasMany
     {
         return $this->hasMany(OrderType::class);
     }

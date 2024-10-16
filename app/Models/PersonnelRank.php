@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PersonnelRank extends Model
 {
-    use HasFactory,PersonnelTrait,DateCastTrait;
+    use DateCastTrait,HasFactory,PersonnelTrait;
 
     public $timestamps = false;
 
@@ -18,18 +18,18 @@ class PersonnelRank extends Model
         'tabel_no',
         'rank_id',
         'name',
-        'given_date'
+        'given_date',
     ];
 
     protected $dates = [
-        'given_date'
+        'given_date',
     ];
 
     protected $casts = [
-        'given_date' => 'date:d.m.Y'
+        'given_date' => 'date:d.m.Y',
     ];
 
-    public function rank() : BelongsTo
+    public function rank(): BelongsTo
     {
         return $this->belongsTo(Rank::class);
     }

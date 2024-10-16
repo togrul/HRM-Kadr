@@ -26,8 +26,9 @@ class DeleteRank extends Component
 
         $this->rank = null;
 
-        $this->dispatch('rankWasDeleted' , __('Rank was deleted!'));
+        $this->dispatch('rankWasDeleted', __('Rank was deleted!'));
     }
+
     public function render()
     {
         return view('livewire.services.ranks.delete-rank');

@@ -9,13 +9,13 @@ class PersonnelExport implements FromView
 {
     public array $report;
 
-    public function __construct( $report )
+    public function __construct($report)
     {
         $this->report = $report;
     }
 
     public function view(): View
     {
-        return view( 'exports.personnel' , [ 'report' => $this -> report ] );
+        return view('exports.personnel', ['report' => $this->report]);
     }
 }

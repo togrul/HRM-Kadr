@@ -16,10 +16,10 @@ class AddTemplate extends Component
 
         $filename = "{$this->template_data['name']}.docx";
 
-        $this->template_data['content'] = $this->template_data['content']->storeAs('templates', $filename,'public');
+        $this->template_data['content'] = $this->template_data['content']->storeAs('templates', $filename, 'public');
 
         Order::create($this->modifyArray($this->template_data));
 
-        $this->dispatch('templateAdded',__('Template was added successfully!'));
+        $this->dispatch('templateAdded', __('Template was added successfully!'));
     }
 }

@@ -16,10 +16,10 @@ class OrderLogComponent extends Model
     protected $fillable = [
         'order_no',
         'component_id',
-        'row_number'
+        'row_number',
     ];
 
-    public function component() : BelongsTo
+    public function component(): BelongsTo
     {
         return $this->belongsTo(Component::class);
     }

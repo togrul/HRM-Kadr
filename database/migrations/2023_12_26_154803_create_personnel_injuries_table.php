@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('tabel_no');
             $table->foreign('tabel_no')->references('tabel_no')->on('personnels')->onDelete('cascade')->onUpdate('cascade');
-            $table->enum('injury_type' , ['other','contusion'])->default('other');
+            $table->enum('injury_type', ['other', 'contusion'])->default('other');
             $table->string('location');
             $table->dateTime('date_time');
             $table->text('description')->nullable();

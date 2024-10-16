@@ -4,39 +4,46 @@ namespace App\Livewire\Traits;
 
 trait Step5Trait
 {
-    public $militaryRankId,$militaryRankName,$searchMilitaryRank;
+    public $militaryRankId;
+
+    public $militaryRankName;
+
+    public $searchMilitaryRank;
 
     public $military = [];
+
     public $military_list = [];
 
     public $injuries = [];
+
     public $injury_list = [];
 
     public $captivity = [];
+
     public $captivity_list = [];
 
     public $personnel_extra = [];
 
-    public function mountStep5Trait() {
+    public function mountStep5Trait()
+    {
         $this->militaryRankName = '---';
-        if(!empty($this->personnelModel))
-        {
+        if (! empty($this->personnelModel)) {
             $this->fillMilitary();
             $this->fillInjury();
             $this->fillCaptivity();
-        };
+        }
     }
 
     public function addMilitary()
     {
         $validator1 = $this->exceptArray('injuries');
         $validator2 = $this->exceptArray('captivity');
-        $this->validate(array_intersect_assoc($validator1,$validator2));
+        $this->validate(array_intersect_assoc($validator1, $validator2));
 
         $this->military_list[] = $this->military;
         $this->militaryRankName = '---';
         $this->reset('militaryRankId');
-        $this->military = [];;
+        $this->military = [];
     }
 
     public function forceDeleteMilitary($key)
@@ -48,24 +55,24 @@ trait Step5Trait
     {
         $updateMilitary = $this->personnelModelData->military->load('rank')->toArray();
 
-        if(!empty($updateMilitary))
-        {
-            foreach($updateMilitary  as $key => $uptMilitary)
-            {
-                $this->military_list[] = [
-                    'attitude_to_military_service' => $uptMilitary['attitude_to_military_service'],
-                    'given_date' => $uptMilitary['given_date'],
-                    'start_date' => $uptMilitary['start_date'],
-                    'end_date' => $uptMilitary['end_date'],
-                ];
+        if (! empty($updateMilitary)) {
+            foreach ($updateMilitary as $key => $uptMilitary) {
+                $this->military_list[] = $this->mapAttributes(
+                    attributes: [
+                        'attitude_to_military_service', 'given_date', 'start_date', 'end_date',
+                    ],
+                    getFrom: $uptMilitary
+                );
 
-                if(!empty($uptMilitary['rank_id']))
-                {
-                    $this->military_list[$key]['rank_id'] = [
-                        'id' => $uptMilitary['rank']['id'],
-                        'name' => $uptMilitary['rank']['name_'.config('app.locale')],
-                    ];
-                }
+                $this->handleRelatedEntitiesMultiDimensional(
+                    entity: 'rank',
+                    field: 'rank_id',
+                    key: $key,
+                    fillTo: 'military_list',
+                    getFrom: $uptMilitary,
+                    titleField: 'name',
+                    hasLocale: true
+                );
             }
         }
     }
@@ -74,15 +81,14 @@ trait Step5Trait
     {
         $updateInjury = $this->personnelModelData->injuries->toArray();
 
-        if(!empty($updateInjury)) {
-            foreach ($updateInjury as $key => $uptInjury)
-            {
-                $this->injury_list[] = [
-                    'injury_type' => $uptInjury['injury_type'],
-                    'location' => $uptInjury['location'],
-                    'date_time' => $uptInjury['date_time'],
-                    'description' => $uptInjury['description'],
-                ];
+        if (! empty($updateInjury)) {
+            foreach ($updateInjury as $key => $uptInjury) {
+                $this->injury_list[] = $this->mapAttributes(
+                    attributes: [
+                        'injury_type', 'location', 'date_time', 'description',
+                    ],
+                    getFrom: $uptInjury
+                );
             }
         }
     }
@@ -91,7 +97,7 @@ trait Step5Trait
     {
         $validator1 = $this->exceptArray('military');
         $validator2 = $this->exceptArray('captivity');
-        $this->validate(array_intersect_assoc($validator1,$validator2));
+        $this->validate(array_intersect_assoc($validator1, $validator2));
 
         $this->injury_list[] = $this->injuries;
         $this->injuries = [];
@@ -106,15 +112,14 @@ trait Step5Trait
     {
         $updateCaptivity = $this->personnelModelData->captives->toArray();
 
-        if(!empty($updateCaptivity)) {
-            foreach ($updateCaptivity as $key => $uptCaptivity)
-            {
-                $this->captivity_list[] = [
-                    'location' => $uptCaptivity['location'],
-                    'condition' => $uptCaptivity['condition'],
-                    'taken_captive_date' => $uptCaptivity['taken_captive_date'],
-                    'release_date' => $uptCaptivity['release_date'],
-                ];
+        if (! empty($updateCaptivity)) {
+            foreach ($updateCaptivity as $key => $uptCaptivity) {
+                $this->captivity_list[] = $this->mapAttributes(
+                    attributes: [
+                        'location', 'condition', 'taken_captive_date', 'release_date',
+                    ],
+                    getFrom: $uptCaptivity
+                );
             }
         }
     }
@@ -123,7 +128,7 @@ trait Step5Trait
     {
         $validator1 = $this->exceptArray('military');
         $validator2 = $this->exceptArray('injuries');
-        $this->validate(array_intersect_assoc($validator1,$validator2));
+        $this->validate(array_intersect_assoc($validator1, $validator2));
 
         $this->captivity_list[] = $this->captivity;
         $this->captivity = [];

@@ -7,7 +7,7 @@
     'key', // hansi key e aid datadir
     'selectedName' => null,
     'searchField' => null,
-    'isCoded' => false,
+    'isCoded' => false, // kodu yoxsa tam adi gelsin
     'row',
     'disabled' => false
 ])
@@ -15,9 +15,9 @@
 @php
     $input = match ($type)
     {
-        '$structure_main','$position','$fullname','$rank' => 'select',
-        '$month','$name','$surname','$days','$location' => 'text-input',
-        '$day','$year' => 'numeric-input',
+        '$structure_main','$position','$fullname','$rank','$transportation' => 'select',
+        '$month','$name','$surname','$days','$location','$trip_start_month','$meeting_hour','$return_month','$car', '$weapon' => 'text-input',
+        '$day','$year','$trip_start_day','$trip_start_year','$return_day' => 'numeric-input',
         '$structure' => 'radio-list',
         '$start_date','$end_date' => 'date-input'
     };
@@ -25,7 +25,6 @@
     $list_string = 'components';
 @endphp
 
-{{--{{$isCoded ? 'true' : 'false'}}--}}
 @if($input == 'text-input')
     <div class="">
         <x-label for="{{ $list_string }}.{{ $key }}.{{ $field }}">{{ $title }}</x-label>
@@ -59,10 +58,25 @@
             </x-select-list-item>
             @foreach($model as $model_item)
                 @php
-                    $_optionValue = ($model_item->fullname_max ?? $model_item->name);
+                    if(is_array($model_item))
+                    {
+                        $_id = $model_item['id'];
+                        $_optionValue = $model_item['name'];
+                        $_selected = $_id === ${$selectedName.'Id'};
+                    }
+                    else
+                    {
+                        $_id = $model_item->id;
+                        $_optionValue = ($model_item->fullname_max ?? $model_item->name);
+                        $_selected = $_id === ${$selectedName.'Id'};
+                    }
                 @endphp
-                <x-select-list-item wire:click="setData('{{ $list_string }}','{{ $field }}',null,'{{ $_optionValue }}',{{ $model_item->id }},{{ $key }});$dispatch('dynamicSelectChanged',{value: {{ $model_item->id }},field: '{{ $field }}',rowKey: {{ $key }} })"
-                                    :selected="$model_item->id === ${$selectedName.'Id'}" wire:model='{{ $list_string }}.{{ $key }}.{{ $field }}.id'>
+                <x-select-list-item wire:click="
+                                        setData('{{ $list_string }}','{{ $field }}',null,'{{ $_optionValue }}',{{ $_id }},{{ $key }});
+                                        $dispatch('dynamicSelectChanged',{value: {{ $_id  }},field: '{{ $field }}',rowKey: {{ $key }} })
+                                    "
+                                    :selected="$_selected"
+                                    wire:model='{{ $list_string }}.{{ $key }}.{{ $field }}.id'>
                     {{ $_optionValue  }}
                 </x-select-list-item>
             @endforeach
@@ -80,7 +94,11 @@
             <button @click="showStructures = !showStructures"
                     class="appearance-none flex justify-center items-center w-full rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium"
             >
-                {{ array_key_exists($field,$this->{$list_string}[$key]) ? $this->{$list_string}[$key][$field]['name'] : __('Structure') }}
+                {{
+                    array_key_exists($field,$this->{$list_string}[$key])
+                            ? $this->{$list_string}[$key][$field]['name']
+                            : __('Structure')
+                }}
             </button>
             @if(!$disabled)
             <div x-show="showStructures"
@@ -110,7 +128,7 @@
                     @endforeach
                 </x-radio-tree.list>
             </div>
-                @endif
+            @endif
         </div>
 
     </div>

@@ -45,7 +45,8 @@ if (isset($__slots)) unset($__slots);
 
         <div class="flex justify-between items-center">
             <div class="flex flex-col items-center justify-between sm:flex-row filter bg-white py-2 px-2 rounded-xl">
-                <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
+                <?php if (isset($component)) { $__componentOriginal6307c0378087124f8a5ba7af51640019 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal6307c0378087124f8a5ba7af51640019 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.filter.nav','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('filter.nav'); ?>
 <?php if ($component->shouldRender()): ?>
@@ -54,7 +55,8 @@ if (isset($__slots)) unset($__slots);
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
 <?php $component->withAttributes([]); ?>
-                    <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
+                    <?php if (isset($component)) { $__componentOriginal5c1e1dd95975c2ff879ca8863e56fe47 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal5c1e1dd95975c2ff879ca8863e56fe47 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.filter.item','data' => ['wire:click.prevent' => 'setStatus(\'current\')','active' => $status === 'current']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('filter.item'); ?>
 <?php if ($component->shouldRender()): ?>
@@ -67,11 +69,16 @@ if (isset($__slots)) unset($__slots);
 
                      <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
-<?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
-<?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
-<?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
+<?php if (isset($__attributesOriginal5c1e1dd95975c2ff879ca8863e56fe47)): ?>
+<?php $attributes = $__attributesOriginal5c1e1dd95975c2ff879ca8863e56fe47; ?>
+<?php unset($__attributesOriginal5c1e1dd95975c2ff879ca8863e56fe47); ?>
 <?php endif; ?>
-                    <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
+<?php if (isset($__componentOriginal5c1e1dd95975c2ff879ca8863e56fe47)): ?>
+<?php $component = $__componentOriginal5c1e1dd95975c2ff879ca8863e56fe47; ?>
+<?php unset($__componentOriginal5c1e1dd95975c2ff879ca8863e56fe47); ?>
+<?php endif; ?>
+                    <?php if (isset($component)) { $__componentOriginal5c1e1dd95975c2ff879ca8863e56fe47 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal5c1e1dd95975c2ff879ca8863e56fe47 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.filter.item','data' => ['wire:click.prevent' => 'setStatus(\'leaves\')','active' => $status === 'leaves']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('filter.item'); ?>
 <?php if ($component->shouldRender()): ?>
@@ -84,11 +91,16 @@ if (isset($__slots)) unset($__slots);
 
                      <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
-<?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
-<?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
-<?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
+<?php if (isset($__attributesOriginal5c1e1dd95975c2ff879ca8863e56fe47)): ?>
+<?php $attributes = $__attributesOriginal5c1e1dd95975c2ff879ca8863e56fe47; ?>
+<?php unset($__attributesOriginal5c1e1dd95975c2ff879ca8863e56fe47); ?>
 <?php endif; ?>
-                    <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
+<?php if (isset($__componentOriginal5c1e1dd95975c2ff879ca8863e56fe47)): ?>
+<?php $component = $__componentOriginal5c1e1dd95975c2ff879ca8863e56fe47; ?>
+<?php unset($__componentOriginal5c1e1dd95975c2ff879ca8863e56fe47); ?>
+<?php endif; ?>
+                    <?php if (isset($component)) { $__componentOriginal5c1e1dd95975c2ff879ca8863e56fe47 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal5c1e1dd95975c2ff879ca8863e56fe47 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.filter.item','data' => ['wire:click.prevent' => 'setStatus(\'all\')','active' => $status === 'all']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('filter.item'); ?>
 <?php if ($component->shouldRender()): ?>
@@ -101,13 +113,18 @@ if (isset($__slots)) unset($__slots);
 
                      <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
-<?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
-<?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
-<?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
+<?php if (isset($__attributesOriginal5c1e1dd95975c2ff879ca8863e56fe47)): ?>
+<?php $attributes = $__attributesOriginal5c1e1dd95975c2ff879ca8863e56fe47; ?>
+<?php unset($__attributesOriginal5c1e1dd95975c2ff879ca8863e56fe47); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal5c1e1dd95975c2ff879ca8863e56fe47)): ?>
+<?php $component = $__componentOriginal5c1e1dd95975c2ff879ca8863e56fe47; ?>
+<?php unset($__componentOriginal5c1e1dd95975c2ff879ca8863e56fe47); ?>
 <?php endif; ?>
                     
                     
-                    <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
+                    <?php if (isset($component)) { $__componentOriginal5c1e1dd95975c2ff879ca8863e56fe47 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal5c1e1dd95975c2ff879ca8863e56fe47 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.filter.item','data' => ['wire:click.prevent' => 'setStatus(\'deleted\')','active' => $status === 'deleted']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('filter.item'); ?>
 <?php if ($component->shouldRender()): ?>
@@ -120,11 +137,16 @@ if (isset($__slots)) unset($__slots);
 
                      <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
-<?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
-<?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
-<?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
+<?php if (isset($__attributesOriginal5c1e1dd95975c2ff879ca8863e56fe47)): ?>
+<?php $attributes = $__attributesOriginal5c1e1dd95975c2ff879ca8863e56fe47; ?>
+<?php unset($__attributesOriginal5c1e1dd95975c2ff879ca8863e56fe47); ?>
 <?php endif; ?>
-                    <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
+<?php if (isset($__componentOriginal5c1e1dd95975c2ff879ca8863e56fe47)): ?>
+<?php $component = $__componentOriginal5c1e1dd95975c2ff879ca8863e56fe47; ?>
+<?php unset($__componentOriginal5c1e1dd95975c2ff879ca8863e56fe47); ?>
+<?php endif; ?>
+                    <?php if (isset($component)) { $__componentOriginal5c1e1dd95975c2ff879ca8863e56fe47 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal5c1e1dd95975c2ff879ca8863e56fe47 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.filter.item','data' => ['wire:click.prevent' => 'setStatus(\'pending\')','active' => $status === 'pending']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('filter.item'); ?>
 <?php if ($component->shouldRender()): ?>
@@ -137,16 +159,24 @@ if (isset($__slots)) unset($__slots);
 
                      <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
-<?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
-<?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
-<?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
+<?php if (isset($__attributesOriginal5c1e1dd95975c2ff879ca8863e56fe47)): ?>
+<?php $attributes = $__attributesOriginal5c1e1dd95975c2ff879ca8863e56fe47; ?>
+<?php unset($__attributesOriginal5c1e1dd95975c2ff879ca8863e56fe47); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal5c1e1dd95975c2ff879ca8863e56fe47)): ?>
+<?php $component = $__componentOriginal5c1e1dd95975c2ff879ca8863e56fe47; ?>
+<?php unset($__componentOriginal5c1e1dd95975c2ff879ca8863e56fe47); ?>
 <?php endif; ?>
                     
                  <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
-<?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
-<?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
-<?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
+<?php if (isset($__attributesOriginal6307c0378087124f8a5ba7af51640019)): ?>
+<?php $attributes = $__attributesOriginal6307c0378087124f8a5ba7af51640019; ?>
+<?php unset($__attributesOriginal6307c0378087124f8a5ba7af51640019); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal6307c0378087124f8a5ba7af51640019)): ?>
+<?php $component = $__componentOriginal6307c0378087124f8a5ba7af51640019; ?>
+<?php unset($__componentOriginal6307c0378087124f8a5ba7af51640019); ?>
 <?php endif; ?>
             </div>
             <div class="flex flex-col">
@@ -177,28 +207,28 @@ if (isset($__slots)) unset($__slots);
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-7 h-7 text-gray-500 transition-all duration-300 hover:text-gray-900">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
                         </svg>
-                        <?php if(count($filters) > 0): ?>
+                        <!--[if BLOCK]><![endif]--><?php if(count($filters) > 0): ?>
                         <span class="absolute top-0 right-0 rounded-full bg-rose-500 text-white flex justify-center w-4 h-4 text-xs">
                             <?php echo e(count($filters)); ?>
 
                         </span>
-                        <?php endif; ?> <!--[if ENDBLOCK]><![endif]-->
+                        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                     </button>
                 </div>
-                <?php if(count($filters) > 0): ?>
+                <!--[if BLOCK]><![endif]--><?php if(count($filters) > 0): ?>
                 <button wire:click="resetSelectedFilter" class="appearance-none text-rose-500 text-sm font-medium flex items-center space-x-2 justify-end">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                    <span> <?php echo e(__('Reset filter')); ?></span>
                 </button>
-                <?php endif; ?> <!--[if ENDBLOCK]><![endif]-->
+                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
             </div>
         </div>
 
         
         <div class="flex justify-start items-center space-x-3 flex-wrap gap-1">
-            <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $_positions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $position): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+            <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $this->positions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $position): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <button
                     wire:click.prevent="setPosition(<?php echo e($position->id); ?>)"
                     class="appearance-none w-max text-sm font-medium bg-slate-900 text-yellow-400 rounded-2xl px-3 py-1 transition-all duration-300 hover:bg-slate-700"
@@ -206,7 +236,7 @@ if (isset($__slots)) unset($__slots);
                     <?php echo e($position->name); ?>
 
                 </button>
-            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?> <!--[if ENDBLOCK]><![endif]-->
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
 
             <!--[if BLOCK]><![endif]--><?php if(!empty($selectedPosition)): ?>
                     <button
@@ -216,7 +246,7 @@ if (isset($__slots)) unset($__slots);
                         <?php echo e(__('Reset')); ?>
 
                     </button>
-            <?php endif; ?> <!--[if ENDBLOCK]><![endif]-->
+            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 
         </div>
 
@@ -224,7 +254,8 @@ if (isset($__slots)) unset($__slots);
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
             <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
 
-                <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
+                <?php if (isset($component)) { $__componentOriginal3ee30789824fd1cc17cb4ff8e03df656 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal3ee30789824fd1cc17cb4ff8e03df656 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table.tbl','data' => ['headers' => [__('#'),__('Tabel'),__('Fullname'),__('Position'),'action','action','action']]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('table.tbl'); ?>
 <?php if ($component->shouldRender()): ?>
@@ -233,12 +264,13 @@ if (isset($__slots)) unset($__slots);
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
 <?php $component->withAttributes(['headers' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute([__('#'),__('Tabel'),__('Fullname'),__('Position'),'action','action','action'])]); ?>
-                    <!--[if BLOCK]><![endif]--><?php $__empty_1 = true; $__currentLoopData = $personnels; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $personnel): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                    <!--[if BLOCK]><![endif]--><?php $__empty_1 = true; $__currentLoopData = $this->personnels; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $personnel): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                     <tr class="<?php echo \Illuminate\Support\Arr::toCssClasses([
                         'bg-white' => empty($personnel->leave_work_date),
                         'bg-red-100' => !empty($personnel->leave_work_date)
                     ]); ?>">
-                        <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
+                        <?php if (isset($component)) { $__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table.td','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('table.td'); ?>
 <?php if ($component->shouldRender()): ?>
@@ -248,17 +280,22 @@ if (isset($__slots)) unset($__slots);
 <?php endif; ?>
 <?php $component->withAttributes([]); ?>
                             <span class="text-sm font-medium text-gray-700">
-                                <?php echo e(($personnels->currentpage()-1) * $personnels->perpage() + $key + 1); ?>
+                                <?php echo e(($this->personnels->currentpage()-1) * $this->personnels->perpage() + $key + 1); ?>
 
                            </span>
                          <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
-<?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
-<?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
-<?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
+<?php if (isset($__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b)): ?>
+<?php $attributes = $__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b; ?>
+<?php unset($__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b)): ?>
+<?php $component = $__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b; ?>
+<?php unset($__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b); ?>
 <?php endif; ?>
 
-                        <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
+                        <?php if (isset($component)) { $__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table.td','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('table.td'); ?>
 <?php if ($component->shouldRender()): ?>
@@ -283,17 +320,22 @@ if (isset($__slots)) unset($__slots);
                                         <span class="text-black"><?php echo e($personnel->personDidDelete->name); ?></span>
                                     </div>
                                 </div>
-                                <?php endif; ?> <!--[if ENDBLOCK]><![endif]-->
+                                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                             </div>
 
                          <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
-<?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
-<?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
-<?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
+<?php if (isset($__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b)): ?>
+<?php $attributes = $__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b; ?>
+<?php unset($__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b)): ?>
+<?php $component = $__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b; ?>
+<?php unset($__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b); ?>
 <?php endif; ?>
 
-                        <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
+                        <?php if (isset($component)) { $__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table.td','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('table.td'); ?>
 <?php if ($component->shouldRender()): ?>
@@ -307,7 +349,7 @@ if (isset($__slots)) unset($__slots);
                                     <img src="<?php echo e(asset('/storage/'.$personnel->photo)); ?>" alt="" class="flex-none rounded-xl object-cover w-14 h-14 border-4 border-gray-200">
                                 <?php else: ?>
                                     <img src="<?php echo e(asset('assets/images/no-image.png')); ?>" alt="" class="flex-none rounded-xl object-cover w-14 h-14 border-4 border-gray-200">
-                                <?php endif; ?> <!--[if ENDBLOCK]><![endif]-->
+                                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                <div class="flex flex-col space-y-1">
                                 <span class="text-sm font-medium text-gray-600">
                                     <?php echo e($personnel->fullname); ?>
@@ -322,17 +364,22 @@ if (isset($__slots)) unset($__slots);
                                     <?php echo e($personnel->latestRank?->rank->name); ?>
 
                                </span>
-                               <?php endif; ?> <!--[if ENDBLOCK]><![endif]-->
+                               <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                </div>
                             </div>
                          <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
-<?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
-<?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
-<?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
+<?php if (isset($__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b)): ?>
+<?php $attributes = $__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b; ?>
+<?php unset($__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b)): ?>
+<?php $component = $__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b; ?>
+<?php unset($__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b); ?>
 <?php endif; ?>
 
-                        <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
+                        <?php if (isset($component)) { $__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table.td','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('table.td'); ?>
 <?php if ($component->shouldRender()): ?>
@@ -359,15 +406,20 @@ if (isset($__slots)) unset($__slots);
                                     <span class="text-gray-500 text-sm font-medium"><?php echo e(__('Leave date')); ?>:</span>
                                     <span class="text-red-500 text-sm font-medium"><?php echo e(\Carbon\Carbon::parse($personnel->leave_work_date)->format('d.m.Y')); ?></span>
                                 </div>
-                                <?php endif; ?> <!--[if ENDBLOCK]><![endif]-->
+                                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                             </div>
                          <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
-<?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
-<?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
-<?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
+<?php if (isset($__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b)): ?>
+<?php $attributes = $__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b; ?>
+<?php unset($__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b); ?>
 <?php endif; ?>
-                        <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
+<?php if (isset($__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b)): ?>
+<?php $component = $__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b; ?>
+<?php unset($__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b); ?>
+<?php endif; ?>
+                        <?php if (isset($component)) { $__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table.td','data' => ['isButton' => true]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('table.td'); ?>
 <?php if ($component->shouldRender()): ?>
@@ -393,15 +445,20 @@ if (isset($__slots)) unset($__slots);
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.678 48.678 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3l-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3l-3 3" />
                                 </svg>
                             </button>
-                            <?php endif; ?> <!--[if ENDBLOCK]><![endif]-->
+                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                          <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
-<?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
-<?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
-<?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
+<?php if (isset($__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b)): ?>
+<?php $attributes = $__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b; ?>
+<?php unset($__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b)): ?>
+<?php $component = $__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b; ?>
+<?php unset($__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b); ?>
 <?php endif; ?>
 
-                        <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
+                        <?php if (isset($component)) { $__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table.td','data' => ['isButton' => true,'style' => 'text-align: center !important;']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('table.td'); ?>
 <?php if ($component->shouldRender()): ?>
@@ -444,12 +501,17 @@ if (isset($__slots)) unset($__slots);
 
                          <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
-<?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
-<?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
-<?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
+<?php if (isset($__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b)): ?>
+<?php $attributes = $__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b; ?>
+<?php unset($__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b)): ?>
+<?php $component = $__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b; ?>
+<?php unset($__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b); ?>
 <?php endif; ?>
 
-                        <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
+                        <?php if (isset($component)) { $__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table.td','data' => ['isButton' => true]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('table.td'); ?>
 <?php if ($component->shouldRender()): ?>
@@ -479,12 +541,16 @@ if (isset($__slots)) unset($__slots);
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m6 4.125l2.25 2.25m0 0l2.25 2.25M12 13.875l2.25-2.25M12 13.875l-2.25 2.25M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
                                 </svg>
                             </button>
-                        <?php endif; ?> <!--[if ENDBLOCK]><![endif]-->
+                        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                          <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
-<?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
-<?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
-<?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
+<?php if (isset($__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b)): ?>
+<?php $attributes = $__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b; ?>
+<?php unset($__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b)): ?>
+<?php $component = $__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b; ?>
+<?php unset($__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b); ?>
 <?php endif; ?>
                     </tr>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
@@ -495,12 +561,16 @@ if (isset($__slots)) unset($__slots);
                            </div>
                         </td>
                     </tr>
-                    <?php endif; ?> <!--[if ENDBLOCK]><![endif]-->
+                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                  <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
-<?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
-<?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
-<?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
+<?php if (isset($__attributesOriginal3ee30789824fd1cc17cb4ff8e03df656)): ?>
+<?php $attributes = $__attributesOriginal3ee30789824fd1cc17cb4ff8e03df656; ?>
+<?php unset($__attributesOriginal3ee30789824fd1cc17cb4ff8e03df656); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal3ee30789824fd1cc17cb4ff8e03df656)): ?>
+<?php $component = $__componentOriginal3ee30789824fd1cc17cb4ff8e03df656; ?>
+<?php unset($__componentOriginal3ee30789824fd1cc17cb4ff8e03df656); ?>
 <?php endif; ?>
 
             </div>
@@ -508,7 +578,7 @@ if (isset($__slots)) unset($__slots);
             </div>
 
             <div class="mt-2">
-                <?php echo e($personnels->links()); ?>
+                <?php echo e($this->personnels->links()); ?>
 
             </div>
     </div>
@@ -517,7 +587,7 @@ if (isset($__slots)) unset($__slots);
 $__split = function ($name, $params = []) {
     return [$name, $params];
 };
-[$__name, $__params] = $__split('filter.detail');
+[$__name, $__params] = $__split('filter.detail',['lazy' => 'on-load']);
 
 $__html = app('livewire')->mount($__name, $__params, 'lw-3935985241-1', $__slots ?? [], get_defined_vars());
 
@@ -529,8 +599,10 @@ unset($__params);
 unset($__split);
 if (isset($__slots)) unset($__slots);
 ?>
+
     
-    <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
+    <?php if (isset($component)) { $__componentOriginal06466d70a5df71623dc2a561e77c49ee = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal06466d70a5df71623dc2a561e77c49ee = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.side-modal','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('side-modal'); ?>
 <?php if ($component->shouldRender()): ?>
@@ -556,7 +628,7 @@ unset($__params);
 unset($__split);
 if (isset($__slots)) unset($__slots);
 ?>
-        <?php endif; ?> <!--[if ENDBLOCK]><![endif]-->
+        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 
         <!--[if BLOCK]><![endif]--><?php if($showSideMenu == 'edit-personnel'): ?>
             <?php
@@ -575,7 +647,7 @@ unset($__params);
 unset($__split);
 if (isset($__slots)) unset($__slots);
 ?>
-        <?php endif; ?> <!--[if ENDBLOCK]><![endif]-->
+        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 
             <!--[if BLOCK]><![endif]--><?php if($showSideMenu == 'show-files'): ?>
                 <?php
@@ -594,12 +666,16 @@ unset($__params);
 unset($__split);
 if (isset($__slots)) unset($__slots);
 ?>
-            <?php endif; ?> <!--[if ENDBLOCK]><![endif]-->
+            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
     <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
-<?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
-<?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
-<?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
+<?php if (isset($__attributesOriginal06466d70a5df71623dc2a561e77c49ee)): ?>
+<?php $attributes = $__attributesOriginal06466d70a5df71623dc2a561e77c49ee; ?>
+<?php unset($__attributesOriginal06466d70a5df71623dc2a561e77c49ee); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal06466d70a5df71623dc2a561e77c49ee)): ?>
+<?php $component = $__componentOriginal06466d70a5df71623dc2a561e77c49ee; ?>
+<?php unset($__componentOriginal06466d70a5df71623dc2a561e77c49ee); ?>
 <?php endif; ?>
    
    <div>
@@ -621,7 +697,8 @@ if (isset($__slots)) unset($__slots);
 ?>
    </div>
 
-   <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
+   <?php if (isset($component)) { $__componentOriginal2686ed4927c64f67d2844e9b73af898c = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal2686ed4927c64f67d2844e9b73af898c = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.datepicker','data' => ['auto' => false]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('datepicker'); ?>
 <?php if ($component->shouldRender()): ?>
@@ -631,9 +708,13 @@ if (isset($__slots)) unset($__slots);
 <?php endif; ?>
 <?php $component->withAttributes(['auto' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(false)]); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
-<?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
-<?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
-<?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
+<?php if (isset($__attributesOriginal2686ed4927c64f67d2844e9b73af898c)): ?>
+<?php $attributes = $__attributesOriginal2686ed4927c64f67d2844e9b73af898c; ?>
+<?php unset($__attributesOriginal2686ed4927c64f67d2844e9b73af898c); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal2686ed4927c64f67d2844e9b73af898c)): ?>
+<?php $component = $__componentOriginal2686ed4927c64f67d2844e9b73af898c; ?>
+<?php unset($__componentOriginal2686ed4927c64f67d2844e9b73af898c); ?>
 <?php endif; ?>
 </div>
 

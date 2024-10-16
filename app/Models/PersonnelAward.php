@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PersonnelAward extends Model
 {
-    use HasFactory,PersonnelTrait,DateCastTrait;
+    use DateCastTrait,HasFactory,PersonnelTrait;
 
     public $timestamps = false;
 
@@ -19,7 +19,7 @@ class PersonnelAward extends Model
         'award_id',
         'reason',
         'given_date',
-        'is_old'
+        'is_old',
     ];
 
     protected $dates = [
@@ -30,7 +30,7 @@ class PersonnelAward extends Model
         'given_date' => 'date:d.m.Y',
     ];
 
-    public function award() : BelongsTo
+    public function award(): BelongsTo
     {
         return $this->belongsTo(Award::class);
     }

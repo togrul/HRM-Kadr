@@ -3,17 +3,17 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Laravel\Sanctum\HasApiTokens;
-use Spatie\Permission\Traits\HasRoles;
-use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable,HasRoles,SoftDeletes;
+    use HasApiTokens, HasFactory, HasRoles,Notifiable,SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -25,7 +25,7 @@ class User extends Authenticatable
         'email',
         'password',
         'is_active',
-        'deleted_by'
+        'deleted_by',
     ];
 
     /**
@@ -48,9 +48,9 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
-    public function personDidDelete() : BelongsTo
+    public function personDidDelete(): BelongsTo
     {
-         return $this->belongsTo(self::class,'deleted_by','id');
+        return $this->belongsTo(self::class, 'deleted_by', 'id');
     }
 
     protected static function boot()

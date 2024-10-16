@@ -10,14 +10,14 @@ class AddCandidate extends Component
 {
     use CandidateCrud;
 
-    public function store()
+    public function store(): void
     {
         $this->validate();
 
         $modelInstance = new Candidate;
 
-        Candidate::create($this->modifyArray($this->candidate,$modelInstance->dateList()));
+        Candidate::create($this->modifyArray($this->candidate, $modelInstance->dateList()));
 
-        $this->dispatch('candidateAdded',__('Candidate was added successfully!'));
+        $this->dispatch('candidateAdded', __('Candidate was added successfully!'));
     }
 }

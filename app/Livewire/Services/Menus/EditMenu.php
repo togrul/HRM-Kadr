@@ -13,27 +13,28 @@ class EditMenu extends Component
     public $menuModel;
 
     public $title;
+
     public $menu;
 
     protected function rules()
     {
         return [
-           'menu.name'=> 'required|string|min:1',
-           'menu.color' => 'required|string|min:1',
-           'menu.order' => 'required|integer',
-           'menu.url' => 'required|string|min:1',
-           'menu.icon' => 'required|string|min:1',
+            'menu.name' => 'required|string|min:1',
+            'menu.color' => 'required|string|min:1',
+            'menu.order' => 'required|integer',
+            'menu.url' => 'required|string|min:1',
+            'menu.icon' => 'required|string|min:1',
         ];
     }
 
     protected function validationAttributes()
     {
         return [
-            'menu.name'=>__('Name'),
+            'menu.name' => __('Name'),
             'menu.color' => __('Color'),
-            'menu.order'=> __('Order'),
-            'menu.url'=> __('URL'),
-            'menu.icon'=> __('Icon'),
+            'menu.order' => __('Order'),
+            'menu.url' => __('URL'),
+            'menu.icon' => __('Icon'),
         ];
     }
 
@@ -41,7 +42,7 @@ class EditMenu extends Component
     {
         // $this->authorize('manage-settings',$this->user);
         $this->title = __('Edit menu');
-        $this->menuModel = Menu::where('id',$this->menuModel['id'])->first();
+        $this->menuModel = Menu::where('id', $this->menuModel['id'])->first();
 
         $this->menu['name'] = $this->menuModel->name;
         $this->menu['url'] = $this->menuModel->url;
@@ -57,7 +58,7 @@ class EditMenu extends Component
 
         $this->menuModel->update($this->menu);
 
-        $this->dispatch('menuAdded',__('Menu was updated successfully!'));
+        $this->dispatch('menuAdded', __('Menu was updated successfully!'));
     }
 
     public function render()

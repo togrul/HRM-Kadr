@@ -13,6 +13,6 @@ class PersonnelDocument extends Model
     protected $fillable = [
         'tabel_no',
         'file',
-        'filename'
+        'filename',
     ];
 }

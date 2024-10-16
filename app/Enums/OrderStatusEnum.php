@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum OrderStatusEnum : int
+enum OrderStatusEnum: int
 {
     case PENDING = 10;
     case APPROVED = 20;

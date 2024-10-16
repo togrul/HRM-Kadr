@@ -13,19 +13,18 @@ class EditComponent extends Component
 
     protected function fillComponent()
     {
-        $this->componentModelData = \App\Models\Component::with('orderType','rank')
-                                        ->where('id',$this->componentModel)
-                                        ->first();
+        $this->componentModelData = \App\Models\Component::with('orderType', 'rank')
+            ->where('id', $this->componentModel)
+            ->first();
 
         $this->component = [
             'name' => $this->componentModelData->name,
             'content' => $this->componentModelData->content,
             'dynamic_fields' => $this->componentModelData->dynamic_fields,
-            'title' => $this->componentModelData->title
+            'title' => $this->componentModelData->title,
         ];
 
-        if(!empty($this->componentModelData->rank_id))
-        {
+        if (! empty($this->componentModelData->rank_id)) {
             $this->component['rank_id'] = [
                 'id' => $this->componentModelData->rank->id,
                 'name' => $this->componentModelData->rank->name,
@@ -34,8 +33,7 @@ class EditComponent extends Component
             $this->orderName = $this->component['rank_id']['name'];
         }
 
-        if(!empty($this->componentModelData->order_type_id))
-        {
+        if (! empty($this->componentModelData->order_type_id)) {
             $this->component['order_type_id'] = [
                 'id' => $this->componentModelData->orderType->id,
                 'name' => $this->componentModelData->orderType->name,
@@ -51,6 +49,6 @@ class EditComponent extends Component
 
         $this->componentModelData->update($this->modifyArray($this->component));
 
-        $this->dispatch('componentAdded',__('Component was updated successfully!'));
+        $this->dispatch('componentAdded', __('Component was updated successfully!'));
     }
 }

@@ -62,7 +62,7 @@
                 </x-select-list>
             </div>
             <div class="flex flex-col">
-                <x-label for="filter.surname">{{ __('Fullname') }}</x-label>
+                <x-label for="filter.fullname">{{ __('Fullname') }}</x-label>
                 <x-livewire-input mode="gray" name="filter.fullname" wire:model.defer="filter.fullname"></x-livewire-input>
             </div>
             <div class="flex flex-col">
@@ -126,13 +126,13 @@
                 <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
 
                     <x-table.tbl :headers="[__('#'),__('Fullname'),__('Structure'),__('Dates'),__('Locations'),__('Order'),'action']">
-                        @forelse ($_vacations as $key => $_vacation)
+                        @forelse ($this->vacations as $key => $_vacation)
                             <tr @class([
                                 'bg-teal-50' => $_vacation->return_work_date > \Carbon\Carbon::now()
                             ])>
                                 <x-table.td>
                                     <span class="text-sm font-medium text-gray-700">
-                                        {{ ($_vacations->currentpage()-1) * $_vacations->perpage() + $key + 1 }}
+                                        {{ ($this->vacations->currentpage()-1) * $this->vacations->perpage() + $key + 1 }}
                                     </span>
                                 </x-table.td>
 
@@ -204,7 +204,7 @@
                                         </div>
                                         <div class="flex items-center space-x-1">
                                             <span class="text-gray-500">{{__('Given date')}}:</span>
-                                            <span class="text-black">{{ \Carbon\Carbon::parse($_vacation->order_given_date)->format('d.m.Y') }}</span>
+                                            <span class="text-black">{{ \Carbon\Carbon::parse($_vacation->order_date)->format('d.m.Y') }}</span>
                                         </div>
                                     </div>
                                 </x-table.td>
@@ -236,7 +236,7 @@
         </div>
 
         <div class="mt-2">
-            {{ $_vacations->links() }}
+            {{ $this->vacations->links() }}
         </div>
     </div>
 

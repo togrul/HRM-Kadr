@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Livewire\Outside\BusinessTrips;
 use App\Traits\DateCastTrait;
+use App\Traits\NestedStructureTrait;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,7 +15,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Personnel extends Model
 {
-    use HasFactory,SoftDeletes,DateCastTrait;
+    use DateCastTrait;
+    use HasFactory;
+    use SoftDeletes;
+    use NestedStructureTrait;
 
     protected $fillable = [
         'tabel_no',
@@ -56,13 +61,13 @@ class Personnel extends Model
         'discrediting_information',
         'added_by',
         'deleted_by',
-        'is_pending'
+        'is_pending',
     ];
 
     protected $dates = [
         'join_work_date',
         'leave_work_date',
-        'birthdate'
+        'birthdate',
     ];
 
     protected $casts = [
@@ -72,311 +77,322 @@ class Personnel extends Model
     ];
 
     protected $likeFilterFields = [
-        'surname','name','patronymic','tabel_no','pin'
+        'surname', 'name', 'patronymic', 'tabel_no', 'pin',
     ];
 
-    public function getFullnameAttribute() : string
+    public function getFullnameAttribute(): string
     {
         return "{$this->surname} {$this->name} {$this->patronymic}";
     }
 
-    public function getFullnameMaxAttribute() : string
+    public function getFullnameMaxAttribute(): string
     {
-        return $this->fullname . ' ' . ($this->gender == 2 ? 'qızı' : 'oğlu');
+        return $this->fullname.' '.($this->gender == 2 ? 'qızı' : 'oğlu');
     }
 
-    public function personDidDelete() : BelongsTo
+    public function personDidDelete(): BelongsTo
     {
-         return $this->belongsTo(User::class,'deleted_by','id');
+        return $this->belongsTo(User::class, 'deleted_by', 'id');
     }
 
-    public function nationality() : BelongsTo
+    public function nationality(): BelongsTo
     {
-        return $this->belongsTo(CountryTranslation::class,'nationality_id','country_id')->where('locale',config('app.locale'));
+        return $this->belongsTo(CountryTranslation::class, 'nationality_id', 'country_id')
+            ->where('locale', config('app.locale'));
     }
 
-    public function previousNationality() : BelongsTo
+    public function previousNationality(): BelongsTo
     {
-        return $this->belongsTo(CountryTranslation::class,'previous_nationality_id','country_id')->where('locale',config('app.locale'));
+        return $this->belongsTo(CountryTranslation::class, 'previous_nationality_id', 'country_id')
+            ->where('locale', config('app.locale'));
     }
 
-    public function educationDegree() : BelongsTo
+    public function educationDegree(): BelongsTo
     {
-        return $this->belongsTo(EducationDegree::class,'education_degree_id','id');
+        return $this->belongsTo(EducationDegree::class, 'education_degree_id', 'id');
     }
 
-    public function structure() : BelongsTo
+    public function structure(): BelongsTo
     {
         return $this->belongsTo(Structure::class);
     }
 
-    public function position() : BelongsTo
+    public function position(): BelongsTo
     {
-        return $this->belongsTo(Position::class,'position_id','id');
+        return $this->belongsTo(Position::class, 'position_id', 'id');
     }
 
-    public function disability() : BelongsTo
+    public function disability(): BelongsTo
     {
-        return $this->belongsTo(Disability::class,'disability_id','id');
+        return $this->belongsTo(Disability::class, 'disability_id', 'id');
     }
 
-    public function workNorm() : BelongsTo
+    public function workNorm(): BelongsTo
     {
-        return $this->belongsTo(WorkNorm::class,'work_norm_id','id');
+        return $this->belongsTo(WorkNorm::class, 'work_norm_id', 'id');
     }
 
-    public function creator() : BelongsTo
+    public function creator(): BelongsTo
     {
-        return $this->belongsTo(User::class,'added_by','id');
+        return $this->belongsTo(User::class, 'added_by', 'id');
     }
 
-    public function deletedBy() : BelongsTo
+    public function deletedBy(): BelongsTo
     {
-        return $this->belongsTo(User::class,'deleted_by','id');
+        return $this->belongsTo(User::class, 'deleted_by', 'id');
     }
 
-    public function awards() : HasMany
+    public function awards(): HasMany
     {
-        return $this->hasMany(PersonnelAward::class,'tabel_no','tabel_no')->orderByDesc('given_date');
+        return $this->hasMany(PersonnelAward::class, 'tabel_no', 'tabel_no')->orderByDesc('given_date');
     }
 
-//    public function criminals() : HasMany
-//    {
-//        return $this->hasMany(PersonnelCriminal::class,'tabel_no','tabel_no')->orderByDesc('given_date');
-//    }
+    //    public function criminals() : HasMany
+    //    {
+    //        return $this->hasMany(PersonnelCriminal::class,'tabel_no','tabel_no')->orderByDesc('given_date');
+    //    }
 
-    public function idDocuments() : HasOne
+    public function idDocuments(): HasOne
     {
-        return $this->hasOne(PersonnelIdentityDocument::class,'tabel_no','tabel_no');
+        return $this->hasOne(PersonnelIdentityDocument::class, 'tabel_no', 'tabel_no');
     }
 
-    public function education() : HasOne
+    public function education(): HasOne
     {
-        return $this->hasOne(PersonnelEducation::class,'tabel_no','tabel_no');
+        return $this->hasOne(PersonnelEducation::class, 'tabel_no', 'tabel_no');
     }
 
-    public function extraEducations() : HasMany
+    public function extraEducations(): HasMany
     {
-        return $this->hasMany(PersonnelExtraEducation::class,'tabel_no','tabel_no')->orderByDesc('graduated_year');
+        return $this->hasMany(PersonnelExtraEducation::class, 'tabel_no', 'tabel_no')->orderByDesc('graduated_year');
     }
 
-    public function foreignLanguages() : HasMany
+    public function foreignLanguages(): HasMany
     {
-        return $this->hasMany(PersonnelForeignLanguage::class,'tabel_no','tabel_no');
+        return $this->hasMany(PersonnelForeignLanguage::class, 'tabel_no', 'tabel_no');
     }
 
-    public function files() : HasMany
+    public function files(): HasMany
     {
-        return $this->hasMany(PersonnelDocument::class,'tabel_no','tabel_no');
+        return $this->hasMany(PersonnelDocument::class, 'tabel_no', 'tabel_no');
     }
 
-    public function kinships() : HasMany
+    public function kinships(): HasMany
     {
-        return $this->hasMany(PersonnelKinship::class,'tabel_no','tabel_no')->orderBy('kinship_id');
+        return $this->hasMany(PersonnelKinship::class, 'tabel_no', 'tabel_no')->orderBy('kinship_id');
     }
 
-    public function fatherMother() : HasMany
+    public function fatherMother(): HasMany
     {
-        return $this->hasMany(PersonnelKinship::class,'tabel_no','tabel_no')->whereBetween('kinship_id',[11,12])->orderBy('kinship_id');
+        return $this->kinships()->whereBetween('kinship_id', [11, 12]);
     }
 
-    public function wifeChildren() : HasMany
+    public function wifeChildren(): HasMany
     {
-        return $this->hasMany(PersonnelKinship::class,'tabel_no','tabel_no')->whereBetween('kinship_id',[21,29])->orderBy('kinship_id');
+        return $this->kinships()->whereBetween('kinship_id', [21, 29]);
     }
 
-    public function laborActivities() : HasMany
+    public function laborActivities(): HasMany
     {
-        return $this->hasMany(PersonnelLaborActivity::class,'tabel_no','tabel_no')
-            ->orderByRaw('leave_date IS NULL DESC, leave_date DESC');;
+        return $this->hasMany(PersonnelLaborActivity::class, 'tabel_no', 'tabel_no')
+            ->orderByRaw('leave_date IS NULL DESC, leave_date DESC');
     }
 
-    public function specialServices() : HasMany
+    public function specialServices(): HasMany
     {
-        return $this->hasMany(PersonnelLaborActivity::class,'tabel_no','tabel_no')
-                    ->where('is_special_service',1)
-                    ->orderByDesc('leave_date');
+        return $this->hasMany(PersonnelLaborActivity::class, 'tabel_no', 'tabel_no')
+            ->where('is_special_service', 1)
+            ->orderByDesc('leave_date');
     }
 
-    public function military() : HasMany
+    public function military(): HasMany
     {
-        return $this->hasMany(PersonnelMilitaryService::class,'tabel_no','tabel_no')->orderByDesc('end_date');
+        return $this->hasMany(PersonnelMilitaryService::class, 'tabel_no', 'tabel_no')->orderByDesc('end_date');
     }
 
-    public function participations() : HasMany
+    public function participations(): HasMany
     {
-        return $this->hasMany(PersonnelParticipationEvent::class,'tabel_no','tabel_no')->orderByDesc('event_date');
+        return $this->hasMany(PersonnelParticipationEvent::class, 'tabel_no', 'tabel_no')->orderByDesc('event_date');
     }
 
-    public function punishments() : HasMany
+    public function punishments(): HasMany
     {
-        return $this->hasMany(PersonnelPunishment::class,'tabel_no','tabel_no')->orderByDesc('given_date');
+        return $this->hasMany(PersonnelPunishment::class, 'tabel_no', 'tabel_no')->orderByDesc('given_date');
     }
 
-    public function ranks() : HasMany
+    public function ranks(): HasMany
     {
-        return $this->hasMany(PersonnelRank::class,'tabel_no','tabel_no')->orderByDesc('given_date');
+        return $this->hasMany(PersonnelRank::class, 'tabel_no', 'tabel_no')->orderByDesc('given_date');
     }
 
-    public function latestRank() : HasOne
+    public function latestRank(): HasOne
     {
-        return $this->hasOne(PersonnelRank::class,'tabel_no','tabel_no')->latestOfMany('given_date');
+        return $this->hasOne(PersonnelRank::class, 'tabel_no', 'tabel_no')->latestOfMany('given_date');
     }
 
-    public function vacations() : HasMany
+    public function weapons(): HasMany
     {
-        return $this->hasMany(PersonnelVacation::class,'tabel_no','tabel_no')->orderByDesc('return_work_date');
+        return $this->hasMany(PersonnelWeapon::class, 'tabel_no', 'tabel_no')->orderByDesc('given_date');
     }
 
-    public function latestVacation() : HasOne
+    public function activeWeapons(): HasMany
     {
-        return $this->hasOne(PersonnelVacation::class,'tabel_no','tabel_no')->latestOfMany('return_work_date');
+        return $this->hasMany(PersonnelWeapon::class, 'tabel_no', 'tabel_no')->whereNull('return_date')->orderByDesc('given_date');
     }
 
-    public function degreeAndNames() : HasMany
+    public function vacations(): HasMany
     {
-        return $this->hasMany(PersonnelScientificDegreeAndName::class,'tabel_no','tabel_no')->orderByDesc('given_date');
+        return $this->hasMany(PersonnelVacation::class, 'tabel_no', 'tabel_no')->orderByDesc('return_work_date');
     }
 
-    public function elections() : HasMany
+    public function latestVacation(): HasOne
     {
-        return $this->hasMany(PersonnelElectedElectoral::class,'tabel_no','tabel_no')->orderByDesc('elected_date');
+        return $this->hasOne(PersonnelVacation::class, 'tabel_no', 'tabel_no')->latestOfMany('return_work_date');
     }
 
-    public function injuries() : HasMany
+    public function businessTrips(): HasMany
     {
-        return $this->hasMany(PersonnelInjury::class,'tabel_no','tabel_no')->orderByDesc('date_time');
+        return $this->hasMany(PersonnelBusinessTrip::class, 'tabel_no', 'tabel_no')->orderByDesc('end_date');
     }
 
-    public function captives() : HasMany
+    public function latestBusinessTrip(): HasOne
     {
-        return $this->hasMany(PersonnelTakenCaptive::class,'tabel_no','tabel_no')->orderByDesc('taken_captive_date');
+        return $this->hasOne(PersonnelBusinessTrip::class, 'tabel_no', 'tabel_no')->latestOfMany('end_date');
     }
 
-    public function socialOrigin() : BelongsTo
+    public function degreeAndNames(): HasMany
     {
-        return $this->belongsTo(SocialOrigin::class,'social_origin_id','id');
+        return $this->hasMany(PersonnelScientificDegreeAndName::class, 'tabel_no', 'tabel_no')->orderByDesc('given_date');
     }
 
-    public function inActiveVacation() : HasOne
+    public function elections(): HasMany
     {
-        return $this->hasMany(PersonnelVacation::class,'tabel_no','tabel_no')
-                    ->where('end_date' ,'>', Carbon::now())
-                    ->where('return_work_date' ,'>', Carbon::now())
-                    ->one();
+        return $this->hasMany(PersonnelElectedElectoral::class, 'tabel_no', 'tabel_no')->orderByDesc('elected_date');
     }
 
-    public function getAgeAttribute() {
+    public function injuries(): HasMany
+    {
+        return $this->hasMany(PersonnelInjury::class, 'tabel_no', 'tabel_no')->orderByDesc('date_time');
+    }
+
+    public function captives(): HasMany
+    {
+        return $this->hasMany(PersonnelTakenCaptive::class, 'tabel_no', 'tabel_no')->orderByDesc('taken_captive_date');
+    }
+
+    public function socialOrigin(): BelongsTo
+    {
+        return $this->belongsTo(SocialOrigin::class, 'social_origin_id', 'id');
+    }
+
+    public function inActiveVacation(): HasOne
+    {
+        return $this->hasMany(PersonnelVacation::class, 'tabel_no', 'tabel_no')
+            ->where('end_date', '>', Carbon::now())
+            ->where('return_work_date', '>', Carbon::now())
+            ->one();
+    }
+
+    public function inActiveBusinessTrip(): HasOne
+    {
+        return $this->hasMany(PersonnelBusinessTrip::class, 'tabel_no', 'tabel_no')
+            ->where('end_date', '>', Carbon::now())
+            ->one();
+    }
+
+    public function getAgeAttribute()
+    {
         return Carbon::parse($this->birthdate)->age;
     }
 
     public function scopeActive($query)
     {
-        return $query->where('is_pending',false)
-                     ->whereNull('leave_work_date');
+        return $query->where('is_pending', false)
+            ->whereNull('leave_work_date');
     }
 
     public function scopeFilter($query, array $filters)
     {
         foreach ($filters as $field => $value) {
-            if($field == 'age')
-            {
-                $query->whereRaw('timestampdiff(year, birthdate, curdate()) between ? and ?', [$value['min'],$value['max']]);
-                continue;
-            }
-            if($field == 'nationality_id')
-            {
-                $query->whereHas('nationality',function($q) use($value){
-                    $q->where('nationality_id',$value);
-                });
-                continue;
-            }
-            if($field == 'born_country_id' || $field == 'born_city_id' || $field == 'is_married')
-            {
-                $query->whereHas('idDocuments',function($q) use($value,$field){
-                    $q->where($field,$value);
-                });
-                continue;
-            }
-            if($field == 'rank_id')
-            {
-                $query->whereHas('ranks',function($q) use($value,$field){
-                    $q->where($field,$value);
-                });
-                continue;
-            }
-            if($field == 'rank_name')
-            {
-                $query->whereHas('ranks',function($q) use($value){
-                    $q->where('name',$value);
-                });
-                continue;
-            }
-            if($field == 'rank')
-            {
-                $query->whereHas('ranks',function($q) use($value){
-                    $q->whereBetween('given_date',[$value['min'],$value['max']]);
-                });
-                continue;
-            }
-            if($field == 'punishment_reason')
-            {
-                $query->whereHas('punishments',function($q) use($value){
-                    $q->where('reason','LIKE',"%{$value}%");
-                });
-                continue;
-            }
-            if($field == 'educational_institution_id' || $field == 'specialty')
-            {
-                $query->whereHas('education',function($q) use($value,$field){
-                    $q->where($field,$value);
-                });
-                continue;
-            }
-            if($field == 'award_id')
-            {
-                $query->whereHas('awards',function($q) use($value,$field){
-                    $q->where($field,$value);
-                });
-                continue;
-            }
-            if($field == 'punishment_id')
-            {
-                $query->whereHas('punishments',function($q) use($value,$field){
-                    $q->where($field,$value);
-                });
-                continue;
-            }
-            if(in_array($field, $this->likeFilterFields) && $value != null) {
-                $query->where($field, 'LIKE', "%$value%");
-                continue;
-            }
-            else if(in_array($field, $this->fillable) && is_array($value))
-            {
-                $_min = empty($value['min']) ? '1990-01-01' : Carbon::parse($value['min'])->format('Y-m-d');
-                $_max = empty($value['max']) ? Carbon::now()->format('Y-m-d') : Carbon::parse($value['max'])->format('Y-m-d');
-                $query->whereBetween($field,[$_min,$_max]);
-                continue;
-            }
-            else if (in_array($field, $this->fillable) && $value != null)
-            {
-                if($field == 'structure_id')
-                {
-                    $structureModel = Structure::with('subs')->find($value);
-                    if ($structureModel) {
-                        $structure = $structureModel->getAllNestedIds();
-                    }
-
-                    $query->whereIn('structure_id', $structure);
-                    continue;
-                }
-                else
-                {
-                    $query->where($field, $value);
-                }
+            if (is_array($value)) {
+                $this->applyRangeFilter($query, $field, $value);
+            } else {
+                $this->applyExactFilter($query, $field, $value);
             }
         }
+
         return $query;
+    }
+
+    protected function applyRangeFilter($query, $field, array $value)
+    {
+        if ($field === 'age') {
+            $query->whereRaw('timestampdiff(year, birthdate, curdate()) between ? and ?', [$value['min'], $value['max']]);
+        } elseif ($field === 'rank') {
+            $query->whereHas('ranks', fn ($q) => $q->whereBetween('given_date', [$value['min'], $value['max']]));
+        } elseif (in_array($field, $this->fillable)) {
+            $min = empty($value['min']) ? '1990-01-01' : Carbon::parse($value['min'])->format('Y-m-d');
+            $max = empty($value['max']) ? Carbon::now()->format('Y-m-d') : Carbon::parse($value['max'])->format('Y-m-d');
+            $query->whereBetween($field, [$min, $max]);
+        }
+    }
+
+    protected function applyExactFilter($query, $field, $value)
+    {
+        switch ($field) {
+            case 'nationality_id':
+                $query->whereHas('nationality', fn ($q) => $q->where('nationality_id', $value));
+                break;
+
+            case 'born_country_id':
+            case 'born_city_id':
+            case 'is_married':
+                $query->whereHas('idDocuments', fn ($q) => $q->where($field, $value));
+                break;
+
+            case 'rank_id':
+                $query->whereHas('ranks', fn ($q) => $q->where($field, $value));
+                break;
+
+            case 'rank_name':
+                $query->whereHas('ranks', fn ($q) => $q->where('name', $value));
+                break;
+
+            case 'punishment_reason':
+                $query->whereHas('punishments', fn ($q) => $q->where('reason', 'LIKE', "%$value%"));
+                break;
+
+            case 'educational_institution_id':
+            case 'specialty':
+                $query->whereHas('education', fn ($q) => $q->where($field, $value));
+                break;
+
+            case 'award_id':
+                $query->whereHas('awards', fn ($q) => $q->where($field, $value));
+                break;
+
+            case 'punishment_id':
+                $query->whereHas('punishments', fn ($q) => $q->where($field, $value));
+                break;
+
+            case 'structure_id':
+                $this->applyStructureFilter($query, $value);
+                break;
+
+            default:
+                if (in_array($field, $this->likeFilterFields) && $value !== null) {
+                    $query->where($field, 'LIKE', "%$value%");
+                } elseif (in_array($field, $this->fillable) && $value !== null) {
+                    $query->where($field, $value);
+                }
+                break;
+        }
+    }
+
+    protected function applyStructureFilter($query, $value)
+    {
+        $structureIds = $this->getNestedStructure($value);
+        $query->whereIn('structure_id', $structureIds);
     }
 
     protected static function boot()
@@ -390,7 +406,4 @@ class Personnel extends Model
             $model->save();
         });
     }
-
-
-
 }

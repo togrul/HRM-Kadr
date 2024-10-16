@@ -1,302 +1,55 @@
 <?php
 
 namespace App\Livewire\Traits;
+
+use App\Enums\KnowledgeStatusEnum;
+use App\Livewire\Traits\Helpers\FillComplexArrayTrait;
+use App\Livewire\Traits\Validations\PersonnelValidationTrait;
+use App\Models\Language;
+use App\Models\ScientificDegreeAndName;
 use App\Services\CallPersonnelInfo;
 use Illuminate\Support\Arr;
-use Livewire\Attributes\On;
+use Livewire\Attributes\Isolate;
 use Livewire\WithFileUploads;
 
 trait PersonnelCrud
 {
-    use WithFileUploads,
-        SelectListTrait,
-        Step1Trait,
-        Step2Trait,
-        Step3Trait,
-        Step4Trait,
-        Step5Trait,
-        Step6Trait,
-        Step7Trait,
-        Step8Trait;
+    use FillComplexArrayTrait;
+    use PersonnelValidationTrait;
+    use SelectListTrait;
+    use Step1Trait;
+    use Step2Trait;
+    use Step3Trait;
+    use Step4Trait;
+    use Step5Trait;
+    use Step6Trait;
+    use Step7Trait;
+    use Step8Trait;
+    use WithFileUploads;
 
     public $title;
 
     public $step;
+
     public array $completedSteps;
-
-    public function validationRules()
-    {
-        return [
-           1 => [
-            'personnel.tabel_no' => 'required|min:3|unique:personnels,tabel_no'. (!empty($this->personnelModel) ? ','.$this->updatePersonnel['id'] : ''),
-            'personnel.name' => 'required|min:3',
-            'personnel.surname' => 'required|min:3',
-            'personnel.patronymic' => 'required|min:3',
-            'personnel.birthdate' => 'required|date',
-            'personnel.previous_name'=> $this->personnel['has_changed_initials'] ? 'required|min:3' : '',
-            'personnel.previous_surname'=> $this->personnel['has_changed_initials'] ? 'required|min:3' : '',
-            'personnel.previous_patronymic'=> $this->personnel['has_changed_initials'] ? 'required|min:3' : '',
-            'personnel.gender' => 'required|int',
-            'personnel.initials_changed_date' =>  $this->personnel['has_changed_initials'] ?'required|date' : '',
-            'personnel.initials_change_reason'=> $this->personnel['has_changed_initials'] ? 'required|min:3' : '',
-            'personnel.nationality_id.id' => 'required|int|exists:countries,id',
-            'personnel.previous_nationality_id.id' => $this->personnel['has_changed_nationality'] ? 'required|int|exists:countries,id' : '',
-            'personnel.nationality_changed_date' => $this->personnel['has_changed_nationality'] ? 'required|date' : '',
-            'personnel.nationality_change_reason' => $this->personnel['has_changed_nationality'] ? 'required|min:3' : '',
-            'personnel.phone' => ['required','min:7'],
-            'personnel.mobile' => ['required','min:7'],
-            'personnel.email' => 'required|email',
-            'personnel.pin' => 'required|min:7|max:7',
-            'personnel.residental_address' => 'required|min:3',
-            'personnel.registered_address' => 'required|min:3',
-            'personnel.education_degree_id.id' => 'required|int|exists:education_degrees,id',
-            'personnel.structure_id.id' => 'required|int',
-            'personnel.position_id.id' => 'required|int',
-            'personnel.work_norm_id.id' => 'required|int|exists:work_norms,id',
-            'personnel.join_work_date' => 'required|date',
-            'personnel.disability_id.id' => $this->isDisability ? 'required|int|exists:disabilities,id' : '',
-            'personnel.disability_given_date' => $this->isDisability ? 'required|date' : '',
-           ],
-           2 => [
-            'document.pin' => 'required|min:7',
-            'document.nationality_id.id' => 'required|int|exists:countries,id',
-            'document.series' => 'required|min:1',
-            'document.number' => 'required|int',
-            'document.born_country_id.id' => 'required|int|exists:countries,id',
-            'document.born_city_id.id' => 'required|int|exists:cities,id',
-            'document.is_married' => 'required|boolean',
-            'document.height' => 'required|int',
-           ],
-           3 => [
-            'education.educational_institution_id.id' => 'required|int|exists:educational_institutions,id',
-            'education.education_form_id.id' => 'required|int|exists:education_forms,id',
-            'education.education_language' => 'required|min:2',
-            'education.specialty' => 'required|min:2',
-            'education.admission_year' => 'required|date',
-            'education.graduated_year' => 'required|date|after:education.admission_year',
-            'education.profession_by_document' => 'required|min:2',
-            'education.diplom_serie' => 'required|min:1',
-            'education.diplom_no' => 'required|int',
-            'education.diplom_given_date' => 'required|date',
-            'extra_education.education_type_id.id' => $this->hasExtraEducation ? 'required|int|exists:education_types,id' : '',
-            'extra_education.educational_institution_id.id' => $this->hasExtraEducation ? 'required|int|exists:educational_institutions,id' : '',
-            'extra_education.education_form_id.id' => $this->hasExtraEducation ? 'required|int|exists:education_forms,id' : '',
-            'extra_education.name' => $this->hasExtraEducation ? 'required|min:2' : '',
-            'extra_education.shortname' => $this->hasExtraEducation ? 'required|min:2' : '',
-            'extra_education.education_language' => $this->hasExtraEducation ? 'required|min:2' : '',
-            'extra_education.education_program_name' => $this->hasExtraEducation ? 'required|min:2' : '',
-            'extra_education.admission_year' =>  $this->hasExtraEducation ? 'required|date' : '',
-            'extra_education.graduated_year' =>   $this->hasExtraEducation ?'required|date|after:extra_education.admission_year' : '',
-            'extra_education.education_document_type_id.id' => $this->hasExtraEducation ? 'required|int|exists:education_document_types,id' : '',
-            'extra_education.diplom_serie' => $this->hasExtraEducation ? 'required|min:1' : '',
-            'extra_education.diplom_no' => $this->hasExtraEducation ? 'required|int|unique:personnel_extra_education,diplom_no' : '',
-            'extra_education.diplom_given_date' => $this->hasExtraEducation ? 'required|date' : '',
-           ],
-           4 => [
-            'labor_activities.company_name' => 'required|min:2',
-            'labor_activities.position' => 'required|min:2',
-            'labor_activities.join_date' => 'required|date',
-            'labor_activities.coefficient' =>  $this->isSpecialService ? 'required|int|min:1' : '',
-            'labor_activities.order_given_by' => $this->isSpecialService ? 'required|min:2' : '',
-            'labor_activities.order_no' => $this->isSpecialService ? 'required|min:2' : '',
-            'labor_activities.order_date' => $this->isSpecialService ? 'required|date' : '',
-            'ranks.rank_id.id' => $this->isAddedRank ? 'required|int|exists:ranks,id' : '',
-            'ranks.name' => $this->isAddedRank ? 'required|min:2' : '',
-            'ranks.given_date' => $this->isAddedRank ? 'required|date' : '',
-           ],
-           5 => [
-            'military.rank_id.id' => 'required|int|exists:ranks,id',
-            'military.attitude_to_military_service' => 'required|min:2',
-            'military.given_date' => 'required|date',
-            'injuries.injury_type' => 'required',
-            'injuries.location' => 'required|min:2',
-            'injuries.date_time' => 'required|date',
-            'captivity.location' => 'required|min:2',
-            'captivity.condition' => 'required|min:2',
-            'captivity.taken_captive_date' => 'required|date'
-           ],
-           6 => [
-            'award.award_id.id' => 'required|int|exists:awards,id',
-            'award.reason' => 'required|min:2',
-            'award.given_date' => 'required|date',
-            'punishment.punishment_id.id' => 'required|int|exists:punishments,id',
-            'punishment.reason' => 'required|min:2',
-            'punishment.given_date' => 'required|date',
-//            'criminal.punishment_id.id' => 'required|int|exists:punishments,id',
-//            'criminal.reason' => 'required|min:2',
-//            'criminal.given_date' => 'required|date',
-           ],
-           7 => [
-            'kinship.kinship_id.id' => 'required|int|exists:kinships,id',
-            'kinship.fullname' => 'required|min:2',
-            'kinship.birthdate' => 'required|date',
-            'kinship.registered_address' => 'required|min:2',
-            'kinship.residental_address' => 'required|min:2'
-           ],
-           8 => [
-            'language.language_id.id' => 'required|int|exists:languages,id',
-            'language.knowledge_status' => 'required',
-            'event.event_type' => 'required|min:2',
-            'event.event_name' => 'required|min:2',
-            'event.event_date' => 'required|date',
-            'degree.degree_and_name_id.id' => 'required|int|exists:education_degrees,id',
-            'degree.science' => 'required|min:2',
-            'degree.given_date' => 'required|date',
-            'degree.subject' => 'required|min:2',
-            'degree.edu_doc_type_id.id' => 'required|int|exists:education_document_types,id',
-            'degree.diplom_serie' => 'required|min:1',
-            'degree.diplom_no' => 'required|int',
-            'degree.diplom_given_date' => 'required|date',
-            'degree.document_issued_by' => 'required|min:2',
-               'elections.election_type' => $this->hasElectedElectorals ? 'required|min:1' : '',
-               'elections.location' => $this->hasElectedElectorals ? 'required|min:2' : '',
-               'elections.elected_date' => $this->hasElectedElectorals ? 'required|date' : '',
-           ]
-        ];
-    }
-
-    protected function validationAttributes()
-    {
-        return [
-            'personnel.tabel_no'=> __('Tabel no'),
-            'personnel.name'=> __('Name'),
-            'personnel.surname'=> __('Surname'),
-            'personnel.patronymic'=> __('Patronymic'),
-            'personnel.birthdate'=> __('Birthdate'),
-            'personnel.previous_name'=> __('Previous name'),
-            'personnel.previous_surname'=> __('Previous surname'),
-            'personnel.previous_patronymic'=> __('Previous patronymic'),
-            'personnel.gender'=> __('Gender'),
-            'personnel.initials_changed_date'=> __('Change date'),
-            'personnel.initials_change_reason'=> __('Change reason'),
-            'personnel.nationality_id.id'=> __('Nationality'),
-            'personnel.previous_nationality_id.id'=> __('Previous nationality'),
-            'personnel.nationality_changed_date'=> __('Nationality change date'),
-            'personnel.nationality_change_reason'=> __('Nationality change reason'),
-            'personnel.phone'=> __('Phone'),
-            'personnel.mobile'=> __('Mobile'),
-            'personnel.email'=> __('Email'),
-            'personnel.pin'=> __('PIN'),
-            'personnel.residental_address'=> __('Residental address'),
-            'personnel.registered_address'=> __('Registered address'),
-            'personnel.education_degree_id.id'=> __('Education degree'),
-            'personnel.structure_id.id'=> __('Structure'),
-            'personnel.position_id.id'=> __('Position'),
-            'personnel.work_norm_id.id'=> __('Work norm'),
-            'personnel.join_work_date'=> __('Join work date'),
-            'personnel.disability_id.id'=> __('Disability'),
-            'personnel.disability_given_date'=> __('Disability given date'),
-            'document.body.pin' => __('Pin'),
-            'document.nationality_id.id' => __('Nationality'),
-            'document.series' => __('Series'),
-            'document.number' => __('Document number'),
-            'document.born_country_id.id' => __('Born country'),
-            'document.born_city_id.id' => __('City'),
-            'document.is_married' => __('Family status'),
-            'document.height' => __('Height'),
-            'education.educational_institution_id.id' => __('Institution'),
-            'education.education_form_id.id' => __('Education form'),
-            'education.education_language' => __('Education language'),
-            'education.specialty' => __('Specialty'),
-            'education.admission_year' => __('Admission year'),
-            'education.graduated_year' => __('Graduated year'),
-            'education.profession_by_document' => __('Profession'),
-            'education.diplom_serie' => __('Diplom serie'),
-            'education.diplom_no' => __('Diplom no'),
-            'education.diplom_given_date' => __('Diplom given date'),
-            'extra_education.education_type_id.id' => __('Education type'),
-            'extra_education.educational_institution_id.id' => __('Institution'),
-            'extra_education.education_form_id.id' => __('Education form'),
-            'extra_education.name' => __('Name'),
-            'extra_education.shortname' => __('Shortname'),
-            'extra_education.education_language' => __('Education language'),
-            'extra_education.education_program_name' => __('Program name'),
-            'extra_education.admission_year' => __('Admission year'),
-            'extra_education.graduated_year' => __('Graduated year'),
-            'extra_education.education_document_type_id.id' => __('Document type'),
-            'extra_education.diplom_serie' => __('Diplom serie'),
-            'extra_education.diplom_no' => __('Diplom no'),
-            'extra_education.diplom_given_date' => __('Diplom given date'),
-            'labor_activities.company_name' => __('Company'),
-            'labor_activities.position' => __('Position'),
-            'labor_activities.join_date' => __('Join date'),
-            'labor_activities.coefficient' => __('Coefficient'),
-            'labor_activities.order_given_by' => __('Order issued by'),
-            'labor_activities.order_no' => __('Order number'),
-            'labor_activities.order_date' => __('Order date'),
-            'ranks.rank_id.id' => __('Rank'),
-            'ranks.name' => __('Name'),
-            'ranks.given_date' => __('Given date'),
-            'military.rank_id.id' => __('Rank'),
-            'military.attitude_to_military_service' => __('Attitude'),
-            'military.given_date' => __('Given date'),
-            'injuries.injury_type' => __('Injury type'),
-            'injuries.location' => __('Location'),
-            'injuries.date_time' => __('Date'),
-            'captivity.condition' => __('Condition'),
-            'captivity.location' => __('Location'),
-            'captivity.taken_captive_date' => __('Taken date'),
-            'award.award_id.id' => __('Award'),
-            'award.reason' => __('Reason'),
-            'award.given_date' => __('Given date'),
-            'punishment.punishment_id.id' => __('Punishment'),
-            'punishment.reason' => __('Reason'),
-            'punishment.given_date' => __('Given date'),
-//            'criminal.punishment_id.id' => __('Criminal'),
-//            'criminal.reason' => __('Reason'),
-//            'criminal.given_date' => __('Given date'),
-            'kinship.kinship_id.id' => __('Kinship'),
-            'kinship.fullname' => __('Fullname'),
-            'kinship.birthdate' => __('Birthdate'),
-            'kinship.registered_address' => __('Registered address'),
-            'kinship.residental_address' => __('Residental address'),
-            'language.language_id.id' => __('Language'),
-            'language.knowledge_status' => __('Knowledge'),
-            'event.event_type' =>  __('Event type'),
-            'event.event_name' => __('Event name'),
-            'event.event_date' => __('Event date'),
-            'degree.degree_and_name_id.id' => __('Degree'),
-            'degree.science' => __('Science'),
-            'degree.given_date' => __('Given date'),
-            'degree.subject' => __('Subject'),
-            'degree.edu_doc_type_id.id' => __('Document type'),
-            'degree.diplom_serie' => __('Diplom serie'),
-            'degree.diplom_no' => __('Diplom number'),
-            'degree.diplom_given_date' => __('Given date'),
-            'degree.document_issued_by' => __('Issued by'),
-            'elections.election_type' => __('Election type'),
-            'elections.location' => __('Location'),
-            'elections.elected_date' => __('Election date'),
-        ];
-    }
 
     public function previousStep()
     {
-        if($this->step > 1)
-        {
-            $this->step --;
-        }
-        else
-        {
-            $this->step = 1;
-        }
-
+        $this->step = max(1, $this->step - 1);
     }
 
     public function exceptArray($arrayKey)
     {
-        $filtered = array_filter($this->validationRules()[$this->step], function ($key) use($arrayKey) {
-            return strpos($key, $arrayKey) === 0;
+        $filtered = array_filter($this->validationRules()[$this->step], function ($key) use ($arrayKey) {
+            return str_starts_with($key, $arrayKey);
         }, ARRAY_FILTER_USE_KEY);
 
-        return Arr::except($this->validationRules()[$this->step],array_keys($filtered));
+        return Arr::except($this->validationRules()[$this->step], array_keys($filtered));
     }
-
 
     public function selectStep($step)
     {
-        if($this->step == 1)
-        {
+        if ($this->step == 1) {
             $this->validate($this->validationRules()[$this->step]);
         }
         $this->step = $step;
@@ -304,36 +57,35 @@ trait PersonnelCrud
 
     protected function completeStep()
     {
-        $stepName = match($this->step)
-        {
+        $stepName = match ($this->step) {
             1 => 'personnel',
             2 => 'document',
             3 => 'education'
         };
-       if(count($this->{$stepName}) > 0)
-       {
-            $validator = !empty($this->extra_education_list) ? $this->exceptArray('extra_education') : $this->validationRules()[$this->step];
+        if (count($this->{$stepName}) > 0) {
+            $validator = ! empty($this->extra_education_list)
+                            ? $this->exceptArray('extra_education')
+                            : $this->validationRules()[$this->step];
             $this->validate($validator);
-            !in_array($stepName,$this->completedSteps)  &&  $this->completedSteps[] = $stepName;
-       }
+            ! in_array($stepName, $this->completedSteps) && $this->completedSteps[] = $stepName;
+        }
     }
 
     public function nextStep()
     {
         $this->isAddedRank = false;
-        if(($this->step == 3 && !empty($this->extra_education_list) ) || ($this->step == 4 && !empty($this->labor_activities_list)))
-        {
-            $exceptValidation = match($this->step)
-            {
+        if (
+            ($this->step == 3 && ! empty($this->extra_education_list)) ||
+            ($this->step == 4 && ! empty($this->labor_activities_list))
+        ) {
+            $exceptValidation = match ($this->step) {
                 3 => 'extra_education',
                 4 => 'labor_activities',
                 default => ''
             };
             $validator = $this->exceptArray($exceptValidation);
-            !empty($validator) && $this->validate($validator);
-        }
-        else
-        {
+            ! empty($validator) && $this->validate($validator);
+        } else {
             $this->validate($this->validationRules()[$this->step]);
         }
 
@@ -351,7 +103,17 @@ trait PersonnelCrud
             5 => __('Military'),
             6 => __('Awards and punishments'),
             7 => __('Kinships'),
-            8 => __('Other')
+            8 => __('Other'),
+        ];
+    }
+
+    #[Isolate]
+    public function getIsolatedProperty(): array
+    {
+        return [
+            'languageModel' => Language::all(),
+            'knowledges' => KnowledgeStatusEnum::values(),
+            'degrees' => ScientificDegreeAndName::all(),
         ];
     }
 
@@ -359,12 +121,12 @@ trait PersonnelCrud
     {
         $steps = ['steps' => $this->getSteps()];
 
-        $view_data = resolve(CallPersonnelInfo::class)->getAll($this->isDisability,$this);
+        $view_data = resolve(CallPersonnelInfo::class)->getAll($this->isDisability, $this);
 
-        $view_name = !empty($this->personnelModel)
+        $view_name = ! empty($this->personnelModel)
                     ? 'livewire.personnel.edit-personnel'
                     : 'livewire.personnel.add-personnel';
 
-        return view($view_name,array_merge($steps,$view_data));
+        return view($view_name, array_merge($steps, array_merge($view_data, $this->isolated)));
     }
 }

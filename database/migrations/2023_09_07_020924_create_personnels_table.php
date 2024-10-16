@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\EducationDegree;
 use App\Models\Structure;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -15,7 +14,7 @@ return new class extends Migration
     {
         Schema::create('personnels', function (Blueprint $table) {
             $table->id();
-            $table->index(['tabel_no','id','position_id']);
+            $table->index(['tabel_no', 'id', 'position_id']);
             $table->string('tabel_no')->unique();
             $table->string('surname');
             $table->string('name');

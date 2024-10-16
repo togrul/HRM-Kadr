@@ -101,7 +101,7 @@
 
         {{-- filter position--}}
         <div class="flex justify-start items-center space-x-3 flex-wrap gap-1">
-            @foreach($_positions as $position)
+            @foreach($this->positions as $position)
                 <button
                     wire:click.prevent="setPosition({{ $position->id }})"
                     class="appearance-none w-max text-sm font-medium bg-slate-900 text-yellow-400 rounded-2xl px-3 py-1 transition-all duration-300 hover:bg-slate-700"
@@ -126,14 +126,14 @@
             <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
 
                 <x-table.tbl :headers="[__('#'),__('Tabel'),__('Fullname'),__('Position'),'action','action','action']">
-                    @forelse ($personnels as $key => $personnel)
+                    @forelse ($this->personnels as $key => $personnel)
                     <tr @class([
                         'bg-white' => empty($personnel->leave_work_date),
                         'bg-red-100' => !empty($personnel->leave_work_date)
                     ])>
                         <x-table.td>
                             <span class="text-sm font-medium text-gray-700">
-                                {{ ($personnels->currentpage()-1) * $personnels->perpage() + $key + 1 }}
+                                {{ ($this->personnels->currentpage()-1) * $this->personnels->perpage() + $key + 1 }}
                            </span>
                         </x-table.td>
 
@@ -300,11 +300,12 @@
             </div>
 
             <div class="mt-2">
-                {{ $personnels->links() }}
+                {{ $this->personnels->links() }}
             </div>
     </div>
 
-    @livewire('filter.detail')
+    @livewire('filter.detail',['lazy' => 'on-load'])
+
     {{-- @can('manage-personnel') --}}
     <x-side-modal>
         @if($showSideMenu == 'add-personnel')

@@ -2,10 +2,11 @@
 
 namespace App\Livewire\Structure;
 
-use Livewire\Attributes\On;
-use Livewire\Component;
 use App\Models\Structure;
+use Illuminate\Support\Facades\Cache;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
+use Livewire\Component;
 
 class Sidebar extends Component
 {
@@ -21,12 +22,16 @@ class Sidebar extends Component
     public function selectStructure($id)
     {
         $this->selectedStructure = $id;
-        $this->dispatch('selectStructure',$id);
+        $this->dispatch('selectStructure', $id);
     }
+
 
     public function render()
     {
-        $structures = Structure::with(['parent','subs'])->whereNull('parent_id')->get();
-        return view('livewire.structure.sidebar',compact('structures'));
+        $structures = Cache::rememberForever('structures', function () {
+            return Structure::withRecursive('subs')->whereNull('parent_id')->get();
+        });
+
+        return view('livewire.structure.sidebar', compact('structures'));
     }
 }

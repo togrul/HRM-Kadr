@@ -24,7 +24,7 @@ class AddRank extends Component
     {
         $this->form->create();
 
-        $this->dispatch('rankAdded',__('Rank was added successfully!'));
+        $this->dispatch('rankAdded', __('Rank was added successfully!'));
     }
 
     public function render()

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Personnel;
-use Illuminate\Http\Request;
 
 class PrintController extends Controller
 {
@@ -38,10 +37,10 @@ class PrintController extends Controller
             'fatherMother',
             'fatherMother.kinship',
             'wifeChildren',
-            'wifeChildren.kinship'
+            'wifeChildren.kinship',
         ]);
 
-        return view('prints.personnel',compact('personnel'));
+        return view('prints.personnel', compact('personnel'));
     }
 
     public function print_page($model = null)

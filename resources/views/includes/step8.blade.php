@@ -230,9 +230,11 @@
               wire:model='degree.edu_doc_type_id.id'>
               ---
             </x-select-list-item>
-                @foreach($educationDocs as $ed)
-                <x-select-list-item wire:click="setData('degree','edu_doc_type_id','eduDoc','{{ $ed->name }}',{{ $ed->id }})"
-                :selected="$ed->id === $eduDocId" wire:model='degree.edu_doc_type_id.id'>
+                @foreach($document_types as $ed)
+                <x-select-list-item
+                    wire:click="setData('degree','edu_doc_type_id','eduDoc','{{ $ed->name }}',{{ $ed->id }})"
+                    :selected="$ed->id === $eduDocId" wire:model='degree.edu_doc_type_id.id'
+                >
                     {{ $ed->name }}
                 </x-select-list-item>
                 @endforeach

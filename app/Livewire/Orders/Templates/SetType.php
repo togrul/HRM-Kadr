@@ -10,13 +10,16 @@ use Livewire\Component;
 
 class SetType extends Component
 {
-    use SideModalAction,AuthorizesRequests;
+    use AuthorizesRequests,SideModalAction;
 
     public $types = [];
+
     public $title;
+
     public $templateModel;
 
     public $selectedType;
+
     public $selectedModel;
 
     public function rules()
@@ -41,27 +44,27 @@ class SetType extends Component
 
         $this->clearField();
 
-        $this->dispatch('typesUpdated',__('Type was added successfully!'));
+        $this->dispatch('typesUpdated', __('Type was added successfully!'));
     }
 
     public function removeType($_typeId)
     {
         OrderType::find($_typeId)->delete();
-        $this->dispatch('typesUpdated',__('Type was updated successfully!'));
+        $this->dispatch('typesUpdated', __('Type was updated successfully!'));
     }
 
     public function editType($_typeId)
     {
         $this->selectedType = $_typeId;
         $this->selectedModel = OrderType::find($_typeId);
-        $this->types['name'] =  $this->selectedModel->name;
+        $this->types['name'] = $this->selectedModel->name;
     }
 
     public function updateModel()
     {
         $this->selectedModel->update($this->types);
         $this->clearField();
-        $this->dispatch('typesUpdated',__('Type was added successfully!'));
+        $this->dispatch('typesUpdated', __('Type was added successfully!'));
     }
 
     public function cancelUpdate()
@@ -86,6 +89,7 @@ class SetType extends Component
     public function render()
     {
         $_order_types = $this->templateModel->types;
-        return view('livewire.orders.templates.set-type',compact('_order_types'));
+
+        return view('livewire.orders.templates.set-type', compact('_order_types'));
     }
 }

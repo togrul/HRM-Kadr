@@ -12,7 +12,7 @@ class AppealStatus extends Model
     protected $fillable = [
         'id',
         'locale',
-        'name'
+        'name',
     ];
 
     public $timestamps = false;

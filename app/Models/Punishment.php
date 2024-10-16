@@ -13,17 +13,17 @@ class Punishment extends Model
     protected $fillable = [
         'id',
         'punishment_type_id',
-        'name'
+        'name',
     ];
 
     public const PUNISHMENT_TYPES = [
-        'criminal'     => 10,
-        'other'    => 90
-     ];
+        'criminal' => 10,
+        'other' => 90,
+    ];
 
     public $timestamps = false;
 
-    public function type() : BelongsTo
+    public function type(): BelongsTo
     {
         return $this->belongsTo(PunishmentType::class);
     }

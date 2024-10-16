@@ -2,20 +2,21 @@
 
 namespace App\Livewire\Roles;
 
+use App\Livewire\Traits\SideModalAction;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Spatie\Permission\Models\Role;
-use App\Livewire\Traits\SideModalAction;
 
-
-#[On(['permissionSet','roleWasDeleted'])]
+#[On(['permissionSet', 'roleWasDeleted'])]
 class ManageRoles extends Component
 {
-    use SideModalAction,AuthorizesRequests;
+    use AuthorizesRequests,SideModalAction;
 
     public $role_name;
+
     public $role_id;
+
     public $isUpdate;
 
     protected $rules = [
@@ -24,24 +25,24 @@ class ManageRoles extends Component
 
     public function editRole($id)
     {
-        $this->isUpdate=true;
+        $this->isUpdate = true;
         $this->resetErrorBag();
         $this->getRoleByID($id);
     }
 
     public function setDeleteRole($roleId)
     {
-        $this->dispatch('setDeleteRole',$roleId);
+        $this->dispatch('setDeleteRole', $roleId);
     }
 
     public function store()
     {
         $this->validate();
-        $data = array(
-            'name' => $this->role_name
-        );
-        Role::updateOrCreate(['id' => $this->role_id],$data);
-        $this->dispatch('roleUpdated' , __('Role was updated successfully!'));
+        $data = [
+            'name' => $this->role_name,
+        ];
+        Role::updateOrCreate(['id' => $this->role_id], $data);
+        $this->dispatch('roleUpdated', __('Role was updated successfully!'));
         $this->cancel();
     }
 
@@ -57,7 +58,7 @@ class ManageRoles extends Component
     {
         $role = Role::findOrFail($id);
         $this->role_id = $id;
-        $this->role_name=$role->name;
+        $this->role_name = $role->name;
     }
 
     public function cancel()
@@ -67,14 +68,16 @@ class ManageRoles extends Component
         $this->resetErrorBag();
     }
 
-    private function resetInputFields(){
-       $this->role_name = '';
-       $this->role_id=null;
+    private function resetInputFields()
+    {
+        $this->role_name = '';
+        $this->role_id = null;
     }
 
     public function render()
     {
         $roles = Role::all();
-        return view('livewire.roles.manage-roles',compact('roles'));
+
+        return view('livewire.roles.manage-roles', compact('roles'));
     }
 }

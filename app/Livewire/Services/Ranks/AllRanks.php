@@ -10,17 +10,17 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-#[On(['rankAdded','rankWasDeleted'])]
+#[On(['rankAdded', 'rankWasDeleted'])]
 class AllRanks extends Component
 {
-    use WithPagination,SideModalAction,AuthorizesRequests;
+    use AuthorizesRequests,SideModalAction,WithPagination;
 
     #[Url]
     public $status;
 
     public function setDeleteRank($rankId)
     {
-        $this->dispatch('setDeleteRank',$rankId);
+        $this->dispatch('setDeleteRank', $rankId);
     }
 
     public function setStatus($newStatus)
@@ -32,17 +32,17 @@ class AllRanks extends Component
     public function mount()
     {
         $this->status = request()->query('status')
-                ? (int)request()->query('status')
+                ? (int) request()->query('status')
                 : 1;
     }
 
     public function render()
     {
         $_ranks = Rank::query()
-            ->where('is_active',$this->status)
+            ->where('is_active', $this->status)
             ->paginate(15)
             ->withQueryString();
 
-        return view('livewire.services.ranks.all-ranks',compact('_ranks'));
+        return view('livewire.services.ranks.all-ranks', compact('_ranks'));
     }
 }

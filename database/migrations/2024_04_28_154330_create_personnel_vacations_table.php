@@ -15,10 +15,10 @@ return new class extends Migration
             $table->id();
             $table->string('tabel_no');
             $table->foreign('tabel_no')
-                    ->references('tabel_no')
-                    ->on('personnels')
-                    ->onDelete('cascade')
-                    ->onUpdate('cascade');
+                ->references('tabel_no')
+                ->on('personnels')
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
             $table->text('vacation_places');
             $table->integer('duration');
             $table->date('start_date');

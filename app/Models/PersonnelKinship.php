@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PersonnelKinship extends Model
 {
-    use HasFactory,PersonnelTrait,DateCastTrait;
+    use DateCastTrait,HasFactory,PersonnelTrait;
 
     public $timestamps = false;
 
@@ -25,7 +25,7 @@ class PersonnelKinship extends Model
         'registered_address',
         'residental_address',
         'birth_certificate_number',
-        'marriage_certificate_number'
+        'marriage_certificate_number',
     ];
 
     protected $dates = [
@@ -36,7 +36,7 @@ class PersonnelKinship extends Model
         'birthdate' => 'date:d.m.Y',
     ];
 
-    public function kinship() : BelongsTo
+    public function kinship(): BelongsTo
     {
         return $this->belongsTo(Kinship::class);
     }

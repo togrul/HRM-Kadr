@@ -26,7 +26,7 @@ class DeleteSettings extends Component
 
         $this->setting = null;
 
-        $this->dispatch('settingsWasDeleted' , __('Setting was deleted!'));
+        $this->dispatch('settingsWasDeleted', __('Setting was deleted!'));
     }
 
     public function render()

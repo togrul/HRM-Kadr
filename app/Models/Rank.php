@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class Rank extends Model
 {
@@ -16,15 +15,15 @@ class Rank extends Model
         'name_en',
         'name_ru',
         'duration',
-        'is_active'
+        'is_active',
     ];
 
     public $timestamps = false;
 
     public function getNameAttribute($value)
     {
-        $localeColumn = 'name_' . config('app.locale');
+        $localeColumn = 'name_'.config('app.locale');
+
         return $this->attributes[$localeColumn] ?? null;
     }
 }
-

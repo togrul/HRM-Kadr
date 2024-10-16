@@ -408,9 +408,9 @@
                       x-on:livewire-upload-progress="progress = $event.detail.progress">
                       <div class="flex flex-col space-y-2 items-center">
                         @if ($avatar)
-                        <img class="w-full h-full object-cover" src="{{ $avatar->temporaryUrl() }}">
+                        <img alt="avatar" class="w-full h-full object-cover" src="{{ $avatar->temporaryUrl() }}">
                         @elseif(!empty($personnelModel) && $personnelModelData->photo)
-                        <img class="w-full h-full object-cover" src="{{ asset('/storage/'.$personnelModelData->photo) }}">
+                        <img alt="avatar" class="w-full h-full object-cover" src="{{ asset('/storage/'.$personnelModelData->photo) }}">
                         @else
                         <img class="w-full h-full" src="{{ asset('assets/images/id-photo.jpeg') }}" alt="id photo">
                         @endif

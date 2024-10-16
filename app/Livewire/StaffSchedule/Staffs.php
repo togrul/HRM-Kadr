@@ -2,22 +2,25 @@
 
 namespace App\Livewire\StaffSchedule;
 
-use Carbon\Carbon;
-use Livewire\Attributes\On;
-use Livewire\Component;
-use App\Models\Structure;
-use Livewire\Attributes\Url;
-use Livewire\WithPagination;
-use App\Models\StaffSchedule;
 use App\Exports\VacancyExport;
-use Maatwebsite\Excel\Facades\Excel;
 use App\Livewire\Traits\SideModalAction;
+use App\Models\StaffSchedule;
+use App\Traits\NestedStructureTrait;
+use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Livewire\Attributes\On;
+use Livewire\Attributes\Url;
+use Livewire\Component;
+use Livewire\WithPagination;
+use Maatwebsite\Excel\Facades\Excel;
 
-#[On(['staffAdded','staffWasDeleted'])]
+#[On(['staffAdded', 'staffWasDeleted'])]
 class Staffs extends Component
 {
-    use WithPagination,SideModalAction,AuthorizesRequests;
+    use AuthorizesRequests;
+    use NestedStructureTrait;
+    use SideModalAction;
+    use WithPagination;
 
     public $structure;
 
@@ -35,10 +38,10 @@ class Staffs extends Component
 
     public function exportExcel()
     {
-         $report = $this->returnData(type:"excel");
-         $name = Carbon::now()->format('d.m.Y H:i');
+        $report = $this->returnData(type: 'excel');
+        $name = Carbon::now()->format('d.m.Y H:i');
 
-         return Excel::download( new VacancyExport( $report ), "vakansiyalar-{$name}.xlsx");
+        return Excel::download(new VacancyExport($report), "vakansiyalar-{$name}.xlsx");
     }
 
     public function showPage($page)
@@ -49,16 +52,13 @@ class Staffs extends Component
     #[On('selectStructure')]
     public function selectStructure($id)
     {
-        $structureModel = Structure::with('subs')->find($id);
-        if ($structureModel) {
-            $this->structure = $structureModel->getAllNestedIds();
-        }
+        $this->structure = $this->getNestedStructure($id);
         $this->resetPage();
     }
 
     public function setDeleteStaff($staffId)
     {
-        $this->dispatch('setDeleteStaff',$staffId);
+        $this->dispatch('setDeleteStaff', $staffId);
     }
 
     public function mount()
@@ -68,35 +68,30 @@ class Staffs extends Component
                         : 'all';
     }
 
-    protected function returnData($type = "normal")
+    protected function returnData($type = 'normal')
     {
-        $result = StaffSchedule::with(['structure','position'])
-                ->when(!empty($this->structure),function($q) {
-                    $q->whereIn('structure_id', $this->structure);
-                })
-                ->when($this->selectedPage == 'vacancies',function($query){
-                    $query->where('vacant','>',0)->whereHas('structure',function($qq){
-                        $qq->whereNotNull('parent_id');
-                    });
-                })
-                ->orderBy('structure_id')
-                ->get();
+        $result = StaffSchedule::with(['structure.parent.parent', 'position'])
+            ->when(! empty($this->structure), fn ($q) => $q->whereIn('structure_id', $this->structure))
+            ->when($this->selectedPage == 'vacancies', function ($query) {
+                $query->where('vacant', '>', 0)
+                    ->whereHas('structure', fn ($qq) => $qq->whereNotNull('parent_id'));
+            })
+            ->orderBy('structure_id')
+            ->get();
 
+        if ($type === 'normal') {
+            return $this->selectedPage === 'all'
+                ? $result->groupBy('structure.name_with_parent')
+                : $result;
+        }
 
-        return $type == 'normal'
-                ?
-                (
-                    $this->selectedPage == 'all'
-                    ? $result->groupBy('structure.name_with_parent')
-                    : $result
-                )
-                : $result->toArray();
+        return $result->toArray();
     }
 
     public function render()
     {
         $staffs = $this->returnData();
 
-        return view('livewire.staff-schedule.staffs',compact('staffs'));
+        return view('livewire.staff-schedule.staffs', compact('staffs'));
     }
 }

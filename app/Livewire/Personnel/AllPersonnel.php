@@ -3,22 +3,26 @@
 namespace App\Livewire\Personnel;
 
 use App\Exports\PersonnelExport;
-use App\Models\Position;
-use Carbon\Carbon;
-use Livewire\Attributes\On;
-use Livewire\Component;
-use App\Models\Personnel;
-use App\Models\Structure;
-use Livewire\Attributes\Url;
-use Livewire\WithPagination;
 use App\Livewire\Traits\SideModalAction;
+use App\Models\Personnel;
+use App\Models\Position;
+use App\Traits\NestedStructureTrait;
+use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\On;
+use Livewire\Attributes\Url;
+use Livewire\Component;
+use Livewire\WithPagination;
 use Maatwebsite\Excel\Facades\Excel;
 
-#[On(['personnelAdded','fileAdded','personnelWasDeleted'])]
+#[On(['personnelAdded', 'fileAdded', 'personnelWasDeleted'])]
 class AllPersonnel extends Component
 {
-    use WithPagination,SideModalAction,AuthorizesRequests;
+    use AuthorizesRequests;
+    use SideModalAction;
+    use WithPagination;
+    use NestedStructureTrait;
 
     #[Url]
     public $status;
@@ -42,24 +46,23 @@ class AllPersonnel extends Component
 
     public function exportExcel()
     {
-         $report['data'] = $this->returnData(type:"excel");
-         $report['filter'] = $this->filters;
-         $name = Carbon::now()->format('d.m.Y H:i');
+        $report['data'] = $this->returnData(type: 'excel');
+        $report['filter'] = $this->filters;
+        $name = Carbon::now()->format('d.m.Y H:i');
 
-         return Excel::download( new PersonnelExport( $report ), "personnel-{$name}.xlsx");
+        return Excel::download(new PersonnelExport($report), "personnel-$name.xlsx");
     }
 
     public function printPage($personnel, $headers = null)
     {
-        $headers = [__('#'),__('Tabel'),__('Fullname'),__('Gender'),__('Position'),'action','action','action','action'];
-        redirect()->route('print.page',['model' => $personnel , 'headers' => $headers]);
+        $headers = [__('#'), __('Tabel'), __('Fullname'), __('Gender'), __('Position'), 'action', 'action', 'action', 'action'];
+        redirect()->route('print.page', ['model' => $personnel, 'headers' => $headers]);
     }
 
     public function printInfo($personnelId)
     {
-        redirect()->route('print.personnel',$personnelId);
+        redirect()->route('print.personnel', $personnelId);
     }
-
 
     #[On('filterSelected')]
     public function filterSelected(array $filter)
@@ -70,33 +73,30 @@ class AllPersonnel extends Component
 
     public function setDeletePersonnel($personnelId)
     {
-        $this->dispatch('setDeletePersonnel',$personnelId);
+        $this->dispatch('setDeletePersonnel', $personnelId);
     }
 
     public function restoreData($id)
     {
-        $personnel = Personnel::withTrashed()->where('tabel_no',$id)->first();
+        $personnel = Personnel::withTrashed()->where('tabel_no', $id)->first();
         $personnel->restore();
         $personnel->update([
-            'deleted_by' => null
+            'deleted_by' => null,
         ]);
-        $this->dispatch('personnelAdded',__('Personnel was updated successfully!'));
+        $this->dispatch('personnelAdded', __('Personnel was updated successfully!'));
     }
 
     public function forceDeleteData($id)
     {
-        $model = Personnel::withTrashed()->where('tabel_no',$id)->first();
+        $model = Personnel::withTrashed()->where('tabel_no', $id)->first();
         $model->forceDelete();
-        $this->dispatch('personnelWasDeleted' , __('Personnel was deleted!'));
+        $this->dispatch('personnelWasDeleted', __('Personnel was deleted!'));
     }
 
     #[On('selectStructure')]
     public function selectStructure($id)
     {
-        $structureModel = Structure::with('subs')->find($id);
-        if ($structureModel) {
-            $this->structure = $structureModel->getAllNestedIds();
-        }
+       $this->structure = $this->getNestedStructure($id);
     }
 
     public function setStatus($newStatus)
@@ -132,68 +132,64 @@ class AllPersonnel extends Component
                     : 'current';
     }
 
+    #[Computed()]
+    public function personnels()
+    {
+        return $this->returnData();
+    }
+
+    #[Computed()]
+    public function positions()
+    {
+        return Position::query()->orderBy('id')->get();
+    }
+
     public function mount()
     {
         $this->fillFilter();
     }
 
-    protected function returnData($type = "normal")
+    protected function returnData($type = 'normal')
     {
         $result = Personnel::with([
-            'nationality',
-            'previousNationality',
-            'idDocuments',
-            'educationDegree',
-            'education',
             'latestRank.rank',
-            'awards',
-            'punishments',
             'structure',
             'position',
             'creator',
-            'deletedBy'
+            'deletedBy',
         ])
-            ->when(!empty($this->structure),function($q) {
+            ->when(! empty($this->structure), function ($q) {
                 $q->whereIn('structure_id', $this->structure);
             })
-            ->when(!empty($this->selectedPosition),function($q) {
+            ->when(! empty($this->selectedPosition), function ($q) {
                 $q->where('position_id', $this->selectedPosition);
             })
-            ->when($this->status == 'current',function($q)
-            {
+            ->when($this->status == 'current', function ($q) {
                 return $q->whereNull('leave_work_date');
             })
-            ->when($this->status == 'leaves',function($q)
-            {
+            ->when($this->status == 'leaves', function ($q) {
                 return $q->whereNotNull('leave_work_date');
             })
-            ->when($this->status == 'deleted',function($q)
-            {
+            ->when($this->status == 'deleted', function ($q) {
                 $q->onlyTrashed();
             })
-            ->when($this->status == 'pending',function($q)
-            {
-                return $q->where('is_pending',true);
+            ->when($this->status == 'pending', function ($q) {
+                return $q->where('is_pending', true);
             })
-            ->when($this->status != 'pending',function($q)
-            {
-                return $q->where('is_pending',false);
+            ->when($this->status != 'pending', function ($q) {
+                return $q->where('is_pending', false);
             })
             ->filter($this->filters ?? [])
             ->orderBy('position_id')
             ->orderBy('structure_id');
 
-        return $type == "normal"
+        return $type == 'normal'
             ? $result->paginate(10)->withQueryString()
             : $result->get()->toArray();
     }
 
     public function render()
     {
-        $personnels = $this->returnData();
-
-        $_positions = Position::orderBy('id')->get();
-
-        return view('livewire.personnel.all-personnel',compact('personnels','_positions'));
+        return view('livewire.personnel.all-personnel');
     }
 }

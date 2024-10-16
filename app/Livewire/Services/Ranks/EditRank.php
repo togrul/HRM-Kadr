@@ -21,7 +21,7 @@ class EditRank extends Component
     {
         $this->form->update();
 
-        $this->dispatch('rankAdded',__('Rank was added successfully!'));
+        $this->dispatch('rankAdded', __('Rank was added successfully!'));
     }
 
     public function render()

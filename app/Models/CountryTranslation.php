@@ -12,7 +12,7 @@ class CountryTranslation extends Model
     protected $fillable = [
         'code',
         'locale',
-        'title'
+        'title',
     ];
 
     public $timestamps = false;

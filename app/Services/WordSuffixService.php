@@ -4,151 +4,160 @@ namespace App\Services;
 
 class WordSuffixService
 {
-    public function getNumberSuffix(int $year)
+    private array $vowels = ['a', 'ı', 'u', 'o', 'i', 'ə', 'ü', 'e', 'ö'];
+
+    private function checkLastCharAndVowel(string $text, int $offset = -1): array
+    {
+        $lastChar = mb_substr($text, $offset, 1);
+        $isVowel = in_array($lastChar, $this->vowels);
+
+        return [
+            $lastChar, $isVowel,
+        ];
+    }
+
+    private function determineSuffix(string $text): string
+    {
+        [$lastChar,$isVowel] = $this->checkLastCharAndVowel(text: $text);
+
+        if (! $isVowel) {
+            [$lastChar, $isVowel] = $this->checkLastCharAndVowel(text: $text, offset: -2);
+        }
+
+        return match ($lastChar) {
+            'a', 'ı' => $isVowel ? 'sı' : 'ı',
+            'i', 'ə', 'e' => $isVowel ? 'si' : 'i',
+            'u', 'o' => $isVowel ? 'su' : 'u',
+            'ü', 'ö' => $isVowel ? 'sü' : 'ü',
+        };
+    }
+
+    private function determineSurnameSuffix(string $text): string
+    {
+        [$lastChar,$isVowel] = $this->checkLastCharAndVowel(text: $text);
+
+        if (! $isVowel) {
+            [$lastChar, $isVowel] = $this->checkLastCharAndVowel(text: $text, offset: -2);
+        }
+
+        return match ($lastChar) {
+            'a', 'ı', 'u', 'o' => $isVowel ? 'ya' : 'a',
+            'i', 'ə', 'ü', 'e', 'ö' => $isVowel ? 'yə' : 'ə',
+        };
+    }
+
+    private function determineStructureSuffix(string $text): string
+    {
+        [$lastChar,$isVowel] = $this->checkLastCharAndVowel(text: $text);
+
+        if (! $isVowel) {
+            if ($lastChar === 'k') {
+                $text = str_replace($lastChar, 'y', $text);
+            }
+            [$lastChar, $isVowel] = $this->checkLastCharAndVowel(text: $text, offset: -2);
+        }
+
+        return match ($lastChar) {
+            'a', 'ı' => $isVowel ? 'nın' : 'ın',
+            'i', 'ə', 'e' => $isVowel ? 'nin' : 'in',
+            'u', 'o' => $isVowel ? 'nun' : 'un',
+            'ü', 'ö' => $isVowel ? 'nün' : 'ün',
+            '1' => 'in',
+            '2' => 'nin',
+            '3' => 'ün',
+        };
+    }
+
+    public function getNumberSuffix(int $year): string
     {
         $lastDigit = $year % 10;
 
-        if($lastDigit == 0)
-        {
+        if ($lastDigit == 0) {
             // Remove trailing zeros
             while ($year % 10 === 0 && $year > 0) {
                 $year /= 10;
                 $lastDigit .= $year % 10;
             }
 
-            $lastDigit = (int)strrev($lastDigit);
+            $lastDigit = (int) strrev($lastDigit);
         }
 
         return $this->getSuffix($lastDigit);
     }
 
-    public function getMultiSuffix($text,$multi = true)
+    public function getMultiSuffix($text, $multi = true): string
     {
-        if (!$text) {
+        if (! $text) {
             return '';
         }
 
-        $_char_list = ['a','ı','u','o','i','ə','ü','e','ö'];
-
-        // eger son herf sait deilse 2 ci herfi gotur ona uygun elave et.
-        $lastChar = mb_substr($text, -1);
-
-        if (!in_array($lastChar, $_char_list))
-        {
-            $lastChar = mb_substr($text, -2,1);
-            $suffix = match($lastChar)
-            {
-                'a','ı' => 'ı',
-                'i','ə','e' => 'i',
-                'u','o' => 'u',
-                'ü','ö' => 'ü'
-            };
-        }
-        else
-        {
-            $suffix = match($lastChar)
-            {
-                'a','ı' => 'sı',
-                'i','ə','e' => 'si',
-                'u','o' => 'su',
-                'ü','ö' => 'sü'
-            };
-        }
+        $suffix = $this->determineSuffix($text);
 
         return $multi
-                ? $text . $suffix . $this->getStructureSuffix($text,true)
-                : $text. $suffix;
+                ? $text.$suffix.$this->getStructureSuffix($text, true)
+                : $text.$suffix;
     }
 
-    public function getSurnameSuffix($text)
+    public function getSurnameSuffix($text): string
     {
-        if (!$text) {
+        if (! $text) {
             return '';
         }
 
-        $_char_list = ['a','ı','u','o','i','ə','ü','e','ö'];
+        $suffix = $this->determineSurnameSuffix($text);
 
-        // eger son herf sait deilse 2 ci herfi gotur ona uygun elave et.
-        $lastChar = mb_substr($text, -1);
-
-        if (!in_array($lastChar, $_char_list))
-        {
-            $lastChar = mb_substr($text, -2,1);
-            $suffix = match($lastChar)
-            {
-                'a','ı','u','o' => 'a',
-                'i','ə','ü','e','ö' => 'ə'
-            };
-        }
-        else
-        {
-            $suffix = match($lastChar)
-            {
-                'a','ı','u','o' => 'ya',
-                'i','ə','ü','e','ö' => 'yə'
-            };
-        }
-
-        return $text . $suffix;
+        return $text.$suffix;
     }
 
-    public function getStructureSuffix($text , $onlySuffix = false,$mainStructure = false)
+    public function getStructureSuffix($text, $onlySuffix = false, $mainStructure = false): string
     {
-        if (!$text) {
+        if (! $text) {
             return '';
         }
 
-        if(is_numeric($text))
-        {
-           $suffix = $this->getNumberSuffix($text) . ($mainStructure ? " idarənin"  : " idarəsinin");
-        }
-        else
-        {
-            $_char_list = ['a','ı','u','o','i','ə','ü','e','ö','1','2','3'];
+        $append = $mainStructure ? 'nin' : ' sinin';
 
-            // eger son herf sait deilse 2 ci herfi gotur ona uygun elave et.
-            $lastChar = mb_substr($text, -1);
+        $suffix = is_numeric($text)
+            ? $this->getNumberSuffix((int) $text)." idare{$append}"
+            : $this->determineStructureSuffix($text);
 
-            if (!in_array($lastChar, $_char_list))
-            {
-                if($lastChar == 'k')
-                {
-                    $text = str_replace($lastChar,'y',$text);
-                }
-                $lastChar = mb_substr($text, -2,1);
-                $suffix = match($lastChar)
-                {
-                    'a','ı' => 'ın',
-                    'i','ə','e' => 'in',
-                    'u','o' => 'un',
-                    'ü','ö' => 'ün'
-                };
-            }
-            else
-            {
-                $suffix = match($lastChar)
-                {
-                    'a','ı' => 'nın',
-                    'i','ə','e','2' => 'nin',
-                    'u','o' => 'nun',
-                    'ü','ö' => 'nün',
-                    '1' => 'in',
-                    '3' => 'ün'
-                };
-            }
-        }
-
-        return $onlySuffix ? $suffix : $text . $suffix;
+        return $onlySuffix ? $suffix : $text.$suffix;
     }
 
-    private function getSuffix($digit)
+    public function getMonthDaySuffix($digit): string
     {
-        return match ($digit)
-        {
-            0,6,40,60,90 => "-cı",
-            3,4,100,200,300,400,500,600,700,800,900 => "-cü",
-            9,10,30 => "-cu",
-            default => "-ci",
+        $digit = (int) $digit;
+        $lastDigit = $digit % 10 ?: $digit;
+        $suffix = match ($lastDigit) {
+            1,5,8 => '-i',
+            2,7,20 => '-si',
+            3,4 => '-ü',
+            6 => '-sı',
+            9,10,30 => '-u'
+        };
+
+        return "{$digit}{$suffix}";
+    }
+
+    public function getTimeSuffix($time): string
+    {
+        $digit = (int) $time;
+        $lastDigit = $digit % 10 ?: $digit;
+        $suffix = match ($lastDigit) {
+            0,6,9,10,30,40 => '-da',
+            default => '-də',
+        };
+
+        return "{$time}{$suffix}";
+    }
+
+    private function getSuffix($digit): string
+    {
+        return match ($digit) {
+            0,6,40,60,90 => '-cı',
+            3,4,100,200,300,400,500,600,700,800,900 => '-cü',
+            9,10,30 => '-cu',
+            default => '-ci',
         };
     }
 }

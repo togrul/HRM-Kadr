@@ -6,6 +6,7 @@ use App\Models\Menu;
 use App\Models\Setting;
 use App\Observers\SettingsObserver;
 use App\Services\NumberToWordsService;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\ServiceProvider;
 
@@ -17,7 +18,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(NumberToWordsService::class, function ($app) {
-            return new NumberToWordsService();
+            return new NumberToWordsService;
         });
     }
 
@@ -26,21 +27,32 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if (! $this->app->isProduction()) {
+            Model::shouldBeStrict();
+
+            Model::handleLazyLoadingViolationUsing(function (Model $model, string $relation) {
+                $class = $model::class;
+
+                info("Attempted to lazy load [$relation] on model [$class]");
+            });
+        }
+
         Setting::observe(SettingsObserver::class);
-        view()->composer('includes.header', function($view)
-        {
-            $menus = Menu::orderBy('order')->where('is_active',1)->get();
+        view()->composer('includes.header', function ($view) {
+            $menus = Menu::query()
+                         ->where('is_active', 1)
+                         ->orderBy('order')
+                         ->get();
 
             $view->with('menus', $menus);
         });
 
-        view()->composer('*',function($view)
-        {
-            $_settings = Cache::rememberForever('settings',function () {
-                return Setting::pluck('value','name')->toArray();
+        view()->composer('*', function ($view) {
+            $_settings = Cache::rememberForever('settings', function () {
+                return Setting::pluck('value', 'name')->toArray();
             });
 
-            $view->with(compact('_settings'));
+            $view->with('_settings',$_settings);
         });
     }
 }

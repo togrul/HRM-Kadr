@@ -10,6 +10,7 @@ use Spatie\Permission\Models\Permission;
 class DeletePermission extends Component
 {
     use AuthorizesRequests;
+
     public ?Permission $permission;
 
     #[On('setDeletePermission')]
@@ -27,7 +28,7 @@ class DeletePermission extends Component
 
         $this->permission = null;
 
-        $this->dispatch('permissionWasDeleted' , __('Permission was deleted!'));
+        $this->dispatch('permissionWasDeleted', __('Permission was deleted!'));
     }
 
     public function render()

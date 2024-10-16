@@ -13,6 +13,6 @@ class EducationType extends Model
 
     protected $fillable = [
         'id',
-        'name'
+        'name',
     ];
 }

@@ -4,48 +4,69 @@ namespace App\Services;
 
 use App\Enums\OrderStatusEnum;
 use App\Helpers\UsefulHelpers;
+use App\Livewire\Outside\BusinessTrips;
 use App\Models\Candidate;
 use App\Models\Order;
 use App\Models\OrderLog;
 use App\Models\Personnel;
+use App\Models\PersonnelBusinessTrip;
 use App\Models\StaffSchedule;
 use Carbon\Carbon;
 
 class OrderConfirmedService
 {
-    public function __construct(public OrderLog $orderLog){}
-    public function handle($personnelIds = [],$action = 'create')
+    public function __construct(public OrderLog $orderLog) {}
+
+    public function handle($personnelIds = [], $action = 'create'): void
     {
         $this->orderLog->load('order');
-        if($this->orderLog->status_id == OrderStatusEnum::APPROVED->value)
-        {
-            // eger ise girme emridirse ve statusu tesdiqlenmisdirse
-            if($this->orderLog->order_id == Order::IG_EMR)
-            {
-                // personnel cedvelinde ise girme tarixin duzeltmek
-                $this->approveEmploymentOrder($personnelIds, $this->orderLog, $action);
-            }
-            if($this->orderLog->order->blade == Order::BLADE_VACATION)
-            {
-                $this->processVacationOrder($this->orderLog);
-            }
-        }
-        elseif($this->orderLog->status_id == OrderStatusEnum::CANCELLED->value)
-        {
-            if($this->orderLog->order->blade == Order::BLADE_VACATION)
-            {
-                // remove all personnels from vacation table
-                $this->removeVacationPersonnels($this->orderLog);
-            }
+        $statusId = $this->orderLog->status_id;
+        $order = $this->orderLog->order;
+
+        if ($statusId == OrderStatusEnum::APPROVED->value) {
+            $this->handleApprovedOrder($personnelIds, $action, $order);
+        } elseif ($statusId == OrderStatusEnum::CANCELLED->value) {
+            $this->handleCancelledOrder($order);
         }
     }
 
-    private function approveEmploymentOrder($personnelIds, $orderLog, $action)
+    private function handleApprovedOrder(array $personnelIds, string $action, $order): void
+    {
+        // eger ise girme emridirse ve statusu tesdiqlenmisdirse
+        if ($this->orderLog->order_id == Order::IG_EMR) {
+            $this->approveEmploymentOrder($personnelIds, $this->orderLog, $action);
+        }
+
+        switch ($order->blade) {
+            case Order::BLADE_VACATION:
+                $this->processVacationOrder($this->orderLog);
+                break;
+
+            case Order::BLADE_BUSINESS_TRIP:
+                $this->processBusinessTripsOrder($this->orderLog);
+                break;
+        }
+    }
+
+    private function handleCancelledOrder($order): void
+    {
+        switch ($order->blade) {
+            case Order::BLADE_VACATION:
+                $this->removeVacationPersonnels($this->orderLog);
+                break;
+
+            case Order::BLADE_BUSINESS_TRIP:
+                $this->removeBusinessTripsPersonnels($this->orderLog);
+                break;
+        }
+    }
+
+    private function approveEmploymentOrder($personnelIds, $orderLog, $action): void
     {
         // Change status to accepted
         Candidate::whereIn('id', $personnelIds)->update(['status_id' => 70]);
 
-        $convertedIds = array_map(fn($x) => "NMZD{$x}", $personnelIds);
+        $convertedIds = array_map(fn ($x) => "NMZD{$x}", $personnelIds);
 
         $personnelModel = $action == 'create'
             ? $orderLog->personnels
@@ -59,8 +80,7 @@ class OrderConfirmedService
         }
     }
 
-
-    private function updatePersonnelEmployment($_personnel, $orderLog)
+    private function updatePersonnelEmployment($_personnel, $orderLog): void
     {
         $component_id = $orderLog->personnels()
             ->where('order_log_personnels.tabel_no', $_personnel->tabel_no)
@@ -70,7 +90,7 @@ class OrderConfirmedService
             ->where('component_id', $component_id)
             ->value('attributes');
 
-        $month = UsefulHelpers::convertToMonthNumber($_attr['$month']['value'],config('app.locale'));
+        $month = UsefulHelpers::convertToMonthNumber($_attr['$month']['value'], config('app.locale'));
 
         $date = "{$_attr['$year']['value']}-{$month}-{$_attr['$day']['value']}";
 
@@ -92,7 +112,7 @@ class OrderConfirmedService
         $_personnel->laborActivities()->create($this->getNewLaborActivityData($_personnel, $orderLog, $date));
     }
 
-    private function updateStaffSchedule($_personnel)
+    private function updateStaffSchedule($_personnel): void
     {
         $staff = StaffSchedule::where('structure_id', $_personnel->structure_id)
             ->where('position_id', $_personnel->position_id)
@@ -104,7 +124,7 @@ class OrderConfirmedService
         ]);
     }
 
-    private function endCurrentLaborActivity($_personnel, $date)
+    private function endCurrentLaborActivity($_personnel, $date): void
     {
         $activeWork = $_personnel->laborActivities()
             ->where('is_current', true)
@@ -119,7 +139,7 @@ class OrderConfirmedService
         }
     }
 
-    private function getNewLaborActivityData($_personnel, $orderLog, $date)
+    private function getNewLaborActivityData($_personnel, $orderLog, $date): array
     {
         return [
             'company_name' => config('app.company'),
@@ -134,7 +154,7 @@ class OrderConfirmedService
         ];
     }
 
-    private function processVacationOrder($orderLog)
+    private function processVacationOrder($orderLog): void
     {
         $orderLog->load('personnels');
         $orderAttributes = $orderLog->attributes->pluck('attributes')->toArray();
@@ -144,38 +164,92 @@ class OrderConfirmedService
         }
     }
 
-    private function updateOrCreateVacation($_person, $orderAttributes, $key, $orderLog)
+    private function processBusinessTripsOrder($orderLog): void
     {
+        $orderLog->load('personnels');
+        $orderAttributes = $orderLog->attributes->pluck('attributes')->toArray();
+
+        foreach ($orderLog->personnels as $key => $_person) {
+            $this->updateOrCreateBusinessTrips($_person, $orderAttributes, $key, $orderLog);
+        }
+    }
+
+    private function updateOrCreateVacation($_person, $orderAttributes, $key, $orderLog): void
+    {
+        $this->updateOrCreateRecord($_person, $orderAttributes, $key, $orderLog);
+    }
+
+    private function updateOrCreateBusinessTrips($_person, $orderAttributes, $key, $orderLog): void
+    {
+        $this->updateOrCreateRecord($_person, $orderAttributes, $key, $orderLog);
+    }
+
+    private function updateOrCreateRecord($_person, $orderAttributes, $key, $orderLog): void
+    {
+        $type = $orderLog->order->blade;
         $arr = UsefulHelpers::searchInsideMultiDimensionalArray($orderAttributes, $_person->fullname, '$fullname', 'value');
 
-        $_person->vacations()->withTrashed()->updateOrCreate(
-            [
-                'start_date' => Carbon::parse($arr[$key]['$start_date']['value'])->format('Y-m-d'),
-                'end_date' => Carbon::parse($arr[$key]['$end_date']['value'])->format('Y-m-d'),
-                'order_no' => $orderLog->order_no,
-                'order_date' => $orderLog->given_date,
-            ],
-            [
-                'vacation_places' => $arr[$key]['$location']['value'],
-                'duration' => $arr[$key]['$days']['value'],
-                'start_date' => Carbon::parse($arr[$key]['$start_date']['value'])->format('Y-m-d'),
-                'end_date' => Carbon::parse($arr[$key]['$end_date']['value'])->format('Y-m-d'),
-                'return_work_date' => Carbon::parse($arr[$key]['$end_date']['value'])->addDay()->format('Y-m-d'),
-                'order_given_by' => "{$orderLog->given_by_rank} {$orderLog->given_by}",
-                'order_no' => $orderLog->order_no,
-                'order_date' => Carbon::parse($orderLog->given_date)->format('Y-m-d'),
-                'deleted_by' => null,
-                'deleted_at' => null,
-            ]
+        $commonAttributes = [
+            'start_date' => Carbon::parse($arr[$key]['$start_date']['value'])->format('Y-m-d'),
+            'end_date' => Carbon::parse($arr[$key]['$end_date']['value'])->format('Y-m-d'),
+            'order_no' => $orderLog->order_no,
+            'order_date' => $orderLog->given_date,
+        ];
+
+        $relationshipMethod = '';
+
+        $filteredAttributes = array_filter($orderAttributes, function ($item) use ($_person) {
+            return isset($item['$fullname']['value']) && $item['$fullname']['value'] == $_person->fullname;
+        });
+
+        $spesificAttributes = [
+            'start_date' => Carbon::parse($arr[$key]['$start_date']['value'])->format('Y-m-d'),
+            'end_date' => Carbon::parse($arr[$key]['$end_date']['value'])->format('Y-m-d'),
+            'order_given_by' => "{$orderLog->given_by_rank} {$orderLog->given_by}",
+            'order_no' => $orderLog->order_no,
+            'order_date' => Carbon::parse($orderLog->given_date)->format('Y-m-d'),
+            'attributes' => reset($filteredAttributes),
+            'deleted_by' => null,
+            'deleted_at' => null,
+        ];
+
+        switch ($type) {
+            case Order::BLADE_VACATION:
+                $spesificAttributes['vacation_places'] = $arr[$key]['$location']['value'];
+                $spesificAttributes['duration'] = $arr[$key]['$days']['value'];
+                $spesificAttributes['return_work_date'] = Carbon::parse($arr[$key]['$end_date']['value'])->addDay()->format('Y-m-d');
+
+                $relationshipMethod = 'vacations';
+                break;
+            case Order::BLADE_BUSINESS_TRIP:
+                $spesificAttributes['location'] = $arr[$key]['$location']['value'];
+                $spesificAttributes['description'] = $arr[$key]['$description'] ?? '';
+
+                $relationshipMethod = 'businessTrips';
+                break;
+        }
+
+        $_person->{$relationshipMethod}()->withTrashed()->updateOrCreate(
+            $commonAttributes,
+            $spesificAttributes
         );
     }
 
-    private function removeVacationPersonnels($orderLog)
+    private function removeVacationPersonnels($orderLog): void
     {
         $orderLog->load('vacations');
 
         $orderLog->vacations()->each(function ($vacation) {
             $vacation->delete();
+        });
+    }
+
+    private function removeBusinessTripsPersonnels($orderLog): void
+    {
+        $orderLog->load('businessTrips');
+
+        $orderLog->businessTrips()->each(function ($businessTrip) {
+            $businessTrip->delete();
         });
     }
 }

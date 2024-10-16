@@ -13,7 +13,7 @@ class DeleteStaff extends Component
     #[On('setDeleteStaff')]
     public function setDeleteStaff($staffId)
     {
-        $this->staff = StaffSchedule::where('structure_id',$staffId)->pluck('id');
+        $this->staff = StaffSchedule::where('structure_id', $staffId)->pluck('id');
 
         $this->dispatch('deleteStaffWasSet');
     }
@@ -25,7 +25,7 @@ class DeleteStaff extends Component
 
         $this->staff = null;
 
-        $this->dispatch('staffWasDeleted' , __('Staff was deleted!'));
+        $this->dispatch('staffWasDeleted', __('Staff was deleted!'));
     }
 
     public function render()

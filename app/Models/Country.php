@@ -13,18 +13,18 @@ class Country extends Model
 
     protected $fillable = [
         'id',
-        'code'
+        'code',
     ];
 
     public $timestamps = false;
 
-    public function countryTranslations() : HasMany
+    public function countryTranslations(): HasMany
     {
         return $this->hasMany(CountryTranslation::class);
     }
 
-    public function currentCountryTranslations() : HasOne
+    public function currentCountryTranslations(): HasOne
     {
-        return $this->hasOne(CountryTranslation::class)->where('locale',config('app.locale'));
+        return $this->hasOne(CountryTranslation::class)->where('locale', config('app.locale'));
     }
 }

@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum MilitaryStatusEnum : string
+enum MilitaryStatusEnum: string
 {
     case Useful = 'yararlı';
     case Useless = 'yararsız';

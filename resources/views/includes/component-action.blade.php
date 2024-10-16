@@ -57,7 +57,7 @@
     <div class="flex flex-col">
         <x-label for="component.content">{{ __('Content') }}</x-label>
         <x-textarea mode="gray" name="component.content" placeholder="{{__('')}}"
-                    wire:model.live="component.content"></x-textarea>
+                    wire:model.live.debounce.900ms="component.content"></x-textarea>
         @error('component.content')
         <x-validation> {{ $message }} </x-validation>
         @enderror
@@ -70,7 +70,7 @@
     <div class="flex flex-col">
         <x-label for="component.title">{{ __('Title') }}</x-label>
         <x-textarea mode="gray" name="component.title" placeholder="{{__('')}}"
-                    wire:model.live="component.title"></x-textarea>
+                    wire:model.live.debounce.900ms="component.title"></x-textarea>
     </div>
 </div>
 

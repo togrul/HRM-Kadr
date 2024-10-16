@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreign('tabel_no')->references('tabel_no')->on('personnels')->onDelete('cascade')->onUpdate('cascade');
             $table->integer('language_id');
             $table->foreign('language_id')->references('id')->on('languages');
-            $table->enum('knowledge_status',KnowledgeStatusEnum::values())->comment('bilik seviyyesi');
+            $table->enum('knowledge_status', KnowledgeStatusEnum::values())->comment('bilik seviyyesi');
         });
     }
 

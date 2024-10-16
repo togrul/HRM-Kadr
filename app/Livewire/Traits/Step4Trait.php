@@ -2,39 +2,41 @@
 
 namespace App\Livewire\Traits;
 
-use App\Models\PersonnelLaborActivity;
 use App\Services\CalculateSeniorityService;
 
 trait Step4Trait
 {
     public $labor_activities = [];
+
     public $labor_activities_list = [];
 
     public $ranks = [];
+
     public $rank_list = [];
 
     public $isAddedRank;
 
-    public $rankId,$rankName,$searchRank;
+    public $rankId;
+
+    public $rankName;
+
+    public $searchRank;
 
     public $isSpecialService;
 
     public $calculatedData = [];
 
-    private $calculateService;
-
     public function addLaborActivity()
     {
         $this->validate($this->exceptArray('ranks'));
-        $time = array_key_exists('time',$this->labor_activities) ? $this->labor_activities['time'] : '12:00';
-        if($this->isSpecialService)
-        {
+        $time = array_key_exists('time', $this->labor_activities) ? $this->labor_activities['time'] : '12:00';
+        if ($this->isSpecialService) {
             $this->labor_activities['is_special_service'] = $this->isSpecialService ? 1 : 0;
             $this->labor_activities['order_date'] .= " {$time}";
             unset($this->labor_activities['time']);
         }
         $this->labor_activities_list[] = $this->labor_activities;
-        $this->labor_activities = array();
+        $this->labor_activities = [];
         $this->calculateSeniority();
     }
 
@@ -62,60 +64,54 @@ trait Step4Trait
         unset($this->rank_list[$key]);
     }
 
-    public function mountStep4Trait() {
+    public function mountStep4Trait()
+    {
         $this->isAddedRank = false;
-        $this->rankName = "---";
-        !empty($this->personnelModel) && $this->fillStep4();
+        $this->rankName = '---';
+        ! empty($this->personnelModel) && $this->fillStep4();
         $this->isSpecialService = false;
         $this->calculateSeniority();
     }
 
     private function calculateSeniority()
     {
-        $this->calculateService = resolve(CalculateSeniorityService::class);
-        $this->calculatedData = $this->calculateService->calculateMulti($this->labor_activities_list);
+        $calculateService = resolve(CalculateSeniorityService::class);
+        $this->calculatedData = $calculateService->calculateMulti($this->labor_activities_list);
     }
 
     protected function fillStep4()
     {
         $updateLaborActivity = $this->personnelModelData->laborActivities;
-        if(!empty($updateLaborActivity))
-        {
-            foreach($updateLaborActivity  as $key => $uptLabor)
-            {
-                $this->labor_activities_list[] = [
-                    'company_name' => $uptLabor['company_name'],
-                    'position' => $uptLabor['position'],
-                    'coefficient' => $uptLabor['coefficient'],
-                    'join_date' => $uptLabor['join_date'],
-                    'leave_date' => $uptLabor['leave_date'],
-                    'is_special_service' => $uptLabor['is_special_service'] == 1 ? true : false,
-                    'order_given_by' => $uptLabor['order_given_by'],
-                    'order_no' => $uptLabor['order_no'],
-                    'order_date' => $uptLabor['order_date'],
-                    'is_current' => $uptLabor['is_current']
-                ];
+        if (! empty($updateLaborActivity)) {
+            foreach ($updateLaborActivity as $key => $uptLabor) {
+                $this->labor_activities_list[] = $this->mapAttributes(
+                    attributes: [
+                        'company_name', 'position', 'coefficient', 'join_date', 'leave_date',
+                        'is_special_service', 'order_given_by', 'order_no', 'order_date', 'is_current',
+                    ],
+                    getFrom: $uptLabor->toArray(),
+                    booleanColumns: ['is_special_service']
+                );
             }
         }
-
         $updateRanks = $this->personnelModelData->ranks->load('rank')->toArray();
 
-        if(!empty($updateRanks))
-        {
-            foreach($updateRanks  as $key => $uptRank)
-            {
+        if (! empty($updateRanks)) {
+            foreach ($updateRanks as $key => $uptRank) {
                 $this->rank_list[] = [
                     'name' => $uptRank['name'],
                     'given_date' => $uptRank['given_date'],
                 ];
 
-                if(!empty($uptRank['rank_id']))
-                {
-                    $this->rank_list[$key]['rank_id'] =  [
-                        'id' => $uptRank['rank']['id'],
-                        'name' => $uptRank['rank']['name_'.config('app.locale')],
-                    ];
-                }
+                $this->handleRelatedEntitiesMultiDimensional(
+                    entity: 'rank',
+                    field: 'rank_id',
+                    key: $key,
+                    fillTo: 'rank_list',
+                    getFrom: $uptRank,
+                    titleField: 'name',
+                    hasLocale: true
+                );
             }
         }
     }

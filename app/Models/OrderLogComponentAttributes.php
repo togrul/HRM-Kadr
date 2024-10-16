@@ -17,15 +17,21 @@ class OrderLogComponentAttributes extends Model
         'order_no',
         'component_id',
         'attributes',
-        'row_number'
+        'row_number',
+        'attributes->$fullname->value'
     ];
 
     protected $casts = [
-        'attributes' => 'array'
+        'attributes' => 'array',
     ];
 
-    public function component() : BelongsTo
+    public function component(): BelongsTo
     {
         return $this->belongsTo(Component::class);
+    }
+
+    public function businessTrips(): BelongsTo
+    {
+        return $this->belongsTo(PersonnelBusinessTrip::class, 'order_no', 'order_no');
     }
 }

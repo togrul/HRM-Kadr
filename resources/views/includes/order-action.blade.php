@@ -69,11 +69,49 @@
         </div>
     </div>
 
+    @if($selectedBlade === \App\Models\Order::BLADE_BUSINESS_TRIP)
+        <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3">
+            <div class="flex flex-col">
+                <x-label for="order.description.start_date">{{ __('Start date') }}</x-label>
+                <x-pikaday-input mode="gray" name="order.description.start_date" format="Y-MM-DD" wire:model.live="order.description.start_date">
+                    <x-slot name="script">
+                        $el.onchange = function () {
+                        @this.set('order.description.start_date', $el.value);
+                        }
+                    </x-slot>
+                </x-pikaday-input>
+                @error("order.description.start_date")
+                    <x-validation> {{ $message }} </x-validation>
+                @enderror
+            </div>
+            <div class="flex flex-col">
+                <x-label for="order.description.end_date">{{ __('End date') }}</x-label>
+                <x-pikaday-input mode="gray" name="order.description.end_date" format="Y-MM-DD" wire:model.live="order.description.end_date">
+                    <x-slot name="script">
+                        $el.onchange = function () {
+                        @this.set('order.description.end_date', $el.value);
+                        }
+                    </x-slot>
+                </x-pikaday-input>
+                @error("order.description.end_date")
+                    <x-validation> {{ $message }} </x-validation>
+                @enderror
+            </div>
+            <div class="">
+                <x-label for="order.description.location">{{ __('Location') }}</x-label>
+                <x-livewire-input mode="gray"  name="order.description.location" wire:model="order.description.location"></x-livewire-input>
+                @error('order.description.location')
+                    <x-validation> {{ $message }} </x-validation>
+                @enderror
+            </div>
+        </div>
+    @endif
+
     @if($showComponent)
 
         @for($i = 0; $i < $componentRows; $i++)
             <div class="grid grid-cols-1 gap-2 border-2 border-slate-200 border-dashed px-4 py-3 rounded-lg relative">
-                @if(($i+1) > count($selectedBlade == 'default' ? $originalComponents : Arr::except($this->originalComponents,'personnels')))
+                @if(($i+1) > count($selectedBlade == \App\Models\Order::BLADE_DEFAULT ? $originalComponents : Arr::except($this->originalComponents,'personnels')))
                 <button class="flex justify-center items-center rounded-lg p-1 shadow-sm absolute right-0 top-0 bg-slate-50 text-rose-500"
                         wire:click="deleteRow"
                 >
@@ -89,7 +127,8 @@
                             $componentId = array_key_exists($i,$components) ? $components[$i]['component_id']['id'] : -1;
                         @endphp
                         <x-select-list class="w-full" :title="__('Select component')" mode="gray" :selected="$componentName" name="componentId">
-                            <x-select-list-item wire:click="setData('components','component_id',null,'---',null,{{ $i }});$dispatch('componentSelected')" :selected="'---' ==  $componentName"
+                            <x-select-list-item wire:click="setData('components','component_id',null,'---',null,{{ $i }});$dispatch('componentSelected')"
+                                                :selected="'---' ==  $componentName"
                                                 wire:model='components.component_id.id'>
                                 ---
                             </x-select-list-item>
@@ -130,7 +169,7 @@
         <div class="flex flex-col space-y-1">
             <x-label for="personnel.gender">{{ __('Status') }}</x-label>
             <div class="flex flex-row">
-                @foreach($_statuses as $_status)
+                @foreach($this->statuses as $_status)
                     <label class="inline-flex items-center bg-gray-100 rounded shadow-sm py-2 px-2">
                         <input type="radio" class="form-radio" name="order.status_id" wire:model="order.status_id" value={{ $_status->id }}>
                         <span class="ml-2 text-sm font-normal">{{ $_status->name }}</span>

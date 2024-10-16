@@ -7,14 +7,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 trait CreateDeleteTrait
 {
-    public function creator() : BelongsTo
+    public function creator(): BelongsTo
     {
-        return $this->belongsTo(User::class,'creator_id','id');
+        return $this->belongsTo(User::class, 'creator_id', 'id');
     }
 
-    public function personDidDelete() : BelongsTo
+    public function personDidDelete(): BelongsTo
     {
-        return $this->belongsTo(User::class,'deleted_by','id');
+        return $this->belongsTo(User::class, 'deleted_by', 'id');
     }
 
     protected static function boot()
@@ -24,7 +24,7 @@ trait CreateDeleteTrait
             $model->creator_id = auth()->user()->id ?? 1;
         });
         static::deleting(function ($model) {
-            $model->deleted_by = auth()->user()->id;
+            $model->deleted_by = auth()->id();
             $model->save();
         });
     }

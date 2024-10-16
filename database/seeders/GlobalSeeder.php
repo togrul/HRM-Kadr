@@ -7,7 +7,6 @@ use App\Models\OrderStatus;
 use App\Models\Rank;
 use App\Models\Setting;
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -34,20 +33,18 @@ class GlobalSeeder extends Seeder
                 'id' => 30,
                 'locale' => 'az',
                 'name' => 'Ləğv edilmiş',
-            ]
+            ],
         ];
 
-        foreach ($order_statuses as $key => $status)
-        {
+        foreach ($order_statuses as $key => $status) {
             OrderStatus::updateOrCreate([
-                'id' => $status['id']
+                'id' => $status['id'],
             ],
-            [
-                'locale' => $status['locale'],
-                'name' => $status['name']
-            ]);
+                [
+                    'locale' => $status['locale'],
+                    'name' => $status['name'],
+                ]);
         }
-
 
         $menus = [
             [
@@ -56,7 +53,7 @@ class GlobalSeeder extends Seeder
                 'color' => 'slate',
                 'order' => 1,
                 'is_active' => 1,
-                'url' => 'staffs'
+                'url' => 'staffs',
             ],
             [
                 'name' => 'Orders',
@@ -64,7 +61,7 @@ class GlobalSeeder extends Seeder
                 'color' => 'cyan',
                 'order' => 2,
                 'is_active' => 1,
-                'url' => 'orders'
+                'url' => 'orders',
             ],
             [
                 'name' => 'Personal affairs',
@@ -72,7 +69,7 @@ class GlobalSeeder extends Seeder
                 'color' => 'emerald',
                 'order' => 3,
                 'is_active' => 1,
-                'url' => 'home'
+                'url' => 'home',
             ],
             [
                 'name' => 'Reports',
@@ -80,7 +77,7 @@ class GlobalSeeder extends Seeder
                 'color' => 'rose',
                 'order' => 4,
                 'is_active' => 1,
-                'url' => 'home'
+                'url' => 'home',
             ],
             [
                 'name' => 'Queries',
@@ -88,7 +85,7 @@ class GlobalSeeder extends Seeder
                 'color' => 'orange',
                 'order' => 5,
                 'is_active' => 1,
-                'url' => 'home'
+                'url' => 'home',
             ],
             [
                 'name' => 'Services',
@@ -96,33 +93,32 @@ class GlobalSeeder extends Seeder
                 'color' => 'gray',
                 'order' => 6,
                 'is_active' => 1,
-                'url' => 'services'
-            ]
+                'url' => 'services',
+            ],
         ];
 
-        foreach ($menus as $key => $menu)
-        {
+        foreach ($menus as $key => $menu) {
             Menu::updateOrCreate(
                 [
-                    'name' => $menu['name']
+                    'name' => $menu['name'],
                 ],
                 [
                     'icon' => $menu['icon'],
                     'color' => $menu['color'],
                     'order' => $menu['order'],
                     'is_active' => $menu['is_active'],
-                    'url' => $menu['url']
+                    'url' => $menu['url'],
                 ]);
         }
 
         $role = Role::updateOrCreate(
             [
-                'name' => 'Admin'
+                'name' => 'Admin',
             ],
             [
                 'guard_name' => 'web',
                 'created_at' => '2023-11-03 23:49:10',
-                'updated_at' => '2023-11-03 23:50:32'
+                'updated_at' => '2023-11-03 23:50:32',
             ]
         );
 
@@ -131,31 +127,29 @@ class GlobalSeeder extends Seeder
                 'name' => 'show-staff',
                 'guard_name' => 'web',
                 'created_at' => '2023-11-04 23:01:35',
-                'updated_at' => '2023-11-04 23:01:35'
+                'updated_at' => '2023-11-04 23:01:35',
             ],
             [
                 'name' => 'manage-staff',
                 'guard_name' => 'web',
                 'created_at' => '2023-11-04 23:01:35',
-                'updated_at' => '2023-11-04 23:01:35'
-            ]
+                'updated_at' => '2023-11-04 23:01:35',
+            ],
         ];
 
-        foreach ($permissions as $key => $permission)
-        {
+        foreach ($permissions as $key => $permission) {
             Permission::updateOrCreate(
                 [
-                    'name' => $permission['name']
+                    'name' => $permission['name'],
                 ],
                 [
                     'guard_name' => $permission['guard_name'],
                     'created_at' => $permission['created_at'],
-                    'updated_at' => $permission['updated_at']
+                    'updated_at' => $permission['updated_at'],
                 ]);
         }
 
-        foreach (User::all() as $key => $user)
-        {
+        foreach (User::all() as $key => $user) {
             $user->syncRoles($role);
         }
 
@@ -165,8 +159,8 @@ class GlobalSeeder extends Seeder
                 'name_az' => 'əsgər',
                 'name_en' => 'soldier',
                 'name_ru' => 'солдат',
-                'duration' => NULL,
-                'is_active' => 1
+                'duration' => null,
+                'is_active' => 1,
             ],
             [
                 'id' => 80,
@@ -174,15 +168,14 @@ class GlobalSeeder extends Seeder
                 'name_en' => 'Lieutenant',
                 'name_ru' => 'Лейтенант',
                 'duration' => 2.00,
-                'is_active' => 1
-            ]
+                'is_active' => 1,
+            ],
         ];
 
-        foreach ($ranks as $key => $rank)
-        {
+        foreach ($ranks as $key => $rank) {
             Rank::updateOrCreate(
                 [
-                    'id' => $rank['id']
+                    'id' => $rank['id'],
                 ],
                 [
                     'name_az' => $rank['name_az'],
@@ -194,8 +187,7 @@ class GlobalSeeder extends Seeder
             );
         }
 
-        foreach (Permission::all() as $permission)
-        {
+        foreach (Permission::all() as $permission) {
             $role->givePermissionTo($permission);
         }
 
@@ -203,30 +195,29 @@ class GlobalSeeder extends Seeder
             [
                 'name' => 'Work coefficient',
                 'value' => '2',
-                'type' => 'double'
+                'type' => 'double',
             ],
             [
                 'name' => 'Education coefficient',
                 'value' => '0.5',
-                'type' => 'double'
+                'type' => 'double',
             ],
             [
                 'name' => 'Chief',
                 'value' => 'Bəylər Eyyubov',
-                'type' => 'string'
+                'type' => 'string',
             ],
             [
                 'name' => 'Chief rank',
                 'value' => 'general-polkovnik',
-                'type' => 'string'
-            ]
+                'type' => 'string',
+            ],
         ];
 
-        foreach ($settings as $setting)
-        {
+        foreach ($settings as $setting) {
             Setting::updateOrCreate(
                 [
-                    'name' => $setting['name']
+                    'name' => $setting['name'],
                 ],
                 [
                     'value' => $setting['value'],
@@ -234,7 +225,6 @@ class GlobalSeeder extends Seeder
                 ]
             );
         }
-
 
     }
 }

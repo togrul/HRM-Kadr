@@ -12,6 +12,7 @@ class SettingsObserver
     private $caches = [
         'settings',
     ];
+
     /**
      * Handle the Setting "created" event.
      */

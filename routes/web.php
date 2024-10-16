@@ -1,13 +1,13 @@
 <?php
 
-use Livewire\Livewire;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Livewire\Orders\AllOrders;
 use App\Livewire\PersonalAffairs\AllAffairs;
 use App\Livewire\Personnel\AllPersonnel;
 use App\Livewire\Services\Service;
 use App\Livewire\StaffSchedule\Staffs;
+use Illuminate\Support\Facades\Route;
+use Livewire\Livewire;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,19 +20,15 @@ use App\Livewire\StaffSchedule\Staffs;
 |
 */
 
-
-
-
-
 Route::middleware('auth')->group(function () {
-    Route::get('/',AllPersonnel::class)->name('home');
-    Route::get('/dashboard',AllAffairs::class)->name('dashboard');
-    Route::get('/staffs',Staffs::class)->name('staffs');
-    Route::get('/services',Service::class)->name('services');
-    Route::get('/orders',AllOrders::class)->name('orders');
-    Route::get('/candidates',\App\Livewire\Candidates\CandidateList::class)->name('candidates');
-    Route::get('/vacations',\App\Livewire\Vacation\Vacations::class)->name('vacations.list');
-    Route::get('/business-trips',\App\Livewire\Outside\BusinessTrips::class)->name('business-trips.list');
+    Route::get('/', AllPersonnel::class)->name('home');
+    Route::get('/dashboard', AllAffairs::class)->name('dashboard');
+    Route::get('/staffs', Staffs::class)->name('staffs');
+    Route::get('/services', Service::class)->name('services');
+    Route::get('/orders', AllOrders::class)->name('orders');
+    Route::get('/candidates', \App\Livewire\Candidates\CandidateList::class)->name('candidates');
+    Route::get('/vacations', \App\Livewire\Vacation\Vacations::class)->name('vacations.list');
+    Route::get('/business-trips', \App\Livewire\Outside\BusinessTrips::class)->name('business-trips.list');
 
     Route::prefix('/profile')->controller(ProfileController::class)->group(function () {
         Route::get('/', 'edit')->name('profile.edit');

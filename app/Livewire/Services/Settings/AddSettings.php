@@ -13,7 +13,7 @@ class AddSettings extends Component
     {
         return [
             'settings.name' => 'required|string',
-            'settings.value' => 'required'
+            'settings.value' => 'required',
         ];
     }
 
@@ -31,7 +31,7 @@ class AddSettings extends Component
 
         Setting::create($this->settings);
 
-        $this->dispatch('settingsUpdated',__('Setting was added successfully!'));
+        $this->dispatch('settingsUpdated', __('Setting was added successfully!'));
 
         $this->settings = [];
     }
