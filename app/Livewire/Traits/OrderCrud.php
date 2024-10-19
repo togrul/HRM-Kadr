@@ -306,6 +306,7 @@ trait OrderCrud
                     $columns['transportation'] = $_final['transportation'] ?? [];
                     $columns['car'] = $_final['car'] ?? "";
                     $columns['weapon'] = $_final['weapon'];
+                    $columns['bullet'] = $_final['bullet'] ?? 32;
                     $columns['service_dog'] = $_final['service_dog'] ?? false;
                     break;
             }

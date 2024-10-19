@@ -7,6 +7,8 @@ use App\Livewire\Traits\SelectListTrait;
 use App\Models\OrderType;
 use App\Models\PersonnelBusinessTrip;
 use App\Models\Structure;
+use App\Models\Weapon;
+use App\Services\WordSuffixService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Computed;
@@ -14,6 +16,7 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Maatwebsite\Excel\Facades\Excel;
+use PhpOffice\PhpWord\TemplateProcessor;
 
 class BusinessTrips extends Component
 {
@@ -58,15 +61,61 @@ class BusinessTrips extends Component
 
     public function printBusinessTripDocument(PersonnelBusinessTrip $model, $multi = false)
     {
-        dd($model);
-//        1 adamirsa onda tekli kagiz diger hallarda multi
-        $model->load(['personnel', 'order.orderType']);
+        $model->load(['personnel', 'order.orderType', 'order.attributes']);
+        $filepath = $multi
+                    ? '/storage/templates/general/Ezamiyyet-vesiqesi.docx'
+                    : '/storage/templates/general/Ezamiyyet-kagizi.docx';
 
-        $dates = [
-            'givenDate' => Carbon::parse($model->order_date),
-            'startDate' => Carbon::parse($model->start_date),
-            'endDate' => Carbon::parse($model->end_date),
-        ];
+        $file = public_path($filepath);
+
+        $templateProcessor = new TemplateProcessor($file);
+
+        if ($multi) {
+//            dd($model->order->description['location']. ' şəhərinə');
+            $dates = [
+                'givenDate' => Carbon::parse($model->order_date),
+                'startDate' => Carbon::parse($model->order->description['start_date']),
+                'endDate' => Carbon::parse($model->order->description['end_date']),
+            ];
+            $trip_start_date = Carbon::parse($dates['startDate']);
+            $trip_end_date = Carbon::parse($dates['endDate']);
+            $formattedDates = array_map(function ($date) {
+                return [
+                    'day' => $date->format('d'),
+                    'month' => $date->locale('AZ')->monthName,
+                    'year' => $date->format('y'),
+                ];
+            }, $dates);
+            $attributes = $model->order->attributes->toArray();
+            $templateProcessor->setValue('orderno', $model->order_no);
+            $templateProcessor->setValue('day', $formattedDates['givenDate']['day']);
+            $templateProcessor->setValue('month', $formattedDates['givenDate']['month']);
+            $templateProcessor->setValue('year', $formattedDates['givenDate']['year']);
+            $templateProcessor->setValue('duration', $trip_start_date->diffInDays($trip_end_date));
+            $templateProcessor->setValue('location', $model->order->description['location']);
+            $templateProcessor->setValue('start_day', $formattedDates['startDate']['day']);
+            $templateProcessor->setValue('start_month', $formattedDates['startDate']['month']);
+            $templateProcessor->setValue('start_year', $formattedDates['startDate']['year']);
+            $templateProcessor->setValue('end_day', $formattedDates['endDate']['day']);
+            $templateProcessor->setValue('end_month', $formattedDates['endDate']['month']);
+            $templateProcessor->setValue('end_year', $formattedDates['endDate']['year']);
+            $templateProcessor->cloneRow('rank', count($attributes));
+            foreach ($attributes as $index => $row) {
+                $templateProcessor->setValue('rank#'.($index + 1), $row['attributes']['$rank']['value']);
+                $templateProcessor->setValue('fullname#'.($index + 1), $row['attributes']['$fullname']['value']);
+                $templateProcessor->setValue('weapon#'.($index + 1), $row['attributes']['$weapon']['value']);
+                $templateProcessor->setValue('bullet#'.($index + 1), $row['attributes']['$bullet']['value'] ?? '32');
+            }
+        } else {
+            $suffixService = new WordSuffixService;
+        }
+
+
+
+        $filename = "{$model->personnel->fullname}_mezuniyyet_{$model->start_date->format('d.m.Y')}";
+        $templateProcessor->saveAs($filename.'.docx');
+
+        return response()->download($filename.'.docx')->deleteFileAfterSend();
     }
 
     protected function returnData($type = 'normal')

@@ -101,7 +101,7 @@ class Vacations extends Component
         $templateProcessor->setValue('end_year', $formattedDates['endDate']['year']);
         $templateProcessor->setValue('work_day', $formattedDates['returnWorkDate']['day']);
         $templateProcessor->setValue('work_month', $formattedDates['returnWorkDate']['month']);
-        $templateProcessor->setValue('work_year', $formattedDates['returnWorkDate']['year'] );
+        $templateProcessor->setValue('work_year', $formattedDates['returnWorkDate']['year']);
         $templateProcessor->setValue('rank_signature', $chief->latestRank?->rank?->name);
         $templateProcessor->setValue('person_signature', $chief->fullname);
 

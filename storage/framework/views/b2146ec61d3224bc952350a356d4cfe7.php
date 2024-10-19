@@ -480,15 +480,18 @@
 
                     <?php if (isset($component)) { $__componentOriginal3ee30789824fd1cc17cb4ff8e03df656 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal3ee30789824fd1cc17cb4ff8e03df656 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table.tbl','data' => ['headers' => [__('#'),__('Fullname'),__('Dates'),__('Locations'),__('Order'),'action']]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table.tbl','data' => ['headers' => [__('#'),__('Fullname'),__('Dates'),__('Locations'),__('Order'),'action'],'wire:transition' => true]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('table.tbl'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['headers' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute([__('#'),__('Fullname'),__('Dates'),__('Locations'),__('Order'),'action'])]); ?>
+<?php $component->withAttributes(['headers' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute([__('#'),__('Fullname'),__('Dates'),__('Locations'),__('Order'),'action']),'wire:transition' => true]); ?>
                         <!--[if BLOCK]><![endif]--><?php $__empty_1 = true; $__currentLoopData = $this->businessTrips; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $_bTrip): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                            <?php
+                                $multi = $_bTrip->order->businessTrips->count() > 1;
+                            ?>
                             <tr class="<?php echo \Illuminate\Support\Arr::toCssClasses([
                                 'bg-teal-50' => $_bTrip->end_date > \Carbon\Carbon::now()
                             ]); ?>">
@@ -633,7 +636,17 @@
                                     <div class="flex flex-col text-sm font-medium">
                                         <div class="flex items-center space-x-1">
                                             <span class="text-gray-500"><?php echo e(__('Order #')); ?>:</span>
-                                            <a href="<?php echo e(route('orders',['search' => ['order_no' =>  $_bTrip->order_no ]])); ?>" class="text-blue-600"><?php echo e($_bTrip->order_no); ?></a>
+                                            <a href="<?php echo e(route('orders',['search' => ['order_no' => $_bTrip->order_no]])); ?>" class="text-blue-600"><?php echo e($_bTrip->order_no); ?></a>
+                                            <!--[if BLOCK]><![endif]--><?php if($multi): ?>
+                                                <button
+                                                    wire:click="printBusinessTripDocument('<?php echo e($_bTrip->id); ?>',<?php echo e($multi); ?>)"
+                                                    class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-teal-50 hover:text-gray-700"
+                                                >
+                                                    <svg class="w-6 h-6 text-teal-500" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z"></path>
+                                                    </svg>
+                                                </button>
+                                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                         </div>
                                         <div class="flex items-center space-x-1">
                                             <span class="text-gray-500"><?php echo e(__('Given by')); ?>:</span>
@@ -665,14 +678,16 @@
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
 <?php $component->withAttributes(['isButton' => true]); ?>
-                                    <button
-                                        wire:click="printBusinessTripDocument('<?php echo e($_bTrip->id); ?>')"
-                                        class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-teal-50 hover:text-gray-700"
-                                    >
-                                        <svg class="w-6 h-6 text-teal-500" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z"></path>
-                                        </svg>
-                                    </button>
+                                    <!--[if BLOCK]><![endif]--><?php if(! $multi): ?>
+                                        <button
+                                            wire:click="printBusinessTripDocument('<?php echo e($_bTrip->id); ?>',<?php echo e($multi); ?>)"
+                                            class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-teal-50 hover:text-gray-700"
+                                        >
+                                            <svg class="w-6 h-6 text-teal-500" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z"></path>
+                                            </svg>
+                                        </button>
+                                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                  <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b)): ?>
@@ -732,6 +747,5 @@
 <?php $component = $__componentOriginal2686ed4927c64f67d2844e9b73af898c; ?>
 <?php unset($__componentOriginal2686ed4927c64f67d2844e9b73af898c); ?>
 <?php endif; ?>
-    
 </div>
 <?php /**PATH /Users/togruljalalli/Desktop/projects/HR-CRM/resources/views/livewire/outside/business-trips.blade.php ENDPATH**/ ?>

@@ -118,6 +118,14 @@
                         </div>
 
                         <div class="flex flex-col">
+                            <div class="flex flex-col">
+                                <x-label for="selected_personnel_list.{{$i}}.{{ $keyPerson }}.bullet">{{ __('Bullet') }}</x-label>
+                                <x-livewire-input
+                                    mode="default"
+                                    name="selected_personnel_list.{{$i}}.{{ $keyPerson }}.bullet"
+                                    wire:model="selected_personnel_list.{{$i}}.{{ $keyPerson }}.bullet"
+                                ></x-livewire-input>
+                            </div>
                             <x-checkbox name="hasServiceDog" model="selected_personnel_list.{{$i}}.{{ $keyPerson }}.service_dog">{{ __('Service dog?') }}</x-checkbox>
                         </div>
 
