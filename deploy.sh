@@ -13,7 +13,7 @@ git commit -m "$commit_message"
 git push origin main
 
 # Execute commands on the remote server
-ssh root@172.31.31.38 << 'EOF'
+ssh toor@172.31.31.38 << 'EOF'
 cd /home/toor/hr_crm
 git pull origin main --force
 php artisan migrate
