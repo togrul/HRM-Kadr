@@ -14,7 +14,7 @@ git push origin main
 
 # Execute commands on the remote server
 ssh toor@172.31.31.38 << 'EOF'
-cd /home/toor/hr_crm
+cd /home/toor/hr-crm
 git pull origin main --force
 php artisan migrate
 php artisan cache:clear
