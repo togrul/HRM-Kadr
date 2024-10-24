@@ -1,2 +1,2 @@
-<img src="<?php echo e(asset('assets/images/logo.png')); ?>" alt="logo" class="h-28" />
+<img src="<?php echo e(asset('assets/images/logo.png')); ?>" alt="logo" class="h-40" />
 <?php /**PATH /Users/togruljalalli/Desktop/projects/HR-CRM/resources/views/components/application-logo.blade.php ENDPATH**/ ?>
