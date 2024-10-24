@@ -1,0 +1,68 @@
+{
+  "resources/css/app.css": {
+    "file": "assets/app-14d1e2a9.css",
+    "isEntry": true,
+    "src": "resources/css/app.css"
+  },
+  "resources/fonts/CircularSpTitle-Bold.woff2": {
+    "file": "assets/CircularSpTitle-Bold-1d752805.woff2",
+    "src": "resources/fonts/CircularSpTitle-Bold.woff2"
+  },
+  "resources/fonts/CircularSpTitle-Tall.woff2": {
+    "file": "assets/CircularSpTitle-Tall-c54f9e75.woff2",
+    "src": "resources/fonts/CircularSpTitle-Tall.woff2"
+  },
+  "resources/fonts/CircularSpotify-Black.woff2": {
+    "file": "assets/CircularSpotify-Black-ec2b383c.woff2",
+    "src": "resources/fonts/CircularSpotify-Black.woff2"
+  },
+  "resources/fonts/CircularSpotify-Bold.woff2": {
+    "file": "assets/CircularSpotify-Bold-faad3530.woff2",
+    "src": "resources/fonts/CircularSpotify-Bold.woff2"
+  },
+  "resources/fonts/CircularSpotify-Regular.woff2": {
+    "file": "assets/CircularSpotify-Regular-5fe0f1f2.woff2",
+    "src": "resources/fonts/CircularSpotify-Regular.woff2"
+  },
+  "resources/fonts/DMSans-Black.ttf": {
+    "file": "assets/DMSans-Black-036b45a2.ttf",
+    "src": "resources/fonts/DMSans-Black.ttf"
+  },
+  "resources/fonts/DMSans-Bold.ttf": {
+    "file": "assets/DMSans-Bold-7f5b8463.ttf",
+    "src": "resources/fonts/DMSans-Bold.ttf"
+  },
+  "resources/fonts/DMSans-ExtraBold.ttf": {
+    "file": "assets/DMSans-ExtraBold-07991b56.ttf",
+    "src": "resources/fonts/DMSans-ExtraBold.ttf"
+  },
+  "resources/fonts/DMSans-ExtraLight.ttf": {
+    "file": "assets/DMSans-ExtraLight-b0952a65.ttf",
+    "src": "resources/fonts/DMSans-ExtraLight.ttf"
+  },
+  "resources/fonts/DMSans-Light.ttf": {
+    "file": "assets/DMSans-Light-1eace982.ttf",
+    "src": "resources/fonts/DMSans-Light.ttf"
+  },
+  "resources/fonts/DMSans-Medium.ttf": {
+    "file": "assets/DMSans-Medium-32c8fe18.ttf",
+    "src": "resources/fonts/DMSans-Medium.ttf"
+  },
+  "resources/fonts/DMSans-Regular.ttf": {
+    "file": "assets/DMSans-Regular-7a73e6aa.ttf",
+    "src": "resources/fonts/DMSans-Regular.ttf"
+  },
+  "resources/fonts/DMSans-SemiBold.ttf": {
+    "file": "assets/DMSans-SemiBold-cd4f7b02.ttf",
+    "src": "resources/fonts/DMSans-SemiBold.ttf"
+  },
+  "resources/fonts/DMSans-Thin.ttf": {
+    "file": "assets/DMSans-Thin-e6ba3eb2.ttf",
+    "src": "resources/fonts/DMSans-Thin.ttf"
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-ddee773b.js",
+    "isEntry": true,
+    "src": "resources/js/app.js"
+  }
+}
