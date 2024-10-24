@@ -1,14 +1,11 @@
 <x-guest-layout>
-    <div class="w-full sm:max-w-3xl bg-white dark:bg-gray-800 shadow-sm overflow-hidden sm:rounded-lg grid grid-cols-1 sm:grid-cols-2">
-        <div class="w-full relative">
-            <img src="{{ asset('/assets/images/hr.jpg') }}" alt="" class="w-full h-full">
-            <div class="absolute bottom-0 px-4 py-6 bg-gray-200/50 z-20 w-full flex items-end justify-center">
-                <a href="/">
-                    <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
-                </a>
-            </div>
-        </div>
-        <div class="flex flex-col space-y-4 py-10 px-8 justify-center">
+    <a href="/" class="py-2">
+        <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
+    </a>
+    <div class="w-full sm:max-w-lg bg-white dark:bg-gray-800 shadow-sm overflow-hidden sm:rounded-lg">
+
+        <div class="flex flex-col w-full space-y-4 py-10 px-8 justify-center">
+
            <h1 class="text-black font-title font-bold text-2xl text-center">{{ __('Human Resources Management system') }}</h1>
             <div class="">
                 <!-- Session Status -->
