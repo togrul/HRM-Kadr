@@ -115,9 +115,7 @@
                 <button class="flex justify-center items-center rounded-lg p-1 shadow-sm absolute right-0 top-0 bg-slate-50 text-rose-500"
                         wire:click="deleteRow"
                 >
-                    <svg data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="w-5 h-5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"></path>
-                    </svg>
+                    @include('components.icons.remove-icon',['color' => 'text-slate-500','hover' => 'text-slate-600'])
                 </button>
                 @endif
                 <div class="flex flex-col space-y-2">
@@ -156,9 +154,7 @@
 
         <div class="flex justify-center items-center">
             <button class="rounded-lg shadow-sm bg-gray-100 text-slate-900 px-6 py-2 font-medium text-sm flex justify-center items-center space-x-2" wire:click="addRow">
-                <svg data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="w-6 h-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"></path>
-                </svg>
+                @include('components.icons.add-icon')
                 <span class="uppercase">{{ __('Add') }}</span>
             </button>
         </div>

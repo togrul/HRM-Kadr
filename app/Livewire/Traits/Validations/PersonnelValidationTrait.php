@@ -46,6 +46,8 @@ trait PersonnelValidationTrait
                 'document.born_city_id.id' => 'required|int|exists:cities,id',
                 'document.is_married' => 'required|boolean',
                 'document.height' => 'required|int',
+                'service_cards.card_number' => 'required|string|min:3',
+                'service_cards.valid_date' => 'required|date'
             ],
             3 => [
                 'education.educational_institution_id.id' => 'required|int|exists:educational_institutions,id',
@@ -174,6 +176,8 @@ trait PersonnelValidationTrait
             'document.born_city_id.id' => __('City'),
             'document.is_married' => __('Family status'),
             'document.height' => __('Height'),
+            'service_cards.card_number' => __('Service cards'),
+            'service_cards.valid_date' => __('Valid date'),
             'education.educational_institution_id.id' => __('Institution'),
             'education.education_form_id.id' => __('Education form'),
             'education.education_language' => __('Education language'),

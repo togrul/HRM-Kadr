@@ -5,6 +5,7 @@ namespace App\Livewire\Personnel;
 use App\Livewire\Traits\PersonnelCrud;
 use App\Models\Personnel;
 use App\Models\PersonnelAward;
+use App\Models\PersonnelCard;
 use App\Models\PersonnelCriminal;
 use App\Models\PersonnelEducation;
 use App\Models\PersonnelElectedElectoral;
@@ -45,6 +46,13 @@ class AddPersonnel extends Component
                 $documentInstance = new PersonnelIdentityDocument;
                 $documentData = $this->modifyArray($this->document, $documentInstance->dateList());
                 $personnel->idDocuments()->create($documentData);
+            }
+            if (! empty($this->service_cards_list)) {
+                foreach ($this->service_cards_list as $card) {
+                    $serviceCardInstance = new PersonnelCard;
+                    $extData = $this->modifyArray($card, $serviceCardInstance->dateList());
+                    $personnel->cards()->create($extData);
+                }
             }
             if (in_array('education', $this->completedSteps)) {
                 $educationInstance = new PersonnelEducation;

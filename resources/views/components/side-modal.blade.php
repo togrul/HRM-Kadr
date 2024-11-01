@@ -61,11 +61,9 @@
                x-transition:leave-end="transform opacity-0"
                style="display: none;"
            >
-             <button @click="isOpen=false;$wire.call('closeSideMenu');document.body.classList.remove('overflow-hidden')" class="z-20 p-1 text-white rounded-lg bg-gray-300 hover:text-white hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-white">
+             <button @click="isOpen=false;$wire.call('closeSideMenu');document.body.classList.remove('overflow-hidden')" class="z-20 p-1 text-white rounded-lg hover:text-white focus:outline-none focus:ring-2 focus:ring-white">
                <span class="sr-only">{{ __('Close') }}</span>
-               <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-               </svg>
+                 @include('components.icons.remove-icon',['size' => 'w-7 h-7','color' => 'text-slate-500','hover' => 'text-slate-900'])
              </button>
            </div>
 

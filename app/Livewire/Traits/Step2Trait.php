@@ -23,6 +23,9 @@ trait Step2Trait
 
     public $searchCity;
 
+    public $service_cards_list = [];
+    public $service_cards = [];
+
     public function getDataByPin()
     {
         $pin = $this->document['pin'] ?? '';
@@ -70,10 +73,24 @@ trait Step2Trait
         // $result = json_decode($data);
     }
 
+    public function addServiceCard() {
+        $this->validate($this->exceptArray('document'));
+        $this->service_cards_list[] = $this->service_cards;
+        $this->service_cards = [];
+    }
+
+    public function forceDeleteServiceCard($key) {
+        unset($this->service_cards_list[$key]);
+    }
+
     public function mountStep2Trait()
     {
         $this->documentNationalityName = $this->documentBornCountryName = $this->documentBornCityName = '---';
-        ! empty($this->personnelModel) && $this->fillIdDocument();
+        if(! empty($this->personnelModel))
+        {
+            $this->fillIdDocument();
+            $this->fillServiceCards();
+        }
     }
 
     protected function fillIdDocument()
@@ -97,6 +114,20 @@ trait Step2Trait
                 $this->handleRelatedEntity(entity: 'born_city', field: 'born_city_id', fillTo: 'document', getFrom: $updateIdDocument, titleField: 'name', differentSelectInput: 'documentBornCity');
             }
         }
+    }
 
+    protected function fillServiceCards()
+    {
+        $updateServiceCards = $this->personnelModelData->cards->toArray();
+        if (! empty($updateServiceCards)) {
+            foreach ($updateServiceCards as $key => $uptServiceCard) {
+                $this->service_cards_list[] = $this->mapAttributes(
+                    attributes: [
+                        'card_number', 'valid_date',
+                    ],
+                    getFrom: $uptServiceCard
+                );
+            }
+        }
     }
 }

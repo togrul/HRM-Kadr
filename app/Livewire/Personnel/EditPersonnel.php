@@ -5,6 +5,7 @@ namespace App\Livewire\Personnel;
 use App\Livewire\Traits\PersonnelCrud;
 use App\Models\Personnel;
 use App\Models\PersonnelAward;
+use App\Models\PersonnelCard;
 use App\Models\PersonnelCriminal;
 use App\Models\PersonnelEducation;
 use App\Models\PersonnelElectedElectoral;
@@ -70,7 +71,6 @@ class EditPersonnel extends Component
         if (! empty($this->avatar)) {
             $this->personnel['photo'] = $this->avatar->store('personnel', 'public');
         }
-
         $personnelData = $this->modifyArray($this->personnel, $this->personnelModelData->dateList());
 
         ($this->step == 2 || $this->step == 3) && $this->completeStep();
@@ -81,6 +81,18 @@ class EditPersonnel extends Component
                 $documentInstance = new PersonnelIdentityDocument;
                 $documentData = $this->modifyArray($this->document, $documentInstance->dateList());
                 $this->personnelModelData->idDocuments()->updateOrCreate(['tabel_no' => $this->personnelModelData->tabel_no], $documentData);
+            }
+            if (! empty($this->service_cards_list)) {
+                foreach ($this->service_cards_list as $card) {
+                    $serviceCardInstance = new PersonnelCard;
+                    $extData = $this->modifyArray($card, $serviceCardInstance->dateList());
+                    $extDataList[] = $extData;
+                    $this->personnelModelData->cards()->updateOrCreate(['card_number' => $card['card_number']], $extData);
+                }
+                $IdToKeep = collect($extDataList)->pluck('card_number');
+                $this->personnelModelData->cards()->whereNotIn('card_number', $IdToKeep)->delete();
+            } else {
+                $this->personnelModelData->cards()->delete();
             }
             if (in_array('education', $this->completedSteps)) {
                 $educationInstance = new PersonnelEducation;

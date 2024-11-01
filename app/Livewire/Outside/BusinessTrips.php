@@ -7,7 +7,6 @@ use App\Livewire\Traits\SelectListTrait;
 use App\Models\OrderType;
 use App\Models\PersonnelBusinessTrip;
 use App\Models\Structure;
-use App\Models\Weapon;
 use App\Services\WordSuffixService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -110,8 +109,6 @@ class BusinessTrips extends Component
             $suffixService = new WordSuffixService;
             //home
         }
-
-
 
         $filename = "{$model->personnel->fullname}_mezuniyyet_{$model->start_date->format('d.m.Y')}";
         $templateProcessor->saveAs($filename.'.docx');

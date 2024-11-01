@@ -157,6 +157,17 @@ class Personnel extends Model
         return $this->hasOne(PersonnelIdentityDocument::class, 'tabel_no', 'tabel_no');
     }
 
+    public function cards(): HasMany
+    {
+        return $this->hasMany(PersonnelCard::class, 'tabel_no', 'tabel_no');
+    }
+
+    public function validCard(): HasOne
+    {
+        return $this->hasOne(PersonnelCard::class, 'tabel_no', 'tabel_no')
+                    ->where('valid_date','>', Carbon::now()->format('Y-m-d'));
+    }
+
     public function education(): HasOne
     {
         return $this->hasOne(PersonnelEducation::class, 'tabel_no', 'tabel_no');

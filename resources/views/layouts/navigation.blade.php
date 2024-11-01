@@ -12,29 +12,33 @@
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                    <x-nav-link  wire:navigate :href="route('candidates')" :active="request()->routeIs('candidates')">
-                        {{ __('Candidates') }}
+                    <x-nav-link class="space-x-2"  wire:navigate :href="route('candidates')" :active="request()->routeIs('candidates')">
+                        @include('components.icons.users-icon',request()->routeIs('candidates') ? ['color' => 'text-gray-900'] : ['color' => 'text-gray-400'])
+                        <span>{{ __('Candidates') }}</span>
                     </x-nav-link>
-                    <x-nav-link  wire:navigate :href="route('vacations.list')" :active="request()->routeIs('vacations.list')">
-                        {{ __('Vacations') }}
+                    <x-nav-link class="space-x-2" wire:navigate :href="route('vacations.list')" :active="request()->routeIs('vacations.list')">
+                        @include('components.icons.home-icon',request()->routeIs('vacations.list') ? ['color' => 'text-gray-900'] : ['color' => 'text-gray-400'])
+                        <span>{{ __('Vacations') }}</span>
                     </x-nav-link>
-                    <x-nav-link  wire:navigate :href="route('business-trips.list')" :active="request()->routeIs('business-trips.list')">
-                        {{ __('Business trips') }}
+                    <x-nav-link class="space-x-2" wire:navigate :href="route('business-trips.list')" :active="request()->routeIs('business-trips.list')">
+                        @include('components.icons.location-icon',request()->routeIs('business-trips.list') ? ['color' => 'text-gray-900'] : ['color' => 'text-gray-400'])
+                        <span>{{ __('Business trips') }}</span>
                     </x-nav-link>
                 </div>
             </div>
 
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ml-6">
-                <x-dropdown align="right" width="48">
+                <x-dropdown align="right">
                     <x-slot name="trigger">
-                        <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
-                            <div>{{ Auth::user()->name }}</div>
+                        <button class="bg-gray-100 border border-gray-200 inline-flex items-center px-3 py-2 text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
+                            <div class="flex flex-col items-start">
+                                <span class="text-sm text-gray-900">{{ Auth::user()->name }}</span>
+                                <span class="text-xs">{{ Auth::user()->email }}</span>
+                            </div>
 
-                            <div class="ml-1">
-                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                </svg>
+                            <div class="ml-4">
+                                @include('components.icons.arrow-icon' ,['size' => 'w-5 h-5'])
                             </div>
                         </button>
                     </x-slot>

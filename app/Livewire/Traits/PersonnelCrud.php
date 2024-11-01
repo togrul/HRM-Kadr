@@ -62,42 +62,50 @@ trait PersonnelCrud
             2 => 'document',
             3 => 'education'
         };
-        if (count($this->{$stepName}) > 0) {
-            $validator = ! empty($this->extra_education_list)
-                            ? $this->exceptArray('extra_education')
-                            : $this->validationRules()[$this->step];
+
+        if ($stepName && count($this->{$stepName}) > 0) {
+            // Determine validation rules based on conditions
+            $validator = match (true) {
+                ! empty($this->service_cards_list) => $this->exceptArray('service_cards'),
+                ! empty($this->extra_education_list) => $this->exceptArray('extra_education'),
+                default => $this->validationRules()[$this->step] ?? []
+            };
+
             $this->validate($validator);
-            ! in_array($stepName, $this->completedSteps) && $this->completedSteps[] = $stepName;
+
+            // Add step to completedSteps if not already added
+            if (! in_array($stepName, $this->completedSteps)) {
+                $this->completedSteps[] = $stepName;
+            }
         }
     }
 
     public function nextStep()
     {
         $this->isAddedRank = false;
-        if (
-            ($this->step == 3 && ! empty($this->extra_education_list)) ||
-            ($this->step == 4 && ! empty($this->labor_activities_list))
-        ) {
-            $exceptValidation = match ($this->step) {
-                3 => 'extra_education',
-                4 => 'labor_activities',
-                default => ''
-            };
-            $validator = $this->exceptArray($exceptValidation);
-            ! empty($validator) && $this->validate($validator);
+
+        $exceptValidation = [
+            2 => 'service_cards',
+            3 => 'extra_education',
+            4 => 'labor_activities',
+        ];
+
+        if (isset($exceptValidation[$this->step]) && ! empty($this->{$exceptValidation[$this->step].'_list'})) {
+            $validator = $this->exceptArray($exceptValidation[$this->step]);
         } else {
-            $this->validate($this->validationRules()[$this->step]);
+            $validator = $this->validationRules()[$this->step] ?? [];
         }
 
-        $this->step++;
+        ! empty($validator) && $this->validate($validator);
 
+        $this->step++;
     }
 
     private function getSteps()
     {
         return [
             1 => __('Personal Information'),
-            2 => __('ID document'),
+            2 => __('Cards'),
             3 => __('Education'),
             4 => __('Labor activities'),
             5 => __('Military'),
