@@ -5,7 +5,7 @@
     'show' => null
 ])
 
-<x-icons.root animated="true" x-show="{{$show}}" :$size :$color :$hover>
+<x-icons.root animated="true" x-show="{{ $show ?? 'true' }}" :$size :$color :$hover>
     <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
         <rect x="0" y="0" width="24" height="24"/>
         <circle fill="currentColor" opacity="0.3" cx="12" cy="12" r="10"/>

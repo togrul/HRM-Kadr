@@ -290,24 +290,24 @@ trait OrderCrud
                 'end_date' => $componentRow['end_date'],
                 'component_id' => $componentRow['component_id'],
                 'row' => $row,
+                'position' => $_final['position'],
+                'location' => $_final['location'] ?? '',
             ];
 
             switch ($selectedBlade) {
                 case Order::BLADE_VACATION:
-                    $columns['position'] = $_final['position'];
                     $columns['days'] = $componentRow['days'];
-                    $columns['location'] = $_final['location'] ?? '';
                     break;
                 case Order::BLADE_BUSINESS_TRIP:
-                    $columns['location'] = $componentRow['location'];
                     $columns['meeting_hour'] = $componentRow['meeting_hour'];
                     $columns['return_month'] = $componentRow['return_month'];
                     $columns['return_day'] = $componentRow['return_day'];
                     $columns['transportation'] = $_final['transportation'] ?? [];
-                    $columns['car'] = $_final['car'] ?? "";
+                    $columns['car'] = $_final['car'] ?? '';
                     $columns['weapon'] = $_final['weapon'];
                     $columns['bullet'] = $_final['bullet'] ?? 32;
                     $columns['service_dog'] = $_final['service_dog'] ?? false;
+                    $columns['passport'] = $_final['passport'] ?? '';
                     break;
             }
 
@@ -419,7 +419,7 @@ trait OrderCrud
 
     public function addToList(string $tabelno, int $row): void
     {
-        $person = Personnel::with(['latestRank.rank', 'structure', 'position', 'activeWeapons', 'activeWeapons.weapon'])
+        $person = Personnel::with(['latestRank.rank', 'idDocuments', 'structure', 'position', 'activeWeapons', 'activeWeapons.weapon'])
             ->where('tabel_no', $tabelno)
             ->first();
 
@@ -428,18 +428,21 @@ trait OrderCrud
             'key' => $tabelno,
             'rank' => $person->latestRank?->rank->name,
             'fullname' => $person->fullname,
-            'structure' => $person->structure->name,
         ];
 
         switch ($this->selectedBlade) {
             case Order::BLADE_VACATION:
                 $data['position'] = $person->position->name;
+                $data['structure'] = $person->structure->name;
                 break;
             case Order::BLADE_BUSINESS_TRIP:
                 $personWeapons = collect($person->activeWeapons)
                     ->map(fn ($activeWeapon) => "{$activeWeapon->weapon->name} №_{$activeWeapon->weapon_serial}")
                     ->implode(' ');
+                $data['position'] = $person->position->name;
+                $data['passport'] = $person->idDocuments->serialNumber ?? '';
                 $data['weapon'] = $personWeapons;
+                $data['structure'] = $this->getStructureFull($person->structure);
                 break;
         }
 
@@ -448,6 +451,19 @@ trait OrderCrud
         $this->selected_personnel_list['personnels'][] = $tabelno;
 
         $this->reset('personnel_name');
+    }
+
+    protected function getStructureFull($structure)
+    {
+        $structureName = $structure?->topLevelParent() ?? $structure->name;
+        $suffixService = new WordSuffixService;
+
+        $levels = array_column(StructureEnum::cases(), 'name', 'value');
+        $levelName = __(strtolower($levels[$structure->level]) ?? '');
+
+        return is_numeric($structureName)
+                ? "{$structureName}{$suffixService->getNumberSuffix((int) $structureName)} {$levelName}"
+                : $structureName;
     }
 
     public function removeFromList($_currentRow, $_mainRow): void

@@ -20,6 +20,37 @@
             }
         })
 ">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 lg:grid-cols-4 px-6 py-4">
+        <div class="flex flex-col">
+            <x-label for="search.order_no">{{ __('Search') }}</x-label>
+            <x-livewire-input mode="gray" name="search.order_no" wire:model="search.order_no"></x-livewire-input>
+        </div>
+        <div class="flex flex-col">
+            <x-label for="search.given_date">{{ __('Given date') }}</x-label>
+            <div class="flex space-x-1 items-center">
+                <x-pikaday-input mode="gray" name="search.given_date.min" format="Y-MM-DD" wire:model="search.given_date.min">
+                    <x-slot name="script">
+                        $el.onchange = function () {
+                        @this.set('search.given_date.min', $el.value);
+                        }
+                    </x-slot>
+                </x-pikaday-input>
+                <span>-</span>
+                <x-pikaday-input mode="gray" name="search.given_date.max" format="Y-MM-DD" wire:model="search.given_date.max">
+                    <x-slot name="script">
+                        $el.onchange = function () {
+                        @this.set('search.given_date.max', $el.value);
+                        }
+                    </x-slot>
+                </x-pikaday-input>
+            </div>
+        </div>
+        <div class="flex items-end space-x-2">
+            <x-button mode="primary" wire:click="searchFilter">{{ __('Search') }}</x-button>
+            <x-button mode="black" wire:click="resetFilter">{{ __('Reset') }}</x-button>
+        </div>
+    </div>
+
     <div class="flex flex-col space-y-4 px-6 py-4">
         <div class="flex justify-between items-center">
             <div class="flex flex-col items-center justify-between sm:flex-row filter bg-white py-2 px-2 rounded-xl">

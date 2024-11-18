@@ -19,14 +19,19 @@ class PersonnelRank extends Model
         'rank_id',
         'name',
         'given_date',
+        'order_no',
+        'order_given_by',
+        'order_date',
     ];
 
     protected $dates = [
         'given_date',
+        'order_date',
     ];
 
     protected $casts = [
         'given_date' => 'date:d.m.Y',
+        'order_date' => 'date:d.m.Y',
     ];
 
     public function rank(): BelongsTo

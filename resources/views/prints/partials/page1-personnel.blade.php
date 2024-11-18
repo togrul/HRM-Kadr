@@ -36,14 +36,45 @@
             <th>əmr kim tərəfindən verilib,əmrin №-si və tarixi</th>
         </thead>
         <tbody>
-        @for($i = 0;$i < 18;$i++)
+        @php
+            $rankChunks = $personnel->ranksASC->chunk(18);
+            $maxRows = 18;
+        @endphp
+        @for($i = 0; $i < $maxRows; $i++)
             <tr>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
+                @if(isset($rankChunks[0][$i]))
+                    <td>{{ $rankChunks[0][$i]->rank->name }}</td>
+                    <td>{{ $rankChunks[0][$i]->order_given_by }}, {{ $rankChunks[0][$i]->order_no }} {{ $rankChunks[0][$i]->order_date->format('d.m.Y') }}</td>
+                @else
+                    <td></td>
+                    <td></td>
+                @endif
+
+                @if(isset($rankChunks[1][$i]))
+                    <td>{{ $rankChunks[1][$i]->rank->name }}</td>
+                    <td>{{ $rankChunks[1][$i]->order_given_by }}, {{ $rankChunks[1][$i]->order_no }} {{ $rankChunks[1][$i]->order_date->format('d.m.Y') }}</td>
+                @else
+                    <td></td>
+                    <td></td>
+                @endif
             </tr>
         @endfor
+{{--        @foreach($personnel->ranksASC as $rank)--}}
+{{--            <tr>--}}
+{{--                <td>{{ $rank->rank->name }}</td>--}}
+{{--                <td>{{ $rank->order_given_by }}, {{ $rank->order_no }} {{ $rank->order_date->format('d.m.Y') }}</td>--}}
+{{--                <td></td>--}}
+{{--                <td></td>--}}
+{{--            </tr>--}}
+{{--        @endforeach--}}
+{{--        @for($i = 0;$i < 18;$i++)--}}
+{{--            <tr>--}}
+{{--                <td></td>--}}
+{{--                <td></td>--}}
+{{--                <td></td>--}}
+{{--                <td></td>--}}
+{{--            </tr>--}}
+{{--        @endfor--}}
         </tbody>
     </table>
 </div>

@@ -24,16 +24,17 @@
 } ?>
 <?php unset($__defined_vars); ?>
 
-<div class="flex items-center w-full pt-4">
-     <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.button','data' => ['mode' => 'primary','class' => 'items-center justify-center space-x-0 px-4 py-2','wire:click' => 'store','wire:loading.attr' => 'disabled','type' => 'submit','disabled' => $disabled]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<div  <?php echo e($attributes->merge(['class' => 'flex items-center w-full pt-4'])); ?>>
+     <?php if (isset($component)) { $__componentOriginald0f1fd2689e4bb7060122a5b91fe8561 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginald0f1fd2689e4bb7060122a5b91fe8561 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.button','data' => ['mode' => $mode,'class' => 'items-center justify-center space-x-0 px-4 py-2','wire:click' => 'store','wire:loading.attr' => 'disabled','type' => 'submit','disabled' => $disabled]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('button'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['mode' => 'primary','class' => 'items-center justify-center space-x-0 px-4 py-2','wire:click' => 'store','wire:loading.attr' => 'disabled','type' => 'submit','disabled' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($disabled)]); ?>
+<?php $component->withAttributes(['mode' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($mode),'class' => 'items-center justify-center space-x-0 px-4 py-2','wire:click' => 'store','wire:loading.attr' => 'disabled','type' => 'submit','disabled' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($disabled)]); ?>
          <svg wire:loading wire:target='store' class="w-5 h-5 mr-3 -ml-1 text-white animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -41,8 +42,13 @@
           <span><?php echo e($slot); ?></span>
       <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
-<?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
-<?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
-<?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
+<?php if (isset($__attributesOriginald0f1fd2689e4bb7060122a5b91fe8561)): ?>
+<?php $attributes = $__attributesOriginald0f1fd2689e4bb7060122a5b91fe8561; ?>
+<?php unset($__attributesOriginald0f1fd2689e4bb7060122a5b91fe8561); ?>
 <?php endif; ?>
- </div><?php /**PATH /Users/togruljalalli/Desktop/projects/HR-CRM/resources/views/components/modal-button.blade.php ENDPATH**/ ?>
+<?php if (isset($__componentOriginald0f1fd2689e4bb7060122a5b91fe8561)): ?>
+<?php $component = $__componentOriginald0f1fd2689e4bb7060122a5b91fe8561; ?>
+<?php unset($__componentOriginald0f1fd2689e4bb7060122a5b91fe8561); ?>
+<?php endif; ?>
+ </div>
+<?php /**PATH /Users/togruljalalli/Desktop/projects/HR-CRM/resources/views/components/modal-button.blade.php ENDPATH**/ ?>

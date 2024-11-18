@@ -60,7 +60,7 @@ class BusinessTrips extends Component
 
     public function printBusinessTripDocument(PersonnelBusinessTrip $model, $multi = false)
     {
-        $model->load(['personnel', 'order.orderType', 'order.attributes']);
+        $model->load(['personnel', 'order.orderType', 'order.attributes', 'personnel.idDocuments']);
         $filepath = $multi
                     ? '/storage/templates/general/Ezamiyyet-vesiqesi.docx'
                     : '/storage/templates/general/Ezamiyyet-kagizi.docx';
@@ -69,35 +69,37 @@ class BusinessTrips extends Component
 
         $templateProcessor = new TemplateProcessor($file);
 
-        if ($multi) {
-//            dd($model->order->description['location']. ' şəhərinə');
-            $dates = [
-                'givenDate' => Carbon::parse($model->order_date),
-                'startDate' => Carbon::parse($model->order->description['start_date']),
-                'endDate' => Carbon::parse($model->order->description['end_date']),
+        $dates = [
+            'givenDate' => Carbon::parse($model->order_date),
+            'startDate' => Carbon::parse($model->order->description['start_date']),
+            'endDate' => Carbon::parse($model->order->description['end_date']),
+        ];
+
+        $tripDuration = $dates['startDate']->diffInDays($dates['endDate']);
+        $formattedDates = array_map(function ($date) {
+            return [
+                'day' => $date->format('d'),
+                'month' => strtolower($date->locale('AZ')->monthName),
+                'year' => $date->format('y'),
             ];
-            $trip_start_date = Carbon::parse($dates['startDate']);
-            $trip_end_date = Carbon::parse($dates['endDate']);
-            $formattedDates = array_map(function ($date) {
-                return [
-                    'day' => $date->format('d'),
-                    'month' => $date->locale('AZ')->monthName,
-                    'year' => $date->format('y'),
-                ];
-            }, $dates);
-            $attributes = $model->order->attributes->toArray();
-            $templateProcessor->setValue('orderno', $model->order_no);
-            $templateProcessor->setValue('day', $formattedDates['givenDate']['day']);
-            $templateProcessor->setValue('month', $formattedDates['givenDate']['month']);
-            $templateProcessor->setValue('year', $formattedDates['givenDate']['year']);
-            $templateProcessor->setValue('duration', $trip_start_date->diffInDays($trip_end_date));
-            $templateProcessor->setValue('location', $model->order->description['location']);
-            $templateProcessor->setValue('start_day', $formattedDates['startDate']['day']);
-            $templateProcessor->setValue('start_month', $formattedDates['startDate']['month']);
-            $templateProcessor->setValue('start_year', $formattedDates['startDate']['year']);
-            $templateProcessor->setValue('end_day', $formattedDates['endDate']['day']);
-            $templateProcessor->setValue('end_month', $formattedDates['endDate']['month']);
-            $templateProcessor->setValue('end_year', $formattedDates['endDate']['year']);
+        }, $dates);
+
+        $attributes = $model->order->attributes->toArray();
+
+        $templateProcessor->setValue('orderno', $model->order_no);
+        $templateProcessor->setValue('day', $formattedDates['givenDate']['day']);
+        $templateProcessor->setValue('month', $formattedDates['givenDate']['month']);
+        $templateProcessor->setValue('year', $formattedDates['givenDate']['year']);
+        $templateProcessor->setValue('duration', $tripDuration);
+        $templateProcessor->setValue('location', $model->order->description['location']);
+        $templateProcessor->setValue('start_day', $formattedDates['startDate']['day']);
+        $templateProcessor->setValue('start_month', $formattedDates['startDate']['month']);
+        $templateProcessor->setValue('start_year', $formattedDates['startDate']['year']);
+        $templateProcessor->setValue('end_day', $formattedDates['endDate']['day']);
+        $templateProcessor->setValue('end_month', $formattedDates['endDate']['month']);
+        $templateProcessor->setValue('end_year', $formattedDates['endDate']['year']);
+        if (!$multi) {
+//            dd($model->order->description['location']. ' şəhərinə');
             $templateProcessor->cloneRow('rank', count($attributes));
             foreach ($attributes as $index => $row) {
                 $templateProcessor->setValue('rank#'.($index + 1), $row['attributes']['$rank']['value']);
@@ -106,11 +108,17 @@ class BusinessTrips extends Component
                 $templateProcessor->setValue('bullet#'.($index + 1), $row['attributes']['$bullet']['value'] ?? '32');
             }
         } else {
-            $suffixService = new WordSuffixService;
-            //home
+//            $suffixService = new WordSuffixService;
+            $filteredAttributes = $model->order->attributes->firstWhere('attributes.$fullname.value', $model->personnel->fullname);
+            $templateProcessor->setValue('passport', $filteredAttributes->attributes['$passport']['value']);
+            $templateProcessor->setValue('position', $filteredAttributes->attributes['$position']['value']);
+            $templateProcessor->setValue('rank', $filteredAttributes->attributes['$rank']['value']);
+            $templateProcessor->setValue('fullname', $filteredAttributes->attributes['$fullname']['value']);
+            $templateProcessor->setValue('weapon', $filteredAttributes->attributes['$weapon']['value'] ?? '---------');
+            $templateProcessor->setValue('bullet', $filteredAttributes->attributes['$bullet']['value'] ?? '---------');
         }
 
-        $filename = "{$model->personnel->fullname}_mezuniyyet_{$model->start_date->format('d.m.Y')}";
+        $filename = "{$model->personnel->fullname}_ezamiyyet_{$model->start_date->format('d.m.Y')}";
         $templateProcessor->saveAs($filename.'.docx');
 
         return response()->download($filename.'.docx')->deleteFileAfterSend();

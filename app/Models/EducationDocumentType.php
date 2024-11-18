@@ -11,6 +11,8 @@ class EducationDocumentType extends Model
 
     public $timestamps = false;
 
+    protected $table = 'education_document_types';
+
     protected $fillable = [
         'id',
         'name',

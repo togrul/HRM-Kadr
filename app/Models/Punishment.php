@@ -25,7 +25,7 @@ class Punishment extends Model
 
     public function type(): BelongsTo
     {
-        return $this->belongsTo(PunishmentType::class);
+        return $this->belongsTo(PunishmentType::class, 'punishment_type_id', 'id');
     }
 
     public function scopeCriminalType($query, $value)

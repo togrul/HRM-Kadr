@@ -13,64 +13,74 @@
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
                     <x-nav-link class="space-x-2"  wire:navigate :href="route('candidates')" :active="request()->routeIs('candidates')">
-                        @include('components.icons.users-icon',request()->routeIs('candidates') ? ['color' => 'text-gray-900'] : ['color' => 'text-gray-400'])
+                        <x-icons.users-icon color="{{ request()->routeIs('candidates') ? 'text-gray-900' : 'text-gray-400' }}"></x-icons.users-icon>
                         <span>{{ __('Candidates') }}</span>
                     </x-nav-link>
                     <x-nav-link class="space-x-2" wire:navigate :href="route('vacations.list')" :active="request()->routeIs('vacations.list')">
-                        @include('components.icons.home-icon',request()->routeIs('vacations.list') ? ['color' => 'text-gray-900'] : ['color' => 'text-gray-400'])
+                        <x-icons.home-icon color="{{ request()->routeIs('vacations.list') ? 'text-gray-900' : 'text-gray-400' }}"></x-icons.home-icon>
                         <span>{{ __('Vacations') }}</span>
                     </x-nav-link>
                     <x-nav-link class="space-x-2" wire:navigate :href="route('business-trips.list')" :active="request()->routeIs('business-trips.list')">
-                        @include('components.icons.location-icon',request()->routeIs('business-trips.list') ? ['color' => 'text-gray-900'] : ['color' => 'text-gray-400'])
+                        <x-icons.location-icon color="{{ request()->routeIs('business-trips.list') ? 'text-gray-900' : 'text-gray-400' }}"></x-icons.location-icon>
                         <span>{{ __('Business trips') }}</span>
                     </x-nav-link>
                 </div>
             </div>
 
-            <!-- Settings Dropdown -->
-            <div class="hidden sm:flex sm:items-center sm:ml-6">
-                <x-dropdown align="right">
-                    <x-slot name="trigger">
-                        <button class="bg-gray-100 border border-gray-200 inline-flex items-center px-3 py-2 text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
-                            <div class="flex flex-col items-start">
-                                <span class="text-sm text-gray-900">{{ Auth::user()->name }}</span>
-                                <span class="text-xs">{{ Auth::user()->email }}</span>
-                            </div>
+            <div class="flex">
+                @can('access-admin')
+                   <div class="flex items-center justify-center">
+                       <a wire:navigate href="{{ route('admin') }}" class="group flex justify-center items-center w-10 h-10 transition-all duration-300 sm:flex sm:items-center hover:bg-slate-50 rounded-md">
+                           <x-icons.barcode-read color="text-yellow-500" size="w-7 h-7"></x-icons.barcode-read>
+                       </a>
+                   </div>
+                @endcan
+                <!-- Settings Dropdown -->
+                <div class="hidden sm:flex sm:items-center sm:ml-6">
+                    <x-dropdown align="right">
+                        <x-slot name="trigger">
+                            <button class="bg-gray-100 border border-gray-200 inline-flex items-center px-3 py-2 text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
+                                <div class="flex flex-col items-start">
+                                    <span class="text-sm text-gray-900">{{ Auth::user()->name }}</span>
+                                    <span class="text-xs">{{ Auth::user()->email }}</span>
+                                </div>
 
-                            <div class="ml-4">
-                                @include('components.icons.arrow-icon' ,['size' => 'w-5 h-5'])
-                            </div>
-                        </button>
-                    </x-slot>
+                                <div class="ml-4">
+                                    <x-icons.arrow-icon size="w-5 h-5"></x-icons.arrow-icon>
+                                </div>
+                            </button>
+                        </x-slot>
 
-                    <x-slot name="content">
-                        <x-dropdown-link :href="route('profile.edit')">
-                            {{ __('Profile') }}
-                        </x-dropdown-link>
-
-                        <!-- Authentication -->
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-
-                            <x-dropdown-link :href="route('logout')"
-                                    onclick="event.preventDefault();
-                                                this.closest('form').submit();">
-                                {{ __('Log Out') }}
+                        <x-slot name="content">
+                            <x-dropdown-link :href="route('profile.edit')">
+                                {{ __('Profile') }}
                             </x-dropdown-link>
-                        </form>
-                    </x-slot>
-                </x-dropdown>
+
+                            <!-- Authentication -->
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+
+                                <x-dropdown-link :href="route('logout')"
+                                                 onclick="event.preventDefault();
+                                                this.closest('form').submit();">
+                                    {{ __('Log Out') }}
+                                </x-dropdown-link>
+                            </form>
+                        </x-slot>
+                    </x-dropdown>
+                </div>
+
+                <!-- Hamburger -->
+                <div class="-mr-2 flex items-center sm:hidden">
+                    <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-900 focus:text-gray-500 dark:focus:text-gray-400 transition duration-150 ease-in-out">
+                        <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                            <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                            <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
             </div>
 
-            <!-- Hamburger -->
-            <div class="-mr-2 flex items-center sm:hidden">
-                <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-900 focus:text-gray-500 dark:focus:text-gray-400 transition duration-150 ease-in-out">
-                    <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                        <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
         </div>
     </div>
 

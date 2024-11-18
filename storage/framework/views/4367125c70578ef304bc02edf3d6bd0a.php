@@ -43,7 +43,7 @@
     }
 ?>
 
-<?php if($type == 'button'): ?>
+<!--[if BLOCK]><![endif]--><?php if($type == 'button'): ?>
     <button <?php if($disabled): echo 'disabled'; endif; ?> <?php echo e($attributes->merge(['type' => 'submit', 'class' => 'camelcase inline-flex justify-center items-center px-4 py-2 border border-transparent rounded-xl font-semibold shadow-sm text-sm focus:outline-none focus:ring ring-gray-300 disabled:opacity-25 transition-all ease-in-out duration-150 '.$extraClasses])); ?>>
         <?php echo e($slot); ?>
 
@@ -53,5 +53,5 @@
         <?php echo e($slot); ?>
 
     </a>
-<?php endif; ?>
+<?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 <?php /**PATH /Users/togruljalalli/Desktop/projects/HR-CRM/resources/views/components/button.blade.php ENDPATH**/ ?>

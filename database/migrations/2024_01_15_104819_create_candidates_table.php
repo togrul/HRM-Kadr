@@ -24,7 +24,7 @@ return new class extends Migration
             $table->integer('height');
             $table->string('military_service')->nullable();
             $table->unsignedInteger('status_id');
-            $table->foreign('status_id')->references('id')->on('appeal_statuses');
+            $table->foreign('status_id')->references('id')->on('appeal_statuses')->cascadeOnUpdate()->nullOnDelete();
             $table->string('phone')->nullable();
             $table->unsignedSmallInteger('knowledge_test')->default(0);
             $table->unsignedSmallInteger('physical_fitness_exam')->default(0);

@@ -18,61 +18,33 @@
                     'border-green-100 text-green-500 bg-green-100' => $step > $key,
                     'border-blue-500 bg-blue-500 text-white' => $step == $key
                 ])>
-                @if($step <= $key)
-                <span class="text-sm">{{ $key }}</span>
-                @else
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                </svg>
-                @endif
+                    @if($step <= $key)
+                        <span class="text-sm">{{ $key }}</span>
+                    @else
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                        </svg>
+                    @endif
                 </span>
                 <span class="text-sm"> {{ $st }}</span>
             </button>
         @endforeach
-       
+
     </div>
     <hr class="py-2" />
 
-    @if($step == 1)
-    @include('includes.step1')
-    @endif
-
-    @if ($step == 2)
-    @include('includes.step2')
-    @endif
-
-    @if($step == 3)
-    @include('includes.step3')
-    @endif
-
-    @if($step == 4)
-    @include('includes.step4')
-    @endif
-
-    @if($step == 5)
-    @include('includes.step5')
-    @endif
-
-    @if($step == 6)
-    @include('includes.step6')
-    @endif
-
-    @if($step == 7)
-    @include('includes.step7')
-    @endif
-
-    @if($step == 8)
-    @include('includes.step8')
+    @if($step >= 1 && $step <= 8)
+        @include('includes.step' . $step)
     @endif
 
     <div class="flex justify-between items-end w-full">
         <x-modal-button>{{ __('Save') }}</x-modal-button>
         <div class="flex items-center space-x-2">
             @if($step > 1)
-            <x-button  mode="warning" wire:click.prevent="previousStep">{{ __('Previous') }}</x-button>
+                <x-button  mode="warning" wire:click.prevent="previousStep">{{ __('Previous') }}</x-button>
             @endif
             @if(array_key_last($steps) != $step)
-            <x-button  mode="success" wire:click.prevent="nextStep">{{ __('Next') }}</x-button>
+                <x-button  mode="success" wire:click.prevent="nextStep">{{ __('Next') }}</x-button>
             @endif
         </div>
     </div>

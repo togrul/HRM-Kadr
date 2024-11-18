@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('punishments', function (Blueprint $table) {
             $table->integer('id')->primary();
             $table->integer('punishment_type_id');
-            $table->foreign('punishment_type_id')->references('id')->on('punishment_types');
+            $table->foreign('punishment_type_id')->references('id')->on('punishment_types')->cascadeOnUpdate()->cascadeOnDelete();
             $table->string('name');
         });
     }

@@ -18,7 +18,7 @@
 <?php $__env->startPush('js'); ?>
      <script src="<?php echo e(asset('assets/js/moment.min.js')); ?>"></script>
      <script src="<?php echo e(asset('assets/js/pikaday.min.js')); ?>"></script>
-     <?php if($auto): ?>
+     <!--[if BLOCK]><![endif]--><?php if($auto): ?>
      <script>
           new Pikaday ({
                field: document.getElementById('date'),
@@ -27,5 +27,5 @@
                }
           })
      </script>
-     <?php endif; ?>
+     <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 <?php $__env->stopPush(); ?><?php /**PATH /Users/togruljalalli/Desktop/projects/HR-CRM/resources/views/components/datepicker.blade.php ENDPATH**/ ?>

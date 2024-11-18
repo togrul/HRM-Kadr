@@ -43,6 +43,16 @@ class Structure extends Model
         return $this->hasMany(Personnel::class);
     }
 
+    public function topLevelParent()
+    {
+        $parent = ! empty($this->parent->parent_id) ? $this->parent : $this;
+        while ($parent && $parent->parent_id > 2 && $parent->level > 1) {
+            $parent = $parent->parent;
+        }
+
+        return $parent->parent_id == 1 ? $parent->code : $parent->name;
+    }
+
     public function scopeWithRecursive($query, $relationship)
     {
         return $query->with([
@@ -54,7 +64,6 @@ class Structure extends Model
 
     public function getNameWithParentAttribute(): string
     {
-        $name = '';
         $list = $this->getAllParentName();
         $arrow = '
             <svg class="w-5 h-5 text-gray-100" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -62,29 +71,26 @@ class Structure extends Model
             </svg>
         ';
         $lastItem = end($list);
-        foreach ($list as $item) {
-            $main = ($item === $lastItem)
-                ? "<span class='text-yellow-400'>{$item}</span>"
-                : "<span class='text-gray-100'>{$item}</span>".$arrow;
 
-            $name .= $main;
-        }
-
-        return $name;
+        return collect($list)->map(fn ($item) => $item === $lastItem
+            ? "<span class='text-yellow-400'>{$item}</span>"
+            : "<span class='text-gray-100'>{$item}</span>".$arrow
+        )->implode('');
     }
 
     public function getAllNestedIds(): array
     {
-        $ids = [$this->id]; // Add the ID of the current model
-
-        // If there are children, recursively collect their IDs
-        if ($this->subs->count() > 0) {
-            foreach ($this->subs as $child) {
-                $ids = array_merge($ids, $child->getAllNestedIds());
-            }
-        }
-
-        return $ids;
+//        $ids = [$this->id]; // Add the ID of the current model
+//
+//        // If there are children, recursively collect their IDs
+//        if ($this->subs->count() > 0) {
+//            foreach ($this->subs as $child) {
+//                $ids = array_merge($ids, $child->getAllNestedIds());
+//            }
+//        }
+//
+//        return $ids;
+        return $this->subs->reduce(fn($ids, $child) => array_merge($ids, $child->getAllNestedIds()), [$this->id]);
     }
 
     public function getAllParentIds(): array

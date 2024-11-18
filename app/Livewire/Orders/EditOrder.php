@@ -131,7 +131,6 @@ class EditOrder extends Component
         }
 
         [$_attributes,$_personnel_ids,$_component_ids, $_new_component_list] = [$data['attributes'], $data['personnel_ids'], $data['component_ids'], $data['vacancy_list']];
-
         DB::transaction(function () use ($_attributes, $_personnel_ids, $_component_ids, $_new_component_list) {
             $this->orderModelData->update([
                 'order_type_id' => $this->order['order_type_id']['id'],

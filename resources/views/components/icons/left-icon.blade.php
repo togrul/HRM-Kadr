@@ -5,7 +5,7 @@
     'show' => null
 ])
 
-<x-icons.root :$size :$color :$hover x-show="{{$show}}">
+<x-icons.root :$size :$color :$hover x-show="{{ $show ?? 'true' }}">
     <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
         <polygon points="0 0 24 0 24 24 0 24"/>
         <rect fill="currentColor" opacity="0.3" transform="translate(14.000000, 12.000000) scale(-1, 1) rotate(-90.000000) translate(-14.000000, -12.000000) " x="13" y="5" width="2" height="14" rx="1"/>

@@ -22,7 +22,6 @@ use Livewire\Livewire;
 
 Route::middleware('auth')->group(function () {
     Route::get('/', AllPersonnel::class)->name('home');
-    Route::get('/dashboard', AllAffairs::class)->name('dashboard');
     Route::get('/staffs', Staffs::class)->name('staffs');
     Route::get('/services', Service::class)->name('services');
     Route::get('/orders', AllOrders::class)->name('orders');
@@ -40,6 +39,31 @@ Route::middleware('auth')->group(function () {
         Route::get('personnel/{id?}', 'personnel_service_book')->name('print.personnel');
         Route::get('page/{model?}', 'print_page')->name('print.page');
     });
+
+    Route::middleware(['can:access-admin'])->prefix('/admin')->group(function () {
+        Route::get('/dashboard', \App\Livewire\Admin\Dashboard::class)->name('admin');
+        Route::get('/appeal-statuses', \App\Livewire\Admin\AppealStatus::class)->name('admin.appeal-status');
+        Route::get('/awards', \App\Livewire\Admin\Awards::class)->name('admin.awards');
+        Route::get('/cities', \App\Livewire\Admin\Cities::class)->name('admin.cities');
+        Route::get('/countries', \App\Livewire\Admin\Countries::class)->name('admin.countries');
+        Route::get('/education-degrees', \App\Livewire\Admin\EducationDegrees::class)->name('admin.education-degrees');
+        Route::get('/document-types', \App\Livewire\Admin\DocumentTypes::class)->name('admin.document-types');
+        Route::get('/education-forms', \App\Livewire\Admin\EducationForms::class)->name('admin.education-forms');
+        Route::get('/education-types', \App\Livewire\Admin\EducationTypes::class)->name('admin.education-types');
+        Route::get('/educational-institutions', \App\Livewire\Admin\EducationalInstitutions::class)->name('admin.educational-institutions');
+        Route::get('/kinship', \App\Livewire\Admin\Kinships::class)->name('admin.kinship');
+        Route::get('/order-categories', \App\Livewire\Admin\OrderCategories::class)->name('admin.order-categories');
+        Route::get('/order-statuses', \App\Livewire\Admin\OrderStatuses::class)->name('admin.order-statuses');
+        Route::get('/positions', \App\Livewire\Admin\Positions::class)->name('admin.positions');
+        Route::get('/structures', \App\Livewire\Admin\Structures::class)->name('admin.structures');
+        Route::get('/punishments', \App\Livewire\Admin\Punishments::class)->name('admin.punishments');
+        Route::get('/weapons', \App\Livewire\Admin\Weapons::class)->name('admin.weapons');
+        Route::get('/work-norms', \App\Livewire\Admin\WorkNorms::class)->name('admin.work-norms');
+        Route::get('/languages', \App\Livewire\Admin\Languages::class)->name('admin.languages');
+        Route::get('/scientific-degrees', \App\Livewire\Admin\ScientificDegrees::class)->name('admin.scientific-degrees');
+        Route::get('/social-origins', \App\Livewire\Admin\SocialOrigins::class)->name('admin.social-origins');
+    });
+
 
     // Livewire::setUpdateRoute(function ($handle) {
     //     return Route::post('/livewire/update', $handle);

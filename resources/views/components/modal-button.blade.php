@@ -4,10 +4,10 @@
      'disabled' => false
 ])
 
-<div class="flex items-center w-full pt-4">
-     <x-button 
-         mode="primary" 
-         class="items-center justify-center space-x-0 px-4 py-2" 
+<div  {{ $attributes->merge(['class' => 'flex items-center w-full pt-4']) }}>
+     <x-button
+         :$mode
+         class="items-center justify-center space-x-0 px-4 py-2"
          wire:click="store"
          wire:loading.attr="disabled"
          type="submit"

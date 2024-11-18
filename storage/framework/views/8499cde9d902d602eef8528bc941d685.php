@@ -22,17 +22,18 @@
 <?php unset($__defined_vars); ?>
 
 <li class="<?php echo \Illuminate\Support\Arr::toCssClasses([
-     'px-3 py-1 font-medium transition duration-150 ease-in  rounded-lg',
+     'px-3 py-1 font-medium transition duration-150 ease-in rounded-lg flex justify-center items-center',
      'bg-white shadow-md' =>  $active && $mode == 'default',
      'bg-slate-700 shadow-md' =>  $active && $mode == 'dark',
      'text-black hover:bg-white' => $mode == 'default',
      'text-slate-100 hover:bg-slate-600' => $mode == 'dark'
  ]); ?>">
      <a href="#"
-     <?php echo e($attributes->merge(['class' => 'pb-3'])); ?>
+     <?php echo e($attributes->merge(['class' => ''])); ?>
 
      >
          <?php echo e($slot); ?>
 
      </a>
- </li><?php /**PATH /Users/togruljalalli/Desktop/projects/HR-CRM/resources/views/components/filter/item.blade.php ENDPATH**/ ?>
+ </li>
+<?php /**PATH /Users/togruljalalli/Desktop/projects/HR-CRM/resources/views/components/filter/item.blade.php ENDPATH**/ ?>

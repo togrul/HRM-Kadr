@@ -56,7 +56,7 @@
             <div class="flex flex-col">
                 <div class="flex space-x-4">
                     <button  wire:click="openSideMenu('add-personnel')" class="flex items-center justify-center rounded-xl w-12 h-12 transition-all duration-300 hover:bg-blue-50" type="button">
-                        @include('components.icons.add-file')
+                        <x-icons.add-file></x-icons.add-file>
                     </button>
                     <button wire:click.prevent="exportExcel" class="flex items-center justify-center rounded-xl w-12 h-12 transition-all duration-300 hover:bg-green-50" type="button">
                         <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"  viewBox="0 0 50 50" class="w-7 h-7 fill-green-400 transition-all duration-300 hover:fill-green-500">
@@ -64,7 +64,7 @@
                         </svg>
                     </button>
                     <button wire:click.prevent="printPage('personnel')" class="flex items-center justify-center rounded-xl w-12 h-12 transition-all duration-300 hover:bg-red-50" type="button">
-                        @include('components.icons.print-file',['color' => 'text-rose-500','hover' => 'text-rose-600','size' => 'w-8 h-8'])
+                        <x-icons.print-file color="text-rose-500" hover="text-rose-600" size="w-8 h-8"></x-icons.print-file>
                     </button>
                     <button
                        @click="
@@ -74,19 +74,17 @@
                             'flex relative items-center justify-center rounded-xl w-12 h-12 transition-all duration-300 hover:bg-gray-100',
                             'bg-gray-100' => count($filters) > 0
                          ]) type="button">
-                        @include('components.icons.search-file')
-                        @if(count($filters) > 0)
-                        <span class="absolute top-0 right-0 rounded-full bg-rose-500 text-white flex justify-center w-4 h-4 text-xs">
-                            {{ count($filters) }}
-                        </span>
-                        @endif
+                            <x-icons.search-file></x-icons.search-file>
+                            @if(count($filters) > 0)
+                                <span class="absolute top-0 right-0 rounded-full bg-rose-500 text-white flex justify-center w-4 h-4 text-xs">
+                                    {{ count($filters) }}
+                                </span>
+                            @endif
                     </button>
                 </div>
                 @if(count($filters) > 0)
                 <button wire:click="resetSelectedFilter" class="appearance-none text-rose-500 text-sm font-medium flex items-center space-x-2 justify-end">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
+                    <x-icons.remove-icon></x-icons.remove-icon>
                    <span> {{ __('Reset filter') }}</span>
                 </button>
                 @endif
@@ -94,7 +92,7 @@
         </div>
 
         {{-- filter position--}}
-        <div class="flex justify-start items-center space-x-3 flex-wrap gap-1">
+        <div class="flex justify-start items-center flex-wrap gap-2">
             @foreach($this->positions as $position)
                 <button
                     wire:click.prevent="setPosition({{ $position->id }})"
@@ -112,7 +110,6 @@
                         {{ __('Reset') }}
                     </button>
             @endif
-
         </div>
 
         <div class="relative min-h-[300px] -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
@@ -201,7 +198,7 @@
                             @if($status != 'deleted')
                             {{-- @can('manage-customers') --}}
                                 <a href="#" wire:click="openSideMenu('edit-personnel',{{ $personnel->id }})" class="flex items-center justify-center w-9 h-9 text-xs font-medium uppercase rounded-lg text-gray-500 bg-gray-100 hover:bg-gray-200 hover:text-gray-700">
-                                    @include('components.icons.profile-icon')
+                                    <x-icons.profile-icon></x-icons.profile-icon>
                                 </a>
                             {{-- @endcan --}}
                             @else
@@ -209,7 +206,7 @@
                                 wire:click="restoreData('{{$personnel->tabel_no}}')"
                                 class="flex items-center justify-center w-9 h-9 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 bg-teal-50 hover:bg-teal-100 hover:text-gray-700"
                             >
-                                @include('components.icons.recover',['color' => 'text-teal-500','hover' => 'text-teal-600'])
+                                <x-icons.recover color="text-teal-500" hover="text-teal-600"></x-icons.recover>
                             </button>
                             @endif
                         </x-table.td>
@@ -218,7 +215,7 @@
                             <div class="relative inline-block text-left" x-data="{showContextMenu:false}">
                                 <div>
                                     <button @click="showContextMenu = !showContextMenu" class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase rounded-lg bg-blue-50 hover:bg-blue-100">
-                                        @include('components.icons.settings-icon')
+                                        <x-icons.settings-icon></x-icons.settings-icon>
                                     </button>
                                 </div>
                                 <div x-show="showContextMenu"
@@ -231,7 +228,6 @@
                                      @click.outside="showContextMenu = false"
                                      class="absolute right-0 z-10 mt-2 w-max origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
                                     <div class="flex flex-col" role="none">
-                                        <!-- Active: "bg-gray-100 text-gray-900", Not Active: "text-gray-700" -->
                                         <a href="#" wire:click="openSideMenu('show-files','{{ $personnel->tabel_no }}')" class="appearance-none w-full flex items-center justify-start space-x-2 px-4 py-2 text-sm font-medium rounded-md  hover:bg-slate-100">
                                             <span class="text-slate-500">{{ __('Files') }}</span>
                                         </a>
@@ -254,7 +250,7 @@
                                wire:click="setDeletePersonnel('{{ $personnel->tabel_no }}')"
                                 class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-100 hover:text-gray-700"
                             >
-                                @include('components.icons.delete-icon')
+                                <x-icons.delete-icon></x-icons.delete-icon>
                             </button>
                             {{-- @endcan --}}
                          @else
@@ -263,7 +259,7 @@
                                 wire:click="forceDeleteData('{{ $personnel->tabel_no }}')"
                                 class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-50 hover:text-gray-700"
                             >
-                                 @include('components.icons.force-delete')
+                                 <x-icons.force-delete></x-icons.force-delete>
                             </button>
                         @endif
                         </x-table.td>

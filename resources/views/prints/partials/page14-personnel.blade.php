@@ -10,7 +10,14 @@
         </tr>
     </thead>
     <tbody>
-    @for($i = 0;$i < 33;$i++)
+    @foreach($personnel->awards as $award)
+        <tr>
+            <td>{{ $award->award->name }}</td>
+            <td>{{ $award->reason }}</td>
+            <td>{{ $award->order_given_by }}, {{ $award->order_no }} {{ \Carbon\Carbon::parse($award->order_date)->format('d.m.Y') }}</td>
+        </tr>
+    @endforeach
+    @for($i = 0;$i < (19 - $personnel->awards->count());$i++)
         <tr>
             <td></td>
             <td></td>

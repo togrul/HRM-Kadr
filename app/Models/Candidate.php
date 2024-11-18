@@ -83,6 +83,6 @@ class Candidate extends Model
 
     public function status(): BelongsTo
     {
-        return $this->belongsTo(AppealStatus::class, 'status_id', 'id');
+        return $this->belongsTo(AppealStatus::class, 'status_id', 'id')->where('locale',config('app.locale'));
     }
 }

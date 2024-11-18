@@ -3,6 +3,7 @@
 namespace App\Livewire\Forms;
 
 use App\Models\Rank;
+use Illuminate\Support\Arr;
 use Livewire\Attributes\Validate;
 use Livewire\Form;
 
@@ -53,9 +54,9 @@ class RankForm extends Form
     public function update()
     {
         $this->validate();
-
+        $updateData = Arr::except($this->all(),'rank');
         $this->rank->update(
-            $this->all()
+            $updateData
         );
     }
 }

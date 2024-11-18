@@ -36,14 +36,45 @@
             <th>əmr kim tərəfindən verilib,əmrin №-si və tarixi</th>
         </thead>
         <tbody>
-        <?php for($i = 0;$i < 18;$i++): ?>
+        <?php
+            $rankChunks = $personnel->ranksASC->chunk(18);
+            $maxRows = 18;
+        ?>
+        <?php for($i = 0; $i < $maxRows; $i++): ?>
             <tr>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
+                <?php if(isset($rankChunks[0][$i])): ?>
+                    <td><?php echo e($rankChunks[0][$i]->rank->name); ?></td>
+                    <td><?php echo e($rankChunks[0][$i]->order_given_by); ?>, <?php echo e($rankChunks[0][$i]->order_no); ?> <?php echo e($rankChunks[0][$i]->order_date->format('d.m.Y')); ?></td>
+                <?php else: ?>
+                    <td></td>
+                    <td></td>
+                <?php endif; ?>
+
+                <?php if(isset($rankChunks[1][$i])): ?>
+                    <td><?php echo e($rankChunks[1][$i]->rank->name); ?></td>
+                    <td><?php echo e($rankChunks[1][$i]->order_given_by); ?>, <?php echo e($rankChunks[1][$i]->order_no); ?> <?php echo e($rankChunks[1][$i]->order_date->format('d.m.Y')); ?></td>
+                <?php else: ?>
+                    <td></td>
+                    <td></td>
+                <?php endif; ?>
             </tr>
         <?php endfor; ?>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         </tbody>
     </table>
 </div>

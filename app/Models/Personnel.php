@@ -157,6 +157,7 @@ class Personnel extends Model
         return $this->hasOne(PersonnelIdentityDocument::class, 'tabel_no', 'tabel_no');
     }
 
+
     public function cards(): HasMany
     {
         return $this->hasMany(PersonnelCard::class, 'tabel_no', 'tabel_no');
@@ -234,6 +235,11 @@ class Personnel extends Model
     public function ranks(): HasMany
     {
         return $this->hasMany(PersonnelRank::class, 'tabel_no', 'tabel_no')->orderByDesc('given_date');
+    }
+
+    public function ranksASC(): HasMany
+    {
+        return $this->hasMany(PersonnelRank::class, 'tabel_no', 'tabel_no')->orderBy('given_date');
     }
 
     public function latestRank(): HasOne

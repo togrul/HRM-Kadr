@@ -15,8 +15,8 @@
 <table <?php echo e($attributes->merge(['class' => 'min-w-full divide-y divide-gray-200'])); ?>>
      <thead class="bg-slate-50">
          <tr>
-             <?php $__currentLoopData = $headers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $header): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-               <?php if($header != 'action'): ?>
+             <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $headers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $header): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+               <!--[if BLOCK]><![endif]--><?php if($header != 'action'): ?>
                <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
                     <?php echo e($header); ?>
 
@@ -25,8 +25,8 @@
                <th scope="col" class="relative px-6 py-3">
                     <span class="sr-only"><?php echo e(__('Edit')); ?></span>
                </th>
-               <?php endif; ?>
-             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+               <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
             
          </tr>
      </thead>

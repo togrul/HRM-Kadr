@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\DateCastTrait;
 use App\Traits\PersonnelTrait;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -39,6 +40,13 @@ class PersonnelIdentityDocument extends Model
     protected $casts = [
         'document_issued_date' => 'date:d.m.Y',
     ];
+
+    protected function serialNumber(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => "{$this->series} {$this->number}",
+        );
+    }
 
     public function nationality(): BelongsTo
     {

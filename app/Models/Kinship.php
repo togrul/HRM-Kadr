@@ -14,6 +14,7 @@ class Kinship extends Model
         'name_az',
         'name_en',
         'name_ru',
+        'is_active'
     ];
 
     public $timestamps = false;

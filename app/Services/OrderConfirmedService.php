@@ -3,13 +3,12 @@
 namespace App\Services;
 
 use App\Enums\OrderStatusEnum;
+use App\Events\StaffScheduleUpdated;
 use App\Helpers\UsefulHelpers;
-use App\Livewire\Outside\BusinessTrips;
 use App\Models\Candidate;
 use App\Models\Order;
 use App\Models\OrderLog;
 use App\Models\Personnel;
-use App\Models\PersonnelBusinessTrip;
 use App\Models\StaffSchedule;
 use Carbon\Carbon;
 
@@ -23,10 +22,13 @@ class OrderConfirmedService
         $statusId = $this->orderLog->status_id;
         $order = $this->orderLog->order;
 
-        if ($statusId == OrderStatusEnum::APPROVED->value) {
-            $this->handleApprovedOrder($personnelIds, $action, $order);
-        } elseif ($statusId == OrderStatusEnum::CANCELLED->value) {
-            $this->handleCancelledOrder($order);
+        switch ($statusId) {
+            case OrderStatusEnum::APPROVED->value:
+                $this->handleApprovedOrder($personnelIds, $action, $order);
+                break;
+            case OrderStatusEnum::CANCELLED->value:
+                $this->handleCancelledOrder($order);
+                break;
         }
     }
 
@@ -105,24 +107,16 @@ class OrderConfirmedService
             'given_date' => $date,
         ]);
 
-        $this->updateStaffSchedule($_personnel);
+        event(new StaffScheduleUpdated(
+            structure_id: $_personnel->structure_id,
+            position_id: $_personnel->position_id
+        ));
 
         $this->endCurrentLaborActivity($_personnel, $date);
 
         $_personnel->laborActivities()->create($this->getNewLaborActivityData($_personnel, $orderLog, $date));
     }
 
-    private function updateStaffSchedule($_personnel): void
-    {
-        $staff = StaffSchedule::where('structure_id', $_personnel->structure_id)
-            ->where('position_id', $_personnel->position_id)
-            ->first();
-
-        $staff->update([
-            'filled' => $staff->filled + 1,
-            'vacant' => $staff->vacant > 0 ? $staff->vacant - 1 : 0,
-        ]);
-    }
 
     private function endCurrentLaborActivity($_personnel, $date): void
     {
@@ -166,9 +160,8 @@ class OrderConfirmedService
 
     private function processBusinessTripsOrder($orderLog): void
     {
-        $orderLog->load('personnels');
+        $orderLog->load(['personnels', 'attributes']);
         $orderAttributes = $orderLog->attributes->pluck('attributes')->toArray();
-
         foreach ($orderLog->personnels as $key => $_person) {
             $this->updateOrCreateBusinessTrips($_person, $orderAttributes, $key, $orderLog);
         }

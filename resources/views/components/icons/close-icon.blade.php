@@ -5,7 +5,7 @@
     'show' => null
 ])
 
-<x-icons.root animated="true" x-show="{{$show}}" :$size :$color :$hover>
+<x-icons.root animated="true" x-show="{{ $show ?? 'true' }}" :$size :$color :$hover>
     <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
         <g transform="translate(12.000000, 12.000000) rotate(-45.000000) translate(-12.000000, -12.000000) translate(4.000000, 4.000000)" fill="currentColor">
             <rect x="0" y="7" width="16" height="2" rx="1"/>

@@ -30,12 +30,15 @@ class Permissions extends Component
         $data = [
             'name' => $this->permission_name,
         ];
-        Permission::updateOrCreate(['id' => $this->permission_id], $data);
+        if ($this->permission_id) {
+            Permission::updateOrCreate(['id' => $this->permission_id], $data);
+        } else {
+            Permission::create($data);
+        }
+
         $this->dispatch('permissionUpdated', __('Permission was added successfully!'));
         $this->resetInputFields();
         $this->resetErrorBag();
-
-        return back();
     }
 
     public function setDeletePermission($permissionId)

@@ -27,7 +27,7 @@
 } ?>
 <?php unset($__defined_vars); ?>
 
-<svg <?php echo e($attributes->merge(['class' => "$size $color transition-all duration-300 hover:$hover"])); ?>
+<svg <?php echo $attributes->merge(['class' => "$size $color transition-all duration-300 hover:{$hover}"]); ?>
 
      xmlns="http://www.w3.org/2000/svg"
      xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -38,10 +38,11 @@
          x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="opacity-0 scale-90"
          x-transition:enter-end="opacity-100 scale-100"
-     <?php endif; ?>
+    <?php endif; ?>
 >
     <defs/>
     <?php echo e($slot); ?>
 
 </svg>
+
 <?php /**PATH /Users/togruljalalli/Desktop/projects/HR-CRM/resources/views/components/icons/root.blade.php ENDPATH**/ ?>

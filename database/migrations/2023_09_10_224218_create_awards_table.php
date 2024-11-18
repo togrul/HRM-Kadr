@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('awards', function (Blueprint $table) {
             $table->integer('id')->primary();
             $table->integer('award_type_id');
-            $table->foreign('award_type_id')->references('id')->on('award_types');
+            $table->foreign('award_type_id')->references('id')->on('award_types')->cascadeOnUpdate()->cascadeOnDelete();
             $table->string('name');
         });
     }

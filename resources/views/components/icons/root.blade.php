@@ -5,7 +5,7 @@
     'animated' => false
 ])
 
-<svg {{ $attributes->merge(['class' => "$size $color transition-all duration-300 hover:$hover"]) }}
+<svg {!!  $attributes->merge(['class' => "$size $color transition-all duration-300 hover:{$hover}"]) !!}
      xmlns="http://www.w3.org/2000/svg"
      xmlns:xlink="http://www.w3.org/1999/xlink"
      width="24px"
@@ -15,8 +15,9 @@
          x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="opacity-0 scale-90"
          x-transition:enter-end="opacity-100 scale-100"
-     @endif
+    @endif
 >
     <defs/>
     {{ $slot }}
 </svg>
+

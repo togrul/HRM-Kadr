@@ -153,7 +153,7 @@
                          showNotification(message)
                     })
 
-                      Livewire.on('rankAdded',message => {
+                     Livewire.on('rankAdded',message => {
                          isError = false
                          showNotification(message)
                     })

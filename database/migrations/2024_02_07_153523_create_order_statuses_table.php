@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('order_statuses', function (Blueprint $table) {
-            $table->integer('id')->primary();
+            $table->integer('id');
             $table->string('locale')->default('az');
             $table->string('name');
         });

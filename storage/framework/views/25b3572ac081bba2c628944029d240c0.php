@@ -10,7 +10,14 @@
         </tr>
     </thead>
     <tbody>
-    <?php for($i = 0;$i < 33;$i++): ?>
+    <?php $__currentLoopData = $personnel->awards; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $award): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+        <tr>
+            <td><?php echo e($award->award->name); ?></td>
+            <td><?php echo e($award->reason); ?></td>
+            <td><?php echo e($award->order_given_by); ?>, <?php echo e($award->order_no); ?> <?php echo e(\Carbon\Carbon::parse($award->order_date)->format('d.m.Y')); ?></td>
+        </tr>
+    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+    <?php for($i = 0;$i < (19 - $personnel->awards->count());$i++): ?>
         <tr>
             <td></td>
             <td></td>

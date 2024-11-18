@@ -95,7 +95,7 @@
                             >
                                 <option value="">--{{ __('Select Transportation') }}--</option>
                                 @foreach(\App\Enums\TransportationEnum::list() as $tKey => $tValue)
-                                    <option value="{{ $tKey }}">{{ $tValue }}</option>
+                                    <option value="{{ $tKey }}">{{ __($tValue) }}</option>
                                 @endforeach
                             </select>
                             @if((isset($selected_personnel_list[$i][$keyPerson]['transportation'])

@@ -42,7 +42,8 @@
                 <div style="height: 50%;border-bottom: 1px solid #000;">
                     <?php if(!empty($personnel['education'])): ?>
                         <?php if(!$personnel['education']['is_military']): ?>
-                            <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
+                            <?php if (isset($component)) { $__componentOriginala3a75ce342e159cafcd8a59bc5a2d0e4 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginala3a75ce342e159cafcd8a59bc5a2d0e4 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.education-list','data' => ['name' => $personnel->education->institution->name,'specialty' => $personnel->education->specialty,'admissionYear' => $personnel->education->admission_year,'graduatedYear' => $personnel->education->graduated_year]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('education-list'); ?>
 <?php if ($component->shouldRender()): ?>
@@ -53,9 +54,13 @@
 <?php $component->withAttributes(['name' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($personnel->education->institution->name),'specialty' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($personnel->education->specialty),'admission_year' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($personnel->education->admission_year),'graduated_year' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($personnel->education->graduated_year)]); ?>
                              <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
-<?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
-<?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
-<?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
+<?php if (isset($__attributesOriginala3a75ce342e159cafcd8a59bc5a2d0e4)): ?>
+<?php $attributes = $__attributesOriginala3a75ce342e159cafcd8a59bc5a2d0e4; ?>
+<?php unset($__attributesOriginala3a75ce342e159cafcd8a59bc5a2d0e4); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginala3a75ce342e159cafcd8a59bc5a2d0e4)): ?>
+<?php $component = $__componentOriginala3a75ce342e159cafcd8a59bc5a2d0e4; ?>
+<?php unset($__componentOriginala3a75ce342e159cafcd8a59bc5a2d0e4); ?>
 <?php endif; ?>
 
                         <?php endif; ?>
@@ -63,7 +68,8 @@
                     <?php if(count($personnel['extraEducations']) > 0): ?>
                         <?php $__currentLoopData = $personnel['extraEducations']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $extraEdu): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <?php if(!$extraEdu['is_military']): ?>
-                                    <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
+                                    <?php if (isset($component)) { $__componentOriginala3a75ce342e159cafcd8a59bc5a2d0e4 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginala3a75ce342e159cafcd8a59bc5a2d0e4 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.education-list','data' => ['name' => $extraEdu->institution->name,'specialty' => $extraEdu->education_program_name,'admissionYear' => $extraEdu->admission_year,'graduatedYear' => $extraEdu->graduated_year]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('education-list'); ?>
 <?php if ($component->shouldRender()): ?>
@@ -74,9 +80,13 @@
 <?php $component->withAttributes(['name' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($extraEdu->institution->name),'specialty' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($extraEdu->education_program_name),'admission_year' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($extraEdu->admission_year),'graduated_year' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($extraEdu->graduated_year)]); ?>
                                      <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
-<?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
-<?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
-<?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
+<?php if (isset($__attributesOriginala3a75ce342e159cafcd8a59bc5a2d0e4)): ?>
+<?php $attributes = $__attributesOriginala3a75ce342e159cafcd8a59bc5a2d0e4; ?>
+<?php unset($__attributesOriginala3a75ce342e159cafcd8a59bc5a2d0e4); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginala3a75ce342e159cafcd8a59bc5a2d0e4)): ?>
+<?php $component = $__componentOriginala3a75ce342e159cafcd8a59bc5a2d0e4; ?>
+<?php unset($__componentOriginala3a75ce342e159cafcd8a59bc5a2d0e4); ?>
 <?php endif; ?>
                                 <?php endif; ?>
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
@@ -86,7 +96,8 @@
                 <div style="height: 50%;">
                     <?php if(!empty($personnel->education)): ?>
                         <?php if($personnel->education->is_military): ?>
-                            <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
+                            <?php if (isset($component)) { $__componentOriginala3a75ce342e159cafcd8a59bc5a2d0e4 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginala3a75ce342e159cafcd8a59bc5a2d0e4 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.education-list','data' => ['name' => $personnel->education->institution->name,'specialty' => $personnel->education->specialty,'admissionYear' => $personnel->education->admission_year,'graduatedYear' => $personnel->education->graduated_year]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('education-list'); ?>
 <?php if ($component->shouldRender()): ?>
@@ -97,9 +108,13 @@
 <?php $component->withAttributes(['name' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($personnel->education->institution->name),'specialty' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($personnel->education->specialty),'admission_year' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($personnel->education->admission_year),'graduated_year' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($personnel->education->graduated_year)]); ?>
                              <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
-<?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
-<?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
-<?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
+<?php if (isset($__attributesOriginala3a75ce342e159cafcd8a59bc5a2d0e4)): ?>
+<?php $attributes = $__attributesOriginala3a75ce342e159cafcd8a59bc5a2d0e4; ?>
+<?php unset($__attributesOriginala3a75ce342e159cafcd8a59bc5a2d0e4); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginala3a75ce342e159cafcd8a59bc5a2d0e4)): ?>
+<?php $component = $__componentOriginala3a75ce342e159cafcd8a59bc5a2d0e4; ?>
+<?php unset($__componentOriginala3a75ce342e159cafcd8a59bc5a2d0e4); ?>
 <?php endif; ?>
 
                         <?php endif; ?>
@@ -107,7 +122,8 @@
                         <?php if(count($personnel->extraEducations) > 0): ?>
                             <?php $__currentLoopData = $personnel->extraEducations; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $extraEdu): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <?php if($extraEdu->is_military): ?>
-                                    <?php if (isset($component)) { $__componentOriginal71c6471fa76ce19017edc287b6f4508c = $component; } ?>
+                                    <?php if (isset($component)) { $__componentOriginala3a75ce342e159cafcd8a59bc5a2d0e4 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginala3a75ce342e159cafcd8a59bc5a2d0e4 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.education-list','data' => ['name' => $extraEdu->institution->name,'specialty' => $extraEdu->education_program_name,'admissionYear' => $extraEdu->admission_year,'graduatedYear' => $extraEdu->graduated_year]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('education-list'); ?>
 <?php if ($component->shouldRender()): ?>
@@ -118,9 +134,13 @@
 <?php $component->withAttributes(['name' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($extraEdu->institution->name),'specialty' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($extraEdu->education_program_name),'admission_year' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($extraEdu->admission_year),'graduated_year' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($extraEdu->graduated_year)]); ?>
                                      <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
-<?php if (isset($__componentOriginal71c6471fa76ce19017edc287b6f4508c)): ?>
-<?php $component = $__componentOriginal71c6471fa76ce19017edc287b6f4508c; ?>
-<?php unset($__componentOriginal71c6471fa76ce19017edc287b6f4508c); ?>
+<?php if (isset($__attributesOriginala3a75ce342e159cafcd8a59bc5a2d0e4)): ?>
+<?php $attributes = $__attributesOriginala3a75ce342e159cafcd8a59bc5a2d0e4; ?>
+<?php unset($__attributesOriginala3a75ce342e159cafcd8a59bc5a2d0e4); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginala3a75ce342e159cafcd8a59bc5a2d0e4)): ?>
+<?php $component = $__componentOriginala3a75ce342e159cafcd8a59bc5a2d0e4; ?>
+<?php unset($__componentOriginala3a75ce342e159cafcd8a59bc5a2d0e4); ?>
 <?php endif; ?>
                                 <?php endif; ?>
                             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>

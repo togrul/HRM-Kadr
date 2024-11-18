@@ -182,7 +182,25 @@ if (isset($__slots)) unset($__slots);
             <div class="flex flex-col">
                 <div class="flex space-x-4">
                     <button  wire:click="openSideMenu('add-personnel')" class="flex items-center justify-center rounded-xl w-12 h-12 transition-all duration-300 hover:bg-blue-50" type="button">
-                        <?php echo $__env->make('components.icons.add-file', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+                        <?php if (isset($component)) { $__componentOriginal7444528437396d3a60bf0a6dc6700f0a = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal7444528437396d3a60bf0a6dc6700f0a = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.icons.add-file','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('icons.add-file'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?> <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal7444528437396d3a60bf0a6dc6700f0a)): ?>
+<?php $attributes = $__attributesOriginal7444528437396d3a60bf0a6dc6700f0a; ?>
+<?php unset($__attributesOriginal7444528437396d3a60bf0a6dc6700f0a); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal7444528437396d3a60bf0a6dc6700f0a)): ?>
+<?php $component = $__componentOriginal7444528437396d3a60bf0a6dc6700f0a; ?>
+<?php unset($__componentOriginal7444528437396d3a60bf0a6dc6700f0a); ?>
+<?php endif; ?>
                     </button>
                     <button wire:click.prevent="exportExcel" class="flex items-center justify-center rounded-xl w-12 h-12 transition-all duration-300 hover:bg-green-50" type="button">
                         <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"  viewBox="0 0 50 50" class="w-7 h-7 fill-green-400 transition-all duration-300 hover:fill-green-500">
@@ -190,7 +208,25 @@ if (isset($__slots)) unset($__slots);
                         </svg>
                     </button>
                     <button wire:click.prevent="printPage('personnel')" class="flex items-center justify-center rounded-xl w-12 h-12 transition-all duration-300 hover:bg-red-50" type="button">
-                        <?php echo $__env->make('components.icons.print-file',['color' => 'text-rose-500','hover' => 'text-rose-600','size' => 'w-8 h-8'], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+                        <?php if (isset($component)) { $__componentOriginal5a7650ea88ba93c672a6a4c1810416c3 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal5a7650ea88ba93c672a6a4c1810416c3 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.icons.print-file','data' => ['color' => 'text-rose-500','hover' => 'text-rose-600','size' => 'w-8 h-8']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('icons.print-file'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['color' => 'text-rose-500','hover' => 'text-rose-600','size' => 'w-8 h-8']); ?> <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal5a7650ea88ba93c672a6a4c1810416c3)): ?>
+<?php $attributes = $__attributesOriginal5a7650ea88ba93c672a6a4c1810416c3; ?>
+<?php unset($__attributesOriginal5a7650ea88ba93c672a6a4c1810416c3); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal5a7650ea88ba93c672a6a4c1810416c3)): ?>
+<?php $component = $__componentOriginal5a7650ea88ba93c672a6a4c1810416c3; ?>
+<?php unset($__componentOriginal5a7650ea88ba93c672a6a4c1810416c3); ?>
+<?php endif; ?>
                     </button>
                     <button
                        @click="
@@ -200,20 +236,54 @@ if (isset($__slots)) unset($__slots);
                             'flex relative items-center justify-center rounded-xl w-12 h-12 transition-all duration-300 hover:bg-gray-100',
                             'bg-gray-100' => count($filters) > 0
                          ]); ?>" type="button">
-                        <?php echo $__env->make('components.icons.search-file', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
-                        <!--[if BLOCK]><![endif]--><?php if(count($filters) > 0): ?>
-                        <span class="absolute top-0 right-0 rounded-full bg-rose-500 text-white flex justify-center w-4 h-4 text-xs">
-                            <?php echo e(count($filters)); ?>
+                            <?php if (isset($component)) { $__componentOriginal01046fb947b9b5b0a1a7f166baac84a0 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal01046fb947b9b5b0a1a7f166baac84a0 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.icons.search-file','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('icons.search-file'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?> <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal01046fb947b9b5b0a1a7f166baac84a0)): ?>
+<?php $attributes = $__attributesOriginal01046fb947b9b5b0a1a7f166baac84a0; ?>
+<?php unset($__attributesOriginal01046fb947b9b5b0a1a7f166baac84a0); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal01046fb947b9b5b0a1a7f166baac84a0)): ?>
+<?php $component = $__componentOriginal01046fb947b9b5b0a1a7f166baac84a0; ?>
+<?php unset($__componentOriginal01046fb947b9b5b0a1a7f166baac84a0); ?>
+<?php endif; ?>
+                            <!--[if BLOCK]><![endif]--><?php if(count($filters) > 0): ?>
+                                <span class="absolute top-0 right-0 rounded-full bg-rose-500 text-white flex justify-center w-4 h-4 text-xs">
+                                    <?php echo e(count($filters)); ?>
 
-                        </span>
-                        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                </span>
+                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                     </button>
                 </div>
                 <!--[if BLOCK]><![endif]--><?php if(count($filters) > 0): ?>
                 <button wire:click="resetSelectedFilter" class="appearance-none text-rose-500 text-sm font-medium flex items-center space-x-2 justify-end">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
+                    <?php if (isset($component)) { $__componentOriginal2b723b42d6712f974b6e7dfc4c0d88fc = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal2b723b42d6712f974b6e7dfc4c0d88fc = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.icons.remove-icon','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('icons.remove-icon'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?> <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal2b723b42d6712f974b6e7dfc4c0d88fc)): ?>
+<?php $attributes = $__attributesOriginal2b723b42d6712f974b6e7dfc4c0d88fc; ?>
+<?php unset($__attributesOriginal2b723b42d6712f974b6e7dfc4c0d88fc); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal2b723b42d6712f974b6e7dfc4c0d88fc)): ?>
+<?php $component = $__componentOriginal2b723b42d6712f974b6e7dfc4c0d88fc; ?>
+<?php unset($__componentOriginal2b723b42d6712f974b6e7dfc4c0d88fc); ?>
+<?php endif; ?>
                    <span> <?php echo e(__('Reset filter')); ?></span>
                 </button>
                 <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
@@ -221,7 +291,7 @@ if (isset($__slots)) unset($__slots);
         </div>
 
         
-        <div class="flex justify-start items-center space-x-3 flex-wrap gap-1">
+        <div class="flex justify-start items-center flex-wrap gap-2">
             <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $this->positions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $position): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <button
                     wire:click.prevent="setPosition(<?php echo e($position->id); ?>)"
@@ -240,7 +310,6 @@ if (isset($__slots)) unset($__slots);
 
                     </button>
             <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
-
         </div>
 
         <div class="relative min-h-[300px] -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
@@ -424,7 +493,25 @@ if (isset($__slots)) unset($__slots);
                             <!--[if BLOCK]><![endif]--><?php if($status != 'deleted'): ?>
                             
                                 <a href="#" wire:click="openSideMenu('edit-personnel',<?php echo e($personnel->id); ?>)" class="flex items-center justify-center w-9 h-9 text-xs font-medium uppercase rounded-lg text-gray-500 bg-gray-100 hover:bg-gray-200 hover:text-gray-700">
-                                    <?php echo $__env->make('components.icons.profile-icon', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+                                    <?php if (isset($component)) { $__componentOriginal1ac9cc6c9f431e28031aa48530f41a62 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal1ac9cc6c9f431e28031aa48530f41a62 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.icons.profile-icon','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('icons.profile-icon'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?> <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal1ac9cc6c9f431e28031aa48530f41a62)): ?>
+<?php $attributes = $__attributesOriginal1ac9cc6c9f431e28031aa48530f41a62; ?>
+<?php unset($__attributesOriginal1ac9cc6c9f431e28031aa48530f41a62); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal1ac9cc6c9f431e28031aa48530f41a62)): ?>
+<?php $component = $__componentOriginal1ac9cc6c9f431e28031aa48530f41a62; ?>
+<?php unset($__componentOriginal1ac9cc6c9f431e28031aa48530f41a62); ?>
+<?php endif; ?>
                                 </a>
                             
                             <?php else: ?>
@@ -432,7 +519,25 @@ if (isset($__slots)) unset($__slots);
                                 wire:click="restoreData('<?php echo e($personnel->tabel_no); ?>')"
                                 class="flex items-center justify-center w-9 h-9 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 bg-teal-50 hover:bg-teal-100 hover:text-gray-700"
                             >
-                                <?php echo $__env->make('components.icons.recover',['color' => 'text-teal-500','hover' => 'text-teal-600'], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+                                <?php if (isset($component)) { $__componentOriginal3b29863ca6c763a42daeb7da6d628a8a = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal3b29863ca6c763a42daeb7da6d628a8a = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.icons.recover','data' => ['color' => 'text-teal-500','hover' => 'text-teal-600']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('icons.recover'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['color' => 'text-teal-500','hover' => 'text-teal-600']); ?> <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal3b29863ca6c763a42daeb7da6d628a8a)): ?>
+<?php $attributes = $__attributesOriginal3b29863ca6c763a42daeb7da6d628a8a; ?>
+<?php unset($__attributesOriginal3b29863ca6c763a42daeb7da6d628a8a); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal3b29863ca6c763a42daeb7da6d628a8a)): ?>
+<?php $component = $__componentOriginal3b29863ca6c763a42daeb7da6d628a8a; ?>
+<?php unset($__componentOriginal3b29863ca6c763a42daeb7da6d628a8a); ?>
+<?php endif; ?>
                             </button>
                             <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                          <?php echo $__env->renderComponent(); ?>
@@ -459,7 +564,25 @@ if (isset($__slots)) unset($__slots);
                             <div class="relative inline-block text-left" x-data="{showContextMenu:false}">
                                 <div>
                                     <button @click="showContextMenu = !showContextMenu" class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase rounded-lg bg-blue-50 hover:bg-blue-100">
-                                        <?php echo $__env->make('components.icons.settings-icon', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+                                        <?php if (isset($component)) { $__componentOriginal2fcb1b3aaae59cbabe31af4a9ea1ca01 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal2fcb1b3aaae59cbabe31af4a9ea1ca01 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.icons.settings-icon','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('icons.settings-icon'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?> <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal2fcb1b3aaae59cbabe31af4a9ea1ca01)): ?>
+<?php $attributes = $__attributesOriginal2fcb1b3aaae59cbabe31af4a9ea1ca01; ?>
+<?php unset($__attributesOriginal2fcb1b3aaae59cbabe31af4a9ea1ca01); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal2fcb1b3aaae59cbabe31af4a9ea1ca01)): ?>
+<?php $component = $__componentOriginal2fcb1b3aaae59cbabe31af4a9ea1ca01; ?>
+<?php unset($__componentOriginal2fcb1b3aaae59cbabe31af4a9ea1ca01); ?>
+<?php endif; ?>
                                     </button>
                                 </div>
                                 <div x-show="showContextMenu"
@@ -472,7 +595,6 @@ if (isset($__slots)) unset($__slots);
                                      @click.outside="showContextMenu = false"
                                      class="absolute right-0 z-10 mt-2 w-max origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
                                     <div class="flex flex-col" role="none">
-                                        <!-- Active: "bg-gray-100 text-gray-900", Not Active: "text-gray-700" -->
                                         <a href="#" wire:click="openSideMenu('show-files','<?php echo e($personnel->tabel_no); ?>')" class="appearance-none w-full flex items-center justify-start space-x-2 px-4 py-2 text-sm font-medium rounded-md  hover:bg-slate-100">
                                             <span class="text-slate-500"><?php echo e(__('Files')); ?></span>
                                         </a>
@@ -513,7 +635,25 @@ if (isset($__slots)) unset($__slots);
                                wire:click="setDeletePersonnel('<?php echo e($personnel->tabel_no); ?>')"
                                 class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-100 hover:text-gray-700"
                             >
-                                <?php echo $__env->make('components.icons.delete-icon', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+                                <?php if (isset($component)) { $__componentOriginal795db0355ab159c86fb4ade6f5b93d10 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal795db0355ab159c86fb4ade6f5b93d10 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.icons.delete-icon','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('icons.delete-icon'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?> <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal795db0355ab159c86fb4ade6f5b93d10)): ?>
+<?php $attributes = $__attributesOriginal795db0355ab159c86fb4ade6f5b93d10; ?>
+<?php unset($__attributesOriginal795db0355ab159c86fb4ade6f5b93d10); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal795db0355ab159c86fb4ade6f5b93d10)): ?>
+<?php $component = $__componentOriginal795db0355ab159c86fb4ade6f5b93d10; ?>
+<?php unset($__componentOriginal795db0355ab159c86fb4ade6f5b93d10); ?>
+<?php endif; ?>
                             </button>
                             
                          <?php else: ?>
@@ -522,7 +662,25 @@ if (isset($__slots)) unset($__slots);
                                 wire:click="forceDeleteData('<?php echo e($personnel->tabel_no); ?>')"
                                 class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-50 hover:text-gray-700"
                             >
-                                 <?php echo $__env->make('components.icons.force-delete', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+                                 <?php if (isset($component)) { $__componentOriginalc68e9de97adc0f3f617404bb2241d8ad = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalc68e9de97adc0f3f617404bb2241d8ad = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.icons.force-delete','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('icons.force-delete'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?> <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginalc68e9de97adc0f3f617404bb2241d8ad)): ?>
+<?php $attributes = $__attributesOriginalc68e9de97adc0f3f617404bb2241d8ad; ?>
+<?php unset($__attributesOriginalc68e9de97adc0f3f617404bb2241d8ad); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginalc68e9de97adc0f3f617404bb2241d8ad)): ?>
+<?php $component = $__componentOriginalc68e9de97adc0f3f617404bb2241d8ad; ?>
+<?php unset($__componentOriginalc68e9de97adc0f3f617404bb2241d8ad); ?>
+<?php endif; ?>
                             </button>
                         <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                          <?php echo $__env->renderComponent(); ?>
