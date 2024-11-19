@@ -29,7 +29,7 @@ class Awards extends Component
     public function rules(): array
     {
         return [
-            'form.id' => 'required|integer|min:1unique:awards,id'.($this->model ? ','.$this->form['id'] : ''),
+            'form.id' => 'required|integer|min:1|unique:awards,id'.($this->model ? ','.$this->form['id'] : ''),
             'form.name' => 'required|string|min:2',
             'form.award_type_id.id' => 'required|integer|exists:award_types,id',
         ];
@@ -100,7 +100,6 @@ class Awards extends Component
 
         $this->form['award_type_id'] = $this->form['award_type_id']['id'];
         $this->form['is_foreign'] = $this->form['is_foreign'] ?? false;
-
         $this->model
             ? $this->model->update($this->form)
             : Award::create($this->form);
