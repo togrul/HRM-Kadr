@@ -19,6 +19,8 @@ class CandidateList extends Component
 {
     use AuthorizesRequests,SideModalAction,WithPagination;
 
+    public array $filter = [];
+
     #[Url]
     public $status;
 
@@ -30,18 +32,29 @@ class CandidateList extends Component
         return Excel::download(new CandidateExport($report), "candidate-$name.xlsx");
     }
 
-    public function setStatus($newStatus)
+    public function setStatus($newStatus): void
     {
         $this->status = $newStatus;
         $this->resetPage();
     }
 
-    public function setDeleteCandidate($candidateId)
+    public function setDeleteCandidate($candidateId): void
     {
         $this->dispatch('setDeleteCandidate', $candidateId);
     }
 
-    public function restoreData($id)
+    public function searchFilter(): void
+    {
+        dd($this->filter);
+    }
+
+    public function resetFilter(): void
+    {
+        $this->filter = [];
+        $this->resetPage();
+    }
+
+    public function restoreData($id): void
     {
         $candidate = Candidate::withTrashed()->where('id', $id)->first();
         $candidate->restore();
@@ -51,7 +64,7 @@ class CandidateList extends Component
         $this->dispatch('candidateAdded', __('Candidate was updated successfully!'));
     }
 
-    public function forceDeleteData($id)
+    public function forceDeleteData($id): void
     {
         $model = Candidate::withTrashed()->where('id', $id)->first();
         $model->forceDelete();
@@ -67,6 +80,7 @@ class CandidateList extends Component
             ->when($this->status == 'deleted', function ($q) {
                 $q->onlyTrashed();
             })
+            ->filter($this->filter?? [])
             ->orderByDesc('appeal_date');
 
         return $type == 'normal'

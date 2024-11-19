@@ -22,24 +22,57 @@
 ">
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 lg:grid-cols-4 px-6 py-4">
         <div class="flex flex-col">
-            <x-label for="search.order_no">{{ __('Search') }}</x-label>
-            <x-livewire-input mode="gray" name="search.order_no" wire:model="search.order_no"></x-livewire-input>
+            <x-label for="filter.fullname">{{ __('Fullname') }}</x-label>
+            <x-livewire-input mode="gray" name="filter.fullname" wire:model="filter.fullname"></x-livewire-input>
         </div>
+        <div class="flex flex-col space-y-1 w-full">
+            <x-label for="filter.gender">{{ __('Gender') }}</x-label>
+            <div class="flex space-x-2">
+                <label class="inline-flex items-center bg-gray-100 rounded shadow-sm py-2 px-2 w-full">
+                    <input type="radio"
+                           class="form-radio"
+                           name="filter.gender"
+                           wire:model="filter.gender"
+                           value="2">
+                    <span class="ml-2 text-sm font-normal">{{__('Woman')}}</span>
+                </label>
+                <label class="inline-flex items-center bg-gray-100 rounded shadow-sm py-2 px-2 w-full">
+                    <input type="radio"
+                           class="form-radio"
+                           name="filter.gender"
+                           wire:model="filter.gender"
+                           value="1"
+                    >
+                    <span class="ml-2 text-sm font-normal">{{__('Man')}}</span>
+                </label>
+            </div>
+        </div>
+        <div class="flex space-x-2 items-center">
+            <div class="flex flex-col">
+                <x-label for="filter.results">{{ __('Test results') }}</x-label>
+                <x-livewire-input mode="gray" type="number" name="filter.results" wire:model="filter.results"></x-livewire-input>
+            </div>
+            <div class="flex flex-col">
+                <x-label for="filter.age">{{ __('Age') }}</x-label>
+                <x-livewire-input mode="gray" type="number" name="filter.age" wire:model="filter.age"></x-livewire-input>
+            </div>
+        </div>
+
         <div class="flex flex-col">
-            <x-label for="search.given_date">{{ __('Given date') }}</x-label>
+            <x-label for="filter.appeal_date">{{ __('Appeal date') }}</x-label>
             <div class="flex space-x-1 items-center">
-                <x-pikaday-input mode="gray" name="search.given_date.min" format="Y-MM-DD" wire:model="search.given_date.min">
+                <x-pikaday-input mode="gray" name="filter.appeal_date.min" format="Y-MM-DD" wire:model="filter.appeal_date.min">
                     <x-slot name="script">
                         $el.onchange = function () {
-                        @this.set('search.given_date.min', $el.value);
+                        @this.set('filter.appeal_date.min', $el.value);
                         }
                     </x-slot>
                 </x-pikaday-input>
                 <span>-</span>
-                <x-pikaday-input mode="gray" name="search.given_date.max" format="Y-MM-DD" wire:model="search.given_date.max">
+                <x-pikaday-input mode="gray" name="filter.appeal_date.max" format="Y-MM-DD" wire:model="filter.appeal_date.max">
                     <x-slot name="script">
                         $el.onchange = function () {
-                        @this.set('search.given_date.max', $el.value);
+                        @this.set('filter.appeal_date.max', $el.value);
                         }
                     </x-slot>
                 </x-pikaday-input>
