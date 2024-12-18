@@ -13,10 +13,6 @@ trait CandidateCrud
 
     public $candidate = [];
 
-    public $structureId;
-
-    public $structureName;
-
     public $searchStructure;
 
     public $statusId;
@@ -63,7 +59,7 @@ trait CandidateCrud
 
     public function mount()
     {
-        $this->structureName = $this->statusName = '---';
+        $this->statusName = '---';
         if (! empty($this->candidateModel)) {
             $this->fillCandidate();
             $this->title = __('Edit candidate');
@@ -77,6 +73,7 @@ trait CandidateCrud
         $structures = Structure::when(! empty($this->searchStructure), function ($q) {
             $q->where('name', 'LIKE', "%$this->searchStructure%");
         })
+            ->ordered()
             ->get();
 
         $statuses = AppealStatus::where('locale', config('app.locale'))->get();

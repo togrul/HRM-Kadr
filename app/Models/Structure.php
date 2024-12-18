@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Observers\StructureObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -43,6 +44,16 @@ class Structure extends Model
         return $this->hasMany(Personnel::class);
     }
 
+    public function roles()
+    {
+        return $this->belongsToMany(\Spatie\Permission\Models\Role::class, 'role_structures');
+    }
+
+    public function scopeOrdered()
+    {
+        return $this->orderBy('level')->orderBy('code');
+    }
+
     public function topLevelParent()
     {
         $parent = ! empty($this->parent->parent_id) ? $this->parent : $this;
@@ -57,7 +68,7 @@ class Structure extends Model
     {
         return $query->with([
             $relationship => function ($q) use ($relationship) {
-                $q->withRecursive($relationship);
+                $q->accessible()->withRecursive($relationship);
             },
         ]);
     }
@@ -80,16 +91,6 @@ class Structure extends Model
 
     public function getAllNestedIds(): array
     {
-//        $ids = [$this->id]; // Add the ID of the current model
-//
-//        // If there are children, recursively collect their IDs
-//        if ($this->subs->count() > 0) {
-//            foreach ($this->subs as $child) {
-//                $ids = array_merge($ids, $child->getAllNestedIds());
-//            }
-//        }
-//
-//        return $ids;
         return $this->subs->reduce(fn($ids, $child) => array_merge($ids, $child->getAllNestedIds()), [$this->id]);
     }
 

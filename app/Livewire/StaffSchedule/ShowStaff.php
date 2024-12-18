@@ -20,6 +20,7 @@ class ShowStaff extends Component
 
     public function mount()
     {
+        $this->authorize('show-staff', $this->structureModel);
         $structure = Structure::where('id', $this->structureModel)->value('name');
         $position = Position::where('id', $this->positionModel)->value('name');
         $this->title = "{$structure}($position)";

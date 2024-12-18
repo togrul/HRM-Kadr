@@ -19,6 +19,7 @@ use App\Models\Structure;
 use App\Services\AttributeProcessService;
 use App\Services\CheckVacancyService;
 use App\Services\OrderCollectionListsService;
+use App\Services\StructureService;
 use App\Services\WordSuffixService;
 use Carbon\Carbon;
 use Livewire\Attributes\Isolate;
@@ -410,6 +411,7 @@ trait OrderCrud
                     ->orWhere('surname', 'LIKE', "%{$this->searchPersonnel}%");
             });
         })
+            ->whereIn('structure_id', resolve(StructureService::class)->getAccessibleStructures())
             ->whereNotIn('id', $_personnel_id_list)
             ->whereNull('leave_work_date')
             ->orderBy('position_id')
@@ -580,10 +582,12 @@ trait OrderCrud
         $_ranks = Rank::where('is_active', true)->get();
 
         $_main_structures = Structure::where('code', 0)->orderBy('id')->get();
-        $_structures = Structure::with('subs')
+
+        $_structures = Structure::withRecursive('subs')
             ->when(! empty($this->searchStructure), function ($q) {
                 $q->where('name', 'LIKE', "%{$this->searchStructure}%");
             })
+            ->accessible()
             ->whereNotNull('parent_id')
             ->where('code', '<>', 0)
             ->orderBy('code')

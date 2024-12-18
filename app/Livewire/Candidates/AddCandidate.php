@@ -4,11 +4,18 @@ namespace App\Livewire\Candidates;
 
 use App\Livewire\Traits\CandidateCrud;
 use App\Models\Candidate;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Component;
 
 class AddCandidate extends Component
 {
     use CandidateCrud;
+    use AuthorizesRequests;
+
+    public function mount()
+    {
+        $this->authorize('add-candidates');
+    }
 
     public function store(): void
     {

@@ -9,6 +9,7 @@ use App\Models\OrderLog;
 use App\Models\OrderStatus;
 use App\Models\Structure;
 use App\Services\GenerateWordReplaceContent;
+use App\Services\StructureService;
 use App\Services\WordSuffixService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -34,22 +35,20 @@ class AllOrders extends Component
     public $search = [];
 
     #[On('selectOrder')]
-    public function selectOrder($id)
+    public function selectOrder($id): void
     {
         $this->selectedOrder = $id;
     }
 
-    public function setStatus($newStatus)
+    public function setStatus($newStatus): void
     {
         $this->status = $newStatus;
         $this->resetPage();
     }
 
-    public function fillFilter()
+    public function fillFilter(): void
     {
-        $this->status = request()->query('status')
-            ? request()->query('status')
-            : 'all';
+        $this->status = request()->query('status') ?? 'all';
     }
 
     public function resetFilter()
@@ -145,12 +144,12 @@ class AllOrders extends Component
         $_replace_texts = [];
         $globalIndex = 0;
 
-//                $att = $order->attributes->groupBy(function ($attribute) {
-//                    $structure = $attribute->attributes['$structure']['value'] ?? null;
-//
-//                    return "{$structure}";
-//                });
-//                dd($att->toArray(),$order->attributes);
+        //                $att = $order->attributes->groupBy(function ($attribute) {
+        //                    $structure = $attribute->attributes['$structure']['value'] ?? null;
+        //
+        //                    return "{$structure}";
+        //                });
+        //                dd($att->toArray(),$order->attributes);
         foreach ($order->components as $componentIndex => $_component) {
             $attr_list = $order->attributes
                 ->where('component_id', $_component->id)
@@ -199,10 +198,11 @@ class AllOrders extends Component
         }
 
         $secondIndex = 0;
+
         foreach ($_component_texts as $key => &$text) {
             ['content' => $content, 'title' => $title] = (new GenerateWordReplaceContent($bladeType, $_replace_texts))
                 ->handle($key, $text, $secondIndex);
-
+            $secondIndex++;
             $text = ! empty($title) ? $this->convertWordIntoBold($title).PHP_EOL.'<w:p/>'.$content : $content;
 
             $replacements[] = [
@@ -227,12 +227,9 @@ class AllOrders extends Component
     {
         $structureModel = Structure::where('name', $name)->first();
         $structureFullName = $structureModel->getAllParentName(isCoded: true);
-        $result = '';
-        foreach ($structureFullName as $structure) {
-            $result .= ($service->getStructureSuffix($structure, mainStructure: true).' ');
-        }
 
-        return rtrim($result);
+        return collect($structureFullName)->map(fn ($structure) => $service->getStructureSuffix($structure, mainStructure: true).' '
+        )->implode('');
     }
 
     private function convertWordIntoBold(string $word): string
@@ -244,17 +241,25 @@ class AllOrders extends Component
 
     protected function returnData($type = 'normal')
     {
-        $result = OrderLog::with(['order', 'components', 'status', 'personDidDelete', 'creator', 'orderType'])
+        $result = OrderLog::with([
+            'order',
+            'components',
+            'status',
+            'personDidDelete',
+            'creator',
+            'orderType',
+        ])
+            ->where(function ($query) {
+                $query->where('order_id', 1010) // Include records with order_id = 1010
+                    ->orWhere(function ($query) {
+                        $query->where('order_id', '!=', 1010) // Exclude records with order_id = 1010
+                            ->whereHas('personnels', fn ($query) => $query->whereIn('structure_id', resolve(StructureService::class)->getAccessibleStructures()));
+                    });
+            })
             ->filter($this->search ?? [])
-            ->when(! empty($this->selectedOrder), function ($q) {
-                $q->where('order_id', $this->selectedOrder);
-            })
-            ->when(is_int($this->status) && $this->status > 0, function ($q) {
-                $q->where('status_id', $this->status);
-            })
-            ->when($this->status == 'deleted', function ($q) {
-                $q->onlyTrashed();
-            })
+            ->when($this->selectedOrder, fn ($q) => $q->where('order_id', $this->selectedOrder))
+            ->when(is_numeric($this->status), fn ($q) => $q->where('status_id', $this->status))
+            ->when($this->status === 'deleted', fn ($q) => $q->onlyTrashed())
             ->orderByDesc('given_date');
 
         return $type == 'normal'
@@ -270,6 +275,7 @@ class AllOrders extends Component
 
     public function mount()
     {
+        $this->authorize('show-orders');
         $this->fillFilter();
         $this->selectedOrder = $this->selectedOrder ?? request()->query('selectedOrder');
     }

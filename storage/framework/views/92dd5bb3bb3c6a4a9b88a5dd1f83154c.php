@@ -55,12 +55,17 @@ if (isset($__slots)) unset($__slots);
         </div>
 
         <div class="flex justify-end items-center space-x-2">
+            <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('add-staff')): ?>
             <button wire:click="openSideMenu('add-staff')" class="flex items-center justify-center transition-all duration-300 rounded-xl bg-slate-100 text-slate-500 hover:bg-slate-200 space-x-2 p-2" type="button">
                 <?php echo $__env->make('components.icons.add-icon', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
             </button>
+            <?php endif; ?>
+            <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('export-staff')): ?>
             <button class="flex items-center justify-center transition-all duration-300 rounded-xl bg-rose-50 text-rose-500 hover:bg-rose-100 space-x-2 p-2" type="button">
                 <?php echo $__env->make('components.icons.print-file',['color' => 'text-rose-400', 'hover' => 'text-rose-500'], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
             </button>
+            <?php endif; ?>
+            <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('export-staff')): ?>
             <!--[if BLOCK]><![endif]--><?php if($selectedPage == 'vacancies'): ?>
             <button wire:click.prevent="exportExcel" class="flex items-center justify-center rounded-xl transition-all duration-300 bg-green-50 text-green-500 hover:bg-green-100 space-x-2 p-2" type="button">
                 <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"  viewBox="0 0 50 50" class="w-6 h-6 fill-green-400 transition-all duration-300 hover:fill-green-500">
@@ -68,6 +73,7 @@ if (isset($__slots)) unset($__slots);
                 </svg>
             </button>
             <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+            <?php endif; ?>
         </div>
     </div>
 
@@ -89,12 +95,16 @@ if (isset($__slots)) unset($__slots);
                     <span></span>
                     <h1 class="text-lg font-medium flex items-center"><?php echo $str; ?> </h1>
                     <div class="flex space-x-2 items-center">
-                        <button wire:click="openSideMenu('edit-staff',<?php echo e($stf[0]->structure_id); ?>)" class="appearance-none w-8 h-8 flex justify-center items-center rounded-lg bg-slate-700 transition-all duration-300 hover:bg-slate-800">
-                            <?php echo $__env->make('components.icons.edit-icon',['color' => 'text-slate-100', 'hover' => 'text-slate-200'], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
-                        </button>
-                        <button wire:click.prevent="setDeleteStaff(<?php echo e($stf[0]->structure_id); ?>)" class="appearance-none w-8 h-8 flex justify-center items-center rounded-lg bg-slate-700 transition-all duration-300 hover:bg-slate-800">
-                            <?php echo $__env->make('components.icons.delete-icon',['color' => 'text-rose-400', 'hover' => 'text-rose-300'], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
-                        </button>
+                        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('edit-staff')): ?>
+                            <button wire:click="openSideMenu('edit-staff',<?php echo e($stf[0]->structure_id); ?>)" class="appearance-none w-8 h-8 flex justify-center items-center rounded-lg bg-slate-700 transition-all duration-300 hover:bg-slate-800">
+                                <?php echo $__env->make('components.icons.edit-icon',['color' => 'text-slate-100', 'hover' => 'text-slate-200'], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+                            </button>
+                        <?php endif; ?>
+                        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('delete-staff')): ?>
+                            <button wire:click.prevent="setDeleteStaff(<?php echo e($stf[0]->structure_id); ?>)" class="appearance-none w-8 h-8 flex justify-center items-center rounded-lg bg-slate-700 transition-all duration-300 hover:bg-slate-800">
+                                <?php echo $__env->make('components.icons.delete-icon',['color' => 'text-rose-400', 'hover' => 'text-rose-300'], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+                            </button>
+                        <?php endif; ?>
                     </div>
                 </div>
 
@@ -342,8 +352,9 @@ if (isset($__slots)) unset($__slots);
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
 <?php $component->withAttributes([]); ?>
-        <!--[if BLOCK]><![endif]--><?php if($showSideMenu == 'add-staff'): ?>
-            <?php
+        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('add-staff')): ?>
+            <!--[if BLOCK]><![endif]--><?php if($showSideMenu == 'add-staff'): ?>
+                <?php
 $__split = function ($name, $params = []) {
     return [$name, $params];
 };
@@ -359,10 +370,12 @@ unset($__params);
 unset($__split);
 if (isset($__slots)) unset($__slots);
 ?>
-        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+        <?php endif; ?>
 
-        <!--[if BLOCK]><![endif]--><?php if($showSideMenu == 'edit-staff'): ?>
-            <?php
+        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('edit-staff')): ?>
+            <!--[if BLOCK]><![endif]--><?php if($showSideMenu == 'edit-staff'): ?>
+                <?php
 $__split = function ($name, $params = []) {
     return [$name, $params];
 };
@@ -378,10 +391,12 @@ unset($__params);
 unset($__split);
 if (isset($__slots)) unset($__slots);
 ?>
-        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+        <?php endif; ?>
 
-        <!--[if BLOCK]><![endif]--><?php if($showSideMenu == 'show-staff'): ?>
-            <?php
+        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('show-staff')): ?>
+            <!--[if BLOCK]><![endif]--><?php if($showSideMenu == 'show-staff'): ?>
+                <?php
 $__split = function ($name, $params = []) {
     return [$name, $params];
 };
@@ -397,7 +412,8 @@ unset($__params);
 unset($__split);
 if (isset($__slots)) unset($__slots);
 ?>
-        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+        <?php endif; ?>
     <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal06466d70a5df71623dc2a561e77c49ee)): ?>
@@ -409,8 +425,9 @@ if (isset($__slots)) unset($__slots);
 <?php unset($__componentOriginal06466d70a5df71623dc2a561e77c49ee); ?>
 <?php endif; ?>
    
-   <div>
-    <?php
+   <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('delete-staff')): ?>
+       <div>
+            <?php
 $__split = function ($name, $params = []) {
     return [$name, $params];
 };
@@ -426,6 +443,7 @@ unset($__params);
 unset($__split);
 if (isset($__slots)) unset($__slots);
 ?>
-   </div>
+       </div>
+   <?php endif; ?>
 </div>
 <?php /**PATH /Users/togruljalalli/Desktop/projects/HR-CRM/resources/views/livewire/staff-schedule/staffs.blade.php ENDPATH**/ ?>

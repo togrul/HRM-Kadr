@@ -17,6 +17,7 @@ class PersonnelRank extends Model
     protected $fillable = [
         'tabel_no',
         'rank_id',
+        'rank_reason_id',
         'name',
         'given_date',
         'order_no',
@@ -37,5 +38,10 @@ class PersonnelRank extends Model
     public function rank(): BelongsTo
     {
         return $this->belongsTo(Rank::class);
+    }
+
+    public function rankReason(): BelongsTo
+    {
+        return $this->belongsTo(RankReason::class, 'rank_reason_id', 'id');
     }
 }

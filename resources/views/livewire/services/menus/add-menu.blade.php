@@ -5,7 +5,7 @@
           </h2>
     </div>
 
-    <div 
+    <div
         class="flex flex-col w-full p-10 px-0 mx-auto my-3 mb-4 space-y-8 transition duration-500 ease-in-out transform bg-white"
     >
         <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
@@ -24,7 +24,7 @@
                 @enderror
               </div>
               <div class="">
-                <x-label for="menu.order">{{ __('Order') }}</x-label>
+                <x-label for="menu.order">{{ __('Order no') }}</x-label>
                 <x-livewire-input type="number" mode="gray" name="menu.order" wire:model="menu.order"></x-livewire-input>
                 @error('menu.order')
                   <x-validation> {{ $message }} </x-validation>
@@ -39,6 +39,29 @@
                     <x-validation> {{ $message }} </x-validation>
                 @enderror
             </div>
+            <div class="flex flex-col">
+                @php
+                    $selectedName = array_key_exists('permission_id', $menu) ? $menu['permission_id']['name'] : '---';
+                    $selectedId = array_key_exists('permission_id', $menu) ? $menu['permission_id']['id'] : -1;
+                @endphp
+                <x-select-list class="w-full" :title="__('Permissions')" mode="gray" :selected="$selectedName" name="permissionId">
+                    <x-select-list-item wire:click="setData('menu','permission_id',null,'---',null)" :selected="'---' == $selectedName"
+                                        wire:model='menu.permission_id.id'>
+                        ---
+                    </x-select-list-item>
+                    @foreach($permissions as $permission)
+                        <x-select-list-item wire:click="setData('menu','permission_id',null,'{{ $permission->name }}',{{ $permission->id }})"
+                                            :selected="$permission->id === $selectedId" wire:model='menu.permission_id.id'>
+                            {{ $permission->name }}
+                        </x-select-list-item>
+                    @endforeach
+                </x-select-list>
+                @error('menu.permission_id.id')
+                    <x-validation> {{ $message }} </x-validation>
+                @enderror
+            </div>
+        </div>
+        <div class="grid grid-cols-1">
             <div class="">
                 <x-label for="menu.icon">{{ __('Icon') }}</x-label>
                 <x-textarea mode="gray" name="menu.icon" wire:model="menu.icon" placeholder="{{ __('Icon') }}"></x-textarea>

@@ -8,8 +8,6 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class PersonnelBusinessTrip extends Model
@@ -41,13 +39,16 @@ class PersonnelBusinessTrip extends Model
         'start_date' => 'date:d.m.Y',
         'end_date' => 'date:d.m.Y',
         'order_date' => 'date:d.m.Y',
-        'attributes' => 'array'
+        'attributes' => 'array',
     ];
 
     protected $likeFilterFields = [
         'location',
         'order_no',
     ];
+
+    const INTERNAL_BUSINESS_TRIP = 6;
+    const FOREIGN_BUSINESS_TRIP = 7;
 
     public function personDidDelete(): BelongsTo
     {
@@ -69,6 +70,19 @@ class PersonnelBusinessTrip extends Model
         return $this->belongsTo(OrderLog::class, 'order_no', 'order_no');
     }
 
+    public function scopeForeignBusinessTrip($query)
+    {
+        return $query->whereHas('order', function ($where) {
+            $where->where('order_type_id', self::FOREIGN_BUSINESS_TRIP);
+        });
+    }
+
+    public function scopeInternalBusinessTrip($query)
+    {
+        return $query->whereHas('order', function ($where) {
+            $where->where('order_type_id', self::INTERNAL_BUSINESS_TRIP);
+        });
+    }
 
     public function scopeFilter($query, array $filters)
     {
@@ -89,7 +103,7 @@ class PersonnelBusinessTrip extends Model
                     break;
                 case 'order_type_id':
                     if (isset($value['id'])) {
-                        $query->whereHas('order.orderType', function ($qq) use($value) {
+                        $query->whereHas('order.orderType', function ($qq) use ($value) {
                             $qq->where('order_type_id', $value['id']);
                         });
                     }

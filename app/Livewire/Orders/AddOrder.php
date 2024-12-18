@@ -8,12 +8,18 @@ use App\Models\OrderLog;
 use App\Services\ImportCandidateToPersonnel;
 use App\Services\OrderConfirmedService;
 use Carbon\Carbon;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class AddOrder extends Component
 {
-    use OrderCrud;
+    use OrderCrud,AuthorizesRequests;
+
+    public function mount()
+    {
+        $this->authorize('add-orders');
+    }
 
     public function store()
     {

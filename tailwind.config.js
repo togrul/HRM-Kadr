@@ -23,6 +23,9 @@ export default {
         'border-orange-400',
         'text-yellow-500',
         'text-yellow-400',
+        'bg-slate-500',
+        'bg-cyan-500',
+        'bg-orange-500'
       ],
     darkMode: 'class',
     theme: {

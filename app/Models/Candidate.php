@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Traits\CreateDeleteTrait;
 use App\Traits\DateCastTrait;
+use App\Traits\GenderEnumTrait;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,7 +13,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Candidate extends Model
 {
-    use CreateDeleteTrait,DateCastTrait,HasFactory,SoftDeletes;
+    use CreateDeleteTrait,
+        DateCastTrait,
+        HasFactory,
+        SoftDeletes;
 
     protected $fillable = [
         'name',
@@ -66,6 +71,9 @@ class Candidate extends Model
         'birthdate' => 'datetime:d.m.Y',
     ];
 
+    protected $likeFilterFields = [
+    ];
+
     public function getFullnameAttribute(): string
     {
         return "$this->surname $this->name $this->patronymic";
@@ -86,10 +94,40 @@ class Candidate extends Model
         return $this->belongsTo(AppealStatus::class, 'status_id', 'id')->where('locale', config('app.locale'));
     }
 
-    public function scopeFilter($query, array $filters) {
-        foreach ($filters as $field => $value)
-        {
-
+    public function scopeFilter($query, array $filters)
+    {
+        foreach ($filters as $field => $value) {
+            switch ($field) {
+                case 'results':
+                    $query->where(function ($q) use ($value) {
+                        $q->where('knowledge_test', $value)->orWhere('physical_fitness_exam', $value);
+                    });
+                    break;
+                case 'age':
+                    $query->whereRaw('timestampdiff(year, birthdate, curdate()) = ?', [$value]);
+                    break;
+                case 'appeal_date':
+                    $min = empty($value['min']) ? '1990-01-01' : Carbon::parse($value['min'])->format('Y-m-d');
+                    $max = empty($value['max']) ? Carbon::now()->format('Y-m-d') : Carbon::parse($value['max'])->format('Y-m-d');
+                    $query->whereBetween($field, [$min, $max]);
+                    break;
+                case 'fullname':
+                    $query->where(function ($q) use ($value) {
+                        $q->where('name', 'LIKE', "%$value%")
+                            ->orWhere('surname', 'LIKE', "%$value%")
+                            ->orWhere('patronymic', 'LIKE', "%$value%");
+                    });
+                    break;
+                default:
+                    if (in_array($field, $this->likeFilterFields) && $value !== null) {
+                        $query->where($field, 'LIKE', "%$value%");
+                    } elseif (in_array($field, $this->fillable) && $value !== null) {
+                        $query->where($field, $value);
+                    }
+                    break;
+            }
         }
+
+        return $query;
     }
 }

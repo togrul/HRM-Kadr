@@ -20,7 +20,7 @@ class DeleteOrder extends Component
 
     public function deleteOrder()
     {
-        // $this->authorize('delete',$this->orderLog);
+        $this->authorize('delete-orders', $this->orderLog);
 
         OrderLog::destroy($this->orderLog->id);
 

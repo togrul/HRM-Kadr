@@ -6,6 +6,7 @@ use App\Exports\CandidateExport;
 use App\Livewire\Traits\SideModalAction;
 use App\Models\AppealStatus;
 use App\Models\Candidate;
+use App\Services\StructureService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\On;
@@ -20,6 +21,8 @@ class CandidateList extends Component
     use AuthorizesRequests,SideModalAction,WithPagination;
 
     public array $filter = [];
+
+    public array $search = [];
 
     #[Url]
     public $status;
@@ -45,18 +48,25 @@ class CandidateList extends Component
 
     public function searchFilter(): void
     {
-        dd($this->filter);
+        $this->applyFilter();
+    }
+
+
+    public function applyFilter(array $filter = []): void
+    {
+        $this->search = $filter ?: $this->filter;
+        $this->resetPage();
     }
 
     public function resetFilter(): void
     {
         $this->filter = [];
-        $this->resetPage();
+        $this->applyFilter([]);
     }
 
     public function restoreData($id): void
     {
-        $candidate = Candidate::withTrashed()->where('id', $id)->first();
+        $candidate = Candidate::withTrashed()->findOrFail($id);
         $candidate->restore();
         $candidate->update([
             'deleted_by' => null,
@@ -66,7 +76,7 @@ class CandidateList extends Component
 
     public function forceDeleteData($id): void
     {
-        $model = Candidate::withTrashed()->where('id', $id)->first();
+        $model = Candidate::withTrashed()->findOrFail($id);
         $model->forceDelete();
         $this->dispatch('candidateWasDeleted', __('Candidate was deleted!'));
     }
@@ -74,13 +84,10 @@ class CandidateList extends Component
     protected function returnData($type = 'normal')
     {
         $result = Candidate::with(['structure', 'status', 'creator', 'personDidDelete'])
-            ->when(is_int($this->status), function ($q) {
-                return $q->where('status_id', $this->status);
-            })
-            ->when($this->status == 'deleted', function ($q) {
-                $q->onlyTrashed();
-            })
-            ->filter($this->filter?? [])
+            ->whereIn('structure_id', resolve(StructureService::class)->getAccessibleStructures())
+            ->when(is_numeric($this->status), fn ($q) => $q->where('status_id', $this->status))
+            ->when($this->status === 'deleted', fn ($q) => $q->onlyTrashed())
+            ->filter($this->search ?? [])
             ->orderByDesc('appeal_date');
 
         return $type == 'normal'
@@ -88,11 +95,10 @@ class CandidateList extends Component
             : $result->get()->toArray();
     }
 
-    public function mount()
+    public function mount(): void
     {
-        $this->status = request()->query('status')
-            ? request()->query('status')
-            : 'all';
+        $this->authorize('show-candidates');
+        $this->status = request()->query('status', 'all');
     }
 
     public function render()

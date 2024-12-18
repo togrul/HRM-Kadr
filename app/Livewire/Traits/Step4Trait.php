@@ -26,7 +26,7 @@ trait Step4Trait
 
     public $calculatedData = [];
 
-    public function addLaborActivity()
+    public function addLaborActivity(): void
     {
         $this->validate($this->exceptArray('ranks'));
         $time = array_key_exists('time', $this->labor_activities) ? $this->labor_activities['time'] : '12:00';
@@ -40,10 +40,8 @@ trait Step4Trait
         $this->calculateSeniority();
     }
 
-    public function addRank()
+    public function addRank(): void
     {
-        //property qoy add methoddusa onda yoxla validation yoxsa yoxlama
-
         $this->isAddedRank = true;
         $this->validate($this->exceptArray('labor_activities'));
         $this->rank_list[] = $this->ranks;
@@ -53,18 +51,18 @@ trait Step4Trait
         $this->isAddedRank = false;
     }
 
-    public function forceDeleteLaborActivity($key)
+    public function forceDeleteLaborActivity($key): void
     {
         unset($this->labor_activities_list[$key]);
         $this->calculateSeniority();
     }
 
-    public function forceDeleteRank($key)
+    public function forceDeleteRank($key): void
     {
         unset($this->rank_list[$key]);
     }
 
-    public function mountStep4Trait()
+    public function mountStep4Trait(): void
     {
         $this->isAddedRank = false;
         $this->rankName = '---';
@@ -73,13 +71,13 @@ trait Step4Trait
         $this->calculateSeniority();
     }
 
-    private function calculateSeniority()
+    private function calculateSeniority(): void
     {
         $calculateService = resolve(CalculateSeniorityService::class);
         $this->calculatedData = $calculateService->calculateMulti($this->labor_activities_list);
     }
 
-    protected function fillStep4()
+    protected function fillStep4(): void
     {
         $updateLaborActivity = $this->personnelModelData->laborActivities;
         if (! empty($updateLaborActivity)) {
@@ -94,13 +92,16 @@ trait Step4Trait
                 );
             }
         }
-        $updateRanks = $this->personnelModelData->ranks->load('rank')->toArray();
+        $updateRanks = $this->personnelModelData->ranks->load(['rank', 'rankReason'])->toArray();
 
         if (! empty($updateRanks)) {
             foreach ($updateRanks as $key => $uptRank) {
                 $this->rank_list[] = [
                     'name' => $uptRank['name'],
                     'given_date' => $uptRank['given_date'],
+                    'order_no' => $uptRank['order_no'],
+                    'order_given_by' => $uptRank['order_given_by'],
+                    'order_date' => $uptRank['order_date'],
                 ];
 
                 $this->handleRelatedEntitiesMultiDimensional(
@@ -111,6 +112,15 @@ trait Step4Trait
                     getFrom: $uptRank,
                     titleField: 'name',
                     hasLocale: true
+                );
+
+                $this->handleRelatedEntitiesMultiDimensional(
+                    entity: 'rank_reason',
+                    field: 'rank_reason_id',
+                    key: $key,
+                    fillTo: 'rank_list',
+                    getFrom: $uptRank,
+                    titleField: 'name'
                 );
             }
         }

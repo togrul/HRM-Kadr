@@ -91,14 +91,12 @@
             <div class="flex flex-col space-y-1">
                 <x-label for="personnel.gender">{{ __('Gender') }}</x-label>
                 <div class="flex flex-row">
-                  <label class="inline-flex items-center bg-gray-100 rounded shadow-sm py-2 px-2">
-                    <input type="radio" class="form-radio" name="personnel.gender" wire:model="personnel.gender" value="2">
-                    <span class="ml-2 text-sm font-normal">{{__('Woman')}}</span>
-                  </label>
-                  <label class="inline-flex items-center ml-4 bg-gray-100 rounded shadow-sm py-2 px-2">
-                    <input type="radio" class="form-radio" name="personnel.gender" wire:model="personnel.gender" value="1">
-                    <span class="ml-2 text-sm font-normal">{{__('Man')}}</span>
-                  </label>
+                    @foreach(\App\Enums\GenderEnum::genderOptions() as $value => $label)
+                        <label class="inline-flex items-center bg-gray-100 rounded shadow-sm py-2 px-2">
+                            <input type="radio" class="form-radio" name="personnel.gender" wire:model="personnel.gender" value="{{ $value }}">
+                            <span class="ml-2 text-sm font-normal">{{ $label }}</span>
+                        </label>
+                    @endforeach
                 </div>
                 @error('personnel.gender')
                 <x-validation> {{ $message }} </x-validation>

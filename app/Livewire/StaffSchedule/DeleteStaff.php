@@ -20,7 +20,7 @@ class DeleteStaff extends Component
 
     public function deleteStaff()
     {
-        // $this->authorize('delete',$this->employee);
+         $this->authorize('delete-staff',$this->staff);
         StaffSchedule::destroy($this->staff);
 
         $this->staff = null;

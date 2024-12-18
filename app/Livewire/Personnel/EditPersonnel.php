@@ -35,6 +35,7 @@ class EditPersonnel extends Component
 
     public function mount()
     {
+        $this->authorize('edit-personnels', $this->personnelModel);
         $this->title = __('Edit personnel');
         $this->step = 1;
         $this->personnelModelData = Personnel::with([
@@ -60,8 +61,7 @@ class EditPersonnel extends Component
             'degreeAndNames',
             'socialOrigin',
         ])
-            ->where('id', $this->personnelModel)
-            ->first();
+            ->findOrFail($this->personnelModel);
     }
 
     public function store()

@@ -25,11 +25,10 @@ class Sidebar extends Component
         $this->dispatch('selectStructure', $id);
     }
 
-
     public function render()
     {
         $structures = Cache::rememberForever('structures', function () {
-            return Structure::withRecursive('subs')->whereNull('parent_id')->get();
+            return Structure::withRecursive('subs')->whereNull('parent_id')->orderBy('code')->get();
         });
 
         return view('livewire.structure.sidebar', compact('structures'));

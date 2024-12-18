@@ -89,6 +89,13 @@
         <?php echo \Livewire\Mechanisms\FrontendAssets\FrontendAssets::scripts(); ?>
 
         <?php echo $__env->yieldPushContent('js'); ?>
+        <script>
+            Livewire.on('refresh-page', () => {
+                setTimeout(() => {
+                    location.reload();
+                }, 2000); // 2000 milliseconds = 2 seconds
+            });
+        </script>
     </body>
 </html>
 <?php /**PATH /Users/togruljalalli/Desktop/projects/HR-CRM/resources/views/layouts/app.blade.php ENDPATH**/ ?>

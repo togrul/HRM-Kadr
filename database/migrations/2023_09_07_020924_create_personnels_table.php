@@ -33,8 +33,8 @@ return new class extends Migration
             $table->integer('nationality_id');
             $table->foreign('nationality_id')->references('id')->on('countries');
             $table->boolean('has_changed_nationality')->default(false);
-            $table->integer('previous_nationality_id');
-            $table->foreign('previous_nationality_id')->nullable()->references('id')->on('countries');
+            $table->integer('previous_nationality_id')->nullable();
+            $table->foreign('previous_nationality_id')->references('id')->on('countries');
             $table->date('nationality_changed_date')->nullable();
             $table->string('nationality_change_reason')->nullable();
             $table->string('pin');
@@ -46,8 +46,8 @@ return new class extends Migration
             $table->foreign('position_id')->references('id')->on('positions');
             $table->date('join_work_date');
             $table->date('leave_work_date')->nullable();
-            $table->integer('disability_id');
-            $table->foreign('disability_id')->nullable()->references('id')->on('disabilities');
+            $table->integer('disability_id')->nullable();
+            $table->foreign('disability_id')->references('id')->on('disabilities');
             $table->date('disability_given_date')->nullable();
             $table->text('extra_important_information')->nullable();
             $table->text('computer_knowledge')->nullable();

@@ -42,6 +42,7 @@ class AddStaff extends Component
 
     public function mount()
     {
+        $this->authorize('add-staff');
         $this->title = __('New staff');
         $this->structureData = [
             [

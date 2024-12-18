@@ -62,6 +62,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/languages', \App\Livewire\Admin\Languages::class)->name('admin.languages');
         Route::get('/scientific-degrees', \App\Livewire\Admin\ScientificDegrees::class)->name('admin.scientific-degrees');
         Route::get('/social-origins', \App\Livewire\Admin\SocialOrigins::class)->name('admin.social-origins');
+        Route::get('/rank-reasons', \App\Livewire\Admin\RankReasons::class)->name('admin.rank-reasons');
     });
 
 

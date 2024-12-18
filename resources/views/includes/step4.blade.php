@@ -88,17 +88,20 @@
 @endif
 
 <div class="flex justify-end space-x-4">
-    <x-checkbox name="labor_activities.is_current"
-                model="labor_activities.is_current">
+    <x-checkbox
+        name="labor_activities.is_current"
+        model="labor_activities.is_current"
+    >
         {{ __('Is current?') }}
     </x-checkbox>
     <x-checkbox
         name="isSpecialService"
         model="isSpecialService"
-    >{{ __('Military forces or law enforcement?') }}</x-checkbox>
+    >
+        {{ __('Military forces or law enforcement?') }}
+    </x-checkbox>
     <x-button  mode="black" wire:click="addLaborActivity">{{ __('Add') }}</x-button>
 </div>
-
 
 <div class="relative -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
     <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
@@ -313,7 +316,7 @@
     <h1>{{ __('Ranks') }}</h1>
 </div>
 
-<div class="grid grid-cols-3 gap-2">
+<div class="grid grid-cols-4 gap-3">
     <div class="flex flex-col">
         <x-select-list class="w-full" :title="__('Ranks')" mode="gray" :selected="$rankName" name="rankId">
             <x-livewire-input  @click.stop="open = true" mode="gray" name="searchRank" wire:model.live="searchRank"></x-livewire-input>
@@ -324,12 +327,37 @@
             </x-select-list-item>
             @foreach($rankModel as $rnk)
                 <x-select-list-item wire:click="setData('ranks','rank_id','rank','{{ $rnk->name }}',{{ $rnk->id }})"
-                :selected="$rnk->id === $rankId" wire:model='ranks.rank_id.id'>
+                                    :selected="$rnk->id === $rankId"
+                                    wire:model='ranks.rank_id.id'
+                >
                     {{ $rnk->name }}
                 </x-select-list-item>
             @endforeach
         </x-select-list>
         @error('ranks.rank_id.id')
+        <x-validation> {{ $message }} </x-validation>
+        @enderror
+    </div>
+    <div class="flex flex-col">
+        @php
+            $selectedName = array_key_exists('rank_reason_id',$ranks) ? $ranks['rank_reason_id']['name'] : '---';
+            $selectedId = array_key_exists('rank_reason_id',$ranks) ? $ranks['rank_reason_id']['id'] : -1;
+        @endphp
+        <x-select-list class="w-full" :title="__('Rank reasons')" mode="gray" :selected="$selectedName" name="rankReasonId">
+            <x-select-list-item wire:click="setData('ranks','rank_reason_id',null,'---',null)"
+                                :selected="'---' ==  $selectedName"
+                                wire:model='ranks.rank_reason_id.id'>
+                ---
+            </x-select-list-item>
+            @foreach($rankReasons as $reason)
+                <x-select-list-item wire:click="setData('ranks','rank_reason_id',null,'{{ trim($reason->name) }}',{{ $reason->id }})"
+                                    :selected="$reason->id === $selectedId"
+                                    wire:model='ranks.rank_reason_id.id'>
+                    {{ $reason->name }}
+                </x-select-list-item>
+            @endforeach
+        </x-select-list>
+        @error('ranks.rank_reason_id.id')
         <x-validation> {{ $message }} </x-validation>
         @enderror
     </div>
@@ -353,7 +381,35 @@
           <x-validation> {{ $message }} </x-validation>
           @enderror
     </div>
+    <div class="flex flex-col">
+        <x-label for="ranks.order_given_by">{{ __('Order issued by') }}</x-label>
+        <x-livewire-input mode="gray" name="ranks.order_given_by" wire:model="ranks.order_given_by"></x-livewire-input>
+        @error('ranks.order_given_by')
+        <x-validation> {{ $message }} </x-validation>
+        @enderror
+    </div>
+    <div class="flex flex-col">
+        <x-label for="ranks.order_no">{{ __('Order number') }}</x-label>
+        <x-livewire-input mode="gray" name="ranks.order_no" wire:model="ranks.order_no"></x-livewire-input>
+        @error('ranks.order_no')
+        <x-validation> {{ $message }} </x-validation>
+        @enderror
+    </div>
+    <div class="flex flex-col">
+        <x-label for="ranks.order_date">{{ __('Order date') }}</x-label>
+        <x-pikaday-input mode="gray" name="ranks.order_date" format="Y-MM-DD" wire:model.live="ranks.order_date">
+            <x-slot name="script">
+                $el.onchange = function () {
+                @this.set('ranks.order_date', $el.value);
+                }
+            </x-slot>
+        </x-pikaday-input>
+        @error('ranks.order_date')
+        <x-validation> {{ $message }} </x-validation>
+        @enderror
+    </div>
 </div>
+
 <div class="flex justify-end">
     <x-button  mode="black" wire:click="addRank">{{ __('Add') }}</x-button>
 </div>
@@ -365,19 +421,47 @@
             @forelse ($rank_list as $keyRank => $rModel)
             <tr>
                 <x-table.td>
-                    <span class="text-sm font-medium text-gray-700">
-                        {{ $rModel['rank_id']['name'] }}
-                   </span>
-                </x-table.td>
-                <x-table.td>
-                    <span class="text-sm font-medium text-gray-700">
-                        {{ $rModel['name'] }}
-                   </span>
+                    <div class="flex flex-col space-y-1">
+                        <span class="text-sm font-medium flex justify-center items-center px-1 py-1 rounded-md border border-gray-300 bg-gray-50 text-emerald-600 w-max">
+                            {{ $rModel['rank_id']['name'] }}
+                       </span>
+                        <span class="text-xs font-medium flex justify-center items-center px-1 py-1 rounded-md border border-gray-300 bg-gray-50 text-gray-600 w-max">
+                            {{ $rModel['rank_reason_id']['name'] }}
+                       </span>
+                    </div>
                 </x-table.td>
                 <x-table.td>
                     <span class="text-sm font-medium text-gray-700">
                         {{ $rModel['given_date']}}
                    </span>
+                </x-table.td>
+                <x-table.td>
+                    <div class="flex flex-col space-y-1">
+                        <div class="flex space-x-2 items-center">
+                             <span class="text-sm font-medium text-gray-500">
+                                    {{ __('Issued by') }}:
+                             </span>
+                            <span class="text-sm font-medium text-gray-900">
+                                    {{ $rModel['order_given_by'] }}
+                            </span>
+                        </div>
+                        <div class="flex space-x-2 items-center">
+                            <span class="text-sm font-medium text-gray-500">
+                                {{ __('Number') }} #:
+                            </span>
+                            <span class="text-sm font-medium text-blue-500">
+                                {{ $rModel['order_no'] }}
+                            </span>
+                        </div>
+                        <div class="flex space-x-2 items-center">
+                            <span class="text-sm font-medium text-gray-500">
+                                {{ __('Date') }}:
+                            </span>
+                            <span class="text-sm font-medium text-gray-700">
+                                {{ \Carbon\Carbon::parse($rModel['order_date'])->format('d.m.Y') }}
+                            </span>
+                        </div>
+                    </div>
                 </x-table.td>
                 <x-table.td :isButton="true">
                      <button

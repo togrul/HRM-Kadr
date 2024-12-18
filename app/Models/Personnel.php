@@ -87,7 +87,7 @@ class Personnel extends Model
 
     public function getFullnameMaxAttribute(): string
     {
-        return $this->fullname.' '.($this->gender == 2 ? 'qızı' : 'oğlu');
+        return $this->fullname. ' ' .($this->gender == 2 ? 'qızı' : 'oğlu');
     }
 
     public function personDidDelete(): BelongsTo
@@ -267,6 +267,11 @@ class Personnel extends Model
         return $this->hasOne(PersonnelVacation::class, 'tabel_no', 'tabel_no')->latestOfMany('return_work_date');
     }
 
+    public function hasActiveVacation()
+    {
+        return $this->latestVacation()->where('return_work_date', '>', \Carbon\Carbon::now());
+    }
+
     public function businessTrips(): HasMany
     {
         return $this->hasMany(PersonnelBusinessTrip::class, 'tabel_no', 'tabel_no')->orderByDesc('end_date');
@@ -275,6 +280,11 @@ class Personnel extends Model
     public function latestBusinessTrip(): HasOne
     {
         return $this->hasOne(PersonnelBusinessTrip::class, 'tabel_no', 'tabel_no')->latestOfMany('end_date');
+    }
+
+    public function hasActiveBusinessTrip()
+    {
+        return $this->latestBusinessTrip()->where('end_date', '>', \Carbon\Carbon::now());
     }
 
     public function degreeAndNames(): HasMany

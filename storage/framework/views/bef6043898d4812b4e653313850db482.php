@@ -1,4 +1,5 @@
-<p class="mt-1 text-xs font-medium text-red-500">
+<p class="py-[1px] px-2.5 text-xs rounded-bl-md rounded-br-md font-medium bg-rose-500 text-rose-50 transition-all duration-300">
      <?php echo e($slot); ?>
 
-</p><?php /**PATH /Users/togruljalalli/Desktop/projects/HR-CRM/resources/views/components/validation.blade.php ENDPATH**/ ?>
+</p>
+<?php /**PATH /Users/togruljalalli/Desktop/projects/HR-CRM/resources/views/components/validation.blade.php ENDPATH**/ ?>

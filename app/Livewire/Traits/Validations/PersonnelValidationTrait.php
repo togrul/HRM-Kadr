@@ -8,7 +8,7 @@ trait PersonnelValidationTrait
     {
         return [
             1 => [
-                'personnel.tabel_no' => 'required|min:3|unique:personnels,tabel_no'.(! empty($this->personnelModel) ? ','.$this->updatePersonnel['id'] : ''),
+                'personnel.tabel_no' => 'required|min:1|unique:personnels,tabel_no'.(! empty($this->personnelModel) ? ','.$this->updatePersonnel['id'] : ''),
                 'personnel.name' => 'required|min:3',
                 'personnel.surname' => 'required|min:3',
                 'personnel.patronymic' => 'required|min:3',
@@ -85,6 +85,11 @@ trait PersonnelValidationTrait
                 'ranks.rank_id.id' => $this->isAddedRank ? 'required|int|exists:ranks,id' : '',
                 'ranks.name' => $this->isAddedRank ? 'required|min:2' : '',
                 'ranks.given_date' => $this->isAddedRank ? 'required|date' : '',
+                'ranks.rank_reason_id.id' => $this->isAddedRank ? 'required|int|exists:rank_reasons,id' : '',
+                'ranks.order_no' => $this->isAddedRank ? 'required|string|min:1' : '',
+                'ranks.order_given_by' => $this->isAddedRank ? 'required|string|min:1' : '',
+                'ranks.order_date' => $this->isAddedRank ? 'required|date' : '',
+
             ],
             5 => [
                 'military.rank_id.id' => 'required|int|exists:ranks,id',
@@ -211,6 +216,10 @@ trait PersonnelValidationTrait
             'ranks.rank_id.id' => __('Rank'),
             'ranks.name' => __('Name'),
             'ranks.given_date' => __('Given date'),
+            'ranks.order_no' => __('Order number'),
+            'ranks.order_given_by' => __('Given by'),
+            'ranks.order_date' => __('Date'),
+            'ranks.rank_reason_id.id' => __('Rank reasons'),
             'military.rank_id.id' => __('Rank'),
             'military.attitude_to_military_service' => __('Attitude'),
             'military.given_date' => __('Given date'),

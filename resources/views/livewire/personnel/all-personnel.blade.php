@@ -55,17 +55,24 @@
             </div>
             <div class="flex flex-col">
                 <div class="flex space-x-4">
-                    <button  wire:click="openSideMenu('add-personnel')" class="flex items-center justify-center rounded-xl w-12 h-12 transition-all duration-300 hover:bg-blue-50" type="button">
+                    @can('add-personnels')
+                    <button wire:click="openSideMenu('add-personnel')" class="flex items-center justify-center rounded-xl w-12 h-12 transition-all duration-300 hover:bg-blue-50" type="button">
                         <x-icons.add-file></x-icons.add-file>
                     </button>
+                    @endcan
+
+                    @can('export-personnels')
                     <button wire:click.prevent="exportExcel" class="flex items-center justify-center rounded-xl w-12 h-12 transition-all duration-300 hover:bg-green-50" type="button">
                         <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"  viewBox="0 0 50 50" class="w-7 h-7 fill-green-400 transition-all duration-300 hover:fill-green-500">
                             <path d="M 28.875 0 C 28.855469 0.0078125 28.832031 0.0195313 28.8125 0.03125 L 0.8125 5.34375 C 0.335938 5.433594 -0.0078125 5.855469 0 6.34375 L 0 43.65625 C -0.0078125 44.144531 0.335938 44.566406 0.8125 44.65625 L 28.8125 49.96875 C 29.101563 50.023438 29.402344 49.949219 29.632813 49.761719 C 29.859375 49.574219 29.996094 49.296875 30 49 L 30 44 L 47 44 C 48.09375 44 49 43.09375 49 42 L 49 8 C 49 6.90625 48.09375 6 47 6 L 30 6 L 30 1 C 30.003906 0.710938 29.878906 0.4375 29.664063 0.246094 C 29.449219 0.0546875 29.160156 -0.0351563 28.875 0 Z M 28 2.1875 L 28 6.53125 C 27.867188 6.808594 27.867188 7.128906 28 7.40625 L 28 42.8125 C 27.972656 42.945313 27.972656 43.085938 28 43.21875 L 28 47.8125 L 2 42.84375 L 2 7.15625 Z M 30 8 L 47 8 L 47 42 L 30 42 L 30 37 L 34 37 L 34 35 L 30 35 L 30 29 L 34 29 L 34 27 L 30 27 L 30 22 L 34 22 L 34 20 L 30 20 L 30 15 L 34 15 L 34 13 L 30 13 Z M 36 13 L 36 15 L 44 15 L 44 13 Z M 6.6875 15.6875 L 12.15625 25.03125 L 6.1875 34.375 L 11.1875 34.375 L 14.4375 28.34375 C 14.664063 27.761719 14.8125 27.316406 14.875 27.03125 L 14.90625 27.03125 C 15.035156 27.640625 15.160156 28.054688 15.28125 28.28125 L 18.53125 34.375 L 23.5 34.375 L 17.75 24.9375 L 23.34375 15.6875 L 18.65625 15.6875 L 15.6875 21.21875 C 15.402344 21.941406 15.199219 22.511719 15.09375 22.875 L 15.0625 22.875 C 14.898438 22.265625 14.710938 21.722656 14.5 21.28125 L 11.8125 15.6875 Z M 36 20 L 36 22 L 44 22 L 44 20 Z M 36 27 L 36 29 L 44 29 L 44 27 Z M 36 35 L 36 37 L 44 37 L 44 35 Z"></path>
                         </svg>
                     </button>
+                    @endcan
+                    @can('edit-personnels')
                     <button wire:click.prevent="printPage('personnel')" class="flex items-center justify-center rounded-xl w-12 h-12 transition-all duration-300 hover:bg-red-50" type="button">
                         <x-icons.print-file color="text-rose-500" hover="text-rose-600" size="w-8 h-8"></x-icons.print-file>
                     </button>
+                    @endcan
                     <button
                        @click="
                             $wire.dispatch('setOpenFilter');
@@ -119,10 +126,24 @@
                 <x-table.tbl :headers="[__('#'),__('Tabel'),__('Fullname'),__('Position'),'action','action','action']">
                     @forelse ($this->personnels as $key => $personnel)
                     <tr @class([
+                        'relative',
                         'bg-white' => empty($personnel->leave_work_date),
                         'bg-red-100' => !empty($personnel->leave_work_date)
                     ])>
                         <x-table.td>
+                            <div class="flex flex-col justify-between h-full absolute top-0 left-0">
+                                @if($personnel->hasActiveVacation)
+                                    <span class=" text-green-50 flex justify-center items-center text-sm font-medium bg-green-600 px-2 py-1 rounded-sm">
+                                        {{ __('In vacation') }}
+                                    </span>
+                                @endif
+                                @if($personnel->hasActiveBusinessTrip)
+                                    <span class=" text-rose-50 flex justify-center items-center text-sm font-medium bg-rose-600 px-2 py-1 rounded-sm">
+                                        {{ __('In business trip') }}
+                                    </span>
+                                @endif
+                            </div>
+
                             <span class="text-sm font-medium text-gray-700">
                                 {{ ($this->personnels->currentpage()-1) * $this->personnels->perpage() + $key + 1 }}
                            </span>
@@ -146,7 +167,6 @@
                                 </div>
                                 @endif
                             </div>
-
                         </x-table.td>
 
                         <x-table.td>
@@ -196,22 +216,25 @@
                         </x-table.td>
                         <x-table.td :isButton="true">
                             @if($status != 'deleted')
-                            {{-- @can('manage-customers') --}}
+                             @can('edit-personnels')
                                 <a href="#" wire:click="openSideMenu('edit-personnel',{{ $personnel->id }})" class="flex items-center justify-center w-9 h-9 text-xs font-medium uppercase rounded-lg text-gray-500 bg-gray-100 hover:bg-gray-200 hover:text-gray-700">
                                     <x-icons.profile-icon></x-icons.profile-icon>
                                 </a>
-                            {{-- @endcan --}}
+                             @endcan
                             @else
-                            <button
-                                wire:click="restoreData('{{$personnel->tabel_no}}')"
-                                class="flex items-center justify-center w-9 h-9 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 bg-teal-50 hover:bg-teal-100 hover:text-gray-700"
-                            >
-                                <x-icons.recover color="text-teal-500" hover="text-teal-600"></x-icons.recover>
-                            </button>
+                                @can('edit-personnels')
+                                <button
+                                    wire:click="restoreData('{{$personnel->tabel_no}}')"
+                                    class="flex items-center justify-center w-9 h-9 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 bg-teal-50 hover:bg-teal-100 hover:text-gray-700"
+                                >
+                                    <x-icons.recover color="text-teal-500" hover="text-teal-600"></x-icons.recover>
+                                </button>
+                                @endcan
                             @endif
                         </x-table.td>
 
                         <x-table.td :isButton="true" style="text-align: center !important;">
+                            @can('edit-personnels')
                             <div class="relative inline-block text-left" x-data="{showContextMenu:false}">
                                 <div>
                                     <button @click="showContextMenu = !showContextMenu" class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase rounded-lg bg-blue-50 hover:bg-blue-100">
@@ -228,39 +251,48 @@
                                      @click.outside="showContextMenu = false"
                                      class="absolute right-0 z-10 mt-2 w-max origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
                                     <div class="flex flex-col" role="none">
-                                        <a href="#" wire:click="openSideMenu('show-files','{{ $personnel->tabel_no }}')" class="appearance-none w-full flex items-center justify-start space-x-2 px-4 py-2 text-sm font-medium rounded-md  hover:bg-slate-100">
+                                        <button wire:click="openSideMenu('show-files','{{ $personnel->tabel_no }}')"
+                                                class="appearance-none w-full flex items-center justify-start space-x-2 px-4 py-2 text-sm font-medium rounded-md  hover:bg-slate-100"
+                                        >
                                             <span class="text-slate-500">{{ __('Files') }}</span>
-                                        </a>
-                                        <button wire:click="printInfo('{{ $personnel->id }}')" class="appearance-none w-full flex items-center justify-start space-x-2 px-4 py-2 text-sm font-medium rounded-md  hover:bg-slate-100">
-                                            <span class="text-slate-500">{{ __('Print') }}</span>
                                         </button>
-                                        <button wire:click="printInfo('{{ $personnel->id }}')" class="appearance-none w-full flex items-center justify-start space-x-2 px-4 py-2 text-sm font-medium rounded-md  hover:bg-slate-100">
+                                        <a href="{{ route('print.personnel',$personnel->id) }}"
+                                           class="appearance-none w-full flex items-center justify-start space-x-2 px-4 py-2 text-sm font-medium rounded-md  hover:bg-slate-100"
+                                           target="_blank"
+                                        >
+                                            <span class="text-slate-500">{{ __('Print') }}</span>
+                                        </a>
+                                        <button wire:click="printInfo('{{ $personnel->id }}')"
+                                                class="appearance-none w-full flex items-center justify-start space-x-2 px-4 py-2 text-sm font-medium rounded-md  hover:bg-slate-100"
+                                        >
                                             <span class="text-slate-500">{{ __('Orders') }}</span>
                                         </button>
                                     </div>
                                 </div>
                             </div>
-
+                            @endcan
                         </x-table.td>
 
                         <x-table.td :isButton="true">
                         @if($status != 'deleted')
-                            {{-- @can('manage-employee') --}}
+                             @can('delete-personnels')
                             <button
-                               wire:click="setDeletePersonnel('{{ $personnel->tabel_no }}')"
+                                wire:click="setDeletePersonnel('{{ $personnel->tabel_no }}')"
                                 class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-100 hover:text-gray-700"
                             >
                                 <x-icons.delete-icon></x-icons.delete-icon>
                             </button>
-                            {{-- @endcan --}}
+                             @endcan
                          @else
-                             <button
-                                wire:confirm="{{ __('Are you sure you want to remove this data?') }}"
-                                wire:click="forceDeleteData('{{ $personnel->tabel_no }}')"
-                                class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-50 hover:text-gray-700"
-                            >
-                                 <x-icons.force-delete></x-icons.force-delete>
-                            </button>
+                            @can('edit-personnels')
+                                 <button
+                                    wire:confirm="{{ __('Are you sure you want to remove this data?') }}"
+                                    wire:click="forceDeleteData('{{ $personnel->tabel_no }}')"
+                                    class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-50 hover:text-gray-700"
+                                 >
+                                     <x-icons.force-delete></x-icons.force-delete>
+                                </button>
+                             @endcan
                         @endif
                         </x-table.td>
                     </tr>
@@ -286,24 +318,31 @@
 
     @livewire('filter.detail',['lazy' => 'on-load'])
 
-    {{-- @can('manage-personnel') --}}
     <x-side-modal>
-        @if($showSideMenu == 'add-personnel')
-            <livewire:personnel.add-personnel />
-        @endif
+        @can('add-personnels')
+            @if($showSideMenu == 'add-personnel')
+                <livewire:personnel.add-personnel />
+            @endif
+        @endcan
 
-        @if($showSideMenu == 'edit-personnel')
-            <livewire:personnel.edit-personnel :personnelModel="$modelName" />
-        @endif
+        @can('edit-personnels')
+            @if($showSideMenu == 'edit-personnel')
+                <livewire:personnel.edit-personnel :personnelModel="$modelName" />
+            @endif
+        @endcan
 
+        @can('edit-personnels')
             @if($showSideMenu == 'show-files')
                 <livewire:personnel.files :personnelModel="$modelName" />
             @endif
-   </x-side-modal>
-   {{-- @endcan --}}
-   <div>
-        <livewire:personnel.delete-personnel />
-   </div>
+        @endcan
+    </x-side-modal>
+
+    @can('delete-personnels')
+       <div>
+            <livewire:personnel.delete-personnel />
+       </div>
+    @endcan
 
    <x-datepicker :auto=false></x-datepicker>
 </div>

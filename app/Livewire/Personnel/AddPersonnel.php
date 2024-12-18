@@ -167,6 +167,7 @@ class AddPersonnel extends Component
 
     public function mount()
     {
+        $this->authorize('add-personnels');
         $this->title = __('New personnel');
         $this->step = 1;
     }

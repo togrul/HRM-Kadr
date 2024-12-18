@@ -6,6 +6,7 @@ use App\Exports\PersonnelExport;
 use App\Livewire\Traits\SideModalAction;
 use App\Models\Personnel;
 use App\Models\Position;
+use App\Services\StructureService;
 use App\Traits\NestedStructureTrait;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -20,9 +21,9 @@ use Maatwebsite\Excel\Facades\Excel;
 class AllPersonnel extends Component
 {
     use AuthorizesRequests;
+    use NestedStructureTrait;
     use SideModalAction;
     use WithPagination;
-    use NestedStructureTrait;
 
     #[Url]
     public $status;
@@ -59,11 +60,6 @@ class AllPersonnel extends Component
         redirect()->route('print.page', ['model' => $personnel, 'headers' => $headers]);
     }
 
-    public function printInfo($personnelId)
-    {
-        redirect()->route('print.personnel', $personnelId);
-    }
-
     #[On('filterSelected')]
     public function filterSelected(array $filter)
     {
@@ -96,7 +92,7 @@ class AllPersonnel extends Component
     #[On('selectStructure')]
     public function selectStructure($id)
     {
-       $this->structure = $this->getNestedStructure($id);
+        $this->structure = $this->getNestedStructure($id);
     }
 
     public function setStatus($newStatus)
@@ -146,6 +142,7 @@ class AllPersonnel extends Component
 
     public function mount()
     {
+        $this->authorize('show-personnels');
         $this->fillFilter();
     }
 
@@ -154,6 +151,8 @@ class AllPersonnel extends Component
         $result = Personnel::with([
             'latestRank.rank',
             'structure',
+            'hasActiveVacation',
+            'hasActiveBusinessTrip',
             'position',
             'creator',
             'deletedBy',
@@ -161,23 +160,27 @@ class AllPersonnel extends Component
             ->when(! empty($this->structure), function ($q) {
                 $q->whereIn('structure_id', $this->structure);
             })
+            ->when(empty($this->structure), fn ($q) => $q->whereIn('structure_id', resolve(StructureService::class)->getAccessibleStructures()))
             ->when(! empty($this->selectedPosition), function ($q) {
                 $q->where('position_id', $this->selectedPosition);
             })
-            ->when($this->status == 'current', function ($q) {
-                return $q->whereNull('leave_work_date');
-            })
-            ->when($this->status == 'leaves', function ($q) {
-                return $q->whereNotNull('leave_work_date');
-            })
-            ->when($this->status == 'deleted', function ($q) {
-                $q->onlyTrashed();
-            })
-            ->when($this->status == 'pending', function ($q) {
-                return $q->where('is_pending', true);
-            })
-            ->when($this->status != 'pending', function ($q) {
-                return $q->where('is_pending', false);
+            ->when($this->status, function ($q) {
+                switch ($this->status) {
+                    case 'current':
+                        $q->whereNull('leave_work_date');
+                        break;
+                    case 'leaves':
+                        $q->whereNotNull('leave_work_date');
+                        break;
+                    case 'deleted':
+                        $q->onlyTrashed();
+                        break;
+                    case 'pending':
+                        $q->where('is_pending', true);
+                        break;
+                    default:
+                        $q->where('is_pending', false);
+                }
             })
             ->filter($this->filters ?? [])
             ->orderBy('position_id')

@@ -17,6 +17,7 @@ use App\Models\Language;
 use App\Models\Position;
 use App\Models\Punishment;
 use App\Models\Rank;
+use App\Models\RankReason;
 use App\Models\ScientificDegreeAndName;
 use App\Models\SocialOrigin;
 use App\Models\Structure;
@@ -49,6 +50,9 @@ class CallPersonnelInfo
         $structures = Structure::when(! empty($_this->searchStructure), function ($q) use ($_this) {
             $q->where('name', 'LIKE', "%$_this->searchStructure%");
         })
+            ->accessible()
+            ->orderBy('level')
+            ->orderBy('code')
             ->get();
 
         $positions = Position::when(! empty($_this->searchPosition), function ($q) use ($_this) {
@@ -106,6 +110,8 @@ class CallPersonnelInfo
             ->where('is_active', 1)
             ->get();
 
+        $rankReasons = RankReason::all();
+
         $awardModel = Award::when(! empty($_this->searchAward), function ($q) use ($_this) {
             $q->where('name', 'LIKE', "%$_this->searchAward%");
         })
@@ -157,6 +163,7 @@ class CallPersonnelInfo
             'education_types' => $education_types,
             'document_types' => $document_types,
             'rankModel' => $rankModel,
+            'rankReasons' => $rankReasons,
             'awardModel' => $awardModel,
             'punishmentModel' => $punishmentModel,
             'criminalModel' => $criminalModel,

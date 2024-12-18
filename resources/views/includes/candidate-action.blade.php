@@ -30,22 +30,26 @@
 
 <div class="grid grid-cols-4 gap-2">
     <div class="flex flex-col">
-        <x-select-list class="w-full" :title="__('Structure')" mode="gray" :selected="$structureName" name="structureId">
+        @php
+            $selectedName = array_key_exists('structure_id',$candidate) ? $candidate['structure_id']['name'] : '---';
+            $selectedId = array_key_exists('structure_id',$candidate) ? $candidate['structure_id']['id'] : -1;
+        @endphp
+        <x-select-list class="w-full" :title="__('Structure')" mode="gray" :selected="$selectedName" name="structureId">
             <x-livewire-input  @click.stop="open = true" mode="gray" name="searchStructure" wire:model.live="searchStructure"></x-livewire-input>
 
-            <x-select-list-item wire:click="setData('candidate','structure_id','structure','---',null)" :selected="'---' == $structureName"
+            <x-select-list-item wire:click="setData('candidate','structure_id','structure','---',null)" :selected="'---' == $selectedName"
                                 wire:model='candidate.structure_id.id'>
                 ---
             </x-select-list-item>
             @foreach($structures as $structure)
                 <x-select-list-item wire:click="setData('candidate','structure_id','structure','{{ $structure->name }}',{{ $structure->id }})"
-                                    :selected="$structure->id === $structureId" wire:model='candidate.structure_id.id'>
+                                    :selected="$structure->id === $selectedId" wire:model='candidate.structure_id.id'>
                     {{ $structure->name }}
                 </x-select-list-item>
             @endforeach
         </x-select-list>
         @error('candidate.structure_id.id')
-        <x-validation> {{ $message }} </x-validation>
+            <x-validation> {{ $message }} </x-validation>
         @enderror
     </div>
     <div class="flex flex-col">
@@ -171,14 +175,12 @@
     <div class="flex flex-col space-y-1">
         <x-label for="candidate.gender">{{ __('Gender') }}</x-label>
         <div class="flex flex-row">
-            <label class="inline-flex items-center bg-gray-100 rounded shadow-sm py-2 px-2">
-                <input type="radio" class="form-radio" name="candidate.gender" wire:model="candidate.gender" value="2">
-                <span class="ml-2 text-sm font-normal">{{__('Woman')}}</span>
-            </label>
-            <label class="inline-flex items-center ml-4 bg-gray-100 rounded shadow-sm py-2 px-2">
-                <input type="radio" class="form-radio" name="candidate.gender" wire:model="candidate.gender" value="1">
-                <span class="ml-2 text-sm font-normal">{{__('Man')}}</span>
-            </label>
+            @foreach(\App\Enums\GenderEnum::genderOptions() as $value => $label)
+                <label class="inline-flex items-center bg-gray-100 rounded shadow-sm py-2 px-2">
+                    <input type="radio" class="form-radio" name="candidate.gender" wire:model="candidate.gender" value="{{ $value }}">
+                    <span class="ml-2 text-sm font-normal">{{ $label }}</span>
+                </label>
+            @endforeach
         </div>
         @error('candidate.gender')
         <x-validation> {{ $message }} </x-validation>

@@ -5,6 +5,7 @@ namespace App\Livewire\StaffSchedule;
 use App\Exports\VacancyExport;
 use App\Livewire\Traits\SideModalAction;
 use App\Models\StaffSchedule;
+use App\Services\StructureService;
 use App\Traits\NestedStructureTrait;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -63,6 +64,7 @@ class Staffs extends Component
 
     public function mount()
     {
+        $this->authorize('show-staff');
         $this->selectedPage = request()->query('selectedPage')
                         ? request()->query('selectedPage')
                         : 'all';
@@ -72,6 +74,8 @@ class Staffs extends Component
     {
         $result = StaffSchedule::with(['structure.parent.parent', 'position'])
             ->when(! empty($this->structure), fn ($q) => $q->whereIn('structure_id', $this->structure))
+            ->when(empty($this->structure), fn ($q) => $q->whereIn('structure_id', resolve(StructureService::class)->getAccessibleStructures()))
+
             ->when($this->selectedPage == 'vacancies', function ($query) {
                 $query->where('vacant', '>', 0)
                     ->whereHas('structure', fn ($qq) => $qq->whereNotNull('parent_id'));

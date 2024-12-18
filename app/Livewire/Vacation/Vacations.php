@@ -9,6 +9,7 @@ use App\Models\Personnel;
 use App\Models\PersonnelVacation;
 use App\Models\Structure;
 use App\Services\NumberToWordsService;
+use App\Services\StructureService;
 use App\Services\WordSuffixService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -122,6 +123,7 @@ class Vacations extends Component
     {
         $result = PersonnelVacation::with(['personnel', 'personnel.structure', 'personnel.position', 'personnel.latestRank.rank'])
             ->filter($this->search)
+            ->whereHas('personnel', fn ($query) => $query->whereIn('structure_id', resolve(StructureService::class)->getAccessibleStructures()))
             ->orderByDesc('end_date')
             ->orderByDesc('return_work_date');
 
@@ -138,6 +140,7 @@ class Vacations extends Component
 
     public function mount()
     {
+        $this->authorize('show-vacations');
         $this->fillFilter();
     }
 
@@ -145,7 +148,10 @@ class Vacations extends Component
     {
         $_structures = Structure::when(! empty($this->searchStructure), function ($q) {
             $q->where('name', 'LIKE', "%{$this->searchStructure}%");
-        })->get();
+        })
+            ->accessible()
+            ->ordered()
+            ->get();
 
         return view('livewire.vacation.vacations', compact('_structures'));
     }

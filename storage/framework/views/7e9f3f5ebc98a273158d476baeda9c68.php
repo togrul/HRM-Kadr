@@ -100,7 +100,7 @@ if (isset($__slots)) unset($__slots);
 <?php unset($__componentOriginal5c1e1dd95975c2ff879ca8863e56fe47); ?>
 <?php endif; ?>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
-                    
+                    <?php if(\Spatie\Permission\PermissionServiceProvider::bladeMethodWrapper('hasRole', 'Admin')): ?>
                     <?php if (isset($component)) { $__componentOriginal5c1e1dd95975c2ff879ca8863e56fe47 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal5c1e1dd95975c2ff879ca8863e56fe47 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.filter.item','data' => ['wire:click.prevent' => 'setStatus(\'deleted\')','active' => $status === 'deleted']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
@@ -123,7 +123,7 @@ if (isset($__slots)) unset($__slots);
 <?php $component = $__componentOriginal5c1e1dd95975c2ff879ca8863e56fe47; ?>
 <?php unset($__componentOriginal5c1e1dd95975c2ff879ca8863e56fe47); ?>
 <?php endif; ?>
-                    
+                    <?php endif; ?>
                  <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal6307c0378087124f8a5ba7af51640019)): ?>
@@ -137,17 +137,22 @@ if (isset($__slots)) unset($__slots);
             </div>
             <div class="flex flex-col">
                 <div class="flex space-x-4">
+                    <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('add-orders')): ?>
                     <button wire:click="openSideMenu('add-order',<?php echo e($selectedOrder); ?>)" class="flex items-center justify-center rounded-xl w-12 h-12 transition-all duration-300 hover:bg-blue-50" type="button">
                         <?php echo $__env->make('components.icons.add-file', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
                     </button>
+                    <?php endif; ?>
+                    <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('export-orders')): ?>
                     <button wire:click.prevent="exportExcel" class="flex items-center justify-center rounded-xl w-12 h-12 transition-all duration-300 hover:bg-green-50" type="button">
                         <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"  viewBox="0 0 50 50" class="w-7 h-7 fill-green-400 transition-all duration-300 hover:fill-green-500">
                             <path d="M 28.875 0 C 28.855469 0.0078125 28.832031 0.0195313 28.8125 0.03125 L 0.8125 5.34375 C 0.335938 5.433594 -0.0078125 5.855469 0 6.34375 L 0 43.65625 C -0.0078125 44.144531 0.335938 44.566406 0.8125 44.65625 L 28.8125 49.96875 C 29.101563 50.023438 29.402344 49.949219 29.632813 49.761719 C 29.859375 49.574219 29.996094 49.296875 30 49 L 30 44 L 47 44 C 48.09375 44 49 43.09375 49 42 L 49 8 C 49 6.90625 48.09375 6 47 6 L 30 6 L 30 1 C 30.003906 0.710938 29.878906 0.4375 29.664063 0.246094 C 29.449219 0.0546875 29.160156 -0.0351563 28.875 0 Z M 28 2.1875 L 28 6.53125 C 27.867188 6.808594 27.867188 7.128906 28 7.40625 L 28 42.8125 C 27.972656 42.945313 27.972656 43.085938 28 43.21875 L 28 47.8125 L 2 42.84375 L 2 7.15625 Z M 30 8 L 47 8 L 47 42 L 30 42 L 30 37 L 34 37 L 34 35 L 30 35 L 30 29 L 34 29 L 34 27 L 30 27 L 30 22 L 34 22 L 34 20 L 30 20 L 30 15 L 34 15 L 34 13 L 30 13 Z M 36 13 L 36 15 L 44 15 L 44 13 Z M 6.6875 15.6875 L 12.15625 25.03125 L 6.1875 34.375 L 11.1875 34.375 L 14.4375 28.34375 C 14.664063 27.761719 14.8125 27.316406 14.875 27.03125 L 14.90625 27.03125 C 15.035156 27.640625 15.160156 28.054688 15.28125 28.28125 L 18.53125 34.375 L 23.5 34.375 L 17.75 24.9375 L 23.34375 15.6875 L 18.65625 15.6875 L 15.6875 21.21875 C 15.402344 21.941406 15.199219 22.511719 15.09375 22.875 L 15.0625 22.875 C 14.898438 22.265625 14.710938 21.722656 14.5 21.28125 L 11.8125 15.6875 Z M 36 20 L 36 22 L 44 22 L 44 20 Z M 36 27 L 36 29 L 44 29 L 44 27 Z M 36 35 L 36 37 L 44 37 L 44 35 Z"></path>
                         </svg>
                     </button>
+
                     <button wire:click.prevent="wordEdit" class="flex items-center justify-center rounded-xl w-12 h-12 transition-all duration-300 hover:bg-rose-50" type="button">
                         <?php echo $__env->make('components.icons.print-file',['color' => 'text-rose-500','hover' => 'text-rose-600','size' => 'w-8 h-8'], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
                     </button>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -390,6 +395,7 @@ if (isset($__slots)) unset($__slots);
                                             <?php echo e(\Carbon\Carbon::parse($_order->given_date)->format('d.m.Y')); ?>
 
                                        </span>
+                                        <?php if(\Spatie\Permission\PermissionServiceProvider::bladeMethodWrapper('hasRole', 'Admin')): ?>
                                         <!--[if BLOCK]><![endif]--><?php if($status == 'deleted'): ?>
                                             <div class="flex flex-col text-xs font-medium">
                                                 <div class="flex items-center space-x-1">
@@ -402,6 +408,7 @@ if (isset($__slots)) unset($__slots);
                                                 </div>
                                             </div>
                                         <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                        <?php endif; ?>
                                     </div>
                                  <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
@@ -484,6 +491,7 @@ if (isset($__slots)) unset($__slots);
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
 <?php $component->withAttributes(['isButton' => true]); ?>
+                                    <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('export-orders')): ?>
                                     <!--[if BLOCK]><![endif]--><?php if($_order->order->blade != \App\Models\Order::BLADE_BUSINESS_TRIP): ?>
                                         <button
                                             wire:click="printOrder('<?php echo e($_order->order_no); ?>')"
@@ -492,6 +500,7 @@ if (isset($__slots)) unset($__slots);
                                             <?php echo $__env->make('components.icons.print-file',['color' => 'text-teal-500','hover' => 'text-teal-600'], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
                                         </button>
                                     <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                    <?php endif; ?>
                                  <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b)): ?>
@@ -514,18 +523,20 @@ if (isset($__slots)) unset($__slots);
 <?php endif; ?>
 <?php $component->withAttributes(['isButton' => true]); ?>
                                     <!--[if BLOCK]><![endif]--><?php if($status != 'deleted'): ?>
-                                        
-                                        <button wire:click="openSideMenu('edit-order','<?php echo e($_order->order_no); ?>')" class="appearance-none flex items-center justify-center w-8 h-8 text-xs font-medium uppercase rounded-lg text-gray-500 bg-gray-100 hover:bg-gray-200 hover:text-gray-700">
-                                            <?php echo $__env->make('components.icons.document-icon', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
-                                        </button>
-                                        
+                                         <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('edit-orders')): ?>
+                                            <button wire:click="openSideMenu('edit-order','<?php echo e($_order->order_no); ?>')" class="appearance-none flex items-center justify-center w-8 h-8 text-xs font-medium uppercase rounded-lg text-gray-500 bg-gray-100 hover:bg-gray-200 hover:text-gray-700">
+                                                <?php echo $__env->make('components.icons.document-icon', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+                                            </button>
+                                         <?php endif; ?>
                                     <?php else: ?>
-                                        <button
-                                            wire:click="restoreData('<?php echo e($_order->order_no); ?>')"
-                                            class="flex items-center justify-center w-9 h-9 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 bg-teal-50 hover:bg-teal-100 hover:text-gray-700"
-                                        >
-                                            <?php echo $__env->make('components.icons.recover',['color' => 'text-teal-500','hover' => 'text-teal-600'], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
-                                        </button>
+                                        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('edit-orders')): ?>
+                                            <button
+                                                wire:click="restoreData('<?php echo e($_order->order_no); ?>')"
+                                                class="flex items-center justify-center w-9 h-9 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 bg-teal-50 hover:bg-teal-100 hover:text-gray-700"
+                                            >
+                                                <?php echo $__env->make('components.icons.recover',['color' => 'text-teal-500','hover' => 'text-teal-600'], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+                                            </button>
+                                        <?php endif; ?>
                                     <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                  <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
@@ -549,15 +560,16 @@ if (isset($__slots)) unset($__slots);
 <?php endif; ?>
 <?php $component->withAttributes(['isButton' => true]); ?>
                                     <!--[if BLOCK]><![endif]--><?php if($status != 'deleted'): ?>
-                                        
+                                        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('delete-orders')): ?>
                                         <button
                                             wire:click="setDeleteOrder('<?php echo e($_order->order_no); ?>')"
                                             class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-100 hover:text-gray-700"
                                         >
                                             <?php echo $__env->make('components.icons.delete-icon', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
                                         </button>
-                                        
+                                         <?php endif; ?>
                                     <?php else: ?>
+                                        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('delete-orders')): ?>
                                         <button
                                             wire:click="forceDeleteData('<?php echo e($_order->order_no); ?>')"
                                             wire:confirm="<?php echo e(__('Are you sure you want to remove this data?')); ?>"
@@ -565,6 +577,7 @@ if (isset($__slots)) unset($__slots);
                                         >
                                             <?php echo $__env->make('components.icons.force-delete', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
                                         </button>
+                                        <?php endif; ?>
                                     <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                  <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
@@ -605,7 +618,6 @@ if (isset($__slots)) unset($__slots);
         </div>
     </div>
 
-    
     <?php if (isset($component)) { $__componentOriginal06466d70a5df71623dc2a561e77c49ee = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal06466d70a5df71623dc2a561e77c49ee = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.side-modal','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
@@ -616,8 +628,9 @@ if (isset($__slots)) unset($__slots);
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
 <?php $component->withAttributes([]); ?>
-        <!--[if BLOCK]><![endif]--><?php if($showSideMenu == 'add-order'): ?>
-            <?php
+        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('add-orders')): ?>
+            <!--[if BLOCK]><![endif]--><?php if($showSideMenu == 'add-order'): ?>
+                <?php
 $__split = function ($name, $params = []) {
     return [$name, $params];
 };
@@ -633,10 +646,11 @@ unset($__params);
 unset($__split);
 if (isset($__slots)) unset($__slots);
 ?>
-        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
-
-        <!--[if BLOCK]><![endif]--><?php if($showSideMenu == 'edit-order'): ?>
-            <?php
+            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+        <?php endif; ?>
+        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('edit-orders')): ?>
+            <!--[if BLOCK]><![endif]--><?php if($showSideMenu == 'edit-order'): ?>
+                <?php
 $__split = function ($name, $params = []) {
     return [$name, $params];
 };
@@ -652,7 +666,8 @@ unset($__params);
 unset($__split);
 if (isset($__slots)) unset($__slots);
 ?>
-        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+        <?php endif; ?>
      <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal06466d70a5df71623dc2a561e77c49ee)): ?>
@@ -664,7 +679,7 @@ if (isset($__slots)) unset($__slots);
 <?php unset($__componentOriginal06466d70a5df71623dc2a561e77c49ee); ?>
 <?php endif; ?>
 
-    
+    <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('delete-orders')): ?>
     <div>
         <?php
 $__split = function ($name, $params = []) {
@@ -683,6 +698,7 @@ unset($__split);
 if (isset($__slots)) unset($__slots);
 ?>
     </div>
+    <?php endif; ?>
 
     <?php if (isset($component)) { $__componentOriginal2686ed4927c64f67d2844e9b73af898c = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal2686ed4927c64f67d2844e9b73af898c = $attributes; } ?>
@@ -703,7 +719,5 @@ if (isset($__slots)) unset($__slots);
 <?php $component = $__componentOriginal2686ed4927c64f67d2844e9b73af898c; ?>
 <?php unset($__componentOriginal2686ed4927c64f67d2844e9b73af898c); ?>
 <?php endif; ?>
-
-
 </div>
 <?php /**PATH /Users/togruljalalli/Desktop/projects/HR-CRM/resources/views/livewire/orders/all-orders.blade.php ENDPATH**/ ?>

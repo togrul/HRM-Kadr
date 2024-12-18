@@ -150,6 +150,7 @@ class Detail extends Component
         $structures = Structure::when(! empty($this->searchStructure), function ($q) {
             $q->where('name', 'LIKE', "%{$this->searchStructure}%");
         })
+            ->ordered()
             ->get();
 
         $positions = Position::when(! empty($this->searchPosition), function ($q) {

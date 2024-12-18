@@ -7,6 +7,7 @@ use App\Livewire\Traits\SelectListTrait;
 use App\Models\OrderType;
 use App\Models\PersonnelBusinessTrip;
 use App\Models\Structure;
+use App\Services\StructureService;
 use App\Services\WordSuffixService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -34,6 +35,7 @@ class BusinessTrips extends Component
 
     public function exportExcel()
     {
+        $this->authorize('export-business_trips');
         $report = $this->returnData(type: 'excel');
         $name = Carbon::now()->format('d.m.Y H:i');
 
@@ -128,6 +130,7 @@ class BusinessTrips extends Component
     {
         $result = PersonnelBusinessTrip::with(['personnel', 'order.orderType'])
             ->filter($this->search)
+            ->whereHas('personnel', fn ($query) => $query->whereIn('structure_id', resolve(StructureService::class)->getAccessibleStructures()))
             ->orderByDesc('end_date');
 
         return $type == 'normal'
@@ -143,6 +146,7 @@ class BusinessTrips extends Component
 
     public function mount()
     {
+        $this->authorize('show-business_trips');
         $this->fillFilter();
     }
 
@@ -150,7 +154,10 @@ class BusinessTrips extends Component
     {
         $_structures = Structure::when(! empty($this->searchStructure), function ($q) {
             $q->where('name', 'LIKE', "%{$this->searchStructure}%");
-        })->get();
+        })
+            ->accessible()
+            ->ordered()
+            ->get();
 
         $_order_types = OrderType::where('order_id', 3010)->get();
 

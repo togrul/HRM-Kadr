@@ -2,13 +2,16 @@
 
 namespace App\Livewire\Services\Menus;
 
+use App\Livewire\Traits\SelectListTrait;
 use App\Models\Menu;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Component;
+use Spatie\Permission\Models\Permission;
 
 class AddMenu extends Component
 {
     use AuthorizesRequests;
+    use SelectListTrait;
 
     public $title;
 
@@ -22,6 +25,7 @@ class AddMenu extends Component
             'menu.order' => 'required|integer',
             'menu.url' => 'required|string|min:1',
             'menu.icon' => 'required|string|min:1',
+            'menu.permission_id.id' => 'required|integer|exists:permissions,id'
         ];
     }
 
@@ -33,6 +37,7 @@ class AddMenu extends Component
             'menu.order' => __('Order'),
             'menu.url' => __('URL'),
             'menu.icon' => __('Icon'),
+            'menu.permission_id.id' => __('Permissions')
         ];
     }
 
@@ -40,7 +45,9 @@ class AddMenu extends Component
     {
         $this->validate();
 
-        Menu::create($this->menu);
+        $data = $this->menu;
+        $data['permission_id'] = $data['permission_id']['id'];
+        Menu::create($data);
 
         $this->dispatch('menuAdded', __('Menu was added successfully!'));
     }
@@ -53,6 +60,7 @@ class AddMenu extends Component
 
     public function render()
     {
-        return view('livewire.services.menus.add-menu');
+        $permissions = Permission::select('id','name')->get();
+        return view('livewire.services.menus.add-menu', compact('permissions'));
     }
 }

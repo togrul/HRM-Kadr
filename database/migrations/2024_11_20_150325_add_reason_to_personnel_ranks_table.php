@@ -1,0 +1,36 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('personnel_ranks', function (Blueprint $table) {
+            $table->unsignedInteger('rank_reason_id')
+                ->nullable()
+                ->after('rank_id');
+            $table->foreign('rank_reason_id')
+                ->references('id')
+                ->on('rank_reasons')
+                ->cascadeOnUpdate()
+                ->nullOnDelete();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('personnel_ranks', function (Blueprint $table) {
+            $table->dropForeign('rank_reason_id');
+            $table->dropColumn('rank_reason_id');
+        });
+    }
+};

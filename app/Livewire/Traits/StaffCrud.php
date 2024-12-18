@@ -21,7 +21,7 @@ trait StaffCrud
 
     public $hidePosition = false;
 
-    public function rules()
+    public function rules(): array
     {
         return [
             'staff.*.structure_id' => 'required|int|exists:structures,id',
@@ -32,7 +32,7 @@ trait StaffCrud
         ];
     }
 
-    protected function validationAttributes()
+    protected function validationAttributes(): array
     {
         return [
             'staff.*.structure_id' => __('Structure'),
@@ -49,7 +49,7 @@ trait StaffCrud
         $exploded = explode('.', $name);
         [$_index,$_name] = $exploded;
         if ($_name == 'total') {
-            $this->staff[$_index]['vacant'] = $value - $this->staff[$_index]['filled'];
+            $this->staff[$_index]['vacant'] = max(0, $value - $this->staff[$_index]['filled']);
         }
     }
 
@@ -74,64 +74,53 @@ trait StaffCrud
     public function deleteRow($row)
     {
         unset($this->staff[$row]);
+        $this->staff = array_values($this->staff);
     }
 
     public function setData($array_key, $model, $key, $content, $name, $id)
     {
         $this->searchPosition = null;
-        if (! empty($id)) {
-            $this->{$model}[$array_key][$key] = $id;
-            $this->{$model}[$array_key][$content] = [
-                'id' => $id,
-                'name' => $name,
-            ];
-        } else {
-            $this->{$model}[$array_key][$key] = null;
-            $this->{$model}[$array_key][$content] = [
-                'id' => null,
-                'name' => '---',
-            ];
-        }
+        $this->{$model}[$array_key][$key] = $id;
+        $this->{$model}[$array_key][$content] = [
+            'id' => $id,
+            'name' => $name ?? '---',
+        ];
         $this->fillAutoData($array_key, $model);
     }
 
     protected function hidePositionAction($array_key)
     {
         $parent_id = Structure::where('id', $this->staff[$array_key]['structure_id'])->value('parent_id');
-        if (empty($parent_id)) {
-            $this->hidePosition = true;
-        }
+        $this->hidePosition = empty($parent_id);
     }
 
     protected function fillAutoData($array_key, $model)
     {
-        if (! empty($this->staff)) {
-            $this->hidePosition = false;
-            if (empty($this->staffModel)) {
-                $this->staff[$array_key]['structure_id'] = $this->structureData[0]['structure_id'];
-            }
+        if (empty($this->staff)) return;
 
-            if (Arr::has($this->staff[$array_key], ['structure_id', 'position_id'])) {
-                $_structureId = $this->staff[$array_key]['structure_id'];
-                $_positionId = $this->staff[$array_key]['position_id'];
-                if ($model == 'structureData') {
-                    $this->hidePositionAction($array_key);
-                    $this->staff[$array_key]['position_id'] = null;
-                    if ($_structureId > 0) {
-                        $_ids = Structure::with('subs')->find($_structureId)->getAllNestedIds();
-                        $this->staff[$array_key]['filled'] = Personnel::whereNull('leave_work_date')
-                            ->whereIn('structure_id', $_ids)
-                            ->get()
-                            ->count();
-                    }
-                } else {
-                    if ($_structureId > 0 && $_positionId > 0) {
-                        $this->staff[$array_key]['filled'] = Personnel::whereNull('leave_work_date')
-                            ->where('structure_id', $_structureId)
-                            ->where('position_id', $_positionId)
-                            ->get()
-                            ->count();
-                    }
+        $this->hidePosition = false;
+        if (empty($this->staffModel)) {
+            $this->staff[$array_key]['structure_id'] = $this->structureData[0]['structure_id'];
+        }
+
+        if (Arr::has($this->staff[$array_key], ['structure_id', 'position_id'])) {
+            $_structureId = $this->staff[$array_key]['structure_id'];
+            $_positionId = $this->staff[$array_key]['position_id'];
+            if ($model == 'structureData') {
+                $this->hidePositionAction($array_key);
+                $this->staff[$array_key]['position_id'] = null;
+                if ($_structureId > 0) {
+                    $_ids = Structure::with('subs')->find($_structureId)->getAllNestedIds();
+                    $this->staff[$array_key]['filled'] = Personnel::whereNull('leave_work_date')
+                        ->whereIn('structure_id', $_ids)
+                        ->count();
+                }
+            } else {
+                if ($_structureId > 0 && $_positionId > 0) {
+                    $this->staff[$array_key]['filled'] = Personnel::whereNull('leave_work_date')
+                        ->where('structure_id', $_structureId)
+                        ->where('position_id', $_positionId)
+                        ->count();
                 }
             }
         }
@@ -142,6 +131,8 @@ trait StaffCrud
         $structures = Structure::when(! empty($this->searchStructure), function ($q) {
             $q->where('name', 'LIKE', "%{$this->searchStructure}%");
         })
+            ->accessible()
+            ->orderBy('code')
             ->get();
 
         $positions = Position::when(! empty($this->searchPosition), function ($q) {
@@ -149,7 +140,9 @@ trait StaffCrud
         })
             ->get();
 
-        $view_name = ! empty($this->staffModel) ? 'livewire.staff-schedule.edit-staff' : 'livewire.staff-schedule.add-staff';
+        $view_name = ! empty($this->staffModel)
+            ? 'livewire.staff-schedule.edit-staff'
+            : 'livewire.staff-schedule.add-staff';
 
         return view($view_name, compact('structures', 'positions'));
     }

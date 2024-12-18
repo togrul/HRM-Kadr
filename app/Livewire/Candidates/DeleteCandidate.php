@@ -3,11 +3,14 @@
 namespace App\Livewire\Candidates;
 
 use App\Models\Candidate;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
 class DeleteCandidate extends Component
 {
+    use AuthorizesRequests;
+
     public ?Candidate $candidate;
 
     #[On('setDeleteCandidate')]
@@ -20,7 +23,7 @@ class DeleteCandidate extends Component
 
     public function deleteCandidate()
     {
-        // $this->authorize('delete',$this->candidate);
+        $this->authorize('delete-candidates', $this->candidate);
 
         Candidate::destroy($this->candidate->id);
 

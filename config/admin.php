@@ -22,5 +22,6 @@ return [
         ['label' => 'Languages', 'icon' => 'globe-icon', 'route' => 'admin.languages'],
         ['label' => 'Scientific degree and names', 'icon' => 'pen-ruler-icon', 'route' => 'admin.scientific-degrees'],
         ['label' => 'Social origin', 'icon' => 'shield-user-icon', 'route' => 'admin.social-origins'],
+        ['label' => 'Rank reasons', 'icon' => 'double-arrow-icon', 'route' => 'admin.rank-reasons'],
     ],
 ];

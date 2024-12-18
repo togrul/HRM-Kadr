@@ -37,14 +37,13 @@
                                </div>
                             </div>
                         </x-table.td>
-    
+
                        <x-table.td>
-                        <span class="text-sm font-medium text-gray-500 rounded-xl px-3 py-1 shadow-sm bg-gray-100">
-                            {{ $staff->gender ? __('Man') : __('Woman') }}
-                       </span>
+                            <span class="text-sm font-medium text-gray-500 rounded-xl px-3 py-1 shadow-sm bg-gray-100">
+                                {{ $staff->gender ? __('Man') : __('Woman') }}
+                           </span>
                         </x-table.td>
-                    
-                    </tr>   
+                    </tr>
                 @endforeach
             </x-table.tbl>
 

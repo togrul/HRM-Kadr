@@ -324,18 +324,16 @@
 <?php unset($__componentOriginald8ba2b4c22a13c55321e34443c386276); ?>
 <?php endif; ?>
             <div class="flex flex-col">
-              <label class="inline-flex items-center bg-gray-100 rounded shadow-sm py-2 px-2">
-                  <input type="radio"
-                         class="form-radio"
-                         name="filter.gender"
-                         wire:model="filter.gender"
-                         value="2">
-                <span class="ml-2 text-sm font-normal"><?php echo e(__('Woman')); ?></span>
-              </label>
-              <label class="inline-flex items-center bg-gray-100 rounded shadow-sm py-2 px-2">
-                <input type="radio" class="form-radio" name="filter.gender" wire:model="filter.gender" value="1">
-                <span class="ml-2 text-sm font-normal"><?php echo e(__('Man')); ?></span>
-              </label>
+                <!--[if BLOCK]><![endif]--><?php $__currentLoopData = \App\Enums\GenderEnum::genderOptions(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $value => $label): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <label class="inline-flex items-center bg-gray-100 rounded shadow-sm py-2 px-2">
+                        <input type="radio"
+                               class="form-radio"
+                               name="filter.gender"
+                               wire:model="filter.gender"
+                               value="<?php echo e($value); ?>">
+                        <span class="ml-2 text-sm font-normal"><?php echo e($label); ?></span>
+                    </label>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
             </div>
           </div>
           <div class="flex flex-col lg:col-span-2">

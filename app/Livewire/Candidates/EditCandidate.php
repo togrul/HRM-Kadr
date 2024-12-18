@@ -5,14 +5,23 @@ namespace App\Livewire\Candidates;
 use App\Livewire\Traits\CandidateCrud;
 use App\Livewire\Traits\Helpers\FillComplexArrayTrait;
 use App\Models\Candidate;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Component;
 
 class EditCandidate extends Component
 {
     use CandidateCrud;
     use FillComplexArrayTrait;
+    use AuthorizesRequests;
 
     public $candidateModelData;
+
+    public function mount()
+    {
+        $this->authorize('edit-candidates', $this->candidateModelData);
+
+        $this->fillCandidate();
+    }
 
     protected function fillCandidate()
     {

@@ -40,12 +40,17 @@
         </div>
 
         <div class="flex justify-end items-center space-x-2">
+            @can('add-staff')
             <button wire:click="openSideMenu('add-staff')" class="flex items-center justify-center transition-all duration-300 rounded-xl bg-slate-100 text-slate-500 hover:bg-slate-200 space-x-2 p-2" type="button">
                 @include('components.icons.add-icon')
             </button>
+            @endcan
+            @can('export-staff')
             <button class="flex items-center justify-center transition-all duration-300 rounded-xl bg-rose-50 text-rose-500 hover:bg-rose-100 space-x-2 p-2" type="button">
                 @include('components.icons.print-file',['color' => 'text-rose-400', 'hover' => 'text-rose-500'])
             </button>
+            @endcan
+            @can('export-staff')
             @if($selectedPage == 'vacancies')
             <button wire:click.prevent="exportExcel" class="flex items-center justify-center rounded-xl transition-all duration-300 bg-green-50 text-green-500 hover:bg-green-100 space-x-2 p-2" type="button">
                 <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"  viewBox="0 0 50 50" class="w-6 h-6 fill-green-400 transition-all duration-300 hover:fill-green-500">
@@ -53,6 +58,7 @@
                 </svg>
             </button>
             @endif
+            @endcan
         </div>
     </div>
 
@@ -74,12 +80,16 @@
                     <span></span>
                     <h1 class="text-lg font-medium flex items-center">{!! $str !!} </h1>
                     <div class="flex space-x-2 items-center">
-                        <button wire:click="openSideMenu('edit-staff',{{ $stf[0]->structure_id }})" class="appearance-none w-8 h-8 flex justify-center items-center rounded-lg bg-slate-700 transition-all duration-300 hover:bg-slate-800">
-                            @include('components.icons.edit-icon',['color' => 'text-slate-100', 'hover' => 'text-slate-200'])
-                        </button>
-                        <button wire:click.prevent="setDeleteStaff({{ $stf[0]->structure_id  }})" class="appearance-none w-8 h-8 flex justify-center items-center rounded-lg bg-slate-700 transition-all duration-300 hover:bg-slate-800">
-                            @include('components.icons.delete-icon',['color' => 'text-rose-400', 'hover' => 'text-rose-300'])
-                        </button>
+                        @can('edit-staff')
+                            <button wire:click="openSideMenu('edit-staff',{{ $stf[0]->structure_id }})" class="appearance-none w-8 h-8 flex justify-center items-center rounded-lg bg-slate-700 transition-all duration-300 hover:bg-slate-800">
+                                @include('components.icons.edit-icon',['color' => 'text-slate-100', 'hover' => 'text-slate-200'])
+                            </button>
+                        @endcan
+                        @can('delete-staff')
+                            <button wire:click.prevent="setDeleteStaff({{ $stf[0]->structure_id  }})" class="appearance-none w-8 h-8 flex justify-center items-center rounded-lg bg-slate-700 transition-all duration-300 hover:bg-slate-800">
+                                @include('components.icons.delete-icon',['color' => 'text-rose-400', 'hover' => 'text-rose-300'])
+                            </button>
+                        @endcan
                     </div>
                 </div>
 
@@ -224,20 +234,28 @@
     @endif
 
     <x-side-modal>
-        @if($showSideMenu == 'add-staff')
-            <livewire:staff-schedule.add-staff />
-        @endif
+        @can('add-staff')
+            @if($showSideMenu == 'add-staff')
+                <livewire:staff-schedule.add-staff />
+            @endif
+        @endcan
 
-        @if($showSideMenu == 'edit-staff')
-            <livewire:staff-schedule.edit-staff :staffModel="$modelName" />
-        @endif
+        @can('edit-staff')
+            @if($showSideMenu == 'edit-staff')
+                <livewire:staff-schedule.edit-staff :staffModel="$modelName" />
+            @endif
+        @endcan
 
-        @if($showSideMenu == 'show-staff')
-            <livewire:staff-schedule.show-staff :structureModel="$modelName" :positionModel="$secondModel" />
-        @endif
+        @can('show-staff')
+            @if($showSideMenu == 'show-staff')
+                <livewire:staff-schedule.show-staff :structureModel="$modelName" :positionModel="$secondModel" />
+            @endif
+        @endcan
    </x-side-modal>
    {{-- @endcan --}}
-   <div>
-    <livewire:staff-schedule.delete-staff />
-   </div>
+   @can('delete-staff')
+       <div>
+            <livewire:staff-schedule.delete-staff />
+       </div>
+   @endcan
 </div>

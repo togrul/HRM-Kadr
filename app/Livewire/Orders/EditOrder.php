@@ -9,17 +9,19 @@ use App\Models\Personnel;
 use App\Services\ImportCandidateToPersonnel;
 use App\Services\OrderConfirmedService;
 use Carbon\Carbon;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class EditOrder extends Component
 {
-    use OrderCrud;
+    use OrderCrud,AuthorizesRequests;
 
     public $orderModelData;
 
     protected function fillOrder()
     {
+        $this->authorize('edit-orders', $this->orderModelData);
         $this->orderModelData = OrderLog::with(['order', 'components', 'personnels', 'status', 'attributes'])
             ->where('order_no', $this->orderModel)
             ->first();

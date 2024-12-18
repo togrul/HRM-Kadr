@@ -30,9 +30,12 @@
                             </x-table.td>
 
                             <x-table.td>
-                                <span class="text-slate-500 font-medium">
-                                    {{ $menu->color }}
-                                </span>
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-slate-500 font-medium">
+                                        {{ $menu->color }}
+                                    </span>
+                                    <span class="w-4 h-4 rounded-full bg-{{ $menu->color }}-500"></span>
+                                </div>
                             </x-table.td>
 
                             <x-table.td>
@@ -92,7 +95,6 @@
             </div>
     </div>
 
-    {{-- @can('manage-settings') --}}
     <x-side-modal>
         @if($showSideMenu == 'add-menu')
             <livewire:services.menus.add-menu />
@@ -102,7 +104,6 @@
             <livewire:services.menus.edit-menu :menuModel="$modelName" />
         @endif
     </x-side-modal>
-   {{-- @endcan --}}
 
    <div class="">
         @auth
