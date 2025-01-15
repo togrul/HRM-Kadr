@@ -11,21 +11,19 @@ class CalculateSeniorityService
         $leave_date,
         $coefficient
     ): array {
-        $data['diff'] = Carbon::parse($join_date)
-            ->diffInMonths(Carbon::parse($leave_date));
+        $diffInMonths = Carbon::parse($join_date)->diffInMonths(Carbon::parse($leave_date));
+        $duration = $coefficient ? $coefficient * $diffInMonths : $diffInMonths;
+        $yearAndMonth = $this->calculateYearAndMonth($diffInMonths);
 
-        $data['duration'] = ! empty($coefficient)
-            ? $coefficient * $data['diff']
-            : $data['diff'];
-
-        $y_m = $this->calculateYearAndMonth($data['diff']);
-        $data['year'] = $y_m['year'];
-        $data['month'] = $y_m['month'];
-
-        return $data;
+        return [
+            'diff' => $diffInMonths,
+            'duration' => $duration,
+            'year' => $yearAndMonth['year'],
+            'month' => $yearAndMonth['month'],
+        ];
     }
 
-    public function calculateEducation($education): array
+    public function calculateEducation(array $education): array
     {
         $result = $this->calculate(
             $education['admission_year'],
@@ -41,100 +39,110 @@ class CalculateSeniorityService
 
     public function calculateMultiEducation($edu_list): array
     {
-        $result = [];
+        $mappedData = collect($edu_list)->map(function ($item) {
+            $graduatedYear = $item['graduated_year'] ?? Carbon::now()->format('Y-m-d');
+            $duration = $this->calculate($item['admission_year'], $graduatedYear, $item['coefficient']);
 
-        $result['data'] = collect($edu_list)->map(function ($item) {
-            $item['duration'] = $this->calculate(
-                $item['admission_year'],
-                $item['graduated_year'] ?? Carbon::now()->format('Y-m-d'),
-                $item['coefficient']
-            );
-
+            $old = $current = $extraSeniority = [];
             if (! empty($item['graduated_year'])) {
-                $item['old'] = $this->calculate(
-                    $item['admission_year'],
-                    $item['graduated_year'],
-                    $item['coefficient']
-                );
+                $old = $this->calculate($item['admission_year'], $item['graduated_year'], $item['coefficient']);
             } else {
-                $item['current'] = $this->calculate(
-                    $item['graduated_year'],
-                    Carbon::now()->format('Y-m-d'),
-                    $item['coefficient']
-                );
+                $current = $this->calculate($item['admission_year'], Carbon::now()->format('Y-m-d'), $item['coefficient']);
             }
 
-            if ($item['calculate_as_seniority']) {
-                $item['extra_seniority'] = $item['old'] + (array_key_exists('current', $item) ? $item['current'] : []);
-                $item['coefficient'] = $this->calculateYearAndMonth($item['duration']['duration']);
+            if ($item['calculate_as_seniority'] ?? false) {
+                $extraSeniority = $old + ($current ?? []);
+                $coefficient = $this->calculateYearAndMonth($duration['duration']);
             } else {
-                $item['extra_seniority'] = 0;
-                $item['coefficient'] = [];
+                $coefficient = [];
             }
 
             return [
-                'old' => $item['old'] ?? [],
-                'current' => $item['current'] ?? [],
-                'duration' => $item['duration'],
-                'extra_seniority' => $item['extra_seniority'],
-                'coefficient' => $item['coefficient'],
+                'old' => $old,
+                'current' => $current,
+                'duration' => $duration,
+                'extra_seniority' => $extraSeniority,
+                'coefficient' => $coefficient,
             ];
         })->toArray();
 
-        $result['extra_seniority'] = array_sum(array_column(array_column($result['data'], 'extra_seniority'), 'duration'));
-        $result['extra_seniority_full'] = $this->calculateYearAndMonth($result['extra_seniority']);
-        $result['total_duration'] = array_sum(array_column(array_column($result['data'], 'duration'), 'diff'));
-        $result['total_duration_diff'] = $this->calculateYearAndMonth($result['total_duration']);
-
-        return $result;
+        return $this->aggregateMultiEducationResults($mappedData);
     }
 
-    public function calculateMulti($list, $currentWorkType = 'military'): array
+    private function aggregateMultiEducationResults(array $mappedData): array
     {
-        $result = [];
+        $extraSeniority = array_sum(array_column(array_column($mappedData, 'extra_seniority'), 'duration'));
+        $totalDuration = array_sum(array_column(array_column($mappedData, 'duration'), 'diff'));
 
-        $result['data'] = collect($list)->map(function ($item) {
+        return [
+            'data' => $mappedData,
+            'extra_seniority' => $extraSeniority,
+            'extra_seniority_full' => $this->calculateYearAndMonth($extraSeniority),
+            'total_duration' => $totalDuration,
+            'total_duration_diff' => $this->calculateYearAndMonth($totalDuration),
+        ];
+    }
+
+    public function calculateMulti(array $list, string $currentWorkType = 'military'): array
+    {
+        $mappedData = collect($list)->map(function ($item) use ($currentWorkType) {
             $leaveDate = $item['leave_date'] ?? Carbon::now();
-            $item['duration'] = $this->calculate($item['join_date'], $leaveDate, $item['coefficient']);
+            $coefficient = $item['coefficient'] ?? 1;
+            $duration = $this->calculate($item['join_date'], $leaveDate, $coefficient);
 
-            if (! $item['is_current']) {
-                $key = $item['is_special_service'] ? 'old_military' : 'old';
-                $item[$key] = $this->calculate($item['join_date'], $leaveDate, $item['coefficient']);
+            $old = $oldMilitary = $current = [];
+            if (!$item['is_current']) {
+                $key = $item['is_special_service'] ? 'oldMilitary' : 'old';
+                ${$key} = $this->calculate($item['join_date'], $leaveDate, $coefficient);
             } else {
-                $item['current'] = $this->calculate($item['join_date'], $leaveDate, $item['coefficient']);
+                $current = $this->calculate($item['join_date'], $leaveDate, $coefficient);
             }
 
             return [
-                'old' => $item['old'] ?? [],
-                'current' => $item['current'] ?? [],
-                'duration' => $item['duration'],
+                'old' => $old,
+                'old_military' => $oldMilitary,
+                'current' => $current,
+                'duration' => $duration,
             ];
         })->toArray();
 
-        $old_month_list = $this->getColumnListFromArray($result['data'], 'old', 'duration');
-        $old_military_month_list = $this->getColumnListFromArray($result['data'], 'old_military', 'duration');
-        $full_current = $this->getColumnListFromArray($result['data'], 'current', 'duration');
-        $full_current_diff = $this->getColumnListFromArray($result['data'], 'current', 'diff');
-        $full_sum = $this->getColumnListFromArray($result['data'], 'duration', 'duration');
+        return $this->aggregateMultiResults($mappedData, $currentWorkType);
+    }
 
-        $result['sum_month_old'] = array_sum($old_month_list);
-        $result['sum_month_military_old'] = array_sum($old_military_month_list);
+    private function aggregateMultiResults(array $mappedData, string $currentWorkType): array
+    {
+        $oldMonths = $this->getColumnListFromArray($mappedData, 'old', 'duration');
+        $oldMilitaryMonths = $this->getColumnListFromArray($mappedData, 'old_military', 'duration');
+        $currentMonths = $this->getColumnListFromArray($mappedData, 'current', 'duration');
+        $currentDiffs = $this->getColumnListFromArray($mappedData, 'current', 'diff');
+        $fullSum = $this->getColumnListFromArray($mappedData, 'duration', 'duration');
 
-        $result['sum_month_current'] = array_sum($full_current);
-        $result['sum_month_current_diff'] = array_sum($full_current_diff);
-        $result['sum_month'] = array_sum($full_sum);
-        $result['sum_total'] = $result['sum_month_old'] + ($currentWorkType == 'military' ? 0 : $result['sum_month_current']);
-        $result['sum_total_military'] = $result['sum_month_military_old'] + ($currentWorkType == 'military' ? $result['sum_month_current'] : 0);
+        $sumOld = array_sum($oldMonths);
+        $sumMilitaryOld = array_sum($oldMilitaryMonths);
+        $sumCurrent = array_sum($currentMonths);
+        $sumCurrentDiff = array_sum($currentDiffs);
+        $sumFull = array_sum($fullSum);
 
-        $result['sum_old'] = $this->calculateYearAndMonth($result['sum_month_old']);
-        $result['sum_old_military'] = $this->calculateYearAndMonth($result['sum_month_military_old']);
-        $result['sum_current'] = $this->calculateYearAndMonth($result['sum_month_current']);
-        $result['sum_current_diff'] = $this->calculateYearAndMonth($result['sum_month_current_diff']);
-        $result['sum_full'] = $this->calculateYearAndMonth($result['sum_month']);
-        $result['sum_total_full'] = $this->calculateYearAndMonth($result['sum_total']);
-        $result['sum_total_military_full'] = $this->calculateYearAndMonth($result['sum_total_military']);
+        $sumTotal = $sumOld + ($currentWorkType === 'military' ? 0 : $sumCurrent);
+        $sumTotalMilitary = $sumMilitaryOld + ($currentWorkType === 'military' ? $sumCurrent : 0);
 
-        return $result;
+        return [
+            'data' => $mappedData,
+            'sum_month_old' => $sumOld,
+            'sum_month_military_old' => $sumMilitaryOld,
+            'sum_month_current' => $sumCurrent,
+            'sum_month_current_diff' => $sumCurrentDiff,
+            'sum_month' => $sumFull,
+            'sum_total' => $sumTotal,
+            'sum_total_military' => $sumTotalMilitary,
+            'sum_old' => $this->calculateYearAndMonth($sumOld),
+            'sum_old_military' => $this->calculateYearAndMonth($sumMilitaryOld),
+            'sum_current' => $this->calculateYearAndMonth($sumCurrent),
+            'sum_current_diff' => $this->calculateYearAndMonth($sumCurrentDiff),
+            'sum_full' => $this->calculateYearAndMonth($sumFull),
+            'sum_total_full' => $this->calculateYearAndMonth($sumTotal),
+            'sum_total_military_full' => $this->calculateYearAndMonth($sumTotalMilitary),
+        ];
     }
 
     private function getColumnListFromArray(array $data, $parentColumnKey, $subColumnKey): array

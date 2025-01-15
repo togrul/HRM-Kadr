@@ -33,7 +33,7 @@ class PersonnelKinship extends Model
     ];
 
     protected $casts = [
-        'birthdate' => 'date:d.m.Y',
+        'birthdate' => self::FORMAT_CAST,
     ];
 
     public function kinship(): BelongsTo

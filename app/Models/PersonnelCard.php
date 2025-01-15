@@ -16,8 +16,14 @@ class PersonnelCard extends Model
     protected $fillable = [
         'tabel_no',
         'card_number',
+        'given_date',
         'valid_date',
     ];
 
-    protected $dates = ['valid_date'];
+    protected $dates = ['given_date', 'valid_date'];
+
+    protected $casts = [
+        'valid_date' => self::FORMAT_CAST,
+        'given_date' => self::FORMAT_CAST,
+    ];
 }

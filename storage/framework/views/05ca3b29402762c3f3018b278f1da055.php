@@ -931,6 +931,7 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <div class="my-2 flex justify-between items-center border border-gray-200 p-2 shadow-sm bg-gray-50 rounded-lg">
         <div class="flex space-x-2 items-center">
             <span class="font-medium text-gray-500"><?php echo e(__('Duration')); ?>:</span>
+            <!--[if BLOCK]><![endif]--><?php if(! empty($calculatedDataEducation)): ?>
             <span class="font-medium text-gray-900">
                 <?php echo e($calculatedDataEducation['diff']); ?> <?php echo e(__('month')); ?>
 
@@ -938,14 +939,17 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 
                 <?php echo e($calculatedDataEducation['month']); ?> <?php echo e(__('month')); ?> )
             </span>
+            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
         </div>
-        <!--[if BLOCK]><![endif]--><?php if($education['coefficient'] > 0): ?>
+
+        <!--[if BLOCK]><![endif]--><?php if(Arr::has($education, 'education') && $education['coefficient'] > 0): ?>
         <div class="flex space-x-2 items-center">
             <span class="font-medium text-gray-500"><?php echo e(__('Coefficient')); ?>:</span>
             <span class="font-medium text-teal-500"><?php echo e($education['coefficient']); ?></span>
         </div>
         <div class="flex space-x-2 items-center">
             <span class="font-medium text-gray-500"><?php echo e(__('Extra seniority')); ?>:</span>
+            <!--[if BLOCK]><![endif]--><?php if(! empty($calculatedDataEducation)): ?>
             <span class="font-medium text-rose-500">
                 <?php echo e($calculatedDataEducation['duration']); ?> <?php echo e(__('month')); ?>
 
@@ -953,6 +957,7 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 
                 <?php echo e($calculatedDataEducation['month_coefficient']); ?> <?php echo e(__('month')); ?>)
             </span>
+            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
         </div>
         <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 </div>

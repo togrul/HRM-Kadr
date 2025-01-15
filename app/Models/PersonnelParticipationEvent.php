@@ -25,6 +25,6 @@ class PersonnelParticipationEvent extends Model
     ];
 
     protected $casts = [
-        'event_date' => 'date:d.m.Y',
+        'event_date' => self::FORMAT_CAST,
     ];
 }

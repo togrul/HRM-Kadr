@@ -20,8 +20,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(NumberToWordsService::class, fn () => new NumberToWordsService());
-        $this->app->singleton(StructureService::class, fn () => new StructureService());
+        $this->app->singleton(NumberToWordsService::class, fn () => new NumberToWordsService);
+        $this->app->singleton(StructureService::class, fn () => new StructureService);
     }
 
     /**
@@ -29,9 +29,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-//        DB::prohibitDestructiveCommands(
-//            $this->app->isProduction(),
-//        );
+        //        DB::prohibitDestructiveCommands(
+        //            $this->app->isProduction(),
+        //        );
         $this->configureModels();
         $this->registerObservers();
         $this->registerViewComposers();
@@ -74,6 +74,7 @@ class AppServiceProvider extends ServiceProvider
         Builder::macro('accessible', function () {
             if (auth()->check()) {
                 $accessibleIds = resolve(StructureService::class)->getAccessibleStructures();
+
                 return $this->whereIn('id', $accessibleIds);
             }
 

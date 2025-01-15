@@ -14,10 +14,10 @@
         <tr>
             <td><?php echo e($award->award->name); ?></td>
             <td><?php echo e($award->reason); ?></td>
-            <td><?php echo e($award->order_given_by); ?>, <?php echo e($award->order_no); ?> <?php echo e(\Carbon\Carbon::parse($award->order_date)->format('d.m.Y')); ?></td>
+            <td><?php echo e($award->order_given_by ? $award->order_given_by . ',' : ''); ?> <?php echo e($award->order_no); ?> <?php echo e(\Carbon\Carbon::parse($award->order_date)->format('d.m.Y')); ?></td>
         </tr>
     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-    <?php for($i = 0;$i < (19 - $personnel->awards->count());$i++): ?>
+    <?php for($i = 0;$i < (18 - $personnel->awards->count());$i++): ?>
         <tr>
             <td></td>
             <td></td>

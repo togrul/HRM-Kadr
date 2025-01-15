@@ -18,7 +18,7 @@
 </div>
 
 <div class="flex-col" style="justify-content: center;align-items: center;">
-    <span style="width: 100%;height: 30px;border-bottom: 1px solid #000;line-height: 2;font-style: italic;">{{ $personnel->fullname }}</span>
+    <span style="width: 100%;height: 30px;border-bottom: 1px solid #000;line-height: 2;font-style: italic;text-align: center">{{ $personnel->fullname }}</span>
     <span style="font-weight: 500;font-style: italic;font-size: 11px;">( soyadı,</span>
 </div>
 
@@ -44,7 +44,8 @@
             <tr>
                 @if(isset($rankChunks[0][$i]))
                     <td>{{ $rankChunks[0][$i]->rank->name }}</td>
-                    <td>{{ $rankChunks[0][$i]->order_given_by }}, {{ $rankChunks[0][$i]->order_no }} {{ $rankChunks[0][$i]->order_date->format('d.m.Y') }}</td>
+{{--                    <td>AR PTX rəisi {{ $rankChunks[0][$i]->order_given_by }}, {{ $rankChunks[0][$i]->order_no }} {{ $rankChunks[0][$i]->order_date->format('d.m.Y') }}</td>--}}
+                    <td>AR PTX rəisinin əmri №{{ $rankChunks[0][$i]->order_no }} {{ $rankChunks[0][$i]->order_date->format('d.m.Y') }}</td>
                 @else
                     <td></td>
                     <td></td>

@@ -91,7 +91,7 @@
         <div class="grid grid-cols-1 gap-2">
             <!--[if BLOCK]><![endif]--><?php $__empty_1 = true; $__currentLoopData = $_components; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $_component): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                 <div class="flex justify-between items-center px-4 py-3 rounded-xl shadow-sm bg-slate-100">
-                    <span class="text-slate-900 font-medium">
+                    <span class="text-slate-900 font-medium w-20">
                         <?php echo e(($_components->currentpage()-1) * $_components->perpage() + $key + 1); ?>
 
                     </span>
@@ -103,8 +103,11 @@
                         <?php echo e($_component->name); ?>
 
                     </span>
-                    <div class="flex justify-end items-center space-x-2">
-                        <a href="javascript:void(0)" wire:click.prevent="openSideMenu('edit-component',<?php echo e($_component->id); ?>)" class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase rounded-lg text-gray-500 hover:bg-gray-200 hover:text-gray-700">
+                    <div class="flex justify-end items-center space-x-2 w-20">
+                        <button
+                            wire:click.prevent="openSideMenu('edit-component',<?php echo e($_component->id); ?>)"
+                            class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase rounded-lg text-gray-500 hover:bg-gray-200 hover:text-gray-700"
+                        >
                             <?php if (isset($component)) { $__componentOriginal308d511ba9bedd167c92178534240350 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal308d511ba9bedd167c92178534240350 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.icons.edit-icon','data' => ['color' => 'text-slate-600','hover' => 'text-slate-700']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
@@ -124,7 +127,7 @@
 <?php $component = $__componentOriginal308d511ba9bedd167c92178534240350; ?>
 <?php unset($__componentOriginal308d511ba9bedd167c92178534240350); ?>
 <?php endif; ?>
-                        </a>
+                        </button>
                         <button
                             wire:click.prevent="setDeleteComponent(<?php echo e($_component->id); ?>)"
                             class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-50 hover:text-gray-700"

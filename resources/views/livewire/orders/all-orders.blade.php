@@ -212,22 +212,22 @@
                                 <x-table.td :isButton="true">
                                     @if($status != 'deleted')
                                         @can('delete-orders')
-                                        <button
-                                            wire:click="setDeleteOrder('{{$_order->order_no}}')"
-                                            class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-100 hover:text-gray-700"
-                                        >
-                                            @include('components.icons.delete-icon')
-                                        </button>
+                                            <button
+                                                wire:click="setDeleteOrder('{{$_order->order_no}}')"
+                                                class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-100 hover:text-gray-700"
+                                            >
+                                                @include('components.icons.delete-icon')
+                                            </button>
                                          @endcan
                                     @else
                                         @can('delete-orders')
-                                        <button
-                                            wire:click="forceDeleteData('{{$_order->order_no}}')"
-                                            wire:confirm="{{ __('Are you sure you want to remove this data?') }}"
-                                            class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-50 hover:text-gray-700"
-                                        >
-                                            @include('components.icons.force-delete')
-                                        </button>
+                                            <button
+                                                wire:click="forceDeleteData('{{$_order->order_no}}')"
+                                                wire:confirm="{{ __('Are you sure you want to remove this data?') }}"
+                                                class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-50 hover:text-gray-700"
+                                            >
+                                                @include('components.icons.force-delete')
+                                            </button>
                                         @endcan
                                     @endif
                                 </x-table.td>

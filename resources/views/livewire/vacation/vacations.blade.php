@@ -127,8 +127,11 @@
 
                     <x-table.tbl :headers="[__('#'),__('Fullname'),__('Structure'),__('Dates'),__('Locations'),__('Order'),'action']">
                         @forelse ($this->vacations as $key => $_vacation)
+                            @php
+                                $activeVacation = $_vacation->start_date <= \Carbon\Carbon::now() && $_vacation->return_work_date > \Carbon\Carbon::now();
+                            @endphp
                             <tr @class([
-                                'bg-teal-50' => $_vacation->return_work_date > \Carbon\Carbon::now()
+                                'bg-teal-50' => $activeVacation
                             ])>
                                 <x-table.td>
                                     <span class="text-sm font-medium text-gray-700">
@@ -144,7 +147,7 @@
                                         <span class="text-sm font-medium text-slate-900">
                                             {{ $_vacation->personnel?->fullname }}
                                         </span>
-                                        @if($_vacation->return_work_date > \Carbon\Carbon::now())
+                                        @if($activeVacation)
                                             <span class="text-green-700 flex justify-center items-center text-sm font-medium bg-green-200 px-2 py-1 rounded-lg">
                                                 {{ __('In vacation') }}
                                             </span>

@@ -48,7 +48,9 @@ class RankForm extends Form
     {
         $this->validate();
 
-        Rank::create($this->all());
+        $updateData = Arr::except($this->all(),'rank');
+
+        Rank::create($updateData);
     }
 
     public function update()

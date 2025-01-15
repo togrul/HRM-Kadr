@@ -22,6 +22,6 @@ class PersonnelElectedElectoral extends Model
     ];
 
     protected $casts = [
-        'elected_date' => 'date:d.m.Y',
+        'elected_date' => self::FORMAT_CAST,
     ];
 }

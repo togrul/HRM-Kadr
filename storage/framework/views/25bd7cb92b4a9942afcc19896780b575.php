@@ -36,7 +36,6 @@
             padding: 10px 0;
             font-size: 16px;
             text-align: left;
-
         }
 
         th,td{

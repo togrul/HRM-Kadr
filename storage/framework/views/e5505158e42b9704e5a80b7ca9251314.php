@@ -2185,7 +2185,7 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                       window.Livewire.find('<?php echo e($_instance->getId()); ?>').set('personnel.leave_work_date', $el.value);
                       }
                      <?php $__env->endSlot(); ?>
-                   <?php echo $__env->renderComponent(); ?>
+                 <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal36038ba5ddba347b69d2b76bc4612d11)): ?>
 <?php $attributes = $__attributesOriginal36038ba5ddba347b69d2b76bc4612d11; ?>
@@ -2197,6 +2197,190 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php endif; ?>
             </div>
         </div>
+
+        <div class="grid grid-cols-2 gap-2">
+            <div class="flex flex-col space-y-2">
+                <div class="flex flex-col">
+                    <?php if (isset($component)) { $__componentOriginald8ba2b4c22a13c55321e34443c386276 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginald8ba2b4c22a13c55321e34443c386276 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'personnel.special_inspection_date']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('label'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['for' => 'personnel.special_inspection_date']); ?><?php echo e(__('Special inspection date')); ?> <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginald8ba2b4c22a13c55321e34443c386276)): ?>
+<?php $attributes = $__attributesOriginald8ba2b4c22a13c55321e34443c386276; ?>
+<?php unset($__attributesOriginald8ba2b4c22a13c55321e34443c386276); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginald8ba2b4c22a13c55321e34443c386276)): ?>
+<?php $component = $__componentOriginald8ba2b4c22a13c55321e34443c386276; ?>
+<?php unset($__componentOriginald8ba2b4c22a13c55321e34443c386276); ?>
+<?php endif; ?>
+                    <?php if (isset($component)) { $__componentOriginal36038ba5ddba347b69d2b76bc4612d11 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal36038ba5ddba347b69d2b76bc4612d11 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.pikaday-input','data' => ['mode' => 'gray','name' => 'personnel.special_inspection_date','format' => 'Y-MM-DD','wire:model.live' => 'personnel.special_inspection_date']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('pikaday-input'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['mode' => 'gray','name' => 'personnel.special_inspection_date','format' => 'Y-MM-DD','wire:model.live' => 'personnel.special_inspection_date']); ?>
+                         <?php $__env->slot('script', null, []); ?> 
+                            $el.onchange = function () {
+                            window.Livewire.find('<?php echo e($_instance->getId()); ?>').set('personnel.special_inspection_date', $el.value);
+                            }
+                         <?php $__env->endSlot(); ?>
+                     <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal36038ba5ddba347b69d2b76bc4612d11)): ?>
+<?php $attributes = $__attributesOriginal36038ba5ddba347b69d2b76bc4612d11; ?>
+<?php unset($__attributesOriginal36038ba5ddba347b69d2b76bc4612d11); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal36038ba5ddba347b69d2b76bc4612d11)): ?>
+<?php $component = $__componentOriginal36038ba5ddba347b69d2b76bc4612d11; ?>
+<?php unset($__componentOriginal36038ba5ddba347b69d2b76bc4612d11); ?>
+<?php endif; ?>
+                </div>
+                <!--[if BLOCK]><![endif]--><?php if(!empty($personnel['special_inspection_date'])): ?>
+                    <div class="flex flex-col">
+                        <?php if (isset($component)) { $__componentOriginald8ba2b4c22a13c55321e34443c386276 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginald8ba2b4c22a13c55321e34443c386276 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'personnel.special_inspection_result']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('label'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['for' => 'personnel.special_inspection_result']); ?><?php echo e(__('Special inspection result')); ?> <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginald8ba2b4c22a13c55321e34443c386276)): ?>
+<?php $attributes = $__attributesOriginald8ba2b4c22a13c55321e34443c386276; ?>
+<?php unset($__attributesOriginald8ba2b4c22a13c55321e34443c386276); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginald8ba2b4c22a13c55321e34443c386276)): ?>
+<?php $component = $__componentOriginald8ba2b4c22a13c55321e34443c386276; ?>
+<?php unset($__componentOriginald8ba2b4c22a13c55321e34443c386276); ?>
+<?php endif; ?>
+                        <?php if (isset($component)) { $__componentOriginal4727f9fd7c3055c2cf9c658d89b16886 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal4727f9fd7c3055c2cf9c658d89b16886 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.textarea','data' => ['mode' => 'gray','name' => 'personnel.special_inspection_result','placeholder' => ''.e(__('')).'','wire:model' => 'personnel.special_inspection_result']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('textarea'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['mode' => 'gray','name' => 'personnel.special_inspection_result','placeholder' => ''.e(__('')).'','wire:model' => 'personnel.special_inspection_result']); ?> <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal4727f9fd7c3055c2cf9c658d89b16886)): ?>
+<?php $attributes = $__attributesOriginal4727f9fd7c3055c2cf9c658d89b16886; ?>
+<?php unset($__attributesOriginal4727f9fd7c3055c2cf9c658d89b16886); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal4727f9fd7c3055c2cf9c658d89b16886)): ?>
+<?php $component = $__componentOriginal4727f9fd7c3055c2cf9c658d89b16886; ?>
+<?php unset($__componentOriginal4727f9fd7c3055c2cf9c658d89b16886); ?>
+<?php endif; ?>
+                    </div>
+                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+            </div>
+            <div class="flex flex-col space-y-2">
+                <div class="flex flex-col">
+                    <?php if (isset($component)) { $__componentOriginald8ba2b4c22a13c55321e34443c386276 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginald8ba2b4c22a13c55321e34443c386276 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'personnel.medical_inspection_date']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('label'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['for' => 'personnel.medical_inspection_date']); ?><?php echo e(__('Medical inspection date')); ?> <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginald8ba2b4c22a13c55321e34443c386276)): ?>
+<?php $attributes = $__attributesOriginald8ba2b4c22a13c55321e34443c386276; ?>
+<?php unset($__attributesOriginald8ba2b4c22a13c55321e34443c386276); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginald8ba2b4c22a13c55321e34443c386276)): ?>
+<?php $component = $__componentOriginald8ba2b4c22a13c55321e34443c386276; ?>
+<?php unset($__componentOriginald8ba2b4c22a13c55321e34443c386276); ?>
+<?php endif; ?>
+                    <?php if (isset($component)) { $__componentOriginal36038ba5ddba347b69d2b76bc4612d11 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal36038ba5ddba347b69d2b76bc4612d11 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.pikaday-input','data' => ['mode' => 'gray','name' => 'personnel.medical_inspection_date','format' => 'Y-MM-DD','wire:model.live' => 'personnel.medical_inspection_date']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('pikaday-input'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['mode' => 'gray','name' => 'personnel.medical_inspection_date','format' => 'Y-MM-DD','wire:model.live' => 'personnel.medical_inspection_date']); ?>
+                         <?php $__env->slot('script', null, []); ?> 
+                            $el.onchange = function () {
+                            window.Livewire.find('<?php echo e($_instance->getId()); ?>').set('personnel.medical_inspection_date', $el.value);
+                            }
+                         <?php $__env->endSlot(); ?>
+                     <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal36038ba5ddba347b69d2b76bc4612d11)): ?>
+<?php $attributes = $__attributesOriginal36038ba5ddba347b69d2b76bc4612d11; ?>
+<?php unset($__attributesOriginal36038ba5ddba347b69d2b76bc4612d11); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal36038ba5ddba347b69d2b76bc4612d11)): ?>
+<?php $component = $__componentOriginal36038ba5ddba347b69d2b76bc4612d11; ?>
+<?php unset($__componentOriginal36038ba5ddba347b69d2b76bc4612d11); ?>
+<?php endif; ?>
+                </div>
+                <!--[if BLOCK]><![endif]--><?php if(!empty($personnel['medical_inspection_date'])): ?>
+                    <div class="flex flex-col">
+                        <?php if (isset($component)) { $__componentOriginald8ba2b4c22a13c55321e34443c386276 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginald8ba2b4c22a13c55321e34443c386276 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'personnel.medical_inspection_result']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('label'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['for' => 'personnel.medical_inspection_result']); ?><?php echo e(__('Medical inspection result')); ?> <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginald8ba2b4c22a13c55321e34443c386276)): ?>
+<?php $attributes = $__attributesOriginald8ba2b4c22a13c55321e34443c386276; ?>
+<?php unset($__attributesOriginald8ba2b4c22a13c55321e34443c386276); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginald8ba2b4c22a13c55321e34443c386276)): ?>
+<?php $component = $__componentOriginald8ba2b4c22a13c55321e34443c386276; ?>
+<?php unset($__componentOriginald8ba2b4c22a13c55321e34443c386276); ?>
+<?php endif; ?>
+                        <?php if (isset($component)) { $__componentOriginal4727f9fd7c3055c2cf9c658d89b16886 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal4727f9fd7c3055c2cf9c658d89b16886 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.textarea','data' => ['mode' => 'gray','name' => 'personnel.medical_inspection_result','placeholder' => ''.e(__('')).'','wire:model' => 'personnel.medical_inspection_result']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('textarea'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['mode' => 'gray','name' => 'personnel.medical_inspection_result','placeholder' => ''.e(__('')).'','wire:model' => 'personnel.medical_inspection_result']); ?> <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal4727f9fd7c3055c2cf9c658d89b16886)): ?>
+<?php $attributes = $__attributesOriginal4727f9fd7c3055c2cf9c658d89b16886; ?>
+<?php unset($__attributesOriginal4727f9fd7c3055c2cf9c658d89b16886); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal4727f9fd7c3055c2cf9c658d89b16886)): ?>
+<?php $component = $__componentOriginal4727f9fd7c3055c2cf9c658d89b16886; ?>
+<?php unset($__componentOriginal4727f9fd7c3055c2cf9c658d89b16886); ?>
+<?php endif; ?>
+                    </div>
+                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+            </div>
+        </div>
+
         <!--[if BLOCK]><![endif]--><?php if($isDisability): ?>
         <div class="grid grid-cols-2 gap-2">
             <div class="flex flex-col">
@@ -2492,6 +2676,47 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php unset($__componentOriginal4727f9fd7c3055c2cf9c658d89b16886); ?>
 <?php endif; ?>
             </div>
+
+            <div class="flex flex-col">
+                <?php if (isset($component)) { $__componentOriginald8ba2b4c22a13c55321e34443c386276 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginald8ba2b4c22a13c55321e34443c386276 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'personnel.referenced_by']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('label'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['for' => 'personnel.referenced_by']); ?><?php echo e(__('Referenced by')); ?> <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginald8ba2b4c22a13c55321e34443c386276)): ?>
+<?php $attributes = $__attributesOriginald8ba2b4c22a13c55321e34443c386276; ?>
+<?php unset($__attributesOriginald8ba2b4c22a13c55321e34443c386276); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginald8ba2b4c22a13c55321e34443c386276)): ?>
+<?php $component = $__componentOriginald8ba2b4c22a13c55321e34443c386276; ?>
+<?php unset($__componentOriginald8ba2b4c22a13c55321e34443c386276); ?>
+<?php endif; ?>
+                <?php if (isset($component)) { $__componentOriginal9364c0b92ee5ab519273634c79f86a27 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal9364c0b92ee5ab519273634c79f86a27 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.livewire-input','data' => ['mode' => 'gray','name' => 'personnel.referenced_by','wire:model' => 'personnel.referenced_by']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('livewire-input'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['mode' => 'gray','name' => 'personnel.referenced_by','wire:model' => 'personnel.referenced_by']); ?> <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal9364c0b92ee5ab519273634c79f86a27)): ?>
+<?php $attributes = $__attributesOriginal9364c0b92ee5ab519273634c79f86a27; ?>
+<?php unset($__attributesOriginal9364c0b92ee5ab519273634c79f86a27); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal9364c0b92ee5ab519273634c79f86a27)): ?>
+<?php $component = $__componentOriginal9364c0b92ee5ab519273634c79f86a27; ?>
+<?php unset($__componentOriginal9364c0b92ee5ab519273634c79f86a27); ?>
+<?php endif; ?>
+            </div>
         </div>
     </div>
     <div class="flex-none w-40">
@@ -2567,14 +2792,17 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
             <div class="border border-gray-300 rounded-lg shadow-sm p-1">
                 <div class="flex flex-col space-y-4">
                     <div class="mt-2 flex flex-col" x-data="{ isUploading: false, progress: 0 }"
-                      x-on:livewire-upload-start="isUploading = true" x-on:livewire-upload-finish="isUploading = false"
-                      x-on:livewire-upload-error="isUploading = false"
-                      x-on:livewire-upload-progress="progress = $event.detail.progress">
+                         x-on:livewire-upload-start="isUploading = true"
+                         x-on:livewire-upload-finish="isUploading = false"
+                         x-on:livewire-upload-error="isUploading = false"
+                         x-on:livewire-upload-progress="progress = $event.detail.progress"
+                    >
                       <div class="flex flex-col space-y-2 items-center">
                         <!--[if BLOCK]><![endif]--><?php if($avatar): ?>
                         <img alt="avatar" class="w-full h-full object-cover" src="<?php echo e($avatar->temporaryUrl()); ?>">
                         <?php elseif(!empty($personnelModel) && $personnelModelData->photo): ?>
-                        <img alt="avatar" class="w-full h-full object-cover" src="<?php echo e(asset('/storage/'.$personnelModelData->photo)); ?>">
+
+                           <img alt="avatar" class="w-full h-full object-cover" src="<?php echo e(\Illuminate\Support\Facades\Storage::url($personnelModelData->photo)); ?>">
                         <?php else: ?>
                         <img class="w-full h-full" src="<?php echo e(asset('assets/images/id-photo.jpeg')); ?>" alt="id photo">
                         <?php endif; ?><!--[if ENDBLOCK]><![endif]-->

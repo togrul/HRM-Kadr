@@ -18,7 +18,7 @@
 </div>
 
 <div class="flex-col" style="justify-content: center;align-items: center;">
-    <span style="width: 100%;height: 30px;border-bottom: 1px solid #000;line-height: 2;font-style: italic;"><?php echo e($personnel->fullname); ?></span>
+    <span style="width: 100%;height: 30px;border-bottom: 1px solid #000;line-height: 2;font-style: italic;text-align: center"><?php echo e($personnel->fullname); ?></span>
     <span style="font-weight: 500;font-style: italic;font-size: 11px;">( soyadı,</span>
 </div>
 
@@ -44,7 +44,8 @@
             <tr>
                 <?php if(isset($rankChunks[0][$i])): ?>
                     <td><?php echo e($rankChunks[0][$i]->rank->name); ?></td>
-                    <td><?php echo e($rankChunks[0][$i]->order_given_by); ?>, <?php echo e($rankChunks[0][$i]->order_no); ?> <?php echo e($rankChunks[0][$i]->order_date->format('d.m.Y')); ?></td>
+
+                    <td>AR PTX rəisinin əmri №<?php echo e($rankChunks[0][$i]->order_no); ?> <?php echo e($rankChunks[0][$i]->order_date->format('d.m.Y')); ?></td>
                 <?php else: ?>
                     <td></td>
                     <td></td>

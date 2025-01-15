@@ -57,10 +57,12 @@ class Vacations extends Component
     {
         $model->load(['personnel', 'personnel.latestRank.rank', 'order', 'order.orderType']);
 
-        $chief = Personnel::with(['latestRank.rank'])
-            ->where(['structure_id' => 8, 'position_id' => 10])
-            ->active()
-            ->firstOrFail();
+//        $chief = Personnel::with(['latestRank.rank'])
+//            ->where(['structure_id' => 8, 'position_id' => 10])
+//            ->active()
+//            ->firstOrFail();
+        $chiefName = cache('settings')['Chief'];
+        $chiefRank = cache('settings')['Chief rank'];
 
         $dates = [
             'givenDate' => Carbon::parse($model->order_date),
@@ -103,8 +105,8 @@ class Vacations extends Component
         $templateProcessor->setValue('work_day', $formattedDates['returnWorkDate']['day']);
         $templateProcessor->setValue('work_month', $formattedDates['returnWorkDate']['month']);
         $templateProcessor->setValue('work_year', $formattedDates['returnWorkDate']['year']);
-        $templateProcessor->setValue('rank_signature', $chief->latestRank?->rank?->name);
-        $templateProcessor->setValue('person_signature', $chief->fullname);
+        $templateProcessor->setValue('rank_signature', $chiefRank);
+        $templateProcessor->setValue('person_signature', $chiefName);
 
         $filename = "{$model->personnel->fullname}_mezuniyyet_{$model->start_date->format('d.m.Y')}";
         $templateProcessor->saveAs($filename.'.docx');
@@ -112,7 +114,7 @@ class Vacations extends Component
         return response()->download($filename.'.docx')->deleteFileAfterSend();
     }
 
-    protected function fillFilter()
+    protected function fillFilter(): void
     {
         $this->filter = [
             'vacation_status' => 'all',

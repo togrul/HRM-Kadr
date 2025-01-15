@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Livewire\Outside\BusinessTrips;
 use App\Traits\DateCastTrait;
 use App\Traits\NestedStructureTrait;
 use Carbon\Carbon;
@@ -17,8 +16,8 @@ class Personnel extends Model
 {
     use DateCastTrait;
     use HasFactory;
-    use SoftDeletes;
     use NestedStructureTrait;
+    use SoftDeletes;
 
     protected $fillable = [
         'tabel_no',
@@ -59,6 +58,11 @@ class Personnel extends Model
         'scientific_works_inventions',
         'participation_in_war',
         'discrediting_information',
+        'referenced_by',
+        'special_inspection_date',
+        'special_inspection_result',
+        'medical_inspection_date',
+        'medical_inspection_result',
         'added_by',
         'deleted_by',
         'is_pending',
@@ -68,12 +72,16 @@ class Personnel extends Model
         'join_work_date',
         'leave_work_date',
         'birthdate',
+        'special_inspection_date',
+        'medical_inspection_date',
     ];
 
     protected $casts = [
-        'birthdate' => 'date:d.m.Y',
-        'join_work_date' => 'date:d.m.Y',
-        'leave_work_date' => 'date:d.m.Y',
+        'birthdate' => self::FORMAT_CAST,
+        'join_work_date' => self::FORMAT_CAST,
+        'leave_work_date' => self::FORMAT_CAST,
+        'special_inspection_date' => self::FORMAT_CAST,
+        'medical_inspection_date' => self::FORMAT_CAST,
     ];
 
     protected $likeFilterFields = [
@@ -87,7 +95,7 @@ class Personnel extends Model
 
     public function getFullnameMaxAttribute(): string
     {
-        return $this->fullname. ' ' .($this->gender == 2 ? 'qızı' : 'oğlu');
+        return $this->fullname.' '.($this->gender == 2 ? 'qızı' : 'oğlu');
     }
 
     public function personDidDelete(): BelongsTo
@@ -157,7 +165,6 @@ class Personnel extends Model
         return $this->hasOne(PersonnelIdentityDocument::class, 'tabel_no', 'tabel_no');
     }
 
-
     public function cards(): HasMany
     {
         return $this->hasMany(PersonnelCard::class, 'tabel_no', 'tabel_no');
@@ -166,7 +173,18 @@ class Personnel extends Model
     public function validCard(): HasOne
     {
         return $this->hasOne(PersonnelCard::class, 'tabel_no', 'tabel_no')
-                    ->where('valid_date','>', Carbon::now()->format('Y-m-d'));
+            ->where('valid_date', '>', Carbon::now()->format('Y-m-d'));
+    }
+
+    public function passports(): HasMany
+    {
+        return $this->hasMany(PersonnelPassports::class, 'tabel_no', 'tabel_no');
+    }
+
+    public function validPassport(): HasOne
+    {
+        return $this->hasOne(PersonnelPassports::class, 'tabel_no', 'tabel_no')
+            ->where('valid_date', '>', Carbon::now()->format('Y-m-d'));
     }
 
     public function education(): HasOne
@@ -269,7 +287,9 @@ class Personnel extends Model
 
     public function hasActiveVacation()
     {
-        return $this->latestVacation()->where('return_work_date', '>', \Carbon\Carbon::now());
+        return $this->latestVacation()
+            ->where('start_date', '<=', Carbon::now())
+            ->where('return_work_date', '>', \Carbon\Carbon::now());
     }
 
     public function businessTrips(): HasMany
@@ -284,7 +304,9 @@ class Personnel extends Model
 
     public function hasActiveBusinessTrip()
     {
-        return $this->latestBusinessTrip()->where('end_date', '>', \Carbon\Carbon::now());
+        return $this->latestBusinessTrip()
+            ->where('start_date', '<=', Carbon::now())
+            ->where('end_date', '>', Carbon::now());
     }
 
     public function degreeAndNames(): HasMany
@@ -300,6 +322,77 @@ class Personnel extends Model
     public function injuries(): HasMany
     {
         return $this->hasMany(PersonnelInjury::class, 'tabel_no', 'tabel_no')->orderByDesc('date_time');
+    }
+
+    public function contracts(): HasMany
+    {
+        return $this->hasMany(PersonnelContract::class, 'tabel_no', 'tabel_no')->orderByDesc('contract_ends_at');
+    }
+
+    public function latestContract(): HasOne
+    {
+        return $this->hasOne(PersonnelContract::class, 'tabel_no', 'tabel_no')->latestOfMany('contract_ends_at');
+    }
+
+    public function hasActiveContract(): HasOne
+    {
+        return $this->latestContract()
+            ->where('contract_start_date', '<=', Carbon::now())
+            ->where('contract_ends_at', '>', Carbon::now());
+    }
+
+    public function pensionCards(): HasMany
+    {
+        return $this->hasMany(PersonnelPensionCard::class, 'tabel_no', 'tabel_no');
+    }
+
+    public function latestPensionCard(): HasOne
+    {
+        return $this->hasOne(PersonnelPensionCard::class, 'tabel_no', 'tabel_no')->latestOfMany('expiry_date');
+    }
+
+    public function hasActivePensionCard(): HasOne
+    {
+        return $this->latestPensionCard()
+            ->where('given_date', '<=', Carbon::now())
+            ->where('expiry_date', '>', Carbon::now());
+    }
+
+    public function disposals(): HasMany
+    {
+        return $this->hasMany(PersonnelDisposal::class, 'tabel_no', 'tabel_no');
+    }
+
+    public function latestDisposal(): HasOne
+    {
+        return $this->hasOne(PersonnelDisposal::class, 'tabel_no', 'tabel_no')->latestOfMany('disposal_date');
+    }
+
+    public function hasActiveDisposal(): HasOne
+    {
+        return $this->latestDisposal()
+            ->where('disposal_date', '<=', Carbon::now())
+            ->whereNull('disposal_end_date');
+    }
+
+    public function educationRequests(): HasMany
+    {
+        return $this->hasMany(PersonnelEducationRequest::class, 'tabel_no', 'tabel_no')->orderByDesc('request_date');
+    }
+
+    public function latestEducationRequest(): HasOne
+    {
+        return $this->hasOne(PersonnelEducationRequest::class, 'tabel_no', 'tabel_no')->latestOfMany('request_date');
+    }
+
+    public function masterDegrees(): HasMany
+    {
+        return $this->hasMany(PersonnelMasterDegree::class, 'tabel_no', 'tabel_no');
+    }
+
+    public function latestMasterDegree(): HasOne
+    {
+        return $this->hasOne(PersonnelMasterDegree::class, 'tabel_no', 'tabel_no')->latestOfMany('given_date');
     }
 
     public function captives(): HasMany
@@ -426,7 +519,7 @@ class Personnel extends Model
     {
         parent::boot();
         static::creating(function ($model) {
-            $model->added_by = auth()->user()->id;
+            $model->added_by = auth()->user()?->id ?? 1;
         });
         static::deleting(function ($model) {
             $model->deleted_by = auth()->user()->id;

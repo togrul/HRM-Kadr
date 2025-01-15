@@ -36,9 +36,9 @@ class PersonnelBusinessTrip extends Model
     ];
 
     protected $casts = [
-        'start_date' => 'date:d.m.Y',
-        'end_date' => 'date:d.m.Y',
-        'order_date' => 'date:d.m.Y',
+        'start_date' => self::FORMAT_CAST,
+        'end_date' => self::FORMAT_CAST,
+        'order_date' => self::FORMAT_CAST,
         'attributes' => 'array',
     ];
 

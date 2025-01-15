@@ -26,8 +26,8 @@
                         <x-table.td>
                            <div class="flex items-center space-x-2">
                                 @if(!empty($staff->photo))
-                                <img src="{{ asset('/storage/'.$staff->photo) }}" alt="" class="flex-none rounded-xl object-cover w-14 h-14 border-4 border-gray-200">
-                                @else
+                                <img src="{{ \Illuminate\Support\Facades\Storage::url($staff->photo) }}" alt="" class="flex-none rounded-xl object-cover w-14 h-14 border-4 border-gray-200">
+                               @else
                                 <img src="{{ asset('assets/images/no-image.png') }}" alt="" class="flex-none rounded-xl object-cover w-14 h-14 border-4 border-gray-200">
                                 @endif
                                <div class="flex flex-col space-y-1">

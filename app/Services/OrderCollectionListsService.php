@@ -6,6 +6,7 @@ use App\Enums\TransportationEnum;
 use App\Models\Order;
 use App\Models\Personnel;
 use App\Models\Weapon;
+use Illuminate\Support\Arr;
 
 class OrderCollectionListsService
 {
@@ -26,30 +27,29 @@ class OrderCollectionListsService
 
     private function getVacationBladeCollections(): array
     {
-        $_personnel_list_by_name = $this->getPersonnelNameListByName('vacation');
-
-        return compact('_personnel_list_by_name');
+        return [
+            '_personnel_list_by_name' => $this->getPersonnelNameListByName('vacation')
+        ];
     }
 
     private function getBusinessTripsBladeCollections(): array
     {
-        $_personnel_list_by_name = $this->getPersonnelNameListByName('business_trips');
-
-        $_transportationList = TransportationEnum::values();
-
-        $_transportations = array_map(fn ($value, $key) => [
-            'id' => $key + 1,
-            'name' => $value,
-        ], $_transportationList, array_keys($_transportationList));
-
-        $_weapons = Weapon::all();
-
         return [
-            '_transportationList' => $_transportationList,
-            '_transportations' => $_transportations,
-            '_weapons' => $_weapons,
-            '_personnel_list_by_name' => $_personnel_list_by_name,
+            '_transportationList' => TransportationEnum::values(),
+            '_transportations' => $this->formatTransportations(),
+            '_weapons' => Weapon::all(),
+            '_personnel_list_by_name' => $this->getPersonnelNameListByName('business_trips'),
         ];
+    }
+
+    private function formatTransportations(): array
+    {
+        return collect(TransportationEnum::values())
+            ->map(fn ($value, $key) => [
+                'id' => $key + 1,
+                'name' => $value,
+            ])
+            ->toArray();
     }
 
     private function getPersonnelNameListByName(string $blade)
@@ -70,7 +70,7 @@ class OrderCollectionListsService
                  })
                  ->active()
                  ->whereNull('deleted_at')
-                 ->whereNotIn('tabel_no', $this->selected_personnel_list['personnels'])
+                 ->whereNotIn('tabel_no', Arr::get($this->selected_personnel_list, 'personnels', []))
                  ->get()
              : [];
     }

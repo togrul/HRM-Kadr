@@ -183,10 +183,8 @@ class OrderConfirmedService
         $arr = UsefulHelpers::searchInsideMultiDimensionalArray($orderAttributes, $_person->fullname, '$fullname', 'value');
 
         $commonAttributes = [
-            'start_date' => Carbon::parse($arr[$key]['$start_date']['value'])->format('Y-m-d'),
-            'end_date' => Carbon::parse($arr[$key]['$end_date']['value'])->format('Y-m-d'),
             'order_no' => $orderLog->order_no,
-            'order_date' => $orderLog->given_date,
+//            'order_date' => $orderLog->given_date,
         ];
 
         $relationshipMethod = '';
@@ -211,12 +209,12 @@ class OrderConfirmedService
                 $spesificAttributes['vacation_places'] = $arr[$key]['$location']['value'];
                 $spesificAttributes['duration'] = $arr[$key]['$days']['value'];
                 $spesificAttributes['return_work_date'] = Carbon::parse($arr[$key]['$end_date']['value'])->addDay()->format('Y-m-d');
-
+                unset($spesificAttributes['attributes']);
                 $relationshipMethod = 'vacations';
                 break;
             case Order::BLADE_BUSINESS_TRIP:
                 $spesificAttributes['location'] = $arr[$key]['$location']['value'];
-                $spesificAttributes['description'] = $arr[$key]['$description'] ?? '';
+                $spesificAttributes['description'] = $orderLog->description['description'] ?? '';
 
                 $relationshipMethod = 'businessTrips';
                 break;

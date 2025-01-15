@@ -52,7 +52,7 @@
         </div>
         <div class="">
             <x-label for="order.given_by_rank">{{ __('Rank') }}</x-label>
-            <x-livewire-input mode="gray" disabled="true" name="order.given_by_rank" wire:model="order.given_by_rank"></x-livewire-input>
+            <x-livewire-input mode="gray"  name="order.given_by_rank" wire:model="order.given_by_rank"></x-livewire-input>
         </div>
         <div class="">
             <x-label for="order.given_date">{{ __('Given date') }}</x-label>
@@ -104,6 +104,15 @@
                     <x-validation> {{ $message }} </x-validation>
                 @enderror
             </div>
+            @if($selectedTemplate == \App\Models\PersonnelBusinessTrip::FOREIGN_BUSINESS_TRIP)
+                <div class="flex flex-col sm:col-span-2 md:col-span-3">
+                    <x-label for="order.description.description">{{ __('Title') }}</x-label>
+                    <x-textarea mode="gray" placeholder=""  name="order.description.description" wire:model="order.description.description"></x-textarea>
+                    @error('order.description.description')
+                    <x-validation> {{ $message }} </x-validation>
+                    @enderror
+                </div>
+            @endif
         </div>
     @endif
 

@@ -490,10 +490,11 @@
 <?php $component->withAttributes(['headers' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute([__('#'),__('Fullname'),__('Dates'),__('Locations'),__('Order'),'action']),'wire:transition' => true]); ?>
                         <!--[if BLOCK]><![endif]--><?php $__empty_1 = true; $__currentLoopData = $this->businessTrips; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $_bTrip): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                             <?php
-                                $multi = $_bTrip->order->businessTrips->count() > 1;
+                                $multi = ($_bTrip->order->businessTrips->count() > 1 && $_bTrip->order->order_type_id != \App\Models\PersonnelBusinessTrip::FOREIGN_BUSINESS_TRIP);
+                                $activeBusinessTrip = \Carbon\Carbon::parse($_bTrip->start_date) <= \Carbon\Carbon::now() && \Carbon\Carbon::parse($_bTrip->end_date) > \Carbon\Carbon::now();
                             ?>
                             <tr class="<?php echo \Illuminate\Support\Arr::toCssClasses([
-                                'bg-teal-50' => $_bTrip->end_date > \Carbon\Carbon::now()
+                                'bg-teal-50' => $activeBusinessTrip
                             ]); ?>">
                                 <?php if (isset($component)) { $__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b = $attributes; } ?>
@@ -543,7 +544,7 @@
                                              <?php echo e($_bTrip->attributes['$structure']['value']); ?>
 
                                         </span>
-                                        <!--[if BLOCK]><![endif]--><?php if($_bTrip->end_date > \Carbon\Carbon::now()): ?>
+                                        <!--[if BLOCK]><![endif]--><?php if($activeBusinessTrip): ?>
                                             <span class="text-green-700 flex justify-center items-center text-sm font-medium bg-green-200 px-2 py-1 rounded-lg">
                                                 <?php echo e(__('In business trip')); ?>
 
@@ -678,12 +679,12 @@
 <?php $component->withAttributes(['isButton' => true]); ?>
                                     <!--[if BLOCK]><![endif]--><?php if(! $multi): ?>
                                         <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('export-business_trips')): ?>
-                                        <button
-                                            wire:click="printBusinessTripDocument('<?php echo e($_bTrip->id); ?>',<?php echo e($multi); ?>)"
-                                            class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase bg-teal-50 transition duration-300 rounded-lg text-gray-500 hover:bg-teal-100 hover:text-gray-700"
-                                        >
-                                            <?php echo $__env->make('components.icons.document-icon',['color' => 'text-teal-500','hover' => 'text-teal-600'], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
-                                        </button>
+                                            <button
+                                                wire:click="printBusinessTripDocument('<?php echo e($_bTrip->id); ?>',<?php echo e($multi); ?>)"
+                                                class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase bg-teal-50 transition duration-300 rounded-lg text-gray-500 hover:bg-teal-100 hover:text-gray-700"
+                                            >
+                                                <?php echo $__env->make('components.icons.document-icon',['color' => 'text-teal-500','hover' => 'text-teal-600'], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+                                            </button>
                                         <?php endif; ?>
                                     <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                  <?php echo $__env->renderComponent(); ?>

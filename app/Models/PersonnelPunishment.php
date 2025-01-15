@@ -28,8 +28,8 @@ class PersonnelPunishment extends Model
     ];
 
     protected $casts = [
-        'given_date' => 'date:d.m.Y',
-        'expired_date' => 'date:d.m.Y',
+        'given_date' => self::FORMAT_CAST,
+        'expired_date' => self::FORMAT_CAST,
     ];
 
     public function punishment(): BelongsTo

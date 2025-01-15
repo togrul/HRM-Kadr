@@ -11,8 +11,10 @@
         <div class="grid grid-cols-2 gap-2">
             <div class="flex flex-col space-y-4 ">
                 <div class="bg-slate-100 rounded-lg shadow-sm p-1">
-                    <div class="flex flex-col py-1" x-data="{ isUploading: false, progress: 0 }"
-                         x-on:livewire-upload-start="isUploading = true" x-on:livewire-upload-finish="isUploading = false"
+                    <div class="flex flex-col py-1"
+                         x-data="{ isUploading: false, progress: 0 }"
+                         x-on:livewire-upload-start="isUploading = true"
+                         x-on:livewire-upload-finish="isUploading = false"
                          x-on:livewire-upload-error="isUploading = false"
                          x-on:livewire-upload-progress="progress = $event.detail.progress">
                         <div class="flex flex-col space-y-2 items-center">

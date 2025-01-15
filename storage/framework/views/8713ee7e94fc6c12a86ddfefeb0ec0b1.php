@@ -21,14 +21,25 @@
        </tr>
     </thead>
     <tbody>
-    <?php for($i = 0;$i < 21;$i++): ?>
-        <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-        </tr>
-    <?php endfor; ?>
+        <?php
+            $tripModel = $personnel->businessTrips()->foreignBusinessTrip()->get();
+        ?>
+        <?php $__currentLoopData = $tripModel; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $foreign): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+            <tr>
+                <td><?php echo e($foreign->location ? $foreign->location . ',' : ''); ?> <?php echo e($foreign->description); ?></td>
+                <td><?php echo e($foreign->order->given_by); ?> <?php echo e($foreign->order_no); ?> <?php echo e($foreign->order_date->format('d.m.Y')); ?></td>
+                <td><?php echo e($foreign->start_date->format('d.m.Y')); ?></td>
+                <td><?php echo e($foreign->end_date->format('d.m.Y')); ?></td>
+            </tr>
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+        <?php for($i = 0;$i < 18 - $tripModel->count();$i++): ?>
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+        <?php endfor; ?>
     </tbody>
 </table>
 
@@ -55,7 +66,7 @@
     <h3 style="margin-bottom: 5px;font-size: 16px;">16. Əsirlikdə olubmu <span style="font-weight: 400;font-size: 16px;">(hansı şəraitdə, harada, nə vaxt əsir düşüb və azad olunub)</span></h3>
     <?php if(count($personnel->captives) > 0): ?>
         <?php $__currentLoopData = $personnel->captives; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $captive): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-            <div style="border-bottom: 1px solid #000; height: <?php echo e($i == 0 ? 10 : 25); ?>px;">
+            <div style="border-bottom: 1px solid #000; min-height: <?php echo e($i == 0 ? 10 : 25); ?>px;">
                 <?php echo e(\Carbon\Carbon::parse($captive->taken_captive_date)->format('d.m.Y')); ?> tarixində <?php echo e($captive->location); ?> ərazisində
                 <?php echo e($captive->condition); ?> əsirlikdə olub.
                 <?php if(!empty($captive->release_date)): ?>

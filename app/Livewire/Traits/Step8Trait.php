@@ -57,12 +57,6 @@ trait Step8Trait
         $this->hasElectedElectorals = count($this->personnelModelData->elections) > 0;
     }
 
-    protected function validateCommon($exclude)
-    {
-        $validators = array_map(fn ($field) => $this->exceptArray($field), $exclude);
-        $this->validate(array_intersect_assoc(...$validators));
-    }
-
     protected function resetLanguageSelection()
     {
         $this->languageName = $this->knowledgeName = '---';

@@ -31,9 +31,9 @@ class PersonnelWeapon extends Model
     ];
 
     protected $casts = [
-        'given_date' => 'date:d.m.Y',
-        'expire_date' => 'date:d.m.Y',
-        'return_date' => 'date:d.m.Y',
+        'given_date' => self::FORMAT_CAST,
+        'expire_date' => self::FORMAT_CAST,
+        'return_date' => self::FORMAT_CAST,
     ];
 
     public function weapon(): BelongsTo

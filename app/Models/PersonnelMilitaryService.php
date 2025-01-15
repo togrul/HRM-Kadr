@@ -30,9 +30,9 @@ class PersonnelMilitaryService extends Model
     ];
 
     protected $casts = [
-        'given_date' => 'date:d.m.Y',
-        'start_date' => 'date:d.m.Y',
-        'end_date' => 'date:d.m.Y',
+        'given_date' => self::FORMAT_CAST,
+        'start_date' => self::FORMAT_CAST,
+        'end_date' => self::FORMAT_CAST,
     ];
 
     public function rank(): BelongsTo

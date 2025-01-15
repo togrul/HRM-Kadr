@@ -127,20 +127,31 @@
                     @forelse ($this->personnels as $key => $personnel)
                     <tr @class([
                         'relative',
-                        'bg-white' => empty($personnel->leave_work_date),
-                        'bg-red-100' => !empty($personnel->leave_work_date)
+//                        'bg-white' => empty($personnel->leave_work_date),
+                        'bg-red-100' => !empty($personnel->leave_work_date),
+                        'bg-gray-50' => $personnel->hasActiveBusinessTrip || $personnel->hasActiveBusinessTrip
                     ])>
                         <x-table.td>
                             <div class="flex flex-col justify-between h-full absolute top-0 left-0">
                                 @if($personnel->hasActiveVacation)
-                                    <span class=" text-green-50 flex justify-center items-center text-sm font-medium bg-green-600 px-2 py-1 rounded-sm">
+                                    @php
+                                        $activeVacation = $personnel->hasActiveBusinessTrip;
+                                        $vacationStart = $activeVacation->start_date;
+                                        $vacationEnd = $activeVacation->return_work_date;
+                                    @endphp
+                                    <x-progress :startDate="$vacationStart" :endDate="$vacationEnd" color="emerald">
                                         {{ __('In vacation') }}
-                                    </span>
+                                    </x-progress>
                                 @endif
                                 @if($personnel->hasActiveBusinessTrip)
-                                    <span class=" text-rose-50 flex justify-center items-center text-sm font-medium bg-rose-600 px-2 py-1 rounded-sm">
+                                    @php
+                                        $businessTrip = $personnel->hasActiveBusinessTrip;
+                                        $startDate = $businessTrip->start_date;
+                                        $endDate = $businessTrip->end_date;
+                                    @endphp
+                                    <x-progress :$startDate :$endDate color="rose">
                                         {{ __('In business trip') }}
-                                    </span>
+                                    </x-progress>
                                 @endif
                             </div>
 
@@ -172,7 +183,7 @@
                         <x-table.td>
                             <div class="flex items-center space-x-2 px-2">
                                 @if(!empty($personnel->photo))
-                                    <img src="{{ asset('/storage/'.$personnel->photo) }}" alt="" class="flex-none rounded-xl object-cover w-14 h-14 border-4 border-gray-200">
+                                    <img src="{{ \Illuminate\Support\Facades\Storage::url($personnel->photo) }}" alt="" class="flex-none rounded-xl object-cover w-14 h-14 border-4 border-gray-200">
                                 @else
                                     <img src="{{ asset('assets/images/no-image.png') }}" alt="" class="flex-none rounded-xl object-cover w-14 h-14 border-4 border-gray-200">
                                 @endif
@@ -262,6 +273,11 @@
                                         >
                                             <span class="text-slate-500">{{ __('Print') }}</span>
                                         </a>
+                                        <button wire:click="openSideMenu('show-information','{{ $personnel->tabel_no }}')"
+                                                class="appearance-none w-full flex items-center justify-start space-x-2 px-4 py-2 text-sm font-medium rounded-md  hover:bg-slate-100"
+                                        >
+                                            <span class="text-slate-500">{{ __('Information') }}</span>
+                                        </button>
                                         <button wire:click="printInfo('{{ $personnel->id }}')"
                                                 class="appearance-none w-full flex items-center justify-start space-x-2 px-4 py-2 text-sm font-medium rounded-md  hover:bg-slate-100"
                                         >
@@ -334,6 +350,12 @@
         @can('edit-personnels')
             @if($showSideMenu == 'show-files')
                 <livewire:personnel.files :personnelModel="$modelName" />
+            @endif
+        @endcan
+
+        @can('edit-personnels')
+            @if($showSideMenu == 'show-information')
+                <livewire:personnel.information :personnelModel="$modelName" />
             @endif
         @endcan
     </x-side-modal>

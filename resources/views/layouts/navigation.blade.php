@@ -12,15 +12,15 @@
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                    <x-nav-link class="space-x-2"  wire:navigate :href="route('candidates')" :active="request()->routeIs('candidates')">
+                    <x-nav-link class="space-x-2 uppercase text-xs"  wire:navigate :href="route('candidates')" :active="request()->routeIs('candidates')">
                         <x-icons.users-icon color="{{ request()->routeIs('candidates') ? 'text-gray-900' : 'text-gray-400' }}"></x-icons.users-icon>
                         <span>{{ __('Candidates') }}</span>
                     </x-nav-link>
-                    <x-nav-link class="space-x-2" wire:navigate :href="route('vacations.list')" :active="request()->routeIs('vacations.list')">
+                    <x-nav-link class="space-x-2 uppercase text-xs" wire:navigate :href="route('vacations.list')" :active="request()->routeIs('vacations.list')">
                         <x-icons.home-icon color="{{ request()->routeIs('vacations.list') ? 'text-gray-900' : 'text-gray-400' }}"></x-icons.home-icon>
                         <span>{{ __('Vacations') }}</span>
                     </x-nav-link>
-                    <x-nav-link class="space-x-2" wire:navigate :href="route('business-trips.list')" :active="request()->routeIs('business-trips.list')">
+                    <x-nav-link class="space-x-2 uppercase text-xs" wire:navigate :href="route('business-trips.list')" :active="request()->routeIs('business-trips.list')">
                         <x-icons.location-icon color="{{ request()->routeIs('business-trips.list') ? 'text-gray-900' : 'text-gray-400' }}"></x-icons.location-icon>
                         <span>{{ __('Business trips') }}</span>
                     </x-nav-link>

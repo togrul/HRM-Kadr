@@ -561,22 +561,22 @@ if (isset($__slots)) unset($__slots);
 <?php $component->withAttributes(['isButton' => true]); ?>
                                     <!--[if BLOCK]><![endif]--><?php if($status != 'deleted'): ?>
                                         <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('delete-orders')): ?>
-                                        <button
-                                            wire:click="setDeleteOrder('<?php echo e($_order->order_no); ?>')"
-                                            class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-100 hover:text-gray-700"
-                                        >
-                                            <?php echo $__env->make('components.icons.delete-icon', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
-                                        </button>
+                                            <button
+                                                wire:click="setDeleteOrder('<?php echo e($_order->order_no); ?>')"
+                                                class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-100 hover:text-gray-700"
+                                            >
+                                                <?php echo $__env->make('components.icons.delete-icon', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+                                            </button>
                                          <?php endif; ?>
                                     <?php else: ?>
                                         <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('delete-orders')): ?>
-                                        <button
-                                            wire:click="forceDeleteData('<?php echo e($_order->order_no); ?>')"
-                                            wire:confirm="<?php echo e(__('Are you sure you want to remove this data?')); ?>"
-                                            class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-50 hover:text-gray-700"
-                                        >
-                                            <?php echo $__env->make('components.icons.force-delete', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
-                                        </button>
+                                            <button
+                                                wire:click="forceDeleteData('<?php echo e($_order->order_no); ?>')"
+                                                wire:confirm="<?php echo e(__('Are you sure you want to remove this data?')); ?>"
+                                                class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-50 hover:text-gray-700"
+                                            >
+                                                <?php echo $__env->make('components.icons.force-delete', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+                                            </button>
                                         <?php endif; ?>
                                     <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                  <?php echo $__env->renderComponent(); ?>

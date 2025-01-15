@@ -12,6 +12,7 @@ class PersonnelTakenCaptive extends Model
     use DateCastTrait,HasFactory,PersonnelTrait;
 
     protected $fillable = [
+        'tabel_no',
         'location',
         'condition',
         'taken_captive_date',
@@ -24,7 +25,7 @@ class PersonnelTakenCaptive extends Model
     ];
 
     protected $casts = [
-        'taken_captive_date' => 'date:d.m.Y',
-        'release_date' => 'date:d.m.Y',
+        'taken_captive_date' => self::FORMAT_CAST,
+        'release_date' => self::FORMAT_CAST,
     ];
 }

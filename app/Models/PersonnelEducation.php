@@ -38,9 +38,9 @@ class PersonnelEducation extends Model
     ];
 
     protected $casts = [
-        'diplom_given_date' => 'date:d.m.Y',
-        'admission_year' => 'date:d.m.Y',
-        'graduated_year' => 'date:d.m.Y',
+        'diplom_given_date' => self::FORMAT_CAST,
+        'admission_year' => self::FORMAT_CAST,
+        'graduated_year' => self::FORMAT_CAST,
     ];
 
     public function institution(): BelongsTo

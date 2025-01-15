@@ -59,7 +59,7 @@
         })(new Pikaday({
           field: $el,
           format: '<?php echo e($format); ?>',
-          yearRange: [1900, <?php echo e($currentYear); ?>],
+          yearRange: 100,
           onSelect: function (date) { $el.value = moment(date.toString()).format('<?php echo e($format); ?>'); }
          }), $el)"
     <?php echo e($disabled ? 'disabled' : ''); ?>

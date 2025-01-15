@@ -62,12 +62,12 @@ class Candidate extends Model
     ];
 
     protected $casts = [
-        'research_date' => 'date:d.m.Y',
-        'examination_date' => 'date:d.m.Y',
-        'appeal_date' => 'date:d.m.Y',
-        'application_date' => 'date:d.m.Y',
-        'requisition_date' => 'date:d.m.Y',
-        'hhk_date' => 'date:d.m.Y',
+        'research_date' => self::FORMAT_CAST,
+        'examination_date' => self::FORMAT_CAST,
+        'appeal_date' => self::FORMAT_CAST,
+        'application_date' => self::FORMAT_CAST,
+        'requisition_date' => self::FORMAT_CAST,
+        'hhk_date' => self::FORMAT_CAST,
         'birthdate' => 'datetime:d.m.Y',
     ];
 

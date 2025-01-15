@@ -47,7 +47,7 @@ trait PersonnelCrud
         return Arr::except($this->validationRules()[$this->step], array_keys($filtered));
     }
 
-    public function selectStep($step)
+    public function selectStep($step): void
     {
         if ($this->step == 1) {
             $this->validate($this->validationRules()[$this->step]);
@@ -55,7 +55,7 @@ trait PersonnelCrud
         $this->step = $step;
     }
 
-    protected function completeStep()
+    protected function completeStep(): void
     {
         $stepName = match ($this->step) {
             1 => 'personnel',
@@ -63,45 +63,66 @@ trait PersonnelCrud
             3 => 'education'
         };
 
-        if ($stepName && count($this->{$stepName}) > 0) {
-            // Determine validation rules based on conditions
-            $validator = match (true) {
-                ! empty($this->service_cards_list) => $this->exceptArray('service_cards'),
-                ! empty($this->extra_education_list) => $this->exceptArray('extra_education'),
-                default => $this->validationRules()[$this->step] ?? []
-            };
+        if ($stepName && count($this->{$stepName}) < 1) {
+            $validator = $this->getValidationRulesForStep();
 
             $this->validate($validator);
 
-            // Add step to completedSteps if not already added
             if (! in_array($stepName, $this->completedSteps)) {
                 $this->completedSteps[] = $stepName;
             }
         }
     }
 
-    public function nextStep()
+    private function getExceptedValidationsByStep(): array
+    {
+        $exceptedValidations = [];
+
+        $stepConditions = [
+            2 => ['service_cards' => $this->service_cards_list, 'passports' => [1], 'document' => [1]],
+            3 => ['extra_education' => $this->extra_education_list],
+            4 => ['labor_activities' => $this->labor_activities_list],
+        ];
+
+        foreach ($stepConditions[$this->step] ?? [] as $field => $list) {
+            if (! empty($list)) {
+                $exceptedValidations[] = $field;
+            }
+        }
+
+        return $exceptedValidations;
+    }
+
+    private function getValidationRulesForStep(): array
+    {
+        $exceptedValidations = $this->getExceptedValidationsByStep();
+
+        if (empty($exceptedValidations)) {
+            return $this->validationRules()[$this->step] ?? [];
+        }
+
+        $specialConditions = array_map(
+            fn ($field) => $this->exceptArray($field),
+            $exceptedValidations
+        );
+
+        return array_intersect_assoc(...$specialConditions);
+    }
+
+    public function nextStep(): void
     {
         $this->isAddedRank = false;
 
-        $exceptValidation = [
-            2 => 'service_cards',
-            3 => 'extra_education',
-            4 => 'labor_activities',
-        ];
+        $validator = $this->getValidationRulesForStep();
 
-        if (isset($exceptValidation[$this->step]) && ! empty($this->{$exceptValidation[$this->step].'_list'})) {
-            $validator = $this->exceptArray($exceptValidation[$this->step]);
-        } else {
-            $validator = $this->validationRules()[$this->step] ?? [];
+        if (! empty($validator) && ! in_array($this->step, [5, 6, 7])) {
+            $this->validate($validator);
         }
-
-        ! empty($validator) && $this->validate($validator);
 
         $this->step++;
     }
 
-    private function getSteps()
+    private function getSteps(): array
     {
         return [
             1 => __('Personal Information'),
@@ -123,6 +144,12 @@ trait PersonnelCrud
             'knowledges' => KnowledgeStatusEnum::values(),
             'degrees' => ScientificDegreeAndName::all(),
         ];
+    }
+
+    protected function validateCommon($exclude)
+    {
+        $validators = array_map(fn ($field) => $this->exceptArray($field), $exclude);
+        $this->validate(array_intersect_assoc(...$validators));
     }
 
     public function render()

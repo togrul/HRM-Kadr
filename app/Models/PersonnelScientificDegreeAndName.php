@@ -33,8 +33,8 @@ class PersonnelScientificDegreeAndName extends Model
     ];
 
     protected $casts = [
-        'diplom_given_date' => 'date:d.m.Y',
-        'given_date' => 'date:d.m.Y',
+        'diplom_given_date' => self::FORMAT_CAST,
+        'given_date' => self::FORMAT_CAST,
     ];
 
     public function degreeAndName(): BelongsTo

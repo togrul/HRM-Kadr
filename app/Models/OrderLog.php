@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\CreateDeleteTrait;
+use App\Traits\DateCastTrait;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,7 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class OrderLog extends Model
 {
-    use CreateDeleteTrait,HasFactory,SoftDeletes;
+    use CreateDeleteTrait,HasFactory,SoftDeletes,DateCastTrait;
 
     protected $fillable = [
         'order_id',
@@ -33,9 +34,9 @@ class OrderLog extends Model
     ];
 
     protected $casts = [
-        'deleted_at' => 'date:d.m.Y',
-        'given_date' => 'date:d.m.Y',
-        'description' => 'array'
+        'deleted_at' => self::FORMAT_CAST,
+        'given_date' => self::FORMAT_CAST,
+        'description' => 'array',
     ];
 
     public function getForeignKeyName()

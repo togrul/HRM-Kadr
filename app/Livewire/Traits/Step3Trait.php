@@ -79,6 +79,7 @@ trait Step3Trait
     public function addEducation()
     {
         $this->validate($this->validationRules()[$this->step]);
+        $this->extra_education['is_military'] ??= false;
         $this->extra_education_list[] = $this->extra_education;
 
         $this->extra_education = [];

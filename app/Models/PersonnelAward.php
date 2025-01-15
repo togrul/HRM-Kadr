@@ -31,8 +31,8 @@ class PersonnelAward extends Model
     ];
 
     protected $casts = [
-        'given_date' => 'date:d.m.Y',
-        'order_date' => 'date:d.m.Y',
+        'given_date' => self::FORMAT_CAST,
+        'order_date' => self::FORMAT_CAST,
     ];
 
     public function award(): BelongsTo

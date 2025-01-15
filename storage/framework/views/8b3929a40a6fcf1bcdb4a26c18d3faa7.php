@@ -113,7 +113,7 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
     <div
         wire:loading.remove
         wire:target="getDataByPin"
-        class="grid grid-cols-4 gap-2"
+        class="grid grid-cols-5 gap-2"
     >
         <div class="flex flex-col">
             <?php if (isset($component)) { $__componentOriginald384098dd1216f6f264fe579adbe3c2f = $component; } ?>
@@ -599,6 +599,46 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
         <div class="flex flex-col col-span-2">
             <?php if (isset($component)) { $__componentOriginald8ba2b4c22a13c55321e34443c386276 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginald8ba2b4c22a13c55321e34443c386276 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'document.birthplace']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('label'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['for' => 'document.birthplace']); ?><?php echo e(__('Birth place')); ?> (<?php echo e(__('Extra')); ?>) <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginald8ba2b4c22a13c55321e34443c386276)): ?>
+<?php $attributes = $__attributesOriginald8ba2b4c22a13c55321e34443c386276; ?>
+<?php unset($__attributesOriginald8ba2b4c22a13c55321e34443c386276); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginald8ba2b4c22a13c55321e34443c386276)): ?>
+<?php $component = $__componentOriginald8ba2b4c22a13c55321e34443c386276; ?>
+<?php unset($__componentOriginald8ba2b4c22a13c55321e34443c386276); ?>
+<?php endif; ?>
+            <?php if (isset($component)) { $__componentOriginal9364c0b92ee5ab519273634c79f86a27 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal9364c0b92ee5ab519273634c79f86a27 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.livewire-input','data' => ['mode' => 'gray','name' => 'document.birthplace','wire:model' => 'document.birthplace']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('livewire-input'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['mode' => 'gray','name' => 'document.birthplace','wire:model' => 'document.birthplace']); ?> <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal9364c0b92ee5ab519273634c79f86a27)): ?>
+<?php $attributes = $__attributesOriginal9364c0b92ee5ab519273634c79f86a27; ?>
+<?php unset($__attributesOriginal9364c0b92ee5ab519273634c79f86a27); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal9364c0b92ee5ab519273634c79f86a27)): ?>
+<?php $component = $__componentOriginal9364c0b92ee5ab519273634c79f86a27; ?>
+<?php unset($__componentOriginal9364c0b92ee5ab519273634c79f86a27); ?>
+<?php endif; ?>
+        </div>
+        <div class="flex flex-col col-span-2">
+            <?php if (isset($component)) { $__componentOriginald8ba2b4c22a13c55321e34443c386276 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginald8ba2b4c22a13c55321e34443c386276 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'document.registered_address']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('label'); ?>
 <?php if ($component->shouldRender()): ?>
@@ -671,7 +711,7 @@ $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?>
-            <?php if (isset($component)) { $__componentOriginala61a9a091bbbf95d1addcb0ba0326332 = $component; } ?>
+                <?php if (isset($component)) { $__componentOriginala61a9a091bbbf95d1addcb0ba0326332 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginala61a9a091bbbf95d1addcb0ba0326332 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.validation','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('validation'); ?>
@@ -883,7 +923,7 @@ if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
         </div>
-        <div class="flex flex-col col-span-2">
+        <div class="flex flex-col">
             <?php if (isset($component)) { $__componentOriginald8ba2b4c22a13c55321e34443c386276 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginald8ba2b4c22a13c55321e34443c386276 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'document.document_issued_authority']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
@@ -923,7 +963,7 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php unset($__componentOriginal9364c0b92ee5ab519273634c79f86a27); ?>
 <?php endif; ?>
         </div>
-        <div class="flex flex-col col-span-2">
+        <div class="flex flex-col">
             <?php if (isset($component)) { $__componentOriginald8ba2b4c22a13c55321e34443c386276 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginald8ba2b4c22a13c55321e34443c386276 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'document.document_issued_date']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
@@ -1021,6 +1061,80 @@ if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?>
                 <?php if (isset($component)) { $__componentOriginala61a9a091bbbf95d1addcb0ba0326332 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginala61a9a091bbbf95d1addcb0ba0326332 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.validation','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('validation'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?> <?php echo e($message); ?>  <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginala61a9a091bbbf95d1addcb0ba0326332)): ?>
+<?php $attributes = $__attributesOriginala61a9a091bbbf95d1addcb0ba0326332; ?>
+<?php unset($__attributesOriginala61a9a091bbbf95d1addcb0ba0326332); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginala61a9a091bbbf95d1addcb0ba0326332)): ?>
+<?php $component = $__componentOriginala61a9a091bbbf95d1addcb0ba0326332; ?>
+<?php unset($__componentOriginala61a9a091bbbf95d1addcb0ba0326332); ?>
+<?php endif; ?>
+            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
+        </div>
+        <div class="flex flex-col">
+            <?php if (isset($component)) { $__componentOriginald8ba2b4c22a13c55321e34443c386276 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginald8ba2b4c22a13c55321e34443c386276 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'service_cards.given_date']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('label'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['for' => 'service_cards.given_date']); ?><?php echo e(__('Given date')); ?> <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginald8ba2b4c22a13c55321e34443c386276)): ?>
+<?php $attributes = $__attributesOriginald8ba2b4c22a13c55321e34443c386276; ?>
+<?php unset($__attributesOriginald8ba2b4c22a13c55321e34443c386276); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginald8ba2b4c22a13c55321e34443c386276)): ?>
+<?php $component = $__componentOriginald8ba2b4c22a13c55321e34443c386276; ?>
+<?php unset($__componentOriginald8ba2b4c22a13c55321e34443c386276); ?>
+<?php endif; ?>
+            <?php if (isset($component)) { $__componentOriginal36038ba5ddba347b69d2b76bc4612d11 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal36038ba5ddba347b69d2b76bc4612d11 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.pikaday-input','data' => ['mode' => 'gray','name' => 'service_cards.given_date','format' => 'Y-MM-DD','wire:model.live' => 'service_cards.given_date']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('pikaday-input'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['mode' => 'gray','name' => 'service_cards.given_date','format' => 'Y-MM-DD','wire:model.live' => 'service_cards.given_date']); ?>
+                 <?php $__env->slot('script', null, []); ?> 
+                    $el.onchange = function () {
+                    window.Livewire.find('<?php echo e($_instance->getId()); ?>').set('service_cards.given_date', $el.value);
+                    }
+                 <?php $__env->endSlot(); ?>
+             <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal36038ba5ddba347b69d2b76bc4612d11)): ?>
+<?php $attributes = $__attributesOriginal36038ba5ddba347b69d2b76bc4612d11; ?>
+<?php unset($__attributesOriginal36038ba5ddba347b69d2b76bc4612d11); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal36038ba5ddba347b69d2b76bc4612d11)): ?>
+<?php $component = $__componentOriginal36038ba5ddba347b69d2b76bc4612d11; ?>
+<?php unset($__componentOriginal36038ba5ddba347b69d2b76bc4612d11); ?>
+<?php endif; ?>
+            <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['service_cards.given_date'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+            <?php if (isset($component)) { $__componentOriginala61a9a091bbbf95d1addcb0ba0326332 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginala61a9a091bbbf95d1addcb0ba0326332 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.validation','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('validation'); ?>
@@ -1145,17 +1259,17 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
             <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
                 <?php if (isset($component)) { $__componentOriginal3ee30789824fd1cc17cb4ff8e03df656 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal3ee30789824fd1cc17cb4ff8e03df656 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table.tbl','data' => ['headers' => [__('Card number'),__('Valid date'),'action','action']]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table.tbl','data' => ['headers' => [__('Card number'),__('Given date'),__('Valid date'),'action']]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('table.tbl'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['headers' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute([__('Card number'),__('Valid date'),'action','action'])]); ?>
+<?php $component->withAttributes(['headers' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute([__('Card number'),__('Given date'),__('Valid date'),'action'])]); ?>
                     <!--[if BLOCK]><![endif]--><?php $__empty_1 = true; $__currentLoopData = $service_cards_list; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $keyServiceCard => $valueServiceCard): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                         <?php
-                            $valid = $valueServiceCard['valid_date'] >= \Carbon\Carbon::now();
+                            $valid = \Carbon\Carbon::parse($valueServiceCard['valid_date']) >= \Carbon\Carbon::now();
                         ?>
                         <tr>
                             <?php if (isset($component)) { $__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b = $component; } ?>
@@ -1170,6 +1284,30 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php $component->withAttributes([]); ?>
                                 <span class="text-sm font-semibold text-gray-700">
                                     <?php echo e($valueServiceCard['card_number']); ?>
+
+                               </span>
+                             <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b)): ?>
+<?php $attributes = $__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b; ?>
+<?php unset($__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b)): ?>
+<?php $component = $__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b; ?>
+<?php unset($__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b); ?>
+<?php endif; ?>
+                            <?php if (isset($component)) { $__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table.td','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('table.td'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+                                <span class="text-sm font-medium">
+                                    <?php echo e($valueServiceCard['given_date']); ?>
 
                                </span>
                              <?php echo $__env->renderComponent(); ?>
@@ -1256,6 +1394,450 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                                 <button
                                     onclick="confirm('Are you sure you want to remove this data?') || event.stopImmediatePropagation()"
                                     wire:click="forceDeleteServiceCard(<?php echo e($keyServiceCard); ?>)"
+                                    class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-50 hover:text-gray-700"
+                                >
+                                    <?php if (isset($component)) { $__componentOriginalc68e9de97adc0f3f617404bb2241d8ad = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalc68e9de97adc0f3f617404bb2241d8ad = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.icons.force-delete','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('icons.force-delete'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?> <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginalc68e9de97adc0f3f617404bb2241d8ad)): ?>
+<?php $attributes = $__attributesOriginalc68e9de97adc0f3f617404bb2241d8ad; ?>
+<?php unset($__attributesOriginalc68e9de97adc0f3f617404bb2241d8ad); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginalc68e9de97adc0f3f617404bb2241d8ad)): ?>
+<?php $component = $__componentOriginalc68e9de97adc0f3f617404bb2241d8ad; ?>
+<?php unset($__componentOriginalc68e9de97adc0f3f617404bb2241d8ad); ?>
+<?php endif; ?>
+                                </button>
+                             <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b)): ?>
+<?php $attributes = $__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b; ?>
+<?php unset($__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b)): ?>
+<?php $component = $__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b; ?>
+<?php unset($__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b); ?>
+<?php endif; ?>
+                        </tr>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                        <tr>
+                            <td colspan="4">
+                                <div class="flex justify-center items-center py-4">
+                                    <span class="font-medium"><?php echo e(__('No information added')); ?></span>
+                                </div>
+                            </td>
+                        </tr>
+                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                 <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal3ee30789824fd1cc17cb4ff8e03df656)): ?>
+<?php $attributes = $__attributesOriginal3ee30789824fd1cc17cb4ff8e03df656; ?>
+<?php unset($__attributesOriginal3ee30789824fd1cc17cb4ff8e03df656); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal3ee30789824fd1cc17cb4ff8e03df656)): ?>
+<?php $component = $__componentOriginal3ee30789824fd1cc17cb4ff8e03df656; ?>
+<?php unset($__componentOriginal3ee30789824fd1cc17cb4ff8e03df656); ?>
+<?php endif; ?>
+            </div>
+        </div>
+    </div>
+
+    <hr>
+    <div class="step-section__title">
+        <h1><?php echo e(__('Foreign passports')); ?></h1>
+    </div>
+    <div class="grid grid-cols-3 gap-2">
+        <div class="flex flex-col">
+            <?php if (isset($component)) { $__componentOriginald8ba2b4c22a13c55321e34443c386276 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginald8ba2b4c22a13c55321e34443c386276 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'passports.serial_number']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('label'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['for' => 'passports.serial_number']); ?><?php echo e(__('Serial number')); ?> <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginald8ba2b4c22a13c55321e34443c386276)): ?>
+<?php $attributes = $__attributesOriginald8ba2b4c22a13c55321e34443c386276; ?>
+<?php unset($__attributesOriginald8ba2b4c22a13c55321e34443c386276); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginald8ba2b4c22a13c55321e34443c386276)): ?>
+<?php $component = $__componentOriginald8ba2b4c22a13c55321e34443c386276; ?>
+<?php unset($__componentOriginald8ba2b4c22a13c55321e34443c386276); ?>
+<?php endif; ?>
+            <?php if (isset($component)) { $__componentOriginal9364c0b92ee5ab519273634c79f86a27 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal9364c0b92ee5ab519273634c79f86a27 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.livewire-input','data' => ['mode' => 'gray','name' => 'passports.serial_number','wire:model' => 'passports.serial_number']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('livewire-input'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['mode' => 'gray','name' => 'passports.serial_number','wire:model' => 'passports.serial_number']); ?> <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal9364c0b92ee5ab519273634c79f86a27)): ?>
+<?php $attributes = $__attributesOriginal9364c0b92ee5ab519273634c79f86a27; ?>
+<?php unset($__attributesOriginal9364c0b92ee5ab519273634c79f86a27); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal9364c0b92ee5ab519273634c79f86a27)): ?>
+<?php $component = $__componentOriginal9364c0b92ee5ab519273634c79f86a27; ?>
+<?php unset($__componentOriginal9364c0b92ee5ab519273634c79f86a27); ?>
+<?php endif; ?>
+            <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['passports.serial_number'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+            <?php if (isset($component)) { $__componentOriginala61a9a091bbbf95d1addcb0ba0326332 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginala61a9a091bbbf95d1addcb0ba0326332 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.validation','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('validation'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?> <?php echo e($message); ?>  <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginala61a9a091bbbf95d1addcb0ba0326332)): ?>
+<?php $attributes = $__attributesOriginala61a9a091bbbf95d1addcb0ba0326332; ?>
+<?php unset($__attributesOriginala61a9a091bbbf95d1addcb0ba0326332); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginala61a9a091bbbf95d1addcb0ba0326332)): ?>
+<?php $component = $__componentOriginala61a9a091bbbf95d1addcb0ba0326332; ?>
+<?php unset($__componentOriginala61a9a091bbbf95d1addcb0ba0326332); ?>
+<?php endif; ?>
+            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
+        </div>
+        <div class="flex flex-col">
+            <?php if (isset($component)) { $__componentOriginald8ba2b4c22a13c55321e34443c386276 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginald8ba2b4c22a13c55321e34443c386276 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'passports.given_date']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('label'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['for' => 'passports.given_date']); ?><?php echo e(__('Given date')); ?> <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginald8ba2b4c22a13c55321e34443c386276)): ?>
+<?php $attributes = $__attributesOriginald8ba2b4c22a13c55321e34443c386276; ?>
+<?php unset($__attributesOriginald8ba2b4c22a13c55321e34443c386276); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginald8ba2b4c22a13c55321e34443c386276)): ?>
+<?php $component = $__componentOriginald8ba2b4c22a13c55321e34443c386276; ?>
+<?php unset($__componentOriginald8ba2b4c22a13c55321e34443c386276); ?>
+<?php endif; ?>
+            <?php if (isset($component)) { $__componentOriginal36038ba5ddba347b69d2b76bc4612d11 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal36038ba5ddba347b69d2b76bc4612d11 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.pikaday-input','data' => ['mode' => 'gray','name' => 'passports.given_date','format' => 'Y-MM-DD','wire:model.live' => 'passports.given_date']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('pikaday-input'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['mode' => 'gray','name' => 'passports.given_date','format' => 'Y-MM-DD','wire:model.live' => 'passports.given_date']); ?>
+                 <?php $__env->slot('script', null, []); ?> 
+                    $el.onchange = function () {
+                    window.Livewire.find('<?php echo e($_instance->getId()); ?>').set('passports.given_date', $el.value);
+                    }
+                 <?php $__env->endSlot(); ?>
+             <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal36038ba5ddba347b69d2b76bc4612d11)): ?>
+<?php $attributes = $__attributesOriginal36038ba5ddba347b69d2b76bc4612d11; ?>
+<?php unset($__attributesOriginal36038ba5ddba347b69d2b76bc4612d11); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal36038ba5ddba347b69d2b76bc4612d11)): ?>
+<?php $component = $__componentOriginal36038ba5ddba347b69d2b76bc4612d11; ?>
+<?php unset($__componentOriginal36038ba5ddba347b69d2b76bc4612d11); ?>
+<?php endif; ?>
+            <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['passports.given_date'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+            <?php if (isset($component)) { $__componentOriginala61a9a091bbbf95d1addcb0ba0326332 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginala61a9a091bbbf95d1addcb0ba0326332 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.validation','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('validation'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?> <?php echo e($message); ?>  <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginala61a9a091bbbf95d1addcb0ba0326332)): ?>
+<?php $attributes = $__attributesOriginala61a9a091bbbf95d1addcb0ba0326332; ?>
+<?php unset($__attributesOriginala61a9a091bbbf95d1addcb0ba0326332); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginala61a9a091bbbf95d1addcb0ba0326332)): ?>
+<?php $component = $__componentOriginala61a9a091bbbf95d1addcb0ba0326332; ?>
+<?php unset($__componentOriginala61a9a091bbbf95d1addcb0ba0326332); ?>
+<?php endif; ?>
+            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
+        </div>
+        <div class="flex flex-col">
+            <?php if (isset($component)) { $__componentOriginald8ba2b4c22a13c55321e34443c386276 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginald8ba2b4c22a13c55321e34443c386276 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'passports.valid_date']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('label'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['for' => 'passports.valid_date']); ?><?php echo e(__('Valid date')); ?> <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginald8ba2b4c22a13c55321e34443c386276)): ?>
+<?php $attributes = $__attributesOriginald8ba2b4c22a13c55321e34443c386276; ?>
+<?php unset($__attributesOriginald8ba2b4c22a13c55321e34443c386276); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginald8ba2b4c22a13c55321e34443c386276)): ?>
+<?php $component = $__componentOriginald8ba2b4c22a13c55321e34443c386276; ?>
+<?php unset($__componentOriginald8ba2b4c22a13c55321e34443c386276); ?>
+<?php endif; ?>
+            <?php if (isset($component)) { $__componentOriginal36038ba5ddba347b69d2b76bc4612d11 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal36038ba5ddba347b69d2b76bc4612d11 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.pikaday-input','data' => ['mode' => 'gray','name' => 'passports.valid_date','format' => 'Y-MM-DD','wire:model.live' => 'passports.valid_date']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('pikaday-input'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['mode' => 'gray','name' => 'passports.valid_date','format' => 'Y-MM-DD','wire:model.live' => 'passports.valid_date']); ?>
+                 <?php $__env->slot('script', null, []); ?> 
+                    $el.onchange = function () {
+                    window.Livewire.find('<?php echo e($_instance->getId()); ?>').set('passports.valid_date', $el.value);
+                    }
+                 <?php $__env->endSlot(); ?>
+             <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal36038ba5ddba347b69d2b76bc4612d11)): ?>
+<?php $attributes = $__attributesOriginal36038ba5ddba347b69d2b76bc4612d11; ?>
+<?php unset($__attributesOriginal36038ba5ddba347b69d2b76bc4612d11); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal36038ba5ddba347b69d2b76bc4612d11)): ?>
+<?php $component = $__componentOriginal36038ba5ddba347b69d2b76bc4612d11; ?>
+<?php unset($__componentOriginal36038ba5ddba347b69d2b76bc4612d11); ?>
+<?php endif; ?>
+            <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['passports.valid_date'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+            <?php if (isset($component)) { $__componentOriginala61a9a091bbbf95d1addcb0ba0326332 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginala61a9a091bbbf95d1addcb0ba0326332 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.validation','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('validation'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?> <?php echo e($message); ?>  <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginala61a9a091bbbf95d1addcb0ba0326332)): ?>
+<?php $attributes = $__attributesOriginala61a9a091bbbf95d1addcb0ba0326332; ?>
+<?php unset($__attributesOriginala61a9a091bbbf95d1addcb0ba0326332); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginala61a9a091bbbf95d1addcb0ba0326332)): ?>
+<?php $component = $__componentOriginala61a9a091bbbf95d1addcb0ba0326332; ?>
+<?php unset($__componentOriginala61a9a091bbbf95d1addcb0ba0326332); ?>
+<?php endif; ?>
+            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
+        </div>
+        <div class="flex justify-start items-end">
+            <?php if (isset($component)) { $__componentOriginald0f1fd2689e4bb7060122a5b91fe8561 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginald0f1fd2689e4bb7060122a5b91fe8561 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.button','data' => ['mode' => 'black','wire:click' => 'addPassport']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('button'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['mode' => 'black','wire:click' => 'addPassport']); ?><?php echo e(__('Add')); ?> <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginald0f1fd2689e4bb7060122a5b91fe8561)): ?>
+<?php $attributes = $__attributesOriginald0f1fd2689e4bb7060122a5b91fe8561; ?>
+<?php unset($__attributesOriginald0f1fd2689e4bb7060122a5b91fe8561); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginald0f1fd2689e4bb7060122a5b91fe8561)): ?>
+<?php $component = $__componentOriginald0f1fd2689e4bb7060122a5b91fe8561; ?>
+<?php unset($__componentOriginald0f1fd2689e4bb7060122a5b91fe8561); ?>
+<?php endif; ?>
+        </div>
+    </div>
+    
+    <div class="relative -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+        <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+            <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
+                <?php if (isset($component)) { $__componentOriginal3ee30789824fd1cc17cb4ff8e03df656 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal3ee30789824fd1cc17cb4ff8e03df656 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table.tbl','data' => ['headers' => [__('Serial number'),__('Given date'),__('Valid date'),'action','action']]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('table.tbl'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['headers' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute([__('Serial number'),__('Given date'),__('Valid date'),'action','action'])]); ?>
+                    <!--[if BLOCK]><![endif]--><?php $__empty_1 = true; $__currentLoopData = $passports_list; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $keyPassport => $valuePassport): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                        <?php
+                            $validPassport = \Carbon\Carbon::parse($valuePassport['valid_date']) >= \Carbon\Carbon::now();
+                        ?>
+                        <tr>
+                            <?php if (isset($component)) { $__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table.td','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('table.td'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+                                <span class="text-sm font-medium text-gray-700">
+                                    <?php echo e($valuePassport['serial_number']); ?>
+
+                               </span>
+                             <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b)): ?>
+<?php $attributes = $__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b; ?>
+<?php unset($__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b)): ?>
+<?php $component = $__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b; ?>
+<?php unset($__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b); ?>
+<?php endif; ?>
+                            <?php if (isset($component)) { $__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table.td','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('table.td'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+                                <span class="<?php echo \Illuminate\Support\Arr::toCssClasses([
+                                    'text-sm font-medium',
+                                    'text-gray-500' => $validPassport,
+                                    'text-gray-500' => ! $validPassport
+                                ]); ?>">
+                                    <?php echo e($valuePassport['given_date']); ?>
+
+                               </span>
+                             <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b)): ?>
+<?php $attributes = $__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b; ?>
+<?php unset($__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b)): ?>
+<?php $component = $__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b; ?>
+<?php unset($__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b); ?>
+<?php endif; ?>
+                            <?php if (isset($component)) { $__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table.td','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('table.td'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+                                <span class="<?php echo \Illuminate\Support\Arr::toCssClasses([
+                                    'text-sm font-medium',
+                                    'text-emerald-500' => $validPassport,
+                                    'text-rose-500' => ! $validPassport
+                                ]); ?>">
+                                    <?php echo e($valuePassport['valid_date']); ?>
+
+                               </span>
+                             <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b)): ?>
+<?php $attributes = $__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b; ?>
+<?php unset($__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b)): ?>
+<?php $component = $__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b; ?>
+<?php unset($__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b); ?>
+<?php endif; ?>
+                            <?php if (isset($component)) { $__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table.td','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('table.td'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+                                <div class="<?php echo \Illuminate\Support\Arr::toCssClasses([
+                                    'px-3 py-1 text-xs rounded-lg font-medium max-w-[120px] flex justify-center items-center space-x-2',
+                                    'bg-emerald-50 text-emerald-500' => $validPassport,
+                                    'bg-rose-50 text-rose-500' => ! $validPassport
+                                ]); ?>">
+                                    <span class="<?php echo \Illuminate\Support\Arr::toCssClasses([
+                                        'w-2 h-2 rounded-full shadow-sm flex',
+                                        'bg-emerald-400' => $validPassport ,
+                                        'bg-rose-400' => ! $validPassport ,
+                                    ]); ?>">
+                                   </span>
+                                    <span><?php echo e($validPassport ? __('Active') : __('De-active')); ?></span>
+                                </div>
+                             <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b)): ?>
+<?php $attributes = $__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b; ?>
+<?php unset($__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b)): ?>
+<?php $component = $__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b; ?>
+<?php unset($__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b); ?>
+<?php endif; ?>
+                            <?php if (isset($component)) { $__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table.td','data' => ['isButton' => true]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('table.td'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['isButton' => true]); ?>
+                                <button
+                                    onclick="confirm('Are you sure you want to remove this data?') || event.stopImmediatePropagation()"
+                                    wire:click="forceDeletePassport(<?php echo e($keyPassport); ?>)"
                                     class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-50 hover:text-gray-700"
                                 >
                                     <?php if (isset($component)) { $__componentOriginalc68e9de97adc0f3f617404bb2241d8ad = $component; } ?>

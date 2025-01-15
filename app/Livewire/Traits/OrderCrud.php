@@ -300,14 +300,22 @@ trait OrderCrud
                     $columns['days'] = $componentRow['days'];
                     break;
                 case Order::BLADE_BUSINESS_TRIP:
-                    $columns['meeting_hour'] = $componentRow['meeting_hour'];
-                    $columns['return_month'] = $componentRow['return_month'];
-                    $columns['return_day'] = $componentRow['return_day'];
-                    $columns['transportation'] = $_final['transportation'] ?? [];
-                    $columns['car'] = $_final['car'] ?? '';
-                    $columns['weapon'] = $_final['weapon'];
-                    $columns['bullet'] = $_final['bullet'] ?? 32;
-                    $columns['service_dog'] = $_final['service_dog'] ?? false;
+                    if($this->selectedTemplate == PersonnelBusinessTrip::INTERNAL_BUSINESS_TRIP)
+                    {
+                        $columns['meeting_hour'] = $componentRow['meeting_hour'];
+                        $columns['return_month'] = $componentRow['return_month'];
+                        $columns['return_day'] = $componentRow['return_day'];
+                        $columns['transportation'] = $_final['transportation'] ?? [];
+                        $columns['car'] = $_final['car'] ?? '';
+                        $columns['weapon'] = $_final['weapon'];
+                        $columns['bullet'] = $_final['bullet'] ?? 32;
+                        $columns['service_dog'] = $_final['service_dog'] ?? false;
+                    }
+                    else
+                    {
+                        // structure_main_id
+                        $columns['location'] = $componentRow['location'];
+                    }
                     $columns['passport'] = $_final['passport'] ?? '';
                     break;
             }
@@ -320,9 +328,11 @@ trait OrderCrud
 
     protected function formatOrderPersonnels(array $tabel_no_list, array $component_ids): array
     {
+        $componentArray = array_pad($component_ids, count($tabel_no_list), end($component_ids));
+
         return array_map(function ($component_id) {
             return ['component_id' => $component_id];
-        }, array_combine($tabel_no_list, $component_ids));
+        }, array_combine($tabel_no_list, $componentArray));
     }
 
     private function prepareToCrud(): array
@@ -345,7 +355,6 @@ trait OrderCrud
         }
 
         if (! empty($bladeData)) {
-
             $_sentList = match ($this->selectedBlade) {
                 Order::BLADE_DEFAULT => $this->components,
                 Order::BLADE_VACATION,Order::BLADE_BUSINESS_TRIP => $this->selected_personnel_list,
@@ -376,9 +385,11 @@ trait OrderCrud
     public function mount()
     {
         if (! empty($this->orderModel)) {
+            $this->authorize('edit-orders');
             $this->title = __('Edit order');
             $this->fillOrder();
         } else {
+            $this->authorize('add-orders');
             $this->title = __('Add order');
             $this->order['given_by'] = cache('settings')['Chief'];
             $this->order['given_by_rank'] = cache('settings')['Chief rank'];
@@ -421,7 +432,7 @@ trait OrderCrud
 
     public function addToList(string $tabelno, int $row): void
     {
-        $person = Personnel::with(['latestRank.rank', 'idDocuments', 'structure', 'position', 'activeWeapons', 'activeWeapons.weapon'])
+        $person = Personnel::with(['latestRank.rank', 'idDocuments', 'validPassport', 'structure', 'position', 'activeWeapons', 'activeWeapons.weapon'])
             ->where('tabel_no', $tabelno)
             ->first();
 
@@ -438,12 +449,19 @@ trait OrderCrud
                 $data['structure'] = $person->structure->name;
                 break;
             case Order::BLADE_BUSINESS_TRIP:
-                $personWeapons = collect($person->activeWeapons)
-                    ->map(fn ($activeWeapon) => "{$activeWeapon->weapon->name} №_{$activeWeapon->weapon_serial}")
-                    ->implode(' ');
+                if($this->selectedTemplate == PersonnelBusinessTrip::INTERNAL_BUSINESS_TRIP)
+                {
+                    $personWeapons = collect($person->activeWeapons)
+                        ->map(fn ($activeWeapon) => "{$activeWeapon->weapon->name} №_{$activeWeapon->weapon_serial}")
+                        ->implode(' ');
+                    $data['passport'] = $person->idDocuments->serialNumber ?? '';
+                    $data['weapon'] = $personWeapons;
+                }
+                else
+                {
+                    $data['passport'] = $person->validPassport->serial_number ?? '';
+                }
                 $data['position'] = $person->position->name;
-                $data['passport'] = $person->idDocuments->serialNumber ?? '';
-                $data['weapon'] = $personWeapons;
                 $data['structure'] = $this->getStructureFull($person->structure);
                 break;
         }
@@ -552,6 +570,16 @@ trait OrderCrud
     public function getStatusesProperty()
     {
         return OrderStatus::where('locale', config('app.locale'))->get();
+    }
+
+    private function isForeignBusinessTrip(): bool
+    {
+        return $this->selectedBlade === Order::BLADE_BUSINESS_TRIP && $this->selectedTemplate == PersonnelBusinessTrip::FOREIGN_BUSINESS_TRIP;
+    }
+
+    private function isInternalBusinessTrip(): bool
+    {
+        return $this->selectedBlade === Order::BLADE_BUSINESS_TRIP && $this->selectedTemplate == PersonnelBusinessTrip::INTERNAL_BUSINESS_TRIP;
     }
 
     public function render()

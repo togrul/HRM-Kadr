@@ -118,7 +118,7 @@ class WordSuffixService
         $append = $mainStructure ? 'nin' : ' sinin';
 
         $suffix = is_numeric($text)
-            ? $this->getNumberSuffix((int) $text)." idare{$append}"
+            ? $this->getNumberSuffix((int) $text)." idarə{$append}"
             : $this->determineStructureSuffix($text);
 
         return $onlySuffix ? $suffix : $text.$suffix;

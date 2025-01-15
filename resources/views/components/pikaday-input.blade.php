@@ -33,7 +33,7 @@
         })(new Pikaday({
           field: $el,
           format: '{{ $format }}',
-          yearRange: [1900, {{ $currentYear }}],
+          yearRange: 100,
           onSelect: function (date) { $el.value = moment(date.toString()).format('{{ $format }}'); }
          }), $el)"
     {{ $disabled ? 'disabled' : '' }}

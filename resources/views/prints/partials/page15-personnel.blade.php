@@ -21,14 +21,25 @@
        </tr>
     </thead>
     <tbody>
-    @for($i = 0;$i < 21;$i++)
-        <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-        </tr>
-    @endfor
+        @php
+            $tripModel = $personnel->businessTrips()->foreignBusinessTrip()->get();
+        @endphp
+        @foreach($tripModel as $foreign)
+            <tr>
+                <td>{{ $foreign->location ? $foreign->location . ',' : '' }} {{ $foreign->description }}</td>
+                <td>{{ $foreign->order->given_by }} {{ $foreign->order_no }} {{ $foreign->order_date->format('d.m.Y') }}</td>
+                <td>{{ $foreign->start_date->format('d.m.Y') }}</td>
+                <td>{{ $foreign->end_date->format('d.m.Y') }}</td>
+            </tr>
+        @endforeach
+        @for($i = 0;$i < 18 - $tripModel->count();$i++)
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+        @endfor
     </tbody>
 </table>
 
@@ -54,7 +65,7 @@
     <h3 style="margin-bottom: 5px;font-size: 16px;">16. Əsirlikdə olubmu <span style="font-weight: 400;font-size: 16px;">(hansı şəraitdə, harada, nə vaxt əsir düşüb və azad olunub)</span></h3>
     @if(count($personnel->captives) > 0)
         @foreach($personnel->captives as $captive)
-            <div style="border-bottom: 1px solid #000; height: {{$i == 0 ? 10 : 25}}px;">
+            <div style="border-bottom: 1px solid #000; min-height: {{$i == 0 ? 10 : 25}}px;">
                 {{ \Carbon\Carbon::parse($captive->taken_captive_date)->format('d.m.Y') }} tarixində {{ $captive->location }} ərazisində
                 {{ $captive->condition }} əsirlikdə olub.
                 @if(!empty($captive->release_date))

@@ -19,7 +19,7 @@
         <div class="grid grid-cols-1 gap-2">
             @forelse ($_components as $key => $_component)
                 <div class="flex justify-between items-center px-4 py-3 rounded-xl shadow-sm bg-slate-100">
-                    <span class="text-slate-900 font-medium">
+                    <span class="text-slate-900 font-medium w-20">
                         {{ ($_components->currentpage()-1) * $_components->perpage() + $key + 1 }}
                     </span>
                     <span class="bg-slate-200 text-slate-700 font-medium px-3 py-1 text-sm rounded-lg">
@@ -28,10 +28,13 @@
                     <span class="text-slate-600 font-medium text-sm">
                         {{ $_component->name }}
                     </span>
-                    <div class="flex justify-end items-center space-x-2">
-                        <a href="javascript:void(0)" wire:click.prevent="openSideMenu('edit-component',{{ $_component->id }})" class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase rounded-lg text-gray-500 hover:bg-gray-200 hover:text-gray-700">
+                    <div class="flex justify-end items-center space-x-2 w-20">
+                        <button
+                            wire:click.prevent="openSideMenu('edit-component',{{ $_component->id }})"
+                            class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase rounded-lg text-gray-500 hover:bg-gray-200 hover:text-gray-700"
+                        >
                             <x-icons.edit-icon color="text-slate-600" hover="text-slate-700"></x-icons.edit-icon>
-                        </a>
+                        </button>
                         <button
                             wire:click.prevent="setDeleteComponent({{ $_component->id  }})"
                             class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-50 hover:text-gray-700"

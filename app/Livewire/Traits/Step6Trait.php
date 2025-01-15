@@ -48,6 +48,7 @@ trait Step6Trait
         //        $validator2 = $this->exceptArray('criminal');
         //        $this->validate(array_intersect_assoc($validator1,$validator2));
         $this->validate($validator1);
+        $this->award['is_old'] ??= false;
         $this->award_list[] = $this->award;
         $this->awardName = '---';
         $this->reset('awardId');

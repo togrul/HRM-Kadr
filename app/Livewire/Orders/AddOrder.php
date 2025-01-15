@@ -14,12 +14,7 @@ use Livewire\Component;
 
 class AddOrder extends Component
 {
-    use OrderCrud,AuthorizesRequests;
-
-    public function mount()
-    {
-        $this->authorize('add-orders');
-    }
+    use AuthorizesRequests,OrderCrud;
 
     public function store()
     {
@@ -41,8 +36,7 @@ class AddOrder extends Component
                 'status_id' => $this->order['status_id'],
             ];
 
-            if($this->selectedBlade == Order::BLADE_BUSINESS_TRIP)
-            {
+            if ($this->selectedBlade == Order::BLADE_BUSINESS_TRIP) {
                 $created['description'] = $this->order['description'];
             }
             //create order logs

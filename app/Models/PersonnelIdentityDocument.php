@@ -23,6 +23,7 @@ class PersonnelIdentityDocument extends Model
         'pin',
         'born_country_id',
         'born_city_id',
+        'birthplace',
         'registered_address',
         'is_married',
         'military_duty',
@@ -38,7 +39,7 @@ class PersonnelIdentityDocument extends Model
     ];
 
     protected $casts = [
-        'document_issued_date' => 'date:d.m.Y',
+        'document_issued_date' => self::FORMAT_CAST,
     ];
 
     protected function serialNumber(): Attribute

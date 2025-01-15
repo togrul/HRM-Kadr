@@ -148,6 +148,7 @@ if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
         </div>
+
         <div class="flex flex-col">
             <?php if (isset($component)) { $__componentOriginald8ba2b4c22a13c55321e34443c386276 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginald8ba2b4c22a13c55321e34443c386276 = $attributes; } ?>
@@ -216,6 +217,8 @@ if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
         </div>
+
+        <!--[if BLOCK]><![endif]--><?php if($selectedTemplate == \App\Models\PersonnelBusinessTrip::INTERNAL_BUSINESS_TRIP): ?>
         <div class="flex flex-col">
             <?php if (isset($component)) { $__componentOriginald8ba2b4c22a13c55321e34443c386276 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginald8ba2b4c22a13c55321e34443c386276 = $attributes; } ?>
@@ -420,6 +423,7 @@ if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
         </div>
+        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
     </div>
     <hr>
     <div class="grid grid-cols-1 gap-2 sm:grid-cols-1 md:grid-cols-1">
@@ -482,12 +486,18 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
             <!--[if BLOCK]><![endif]--><?php if(array_key_exists($i,$this->selected_personnel_list)): ?>
                 <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $this->selected_personnel_list[$i]; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $keyPerson => $selectPerson): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <div class="w-full bg-slate-50 border border-slate-200 gap-3 px-3 py-1 rounded-lg flex items-center justify-between">
-                        <p class="flex-none flex flex-col text-sm text-slate-800">
+                        <p
+                           class="<?php echo \Illuminate\Support\Arr::toCssClasses([
+                                'flex-none flex text-sm text-slate-800',
+                                'flex-col' => $selectedTemplate == \App\Models\PersonnelBusinessTrip::INTERNAL_BUSINESS_TRIP,
+                                'space-x-4' => $selectedTemplate == \App\Models\PersonnelBusinessTrip::FOREIGN_BUSINESS_TRIP,
+                           ]); ?>"
+                        >
                             <span class="text-slate-400"><?php echo e($selectPerson['rank']); ?></span>
                             <span> <?php echo e($selectPerson['fullname']); ?> </span>
                             <span class="text-teal-500"><?php echo e($selectPerson['structure']); ?></span>
                         </p>
-
+                        <!--[if BLOCK]><![endif]--><?php if($selectedTemplate == \App\Models\PersonnelBusinessTrip::INTERNAL_BUSINESS_TRIP): ?>
                         <div class="flex flex-col">
 
                             <select
@@ -626,7 +636,7 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php unset($__componentOriginal74b62b190a03153f11871f645315f4de); ?>
 <?php endif; ?>
                         </div>
-
+                        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                         <button wire:click="removeFromList(<?php echo e($keyPerson); ?>,<?php echo e($i); ?>)"
                                 class="appearance-none flex flex-none justify-center items-center w-6 h-6 rounded-lg drop-shadow-sm transition-all duration-300 hover:drop-shadow-none"
                         >

@@ -35,6 +35,11 @@ trait Step4Trait
             $this->labor_activities['order_date'] .= " {$time}";
             unset($this->labor_activities['time']);
         }
+        else
+        {
+            $this->labor_activities['is_special_service'] ??= false;
+        }
+        $this->labor_activities['is_current'] ??= false;
         $this->labor_activities_list[] = $this->labor_activities;
         $this->labor_activities = [];
         $this->calculateSeniority();

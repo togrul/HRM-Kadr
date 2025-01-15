@@ -41,6 +41,7 @@ class PrintController extends Controller
             'fatherMother.kinship',
             'wifeChildren',
             'wifeChildren.kinship',
+            'businessTrips'
         ]);
 
         return view('prints.personnel', compact('personnel'));

@@ -34,8 +34,8 @@ class PersonnelLaborActivity extends Model
     ];
 
     protected $casts = [
-        'join_date' => 'date:d.m.Y',
-        'leave_date' => 'date:d.m.Y',
-        'order_date' => 'date:d.m.Y',
+        'join_date' => self::FORMAT_CAST,
+        'leave_date' => self::FORMAT_CAST,
+        'order_date' => self::FORMAT_CAST,
     ];
 }

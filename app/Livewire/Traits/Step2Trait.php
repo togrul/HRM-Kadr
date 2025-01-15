@@ -23,8 +23,13 @@ trait Step2Trait
 
     public $searchCity;
 
-    public $service_cards_list = [];
-    public $service_cards = [];
+    public array $service_cards_list = [];
+
+    public array $service_cards = [];
+
+    public array $passports = [];
+
+    public array $passports_list = [];
 
     public function getDataByPin()
     {
@@ -57,6 +62,7 @@ trait Step2Trait
                     'id' => $this->documentBornCityId,
                     'name' => $this->documentBornCityName,
                 ],
+                'birthplace' => 'Bayil',
                 'registered_address' => 'Bakixanov Sakit Qocayev',
                 'is_married' => true,
                 'military_duty' => 'h/m',
@@ -73,23 +79,37 @@ trait Step2Trait
         // $result = json_decode($data);
     }
 
-    public function addServiceCard() {
-        $this->validate($this->exceptArray('document'));
+    public function addServiceCard()
+    {
+        $this->validateCommon(['document', 'passports']);
         $this->service_cards_list[] = $this->service_cards;
         $this->service_cards = [];
     }
 
-    public function forceDeleteServiceCard($key) {
+    public function forceDeleteServiceCard($key)
+    {
         unset($this->service_cards_list[$key]);
+    }
+
+    public function forceDeletePassport($key)
+    {
+        unset($this->passports_list[$key]);
+    }
+
+    public function addPassport()
+    {
+        $this->validateCommon(['document', 'service_cards']);
+        $this->passports_list[] = $this->passports;
+        $this->passports = [];
     }
 
     public function mountStep2Trait()
     {
         $this->documentNationalityName = $this->documentBornCountryName = $this->documentBornCityName = '---';
-        if(! empty($this->personnelModel))
-        {
+        if (! empty($this->personnelModel)) {
             $this->fillIdDocument();
             $this->fillServiceCards();
+            $this->fillPassports();
         }
     }
 
@@ -97,13 +117,13 @@ trait Step2Trait
     {
         if (! empty($this->personnelModelData->idDocuments)) {
             $updateIdDocument = $this->personnelModelData->idDocuments
-                            ->load(['nationality', 'bornCountry', 'bornCity'])
-                            ->toArray();
+                ->load(['nationality', 'bornCountry', 'bornCity'])
+                ->toArray();
 
             if (! empty($updateIdDocument)) {
                 $this->document = $this->mapAttributes(
                     attributes: [
-                        'pin', 'series', 'number', 'registered_address', 'is_married',
+                        'pin', 'series', 'number', 'birthplace', 'registered_address', 'is_married',
                         'military_duty', 'blood_group', 'eye_color',
                         'height', 'document_issued_authority', 'document_issued_date',
                     ], getFrom: $updateIdDocument
@@ -123,9 +143,24 @@ trait Step2Trait
             foreach ($updateServiceCards as $key => $uptServiceCard) {
                 $this->service_cards_list[] = $this->mapAttributes(
                     attributes: [
-                        'card_number', 'valid_date',
+                        'card_number', 'given_date', 'valid_date',
                     ],
                     getFrom: $uptServiceCard
+                );
+            }
+        }
+    }
+
+    protected function fillPassports()
+    {
+        $updatePassports = $this->personnelModelData->passports->toArray();
+        if (! empty($updatePassports)) {
+            foreach ($updatePassports as $key => $uptPassport) {
+                $this->passports_list[] = $this->mapAttributes(
+                    attributes: [
+                        'serial_number', 'given_date', 'valid_date',
+                    ],
+                    getFrom: $uptPassport
                 );
             }
         }

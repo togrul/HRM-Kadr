@@ -23,6 +23,7 @@ class ImportCandidateToPersonnel
                 'structure_id' => $component['structure_id']['id'],
                 'position_id' => $component['position_id']['id'],
                 'gender' => $candidate->gender,
+                'referenced_by' => $candidate->presented_by,
                 'birthdate' => Carbon::parse($candidate->birthdate)->format('Y-m-d'),
                 'is_pending' => $status != OrderStatusEnum::APPROVED->value,
                 'tabel_no' => "NMZD{$candidate->id}",

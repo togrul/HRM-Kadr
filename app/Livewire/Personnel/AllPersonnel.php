@@ -128,13 +128,13 @@ class AllPersonnel extends Component
                     : 'current';
     }
 
-    #[Computed()]
+    #[Computed]
     public function personnels()
     {
         return $this->returnData();
     }
 
-    #[Computed()]
+    #[Computed]
     public function positions()
     {
         return Position::query()->orderBy('id')->get();

@@ -115,7 +115,7 @@
                             <p class="text-sm font-medium text-gray-700">
                                 {{ $laModel['company_name'] }}
                             </p>
-                            @if($laModel['is_current'])
+                            @if($laModel['is_current'] ??= false)
                                 <span class="flex items-center justify-center rounded-full w-4 h-4 bg-green-500 border-4 border-green-200">
                                 </span>
                             @endif

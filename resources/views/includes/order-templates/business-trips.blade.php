@@ -26,6 +26,7 @@
                 <x-validation> {{ $message }} </x-validation>
             @enderror
         </div>
+
         <div class="flex flex-col">
             <x-label for="components.{{$i}}.location">{{ __('Location') }}</x-label>
             <x-livewire-input mode="gray" name="components.{{$i}}.location" wire:model="components.{{$i}}.location"></x-livewire-input>
@@ -33,6 +34,8 @@
                 <x-validation> {{ $message }} </x-validation>
             @enderror
         </div>
+
+        @if($selectedTemplate == \App\Models\PersonnelBusinessTrip::INTERNAL_BUSINESS_TRIP)
         <div class="flex flex-col">
             <x-label for="components.{{$i}}.meeting_hour">{{ __('Meeting hour') }}</x-label>
             <x-livewire-input mode="gray" name="components.{{$i}}.meeting_hour" wire:model="components.{{$i}}.meeting_hour"></x-livewire-input>
@@ -54,6 +57,7 @@
                 <x-validation> {{ $message }} </x-validation>
             @enderror
         </div>
+        @endif
     </div>
     <hr>
     <div class="grid grid-cols-1 gap-2 sm:grid-cols-1 md:grid-cols-1">
@@ -80,12 +84,18 @@
             @if(array_key_exists($i,$this->selected_personnel_list))
                 @foreach($this->selected_personnel_list[$i] as $keyPerson => $selectPerson)
                     <div class="w-full bg-slate-50 border border-slate-200 gap-3 px-3 py-1 rounded-lg flex items-center justify-between">
-                        <p class="flex-none flex flex-col text-sm text-slate-800">
+                        <p
+                           @class([
+                                'flex-none flex text-sm text-slate-800',
+                                'flex-col' => $selectedTemplate == \App\Models\PersonnelBusinessTrip::INTERNAL_BUSINESS_TRIP,
+                                'space-x-4' => $selectedTemplate == \App\Models\PersonnelBusinessTrip::FOREIGN_BUSINESS_TRIP,
+                           ])
+                        >
                             <span class="text-slate-400">{{ $selectPerson['rank'] }}</span>
                             <span> {{ $selectPerson['fullname'] }} </span>
                             <span class="text-teal-500">{{ $selectPerson['structure'] }}</span>
                         </p>
-
+                        @if($selectedTemplate == \App\Models\PersonnelBusinessTrip::INTERNAL_BUSINESS_TRIP)
                         <div class="flex flex-col">
 {{--                            <x-label for="selected_personnel_list.{{$i}}.{{ $keyPerson }}.car">{{ __('Transportation') }}</x-label>--}}
                             <select
@@ -128,7 +138,7 @@
                             </div>
                             <x-checkbox name="hasServiceDog" model="selected_personnel_list.{{$i}}.{{ $keyPerson }}.service_dog">{{ __('Service dog?') }}</x-checkbox>
                         </div>
-
+                        @endif
                         <button wire:click="removeFromList({{$keyPerson}},{{ $i }})"
                                 class="appearance-none flex flex-none justify-center items-center w-6 h-6 rounded-lg drop-shadow-sm transition-all duration-300 hover:drop-shadow-none"
                         >

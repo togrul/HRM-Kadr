@@ -143,24 +143,29 @@
 <div class="my-2 flex justify-between items-center border border-gray-200 p-2 shadow-sm bg-gray-50 rounded-lg">
         <div class="flex space-x-2 items-center">
             <span class="font-medium text-gray-500">{{ __('Duration') }}:</span>
+            @if(! empty($calculatedDataEducation))
             <span class="font-medium text-gray-900">
                 {{ $calculatedDataEducation['diff'] }} {{ __('month') }}
                 ({{ $calculatedDataEducation['year'] }} {{ __('year') }}
                 {{ $calculatedDataEducation['month'] }} {{ __('month') }} )
             </span>
+            @endif
         </div>
-        @if($education['coefficient'] > 0)
+
+        @if(Arr::has($education, 'education') && $education['coefficient'] > 0)
         <div class="flex space-x-2 items-center">
             <span class="font-medium text-gray-500">{{ __('Coefficient') }}:</span>
             <span class="font-medium text-teal-500">{{ $education['coefficient'] }}</span>
         </div>
         <div class="flex space-x-2 items-center">
             <span class="font-medium text-gray-500">{{ __('Extra seniority') }}:</span>
+            @if(! empty($calculatedDataEducation))
             <span class="font-medium text-rose-500">
                 {{ $calculatedDataEducation['duration'] }} {{ __('month') }}
                 ({{ $calculatedDataEducation['year_coefficient'] }} {{ __('year') }}
                 {{ $calculatedDataEducation['month_coefficient'] }} {{ __('month') }})
             </span>
+            @endif
         </div>
         @endif
 </div>

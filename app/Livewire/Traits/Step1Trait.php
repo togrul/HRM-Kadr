@@ -78,7 +78,7 @@ trait Step1Trait
 
     }
 
-    protected function fillPersonnel()
+    protected function fillPersonnel(): void
     {
         $this->updatePersonnel = $this->personnelModelData->toArray();
         $this->personnel = $this->mapAttributes(attributes: [
@@ -90,7 +90,9 @@ trait Step1Trait
             'nationality_change_reason', 'pin', 'residental_address',
             'registered_address', 'join_work_date', 'leave_work_date',
             'extra_important_information', 'computer_knowledge',
-            'scientific_works_inventions',
+            'scientific_works_inventions', 'referenced_by',
+            'special_inspection_date', 'special_inspection_result',
+            'medical_inspection_date', 'medical_inspection_result',
         ], getFrom: $this->updatePersonnel);
 
         $this->personnel_extra = $this->mapAttributes(

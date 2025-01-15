@@ -525,6 +525,8 @@
 <?php $component->withAttributes([]); ?>
                                     <?php
                                         $_status_color = [
+                                                0 => 'slate',
+                                                1 => 'gray',
                                                 2 => 'rose',
                                                 3 => 'orange',
                                                 4 => 'blue',

@@ -141,10 +141,11 @@
                     <x-table.tbl :headers="[__('#'),__('Fullname'),__('Dates'),__('Locations'),__('Order'),'action']" wire:transition>
                         @forelse ($this->businessTrips as $key => $_bTrip)
                             @php
-                                $multi = $_bTrip->order->businessTrips->count() > 1;
+                                $multi = ($_bTrip->order->businessTrips->count() > 1 && $_bTrip->order->order_type_id != \App\Models\PersonnelBusinessTrip::FOREIGN_BUSINESS_TRIP);
+                                $activeBusinessTrip = \Carbon\Carbon::parse($_bTrip->start_date) <= \Carbon\Carbon::now() && \Carbon\Carbon::parse($_bTrip->end_date) > \Carbon\Carbon::now();
                             @endphp
                             <tr @class([
-                                'bg-teal-50' => $_bTrip->end_date > \Carbon\Carbon::now()
+                                'bg-teal-50' => $activeBusinessTrip
                             ])>
                                 <x-table.td>
                                     <span class="text-sm font-medium text-gray-700">
@@ -163,7 +164,7 @@
                                         <span class="text-blue-500 text-sm font-medium bg-slate-100 px-2 py-1 rounded-lg">
                                              {{ $_bTrip->attributes['$structure']['value'] }}
                                         </span>
-                                        @if($_bTrip->end_date > \Carbon\Carbon::now())
+                                        @if($activeBusinessTrip)
                                             <span class="text-green-700 flex justify-center items-center text-sm font-medium bg-green-200 px-2 py-1 rounded-lg">
                                                 {{ __('In business trip') }}
                                             </span>
@@ -223,12 +224,12 @@
                                 <x-table.td :isButton="true">
                                     @if(! $multi)
                                         @can('export-business_trips')
-                                        <button
-                                            wire:click="printBusinessTripDocument('{{ $_bTrip->id }}',{{ $multi }})"
-                                            class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase bg-teal-50 transition duration-300 rounded-lg text-gray-500 hover:bg-teal-100 hover:text-gray-700"
-                                        >
-                                            @include('components.icons.document-icon',['color' => 'text-teal-500','hover' => 'text-teal-600'])
-                                        </button>
+                                            <button
+                                                wire:click="printBusinessTripDocument('{{ $_bTrip->id }}',{{ $multi }})"
+                                                class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase bg-teal-50 transition duration-300 rounded-lg text-gray-500 hover:bg-teal-100 hover:text-gray-700"
+                                            >
+                                                @include('components.icons.document-icon',['color' => 'text-teal-500','hover' => 'text-teal-600'])
+                                            </button>
                                         @endcan
                                     @endif
                                 </x-table.td>

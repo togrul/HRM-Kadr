@@ -105,7 +105,7 @@
                     @enderror
                 </div>
                 <div class="flex items-end">
-                    <x-checkbox name="form.is_foreign"  model="form.is_foreign">{{ __('Is foreign?') }}</x-checkbox>
+                    <x-checkbox name="form.is_foreign" model="form.is_foreign">{{ __('Is foreign?') }}</x-checkbox>
                 </div>
                 <div class="flex items-end">
                     <x-modal-button mode="black">{{ __('Save') }}</x-modal-button>

@@ -24,7 +24,7 @@ class PersonnelInjury extends Model
     ];
 
     protected $casts = [
-        'date_time' => 'date:d.m.Y',
+        'date_time' => self::FORMAT_CAST,
     ];
 
     public $timestamps = false;

@@ -334,9 +334,51 @@
                       @this.set('personnel.leave_work_date', $el.value);
                       }
                     </x-slot>
-                  </x-pikaday-input>
+                </x-pikaday-input>
             </div>
         </div>
+
+        <div class="grid grid-cols-2 gap-2">
+            <div class="flex flex-col space-y-2">
+                <div class="flex flex-col">
+                    <x-label for="personnel.special_inspection_date">{{ __('Special inspection date') }}</x-label>
+                    <x-pikaday-input mode="gray" name="personnel.special_inspection_date" format="Y-MM-DD" wire:model.live="personnel.special_inspection_date">
+                        <x-slot name="script">
+                            $el.onchange = function () {
+                            @this.set('personnel.special_inspection_date', $el.value);
+                            }
+                        </x-slot>
+                    </x-pikaday-input>
+                </div>
+                @if (!empty($personnel['special_inspection_date']))
+                    <div class="flex flex-col">
+                        <x-label for="personnel.special_inspection_result">{{ __('Special inspection result') }}</x-label>
+                        <x-textarea mode="gray" name="personnel.special_inspection_result" placeholder="{{__('')}}"
+                                    wire:model="personnel.special_inspection_result"></x-textarea>
+                    </div>
+                @endif
+            </div>
+            <div class="flex flex-col space-y-2">
+                <div class="flex flex-col">
+                    <x-label for="personnel.medical_inspection_date">{{ __('Medical inspection date') }}</x-label>
+                    <x-pikaday-input mode="gray" name="personnel.medical_inspection_date" format="Y-MM-DD" wire:model.live="personnel.medical_inspection_date">
+                        <x-slot name="script">
+                            $el.onchange = function () {
+                            @this.set('personnel.medical_inspection_date', $el.value);
+                            }
+                        </x-slot>
+                    </x-pikaday-input>
+                </div>
+                @if (!empty($personnel['medical_inspection_date']))
+                    <div class="flex flex-col">
+                        <x-label for="personnel.medical_inspection_result">{{ __('Medical inspection result') }}</x-label>
+                        <x-textarea mode="gray" name="personnel.medical_inspection_result" placeholder="{{__('')}}"
+                                    wire:model="personnel.medical_inspection_result"></x-textarea>
+                    </div>
+                @endif
+            </div>
+        </div>
+
         @if($isDisability)
         <div class="grid grid-cols-2 gap-2">
             <div class="flex flex-col">
@@ -387,6 +429,11 @@
                 <x-textarea mode="gray" name="personnel.computer_knowledge" placeholder="{{__('')}}"
                   wire:model="personnel.computer_knowledge"></x-textarea>
             </div>
+
+            <div class="flex flex-col">
+                <x-label for="personnel.referenced_by">{{ __('Referenced by') }}</x-label>
+                <x-livewire-input mode="gray" name="personnel.referenced_by" wire:model="personnel.referenced_by"></x-livewire-input>
+            </div>
         </div>
     </div>
     <div class="flex-none w-40">
@@ -401,14 +448,17 @@
             <div class="border border-gray-300 rounded-lg shadow-sm p-1">
                 <div class="flex flex-col space-y-4">
                     <div class="mt-2 flex flex-col" x-data="{ isUploading: false, progress: 0 }"
-                      x-on:livewire-upload-start="isUploading = true" x-on:livewire-upload-finish="isUploading = false"
-                      x-on:livewire-upload-error="isUploading = false"
-                      x-on:livewire-upload-progress="progress = $event.detail.progress">
+                         x-on:livewire-upload-start="isUploading = true"
+                         x-on:livewire-upload-finish="isUploading = false"
+                         x-on:livewire-upload-error="isUploading = false"
+                         x-on:livewire-upload-progress="progress = $event.detail.progress"
+                    >
                       <div class="flex flex-col space-y-2 items-center">
                         @if ($avatar)
                         <img alt="avatar" class="w-full h-full object-cover" src="{{ $avatar->temporaryUrl() }}">
                         @elseif(!empty($personnelModel) && $personnelModelData->photo)
-                        <img alt="avatar" class="w-full h-full object-cover" src="{{ asset('/storage/'.$personnelModelData->photo) }}">
+{{--                        <img alt="avatar" class="w-full h-full object-cover" src="{{ asset('/storage/'.$personnelModelData->photo) }}">--}}
+                           <img alt="avatar" class="w-full h-full object-cover" src="{{ \Illuminate\Support\Facades\Storage::url($personnelModelData->photo) }}">
                         @else
                         <img class="w-full h-full" src="{{ asset('assets/images/id-photo.jpeg') }}" alt="id photo">
                         @endif

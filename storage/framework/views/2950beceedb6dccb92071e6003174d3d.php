@@ -459,8 +459,11 @@
 <?php endif; ?>
 <?php $component->withAttributes(['headers' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute([__('#'),__('Fullname'),__('Structure'),__('Dates'),__('Locations'),__('Order'),'action'])]); ?>
                         <!--[if BLOCK]><![endif]--><?php $__empty_1 = true; $__currentLoopData = $this->vacations; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $_vacation): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                            <?php
+                                $activeVacation = $_vacation->start_date <= \Carbon\Carbon::now() && $_vacation->return_work_date > \Carbon\Carbon::now();
+                            ?>
                             <tr class="<?php echo \Illuminate\Support\Arr::toCssClasses([
-                                'bg-teal-50' => $_vacation->return_work_date > \Carbon\Carbon::now()
+                                'bg-teal-50' => $activeVacation
                             ]); ?>">
                                 <?php if (isset($component)) { $__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b = $attributes; } ?>
@@ -506,7 +509,7 @@
                                             <?php echo e($_vacation->personnel?->fullname); ?>
 
                                         </span>
-                                        <!--[if BLOCK]><![endif]--><?php if($_vacation->return_work_date > \Carbon\Carbon::now()): ?>
+                                        <!--[if BLOCK]><![endif]--><?php if($activeVacation): ?>
                                             <span class="text-green-700 flex justify-center items-center text-sm font-medium bg-green-200 px-2 py-1 rounded-lg">
                                                 <?php echo e(__('In vacation')); ?>
 

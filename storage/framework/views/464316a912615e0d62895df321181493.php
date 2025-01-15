@@ -708,7 +708,7 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                                 <?php echo e($laModel['company_name']); ?>
 
                             </p>
-                            <!--[if BLOCK]><![endif]--><?php if($laModel['is_current']): ?>
+                            <!--[if BLOCK]><![endif]--><?php if($laModel['is_current'] ??= false): ?>
                                 <span class="flex items-center justify-center rounded-full w-4 h-4 bg-green-500 border-4 border-green-200">
                                 </span>
                             <?php endif; ?><!--[if ENDBLOCK]><![endif]-->

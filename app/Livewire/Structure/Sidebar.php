@@ -19,7 +19,7 @@ class Sidebar extends Component
         $this->selectedStructure = null;
     }
 
-    public function selectStructure($id)
+    public function selectStructure($id): void
     {
         $this->selectedStructure = $id;
         $this->dispatch('selectStructure', $id);

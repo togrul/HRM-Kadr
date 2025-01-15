@@ -67,6 +67,7 @@ class BusinessTrips extends Component
                     ? '/storage/templates/general/Ezamiyyet-vesiqesi.docx'
                     : '/storage/templates/general/Ezamiyyet-kagizi.docx';
 
+
         $file = public_path($filepath);
 
         $templateProcessor = new TemplateProcessor($file);
@@ -100,7 +101,7 @@ class BusinessTrips extends Component
         $templateProcessor->setValue('end_day', $formattedDates['endDate']['day']);
         $templateProcessor->setValue('end_month', $formattedDates['endDate']['month']);
         $templateProcessor->setValue('end_year', $formattedDates['endDate']['year']);
-        if (!$multi) {
+        if ($multi) {
 //            dd($model->order->description['location']. ' şəhərinə');
             $templateProcessor->cloneRow('rank', count($attributes));
             foreach ($attributes as $index => $row) {
@@ -112,7 +113,7 @@ class BusinessTrips extends Component
         } else {
 //            $suffixService = new WordSuffixService;
             $filteredAttributes = $model->order->attributes->firstWhere('attributes.$fullname.value', $model->personnel->fullname);
-            $templateProcessor->setValue('passport', $filteredAttributes->attributes['$passport']['value']);
+            $templateProcessor->setValue('passport', $filteredAttributes->attributes['$passport']['value']) ?? '';
             $templateProcessor->setValue('position', $filteredAttributes->attributes['$position']['value']);
             $templateProcessor->setValue('rank', $filteredAttributes->attributes['$rank']['value']);
             $templateProcessor->setValue('fullname', $filteredAttributes->attributes['$fullname']['value']);

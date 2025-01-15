@@ -336,8 +336,9 @@ if (isset($__slots)) unset($__slots);
                     <!--[if BLOCK]><![endif]--><?php $__empty_1 = true; $__currentLoopData = $this->personnels; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $personnel): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                     <tr class="<?php echo \Illuminate\Support\Arr::toCssClasses([
                         'relative',
-                        'bg-white' => empty($personnel->leave_work_date),
-                        'bg-red-100' => !empty($personnel->leave_work_date)
+//                        'bg-white' => empty($personnel->leave_work_date),
+                        'bg-red-100' => !empty($personnel->leave_work_date),
+                        'bg-gray-50' => $personnel->hasActiveBusinessTrip || $personnel->hasActiveBusinessTrip
                     ]); ?>">
                         <?php if (isset($component)) { $__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b = $attributes; } ?>
@@ -351,16 +352,62 @@ if (isset($__slots)) unset($__slots);
 <?php $component->withAttributes([]); ?>
                             <div class="flex flex-col justify-between h-full absolute top-0 left-0">
                                 <!--[if BLOCK]><![endif]--><?php if($personnel->hasActiveVacation): ?>
-                                    <span class=" text-green-50 flex justify-center items-center text-sm font-medium bg-green-600 px-2 py-1 rounded-sm">
+                                    <?php
+                                        $activeVacation = $personnel->hasActiveBusinessTrip;
+                                        $vacationStart = $activeVacation->start_date;
+                                        $vacationEnd = $activeVacation->return_work_date;
+                                    ?>
+                                    <?php if (isset($component)) { $__componentOriginale375e741fa8af2e5aa10d29452e1526c = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginale375e741fa8af2e5aa10d29452e1526c = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.progress','data' => ['startDate' => $vacationStart,'endDate' => $vacationEnd,'color' => 'emerald']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('progress'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['startDate' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($vacationStart),'endDate' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($vacationEnd),'color' => 'emerald']); ?>
                                         <?php echo e(__('In vacation')); ?>
 
-                                    </span>
+                                     <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginale375e741fa8af2e5aa10d29452e1526c)): ?>
+<?php $attributes = $__attributesOriginale375e741fa8af2e5aa10d29452e1526c; ?>
+<?php unset($__attributesOriginale375e741fa8af2e5aa10d29452e1526c); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginale375e741fa8af2e5aa10d29452e1526c)): ?>
+<?php $component = $__componentOriginale375e741fa8af2e5aa10d29452e1526c; ?>
+<?php unset($__componentOriginale375e741fa8af2e5aa10d29452e1526c); ?>
+<?php endif; ?>
                                 <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                 <!--[if BLOCK]><![endif]--><?php if($personnel->hasActiveBusinessTrip): ?>
-                                    <span class=" text-rose-50 flex justify-center items-center text-sm font-medium bg-rose-600 px-2 py-1 rounded-sm">
+                                    <?php
+                                        $businessTrip = $personnel->hasActiveBusinessTrip;
+                                        $startDate = $businessTrip->start_date;
+                                        $endDate = $businessTrip->end_date;
+                                    ?>
+                                    <?php if (isset($component)) { $__componentOriginale375e741fa8af2e5aa10d29452e1526c = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginale375e741fa8af2e5aa10d29452e1526c = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.progress','data' => ['startDate' => $startDate,'endDate' => $endDate,'color' => 'rose']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('progress'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['startDate' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($startDate),'endDate' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($endDate),'color' => 'rose']); ?>
                                         <?php echo e(__('In business trip')); ?>
 
-                                    </span>
+                                     <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginale375e741fa8af2e5aa10d29452e1526c)): ?>
+<?php $attributes = $__attributesOriginale375e741fa8af2e5aa10d29452e1526c; ?>
+<?php unset($__attributesOriginale375e741fa8af2e5aa10d29452e1526c); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginale375e741fa8af2e5aa10d29452e1526c)): ?>
+<?php $component = $__componentOriginale375e741fa8af2e5aa10d29452e1526c; ?>
+<?php unset($__componentOriginale375e741fa8af2e5aa10d29452e1526c); ?>
+<?php endif; ?>
                                 <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                             </div>
 
@@ -430,7 +477,7 @@ if (isset($__slots)) unset($__slots);
 <?php $component->withAttributes([]); ?>
                             <div class="flex items-center space-x-2 px-2">
                                 <!--[if BLOCK]><![endif]--><?php if(!empty($personnel->photo)): ?>
-                                    <img src="<?php echo e(asset('/storage/'.$personnel->photo)); ?>" alt="" class="flex-none rounded-xl object-cover w-14 h-14 border-4 border-gray-200">
+                                    <img src="<?php echo e(\Illuminate\Support\Facades\Storage::url($personnel->photo)); ?>" alt="" class="flex-none rounded-xl object-cover w-14 h-14 border-4 border-gray-200">
                                 <?php else: ?>
                                     <img src="<?php echo e(asset('assets/images/no-image.png')); ?>" alt="" class="flex-none rounded-xl object-cover w-14 h-14 border-4 border-gray-200">
                                 <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
@@ -631,6 +678,11 @@ if (isset($__slots)) unset($__slots);
                                         >
                                             <span class="text-slate-500"><?php echo e(__('Print')); ?></span>
                                         </a>
+                                        <button wire:click="openSideMenu('show-information','<?php echo e($personnel->tabel_no); ?>')"
+                                                class="appearance-none w-full flex items-center justify-start space-x-2 px-4 py-2 text-sm font-medium rounded-md  hover:bg-slate-100"
+                                        >
+                                            <span class="text-slate-500"><?php echo e(__('Information')); ?></span>
+                                        </button>
                                         <button wire:click="printInfo('<?php echo e($personnel->id); ?>')"
                                                 class="appearance-none w-full flex items-center justify-start space-x-2 px-4 py-2 text-sm font-medium rounded-md  hover:bg-slate-100"
                                         >
@@ -847,6 +899,27 @@ if (isset($__slots)) unset($__slots);
 ?>
             <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
         <?php endif; ?>
+
+        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('edit-personnels')): ?>
+            <!--[if BLOCK]><![endif]--><?php if($showSideMenu == 'show-information'): ?>
+                <?php
+$__split = function ($name, $params = []) {
+    return [$name, $params];
+};
+[$__name, $__params] = $__split('personnel.information', ['personnelModel' => $modelName]);
+
+$__html = app('livewire')->mount($__name, $__params, 'lw-3935985241-5', $__slots ?? [], get_defined_vars());
+
+echo $__html;
+
+unset($__html);
+unset($__name);
+unset($__params);
+unset($__split);
+if (isset($__slots)) unset($__slots);
+?>
+            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+        <?php endif; ?>
      <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal06466d70a5df71623dc2a561e77c49ee)): ?>
@@ -866,7 +939,7 @@ $__split = function ($name, $params = []) {
 };
 [$__name, $__params] = $__split('personnel.delete-personnel', []);
 
-$__html = app('livewire')->mount($__name, $__params, 'lw-3935985241-5', $__slots ?? [], get_defined_vars());
+$__html = app('livewire')->mount($__name, $__params, 'lw-3935985241-6', $__slots ?? [], get_defined_vars());
 
 echo $__html;
 

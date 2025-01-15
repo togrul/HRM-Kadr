@@ -4,145 +4,212 @@ namespace App\Livewire\Traits\Validations;
 
 trait PersonnelValidationTrait
 {
-    public function validationRules()
+    public function validationRules(): array
     {
         return [
-            1 => [
-                'personnel.tabel_no' => 'required|min:1|unique:personnels,tabel_no'.(! empty($this->personnelModel) ? ','.$this->updatePersonnel['id'] : ''),
-                'personnel.name' => 'required|min:3',
-                'personnel.surname' => 'required|min:3',
-                'personnel.patronymic' => 'required|min:3',
-                'personnel.birthdate' => 'required|date',
-                'personnel.previous_name' => $this->personnel['has_changed_initials'] ? 'required|min:3' : '',
-                'personnel.previous_surname' => $this->personnel['has_changed_initials'] ? 'required|min:3' : '',
-                'personnel.previous_patronymic' => $this->personnel['has_changed_initials'] ? 'required|min:3' : '',
-                'personnel.gender' => 'required|int',
-                'personnel.initials_changed_date' => $this->personnel['has_changed_initials'] ? 'required|date' : '',
-                'personnel.initials_change_reason' => $this->personnel['has_changed_initials'] ? 'required|min:3' : '',
-                'personnel.nationality_id.id' => 'required|int|exists:countries,id',
-                'personnel.previous_nationality_id.id' => $this->personnel['has_changed_nationality'] ? 'required|int|exists:countries,id' : '',
-                'personnel.nationality_changed_date' => $this->personnel['has_changed_nationality'] ? 'required|date' : '',
-                'personnel.nationality_change_reason' => $this->personnel['has_changed_nationality'] ? 'required|min:3' : '',
-                'personnel.phone' => ['required', 'min:7'],
-                'personnel.mobile' => ['required', 'min:7'],
-                'personnel.email' => 'required|email',
-                'personnel.pin' => 'required|min:7|max:7',
-                'personnel.residental_address' => 'required|min:3',
-                'personnel.registered_address' => 'required|min:3',
-                'personnel.education_degree_id.id' => 'required|int|exists:education_degrees,id',
-                'personnel.structure_id.id' => 'required|int',
-                'personnel.position_id.id' => 'required|int',
-                'personnel.work_norm_id.id' => 'required|int|exists:work_norms,id',
-                'personnel.join_work_date' => 'required|date',
-                'personnel.disability_id.id' => $this->isDisability ? 'required|int|exists:disabilities,id' : '',
-                'personnel.disability_given_date' => $this->isDisability ? 'required|date' : '',
-            ],
-            2 => [
-                'document.pin' => 'required|min:7',
-                'document.nationality_id.id' => 'required|int|exists:countries,id',
-                'document.series' => 'required|min:1',
-                'document.number' => 'required|int',
-                'document.born_country_id.id' => 'required|int|exists:countries,id',
-                'document.born_city_id.id' => 'required|int|exists:cities,id',
-                'document.is_married' => 'required|boolean',
-                'document.height' => 'required|int',
-                'service_cards.card_number' => 'required|string|min:3',
-                'service_cards.valid_date' => 'required|date'
-            ],
-            3 => [
-                'education.educational_institution_id.id' => 'required|int|exists:educational_institutions,id',
-                'education.education_form_id.id' => 'required|int|exists:education_forms,id',
-                'education.education_language' => 'required|min:2',
-                'education.specialty' => 'required|min:2',
-                'education.admission_year' => 'required|date',
-                'education.graduated_year' => 'required|date|after:education.admission_year',
-                'education.profession_by_document' => 'required|min:2',
-                'education.diplom_serie' => 'required|min:1',
-                'education.diplom_no' => 'required|int',
-                'education.diplom_given_date' => 'required|date',
-                'extra_education.education_type_id.id' => $this->hasExtraEducation ? 'required|int|exists:education_types,id' : '',
-                'extra_education.educational_institution_id.id' => $this->hasExtraEducation ? 'required|int|exists:educational_institutions,id' : '',
-                'extra_education.education_form_id.id' => $this->hasExtraEducation ? 'required|int|exists:education_forms,id' : '',
-                'extra_education.name' => $this->hasExtraEducation ? 'required|min:2' : '',
-                'extra_education.shortname' => $this->hasExtraEducation ? 'required|min:2' : '',
-                'extra_education.education_language' => $this->hasExtraEducation ? 'required|min:2' : '',
-                'extra_education.education_program_name' => $this->hasExtraEducation ? 'required|min:2' : '',
-                'extra_education.admission_year' => $this->hasExtraEducation ? 'required|date' : '',
-                'extra_education.graduated_year' => $this->hasExtraEducation ? 'required|date|after:extra_education.admission_year' : '',
-                'extra_education.education_document_type_id.id' => $this->hasExtraEducation ? 'required|int|exists:education_document_types,id' : '',
-                'extra_education.diplom_serie' => $this->hasExtraEducation ? 'required|min:1' : '',
-                'extra_education.diplom_no' => $this->hasExtraEducation ? 'required|int|unique:personnel_extra_education,diplom_no' : '',
-                'extra_education.diplom_given_date' => $this->hasExtraEducation ? 'required|date' : '',
-            ],
-            4 => [
-                'labor_activities.company_name' => 'required|min:2',
-                'labor_activities.position' => 'required|min:2',
-                'labor_activities.join_date' => 'required|date',
-                'labor_activities.coefficient' => $this->isSpecialService ? 'required|int|min:1' : '',
-                'labor_activities.order_given_by' => $this->isSpecialService ? 'required|min:2' : '',
-                'labor_activities.order_no' => $this->isSpecialService ? 'required|min:2' : '',
-                'labor_activities.order_date' => $this->isSpecialService ? 'required|date' : '',
-                'ranks.rank_id.id' => $this->isAddedRank ? 'required|int|exists:ranks,id' : '',
-                'ranks.name' => $this->isAddedRank ? 'required|min:2' : '',
-                'ranks.given_date' => $this->isAddedRank ? 'required|date' : '',
-                'ranks.rank_reason_id.id' => $this->isAddedRank ? 'required|int|exists:rank_reasons,id' : '',
-                'ranks.order_no' => $this->isAddedRank ? 'required|string|min:1' : '',
-                'ranks.order_given_by' => $this->isAddedRank ? 'required|string|min:1' : '',
-                'ranks.order_date' => $this->isAddedRank ? 'required|date' : '',
-
-            ],
-            5 => [
-                'military.rank_id.id' => 'required|int|exists:ranks,id',
-                'military.attitude_to_military_service' => 'required|min:2',
-                'military.given_date' => 'required|date',
-                'injuries.injury_type' => 'required',
-                'injuries.location' => 'required|min:2',
-                'injuries.date_time' => 'required|date',
-                'captivity.location' => 'required|min:2',
-                'captivity.condition' => 'required|min:2',
-                'captivity.taken_captive_date' => 'required|date',
-            ],
-            6 => [
-                'award.award_id.id' => 'required|int|exists:awards,id',
-                'award.reason' => 'required|min:2',
-                'award.given_date' => 'required|date',
-                'punishment.punishment_id.id' => 'required|int|exists:punishments,id',
-                'punishment.reason' => 'required|min:2',
-                'punishment.given_date' => 'required|date',
-                //            'criminal.punishment_id.id' => 'required|int|exists:punishments,id',
-                //            'criminal.reason' => 'required|min:2',
-                //            'criminal.given_date' => 'required|date',
-            ],
-            7 => [
-                'kinship.kinship_id.id' => 'required|int|exists:kinships,id',
-                'kinship.fullname' => 'required|min:2',
-                'kinship.birthdate' => 'required|date',
-                'kinship.registered_address' => 'required|min:2',
-                'kinship.residental_address' => 'required|min:2',
-            ],
-            8 => [
-                'language.language_id.id' => 'required|int|exists:languages,id',
-                'language.knowledge_status' => 'required',
-                'event.event_type' => 'required|min:2',
-                'event.event_name' => 'required|min:2',
-                'event.event_date' => 'required|date',
-                'degree.degree_and_name_id.id' => 'required|int|exists:education_degrees,id',
-                'degree.science' => 'required|min:2',
-                'degree.given_date' => 'required|date',
-                'degree.subject' => 'required|min:2',
-                'degree.edu_doc_type_id.id' => 'required|int|exists:education_document_types,id',
-                'degree.diplom_serie' => 'required|min:1',
-                'degree.diplom_no' => 'required|int',
-                'degree.diplom_given_date' => 'required|date',
-                'degree.document_issued_by' => 'required|min:2',
-                'elections.election_type' => $this->hasElectedElectorals ? 'required|min:1' : '',
-                'elections.location' => $this->hasElectedElectorals ? 'required|min:2' : '',
-                'elections.elected_date' => $this->hasElectedElectorals ? 'required|date' : '',
-            ],
+            1 => $this->getPersonalInfoRules(),
+            2 => $this->getDocumentRules(),
+            3 => $this->getEducationRules(),
+            4 => $this->getCareerRules(),
+            5 => $this->getMilitaryAndHealthRules(),
+            6 => $this->getRewardsAndPunishmentsRules(),
+            7 => $this->getKinshipRules(),
+            8 => $this->getMiscellaneousRules(),
         ];
     }
 
-    protected function validationAttributes()
+    protected function getPersonalInfoRules(): array
+    {
+        $uniqueTableRule = 'required|min:1|unique:personnels,tabel_no' .
+            (!empty($this->personnelModel) ? ',' . $this->updatePersonnel['id'] : '');
+
+        $initialsChangeRules = $this->personnel['has_changed_initials'] ? [
+            'personnel.previous_name' => 'required|min:3',
+            'personnel.previous_surname' => 'required|min:3',
+            'personnel.previous_patronymic' => 'required|min:3',
+            'personnel.initials_changed_date' => 'required|date',
+            'personnel.initials_change_reason' => 'required|min:3',
+        ] : [];
+
+        $nationalityChangeRules = $this->personnel['has_changed_nationality'] ? [
+            'personnel.previous_nationality_id.id' => 'required|int|exists:countries,id',
+            'personnel.nationality_changed_date' => 'required|date',
+            'personnel.nationality_change_reason' => 'required|min:3',
+        ] : [];
+
+        $disabilityRules = $this->isDisability ? [
+            'personnel.disability_id.id' => 'required|int|exists:disabilities,id',
+            'personnel.disability_given_date' => 'required|date',
+        ] : [];
+
+        return array_merge([
+            'personnel.tabel_no' => $uniqueTableRule,
+            'personnel.name' => 'required|min:3',
+            'personnel.surname' => 'required|min:3',
+            'personnel.patronymic' => 'required|min:3',
+            'personnel.birthdate' => 'required|date',
+            'personnel.gender' => 'required|int',
+            'personnel.nationality_id.id' => 'required|int|exists:countries,id',
+            'personnel.phone' => ['required', 'min:7'],
+            'personnel.mobile' => ['required', 'min:7'],
+            'personnel.email' => 'required|email',
+            'personnel.pin' => 'required|min:7|max:7',
+            'personnel.residental_address' => 'required|min:3',
+            'personnel.registered_address' => 'required|min:3',
+            'personnel.education_degree_id.id' => 'required|int|exists:education_degrees,id',
+            'personnel.structure_id.id' => 'required|int',
+            'personnel.position_id.id' => 'required|int',
+            'personnel.work_norm_id.id' => 'required|int|exists:work_norms,id',
+            'personnel.join_work_date' => 'required|date',
+        ], $initialsChangeRules, $nationalityChangeRules, $disabilityRules);
+    }
+
+    protected function getDocumentRules(): array
+    {
+        return [
+            'document.pin' => 'required|min:7',
+            'document.nationality_id.id' => 'required|int|exists:countries,id',
+            'document.series' => 'required|min:1',
+            'document.number' => 'required|int',
+            'document.born_country_id.id' => 'required|int|exists:countries,id',
+            'document.born_city_id.id' => 'required|int|exists:cities,id',
+            'document.is_married' => 'required|boolean',
+            'document.height' => 'required|int',
+            'service_cards.card_number' => 'required|string|min:3',
+            'service_cards.given_date' => 'required|date',
+            'service_cards.valid_date' => 'required|date',
+            'passports.serial_number' => 'required|string|min:3',
+            'passports.valid_date' => 'required|date',
+            'passports.given_date' => 'required|date',
+        ];
+    }
+
+    protected function getEducationRules(): array
+    {
+        $extraEducationRules = $this->hasExtraEducation ? [
+            'extra_education.education_type_id.id' => 'required|int|exists:education_types,id',
+            'extra_education.educational_institution_id.id' => 'required|int|exists:educational_institutions,id',
+            'extra_education.education_form_id.id' => 'required|int|exists:education_forms,id',
+            'extra_education.name' => 'required|min:2',
+            'extra_education.shortname' => 'required|min:2',
+            'extra_education.education_language' => 'required|min:2',
+            'extra_education.education_program_name' => 'required|min:2',
+            'extra_education.admission_year' => 'required|date',
+            'extra_education.graduated_year' => 'required|date|after:extra_education.admission_year',
+            'extra_education.education_document_type_id.id' => 'required|int|exists:education_document_types,id',
+            'extra_education.diplom_serie' => 'required|min:1',
+            'extra_education.diplom_no' => 'required|int|unique:personnel_extra_education,diplom_no',
+            'extra_education.diplom_given_date' => 'required|date',
+        ] : [];
+
+        return array_merge([
+            'education.educational_institution_id.id' => 'required|int|exists:educational_institutions,id',
+            'education.education_form_id.id' => 'required|int|exists:education_forms,id',
+            'education.education_language' => 'required|min:2',
+            'education.specialty' => 'required|min:2',
+            'education.admission_year' => 'required|date',
+            'education.graduated_year' => 'required|date|after:education.admission_year',
+            'education.profession_by_document' => 'required|min:2',
+            'education.diplom_serie' => 'required|min:1',
+            'education.diplom_no' => 'required|int',
+            'education.diplom_given_date' => 'required|date',
+        ], $extraEducationRules);
+    }
+
+    protected function getCareerRules(): array
+    {
+        $specialServiceRules = $this->isSpecialService ? [
+            'labor_activities.coefficient' => 'required|numeric|min:0',
+            'labor_activities.order_given_by' => 'required|min:2',
+            'labor_activities.order_no' => 'required|min:2',
+            'labor_activities.order_date' => 'required|date',
+        ] : [];
+
+        $rankRules = $this->isAddedRank ? [
+            'ranks.rank_id.id' => 'required|int|exists:ranks,id',
+            'ranks.name' => 'required|min:2',
+            'ranks.given_date' => 'required|date',
+            'ranks.rank_reason_id.id' => 'required|int|exists:rank_reasons,id',
+            'ranks.order_no' => 'required|string|min:1',
+            'ranks.order_given_by' => 'required|string|min:1',
+            'ranks.order_date' => 'required|date',
+        ] : [];
+
+        return array_merge([
+            'labor_activities.company_name' => 'required|min:2',
+            'labor_activities.position' => 'required|min:2',
+            'labor_activities.join_date' => 'required|date',
+        ], $specialServiceRules, $rankRules);
+    }
+
+    protected function getMilitaryAndHealthRules(): array
+    {
+        return [
+            'military.rank_id.id' => 'required|int|exists:ranks,id',
+            'military.attitude_to_military_service' => 'required|min:2',
+            'military.given_date' => 'required|date',
+            'injuries.injury_type' => 'required',
+            'injuries.location' => 'required|min:2',
+            'injuries.date_time' => 'required|date',
+            'captivity.location' => 'required|min:2',
+            'captivity.condition' => 'required|min:2',
+            'captivity.taken_captive_date' => 'required|date',
+        ];
+    }
+
+    protected function getRewardsAndPunishmentsRules(): array
+    {
+        return [
+            'award.award_id.id' => 'required|int|exists:awards,id',
+            'award.reason' => 'required|min:2',
+            'award.given_date' => 'required|date',
+            'punishment.punishment_id.id' => 'required|int|exists:punishments,id',
+            'punishment.reason' => 'required|min:2',
+            'punishment.given_date' => 'required|date',
+        ];
+        //            'criminal.punishment_id.id' => 'required|int|exists:punishments,id',
+        //            'criminal.reason' => 'required|min:2',
+        //            'criminal.given_date' => 'required|date',
+    }
+
+    protected function getKinshipRules(): array
+    {
+        return [
+            'kinship.kinship_id.id' => 'required|int|exists:kinships,id',
+            'kinship.fullname' => 'required|min:2',
+            'kinship.birthdate' => 'required|date',
+            'kinship.registered_address' => 'required|min:2',
+            'kinship.residental_address' => 'required|min:2',
+        ];
+    }
+
+    protected function getMiscellaneousRules(): array
+    {
+        $electionRules = $this->hasElectedElectorals ? [
+            'elections.election_type' => 'required|min:1',
+            'elections.location' => 'required|min:2',
+            'elections.elected_date' => 'required|date',
+        ] : [];
+
+        return array_merge([
+            'language.language_id.id' => 'required|int|exists:languages,id',
+            'language.knowledge_status' => 'required',
+            'event.event_type' => 'required|min:2',
+            'event.event_name' => 'required|min:2',
+            'event.event_date' => 'required|date',
+            'degree.degree_and_name_id.id' => 'required|int|exists:education_degrees,id',
+            'degree.science' => 'required|min:2',
+            'degree.given_date' => 'required|date',
+            'degree.subject' => 'required|min:2',
+            'degree.edu_doc_type_id.id' => 'required|int|exists:education_document_types,id',
+            'degree.diplom_serie' => 'required|min:1',
+            'degree.diplom_no' => 'required|int',
+            'degree.diplom_given_date' => 'required|date',
+            'degree.document_issued_by' => 'required|min:2',
+        ], $electionRules);
+    }
+
+    protected function validationAttributes(): array
     {
         return [
             'personnel.tabel_no' => __('Tabel no'),
@@ -183,6 +250,10 @@ trait PersonnelValidationTrait
             'document.height' => __('Height'),
             'service_cards.card_number' => __('Service cards'),
             'service_cards.valid_date' => __('Valid date'),
+            'service_cards.given_date' => __('Given date'),
+            'passports.serial_number' => __('Serial number'),
+            'passports.valid_date' => __('Valid date'),
+            'passports.given_date' => __('Given date'),
             'education.educational_institution_id.id' => __('Institution'),
             'education.education_form_id.id' => __('Education form'),
             'education.education_language' => __('Education language'),

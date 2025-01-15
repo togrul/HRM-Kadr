@@ -34,7 +34,7 @@
     <div
         wire:loading.remove
         wire:target="getDataByPin"
-        class="grid grid-cols-4 gap-2"
+        class="grid grid-cols-5 gap-2"
     >
         <div class="flex flex-col">
             <x-select-list  class="w-full" :title="__('Nationality')" mode="gray" :selected="$documentNationalityName" name="documentNationalityId">
@@ -108,6 +108,10 @@
             @enderror
         </div>
         <div class="flex flex-col col-span-2">
+            <x-label for="document.birthplace">{{ __('Birth place') }} ({{ __('Extra') }})</x-label>
+            <x-livewire-input mode="gray" name="document.birthplace" wire:model="document.birthplace"></x-livewire-input>
+        </div>
+        <div class="flex flex-col col-span-2">
             <x-label for="document.registered_address">{{ __('Registered address') }}</x-label>
             <x-livewire-input mode="gray" name="document.registered_address" wire:model="document.registered_address"></x-livewire-input>
         </div>
@@ -124,7 +128,7 @@
                 </label>
             </div>
             @error('document.is_married')
-            <x-validation> {{ $message }} </x-validation>
+                <x-validation> {{ $message }} </x-validation>
             @enderror
         </div>
         <div class="flex flex-col">
@@ -146,11 +150,11 @@
             <x-validation> {{ $message }} </x-validation>
             @enderror
         </div>
-        <div class="flex flex-col col-span-2">
+        <div class="flex flex-col">
             <x-label for="document.document_issued_authority">{{ __('Document issued by') }}</x-label>
             <x-livewire-input mode="gray" name="document.document_issued_authority" wire:model="document.document_issued_authority"></x-livewire-input>
         </div>
-        <div class="flex flex-col col-span-2">
+        <div class="flex flex-col">
             <x-label for="document.document_issued_date">{{ __('Document issue date') }}</x-label>
             <x-pikaday-input mode="gray" name="document.document_issued_date" format="Y-MM-DD" wire:model.live="document.document_issued_date">
                 <x-slot name="script">
@@ -175,6 +179,19 @@
             @enderror
         </div>
         <div class="flex flex-col">
+            <x-label for="service_cards.given_date">{{ __('Given date') }}</x-label>
+            <x-pikaday-input mode="gray" name="service_cards.given_date" format="Y-MM-DD" wire:model.live="service_cards.given_date">
+                <x-slot name="script">
+                    $el.onchange = function () {
+                    @this.set('service_cards.given_date', $el.value);
+                    }
+                </x-slot>
+            </x-pikaday-input>
+            @error('service_cards.given_date')
+            <x-validation> {{ $message }} </x-validation>
+            @enderror
+        </div>
+        <div class="flex flex-col">
             <x-label for="service_cards.valid_date">{{ __('Valid date') }}</x-label>
             <x-pikaday-input mode="gray" name="service_cards.valid_date" format="Y-MM-DD" wire:model.live="service_cards.valid_date">
                 <x-slot name="script">
@@ -194,15 +211,20 @@
     <div class="relative -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
         <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
             <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
-                <x-table.tbl :headers="[__('Card number'),__('Valid date'),'action','action']">
+                <x-table.tbl :headers="[__('Card number'),__('Given date'),__('Valid date'),'action']">
                     @forelse ($service_cards_list as $keyServiceCard => $valueServiceCard)
                         @php
-                            $valid = $valueServiceCard['valid_date'] >= \Carbon\Carbon::now();
+                            $valid = \Carbon\Carbon::parse($valueServiceCard['valid_date']) >= \Carbon\Carbon::now();
                         @endphp
                         <tr>
                             <x-table.td>
                                 <span class="text-sm font-semibold text-gray-700">
                                     {{ $valueServiceCard['card_number'] }}
+                               </span>
+                            </x-table.td>
+                            <x-table.td>
+                                <span class="text-sm font-medium">
+                                    {{ $valueServiceCard['given_date'] }}
                                </span>
                             </x-table.td>
                             <x-table.td>
@@ -233,6 +255,120 @@
                                 <button
                                     onclick="confirm('Are you sure you want to remove this data?') || event.stopImmediatePropagation()"
                                     wire:click="forceDeleteServiceCard({{ $keyServiceCard }})"
+                                    class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-50 hover:text-gray-700"
+                                >
+                                    <x-icons.force-delete></x-icons.force-delete>
+                                </button>
+                            </x-table.td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="4">
+                                <div class="flex justify-center items-center py-4">
+                                    <span class="font-medium">{{ __('No information added') }}</span>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforelse
+                </x-table.tbl>
+            </div>
+        </div>
+    </div>
+
+    <hr>
+    <div class="step-section__title">
+        <h1>{{ __('Foreign passports') }}</h1>
+    </div>
+    <div class="grid grid-cols-3 gap-2">
+        <div class="flex flex-col">
+            <x-label for="passports.serial_number">{{ __('Serial number') }}</x-label>
+            <x-livewire-input mode="gray" name="passports.serial_number" wire:model="passports.serial_number"></x-livewire-input>
+            @error('passports.serial_number')
+            <x-validation> {{ $message }} </x-validation>
+            @enderror
+        </div>
+        <div class="flex flex-col">
+            <x-label for="passports.given_date">{{ __('Given date') }}</x-label>
+            <x-pikaday-input mode="gray" name="passports.given_date" format="Y-MM-DD" wire:model.live="passports.given_date">
+                <x-slot name="script">
+                    $el.onchange = function () {
+                    @this.set('passports.given_date', $el.value);
+                    }
+                </x-slot>
+            </x-pikaday-input>
+            @error('passports.given_date')
+            <x-validation> {{ $message }} </x-validation>
+            @enderror
+        </div>
+        <div class="flex flex-col">
+            <x-label for="passports.valid_date">{{ __('Valid date') }}</x-label>
+            <x-pikaday-input mode="gray" name="passports.valid_date" format="Y-MM-DD" wire:model.live="passports.valid_date">
+                <x-slot name="script">
+                    $el.onchange = function () {
+                    @this.set('passports.valid_date', $el.value);
+                    }
+                </x-slot>
+            </x-pikaday-input>
+            @error('passports.valid_date')
+            <x-validation> {{ $message }} </x-validation>
+            @enderror
+        </div>
+        <div class="flex justify-start items-end">
+            <x-button  mode="black" wire:click="addPassport">{{ __('Add') }}</x-button>
+        </div>
+    </div>
+    {{--list passports--}}
+    <div class="relative -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+        <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+            <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
+                <x-table.tbl :headers="[__('Serial number'),__('Given date'),__('Valid date'),'action','action']">
+                    @forelse ($passports_list as $keyPassport => $valuePassport)
+                        @php
+                            $validPassport = \Carbon\Carbon::parse($valuePassport['valid_date']) >= \Carbon\Carbon::now();
+                        @endphp
+                        <tr>
+                            <x-table.td>
+                                <span class="text-sm font-medium text-gray-700">
+                                    {{ $valuePassport['serial_number'] }}
+                               </span>
+                            </x-table.td>
+                            <x-table.td>
+                                <span @class([
+                                    'text-sm font-medium',
+                                    'text-gray-500' => $validPassport,
+                                    'text-gray-500' => ! $validPassport
+                                ])>
+                                    {{ $valuePassport['given_date'] }}
+                               </span>
+                            </x-table.td>
+                            <x-table.td>
+                                <span @class([
+                                    'text-sm font-medium',
+                                    'text-emerald-500' => $validPassport,
+                                    'text-rose-500' => ! $validPassport
+                                ])>
+                                    {{ $valuePassport['valid_date'] }}
+                               </span>
+                            </x-table.td>
+                            <x-table.td>
+                                <div @class([
+                                    'px-3 py-1 text-xs rounded-lg font-medium max-w-[120px] flex justify-center items-center space-x-2',
+                                    'bg-emerald-50 text-emerald-500' => $validPassport,
+                                    'bg-rose-50 text-rose-500' => ! $validPassport
+                                ])>
+                                    <span @class([
+                                        'w-2 h-2 rounded-full shadow-sm flex',
+                                        'bg-emerald-400' => $validPassport ,
+                                        'bg-rose-400' => ! $validPassport ,
+                                    ])>
+                                   </span>
+                                    <span>{{ $validPassport ? __('Active') : __('De-active') }}</span>
+                                </div>
+                            </x-table.td>
+                            <x-table.td :isButton="true">
+                                <button
+                                    onclick="confirm('Are you sure you want to remove this data?') || event.stopImmediatePropagation()"
+                                    wire:click="forceDeletePassport({{ $keyPassport }})"
                                     class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-50 hover:text-gray-700"
                                 >
                                     <x-icons.force-delete></x-icons.force-delete>
