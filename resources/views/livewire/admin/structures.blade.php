@@ -44,7 +44,7 @@
                     @endphp
                     <x-select-list class="w-full" :title="__('Parent')" mode="default" :selected="$selectedNameParent" name="selectedIdParent">
                         <x-livewire-input @click.stop="open = true" mode="gray" name="searchParent"  wire:model.live.debounce.500ms="searchParent"></x-livewire-input>
-                        <x-select-list-item wire:click="setData('form','parent_id',null,'---',null)" :selected="'---' ==  $selectedNameParent"
+                        <x-select-list-item wire:click="setData('form','parent_id',null,'---',null)" :selected="'---' == $selectedNameParent"
                                             wire:model='form.parent_id.id'>
                             ---
                         </x-select-list-item>

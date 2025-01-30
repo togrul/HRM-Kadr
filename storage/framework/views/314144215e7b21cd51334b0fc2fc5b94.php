@@ -218,7 +218,7 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
         </div>
     </div>
     <hr>
-    <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3">
+    <div class="grid grid-cols-1 gap-2 sm:grid-cols-1 md:grid-cols-1">
         <div class="flex flex-col relative">
             <?php if (isset($component)) { $__componentOriginald8ba2b4c22a13c55321e34443c386276 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginald8ba2b4c22a13c55321e34443c386276 = $attributes; } ?>
@@ -274,16 +274,66 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
             </div>
         </div>
 
-        <div class="md:col-span-2 px-2 py-3 bg-slate-100 rounded-lg flex flex-col space-y-2">
+        <div class="px-2 py-3 bg-slate-100 rounded-lg flex flex-col space-y-2">
             <!--[if BLOCK]><![endif]--><?php if(array_key_exists($i,$this->selected_personnel_list)): ?>
                 <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $this->selected_personnel_list[$i]; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $keyPerson => $selectPerson): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <div class="w-full bg-slate-50 border border-slate-200 gap-3 px-3 py-1 rounded-lg flex items-center justify-between">
                         <p class="flex-none flex flex-col text-sm text-slate-800">
                             <span class="text-slate-400"><?php echo e($selectPerson['rank']); ?></span>
-                            <span> <?php echo e($selectPerson['fullname']); ?> </span>
+                            <span><?php echo e($selectPerson['fullname']); ?></span>
                             <span class="text-teal-500"><?php echo e($selectPerson['structure']); ?></span>
+                            <?php
+                                [$year, $month] = [intdiv($selectPerson['work_duration'], 12), $selectPerson['work_duration'] % 12];
+                                $duration = $selectPerson['work_duration'] > 11 ? "{$year} il {$month} ay" : "{$month} ay";
+                            ?>
+                            <span class="<?php echo \Illuminate\Support\Arr::toCssClasses([
+                                        'text-sm',
+                                        'text-rose-500' => $selectPerson['work_duration'] < 6,
+                                        'text-slate-900' => $selectPerson['work_duration'] >= 6
+                            ]); ?>"><?php echo e(__('Seniority')); ?>: <?php echo e($duration); ?></span>
                         </p>
-                        <?php if (isset($component)) { $__componentOriginal9364c0b92ee5ab519273634c79f86a27 = $component; } ?>
+                        <div class="flex flex-col w-full">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-2">
+                                    <?php if (isset($component)) { $__componentOriginald8ba2b4c22a13c55321e34443c386276 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginald8ba2b4c22a13c55321e34443c386276 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('label'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?><?php echo e(__('Reserved month')); ?>:  <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginald8ba2b4c22a13c55321e34443c386276)): ?>
+<?php $attributes = $__attributesOriginald8ba2b4c22a13c55321e34443c386276; ?>
+<?php unset($__attributesOriginald8ba2b4c22a13c55321e34443c386276); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginald8ba2b4c22a13c55321e34443c386276)): ?>
+<?php $component = $__componentOriginald8ba2b4c22a13c55321e34443c386276; ?>
+<?php unset($__componentOriginald8ba2b4c22a13c55321e34443c386276); ?>
+<?php endif; ?>
+                                    <span class="text-sm text-sky-500"><?php echo e($selectPerson['reserved_date_month']); ?></span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <?php
+                                        $percentage = ($selectPerson['vacation_days_remaining'] * 100) / $selectPerson['vacation_days_total'];
+                                        $color = match (true) {
+                                             $percentage < 30 => 'rose',
+                                             $percentage < 60 => 'blue',
+                                             default => 'teal',
+                                         };
+                                    ?>
+                                    <span class="text-sm text-gray-600 flex-shrink-0"><?php echo e(__('Vacation days')); ?>: </span>
+                                    <div class="rounded-lg h-3 bg-slate-200 relative w-28 overflow-hidden flex justify-center items-center">
+                                        <div class="absolute left-0 h-full bg-<?php echo e($color); ?>-500 shadow-sm" style="width: <?php echo e($percentage); ?>%"></div>
+                                    </div>
+                                    <span class="text-sm z-10 text-slate-600"><?php echo e($selectPerson['vacation_days_remaining']); ?>/<?php echo e($selectPerson['vacation_days_total']); ?></span>
+                                </div>
+                            </div>
+
+                            <?php if (isset($component)) { $__componentOriginal9364c0b92ee5ab519273634c79f86a27 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal9364c0b92ee5ab519273634c79f86a27 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.livewire-input','data' => ['mode' => 'default','name' => 'selected_personnel_list.'.e($i).'.'.e($keyPerson).'.location','wire:model' => 'selected_personnel_list.'.e($i).'.'.e($keyPerson).'.location']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('livewire-input'); ?>
@@ -302,10 +352,29 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php $component = $__componentOriginal9364c0b92ee5ab519273634c79f86a27; ?>
 <?php unset($__componentOriginal9364c0b92ee5ab519273634c79f86a27); ?>
 <?php endif; ?>
+                        </div>
                         <button wire:click="removeFromList(<?php echo e($keyPerson); ?>,<?php echo e($i); ?>)"
                                 class="appearance-none flex flex-none justify-center items-center w-6 h-6 rounded-lg drop-shadow-sm transition-all duration-300 hover:drop-shadow-none"
                         >
-                           <?php echo $__env->make('components.icons.backspace-icon', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+                            <?php if (isset($component)) { $__componentOriginal04570af621f08b8d15ec5658fc450132 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal04570af621f08b8d15ec5658fc450132 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.icons.backspace-icon','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('icons.backspace-icon'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?> <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal04570af621f08b8d15ec5658fc450132)): ?>
+<?php $attributes = $__attributesOriginal04570af621f08b8d15ec5658fc450132; ?>
+<?php unset($__attributesOriginal04570af621f08b8d15ec5658fc450132); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal04570af621f08b8d15ec5658fc450132)): ?>
+<?php $component = $__componentOriginal04570af621f08b8d15ec5658fc450132; ?>
+<?php unset($__componentOriginal04570af621f08b8d15ec5658fc450132); ?>
+<?php endif; ?>
                         </button>
                     </div>
                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->

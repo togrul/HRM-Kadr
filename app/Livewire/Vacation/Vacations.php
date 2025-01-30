@@ -34,6 +34,11 @@ class Vacations extends Component
     #[Url]
     public $status;
 
+    public $years = [];
+
+    #[Url(as: 'year', keep: true)]
+    public $selectedYear;
+
     public function exportExcel()
     {
         $report = $this->returnData(type: 'excel');
@@ -55,12 +60,17 @@ class Vacations extends Component
 
     public function printVacationDocument(PersonnelVacation $model)
     {
-        $model->load(['personnel', 'personnel.latestRank.rank', 'order', 'order.orderType']);
+        $model->load([
+            'personnel',
+            'personnel.latestRank.rank',
+            'order',
+            'order.orderType',
+        ]);
 
-//        $chief = Personnel::with(['latestRank.rank'])
-//            ->where(['structure_id' => 8, 'position_id' => 10])
-//            ->active()
-//            ->firstOrFail();
+        //        $chief = Personnel::with(['latestRank.rank'])
+        //            ->where(['structure_id' => 8, 'position_id' => 10])
+        //            ->active()
+        //            ->firstOrFail();
         $chiefName = cache('settings')['Chief'];
         $chiefRank = cache('settings')['Chief rank'];
 
@@ -123,9 +133,16 @@ class Vacations extends Component
 
     protected function returnData($type = 'normal')
     {
-        $result = PersonnelVacation::with(['personnel', 'personnel.structure', 'personnel.position', 'personnel.latestRank.rank'])
-            ->filter($this->search)
+        $result = PersonnelVacation::with([
+            'personnel' => fn ($q) => $q->with([
+                'structure',
+                'position',
+                'latestRank.rank',
+            ]),
+        ])
             ->whereHas('personnel', fn ($query) => $query->whereIn('structure_id', resolve(StructureService::class)->getAccessibleStructures()))
+            ->filter($this->search)
+            ->when((empty($this->search['date']['min'] ?? null) && empty($this->search['date']['max'] ?? null)), fn($qq) => $qq->whereDateInYear($this->selectedYear))
             ->orderByDesc('end_date')
             ->orderByDesc('return_work_date');
 
@@ -134,16 +151,36 @@ class Vacations extends Component
             : $result->get()->toArray();
     }
 
-    #[Computed()]
+    #[Computed]
     public function vacations()
     {
         return $this->returnData();
+    }
+
+    protected function fillYear(): void
+    {
+        $this->years = PersonnelVacation::selectRaw('YEAR(start_date) as year')
+            ->distinct()
+            ->orderBy('year', 'desc')
+            ->pluck('year')
+            ->prepend(Carbon::now()->year)
+            ->unique()
+            ->sortDesc()
+            ->values();
+
+        $this->selectedYear = request()->has('year') ? request()->get('year') : $this->years->first();
     }
 
     public function mount()
     {
         $this->authorize('show-vacations');
         $this->fillFilter();
+        $this->fillYear();
+        if (session()->has('vacation-updated')) {
+            $sessionData = session()->pull('vacation-updated');
+            $this->filter = array_merge($this->filter, $sessionData);
+            $this->searchFilter();
+        }
     }
 
     public function render()

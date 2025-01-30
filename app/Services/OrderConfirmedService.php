@@ -9,12 +9,11 @@ use App\Models\Candidate;
 use App\Models\Order;
 use App\Models\OrderLog;
 use App\Models\Personnel;
-use App\Models\StaffSchedule;
 use Carbon\Carbon;
 
 class OrderConfirmedService
 {
-    public function __construct(public OrderLog $orderLog) {}
+    public function __construct(public OrderLog $orderLog, public array $extraData = []) {}
 
     public function handle($personnelIds = [], $action = 'create'): void
     {
@@ -117,7 +116,6 @@ class OrderConfirmedService
         $_personnel->laborActivities()->create($this->getNewLaborActivityData($_personnel, $orderLog, $date));
     }
 
-
     private function endCurrentLaborActivity($_personnel, $date): void
     {
         $activeWork = $_personnel->laborActivities()
@@ -152,7 +150,6 @@ class OrderConfirmedService
     {
         $orderLog->load('personnels');
         $orderAttributes = $orderLog->attributes->pluck('attributes')->toArray();
-
         foreach ($orderLog->personnels as $key => $_person) {
             $this->updateOrCreateVacation($_person, $orderAttributes, $key, $orderLog);
         }
@@ -184,14 +181,11 @@ class OrderConfirmedService
 
         $commonAttributes = [
             'order_no' => $orderLog->order_no,
-//            'order_date' => $orderLog->given_date,
         ];
 
         $relationshipMethod = '';
 
-        $filteredAttributes = array_filter($orderAttributes, function ($item) use ($_person) {
-            return isset($item['$fullname']['value']) && $item['$fullname']['value'] == $_person->fullname;
-        });
+        $filteredAttributes = $this->filterArrayByFullname($orderAttributes, $_person->fullname, 'fullname', true);
 
         $spesificAttributes = [
             'start_date' => Carbon::parse($arr[$key]['$start_date']['value'])->format('Y-m-d'),
@@ -209,7 +203,12 @@ class OrderConfirmedService
                 $spesificAttributes['vacation_places'] = $arr[$key]['$location']['value'];
                 $spesificAttributes['duration'] = $arr[$key]['$days']['value'];
                 $spesificAttributes['return_work_date'] = Carbon::parse($arr[$key]['$end_date']['value'])->addDay()->format('Y-m-d');
+                // teze days lari elave etmek
                 unset($spesificAttributes['attributes']);
+                $extraData = $this->filterArrayByFullname($this->extraData[$key], $_person->fullname, 'fullname');
+                $extraDataConverted = array_merge(...$extraData);
+                $spesificAttributes['vacation_days_total'] = $extraDataConverted['vacation_days_total'];
+                $spesificAttributes['remaining_days'] = $extraDataConverted['vacation_days_remaining'] - $spesificAttributes['duration'];
                 $relationshipMethod = 'vacations';
                 break;
             case Order::BLADE_BUSINESS_TRIP:
@@ -218,12 +217,32 @@ class OrderConfirmedService
 
                 $relationshipMethod = 'businessTrips';
                 break;
+            default:
+                throw new \InvalidArgumentException("Unsupported order type: $type");
         }
-
         $_person->{$relationshipMethod}()->withTrashed()->updateOrCreate(
             $commonAttributes,
             $spesificAttributes
         );
+
+        if ($type === Order::BLADE_VACATION) {
+            $_person->yearlyVacation()
+                ->where('year', Carbon::parse($arr[$key]['$start_date']['value'])->year)
+                ->update([
+                    'remaining_days' => $spesificAttributes['remaining_days'],
+                ]);
+        }
+    }
+
+    private function filterArrayByFullname(array $mainArray, string $filteredKey, string $arrayKey, bool $isNested = false)
+    {
+        return array_filter($mainArray, function ($item) use ($arrayKey, $filteredKey, $isNested) {
+            if ($isNested) {
+                $key = '$'.$arrayKey;
+                return isset($item[$key]['value']) && $item[$key]['value'] === $filteredKey;
+            }
+            return isset($item[$arrayKey]) && $item[$arrayKey] == $filteredKey;
+        });
     }
 
     private function removeVacationPersonnels($orderLog): void

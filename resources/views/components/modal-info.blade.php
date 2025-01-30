@@ -2,7 +2,7 @@
     'eventToOpenModal' => null,
     'livewireEventToOpenModal' => null,
     'modal-title',
-    'bodyMessage'
+    'bodyMessage' => ''
 ])
 
 <div
@@ -10,22 +10,24 @@
         @if( $livewireEventToOpenModal)
         $wire.on('{{ $livewireEventToOpenModal }}',message => {
             openDeleteModal = true
-            $nextTick(() => $refs.confirmButton.focus())
+{{--            $nextTick(() => $refs.confirmButton.focus())--}}
             this.bodyMessage = message
+            bodyMessage = message
           })
         @endif
         "
-    x-data={openDeleteModal:false}
+    x-data={openDeleteModal:false,bodyMessage:''}
     x-show="openDeleteModal"
     @keydown.escape.window="openDeleteModal = false"
     @if( $eventToOpenModal)
         {{ '@'.$eventToOpenModal }}.window="
         openDeleteModal = true
-        $nextTick(() => $refs.confirmButton.focus())
+{{--        $nextTick(() => $refs.confirmButton.focus())--}}
         this.bodyMessage = message
+        bodyMessage = message
     "
     @endif
-    class="fixed inset-0 z-50 overflow-y-auto"
+    class="fixed inset-0 z-[99999] overflow-y-auto"
     aria-labelledby="modal-title"
     role="dialog"
     aria-modal="true"
@@ -79,7 +81,7 @@
                         <h3 class="text-xl font-medium leading-6 text-gray-900" id="modal-title">
                             {{ $modalTitle }}
                         </h3>
-                        <div class="flex flex-col py-2 space-y-2 text-gray-600" x-html="bodyMessage">
+                        <div class="flex flex-col py-2 space-y-2 text-gray-600" x-text="bodyMessage">
                             {{ $slot }}
                         </div>
                     </div>

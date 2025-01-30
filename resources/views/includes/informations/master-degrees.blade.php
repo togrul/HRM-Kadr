@@ -45,7 +45,7 @@
         </div>
     </div>
     <div class="flex justify-end space-x-2">
-        @if($selectedRequest)
+        @if($selectedDegree)
             <x-button mode="danger" wire:click="resetSelected">{{ __('Cancel') }}</x-button>
         @endif
         <x-button mode="black" wire:click="addMasterDegree">{{ __('Save') }}</x-button>

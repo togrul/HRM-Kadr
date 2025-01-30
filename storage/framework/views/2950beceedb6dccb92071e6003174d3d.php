@@ -22,7 +22,38 @@
 ">
     <div class="flex flex-col space-y-4 px-6 py-4">
         <div class="flex justify-between items-center">
-            <div class="flex flex-col items-center justify-between sm:flex-row filter bg-white py-2 px-2 rounded-xl"></div>
+            <div class="flex flex-row space-x-2 items-center justify-start py-2 px-2 rounded-xl">
+                <?php if (isset($component)) { $__componentOriginald8ba2b4c22a13c55321e34443c386276 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginald8ba2b4c22a13c55321e34443c386276 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('label'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?><?php echo e(__('Year')); ?>   <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginald8ba2b4c22a13c55321e34443c386276)): ?>
+<?php $attributes = $__attributesOriginald8ba2b4c22a13c55321e34443c386276; ?>
+<?php unset($__attributesOriginald8ba2b4c22a13c55321e34443c386276); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginald8ba2b4c22a13c55321e34443c386276)): ?>
+<?php $component = $__componentOriginald8ba2b4c22a13c55321e34443c386276; ?>
+<?php unset($__componentOriginald8ba2b4c22a13c55321e34443c386276); ?>
+<?php endif; ?>
+                <select
+                    name="selectedYear"
+                    id="selectedYear"
+                    wire:model.live="selectedYear"
+                    <?php if(!empty($filter['date']['min'] ?? null) || !empty($filter['date']['max'] ?? null)): echo 'disabled'; endif; ?>
+                    class="block w-full text-base bg-slate-800 border-slate-600 text-white focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm rounded-md"
+                >
+                    <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $years; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $year): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <option value="<?php echo e($year); ?>" <?php if($year == $selectedYear): echo 'selected'; endif; ?>><?php echo e($year); ?></option>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
+                </select>
+            </div>
 
             <div class="flex flex-col">
                 <div class="flex space-x-4">
@@ -235,17 +266,21 @@
                 <div class="flex space-x-1 items-center">
                     <?php if (isset($component)) { $__componentOriginal36038ba5ddba347b69d2b76bc4612d11 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal36038ba5ddba347b69d2b76bc4612d11 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.pikaday-input','data' => ['mode' => 'gray','name' => 'filter.date.min','format' => 'Y-MM-DD','wire:model.live' => 'filter.date.min']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.pikaday-input','data' => ['mode' => 'gray','name' => 'filter.date.min','format' => 'Y-MM-DD','wire:model.defer' => 'filter.date.min']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('pikaday-input'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['mode' => 'gray','name' => 'filter.date.min','format' => 'Y-MM-DD','wire:model.live' => 'filter.date.min']); ?>
+<?php $component->withAttributes(['mode' => 'gray','name' => 'filter.date.min','format' => 'Y-MM-DD','wire:model.defer' => 'filter.date.min']); ?>
                          <?php $__env->slot('script', null, []); ?> 
                             $el.onchange = function () {
-                            window.Livewire.find('<?php echo e($_instance->getId()); ?>').set('filter.date.min', $el.value);
+                                if ($el.value === '') {
+                                    window.Livewire.find('<?php echo e($_instance->getId()); ?>').set('filter.date.min', null);
+                                } else {
+                                    window.Livewire.find('<?php echo e($_instance->getId()); ?>').set('filter.date.min', $el.value);
+                                }
                             }
                          <?php $__env->endSlot(); ?>
                      <?php echo $__env->renderComponent(); ?>
@@ -261,17 +296,21 @@
                     <span>-</span>
                     <?php if (isset($component)) { $__componentOriginal36038ba5ddba347b69d2b76bc4612d11 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal36038ba5ddba347b69d2b76bc4612d11 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.pikaday-input','data' => ['mode' => 'gray','name' => 'filter.date.max','format' => 'Y-MM-DD','wire:model.live' => 'filter.date.max']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.pikaday-input','data' => ['mode' => 'gray','name' => 'filter.date.max','format' => 'Y-MM-DD','wire:model.defer' => 'filter.date.max']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('pikaday-input'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['mode' => 'gray','name' => 'filter.date.max','format' => 'Y-MM-DD','wire:model.live' => 'filter.date.max']); ?>
+<?php $component->withAttributes(['mode' => 'gray','name' => 'filter.date.max','format' => 'Y-MM-DD','wire:model.defer' => 'filter.date.max']); ?>
                          <?php $__env->slot('script', null, []); ?> 
                             $el.onchange = function () {
-                            window.Livewire.find('<?php echo e($_instance->getId()); ?>').set('filter.date.max', $el.value);
+                                if ($el.value === '') {
+                                    window.Livewire.find('<?php echo e($_instance->getId()); ?>').set('filter.date.max', null); // Explicitly set to null when cleared
+                                } else {
+                                    window.Livewire.find('<?php echo e($_instance->getId()); ?>').set('filter.date.max', $el.value);
+                                }
                             }
                          <?php $__env->endSlot(); ?>
                      <?php echo $__env->renderComponent(); ?>
@@ -404,14 +443,14 @@
             <div class="flex space-x-2 items-end">
                 <?php if (isset($component)) { $__componentOriginald0f1fd2689e4bb7060122a5b91fe8561 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginald0f1fd2689e4bb7060122a5b91fe8561 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.button','data' => ['mode' => 'primary','wire:click' => 'searchFilter']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.button','data' => ['mode' => 'primary','wire:click' => 'searchFilter()']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('button'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['mode' => 'primary','wire:click' => 'searchFilter']); ?><?php echo e(__('Search')); ?> <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['mode' => 'primary','wire:click' => 'searchFilter()']); ?><?php echo e(__('Search')); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginald0f1fd2689e4bb7060122a5b91fe8561)): ?>
 <?php $attributes = $__attributesOriginald0f1fd2689e4bb7060122a5b91fe8561; ?>
@@ -442,7 +481,6 @@
 <?php endif; ?>
             </div>
         </div>
-
 
         <div class="relative min-h-[300px] -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
@@ -547,7 +585,6 @@
 
                                         </span>
                                     </div>
-
                                  <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b)): ?>
@@ -585,6 +622,22 @@
                                         <div class="flex items-center space-x-1">
                                             <span class="text-gray-500"><?php echo e(__('Return work date')); ?>:</span>
                                             <span class="text-green-500"><?php echo e(\Carbon\Carbon::parse($_vacation->return_work_date)->format('d.m.Y')); ?></span>
+                                        </div>
+                                        <div class="flex items-center space-x-2">
+                                            <?php
+                                                $totalDays = max($_vacation->vacation_days_total, 1); // Avoid division by zero
+                                                $percentage = ($_vacation->remaining_days * 100) / $totalDays;
+                                                $color = match (true) {
+                                                    $percentage < 30 => 'rose',
+                                                    $percentage < 60 => 'blue',
+                                                    default => 'teal', // Handles $percentage >= 60
+                                                };
+                                            ?>
+                                            <span class="text-sm text-gray-500 flex-shrink-0"><?php echo e(__('Vacation days')); ?>: </span>
+                                            <div class="rounded-lg h-2 bg-slate-200 relative w-20 overflow-hidden flex justify-center items-center">
+                                                <div class="absolute left-0 h-full bg-<?php echo e($color); ?>-500 shadow-sm" style="width: <?php echo e($percentage); ?>%"></div>
+                                            </div>
+                                            <span class="text-sm z-10 text-slate-900 font-medium"><?php echo e($_vacation->remaining_days); ?>/<?php echo e($_vacation->vacation_days_total); ?></span>
                                         </div>
                                     </div>
                                  <?php echo $__env->renderComponent(); ?>

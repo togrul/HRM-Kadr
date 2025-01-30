@@ -7,13 +7,32 @@
 <div
     class="flex flex-col w-full p-10 px-0 mx-auto my-3 mb-4 space-y-8 transition duration-500 ease-in-out transform bg-white"
 >
-    <div class="grid grid-cols-1 gap-2 sm:grid-cols-4">
+    <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
         <div class="">
             <x-label for="form.id">{{ __('ID') }}</x-label>
             <x-livewire-input type="number" mode="gray" name="form.id" wire:model="form.id"></x-livewire-input>
             @error('form.id')
-            <x-validation> {{ $message }} </x-validation>
+                <x-validation> {{ $message }} </x-validation>
             @enderror
+        </div>
+        <div class="sm:col-span-2">
+            @php
+                $selectedName = array_key_exists('rank_category_id',$data) ? $data['rank_category_id']['name'] : '---';
+                $selectedId = array_key_exists('rank_category_id',$data) ? $data['rank_category_id']['id'] : -1;
+            @endphp
+            <x-select-list class="w-full" mode="gray" :title="__('Rank category')" :selected="$selectedName" name="rankCategoryId">
+                <x-select-list-item wire:click.prevent="setData('data','rank_category_id',null,'---',null)"
+                                    :selected="'---' ==  $selectedName"
+                                    wire:model='data.rank_category_id.id'>
+                    ---
+                </x-select-list-item>
+                @foreach($this->rankCategory as $category)
+                    <x-select-list-item wire:click.prevent="setData('data','rank_category_id',null,'{{ $category->name }}',{{ $category->id }})"
+                                        :selected="$category->id === $selectedId" wire:model='data.rank_category_id.id'>
+                        {{ $category->name }}
+                    </x-select-list-item>
+                @endforeach
+            </x-select-list>
         </div>
         <div class="">
             <x-label for="form.name_az">{{ __('Name') }} AZ</x-label>

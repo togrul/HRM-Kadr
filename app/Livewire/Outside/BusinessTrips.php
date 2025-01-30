@@ -129,9 +129,9 @@ class BusinessTrips extends Component
 
     protected function returnData($type = 'normal')
     {
-        $result = PersonnelBusinessTrip::with(['personnel', 'order.orderType'])
-            ->filter($this->search)
+        $result = PersonnelBusinessTrip::with(['personnel', 'order.orderType', 'personDidDelete'])
             ->whereHas('personnel', fn ($query) => $query->whereIn('structure_id', resolve(StructureService::class)->getAccessibleStructures()))
+            ->filter($this->search)
             ->orderByDesc('end_date');
 
         return $type == 'normal'
@@ -139,7 +139,7 @@ class BusinessTrips extends Component
             : $result->get()->toArray();
     }
 
-    #[Computed()]
+    #[Computed]
     public function businessTrips()
     {
         return $this->returnData();

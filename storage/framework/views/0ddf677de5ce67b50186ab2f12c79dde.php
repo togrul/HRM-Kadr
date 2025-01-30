@@ -63,7 +63,25 @@
            >
              <button @click="isOpen=false;$wire.call('closeSideMenu');document.body.classList.remove('overflow-hidden')" class="z-20 p-1 text-white rounded-lg hover:text-white focus:outline-none focus:ring-2 focus:ring-white">
                <span class="sr-only"><?php echo e(__('Close')); ?></span>
-                 <?php echo $__env->make('components.icons.remove-icon',['size' => 'w-7 h-7','color' => 'text-slate-500','hover' => 'text-slate-900'], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+                 <?php if (isset($component)) { $__componentOriginal2b723b42d6712f974b6e7dfc4c0d88fc = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal2b723b42d6712f974b6e7dfc4c0d88fc = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.icons.remove-icon','data' => ['size' => 'w-7 h-7','color' => 'text-slate-500','hover' => 'text-slate-900']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('icons.remove-icon'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['size' => 'w-7 h-7','color' => 'text-slate-500','hover' => 'text-slate-900']); ?> <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal2b723b42d6712f974b6e7dfc4c0d88fc)): ?>
+<?php $attributes = $__attributesOriginal2b723b42d6712f974b6e7dfc4c0d88fc; ?>
+<?php unset($__attributesOriginal2b723b42d6712f974b6e7dfc4c0d88fc); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal2b723b42d6712f974b6e7dfc4c0d88fc)): ?>
+<?php $component = $__componentOriginal2b723b42d6712f974b6e7dfc4c0d88fc; ?>
+<?php unset($__componentOriginal2b723b42d6712f974b6e7dfc4c0d88fc); ?>
+<?php endif; ?>
              </button>
            </div>
 

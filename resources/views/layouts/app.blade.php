@@ -27,6 +27,14 @@
             />
         @endif
 
+        @if(session()->has('error'))
+            <x-notification
+                type="error"
+                :redirect="false"
+                :message-to-display="session('error')"
+            />
+        @endif
+
         @if(session()->has('error_message'))
             <x-notification
                 type="error"

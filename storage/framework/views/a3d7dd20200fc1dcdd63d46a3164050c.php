@@ -34,12 +34,12 @@
 
 
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-        <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $settings; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $stg): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+        <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $settings; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $settingValue): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
         <div class="flex space-x-2 justify-between items-end w-full">
             <div class="flex flex-col space-y-2 w-full">
-                <span class="text-sm font-medium text-gray-500"><?php echo e(__($stg->name)); ?></span>
-                <!--[if BLOCK]><![endif]--><?php if($stg->type == 'string'): ?>
-                <?php if (isset($component)) { $__componentOriginal9364c0b92ee5ab519273634c79f86a27 = $component; } ?>
+                <span class="text-sm font-medium text-gray-500"><?php echo e(__($settingValue->name)); ?></span>
+                <!--[if BLOCK]><![endif]--><?php if($settingValue->type == 'string'): ?>
+                    <?php if (isset($component)) { $__componentOriginal9364c0b92ee5ab519273634c79f86a27 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal9364c0b92ee5ab519273634c79f86a27 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.livewire-input','data' => ['mode' => 'gray','name' => 'setting.'.e($key).'.value','wire:model.live' => 'setting.'.e($key).'.value']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('livewire-input'); ?>
@@ -58,17 +58,17 @@
 <?php $component = $__componentOriginal9364c0b92ee5ab519273634c79f86a27; ?>
 <?php unset($__componentOriginal9364c0b92ee5ab519273634c79f86a27); ?>
 <?php endif; ?>
-                <?php elseif($stg->type == 'bool'): ?>
-                <?php if (isset($component)) { $__componentOriginal74b62b190a03153f11871f645315f4de = $component; } ?>
+                <?php elseif($settingValue->type == 'bool'): ?>
+                    <?php if (isset($component)) { $__componentOriginal74b62b190a03153f11871f645315f4de = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal74b62b190a03153f11871f645315f4de = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.checkbox','data' => ['name' => 'setting.'.e($key).'.value','model' => 'setting.'.e($key).'.value']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.checkbox','data' => ['name' => 'setting.'.e($key).'.value','model' => 'setting.'.e($key).'.value','checked' => ''.e($settingValue->value == '1').'','value' => ''.e((bool)$settingValue->value).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('checkbox'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['name' => 'setting.'.e($key).'.value','model' => 'setting.'.e($key).'.value']); ?> <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['name' => 'setting.'.e($key).'.value','model' => 'setting.'.e($key).'.value','checked' => ''.e($settingValue->value == '1').'','value' => ''.e((bool)$settingValue->value).'']); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal74b62b190a03153f11871f645315f4de)): ?>
 <?php $attributes = $__attributesOriginal74b62b190a03153f11871f645315f4de; ?>
@@ -79,7 +79,7 @@
 <?php unset($__componentOriginal74b62b190a03153f11871f645315f4de); ?>
 <?php endif; ?>
                 <?php else: ?>
-                <?php if (isset($component)) { $__componentOriginal9364c0b92ee5ab519273634c79f86a27 = $component; } ?>
+                    <?php if (isset($component)) { $__componentOriginal9364c0b92ee5ab519273634c79f86a27 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal9364c0b92ee5ab519273634c79f86a27 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.livewire-input','data' => ['mode' => 'gray','type' => 'number','name' => 'setting.'.e($key).'.value','wire:model.live' => 'setting.'.e($key).'.value']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('livewire-input'); ?>
@@ -101,17 +101,14 @@
                 <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
             </div>
             <button
-            wire:click.prevent = "setDeleteSettings(<?php echo e($stg->id); ?>)"
+                wire:click.prevent = "setDeleteSettings(<?php echo e($settingValue->id); ?>)"
                 class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-100 hover:text-gray-700"
             >
                 <?php echo $__env->make('components.icons.delete-icon', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
             </button>
         </div>
-
         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
     </div>
-
-
 
     
     <div>

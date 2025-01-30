@@ -1,46 +1,69 @@
-@props([
-     'type',
-     'data'
-])
+@props(['notification'])
 
 @php
-     $color = match($type)
-     {
-          'birthday' => 'green',
-          'stock','bar' => 'blue',
-          'payment' => 'red'
-     }
+      $data = $notification->data;
+      $type = $data['type'];
+      $action = $data['action'] ?? '';
+      $isRead = !empty($notification->read_at);
+      switch ($action) {
+             case 'create':
+                 $color = 'teal';
+                 $message = __('has created new personnel');
+                 $category = __('New '. strtolower($type));
+                 $addedBy = $data['added_by'];
+                 break;
+             case 'delete':
+                 $color = 'rose';
+                 $message = __('has deleted personnel');
+                 $category = __($type . ' deleted');
+                 $addedBy = $data['added_by'];
+                 break;
+             case 'birthday':
+                 $color = 'blue';
+                 $message = '';
+                 $category = $type;
+                 $addedBy = null;
+                 break;
+             default:
+                  $color = 'gray';
+                  $message = __('has a notification');
+         };
 @endphp
+<li class="w-full">
+    <button
+        @click.prevent="isOpen = false"
+        wire:click.prevent="markAsRead('{{ $notification->id }}')"
+        @class([
+            'flex w-full px-5 py-3 transition duration-150 ease-in hover:bg-gray-100',
+            'bg-slate-50' => !empty($notification->read_at)
+        ])
+    >
+        <div class="flex flex-col items-start w-full space-y-1">
+            <div class="flex items-start justify-between w-full">
+                <p class="flex items-start space-x-2">
+                     <span class="bg-{{ $color }}-100 text-xs rounded uppercase text-{{ $color }}-500 font-medium px-2 py-1">
+                         {{ __($category) }}
+                     </span>
+                </p>
+            </div>
 
-<div class="flex flex-col w-full">
-     <div class="leading-4 space-x-1 space-y-2">
-          <div class="flex justify-between items-center w-full">
-               <span class="bg-{{$color}}-100 text-xs rounded text-{{$color}}-500 font-medium px-2 py-1">
-                    {{__($type)}}
-                </span>
-                <span class="text-xs font-medium text-gray-500">{{ $data['create_date']->diffForHumans() }}</span>
-          </div>
-        
-         <p>
-             <span class="font-medium">{{ $data['name'] }}</span>
-             @if(!empty($data['category']))
-               <span class="font-medium text-gray-500">( {{ __($data['category']) }} )</span>
-             @endif
-         </p> 
-         @if($type == 'payment')
-               <div class="flex items-center space-x-3">
-                    <div class="flex items-center space-x-2">
-                         {{$data['title'][0]}}:<span class="font-medium text-xs py-1 px-2 rounded text-{{$color}}-500">{{ $data['value'][0] }}</span>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                         {{$data['title'][1]}}:<span class="font-medium text-xs py-1 px-2 rounded text-{{$color}}-500">{{ $data['value'][1] }}</span>
-                    </div>
-               </div>
-          @else
-            <p>{{$data['title'][0]}}:<span class="font-medium text-xs py-1 px-2 rounded text-{{$color}}-500">{{ $data['value'][0] }}</span></p>
-          @endif
-          @if(!empty($data['text']))
-               <span class="font-medium text-gray-500">{{$data['text']}}</span>
-          @endif  
-     </div>
- </div>
+            <div class="flex items-start justify-between w-full">
+                <p class="flex items-center space-x-1 text-sm font-medium text-gray-500 text-left">
+                    @if($action == 'birthday')
+                        <x-icons.cake-icon color="text-yellow-800"></x-icons.cake-icon>
+                        <span class="text-black text-base flex items-center"><span class="text-sm text-gray-500">{{ __('Age') }}:</span>{{ \Carbon\Carbon::parse($data['added_by'])->age }}</span>
+                    @else
+                        <span class="font-semibold text-slate-500">{{ $addedBy }}</span>
+                    @endif
+                    <span>{{ $message ?? '' }} -</span>
+                    <span class="font-semibold text-black">{{ $data['name'] }}</span>
+                </p>
+                @if(! $isRead) <span class="w-2 h-2 rounded-full bg-blue-500 mt-1"></span> @endif
+            </div>
+            <div class="flex items-center justify-between w-full">
+                <span class="font-light text-sm text-gray-500">{{ $notification->created_at->format('d.m.Y H:i') }}</span>
+                <span class="font-light text-sm text-gray-500">{{ $notification->created_at->diffForHumans() }}</span>
+            </div>
+        </div>
+    </button>
+</li>

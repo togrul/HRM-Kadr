@@ -28,6 +28,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/candidates', \App\Livewire\Candidates\CandidateList::class)->name('candidates');
     Route::get('/vacations', \App\Livewire\Vacation\Vacations::class)->name('vacations.list');
     Route::get('/business-trips', \App\Livewire\Outside\BusinessTrips::class)->name('business-trips.list');
+    Route::get('/notifications', \App\Livewire\Notification\NotificationList::class)->name('notifications');
 
     Route::prefix('/profile')->controller(ProfileController::class)->group(function () {
         Route::get('/', 'edit')->name('profile.edit');
@@ -63,6 +64,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/scientific-degrees', \App\Livewire\Admin\ScientificDegrees::class)->name('admin.scientific-degrees');
         Route::get('/social-origins', \App\Livewire\Admin\SocialOrigins::class)->name('admin.social-origins');
         Route::get('/rank-reasons', \App\Livewire\Admin\RankReasons::class)->name('admin.rank-reasons');
+        Route::get('/rank-categories', \App\Livewire\Admin\RankCategories::class)->name('admin.rank-categories');
     });
 
 

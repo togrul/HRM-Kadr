@@ -8,7 +8,7 @@
 <div
     class="flex flex-col w-full p-10 px-0 mx-auto my-3 mb-4 space-y-8 transition duration-500 ease-in-out transform bg-white"
 >
-    <div class="grid grid-cols-1 gap-2 sm:grid-cols-4">
+    <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
         <div class="">
             <?php if (isset($component)) { $__componentOriginald8ba2b4c22a13c55321e34443c386276 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginald8ba2b4c22a13c55321e34443c386276 = $attributes; } ?>
@@ -53,7 +53,7 @@ $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?>
-            <?php if (isset($component)) { $__componentOriginala61a9a091bbbf95d1addcb0ba0326332 = $component; } ?>
+                <?php if (isset($component)) { $__componentOriginala61a9a091bbbf95d1addcb0ba0326332 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginala61a9a091bbbf95d1addcb0ba0326332 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.validation','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('validation'); ?>
@@ -76,6 +76,77 @@ $message = $__bag->first($__errorArgs[0]); ?>
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
+        </div>
+        <div class="sm:col-span-2">
+            <?php
+                $selectedName = array_key_exists('rank_category_id',$data) ? $data['rank_category_id']['name'] : '---';
+                $selectedId = array_key_exists('rank_category_id',$data) ? $data['rank_category_id']['id'] : -1;
+            ?>
+            <?php if (isset($component)) { $__componentOriginald384098dd1216f6f264fe579adbe3c2f = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginald384098dd1216f6f264fe579adbe3c2f = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list','data' => ['class' => 'w-full','mode' => 'gray','title' => __('Rank category'),'selected' => $selectedName,'name' => 'rankCategoryId']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('select-list'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['class' => 'w-full','mode' => 'gray','title' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(__('Rank category')),'selected' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($selectedName),'name' => 'rankCategoryId']); ?>
+                <?php if (isset($component)) { $__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list-item','data' => ['wire:click.prevent' => 'setData(\'data\',\'rank_category_id\',null,\'---\',null)','selected' => '---' ==  $selectedName,'wire:model' => 'data.rank_category_id.id']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('select-list-item'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['wire:click.prevent' => 'setData(\'data\',\'rank_category_id\',null,\'---\',null)','selected' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute('---' ==  $selectedName),'wire:model' => 'data.rank_category_id.id']); ?>
+                    ---
+                 <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee)): ?>
+<?php $attributes = $__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee; ?>
+<?php unset($__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee)): ?>
+<?php $component = $__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee; ?>
+<?php unset($__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee); ?>
+<?php endif; ?>
+                <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $this->rankCategory; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $category): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <?php if (isset($component)) { $__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list-item','data' => ['wire:click.prevent' => 'setData(\'data\',\'rank_category_id\',null,\''.e($category->name).'\','.e($category->id).')','selected' => $category->id === $selectedId,'wire:model' => 'data.rank_category_id.id']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('select-list-item'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['wire:click.prevent' => 'setData(\'data\',\'rank_category_id\',null,\''.e($category->name).'\','.e($category->id).')','selected' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($category->id === $selectedId),'wire:model' => 'data.rank_category_id.id']); ?>
+                        <?php echo e($category->name); ?>
+
+                     <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee)): ?>
+<?php $attributes = $__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee; ?>
+<?php unset($__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee)): ?>
+<?php $component = $__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee; ?>
+<?php unset($__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee); ?>
+<?php endif; ?>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
+             <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginald384098dd1216f6f264fe579adbe3c2f)): ?>
+<?php $attributes = $__attributesOriginald384098dd1216f6f264fe579adbe3c2f; ?>
+<?php unset($__attributesOriginald384098dd1216f6f264fe579adbe3c2f); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginald384098dd1216f6f264fe579adbe3c2f)): ?>
+<?php $component = $__componentOriginald384098dd1216f6f264fe579adbe3c2f; ?>
+<?php unset($__componentOriginald384098dd1216f6f264fe579adbe3c2f); ?>
+<?php endif; ?>
         </div>
         <div class="">
             <?php if (isset($component)) { $__componentOriginald8ba2b4c22a13c55321e34443c386276 = $component; } ?>

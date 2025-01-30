@@ -135,21 +135,20 @@
         </div>
     </div>
 
-
     <div class="flex flex-col space-y-2">
         <div class="relative min-h-[300px] -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
                 <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
                     <?php if (isset($component)) { $__componentOriginal3ee30789824fd1cc17cb4ff8e03df656 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal3ee30789824fd1cc17cb4ff8e03df656 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table.tbl','data' => ['headers' => [__('ID'),__('Name'),__('Duration'),__('Active?'),'action','action']]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table.tbl','data' => ['headers' => [__('ID'),__('Category'),__('Name'),__('Duration'),__('Active?'),'action','action']]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('table.tbl'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['headers' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute([__('ID'),__('Name'),__('Duration'),__('Active?'),'action','action'])]); ?>
+<?php $component->withAttributes(['headers' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute([__('ID'),__('Category'),__('Name'),__('Duration'),__('Active?'),'action','action'])]); ?>
                         <!--[if BLOCK]><![endif]--><?php $__empty_1 = true; $__currentLoopData = $_ranks; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $rank): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                             <tr>
                                 <?php if (isset($component)) { $__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b = $component; } ?>
@@ -164,6 +163,33 @@
 <?php $component->withAttributes([]); ?>
                                       <span class="text-sm font-medium">
                                           <?php echo e($rank->id); ?>
+
+                                      </span>
+                                 <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b)): ?>
+<?php $attributes = $__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b; ?>
+<?php unset($__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b)): ?>
+<?php $component = $__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b; ?>
+<?php unset($__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b); ?>
+<?php endif; ?>
+                                <?php if (isset($component)) { $__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table.td','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('table.td'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+                                      <span class="<?php echo \Illuminate\Support\Arr::toCssClasses([
+                                            'text-sm font-medium text-blue-500',
+                                            'bg-slate-100 rounded-sm px-3 py-1' => $rank->rankCategory
+                                      ]); ?>">
+                                          <?php echo e($rank->rankCategory?->name); ?>
 
                                       </span>
                                  <?php echo $__env->renderComponent(); ?>

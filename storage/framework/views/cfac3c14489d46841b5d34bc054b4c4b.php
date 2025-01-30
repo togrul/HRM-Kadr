@@ -39,7 +39,31 @@
     <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 
     <div class="flex justify-between items-end w-full">
-        <?php if (isset($component)) { $__componentOriginaldc57d0f5eb34c46effd5ce9af16bca01 = $component; } ?>
+        <!--[if BLOCK]><![endif]--><?php if(! auth()->user()->can('update-personnels') && isset($personnelModel)): ?>
+            <div class="flex space-x-2 items-center">
+                <?php if (isset($component)) { $__componentOriginal197957cb487bb6b611bd5c5b4499498e = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal197957cb487bb6b611bd5c5b4499498e = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.icons.lock-icon','data' => ['color' => 'text-rose-500','hover' => 'text-rose-600','size' => 'w-7 h-7']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('icons.lock-icon'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['color' => 'text-rose-500','hover' => 'text-rose-600','size' => 'w-7 h-7']); ?> <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal197957cb487bb6b611bd5c5b4499498e)): ?>
+<?php $attributes = $__attributesOriginal197957cb487bb6b611bd5c5b4499498e; ?>
+<?php unset($__attributesOriginal197957cb487bb6b611bd5c5b4499498e); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal197957cb487bb6b611bd5c5b4499498e)): ?>
+<?php $component = $__componentOriginal197957cb487bb6b611bd5c5b4499498e; ?>
+<?php unset($__componentOriginal197957cb487bb6b611bd5c5b4499498e); ?>
+<?php endif; ?>
+                <span class="text-sm text-slate-500"><?php echo e(__('You have no permission to edit.')); ?></span>
+            </div>
+        <?php else: ?>
+            <?php if (isset($component)) { $__componentOriginaldc57d0f5eb34c46effd5ce9af16bca01 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginaldc57d0f5eb34c46effd5ce9af16bca01 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.modal-button','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('modal-button'); ?>
@@ -58,6 +82,8 @@
 <?php $component = $__componentOriginaldc57d0f5eb34c46effd5ce9af16bca01; ?>
 <?php unset($__componentOriginaldc57d0f5eb34c46effd5ce9af16bca01); ?>
 <?php endif; ?>
+        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+
         <div class="flex items-center space-x-2">
             <!--[if BLOCK]><![endif]--><?php if($step > 1): ?>
                 <?php if (isset($component)) { $__componentOriginald0f1fd2689e4bb7060122a5b91fe8561 = $component; } ?>

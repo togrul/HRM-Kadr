@@ -63,7 +63,7 @@
            >
              <button @click="isOpen=false;$wire.call('closeSideMenu');document.body.classList.remove('overflow-hidden')" class="z-20 p-1 text-white rounded-lg hover:text-white focus:outline-none focus:ring-2 focus:ring-white">
                <span class="sr-only">{{ __('Close') }}</span>
-                 @include('components.icons.remove-icon',['size' => 'w-7 h-7','color' => 'text-slate-500','hover' => 'text-slate-900'])
+                 <x-icons.remove-icon size="w-7 h-7" color="text-slate-500" hover="text-slate-900"></x-icons.remove-icon>
              </button>
            </div>
 

@@ -3,7 +3,7 @@
     'eventToOpenModal' => null,
     'livewireEventToOpenModal' => null,
     'modal-title',
-    'bodyMessage'
+    'bodyMessage' => ''
 ]) as $__key => $__value) {
     $$__key = $$__key ?? $__value;
 } ?>
@@ -11,13 +11,13 @@
     'eventToOpenModal' => null,
     'livewireEventToOpenModal' => null,
     'modal-title',
-    'bodyMessage'
+    'bodyMessage' => ''
 ]); ?>
 <?php foreach (array_filter(([
     'eventToOpenModal' => null,
     'livewireEventToOpenModal' => null,
     'modal-title',
-    'bodyMessage'
+    'bodyMessage' => ''
 ]), 'is_string', ARRAY_FILTER_USE_KEY) as $__key => $__value) {
     $$__key = $$__key ?? $__value;
 } ?>
@@ -32,22 +32,24 @@
         <?php if( $livewireEventToOpenModal): ?>
         $wire.on('<?php echo e($livewireEventToOpenModal); ?>',message => {
             openDeleteModal = true
-            $nextTick(() => $refs.confirmButton.focus())
+
             this.bodyMessage = message
+            bodyMessage = message
           })
         <?php endif; ?>
         "
-    x-data={openDeleteModal:false}
+    x-data={openDeleteModal:false,bodyMessage:''}
     x-show="openDeleteModal"
     @keydown.escape.window="openDeleteModal = false"
     <?php if( $eventToOpenModal): ?>
         <?php echo e('@'.$eventToOpenModal); ?>.window="
         openDeleteModal = true
-        $nextTick(() => $refs.confirmButton.focus())
+
         this.bodyMessage = message
+        bodyMessage = message
     "
     <?php endif; ?>
-    class="fixed inset-0 z-50 overflow-y-auto"
+    class="fixed inset-0 z-[99999] overflow-y-auto"
     aria-labelledby="modal-title"
     role="dialog"
     aria-modal="true"
@@ -102,7 +104,7 @@
                             <?php echo e($modalTitle); ?>
 
                         </h3>
-                        <div class="flex flex-col py-2 space-y-2 text-gray-600" x-html="bodyMessage">
+                        <div class="flex flex-col py-2 space-y-2 text-gray-600" x-text="bodyMessage">
                             <?php echo e($slot); ?>
 
                         </div>

@@ -40,14 +40,33 @@
                     <x-label for="form.id">{{ __('ID') }}</x-label>
                     <x-livewire-input mode="default" type="number" name="form.id" wire:model="form.id"></x-livewire-input>
                     @error('form.id')
-                    <x-validation> {{ $message }} </x-validation>
+                        <x-validation> {{ $message }} </x-validation>
                     @enderror
+                </div>
+                <div class="flex flex-col">
+                    @php
+                        $selectedName = array_key_exists('rank_category_id',$form) ? $form['rank_category_id']['name'] : '---';
+                        $selectedId = array_key_exists('rank_category_id',$form) ? $form['rank_category_id']['id'] : -1;
+                    @endphp
+                    <x-select-list class="w-full" mode="default" :title="__('Rank category')" :selected="$selectedName" name="rankCategoryId">
+                        <x-select-list-item wire:click.prevent="setData('form','rank_category_id',null,'---',null)"
+                                            :selected="'---' ==  $selectedName"
+                                            wire:model='form.rank_category_id.id'>
+                            ---
+                        </x-select-list-item>
+                        @foreach($this->rankCategory as $category)
+                            <x-select-list-item wire:click.prevent="setData('form','rank_category_id',null,'{{ $category->name }}',{{ $category->id }})"
+                                                :selected="$category->id === $selectedId" wire:model='form.rank_category_id.id'>
+                                {{ $category->name }}
+                            </x-select-list-item>
+                        @endforeach
+                    </x-select-list>
                 </div>
                 <div class="flex flex-col">
                     <x-label for="form.name">{{ __('Name') }}</x-label>
                     <x-livewire-input mode="default" name="form.name" wire:model="form.name"></x-livewire-input>
                     @error('form.name')
-                    <x-validation> {{ $message }} </x-validation>
+                        <x-validation> {{ $message }} </x-validation>
                     @enderror
                 </div>
                 <div class="flex items-end">
@@ -61,12 +80,20 @@
         <div class="relative min-h-[300px] -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
                 <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
-                    <x-table.tbl :headers="[__('ID'),__('Name'),'action']">
+                    <x-table.tbl :headers="[__('ID'),__('Category'),__('Name'),'action']">
                         @forelse ($positions as $position)
                             <tr>
                                 <x-table.td>
                                       <span class="text-sm text-gray-500 font-medium">
                                           {{ $position->id }}
+                                      </span>
+                                </x-table.td>
+                                <x-table.td>
+                                      <span @class([
+                                            'text-sm font-medium text-blue-500',
+                                            'bg-slate-100 rounded-sm px-3 py-1' => $position->rankCategory
+                                      ])>
+                                          {{ $position->rankCategory?->name }}
                                       </span>
                                 </x-table.td>
                                 <x-table.td>

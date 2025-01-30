@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Rank extends Model
 {
@@ -11,6 +12,7 @@ class Rank extends Model
 
     protected $fillable = [
         'id',
+        'rank_category_id',
         'name_az',
         'name_en',
         'name_ru',
@@ -19,6 +21,11 @@ class Rank extends Model
     ];
 
     public $timestamps = false;
+
+    public function rankCategory(): BelongsTo
+    {
+        return $this->belongsTo(RankCategory::class);
+    }
 
     public function getNameAttribute($value)
     {

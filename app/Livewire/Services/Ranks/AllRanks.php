@@ -4,7 +4,9 @@ namespace App\Livewire\Services\Ranks;
 
 use App\Livewire\Traits\SideModalAction;
 use App\Models\Rank;
+use App\Models\RankCategory;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -29,6 +31,7 @@ class AllRanks extends Component
         $this->resetPage();
     }
 
+
     public function mount()
     {
         $this->status = request()->query('status')
@@ -38,7 +41,7 @@ class AllRanks extends Component
 
     public function render()
     {
-        $_ranks = Rank::query()
+        $_ranks = Rank::with('rankCategory')
             ->where('is_active', $this->status)
             ->paginate(15)
             ->withQueryString();

@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class PersonnelVacation extends Model
@@ -26,6 +27,8 @@ class PersonnelVacation extends Model
         'order_given_by',
         'order_no',
         'order_date',
+        'vacation_days_total',
+        'remaining_days',
         'added_by',
         'deleted_by',
         'deleted_at',
@@ -71,10 +74,16 @@ class PersonnelVacation extends Model
         return $this->belongsTo(OrderLog::class, 'order_no', 'order_no');
     }
 
+    public function scopeWhereDateInYear($query, $year)
+    {
+        return $query->where(function ($q) use ($year) {
+            $q->where('start_date', '>=', "{$year}-01-01")
+                ->where('start_date', '<=', "{$year}-12-31");
+        });
+    }
+
     public function scopeFilter($query, array $filters)
     {
-        $currentDate = Carbon::now()->format('Y-m-d');
-
         foreach ($filters as $field => $value) {
             switch ($field) {
                 case 'structure_id':
@@ -89,9 +98,8 @@ class PersonnelVacation extends Model
                     }
                     break;
                 case 'date':
-                    $minDate = isset($value['min']) ? Carbon::parse($value['min'])->format('Y-m-d') : null;
-                    $maxDate = isset($value['max']) ? Carbon::parse($value['max'])->format('Y-m-d') : null;
-
+                    $minDate = $value['min'] ?? '' ? Carbon::parse($value['min'])->format('Y-m-d') : null;
+                    $maxDate = $value['max'] ?? '' ? Carbon::parse($value['max'])->format('Y-m-d') : null;
                     if ($minDate) {
                         $query->where('start_date', '>=', $minDate);
                     }
@@ -101,17 +109,24 @@ class PersonnelVacation extends Model
                     break;
                 case 'vacation_status':
                     if ($value === 'at_work') {
-                        $query->where('return_work_date', '<', $currentDate);
-                    } elseif ($value === 'in_business_trip') {
-                        $query->where('return_work_date', '>', $currentDate);
+                        $query->where('return_work_date', '<', Carbon::now());
+                    } elseif ($value === 'in_vacation') {
+                        $query->where('return_work_date', '>', Carbon::now());
                     }
                     break;
                 case 'fullname':
                     $query->whereHas('personnel', function ($qq) use ($value) {
                         $qq->where(function ($q) use ($value) {
-                            $q->where('surname', 'LIKE', "%$value%")
-                                ->orWhere('name', 'LIKE', "%$value%")
-                                ->orWhere('patronymic', 'LIKE', "%$value%");
+                            // Split the search term into words
+                            $searchTerms = explode(' ', trim($value));
+
+                            foreach ($searchTerms as $term) {
+                                $q->where(function ($subQuery) use ($term) {
+                                    $subQuery->orWhere('surname', 'LIKE', "%{$term}%")
+                                        ->orWhere('name', 'LIKE', "%{$term}%")
+                                        ->orWhere('patronymic', 'LIKE', "%{$term}%");
+                                });
+                            }
                         });
                     });
                     break;

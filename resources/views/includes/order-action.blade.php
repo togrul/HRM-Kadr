@@ -124,7 +124,7 @@
                 <button class="flex justify-center items-center rounded-lg p-1 shadow-sm absolute right-0 top-0 bg-slate-50 text-rose-500"
                         wire:click="deleteRow"
                 >
-                    @include('components.icons.remove-icon',['color' => 'text-slate-500','hover' => 'text-slate-600'])
+                    <x-icons.remove-icon color="text-slate-500" hover="text-slate-600"></x-icons.remove-icon>
                 </button>
                 @endif
                 <div class="flex flex-col space-y-2">
@@ -163,7 +163,7 @@
 
         <div class="flex justify-center items-center">
             <button class="rounded-lg shadow-sm bg-gray-100 text-slate-900 px-6 py-2 font-medium text-sm flex justify-center items-center space-x-2" wire:click="addRow">
-                @include('components.icons.add-icon')
+                <x-icons.add-icon></x-icons.add-icon>
                 <span class="uppercase">{{ __('Add') }}</span>
             </button>
         </div>
@@ -191,11 +191,15 @@
         <x-modal-button>{{ __('Save') }}</x-modal-button>
     </div>
 
-
     <div>
         <x-modal-info
             livewire-event-to-open-modal="checkVacancyWasSet"
             :modal-title="__('Vacancy error')"
+        ></x-modal-info>
+
+        <x-modal-info
+            livewire-event-to-open-modal="checkVacationAdd"
+            :modal-title="__('Vacation error')"
         ></x-modal-info>
     </div>
 </div>

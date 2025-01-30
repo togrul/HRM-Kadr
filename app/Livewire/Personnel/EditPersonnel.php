@@ -69,6 +69,7 @@ class EditPersonnel extends Component
 
     public function store()
     {
+        $this->authorize('update-personnels', $this->personnelModel);
         $this->step == 1 && $this->validate($this->validationRules()[$this->step]);
 
         if (! empty($this->avatar)) {

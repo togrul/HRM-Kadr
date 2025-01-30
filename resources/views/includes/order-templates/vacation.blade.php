@@ -35,7 +35,7 @@
         </div>
     </div>
     <hr>
-    <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3">
+    <div class="grid grid-cols-1 gap-2 sm:grid-cols-1 md:grid-cols-1">
         <div class="flex flex-col relative">
             <x-label for="personnel_name">{{ __('Search personnel') }}</x-label>
             <x-livewire-input @click.stop="showPersonnelList = {{ $i }}" mode="gray" name="personnel_name" wire:model.live="personnel_name"></x-livewire-input>
@@ -55,20 +55,53 @@
             </div>
         </div>
 
-        <div class="md:col-span-2 px-2 py-3 bg-slate-100 rounded-lg flex flex-col space-y-2">
+        <div class="px-2 py-3 bg-slate-100 rounded-lg flex flex-col space-y-2">
             @if(array_key_exists($i,$this->selected_personnel_list))
                 @foreach($this->selected_personnel_list[$i] as $keyPerson => $selectPerson)
                     <div class="w-full bg-slate-50 border border-slate-200 gap-3 px-3 py-1 rounded-lg flex items-center justify-between">
                         <p class="flex-none flex flex-col text-sm text-slate-800">
                             <span class="text-slate-400">{{ $selectPerson['rank'] }}</span>
-                            <span> {{ $selectPerson['fullname'] }} </span>
+                            <span>{{ $selectPerson['fullname'] }}</span>
                             <span class="text-teal-500">{{ $selectPerson['structure'] }}</span>
+                            @php
+                                [$year, $month] = [intdiv($selectPerson['work_duration'], 12), $selectPerson['work_duration'] % 12];
+                                $duration = $selectPerson['work_duration'] > 11 ? "{$year} il {$month} ay" : "{$month} ay";
+                            @endphp
+                            <span @class([
+                                        'text-sm',
+                                        'text-rose-500' => $selectPerson['work_duration'] < 6,
+                                        'text-slate-900' => $selectPerson['work_duration'] >= 6
+                            ])>{{ __('Seniority') }}: {{ $duration }}</span>
                         </p>
-                        <x-livewire-input mode="default" name="selected_personnel_list.{{$i}}.{{ $keyPerson }}.location" wire:model="selected_personnel_list.{{$i}}.{{ $keyPerson }}.location"></x-livewire-input>
+                        <div class="flex flex-col w-full">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-2">
+                                    <x-label>{{ __('Reserved month') }}: </x-label>
+                                    <span class="text-sm text-sky-500">{{ $selectPerson['reserved_date_month'] }}</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    @php
+                                        $percentage = ($selectPerson['vacation_days_remaining'] * 100) / $selectPerson['vacation_days_total'];
+                                        $color = match (true) {
+                                             $percentage < 30 => 'rose',
+                                             $percentage < 60 => 'blue',
+                                             default => 'teal',
+                                         };
+                                    @endphp
+                                    <span class="text-sm text-gray-600 flex-shrink-0">{{ __('Vacation days') }}: </span>
+                                    <div class="rounded-lg h-3 bg-slate-200 relative w-28 overflow-hidden flex justify-center items-center">
+                                        <div class="absolute left-0 h-full bg-{{ $color }}-500 shadow-sm" style="width: {{ $percentage }}%"></div>
+                                    </div>
+                                    <span class="text-sm z-10 text-slate-600">{{ $selectPerson['vacation_days_remaining'] }}/{{ $selectPerson['vacation_days_total'] }}</span>
+                                </div>
+                            </div>
+
+                            <x-livewire-input mode="default" name="selected_personnel_list.{{$i}}.{{ $keyPerson }}.location" wire:model="selected_personnel_list.{{$i}}.{{ $keyPerson }}.location"></x-livewire-input>
+                        </div>
                         <button wire:click="removeFromList({{$keyPerson}},{{ $i }})"
                                 class="appearance-none flex flex-none justify-center items-center w-6 h-6 rounded-lg drop-shadow-sm transition-all duration-300 hover:drop-shadow-none"
                         >
-                           @include('components.icons.backspace-icon')
+                            <x-icons.backspace-icon></x-icons.backspace-icon>
                         </button>
                     </div>
                 @endforeach

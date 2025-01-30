@@ -659,7 +659,25 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                 <button class="flex justify-center items-center rounded-lg p-1 shadow-sm absolute right-0 top-0 bg-slate-50 text-rose-500"
                         wire:click="deleteRow"
                 >
-                    <?php echo $__env->make('components.icons.remove-icon',['color' => 'text-slate-500','hover' => 'text-slate-600'], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+                    <?php if (isset($component)) { $__componentOriginal2b723b42d6712f974b6e7dfc4c0d88fc = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal2b723b42d6712f974b6e7dfc4c0d88fc = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.icons.remove-icon','data' => ['color' => 'text-slate-500','hover' => 'text-slate-600']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('icons.remove-icon'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['color' => 'text-slate-500','hover' => 'text-slate-600']); ?> <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal2b723b42d6712f974b6e7dfc4c0d88fc)): ?>
+<?php $attributes = $__attributesOriginal2b723b42d6712f974b6e7dfc4c0d88fc; ?>
+<?php unset($__attributesOriginal2b723b42d6712f974b6e7dfc4c0d88fc); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal2b723b42d6712f974b6e7dfc4c0d88fc)): ?>
+<?php $component = $__componentOriginal2b723b42d6712f974b6e7dfc4c0d88fc; ?>
+<?php unset($__componentOriginal2b723b42d6712f974b6e7dfc4c0d88fc); ?>
+<?php endif; ?>
                 </button>
                 <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                 <div class="flex flex-col space-y-2">
@@ -776,7 +794,25 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 
         <div class="flex justify-center items-center">
             <button class="rounded-lg shadow-sm bg-gray-100 text-slate-900 px-6 py-2 font-medium text-sm flex justify-center items-center space-x-2" wire:click="addRow">
-                <?php echo $__env->make('components.icons.add-icon', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+                <?php if (isset($component)) { $__componentOriginaldfc7e290c37ee4892c2a2155433789a2 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginaldfc7e290c37ee4892c2a2155433789a2 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.icons.add-icon','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('icons.add-icon'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?> <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginaldfc7e290c37ee4892c2a2155433789a2)): ?>
+<?php $attributes = $__attributesOriginaldfc7e290c37ee4892c2a2155433789a2; ?>
+<?php unset($__attributesOriginaldfc7e290c37ee4892c2a2155433789a2); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginaldfc7e290c37ee4892c2a2155433789a2)): ?>
+<?php $component = $__componentOriginaldfc7e290c37ee4892c2a2155433789a2; ?>
+<?php unset($__componentOriginaldfc7e290c37ee4892c2a2155433789a2); ?>
+<?php endif; ?>
                 <span class="uppercase"><?php echo e(__('Add')); ?></span>
             </button>
         </div>
@@ -865,7 +901,6 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php endif; ?>
     </div>
 
-
     <div>
         <?php if (isset($component)) { $__componentOriginal16a69a1a43f5ecd0133586a23e13ec2a = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal16a69a1a43f5ecd0133586a23e13ec2a = $attributes; } ?>
@@ -877,6 +912,26 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
 <?php $component->withAttributes(['livewire-event-to-open-modal' => 'checkVacancyWasSet','modal-title' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(__('Vacancy error'))]); ?> <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal16a69a1a43f5ecd0133586a23e13ec2a)): ?>
+<?php $attributes = $__attributesOriginal16a69a1a43f5ecd0133586a23e13ec2a; ?>
+<?php unset($__attributesOriginal16a69a1a43f5ecd0133586a23e13ec2a); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal16a69a1a43f5ecd0133586a23e13ec2a)): ?>
+<?php $component = $__componentOriginal16a69a1a43f5ecd0133586a23e13ec2a; ?>
+<?php unset($__componentOriginal16a69a1a43f5ecd0133586a23e13ec2a); ?>
+<?php endif; ?>
+
+        <?php if (isset($component)) { $__componentOriginal16a69a1a43f5ecd0133586a23e13ec2a = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal16a69a1a43f5ecd0133586a23e13ec2a = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.modal-info','data' => ['livewireEventToOpenModal' => 'checkVacationAdd','modalTitle' => __('Vacation error')]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('modal-info'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['livewire-event-to-open-modal' => 'checkVacationAdd','modal-title' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(__('Vacation error'))]); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal16a69a1a43f5ecd0133586a23e13ec2a)): ?>
 <?php $attributes = $__attributesOriginal16a69a1a43f5ecd0133586a23e13ec2a; ?>

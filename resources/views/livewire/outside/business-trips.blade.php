@@ -126,6 +126,10 @@
                         <input type="radio" class="form-radio" name="filter.business_trip_status" wire:model="filter.business_trip_status" value="in_business_trip">
                         <span class="ml-2 text-sm font-normal">{{__('In business trip')}}</span>
                     </label>
+                    <label class="inline-flex items-center bg-gray-100 rounded shadow-sm py-2 px-2">
+                        <input type="radio" class="form-radio" name="filter.business_trip_status" wire:model="filter.business_trip_status" value="deleted">
+                        <span class="ml-2 text-sm font-normal">{{ __('Deleted') }}</span>
+                    </label>
                 </div>
             </div>
             <div class="flex space-x-2 items-end">
@@ -138,7 +142,7 @@
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
                 <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
 
-                    <x-table.tbl :headers="[__('#'),__('Fullname'),__('Dates'),__('Locations'),__('Order'),'action']" wire:transition>
+                    <x-table.tbl :headers="[__('#'),__('Fullname'),__('Dates'),__('Locations'),__('Order'),'action']">
                         @forelse ($this->businessTrips as $key => $_bTrip)
                             @php
                                 $multi = ($_bTrip->order->businessTrips->count() > 1 && $_bTrip->order->order_type_id != \App\Models\PersonnelBusinessTrip::FOREIGN_BUSINESS_TRIP);
@@ -182,6 +186,18 @@
                                             <span class="text-gray-500">{{__('End date')}}:</span>
                                             <span class="text-rose-500">{{ \Carbon\Carbon::parse($_bTrip->end_date)->format('d.m.Y') }}</span>
                                         </div>
+                                        @if( \Illuminate\Support\Arr::get($search ,'business_trip_status', '') == 'deleted')
+                                            <div class="flex flex-col text-sm font-medium">
+                                                <div class="flex items-center space-x-1">
+                                                    <span class="text-gray-500">{{__('Deleted date')}}:</span>
+                                                    <span class="text-black">{{ \Carbon\Carbon::parse($_bTrip->deleted_at)->format('d.m.Y H:i') }}</span>
+                                                </div>
+                                                <div class="flex items-center space-x-1">
+                                                    <span class="text-gray-500">{{__('Deleted by')}}:</span>
+                                                    <span class="text-black">{{$_bTrip->personDidDelete->name}}</span>
+                                                </div>
+                                            </div>
+                                        @endif
                                     </div>
                                 </x-table.td>
 

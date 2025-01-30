@@ -38,7 +38,15 @@
     @endif
 
     <div class="flex justify-between items-end w-full">
-        <x-modal-button>{{ __('Save') }}</x-modal-button>
+        @if(! auth()->user()->can('update-personnels') && isset($personnelModel))
+            <div class="flex space-x-2 items-center">
+                <x-icons.lock-icon color="text-rose-500" hover="text-rose-600" size="w-7 h-7"></x-icons.lock-icon>
+                <span class="text-sm text-slate-500">{{ __('You have no permission to edit.') }}</span>
+            </div>
+        @else
+            <x-modal-button>{{ __('Save') }}</x-modal-button>
+        @endif
+
         <div class="flex items-center space-x-2">
             @if($step > 1)
                 <x-button mode="warning" wire:click.prevent="previousStep">{{ __('Previous') }}</x-button>

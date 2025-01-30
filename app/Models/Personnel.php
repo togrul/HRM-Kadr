@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use App\Observers\PersonnelObserver;
 use App\Traits\DateCastTrait;
 use App\Traits\NestedStructureTrait;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+#[ObservedBy(PersonnelObserver::class)]
 class Personnel extends Model
 {
     use DateCastTrait;
@@ -235,6 +238,12 @@ class Personnel extends Model
             ->orderByDesc('leave_date');
     }
 
+    public function currentWork(): HasOne
+    {
+        return $this->hasOne(PersonnelLaborActivity::class, 'tabel_no', 'tabel_no')
+            ->where('is_current', true);
+    }
+
     public function military(): HasMany
     {
         return $this->hasMany(PersonnelMilitaryService::class, 'tabel_no', 'tabel_no')->orderByDesc('end_date');
@@ -268,6 +277,19 @@ class Personnel extends Model
     public function weapons(): HasMany
     {
         return $this->hasMany(PersonnelWeapon::class, 'tabel_no', 'tabel_no')->orderByDesc('given_date');
+    }
+
+    public function yearlyVacation(): HasMany
+    {
+        return $this->hasMany(Vacation::class, 'tabel_no', 'tabel_no')->orderByDesc('year');
+    }
+
+    public function latestYearlyVacation(): HasOne
+    {
+        return $this->hasOne(Vacation::class, 'tabel_no', 'tabel_no')
+            ->where(function ($query) {
+                $query->where('year', Carbon::now()->year);
+            });
     }
 
     public function activeWeapons(): HasMany

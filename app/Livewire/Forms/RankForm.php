@@ -14,6 +14,8 @@ class RankForm extends Form
     #[Validate('required|integer|min:1')]
     public $id;
 
+    public $rank_category_id;
+
     #[Validate('required|min:2')]
     public $name_az;
 
@@ -37,6 +39,7 @@ class RankForm extends Form
         $this->rank = $rank;
 
         $this->id = $rank->id;
+        $this->rank_category_id = $rank->rank_category_id;
         $this->name_az = $rank->name_az;
         $this->name_en = $rank->name_en;
         $this->name_ru = $rank->name_ru;
@@ -44,8 +47,9 @@ class RankForm extends Form
         $this->is_active = (bool) $rank->is_active;
     }
 
-    public function create()
+    public function create(array $data)
     {
+        $this->rank_category_id = $data['rank_category_id']['id'];
         $this->validate();
 
         $updateData = Arr::except($this->all(),'rank');
@@ -53,8 +57,9 @@ class RankForm extends Form
         Rank::create($updateData);
     }
 
-    public function update()
+    public function update(array $data)
     {
+        $this->rank_category_id = $data['rank_category_id']['id'];
         $this->validate();
         $updateData = Arr::except($this->all(),'rank');
         $this->rank->update(

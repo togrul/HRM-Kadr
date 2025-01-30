@@ -62,7 +62,7 @@
                                         'bg-rose-200' => ! $activeCard
                                     ])>
                                         <span @class([
-                                            'flex justify-center items-center w-2 h-2 rounded-full shadow-sm',
+                                            'flex justify-center items-center w-2 h-2 rounded-full shadow-sm transition duration-300',
                                             'bg-green-500' => $activeCard,
                                             'bg-rose-500' => ! $activeCard
                                         ])></span>

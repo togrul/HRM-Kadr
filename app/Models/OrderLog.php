@@ -128,7 +128,13 @@ class OrderLog extends Model
 
         switch ($this->order->blade) {
             case Order::BLADE_VACATION:
+                // mezuniyyet emrini sil ve ona aid olan verilenleri evvelki veziyyetine geri qaytar.
+                $vacation = $this->vacations->first();
                 $this->vacations()->forceDelete();
+                Vacation::where([
+                    'tabel_no' => $vacation->tabel_no,
+                    'year' => $vacation->start_date->year,
+                ])->increment('remaining_days', $vacation->duration);
                 break;
             case Order::BLADE_BUSINESS_TRIP:
                 $this->businessTrips()->forceDelete();

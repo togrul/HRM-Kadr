@@ -430,6 +430,10 @@
                         <input type="radio" class="form-radio" name="filter.business_trip_status" wire:model="filter.business_trip_status" value="in_business_trip">
                         <span class="ml-2 text-sm font-normal"><?php echo e(__('In business trip')); ?></span>
                     </label>
+                    <label class="inline-flex items-center bg-gray-100 rounded shadow-sm py-2 px-2">
+                        <input type="radio" class="form-radio" name="filter.business_trip_status" wire:model="filter.business_trip_status" value="deleted">
+                        <span class="ml-2 text-sm font-normal"><?php echo e(__('Deleted')); ?></span>
+                    </label>
                 </div>
             </div>
             <div class="flex space-x-2 items-end">
@@ -480,14 +484,14 @@
 
                     <?php if (isset($component)) { $__componentOriginal3ee30789824fd1cc17cb4ff8e03df656 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal3ee30789824fd1cc17cb4ff8e03df656 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table.tbl','data' => ['headers' => [__('#'),__('Fullname'),__('Dates'),__('Locations'),__('Order'),'action'],'wire:transition' => true]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table.tbl','data' => ['headers' => [__('#'),__('Fullname'),__('Dates'),__('Locations'),__('Order'),'action']]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('table.tbl'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['headers' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute([__('#'),__('Fullname'),__('Dates'),__('Locations'),__('Order'),'action']),'wire:transition' => true]); ?>
+<?php $component->withAttributes(['headers' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute([__('#'),__('Fullname'),__('Dates'),__('Locations'),__('Order'),'action'])]); ?>
                         <!--[if BLOCK]><![endif]--><?php $__empty_1 = true; $__currentLoopData = $this->businessTrips; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $_bTrip): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                             <?php
                                 $multi = ($_bTrip->order->businessTrips->count() > 1 && $_bTrip->order->order_type_id != \App\Models\PersonnelBusinessTrip::FOREIGN_BUSINESS_TRIP);
@@ -581,6 +585,18 @@
                                             <span class="text-gray-500"><?php echo e(__('End date')); ?>:</span>
                                             <span class="text-rose-500"><?php echo e(\Carbon\Carbon::parse($_bTrip->end_date)->format('d.m.Y')); ?></span>
                                         </div>
+                                        <!--[if BLOCK]><![endif]--><?php if( \Illuminate\Support\Arr::get($search ,'business_trip_status', '') == 'deleted'): ?>
+                                            <div class="flex flex-col text-sm font-medium">
+                                                <div class="flex items-center space-x-1">
+                                                    <span class="text-gray-500"><?php echo e(__('Deleted date')); ?>:</span>
+                                                    <span class="text-black"><?php echo e(\Carbon\Carbon::parse($_bTrip->deleted_at)->format('d.m.Y H:i')); ?></span>
+                                                </div>
+                                                <div class="flex items-center space-x-1">
+                                                    <span class="text-gray-500"><?php echo e(__('Deleted by')); ?>:</span>
+                                                    <span class="text-black"><?php echo e($_bTrip->personDidDelete->name); ?></span>
+                                                </div>
+                                            </div>
+                                        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                     </div>
                                  <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>

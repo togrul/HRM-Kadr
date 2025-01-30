@@ -317,7 +317,7 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                                         'bg-rose-200' => ! $activeCard
                                     ]); ?>">
                                         <span class="<?php echo \Illuminate\Support\Arr::toCssClasses([
-                                            'flex justify-center items-center w-2 h-2 rounded-full shadow-sm',
+                                            'flex justify-center items-center w-2 h-2 rounded-full shadow-sm transition duration-300',
                                             'bg-green-500' => $activeCard,
                                             'bg-rose-500' => ! $activeCard
                                         ]); ?>"></span>

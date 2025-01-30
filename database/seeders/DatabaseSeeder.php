@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             //            CandidateSeeder::class,
             //            CitiesSeeder::class,
             //            GlobalSeeder::class
+            //            RankCategorySeeder::class,
         ]);
 
         // \App\Models\User::factory(10)->create();

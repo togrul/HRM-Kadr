@@ -4,6 +4,7 @@ namespace App\Livewire\Traits;
 
 use App\Enums\StructureEnum;
 use App\Helpers\UsefulHelpers;
+use App\Livewire\Traits\Admin\CallSwalTrait;
 use App\Livewire\Traits\SRP\BladeDataPreparation;
 use App\Livewire\Traits\Validations\OrderValidationTrait;
 use App\Models\Candidate;
@@ -30,6 +31,7 @@ trait OrderCrud
     use BladeDataPreparation;
     use OrderValidationTrait;
     use SelectListTrait;
+    use CallSwalTrait;
 
     //esas cedvelin listi
     public array $order = [];
@@ -300,8 +302,7 @@ trait OrderCrud
                     $columns['days'] = $componentRow['days'];
                     break;
                 case Order::BLADE_BUSINESS_TRIP:
-                    if($this->selectedTemplate == PersonnelBusinessTrip::INTERNAL_BUSINESS_TRIP)
-                    {
+                    if ($this->selectedTemplate == PersonnelBusinessTrip::INTERNAL_BUSINESS_TRIP) {
                         $columns['meeting_hour'] = $componentRow['meeting_hour'];
                         $columns['return_month'] = $componentRow['return_month'];
                         $columns['return_day'] = $componentRow['return_day'];
@@ -310,9 +311,7 @@ trait OrderCrud
                         $columns['weapon'] = $_final['weapon'];
                         $columns['bullet'] = $_final['bullet'] ?? 32;
                         $columns['service_dog'] = $_final['service_dog'] ?? false;
-                    }
-                    else
-                    {
+                    } else {
                         // structure_main_id
                         $columns['location'] = $componentRow['location'];
                     }
@@ -445,20 +444,34 @@ trait OrderCrud
 
         switch ($this->selectedBlade) {
             case Order::BLADE_VACATION:
+                $person->load(['currentWork', 'yearlyVacation']);
+                $data['vacation_days_total'] = $person->yearlyVacation[0]->vacation_days_total;
+                $data['vacation_days_remaining'] = $person->yearlyVacation[0]->remaining_days;
+                $data['reserved_date_month'] = array_search($person->yearlyVacation[0]->reserved_date_month, UsefulHelpers::monthsList(config('app.locale')));
+                $workDuration = $person->currentWork?->join_date->diffInMonths(Carbon::now());
+                $data['work_duration'] = $workDuration;
+                if(
+                    $data['vacation_days_remaining'] < 1
+                    || (array_key_exists('days', $this->components[$row]) && $this->components[$row]['days'] > $data['vacation_days_remaining'])
+                )
+                {
+                    $this->dispatch('checkVacationAdd',__('There are not enough days left for this vacation.'));
+                    return;
+                }
+                if ($workDuration < 6) {
+                    $this->dispatch('addError', $data['fullname'].' 6 aydan az müddətdir işləyir.');
+                }
                 $data['position'] = $person->position->name;
                 $data['structure'] = $person->structure->name;
                 break;
             case Order::BLADE_BUSINESS_TRIP:
-                if($this->selectedTemplate == PersonnelBusinessTrip::INTERNAL_BUSINESS_TRIP)
-                {
+                if ($this->selectedTemplate == PersonnelBusinessTrip::INTERNAL_BUSINESS_TRIP) {
                     $personWeapons = collect($person->activeWeapons)
                         ->map(fn ($activeWeapon) => "{$activeWeapon->weapon->name} №_{$activeWeapon->weapon_serial}")
                         ->implode(' ');
                     $data['passport'] = $person->idDocuments->serialNumber ?? '';
                     $data['weapon'] = $personWeapons;
-                }
-                else
-                {
+                } else {
                     $data['passport'] = $person->validPassport->serial_number ?? '';
                 }
                 $data['position'] = $person->position->name;

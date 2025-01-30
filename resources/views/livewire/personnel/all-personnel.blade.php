@@ -103,7 +103,11 @@
             @foreach($this->positions as $position)
                 <button
                     wire:click.prevent="setPosition({{ $position->id }})"
-                    class="appearance-none w-max text-sm font-medium bg-gray-50 shadow-md text-gray-600 border rounded-md px-3 py-1 transition-all duration-300 hover:shadow-sm hover:text-gray-900"
+                    @class([
+                        'appearance-none w-max text-sm font-medium bg-gray-50 border rounded-md px-3 py-1 transition-all duration-300 hover:shadow-sm hover:text-gray-900',
+                        'shadow-none text-teal-500' => $position->id == $selectedPosition,
+                        'shadow-md text-gray-600' => $position->id != $selectedPosition
+                    ])
                 >
                    <span> {{ $position->name }} </span>
                 </button>
@@ -260,7 +264,12 @@
                                      x-transition:leave-start="opacity-100 scale-100"
                                      x-transition:leave-end="opacity-0 scale-90"
                                      @click.outside="showContextMenu = false"
-                                     class="absolute right-0 z-10 mt-2 w-max origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
+                                     @class([
+                                        'absolute right-0 z-10 mt-2 origin-bottom-right w-max rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none',
+                                        'bottom-full' => $loop->remaining <= 1,
+                                        'top-full' => $loop->remaining > 1
+                                     ])
+                                     role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
                                     <div class="flex flex-col" role="none">
                                         <button wire:click="openSideMenu('show-files','{{ $personnel->tabel_no }}')"
                                                 class="appearance-none w-full flex items-center justify-start space-x-2 px-4 py-2 text-sm font-medium rounded-md  hover:bg-slate-100"
@@ -282,6 +291,11 @@
                                                 class="appearance-none w-full flex items-center justify-start space-x-2 px-4 py-2 text-sm font-medium rounded-md  hover:bg-slate-100"
                                         >
                                             <span class="text-slate-500">{{ __('Orders') }}</span>
+                                        </button>
+                                        <button wire:click="openSideMenu('show-vacations','{{ $personnel->tabel_no }}')"
+                                                class="appearance-none w-full flex items-center justify-start space-x-2 px-4 py-2 text-sm font-medium rounded-md  hover:bg-slate-100"
+                                        >
+                                            <span class="text-slate-500">{{ __('Vacations') }}</span>
                                         </button>
                                     </div>
                                 </div>
@@ -322,7 +336,6 @@
                     </tr>
                     @endforelse
                 </x-table.tbl>
-
             </div>
             </div>
             </div>
@@ -358,6 +371,13 @@
                 <livewire:personnel.information :personnelModel="$modelName" />
             @endif
         @endcan
+
+        @can('edit-personnels')
+             @if($showSideMenu == 'show-vacations')
+                <livewire:personnel.vacation-list :personnelModel="$modelName" :key="'vacation-list-'.$modelName" />
+             @endif
+        @endcan
+
     </x-side-modal>
 
     @can('delete-personnels')
@@ -368,4 +388,3 @@
 
    <x-datepicker :auto=false></x-datepicker>
 </div>
-

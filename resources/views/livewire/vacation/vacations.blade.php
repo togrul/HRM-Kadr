@@ -22,7 +22,20 @@
 ">
     <div class="flex flex-col space-y-4 px-6 py-4">
         <div class="flex justify-between items-center">
-            <div class="flex flex-col items-center justify-between sm:flex-row filter bg-white py-2 px-2 rounded-xl"></div>
+            <div class="flex flex-row space-x-2 items-center justify-start py-2 px-2 rounded-xl">
+                <x-label>{{ __('Year') }}  </x-label>
+                <select
+                    name="selectedYear"
+                    id="selectedYear"
+                    wire:model.live="selectedYear"
+                    @disabled(!empty($filter['date']['min'] ?? null) || !empty($filter['date']['max'] ?? null))
+                    class="block w-full text-base bg-slate-800 border-slate-600 text-white focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm rounded-md"
+                >
+                    @foreach($years as $year)
+                        <option value="{{$year}}" @selected($year == $selectedYear)>{{$year}}</option>
+                    @endforeach
+                </select>
+            </div>
 
             <div class="flex flex-col">
                 <div class="flex space-x-4">
@@ -72,18 +85,26 @@
             <div class="flex flex-col lg:col-span-2">
                 <x-label for="filter.date_range">{{ __('Date range') }}</x-label>
                 <div class="flex space-x-1 items-center">
-                    <x-pikaday-input mode="gray" name="filter.date.min" format="Y-MM-DD" wire:model.live="filter.date.min">
+                    <x-pikaday-input mode="gray" name="filter.date.min" format="Y-MM-DD" wire:model.defer="filter.date.min">
                         <x-slot name="script">
                             $el.onchange = function () {
-                            @this.set('filter.date.min', $el.value);
+                                if ($el.value === '') {
+                                    @this.set('filter.date.min', null);
+                                } else {
+                                    @this.set('filter.date.min', $el.value);
+                                }
                             }
                         </x-slot>
                     </x-pikaday-input>
                     <span>-</span>
-                    <x-pikaday-input mode="gray" name="filter.date.max" format="Y-MM-DD" wire:model.live="filter.date.max">
+                    <x-pikaday-input mode="gray" name="filter.date.max" format="Y-MM-DD" wire:model.defer="filter.date.max">
                         <x-slot name="script">
                             $el.onchange = function () {
-                            @this.set('filter.date.max', $el.value);
+                                if ($el.value === '') {
+                                    @this.set('filter.date.max', null); // Explicitly set to null when cleared
+                                } else {
+                                    @this.set('filter.date.max', $el.value);
+                                }
                             }
                         </x-slot>
                     </x-pikaday-input>
@@ -115,11 +136,10 @@
                 </div>
             </div>
             <div class="flex space-x-2 items-end">
-                <x-button mode="primary" wire:click="searchFilter">{{ __('Search') }}</x-button>
+                <x-button mode="primary" wire:click="searchFilter()">{{ __('Search') }}</x-button>
                 <x-button mode="black" wire:click="resetFilter">{{ __('Reset') }}</x-button>
             </div>
         </div>
-
 
         <div class="relative min-h-[300px] -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
@@ -164,7 +184,6 @@
                                             {{ $_vacation->personnel?->position?->name }}
                                         </span>
                                     </div>
-
                                 </x-table.td>
 
                                 <x-table.td>
@@ -184,6 +203,22 @@
                                         <div class="flex items-center space-x-1">
                                             <span class="text-gray-500">{{__('Return work date')}}:</span>
                                             <span class="text-green-500">{{ \Carbon\Carbon::parse($_vacation->return_work_date)->format('d.m.Y') }}</span>
+                                        </div>
+                                        <div class="flex items-center space-x-2">
+                                            @php
+                                                $totalDays = max($_vacation->vacation_days_total, 1); // Avoid division by zero
+                                                $percentage = ($_vacation->remaining_days * 100) / $totalDays;
+                                                $color = match (true) {
+                                                    $percentage < 30 => 'rose',
+                                                    $percentage < 60 => 'blue',
+                                                    default => 'teal', // Handles $percentage >= 60
+                                                };
+                                            @endphp
+                                            <span class="text-sm text-gray-500 flex-shrink-0">{{ __('Vacation days') }}: </span>
+                                            <div class="rounded-lg h-2 bg-slate-200 relative w-20 overflow-hidden flex justify-center items-center">
+                                                <div class="absolute left-0 h-full bg-{{ $color }}-500 shadow-sm" style="width: {{ $percentage }}%"></div>
+                                            </div>
+                                            <span class="text-sm z-10 text-slate-900 font-medium">{{ $_vacation->remaining_days }}/{{ $_vacation->vacation_days_total }}</span>
                                         </div>
                                     </div>
                                 </x-table.td>

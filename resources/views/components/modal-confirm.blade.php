@@ -5,7 +5,7 @@
     'modal-title',
     'modal-confirm-button-text',
     'wire-click',
-    'bodyMessage'
+    'bodyMessage' => ''
 ])
 
 <div

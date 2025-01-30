@@ -167,6 +167,11 @@
                          isError = false
                          showNotification(message)
                     })
+
+                     Livewire.on('addError',message => {
+                         isError = true
+                         showNotification(message)
+                    })
                @endif
           "
      class="fixed top-0 right-0 z-[99999] flex justify-between w-full max-w-xs px-6 py-5 mx-2 my-8 bg-white border shadow-lg sm:mx-6 sm:max-w-sm rounded-xl"

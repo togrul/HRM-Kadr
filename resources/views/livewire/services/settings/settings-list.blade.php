@@ -16,30 +16,27 @@
 
 
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-        @foreach ($settings as $key => $stg)
+        @foreach ($settings as $key => $settingValue)
         <div class="flex space-x-2 justify-between items-end w-full">
             <div class="flex flex-col space-y-2 w-full">
-                <span class="text-sm font-medium text-gray-500">{{ __($stg->name) }}</span>
-                @if($stg->type == 'string')
-                <x-livewire-input mode="gray" name="setting.{{ $key }}.value" wire:model.live="setting.{{ $key }}.value"></x-livewire-input>
-                @elseif($stg->type == 'bool')
-                <x-checkbox name="setting.{{ $key }}.value" model="setting.{{ $key }}.value"></x-checkbox>
+                <span class="text-sm font-medium text-gray-500">{{ __($settingValue->name) }}</span>
+                @if($settingValue->type == 'string')
+                    <x-livewire-input mode="gray" name="setting.{{ $key }}.value" wire:model.live="setting.{{ $key }}.value"></x-livewire-input>
+                @elseif($settingValue->type == 'bool')
+                    <x-checkbox name="setting.{{ $key }}.value" model="setting.{{ $key }}.value" checked="{{ $settingValue->value == '1'  }}" value="{{ (bool)$settingValue->value }}"></x-checkbox>
                 @else
-                <x-livewire-input mode="gray" type="number" name="setting.{{ $key }}.value" wire:model.live="setting.{{ $key }}.value"></x-livewire-input>
+                    <x-livewire-input mode="gray" type="number" name="setting.{{ $key }}.value" wire:model.live="setting.{{ $key }}.value"></x-livewire-input>
                 @endif
             </div>
             <button
-            wire:click.prevent = "setDeleteSettings({{ $stg->id }})"
+                wire:click.prevent = "setDeleteSettings({{ $settingValue->id }})"
                 class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-100 hover:text-gray-700"
             >
                 @include('components.icons.delete-icon')
             </button>
         </div>
-
         @endforeach
     </div>
-
-
 
     {{-- @can('manage-settings') --}}
     <div>

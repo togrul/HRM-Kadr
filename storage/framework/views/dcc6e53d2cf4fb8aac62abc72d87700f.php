@@ -302,7 +302,11 @@ if (isset($__slots)) unset($__slots);
             <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $this->positions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $position): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <button
                     wire:click.prevent="setPosition(<?php echo e($position->id); ?>)"
-                    class="appearance-none w-max text-sm font-medium bg-gray-50 shadow-md text-gray-600 border rounded-md px-3 py-1 transition-all duration-300 hover:shadow-sm hover:text-gray-900"
+                    class="<?php echo \Illuminate\Support\Arr::toCssClasses([
+                        'appearance-none w-max text-sm font-medium bg-gray-50 border rounded-md px-3 py-1 transition-all duration-300 hover:shadow-sm hover:text-gray-900',
+                        'shadow-none text-teal-500' => $position->id == $selectedPosition,
+                        'shadow-md text-gray-600' => $position->id != $selectedPosition
+                    ]); ?>"
                 >
                    <span> <?php echo e($position->name); ?> </span>
                 </button>
@@ -665,7 +669,12 @@ if (isset($__slots)) unset($__slots);
                                      x-transition:leave-start="opacity-100 scale-100"
                                      x-transition:leave-end="opacity-0 scale-90"
                                      @click.outside="showContextMenu = false"
-                                     class="absolute right-0 z-10 mt-2 w-max origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
+                                     class="<?php echo \Illuminate\Support\Arr::toCssClasses([
+                                        'absolute right-0 z-10 mt-2 origin-bottom-right w-max rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none',
+                                        'bottom-full' => $loop->remaining <= 1,
+                                        'top-full' => $loop->remaining > 1
+                                     ]); ?>"
+                                     role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
                                     <div class="flex flex-col" role="none">
                                         <button wire:click="openSideMenu('show-files','<?php echo e($personnel->tabel_no); ?>')"
                                                 class="appearance-none w-full flex items-center justify-start space-x-2 px-4 py-2 text-sm font-medium rounded-md  hover:bg-slate-100"
@@ -687,6 +696,11 @@ if (isset($__slots)) unset($__slots);
                                                 class="appearance-none w-full flex items-center justify-start space-x-2 px-4 py-2 text-sm font-medium rounded-md  hover:bg-slate-100"
                                         >
                                             <span class="text-slate-500"><?php echo e(__('Orders')); ?></span>
+                                        </button>
+                                        <button wire:click="openSideMenu('show-vacations','<?php echo e($personnel->tabel_no); ?>')"
+                                                class="appearance-none w-full flex items-center justify-start space-x-2 px-4 py-2 text-sm font-medium rounded-md  hover:bg-slate-100"
+                                        >
+                                            <span class="text-slate-500"><?php echo e(__('Vacations')); ?></span>
                                         </button>
                                     </div>
                                 </div>
@@ -799,7 +813,6 @@ if (isset($__slots)) unset($__slots);
 <?php $component = $__componentOriginal3ee30789824fd1cc17cb4ff8e03df656; ?>
 <?php unset($__componentOriginal3ee30789824fd1cc17cb4ff8e03df656); ?>
 <?php endif; ?>
-
             </div>
             </div>
             </div>
@@ -920,6 +933,28 @@ if (isset($__slots)) unset($__slots);
 ?>
             <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
         <?php endif; ?>
+
+        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('edit-personnels')): ?>
+             <!--[if BLOCK]><![endif]--><?php if($showSideMenu == 'show-vacations'): ?>
+                <?php
+$__split = function ($name, $params = []) {
+    return [$name, $params];
+};
+[$__name, $__params] = $__split('personnel.vacation-list', ['personnelModel' => $modelName]);
+
+$__html = app('livewire')->mount($__name, $__params, 'vacation-list-'.$modelName, $__slots ?? [], get_defined_vars());
+
+echo $__html;
+
+unset($__html);
+unset($__name);
+unset($__params);
+unset($__split);
+if (isset($__slots)) unset($__slots);
+?>
+             <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+        <?php endif; ?>
+
      <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal06466d70a5df71623dc2a561e77c49ee)): ?>
@@ -972,5 +1007,4 @@ if (isset($__slots)) unset($__slots);
 <?php unset($__componentOriginal2686ed4927c64f67d2844e9b73af898c); ?>
 <?php endif; ?>
 </div>
-
 <?php /**PATH /Users/togruljalalli/Desktop/projects/HR-CRM/resources/views/livewire/personnel/all-personnel.blade.php ENDPATH**/ ?>

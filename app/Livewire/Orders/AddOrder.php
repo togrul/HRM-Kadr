@@ -19,13 +19,11 @@ class AddOrder extends Component
     public function store()
     {
         $data = $this->fillCrudData();
-
         if (! is_array($data)) {
             return $data;
         }
         [$_attributes,$_personnel_ids,$_component_ids] = [$data['attributes'], $data['personnel_ids'], $data['component_ids']];
-
-        DB::transaction(function () use ($_attributes, $_personnel_ids, $_component_ids) {
+        DB::transaction(function () use ($_attributes, $_personnel_ids, $_component_ids, $data) {
             $created = [
                 'order_type_id' => $this->order['order_type_id']['id'],
                 'order_id' => $this->order['order_id'],
@@ -57,8 +55,13 @@ class AddOrder extends Component
             $_order_personnels = $this->formatOrderPersonnels($tabel_no_list, $_component_ids);
 
             $order_log->personnels()->attach($_order_personnels);
-
-            (new OrderConfirmedService($order_log))->handle($_personnel_ids);
+            // vacation days leri bura gondermek ucun usul. ancaq vacation table i olanda.
+            // shert qoymaq ayrica array gondermek.
+            $extraData = match($this->selectedBlade) {
+                Order::BLADE_VACATION => collect($data['vacancy_list'])->except('personnels')->toArray(),
+                default => []
+            };
+            (new OrderConfirmedService($order_log, $extraData))->handle($_personnel_ids);
         });
 
         $this->dispatch('orderAdded', __('Order was added successfully!'));

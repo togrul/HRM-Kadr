@@ -4,8 +4,11 @@ namespace App\Livewire\Admin;
 
 use App\Livewire\Traits\Admin\AdminCrudTrait;
 use App\Livewire\Traits\Admin\CallSwalTrait;
+use App\Livewire\Traits\SelectListTrait;
 use App\Models\Position;
+use App\Models\RankCategory;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -15,6 +18,7 @@ class Positions extends Component
     use AdminCrudTrait;
     use AuthorizesRequests;
     use CallSwalTrait;
+    use SelectListTrait;
 
     public function rules(): array
     {
@@ -35,10 +39,21 @@ class Positions extends Component
     public function openCrud(?int $id = null): void
     {
         $this->model = $id
-            ? Position::find($id)
+            ? Position::with('rankCategory:id,name')->find($id)
             : null;
 
-        $this->form = $this->model ? $this->model->toArray() : [];
+        if ($this->model) {
+            $this->form = $this->model->toArray();
+            $this->form['rank_category_id'] = $this->form['rank_category'] ?? [
+                'id' => null,
+                'name' => '---',
+            ];
+
+            unset($this->form['rank_category']);
+        }
+        else {
+            $this->form = [];
+        }
         $this->isAdded = true;
     }
 
@@ -57,6 +72,8 @@ class Positions extends Component
     {
         $this->validate();
 
+        $this->form['rank_category_id'] = array_key_exists('rank_category_id', $this->form) ? $this->form['rank_category_id']['id'] : null;
+
         $this->model
             ? $this->model->update($this->form)
             : Position::create($this->form);
@@ -65,6 +82,12 @@ class Positions extends Component
 
         $this->dispatch('positionUpdated');
         $this->closeCrud();
+    }
+
+    #[Computed]
+    public function rankCategory()
+    {
+        return RankCategory::all();
     }
 
     public function render()

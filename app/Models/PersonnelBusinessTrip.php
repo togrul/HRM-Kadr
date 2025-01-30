@@ -60,11 +60,6 @@ class PersonnelBusinessTrip extends Model
         return $this->belongsTo(User::class, 'added_by', 'id');
     }
 
-    public function deletedBy(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'deleted_by', 'id');
-    }
-
     public function order(): BelongsTo
     {
         return $this->belongsTo(OrderLog::class, 'order_no', 'order_no');
@@ -116,10 +111,18 @@ class PersonnelBusinessTrip extends Model
                         ->when($maxDate, fn ($q) => $q->where('end_date', '<=', $maxDate));
                     break;
                 case 'business_trip_status':
-                    if ($value === 'at_work') {
-                        $query->where('end_date', '<', $currentDate);
-                    } elseif ($value === 'in_business_trip') {
-                        $query->where('end_date', '>', $currentDate);
+                    switch ($value) {
+                        case 'at_work':
+                            $query->where('end_date', '<', $currentDate);
+                            break;
+                        case 'in_business_trip':
+                            $query->where('end_date', '>=', $currentDate);
+                            break;
+                        case 'deleted':
+                            $query->onlyTrashed();
+                            break;
+                        default:
+                            break;
                     }
                     break;
                 case 'fullname':

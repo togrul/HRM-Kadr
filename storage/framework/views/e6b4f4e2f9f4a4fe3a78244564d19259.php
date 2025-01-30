@@ -63,6 +63,29 @@
 <?php endif; ?>
         <?php endif; ?>
 
+        <?php if(session()->has('error')): ?>
+            <?php if (isset($component)) { $__componentOriginal0d8d3c14ebd2b92d484be47e6c018839 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal0d8d3c14ebd2b92d484be47e6c018839 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.notification','data' => ['type' => 'error','redirect' => false,'messageToDisplay' => session('error')]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('notification'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['type' => 'error','redirect' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(false),'message-to-display' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(session('error'))]); ?>
+<?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal0d8d3c14ebd2b92d484be47e6c018839)): ?>
+<?php $attributes = $__attributesOriginal0d8d3c14ebd2b92d484be47e6c018839; ?>
+<?php unset($__attributesOriginal0d8d3c14ebd2b92d484be47e6c018839); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal0d8d3c14ebd2b92d484be47e6c018839)): ?>
+<?php $component = $__componentOriginal0d8d3c14ebd2b92d484be47e6c018839; ?>
+<?php unset($__componentOriginal0d8d3c14ebd2b92d484be47e6c018839); ?>
+<?php endif; ?>
+        <?php endif; ?>
+
         <?php if(session()->has('error_message')): ?>
             <?php if (isset($component)) { $__componentOriginal0d8d3c14ebd2b92d484be47e6c018839 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal0d8d3c14ebd2b92d484be47e6c018839 = $attributes; } ?>

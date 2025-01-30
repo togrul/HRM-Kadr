@@ -43,17 +43,24 @@
         </div>
     </div>
 
-
     <div class="flex flex-col space-y-2">
         <div class="relative min-h-[300px] -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
                 <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
-                    <x-table.tbl :headers="[__('ID'),__('Name'),__('Duration'),__('Active?'),'action','action']">
+                    <x-table.tbl :headers="[__('ID'),__('Category'),__('Name'),__('Duration'),__('Active?'),'action','action']">
                         @forelse ($_ranks as $rank)
                             <tr>
                                 <x-table.td>
                                       <span class="text-sm font-medium">
                                           {{ $rank->id }}
+                                      </span>
+                                </x-table.td>
+                                <x-table.td>
+                                      <span @class([
+                                            'text-sm font-medium text-blue-500',
+                                            'bg-slate-100 rounded-sm px-3 py-1' => $rank->rankCategory
+                                      ])>
+                                          {{ $rank->rankCategory?->name }}
                                       </span>
                                 </x-table.td>
                                 <x-table.td>
