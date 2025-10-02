@@ -13,14 +13,26 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 #[ObservedBy(PersonnelObserver::class)]
 class Personnel extends Model
 {
     use DateCastTrait;
     use HasFactory;
+    use LogsActivity;
     use NestedStructureTrait;
     use SoftDeletes;
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty()
+            ->useLogName('personnel')
+            ->dontSubmitEmptyLogs();
+    }
 
     protected $fillable = [
         'tabel_no',
@@ -466,6 +478,11 @@ class Personnel extends Model
         return $query;
     }
 
+    public function getDescriptionForEvent(string $eventName): string
+    {
+        return "You have {$eventName} personnel";
+    }
+
     protected function applyRangeFilter($query, $field, array $value)
     {
         if ($field === 'age') {
@@ -540,12 +557,7 @@ class Personnel extends Model
     protected static function boot()
     {
         parent::boot();
-        static::creating(function ($model) {
-            $model->added_by = auth()->user()?->id ?? 1;
-        });
-        static::deleting(function ($model) {
-            $model->deleted_by = auth()->user()->id;
-            $model->save();
-        });
+        static::creating(fn ($model) => $model->added_by = auth()->id() ?? 1);
+        static::deleting(fn ($model) => $model->forceFill(['deleted_by' => auth()->id() ?? 1])->save());
     }
 }

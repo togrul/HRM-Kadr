@@ -12,7 +12,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call([
+        // if (env('APP_TYPE') == 'MILITARY') {
+        //     dd('military');
+        // } else {
+        //     dd(env('APP_TYPE'));
+        // }
+        $special = [
             //            PositionSeeder::class,
             //            PersonnelSeeder::class,
             //            OrderSeeder::class,
@@ -20,8 +25,10 @@ class DatabaseSeeder extends Seeder
             //            CandidateSeeder::class,
             //            CitiesSeeder::class,
             //            GlobalSeeder::class
-            //            RankCategorySeeder::class,
-        ]);
+            //            RankCategorySeeder::class,\
+        ];
+
+        $this->call($this->fillDefaultData());
 
         // \App\Models\User::factory(10)->create();
 
@@ -30,5 +37,13 @@ class DatabaseSeeder extends Seeder
         //     'email' => 'test@example.com',
         // ]);
 
+    }
+
+    private function fillDefaultData(): array
+    {
+        return [
+            // TruncateTablesSeeder::class,
+            StructureSeeder::class
+        ];
     }
 }

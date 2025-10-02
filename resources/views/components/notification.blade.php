@@ -4,200 +4,80 @@
 'messageToDisplay' => ''
 ])
 
-<div x-data="{
-                    isActiveNotification: false ,
-                    isError: @if ($type === 'success') false @elseif($type === 'error') true @endif,
-                    messageToDisplay:'{{ $messageToDisplay }}',
-                    showNotification(message) {
-                         this.isActiveNotification = true
-                         this.messageToDisplay = message
-                         setTimeout(() => {
-                              this.isActiveNotification = false
-                         },7000)
-                    }
-               }" x-show.transition.opacity.duration.500="isActiveNotification" x-init="
-               @if($redirect)
-                    $nextTick(() => showNotification(messageToDisplay))
-               @else
-                    Livewire.on('personnelAdded',message => {
-                         isError = false
-                         showNotification(message)
-                    })
-                    Livewire.on('personnelWasDeleted',message => {
-                         isError = false
-                         showNotification(message)
-                    })
+<div
+    x-data="{
+     isActiveNotification: false,
+     isError: @if ($type === 'success') false @elseif($type === 'error') true @endif,
+     messageToDisplay: '{{ $messageToDisplay }}',
+     showNotification(message, error = false) {
+          this.isError = error
+          this.isActiveNotification = true
+          this.messageToDisplay = message
+          setTimeout(() => {
+               this.isActiveNotification = false
+          }, 7000)
+     }
+    }"
+     x-show.transition.opacity.duration.500="isActiveNotification" x-init="
+     @if($redirect)
+          $nextTick(() => showNotification(messageToDisplay))
+     @else
+          const successEvents = [
+               'personnelAdded', 'personnelWasDeleted',
+               'staffAdded', 'staffWasDeleted',
+               'roleUpdated', 'roleWasDeleted',
+               'permissionUpdated', 'permissionSet', 'permissionWasDeleted',
+               'userAdded', 'userWasDeleted',
+               'menuAdded', 'menuWasDeleted',
+               'fileAdded',
+               'settingsUpdated', 'settingsWasDeleted',
+               'candidateAdded', 'candidateWasDeleted',
+               'templateAdded', 'templateWasDeleted',
+               'componentWasDeleted',
+               'orderAdded', 'orderWasDeleted',
+               'typesUpdated', 'vacancyUpdated',
+               'rankAdded', 'rankWasDeleted',
+               'contractAdded', 'leaveApproved', 'leaveRejected', 'leaveWasDeleted',
+               'leaveAdded'
+          ]
 
-                    Livewire.on('staffAdded',message => {
-                         isError = false
-                         showNotification(message)
-                    })
+          const errorEvents = ['staffScheduleError', 'addError']
 
-                    Livewire.on('staffWasDeleted',message => {
-                         isError = false
-                         showNotification(message)
-                    })
+          successEvents.forEach(event => {
+               Livewire.on(event, message => {
+                    showNotification(message, false)
+               })
+          })
 
-                    Livewire.on('roleUpdated',message => {
-                         isError = false
-                         showNotification(message)
-                    })
-
-                    Livewire.on('roleWasDeleted',message => {
-                         isError = false
-                         showNotification(message)
-                    })
-
-                    Livewire.on('permissionUpdated',message => {
-                         isError = false
-                         showNotification(message)
-                    })
-
-                    Livewire.on('permissionSet',message => {
-                         isError = false
-                         showNotification(message)
-                    })
-
-                    Livewire.on('permissionWasDeleted',message => {
-                         isError = false
-                         showNotification(message)
-                    })
-
-                    Livewire.on('userAdded',message => {
-                         isError = false
-                         showNotification(message)
-                    })
-
-                    Livewire.on('userWasDeleted',message => {
-                         isError = false
-                         showNotification(message)
-                    })
-
-                    Livewire.on('menuAdded',message => {
-                         isError = false
-                         showNotification(message)
-                    })
-
-                    Livewire.on('fileAdded',message => {
-                         isError = false
-                         showNotification(message)
-                    })
-
-                    Livewire.on('menuWasDeleted',message => {
-                         isError = false
-                         showNotification(message)
-                    })
-
-                    Livewire.on('staffScheduleError',message => {
-                         isError = true
-                         showNotification(message)
-                    })
-
-                    Livewire.on('settingsUpdated',message => {
-                         isError = false
-                         showNotification(message)
-                    })
-
-                    Livewire.on('settingsWasDeleted',message => {
-                         isError = false
-                         showNotification(message)
-                    })
-
-                    Livewire.on('candidateAdded',message => {
-                         isError = false
-                         showNotification(message)
-                    })
-
-                    Livewire.on('candidateWasDeleted',message => {
-                         isError = false
-                         showNotification(message)
-                    })
-
-                      Livewire.on('templateAdded',message => {
-                         isError = false
-                         showNotification(message)
-                    })
-
-                    Livewire.on('templateWasDeleted',message => {
-                         isError = false
-                         showNotification(message)
-                    })
-
-                    Livewire.on('candidateAdded',message => {
-                         isError = false
-                         showNotification(message)
-                    })
-
-                    Livewire.on('componentWasDeleted',message => {
-                         isError = false
-                         showNotification(message)
-                    })
-
-                    Livewire.on('orderAdded',message => {
-                         isError = false
-                         showNotification(message)
-                    })
-
-                    Livewire.on('orderWasDeleted',message => {
-                         isError = false
-                         showNotification(message)
-                    })
-
-                     Livewire.on('typesUpdated',message => {
-                         isError = false
-                         showNotification(message)
-                    })
-
-                    Livewire.on('vacancyUpdated',message => {
-                         isError = false
-                         showNotification(message)
-                    })
-
-                     Livewire.on('rankAdded',message => {
-                         isError = false
-                         showNotification(message)
-                    })
-
-                      Livewire.on('rankWasDeleted',message => {
-                         isError = false
-                         showNotification(message)
-                    })
-
-                      Livewire.on('contractAdded',message => {
-                         isError = false
-                         showNotification(message)
-                    })
-
-                     Livewire.on('addError',message => {
-                         isError = true
-                         showNotification(message)
-                    })
-               @endif
-          "
+          errorEvents.forEach(event => {
+               Livewire.on(event, message => {
+                    showNotification(message, true)
+               })
+          })
+     @endif
+"
      class="fixed top-0 right-0 z-[99999] flex justify-between w-full max-w-xs px-6 py-5 mx-2 my-8 bg-white border shadow-lg sm:mx-6 sm:max-w-sm rounded-xl"
      style="display: none;">
-     <div class="flex items-center justify-center text-sm font-normal text-gray-500 sm:text-base">
+    <div class="flex items-center justify-center text-sm font-normal text-gray-500 sm:text-base">
+        <div class="w-8 h-8">
+            <svg x-show="!isError" class="w-8 h-8 text-green-400" xmlns="http://www.w3.org/2000/svg" fill="none"
+                 viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <svg x-show="isError" class="w-8 h-8 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none"
+                 viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+            </svg>
+        </div>
 
-          <div class="w-8 h-8">
-               <svg x-show="!isError" class="w-8 h-8 text-green-400" xmlns="http://www.w3.org/2000/svg" fill="none"
-                    viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                         d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-               </svg>
-               <svg x-show="isError" class="w-8 h-8 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none"
-                    viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                         d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
-               </svg>
-          </div>
-
-          <div class="ml-2 text-base" x-html="messageToDisplay">
-               {{-- {!! $messageToDisplay !!} --}}
-          </div>
-     </div>
-     <button @click="isActiveNotification=false" class="text-gray-400 hover:text-gray-500">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-          </svg>
-     </button>
+        <div class="ml-2 text-base" x-html="messageToDisplay">
+        </div>
+    </div>
+    <button @click="isActiveNotification=false" class="text-gray-400 hover:text-gray-500">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+    </button>
 </div>

@@ -95,6 +95,29 @@ class AllPersonnel extends Component
         $this->structure = $this->getNestedStructure($id);
     }
 
+    public function getStatusFilters(): array
+    {
+        return [
+            ['key' => 'current', 'label' => __('Active')],
+            ['key' => 'leaves', 'label' => __('Resigned')],
+            ['key' => 'all', 'label' => __('All')],
+            ['key' => 'deleted', 'label' => __('Deleted'), 'permission' => 'access-admin'],
+            ['key' => 'pending', 'label' => __('Pending')],
+        ];
+    }
+
+    public function getTableHeaders(): array
+    {
+        return [
+            __('#'),
+            __('Tabel'),
+            __('Fullname'),
+            __('Structure'),
+            __('Date'),
+            'action',
+        ];
+    }
+
     public function setStatus($newStatus)
     {
         $this->status = $newStatus;
@@ -124,8 +147,8 @@ class AllPersonnel extends Component
     public function fillFilter()
     {
         $this->status = request()->query('status')
-                    ? request()->query('status')
-                    : 'current';
+            ? request()->query('status')
+            : 'current';
     }
 
     #[Computed]
@@ -160,7 +183,7 @@ class AllPersonnel extends Component
             ->when(! empty($this->structure), function ($q) {
                 $q->whereIn('structure_id', $this->structure);
             })
-            ->when(empty($this->structure), fn ($q) => $q->whereIn('structure_id', resolve(StructureService::class)->getAccessibleStructures()))
+            ->when(empty($this->structure), fn($q) => $q->whereIn('structure_id', resolve(StructureService::class)->getAccessibleStructures()))
             ->when(! empty($this->selectedPosition), function ($q) {
                 $q->where('position_id', $this->selectedPosition);
             })

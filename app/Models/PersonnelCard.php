@@ -6,12 +6,25 @@ use App\Traits\DateCastTrait;
 use App\Traits\PersonnelTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class PersonnelCard extends Model
 {
+    // xidmeti vesiqeler
     use HasFactory;
     use PersonnelTrait;
     use DateCastTrait;
+    use LogsActivity;
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty()
+            ->useLogName('personnel')
+            ->dontSubmitEmptyLogs();
+    }
 
     protected $fillable = [
         'tabel_no',

@@ -12,11 +12,6 @@ class AddCandidate extends Component
     use CandidateCrud;
     use AuthorizesRequests;
 
-    public function mount()
-    {
-        $this->authorize('add-candidates');
-    }
-
     public function store(): void
     {
         $this->validate();

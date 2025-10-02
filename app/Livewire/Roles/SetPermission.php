@@ -68,6 +68,7 @@ class SetPermission extends Component
     private function clearCacheAndSelections(): void
     {
         Cache::forget('structures');
+        Cache::forget("structure-accessible-".auth()->user()->id);
         $this->initializeProperties();
     }
 

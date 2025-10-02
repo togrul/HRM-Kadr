@@ -5,11 +5,11 @@
 @endphp
 
 <div class="flex flex-col space-y-4" x-data="{showPersonnelList : -1}">
-    <div class="sidemenu-title">
-        <h2 class="text-2xl font-title font-semibold text-gray-500" id="slide-over-title">
+    <header class="sidemenu-title">
+        <h2 class="text-xl font-title font-semibold text-gray-500" id="slide-over-title">
             {{ $title ?? ''}}
         </h2>
-    </div>
+    </header>
 
     <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 mt-4">
         <div class="flex flex-col">
@@ -203,5 +203,3 @@
         ></x-modal-info>
     </div>
 </div>
-
-

@@ -1,5 +1,5 @@
 <div class="sidemenu-title">
-    <h2 class="text-2xl font-title font-semibold text-gray-500" id="slide-over-title">
+    <h2 class="text-xl font-title font-semibold text-gray-500" id="slide-over-title">
         {{ $title ?? ''}}
     </h2>
 </div>

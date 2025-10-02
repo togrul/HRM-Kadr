@@ -20,7 +20,7 @@ use App\Models\Structure;
 use App\Services\AttributeProcessService;
 use App\Services\CheckVacancyService;
 use App\Services\OrderCollectionListsService;
-use App\Services\StructureService;
+use App\Services\Orders\OrderLookupService;
 use App\Services\WordSuffixService;
 use Carbon\Carbon;
 use Livewire\Attributes\Isolate;
@@ -32,6 +32,13 @@ trait OrderCrud
     use OrderValidationTrait;
     use SelectListTrait;
     use CallSwalTrait;
+
+    protected OrderLookupService $orderLookupService;
+
+    /**
+     * Cheap in-memory cache for lookup datasets that rarely change during a component lifecycle.
+     */
+    protected array $staticLookups = [];
 
     //esas cedvelin listi
     public array $order = [];
@@ -79,6 +86,11 @@ trait OrderCrud
 
     public $selectedBlade;
 
+    public function bootOrderCrud(OrderLookupService $orderLookupService): void
+    {
+        $this->orderLookupService = $orderLookupService;
+    }
+
     public function setStructure($id, $list, $field, $key, $isCoded)
     {
         $model = Structure::find($id);
@@ -106,13 +118,22 @@ trait OrderCrud
                 : $suffixService->getStructureSuffix($level_name);
 
             $data = $isCoded
-                ? $parent->code.$suffixService->getNumberSuffix($parent->code).' '.$level_with_suffix.' '
-                : $suffixService->getStructureSuffix($parent->name).' ';
+                ? $parent->code . $suffixService->getNumberSuffix($parent->code) . ' ' . $level_with_suffix . ' '
+                : $suffixService->getStructureSuffix($parent->name) . ' ';
 
             $value .= $data;
         }
 
         return $value;
+    }
+
+    protected function cachedLookup(string $key, callable $resolver)
+    {
+        if (! array_key_exists($key, $this->staticLookups)) {
+            $this->staticLookups[$key] = $resolver();
+        }
+
+        return $this->staticLookups[$key];
     }
 
     #[On('componentSelected')]
@@ -229,8 +250,8 @@ trait OrderCrud
                     'structure_main_id' => '$structure_main',
                     'structure_id' => '$structure',
                     'position_id' => '$position',
-                    'component_id','row' => $keyComponent,
-                    default => '$'.$keyComponent
+                    'component_id', 'row' => $keyComponent,
+                    default => '$' . $keyComponent
                 };
 
                 $_modified_component[$key][$_edit_key] = $keyComponent == 'component_id'
@@ -300,6 +321,10 @@ trait OrderCrud
             switch ($selectedBlade) {
                 case Order::BLADE_VACATION:
                     $columns['days'] = $componentRow['days'];
+                    $columns['vacation_days_total'] = $_final['vacation_days_total'];
+                    $columns['vacation_days_remaining'] = $columns['vacation_days_total'] - $columns['days'];
+                    $columns['reserved_date_month'] = $_final['reserved_date_month'];
+                    $columns['work_duration'] = $_final['work_duration'];
                     break;
                 case Order::BLADE_BUSINESS_TRIP:
                     if ($this->selectedTemplate == PersonnelBusinessTrip::INTERNAL_BUSINESS_TRIP) {
@@ -356,7 +381,7 @@ trait OrderCrud
         if (! empty($bladeData)) {
             $_sentList = match ($this->selectedBlade) {
                 Order::BLADE_DEFAULT => $this->components,
-                Order::BLADE_VACATION,Order::BLADE_BUSINESS_TRIP => $this->selected_personnel_list,
+                Order::BLADE_VACATION, Order::BLADE_BUSINESS_TRIP => $this->selected_personnel_list,
             };
             $list_for_vacancy = $this->prepareListForVacancy($_sentList, $this->originalComponents);
             if ($this->order['order_id'] == Order::IG_EMR) {
@@ -364,7 +389,6 @@ trait OrderCrud
                 $message = ! empty($this->vacancy_list) ? $this->vacancy_list['message'] : '';
             }
         }
-
         return [
             'attributes' => $bladeData['attributes'] ?? [],
             'personnel_ids' => $bladeData['personnel_ids'] ?? [],
@@ -400,37 +424,9 @@ trait OrderCrud
         }
     }
 
-    private function getPersonnelsStatusReady($_personnel_id_list)
-    {
-        return Candidate::when(! empty($this->searchPersonnel), function ($q) {
-            $q->where(function ($query) {
-                $query->where('name', 'LIKE', "%{$this->searchPersonnel}%")
-                    ->orWhere('surname', 'LIKE', "%{$this->searchPersonnel}%");
-            });
-        })
-            ->whereNotIn('id', $_personnel_id_list)
-            ->where('status_id', 30)
-            ->get();
-    }
-
-    private function getPersonnelsList($_personnel_id_list)
-    {
-        return Personnel::when(! empty($this->searchPersonnel), function ($q) {
-            $q->where(function ($query) {
-                $query->where('name', 'LIKE', "%{$this->searchPersonnel}%")
-                    ->orWhere('surname', 'LIKE', "%{$this->searchPersonnel}%");
-            });
-        })
-            ->whereIn('structure_id', resolve(StructureService::class)->getAccessibleStructures())
-            ->whereNotIn('id', $_personnel_id_list)
-            ->whereNull('leave_work_date')
-            ->orderBy('position_id')
-            ->orderBy('structure_id')
-            ->get();
-    }
-
     public function addToList(string $tabelno, int $row): void
     {
+        $this->validate($this->validationRules()['dynamic']);
         $person = Personnel::with(['latestRank.rank', 'idDocuments', 'validPassport', 'structure', 'position', 'activeWeapons', 'activeWeapons.weapon'])
             ->where('tabel_no', $tabelno)
             ->first();
@@ -450,16 +446,15 @@ trait OrderCrud
                 $data['reserved_date_month'] = array_search($person->yearlyVacation[0]->reserved_date_month, UsefulHelpers::monthsList(config('app.locale')));
                 $workDuration = $person->currentWork?->join_date->diffInMonths(Carbon::now());
                 $data['work_duration'] = $workDuration;
-                if(
+                if (
                     $data['vacation_days_remaining'] < 1
                     || (array_key_exists('days', $this->components[$row]) && $this->components[$row]['days'] > $data['vacation_days_remaining'])
-                )
-                {
-                    $this->dispatch('checkVacationAdd',__('There are not enough days left for this vacation.'));
+                ) {
+                    $this->dispatch('checkVacationAdd', __('There are not enough days left for this vacation.'));
                     return;
                 }
                 if ($workDuration < 6) {
-                    $this->dispatch('addError', $data['fullname'].' 6 aydan az müddətdir işləyir.');
+                    $this->dispatch('addError', $data['fullname'] . ' 6 aydan az müddətdir işləyir.');
                 }
                 $data['position'] = $person->position->name;
                 $data['structure'] = $person->structure->name;
@@ -467,7 +462,7 @@ trait OrderCrud
             case Order::BLADE_BUSINESS_TRIP:
                 if ($this->selectedTemplate == PersonnelBusinessTrip::INTERNAL_BUSINESS_TRIP) {
                     $personWeapons = collect($person->activeWeapons)
-                        ->map(fn ($activeWeapon) => "{$activeWeapon->weapon->name} №_{$activeWeapon->weapon_serial}")
+                        ->map(fn($activeWeapon) => "{$activeWeapon->weapon->name} №_{$activeWeapon->weapon_serial}")
                         ->implode(' ');
                     $data['passport'] = $person->idDocuments->serialNumber ?? '';
                     $data['weapon'] = $personWeapons;
@@ -495,8 +490,8 @@ trait OrderCrud
         $levelName = __(strtolower($levels[$structure->level]) ?? '');
 
         return is_numeric($structureName)
-                ? "{$structureName}{$suffixService->getNumberSuffix((int) $structureName)} {$levelName}"
-                : $structureName;
+            ? "{$structureName}{$suffixService->getNumberSuffix((int)$structureName)} {$levelName}"
+            : $structureName;
     }
 
     public function removeFromList($_currentRow, $_mainRow): void
@@ -599,61 +594,48 @@ trait OrderCrud
     {
         $this->modifyCodedList();
 
-        $_templates = OrderType::when(! empty($this->searchTemplate), function ($q) {
-            $q->where('name', 'LIKE', "%{$this->searchTemplate}%");
-        })
-            ->when(! empty($this->selectedOrder), function ($q) {
-                $q->where('order_id', $this->selectedOrder);
-            })
-            ->get();
+        $lookup = $this->resolveLookupCollections();
 
-        $_components = \App\Models\Component::with('orderType')
-            ->where('order_type_id', $this->selectedTemplate)
-            ->get();
-
-        $_personnel_id_list = array_filter(
-            collect($this->components)->pluck('personnel_id.id')->toArray(),
-            fn ($value) => $value !== null
-        );
-
-        $_personnels = ($this->order['order_id'] ?? null) === Order::IG_EMR
-            ? $this->getPersonnelsStatusReady($_personnel_id_list)
-            : $this->getPersonnelsList($_personnel_id_list);
-
-        $_ranks = Rank::where('is_active', true)->get();
-
-        $_main_structures = Structure::where('code', 0)->orderBy('id')->get();
-
-        $_structures = Structure::withRecursive('subs')
-            ->when(! empty($this->searchStructure), function ($q) {
-                $q->where('name', 'LIKE', "%{$this->searchStructure}%");
-            })
-            ->accessible()
-            ->whereNotNull('parent_id')
-            ->where('code', '<>', 0)
-            ->orderBy('code')
-            ->get();
-
-        $_positions = Position::when(! empty($this->searchPosition), function ($q) {
-            $q->where('name', 'LIKE', "%{$this->searchPosition}%");
-        })->get();
-
-        $defaultCollections = compact(
-            '_templates', '_components', '_personnels', '_ranks',
-            '_main_structures', '_structures', '_positions'
-        );
+        $defaultCollections = [
+            '_templates' => $lookup['templates'],
+            '_components' => $lookup['components'],
+            '_personnels' => $lookup['personnels'],
+            '_ranks' => $lookup['ranks'],
+            '_main_structures' => $lookup['main_structures'],
+            '_structures' => $lookup['structures'],
+            '_positions' => $lookup['positions'],
+        ];
 
         $bladeCollections = (new OrderCollectionListsService(
             selectedBlade: $this->selectedBlade,
             personnel_name: $this->personnel_name,
             selected_personnel_list: $this->selected_personnel_list
-        ))
-            ->handle();
+        ))->handle();
 
-        $view_name = ! empty($this->orderModel)
-                    ? 'livewire.orders.edit-order'
-                    : 'livewire.orders.add-order';
+        $viewName = ! empty($this->orderModel)
+            ? 'livewire.orders.edit-order'
+            : 'livewire.orders.add-order';
 
-        return view($view_name, array_merge($defaultCollections, $bladeCollections));
+        return view($viewName, array_merge($defaultCollections, $bladeCollections));
+    }
+
+    protected function resolveLookupCollections(): array
+    {
+        $personnelIdList = array_filter(
+            collect($this->components)->pluck('personnel_id.id')->toArray(),
+            static fn ($value) => $value !== null
+        );
+
+        $isCandidateOrder = ($this->order['order_id'] ?? null) === Order::IG_EMR;
+
+        return [
+            'templates' => $this->orderLookupService->templates($this->selectedOrder ?? null, $this->searchTemplate),
+            'components' => $this->orderLookupService->components($this->selectedTemplate),
+            'personnels' => $this->orderLookupService->personnels($isCandidateOrder, $personnelIdList, $this->searchPersonnel),
+            'ranks' => $this->cachedLookup('ranks', fn () => $this->orderLookupService->ranks()),
+            'main_structures' => $this->cachedLookup('main_structures', fn () => $this->orderLookupService->mainStructures()),
+            'structures' => $this->orderLookupService->structures($this->searchStructure),
+            'positions' => $this->orderLookupService->positions($this->searchPosition),
+        ];
     }
 }

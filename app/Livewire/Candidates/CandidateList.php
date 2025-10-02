@@ -18,7 +18,7 @@ use Maatwebsite\Excel\Facades\Excel;
 #[On(['candidateAdded', 'filterSelected', 'candidateWasDeleted'])]
 class CandidateList extends Component
 {
-    use AuthorizesRequests,SideModalAction,WithPagination;
+    use AuthorizesRequests, SideModalAction, WithPagination;
 
     public array $filter = [];
 
@@ -51,6 +51,19 @@ class CandidateList extends Component
         $this->applyFilter();
     }
 
+    public function getTableHeaders(): array
+    {
+        return [
+            __('#'),
+            __('Fullname'),
+            __('Structure'),
+            __('Tests'),
+            __('Dates'),
+            __('Status'),
+            'action',
+            'action',
+        ];
+    }
 
     public function applyFilter(array $filter = []): void
     {
@@ -85,8 +98,8 @@ class CandidateList extends Component
     {
         $result = Candidate::with(['structure', 'status', 'creator', 'personDidDelete'])
             ->whereIn('structure_id', resolve(StructureService::class)->getAccessibleStructures())
-            ->when(is_numeric($this->status), fn ($q) => $q->where('status_id', $this->status))
-            ->when($this->status === 'deleted', fn ($q) => $q->onlyTrashed())
+            ->when(is_numeric($this->status), fn($q) => $q->where('status_id', $this->status))
+            ->when($this->status === 'deleted', fn($q) => $q->onlyTrashed())
             ->filter($this->search ?? [])
             ->orderByDesc('appeal_date');
 

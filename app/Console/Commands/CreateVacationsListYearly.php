@@ -43,7 +43,7 @@ class CreateVacationsListYearly extends Command
         $this->line('Successfully!');
     }
 
-    private function processPersonnel($personnel, Carbon $now, bool $vacationReset)
+    private function processPersonnel($personnel, Carbon $now, bool $vacationReset): void
     {
         $workDurationInYears = $personnel->join_work_date->diffInYears($now);
         $workDurationInMonths = $personnel->join_work_date->diffInMonths($now);

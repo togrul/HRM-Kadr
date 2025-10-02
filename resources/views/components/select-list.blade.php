@@ -13,7 +13,7 @@
           'default' => 'bg-white',
           'gray' => 'bg-gray-100'
      };
-     $isError = $errors->has($name)?'bg-red-50':'';
+     $isError = $errors->has($name) ? 'bg-rose-50' : '';
 @endphp
 
 <div x-data="{open : false}" class="w-full"

@@ -6,10 +6,28 @@ use App\Traits\DateCastTrait;
 use App\Traits\PersonnelTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class PersonnelTakenCaptive extends Model
 {
-    use DateCastTrait,HasFactory,PersonnelTrait;
+    use DateCastTrait,HasFactory,LogsActivity,PersonnelTrait;
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty()
+            ->useLogName('personnel')
+            ->dontSubmitEmptyLogs();
+    }
+
+    protected static $recordEvents = ['deleted','created','updated'];
+
+    public function getDescriptionForEvent(string $eventName): string
+    {
+        return "You have {$eventName} personnel";
+    }
 
     protected $fillable = [
         'tabel_no',

@@ -83,7 +83,7 @@ class Information extends Component
     #[Computed]
     public function ranks()
     {
-        return Rank::query()->pluck('name_'.config('app.locale'), 'id');
+        return Rank::query()->pluck('name_' . config('app.locale'), 'id');
     }
 
     public function resetSelected(): void
@@ -117,6 +117,7 @@ class Information extends Component
             'pensionCards',
             'disposals',
         ])
+            ->withTrashed()
             ->where('tabel_no', $this->personnelModel)
             ->firstOrFail();
     }

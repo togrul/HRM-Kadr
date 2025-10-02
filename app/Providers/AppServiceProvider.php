@@ -71,14 +71,19 @@ class AppServiceProvider extends ServiceProvider
      */
     private function registerMacros(): void
     {
-        Builder::macro('accessible', function () {
-            if (auth()->check()) {
-                $accessibleIds = resolve(StructureService::class)->getAccessibleStructures();
+        // Builder::macro('accessible', function () {
+        //     if (auth()->check()) {
+        //         $accessibleIds = resolve(StructureService::class)->getAccessibleStructures();
 
-                return $this->whereIn('id', $accessibleIds);
-            }
+        //         return $this->whereIn('id', $accessibleIds);
+        //     }
 
-            return $this;
+        //     return $this;
+        // });
+
+        Builder::macro('accessible', function (?User $user = null) {
+            $ids = resolve(StructureService::class)->getAccessibleStructures($user);
+            return empty($ids) ? $this : $this->whereIn('id', $ids);
         });
     }
 

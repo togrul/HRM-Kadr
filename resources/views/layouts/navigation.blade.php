@@ -1,39 +1,48 @@
 <nav x-data="{ open: false }" class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 lg:px-0">
-        <div class="flex justify-between h-24">
+        <div class="flex justify-between h-16">
             <div class="flex">
                 <!-- Logo -->
-                <div class="shrink-0 flex items-center">
+                <div class="shrink-0 flex items-center px-2">
                     <a href="{{ route('home') }}">
-                        <x-application-logo size="sm" class="block w-auto fill-current text-gray-800 dark:text-gray-200" />
+                        <x-application-logo size="xs"
+                            class="block w-auto fill-current text-gray-800 dark:text-gray-200" />
                     </a>
                 </div>
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                    <x-nav-link class="space-x-2 uppercase text-xs"  wire:navigate :href="route('candidates')" :active="request()->routeIs('candidates')">
-                        <x-icons.users-icon color="{{ request()->routeIs('candidates') ? 'text-gray-900' : 'text-gray-400' }}"></x-icons.users-icon>
+                    <x-nav-link class="space-x-2 uppercase text-xs" wire:navigate :href="route('candidates')" :active="request()->routeIs('candidates')">
+                        <x-icons.candidate-icon
+                            color="{{ request()->routeIs('candidates') ? 'text-gray-900' : 'text-gray-400' }}"></x-icons.candidate-icon>
                         <span>{{ __('Candidates') }}</span>
                     </x-nav-link>
                     <x-nav-link class="space-x-2 uppercase text-xs" wire:navigate :href="route('vacations.list')" :active="request()->routeIs('vacations.list')">
-                        <x-icons.home-icon color="{{ request()->routeIs('vacations.list') ? 'text-gray-900' : 'text-gray-400' }}"></x-icons.home-icon>
+                        <x-icons.vacation-icon
+                            color="{{ request()->routeIs('vacations.list') ? 'text-gray-900' : 'text-gray-400' }}"></x-icons.vacation-icon>
                         <span>{{ __('Vacations') }}</span>
                     </x-nav-link>
                     <x-nav-link class="space-x-2 uppercase text-xs" wire:navigate :href="route('business-trips.list')" :active="request()->routeIs('business-trips.list')">
-                        <x-icons.location-icon color="{{ request()->routeIs('business-trips.list') ? 'text-gray-900' : 'text-gray-400' }}"></x-icons.location-icon>
+                        <x-icons.holiday-icon
+                            color="{{ request()->routeIs('business-trips.list') ? 'text-gray-900' : 'text-gray-400' }}"></x-icons.holiday-icon>
                         <span>{{ __('Business trips') }}</span>
+                    </x-nav-link>
+                     <x-nav-link class="space-x-2 uppercase text-xs" wire:navigate :href="route('leaves')" :active="request()->routeIs('leaves')">
+                        <x-icons.calendar-icon color="{{ request()->routeIs('leaves') ? 'text-gray-900' : 'text-gray-400' }}" size="w-7 h-7"></x-icons.calendar-icon>
+                        <span>{{ __('Time off') }}</span>
                     </x-nav-link>
                 </div>
             </div>
 
             <div class="flex">
                 @can('access-admin')
-                   <div class="flex items-center justify-center">
-                       <a wire:navigate href="{{ route('admin') }}" class="group flex justify-center items-center w-10 h-10 transition-all duration-300 sm:flex sm:items-center hover:bg-slate-50 rounded-md">
-                           <x-icons.barcode-read color="text-yellow-500" size="w-7 h-7"></x-icons.barcode-read>
-                       </a>
-                   </div>
+                    <div class="flex items-center justify-center">
+                        <a wire:navigate href="{{ route('admin') }}"
+                            class="group flex justify-center items-center w-10 h-10 transition-all duration-300 sm:flex sm:items-center hover:bg-slate-50 rounded-md">
+                            <x-icons.admin-icon color="text-yellow-500" size="w-7 h-7"></x-icons.admin-icon>
+                        </a>
+                    </div>
                 @endcan
 
                 @can('get-notification')
@@ -43,7 +52,8 @@
                 <div class="hidden sm:flex sm:items-center sm:ml-6">
                     <x-dropdown align="right">
                         <x-slot name="trigger">
-                            <button class="bg-gray-100 border border-gray-200 inline-flex items-center px-3 py-2 text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
+                            <button
+                                class="bg-gray-100 border border-gray-200 inline-flex items-center px-3 py-2 text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
                                 <div class="flex flex-col items-start">
                                     <span class="text-sm text-gray-900">{{ Auth::user()->name }}</span>
                                     <span class="text-xs">{{ Auth::user()->email }}</span>
@@ -65,7 +75,7 @@
                                 @csrf
 
                                 <x-dropdown-link :href="route('logout')"
-                                                 onclick="event.preventDefault();
+                                    onclick="event.preventDefault();
                                                 this.closest('form').submit();">
                                     {{ __('Log Out') }}
                                 </x-dropdown-link>
@@ -76,10 +86,15 @@
 
                 <!-- Hamburger -->
                 <div class="-mr-2 flex items-center sm:hidden">
-                    <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-900 focus:text-gray-500 dark:focus:text-gray-400 transition duration-150 ease-in-out">
+                    <button @click="open = ! open"
+                        class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-900 focus:text-gray-500 dark:focus:text-gray-400 transition duration-150 ease-in-out">
                         <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                            <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                            <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            <path :class="{ 'hidden': open, 'inline-flex': !open }" class="inline-flex"
+                                stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 12h16M4 18h16" />
+                            <path :class="{ 'hidden': !open, 'inline-flex': open }" class="hidden"
+                                stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
                 </div>
@@ -89,7 +104,7 @@
     </div>
 
     <!-- Responsive Navigation Menu -->
-    <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
+    <div :class="{ 'block': open, 'hidden': !open }" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link wire:navigate :href="route('candidates')" :active="request()->routeIs('candidates')">
                 {{ __('Candidates') }}
@@ -116,7 +131,7 @@
                     @csrf
 
                     <x-responsive-nav-link :href="route('logout')"
-                            onclick="event.preventDefault();
+                        onclick="event.preventDefault();
                                         this.closest('form').submit();">
                         {{ __('Log Out') }}
                     </x-responsive-nav-link>

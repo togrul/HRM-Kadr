@@ -73,9 +73,10 @@ class VacationList extends Component
         $this->months = UsefulHelpers::monthsList(config('app.locale'));
         $this->personnelModelData = Personnel::with(['yearlyVacation'])
             ->where('tabel_no', $this->personnelModel)
+            ->withTrashed()
             ->firstOrFail();
 
-        $this->title = __('Vacations').' - '."<span class='text-blue-500'>{$this->personnelModelData->fullname}</span>";
+        $this->title = __('Vacations') . ' - ' . "<span class='text-blue-500'>{$this->personnelModelData->fullname}</span>";
     }
 
     public function render()

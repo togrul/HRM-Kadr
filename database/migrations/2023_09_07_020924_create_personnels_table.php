@@ -16,6 +16,7 @@ return new class extends Migration
             $table->id();
             $table->index(['tabel_no', 'id', 'position_id']);
             $table->string('tabel_no')->unique();
+            $table->index(['name', 'surname', 'patronymic']);
             $table->string('surname');
             $table->string('name');
             $table->string('patronymic');

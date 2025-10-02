@@ -2,7 +2,7 @@
      x-data="{}"
 >
     <div class="sidemenu-title">
-        <h2 class="text-2xl font-title font-semibold text-gray-500" id="slide-over-title">
+        <h2 class="text-xl font-title font-semibold text-gray-500" id="slide-over-title">
             {!!  $title ?? '' !!}
         </h2>
     </div>
@@ -87,7 +87,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4">
+                            <td colspan="6">
                                 <div class="flex justify-center items-center py-4">
                                     <span class="font-medium">{{ __('No information added') }}</span>
                                 </div>

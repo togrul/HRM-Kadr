@@ -1,0 +1,75 @@
+activity_log	id, log_name, description, subject_type, event, subject_id, causer_type, causer_id, properties, batch_uuid, created_at, updated_at
+appeal_statuses	id, locale, name
+awards	id, award_type_id, name, is_foreign
+award_types	id, name
+candidates	id, surname, name, patronymic, structure_id, height, military_service, status_id, phone, birthdate, gender, knowledge_test, physical_fitness_exam, research_date, research_result, discrediting_information, examination_date, appeal_date, application_date, requisition_date, initial_documents, documents_completeness, attitude_to_military, characteristics, hhk_date, hhk_result, useless_info, note, presented_by, creator_id, deleted_by, deleted_at, created_at, updated_at
+cities	id, country_id, parent_id, name
+components	id, order_type_id, rank_id, name, content, dynamic_fields, title
+countries	id, code
+country_translations	id, country_id, locale, title
+disabilities	id, name
+educational_institutions	id, name, shortname, old_name_1, old_name_2, old_name_3
+education_degrees	id, title_az, title_en, title_ru
+education_document_types	id, name
+education_forms	id, name_az, name_en, name_ru
+education_types	id, name
+failed_jobs	id, uuid, connection, queue, payload, exception, failed_at
+kinships	id, name_az, name_en, name_ru, is_active
+notifications	id, type, notifiable_type, notifiable_id, data, read_at, created_at, updated_at
+orders	id, order_category_id, name, content, order_model, blade, deleted_at
+order_categories	id, name_az, name_en, name_ru
+order_logs	id, order_id, order_type_id, order_no, given_date, given_by, given_by_rank, description, status_id, creator_id, deleted_by, deleted_at, created_at, updated_at
+order_log_components	id, order_no, component_id, row_number
+order_log_component_attributes	id, order_no, component_id, attributes, row_number
+order_log_personnels	id, order_no, component_id, tabel_no
+order_statuses	id, locale, name
+order_types	id, order_id, name
+password_reset_tokens	email, token, created_at
+permissions	id, name, guard_name, created_at, updated_at
+personal_access_tokens	id, tokenable_type, tokenable_id, name, token, abilities, last_used_at, expires_at, created_at, updated_at
+personnels	id, tabel_no, surname, name, patronymic, photo, has_changed_initials, previous_surname, previous_name, previous_patronymic, initials_changed_date, initials_change_reason, birthdate, gender, phone, mobile, email, nationality_id, has_changed_nationality, previous_nationality_id, nationality_changed_date, nationality_change_reason, pin, residental_address, registered_address, education_degree_id, structure_id, position_id, work_norm_id, join_work_date, leave_work_date, social_origin_id, disability_id, disability_given_date, extra_important_information, computer_knowledge, participation_in_war, discrediting_information, scientific_works_inventions, medical_inspection_result, medical_inspection_date, special_inspection_result, special_inspection_date, added_by, deleted_by, deleted_at, is_pending, referenced_by, created_at, updated_at
+personnel_awards	id, tabel_no, award_id, reason, given_date, is_old, order_given_by, order_no, order_date
+personnel_business_trips	id, tabel_no, location, description, attributes, start_date, end_date, order_given_by, order_no, order_date, added_by, deleted_by, deleted_at, created_at, updated_at
+personnel_cards	id, tabel_no, card_number, given_date, valid_date, created_at, updated_at
+personnel_contracts	id, tabel_no, rank_id, contract_date, contract_refresh_date, contract_duration, contract_ends_at, created_at, updated_at
+personnel_criminals	id, tabel_no, punishment_id, reason, given_date
+personnel_disposals	id, tabel_no, disposal_date, disposal_end_date, disposal_reason, created_at, updated_at
+personnel_documents	id, tabel_no, file, filename, created_at, updated_at
+personnel_education	id, tabel_no, educational_institution_id, education_form_id, education_language, specialty, admission_year, graduated_year, profession_by_document, diplom_serie, diplom_no, diplom_given_date, coefficient, calculate_as_seniority, is_military
+personnel_education_requests	id, tabel_no, education_place, specialty, description, request_date, request_result, created_at, updated_at
+personnel_elected_electorals	id, tabel_no, election_type, location, elected_date, created_at, updated_at
+personnel_extra_education	id, tabel_no, education_type_id, educational_institution_id, education_form_id, name, shortname, education_language, education_program_name, admission_year, graduated_year, education_document_type_id, diplom_serie, diplom_no, diplom_given_date, coefficient, calculate_as_seniority, is_military
+personnel_foreign_languages	id, tabel_no, language_id, knowledge_status
+personnel_identity_documents	id, tabel_no, nationality_id, series, number, pin, born_country_id, born_city_id, birthplace, registered_address, is_married, military_duty, blood_group, eye_color, height, document_issued_authority, document_issued_date
+personnel_injuries	id, tabel_no, injury_type, location, date_time, description
+personnel_kinships	id, tabel_no, kinship_id, fullname, birthdate, birth_place, company_name, position, registered_address, residental_address, birth_certificate_number, marriage_certificate_number
+personnel_labor_activities	id, tabel_no, company_name, position, coefficient, join_date, leave_date, is_special_service, order_given_by, order_no, order_date, is_current
+personnel_master_degrees	id, tabel_no, degree, approved_date, given_date, redemption_date, created_at, updated_at
+personnel_military_services	id, tabel_no, attitude_to_military_service, rank_id, given_date, start_date, end_date
+personnel_participation_events	id, tabel_no, event_type, event_name, event_date
+personnel_passports	id, tabel_no, serial_number, given_date, valid_date, created_at, updated_at
+personnel_pension_cards	id, tabel_no, card_no, given_date, expiry_date, created_at, updated_at
+personnel_punishments	id, tabel_no, punishment_id, reason, given_date, expired_date
+personnel_ranks	id, tabel_no, rank_id, rank_reason_id, name, given_date, order_given_by, order_no, order_date
+personnel_scientific_degree_and_names	id, tabel_no, degree_and_name_id, science, given_date, subject, edu_doc_type_id, diplom_serie, diplom_no, diplom_given_date, document_issued_by
+personnel_taken_captives	id, tabel_no, location, condition, taken_captive_date, release_date, created_at, updated_at
+personnel_vacations	id, tabel_no, vacation_places, duration, start_date, end_date, return_work_date, order_given_by, order_no, order_date, remaining_days, vacation_days_total, added_by, deleted_by, deleted_at, created_at, updated_at
+personnel_weapons	id, tabel_no, weapon_id, weapon_serial, bullets, chest, replacement_card, given_date, expire_date, return_date, created_at, updated_at
+positions	id, rank_category_id, name
+punishments	id, punishment_type_id, name
+punishment_types	id, name
+ranks	id, rank_category_id, name_az, name_en, name_ru, duration, is_active
+rank_categories	id, name, vacation_days_count, contract_duration, next_contract_duration, vacation_days_per_month
+rank_reasons	id, name
+roles	id, name, guard_name, created_at, updated_at
+role_has_permissions	permission_id, role_id
+role_structures	role_id, structure_id
+scientific_degree_and_names	id, name
+settings	id, name, value, type
+social_origins	id, name
+staff_schedules	id, structure_id, position_id, total, filled, vacant
+structures	id, parent_id, name, shortname, coefficient, code, level
+users	id, name, email, email_verified_at, password, remember_token, created_at, updated_at, is_active, deleted_by, deleted_at
+vacations	id, tabel_no, reserved_date_month, vacation_days_total, remaining_days, year
+weapons	id, name, serial_number, capacity, production_year
+work_norms	id, name_az, name_en, name_ru

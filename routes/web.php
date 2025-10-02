@@ -28,6 +28,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/candidates', \App\Livewire\Candidates\CandidateList::class)->name('candidates');
     Route::get('/vacations', \App\Livewire\Vacation\Vacations::class)->name('vacations.list');
     Route::get('/business-trips', \App\Livewire\Outside\BusinessTrips::class)->name('business-trips.list');
+    Route::get('/leaves', \App\Livewire\Outside\Leaves::class)->name('leaves');
     Route::get('/notifications', \App\Livewire\Notification\NotificationList::class)->name('notifications');
 
     Route::prefix('/profile')->controller(ProfileController::class)->group(function () {
@@ -52,6 +53,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/education-forms', \App\Livewire\Admin\EducationForms::class)->name('admin.education-forms');
         Route::get('/education-types', \App\Livewire\Admin\EducationTypes::class)->name('admin.education-types');
         Route::get('/educational-institutions', \App\Livewire\Admin\EducationalInstitutions::class)->name('admin.educational-institutions');
+        Route::get('/leave-types', \App\Livewire\Admin\LeaveTypes::class)->name('admin.leave-types');
         Route::get('/kinship', \App\Livewire\Admin\Kinships::class)->name('admin.kinship');
         Route::get('/order-categories', \App\Livewire\Admin\OrderCategories::class)->name('admin.order-categories');
         Route::get('/order-statuses', \App\Livewire\Admin\OrderStatuses::class)->name('admin.order-statuses');
@@ -73,4 +75,4 @@ Route::middleware('auth')->group(function () {
     // });
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

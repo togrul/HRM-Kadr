@@ -6,6 +6,7 @@ use App\Livewire\Traits\Admin\AdminCrudTrait;
 use App\Livewire\Traits\Admin\CallSwalTrait;
 use App\Models\AppealStatus as AppealStatusAlias;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -70,11 +71,21 @@ class AppealStatus extends Component
         $this->validate();
 
         $data = array_merge($this->form, ['locale' => $this->selectedLocale]);
-        $this->model
-            ? $this->model->where('locale', $this->selectedLocale)->update([
-                    'name' => $this->form['name']
-                ])
-            : AppealStatusAlias::create($data);
+
+        DB::transaction(function () use ($data){
+            DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+
+            $this->model
+                ? AppealStatusAlias::where([
+                ['id', '=', $this->model->id],
+                ['locale', '=', $this->selectedLocale],
+            ])->update([
+                'id' => $this->form['id'],
+                'name' => $this->form['name'],
+            ])
+                : AppealStatusAlias::create($data);
+            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        });
 
         $this->callSuccessSwal();
 

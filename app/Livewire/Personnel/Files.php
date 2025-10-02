@@ -10,7 +10,7 @@ use Livewire\WithFileUploads;
 
 class Files extends Component
 {
-    use AuthorizesRequests,WithFileUploads;
+    use AuthorizesRequests, WithFileUploads;
 
     public $title;
 
@@ -69,9 +69,10 @@ class Files extends Component
     {
         $this->personnelFiles = Personnel::with('files:tabel_no,file,filename')
             ->where('tabel_no', $this->personnelModel)
+            ->withTrashed()
             ->first();
 
-        $this->title = __('Files')."( {$this->personnelFiles->fullname} )";
+        $this->title = __('Files') . "( {$this->personnelFiles->fullname} )";
 
         $this->file_list = $this->personnelFiles->files->toArray();
     }

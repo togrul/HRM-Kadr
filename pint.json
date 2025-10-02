@@ -1,3 +1,11 @@
 {
-    "preset": "laravel"
+    "preset": "laravel",
+    "rules": {
+    "fully_qualified_strict_types": false,
+    "global_namespace_import": {
+      "import_functions": true,
+      "import_constants": true
+    },
+    "no_unused_imports": true
+  }
 }

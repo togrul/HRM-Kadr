@@ -75,8 +75,11 @@ class OrderStatuses extends Component
         $data = array_merge($this->form, ['locale' => $this->selectedLocale]);
 
         $this->model
-            ? $this->model->where('locale', $this->selectedLocale)->update([
-                'name' => $this->form['name']
+            ? OrderStatus::where([
+                ['id', '=', $this->model->id],
+                ['locale', '=', $this->selectedLocale],
+            ])->update([
+                'name' => $this->form['name'],
             ])
             : OrderStatus::create($data);
 

@@ -4,19 +4,28 @@ namespace App\Models;
 
 use App\Traits\CreateDeleteTrait;
 use App\Traits\DateCastTrait;
-use App\Traits\GenderEnumTrait;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Candidate extends Model
 {
     use CreateDeleteTrait,
         DateCastTrait,
         HasFactory,
+        LogsActivity,
         SoftDeletes;
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty();
+    }
 
     protected $fillable = [
         'name',

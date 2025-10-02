@@ -9,7 +9,7 @@ class NotificationList extends Component
 {
     use WithPagination;
 
-    const NOTIFICATION_TRESHOLD = 20;
+    const NOTIFICATION_THRESHOLD = 20;
 
     public function mount()
     {
@@ -27,7 +27,7 @@ class NotificationList extends Component
             ->notifications()
             ->orderBy('read_at')
             ->latest()
-            ->paginate(self::NOTIFICATION_TRESHOLD);
+            ->paginate(self::NOTIFICATION_THRESHOLD);
 
         return view('livewire.notification.notification-list', compact('notifications'));
     }

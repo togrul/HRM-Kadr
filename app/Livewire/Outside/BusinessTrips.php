@@ -60,12 +60,17 @@ class BusinessTrips extends Component
         ];
     }
 
+    public function getTableHeaders(): array
+    {
+        return [__('#'), __('Fullname'), __('Dates'), __('Locations'), __('Order'), 'action'];
+    }
+
     public function printBusinessTripDocument(PersonnelBusinessTrip $model, $multi = false)
     {
         $model->load(['personnel', 'order.orderType', 'order.attributes', 'personnel.idDocuments']);
         $filepath = $multi
-                    ? '/storage/templates/general/Ezamiyyet-vesiqesi.docx'
-                    : '/storage/templates/general/Ezamiyyet-kagizi.docx';
+            ? '/storage/templates/general/Ezamiyyet-vesiqesi.docx'
+            : '/storage/templates/general/Ezamiyyet-kagizi.docx';
 
 
         $file = public_path($filepath);
@@ -102,16 +107,16 @@ class BusinessTrips extends Component
         $templateProcessor->setValue('end_month', $formattedDates['endDate']['month']);
         $templateProcessor->setValue('end_year', $formattedDates['endDate']['year']);
         if ($multi) {
-//            dd($model->order->description['location']. ' şəhərinə');
+            //            dd($model->order->description['location']. ' şəhərinə');
             $templateProcessor->cloneRow('rank', count($attributes));
             foreach ($attributes as $index => $row) {
-                $templateProcessor->setValue('rank#'.($index + 1), $row['attributes']['$rank']['value']);
-                $templateProcessor->setValue('fullname#'.($index + 1), $row['attributes']['$fullname']['value']);
-                $templateProcessor->setValue('weapon#'.($index + 1), $row['attributes']['$weapon']['value']);
-                $templateProcessor->setValue('bullet#'.($index + 1), $row['attributes']['$bullet']['value'] ?? '32');
+                $templateProcessor->setValue('rank#' . ($index + 1), $row['attributes']['$rank']['value']);
+                $templateProcessor->setValue('fullname#' . ($index + 1), $row['attributes']['$fullname']['value']);
+                $templateProcessor->setValue('weapon#' . ($index + 1), $row['attributes']['$weapon']['value']);
+                $templateProcessor->setValue('bullet#' . ($index + 1), $row['attributes']['$bullet']['value'] ?? '32');
             }
         } else {
-//            $suffixService = new WordSuffixService;
+            //            $suffixService = new WordSuffixService;
             $filteredAttributes = $model->order->attributes->firstWhere('attributes.$fullname.value', $model->personnel->fullname);
             $templateProcessor->setValue('passport', $filteredAttributes->attributes['$passport']['value']) ?? '';
             $templateProcessor->setValue('position', $filteredAttributes->attributes['$position']['value']);
@@ -122,15 +127,15 @@ class BusinessTrips extends Component
         }
 
         $filename = "{$model->personnel->fullname}_ezamiyyet_{$model->start_date->format('d.m.Y')}";
-        $templateProcessor->saveAs($filename.'.docx');
+        $templateProcessor->saveAs($filename . '.docx');
 
-        return response()->download($filename.'.docx')->deleteFileAfterSend();
+        return response()->download($filename . '.docx')->deleteFileAfterSend();
     }
 
     protected function returnData($type = 'normal')
     {
         $result = PersonnelBusinessTrip::with(['personnel', 'order.orderType', 'personDidDelete'])
-            ->whereHas('personnel', fn ($query) => $query->whereIn('structure_id', resolve(StructureService::class)->getAccessibleStructures()))
+            ->whereHas('personnel', fn($query) => $query->whereIn('structure_id', resolve(StructureService::class)->getAccessibleStructures()))
             ->filter($this->search)
             ->orderByDesc('end_date');
 

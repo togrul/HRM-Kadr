@@ -24,7 +24,7 @@ use PhpOffice\PhpWord\TemplateProcessor;
 #[On(['orderAdded', 'orderWasDeleted'])]
 class AllOrders extends Component
 {
-    use AuthorizesRequests,SideModalAction,WithPagination;
+    use AuthorizesRequests, SideModalAction, WithPagination;
 
     public $selectedOrder;
 
@@ -55,6 +55,20 @@ class AllOrders extends Component
     {
         $this->reset('search');
         $this->resetPage();
+    }
+
+    public function getTableHeaders(): array
+    {
+        return [
+            __('#'),
+            __('Order #'),
+            __('Given date'),
+            __('Given by'),
+            __('Status'),
+            'action',
+            'action',
+            'action',
+        ];
     }
 
     public function setDeleteOrder($order_no)
@@ -90,7 +104,7 @@ class AllOrders extends Component
         $suffixService = new WordSuffixService;
         $bladeType = $order->order->blade;
 
-        $templateProcessor = new TemplateProcessor('storage/'.$order->order->content);
+        $templateProcessor = new TemplateProcessor('storage/' . $order->order->content);
         $templateProcessor->setValue('day', $givenDate->format('d'));
         $templateProcessor->setValue('month', $givenDate->locale('AZ')->monthName);
         $templateProcessor->setValue('year', $givenDate->format('Y'));
@@ -114,7 +128,7 @@ class AllOrders extends Component
                 $templateProcessor->setValue('day_start', $startDateFormat);
                 $templateProcessor->setValue('day_end', $endDate->format('d'));
                 $templateProcessor->setValue('month_trip', $endDate->locale('AZ')->monthName);
-                $templateProcessor->setValue('year_trip', $endDate->format('Y').$suffixService->getNumberSuffix($endDate->format('Y')));
+                $templateProcessor->setValue('year_trip', $endDate->format('Y') . $suffixService->getNumberSuffix($endDate->format('Y')));
                 break;
         }
 
@@ -188,7 +202,7 @@ class AllOrders extends Component
                         $trip_start = Carbon::parse($_replace_texts[$keyReplaced][$lastIndex]['$start_date']);
                         $_replace_texts[$keyReplaced][$lastIndex]['$trip_start_day'] = $trip_start->format('d');
                         $_replace_texts[$keyReplaced][$lastIndex]['$trip_start_month'] = $trip_start->locale('AZ')->monthName;
-                        $_replace_texts[$keyReplaced][$lastIndex]['$trip_start_year'] = $trip_start->year.$suffixService->getNumberSuffix($trip_start->year).' '.__('year');
+                        $_replace_texts[$keyReplaced][$lastIndex]['$trip_start_year'] = $trip_start->year . $suffixService->getNumberSuffix($trip_start->year) . ' ' . __('year');
                         $_replace_texts[$keyReplaced][$lastIndex]['$trip_location'] = $_replace_texts[$keyReplaced][$lastIndex]['$location'];
                         $_replace_texts[$keyReplaced][$lastIndex]['$return_day'] = $suffixService->getMonthDaySuffix($_replace_texts[$keyReplaced][$lastIndex]['$return_day']);
                         $_replace_texts[$keyReplaced][$lastIndex]['$meeting_hour'] = $suffixService->getTimeSuffix($_replace_texts[$keyReplaced][$lastIndex]['$meeting_hour']);
@@ -203,12 +217,12 @@ class AllOrders extends Component
             ['content' => $content, 'title' => $title] = (new GenerateWordReplaceContent($bladeType, $_replace_texts))
                 ->handle($key, $text, $secondIndex);
             $secondIndex++;
-            $text = ! empty($title) ? $this->convertWordIntoBold($title).PHP_EOL.'<w:p/>'.$content : $content;
+            $text = ! empty($title) ? $this->convertWordIntoBold($title) . PHP_EOL . '<w:p/>' . $content : $content;
 
             $replacements[] = [
                 'content_text' => match ($bladeType) {
-                    Order::BLADE_VACATION,Order::BLADE_BUSINESS_TRIP => str_replace("\n", '<w:br/>', $text),
-                    Order::BLADE_DEFAULT => ($key + 1).'. '.str_replace("\n", '<w:br/>', $text),
+                    Order::BLADE_VACATION, Order::BLADE_BUSINESS_TRIP => str_replace("\n", '<w:br/>', $text),
+                    Order::BLADE_DEFAULT => ($key + 1) . '. ' . str_replace("\n", '<w:br/>', $text),
                 },
             ];
         }
@@ -217,10 +231,10 @@ class AllOrders extends Component
         $templateProcessor->cloneBlock('content', 0, true, false, $replacements);
         // end export to word file
 
-        $filename = "{$order->order->name}_".Carbon::now()->format('d.m.Y H:i:s');
-        $templateProcessor->saveAs($filename.'.docx');
+        $filename = "{$order->order->name}_" . Carbon::now()->format('d.m.Y H:i:s');
+        $templateProcessor->saveAs($filename . '.docx');
 
-        return response()->download($filename.'.docx')->deleteFileAfterSend();
+        return response()->download($filename . '.docx')->deleteFileAfterSend();
     }
 
     protected function getFullStructureNameWithSuffixes($name, $service)
@@ -228,15 +242,16 @@ class AllOrders extends Component
         $structureModel = Structure::where('name', $name)->first();
         $structureFullName = $structureModel->getAllParentName(isCoded: true);
 
-        return collect($structureFullName)->map(fn ($structure) => $service->getStructureSuffix($structure, mainStructure: true).' '
+        return collect($structureFullName)->map(
+            fn($structure) => $service->getStructureSuffix($structure, mainStructure: true) . ' '
         )->implode('');
     }
 
     private function convertWordIntoBold(string $word): string
     {
         return '<w:rPr><w:b w:val="true"/></w:rPr>'
-            .$word
-            .'<w:rPr><w:b w:val="false"/></w:rPr>';
+            . $word
+            . '<w:rPr><w:b w:val="false"/></w:rPr>';
     }
 
     protected function returnData($type = 'normal')
@@ -253,13 +268,13 @@ class AllOrders extends Component
                 $query->where('order_id', 1010) // Include records with order_id = 1010
                     ->orWhere(function ($query) {
                         $query->where('order_id', '!=', 1010) // Exclude records with order_id = 1010
-                            ->whereHas('personnels', fn ($query) => $query->whereIn('structure_id', resolve(StructureService::class)->getAccessibleStructures()));
+                            ->whereHas('personnels', fn($query) => $query->whereIn('structure_id', resolve(StructureService::class)->getAccessibleStructures()));
                     });
             })
             ->filter($this->search ?? [])
-            ->when($this->selectedOrder, fn ($q) => $q->where('order_id', $this->selectedOrder))
-            ->when(is_numeric($this->status), fn ($q) => $q->where('status_id', $this->status))
-            ->when($this->status === 'deleted', fn ($q) => $q->onlyTrashed())
+            ->when($this->selectedOrder, fn($q) => $q->where('order_id', $this->selectedOrder))
+            ->when(is_numeric($this->status), fn($q) => $q->where('status_id', $this->status))
+            ->when($this->status === 'deleted', fn($q) => $q->onlyTrashed())
             ->orderByDesc('given_date');
 
         return $type == 'normal'

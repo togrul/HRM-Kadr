@@ -1,0 +1,1 @@
+<img src="<?php echo e(asset('/assets/images/modal-loader.gif')); ?>" class="w-56" alt="loader"><?php /**PATH /Users/togruljalalli/Desktop/projects/HRM/resources/views/components/modal-loading.blade.php ENDPATH**/ ?>

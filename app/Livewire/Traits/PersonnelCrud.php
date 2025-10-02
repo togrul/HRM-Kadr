@@ -55,8 +55,12 @@ trait PersonnelCrud
         $this->step = $step;
     }
 
-    protected function completeStep(): void
+    protected function completeStep(bool $actionSave = false): void
     {
+        if ($actionSave) {
+            return;
+        }
+
         $stepName = match ($this->step) {
             1 => 'personnel',
             2 => 'document',
@@ -79,7 +83,7 @@ trait PersonnelCrud
         $exceptedValidations = [];
 
         $stepConditions = [
-            2 => ['service_cards' => $this->service_cards_list, 'passports' => [1], 'document' => [1]],
+            2 => ['service_cards' => $this->service_cards_list, 'passports' => $this->passports_list, 'document' => $this->document],
             3 => ['extra_education' => $this->extra_education_list],
             4 => ['labor_activities' => $this->labor_activities_list],
         ];

@@ -2,14 +2,15 @@
 
 namespace App\Services;
 
-use App\Enums\OrderStatusEnum;
-use App\Events\StaffScheduleUpdated;
-use App\Helpers\UsefulHelpers;
-use App\Models\Candidate;
+use Carbon\Carbon;
 use App\Models\Order;
 use App\Models\OrderLog;
+use App\Models\Candidate;
 use App\Models\Personnel;
-use Carbon\Carbon;
+use App\Enums\OrderStatusEnum;
+use App\Helpers\UsefulHelpers;
+use Illuminate\Support\Facades\DB;
+use App\Events\StaffScheduleUpdated;
 
 class OrderConfirmedService
 {
@@ -67,14 +68,14 @@ class OrderConfirmedService
         // Change status to accepted
         Candidate::whereIn('id', $personnelIds)->update(['status_id' => 70]);
 
-        $convertedIds = array_map(fn ($x) => "NMZD{$x}", $personnelIds);
+        $convertedIds = array_map(fn($x) => "NMZD{$x}", $personnelIds);
 
         $personnelModel = $action == 'create'
             ? $orderLog->personnels
             : Personnel::whereIn('tabel_no', $convertedIds)
-                ->where('is_pending', true)
-                ->with(['ranks', 'structure', 'position', 'laborActivities'])
-                ->get();
+            ->where('is_pending', true)
+            ->with(['ranks', 'structure', 'position', 'laborActivities'])
+            ->get();
 
         foreach ($personnelModel as $_personnel) {
             $this->updatePersonnelEmployment($_personnel, $orderLog);
@@ -95,25 +96,27 @@ class OrderConfirmedService
 
         $date = "{$_attr['$year']['value']}-{$month}-{$_attr['$day']['value']}";
 
-        $_personnel->update([
-            'join_work_date' => $date,
-            'is_pending' => false,
-        ]);
+        DB::transaction(function () use ($_personnel, $date, $_attr, $orderLog) {
+            $_personnel->update([
+                'join_work_date' => $date,
+                'is_pending' => false,
+            ]);
 
-        $_personnel->ranks()->create([
-            'rank_id' => $_attr['$rank']['id'] ?? 10,
-            'name' => 'İşə qəbul',
-            'given_date' => $date,
-        ]);
+            $_personnel->ranks()->create([
+                'rank_id' => $_attr['$rank']['id'] ?? 10,
+                'name' => 'İşə qəbul',
+                'given_date' => $date,
+            ]);
 
-        event(new StaffScheduleUpdated(
-            structure_id: $_personnel->structure_id,
-            position_id: $_personnel->position_id
-        ));
+            event(new StaffScheduleUpdated(
+                structure_id: $_personnel->structure_id,
+                position_id: $_personnel->position_id
+            ));
 
-        $this->endCurrentLaborActivity($_personnel, $date);
+            $this->endCurrentLaborActivity($_personnel, $date);
 
-        $_personnel->laborActivities()->create($this->getNewLaborActivityData($_personnel, $orderLog, $date));
+            $_personnel->laborActivities()->create($this->getNewLaborActivityData($_personnel, $orderLog, $date));
+        });
     }
 
     private function endCurrentLaborActivity($_personnel, $date): void
@@ -238,7 +241,7 @@ class OrderConfirmedService
     {
         return array_filter($mainArray, function ($item) use ($arrayKey, $filteredKey, $isNested) {
             if ($isNested) {
-                $key = '$'.$arrayKey;
+                $key = '$' . $arrayKey;
                 return isset($item[$key]['value']) && $item[$key]['value'] === $filteredKey;
             }
             return isset($item[$arrayKey]) && $item[$arrayKey] == $filteredKey;

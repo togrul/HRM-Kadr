@@ -7,12 +7,23 @@ use App\Traits\PersonnelTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class PersonnelMilitaryService extends Model
 {
-    use DateCastTrait,HasFactory,PersonnelTrait;
+    use DateCastTrait,HasFactory,LogsActivity,PersonnelTrait;
 
     public $timestamps = false;
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty()
+            ->useLogName('personnel')
+            ->dontSubmitEmptyLogs();
+    }
 
     protected $fillable = [
         'tabel_no',

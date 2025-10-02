@@ -57,7 +57,7 @@ class AddOrder extends Component
             $order_log->personnels()->attach($_order_personnels);
             // vacation days leri bura gondermek ucun usul. ancaq vacation table i olanda.
             // shert qoymaq ayrica array gondermek.
-            $extraData = match($this->selectedBlade) {
+            $extraData = match ($this->selectedBlade) {
                 Order::BLADE_VACATION => collect($data['vacancy_list'])->except('personnels')->toArray(),
                 default => []
             };

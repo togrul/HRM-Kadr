@@ -8,12 +8,23 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class PersonnelIdentityDocument extends Model
 {
-    use DateCastTrait,HasFactory,PersonnelTrait;
+    use DateCastTrait,HasFactory,LogsActivity, PersonnelTrait;
 
     public $timestamps = false;
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty()
+            ->useLogName('personnel')
+            ->dontSubmitEmptyLogs();
+    }
 
     protected $fillable = [
         'tabel_no',

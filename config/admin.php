@@ -11,6 +11,7 @@ return [
         ['label' => 'Education form', 'icon' => 'library-icon', 'route' => 'admin.education-forms'],
         ['label' => 'Education type', 'icon' => 'briefcase-icon', 'route' => 'admin.education-types'],
         ['label' => 'Universities', 'icon' => 'home-icon', 'route' => 'admin.educational-institutions'],
+        ['label' => 'Leave Types', 'icon' => 'folder-plus-icon', 'route' => 'admin.leave-types'],
         ['label' => 'Kinships', 'icon' => 'users-icon', 'route' => 'admin.kinship'],
         ['label' => 'Order categories', 'icon' => 'category-icon', 'route' => 'admin.order-categories'],
         ['label' => 'Order statuses', 'icon' => 'recover', 'route' => 'admin.order-statuses'],

@@ -61,16 +61,18 @@ trait CandidateCrud
     {
         $this->statusName = '---';
         if (! empty($this->candidateModel)) {
+            $this->authorize('edit-candidates', $this->candidateModelData);
             $this->fillCandidate();
-            $this->title = __('Edit candidate');
+            $this->title = __('Edit candidate') . ' - ' . "<span class='text-teal-500'>{$this->candidateModelData->fullname}</span>";
         } else {
+            $this->authorize('add-candidates');
             $this->title = __('Add candidate');
         }
     }
 
     public function render()
     {
-        $structures = Structure::when(! empty($this->searchStructure), function ($q) {
+        $structures = Structure::when(!empty($this->searchStructure), function ($q) {
             $q->where('name', 'LIKE', "%$this->searchStructure%");
         })
             ->ordered()

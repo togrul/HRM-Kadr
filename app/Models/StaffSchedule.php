@@ -5,10 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class StaffSchedule extends Model
 {
-    use HasFactory;
+    use HasFactory, LogsActivity;
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty();
+    }
 
     public $timestamps = false;
 
@@ -33,10 +42,12 @@ class StaffSchedule extends Model
     protected static function updateMainStructureVacancy(): void
     {
         $_mainStructure = StaffSchedule::where('structure_id', 1)->first();
-        $filled = Personnel::active()->count();
-        $_mainStructure->filled = $filled;
-        $_mainStructure->vacant = $_mainStructure->total - $filled;
-        $_mainStructure->save();
+        if ($_mainStructure) {
+            $filled = Personnel::active()?->count() ?? 0;
+            $_mainStructure->filled = $filled;
+            $_mainStructure->vacant = $_mainStructure?->total - $filled;
+            $_mainStructure->save();
+        }
     }
 
     protected static function boot()

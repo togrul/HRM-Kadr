@@ -6,12 +6,24 @@ use App\Traits\DateCastTrait;
 use App\Traits\PersonnelTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class PersonnelPassports extends Model
 {
-    use HasFactory;
-    use PersonnelTrait;
     use DateCastTrait;
+    use HasFactory;
+    use LogsActivity;
+    use PersonnelTrait;
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty()
+            ->useLogName('personnel')
+            ->dontSubmitEmptyLogs();
+    }
 
     protected $fillable = [
         'tabel_no',
@@ -20,5 +32,5 @@ class PersonnelPassports extends Model
         'valid_date',
     ];
 
-    protected $dates = ['valid_date','given_date'];
+    protected array $dates = ['valid_date', 'given_date'];
 }

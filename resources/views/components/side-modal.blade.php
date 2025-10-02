@@ -1,3 +1,15 @@
+@props([
+    'size' => 'large'
+])
+
+@php
+    $sizeClass = match($size){
+        'large' => 'md:max-w-3xl lg:max-w-4xl',
+        'x-large' => 'md:max-w-4xl lg:max-w-5xl',
+        'xx-large' => 'md:max-w-5xl lg:max-w-6xl'
+    };
+@endphp
+
 <div x-data="{ isOpen: false }"
      class="fixed inset-0 z-50 overflow-hidden"
      aria-labelledby="slide-over-title"
@@ -40,7 +52,7 @@
 
        <div class="fixed inset-y-0 right-0 flex max-w-full pl-10">
 
-         <div class="relative w-screen md:max-w-3xl lg:max-w-4xl"
+         <div class="relative w-screen {{$sizeClass}}"
                x-show="isOpen"
                x-transition:enter="transform transition ease-in-out duration-500 sm:duration-700"
                x-transition:enter-start="transform translate-x-full"

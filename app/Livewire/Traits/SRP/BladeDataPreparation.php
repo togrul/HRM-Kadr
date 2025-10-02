@@ -13,7 +13,6 @@ trait BladeDataPreparation
         $_personnel_ids = Personnel::find($_personnel_ids_list)->pluck('tabel_no')->toArray();
 
         $_component_ids = collect($_attrData)->pluck('component_id.id')->toArray();
-
         return $this->returnResponse($_attrData, $_personnel_ids, $_component_ids);
     }
 
@@ -39,7 +38,6 @@ trait BladeDataPreparation
             ->values()
             ->pluck('component_id.id')
             ->all();
-
         return $this->returnResponse($_attrData, $_personnel_ids, $_component_ids);
     }
 

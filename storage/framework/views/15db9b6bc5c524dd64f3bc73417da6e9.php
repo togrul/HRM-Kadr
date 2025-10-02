@@ -42,7 +42,6 @@
         };
 ?>
 <div class="border-t-8 border-gray-50 px-8 py-4 relative">
-
      <div class="flex items-center justify-between space-x-2">
           <div class="flex items-center space-x-3">
                <span class="rounded-tl-lg rounded-br-lg px-2 py-1 text-sm font-medium bg-<?php echo e($color); ?>-100 text-<?php echo e($color); ?>-500">
@@ -70,12 +69,15 @@
 <?php $component = $__componentOriginale2791dd75f39941788bfda38ee9a2f8b; ?>
 <?php unset($__componentOriginale2791dd75f39941788bfda38ee9a2f8b); ?>
 <?php endif; ?>
-                       <span class="text-black text-base flex items-center"><span class="text-sm text-gray-500"><?php echo e(__('Age')); ?>:</span><?php echo e(\Carbon\Carbon::parse($data['added_by'])->age); ?></span>
+                       <span class="text-black text-base flex items-center">
+                           <span class="text-sm text-gray-500"><?php echo e(__('Age')); ?>:</span><?php echo e(\Carbon\Carbon::parse($data['added_by'])->age); ?>
+
+                       </span>
                    <?php else: ?>
                        <span class="font-medium text-slate-500"><?php echo e($addedBy); ?></span>
                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                    <span><?php echo e($message ?? ''); ?> -</span>
-                    <span class="font-medium text-sky-500"><?php echo e($data['name']); ?></span>
+                   <span class="font-medium text-sky-500"><?php echo e($data['name']); ?></span>
                 </p>
           </div>
          <div class="flex items-center space-x-2">

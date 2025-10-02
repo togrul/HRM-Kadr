@@ -329,20 +329,20 @@ if (isset($__slots)) unset($__slots);
 
                 <?php if (isset($component)) { $__componentOriginal3ee30789824fd1cc17cb4ff8e03df656 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal3ee30789824fd1cc17cb4ff8e03df656 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table.tbl','data' => ['headers' => [__('#'),__('Tabel'),__('Fullname'),__('Position'),'action','action','action']]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table.tbl','data' => ['headers' => [ __('#'), __('Tabel'), __('Fullname'), __('Position'), 'action', 'action', 'action']]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('table.tbl'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['headers' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute([__('#'),__('Tabel'),__('Fullname'),__('Position'),'action','action','action'])]); ?>
+<?php $component->withAttributes(['headers' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute([ __('#'), __('Tabel'), __('Fullname'), __('Position'), 'action', 'action', 'action'])]); ?>
                     <!--[if BLOCK]><![endif]--><?php $__empty_1 = true; $__currentLoopData = $this->personnels; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $personnel): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                     <tr class="<?php echo \Illuminate\Support\Arr::toCssClasses([
                         'relative',
 //                        'bg-white' => empty($personnel->leave_work_date),
                         'bg-red-100' => !empty($personnel->leave_work_date),
-                        'bg-gray-50' => $personnel->hasActiveBusinessTrip || $personnel->hasActiveBusinessTrip
+                        'bg-gray-50' => ($personnel->hasActiveVacation || $personnel->hasActiveBusinessTrip)
                     ]); ?>">
                         <?php if (isset($component)) { $__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b = $attributes; } ?>
@@ -357,7 +357,7 @@ if (isset($__slots)) unset($__slots);
                             <div class="flex flex-col justify-between h-full absolute top-0 left-0">
                                 <!--[if BLOCK]><![endif]--><?php if($personnel->hasActiveVacation): ?>
                                     <?php
-                                        $activeVacation = $personnel->hasActiveBusinessTrip;
+                                        $activeVacation = $personnel->hasActiveVacation;
                                         $vacationStart = $activeVacation->start_date;
                                         $vacationEnd = $activeVacation->return_work_date;
                                     ?>
@@ -444,7 +444,17 @@ if (isset($__slots)) unset($__slots);
                                 <span class="text-sm font-medium text-blue-500">
                                     <?php echo e($personnel->tabel_no); ?>
 
-                               </span>
+                                </span>
+
+                                <!--[if BLOCK]><![endif]--><?php if($personnel->is_pending): ?>
+                                    <div class="text-xs font-medium rounded-lg shadow-sm px-4 py-1 flex space-x-2 items-center bg-teal-50 border border-teal-200 text-teal-500">
+                                        <svg class="h-5 w-5 text-teal-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                        </svg>
+                                        <span class=""><?php echo e(__('Waiting for approval')); ?></span>
+                                    </div>
+                                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+
                                 <!--[if BLOCK]><![endif]--><?php if($status == 'deleted'): ?>
                                 <div class="flex flex-col text-xs font-medium">
                                     <div class="flex items-center space-x-1">
@@ -457,6 +467,7 @@ if (isset($__slots)) unset($__slots);
                                     </div>
                                 </div>
                                 <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+
                             </div>
                          <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>

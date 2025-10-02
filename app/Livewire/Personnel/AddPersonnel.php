@@ -36,6 +36,7 @@ class AddPersonnel extends Component
 
         $modelInstance = new Personnel;
         $personnelData = $this->modifyArray($this->personnel, $modelInstance->dateList());
+        $personnelData['is_pending'] = ! auth()->user()->can('confirmation-general');
 
         if (! empty($this->avatar)) {
             $this->personnel['photo'] = $this->avatar->store('personnel', 'public');
@@ -45,7 +46,7 @@ class AddPersonnel extends Component
 
         DB::transaction(function () use ($personnelData) {
             $personnel = Personnel::create($personnelData);
-            //other cruds
+            // relation other crud
             $this->createRelatedData($personnel, 'idDocuments', PersonnelIdentityDocument::class, $this->document);
             $this->createMultipleRelatedData($personnel, 'cards', PersonnelCard::class, $this->service_cards_list);
             $this->createMultipleRelatedData($personnel, 'passports', PersonnelPassports::class, $this->passports_list);

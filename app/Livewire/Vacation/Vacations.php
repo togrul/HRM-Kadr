@@ -5,7 +5,6 @@ namespace App\Livewire\Vacation;
 use App\Exports\VacationExport;
 use App\Livewire\Traits\SelectListTrait;
 use App\Livewire\Traits\SideModalAction;
-use App\Models\Personnel;
 use App\Models\PersonnelVacation;
 use App\Models\Structure;
 use App\Services\NumberToWordsService;
@@ -23,7 +22,7 @@ use PhpOffice\PhpWord\TemplateProcessor;
 
 class Vacations extends Component
 {
-    use AuthorizesRequests,SelectListTrait,SideModalAction,WithPagination;
+    use AuthorizesRequests, SelectListTrait, SideModalAction, WithPagination;
 
     public array $filter = [];
 
@@ -58,6 +57,19 @@ class Vacations extends Component
         $this->search = $this->filter;
     }
 
+    public function getTableHeaders(): array
+    {
+        return [
+            __('#'),
+            __('Fullname'),
+            __('Structure'),
+            __('Dates'),
+            __('Locations'),
+            __('Order'),
+            'action',
+        ];
+    }
+
     public function printVacationDocument(PersonnelVacation $model)
     {
         $model->load([
@@ -90,7 +102,7 @@ class Vacations extends Component
             return [
                 'day' => $date->format('d'),
                 'month' => $date->locale('AZ')->monthName,
-                'year' => $year.$suffixService->getNumberSuffix((int) $year),
+                'year' => $year . $suffixService->getNumberSuffix((int) $year),
             ];
         }, $dates);
 
@@ -119,9 +131,9 @@ class Vacations extends Component
         $templateProcessor->setValue('person_signature', $chiefName);
 
         $filename = "{$model->personnel->fullname}_mezuniyyet_{$model->start_date->format('d.m.Y')}";
-        $templateProcessor->saveAs($filename.'.docx');
+        $templateProcessor->saveAs($filename . '.docx');
 
-        return response()->download($filename.'.docx')->deleteFileAfterSend();
+        return response()->download($filename . '.docx')->deleteFileAfterSend();
     }
 
     protected function fillFilter(): void
@@ -134,13 +146,13 @@ class Vacations extends Component
     protected function returnData($type = 'normal')
     {
         $result = PersonnelVacation::with([
-            'personnel' => fn ($q) => $q->with([
+            'personnel' => fn($q) => $q->with([
                 'structure',
                 'position',
                 'latestRank.rank',
             ]),
         ])
-            ->whereHas('personnel', fn ($query) => $query->whereIn('structure_id', resolve(StructureService::class)->getAccessibleStructures()))
+            ->whereHas('personnel', fn($query) => $query->whereIn('structure_id', resolve(StructureService::class)->getAccessibleStructures()))
             ->filter($this->search)
             ->when((empty($this->search['date']['min'] ?? null) && empty($this->search['date']['max'] ?? null)), fn($qq) => $qq->whereDateInYear($this->selectedYear))
             ->orderByDesc('end_date')

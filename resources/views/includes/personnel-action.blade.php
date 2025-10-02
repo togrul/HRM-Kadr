@@ -1,10 +1,21 @@
-<div class="sidemenu-title">
-    <h2 class="text-2xl font-title font-semibold text-gray-500" id="slide-over-title">
+<div class="sidemenu-title flex flex-col space-y-2">
+    <h2 class="text-xl font-title font-semibold text-gray-500" id="slide-over-title">
       {{ $title ?? ''}}
     </h2>
+    @if(auth()->user()->can('confirmation-general') && isset($personnelModel) && $personnelModelData->is_pending)
+    <div class="flex px-4 py-2 rounded-md space-x-3 shadow-lg border border-gray-200 bg-white items-center justify-start">
+        <span class="flex-none">
+            <svg class="w-6 h-6 text-rose-500" xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6v6l4 2"/><path d="M16 21.16a10 10 0 1 1 5-13.516"/><path d="M20 11.5v6"/><path d="M20 21.5h.01"/></svg>
+        </span>
+        <div class="flex justify-between items-center w-full">
+            <p class="text-sm font-medium text-gray-900">{{ __('personnel.confirm-message') }}</p>
+            <button wire:click="confirmPersonnel" class="appearance-none text-sm bg-gray-900 text-white font-semibold px-4 py-2 shadow-sm rounded-lg transition-all duration-200 hover:bg-gray-700">{{ __('Confirm') }}</button>
+        </div>
+    </div>
+    @endif
 </div>
 
-<div class="flex flex-col w-full p-10 px-0 mx-auto my-3 mb-4 space-y-8 transition duration-500 ease-in-out transform bg-white">
+<div class="flex flex-col w-full p-5 px-0 mx-auto my-1 mb-4 space-y-8 transition duration-500 ease-in-out transform bg-white">
     <div class="grid grid-cols-8 gap-y-2 items-start">
         @foreach ($steps as $key => $st)
             <button wire:click="selectStep({{ $key }})" @class([
@@ -14,7 +25,7 @@
             ])>
                 <span @class([
                     'flex-none w-12 h-12 flex justify-center items-center rounded-full z-10 transition-all duration-300 border-[6px] border-white',
-                    'border-gray-200 text-black bg-gray-200' =>  ($step != $key && $step < $key),
+                    'border-gray-200 text-black bg-gray-200' => $step < $key,
                     'text-emerald-50 bg-emerald-500' => $step > $key,
                     'bg-blue-600 text-white' => $step == $key
                 ])>

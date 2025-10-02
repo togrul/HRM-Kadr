@@ -29,7 +29,7 @@ trait OrderValidationTrait
                 'components.*.name' => $this->selectedBlade == Order::BLADE_DEFAULT ? 'required|string' : '',
                 'components.*.surname' => $this->selectedBlade == Order::BLADE_DEFAULT ? 'required|string' : '',
                 'components.*.start_date' => in_array($this->selectedBlade, [Order::BLADE_VACATION, Order::BLADE_BUSINESS_TRIP]) ? 'required|date' : '',
-                'components.*.end_date' => in_array($this->selectedBlade, [Order::BLADE_VACATION, Order::BLADE_BUSINESS_TRIP]) ? 'required|date|after:start_date' : '',
+                'components.*.end_date' => in_array($this->selectedBlade, [Order::BLADE_VACATION, Order::BLADE_BUSINESS_TRIP]) ? 'required|date|after:components.*.start_date' : '',
                 'components.*.days' => $this->selectedBlade == Order::BLADE_VACATION ? 'required|int|min:0' : '',
                 'components.*.location' => $this->selectedBlade == Order::BLADE_BUSINESS_TRIP ? 'required|string|min:2' : '',
                 'components.*.meeting_hour' => $this->isInternalBusinessTrip() ? 'required|string' : '',

@@ -67,6 +67,12 @@ class EditPersonnel extends Component
             ->findOrFail($this->personnelModel);
     }
 
+    public function confirmPersonnel(): void
+    {
+        $this->personnelModelData->update(['is_pending' => false]);
+        $this->dispatch('addError', __('Personnel was updated successfully!'));
+    }
+
     public function store()
     {
         $this->authorize('update-personnels', $this->personnelModel);
@@ -78,7 +84,7 @@ class EditPersonnel extends Component
         $personnelData = $this->modifyArray($this->personnel, $this->personnelModelData->dateList());
 
         if ($this->step == 2 || $this->step == 3) {
-            $this->completeStep();
+            $this->completeStep(actionSave: true);
         }
 
         DB::transaction(function () use ($personnelData) {

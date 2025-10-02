@@ -16,13 +16,6 @@ class EditCandidate extends Component
 
     public $candidateModelData;
 
-    public function mount()
-    {
-        $this->authorize('edit-candidates', $this->candidateModelData);
-
-        $this->fillCandidate();
-    }
-
     protected function fillCandidate()
     {
         $this->candidateModelData = Candidate::with(['status', 'structure'])
