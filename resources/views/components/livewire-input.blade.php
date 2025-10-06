@@ -9,8 +9,8 @@
      $extraClass = match($mode)
      {
           'default' => 'bg-white',
-          'gray' => "bg-gray-100",
-          'disabled' => "bg-gray-200"
+          'gray' => "bg-neutral-100",
+          'disabled' => "bg-neutral-200"
      };
      $isError = $errors->has($name)?'bg-red-50':'';
 @endphp

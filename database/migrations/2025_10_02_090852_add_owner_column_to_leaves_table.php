@@ -12,7 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('leaves', function (Blueprint $table) {
-            //
+            $table
+                ->foreignId('assigned_to')
+                ->nullable()
+                ->after('document_path')
+                ->constrained('users')
+                ->nullOnDelete();
         });
     }
 
@@ -22,7 +27,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('leaves', function (Blueprint $table) {
-            //
+            $table->dropForeign('leaves_assigned_to_foreign');
+            $table->dropColumn('assigned_to');
         });
     }
 };

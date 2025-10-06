@@ -37,7 +37,7 @@
      $extraClass = match($mode)
      {
           'default' => 'bg-white',
-          'gray' => "bg-gray-100"
+          'gray' => "bg-neutral-100"
      };
      $isError = $errors->has($name)?'bg-red-50':'';
 

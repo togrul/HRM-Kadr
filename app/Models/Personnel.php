@@ -2,19 +2,20 @@
 
 namespace App\Models;
 
-use App\Observers\PersonnelObserver;
-use App\Traits\DateCastTrait;
-use App\Traits\NestedStructureTrait;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Traits\DateCastTrait;
 use Spatie\Activitylog\LogOptions;
+use App\Observers\PersonnelObserver;
+use App\Traits\NestedStructureTrait;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 
 #[ObservedBy(PersonnelObserver::class)]
 class Personnel extends Model
@@ -552,6 +553,19 @@ class Personnel extends Model
     {
         $structureIds = $this->getNestedStructure($value);
         $query->whereIn('structure_id', $structureIds);
+    }
+
+     public function scopeNameLike(Builder $query, ?string $term): Builder
+    {
+        $term = trim((string) $term);
+        if ($term === '') {
+            return $query;
+        }
+
+        return $query->where(function (Builder $q) use ($term) {
+            $q->where('name', 'like', "%{$term}%")
+              ->orWhere('surname', 'like', "%{$term}%");
+        });
     }
 
     protected static function boot()

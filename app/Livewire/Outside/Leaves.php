@@ -62,7 +62,6 @@ class Leaves extends Component
                 OrderStatusEnum::CANCELLED->value,
             ];
 
-            // Yalnız yekunlaşmamış sorğuda statusu dəyiş (atomik şərtli update)
             $updates = ['status_id' => $toStatus->value];
 
             if ($toStatus === OrderStatusEnum::APPROVED) {
@@ -75,7 +74,6 @@ class Leaves extends Component
                 ->update($updates);
 
             if ($affected !== 1) {
-                // artıq kim isə yekunlaşdırıb
                 throw new \RuntimeException('This leave request is already finalized.');
             }
 

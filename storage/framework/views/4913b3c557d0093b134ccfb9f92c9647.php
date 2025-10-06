@@ -37,7 +37,7 @@
         'teal'
             => 'bg-teal-100 border border-teal-500 hover:bg-teal-200 active:bg-teal-100 focus:bg-teal-100 text-teal-500',
         'slate'
-            => 'bg-slate-100 border border-slate-500 hover:bg-slate-200 active:bg-slate-100 focus:bg-slate-100 text-slate-500',
+            => 'bg-neutral-100 border border-neutral-200 hover:bg-neutral-200 active:bg-neutral-100 focus:bg-neutral-100 text-neutral-500',
         'light-red'
             => 'bg-red-100 border border-red-500 hover:bg-red-200 active:bg-red-100 focus:bg-red-100 text-red-500',
         'light-blue'
