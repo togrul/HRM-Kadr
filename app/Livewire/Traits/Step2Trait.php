@@ -4,6 +4,7 @@ namespace App\Livewire\Traits;
 
 use App\Models\City;
 use App\Models\CountryTranslation;
+use Illuminate\Support\Facades\Cache;
 
 trait Step2Trait
 {
@@ -37,11 +38,21 @@ trait Step2Trait
 
         $data = [
             'pin' => $pin,
+            'nationality' => 'Azərbaycan',
+            'city' => 'Bakı',
         ];
 
         if ($pin == '1071F12') {
-            $nationality = CountryTranslation::where('title', 'LIKE', '%Azərbaycan%')->select('country_id', 'title')->first();
-            $city = City::where('name', 'LIKE', '%Bakı%')->select('id', 'name')->first();
+            $nationality = Cache::rememberForever('nationality:'. $data['nationality'] , fn () =>
+            CountryTranslation::select('country_id', 'title')
+                ->where('title', 'LIKE', "%{$data['nationality']}%")
+                ->first()
+            );
+            $city = Cache::rememberForever('city:' . $data['city'], fn () =>
+                City::select('id', 'name')
+                    ->where('name', 'LIKE', "%{$data['city']}%")
+                    ->first()
+            );
             $this->documentNationalityName = $this->documentBornCountryName = $nationality->title;
             $this->documentNationalityId = $this->documentBornCountryId = $nationality->country_id;
             $this->documentBornCityId = $city->id;
