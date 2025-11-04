@@ -2,101 +2,73 @@
 
 namespace App\Livewire\Filter;
 
-use App\Models\Award;
-use App\Models\City;
-use App\Models\Country;
-use App\Models\EducationalInstitution;
-use App\Models\EducationDegree;
-use App\Models\Position;
-use App\Models\Punishment;
-use App\Models\Rank;
-use App\Models\Structure;
-use Illuminate\Support\Facades\DB;
-use Livewire\Attributes\On;
 use Livewire\Component;
+use Livewire\Attributes\On;
+use App\Livewire\Traits\DropdownConstructTrait;
+use Livewire\Attributes\Computed;
+use Illuminate\Support\Facades\DB;
 
+use App\Models\{
+    Structure, Position, Country, City, Rank, EducationalInstitution,
+    EducationDegree, Award, Punishment
+};
 
 class Detail extends Component
 {
+    use DropdownConstructTrait;
+    // --- State ---
     public array $filter = [];
 
-    public $structureId;
+    // Search terms (debounce/lazy in Blade)
+    public string $searchStructure = '';
+    public string $searchPosition = '';
+    public string $searchNationality = '';
+    public string $searchPreviousNationality = '';
+    public string $searchCity = '';
+    public string $searchRank = '';
+    public string $searchInstitution = '';
+    public string $searchEducationDegree = '';
+    public string $searchAward = '';
+    public string $searchPunishment = '';
 
-    public $structureName;
-
-    public $searchStructure;
-
-    public $positionId;
-
-    public $positionName;
-
-    public $searchPosition;
-
-    public $nationalityId;
-
-    public $nationalityName;
-
-    public $searchNationality;
-
-    public $bornCountryId;
-
-    public $bornCountryName;
-
-    public $searchPreviousNationality;
-
-    public $bornCityId;
-
-    public $bornCityName;
-
-    public $searchCity;
-
-    public $rankId;
-
-    public $rankName;
-
-    public $searchRank;
-
-    public $educationDegreeId;
-
-    public $educationDegreeName;
-
-    public $searchEducationDegree;
-
-    public $institutionId;
-
-    public $institutionName;
-
-    public $searchInstitution;
-
-    public $awardId;
-
-    public $awardName;
-
-    public $searchAward;
-
-    public $punishmentId;
-
-    public $punishmentName;
-
-    public $searchPunishment;
 
     #[On('filterResetted')]
-    public function filterResetted()
+    public function filterResetted(): void
     {
-        $this->filter = [];
-        $this->mount();
+        $this->filter = $this->defaultFilter();;
     }
 
     #[On('setOpenFilter')]
-    public function setOpenFilter()
+    public function setOpenFilter(): void
     {
         $this->dispatch('openFilterWasSet');
     }
 
-    public function updatedFilter($value, $name)
+    private function defaultFilter(): array
     {
-        if (empty($value) && $name != 'is_married') {
+        return [
+            'structure_id' => null,
+            'position_id'  => null,
+            'nationality_id' => null,
+            'born_country_id' => null,
+            'born_city_id' => null,
+            'rank_id' => null,
+            'educational_institution_id' => null,
+            'education_degree_id' => null,
+            'award_id' => null,
+            'punishment_id' => null,
+            'is_married' => null,
+        ];
+    }
+
+    public function updatedFilter($value, $name): void
+    {
+        if ($name !== 'is_married' && ($value === '' || $value === null)) {
             unset($this->filter[$name]);
+        }
+
+        if ($name === 'born_country_id') {
+            $this->filter['born_city_id'] = null;
         }
     }
 
@@ -104,22 +76,6 @@ class Detail extends Component
     {
         //datani gondermek birbasa query stringe
         $this->dispatch('filterSelected', $this->filter);
-    }
-
-    public function setData($model, $key, $content, $name, $id)
-    {
-        $this->{$content.'Id'} = $id;
-        $this->{$content.'Name'} = $name;
-        if (! empty($id)) {
-            $this->{$model}[$key] = $id;
-        } else {
-            unset($this->{$model}[$key]);
-        }
-    }
-
-    public function mount()
-    {
-        $this->structureName = $this->positionName = $this->nationalityName = $this->bornCountryName = $this->bornCityName = $this->rankName = $this->institutionName = $this->educationDegreeName = $this->awardName = $this->punishmentName = '---';
     }
 
     public function placeholder()
@@ -145,71 +101,198 @@ class Detail extends Component
         HTML;
     }
 
-    public function render()
+    #[Computed()]
+    public function structureOptions(): array
     {
-        $structures = Structure::when(! empty($this->searchStructure), function ($q) {
-            $q->where('name', 'LIKE', "%{$this->searchStructure}%");
-        })
-            ->ordered()
-            ->get();
+        $selected = data_get($this->filter, 'structure_id');
 
-        $positions = Position::when(! empty($this->searchPosition), function ($q) {
-            $q->where('name', 'LIKE', "%{$this->searchPosition}%");
-        })
-            ->get();
+        $base = \App\Models\Structure::query()
+            ->select('id', DB::raw("name as label"))
+            ->orderBy('name');
 
-        $nationalities = Country::whereHas('currentCountryTranslations', function ($query) {
-            $query->when(! empty($this->searchNationality), function ($q) {
-                $q->where('title', 'LIKE', "%{$this->searchNationality}%");
-            })
-                ->when(! empty($this->searchPreviousNationality), function ($q) {
-                    $q->where('title', 'LIKE', "%{$this->searchPreviousNationality}%");
-                });
-        })
-            ->with('currentCountryTranslations')
-            ->get()
-            ->sortBy('currentCountryTranslations.title')
-            ->all();
-
-        $cities = City::select('id', 'name', 'country_id')
-            ->when(! empty($this->searchCity), function ($q) {
-                $q->where('name', 'LIKE', "%{$this->searchCity}%");
-            })
-            ->when(! empty($this->bornCountryId), function ($q) {
-                $q->where('country_id', $this->bornCountryId);
-            })
-            ->get();
-
-        $rankModel = Rank::query()
-            ->when(! empty($this->searchRank), function ($q) {
-                $q->where('name_'.config('app.locale'), 'LIKE', "%{$this->searchRank}%");
-            })
-            ->where('is_active', 1)
-            ->get();
-
-        $institutions = EducationalInstitution::when(! empty($this->searchInstitution), function ($q) {
-            $q->where('name', 'LIKE', "%{$this->searchInstitution}%");
-        })
-            ->get();
-
-        $education_degrees = EducationDegree::select('id', DB::raw('title_'.config('app.locale').' as title'))
-            ->when(! empty($this->searchEducationDegree), function ($q) {
-                $q->where('title_'.config('app.locale'), 'LIKE', "%{$this->searchEducationDegree}%");
-            })
-            ->get();
-
-        $awardModel = Award::when(! empty($this->searchAward), function ($q) {
-            $q->where('name', 'LIKE', "%{$this->searchAward}%");
-        })
-            ->get();
-
-        $punishmentModel = Punishment::when(! empty($this->searchPunishment), function ($q) {
-            $q->where('name', 'LIKE', "%{$this->searchPunishment}%");
-        })
-            ->criminalType('other')
-            ->orderBy('name')
-            ->get();
-
-        return view('livewire.filter.detail', compact('structures', 'positions', 'nationalities', 'cities', 'rankModel', 'institutions', 'education_degrees', 'awardModel', 'punishmentModel'));
+        return $this->optionsWithSelected(
+            base: $base,
+            searchCol: 'name',
+            searchTerm: $this->searchStructure,
+            selectedId: $selected,
+            limit: 80
+        );
     }
+
+    #[Computed]
+    public function positions(): array
+    {
+        $selected = data_get($this->filter, 'position_id');
+
+        $base = \App\Models\Position::query()
+            ->select('id', DB::raw("name as label"))
+            ->orderBy('name');
+
+        return $this->optionsWithSelected(
+            base: $base,
+            searchCol: 'name',
+            searchTerm: $this->searchPosition,
+            selectedId: $selected,
+            limit: 50
+        );
+    }
+
+    #[Computed]
+    public function rankOptions(): array
+    {
+        $selected = data_get($this->filter, 'rank_id');
+        $localeCol = 'name_'.app()->getLocale(); // real column
+        $base = \App\Models\Rank::query()
+            ->select('id', DB::raw("$localeCol as label"))
+            ->where('is_active', 1);
+
+        return $this->optionsWithSelected(
+            base: $base,
+            searchCol: $localeCol,
+            searchTerm: $this->searchRank,
+            selectedId: $selected,
+            limit: 50
+        );
+    }
+
+   #[Computed]
+    public function institutionOptions(): array
+    {
+        $selected = data_get($this->filter, 'educational_institution_id');
+
+        $base = \App\Models\EducationalInstitution::query()
+            ->select('id', DB::raw("name as label"));
+
+        return $this->optionsWithSelected(
+            base: $base,
+            searchCol: 'name',
+            searchTerm: $this->searchInstitution,
+            selectedId: $selected,
+            limit: 50
+        );
+    }
+
+    #[Computed]
+    public function educationDegreeOptions(): array
+    {
+        $selected  = data_get($this->filter, 'education_degree_id');
+        $localeCol = 'title_'.app()->getLocale();
+
+        $base = \App\Models\EducationDegree::query()
+            ->select('id', DB::raw("$localeCol as label"));
+
+        return $this->optionsWithSelected(
+            base: $base,
+            searchCol: $localeCol,
+            searchTerm: $this->searchEducationDegree,
+            selectedId: $selected,
+            limit: 50
+        );
+    }
+
+    #[Computed]
+    public function awardOptions(): array
+    {
+        $selected = data_get($this->filter, 'award_id');
+
+        $base = \App\Models\Award::query()
+            ->select('id', DB::raw("name as label"))
+            ->orderBy('name');
+
+        return $this->optionsWithSelected(
+            base: $base,
+            searchCol: 'name',
+            searchTerm: $this->searchAward,
+            selectedId: $selected,
+            limit: 50
+        );
+    }
+
+    #[Computed]
+    public function punishmentOptions(): array
+    {
+        $selected = data_get($this->filter, 'punishment_id');
+
+        $base = \App\Models\Punishment::query()
+            ->select('id', DB::raw("name as label"))
+            ->criminalType('other') // local scope
+            ->orderBy('name');
+
+        return $this->optionsWithSelected(
+            base: $base,
+            searchCol: 'name',
+            searchTerm: $this->searchPunishment,
+            selectedId: $selected,
+            limit: 50
+        );
+    }
+
+    #[Computed]
+    public function cities(): array
+    {
+        $countryId = data_get($this->filter, 'born_country_id');
+        if (!$countryId) return [];
+
+        $selectedId = data_get($this->filter, 'born_city_id');
+
+        $base = \App\Models\City::query()
+            ->select('id', DB::raw('name as label'))
+            ->where('country_id', $countryId)
+            ->orderBy('name');
+
+        return $this->optionsWithSelected(
+            base: $base,
+            searchCol: 'name',
+            searchTerm: $this->searchCity,
+            selectedId: $selectedId,
+            limit: 50
+        );
+    }
+
+    private function getBaseQueryCountry()
+    {
+        $locale = app()->getLocale();
+        return \App\Models\Country::query()
+            ->select('countries.id', DB::raw('t.title as label'))
+            ->join('country_translations as t', function ($join) use ($locale) {
+                $join->on('t.country_id', '=', 'countries.id')
+                    ->where('t.locale', '=', $locale);
+            })
+            ->orderBy('t.title');
+    }
+
+    #[Computed]
+    public function nationalityOptions(): array
+    {
+        $selected = data_get($this->filter, 'nationality_id');
+
+        $base = $this->getBaseQueryCountry();
+
+        return $this->optionsWithSelected(
+            base: $base,
+            searchCol: 't.title',
+            searchTerm: $this->searchNationality,
+            selectedId: $selected,
+            limit: 80
+        );
+    }
+
+    #[Computed]
+    public function bornCountryOptions(): array
+    {
+        $selected = data_get($this->filter, 'born_country_id');
+
+        $base = $this->getBaseQueryCountry();
+
+        return $this->optionsWithSelected(
+            base: $base,
+            searchCol: 't.title',
+            searchTerm: $this->searchPreviousNationality,
+            selectedId: $selected,
+            limit: 80
+        );
+    }
+
+    public function mount() { $this->filterResetted(); }
+    public function render() { return view('livewire.filter.detail'); }
 }

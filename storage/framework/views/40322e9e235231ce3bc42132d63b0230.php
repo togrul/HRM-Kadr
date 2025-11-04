@@ -15,7 +15,7 @@
         <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>
     </head>
     <body class="font-sans text-gray-900 antialiased">
-        <div class="min-h-screen flex w-full pt-6 sm:pt-0 bg-gradient-to-r from-gray-50 from-10% via-gray-100 via-50% to-gray-200 to-100% dark:bg-gray-900">
+        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gradient-to-r from-gray-50 from-10% via-gray-100 via-50% to-gray-200 to-100% dark:bg-gray-900">
            <?php echo e($slot); ?>
 
         </div>

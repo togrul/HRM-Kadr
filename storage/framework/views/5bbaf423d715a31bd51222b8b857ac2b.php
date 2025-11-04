@@ -1,5 +1,5 @@
 <div class="flex flex-col space-y-4">
-    <div class="grid gap-2 grid-cols-1 md:grid-cols-2">
+    <div class="grid gap-2 grid-cols-1 md:grid-cols-2 items-stretch">
         <?php if (isset($component)) { $__componentOriginal8e3939701bc9c667d1f9e91d04821cb7 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal8e3939701bc9c667d1f9e91d04821cb7 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.form-card','data' => ['title' => 'Languages']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
@@ -1515,7 +1515,7 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                     </div>
                 </div>
             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-                <div class="flex justify-center items-center bg-slate-100 shadow-sm rounded-lg px-4 py-2 relative">
+                <div class="flex justify-center items-center bg-neutral-100 shadow-sm rounded-lg px-4 py-2 relative">
                     <h1 class="font-medium text-base text-gray-600">
                         <?php echo e(__('No information added')); ?>
 

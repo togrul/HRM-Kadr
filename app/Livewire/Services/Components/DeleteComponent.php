@@ -1,29 +1,59 @@
 <?php
 
 namespace App\Livewire\Services\Components;
-
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
 class DeleteComponent extends Component
 {
-    public ?\App\Models\Component $component;
+    use AuthorizesRequests;
+
+    #[Locked]
+    public ?int $componentId = null;
 
     #[On('setDeleteComponent')]
     public function setDeleteComponent($componentId)
     {
-        $this->component = \App\Models\Component::where('id', $componentId)->first();
+        $component = \App\Models\Component::query()
+            ->select('id')
+            ->find($componentId);
+
+        if (! $component) {
+            $this->componentId = null;
+
+            return;
+        }
+
+        // $this->authorize('delete', $component);
+
+        $this->componentId = (int) $component->id;
 
         $this->dispatch('deleteComponentWasSet');
     }
 
     public function deleteComponent()
     {
-        // $this->authorize('delete',$this->component);
+        if (! $this->componentId) {
+            return;
+        }
 
-        \App\Models\Component::destroy($this->component->id);
+        $component = \App\Models\Component::query()
+            ->select('id')
+            ->find($this->componentId);
 
-        $this->component = null;
+        if (! $component) {
+            $this->componentId = null;
+
+            return;
+        }
+
+        // $this->authorize('delete', $component);
+
+        $component->delete();
+
+        $this->componentId = null;
 
         $this->dispatch('componentWasDeleted', __('Component was deleted!'));
     }

@@ -9,7 +9,7 @@
 <?php endif; ?>
 <?php $component->withAttributes([]); ?>
     <div class="grid grid-cols-1 md:grid-cols-2 w-full">
-        <div class="w-full bg-white/40 dark:bg-gray-800 shadow-sm overflow-hidden sm:rounded-lg">
+        <div class="w-full bg-white/40 dark:bg-gray-800 h-screen shadow-sm overflow-hidden sm:rounded-lg">
 
             <div class="flex flex-col w-full space-y-4 py-10 px-8 justify-center max-w-lg mx-auto h-full">
                 <a href="/" class="py-2 mx-auto flex">

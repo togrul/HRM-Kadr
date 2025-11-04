@@ -3,28 +3,59 @@
 namespace App\Livewire\Orders\Templates;
 
 use App\Models\Order;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
 class DeleteTemplate extends Component
 {
-    public ?Order $template;
+    use AuthorizesRequests;
+
+    #[Locked]
+    public ?int $templateId = null;
 
     #[On('setDeleteTemplate')]
     public function setDeleteTemplate($templateId)
     {
-        $this->template = Order::where('id', $templateId)->first();
+        $template = Order::query()
+            ->select('id')
+            ->find($templateId);
+
+        if (! $template) {
+            $this->templateId = null;
+
+            return;
+        }
+
+        // $this->authorize('delete', $template);
+
+        $this->templateId = (int) $template->id;
 
         $this->dispatch('deleteTemplateWasSet');
     }
 
     public function deleteTemplate()
     {
-        // $this->authorize('delete',$this->template);
+        if (! $this->templateId) {
+            return;
+        }
 
-        Order::destroy($this->template->id);
+        $template = Order::query()
+            ->select('id')
+            ->find($this->templateId);
 
-        $this->template = null;
+        if (! $template) {
+            $this->templateId = null;
+
+            return;
+        }
+
+        // $this->authorize('delete', $template);
+
+        $template->delete();
+
+        $this->templateId = null;
 
         $this->dispatch('templateWasDeleted', __('Template was deleted!'));
     }

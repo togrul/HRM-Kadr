@@ -27,6 +27,7 @@ class AppealStatus extends Component
         ];
     }
 
+
     protected function validationAttributes(): array
     {
         return [
@@ -35,24 +36,35 @@ class AppealStatus extends Component
         ];
     }
 
+    private function findByIdAndLocale(int $id): ?AppealStatusAlias
+    {
+        return AppealStatusAlias::where('id', $id)
+            ->where('locale', $this->selectedLocale)
+            ->first();
+    }
+
     public function openCrud(?int $id = null): void
     {
-        $this->model = $id
-            ? AppealStatusAlias::where('id', $id)
-                ->where('locale', $this->selectedLocale)
-                ->first()
-            : null;
+        if ($id) {
+            $this->model = $this->findByIdAndLocale($id);
 
-        $this->form = $this->model ? $this->model->toArray() : [];
+            if (!$this->model) {
+                return;
+            }
+
+            $this->form = $this->model->toArray();
+        } else {
+            $this->model = null;
+            $this->form = [];
+        }
+
         $this->isAdded = true;
     }
 
     public function deleteModel(?int $id = null): void
     {
         if ($id) {
-            $this->model = AppealStatusAlias::where('id', $id)
-                ->where('locale', $this->selectedLocale)
-                ->first();
+            $this->model = $this->findByIdAndLocale($id);
 
             if ($this->model) {
                 $this->callDeletePromptSwal();
@@ -100,9 +112,7 @@ class AppealStatus extends Component
 
     public function render()
     {
-        $_appeal_statuses = AppealStatusAlias::query()
-            ->where('locale', '=', $this->selectedLocale)
-            ->get();
+        $_appeal_statuses = AppealStatusAlias::where('locale', $this->selectedLocale)->get();
 
         return view('livewire.admin.appeal-status', compact('_appeal_statuses'));
     }

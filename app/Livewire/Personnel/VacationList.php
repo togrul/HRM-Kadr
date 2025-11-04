@@ -7,6 +7,7 @@ use App\Livewire\Traits\SelectListTrait;
 use App\Models\Personnel;
 use App\Models\Vacation;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -18,6 +19,7 @@ class VacationList extends Component
 
     public string $title;
 
+    #[Locked]
     public string $personnelModel;
 
     public $personnelModelData;

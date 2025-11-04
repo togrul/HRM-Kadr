@@ -1,3 +1,1 @@
-<div>
-   sds
-</div>
+@include('partials.leave-partial')

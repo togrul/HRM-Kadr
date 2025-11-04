@@ -13,6 +13,7 @@ use App\Models\Personnel;
 use App\Models\Rank;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -30,6 +31,7 @@ class Information extends Component
 
     public string $title;
 
+    #[Locked]
     public string $personnelModel;
 
     public $personnelModelData;

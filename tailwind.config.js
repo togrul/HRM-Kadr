@@ -1,5 +1,5 @@
-import defaultTheme from 'tailwindcss/defaultTheme';
 import forms from '@tailwindcss/forms';
+import defaultTheme from 'tailwindcss/defaultTheme';
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -7,7 +7,12 @@ export default {
     content: [
         './vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php',
         './storage/framework/views/*.php',
-        './resources/views/**/*.blade.php'
+        './resources/views/**/*.blade.php',
+        "./resources/**/*.blade.php",
+        "./resources/**/*.js",
+        "./resources/**/*.vue",
+        "./app/Livewire/**/*.php",
+        "./app/View/Components/**/*.php",
     ],
     safelist: [
         'bg-cyan-100',
@@ -25,6 +30,7 @@ export default {
         'text-yellow-400',
         'bg-slate-500',
         'bg-cyan-500',
+        'bg-orange-100',
         'bg-orange-500',
         'bg-neutral-200/60',
         'border-neutral-200/70',
@@ -42,10 +48,3 @@ export default {
 
     plugins: [forms],
 };
-
-// 10 => 'bg-neutral-200/60 text-neutral-600 border-neutral-200/70',
-//     20 => 'bg-amber-50 border-amber-200 text-amber-600',
-//     30 => 'bg-sky-50 border-sky-200 text-sky-600',
-//     40 => 'bg-indigo-50 border-indigo-200 text-indigo-600',
-//     70 => 'bg-emerald-50 border-emerald-200 text-emerald-600',
-//     90 => 'bg-rose-50 border-rose-200 text-rose-600',

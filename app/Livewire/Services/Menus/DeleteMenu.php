@@ -1,30 +1,60 @@
 <?php
 
 namespace App\Livewire\Services\Menus;
-
 use App\Models\Menu;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
 class DeleteMenu extends Component
 {
-    public ?Menu $menu;
+    use AuthorizesRequests;
+
+    #[Locked]
+    public ?int $menuId = null;
 
     #[On('setDeleteMenu')]
     public function setDeleteMenu($menuId)
     {
-        $this->menu = Menu::findOrFail($menuId);
+        $menu = Menu::query()
+            ->select('id')
+            ->find($menuId);
+
+        if (! $menu) {
+            $this->menuId = null;
+
+            return;
+        }
+
+        // $this->authorize('delete', $menu);
+
+        $this->menuId = (int) $menu->id;
 
         $this->dispatch('deleteMenuWasSet');
     }
 
     public function deleteMenu()
     {
-        // $this->authorize('delete',$this->comment);
+        if (! $this->menuId) {
+            return;
+        }
 
-        Menu::destroy($this->menu->id);
+        $menu = Menu::query()
+            ->select('id')
+            ->find($this->menuId);
 
-        $this->menu = null;
+        if (! $menu) {
+            $this->menuId = null;
+
+            return;
+        }
+
+        // $this->authorize('delete', $menu);
+
+        $menu->delete();
+
+        $this->menuId = null;
 
         $this->dispatch('menuWasDeleted', __('Menu was deleted!'));
     }

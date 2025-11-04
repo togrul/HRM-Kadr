@@ -105,7 +105,7 @@ class CandidateList extends Component
 
         return $type == 'normal'
             ? $result->paginate(15)->withQueryString()
-            : $result->get()->toArray();
+            : $result->cursor();
     }
 
     public function mount(): void

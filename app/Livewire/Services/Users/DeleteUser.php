@@ -1,30 +1,60 @@
 <?php
 
 namespace App\Livewire\Services\Users;
-
 use App\Models\User;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
 class DeleteUser extends Component
 {
-    public ?User $user;
+    use AuthorizesRequests;
+
+    #[Locked]
+    public ?int $userId = null;
 
     #[On('setDeleteUser')]
     public function setDeleteUser($userId)
     {
-        $this->user = User::findOrFail($userId);
+        $user = User::query()
+            ->select('id')
+            ->find($userId);
+
+        if (! $user) {
+            $this->userId = null;
+
+            return;
+        }
+
+        // $this->authorize('delete', $user);
+
+        $this->userId = (int) $user->id;
 
         $this->dispatch('deleteUserWasSet');
     }
 
     public function deleteUser()
     {
-        // $this->authorize('delete',$this->comment);
+        if (! $this->userId) {
+            return;
+        }
 
-        User::destroy($this->user->id);
+        $user = User::query()
+            ->select('id')
+            ->find($this->userId);
 
-        $this->user = null;
+        if (! $user) {
+            $this->userId = null;
+
+            return;
+        }
+
+        // $this->authorize('delete', $user);
+
+        $user->delete();
+
+        $this->userId = null;
 
         $this->dispatch('userWasDeleted', __('User was deleted!'));
     }

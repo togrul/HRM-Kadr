@@ -43,7 +43,7 @@
      name="<?php echo e($name); ?>"
      <?php echo e($disabled ? 'disabled' : ''); ?>
 
-     <?php echo $attributes->merge(['class' => "block border-none font-normal w-full mt-1 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition duration-100 ease-in-out transform {$extraClass} {$isError} "]); ?>
+     <?php echo $attributes->merge(['class' => "block border-none font-normal w-full mt-1 rounded-lg shadow-sm focus:ring-blue-500 px-3 py-2 focus:border-blue-500 sm:text-sm transition duration-100 ease-in-out transform {$extraClass} {$isError} "]); ?>
 
 
 >

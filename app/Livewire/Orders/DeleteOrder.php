@@ -3,28 +3,60 @@
 namespace App\Livewire\Orders;
 
 use App\Models\OrderLog;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
 class DeleteOrder extends Component
 {
-    public ?OrderLog $orderLog;
+    use AuthorizesRequests;
+
+    #[Locked]
+    public ?int $orderLogId = null;
 
     #[On('setDeleteOrder')]
     public function setDeleteOrder($order_no)
     {
-        $this->orderLog = OrderLog::where('order_no', $order_no)->first();
+        $orderLog = OrderLog::query()
+            ->select('id', 'order_no')
+            ->where('order_no', $order_no)
+            ->first();
+
+        if (! $orderLog) {
+            $this->orderLogId = null;
+
+            return;
+        }
+
+        $this->authorize('delete-orders', $orderLog);
+
+        $this->orderLogId = (int) $orderLog->id;
 
         $this->dispatch('deleteOrderWasSet');
     }
 
     public function deleteOrder()
     {
-        $this->authorize('delete-orders', $this->orderLog);
+        if (! $this->orderLogId) {
+            return;
+        }
 
-        OrderLog::destroy($this->orderLog->id);
+        $orderLog = OrderLog::query()
+            ->select('id')
+            ->find($this->orderLogId);
 
-        $this->orderLog = null;
+        if (! $orderLog) {
+            $this->orderLogId = null;
+
+            return;
+        }
+
+        $this->authorize('delete-orders', $orderLog);
+
+        $orderLog->delete();
+
+        $this->orderLogId = null;
 
         $this->dispatch('orderWasDeleted', __('Order was deleted!'));
     }

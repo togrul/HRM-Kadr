@@ -7,9 +7,9 @@ use Maatwebsite\Excel\Concerns\FromView;
 
 class CandidateExport implements FromView
 {
-    public array $report;
+    public iterable $report;
 
-    public function __construct($report)
+    public function __construct(iterable $report)
     {
         $this->report = $report;
     }

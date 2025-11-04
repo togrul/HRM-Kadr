@@ -41,7 +41,7 @@ class ManageRoles extends Component
         $data = [
             'name' => $this->role_name,
         ];
-        Role::updateOrCreate(['id' => $this->role_id], $data);
+        Role::updateOrCreate($data);
         $this->dispatch('roleUpdated', __('Role was updated successfully!'));
         $this->cancel();
     }

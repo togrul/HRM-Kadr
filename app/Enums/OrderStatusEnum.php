@@ -12,4 +12,13 @@ enum OrderStatusEnum: int
     {
         return array_column(self::cases(), 'value');
     }
+
+    public static function label($value): self
+    {
+        return match($value) {
+            'PENDING'   => self::PENDING,
+            'APPROVED'  => self::APPROVED,
+            'CANCELLED' => self::CANCELLED,
+        };
+    }
 }

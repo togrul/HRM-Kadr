@@ -4,6 +4,7 @@ namespace App\Livewire\Candidates;
 
 use App\Models\Candidate;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -11,23 +12,50 @@ class DeleteCandidate extends Component
 {
     use AuthorizesRequests;
 
-    public ?Candidate $candidate;
+    #[Locked]
+    public ?int $candidateId = null;
 
     #[On('setDeleteCandidate')]
     public function setDeleteCandidate($candidateId)
     {
-        $this->candidate = Candidate::where('id', $candidateId)->first();
+        $candidate = Candidate::query()
+            ->select('id')
+            ->find($candidateId);
+
+        if (! $candidate) {
+            $this->candidateId = null;
+
+            return;
+        }
+
+        $this->authorize('delete-candidates', $candidate);
+
+        $this->candidateId = (int) $candidate->id;
 
         $this->dispatch('deleteCandidateWasSet');
     }
 
     public function deleteCandidate()
     {
-        $this->authorize('delete-candidates', $this->candidate);
+        if (! $this->candidateId) {
+            return;
+        }
 
-        Candidate::destroy($this->candidate->id);
+        $candidate = Candidate::query()
+            ->select('id')
+            ->find($this->candidateId);
 
-        $this->candidate = null;
+        if (! $candidate) {
+            $this->candidateId = null;
+
+            return;
+        }
+
+        $this->authorize('delete-candidates', $candidate);
+
+        $candidate->delete();
+
+        $this->candidateId = null;
 
         $this->dispatch('candidateWasDeleted', __('Candidate was deleted!'));
     }

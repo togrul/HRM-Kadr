@@ -38,7 +38,7 @@
 <?php endif; ?>
     <!--[if BLOCK]><![endif]--><?php if(count($filters) > 0): ?>
         <span class="absolute top-0 right-0 rounded-full bg-rose-500 text-white flex justify-center w-4 h-4 text-xs">
-            <?php echo e(count($filters)); ?>
+            <?php echo e(count(array_filter($filters, fn($v) => $v !== null))); ?>
 
         </span>
     <?php endif; ?><!--[if ENDBLOCK]><![endif]-->

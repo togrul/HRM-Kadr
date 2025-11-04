@@ -1,29 +1,29 @@
 <?php $attributes ??= new \Illuminate\View\ComponentAttributeBag; ?>
 <?php foreach($attributes->onlyProps([
-'eventToOpenModal' => null,
-'livewireEventToOpenModal' => null,
-'event-to-close-modal',
-'modal-title',
-'modal-confirm-button-text',
-'wire-click'
+    'eventToOpenModal' => null,
+    'livewireEventToOpenModal' => null,
+    'event-to-close-modal',
+    'modal-title',
+    'modal-confirm-button-text',
+    'wire-click'
 ]) as $__key => $__value) {
     $$__key = $$__key ?? $__value;
 } ?>
 <?php $attributes = $attributes->exceptProps([
-'eventToOpenModal' => null,
-'livewireEventToOpenModal' => null,
-'event-to-close-modal',
-'modal-title',
-'modal-confirm-button-text',
-'wire-click'
+    'eventToOpenModal' => null,
+    'livewireEventToOpenModal' => null,
+    'event-to-close-modal',
+    'modal-title',
+    'modal-confirm-button-text',
+    'wire-click'
 ]); ?>
 <?php foreach (array_filter(([
-'eventToOpenModal' => null,
-'livewireEventToOpenModal' => null,
-'event-to-close-modal',
-'modal-title',
-'modal-confirm-button-text',
-'wire-click'
+    'eventToOpenModal' => null,
+    'livewireEventToOpenModal' => null,
+    'event-to-close-modal',
+    'modal-title',
+    'modal-confirm-button-text',
+    'wire-click'
 ]), 'is_string', ARRAY_FILTER_USE_KEY) as $__key => $__value) {
     $$__key = $$__key ?? $__value;
 } ?>
@@ -47,6 +47,7 @@
         "
     x-data={openDeleteModal:false}
     x-show="openDeleteModal"
+    x-transition.opacity
     @keydown.escape.window="openDeleteModal = false"
     <?php if( $eventToOpenModal): ?>
         <?php echo e('@'.$eventToOpenModal); ?>.window="
@@ -60,16 +61,11 @@
     aria-modal="true"
     style="display: none;"
 >
-    <div class="flex items-end justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+    <div class="flex items-end justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0 backdrop-blur-sm">
 
         <div  x-show="openDeleteModal"
-              x-transition:enter="transition origin-top ease-out duration-300"
-              x-transition:enter-start="transform translate-y-full opacity-0"
-              x-transition:enter-end="transform translate-y-0 opacity-100"
-              x-transition:leave="transition origin-top ease-out duration-300"
-              x-transition:leave-start="opacity-100"
-              x-transition:leave-end="opacity-0"
-              class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"
+             x-transition
+              class="fixed inset-0 transition-opacity bg-neutral-500 bg-opacity-75"
               aria-hidden="true"
         ></div>
 
@@ -78,38 +74,43 @@
         <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
 
 
-        <div  x-show="openDeleteModal"
-              x-transition:enter="transition origin-top ease-out duration-300"
-              x-transition:enter-start="transform translate-y-full opacity-0"
-              x-transition:enter-end="transform translate-y-0 opacity-100"
-              x-transition:leave="transition origin-top ease-out duration-300"
-              x-transition:leave-start="transform translate-y-0 opacity-100"
-              x-transition:leave-end="transform translate-y-full opacity-0"
-              class="inline-block  text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:align-middle w-full sm:max-w-xl md:max-w-2xl lg:max-w-4xl"
+        <div x-show="openDeleteModal"
+             x-transition
+             class="inline-block text-left align-bottom transition-all transform bg-white rounded-xl sm:my-8 ring-1 ring-black/5 sm:align-middle w-full sm:max-w-xl md:max-w-2xl lg:max-w-4xl overflow-hidden"
         >
+            <div class="px-5 py-4 border-b border-neutral-200/70 dark:border-neutral-800/60">
+                <div class="flex items-start justify-between gap-4">
+                <h2 id="comment-modal-title" class="text-lg font-medium text-neutral-900 dark:text-neutral-100">
+                    <?php echo e($modalTitle); ?>
 
-            <div class="absolute top-0 right-0 py-2 pr-4">
+                </h2>
                 <button
+                    type="button"
+                    class="inline-flex items-center justify-center rounded-xl px-2 py-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-neutral-400"
+                    aria-label="Bağla"
                     @click="openDeleteModal = false"
-                    class="text-gray-400 hover:text-gray-500"
                 >
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
                 </button>
+                </div>
             </div>
-            <div class="px-4 py-2 border-b border-gray-300 flex justify-center text-lg items-center font-medium">
-                <?php echo e($modalTitle); ?>
 
-            </div>
             <div class="flex flex-col px-4 py-2 space-y-2">
                 <?php echo e($slot); ?>
 
             </div>
-            <div class="px-4 py-3 bg-gray-50 sm:px-6 sm:flex sm:flex-row-reverse">
-                <button wire:click='<?php echo e($wireClick); ?>' x-ref="confirmButton" type="button" class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-white bg-rose-500 border border-transparent rounded-xl shadow-sm hover:bg-rose-600 sm:ml-3 sm:w-auto">
+           <div class="px-5 py-4 border-t border-neutral-200/70 dark:border-neutral-800/60 flex items-center justify-end gap-1">
+                <button wire:click='<?php echo e($wireClick); ?>' x-ref="confirmButton" type="button" class="flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium bg-rose-500 text-white hover:bg-rose-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 disabled:opacity-60">
+                    <svg wire:loading class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
+                        <path class="opacity-75" d="M4 12a8 8 0 018-8v3a5 5 0 00-5 5H4z" fill="currentColor"></path>
+                    </svg>
                     <?php echo e($modalConfirmButtonText); ?>
 
                 </button>
-                <button @click="openDeleteModal = false" type="button" class="inline-flex justify-center w-full px-4 py-2 mt-3 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-xl shadow-sm hover:bg-gray-50  sm:mt-0 sm:ml-3 sm:w-auto">
+                <button @click="openDeleteModal = false" type="button" class="rounded-xl px-4 py-2 text-sm font-medium border border-neutral-200 dark:border-neutral-800 text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-300 flex items-center gap-2">
                     <?php echo e(__('Cancel')); ?>
 
                 </button>

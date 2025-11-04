@@ -1,33 +1,26 @@
-
 <?php $attributes ??= new \Illuminate\View\ComponentAttributeBag; ?>
 <?php foreach($attributes->onlyProps([
   'label' => '',
-  'options' => [],
   'placeholder' => '---',
-  'mode' => 'default',      // 'default' | 'gray'
+  'mode' => 'default',
   'disabled' => false,
-  'hasCheckbox' => false,
-  'nullValue' => null,
+  'model' => [],  // [{id,label}]
 ]) as $__key => $__value) {
     $$__key = $$__key ?? $__value;
 } ?>
 <?php $attributes = $attributes->exceptProps([
   'label' => '',
-  'options' => [],
   'placeholder' => '---',
-  'mode' => 'default',      // 'default' | 'gray'
+  'mode' => 'default',
   'disabled' => false,
-  'hasCheckbox' => false,
-  'nullValue' => null,
+  'model' => [],  // [{id,label}]
 ]); ?>
 <?php foreach (array_filter(([
   'label' => '',
-  'options' => [],
   'placeholder' => '---',
-  'mode' => 'default',      // 'default' | 'gray'
+  'mode' => 'default',
   'disabled' => false,
-  'hasCheckbox' => false,
-  'nullValue' => null,
+  'model' => [],  // [{id,label}]
 ]), 'is_string', ARRAY_FILTER_USE_KEY) as $__key => $__value) {
     $$__key = $$__key ?? $__value;
 } ?>
@@ -39,81 +32,94 @@
 
 <?php
   use Illuminate\Support\Str;
-
-  $wireModel = $attributes->wire('model')->value();
-
-  // Normalize options: supports ['1'=>'Label'] or [['id'=>1,'label'=>'Label'], ...]
-  $normalized = collect($options)->map(function ($opt, $key) {
-      if (is_array($opt) || is_object($opt)) {
-          return ['id' => data_get($opt, 'id', $key), 'label' => data_get($opt, 'label', (string)$key)];
-      }
-      return ['id' => $key, 'label' => $opt];
-  })->values();
-
-  $bg = match($mode) {
-    'default' => 'bg-white',
-    'gray'    => 'bg-neutral-100',
-    default   => 'bg-white',
-  };
-
-  $hasError = $wireModel ? $errors->has($wireModel) : false;
-
-  // Stable ids/keys
+  $wireModelDirective = $attributes->wire('model'); // 'filter.structure_id' vb.
+  $wireModel = optional($wireModelDirective)->value();
   $uid = 'ui-select-'.Str::slug($wireModel ?? Str::uuid(), '_');
   $labelId = $uid.'-label';
+  $bg = $mode === 'gray' ? 'bg-neutral-100' : 'bg-white';
 ?>
 
 <div
+  wire:key="select-<?php echo e($uid); ?>"
   x-data="{
-    id: <?php echo \Illuminate\Support\Js::from($uid)->toHtml() ?>,
-    isOpen: false,
-    value: <?php if ((object) ($wireModel) instanceof \Livewire\WireDirective) : ?>window.Livewire.find('<?php echo e($__livewire->getId()); ?>').entangle('<?php echo e($wireModel->value()); ?>')<?php echo e($wireModel->hasModifier('live') ? '.live' : ''); ?><?php else : ?>window.Livewire.find('<?php echo e($__livewire->getId()); ?>').entangle('<?php echo e($wireModel); ?>')<?php endif; ?>,
-    options: <?php echo \Illuminate\Support\Js::from($normalized)->toHtml() ?>,
+    valueProxy: <?php if($wireModel): ?> <?php if ((object) ($wireModel) instanceof \Livewire\WireDirective) : ?>window.Livewire.find('<?php echo e($__livewire->getId()); ?>').entangle('<?php echo e($wireModel->value()); ?>')<?php echo e($wireModel->hasModifier('live') ? '.live' : ''); ?><?php else : ?>window.Livewire.find('<?php echo e($__livewire->getId()); ?>').entangle('<?php echo e($wireModel); ?>')<?php endif; ?>.live <?php else: ?> null <?php endif; ?>,
+    cachedOptions: <?php echo \Illuminate\Support\Js::from($model)->toHtml() ?>,
     placeholder: <?php echo \Illuminate\Support\Js::from($placeholder)->toHtml() ?>,
-    disabled: <?php echo \Illuminate\Support\Js::from($disabled)->toHtml() ?>,
-    activeIndex: -1,
-    nullValue: <?php echo \Illuminate\Support\Js::from($nullValue)->toHtml() ?>,
+    uid: <?php echo \Illuminate\Support\Js::from($uid)->toHtml() ?>,
+    isOpen: false,
+    currentValue: null,
+    selectedCache: { id: null, label: '' },
 
-    toggle(){ if (this.disabled) return; this.isOpen = !this.isOpen; if (this.isOpen) { this.setActiveToCurrent(); this.$nextTick(()=> this.$refs.listbox?.focus()) } },
-    openAndMove(step){ if (this.disabled) return; this.isOpen = true; this.$nextTick(()=> this.$refs.listbox?.focus()); this.move(step) },
-    move(step){ if (!this.options.length) return; if (this.activeIndex === -1) this.setActiveToCurrent(); this.activeIndex = (this.activeIndex + step + this.options.length) % this.options.length; this.scrollActiveIntoView() },
-    commitActive(){ if (this.activeIndex >= 0) this.select(this.options[this.activeIndex].id) },
-    setActiveToCurrent(){ const i = this.options.findIndex(o => String(o.id) === String(this.value)); this.activeIndex = i >= 0 ? i : 0 },
-    select(id){ this.value = id; this.isOpen = false },
-    selectedLabel(){ const f = this.options.find(o => String(o.id) === String(this.value)); return f ? f.label : this.placeholder },
-    scrollActiveIntoView(){ const el = document.getElementById(this.id + '-option-' + this.activeIndex); if (el) el.scrollIntoView({ block: 'nearest' }) }
+    resolve(t){
+      if (!t) return t;
+      if (typeof t.get === 'function') return t.get();
+      if (typeof t.value !== 'undefined') return t.value;
+      return t;
+    },
+    toId(v){ return (v===null||v===undefined||v==='') ? null : String(v); },
+
+    init(){
+      this.syncValue();
+      this.$watch(() => this.resolve(this.valueProxy), () => this.syncValue());
+    },
+
+    // when Livewire re-renders, Blade re-passes :model — Alpine sees it via x-bind below
+    applyOptions(next){
+      if (!Array.isArray(next)) return;
+      // replace, preserve selection label if missing
+      this.cachedOptions = next;
+      // try refresh cache if selected exists in new list
+      const found = this.cachedOptions.find(o => String(o.id) === String(this.currentValue));
+      if (found) this.selectedCache = { id: found.id, label: found.label };
+    },
+
+    syncValue(){
+      const next = this.toId(this.resolve(this.valueProxy));
+      if (next === this.currentValue) return;
+      this.currentValue = next;
+      // try to find label in current list
+      const found = this.cachedOptions.find(o => String(o.id) === String(this.currentValue));
+      if (found) {
+        this.selectedCache = { id: found.id, label: found.label };
+      }
+      // else keep previous selectedCache (so text stays) until server returns item
+    },
+
+    selectedLabel(){
+      if (this.currentValue == null || this.currentValue === '') return this.placeholder;
+      const found = this.cachedOptions.find(o => String(o.id) === String(this.currentValue));
+      if (found) return found.label;
+      if (String(this.selectedCache.id) === String(this.currentValue) && this.selectedCache.label) {
+        return this.selectedCache.label;
+      }
+      return this.placeholder;
+    },
+
+    select(id, label = null){
+      const val = this.toId(id);
+      this.currentValue = val;
+      if (label !== null && label !== undefined) {
+        this.selectedCache = { id: val, label: String(label) };
+      } else {
+        const found = this.cachedOptions.find(o => String(o.id) === String(val));
+        this.selectedCache = found ? { id: found.id, label: found.label } : { id: val, label: '' };
+      }
+      if (this.valueProxy && typeof this.valueProxy.set === 'function') {
+        this.valueProxy.set(val);
+      } else {
+        this.valueProxy = val;
+      }
+      this.isOpen = false;
+    },
+
+    toggle(){ this.isOpen = !this.isOpen; },
   }"
-  
   @click.window="if (!$el.contains($event.target)) isOpen = false"
   @keydown.escape.window="isOpen = false"
-  wire:key="<?php echo e($uid); ?>"
   <?php echo e($attributes->except(['wire:model','wire:model.defer','wire:model.lazy'])->class('w-full')); ?>
 
 >
-  <!--[if BLOCK]><![endif]--><?php if($hasCheckbox): ?>
-    <div class="flex items-center justify-between space-x-2">
-      <?php if (isset($component)) { $__componentOriginald8ba2b4c22a13c55321e34443c386276 = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginald8ba2b4c22a13c55321e34443c386276 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['id' => ''.e($labelId).'','for' => ''.e($uid).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
-<?php $component->withName('label'); ?>
-<?php if ($component->shouldRender()): ?>
-<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
-<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
-<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
-<?php endif; ?>
-<?php $component->withAttributes(['id' => ''.e($labelId).'','for' => ''.e($uid).'']); ?><?php echo e($label); ?> <?php echo $__env->renderComponent(); ?>
-<?php endif; ?>
-<?php if (isset($__attributesOriginald8ba2b4c22a13c55321e34443c386276)): ?>
-<?php $attributes = $__attributesOriginald8ba2b4c22a13c55321e34443c386276; ?>
-<?php unset($__attributesOriginald8ba2b4c22a13c55321e34443c386276); ?>
-<?php endif; ?>
-<?php if (isset($__componentOriginald8ba2b4c22a13c55321e34443c386276)): ?>
-<?php $component = $__componentOriginald8ba2b4c22a13c55321e34443c386276; ?>
-<?php unset($__componentOriginald8ba2b4c22a13c55321e34443c386276); ?>
-<?php endif; ?>
-      <!--[if BLOCK]><![endif]--><?php if(isset($checkbox)): ?> <?php echo e($checkbox); ?> <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
-    </div>
-  <?php else: ?>
+  <!--[if BLOCK]><![endif]--><?php if($label): ?>
     <?php if (isset($component)) { $__componentOriginald8ba2b4c22a13c55321e34443c386276 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginald8ba2b4c22a13c55321e34443c386276 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['id' => ''.e($labelId).'','for' => ''.e($uid).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
@@ -137,22 +143,13 @@
 
   <div class="relative mt-1">
     <button
-      type="button"
-      id="<?php echo e($uid); ?>-button"
-      class="relative w-full py-2 pl-3 pr-10 text-left rounded-lg shadow-sm cursor-default focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm <?php echo e($bg); ?> <?php echo e($disabled ? 'opacity-60 cursor-not-allowed' : ''); ?> <?php echo e($hasError ? 'bg-rose-50' : ''); ?>"
-      :aria-expanded="isOpen"
-      aria-labelledby="<?php echo e($labelId); ?>"
-      :aria-controls="id + '-listbox'"
-      :disabled="disabled"
+      type="button" id="<?php echo e($uid); ?>-button"
+      class="relative w-full py-2 pl-3 pr-10 text-left rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm <?php echo e($bg); ?>"
+      :aria-expanded="isOpen" aria-labelledby="<?php echo e($labelId); ?>"
       @click="toggle()"
-      @keydown.arrow-down.prevent="openAndMove(1)"
-      @keydown.arrow-up.prevent="openAndMove(-1)"
-      @keydown.enter.prevent="commitActive()"
-      @keydown.space.prevent="toggle()"
     >
       <span class="flex items-center">
-        <span class="block ml-3 font-normal text-neutral-900 truncate"
-              x-text="selectedLabel()"><?php echo e($placeholder); ?></span>
+        <span class="block ml-3 font-normal text-neutral-900 truncate" x-text="selectedLabel()"><?php echo e($placeholder); ?></span>
       </span>
       <span class="absolute inset-y-0 right-0 flex items-center pr-2 ml-3 pointer-events-none">
         <svg class="w-5 h-5 text-neutral-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -161,84 +158,34 @@
       </span>
     </button>
 
-    <!--[if BLOCK]><![endif]--><?php if (! ($disabled)): ?>
-      <ul
-        x-ref="listbox"
-        x-show="isOpen"
-        x-transition.opacity.duration.100ms
-        x-cloak
-        :id="id + '-listbox'"
-        role="listbox"
-        aria-labelledby="<?php echo e($labelId); ?>"
-        tabindex="-1"
-        class="absolute z-10 w-full px-3 py-2 mt-1 space-y-2 overflow-auto text-base bg-white rounded-md shadow-xl max-h-56 focus:outline-none sm:text-sm"
-      >
-      <li
-            :id="id + '-option-none'"
-            role="option"
-            class="group relative py-2 pl-3 pr-9 cursor-pointer select-none hover:bg-blue-400 bg-neutral-50 rounded-lg"
-            :aria-selected="value == nullValue || value === null || value === ''"
-            @click="select(null)"
-          >
-            <div class="flex items-center">
-              <span
-                class="block ml-3 truncate"
-                :class="(value == nullValue || value === null || value === '')
-                    ? 'font-medium text-neutral-900 group-hover:text-white'
-                    : 'font-normal text-neutral-700 group-hover:text-neutral-100'"
-                x-text="placeholder"
-              ></span>
-            </div>
-            <span
-              class="absolute inset-y-0 right-0 items-center pr-4 text-indigo-600 group-hover:text-white"
-              :class="(value == nullValue || value === null || value === '') ? 'flex' : 'hidden'"
-              aria-hidden="true"
-            >
-              <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-              </svg>
-            </span>
-          </li>
-        <template x-for="(opt, idx) in options" :key="opt.id">
-          <li
-            :id="id + '-option-' + idx"
-            role="option"
-            class="group relative py-2 pl-3 pr-9 cursor-pointer select-none hover:bg-blue-400 bg-neutral-50 rounded-lg"
-            :aria-selected="String(opt.id) === String(value)"
-            @mousemove="activeIndex = idx"
-            @click="select(opt.id)"
-          >
-            <div class="flex items-center">
-              <span
-                class="block ml-3 truncate"
-                :class="String(opt.id) === String(value)
-                    ? 'font-medium text-neutral-900 group-hover:text-white'
-                    : 'font-normal text-neutral-700 group-hover:text-neutral-100'"
-                x-text="opt.label"
-              ></span>
-            </div>
+    <ul
+      x-show="isOpen" x-transition.opacity.duration.100ms x-cloak
+      class="absolute z-10 w-full px-3 py-2 mt-1 space-y-2 overflow-auto text-base bg-white rounded-md shadow-xl max-h-56 focus:outline-none sm:text-sm"
+    >
+      
+      <?php echo e($slot); ?>
 
-            <span
-              class="absolute inset-y-0 right-0 items-center pr-4 text-indigo-600 group-hover:text-white"
-              :class="String(opt.id) === String(value) ? 'flex' : 'hidden'"
-              aria-hidden="true"
-            >
-              <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-              </svg>
-            </span>
-          </li>
-        </template>
 
-        <!--[if BLOCK]><![endif]--><?php if($wireModel): ?>
-          <input type="hidden" name="<?php echo e($wireModel); ?>">
-        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
-      </ul>
-    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+      
+      <li class="group relative py-2 pl-3 pr-9 cursor-pointer select-none hover:bg-blue-400 bg-neutral-50 rounded-lg"
+          @click="select(null)">
+        <div class="flex items-center">
+          <span class="block ml-3 truncate"> <?php echo e($placeholder); ?> </span>
+        </div>
+      </li>
+
+      <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $model; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $idx => $opt): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+        <li
+          wire:key="<?php echo e($uid); ?>-<?php echo e($opt['id']); ?>"
+          class="group relative py-2 pl-3 pr-9 cursor-pointer select-none hover:bg-blue-400 bg-neutral-50 rounded-lg"
+          @click="select('<?php echo e($opt['id']); ?>', '<?php echo e(e($opt['label'])); ?>')"
+        >
+          <div class="flex items-center">
+            <span class="block ml-3 truncate"><?php echo e($opt['label']); ?></span>
+          </div>
+        </li>
+      <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
+    </ul>
   </div>
 </div>
-
-<?php if (! $__env->hasRenderedOnce('d5b68e74-d06d-456a-90d4-91b2afb85bad')): $__env->markAsRenderedOnce('d5b68e74-d06d-456a-90d4-91b2afb85bad'); ?>
-  <style>[x-cloak]{display:none!important}</style>
-<?php endif; ?>
 <?php /**PATH /Users/togruljalalli/Desktop/projects/HRM/resources/views/components/ui/select-dropdown.blade.php ENDPATH**/ ?>

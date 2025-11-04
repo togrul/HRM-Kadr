@@ -3,28 +3,59 @@
 namespace App\Livewire\Services\Settings;
 
 use App\Models\Setting;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
 class DeleteSettings extends Component
 {
-    public ?Setting $setting;
+    use AuthorizesRequests;
+
+    #[Locked]
+    public ?int $settingId = null;
 
     #[On('setDeleteSettings')]
     public function setDeleteSettings($settingId)
     {
-        $this->setting = Setting::findOrFail($settingId);
+        $setting = Setting::query()
+            ->select('id')
+            ->find($settingId);
+
+        if (! $setting) {
+            $this->settingId = null;
+
+            return;
+        }
+
+        // $this->authorize('delete', $setting);
+
+        $this->settingId = (int) $setting->id;
 
         $this->dispatch('deleteSettingsWasSet');
     }
 
     public function deleteSetting()
     {
-        // $this->authorize('delete',$this->comment);
+        if (! $this->settingId) {
+            return;
+        }
 
-        Setting::destroy($this->setting->id);
+        $setting = Setting::query()
+            ->select('id')
+            ->find($this->settingId);
 
-        $this->setting = null;
+        if (! $setting) {
+            $this->settingId = null;
+
+            return;
+        }
+
+        // $this->authorize('delete', $setting);
+
+        $setting->delete();
+
+        $this->settingId = null;
 
         $this->dispatch('settingsWasDeleted', __('Setting was deleted!'));
     }

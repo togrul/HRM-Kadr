@@ -256,6 +256,8 @@ class AllOrders extends Component
 
     protected function returnData($type = 'normal')
     {
+        $structureService = app(StructureService::class);
+        $accessible = $structureService->getAccessibleStructures();
         $result = OrderLog::with([
             'order',
             'components',
@@ -264,13 +266,13 @@ class AllOrders extends Component
             'creator',
             'orderType',
         ])
-            ->where(function ($query) {
-                $query->where('order_id', 1010) // Include records with order_id = 1010
-                    ->orWhere(function ($query) {
-                        $query->where('order_id', '!=', 1010) // Exclude records with order_id = 1010
-                            ->whereHas('personnels', fn($query) => $query->whereIn('structure_id', resolve(StructureService::class)->getAccessibleStructures()));
-                    });
-            })
+           ->where(fn ($query) => $query
+                ->where('order_id', 1010)
+                ->orWhere(fn ($query) => $query
+                    ->where('order_id', '!=', 1010)
+                    ->whereHas('personnels', fn ($query) => $query->whereIn('structure_id', $accessible))
+                )
+            )
             ->filter($this->search ?? [])
             ->when($this->selectedOrder, fn($q) => $q->where('order_id', $this->selectedOrder))
             ->when(is_numeric($this->status), fn($q) => $q->where('status_id', $this->status))
@@ -279,7 +281,7 @@ class AllOrders extends Component
 
         return $type == 'normal'
             ? $result->paginate(20)->withQueryString()
-            : $result->get()->toArray();
+            : $result->cursor();
     }
 
     #[Isolate]

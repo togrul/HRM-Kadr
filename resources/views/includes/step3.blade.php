@@ -471,7 +471,7 @@
                     </div>
                 </div>
             @empty
-                <div class="flex justify-center items-center bg-slate-100 shadow-sm rounded-lg px-4 py-2 relative">
+                <div class="flex justify-center items-center bg-neutral-100 shadow-sm rounded-lg px-4 py-2 relative">
                     <h1 class="font-medium text-base text-gray-600">
                         {{ __('No information added') }}
                     </h1>

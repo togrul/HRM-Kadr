@@ -54,7 +54,7 @@ class AllPersonnel extends Component
         return Excel::download(new PersonnelExport($report), "personnel-$name.xlsx");
     }
 
-    public function printPage($personnel, $headers = null)
+    public function printPage($personnel, $headers = null): void
     {
         $headers = [__('#'), __('Tabel'), __('Fullname'), __('Gender'), __('Position'), 'action', 'action', 'action', 'action'];
         redirect()->route('print.page', ['model' => $personnel, 'headers' => $headers]);
@@ -211,7 +211,7 @@ class AllPersonnel extends Component
 
         return $type == 'normal'
             ? $result->paginate(10)->withQueryString()
-            : $result->get()->toArray();
+            : $result->cursor();
     }
 
     public function render()

@@ -1,8 +1,8 @@
 <?php
 
 namespace App\Livewire\Roles;
-
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Spatie\Permission\Models\Permission;
@@ -11,22 +11,50 @@ class DeletePermission extends Component
 {
     use AuthorizesRequests;
 
-    public ?Permission $permission;
+    #[Locked]
+    public ?int $permissionId = null;
 
     #[On('setDeletePermission')]
     public function setDeletePermission($permissionId)
     {
-        $this->permission = Permission::findOrFail($permissionId);
+        $permission = Permission::query()
+            ->select('id')
+            ->find($permissionId);
+
+        if (! $permission) {
+            $this->permissionId = null;
+
+            return;
+        }
+
+        // $this->authorize('manage-settings');
+
+        $this->permissionId = (int) $permission->id;
 
         $this->dispatch('deletePermissionWasSet');
     }
 
     public function deletePermission()
     {
-        // $this->authorize('manage-settings');
-        Permission::destroy($this->permission->id);
+        if (! $this->permissionId) {
+            return;
+        }
 
-        $this->permission = null;
+        $permission = Permission::query()
+            ->select('id')
+            ->find($this->permissionId);
+
+        if (! $permission) {
+            $this->permissionId = null;
+
+            return;
+        }
+
+        // $this->authorize('manage-settings');
+
+        $permission->delete();
+
+        $this->permissionId = null;
 
         $this->dispatch('permissionWasDeleted', __('Permission was deleted!'));
     }

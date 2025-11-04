@@ -15,7 +15,7 @@
     <?php echo $__env->yieldPushContent('css'); ?>
 </head>
 
-<body class="font-sans subpixel-antialiased min-h-screen pb-1 bg-neutral-100 dark:bg-neutral-900/80">
+<body class="font-sans subpixel-antialiased min-h-screen pb-1 bg-neutral-100 dark:bg-neutral-900/80" x-data>
     <div class="min-h-full">
         <?php echo $__env->renderWhen(!\request()->is('admin/*'), 'includes.layout.default', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path'])); ?>
         <?php echo $__env->renderWhen(\request()->is('admin/*'), 'includes.layout.admin', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path'])); ?>

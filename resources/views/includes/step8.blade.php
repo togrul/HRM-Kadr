@@ -1,11 +1,11 @@
 <div class="flex flex-col space-y-4">
-    <div class="grid gap-2 grid-cols-1 md:grid-cols-2">
+    <div class="grid gap-2 grid-cols-1 md:grid-cols-2 items-stretch">
         <x-form-card title="Languages">
             <div class="grid grid-cols-2 gap-2">
                 <div class="flex flex-col">
                     <x-select-list class="w-full" :title="__('Languages')" mode="gray" :selected="$languageName" name="languageId">
                         <x-select-list-item wire:click="setData('language','language_id','language','---',null)" :selected="'---' == $languageName"
-                                            wire:model='language.language_id.id'>
+                        wire:model='language.language_id.id'>
                             ---
                         </x-select-list-item>
                         @foreach($languageModel as $lng)
@@ -328,7 +328,7 @@
                     </div>
                 </div>
             @empty
-                <div class="flex justify-center items-center bg-slate-100 shadow-sm rounded-lg px-4 py-2 relative">
+                <div class="flex justify-center items-center bg-neutral-100 shadow-sm rounded-lg px-4 py-2 relative">
                     <h1 class="font-medium text-base text-gray-600">
                         {{ __('No information added') }}
                     </h1>

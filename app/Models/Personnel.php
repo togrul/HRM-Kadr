@@ -469,13 +469,15 @@ class Personnel extends Model
     public function scopeFilter($query, array $filters)
     {
         foreach ($filters as $field => $value) {
-            if (is_array($value)) {
-                $this->applyRangeFilter($query, $field, $value);
-            } else {
-                $this->applyExactFilter($query, $field, $value);
+            if($value)
+            {
+                if (is_array($value)) {
+                    $this->applyRangeFilter($query, $field, $value);
+                } else {
+                    $this->applyExactFilter($query, $field, $value);
+                }
             }
         }
-
         return $query;
     }
 

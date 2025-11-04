@@ -7,7 +7,7 @@
     <x-icons.search-file />
     @if (count($filters) > 0)
         <span class="absolute top-0 right-0 rounded-full bg-rose-500 text-white flex justify-center w-4 h-4 text-xs">
-            {{ count($filters) }}
+            {{ count(array_filter($filters, fn($v) => $v !== null)); }}
         </span>
     @endif
 </button>

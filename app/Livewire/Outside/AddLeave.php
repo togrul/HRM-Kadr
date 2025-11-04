@@ -2,104 +2,53 @@
 
 namespace App\Livewire\Outside;
 
+use App\Models\Leave;
 use Livewire\Component;
-use App\Models\LeaveType;
-use App\Models\Personnel;
-use App\Models\OrderStatus;
 use Livewire\WithFileUploads;
-use Livewire\Attributes\Computed;
-use App\Livewire\Traits\SelectListTrait;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Livewire\Attributes\Locked;
+use App\Livewire\Forms\LeaveForm;
+use App\Livewire\Outside\Concerns\InteractsWithLeaveForm;
 
 class AddLeave extends Component
 {
     use AuthorizesRequests;
-    use SelectListTrait;
     use WithFileUploads;
+    use InteractsWithLeaveForm;
 
-    public $title;
+    #[Locked] public string $title = '';
 
-    public $leave = [];
+    public LeaveForm $leave;
 
-    public string $personnelName = '';
-    public string $assignedSearch = '';
-
-    // protected function rules()
-    // {
-    //     return [
-    //         'menu.name' => 'required|string|min:1',
-    //         'menu.color' => 'required|string|min:1',
-    //         'menu.order' => 'required|integer',
-    //         'menu.url' => 'required|string|min:1',
-    //         'menu.icon' => 'required|string|min:1',
-    //         'menu.permission_id.id' => 'required|integer|exists:permissions,id'
-    //     ];
-    // }
-
-    // protected function validationAttributes()
-    // {
-    //     return [
-    //         'menu.name' => __('Name'),
-    //         'menu.color' => __('Color'),
-    //         'menu.order' => __('Order'),
-    //         'menu.url' => __('URL'),
-    //         'menu.icon' => __('Icon'),
-    //         'menu.permission_id.id' => __('Permissions')
-    //     ];
-    // }
-
-    // public function store()
-    // {
-    //     $this->validate();
-
-    //     $data = $this->menu;
-    //     $data['permission_id'] = $data['permission_id']['id'];
-    //     Menu::create($data);
-
-    //     $this->dispatch('menuAdded', __('Menu was added successfully!'));
-    // }
-
-    public function selectPersonnel(string $tabelNo, string $fullname,$key)
+    public function mount(): void
     {
-        $this->leave[$key] = [
-            'tabel_no' => $tabelNo,
-            'fullname' => $fullname
-        ];
-        $this->reset(['personnelName', 'assignedSearch']);
-    }
-
-    public function removePersonnel(string $key)
-    {
-        unset($this->leave[$key]);
-        $this->reset(['personnelName']);
-    }
-
-    #[Computed]
-    public function personnelList()
-    {
-        $canSearch = (strlen($this->personnelName) > 2) || (strlen($this->assignedSearch) > 2);
-        return $canSearch
-             ? Personnel::query()
-                ->when(! empty($this->personnelName), fn($q) => $q->nameLike($this->personnelName))
-                ->when(! empty($this->assignedSearch), fn($q) => $q->nameLike($this->assignedSearch))
-                 ->active()
-                 ->whereNull('deleted_at')
-                 ->get()
-             : [];
-    }
-
-    public function mount()
-    {
-        // $this->authorize('manage-settings',$this->user);
         $this->title = __('Add leave');
-        $this->leave = [];
+        $this->leave->resetForm();
+    }
+
+    public function store(): void
+    {
+        $this->leave->validate();
+
+        $payload = $this->leave->toPayload();
+
+        $file = $this->leave->document_path;
+        if ($file instanceof TemporaryUploadedFile) {
+            $payload['document_path'] = $file->store('leaves', 'public');
+        }
+
+        DB::transaction(fn () => Leave::create($payload));
+
+        $this->dispatch('leaveAdded', __('Leave was added successfully!'));
+
+        $this->leave->resetForm();
+        $this->reset('personnelName', 'assignedSearch');
     }
 
     public function render()
     {
-        $leaveTypes = LeaveType::pluck('name','id');
-        $statuses = OrderStatus::pluck('name', 'id');
-
-        return view('livewire.outside.add-leave', compact('leaveTypes','statuses'));
+        return view('livewire.outside.add-leave');
     }
 }

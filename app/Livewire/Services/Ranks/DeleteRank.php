@@ -3,28 +3,59 @@
 namespace App\Livewire\Services\Ranks;
 
 use App\Models\Rank;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
 class DeleteRank extends Component
 {
-    public ?Rank $rank;
+    use AuthorizesRequests;
+
+    #[Locked]
+    public ?int $rankId = null;
 
     #[On('setDeleteRank')]
     public function setDeleteRank($rankId)
     {
-        $this->rank = Rank::findOrFail($rankId);
+        $rank = Rank::query()
+            ->select('id')
+            ->find($rankId);
+
+        if (! $rank) {
+            $this->rankId = null;
+
+            return;
+        }
+
+        // $this->authorize('delete', $rank);
+
+        $this->rankId = (int) $rank->id;
 
         $this->dispatch('deleteRankWasSet');
     }
 
     public function deleteRank()
     {
-        // $this->authorize('delete',$this->rank);
+        if (! $this->rankId) {
+            return;
+        }
 
-        Rank::destroy($this->rank->id);
+        $rank = Rank::query()
+            ->select('id')
+            ->find($this->rankId);
 
-        $this->rank = null;
+        if (! $rank) {
+            $this->rankId = null;
+
+            return;
+        }
+
+        // $this->authorize('delete', $rank);
+
+        $rank->delete();
+
+        $this->rankId = null;
 
         $this->dispatch('rankWasDeleted', __('Rank was deleted!'));
     }

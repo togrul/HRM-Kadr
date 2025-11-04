@@ -112,7 +112,7 @@
                <x-label for="document.registered_address">{{ __('Registered address') }}</x-label>
                <x-livewire-input mode="gray" name="document.registered_address" wire:model="document.registered_address"></x-livewire-input>
            </div>
-           <div class="flex flex-col">
+           <div class="flex flex-col gap-1">
                <x-label for="document.is_married">{{ __('Family status') }}</x-label>
                <div class="flex flex-row">
                    <label class="inline-flex items-center bg-gray-100 rounded shadow-sm py-2 px-2">
@@ -342,7 +342,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4">
+                                <td colspan="5">
                                     <div class="flex justify-center items-center py-4">
                                         <span class="font-medium">{{ __('No information added') }}</span>
                                     </div>

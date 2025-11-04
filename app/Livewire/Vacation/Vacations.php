@@ -160,7 +160,7 @@ class Vacations extends Component
 
         return $type == 'normal'
             ? $result->paginate(15)->withQueryString()
-            : $result->get()->toArray();
+            : $result->cursor();
     }
 
     #[Computed]

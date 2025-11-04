@@ -1,29 +1,26 @@
 <?php $attributes ??= new \Illuminate\View\ComponentAttributeBag; ?>
 <?php foreach($attributes->onlyProps([
-     'name',
-     'model',
-     'value',
-     'selected' => false,
-     'hidden' => false,
-     'checked' => false
+    'name',
+    'model',
+    'value' => null,
+    'hidden' => false,
+    'checked' => false,
 ]) as $__key => $__value) {
     $$__key = $$__key ?? $__value;
 } ?>
 <?php $attributes = $attributes->exceptProps([
-     'name',
-     'model',
-     'value',
-     'selected' => false,
-     'hidden' => false,
-     'checked' => false
+    'name',
+    'model',
+    'value' => null,
+    'hidden' => false,
+    'checked' => false,
 ]); ?>
 <?php foreach (array_filter(([
-     'name',
-     'model',
-     'value',
-     'selected' => false,
-     'hidden' => false,
-     'checked' => false
+    'name',
+    'model',
+    'value' => null,
+    'hidden' => false,
+    'checked' => false,
 ]), 'is_string', ARRAY_FILTER_USE_KEY) as $__key => $__value) {
     $$__key = $$__key ?? $__value;
 } ?>
@@ -34,23 +31,45 @@
 <?php unset($__defined_vars); ?>
 
 <?php
-     $extraClass = $selected || $hidden ? 'text-gray-900' : 'text-gray-500';
+    $extraClass = $hidden ? 'text-gray-400 line-through' : 'text-gray-700';
 ?>
 
-<div class="max-w-sm flex">
-     <label class="inline-flex items-center cursor-pointer <?php echo e($hidden ? 'line-through' : ''); ?>">
-       <input
-          <?php echo e($attributes->merge(['class' => "relative w-5 h-5 mr-2 bg-trueGray-100 text-green-400 border border-gray-300 rounded focus:ring-green-500 focus:ring-opacity-25"])); ?>
-
-           wire:model.live="<?php echo e($model); ?>"
-           <?php if(!empty($value)): ?>  value="<?php echo e($value); ?>"  <?php endif; ?>
-           name="<?php echo e($name); ?>"
-           type="checkbox"
+<div class="flex items-center">
+    <label class="relative inline-flex items-center cursor-pointer <?php echo e($hidden ? 'line-through opacity-60' : ''); ?>">
+        
+        <input
+            wire:model.live="<?php echo e($model); ?>"
+            <?php if($value): ?> value="<?php echo e($value); ?>" <?php endif; ?>
+            name="<?php echo e($name); ?>"
+            type="checkbox"
             <?php if($checked): ?> <?php if(true): echo 'checked'; endif; ?> <?php endif; ?>
-           <?php echo e($hidden ? 'disabled' : ''); ?>
+            <?php echo e($hidden ? 'disabled' : ''); ?>
 
-       />
-       <span class="text-sm font-medium <?php echo e($extraClass); ?>"><?php echo e($slot); ?></span>
-     </label>
+            class="peer w-5 h-5 mr-2 appearance-none rounded border border-neutral-300
+                   bg-neutral-100 transition-colors duration-150
+                   focus:outline-none focus:ring-2 focus:ring-green-500/40
+                   checked:bg-green-500 checked:border-green-500
+                   disabled:opacity-50"
+        />
+
+        
+        <svg
+            class="absolute left-[0.25rem] top-[0.25rem] w-3 h-3 text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-150 pointer-events-none"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            viewBox="0 0 20 20"
+        >
+            <polyline points="5 10.5 8.5 14 15 6" />
+        </svg>
+
+        
+        <span class="text-sm font-medium <?php echo e($extraClass); ?>">
+            <?php echo e($slot); ?>
+
+        </span>
+    </label>
 </div>
 <?php /**PATH /Users/togruljalalli/Desktop/projects/HRM/resources/views/components/checkbox.blade.php ENDPATH**/ ?>

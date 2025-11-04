@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Data\LeaveFilterData;
 use Carbon\CarbonImmutable;
 use App\Enums\OrderStatusEnum;
 use App\Traits\PersonnelTrait;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -129,6 +131,59 @@ class Leave extends Model
         if ($from) $q->whereDate('starts_at', '>=', $from);
         if ($to)   $q->whereDate('ends_at',   '<=', $to);
         return $q;
+    }
+
+    public function scopeFilter(Builder $query, array|LeaveFilterData $filters): Builder
+    {
+        if ($filters instanceof LeaveFilterData) {
+            $filters = $filters->toArray();
+        }
+
+        if (empty($filters)) {
+            return $query;
+        }
+
+        $leaveType = data_get($filters, 'leave_type_id');
+        if ($leaveType !== null && $leaveType !== '') {
+            $query->where('leave_type_id', (int) $leaveType);
+        }
+
+        $reason = trim((string) data_get($filters, 'reason', ''));
+        if ($reason !== '') {
+            $query->where('reason', 'like', "%{$reason}%");
+        }
+
+        if (array_key_exists('gender', $filters)) {
+            $gender = data_get($filters, 'gender');
+            if ($gender !== null && $gender !== '') {
+                $query->whereHas('personnel', fn (Builder $q) => $q->where('gender', $gender));
+            }
+        }
+
+        $fullname = trim((string) data_get($filters, 'fullname', ''));
+        if ($fullname !== '') {
+            $query->whereHas('personnel', fn (Builder $q) => $q->nameLike($fullname));
+        }
+
+        $startsAt = data_get($filters, 'starts_at');
+        $endsAt = data_get($filters, 'ends_at');
+
+        $startDate = $startsAt ? CarbonImmutable::parse($startsAt)->startOfDay() : null;
+        $endDate = $endsAt ? CarbonImmutable::parse($endsAt)->endOfDay() : null;
+
+        if ($startDate && $endDate) {
+            if ($endDate->lessThan($startDate)) {
+                [$startDate, $endDate] = [$endDate, $startDate];
+            }
+
+            $query->whereBetween('starts_at', [$startDate, $endDate]);
+        } elseif ($startDate) {
+            $query->whereDate('starts_at', '>=', $startDate);
+        } elseif ($endDate) {
+            $query->whereDate('ends_at', '<=', $endDate);
+        }
+
+        return $query;
     }
 
     /* ------------------------------ Domain Logic ----------------------------- */
