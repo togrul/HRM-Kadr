@@ -1,4 +1,4 @@
-@livewire('filter.detail', ['lazy' => 'on-load'])
+<livewire:filter.detail/>
 
 <x-side-modal size="x-large">
     @can('add-personnels')

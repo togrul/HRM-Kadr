@@ -2,6 +2,10 @@
 
 namespace App\Livewire\Personnel;
 
+use App\Livewire\Forms\Personnel\DocumentForm;
+use App\Livewire\Forms\Personnel\EducationForm;
+use App\Livewire\Forms\Personnel\LaborActivityForm;
+use App\Livewire\Forms\Personnel\PersonalInformationForm;
 use App\Livewire\Traits\PersonnelCrud;
 use App\Livewire\Traits\RelationCruds\RelationCrudTrait;
 use App\Models\Personnel;
@@ -22,6 +26,7 @@ use App\Models\PersonnelPunishment;
 use App\Models\PersonnelRank;
 use App\Models\PersonnelScientificDegreeAndName;
 use App\Models\PersonnelTakenCaptive;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
@@ -29,6 +34,11 @@ class EditPersonnel extends Component
 {
     use PersonnelCrud;
     use RelationCrudTrait;
+
+    public PersonalInformationForm $personalForm;
+    public DocumentForm $documentForm;
+    public EducationForm $educationForm;
+    public LaborActivityForm $laborActivityForm;
 
     public $updatePersonnel;
 
@@ -65,6 +75,32 @@ class EditPersonnel extends Component
             'socialOrigin',
         ])
             ->findOrFail($this->personnelModel);
+
+        if (isset($this->personalForm)) {
+            $this->personalForm->fillFromModel($this->personnelModelData);
+            $this->syncArraysFromPersonalForm();
+        }
+
+        if (isset($this->documentForm)) {
+            $this->documentForm->fillFromModel($this->personnelModelData);
+            $this->syncArraysFromDocumentForm();
+        } else {
+            $this->hydrateDocumentFormFromArrays();
+        }
+
+        if (isset($this->educationForm)) {
+            $this->educationForm->fillFromModel($this->personnelModelData);
+            $this->syncArraysFromEducationForm();
+        } else {
+            $this->hydrateEducationFormFromArrays();
+        }
+
+        if (isset($this->laborActivityForm)) {
+            $this->laborActivityForm->fillFromModel($this->personnelModelData);
+            $this->syncArraysFromLaborActivityForm();
+        } else {
+            $this->hydrateLaborActivityFormFromArrays();
+        }
     }
 
     public function confirmPersonnel(): void
@@ -76,26 +112,55 @@ class EditPersonnel extends Component
     public function store()
     {
         $this->authorize('update-personnels', $this->personnelModel);
-        $this->step == 1 && $this->validate($this->validationRules()[$this->step]);
+        $this->syncArraysFromPersonalForm();
+        $this->syncArraysFromDocumentForm();
+        $this->syncArraysFromEducationForm();
+        $this->syncArraysFromLaborActivityForm();
+        $currentStep = (int) $this->step;
+
+        if ($currentStep === 1) {
+            $this->validate($this->validationRules()[1]);
+        } elseif ($currentStep === 2 && $this->shouldValidateStep(2)) {
+            $rules = $this->validationRules()[2] ?? [];
+            if ($rules) {
+                $this->validate($rules);
+            }
+        } elseif ($currentStep === 3 && $this->shouldValidateStep(3)) {
+            $rules = $this->validationRules()[3] ?? [];
+            if ($rules) {
+                $this->validate($rules);
+            }
+        } elseif ($currentStep === 4 && $this->shouldValidateStep(4)) {
+            $rules = $this->validationRules()[4] ?? [];
+            if ($rules) {
+                $this->validate($rules);
+            }
+        }
 
         if (! empty($this->avatar)) {
             $this->personnel['photo'] = $this->avatar->store('personnel', 'public');
         }
         $personnelData = $this->modifyArray($this->personnel, $this->personnelModelData->dateList());
 
-        if ($this->step == 2 || $this->step == 3) {
+        if (in_array($this->step, [2, 3, 4], true)) {
             $this->completeStep(actionSave: true);
         }
 
-        DB::transaction(function () use ($personnelData) {
+        $laborActivities = collect($this->laborActivityForm->laborActivityList ?? [])
+            ->map(fn ($activity) => Arr::except($activity, ['time']))
+            ->all();
+
+        $ranks = $this->laborActivityForm->rankList ?? [];
+
+        DB::transaction(function () use ($personnelData, $laborActivities, $ranks) {
             $this->personnelModelData->update($personnelData);
             $this->handleSingleAssociation(relation: 'document', data: $this->document, model: PersonnelIdentityDocument::class, differentRelationName: 'idDocuments');
             $this->handleAssociations(relation: 'cards', list: $this->service_cards_list, uniqueKeys: 'card_number', model: PersonnelCard::class);
             $this->handleAssociations(relation: 'passports', list: $this->passports_list, uniqueKeys: 'serial_number', model: PersonnelPassports::class);
             $this->handleSingleAssociation(relation: 'education', data: $this->education, model: PersonnelEducation::class);
             $this->handleAssociations(relation: 'extraEducations', list: $this->extra_education_list, uniqueKeys: 'diplom_no', model: PersonnelExtraEducation::class);
-            $this->handleAssociations(relation: 'laborActivities', list: $this->labor_activities_list, uniqueKeys: 'join_date', model: PersonnelLaborActivity::class);
-            $this->handleAssociations(relation: 'ranks', list: $this->rank_list, uniqueKeys: 'given_date', model: PersonnelRank::class, tabelCheck: true);
+            $this->handleAssociations(relation: 'laborActivities', list: $laborActivities, uniqueKeys: 'join_date', model: PersonnelLaborActivity::class);
+            $this->handleAssociations(relation: 'ranks', list: $ranks, uniqueKeys: 'given_date', model: PersonnelRank::class, tabelCheck: true);
             $this->handleAssociations(relation: 'military', list: $this->military_list, uniqueKeys: 'start_date', model: PersonnelMilitaryService::class, tabelCheck: true);
             $this->handleAssociations(relation: 'injuries', list: $this->injury_list, uniqueKeys: ['description', 'date_time'], model: PersonnelInjury::class, tabelCheck: true);
             $this->handleAssociations(relation: 'captives', list: $this->captivity_list, uniqueKeys: 'taken_captive_date', model: PersonnelTakenCaptive::class, tabelCheck: true);

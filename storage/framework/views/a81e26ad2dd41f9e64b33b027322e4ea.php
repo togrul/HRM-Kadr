@@ -1,4 +1,5 @@
-<?php if (isset($component)) { $__componentOriginal47243a3de3ed132c2f9157dc8e8a8bd7 = $component; } ?>
+<div>
+    <?php if (isset($component)) { $__componentOriginal47243a3de3ed132c2f9157dc8e8a8bd7 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal47243a3de3ed132c2f9157dc8e8a8bd7 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.modal-delete','data' => ['livewireEventToOpenModal' => 'deletePersonnelWasSet','eventToCloseModal' => 'personnelWasDeleted','modalTitle' => __('Delete personnel'),'modalDescription' => __('Are you sure you want to delete this personnel?'),'modalConfirmButtonText' => __('Delete'),'wireClick' => 'deletePersonnel']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('modal-delete'); ?>
@@ -17,4 +18,6 @@
 <?php if (isset($__componentOriginal47243a3de3ed132c2f9157dc8e8a8bd7)): ?>
 <?php $component = $__componentOriginal47243a3de3ed132c2f9157dc8e8a8bd7; ?>
 <?php unset($__componentOriginal47243a3de3ed132c2f9157dc8e8a8bd7); ?>
-<?php endif; ?><?php /**PATH /Users/togruljalalli/Desktop/projects/HRM/resources/views/livewire/personnel/delete-personnel.blade.php ENDPATH**/ ?>
+<?php endif; ?>
+</div>
+<?php /**PATH /Users/togruljalalli/Desktop/projects/HRM/resources/views/livewire/personnel/delete-personnel.blade.php ENDPATH**/ ?>

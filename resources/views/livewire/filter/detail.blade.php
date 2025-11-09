@@ -1,11 +1,12 @@
-<x-modal-confirm-lg
+<div>
+  <x-modal-confirm-lg
     livewire-event-to-open-modal="openFilterWasSet"
     event-to-close-modal="filterSelected"
     :modal-title="__('All filters')"
     :modal-confirm-button-text="__('Search')"
     wire-click="search"
 >
-    <div class="grid grid-cols-3 lg:grid-cols-5 gap-2">
+    <div class="grid grid-cols-3 gap-2 lg:grid-cols-5">
         <div class="flex flex-col">
             <x-label for="filter.surname">{{ __('Surname') }}</x-label>
             <x-livewire-input mode="gray" name="filter.surname" wire:model.defer="filter.surname"></x-livewire-input>
@@ -60,7 +61,7 @@
                 />
             </x-ui.select-dropdown>
           </div>
-        <div class="flex flex-col space-y-1 w-full">
+        <div class="flex flex-col w-full space-y-1">
             <x-label for="filter.gender">{{ __('Gender') }}</x-label>
             <div class="flex flex-col">
                 @foreach(\App\Enums\GenderEnum::genderOptions() as $value => $label)
@@ -74,7 +75,7 @@
           </div>
           <div class="flex flex-col lg:col-span-2">
             <x-label for="filter.birthdate">{{ __('Birthdate') }}</x-label>
-            <div class="flex space-x-1 items-center">
+            <div class="flex items-center space-x-1">
                 <x-pikaday-input mode="gray" name="filter.birthdate.min" format="Y-MM-DD" wire:model.live="filter.birthdate.min">
                     <x-slot name="script">
                       $el.onchange = function () {
@@ -94,7 +95,7 @@
         </div>
         <div class="flex flex-col lg:col-span-2">
             <x-label for="filter.birthdate">{{ __('Age') }}</x-label>
-            <div class="flex space-x-1 items-center">
+            <div class="flex items-center space-x-1">
                 <x-livewire-input mode="gray" name="filter.age.min" wire:model.defer="filter.age.min"></x-livewire-input>
                 <span>-</span>
                 <x-livewire-input mode="gray" name="filter.age.max" wire:model.defer="filter.age.max"></x-livewire-input>
@@ -188,7 +189,7 @@
         </div>
         <div class="flex flex-col lg:col-span-2">
             <x-label for="filter.rank">{{ __('Rank date') }}</x-label>
-            <div class="flex space-x-1 items-center">
+            <div class="flex items-center space-x-1">
                 <x-pikaday-input mode="gray" name="filter.rank.min" format="Y-MM-DD" wire:model.live="filter.rank.min">
                     <x-slot name="script">
                       $el.onchange = function () {
@@ -320,14 +321,14 @@
             </x-ui.select-dropdown>
         </div>
     </div>
-    <div class="grid grid-cols-1 lg:grid-cols-5 gap-2">
+    <div class="grid grid-cols-1 gap-2 lg:grid-cols-5">
         <div class="flex flex-col">
             <x-label for="filter.punishment_reason">{{ __('Punishment reason') }}</x-label>
             <x-livewire-input mode="gray" name="filter.punishment_reason" wire:model.defer="filter.punishment_reason"></x-livewire-input>
         </div>
         <div class="flex flex-col lg:col-span-2">
             <x-label for="filter.join_work_date">{{ __('Join work date') }}</x-label>
-            <div class="flex space-x-1 items-center">
+            <div class="flex items-center space-x-1">
                 <x-pikaday-input mode="gray" name="filter.join_work_date.min" format="Y-MM-DD" wire:model.live="filter.join_work_date.min">
                     <x-slot name="script">
                       $el.onchange = function () {
@@ -347,7 +348,7 @@
         </div>
         <div class="flex flex-col lg:col-span-2">
             <x-label for="filter.rank">{{ __('Leave work date') }}</x-label>
-            <div class="flex space-x-1 items-center">
+            <div class="flex items-center space-x-1">
                 <x-pikaday-input mode="gray" name="filter.leave_work_date.min" format="Y-MM-DD" wire:model.live="filter.leave_work_date.min">
                     <x-slot name="script">
                       $el.onchange = function () {
@@ -366,4 +367,5 @@
             </div>
         </div>
     </div>
-</x-modal-confirm-lg>
+  </x-modal-confirm-lg>
+</div>

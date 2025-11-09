@@ -1,4 +1,5 @@
-<?php if (isset($component)) { $__componentOriginal44a7a1d6b33cb19797fb1d49cc6fc857 = $component; } ?>
+<div>
+  <?php if (isset($component)) { $__componentOriginal44a7a1d6b33cb19797fb1d49cc6fc857 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal44a7a1d6b33cb19797fb1d49cc6fc857 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.modal-confirm-lg','data' => ['livewireEventToOpenModal' => 'openFilterWasSet','eventToCloseModal' => 'filterSelected','modalTitle' => __('All filters'),'modalConfirmButtonText' => __('Search'),'wireClick' => 'search']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('modal-confirm-lg'); ?>
@@ -8,7 +9,7 @@
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
 <?php $component->withAttributes(['livewire-event-to-open-modal' => 'openFilterWasSet','event-to-close-modal' => 'filterSelected','modal-title' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(__('All filters')),'modal-confirm-button-text' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(__('Search')),'wire-click' => 'search']); ?>
-    <div class="grid grid-cols-3 lg:grid-cols-5 gap-2">
+    <div class="grid grid-cols-3 gap-2 lg:grid-cols-5">
         <div class="flex flex-col">
             <?php if (isset($component)) { $__componentOriginald8ba2b4c22a13c55321e34443c386276 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginald8ba2b4c22a13c55321e34443c386276 = $attributes; } ?>
@@ -213,7 +214,7 @@
 <?php unset($__componentOriginalb7c56d9f0bb75b99472ae2845823c8e9); ?>
 <?php endif; ?>
           </div>
-        <div class="flex flex-col space-y-1 w-full">
+        <div class="flex flex-col w-full space-y-1">
             <?php if (isset($component)) { $__componentOriginald8ba2b4c22a13c55321e34443c386276 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginald8ba2b4c22a13c55321e34443c386276 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'filter.gender']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
@@ -278,7 +279,7 @@
 <?php $component = $__componentOriginald8ba2b4c22a13c55321e34443c386276; ?>
 <?php unset($__componentOriginald8ba2b4c22a13c55321e34443c386276); ?>
 <?php endif; ?>
-            <div class="flex space-x-1 items-center">
+            <div class="flex items-center space-x-1">
                 <?php if (isset($component)) { $__componentOriginal36038ba5ddba347b69d2b76bc4612d11 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal36038ba5ddba347b69d2b76bc4612d11 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.pikaday-input','data' => ['mode' => 'gray','name' => 'filter.birthdate.min','format' => 'Y-MM-DD','wire:model.live' => 'filter.birthdate.min']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
@@ -352,7 +353,7 @@
 <?php $component = $__componentOriginald8ba2b4c22a13c55321e34443c386276; ?>
 <?php unset($__componentOriginald8ba2b4c22a13c55321e34443c386276); ?>
 <?php endif; ?>
-            <div class="flex space-x-1 items-center">
+            <div class="flex items-center space-x-1">
                 <?php if (isset($component)) { $__componentOriginal9364c0b92ee5ab519273634c79f86a27 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal9364c0b92ee5ab519273634c79f86a27 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.livewire-input','data' => ['mode' => 'gray','name' => 'filter.age.min','wire:model.defer' => 'filter.age.min']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
@@ -683,7 +684,7 @@
 <?php $component = $__componentOriginald8ba2b4c22a13c55321e34443c386276; ?>
 <?php unset($__componentOriginald8ba2b4c22a13c55321e34443c386276); ?>
 <?php endif; ?>
-            <div class="flex space-x-1 items-center">
+            <div class="flex items-center space-x-1">
                 <?php if (isset($component)) { $__componentOriginal36038ba5ddba347b69d2b76bc4612d11 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal36038ba5ddba347b69d2b76bc4612d11 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.pikaday-input','data' => ['mode' => 'gray','name' => 'filter.rank.min','format' => 'Y-MM-DD','wire:model.live' => 'filter.rank.min']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
@@ -1028,7 +1029,7 @@
 <?php endif; ?>
         </div>
     </div>
-    <div class="grid grid-cols-1 lg:grid-cols-5 gap-2">
+    <div class="grid grid-cols-1 gap-2 lg:grid-cols-5">
         <div class="flex flex-col">
             <?php if (isset($component)) { $__componentOriginald8ba2b4c22a13c55321e34443c386276 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginald8ba2b4c22a13c55321e34443c386276 = $attributes; } ?>
@@ -1089,7 +1090,7 @@
 <?php $component = $__componentOriginald8ba2b4c22a13c55321e34443c386276; ?>
 <?php unset($__componentOriginald8ba2b4c22a13c55321e34443c386276); ?>
 <?php endif; ?>
-            <div class="flex space-x-1 items-center">
+            <div class="flex items-center space-x-1">
                 <?php if (isset($component)) { $__componentOriginal36038ba5ddba347b69d2b76bc4612d11 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal36038ba5ddba347b69d2b76bc4612d11 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.pikaday-input','data' => ['mode' => 'gray','name' => 'filter.join_work_date.min','format' => 'Y-MM-DD','wire:model.live' => 'filter.join_work_date.min']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
@@ -1163,7 +1164,7 @@
 <?php $component = $__componentOriginald8ba2b4c22a13c55321e34443c386276; ?>
 <?php unset($__componentOriginald8ba2b4c22a13c55321e34443c386276); ?>
 <?php endif; ?>
-            <div class="flex space-x-1 items-center">
+            <div class="flex items-center space-x-1">
                 <?php if (isset($component)) { $__componentOriginal36038ba5ddba347b69d2b76bc4612d11 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal36038ba5ddba347b69d2b76bc4612d11 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.pikaday-input','data' => ['mode' => 'gray','name' => 'filter.leave_work_date.min','format' => 'Y-MM-DD','wire:model.live' => 'filter.leave_work_date.min']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
@@ -1218,7 +1219,7 @@
             </div>
         </div>
     </div>
- <?php echo $__env->renderComponent(); ?>
+   <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal44a7a1d6b33cb19797fb1d49cc6fc857)): ?>
 <?php $attributes = $__attributesOriginal44a7a1d6b33cb19797fb1d49cc6fc857; ?>
@@ -1228,4 +1229,5 @@
 <?php $component = $__componentOriginal44a7a1d6b33cb19797fb1d49cc6fc857; ?>
 <?php unset($__componentOriginal44a7a1d6b33cb19797fb1d49cc6fc857); ?>
 <?php endif; ?>
+</div>
 <?php /**PATH /Users/togruljalalli/Desktop/projects/HRM/resources/views/livewire/filter/detail.blade.php ENDPATH**/ ?>

@@ -26,26 +26,33 @@
     };
 ?>
 
-<div x-data="{ isOpen: false }"
+<div x-data="{
+        isOpen: <?php if ((object) ('isSideModalOpen') instanceof \Livewire\WireDirective) : ?>window.Livewire.find('<?php echo e($__livewire->getId()); ?>').entangle('<?php echo e('isSideModalOpen'->value()); ?>')<?php echo e('isSideModalOpen'->hasModifier('live') ? '.live' : ''); ?><?php else : ?>window.Livewire.find('<?php echo e($__livewire->getId()); ?>').entangle('<?php echo e('isSideModalOpen'); ?>')<?php endif; ?>.live,
+        toggleBody(open) {
+            document.body.classList.toggle('overflow-hidden', open)
+        }
+    }"
      class="fixed inset-0 z-50 overflow-hidden"
      aria-labelledby="slide-over-title"
      role="dialog"
      aria-modal="true"
      x-show="isOpen"
-     @keydown.escape.window="isOpen = false;$wire.dispatch('closeSideMenu');document.body.classList.remove('overflow-hidden');"
+     @keydown.escape.window="isOpen = false; $wire.dispatch('closeSideMenu'); toggleBody(false);"
      x-init="
       <?php
         $arrEvents = ['personnelAdded','permissionSet','staffAdded','userAdded','menuAdded','fileAdded','candidateAdded','templateAdded','componentAdded','orderAdded','rankAdded', 'leaveAdded', 'leaveUpdated'];
       ?>
+          toggleBody(isOpen);
+          $watch('isOpen', (value) => toggleBody(value));
           $wire.on('openSideMenu',() => {
+               console.info('[SideModal] open event received');
                isOpen = true
-               document.body.classList.add('overflow-hidden')
           })
           <?php $__currentLoopData = $arrEvents; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $event): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
           $wire.on('<?php echo e($event); ?>',() => {
+            console.warn('[SideModal] closing because event `<?php echo e($event); ?>` fired');
             isOpen = false
             $wire.dispatch('closeSideMenu')
-            document.body.classList.remove('overflow-hidden')
           })
         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
      "
@@ -89,7 +96,7 @@
                x-transition:leave-end="transform opacity-0"
                style="display: none;"
            >
-             <button @click="isOpen=false;$wire.call('closeSideMenu');document.body.classList.remove('overflow-hidden')" class="z-20 p-1 text-white rounded-lg hover:text-white focus:outline-none focus:ring-2 focus:ring-white">
+             <button @click="isOpen=false;toggleBody(false);$wire.call('closeSideMenu')" class="z-20 p-1 text-white rounded-lg hover:text-white focus:outline-none focus:ring-2 focus:ring-white">
                <span class="sr-only"><?php echo e(__('Close')); ?></span>
                  <?php if (isset($component)) { $__componentOriginal2b723b42d6712f974b6e7dfc4c0d88fc = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal2b723b42d6712f974b6e7dfc4c0d88fc = $attributes; } ?>

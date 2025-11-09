@@ -2,6 +2,10 @@
 
 namespace App\Livewire\Personnel;
 
+use App\Livewire\Forms\Personnel\DocumentForm;
+use App\Livewire\Forms\Personnel\EducationForm;
+use App\Livewire\Forms\Personnel\LaborActivityForm;
+use App\Livewire\Forms\Personnel\PersonalInformationForm;
 use App\Livewire\Traits\PersonnelCrud;
 use App\Livewire\Traits\RelationCruds\RelationCrudTrait;
 use App\Models\Personnel;
@@ -22,6 +26,7 @@ use App\Models\PersonnelPunishment;
 use App\Models\PersonnelRank;
 use App\Models\PersonnelScientificDegreeAndName;
 use App\Models\PersonnelTakenCaptive;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
@@ -30,8 +35,17 @@ class AddPersonnel extends Component
     use PersonnelCrud;
     use RelationCrudTrait;
 
+    public PersonalInformationForm $personalForm;
+    public DocumentForm $documentForm;
+    public EducationForm $educationForm;
+    public LaborActivityForm $laborActivityForm;
+
     public function store()
     {
+        $this->syncArraysFromPersonalForm();
+        $this->syncArraysFromDocumentForm();
+        $this->syncArraysFromEducationForm();
+        $this->syncArraysFromLaborActivityForm();
         $this->step == 1 && $this->validate($this->validationRules()[$this->step]);
 
         $modelInstance = new Personnel;
@@ -42,9 +56,15 @@ class AddPersonnel extends Component
             $this->personnel['photo'] = $this->avatar->store('personnel', 'public');
         }
 
-        ($this->step == 2 || $this->step == 3) && $this->completeStep();
+        in_array($this->step, [2, 3, 4], true) && $this->completeStep();
 
-        DB::transaction(function () use ($personnelData) {
+        $laborActivities = collect($this->laborActivityForm->laborActivityList ?? [])
+            ->map(fn ($activity) => Arr::except($activity, ['time']))
+            ->all();
+
+        $ranks = $this->laborActivityForm->rankList ?? [];
+
+        DB::transaction(function () use ($personnelData, $laborActivities, $ranks) {
             $personnel = Personnel::create($personnelData);
             // relation other crud
             $this->createRelatedData($personnel, 'idDocuments', PersonnelIdentityDocument::class, $this->document);
@@ -52,8 +72,8 @@ class AddPersonnel extends Component
             $this->createMultipleRelatedData($personnel, 'passports', PersonnelPassports::class, $this->passports_list);
             $this->createRelatedData($personnel, 'education', PersonnelEducation::class, $this->education);
             $this->createMultipleRelatedData($personnel, 'extraEducations', PersonnelExtraEducation::class, $this->extra_education_list);
-            $this->createMultipleRelatedData($personnel, 'laborActivities', PersonnelLaborActivity::class, $this->labor_activities_list);
-            $this->createMultipleRelatedData($personnel, 'ranks', PersonnelRank::class, $this->rank_list);
+            $this->createMultipleRelatedData($personnel, 'laborActivities', PersonnelLaborActivity::class, $laborActivities);
+            $this->createMultipleRelatedData($personnel, 'ranks', PersonnelRank::class, $ranks);
             $this->createMultipleRelatedData($personnel, 'military', PersonnelMilitaryService::class, $this->military_list);
             $this->createMultipleRelatedData($personnel, 'injuries', PersonnelInjury::class, $this->injury_list);
             $this->createMultipleRelatedData($personnel, 'captives', PersonnelTakenCaptive::class, $this->captivity_list);
@@ -78,5 +98,25 @@ class AddPersonnel extends Component
         $this->authorize('add-personnels');
         $this->title = __('New personnel');
         $this->step = 1;
+
+        if (isset($this->personalForm)) {
+            $this->personalForm->resetForm();
+            $this->hydratePersonalFormFromArrays();
+        }
+
+        if (isset($this->documentForm)) {
+            $this->documentForm->resetForm();
+            $this->hydrateDocumentFormFromArrays();
+        }
+
+        if (isset($this->educationForm)) {
+            $this->educationForm->resetForm();
+            $this->hydrateEducationFormFromArrays();
+        }
+
+        if (isset($this->laborActivityForm)) {
+            $this->laborActivityForm->resetForm();
+            $this->hydrateLaborActivityFormFromArrays();
+        }
     }
 }

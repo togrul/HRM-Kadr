@@ -2,7 +2,7 @@
 $__split = function ($name, $params = []) {
     return [$name, $params];
 };
-[$__name, $__params] = $__split('filter.detail', ['lazy' => 'on-load']);
+[$__name, $__params] = $__split('filter.detail', []);
 
 $__html = app('livewire')->mount($__name, $__params, 'lw-3043010947-0', $__slots ?? [], get_defined_vars());
 

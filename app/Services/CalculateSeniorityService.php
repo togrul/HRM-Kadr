@@ -11,15 +11,27 @@ class CalculateSeniorityService
         $leave_date,
         $coefficient
     ): array {
-        $diffInMonths = Carbon::parse($join_date)->diffInMonths(Carbon::parse($leave_date));
+        $start = Carbon::parse($join_date);
+        $end = Carbon::parse($leave_date);
+
+        if ($start->greaterThan($end)) {
+            [$start, $end] = [$end, $start];
+        }
+
+        $diffInMonths = $start->diffInMonths($end);
+        $diffInDays = $start->diffInDays($end);
         $duration = $coefficient ? $coefficient * $diffInMonths : $diffInMonths;
+        $durationDays = $coefficient ? $coefficient * $diffInDays : $diffInDays;
         $yearAndMonth = $this->calculateYearAndMonth($diffInMonths);
 
         return [
             'diff' => $diffInMonths,
+            'diff_days' => $diffInDays,
             'duration' => $duration,
+            'duration_days' => $durationDays,
             'year' => $yearAndMonth['year'],
             'month' => $yearAndMonth['month'],
+            'day' => $start->diff($end)->d,
         ];
     }
 
@@ -72,14 +84,18 @@ class CalculateSeniorityService
     private function aggregateMultiEducationResults(array $mappedData): array
     {
         $extraSeniority = array_sum(array_column(array_column($mappedData, 'extra_seniority'), 'duration'));
+        $extraSeniorityDays = array_sum(array_column(array_column($mappedData, 'extra_seniority'), 'duration_days'));
         $totalDuration = array_sum(array_column(array_column($mappedData, 'duration'), 'diff'));
+        $totalDurationDays = array_sum(array_column(array_column($mappedData, 'duration'), 'diff_days'));
 
         return [
             'data' => $mappedData,
             'extra_seniority' => $extraSeniority,
             'extra_seniority_full' => $this->calculateYearAndMonth($extraSeniority),
+            'extra_seniority_days' => $extraSeniorityDays,
             'total_duration' => $totalDuration,
             'total_duration_diff' => $this->calculateYearAndMonth($totalDuration),
+            'total_duration_days' => $totalDurationDays,
         ];
     }
 

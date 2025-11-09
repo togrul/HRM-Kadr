@@ -23,21 +23,15 @@ trait SelectListTrait
             $this->{$content.'Name'} = $name;
         }
 
+        $value = ['id' => $id, 'name' => $name];
+
         if (! is_null($multiple)) {
-            if (array_key_exists($multiple, $this->{$model})) {
-                if (array_key_exists($key, $this->{$model}[$multiple])) {
-                    $this->{$model}[$multiple][$key] = ['id' => $id, 'name' => $name];
-                }
-            } else {
-                $this->{$model} += [$multiple => [$key => ['id' => $id, 'name' => $name]]];
-            }
+            data_set($this->{$model}, "{$multiple}.{$key}", $value);
         } else {
-            if (array_key_exists($key, $this->{$model})) {
-                $this->{$model}[$key] = ['id' => $id, 'name' => $name];
-            } else {
-                $this->{$model} += [$key => ['id' => $id, 'name' => $name]];
-            }
+            data_set($this->{$model}, $key, $value);
         }
+
+        $this->syncFormSelectValue($model, $key, $value, $multiple);
     }
 
     private function updateExtraEducationData($model, $key, $id, $name)
@@ -73,6 +67,32 @@ trait SelectListTrait
         }
     }
 
+    private function syncFormSelectValue(string $model, string $key, array $value, ?string $multiple = null): void
+    {
+        if ($model === 'ranks'
+            && property_exists($this, 'laborActivityForm')
+            && isset($this->laborActivityForm)) {
+            $id = $value['id'] ?? null;
+            data_set($this->laborActivityForm->rank, $key, $id);
+
+            if (method_exists($this, 'syncArraysFromLaborActivityForm')) {
+                $this->syncArraysFromLaborActivityForm();
+            }
+
+            return;
+        }
+
+        if ($model !== 'personnel' || ! property_exists($this, 'personalForm') || ! isset($this->personalForm)) {
+            return;
+        }
+
+        if ($multiple !== null) {
+            data_set($this->personalForm->personnel, "{$multiple}.{$key}", $value);
+        } else {
+            data_set($this->personalForm->personnel, $key, $value);
+        }
+    }
+
     protected function modifyArray($array, $_castedDates = null)
     {
         $filteredArray = array_filter($array, function ($key) {
@@ -83,7 +103,11 @@ trait SelectListTrait
 
         foreach ($filteredArray as $key => $value) {
             unset($array[$key]);
-            $array[$key] = $value['id'];
+            if (is_array($value)) {
+                $array[$key] = $value['id'] ?? null;
+            } else {
+                $array[$key] = $value;
+            }
         }
 
         if (! empty($_castedDates)) {

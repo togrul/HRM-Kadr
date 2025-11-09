@@ -21,125 +21,196 @@ trait PersonnelValidationTrait
     protected function getPersonalInfoRules(): array
     {
         $uniqueTableRule = 'required|min:1|unique:personnels,tabel_no' .
-            (!empty($this->personnelModel) ? ',' . $this->updatePersonnel['id'] : '');
+            ($this->resolvePersonnelId() ? ',' . $this->resolvePersonnelId() : '');
 
-        $initialsChangeRules = $this->personnel['has_changed_initials'] ? [
-            'personnel.previous_name' => 'required|min:3',
-            'personnel.previous_surname' => 'required|min:3',
-            'personnel.previous_patronymic' => 'required|min:3',
-            'personnel.initials_changed_date' => 'required|date',
-            'personnel.initials_change_reason' => 'required|min:3',
+        $personnelState = $this->resolvePersonnelState();
+        $hasChangedInitials = (bool) data_get($personnelState, 'has_changed_initials', false);
+        $hasChangedNationality = (bool) data_get($personnelState, 'has_changed_nationality', false);
+        $hasDisability = property_exists($this, 'personalForm') && $this->personalForm
+            ? (bool) $this->personalForm->hasDisability
+            : (bool) ($this->isDisability ?? false);
+
+        $initialsChangeRules = $hasChangedInitials ? [
+            'personalForm.personnel.previous_name' => 'required|min:3',
+            'personalForm.personnel.previous_surname' => 'required|min:3',
+            'personalForm.personnel.previous_patronymic' => 'required|min:3',
+            'personalForm.personnel.initials_changed_date' => 'required|date',
+            'personalForm.personnel.initials_change_reason' => 'required|min:3',
         ] : [];
 
-        $nationalityChangeRules = $this->personnel['has_changed_nationality'] ? [
-            'personnel.previous_nationality_id.id' => 'required|int|exists:countries,id',
-            'personnel.nationality_changed_date' => 'required|date',
-            'personnel.nationality_change_reason' => 'required|min:3',
+        $nationalityChangeRules = $hasChangedNationality ? [
+            'personalForm.personnel.previous_nationality_id' => 'required|int|exists:countries,id',
+            'personalForm.personnel.nationality_changed_date' => 'required|date',
+            'personalForm.personnel.nationality_change_reason' => 'required|min:3',
         ] : [];
 
-        $disabilityRules = $this->isDisability ? [
-            'personnel.disability_id.id' => 'required|int|exists:disabilities,id',
-            'personnel.disability_given_date' => 'required|date',
+        $disabilityRules = $hasDisability ? [
+            'personalForm.personnel.disability_id' => 'required|int|exists:disabilities,id',
+            'personalForm.personnel.disability_given_date' => 'required|date',
         ] : [];
 
         return array_merge([
-            'personnel.tabel_no' => $uniqueTableRule,
-            'personnel.name' => 'required|min:3',
-            'personnel.surname' => 'required|min:3',
-            'personnel.patronymic' => 'required|min:3',
-            'personnel.birthdate' => 'required|date',
-            'personnel.gender' => 'required|int',
-            'personnel.nationality_id.id' => 'required|int|exists:countries,id',
-            'personnel.phone' => ['required', 'min:7'],
-            'personnel.mobile' => ['required', 'min:7'],
-            'personnel.email' => 'required|email',
-            'personnel.pin' => 'required|min:7|max:7',
-            'personnel.residental_address' => 'required|min:3',
-            'personnel.registered_address' => 'required|min:3',
-            'personnel.education_degree_id.id' => 'required|int|exists:education_degrees,id',
-            'personnel.structure_id.id' => 'required|int',
-            'personnel.position_id.id' => 'required|int',
-            'personnel.work_norm_id.id' => 'required|int|exists:work_norms,id',
-            'personnel.join_work_date' => 'required|date',
+            'personalForm.personnel.tabel_no' => $uniqueTableRule,
+            'personalForm.personnel.name' => 'required|min:3',
+            'personalForm.personnel.surname' => 'required|min:3',
+            'personalForm.personnel.patronymic' => 'required|min:3',
+            'personalForm.personnel.birthdate' => 'required|date',
+            'personalForm.personnel.gender' => 'required|int',
+            'personalForm.personnel.nationality_id' => 'required|int|exists:countries,id',
+            'personalForm.personnel.phone' => ['required', 'min:7'],
+            'personalForm.personnel.mobile' => ['required', 'min:7'],
+            'personalForm.personnel.email' => 'required|email',
+            'personalForm.personnel.pin' => 'required|min:7|max:7',
+            'personalForm.personnel.residental_address' => 'required|min:3',
+            'personalForm.personnel.registered_address' => 'required|min:3',
+            'personalForm.personnel.education_degree_id' => 'required|int|exists:education_degrees,id',
+            'personalForm.personnel.structure_id' => 'required|int',
+            'personalForm.personnel.position_id' => 'required|int',
+            'personalForm.personnel.work_norm_id' => 'required|int|exists:work_norms,id',
+            'personalForm.personnel.join_work_date' => 'required|date',
         ], $initialsChangeRules, $nationalityChangeRules, $disabilityRules);
     }
 
     protected function getDocumentRules(): array
     {
+        $rules = [];
+
+        if ($this->shouldValidateDocumentBlock()) {
+            $rules = array_merge($rules, $this->documentRuleSet());
+        }
+
+        if ($this->shouldValidateServiceCardBlock()) {
+            $rules = array_merge($rules, $this->serviceCardRuleSet());
+        }
+
+        if ($this->shouldValidatePassportBlock()) {
+            $rules = array_merge($rules, $this->passportRuleSet());
+        }
+
+        return $rules;
+    }
+
+    protected function documentRuleSet(): array
+    {
         return [
-            'document.pin' => 'required|min:7',
-            'document.nationality_id.id' => 'required|int|exists:countries,id',
-            'document.series' => 'required|min:1',
-            'document.number' => 'required|int',
-            'document.born_country_id.id' => 'required|int|exists:countries,id',
-            'document.born_city_id.id' => 'required|int|exists:cities,id',
-            'document.is_married' => 'required|boolean',
-            'document.height' => 'required|int',
-            'service_cards.card_number' => 'required|string|min:3',
-            'service_cards.given_date' => 'required|date',
-            'service_cards.valid_date' => 'required|date',
-            'passports.serial_number' => 'required|string|min:3',
-            'passports.valid_date' => 'required|date',
-            'passports.given_date' => 'required|date',
+            'documentForm.document.pin' => 'required|min:7',
+            'documentForm.document.nationality_id' => 'required|int|exists:countries,id',
+            'documentForm.document.series' => 'required|min:1',
+            'documentForm.document.number' => 'required|int',
+            'documentForm.document.born_country_id' => 'required|int|exists:countries,id',
+            'documentForm.document.born_city_id' => 'required|int|exists:cities,id',
+            'documentForm.document.is_married' => 'required|boolean',
+            'documentForm.document.height' => 'required|int',
         ];
+    }
+
+    protected function serviceCardRuleSet(): array
+    {
+        return [
+            'documentForm.serviceCards.card_number' => 'required|string|min:3',
+            'documentForm.serviceCards.given_date' => 'required|date',
+            'documentForm.serviceCards.valid_date' => 'required|date',
+        ];
+    }
+
+    protected function passportRuleSet(): array
+    {
+        return [
+            'documentForm.passports.serial_number' => 'required|string|min:3',
+            'documentForm.passports.valid_date' => 'required|date',
+            'documentForm.passports.given_date' => 'required|date',
+        ];
+    }
+
+    protected function educationRuleSet(): array
+    {
+        return [
+            'educationForm.education.educational_institution_id' => 'required|int|exists:educational_institutions,id',
+            'educationForm.education.education_form_id' => 'required|int|exists:education_forms,id',
+            'educationForm.education.education_language' => 'required|min:2',
+            'educationForm.education.specialty' => 'required|min:2',
+            'educationForm.education.admission_year' => 'required|date',
+            'educationForm.education.graduated_year' => 'required|date|after:educationForm.education.admission_year',
+            'educationForm.education.profession_by_document' => 'required|min:2',
+            'educationForm.education.diplom_serie' => 'required|min:1',
+            'educationForm.education.diplom_no' => 'required|int',
+            'educationForm.education.diplom_given_date' => 'required|date',
+        ];
+    }
+
+    protected function extraEducationRuleSet(): array
+    {
+        return [
+            'educationForm.extraEducation.education_type_id' => 'required|int|exists:education_types,id',
+            'educationForm.extraEducation.educational_institution_id' => 'required|int|exists:educational_institutions,id',
+            'educationForm.extraEducation.education_form_id' => 'required|int|exists:education_forms,id',
+            'educationForm.extraEducation.name' => 'required|min:2',
+            'educationForm.extraEducation.shortname' => 'required|min:2',
+            'educationForm.extraEducation.education_language' => 'required|min:2',
+            'educationForm.extraEducation.education_program_name' => 'required|min:2',
+            'educationForm.extraEducation.admission_year' => 'required|date',
+            'educationForm.extraEducation.graduated_year' => 'required|date|after:educationForm.extraEducation.admission_year',
+            'educationForm.extraEducation.education_document_type_id' => 'required|int|exists:education_document_types,id',
+            'educationForm.extraEducation.diplom_serie' => 'required|min:1',
+            'educationForm.extraEducation.diplom_no' => 'required|int|unique:personnel_extra_education,diplom_no',
+            'educationForm.extraEducation.diplom_given_date' => 'required|date',
+        ];
+    }
+
+    protected function resolvePersonnelState(): array
+    {
+        if (property_exists($this, 'personalForm') && $this->personalForm) {
+            return $this->personalForm->personnel ?? [];
+        }
+
+        return $this->personnel ?? [];
+    }
+
+    protected function resolvePersonnelId(): ?int
+    {
+        if (property_exists($this, 'personnelModelData') && $this->personnelModelData) {
+            return $this->personnelModelData->id ?? null;
+        }
+
+        if (property_exists($this, 'updatePersonnel') && ! empty($this->updatePersonnel['id'])) {
+            return (int) $this->updatePersonnel['id'];
+        }
+
+        if (property_exists($this, 'personnelModel') && $this->personnelModel) {
+            return is_numeric($this->personnelModel) ? (int) $this->personnelModel : null;
+        }
+
+        return null;
     }
 
     protected function getEducationRules(): array
     {
-        $extraEducationRules = $this->hasExtraEducation ? [
-            'extra_education.education_type_id.id' => 'required|int|exists:education_types,id',
-            'extra_education.educational_institution_id.id' => 'required|int|exists:educational_institutions,id',
-            'extra_education.education_form_id.id' => 'required|int|exists:education_forms,id',
-            'extra_education.name' => 'required|min:2',
-            'extra_education.shortname' => 'required|min:2',
-            'extra_education.education_language' => 'required|min:2',
-            'extra_education.education_program_name' => 'required|min:2',
-            'extra_education.admission_year' => 'required|date',
-            'extra_education.graduated_year' => 'required|date|after:extra_education.admission_year',
-            'extra_education.education_document_type_id.id' => 'required|int|exists:education_document_types,id',
-            'extra_education.diplom_serie' => 'required|min:1',
-            'extra_education.diplom_no' => 'required|int|unique:personnel_extra_education,diplom_no',
-            'extra_education.diplom_given_date' => 'required|date',
-        ] : [];
+        $rules = $this->educationRuleSet();
 
-        return array_merge([
-            'education.educational_institution_id.id' => 'required|int|exists:educational_institutions,id',
-            'education.education_form_id.id' => 'required|int|exists:education_forms,id',
-            'education.education_language' => 'required|min:2',
-            'education.specialty' => 'required|min:2',
-            'education.admission_year' => 'required|date',
-            'education.graduated_year' => 'required|date|after:education.admission_year',
-            'education.profession_by_document' => 'required|min:2',
-            'education.diplom_serie' => 'required|min:1',
-            'education.diplom_no' => 'required|int',
-            'education.diplom_given_date' => 'required|date',
-        ], $extraEducationRules);
+        if ($this->hasExtraEducation) {
+            $rules = array_merge($rules, $this->extraEducationRuleSet());
+        }
+
+        return $rules;
     }
 
     protected function getCareerRules(): array
     {
-        $specialServiceRules = $this->isSpecialService ? [
-            'labor_activities.coefficient' => 'required|numeric|min:0',
-            'labor_activities.order_given_by' => 'required|min:2',
-            'labor_activities.order_no' => 'required|min:2',
-            'labor_activities.order_date' => 'required|date',
-        ] : [];
+        $rules = [];
 
-        $rankRules = $this->isAddedRank ? [
-            'ranks.rank_id.id' => 'required|int|exists:ranks,id',
-            'ranks.name' => 'required|min:2',
-            'ranks.given_date' => 'required|date',
-            'ranks.rank_reason_id.id' => 'required|int|exists:rank_reasons,id',
-            'ranks.order_no' => 'required|string|min:1',
-            'ranks.order_given_by' => 'required|string|min:1',
-            'ranks.order_date' => 'required|date',
-        ] : [];
+        if ($this->shouldValidateLaborActivityDraft()) {
+            $rules = $this->laborActivityRuleSet();
 
-        return array_merge([
-            'labor_activities.company_name' => 'required|min:2',
-            'labor_activities.position' => 'required|min:2',
-            'labor_activities.join_date' => 'required|date',
-        ], $specialServiceRules, $rankRules);
+            if ($this->isSpecialServiceEnabled()) {
+                $rules = array_merge($rules, $this->laborActivitySpecialServiceRules());
+            }
+        }
+
+        if ($this->isAddedRank) {
+            $rules = array_merge($rules, $this->rankRuleSet());
+        }
+
+        return $rules;
     }
 
     protected function getMilitaryAndHealthRules(): array
@@ -209,88 +280,142 @@ trait PersonnelValidationTrait
         ], $electionRules);
     }
 
+    protected function laborActivityRuleSet(): array
+    {
+        return [
+            'laborActivityForm.laborActivity.company_name' => 'required|min:2',
+            'laborActivityForm.laborActivity.position' => 'required|min:2',
+            'laborActivityForm.laborActivity.join_date' => 'required|date',
+        ];
+    }
+
+    protected function laborActivitySpecialServiceRules(): array
+    {
+        return [
+            'laborActivityForm.laborActivity.coefficient' => 'required|numeric|min:0',
+            'laborActivityForm.laborActivity.order_given_by' => 'required|min:2',
+            'laborActivityForm.laborActivity.order_no' => 'required|min:2',
+            'laborActivityForm.laborActivity.order_date' => 'required|date',
+        ];
+    }
+
+    protected function rankRuleSet(): array
+    {
+        return [
+            'laborActivityForm.rank.rank_id' => 'required|int|exists:ranks,id',
+            'laborActivityForm.rank.name' => 'required|min:2',
+            'laborActivityForm.rank.given_date' => 'required|date',
+            'laborActivityForm.rank.rank_reason_id' => 'required|int|exists:rank_reasons,id',
+            'laborActivityForm.rank.order_no' => 'required|string|min:1',
+            'laborActivityForm.rank.order_given_by' => 'required|string|min:1',
+            'laborActivityForm.rank.order_date' => 'required|date',
+        ];
+    }
+
+    protected function isSpecialServiceEnabled(): bool
+    {
+        if (property_exists($this, 'isSpecialService')) {
+            return (bool) $this->isSpecialService;
+        }
+
+        return false;
+    }
+
+    protected function shouldValidateLaborActivityDraft(): bool
+    {
+        if (! property_exists($this, 'laborActivityForm') || ! $this->laborActivityForm) {
+            return false;
+        }
+
+        $draft = $this->laborActivityForm->laborActivity ?? [];
+
+        return filled($draft['company_name'] ?? null)
+            || filled($draft['position'] ?? null)
+            || filled($draft['join_date'] ?? null);
+    }
+
     protected function validationAttributes(): array
     {
         return [
-            'personnel.tabel_no' => __('Tabel no'),
-            'personnel.name' => __('Name'),
-            'personnel.surname' => __('Surname'),
-            'personnel.patronymic' => __('Patronymic'),
-            'personnel.birthdate' => __('Birthdate'),
-            'personnel.previous_name' => __('Previous name'),
-            'personnel.previous_surname' => __('Previous surname'),
-            'personnel.previous_patronymic' => __('Previous patronymic'),
-            'personnel.gender' => __('Gender'),
-            'personnel.initials_changed_date' => __('Change date'),
-            'personnel.initials_change_reason' => __('Change reason'),
-            'personnel.nationality_id.id' => __('Nationality'),
-            'personnel.previous_nationality_id.id' => __('Previous nationality'),
-            'personnel.nationality_changed_date' => __('Nationality change date'),
-            'personnel.nationality_change_reason' => __('Nationality change reason'),
-            'personnel.phone' => __('Phone'),
-            'personnel.mobile' => __('Mobile'),
-            'personnel.email' => __('Email'),
-            'personnel.pin' => __('PIN'),
-            'personnel.residental_address' => __('Residental address'),
-            'personnel.registered_address' => __('Registered address'),
-            'personnel.education_degree_id.id' => __('Education degree'),
-            'personnel.structure_id.id' => __('Structure'),
-            'personnel.position_id.id' => __('Position'),
-            'personnel.work_norm_id.id' => __('Work norm'),
-            'personnel.join_work_date' => __('Join work date'),
-            'personnel.disability_id.id' => __('Disability'),
-            'personnel.disability_given_date' => __('Disability given date'),
-            'document.body.pin' => __('Pin'),
-            'document.nationality_id.id' => __('Nationality'),
-            'document.series' => __('Series'),
-            'document.number' => __('Document number'),
-            'document.born_country_id.id' => __('Born country'),
-            'document.born_city_id.id' => __('City'),
-            'document.is_married' => __('Family status'),
-            'document.height' => __('Height'),
-            'service_cards.card_number' => __('Service cards'),
-            'service_cards.valid_date' => __('Valid date'),
-            'service_cards.given_date' => __('Given date'),
-            'passports.serial_number' => __('Serial number'),
-            'passports.valid_date' => __('Valid date'),
-            'passports.given_date' => __('Given date'),
-            'education.educational_institution_id.id' => __('Institution'),
-            'education.education_form_id.id' => __('Education form'),
-            'education.education_language' => __('Education language'),
-            'education.specialty' => __('Specialty'),
-            'education.admission_year' => __('Admission year'),
-            'education.graduated_year' => __('Graduated year'),
-            'education.profession_by_document' => __('Profession'),
-            'education.diplom_serie' => __('Diplom serie'),
-            'education.diplom_no' => __('Diplom no'),
-            'education.diplom_given_date' => __('Diplom given date'),
-            'extra_education.education_type_id.id' => __('Education type'),
-            'extra_education.educational_institution_id.id' => __('Institution'),
-            'extra_education.education_form_id.id' => __('Education form'),
-            'extra_education.name' => __('Name'),
-            'extra_education.shortname' => __('Shortname'),
-            'extra_education.education_language' => __('Education language'),
-            'extra_education.education_program_name' => __('Program name'),
-            'extra_education.admission_year' => __('Admission year'),
-            'extra_education.graduated_year' => __('Graduated year'),
-            'extra_education.education_document_type_id.id' => __('Document type'),
-            'extra_education.diplom_serie' => __('Diplom serie'),
-            'extra_education.diplom_no' => __('Diplom no'),
-            'extra_education.diplom_given_date' => __('Diplom given date'),
-            'labor_activities.company_name' => __('Company'),
-            'labor_activities.position' => __('Position'),
-            'labor_activities.join_date' => __('Join date'),
-            'labor_activities.coefficient' => __('Coefficient'),
-            'labor_activities.order_given_by' => __('Order issued by'),
-            'labor_activities.order_no' => __('Order number'),
-            'labor_activities.order_date' => __('Order date'),
-            'ranks.rank_id.id' => __('Rank'),
-            'ranks.name' => __('Name'),
-            'ranks.given_date' => __('Given date'),
-            'ranks.order_no' => __('Order number'),
-            'ranks.order_given_by' => __('Given by'),
-            'ranks.order_date' => __('Date'),
-            'ranks.rank_reason_id.id' => __('Rank reasons'),
+            'personalForm.personnel.tabel_no' => __('Tabel no'),
+            'personalForm.personnel.name' => __('Name'),
+            'personalForm.personnel.surname' => __('Surname'),
+            'personalForm.personnel.patronymic' => __('Patronymic'),
+            'personalForm.personnel.birthdate' => __('Birthdate'),
+            'personalForm.personnel.previous_name' => __('Previous name'),
+            'personalForm.personnel.previous_surname' => __('Previous surname'),
+            'personalForm.personnel.previous_patronymic' => __('Previous patronymic'),
+            'personalForm.personnel.gender' => __('Gender'),
+            'personalForm.personnel.initials_changed_date' => __('Change date'),
+            'personalForm.personnel.initials_change_reason' => __('Change reason'),
+            'personalForm.personnel.nationality_id' => __('Nationality'),
+            'personalForm.personnel.previous_nationality_id' => __('Previous nationality'),
+            'personalForm.personnel.nationality_changed_date' => __('Nationality change date'),
+            'personalForm.personnel.nationality_change_reason' => __('Nationality change reason'),
+            'personalForm.personnel.phone' => __('Phone'),
+            'personalForm.personnel.mobile' => __('Mobile'),
+            'personalForm.personnel.email' => __('Email'),
+            'personalForm.personnel.pin' => __('PIN'),
+            'personalForm.personnel.residental_address' => __('Residental address'),
+            'personalForm.personnel.registered_address' => __('Registered address'),
+            'personalForm.personnel.education_degree_id' => __('Education degree'),
+            'personalForm.personnel.structure_id' => __('Structure'),
+            'personalForm.personnel.position_id' => __('Position'),
+            'personalForm.personnel.work_norm_id' => __('Work norm'),
+            'personalForm.personnel.join_work_date' => __('Join work date'),
+            'personalForm.personnel.disability_id' => __('Disability'),
+            'personalForm.personnel.disability_given_date' => __('Disability given date'),
+            'documentForm.document.pin' => __('Pin'),
+            'documentForm.document.nationality_id' => __('Nationality'),
+            'documentForm.document.series' => __('Series'),
+            'documentForm.document.number' => __('Document number'),
+            'documentForm.document.born_country_id' => __('Born country'),
+            'documentForm.document.born_city_id' => __('City'),
+            'documentForm.document.is_married' => __('Family status'),
+            'documentForm.document.height' => __('Height'),
+            'documentForm.serviceCards.card_number' => __('Service cards'),
+            'documentForm.serviceCards.valid_date' => __('Valid date'),
+            'documentForm.serviceCards.given_date' => __('Given date'),
+            'documentForm.passports.serial_number' => __('Serial number'),
+            'documentForm.passports.valid_date' => __('Valid date'),
+            'documentForm.passports.given_date' => __('Given date'),
+            'educationForm.education.educational_institution_id' => __('Institution'),
+            'educationForm.education.education_form_id' => __('Education form'),
+            'educationForm.education.education_language' => __('Education language'),
+            'educationForm.education.specialty' => __('Specialty'),
+            'educationForm.education.admission_year' => __('Admission year'),
+            'educationForm.education.graduated_year' => __('Graduated year'),
+            'educationForm.education.profession_by_document' => __('Profession'),
+            'educationForm.education.diplom_serie' => __('Diplom serie'),
+            'educationForm.education.diplom_no' => __('Diplom no'),
+            'educationForm.education.diplom_given_date' => __('Diplom given date'),
+            'educationForm.extraEducation.education_type_id' => __('Education type'),
+            'educationForm.extraEducation.educational_institution_id' => __('Institution'),
+            'educationForm.extraEducation.education_form_id' => __('Education form'),
+            'educationForm.extraEducation.name' => __('Name'),
+            'educationForm.extraEducation.shortname' => __('Shortname'),
+            'educationForm.extraEducation.education_language' => __('Education language'),
+            'educationForm.extraEducation.education_program_name' => __('Program name'),
+            'educationForm.extraEducation.admission_year' => __('Admission year'),
+            'educationForm.extraEducation.graduated_year' => __('Graduated year'),
+            'educationForm.extraEducation.education_document_type_id' => __('Document type'),
+            'educationForm.extraEducation.diplom_serie' => __('Diplom serie'),
+            'educationForm.extraEducation.diplom_no' => __('Diplom no'),
+            'educationForm.extraEducation.diplom_given_date' => __('Diplom given date'),
+            'laborActivityForm.laborActivity.company_name' => __('Company'),
+            'laborActivityForm.laborActivity.position' => __('Position'),
+            'laborActivityForm.laborActivity.join_date' => __('Join date'),
+            'laborActivityForm.laborActivity.coefficient' => __('Coefficient'),
+            'laborActivityForm.laborActivity.order_given_by' => __('Order issued by'),
+            'laborActivityForm.laborActivity.order_no' => __('Order number'),
+            'laborActivityForm.laborActivity.order_date' => __('Order date'),
+            'laborActivityForm.rank.rank_id' => __('Rank'),
+            'laborActivityForm.rank.name' => __('Name'),
+            'laborActivityForm.rank.given_date' => __('Given date'),
+            'laborActivityForm.rank.order_no' => __('Order number'),
+            'laborActivityForm.rank.order_given_by' => __('Given by'),
+            'laborActivityForm.rank.order_date' => __('Date'),
+            'laborActivityForm.rank.rank_reason_id' => __('Rank reasons'),
             'military.rank_id.id' => __('Rank'),
             'military.attitude_to_military_service' => __('Attitude'),
             'military.given_date' => __('Given date'),
@@ -332,5 +457,45 @@ trait PersonnelValidationTrait
             'elections.location' => __('Location'),
             'elections.elected_date' => __('Election date'),
         ];
+    }
+
+    protected function shouldValidateDocumentBlock(): bool
+    {
+        $document = property_exists($this, 'document') ? ($this->document ?? []) : [];
+
+        return $this->hasPayloadValues($document);
+    }
+
+    protected function shouldValidateServiceCardBlock(): bool
+    {
+        $serviceCards = property_exists($this, 'service_cards') ? ($this->service_cards ?? []) : [];
+
+        return $this->hasPayloadValues($serviceCards);
+    }
+
+    protected function shouldValidatePassportBlock(): bool
+    {
+        $passports = property_exists($this, 'passports') ? ($this->passports ?? []) : [];
+
+        return $this->hasPayloadValues($passports);
+    }
+
+    protected function hasPayloadValues($payload): bool
+    {
+        if (method_exists($this, 'payloadHasValues')) {
+            return $this->payloadHasValues($payload);
+        }
+
+        if (is_array($payload)) {
+            foreach ($payload as $value) {
+                if ($this->hasPayloadValues($value)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        return $payload !== null && $payload !== '';
     }
 }
