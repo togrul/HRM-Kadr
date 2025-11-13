@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Order;
 use App\Models\OrderStatus;
+use App\Models\OrderCategory;
 use Illuminate\Database\Seeder;
 
 class OrderSeeder extends Seeder
@@ -13,12 +14,12 @@ class OrderSeeder extends Seeder
      */
     public function run(): void
     {
-        //        OrderCategory::firstOrCreate([
-        //            'id' => 10,
-        //            'name_az' => 'Əmək müqaviləsi əmrləri',
-        //            'name_en' => 'Employment contract orders',
-        //            'name_ru' => 'Приказы о трудовом договоре',
-        //        ]);
+               OrderCategory::firstOrCreate([
+                   'id' => 10,
+                   'name_az' => 'Əmək müqaviləsi əmrləri',
+                   'name_en' => 'Employment contract orders',
+                   'name_ru' => 'Приказы о трудовом договоре',
+               ]);
 
         Order::firstOrCreate([
             'id' => 1010,

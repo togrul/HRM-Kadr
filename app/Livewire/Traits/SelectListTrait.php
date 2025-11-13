@@ -2,7 +2,6 @@
 
 namespace App\Livewire\Traits;
 
-use App\Models\EducationalInstitution;
 use Carbon\Carbon;
 
 trait SelectListTrait
@@ -11,12 +10,10 @@ trait SelectListTrait
     {
         $this->setAttributes($model, $key, $content, $name, $id, $multiple);
 
-        $this->updateExtraEducationData($model, $key, $id, $name);
-
         $this->clearSearchFields($content);
     }
 
-    private function setAttributes($model, $key, $content, $name, $id, $multiple = null)
+    private function setAttributes($model, $key, $content, $name, $id, $multiple = null): void
     {
         if (! empty($content)) {
             $this->{$content.'Id'} = $id;
@@ -30,66 +27,16 @@ trait SelectListTrait
         } else {
             data_set($this->{$model}, $key, $value);
         }
-
-        $this->syncFormSelectValue($model, $key, $value, $multiple);
     }
 
-    private function updateExtraEducationData($model, $key, $id, $name)
+    private function clearSearchFields($content): void
     {
-        if (! empty($id)) {
-            if ($model == 'extra_education' && $key == 'educational_institution_id') {
-                $this->extra_education['name'] = $name;
-                $this->extra_education['shortname'] = EducationalInstitution::find($id)->value('shortname');
-            }
-        } else {
-            if ($model == 'extra_education' && $key == 'educational_institution_id') {
-                unset($this->{$model}['name']);
-                unset($this->{$model}['shortname']);
-            }
-        }
-    }
-
-    private function clearSearchFields($content)
-    {
-        $searchFields = match ($content) {
-            'previousNationality','nationality' => ['searchPreviousNationality', 'searchNationality'],
-            'extraInstitution','institution' => ['searchExtraInstitution', 'searchInstitution'],
-            'extraEducationForm','educationForm' => ['searchExtraEducationForm', 'searchEducationForm'],
-            'ranks' , 'militaryRank' => ['searchMilitaryRank', 'searchRank'],
-            null => ['searchPersonnel'],
-            default => []
-        };
-
-        if (isset($searchFields)) {
-            foreach ($searchFields as $field) {
-                $this->{$field} = '';
-            }
-        }
-    }
-
-    private function syncFormSelectValue(string $model, string $key, array $value, ?string $multiple = null): void
-    {
-        if ($model === 'ranks'
-            && property_exists($this, 'laborActivityForm')
-            && isset($this->laborActivityForm)) {
-            $id = $value['id'] ?? null;
-            data_set($this->laborActivityForm->rank, $key, $id);
-
-            if (method_exists($this, 'syncArraysFromLaborActivityForm')) {
-                $this->syncArraysFromLaborActivityForm();
-            }
-
+        if ($content !== null) {
             return;
         }
 
-        if ($model !== 'personnel' || ! property_exists($this, 'personalForm') || ! isset($this->personalForm)) {
-            return;
-        }
-
-        if ($multiple !== null) {
-            data_set($this->personalForm->personnel, "{$multiple}.{$key}", $value);
-        } else {
-            data_set($this->personalForm->personnel, $key, $value);
+        if (property_exists($this, 'searchPersonnel')) {
+            $this->searchPersonnel = '';
         }
     }
 

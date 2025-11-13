@@ -5,9 +5,13 @@
     </x-slot>
     {{-- end sidebar --}}
 
-    <div class="flex flex-col space-y-4 px-6 py-4">
+    <div class="flex flex-col px-6 py-4 space-y-4">
+        @php
+            $personnels = $this->personnels;
+            $status = $this->status;
+        @endphp
         {{-- header section --}}
-        <div class="flex justify-between items-center">
+        <div class="flex items-center justify-between">
             @include('partials.personnel.status-filters')
             @include('partials.personnel.action-buttons')
         </div>
@@ -16,32 +20,30 @@
 
         <div class="relative min-h-[300px] -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-                <div class="overflow-inherit border-b border-gray-200 shadow sm:rounded-xl">
+                <div class="border-b border-gray-200 shadow overflow-inherit sm:rounded-xl">
                     <x-table.tbl :headers="$this->getTableHeaders()">
-                        @forelse ($this->personnels as $key => $personnel)
+                        @forelse ($personnels as $key => $personnel)
+                            @php
+                                $activeVacation = $personnel->activeVacation;
+                                $activeBusinessTrip = $personnel->activeBusinessTrip;
+                            @endphp
                             <tr @class([
                                 'relative',
                                 'bg-rose-100' => !empty($personnel->leave_work_date),
-                                'bg-white' => $personnel->hasActiveVacation || $personnel->hasActiveBusinessTrip,
+                                'bg-white' => $activeVacation || $activeBusinessTrip,
                             ])>
                                 <x-table.td>
-                                    <div class="flex flex-col justify-between h-full absolute top-0 left-0">
-                                        @if ($personnel->hasActiveVacation)
-                                            @php
-                                                $activeVacation = $personnel->hasActiveVacation;
-                                                $vacationStart = $activeVacation->start_date;
-                                                $vacationEnd = $activeVacation->return_work_date;
-                                            @endphp
+                                    <div class="absolute top-0 left-0 flex flex-col justify-between h-full">
+                                        @if ($activeVacation)
+                                            @php($vacationStart = $activeVacation->start_date)
+                                            @php($vacationEnd = $activeVacation->return_work_date)
                                             <x-progress :startDate="$vacationStart" :endDate="$vacationEnd" color="emerald">
                                                 {{ __('In vacation') }}
                                             </x-progress>
                                         @endif
-                                        @if ($personnel->hasActiveBusinessTrip)
-                                            @php
-                                                $businessTrip = $personnel->hasActiveBusinessTrip;
-                                                $startDate = $businessTrip->start_date;
-                                                $endDate = $businessTrip->end_date;
-                                            @endphp
+                                        @if ($activeBusinessTrip)
+                                            @php($startDate = $activeBusinessTrip->start_date)
+                                            @php($endDate = $activeBusinessTrip->end_date)
                                             <x-progress :$startDate :$endDate color="rose">
                                                 {{ __('In business trip') }}
                                             </x-progress>
@@ -49,7 +51,7 @@
                                     </div>
 
                                     <span class="text-sm font-medium text-gray-700">
-                                        {{ ($this->personnels->currentpage() - 1) * $this->personnels->perpage() + $key + 1 }}
+                                        {{ ($personnels->currentPage() - 1) * $personnels->perPage() + $key + 1 }}
                                     </span>
                                 </x-table.td>
 
@@ -61,8 +63,8 @@
 
                                         @if ($personnel->is_pending)
                                             <div
-                                                class="text-xs font-medium rounded-lg shadow-sm px-4 py-1 flex space-x-2 items-center bg-teal-50 border border-teal-200 text-teal-500">
-                                                <svg class="h-5 w-5 text-teal-500" xmlns="http://www.w3.org/2000/svg"
+                                                class="flex items-center px-4 py-1 space-x-2 text-xs font-medium text-teal-500 border border-teal-200 rounded-lg shadow-sm bg-teal-50">
+                                                <svg class="w-5 h-5 text-teal-500" xmlns="http://www.w3.org/2000/svg"
                                                     fill="none" viewBox="0 0 24 24" stroke-width="2"
                                                     stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -90,26 +92,26 @@
                                 </x-table.td>
 
                                 <x-table.td>
-                                    <div class="flex items-center space-x-2 px-2">
+                                    <div class="flex items-center px-2 space-x-2">
                                         @if (!empty($personnel->photo))
                                             <img src="{{ \Illuminate\Support\Facades\Storage::url($personnel->photo) }}"
                                                 alt=""
-                                                class="flex-none rounded-xl object-cover w-14 h-14 border-2 shadow-lg border-zinc-200">
+                                                class="flex-none object-cover border-2 shadow-lg rounded-xl w-14 h-14 border-zinc-200">
                                         @else
                                             <img src="{{ asset('assets/images/no-image.png') }}" alt=""
-                                                class="flex-none rounded-xl object-cover w-14 h-14 border-2 shadow-lg border-zinc-200">
+                                                class="flex-none object-cover border-2 shadow-lg rounded-xl w-14 h-14 border-zinc-200">
                                         @endif
                                         <div class="flex flex-col space-y-1">
                                             <span class="text-sm font-medium text-zinc-900">
                                                 {{ $personnel->fullname }}
                                             </span>
                                             <span
-                                                class="text-sm w-max font-medium text-neutral-600 rounded-xl px-3 py-1 shadow-sm bg-neutral-200/70">
+                                                class="px-3 py-1 text-sm font-medium shadow-sm w-max text-neutral-600 rounded-xl bg-neutral-200/70">
                                                 {{ $personnel->gender == 1 ? __('Man') : __('Woman') }}
                                             </span>
                                             @if (!empty($personnel->latestRank))
                                                 <span
-                                                    class="text-sm font-medium rounded-xl px-3 py-1 shadow-sm w-max bg-green-950 text-yellow-400">
+                                                    class="px-3 py-1 text-sm font-medium text-yellow-400 shadow-sm rounded-xl w-max bg-green-950">
                                                     {{ $personnel->latestRank?->rank->name }}
                                                 </span>
                                             @endif
@@ -120,9 +122,9 @@
                                 <x-table.td>
                                     <div class="flex flex-col space-y-1">
                                         <span
-                                            class="text-zinc-900 text-sm font-medium">{{ $personnel->structure->name }}</span>
+                                            class="text-sm font-medium text-zinc-900">{{ $personnel->structure->name }}</span>
                                         <span
-                                            class="text-zinc-600 text-sm font-medium">{{ $personnel->position->name }}</span>
+                                            class="text-sm font-medium text-zinc-600">{{ $personnel->position->name }}</span>
                                     </div>
                                 </x-table.td>
 
@@ -138,19 +140,19 @@
                                 </x-table.td>
 
                                 <x-table.td :isButton="true" style="text-align: center !important;">
-                                    <div class="flex space-x-2 items-center">
+                                    <div class="flex items-center space-x-2">
                                         @if ($status != 'deleted')
                                             @can('edit-personnels')
                                                 <a href="#"
                                                     wire:click="openSideMenu('edit-personnel',{{ $personnel->id }})"
-                                                    class="flex items-center justify-center w-9 h-9 text-xs font-medium uppercase rounded-lg text-gray-500 bg-gray-100 hover:bg-gray-200 hover:text-gray-700">
+                                                    class="flex items-center justify-center text-xs font-medium text-gray-500 uppercase bg-gray-100 rounded-lg w-9 h-9 hover:bg-gray-200 hover:text-gray-700">
                                                     <x-icons.profile-icon></x-icons.profile-icon>
                                                 </a>
                                             @endcan
                                         @else
                                             @can('edit-personnels')
                                                 <button wire:click="restoreData('{{ $personnel->tabel_no }}')"
-                                                    class="flex items-center justify-center w-9 h-9 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 bg-teal-50 hover:bg-teal-100 hover:text-gray-700">
+                                                    class="flex items-center justify-center text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg w-9 h-9 bg-teal-50 hover:bg-teal-100 hover:text-gray-700">
                                                     <x-icons.recover color="text-teal-500"
                                                         hover="text-teal-600"></x-icons.recover>
                                                 </button>
@@ -183,27 +185,27 @@
                                                     <div class="flex items-center divide-x divide-neutral-100" role="none">
                                                         <button
                                                             wire:click="openSideMenu('show-files','{{ $personnel->tabel_no }}')"
-                                                            class="appearance-none w-full flex items-center justify-start space-x-2 px-4 py-2 text-sm font-medium relative hover:bg-slate-100"
+                                                            class="relative flex items-center justify-start w-full px-4 py-2 space-x-2 text-sm font-medium appearance-none hover:bg-slate-100"
                                                             @mouseover="showTooltip = 'files'"
                                                             @mouseleave="showTooltip = ''"
                                                         >
                                                             <x-icons.files-icon hover="text-blue-500"  />
                                                             <div x-show="showTooltip == 'files'"
-                                                                 class="absolute -top-9 left-1/2 opacity-100 -translate-x-1/2 z-10 whitespace-nowrap bg-white shadow-lg shadow-black/5 rounded-lg border border-neutral-200/70 px-2 py-1 text-center text-sm text-neutral-600 transition-all ease-out dark:bg-neutral-900/80 dark:text-neutral-50"
+                                                                 class="absolute z-10 px-2 py-1 text-sm text-center transition-all ease-out -translate-x-1/2 bg-white border rounded-lg shadow-lg opacity-100 -top-9 left-1/2 whitespace-nowrap shadow-black/5 border-neutral-200/70 text-neutral-600 dark:bg-neutral-900/80 dark:text-neutral-50"
                                                                  role="tooltip"
                                                             >
                                                                 {{ __('Files') }}
                                                             </div>
                                                         </button>
                                                         <a href="{{ route('print.personnel', $personnel->id) }}"
-                                                            class="appearance-none w-full flex items-center justify-start space-x-2 px-4 py-2 text-sm font-medium  hover:bg-slate-100"
+                                                            class="flex items-center justify-start w-full px-4 py-2 space-x-2 text-sm font-medium appearance-none hover:bg-slate-100"
                                                             target="_blank"
                                                             @mouseover="showTooltip = 'print'"
                                                             @mouseleave="showTooltip = ''"
                                                         >
                                                             <x-icons.print-outline-icon hover="text-blue-500"  />
                                                             <div x-show="showTooltip == 'print'"
-                                                                 class="absolute -top-9 left-1/2 opacity-100 -translate-x-1/2 z-10 whitespace-nowrap bg-white shadow-lg shadow-black/5 border border-neutral-200/70 px-2 py-1 text-center text-sm text-neutral-600 transition-all ease-out dark:bg-neutral-900/80 dark:text-neutral-50"
+                                                                 class="absolute z-10 px-2 py-1 text-sm text-center transition-all ease-out -translate-x-1/2 bg-white border shadow-lg opacity-100 -top-9 left-1/2 whitespace-nowrap shadow-black/5 border-neutral-200/70 text-neutral-600 dark:bg-neutral-900/80 dark:text-neutral-50"
                                                                  role="tooltip"
                                                             >
                                                                 {{ __('Print') }}
@@ -211,13 +213,13 @@
                                                         </a>
                                                         <button
                                                             wire:click="openSideMenu('show-information','{{ $personnel->tabel_no }}')"
-                                                            class="appearance-none w-full flex items-center justify-start space-x-2 px-4 py-2 text-sm font-medium relative hover:bg-slate-100"
+                                                            class="relative flex items-center justify-start w-full px-4 py-2 space-x-2 text-sm font-medium appearance-none hover:bg-slate-100"
                                                             @mouseover="showTooltip = 'information'"
                                                             @mouseleave="showTooltip = ''"
                                                         >
                                                             <x-icons.profile-outline-icon hover="text-blue-500"  />
                                                             <div x-show="showTooltip == 'information'"
-                                                                 class="absolute -top-9 left-1/2 opacity-100 -translate-x-1/2 z-10 whitespace-nowrap bg-white shadow-lg shadow-black/5 border border-neutral-200/70 px-2 py-1 text-center text-sm text-neutral-600 transition-all ease-out dark:bg-neutral-900/80 dark:text-neutral-50"
+                                                                 class="absolute z-10 px-2 py-1 text-sm text-center transition-all ease-out -translate-x-1/2 bg-white border shadow-lg opacity-100 -top-9 left-1/2 whitespace-nowrap shadow-black/5 border-neutral-200/70 text-neutral-600 dark:bg-neutral-900/80 dark:text-neutral-50"
                                                                  role="tooltip"
                                                             >
                                                                 {{ __('Information') }}
@@ -225,13 +227,13 @@
                                                         </button>
                                                         <button
                                                             wire:click="printInfo('{{ $personnel->id }}')"
-                                                            class="appearance-none w-full flex items-center justify-start space-x-2 px-4 py-2 text-sm font-medium relative hover:bg-slate-100"
+                                                            class="relative flex items-center justify-start w-full px-4 py-2 space-x-2 text-sm font-medium appearance-none hover:bg-slate-100"
                                                             @mouseover="showTooltip = 'orders'"
                                                             @mouseleave="showTooltip = ''"
                                                         >
                                                             <x-icons.orders-icon hover="text-blue-500"  />
                                                             <div x-show="showTooltip == 'orders'"
-                                                                 class="absolute -top-9 left-1/2 opacity-100 -translate-x-1/2 z-10 whitespace-nowrap bg-white shadow-lg shadow-black/5 rounded-lg border border-neutral-200/70 px-2 py-1 text-center text-sm text-neutral-600 transition-all ease-out dark:bg-neutral-900/80 dark:text-neutral-50"
+                                                                 class="absolute z-10 px-2 py-1 text-sm text-center transition-all ease-out -translate-x-1/2 bg-white border rounded-lg shadow-lg opacity-100 -top-9 left-1/2 whitespace-nowrap shadow-black/5 border-neutral-200/70 text-neutral-600 dark:bg-neutral-900/80 dark:text-neutral-50"
                                                                  role="tooltip"
                                                             >
                                                                 {{ __('Orders') }}
@@ -239,13 +241,13 @@
                                                         </button>
                                                         <button
                                                             wire:click="openSideMenu('show-vacations','{{ $personnel->tabel_no }}')"
-                                                            class="appearance-none w-full flex items-center justify-start space-x-2 px-4 py-2 text-sm font-medium relative hover:bg-slate-100"
+                                                            class="relative flex items-center justify-start w-full px-4 py-2 space-x-2 text-sm font-medium appearance-none hover:bg-slate-100"
                                                             @mouseover="showTooltip = 'vacations'"
                                                             @mouseleave="showTooltip = ''"
                                                         >
                                                             <x-icons.vacation-outline-icon hover="text-blue-500"  />
                                                             <div x-show="showTooltip == 'vacations'"
-                                                                 class="absolute -top-9 left-1/2 opacity-100 -translate-x-1/2 z-10 whitespace-nowrap bg-white shadow-lg shadow-black/5 rounded-lg border border-neutral-200/70 px-2 py-1 text-center text-sm text-neutral-600 transition-all ease-out dark:bg-neutral-900/80 dark:text-neutral-50"
+                                                                 class="absolute z-10 px-2 py-1 text-sm text-center transition-all ease-out -translate-x-1/2 bg-white border rounded-lg shadow-lg opacity-100 -top-9 left-1/2 whitespace-nowrap shadow-black/5 border-neutral-200/70 text-neutral-600 dark:bg-neutral-900/80 dark:text-neutral-50"
                                                                  role="tooltip"
                                                             >
                                                                 {{ __('Vacations') }}
@@ -259,7 +261,7 @@
                                         @if ($status != 'deleted')
                                             @can('delete-personnels')
                                                 <button wire:click="setDeletePersonnel('{{ $personnel->tabel_no }}')"
-                                                    class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-100 hover:text-gray-700">
+                                                    class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-100 hover:text-gray-700">
                                                     <x-icons.delete-icon></x-icons.delete-icon>
                                                 </button>
                                             @endcan
@@ -268,7 +270,7 @@
                                                 <button
                                                     wire:confirm="{{ __('Are you sure you want to remove this data?') }}"
                                                     wire:click="forceDeleteData('{{ $personnel->tabel_no }}')"
-                                                    class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-50 hover:text-gray-700">
+                                                    class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700">
                                                     <x-icons.force-delete></x-icons.force-delete>
                                                 </button>
                                             @endcan
@@ -285,7 +287,7 @@
         </div>
 
         <div class="mt-2">
-            {{ $this->personnels->links() }}
+            {{ $personnels->links() }}
         </div>
     </div>
 

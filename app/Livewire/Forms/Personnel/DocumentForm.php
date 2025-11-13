@@ -108,6 +108,38 @@ class DocumentForm extends Form
             ->all();
     }
 
+    public function addServiceCardEntry(): void
+    {
+        $this->serviceCardsList[] = $this->serviceCards;
+        $this->resetServiceCard();
+    }
+
+    public function removeServiceCardEntry(int $index): void
+    {
+        if (! array_key_exists($index, $this->serviceCardsList)) {
+            return;
+        }
+
+        unset($this->serviceCardsList[$index]);
+        $this->serviceCardsList = array_values($this->serviceCardsList);
+    }
+
+    public function addPassportEntry(): void
+    {
+        $this->passportsList[] = $this->passports;
+        $this->resetPassport();
+    }
+
+    public function removePassportEntry(int $index): void
+    {
+        if (! array_key_exists($index, $this->passportsList)) {
+            return;
+        }
+
+        unset($this->passportsList[$index]);
+        $this->passportsList = array_values($this->passportsList);
+    }
+
     protected function defaultDocument(): array
     {
         return [

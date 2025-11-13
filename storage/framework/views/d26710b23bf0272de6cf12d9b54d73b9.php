@@ -11,26 +11,27 @@
 <?php $component->withAttributes(['title' => 'Military']); ?>
         <div class="grid grid-cols-2 gap-2">
             <div class="flex flex-col">
-                <?php if (isset($component)) { $__componentOriginald384098dd1216f6f264fe579adbe3c2f = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginald384098dd1216f6f264fe579adbe3c2f = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list','data' => ['class' => 'w-full','title' => __('Ranks'),'mode' => 'gray','selected' => $militaryRankName,'name' => 'militaryRankId']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
-<?php $component->withName('select-list'); ?>
+                <?php if (isset($component)) { $__componentOriginalb7c56d9f0bb75b99472ae2845823c8e9 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalb7c56d9f0bb75b99472ae2845823c8e9 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.ui.select-dropdown','data' => ['label' => ''.e(__('Ranks')).'','placeholder' => '---','mode' => 'gray','class' => 'w-full','wire:model.live' => 'historyForm.military.rank_id','model' => $this->militaryRankOptions]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('ui.select-dropdown'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['class' => 'w-full','title' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(__('Ranks')),'mode' => 'gray','selected' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($militaryRankName),'name' => 'militaryRankId']); ?>
+<?php $component->withAttributes(['label' => ''.e(__('Ranks')).'','placeholder' => '---','mode' => 'gray','class' => 'w-full','wire:model.live' => 'historyForm.military.rank_id','model' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($this->militaryRankOptions)]); ?>
                     <?php if (isset($component)) { $__componentOriginal9364c0b92ee5ab519273634c79f86a27 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal9364c0b92ee5ab519273634c79f86a27 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.livewire-input','data' => ['@click.stop' => 'open = true','mode' => 'gray','name' => 'searchMilitaryRank','wire:model.live' => 'searchMilitaryRank']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.livewire-input','data' => ['mode' => 'gray','name' => 'searchMilitaryRank','wire:model.live.debounce.300ms' => 'searchMilitaryRank','@click.stop' => 'isOpen = true','xOn:input.stop' => 'null','xOn:keyup.stop' => 'null','xOn:keydown.stop' => 'null','xOn:change.stop' => 'null']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('livewire-input'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['@click.stop' => 'open = true','mode' => 'gray','name' => 'searchMilitaryRank','wire:model.live' => 'searchMilitaryRank']); ?> <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['mode' => 'gray','name' => 'searchMilitaryRank','wire:model.live.debounce.300ms' => 'searchMilitaryRank','@click.stop' => 'isOpen = true','x-on:input.stop' => 'null','x-on:keyup.stop' => 'null','x-on:keydown.stop' => 'null','x-on:change.stop' => 'null']); ?>
+<?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal9364c0b92ee5ab519273634c79f86a27)): ?>
 <?php $attributes = $__attributesOriginal9364c0b92ee5ab519273634c79f86a27; ?>
@@ -40,65 +41,17 @@
 <?php $component = $__componentOriginal9364c0b92ee5ab519273634c79f86a27; ?>
 <?php unset($__componentOriginal9364c0b92ee5ab519273634c79f86a27); ?>
 <?php endif; ?>
-
-                    <?php if (isset($component)) { $__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list-item','data' => ['wire:click' => 'setData(\'military\',\'rank_id\',\'militaryRank\',\'---\',null)','selected' => '---' == $militaryRankName,'wire:model' => 'military.rank_id.id']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
-<?php $component->withName('select-list-item'); ?>
-<?php if ($component->shouldRender()): ?>
-<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
-<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
-<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
-<?php endif; ?>
-<?php $component->withAttributes(['wire:click' => 'setData(\'military\',\'rank_id\',\'militaryRank\',\'---\',null)','selected' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute('---' == $militaryRankName),'wire:model' => 'military.rank_id.id']); ?>
-                        ---
-                     <?php echo $__env->renderComponent(); ?>
-<?php endif; ?>
-<?php if (isset($__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee)): ?>
-<?php $attributes = $__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee; ?>
-<?php unset($__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee); ?>
-<?php endif; ?>
-<?php if (isset($__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee)): ?>
-<?php $component = $__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee; ?>
-<?php unset($__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee); ?>
-<?php endif; ?>
-                    <!--[if BLOCK]><![endif]--><?php if(!empty($rankModel)): ?>
-                        <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $rankModel; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $mr): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                            <?php if (isset($component)) { $__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list-item','data' => ['wire:click' => 'setData(\'military\',\'rank_id\',\'militaryRank\',\''.e($mr->name).'\','.e($mr->id).')','selected' => $mr->id === $militaryRankId,'wire:model' => 'military.rank_id.id']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
-<?php $component->withName('select-list-item'); ?>
-<?php if ($component->shouldRender()): ?>
-<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
-<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
-<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
-<?php endif; ?>
-<?php $component->withAttributes(['wire:click' => 'setData(\'military\',\'rank_id\',\'militaryRank\',\''.e($mr->name).'\','.e($mr->id).')','selected' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($mr->id === $militaryRankId),'wire:model' => 'military.rank_id.id']); ?>
-                                <?php echo e($mr->name); ?>
-
-                             <?php echo $__env->renderComponent(); ?>
-<?php endif; ?>
-<?php if (isset($__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee)): ?>
-<?php $attributes = $__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee; ?>
-<?php unset($__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee); ?>
-<?php endif; ?>
-<?php if (isset($__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee)): ?>
-<?php $component = $__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee; ?>
-<?php unset($__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee); ?>
-<?php endif; ?>
-                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
-                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                  <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
-<?php if (isset($__attributesOriginald384098dd1216f6f264fe579adbe3c2f)): ?>
-<?php $attributes = $__attributesOriginald384098dd1216f6f264fe579adbe3c2f; ?>
-<?php unset($__attributesOriginald384098dd1216f6f264fe579adbe3c2f); ?>
+<?php if (isset($__attributesOriginalb7c56d9f0bb75b99472ae2845823c8e9)): ?>
+<?php $attributes = $__attributesOriginalb7c56d9f0bb75b99472ae2845823c8e9; ?>
+<?php unset($__attributesOriginalb7c56d9f0bb75b99472ae2845823c8e9); ?>
 <?php endif; ?>
-<?php if (isset($__componentOriginald384098dd1216f6f264fe579adbe3c2f)): ?>
-<?php $component = $__componentOriginald384098dd1216f6f264fe579adbe3c2f; ?>
-<?php unset($__componentOriginald384098dd1216f6f264fe579adbe3c2f); ?>
+<?php if (isset($__componentOriginalb7c56d9f0bb75b99472ae2845823c8e9)): ?>
+<?php $component = $__componentOriginalb7c56d9f0bb75b99472ae2845823c8e9; ?>
+<?php unset($__componentOriginalb7c56d9f0bb75b99472ae2845823c8e9); ?>
 <?php endif; ?>
-                <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['military.rank_id.id'];
+                <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['historyForm.military.rank_id'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -130,14 +83,14 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
             <div class="flex flex-col">
                 <?php if (isset($component)) { $__componentOriginald8ba2b4c22a13c55321e34443c386276 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginald8ba2b4c22a13c55321e34443c386276 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'military.attitude_to_military_service']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'historyForm.military.attitude_to_military_service']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('label'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['for' => 'military.attitude_to_military_service']); ?><?php echo e(__('Attitude to military service')); ?> <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['for' => 'historyForm.military.attitude_to_military_service']); ?><?php echo e(__('Attitude to military service')); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginald8ba2b4c22a13c55321e34443c386276)): ?>
 <?php $attributes = $__attributesOriginald8ba2b4c22a13c55321e34443c386276; ?>
@@ -149,14 +102,14 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php endif; ?>
                 <?php if (isset($component)) { $__componentOriginal9364c0b92ee5ab519273634c79f86a27 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal9364c0b92ee5ab519273634c79f86a27 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.livewire-input','data' => ['mode' => 'gray','name' => 'military.attitude_to_military_service','wire:model' => 'military.attitude_to_military_service']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.livewire-input','data' => ['mode' => 'gray','name' => 'historyForm.military.attitude_to_military_service','wire:model' => 'historyForm.military.attitude_to_military_service']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('livewire-input'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['mode' => 'gray','name' => 'military.attitude_to_military_service','wire:model' => 'military.attitude_to_military_service']); ?> <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['mode' => 'gray','name' => 'historyForm.military.attitude_to_military_service','wire:model' => 'historyForm.military.attitude_to_military_service']); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal9364c0b92ee5ab519273634c79f86a27)): ?>
 <?php $attributes = $__attributesOriginal9364c0b92ee5ab519273634c79f86a27; ?>
@@ -166,7 +119,7 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php $component = $__componentOriginal9364c0b92ee5ab519273634c79f86a27; ?>
 <?php unset($__componentOriginal9364c0b92ee5ab519273634c79f86a27); ?>
 <?php endif; ?>
-                <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['military.attitude_to_military_service'];
+                <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['historyForm.military.attitude_to_military_service'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -200,14 +153,14 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
             <div class="flex flex-col">
                 <?php if (isset($component)) { $__componentOriginald8ba2b4c22a13c55321e34443c386276 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginald8ba2b4c22a13c55321e34443c386276 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'military.given_date']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'historyForm.military.given_date']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('label'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['for' => 'military.given_date']); ?><?php echo e(__('Given date')); ?> <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['for' => 'historyForm.military.given_date']); ?><?php echo e(__('Given date')); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginald8ba2b4c22a13c55321e34443c386276)): ?>
 <?php $attributes = $__attributesOriginald8ba2b4c22a13c55321e34443c386276; ?>
@@ -219,17 +172,17 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php endif; ?>
                 <?php if (isset($component)) { $__componentOriginal36038ba5ddba347b69d2b76bc4612d11 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal36038ba5ddba347b69d2b76bc4612d11 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.pikaday-input','data' => ['mode' => 'gray','name' => 'military.given_date','format' => 'Y-MM-DD','wire:model.live' => 'military.given_date']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.pikaday-input','data' => ['mode' => 'gray','name' => 'historyForm.military.given_date','format' => 'Y-MM-DD','wire:model.live' => 'historyForm.military.given_date']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('pikaday-input'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['mode' => 'gray','name' => 'military.given_date','format' => 'Y-MM-DD','wire:model.live' => 'military.given_date']); ?>
+<?php $component->withAttributes(['mode' => 'gray','name' => 'historyForm.military.given_date','format' => 'Y-MM-DD','wire:model.live' => 'historyForm.military.given_date']); ?>
                      <?php $__env->slot('script', null, []); ?> 
                         $el.onchange = function () {
-                        window.Livewire.find('<?php echo e($_instance->getId()); ?>').set('military.given_date', $el.value);
+                        window.Livewire.find('<?php echo e($_instance->getId()); ?>').set('historyForm.military.given_date', $el.value);
                         }
                      <?php $__env->endSlot(); ?>
                  <?php echo $__env->renderComponent(); ?>
@@ -242,7 +195,7 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php $component = $__componentOriginal36038ba5ddba347b69d2b76bc4612d11; ?>
 <?php unset($__componentOriginal36038ba5ddba347b69d2b76bc4612d11); ?>
 <?php endif; ?>
-                <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['military.given_date'];
+                <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['historyForm.military.given_date'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -274,14 +227,14 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
             <div class="flex flex-col">
                 <?php if (isset($component)) { $__componentOriginald8ba2b4c22a13c55321e34443c386276 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginald8ba2b4c22a13c55321e34443c386276 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'military.start_date']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'historyForm.military.start_date']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('label'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['for' => 'military.start_date']); ?><?php echo e(__('Start date')); ?> <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['for' => 'historyForm.military.start_date']); ?><?php echo e(__('Start date')); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginald8ba2b4c22a13c55321e34443c386276)): ?>
 <?php $attributes = $__attributesOriginald8ba2b4c22a13c55321e34443c386276; ?>
@@ -293,17 +246,17 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php endif; ?>
                 <?php if (isset($component)) { $__componentOriginal36038ba5ddba347b69d2b76bc4612d11 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal36038ba5ddba347b69d2b76bc4612d11 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.pikaday-input','data' => ['mode' => 'gray','name' => 'military.start_date','format' => 'Y-MM-DD','wire:model.live' => 'military.start_date']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.pikaday-input','data' => ['mode' => 'gray','name' => 'historyForm.military.start_date','format' => 'Y-MM-DD','wire:model.live' => 'historyForm.military.start_date']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('pikaday-input'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['mode' => 'gray','name' => 'military.start_date','format' => 'Y-MM-DD','wire:model.live' => 'military.start_date']); ?>
+<?php $component->withAttributes(['mode' => 'gray','name' => 'historyForm.military.start_date','format' => 'Y-MM-DD','wire:model.live' => 'historyForm.military.start_date']); ?>
                      <?php $__env->slot('script', null, []); ?> 
                         $el.onchange = function () {
-                        window.Livewire.find('<?php echo e($_instance->getId()); ?>').set('military.start_date', $el.value);
+                        window.Livewire.find('<?php echo e($_instance->getId()); ?>').set('historyForm.military.start_date', $el.value);
                         }
                      <?php $__env->endSlot(); ?>
                  <?php echo $__env->renderComponent(); ?>
@@ -320,14 +273,14 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
             <div class="flex flex-col">
                 <?php if (isset($component)) { $__componentOriginald8ba2b4c22a13c55321e34443c386276 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginald8ba2b4c22a13c55321e34443c386276 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'military.end_date']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'historyForm.military.end_date']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('label'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['for' => 'military.end_date']); ?><?php echo e(__('End date')); ?> <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['for' => 'historyForm.military.end_date']); ?><?php echo e(__('End date')); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginald8ba2b4c22a13c55321e34443c386276)): ?>
 <?php $attributes = $__attributesOriginald8ba2b4c22a13c55321e34443c386276; ?>
@@ -339,17 +292,17 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php endif; ?>
                 <?php if (isset($component)) { $__componentOriginal36038ba5ddba347b69d2b76bc4612d11 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal36038ba5ddba347b69d2b76bc4612d11 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.pikaday-input','data' => ['mode' => 'gray','name' => 'military.end_date','format' => 'Y-MM-DD','wire:model.live' => 'military.end_date']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.pikaday-input','data' => ['mode' => 'gray','name' => 'historyForm.military.end_date','format' => 'Y-MM-DD','wire:model.live' => 'historyForm.military.end_date']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('pikaday-input'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['mode' => 'gray','name' => 'military.end_date','format' => 'Y-MM-DD','wire:model.live' => 'military.end_date']); ?>
+<?php $component->withAttributes(['mode' => 'gray','name' => 'historyForm.military.end_date','format' => 'Y-MM-DD','wire:model.live' => 'historyForm.military.end_date']); ?>
                      <?php $__env->slot('script', null, []); ?> 
                         $el.onchange = function () {
-                        window.Livewire.find('<?php echo e($_instance->getId()); ?>').set('military.end_date', $el.value);
+                        window.Livewire.find('<?php echo e($_instance->getId()); ?>').set('historyForm.military.end_date', $el.value);
                         }
                      <?php $__env->endSlot(); ?>
                  <?php echo $__env->renderComponent(); ?>
@@ -400,7 +353,7 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
 <?php $component->withAttributes(['headers' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute([__('Attitude'),__('Rank'),__('Date'),'action'])]); ?>
-                        <!--[if BLOCK]><![endif]--><?php $__empty_1 = true; $__currentLoopData = $military_list; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $msModel): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                        <!--[if BLOCK]><![endif]--><?php $__empty_1 = true; $__currentLoopData = $historyForm->militaryList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $msModel): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                             <tr>
                                 <?php if (isset($component)) { $__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b = $attributes; } ?>
@@ -437,7 +390,7 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php endif; ?>
 <?php $component->withAttributes([]); ?>
                                    <span class="text-sm font-medium text-teal-600">
-                                        <?php echo e($msModel['rank_id']['name']); ?>
+                                        <?php echo e($this->rankLabel(data_get($msModel, 'rank_id')) ?? '---'); ?>
 
                                     </span>
                                  <?php echo $__env->renderComponent(); ?>
@@ -572,14 +525,14 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
             <div class="flex flex-col">
                 <?php if (isset($component)) { $__componentOriginald8ba2b4c22a13c55321e34443c386276 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginald8ba2b4c22a13c55321e34443c386276 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'injuries.injury_type']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'historyForm.injury.injury_type']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('label'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['for' => 'injuries.injury_type']); ?><?php echo e(__('Injury type')); ?> <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['for' => 'historyForm.injury.injury_type']); ?><?php echo e(__('Injury type')); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginald8ba2b4c22a13c55321e34443c386276)): ?>
 <?php $attributes = $__attributesOriginald8ba2b4c22a13c55321e34443c386276; ?>
@@ -591,15 +544,15 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php endif; ?>
                 <div class="flex flex-row">
                     <label class="inline-flex items-center bg-gray-100 rounded shadow-sm py-2 px-2 w-full">
-                        <input type="radio" class="form-radio" name="injuries.injury_type" wire:model="injuries.injury_type" value="other">
+                        <input type="radio" class="form-radio" name="historyForm.injury.injury_type" wire:model="historyForm.injury.injury_type" value="other">
                         <span class="ml-2 text-sm font-normal"><?php echo e(__('Other')); ?></span>
                     </label>
                     <label class="inline-flex items-center ml-4 bg-gray-100 rounded shadow-sm py-2 px-2 w-full">
-                        <input type="radio" class="form-radio" name="injuries.injury_type" wire:model="injuries.injury_type" value="contusion">
+                        <input type="radio" class="form-radio" name="historyForm.injury.injury_type" wire:model="historyForm.injury.injury_type" value="contusion">
                         <span class="ml-2 text-sm font-normal"><?php echo e(__('Contusion')); ?></span>
                     </label>
                 </div>
-                <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['injuries.injury_type'];
+                <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['historyForm.injury.injury_type'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -631,14 +584,14 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
             <div class="flex flex-col">
                 <?php if (isset($component)) { $__componentOriginald8ba2b4c22a13c55321e34443c386276 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginald8ba2b4c22a13c55321e34443c386276 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'injuries.location']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'historyForm.injury.location']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('label'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['for' => 'injuries.location']); ?><?php echo e(__('Location')); ?> <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['for' => 'historyForm.injury.location']); ?><?php echo e(__('Location')); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginald8ba2b4c22a13c55321e34443c386276)): ?>
 <?php $attributes = $__attributesOriginald8ba2b4c22a13c55321e34443c386276; ?>
@@ -650,14 +603,14 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php endif; ?>
                 <?php if (isset($component)) { $__componentOriginal9364c0b92ee5ab519273634c79f86a27 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal9364c0b92ee5ab519273634c79f86a27 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.livewire-input','data' => ['mode' => 'gray','name' => 'injuries.location','wire:model' => 'injuries.location']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.livewire-input','data' => ['mode' => 'gray','name' => 'historyForm.injury.location','wire:model' => 'historyForm.injury.location']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('livewire-input'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['mode' => 'gray','name' => 'injuries.location','wire:model' => 'injuries.location']); ?> <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['mode' => 'gray','name' => 'historyForm.injury.location','wire:model' => 'historyForm.injury.location']); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal9364c0b92ee5ab519273634c79f86a27)): ?>
 <?php $attributes = $__attributesOriginal9364c0b92ee5ab519273634c79f86a27; ?>
@@ -667,7 +620,7 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php $component = $__componentOriginal9364c0b92ee5ab519273634c79f86a27; ?>
 <?php unset($__componentOriginal9364c0b92ee5ab519273634c79f86a27); ?>
 <?php endif; ?>
-                <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['injuries.location'];
+                <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['historyForm.injury.location'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -699,14 +652,14 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
             <div class="flex flex-col">
                 <?php if (isset($component)) { $__componentOriginald8ba2b4c22a13c55321e34443c386276 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginald8ba2b4c22a13c55321e34443c386276 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'injuries.date_time']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'historyForm.injury.date_time']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('label'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['for' => 'injuries.date_time']); ?><?php echo e(__('Date')); ?> <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['for' => 'historyForm.injury.date_time']); ?><?php echo e(__('Date')); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginald8ba2b4c22a13c55321e34443c386276)): ?>
 <?php $attributes = $__attributesOriginald8ba2b4c22a13c55321e34443c386276; ?>
@@ -718,17 +671,17 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php endif; ?>
                 <?php if (isset($component)) { $__componentOriginal36038ba5ddba347b69d2b76bc4612d11 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal36038ba5ddba347b69d2b76bc4612d11 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.pikaday-input','data' => ['mode' => 'gray','name' => 'injuries.date_time','format' => 'Y-MM-DD','wire:model.live' => 'injuries.date_time']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.pikaday-input','data' => ['mode' => 'gray','name' => 'historyForm.injury.date_time','format' => 'Y-MM-DD','wire:model.live' => 'historyForm.injury.date_time']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('pikaday-input'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['mode' => 'gray','name' => 'injuries.date_time','format' => 'Y-MM-DD','wire:model.live' => 'injuries.date_time']); ?>
+<?php $component->withAttributes(['mode' => 'gray','name' => 'historyForm.injury.date_time','format' => 'Y-MM-DD','wire:model.live' => 'historyForm.injury.date_time']); ?>
                      <?php $__env->slot('script', null, []); ?> 
                         $el.onchange = function () {
-                        window.Livewire.find('<?php echo e($_instance->getId()); ?>').set('injuries.date_time', $el.value);
+                        window.Livewire.find('<?php echo e($_instance->getId()); ?>').set('historyForm.injury.date_time', $el.value);
                         }
                      <?php $__env->endSlot(); ?>
                  <?php echo $__env->renderComponent(); ?>
@@ -741,7 +694,7 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php $component = $__componentOriginal36038ba5ddba347b69d2b76bc4612d11; ?>
 <?php unset($__componentOriginal36038ba5ddba347b69d2b76bc4612d11); ?>
 <?php endif; ?>
-                <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['injuries.date_time'];
+                <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['historyForm.injury.date_time'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -776,14 +729,14 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
             <div class="flex flex-col">
                 <?php if (isset($component)) { $__componentOriginald8ba2b4c22a13c55321e34443c386276 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginald8ba2b4c22a13c55321e34443c386276 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'injuries.description']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'historyForm.injury.description']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('label'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['for' => 'injuries.description']); ?><?php echo e(__('Description')); ?> <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['for' => 'historyForm.injury.description']); ?><?php echo e(__('Description')); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginald8ba2b4c22a13c55321e34443c386276)): ?>
 <?php $attributes = $__attributesOriginald8ba2b4c22a13c55321e34443c386276; ?>
@@ -795,14 +748,14 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php endif; ?>
                 <?php if (isset($component)) { $__componentOriginal4727f9fd7c3055c2cf9c658d89b16886 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal4727f9fd7c3055c2cf9c658d89b16886 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.textarea','data' => ['mode' => 'gray','name' => 'injuries.description','placeholder' => ''.e(__('')).'','wire:model' => 'injuries.description']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.textarea','data' => ['mode' => 'gray','name' => 'historyForm.injury.description','placeholder' => ''.e(__('')).'','wire:model' => 'historyForm.injury.description']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('textarea'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['mode' => 'gray','name' => 'injuries.description','placeholder' => ''.e(__('')).'','wire:model' => 'injuries.description']); ?> <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['mode' => 'gray','name' => 'historyForm.injury.description','placeholder' => ''.e(__('')).'','wire:model' => 'historyForm.injury.description']); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal4727f9fd7c3055c2cf9c658d89b16886)): ?>
 <?php $attributes = $__attributesOriginal4727f9fd7c3055c2cf9c658d89b16886; ?>
@@ -850,7 +803,7 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
 <?php $component->withAttributes(['headers' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute([__('Type'),__('Location and date'),__('Description'),'action'])]); ?>
-                        <!--[if BLOCK]><![endif]--><?php $__empty_1 = true; $__currentLoopData = $injury_list; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $injuryModel): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                        <!--[if BLOCK]><![endif]--><?php $__empty_1 = true; $__currentLoopData = $historyForm->injuryList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $injuryModel): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                             <tr>
                                 <?php if (isset($component)) { $__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b = $attributes; } ?>
@@ -894,8 +847,10 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 
                                         </span>
                                         <span class="text-sm font-medium text-gray-900">
-                                            <?php echo e(\Carbon\Carbon::parse($injuryModel['date_time'])->format('d.m.Y')); ?>
+                                            <!--[if BLOCK]><![endif]--><?php if(! empty($injuryModel['date_time'])): ?>
+                                                <?php echo e(\Carbon\Carbon::parse($injuryModel['date_time'])->format('d.m.Y')); ?>
 
+                                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                         </span>
                                     </div>
                                  <?php echo $__env->renderComponent(); ?>
@@ -1015,14 +970,14 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
         <div class="flex flex-col">
             <?php if (isset($component)) { $__componentOriginald8ba2b4c22a13c55321e34443c386276 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginald8ba2b4c22a13c55321e34443c386276 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'personnel_extra.participation_in_war']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'personalForm.personnelExtra.participation_in_war']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('label'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['for' => 'personnel_extra.participation_in_war']); ?><?php echo e(__('Description')); ?> <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['for' => 'personalForm.personnelExtra.participation_in_war']); ?><?php echo e(__('Description')); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginald8ba2b4c22a13c55321e34443c386276)): ?>
 <?php $attributes = $__attributesOriginald8ba2b4c22a13c55321e34443c386276; ?>
@@ -1034,14 +989,14 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php endif; ?>
             <?php if (isset($component)) { $__componentOriginal4727f9fd7c3055c2cf9c658d89b16886 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal4727f9fd7c3055c2cf9c658d89b16886 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.textarea','data' => ['mode' => 'gray','name' => 'personnel_extra.participation_in_war','placeholder' => ''.e(__('')).'','wire:model' => 'personnel_extra.participation_in_war']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.textarea','data' => ['mode' => 'gray','name' => 'personalForm.personnelExtra.participation_in_war','placeholder' => ''.e(__('')).'','wire:model' => 'personalForm.personnelExtra.participation_in_war']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('textarea'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['mode' => 'gray','name' => 'personnel_extra.participation_in_war','placeholder' => ''.e(__('')).'','wire:model' => 'personnel_extra.participation_in_war']); ?> <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['mode' => 'gray','name' => 'personalForm.personnelExtra.participation_in_war','placeholder' => ''.e(__('')).'','wire:model' => 'personalForm.personnelExtra.participation_in_war']); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal4727f9fd7c3055c2cf9c658d89b16886)): ?>
 <?php $attributes = $__attributesOriginal4727f9fd7c3055c2cf9c658d89b16886; ?>
@@ -1051,6 +1006,34 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php $component = $__componentOriginal4727f9fd7c3055c2cf9c658d89b16886; ?>
 <?php unset($__componentOriginal4727f9fd7c3055c2cf9c658d89b16886); ?>
 <?php endif; ?>
+            <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['personalForm.personnelExtra.participation_in_war'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+            <?php if (isset($component)) { $__componentOriginala61a9a091bbbf95d1addcb0ba0326332 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginala61a9a091bbbf95d1addcb0ba0326332 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.validation','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('validation'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?> <?php echo e($message); ?>  <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginala61a9a091bbbf95d1addcb0ba0326332)): ?>
+<?php $attributes = $__attributesOriginala61a9a091bbbf95d1addcb0ba0326332; ?>
+<?php unset($__attributesOriginala61a9a091bbbf95d1addcb0ba0326332); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginala61a9a091bbbf95d1addcb0ba0326332)): ?>
+<?php $component = $__componentOriginala61a9a091bbbf95d1addcb0ba0326332; ?>
+<?php unset($__componentOriginala61a9a091bbbf95d1addcb0ba0326332); ?>
+<?php endif; ?>
+            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
         </div>
      <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
@@ -1077,14 +1060,14 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
             <div class="flex flex-col">
                 <?php if (isset($component)) { $__componentOriginald8ba2b4c22a13c55321e34443c386276 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginald8ba2b4c22a13c55321e34443c386276 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'captivity.location']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'historyForm.captivity.location']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('label'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['for' => 'captivity.location']); ?><?php echo e(__('Location')); ?> <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['for' => 'historyForm.captivity.location']); ?><?php echo e(__('Location')); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginald8ba2b4c22a13c55321e34443c386276)): ?>
 <?php $attributes = $__attributesOriginald8ba2b4c22a13c55321e34443c386276; ?>
@@ -1096,14 +1079,14 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php endif; ?>
                 <?php if (isset($component)) { $__componentOriginal9364c0b92ee5ab519273634c79f86a27 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal9364c0b92ee5ab519273634c79f86a27 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.livewire-input','data' => ['mode' => 'gray','name' => 'captivity.location','wire:model' => 'captivity.location']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.livewire-input','data' => ['mode' => 'gray','name' => 'historyForm.captivity.location','wire:model' => 'historyForm.captivity.location']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('livewire-input'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['mode' => 'gray','name' => 'captivity.location','wire:model' => 'captivity.location']); ?> <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['mode' => 'gray','name' => 'historyForm.captivity.location','wire:model' => 'historyForm.captivity.location']); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal9364c0b92ee5ab519273634c79f86a27)): ?>
 <?php $attributes = $__attributesOriginal9364c0b92ee5ab519273634c79f86a27; ?>
@@ -1113,7 +1096,7 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php $component = $__componentOriginal9364c0b92ee5ab519273634c79f86a27; ?>
 <?php unset($__componentOriginal9364c0b92ee5ab519273634c79f86a27); ?>
 <?php endif; ?>
-                <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['captivity.location'];
+                <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['historyForm.captivity.location'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -1145,14 +1128,14 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
             <div class="flex flex-col">
                 <?php if (isset($component)) { $__componentOriginald8ba2b4c22a13c55321e34443c386276 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginald8ba2b4c22a13c55321e34443c386276 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'captivity.condition']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'historyForm.captivity.condition']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('label'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['for' => 'captivity.condition']); ?><?php echo e(__('Condition')); ?> <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['for' => 'historyForm.captivity.condition']); ?><?php echo e(__('Condition')); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginald8ba2b4c22a13c55321e34443c386276)): ?>
 <?php $attributes = $__attributesOriginald8ba2b4c22a13c55321e34443c386276; ?>
@@ -1164,14 +1147,14 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php endif; ?>
                 <?php if (isset($component)) { $__componentOriginal9364c0b92ee5ab519273634c79f86a27 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal9364c0b92ee5ab519273634c79f86a27 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.livewire-input','data' => ['mode' => 'gray','name' => 'captivity.condition','wire:model' => 'captivity.condition']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.livewire-input','data' => ['mode' => 'gray','name' => 'historyForm.captivity.condition','wire:model' => 'historyForm.captivity.condition']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('livewire-input'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['mode' => 'gray','name' => 'captivity.condition','wire:model' => 'captivity.condition']); ?> <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['mode' => 'gray','name' => 'historyForm.captivity.condition','wire:model' => 'historyForm.captivity.condition']); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal9364c0b92ee5ab519273634c79f86a27)): ?>
 <?php $attributes = $__attributesOriginal9364c0b92ee5ab519273634c79f86a27; ?>
@@ -1181,7 +1164,7 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php $component = $__componentOriginal9364c0b92ee5ab519273634c79f86a27; ?>
 <?php unset($__componentOriginal9364c0b92ee5ab519273634c79f86a27); ?>
 <?php endif; ?>
-                <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['captivity.condition'];
+                <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['historyForm.captivity.condition'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -1213,14 +1196,14 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
             <div class="flex flex-col">
                 <?php if (isset($component)) { $__componentOriginald8ba2b4c22a13c55321e34443c386276 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginald8ba2b4c22a13c55321e34443c386276 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'captivity.taken_captive_date']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'historyForm.captivity.taken_captive_date']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('label'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['for' => 'captivity.taken_captive_date']); ?><?php echo e(__('Taken date')); ?> <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['for' => 'historyForm.captivity.taken_captive_date']); ?><?php echo e(__('Taken date')); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginald8ba2b4c22a13c55321e34443c386276)): ?>
 <?php $attributes = $__attributesOriginald8ba2b4c22a13c55321e34443c386276; ?>
@@ -1232,17 +1215,17 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php endif; ?>
                 <?php if (isset($component)) { $__componentOriginal36038ba5ddba347b69d2b76bc4612d11 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal36038ba5ddba347b69d2b76bc4612d11 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.pikaday-input','data' => ['mode' => 'gray','name' => 'captivity.taken_captive_date','format' => 'Y-MM-DD','wire:model.live' => 'captivity.taken_captive_date']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.pikaday-input','data' => ['mode' => 'gray','name' => 'historyForm.captivity.taken_captive_date','format' => 'Y-MM-DD','wire:model.live' => 'historyForm.captivity.taken_captive_date']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('pikaday-input'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['mode' => 'gray','name' => 'captivity.taken_captive_date','format' => 'Y-MM-DD','wire:model.live' => 'captivity.taken_captive_date']); ?>
+<?php $component->withAttributes(['mode' => 'gray','name' => 'historyForm.captivity.taken_captive_date','format' => 'Y-MM-DD','wire:model.live' => 'historyForm.captivity.taken_captive_date']); ?>
                      <?php $__env->slot('script', null, []); ?> 
                         $el.onchange = function () {
-                            window.Livewire.find('<?php echo e($_instance->getId()); ?>').set('captivity.taken_captive_date', $el.value);
+                        window.Livewire.find('<?php echo e($_instance->getId()); ?>').set('historyForm.captivity.taken_captive_date', $el.value);
                         }
                      <?php $__env->endSlot(); ?>
                  <?php echo $__env->renderComponent(); ?>
@@ -1255,7 +1238,7 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php $component = $__componentOriginal36038ba5ddba347b69d2b76bc4612d11; ?>
 <?php unset($__componentOriginal36038ba5ddba347b69d2b76bc4612d11); ?>
 <?php endif; ?>
-                <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['captivity.taken_captive_date'];
+                <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['historyForm.captivity.taken_captive_date'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -1287,14 +1270,14 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
             <div class="flex flex-col">
                 <?php if (isset($component)) { $__componentOriginald8ba2b4c22a13c55321e34443c386276 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginald8ba2b4c22a13c55321e34443c386276 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'captivity.release_date']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'historyForm.captivity.release_date']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('label'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['for' => 'captivity.release_date']); ?><?php echo e(__('Release date')); ?> <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['for' => 'historyForm.captivity.release_date']); ?><?php echo e(__('Release date')); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginald8ba2b4c22a13c55321e34443c386276)): ?>
 <?php $attributes = $__attributesOriginald8ba2b4c22a13c55321e34443c386276; ?>
@@ -1306,17 +1289,17 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php endif; ?>
                 <?php if (isset($component)) { $__componentOriginal36038ba5ddba347b69d2b76bc4612d11 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal36038ba5ddba347b69d2b76bc4612d11 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.pikaday-input','data' => ['mode' => 'gray','name' => 'captivity.release_date','format' => 'Y-MM-DD','wire:model.live' => 'captivity.release_date']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.pikaday-input','data' => ['mode' => 'gray','name' => 'historyForm.captivity.release_date','format' => 'Y-MM-DD','wire:model.live' => 'historyForm.captivity.release_date']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('pikaday-input'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['mode' => 'gray','name' => 'captivity.release_date','format' => 'Y-MM-DD','wire:model.live' => 'captivity.release_date']); ?>
+<?php $component->withAttributes(['mode' => 'gray','name' => 'historyForm.captivity.release_date','format' => 'Y-MM-DD','wire:model.live' => 'historyForm.captivity.release_date']); ?>
                      <?php $__env->slot('script', null, []); ?> 
                         $el.onchange = function () {
-                            window.Livewire.find('<?php echo e($_instance->getId()); ?>').set('captivity.release_date', $el.value);
+                        window.Livewire.find('<?php echo e($_instance->getId()); ?>').set('historyForm.captivity.release_date', $el.value);
                         }
                      <?php $__env->endSlot(); ?>
                  <?php echo $__env->renderComponent(); ?>
@@ -1367,7 +1350,7 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
 <?php $component->withAttributes(['headers' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute([__('Location'),__('Condition'),__('Date'),'action'])]); ?>
-                        <!--[if BLOCK]><![endif]--><?php $__empty_1 = true; $__currentLoopData = $captivity_list; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $captivityModel): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                        <!--[if BLOCK]><![endif]--><?php $__empty_1 = true; $__currentLoopData = $historyForm->captivityList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $captivityModel): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                             <tr>
                                 <?php if (isset($component)) { $__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b = $attributes; } ?>
@@ -1431,11 +1414,13 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                                         <div class="flex flex-col space-y-1 items-start">
                                             <span class="text-sm font-medium text-gray-500 border-b border-dashed border-slate-400"><?php echo e(__('Taken date')); ?>:</span>
                                             <span class="text-sm font-medium text-gray-900">
-                                                <?php echo e(\Carbon\Carbon::parse($captivityModel['taken_captive_date'])->format('d.m.Y')); ?>
+                                                <!--[if BLOCK]><![endif]--><?php if(! empty($captivityModel['taken_captive_date'])): ?>
+                                                    <?php echo e(\Carbon\Carbon::parse($captivityModel['taken_captive_date'])->format('d.m.Y')); ?>
 
+                                                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                             </span>
                                         </div>
-                                        <!--[if BLOCK]><![endif]--><?php if(array_key_exists('release_date',$captivityModel)): ?>
+                                        <!--[if BLOCK]><![endif]--><?php if(! empty($captivityModel['release_date'])): ?>
                                             <div class="flex flex-col space-y-1 items-start">
                                                 <span class="text-sm font-medium text-gray-500 border-b border-dashed border-slate-400"><?php echo e(__('Release date')); ?>:</span>
                                                 <span class="text-sm font-medium text-emerald-500">

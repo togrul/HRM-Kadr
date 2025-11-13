@@ -3,32 +3,19 @@
 namespace App\Livewire\Traits;
 
 use App\Enums\KnowledgeStatusEnum;
+use App\Livewire\Forms\Personnel\AwardsPunishmentsForm;
+use App\Livewire\Forms\Personnel\KinshipForm;
+use App\Livewire\Forms\Personnel\MiscellaneousForm;
+use App\Livewire\Forms\Personnel\ServiceHistoryForm;
 use App\Livewire\Traits\Helpers\FillComplexArrayTrait;
 use App\Livewire\Traits\Validations\PersonnelValidationTrait;
 use App\Models\City;
-use App\Models\Country;
 use App\Models\CountryTranslation;
-use App\Models\Disability;
-use App\Models\EducationDocumentType;
-use App\Models\EducationDegree;
-use App\Models\EducationForm as EducationFormModel;
-use App\Models\EducationType;
-use App\Models\EducationalInstitution;
-use App\Models\Language;
-use App\Models\Position;
-use App\Models\Rank;
-use App\Models\RankReason;
-use App\Models\ScientificDegreeAndName;
-use App\Models\SocialOrigin;
-use App\Models\Structure;
-use App\Models\WorkNorm;
 use App\Services\CalculateSeniorityService;
+use App\Services\EducationDurationService;
 use App\Services\CallPersonnelInfo;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
-use Livewire\Attributes\Computed;
 use Livewire\Attributes\Isolate;
 use Livewire\WithFileUploads;
 
@@ -36,12 +23,9 @@ trait PersonnelCrud
 {
     use DropdownConstructTrait;
     use FillComplexArrayTrait;
+    use PersonnelDropdownOptions;
     use PersonnelValidationTrait;
     use SelectListTrait;
-    use Step5Trait;
-    use Step6Trait;
-    use Step7Trait;
-    use Step8Trait;
     use WithFileUploads;
 
     public $title;
@@ -50,26 +34,6 @@ trait PersonnelCrud
 
     public array $completedSteps;
 
-    public array $personnel = [];
-
-    public array $document = [];
-
-    public array $service_cards = [];
-
-    public array $service_cards_list = [];
-
-    public array $passports = [];
-
-    public array $passports_list = [];
-
-    public array $education = [];
-
-    public array $extra_education = [];
-
-    public array $extra_education_list = [];
-
-    public bool $hasExtraEducation = false;
-
     public array $calculatedDataEducation = [];
 
     public array $calculatedDataExtraEducation = [];
@@ -77,8 +41,6 @@ trait PersonnelCrud
     public array $calculatedData = [];
 
     public $avatar;
-
-    public $isDisability = false;
 
     public $searchNationality = '';
 
@@ -118,15 +80,27 @@ trait PersonnelCrud
 
     public $searchRankReason = '';
 
+    public $searchMilitaryRank = '';
+
+    public $searchKinship = '';
+
+    public $searchLanguage = '';
+
+    public $searchDegree = '';
+
+    public $searchDegreeDocumentType = '';
+
+    public $searchAward = '';
+
+    public $searchPunishment = '';
+
     public $isSpecialService = false;
 
     public $isAddedRank = false;
 
-    protected int $dropdownCacheMinutes = 10;
+    protected ?CalculateSeniorityService $seniorityServiceInstance = null;
 
-    protected array $rankLabelCache = [];
-
-    protected array $rankReasonLabelCache = [];
+    protected ?EducationDurationService $educationDurationServiceInstance = null;
 
     public function updatedAvatar(): void
     {
@@ -140,6 +114,7 @@ trait PersonnelCrud
         $this->validateNavigationStepIfNeeded();
 
         $this->step = max(1, $this->step - 1);
+        $this->handleStepChanged();
     }
 
     public function exceptArray($arrayKey)
@@ -156,6 +131,7 @@ trait PersonnelCrud
         $this->validateNavigationStepIfNeeded();
 
         $this->step = $step;
+        $this->handleStepChanged();
     }
 
     protected function completeStep(bool $actionSave = false): void
@@ -195,16 +171,33 @@ trait PersonnelCrud
     {
         $exceptedValidations = [];
 
+        $documentPayload = $this->documentPayload();
+
         $stepConditions = [
             2 => [
-                'documentForm.document' => $this->document ?? [],
-                'documentForm.serviceCards' => $this->service_cards_list ?? [],
-                'documentForm.passports' => $this->passports_list ?? [],
+                'documentForm.document' => data_get($documentPayload, 'document', []),
+                'documentForm.serviceCards' => data_get($documentPayload, 'service_cards.list', []),
+                'documentForm.passports' => data_get($documentPayload, 'passports.list', []),
             ],
-            3 => ['educationForm.extraEducation' => $this->extra_education_list ?? []],
+            3 => [
+                'educationForm.extraEducation' => (property_exists($this, 'educationForm') && $this->educationForm)
+                    ? ($this->educationForm->extraEducationList ?? [])
+                    : [],
+            ],
             4 => [
                 'laborActivityForm.laborActivity' => property_exists($this, 'laborActivityForm')
                     ? ($this->laborActivityForm->laborActivityList ?? [])
+                    : [],
+            ],
+            5 => [
+                'historyForm.military' => property_exists($this, 'historyForm')
+                    ? ($this->historyForm->militaryList ?? [])
+                    : [],
+                'historyForm.injury' => property_exists($this, 'historyForm')
+                    ? ($this->historyForm->injuryList ?? [])
+                    : [],
+                'historyForm.captivity' => property_exists($this, 'historyForm')
+                    ? ($this->historyForm->captivityList ?? [])
                     : [],
             ],
         ];
@@ -249,9 +242,8 @@ trait PersonnelCrud
             return;
         }
 
-        $this->syncArraysFromPersonalForm();
-        $this->syncArraysFromDocumentForm();
-        $this->syncArraysFromEducationForm();
+        $this->recalculateEducationDurations();
+        $this->calculateSeniority();
 
         if (! $this->shouldValidateCurrentStep()) {
             return;
@@ -266,7 +258,7 @@ trait PersonnelCrud
 
     protected function shouldSkipNavigationValidation(): bool
     {
-        return in_array((int) $this->step, [5, 6, 7], true);
+        return false;
     }
 
     protected function shouldValidateCurrentStep(): bool
@@ -280,27 +272,27 @@ trait PersonnelCrud
             2 => $this->hasDocumentStepPayload(),
             3 => $this->hasEducationStepPayload(),
             4 => $this->hasLaborStepPayload(),
+            5 => $this->historyFormHasDraft(),
+            6 => $this->awardsFormHasDraft(),
+            7 => $this->kinshipFormHasDraft(),
+            8 => $this->miscFormHasDraft(),
             default => true,
         };
     }
 
     protected function hasDocumentStepPayload(): bool
     {
-        $payloads = [
-            $this->document ?? [],
-            $this->service_cards ?? [],
-            $this->service_cards_list ?? [],
-            $this->passports ?? [],
-            $this->passports_list ?? [],
-        ];
-
-        if (property_exists($this, 'documentForm') && $this->documentForm) {
-            $payloads[] = $this->documentForm->document ?? [];
-            $payloads[] = $this->documentForm->serviceCards ?? [];
-            $payloads[] = $this->documentForm->serviceCardsList ?? [];
-            $payloads[] = $this->documentForm->passports ?? [];
-            $payloads[] = $this->documentForm->passportsList ?? [];
+        if (! property_exists($this, 'documentForm') || ! $this->documentForm) {
+            return false;
         }
+
+        $payloads = [
+            $this->documentForm->document ?? [],
+            $this->documentForm->serviceCards ?? [],
+            $this->documentForm->serviceCardsList ?? [],
+            $this->documentForm->passports ?? [],
+            $this->documentForm->passportsList ?? [],
+        ];
 
         foreach ($payloads as $payload) {
             if ($this->payloadHasValues($payload)) {
@@ -313,17 +305,15 @@ trait PersonnelCrud
 
     protected function hasEducationStepPayload(): bool
     {
-        $payloads = [
-            $this->education ?? [],
-            $this->extra_education ?? [],
-            $this->extra_education_list ?? [],
-        ];
-
-        if (property_exists($this, 'educationForm') && $this->educationForm) {
-            $payloads[] = $this->educationForm->education ?? [];
-            $payloads[] = $this->educationForm->extraEducation ?? [];
-            $payloads[] = $this->educationForm->extraEducationList ?? [];
+        if (! property_exists($this, 'educationForm') || ! $this->educationForm) {
+            return false;
         }
+
+        $payloads = [
+            $this->educationForm->education ?? [],
+            $this->educationForm->extraEducation ?? [],
+            $this->educationForm->extraEducationList ?? [],
+        ];
 
         foreach ($payloads as $payload) {
             if ($this->payloadHasValues($payload)) {
@@ -354,6 +344,71 @@ trait PersonnelCrud
         return false;
     }
 
+    protected function historyFormHasDraft(): bool
+    {
+        if (! property_exists($this, 'historyForm') || ! $this->historyForm) {
+            return false;
+        }
+
+        $drafts = [
+            $this->historyForm->military ?? [],
+            $this->historyForm->injury ?? [],
+            $this->historyForm->captivity ?? [],
+        ];
+
+        foreach ($drafts as $draft) {
+            if ($this->payloadHasValues($draft)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    protected function awardsFormHasDraft(): bool
+    {
+        if (! property_exists($this, 'awardsPunishmentsForm') || ! $this->awardsPunishmentsForm) {
+            return false;
+        }
+
+        return $this->payloadHasValues($this->awardsPunishmentsForm->award ?? [])
+            || $this->payloadHasValues($this->awardsPunishmentsForm->punishment ?? []);
+    }
+
+    protected function kinshipFormHasDraft(): bool
+    {
+        if (! property_exists($this, 'kinshipForm') || ! $this->kinshipForm) {
+            return false;
+        }
+
+        return $this->payloadHasValues($this->kinshipForm->kinship ?? []);
+    }
+
+    protected function miscFormHasDraft(): bool
+    {
+        if (! property_exists($this, 'miscForm') || ! $this->miscForm) {
+            return false;
+        }
+
+        $drafts = [
+            $this->miscForm->language ?? [],
+            $this->miscForm->event ?? [],
+            $this->miscForm->degree ?? [],
+        ];
+
+        if ($this->miscForm->hasElectedElectorals ?? false) {
+            $drafts[] = $this->miscForm->election ?? [];
+        }
+
+        foreach ($drafts as $draft) {
+            if ($this->payloadHasValues($draft)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public function nextStep(): void
     {
         $this->isAddedRank = false;
@@ -361,6 +416,7 @@ trait PersonnelCrud
         $this->validateNavigationStepIfNeeded();
 
         $this->step++;
+        $this->handleStepChanged();
     }
 
     private function getSteps(): array
@@ -381,9 +437,7 @@ trait PersonnelCrud
     public function getIsolatedProperty(): array
     {
         return [
-            'languageModel' => Language::all(),
             'knowledges' => KnowledgeStatusEnum::values(),
-            'degrees' => ScientificDegreeAndName::all(),
         ];
     }
 
@@ -406,80 +460,13 @@ trait PersonnelCrud
         $this->validate($rules);
     }
 
-    protected function hydratePersonalFormFromArrays(): void
-    {
-        if (! property_exists($this, 'personalForm') || ! $this->personalForm) {
-            return;
-        }
-
-        $this->personalForm->personnel = array_replace_recursive(
-            $this->personalForm->personnel ?? [],
-            $this->personnel ?? []
-        );
-
-        $this->personalForm->personnelExtra = array_replace_recursive(
-            $this->personalForm->personnelExtra ?? [],
-            $this->personnel_extra ?? []
-        );
-
-        $this->personalForm->hasDisability = (bool) ($this->isDisability ?? false);
-        $this->personalForm->avatarPath = $this->personalForm->avatarPath ?? null;
-    }
-
-    protected function syncArraysFromPersonalForm(): void
-    {
-        if (! property_exists($this, 'personalForm') || ! $this->personalForm) {
-            return;
-        }
-
-        $this->personnel = $this->personalForm->personnel;
-        $this->personnel_extra = $this->personalForm->personnelExtra;
-        $this->isDisability = $this->personalForm->hasDisability;
-    }
-
-    public function updatedPersonalForm($value, $key): void
-    {
-        $this->syncArraysFromPersonalForm();
-    }
-
-    protected function hydrateDocumentFormFromArrays(): void
-    {
-        if (! property_exists($this, 'documentForm') || ! $this->documentForm) {
-            return;
-        }
-
-        $this->documentForm->fillFromArrays(
-            document: $this->document ?? [],
-            serviceCards: $this->service_cards ?? [],
-            serviceCardList: $this->service_cards_list ?? [],
-            passports: $this->passports ?? [],
-            passportList: $this->passports_list ?? []
-        );
-    }
-
-    protected function syncArraysFromDocumentForm(): void
-    {
-        if (! property_exists($this, 'documentForm') || ! $this->documentForm) {
-            return;
-        }
-
-        $this->document = $this->documentForm->document;
-        $this->service_cards = $this->documentForm->serviceCards;
-        $this->service_cards_list = $this->documentForm->serviceCardsList;
-        $this->passports = $this->documentForm->passports;
-        $this->passports_list = $this->documentForm->passportsList;
-    }
-
     public function updatedDocumentForm($value, $key): void
     {
-        $this->syncArraysFromDocumentForm();
-
         if (is_string($key) && str_contains($key, 'born_country_id')) {
             if (property_exists($this, 'documentForm') && $this->documentForm) {
                 $this->documentForm->document['born_city_id'] = null;
             }
 
-            $this->document['born_city_id'] = null;
             $this->searchDocumentCity = '';
         }
     }
@@ -490,13 +477,9 @@ trait PersonnelCrud
             return;
         }
 
-        $this->syncArraysFromDocumentForm();
         $this->validate($this->serviceCardRuleSet());
 
-        $this->documentForm->serviceCardsList[] = $this->documentForm->serviceCards;
-        $this->documentForm->resetServiceCard();
-
-        $this->syncArraysFromDocumentForm();
+        $this->documentForm->addServiceCardEntry();
     }
 
     public function removeServiceCard(int $key): void
@@ -505,10 +488,7 @@ trait PersonnelCrud
             return;
         }
 
-        unset($this->documentForm->serviceCardsList[$key]);
-        $this->documentForm->serviceCardsList = array_values($this->documentForm->serviceCardsList);
-
-        $this->syncArraysFromDocumentForm();
+        $this->documentForm->removeServiceCardEntry($key);
     }
 
     public function forceDeleteServiceCard(int $key): void
@@ -522,13 +502,9 @@ trait PersonnelCrud
             return;
         }
 
-        $this->syncArraysFromDocumentForm();
         $this->validate($this->passportRuleSet());
 
-        $this->documentForm->passportsList[] = $this->documentForm->passports;
-        $this->documentForm->resetPassport();
-
-        $this->syncArraysFromDocumentForm();
+        $this->documentForm->addPassportEntry();
     }
 
     public function removePassport(int $key): void
@@ -537,10 +513,7 @@ trait PersonnelCrud
             return;
         }
 
-        unset($this->documentForm->passportsList[$key]);
-        $this->documentForm->passportsList = array_values($this->documentForm->passportsList);
-
-        $this->syncArraysFromDocumentForm();
+        $this->documentForm->removePassportEntry($key);
     }
 
     public function forceDeletePassport(int $key): void
@@ -591,41 +564,25 @@ trait PersonnelCrud
         }
 
         $this->documentForm->mergeDocument($payload);
-        $this->syncArraysFromDocumentForm();
     }
 
-    protected function hydrateEducationFormFromArrays(): void
+    protected function documentPayload(): array
     {
-        if (! property_exists($this, 'educationForm') || ! $this->educationForm) {
-            return;
+        if (property_exists($this, 'documentForm') && $this->documentForm) {
+            return $this->documentForm->toPayload();
         }
 
-        $this->educationForm->fillFromArrays(
-            education: $this->education ?? [],
-            extraEducation: $this->extra_education ?? [],
-            extraEducationList: $this->extra_education_list ?? [],
-            hasExtraEducation: (bool) ($this->hasExtraEducation ?? false)
-        );
-    }
-
-    protected function syncArraysFromEducationForm(): void
-    {
-        if (! property_exists($this, 'educationForm') || ! $this->educationForm) {
-            return;
-        }
-
-        $this->education = $this->educationForm->education;
-        $this->extra_education = $this->educationForm->extraEducation;
-        $this->extra_education_list = $this->educationForm->extraEducationList;
-        $this->hasExtraEducation = $this->educationForm->hasExtraEducation;
-
-        $this->recalculateEducationDurations();
+        return [
+            'document' => [],
+            'service_cards' => ['current' => [], 'list' => []],
+            'passports' => ['current' => [], 'list' => []],
+        ];
     }
 
     public function updatedEducationForm($value, $key): void
     {
         if (! is_string($key)) {
-            $this->syncArraysFromEducationForm();
+            $this->recalculateEducationDurations();
 
             return;
         }
@@ -642,53 +599,36 @@ trait PersonnelCrud
             return;
         }
 
-        $this->syncArraysFromEducationForm();
+        $this->recalculateEducationDurations();
     }
 
-    protected function hydrateLaborActivityFormFromArrays(): void
+    public function updatedLaborActivityForm($value, $key): void
     {
-        if (! property_exists($this, 'laborActivityForm') || ! $this->laborActivityForm) {
-            return;
-        }
-
-        $this->laborActivityForm->fillFromArrays(
-            laborActivity: [],
-            laborActivityList: [],
-            rank: [],
-            rankList: []
-        );
-    }
-
-    protected function syncArraysFromLaborActivityForm(): void
-    {
-        if (! property_exists($this, 'laborActivityForm') || ! $this->laborActivityForm) {
+        if (is_string($key)
+            && ! str_contains($key, 'laborActivityList')
+            && ! str_contains($key, 'laborActivityForm.laborActivity.')
+        ) {
             return;
         }
 
         $this->calculateSeniority();
     }
 
-    public function updatedLaborActivityForm($value, $key): void
-    {
-        $this->syncArraysFromLaborActivityForm();
-    }
-
-    public function updatedHasExtraEducation($value): void
+    public function updatedEducationFormHasExtraEducation($value): void
     {
         if (! property_exists($this, 'educationForm') || ! $this->educationForm) {
-            $this->hasExtraEducation = (bool) $value;
-
             return;
         }
 
-        $this->educationForm->hasExtraEducation = (bool) $value;
+        $value = (bool) $value;
 
-        if (! $value) {
-            $this->educationForm->extraEducationList = [];
-            $this->educationForm->resetExtraEducation();
+        if ($value) {
+            $this->educationForm->hasExtraEducation = true;
+        } else {
+            $this->educationForm->disableExtraEducation();
         }
 
-        $this->syncArraysFromEducationForm();
+        $this->recalculateEducationDurations();
     }
 
     protected function setEducationCoefficient(bool $enabled, bool $forExtra): void
@@ -702,7 +642,7 @@ trait PersonnelCrud
             ? $this->educationCoefficientValue()
             : null;
 
-        $this->syncArraysFromEducationForm();
+        $this->recalculateEducationDurations();
     }
 
     protected function educationCoefficientValue(): ?float
@@ -716,20 +656,19 @@ trait PersonnelCrud
 
     protected function recalculateEducationDurations(): void
     {
-        $service = resolve(CalculateSeniorityService::class);
+        if (! property_exists($this, 'educationForm') || ! $this->educationForm) {
+            $this->calculatedDataEducation = [];
+            $this->calculatedDataExtraEducation = [];
 
-        $this->calculatedDataEducation = $this->shouldCalculateEducationDuration($this->education)
-            ? $service->calculateEducation($this->education)
-            : [];
+            return;
+        }
 
-        $this->calculatedDataExtraEducation = ! empty($this->extra_education_list)
-            ? $service->calculateMultiEducation($this->extra_education_list)
-            : [];
-    }
+        $education = $this->educationForm->education ?? [];
+        $extraEducationList = $this->educationForm->extraEducationList ?? [];
+        $service = $this->educationDurationService();
 
-    protected function shouldCalculateEducationDuration(array $education): bool
-    {
-        return ! empty($education['admission_year']);
+        $this->calculatedDataEducation = $service->education($education);
+        $this->calculatedDataExtraEducation = $service->extraEducations($extraEducationList);
     }
 
     public function addExtraEducation(): void
@@ -738,22 +677,13 @@ trait PersonnelCrud
             return;
         }
 
-        $this->educationForm->hasExtraEducation = true;
-        $this->hasExtraEducation = true;
-
         $this->validate($this->extraEducationRuleSet());
 
-        $entry = $this->educationForm->extraEducation;
-        $entry['calculate_as_seniority'] = (bool) ($entry['calculate_as_seniority'] ?? false);
-        $entry['is_military'] = (bool) ($entry['is_military'] ?? false);
-        $entry['coefficient'] = $entry['calculate_as_seniority']
-            ? $this->educationCoefficientValue()
-            : null;
+        $this->educationForm->addExtraEducationEntry(
+            $this->educationCoefficientValue()
+        );
 
-        $this->educationForm->extraEducationList[] = $entry;
-        $this->educationForm->resetExtraEducation();
-
-        $this->syncArraysFromEducationForm();
+        $this->recalculateEducationDurations();
     }
 
     public function removeExtraEducation(int $key): void
@@ -762,10 +692,9 @@ trait PersonnelCrud
             return;
         }
 
-        unset($this->educationForm->extraEducationList[$key]);
-        $this->educationForm->extraEducationList = array_values($this->educationForm->extraEducationList);
+        $this->educationForm->removeExtraEducationEntry($key);
 
-        $this->syncArraysFromEducationForm();
+        $this->recalculateEducationDurations();
     }
 
     public function addLaborActivity(): void
@@ -774,29 +703,11 @@ trait PersonnelCrud
             return;
         }
 
-        $this->syncArraysFromLaborActivityForm();
         $this->validate($this->laborActivityRuleSet());
 
-        $entry = $this->laborActivityForm->laborActivity;
-        $entry['is_special_service'] = $this->isSpecialService ? 1 : 0;
-        $entry['is_current'] = (bool) ($entry['is_current'] ?? false);
+        $this->laborActivityForm->addLaborActivityEntry((bool) $this->isSpecialService);
 
-        if ($this->isSpecialService) {
-            $time = $entry['time'] ?? '12:00';
-            $orderDate = $entry['order_date'] ?? '';
-            $entry['order_date'] = trim("{$orderDate} {$time}");
-        } else {
-            $entry['order_given_by'] = null;
-            $entry['order_no'] = null;
-            $entry['order_date'] = null;
-        }
-
-        unset($entry['time']);
-
-        $this->laborActivityForm->laborActivityList[] = $entry;
-        $this->laborActivityForm->resetLaborActivity();
-
-        $this->syncArraysFromLaborActivityForm();
+        $this->calculateSeniority();
     }
 
     public function forceDeleteLaborActivity(int $key): void
@@ -805,10 +716,9 @@ trait PersonnelCrud
             return;
         }
 
-        unset($this->laborActivityForm->laborActivityList[$key]);
-        $this->laborActivityForm->laborActivityList = array_values($this->laborActivityForm->laborActivityList);
+        $this->laborActivityForm->removeLaborActivityEntry($key);
 
-        $this->syncArraysFromLaborActivityForm();
+        $this->calculateSeniority();
     }
 
     public function addRank(): void
@@ -818,15 +728,10 @@ trait PersonnelCrud
         }
 
         $this->isAddedRank = true;
-        $this->syncArraysFromLaborActivityForm();
         $this->validate($this->rankRuleSet());
 
-        $entry = $this->laborActivityForm->rank;
-        $this->laborActivityForm->rankList[] = $entry;
-        $this->laborActivityForm->resetRank();
+        $this->laborActivityForm->addRankEntry();
         $this->isAddedRank = false;
-
-        $this->syncArraysFromLaborActivityForm();
     }
 
     public function forceDeleteRank(int $key): void
@@ -835,13 +740,10 @@ trait PersonnelCrud
             return;
         }
 
-        unset($this->laborActivityForm->rankList[$key]);
-        $this->laborActivityForm->rankList = array_values($this->laborActivityForm->rankList);
-
-        $this->syncArraysFromLaborActivityForm();
+        $this->laborActivityForm->removeRankEntry($key);
     }
 
-    protected function calculateSeniority(): void
+    protected function calculateSeniority(?array $list = null): void
     {
         if (! property_exists($this, 'laborActivityForm') || ! $this->laborActivityForm) {
             $this->calculatedData = [];
@@ -849,7 +751,7 @@ trait PersonnelCrud
             return;
         }
 
-        $list = $this->laborActivityForm->laborActivityList ?? [];
+        $list ??= $this->laborActivitiesWithDraft();
 
         if (empty($list)) {
             $this->calculatedData = [];
@@ -857,619 +759,315 @@ trait PersonnelCrud
             return;
         }
 
-        $calculateService = resolve(CalculateSeniorityService::class);
-        $this->calculatedData = $calculateService->calculateMulti($list);
+        $this->calculatedData = $this->seniorityService()->calculateMulti($list);
     }
 
-    #[Computed]
-    public function nationalityOptions(): array
+    protected function laborActivitiesWithDraft(): array
     {
-        return $this->countryOptions(
-            searchTerm: $this->dropdownSearch('searchNationality'),
-            selectedId: $this->dropdownSelected('nationality_id')
+        $list = $this->laborActivityForm->laborActivityList ?? [];
+
+        if ($this->laborActivityDraftHasValues()) {
+            $draft = Arr::except($this->laborActivityForm->laborActivity ?? [], ['time']);
+            $list[] = $draft;
+        }
+
+        return $list;
+    }
+
+    protected function laborActivityDraftHasValues(): bool
+    {
+        if (! property_exists($this, 'laborActivityForm') || ! $this->laborActivityForm) {
+            return false;
+        }
+
+        $draft = Arr::except($this->laborActivityForm->laborActivity ?? [], ['time']);
+
+        return $this->payloadHasValues($draft);
+    }
+
+    public function addMilitary(): void
+    {
+        $form = $this->historyFormInstance();
+
+        if (! $form) {
+            return;
+        }
+
+        $rules = $this->intersectValidators([
+            $this->exceptArray('historyForm.injury'),
+            $this->exceptArray('historyForm.captivity'),
+        ]);
+
+        if (! empty($rules)) {
+            $this->validate($rules);
+        }
+
+        $form->addMilitaryEntry();
+    }
+
+    public function forceDeleteMilitary(int $key): void
+    {
+        $form = $this->historyFormInstance();
+
+        if (! $form) {
+            return;
+        }
+
+        $form->removeMilitaryEntry($key);
+    }
+
+    public function addInjury(): void
+    {
+        $form = $this->historyFormInstance();
+
+        if (! $form) {
+            return;
+        }
+
+        $rules = $this->intersectValidators([
+            $this->exceptArray('historyForm.military'),
+            $this->exceptArray('historyForm.captivity'),
+        ]);
+
+        if (! empty($rules)) {
+            $this->validate($rules);
+        }
+
+        $form->addInjuryEntry();
+    }
+
+    public function forceDeleteInjury(int $key): void
+    {
+        $form = $this->historyFormInstance();
+
+        if (! $form) {
+            return;
+        }
+
+        $form->removeInjuryEntry($key);
+    }
+
+    public function addCaptivity(): void
+    {
+        $form = $this->historyFormInstance();
+
+        if (! $form) {
+            return;
+        }
+
+        $rules = $this->intersectValidators([
+            $this->exceptArray('historyForm.military'),
+            $this->exceptArray('historyForm.injury'),
+        ]);
+
+        if (! empty($rules)) {
+            $this->validate($rules);
+        }
+
+        $form->addCaptivityEntry();
+    }
+
+    public function forceDeleteCaptivity(int $key): void
+    {
+        $form = $this->historyFormInstance();
+
+        if (! $form) {
+            return;
+        }
+
+        $form->removeCaptivityEntry($key);
+    }
+
+    public function addAward(): void
+    {
+        $form = $this->awardsPunishmentsFormInstance();
+
+        if (! $form) {
+            return;
+        }
+
+        $rules = $this->awardRuleSet();
+
+        if (! empty($rules)) {
+            $this->validate($rules);
+        }
+
+        $form->addAwardEntry();
+    }
+
+    public function forceDeleteAward(int $key): void
+    {
+        $form = $this->awardsPunishmentsFormInstance();
+
+        if (! $form) {
+            return;
+        }
+
+        $form->removeAwardEntry($key);
+    }
+
+    public function addPunishment(): void
+    {
+        $form = $this->awardsPunishmentsFormInstance();
+
+        if (! $form) {
+            return;
+        }
+
+        $rules = $this->punishmentRuleSet();
+
+        if (! empty($rules)) {
+            $this->validate($rules);
+        }
+
+        $form->addPunishmentEntry();
+    }
+
+    public function forceDeletePunishment(int $key): void
+    {
+        $form = $this->awardsPunishmentsFormInstance();
+
+        if (! $form) {
+            return;
+        }
+
+        $form->removePunishmentEntry($key);
+    }
+
+    public function addKinship(): void
+    {
+        $form = $this->kinshipFormInstance();
+
+        if (! $form) {
+            return;
+        }
+
+        $this->validate($this->getKinshipRules());
+
+        $form->addKinshipEntry(
+            $this->kinshipLabel(data_get($form->kinship, 'kinship_id'))
         );
     }
 
-    #[Computed]
-    public function previousNationalityOptions(): array
+    public function forceDeleteKinship(int $key): void
     {
-        $search = $this->dropdownSearch('searchPreviousNationality');
+        $form = $this->kinshipFormInstance();
 
-        return $this->countryOptions(
-            searchTerm: $search,
-            selectedId: $this->dropdownSelected('previous_nationality_id'),
-            cacheKeySuffix: 'previous'
+        if (! $form) {
+            return;
+        }
+
+        $form->removeKinshipEntry($key);
+    }
+
+    public function addLanguage(): void
+    {
+        $form = $this->miscFormInstance();
+
+        if (! $form) {
+            return;
+        }
+
+        $this->validate($this->languageRuleSet());
+
+        $form->addLanguageEntry(
+            $this->languageLabel(data_get($form->language, 'language_id'))
         );
     }
 
-    #[Computed]
-    public function documentNationalityOptions(): array
+    public function forceDeleteLanguage(int $key): void
     {
-        return $this->countryOptions(
-            searchTerm: $this->dropdownSearch('searchDocumentNationality'),
-            selectedId: $this->documentValue('nationality_id'),
-            cacheKeySuffix: 'document-nationality'
+        $form = $this->miscFormInstance();
+
+        if (! $form) {
+            return;
+        }
+
+        $form->removeLanguageEntry($key);
+    }
+
+    public function addEvent(): void
+    {
+        $form = $this->miscFormInstance();
+
+        if (! $form) {
+            return;
+        }
+
+        $this->validate($this->eventRuleSet());
+
+        $form->addEventEntry();
+    }
+
+    public function forceDeleteEvent(int $key): void
+    {
+        $form = $this->miscFormInstance();
+
+        if (! $form) {
+            return;
+        }
+
+        $form->removeEventEntry($key);
+    }
+
+    public function addDegree(): void
+    {
+        $form = $this->miscFormInstance();
+
+        if (! $form) {
+            return;
+        }
+
+        $this->validate($this->degreeRuleSet());
+
+        $form->addDegreeEntry(
+            $this->scientificDegreeLabel(data_get($form->degree, 'degree_and_name_id')),
+            $this->educationDocumentLabel(data_get($form->degree, 'edu_doc_type_id'))
         );
     }
 
-    #[Computed]
-    public function documentBornCountryOptions(): array
+    public function forceDeleteDegree(int $key): void
     {
-        return $this->countryOptions(
-            searchTerm: $this->dropdownSearch('searchDocumentBornCountry'),
-            selectedId: $this->documentValue('born_country_id'),
-            cacheKeySuffix: 'document-born-country'
-        );
-    }
+        $form = $this->miscFormInstance();
 
-    #[Computed]
-    public function documentCityOptions(): array
-    {
-        $base = City::query()
-            ->select('id', DB::raw('name as label'))
-            ->orderBy('name');
-
-        if ($countryId = $this->documentValue('born_country_id')) {
-            $base->where('country_id', $countryId);
+        if (! $form) {
+            return;
         }
 
-        return $this->optionsWithSelected(
-            base: $base,
-            searchCol: 'name',
-            searchTerm: $this->dropdownSearch('searchDocumentCity'),
-            selectedId: $this->documentValue('born_city_id'),
-            limit: 80
-        );
+        $form->removeDegreeEntry($key);
     }
 
-    #[Computed]
-    public function educationInstitutionOptions(): array
+    public function addElection(): void
     {
-        return $this->educationInstitutionOptionsFor(
-            search: $this->dropdownSearch('searchEducationInstitution'),
-            selectedId: $this->educationSelected('educational_institution_id'),
-            cacheSuffix: 'primary'
-        );
+        $form = $this->miscFormInstance();
+
+        $this->validate($this->electionRuleSet());
+
+        $form->addElectionEntry();
     }
 
-    #[Computed]
-    public function extraEducationInstitutionOptions(): array
+    public function forceDeleteElection(int $key): void
     {
-        return $this->educationInstitutionOptionsFor(
-            search: $this->dropdownSearch('searchExtraEducationInstitution'),
-            selectedId: $this->educationSelected('educational_institution_id', true),
-            cacheSuffix: 'extra'
-        );
-    }
+        $form = $this->miscFormInstance();
 
-    protected function educationInstitutionOptionsFor(string $search, $selectedId, string $cacheSuffix): array
-    {
-        $base = EducationalInstitution::query()
-            ->select('id', DB::raw('name as label'))
-            ->orderBy('name');
-
-        if ($search === '') {
-            return $this->cachedOptionsWithSelected(
-                cacheKey: "personnel:education:institutions:{$cacheSuffix}",
-                base: $base,
-                selectedId: $selectedId,
-                limit: 80
-            );
+        if (! $form) {
+            return;
         }
 
-        return $this->optionsWithSelected(
-            base: $base,
-            searchCol: 'name',
-            searchTerm: $search,
-            selectedId: $selectedId,
-            limit: 80
-        );
+        $form->removeElectionEntry($key);
     }
 
-    #[Computed]
-    public function educationFormOptions(): array
+
+    protected function seniorityService(): CalculateSeniorityService
     {
-        return $this->educationFormOptionsFor(
-            search: $this->dropdownSearch('searchEducationForm'),
-            selectedId: $this->educationSelected('education_form_id'),
-            cacheSuffix: 'primary'
-        );
+        return $this->seniorityServiceInstance
+            ??= resolve(CalculateSeniorityService::class);
     }
 
-    #[Computed]
-    public function extraEducationFormOptions(): array
+    protected function educationDurationService(): EducationDurationService
     {
-        return $this->educationFormOptionsFor(
-            search: $this->dropdownSearch('searchExtraEducationForm'),
-            selectedId: $this->educationSelected('education_form_id', true),
-            cacheSuffix: 'extra'
-        );
-    }
-
-    protected function educationFormOptionsFor(string $search, $selectedId, string $cacheSuffix): array
-    {
-        $locale = app()->getLocale();
-        $labelColumn = "name_{$locale}";
-
-        $base = EducationFormModel::query()
-            ->select('id', DB::raw("$labelColumn as label"))
-            ->orderBy($labelColumn);
-
-        if ($search === '') {
-            return $this->cachedOptionsWithSelected(
-                cacheKey: "personnel:education:forms:{$cacheSuffix}:{$locale}",
-                base: $base,
-                selectedId: $selectedId,
-                limit: 80
-            );
-        }
-
-        return $this->optionsWithSelected(
-            base: $base,
-            searchCol: $labelColumn,
-            searchTerm: $search,
-            selectedId: $selectedId,
-            limit: 80
-        );
-    }
-
-    #[Computed]
-    public function educationTypeOptions(): array
-    {
-        $base = EducationType::query()
-            ->select('id', DB::raw('name as label'))
-            ->orderBy('name');
-
-        if ($this->dropdownSearch('searchEducationType') === '') {
-            return $this->cachedOptionsWithSelected(
-                cacheKey: 'personnel:education:types',
-                base: $base,
-                selectedId: $this->educationSelected('education_type_id', true),
-                limit: 60
-            );
-        }
-
-        return $this->optionsWithSelected(
-            base: $base,
-            searchCol: 'name',
-            searchTerm: $this->dropdownSearch('searchEducationType'),
-            selectedId: $this->educationSelected('education_type_id', true),
-            limit: 60
-        );
-    }
-
-    #[Computed]
-    public function educationDocumentTypeOptions(): array
-    {
-        $base = EducationDocumentType::query()
-            ->select('id', DB::raw('name as label'))
-            ->orderBy('name');
-
-        if ($this->dropdownSearch('searchEducationDocumentType') === '') {
-            return $this->cachedOptionsWithSelected(
-                cacheKey: 'personnel:education:document_types',
-                base: $base,
-                selectedId: $this->educationSelected('education_document_type_id', true),
-                limit: 60
-            );
-        }
-
-        return $this->optionsWithSelected(
-            base: $base,
-            searchCol: 'name',
-            searchTerm: $this->dropdownSearch('searchEducationDocumentType'),
-            selectedId: $this->educationSelected('education_document_type_id', true),
-            limit: 60
-        );
-    }
-
-    #[Computed]
-    public function rankOptions(): array
-    {
-        return $this->rankOptionsFor(
-            search: $this->dropdownSearch('searchRank'),
-            selectedId: $this->currentRankSelection('rank_id')
-        );
-    }
-
-    #[Computed]
-    public function rankReasonOptions(): array
-    {
-        return $this->rankReasonOptionsFor(
-            search: $this->dropdownSearch('searchRankReason'),
-            selectedId: $this->currentRankSelection('rank_reason_id')
-        );
-    }
-
-    protected function rankOptionsFor(string $search, $selectedId): array
-    {
-        $locale = app()->getLocale();
-        $labelColumn = "name_{$locale}";
-
-        $base = Rank::query()
-            ->select('id', DB::raw("$labelColumn as label"))
-            ->where('is_active', true)
-            ->orderBy($labelColumn);
-
-        if ($search === '') {
-            return $this->cachedOptionsWithSelected(
-                cacheKey: "personnel:ranks:{$locale}",
-                base: $base,
-                selectedId: $selectedId,
-                limit: 80
-            );
-        }
-
-        return $this->optionsWithSelected(
-            base: $base,
-            searchCol: $labelColumn,
-            searchTerm: $search,
-            selectedId: $selectedId,
-            limit: 80
-        );
-    }
-
-    protected function rankReasonOptionsFor(string $search, $selectedId): array
-    {
-        $base = RankReason::query()
-            ->select('id', DB::raw('name as label'))
-            ->orderBy('name');
-
-        if ($search === '') {
-            return $this->cachedOptionsWithSelected(
-                cacheKey: 'personnel:rank_reasons',
-                base: $base,
-                selectedId: $selectedId,
-                limit: 80
-            );
-        }
-
-        return $this->optionsWithSelected(
-            base: $base,
-            searchCol: 'name',
-            searchTerm: $search,
-            selectedId: $selectedId,
-            limit: 80
-        );
-    }
-    #[Computed]
-    public function structureOptions(): array
-    {
-        $base = Structure::query()
-            ->select('id', DB::raw('name as label'))
-            ->accessible()
-            ->orderBy('level')
-            ->orderBy('code');
-
-        $search = $this->dropdownSearch('searchStructure');
-        $selected = $this->dropdownSelected('structure_id');
-
-        if ($search === '') {
-            return $this->cachedOptionsWithSelected(
-                cacheKey: 'personnel:structures',
-                base: $base,
-                selectedId: $selected,
-                limit: 80
-            );
-        }
-
-        return $this->optionsWithSelected(
-            base: $base,
-            searchCol: 'name',
-            searchTerm: $search,
-            selectedId: $selected,
-            limit: 80
-        );
-    }
-
-    #[Computed]
-    public function positionOptions(): array
-    {
-        $base = Position::query()
-            ->select('id', DB::raw('name as label'))
-            ->orderBy('name');
-
-        $search = $this->dropdownSearch('searchPosition');
-        $selected = $this->dropdownSelected('position_id');
-
-        if ($search === '') {
-            return $this->cachedOptionsWithSelected(
-                cacheKey: 'personnel:positions',
-                base: $base,
-                selectedId: $selected,
-                limit: 80
-            );
-        }
-
-        return $this->optionsWithSelected(
-            base: $base,
-            searchCol: 'name',
-            searchTerm: $search,
-            selectedId: $selected,
-            limit: 80
-        );
-    }
-
-    #[Computed]
-    public function educationDegreeOptions(): array
-    {
-        $locale = app()->getLocale();
-        $labelColumn = 'title_'.$locale;
-
-        $base = EducationDegree::query()
-            ->select('id', DB::raw("$labelColumn as label"));
-
-        $search = $this->dropdownSearch('searchEducationDegree');
-        $selected = $this->dropdownSelected('education_degree_id');
-
-        if ($search === '') {
-            return $this->cachedOptionsWithSelected(
-                cacheKey: "personnel:education_degree:{$locale}",
-                base: $base,
-                selectedId: $selected,
-                limit: 60
-            );
-        }
-
-        return $this->optionsWithSelected(
-            base: $base,
-            searchCol: $labelColumn,
-            searchTerm: $search,
-            selectedId: $selected,
-            limit: 60
-        );
-    }
-
-    #[Computed]
-    public function workNormOptions(): array
-    {
-        $locale = app()->getLocale();
-        $labelColumn = 'name_'.$locale;
-
-        $base = WorkNorm::query()
-            ->select('id', DB::raw("$labelColumn as label"));
-
-        $search = $this->dropdownSearch('searchWorkNorm');
-        $selected = $this->dropdownSelected('work_norm_id');
-
-        if ($search === '') {
-            return $this->cachedOptionsWithSelected(
-                cacheKey: "personnel:work_norms:{$locale}",
-                base: $base,
-                selectedId: $selected,
-                limit: 50
-            );
-        }
-
-        return $this->optionsWithSelected(
-            base: $base,
-            searchCol: $labelColumn,
-            searchTerm: $search,
-            selectedId: $selected,
-            limit: 50
-        );
-    }
-
-    #[Computed]
-    public function socialOriginOptions(): array
-    {
-        $base = SocialOrigin::query()
-            ->select('id', DB::raw('name as label'))
-            ->orderBy('name');
-
-        $search = $this->dropdownSearch('searchSocialOrigin');
-        $selected = $this->dropdownSelected('social_origin_id');
-
-        if ($search === '') {
-            return $this->cachedOptionsWithSelected(
-                cacheKey: 'personnel:social_origin',
-                base: $base,
-                selectedId: $selected,
-                limit: 50
-            );
-        }
-
-        return $this->optionsWithSelected(
-            base: $base,
-            searchCol: 'name',
-            searchTerm: $search,
-            selectedId: $selected,
-            limit: 50
-        );
-    }
-
-    #[Computed]
-    public function disabilityOptions(): array
-    {
-        if (! $this->isDisabilityEnabled()) {
-            return [];
-        }
-
-        $base = Disability::query()
-            ->select('id', DB::raw('name as label'))
-            ->orderBy('name');
-
-        $search = $this->dropdownSearch('searchDisability');
-        $selected = $this->dropdownSelected('disability_id');
-
-        if ($search === '') {
-            return $this->cachedOptionsWithSelected(
-                cacheKey: 'personnel:disabilities',
-                base: $base,
-                selectedId: $selected,
-                limit: 50
-            );
-        }
-
-        return $this->optionsWithSelected(
-            base: $base,
-            searchCol: 'name',
-            searchTerm: $search,
-            selectedId: $selected,
-            limit: 50
-        );
-    }
-
-    protected function dropdownSelected(string $key): int|string|null
-    {
-        if (property_exists($this, 'personalForm') && $this->personalForm) {
-            return data_get($this->personalForm->personnel, $key);
-        }
-
-        return data_get($this->personnel ?? [], $key);
-    }
-
-    protected function educationSelected(string $key, bool $isExtra = false): int|string|null
-    {
-        if (property_exists($this, 'educationForm') && $this->educationForm) {
-            $source = $isExtra ? $this->educationForm->extraEducation : $this->educationForm->education;
-
-            return data_get($source ?? [], $key);
-        }
-
-        $source = $isExtra ? ($this->extra_education ?? []) : ($this->education ?? []);
-
-        return data_get($source, $key);
-    }
-
-    protected function currentRankSelection(string $path)
-    {
-        if (property_exists($this, 'laborActivityForm') && $this->laborActivityForm) {
-            return data_get($this->laborActivityForm->rank ?? [], $path);
-        }
-
-        return null;
-    }
-
-    public function rankLabel($id): ?string
-    {
-        if (empty($id)) {
-            return null;
-        }
-
-        $locale = app()->getLocale();
-        $cacheKey = "{$locale}:{$id}";
-
-        if (! array_key_exists($cacheKey, $this->rankLabelCache)) {
-            $column = "name_{$locale}";
-            $this->rankLabelCache[$cacheKey] = Rank::query()->whereKey($id)->value($column);
-        }
-
-        return $this->rankLabelCache[$cacheKey];
-    }
-
-    public function rankReasonLabel($id): ?string
-    {
-        if (empty($id)) {
-            return null;
-        }
-
-        if (! array_key_exists($id, $this->rankReasonLabelCache)) {
-            $this->rankReasonLabelCache[$id] = RankReason::query()->whereKey($id)->value('name');
-        }
-
-        return $this->rankReasonLabelCache[$id];
-    }
-
-    protected function documentValue(string $key): mixed
-    {
-        if (property_exists($this, 'documentForm') && $this->documentForm) {
-            return data_get($this->documentForm->document, $key);
-        }
-
-        return data_get($this->document ?? [], $key);
-    }
-
-    protected function dropdownSearch(string $property): string
-    {
-        return trim((string) ($this->{$property} ?? ''));
-    }
-
-    protected function isDisabilityEnabled(): bool
-    {
-        if (property_exists($this, 'personalForm') && $this->personalForm) {
-            return (bool) $this->personalForm->hasDisability;
-        }
-
-        return (bool) ($this->isDisability ?? false);
-    }
-
-    protected function countryOptions(string $searchTerm, $selectedId, string $cacheKeySuffix = 'current'): array
-    {
-        $locale = app()->getLocale();
-
-        $base = Country::query()
-            ->select('countries.id', DB::raw('ct.title as label'))
-            ->join('country_translations as ct', function ($join) use ($locale) {
-                $join->on('ct.country_id', '=', 'countries.id')
-                    ->where('ct.locale', $locale);
-            })
-            ->orderBy('ct.title');
-
-        if ($searchTerm === '') {
-            return $this->cachedOptionsWithSelected(
-                cacheKey: "personnel:country:{$cacheKeySuffix}:{$locale}",
-                base: $base,
-                selectedId: $selectedId,
-                limit: 80
-            );
-        }
-
-        return $this->optionsWithSelected(
-            base: $base,
-            searchCol: 'ct.title',
-            searchTerm: $searchTerm,
-            selectedId: $selectedId,
-            limit: 80
-        );
-    }
-
-    protected function cachedOptionsWithSelected(string $cacheKey, Builder $base, $selectedId, int $limit = 50): array
-    {
-        $options = cache()->remember(
-            $cacheKey,
-            now()->addMinutes($this->dropdownCacheMinutes),
-            function () use ($base, $limit) {
-                $query = clone $base;
-                $query->limit($limit);
-
-                return $this->toOptions($query);
-            }
-        );
-
-        return $this->appendSelectedOption($options, $base, $selectedId);
-    }
-
-    protected function appendSelectedOption(array $options, Builder $base, $selectedId): array
-    {
-        if (empty($selectedId)) {
-            return $options;
-        }
-
-        $hasSelected = collect($options)->first(
-            fn ($option) => (int) $option['id'] === (int) $selectedId
-        );
-
-        if ($hasSelected) {
-            return $options;
-        }
-
-        $selectedRow = (clone $base)
-            ->where($base->getModel()->getQualifiedKeyName(), $selectedId)
-            ->first();
-
-        if ($selectedRow) {
-            $options[] = [
-                'id' => (int) data_get($selectedRow, 'id'),
-                'label' => (string) data_get($selectedRow, 'label'),
-            ];
-        }
-
-        return collect($options)
-            ->unique('id')
-            ->sortBy('label', SORT_NATURAL | SORT_FLAG_CASE)
-            ->values()
-            ->all();
+        return $this->educationDurationServiceInstance
+            ??= resolve(EducationDurationService::class);
     }
 
     public function render()
@@ -1477,7 +1075,7 @@ trait PersonnelCrud
         $steps = ['steps' => $this->getSteps()];
 
         $view_data = $this->shouldLoadLookupData()
-            ? resolve(CallPersonnelInfo::class)->getAll($this->isDisability, $this)
+            ? resolve(CallPersonnelInfo::class)->getAll($this->personalFormHasDisability(), $this)
             : [];
 
         $view_name = ! empty($this->personnelModel)
@@ -1489,7 +1087,27 @@ trait PersonnelCrud
 
     protected function shouldLoadLookupData(): bool
     {
-        return ! in_array((int) ($this->step ?? 0), [1, 2, 3], true);
+        $step = $this->step;
+
+        if (is_null($step) || (is_numeric($step) && (int) $step <= 0)) {
+            return false;
+        }
+
+        return ! in_array((int) $step, [1, 2, 3, 4, 5, 6, 7, 8], true);
+    }
+
+    protected function handleStepChanged(): void
+    {
+        if (method_exists($this, 'onStepChanged')) {
+            $this->onStepChanged((int) $this->step);
+        }
+    }
+
+    protected function personalFormHasDisability(): bool
+    {
+        return property_exists($this, 'personalForm')
+            && $this->personalForm
+            && (bool) $this->personalForm->hasDisability;
     }
 
     protected function payloadHasValues($data): bool
@@ -1526,5 +1144,59 @@ trait PersonnelCrud
         }
 
         return $value !== null && $value !== '';
+    }
+
+    protected function awardsPunishmentsFormInstance(): ?AwardsPunishmentsForm
+    {
+        if (property_exists($this, 'awardsPunishmentsForm') && $this->awardsPunishmentsForm instanceof AwardsPunishmentsForm) {
+            return $this->awardsPunishmentsForm;
+        }
+
+        return null;
+    }
+
+    protected function kinshipFormInstance(): ?KinshipForm
+    {
+        if (property_exists($this, 'kinshipForm') && $this->kinshipForm instanceof KinshipForm) {
+            return $this->kinshipForm;
+        }
+
+        return null;
+    }
+
+    protected function miscFormInstance(): ?MiscellaneousForm
+    {
+        if (property_exists($this, 'miscForm') && $this->miscForm instanceof MiscellaneousForm) {
+            return $this->miscForm;
+        }
+
+        return null;
+    }
+
+    protected function historyFormInstance(): ?ServiceHistoryForm
+    {
+        if (property_exists($this, 'historyForm') && $this->historyForm instanceof ServiceHistoryForm) {
+            return $this->historyForm;
+        }
+
+        return null;
+    }
+
+    /**
+     * @param  array<int, array>  $validators
+     */
+    protected function intersectValidators(array $validators): array
+    {
+        $filtered = array_values(array_filter($validators, fn ($rules) => ! empty($rules)));
+
+        if (empty($filtered)) {
+            return [];
+        }
+
+        return array_reduce(
+            $filtered,
+            fn ($carry, $rules) => $carry === null ? $rules : array_intersect_assoc($carry, $rules),
+            null
+        ) ?? [];
     }
 }

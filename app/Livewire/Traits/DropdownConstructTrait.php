@@ -2,12 +2,26 @@
 
 namespace App\Livewire\Traits;
 
-use Closure;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 
 trait DropdownConstructTrait
 {
+    /**
+     * Simple in-request cache for selected option rows.
+     *
+     * @var array<string, mixed>
+     */
+    protected array $selectedOptionRowCache = [];
+
+    /**
+     * Labels we already have from eager-loaded relations, keyed by table name.
+     *
+     * @var array<string, array<int, string>>
+     */
+    protected array $preloadedDropdownLabels = [];
+
     /**
      * Map builder/collection into [{id,label}], sorted.
      */
@@ -65,7 +79,7 @@ trait DropdownConstructTrait
             $pk = $base->getModel()->getQualifiedKeyName(); // table.id
             $has = $list->firstWhere('id', (int) $selectedId);
             if (!$has) {
-                $selectedRow = (clone $base)->where($pk, $selectedId)->first();
+                $selectedRow = $this->fetchSelectedOptionRow($base, $selectedId);
                 if ($selectedRow) {
                     $list->push($selectedRow);
                 }
@@ -74,5 +88,80 @@ trait DropdownConstructTrait
 
         // 4) uniq + map
         return $this->toOptions($list->unique('id')->values());
+    }
+
+    protected function fetchSelectedOptionRow(Builder $base, int|string $selectedId): mixed
+    {
+        $query = clone $base;
+        $query->where($base->getModel()->getQualifiedKeyName(), $selectedId);
+
+        $cacheKey = $this->selectedOptionCacheKey($query, $selectedId);
+
+        if (array_key_exists($cacheKey, $this->selectedOptionRowCache)) {
+            return $this->selectedOptionRowCache[$cacheKey];
+        }
+
+        $ttl = $this->dropdownCacheTtlMinutes();
+
+        $row = Cache::remember(
+            $cacheKey,
+            now()->addMinutes($ttl),
+            fn () => $query->first()
+        );
+
+        return $this->selectedOptionRowCache[$cacheKey] = $row;
+    }
+
+    protected function selectedOptionCacheKey(Builder $query, int|string $selectedId): string
+    {
+        $model = $query->getModel();
+        $sql = $query->toSql();
+        $bindings = $query->getBindings();
+        $hash = md5($sql.'|'.serialize($bindings));
+        $user = auth()->id() ?? 'guest';
+
+        return implode(':', [
+            'personnel',
+            'option',
+            $model->getTable(),
+            $selectedId,
+            $user,
+            $hash,
+        ]);
+    }
+
+    protected function dropdownCacheTtlMinutes(): int
+    {
+        return property_exists($this, 'dropdownCacheMinutes')
+            ? (int) $this->dropdownCacheMinutes
+            : 10;
+    }
+
+    protected function registerDropdownLabel(string $tableKey, $id, ?string $label): void
+    {
+        if (empty($tableKey) || empty($id) || empty($label)) {
+            return;
+        }
+
+        $this->preloadedDropdownLabels[$tableKey][(int) $id] = (string) $label;
+    }
+
+    protected function resetDropdownLabelCache(): void
+    {
+        $this->preloadedDropdownLabels = [];
+    }
+
+    protected function getPreloadedDropdownLabel(string $tableKey, $id): ?string
+    {
+        if (empty($tableKey) || empty($id)) {
+            return null;
+        }
+
+        return $this->preloadedDropdownLabels[$tableKey][(int) $id] ?? null;
+    }
+
+    protected function dropdownLabelCacheKey(Builder $base): string
+    {
+        return $base->getModel()->getTable();
     }
 }

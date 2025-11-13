@@ -2,113 +2,141 @@
 
 namespace App\Services;
 
-use App\Enums\KnowledgeStatusEnum;
-use App\Models\Award;
 use App\Models\Country;
 use App\Models\Disability;
 use App\Models\EducationDegree;
-use App\Models\Kinship;
-use App\Models\Language;
 use App\Models\Position;
-use App\Models\Punishment;
-use App\Models\Rank;
 use App\Models\RankReason;
-use App\Models\ScientificDegreeAndName;
 use App\Models\SocialOrigin;
 use App\Models\Structure;
 use App\Models\WorkNorm;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class CallPersonnelInfo
 {
+    /**
+     * Flush cached dropdown payloads. Useful after seeders or manual CRUD.
+     */
+    public static function flush(?int $userId = null, ?string $locale = null): void
+    {
+        $service = resolve(static::class);
+        $locale ??= config('app.locale');
+        $userId ??= auth()->id();
+
+        Cache::forget($service->cacheKey('nationalities'));
+        Cache::forget($service->cacheKey('positions'));
+        Cache::forget($service->cacheKey('disabilities'));
+        Cache::forget($service->cacheKey('rank_reasons'));
+        Cache::forget($service->cacheKey('social_origins'));
+
+        if ($locale) {
+            Cache::forget($service->cacheKey('education_degrees', $locale));
+            Cache::forget($service->cacheKey('work_norms', $locale));
+        }
+
+        if ($userId) {
+            Cache::forget($service->cacheKey('structures', $userId));
+        }
+    }
+
     public function getAll($isDisability, $_this): array
     {
-        $nationalities = Country::withWhereHas('currentCountryTranslations', function ($query) use ($_this) {
-            $query
-                ->when(! empty($_this->searchNationality), function ($q) use ($_this) {
-                    $q->where('title', 'LIKE', "%$_this->searchNationality%");
+        $nationalities = $this->rememberCollection(
+            $this->cacheKey('nationalities'),
+            function () use ($_this) {
+                return Country::withWhereHas('currentCountryTranslations', function ($query) use ($_this) {
+                    $query
+                        ->when(! empty($_this->searchNationality), function ($q) use ($_this) {
+                            $q->where('title', 'LIKE', "%$_this->searchNationality%");
+                        })
+                        ->when(! empty($_this->searchPreviousNationality), function ($q) use ($_this) {
+                            $q->where('title', 'LIKE', "%$_this->searchPreviousNationality%");
+                        });
                 })
-                ->when(! empty($_this->searchPreviousNationality), function ($q) use ($_this) {
-                    $q->where('title', 'LIKE', "%$_this->searchPreviousNationality%");
-                });
-        })
-            ->get()
-            ->sortBy('currentCountryTranslations.title')
-            ->all();
+                    ->get()
+                    ->sortBy('currentCountryTranslations.title')
+                    ->all();
+            },
+            empty($_this->searchNationality) && empty($_this->searchPreviousNationality)
+        );
 
-        $education_degrees = EducationDegree::select('id', DB::raw('title_'.config('app.locale').' as title'))
-            ->when(! empty($_this->searchEducationDegree), function ($q) use ($_this) {
-                $q->where('title_'.config('app.locale'), 'LIKE', "%$_this->searchEducationDegree%");
-            })
-            ->get();
+        $education_degrees = $this->rememberCollection(
+            $this->cacheKey('education_degrees', config('app.locale')),
+            function () use ($_this) {
+                return EducationDegree::select('id', DB::raw('title_'.config('app.locale').' as title'))
+                    ->when(! empty($_this->searchEducationDegree), function ($q) use ($_this) {
+                        $q->where('title_'.config('app.locale'), 'LIKE', "%$_this->searchEducationDegree%");
+                    })
+                    ->get();
+            },
+            empty($_this->searchEducationDegree)
+        );
 
-        $structures = Structure::when(! empty($_this->searchStructure), function ($q) use ($_this) {
-            $q->where('name', 'LIKE', "%$_this->searchStructure%");
-        })
-            ->accessible()
-            ->orderBy('level')
-            ->orderBy('code')
-            ->get();
+        $structures = $this->rememberCollection(
+            $this->cacheKey('structures', auth()->id()),
+            function () use ($_this) {
+                return Structure::accessible()
+                    ->when(! empty($_this->searchStructure), function ($q) use ($_this) {
+                        $q->where('name', 'LIKE', "%$_this->searchStructure%");
+                    })
+                    ->orderBy('level')
+                    ->orderBy('code')
+                    ->get();
+            },
+            empty($_this->searchStructure)
+        );
 
-        $positions = Position::when(! empty($_this->searchPosition), function ($q) use ($_this) {
-            $q->where('name', 'LIKE', "%$_this->searchPosition%");
-        })
-            ->get();
+        $positions = $this->rememberCollection(
+            $this->cacheKey('positions'),
+            function () use ($_this) {
+                return Position::when(! empty($_this->searchPosition), function ($q) use ($_this) {
+                    $q->where('name', 'LIKE', "%$_this->searchPosition%");
+                })->get();
+            },
+            empty($_this->searchPosition)
+        );
 
-        $work_norms = WorkNorm::select('id', DB::raw('name_'.config('app.locale').' as name'))
-            ->when(! empty($_this->searchWorkNorm), function ($q) use ($_this) {
-                $q->where('name_'.config('app.locale'), 'LIKE', "%$_this->searchWorkNorm%");
-            })
-            ->get();
+        $work_norms = $this->rememberCollection(
+            $this->cacheKey('work_norms', config('app.locale')),
+            function () use ($_this) {
+                return WorkNorm::select('id', DB::raw('name_'.config('app.locale').' as name'))
+                    ->when(! empty($_this->searchWorkNorm), function ($q) use ($_this) {
+                        $q->where('name_'.config('app.locale'), 'LIKE', "%$_this->searchWorkNorm%");
+                    })
+                    ->get();
+            },
+            empty($_this->searchWorkNorm)
+        );
 
-        $disabilities = $isDisability
-            ? Disability::when(! empty($_this->searchDisability), function ($q) use ($_this) {
-                $q->where('name', 'LIKE', "%$_this->searchDisability%");
-            })
-                ->get()
-            : [];
+        $disabilities = [];
 
-        $rankModel = Rank::query()
-            ->when(! empty($_this->searchRank), function ($q) use ($_this) {
-                $q->where('name_'.config('app.locale'), 'LIKE', "%$_this->searchRank%");
-            })
-            ->when(! empty($_this->searchMilitaryRank), function ($q) use ($_this) {
-                $q->where('name_'.config('app.locale'), 'LIKE', "%$_this->searchMilitaryRank%");
-            })
-            ->where('is_active', 1)
-            ->get();
+        if ($isDisability) {
+            $disabilities = $this->rememberCollection(
+                $this->cacheKey('disabilities'),
+                function () use ($_this) {
+                    return Disability::when(! empty($_this->searchDisability), function ($q) use ($_this) {
+                        $q->where('name', 'LIKE', "%$_this->searchDisability%");
+                    })->get();
+                },
+                empty($_this->searchDisability)
+            );
+        }
 
-        $rankReasons = RankReason::all();
+        $rankReasons = $this->rememberCollection(
+            $this->cacheKey('rank_reasons'),
+            fn () => RankReason::all()
+        );
 
-        $awardModel = Award::when(! empty($_this->searchAward), function ($q) use ($_this) {
-            $q->where('name', 'LIKE', "%$_this->searchAward%");
-        })
-            ->get();
-
-        $punishmentModel = Punishment::when(! empty($_this->searchPunishment), function ($q) use ($_this) {
-            $q->where('name', 'LIKE', "%$_this->searchPunishment%");
-        })
-            ->criminalType('other')
-            ->orderBy('name')
-            ->get();
-
-        $criminalModel = Punishment::when(! empty($_this->searchCriminal), function ($q) use ($_this) {
-            $q->where('name', 'LIKE', "%$_this->searchCriminal%");
-        })
-            ->criminalType('criminal')
-            ->orderBy('name')
-            ->get();
-
-        $kinshipModel = Kinship::select('id', DB::raw('name_'.config('app.locale').' as name'), 'is_active')
-            ->when(! empty($_this->searchKinship), function ($q) use ($_this) {
-                $q->where('name_'.config('app.locale'), 'LIKE', "%$_this->searchKinship%");
-            })
-            ->where('is_active', 1)
-            ->get();
-
-        $_social_origins = SocialOrigin::when(! empty($_this->searchSocialOrigin), function ($q) use ($_this) {
-            $q->where('name', 'LIKE', "%$_this->searchSocialOrigin%");
-        })->get();
+        $_social_origins = $this->rememberCollection(
+            $this->cacheKey('social_origins'),
+            function () use ($_this) {
+                return SocialOrigin::when(! empty($_this->searchSocialOrigin), function ($q) use ($_this) {
+                    $q->where('name', 'LIKE', "%$_this->searchSocialOrigin%");
+                })->get();
+            },
+            empty($_this->searchSocialOrigin)
+        );
 
         return [
             'nationalities' => $nationalities,
@@ -117,13 +145,24 @@ class CallPersonnelInfo
             'positions' => $positions,
             'work_norms' => $work_norms,
             'disabilities' => $disabilities,
-            'rankModel' => $rankModel,
             'rankReasons' => $rankReasons,
-            'awardModel' => $awardModel,
-            'punishmentModel' => $punishmentModel,
-            'criminalModel' => $criminalModel,
-            'kinshipModel' => $kinshipModel,
             '_social_origins' => $_social_origins,
         ];
+    }
+
+    protected function rememberCollection(string $cacheKey, callable $resolver, bool $useCache = true)
+    {
+        if (! $useCache) {
+            return $resolver();
+        }
+
+        return Cache::rememberForever($cacheKey, $resolver);
+    }
+
+    protected function cacheKey(string $prefix, $suffix = null): string
+    {
+        $parts = array_filter([$prefix, $suffix]);
+
+        return implode(':', $parts);
     }
 }

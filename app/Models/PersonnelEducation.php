@@ -54,12 +54,20 @@ class PersonnelEducation extends Model
         'graduated_year' => self::FORMAT_CAST,
     ];
 
-    public function institution(): BelongsTo
+    public function educationalInstitution(): BelongsTo
     {
         return $this->belongsTo(EducationalInstitution::class, 'educational_institution_id', 'id');
     }
 
-    public function form(): BelongsTo
+    /**
+     * Backwards-compatible alias for legacy templates expecting $education->institution.
+     */
+    public function institution(): BelongsTo
+    {
+        return $this->educationalInstitution();
+    }
+
+    public function educationForm(): BelongsTo
     {
         return $this->belongsTo(EducationForm::class, 'education_form_id', 'id');
     }

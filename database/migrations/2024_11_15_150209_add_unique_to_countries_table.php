@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::getConnection()->getDriverName() === 'sqlite') {
+            return;
+        }
+
         Schema::table('countries', function (Blueprint $table) {
              $table->integer('id')->change();
              $table->unique(['id', 'code']);
@@ -22,6 +26,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (Schema::getConnection()->getDriverName() === 'sqlite') {
+            return;
+        }
+
         Schema::table('countries', function (Blueprint $table) {
             //
         });

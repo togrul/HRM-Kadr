@@ -20,9 +20,13 @@ if (isset($__slots)) unset($__slots);
      <?php $__env->endSlot(); ?>
     
 
-    <div class="flex flex-col space-y-4 px-6 py-4">
+    <div class="flex flex-col px-6 py-4 space-y-4">
+        <?php
+            $personnels = $this->personnels;
+            $status = $this->status;
+        ?>
         
-        <div class="flex justify-between items-center">
+        <div class="flex items-center justify-between">
             <?php echo $__env->make('partials.personnel.status-filters', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
             <?php echo $__env->make('partials.personnel.action-buttons', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
         </div>
@@ -31,7 +35,7 @@ if (isset($__slots)) unset($__slots);
 
         <div class="relative min-h-[300px] -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-                <div class="overflow-inherit border-b border-gray-200 shadow sm:rounded-xl">
+                <div class="border-b border-gray-200 shadow overflow-inherit sm:rounded-xl">
                     <?php if (isset($component)) { $__componentOriginal3ee30789824fd1cc17cb4ff8e03df656 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal3ee30789824fd1cc17cb4ff8e03df656 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table.tbl','data' => ['headers' => $this->getTableHeaders()]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
@@ -42,11 +46,15 @@ if (isset($__slots)) unset($__slots);
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
 <?php $component->withAttributes(['headers' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($this->getTableHeaders())]); ?>
-                        <!--[if BLOCK]><![endif]--><?php $__empty_1 = true; $__currentLoopData = $this->personnels; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $personnel): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                        <!--[if BLOCK]><![endif]--><?php $__empty_1 = true; $__currentLoopData = $personnels; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $personnel): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                            <?php
+                                $activeVacation = $personnel->activeVacation;
+                                $activeBusinessTrip = $personnel->activeBusinessTrip;
+                            ?>
                             <tr class="<?php echo \Illuminate\Support\Arr::toCssClasses([
                                 'relative',
                                 'bg-rose-100' => !empty($personnel->leave_work_date),
-                                'bg-white' => $personnel->hasActiveVacation || $personnel->hasActiveBusinessTrip,
+                                'bg-white' => $activeVacation || $activeBusinessTrip,
                             ]); ?>">
                                 <?php if (isset($component)) { $__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b = $attributes; } ?>
@@ -58,13 +66,10 @@ if (isset($__slots)) unset($__slots);
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
 <?php $component->withAttributes([]); ?>
-                                    <div class="flex flex-col justify-between h-full absolute top-0 left-0">
-                                        <!--[if BLOCK]><![endif]--><?php if($personnel->hasActiveVacation): ?>
-                                            <?php
-                                                $activeVacation = $personnel->hasActiveVacation;
-                                                $vacationStart = $activeVacation->start_date;
-                                                $vacationEnd = $activeVacation->return_work_date;
-                                            ?>
+                                    <div class="absolute top-0 left-0 flex flex-col justify-between h-full">
+                                        <!--[if BLOCK]><![endif]--><?php if($activeVacation): ?>
+                                            <?php ($vacationStart = $activeVacation->start_date); ?>
+                                            <?php ($vacationEnd = $activeVacation->return_work_date); ?>
                                             <?php if (isset($component)) { $__componentOriginale375e741fa8af2e5aa10d29452e1526c = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginale375e741fa8af2e5aa10d29452e1526c = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.progress','data' => ['startDate' => $vacationStart,'endDate' => $vacationEnd,'color' => 'emerald']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
@@ -88,12 +93,9 @@ if (isset($__slots)) unset($__slots);
 <?php unset($__componentOriginale375e741fa8af2e5aa10d29452e1526c); ?>
 <?php endif; ?>
                                         <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
-                                        <!--[if BLOCK]><![endif]--><?php if($personnel->hasActiveBusinessTrip): ?>
-                                            <?php
-                                                $businessTrip = $personnel->hasActiveBusinessTrip;
-                                                $startDate = $businessTrip->start_date;
-                                                $endDate = $businessTrip->end_date;
-                                            ?>
+                                        <!--[if BLOCK]><![endif]--><?php if($activeBusinessTrip): ?>
+                                            <?php ($startDate = $activeBusinessTrip->start_date); ?>
+                                            <?php ($endDate = $activeBusinessTrip->end_date); ?>
                                             <?php if (isset($component)) { $__componentOriginale375e741fa8af2e5aa10d29452e1526c = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginale375e741fa8af2e5aa10d29452e1526c = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.progress','data' => ['startDate' => $startDate,'endDate' => $endDate,'color' => 'rose']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
@@ -120,7 +122,7 @@ if (isset($__slots)) unset($__slots);
                                     </div>
 
                                     <span class="text-sm font-medium text-gray-700">
-                                        <?php echo e(($this->personnels->currentpage() - 1) * $this->personnels->perpage() + $key + 1); ?>
+                                        <?php echo e(($personnels->currentPage() - 1) * $personnels->perPage() + $key + 1); ?>
 
                                     </span>
                                  <?php echo $__env->renderComponent(); ?>
@@ -152,8 +154,8 @@ if (isset($__slots)) unset($__slots);
 
                                         <!--[if BLOCK]><![endif]--><?php if($personnel->is_pending): ?>
                                             <div
-                                                class="text-xs font-medium rounded-lg shadow-sm px-4 py-1 flex space-x-2 items-center bg-teal-50 border border-teal-200 text-teal-500">
-                                                <svg class="h-5 w-5 text-teal-500" xmlns="http://www.w3.org/2000/svg"
+                                                class="flex items-center px-4 py-1 space-x-2 text-xs font-medium text-teal-500 border border-teal-200 rounded-lg shadow-sm bg-teal-50">
+                                                <svg class="w-5 h-5 text-teal-500" xmlns="http://www.w3.org/2000/svg"
                                                     fill="none" viewBox="0 0 24 24" stroke-width="2"
                                                     stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -199,14 +201,14 @@ if (isset($__slots)) unset($__slots);
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
 <?php $component->withAttributes([]); ?>
-                                    <div class="flex items-center space-x-2 px-2">
+                                    <div class="flex items-center px-2 space-x-2">
                                         <!--[if BLOCK]><![endif]--><?php if(!empty($personnel->photo)): ?>
                                             <img src="<?php echo e(\Illuminate\Support\Facades\Storage::url($personnel->photo)); ?>"
                                                 alt=""
-                                                class="flex-none rounded-xl object-cover w-14 h-14 border-2 shadow-lg border-zinc-200">
+                                                class="flex-none object-cover border-2 shadow-lg rounded-xl w-14 h-14 border-zinc-200">
                                         <?php else: ?>
                                             <img src="<?php echo e(asset('assets/images/no-image.png')); ?>" alt=""
-                                                class="flex-none rounded-xl object-cover w-14 h-14 border-2 shadow-lg border-zinc-200">
+                                                class="flex-none object-cover border-2 shadow-lg rounded-xl w-14 h-14 border-zinc-200">
                                         <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                         <div class="flex flex-col space-y-1">
                                             <span class="text-sm font-medium text-zinc-900">
@@ -214,13 +216,13 @@ if (isset($__slots)) unset($__slots);
 
                                             </span>
                                             <span
-                                                class="text-sm w-max font-medium text-neutral-600 rounded-xl px-3 py-1 shadow-sm bg-neutral-200/70">
+                                                class="px-3 py-1 text-sm font-medium shadow-sm w-max text-neutral-600 rounded-xl bg-neutral-200/70">
                                                 <?php echo e($personnel->gender == 1 ? __('Man') : __('Woman')); ?>
 
                                             </span>
                                             <!--[if BLOCK]><![endif]--><?php if(!empty($personnel->latestRank)): ?>
                                                 <span
-                                                    class="text-sm font-medium rounded-xl px-3 py-1 shadow-sm w-max bg-green-950 text-yellow-400">
+                                                    class="px-3 py-1 text-sm font-medium text-yellow-400 shadow-sm rounded-xl w-max bg-green-950">
                                                     <?php echo e($personnel->latestRank?->rank->name); ?>
 
                                                 </span>
@@ -250,9 +252,9 @@ if (isset($__slots)) unset($__slots);
 <?php $component->withAttributes([]); ?>
                                     <div class="flex flex-col space-y-1">
                                         <span
-                                            class="text-zinc-900 text-sm font-medium"><?php echo e($personnel->structure->name); ?></span>
+                                            class="text-sm font-medium text-zinc-900"><?php echo e($personnel->structure->name); ?></span>
                                         <span
-                                            class="text-zinc-600 text-sm font-medium"><?php echo e($personnel->position->name); ?></span>
+                                            class="text-sm font-medium text-zinc-600"><?php echo e($personnel->position->name); ?></span>
                                     </div>
                                  <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
@@ -342,12 +344,12 @@ if (isset($__slots)) unset($__slots);
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
 <?php $component->withAttributes(['isButton' => true,'style' => 'text-align: center !important;']); ?>
-                                    <div class="flex space-x-2 items-center">
+                                    <div class="flex items-center space-x-2">
                                         <!--[if BLOCK]><![endif]--><?php if($status != 'deleted'): ?>
                                             <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('edit-personnels')): ?>
                                                 <a href="#"
                                                     wire:click="openSideMenu('edit-personnel',<?php echo e($personnel->id); ?>)"
-                                                    class="flex items-center justify-center w-9 h-9 text-xs font-medium uppercase rounded-lg text-gray-500 bg-gray-100 hover:bg-gray-200 hover:text-gray-700">
+                                                    class="flex items-center justify-center text-xs font-medium text-gray-500 uppercase bg-gray-100 rounded-lg w-9 h-9 hover:bg-gray-200 hover:text-gray-700">
                                                     <?php if (isset($component)) { $__componentOriginal1ac9cc6c9f431e28031aa48530f41a62 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal1ac9cc6c9f431e28031aa48530f41a62 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.icons.profile-icon','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
@@ -372,7 +374,7 @@ if (isset($__slots)) unset($__slots);
                                         <?php else: ?>
                                             <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('edit-personnels')): ?>
                                                 <button wire:click="restoreData('<?php echo e($personnel->tabel_no); ?>')"
-                                                    class="flex items-center justify-center w-9 h-9 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 bg-teal-50 hover:bg-teal-100 hover:text-gray-700">
+                                                    class="flex items-center justify-center text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg w-9 h-9 bg-teal-50 hover:bg-teal-100 hover:text-gray-700">
                                                     <?php if (isset($component)) { $__componentOriginal3b29863ca6c763a42daeb7da6d628a8a = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal3b29863ca6c763a42daeb7da6d628a8a = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.icons.recover','data' => ['color' => 'text-teal-500','hover' => 'text-teal-600']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
@@ -440,7 +442,7 @@ if (isset($__slots)) unset($__slots);
                                                     <div class="flex items-center divide-x divide-neutral-100" role="none">
                                                         <button
                                                             wire:click="openSideMenu('show-files','<?php echo e($personnel->tabel_no); ?>')"
-                                                            class="appearance-none w-full flex items-center justify-start space-x-2 px-4 py-2 text-sm font-medium relative hover:bg-slate-100"
+                                                            class="relative flex items-center justify-start w-full px-4 py-2 space-x-2 text-sm font-medium appearance-none hover:bg-slate-100"
                                                             @mouseover="showTooltip = 'files'"
                                                             @mouseleave="showTooltip = ''"
                                                         >
@@ -465,7 +467,7 @@ if (isset($__slots)) unset($__slots);
 <?php unset($__componentOriginal7dd4dad32983eebaf5b0cf2c88f3cdd9); ?>
 <?php endif; ?>
                                                             <div x-show="showTooltip == 'files'"
-                                                                 class="absolute -top-9 left-1/2 opacity-100 -translate-x-1/2 z-10 whitespace-nowrap bg-white shadow-lg shadow-black/5 rounded-lg border border-neutral-200/70 px-2 py-1 text-center text-sm text-neutral-600 transition-all ease-out dark:bg-neutral-900/80 dark:text-neutral-50"
+                                                                 class="absolute z-10 px-2 py-1 text-sm text-center transition-all ease-out -translate-x-1/2 bg-white border rounded-lg shadow-lg opacity-100 -top-9 left-1/2 whitespace-nowrap shadow-black/5 border-neutral-200/70 text-neutral-600 dark:bg-neutral-900/80 dark:text-neutral-50"
                                                                  role="tooltip"
                                                             >
                                                                 <?php echo e(__('Files')); ?>
@@ -473,7 +475,7 @@ if (isset($__slots)) unset($__slots);
                                                             </div>
                                                         </button>
                                                         <a href="<?php echo e(route('print.personnel', $personnel->id)); ?>"
-                                                            class="appearance-none w-full flex items-center justify-start space-x-2 px-4 py-2 text-sm font-medium  hover:bg-slate-100"
+                                                            class="flex items-center justify-start w-full px-4 py-2 space-x-2 text-sm font-medium appearance-none hover:bg-slate-100"
                                                             target="_blank"
                                                             @mouseover="showTooltip = 'print'"
                                                             @mouseleave="showTooltip = ''"
@@ -499,7 +501,7 @@ if (isset($__slots)) unset($__slots);
 <?php unset($__componentOriginalc28559b53500c6783f3a7dc437a050ab); ?>
 <?php endif; ?>
                                                             <div x-show="showTooltip == 'print'"
-                                                                 class="absolute -top-9 left-1/2 opacity-100 -translate-x-1/2 z-10 whitespace-nowrap bg-white shadow-lg shadow-black/5 border border-neutral-200/70 px-2 py-1 text-center text-sm text-neutral-600 transition-all ease-out dark:bg-neutral-900/80 dark:text-neutral-50"
+                                                                 class="absolute z-10 px-2 py-1 text-sm text-center transition-all ease-out -translate-x-1/2 bg-white border shadow-lg opacity-100 -top-9 left-1/2 whitespace-nowrap shadow-black/5 border-neutral-200/70 text-neutral-600 dark:bg-neutral-900/80 dark:text-neutral-50"
                                                                  role="tooltip"
                                                             >
                                                                 <?php echo e(__('Print')); ?>
@@ -508,7 +510,7 @@ if (isset($__slots)) unset($__slots);
                                                         </a>
                                                         <button
                                                             wire:click="openSideMenu('show-information','<?php echo e($personnel->tabel_no); ?>')"
-                                                            class="appearance-none w-full flex items-center justify-start space-x-2 px-4 py-2 text-sm font-medium relative hover:bg-slate-100"
+                                                            class="relative flex items-center justify-start w-full px-4 py-2 space-x-2 text-sm font-medium appearance-none hover:bg-slate-100"
                                                             @mouseover="showTooltip = 'information'"
                                                             @mouseleave="showTooltip = ''"
                                                         >
@@ -533,7 +535,7 @@ if (isset($__slots)) unset($__slots);
 <?php unset($__componentOriginal9906a361620ca30cfbf4dda88768efec); ?>
 <?php endif; ?>
                                                             <div x-show="showTooltip == 'information'"
-                                                                 class="absolute -top-9 left-1/2 opacity-100 -translate-x-1/2 z-10 whitespace-nowrap bg-white shadow-lg shadow-black/5 border border-neutral-200/70 px-2 py-1 text-center text-sm text-neutral-600 transition-all ease-out dark:bg-neutral-900/80 dark:text-neutral-50"
+                                                                 class="absolute z-10 px-2 py-1 text-sm text-center transition-all ease-out -translate-x-1/2 bg-white border shadow-lg opacity-100 -top-9 left-1/2 whitespace-nowrap shadow-black/5 border-neutral-200/70 text-neutral-600 dark:bg-neutral-900/80 dark:text-neutral-50"
                                                                  role="tooltip"
                                                             >
                                                                 <?php echo e(__('Information')); ?>
@@ -542,7 +544,7 @@ if (isset($__slots)) unset($__slots);
                                                         </button>
                                                         <button
                                                             wire:click="printInfo('<?php echo e($personnel->id); ?>')"
-                                                            class="appearance-none w-full flex items-center justify-start space-x-2 px-4 py-2 text-sm font-medium relative hover:bg-slate-100"
+                                                            class="relative flex items-center justify-start w-full px-4 py-2 space-x-2 text-sm font-medium appearance-none hover:bg-slate-100"
                                                             @mouseover="showTooltip = 'orders'"
                                                             @mouseleave="showTooltip = ''"
                                                         >
@@ -567,7 +569,7 @@ if (isset($__slots)) unset($__slots);
 <?php unset($__componentOriginal9b80fa9788394248f2b380b2fdd350e3); ?>
 <?php endif; ?>
                                                             <div x-show="showTooltip == 'orders'"
-                                                                 class="absolute -top-9 left-1/2 opacity-100 -translate-x-1/2 z-10 whitespace-nowrap bg-white shadow-lg shadow-black/5 rounded-lg border border-neutral-200/70 px-2 py-1 text-center text-sm text-neutral-600 transition-all ease-out dark:bg-neutral-900/80 dark:text-neutral-50"
+                                                                 class="absolute z-10 px-2 py-1 text-sm text-center transition-all ease-out -translate-x-1/2 bg-white border rounded-lg shadow-lg opacity-100 -top-9 left-1/2 whitespace-nowrap shadow-black/5 border-neutral-200/70 text-neutral-600 dark:bg-neutral-900/80 dark:text-neutral-50"
                                                                  role="tooltip"
                                                             >
                                                                 <?php echo e(__('Orders')); ?>
@@ -576,7 +578,7 @@ if (isset($__slots)) unset($__slots);
                                                         </button>
                                                         <button
                                                             wire:click="openSideMenu('show-vacations','<?php echo e($personnel->tabel_no); ?>')"
-                                                            class="appearance-none w-full flex items-center justify-start space-x-2 px-4 py-2 text-sm font-medium relative hover:bg-slate-100"
+                                                            class="relative flex items-center justify-start w-full px-4 py-2 space-x-2 text-sm font-medium appearance-none hover:bg-slate-100"
                                                             @mouseover="showTooltip = 'vacations'"
                                                             @mouseleave="showTooltip = ''"
                                                         >
@@ -601,7 +603,7 @@ if (isset($__slots)) unset($__slots);
 <?php unset($__componentOriginal36d64938bb4d5f38af4c4cf42ab4b7c6); ?>
 <?php endif; ?>
                                                             <div x-show="showTooltip == 'vacations'"
-                                                                 class="absolute -top-9 left-1/2 opacity-100 -translate-x-1/2 z-10 whitespace-nowrap bg-white shadow-lg shadow-black/5 rounded-lg border border-neutral-200/70 px-2 py-1 text-center text-sm text-neutral-600 transition-all ease-out dark:bg-neutral-900/80 dark:text-neutral-50"
+                                                                 class="absolute z-10 px-2 py-1 text-sm text-center transition-all ease-out -translate-x-1/2 bg-white border rounded-lg shadow-lg opacity-100 -top-9 left-1/2 whitespace-nowrap shadow-black/5 border-neutral-200/70 text-neutral-600 dark:bg-neutral-900/80 dark:text-neutral-50"
                                                                  role="tooltip"
                                                             >
                                                                 <?php echo e(__('Vacations')); ?>
@@ -616,7 +618,7 @@ if (isset($__slots)) unset($__slots);
                                         <!--[if BLOCK]><![endif]--><?php if($status != 'deleted'): ?>
                                             <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('delete-personnels')): ?>
                                                 <button wire:click="setDeletePersonnel('<?php echo e($personnel->tabel_no); ?>')"
-                                                    class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-100 hover:text-gray-700">
+                                                    class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-100 hover:text-gray-700">
                                                     <?php if (isset($component)) { $__componentOriginal795db0355ab159c86fb4ade6f5b93d10 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal795db0355ab159c86fb4ade6f5b93d10 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.icons.delete-icon','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
@@ -643,7 +645,7 @@ if (isset($__slots)) unset($__slots);
                                                 <button
                                                     wire:confirm="<?php echo e(__('Are you sure you want to remove this data?')); ?>"
                                                     wire:click="forceDeleteData('<?php echo e($personnel->tabel_no); ?>')"
-                                                    class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-50 hover:text-gray-700">
+                                                    class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700">
                                                     <?php if (isset($component)) { $__componentOriginalc68e9de97adc0f3f617404bb2241d8ad = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalc68e9de97adc0f3f617404bb2241d8ad = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.icons.force-delete','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
@@ -714,7 +716,7 @@ if (isset($__slots)) unset($__slots);
         </div>
 
         <div class="mt-2">
-            <?php echo e($this->personnels->links()); ?>
+            <?php echo e($personnels->links()); ?>
 
         </div>
     </div>

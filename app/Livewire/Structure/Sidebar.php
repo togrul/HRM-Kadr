@@ -27,7 +27,7 @@ class Sidebar extends Component
 
     public function render()
     {
-        $structures = Cache::rememberForever('structures', function () {
+      $structures = Cache::rememberForever('structures', function () {
             return Structure::withRecursive('subs')->whereNull('parent_id')->orderBy('code')->get();
         });
 

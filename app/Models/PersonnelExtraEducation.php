@@ -57,17 +57,25 @@ class PersonnelExtraEducation extends Model
         'graduated_year' => self::FORMAT_CAST,
     ];
 
-    public function type(): BelongsTo
+    public function educationType(): BelongsTo
     {
         return $this->belongsTo(EducationType::class, 'education_type_id', 'id');
     }
 
-    public function institution(): BelongsTo
+    /**
+     * Preserve the old $extraEducation->type accessors.
+     */
+    public function type(): BelongsTo
+    {
+        return $this->educationType();
+    }
+
+    public function educationalInstitution(): BelongsTo
     {
         return $this->belongsTo(EducationalInstitution::class, 'educational_institution_id', 'id');
     }
 
-    public function form(): BelongsTo
+    public function educationForm(): BelongsTo
     {
         return $this->belongsTo(EducationForm::class, 'education_form_id', 'id');
     }
@@ -75,5 +83,13 @@ class PersonnelExtraEducation extends Model
     public function documentType(): BelongsTo
     {
         return $this->belongsTo(EducationDocumentType::class, 'education_document_type_id', 'id');
+    }
+
+    /**
+     * Backwards-compatible alias for legacy templates expecting $extraEducation->institution.
+     */
+    public function institution(): BelongsTo
+    {
+        return $this->educationalInstitution();
     }
 }

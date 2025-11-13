@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (! Schema::hasTable('order_log_component_attributes')) {
+            return;
+        }
+
         Schema::table('order_log_component_attributes', function (Blueprint $table) {
             $table->integer('row_number')->default(0);
         });
@@ -21,6 +25,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (! Schema::hasTable('order_log_component_attributes')) {
+            return;
+        }
+
         Schema::table('order_log_component_attributes', function (Blueprint $table) {
             $table->dropColumn('row_number');
         });

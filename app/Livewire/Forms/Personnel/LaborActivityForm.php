@@ -46,10 +46,12 @@ class LaborActivityForm extends Form
 
         $this->laborActivityList = $laborActivityList;
 
-        $this->rank = $this->prepareRankPayload($rank);
+        $this->rank = ! empty($rank)
+            ? array_replace($this->defaultRank(), $rank)
+            : $this->defaultRank();
 
         $this->rankList = collect($rankList)
-            ->map(fn ($entry) => $this->prepareRankPayload($entry))
+            ->map(fn ($entry) => array_replace($this->defaultRank(), $entry ?? []))
             ->all();
     }
 
@@ -81,12 +83,61 @@ class LaborActivityForm extends Form
 
         $this->rankList = $personnel->ranks
             ->map(function ($rank) {
-                return $this->prepareRankPayload(
+                return array_replace(
+                    $this->defaultRank(),
                     Arr::only($rank->toArray(), array_keys($this->defaultRank()))
                 );
             })
             ->values()
             ->all();
+    }
+
+    public function addLaborActivityEntry(bool $isSpecialService = false): void
+    {
+        $entry = $this->laborActivity;
+        $entry['is_special_service'] = $isSpecialService ? 1 : 0;
+        $entry['is_current'] = (bool) ($entry['is_current'] ?? false);
+
+        if ($isSpecialService) {
+            $time = trim((string) ($entry['time'] ?? '12:00'));
+            $orderDate = trim((string) ($entry['order_date'] ?? ''));
+            $entry['order_date'] = trim("{$orderDate} {$time}");
+        } else {
+            $entry['order_given_by'] = null;
+            $entry['order_no'] = null;
+            $entry['order_date'] = null;
+        }
+
+        unset($entry['time']);
+
+        $this->laborActivityList[] = $entry;
+        $this->resetLaborActivity();
+    }
+
+    public function removeLaborActivityEntry(int $index): void
+    {
+        if (! array_key_exists($index, $this->laborActivityList)) {
+            return;
+        }
+
+        unset($this->laborActivityList[$index]);
+        $this->laborActivityList = array_values($this->laborActivityList);
+    }
+
+    public function addRankEntry(): void
+    {
+        $this->rankList[] = $this->rank;
+        $this->resetRank();
+    }
+
+    public function removeRankEntry(int $index): void
+    {
+        if (! array_key_exists($index, $this->rankList)) {
+            return;
+        }
+
+        unset($this->rankList[$index]);
+        $this->rankList = array_values($this->rankList);
     }
 
     protected function defaultLaborActivity(): array
@@ -119,18 +170,15 @@ class LaborActivityForm extends Form
         ];
     }
 
-    protected function prepareRankPayload(array $rank): array
+    public function laborActivitiesForPersistence(): array
     {
-        $payload = array_replace($this->defaultRank(), $rank);
+        return collect($this->laborActivityList ?? [])
+            ->map(fn ($activity) => Arr::except($activity, ['time']))
+            ->all();
+    }
 
-        if (isset($payload['rank_id']) && is_array($payload['rank_id'])) {
-            $payload['rank_id'] = $payload['rank_id']['id'] ?? null;
-        }
-
-        if (isset($payload['rank_reason_id']) && is_array($payload['rank_reason_id'])) {
-            $payload['rank_reason_id'] = $payload['rank_reason_id']['id'] ?? null;
-        }
-
-        return $payload;
+    public function ranksForPersistence(): array
+    {
+        return $this->rankList ?? [];
     }
 }

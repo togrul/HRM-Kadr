@@ -28,7 +28,7 @@ trait PersonnelValidationTrait
         $hasChangedNationality = (bool) data_get($personnelState, 'has_changed_nationality', false);
         $hasDisability = property_exists($this, 'personalForm') && $this->personalForm
             ? (bool) $this->personalForm->hasDisability
-            : (bool) ($this->isDisability ?? false);
+            : false;
 
         $initialsChangeRules = $hasChangedInitials ? [
             'personalForm.personnel.previous_name' => 'required|min:3',
@@ -163,7 +163,7 @@ trait PersonnelValidationTrait
             return $this->personalForm->personnel ?? [];
         }
 
-        return $this->personnel ?? [];
+        return [];
     }
 
     protected function resolvePersonnelId(): ?int
@@ -187,11 +187,18 @@ trait PersonnelValidationTrait
     {
         $rules = $this->educationRuleSet();
 
-        if ($this->hasExtraEducation) {
+        if ($this->educationFormHasExtraEducation()) {
             $rules = array_merge($rules, $this->extraEducationRuleSet());
         }
 
         return $rules;
+    }
+
+    protected function educationFormHasExtraEducation(): bool
+    {
+        return property_exists($this, 'educationForm')
+            && $this->educationForm
+            && (bool) ($this->educationForm->hasExtraEducation ?? false);
     }
 
     protected function getCareerRules(): array
@@ -216,68 +223,109 @@ trait PersonnelValidationTrait
     protected function getMilitaryAndHealthRules(): array
     {
         return [
-            'military.rank_id.id' => 'required|int|exists:ranks,id',
-            'military.attitude_to_military_service' => 'required|min:2',
-            'military.given_date' => 'required|date',
-            'injuries.injury_type' => 'required',
-            'injuries.location' => 'required|min:2',
-            'injuries.date_time' => 'required|date',
-            'captivity.location' => 'required|min:2',
-            'captivity.condition' => 'required|min:2',
-            'captivity.taken_captive_date' => 'required|date',
+            'historyForm.military.rank_id' => 'required|int|exists:ranks,id',
+            'historyForm.military.attitude_to_military_service' => 'required|min:2',
+            'historyForm.military.given_date' => 'required|date',
+            'historyForm.injury.injury_type' => 'required',
+            'historyForm.injury.location' => 'required|min:2',
+            'historyForm.injury.date_time' => 'required|date',
+            'historyForm.captivity.location' => 'required|min:2',
+            'historyForm.captivity.condition' => 'required|min:2',
+            'historyForm.captivity.taken_captive_date' => 'required|date',
         ];
     }
 
     protected function getRewardsAndPunishmentsRules(): array
     {
+        return array_merge(
+            $this->awardRuleSet(),
+            $this->punishmentRuleSet()
+        );
+    }
+
+    protected function awardRuleSet(): array
+    {
         return [
-            'award.award_id.id' => 'required|int|exists:awards,id',
-            'award.reason' => 'required|min:2',
-            'award.given_date' => 'required|date',
-            'punishment.punishment_id.id' => 'required|int|exists:punishments,id',
-            'punishment.reason' => 'required|min:2',
-            'punishment.given_date' => 'required|date',
+            'awardsPunishmentsForm.award.award_id' => 'required|int|exists:awards,id',
+            'awardsPunishmentsForm.award.reason' => 'required|min:2',
+            'awardsPunishmentsForm.award.given_date' => 'required|date',
         ];
-        //            'criminal.punishment_id.id' => 'required|int|exists:punishments,id',
-        //            'criminal.reason' => 'required|min:2',
-        //            'criminal.given_date' => 'required|date',
+    }
+
+    protected function punishmentRuleSet(): array
+    {
+        return [
+            'awardsPunishmentsForm.punishment.punishment_id' => 'required|int|exists:punishments,id',
+            'awardsPunishmentsForm.punishment.reason' => 'required|min:2',
+            'awardsPunishmentsForm.punishment.given_date' => 'required|date',
+        ];
+    }
+
+    protected function languageRuleSet(): array
+    {
+        return [
+            'miscForm.language.language_id' => 'required|int|exists:languages,id',
+            'miscForm.language.knowledge_status' => 'required|min:1',
+        ];
+    }
+
+    protected function eventRuleSet(): array
+    {
+        return [
+            'miscForm.event.event_type' => 'required|min:2',
+            'miscForm.event.event_name' => 'required|min:2',
+            'miscForm.event.event_date' => 'required|date',
+        ];
+    }
+
+    protected function degreeRuleSet(): array
+    {
+        return [
+            'miscForm.degree.degree_and_name_id' => 'required|int|exists:education_degrees,id',
+            'miscForm.degree.science' => 'required|min:2',
+            'miscForm.degree.given_date' => 'required|date',
+            'miscForm.degree.subject' => 'required|min:2',
+            'miscForm.degree.edu_doc_type_id' => 'required|int|exists:education_document_types,id',
+            'miscForm.degree.diplom_serie' => 'required|min:1',
+            'miscForm.degree.diplom_no' => 'required|int',
+            'miscForm.degree.diplom_given_date' => 'required|date',
+            'miscForm.degree.document_issued_by' => 'required|min:2',
+        ];
+    }
+
+    protected function electionRuleSet(): array
+    {
+        return [
+            'miscForm.election.election_type' => 'required|min:1',
+            'miscForm.election.location' => 'required|min:2',
+            'miscForm.election.elected_date' => 'required|date',
+        ];
     }
 
     protected function getKinshipRules(): array
     {
         return [
-            'kinship.kinship_id.id' => 'required|int|exists:kinships,id',
-            'kinship.fullname' => 'required|min:2',
-            'kinship.birthdate' => 'required|date',
-            'kinship.registered_address' => 'required|min:2',
-            'kinship.residental_address' => 'required|min:2',
+            'kinshipForm.kinship.kinship_id' => 'required|int|exists:kinships,id',
+            'kinshipForm.kinship.fullname' => 'required|min:2',
+            'kinshipForm.kinship.birthdate' => 'required|date',
+            'kinshipForm.kinship.registered_address' => 'required|min:2',
+            'kinshipForm.kinship.residental_address' => 'required|min:2',
         ];
     }
 
     protected function getMiscellaneousRules(): array
     {
-        $electionRules = $this->hasElectedElectorals ? [
-            'elections.election_type' => 'required|min:1',
-            'elections.location' => 'required|min:2',
-            'elections.elected_date' => 'required|date',
-        ] : [];
+        $rules = array_merge(
+            $this->languageRuleSet(),
+            $this->eventRuleSet(),
+            $this->degreeRuleSet()
+        );
 
-        return array_merge([
-            'language.language_id.id' => 'required|int|exists:languages,id',
-            'language.knowledge_status' => 'required',
-            'event.event_type' => 'required|min:2',
-            'event.event_name' => 'required|min:2',
-            'event.event_date' => 'required|date',
-            'degree.degree_and_name_id.id' => 'required|int|exists:education_degrees,id',
-            'degree.science' => 'required|min:2',
-            'degree.given_date' => 'required|date',
-            'degree.subject' => 'required|min:2',
-            'degree.edu_doc_type_id.id' => 'required|int|exists:education_document_types,id',
-            'degree.diplom_serie' => 'required|min:1',
-            'degree.diplom_no' => 'required|int',
-            'degree.diplom_given_date' => 'required|date',
-            'degree.document_issued_by' => 'required|min:2',
-        ], $electionRules);
+        if ($this->miscFormHasElections()) {
+            $rules = array_merge($rules, $this->electionRuleSet());
+        }
+
+        return $rules;
     }
 
     protected function laborActivityRuleSet(): array
@@ -310,6 +358,15 @@ trait PersonnelValidationTrait
             'laborActivityForm.rank.order_given_by' => 'required|string|min:1',
             'laborActivityForm.rank.order_date' => 'required|date',
         ];
+    }
+
+    protected function miscFormHasElections(): bool
+    {
+        if (property_exists($this, 'miscForm') && $this->miscForm) {
+            return (bool) $this->miscForm->hasElectedElectorals;
+        }
+
+        return false;
     }
 
     protected function isSpecialServiceEnabled(): bool
@@ -416,66 +473,72 @@ trait PersonnelValidationTrait
             'laborActivityForm.rank.order_given_by' => __('Given by'),
             'laborActivityForm.rank.order_date' => __('Date'),
             'laborActivityForm.rank.rank_reason_id' => __('Rank reasons'),
-            'military.rank_id.id' => __('Rank'),
-            'military.attitude_to_military_service' => __('Attitude'),
-            'military.given_date' => __('Given date'),
-            'injuries.injury_type' => __('Injury type'),
-            'injuries.location' => __('Location'),
-            'injuries.date_time' => __('Date'),
-            'captivity.condition' => __('Condition'),
-            'captivity.location' => __('Location'),
-            'captivity.taken_captive_date' => __('Taken date'),
-            'award.award_id.id' => __('Award'),
-            'award.reason' => __('Reason'),
-            'award.given_date' => __('Given date'),
-            'punishment.punishment_id.id' => __('Punishment'),
-            'punishment.reason' => __('Reason'),
-            'punishment.given_date' => __('Given date'),
+            'historyForm.military.rank_id' => __('Rank'),
+            'historyForm.military.attitude_to_military_service' => __('Attitude'),
+            'historyForm.military.given_date' => __('Given date'),
+            'historyForm.injury.injury_type' => __('Injury type'),
+            'historyForm.injury.location' => __('Location'),
+            'historyForm.injury.date_time' => __('Date'),
+            'historyForm.captivity.condition' => __('Condition'),
+            'historyForm.captivity.location' => __('Location'),
+            'historyForm.captivity.taken_captive_date' => __('Taken date'),
+            'awardsPunishmentsForm.award.award_id' => __('Award'),
+            'awardsPunishmentsForm.award.reason' => __('Reason'),
+            'awardsPunishmentsForm.award.given_date' => __('Given date'),
+            'awardsPunishmentsForm.punishment.punishment_id' => __('Punishment'),
+            'awardsPunishmentsForm.punishment.reason' => __('Reason'),
+            'awardsPunishmentsForm.punishment.given_date' => __('Given date'),
             //            'criminal.punishment_id.id' => __('Criminal'),
             //            'criminal.reason' => __('Reason'),
             //            'criminal.given_date' => __('Given date'),
-            'kinship.kinship_id.id' => __('Kinship'),
-            'kinship.fullname' => __('Fullname'),
-            'kinship.birthdate' => __('Birthdate'),
-            'kinship.registered_address' => __('Registered address'),
-            'kinship.residental_address' => __('Residental address'),
-            'language.language_id.id' => __('Language'),
-            'language.knowledge_status' => __('Knowledge'),
-            'event.event_type' => __('Event type'),
-            'event.event_name' => __('Event name'),
-            'event.event_date' => __('Event date'),
-            'degree.degree_and_name_id.id' => __('Degree'),
-            'degree.science' => __('Science'),
-            'degree.given_date' => __('Given date'),
-            'degree.subject' => __('Subject'),
-            'degree.edu_doc_type_id.id' => __('Document type'),
-            'degree.diplom_serie' => __('Diplom serie'),
-            'degree.diplom_no' => __('Diplom number'),
-            'degree.diplom_given_date' => __('Given date'),
-            'degree.document_issued_by' => __('Issued by'),
-            'elections.election_type' => __('Election type'),
-            'elections.location' => __('Location'),
-            'elections.elected_date' => __('Election date'),
+            'kinshipForm.kinship.kinship_id' => __('Kinship'),
+            'kinshipForm.kinship.fullname' => __('Fullname'),
+            'kinshipForm.kinship.birthdate' => __('Birthdate'),
+            'kinshipForm.kinship.registered_address' => __('Registered address'),
+            'kinshipForm.kinship.residental_address' => __('Residental address'),
+            'miscForm.language.language_id' => __('Language'),
+            'miscForm.language.knowledge_status' => __('Knowledge'),
+            'miscForm.event.event_type' => __('Event type'),
+            'miscForm.event.event_name' => __('Event name'),
+            'miscForm.event.event_date' => __('Event date'),
+            'miscForm.degree.degree_and_name_id' => __('Degree'),
+            'miscForm.degree.science' => __('Science'),
+            'miscForm.degree.given_date' => __('Given date'),
+            'miscForm.degree.subject' => __('Subject'),
+            'miscForm.degree.edu_doc_type_id' => __('Document type'),
+            'miscForm.degree.diplom_serie' => __('Diplom serie'),
+            'miscForm.degree.diplom_no' => __('Diplom number'),
+            'miscForm.degree.diplom_given_date' => __('Given date'),
+            'miscForm.degree.document_issued_by' => __('Issued by'),
+            'miscForm.election.election_type' => __('Election type'),
+            'miscForm.election.location' => __('Location'),
+            'miscForm.election.elected_date' => __('Election date'),
         ];
     }
 
     protected function shouldValidateDocumentBlock(): bool
     {
-        $document = property_exists($this, 'document') ? ($this->document ?? []) : [];
+        $document = property_exists($this, 'documentForm') && $this->documentForm
+            ? ($this->documentForm->document ?? [])
+            : [];
 
         return $this->hasPayloadValues($document);
     }
 
     protected function shouldValidateServiceCardBlock(): bool
     {
-        $serviceCards = property_exists($this, 'service_cards') ? ($this->service_cards ?? []) : [];
+        $serviceCards = property_exists($this, 'documentForm') && $this->documentForm
+            ? ($this->documentForm->serviceCards ?? [])
+            : [];
 
         return $this->hasPayloadValues($serviceCards);
     }
 
     protected function shouldValidatePassportBlock(): bool
     {
-        $passports = property_exists($this, 'passports') ? ($this->passports ?? []) : [];
+        $passports = property_exists($this, 'documentForm') && $this->documentForm
+            ? ($this->documentForm->passports ?? [])
+            : [];
 
         return $this->hasPayloadValues($passports);
     }

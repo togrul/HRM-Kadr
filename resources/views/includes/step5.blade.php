@@ -2,64 +2,67 @@
     <x-form-card title="Military">
         <div class="grid grid-cols-2 gap-2">
             <div class="flex flex-col">
-                <x-select-list class="w-full" :title="__('Ranks')" mode="gray" :selected="$militaryRankName" name="militaryRankId">
-                    <x-livewire-input  @click.stop="open = true" mode="gray" name="searchMilitaryRank" wire:model.live="searchMilitaryRank"></x-livewire-input>
-
-                    <x-select-list-item wire:click="setData('military','rank_id','militaryRank','---',null)" :selected="'---' == $militaryRankName"
-                                        wire:model='military.rank_id.id'>
-                        ---
-                    </x-select-list-item>
-                    @if(!empty($rankModel))
-                        @foreach($rankModel as $mr)
-                            <x-select-list-item wire:click="setData('military','rank_id','militaryRank','{{ $mr->name }}',{{ $mr->id }})"
-                                                :selected="$mr->id === $militaryRankId" wire:model='military.rank_id.id'>
-                                {{ $mr->name }}
-                            </x-select-list-item>
-                        @endforeach
-                    @endif
-                </x-select-list>
-                @error('military.rank_id.id')
+                <x-ui.select-dropdown
+                    label="{{ __('Ranks') }}"
+                    placeholder="---"
+                    mode="gray"
+                    class="w-full"
+                    wire:model.live="historyForm.military.rank_id"
+                    :model="$this->militaryRankOptions"
+                >
+                    <x-livewire-input
+                        mode="gray"
+                        name="searchMilitaryRank"
+                        wire:model.live.debounce.300ms="searchMilitaryRank"
+                        @click.stop="isOpen = true"
+                        x-on:input.stop="null"
+                        x-on:keyup.stop="null"
+                        x-on:keydown.stop="null"
+                        x-on:change.stop="null"
+                    />
+                </x-ui.select-dropdown>
+                @error('historyForm.military.rank_id')
                 <x-validation> {{ $message }} </x-validation>
                 @enderror
             </div>
             <div class="flex flex-col">
-                <x-label for="military.attitude_to_military_service">{{ __('Attitude to military service') }}</x-label>
-                <x-livewire-input mode="gray" name="military.attitude_to_military_service" wire:model="military.attitude_to_military_service"></x-livewire-input>
-                @error('military.attitude_to_military_service')
+                <x-label for="historyForm.military.attitude_to_military_service">{{ __('Attitude to military service') }}</x-label>
+                <x-livewire-input mode="gray" name="historyForm.military.attitude_to_military_service" wire:model="historyForm.military.attitude_to_military_service"></x-livewire-input>
+                @error('historyForm.military.attitude_to_military_service')
                 <x-validation> {{ $message }} </x-validation>
                 @enderror
             </div>
         </div>
         <div class="grid grid-cols-3 gap-2">
             <div class="flex flex-col">
-                <x-label for="military.given_date">{{ __('Given date') }}</x-label>
-                <x-pikaday-input mode="gray" name="military.given_date" format="Y-MM-DD" wire:model.live="military.given_date">
+                <x-label for="historyForm.military.given_date">{{ __('Given date') }}</x-label>
+                <x-pikaday-input mode="gray" name="historyForm.military.given_date" format="Y-MM-DD" wire:model.live="historyForm.military.given_date">
                     <x-slot name="script">
                         $el.onchange = function () {
-                        @this.set('military.given_date', $el.value);
+                        @this.set('historyForm.military.given_date', $el.value);
                         }
                     </x-slot>
                 </x-pikaday-input>
-                @error('military.given_date')
+                @error('historyForm.military.given_date')
                 <x-validation> {{ $message }} </x-validation>
                 @enderror
             </div>
             <div class="flex flex-col">
-                <x-label for="military.start_date">{{ __('Start date') }}</x-label>
-                <x-pikaday-input mode="gray" name="military.start_date" format="Y-MM-DD" wire:model.live="military.start_date">
+                <x-label for="historyForm.military.start_date">{{ __('Start date') }}</x-label>
+                <x-pikaday-input mode="gray" name="historyForm.military.start_date" format="Y-MM-DD" wire:model.live="historyForm.military.start_date">
                     <x-slot name="script">
                         $el.onchange = function () {
-                        @this.set('military.start_date', $el.value);
+                        @this.set('historyForm.military.start_date', $el.value);
                         }
                     </x-slot>
                 </x-pikaday-input>
             </div>
             <div class="flex flex-col">
-                <x-label for="military.end_date">{{ __('End date') }}</x-label>
-                <x-pikaday-input mode="gray" name="military.end_date" format="Y-MM-DD" wire:model.live="military.end_date">
+                <x-label for="historyForm.military.end_date">{{ __('End date') }}</x-label>
+                <x-pikaday-input mode="gray" name="historyForm.military.end_date" format="Y-MM-DD" wire:model.live="historyForm.military.end_date">
                     <x-slot name="script">
                         $el.onchange = function () {
-                        @this.set('military.end_date', $el.value);
+                        @this.set('historyForm.military.end_date', $el.value);
                         }
                     </x-slot>
                 </x-pikaday-input>
@@ -74,7 +77,7 @@
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
                 <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
                     <x-table.tbl :headers="[__('Attitude'),__('Rank'),__('Date'),'action']">
-                        @forelse ($military_list as $key => $msModel)
+                        @forelse ($historyForm->militaryList as $key => $msModel)
                             <tr>
                                 <x-table.td>
                                     <span class="text-sm font-medium text-gray-700">
@@ -83,7 +86,7 @@
                                 </x-table.td>
                                 <x-table.td>
                                    <span class="text-sm font-medium text-teal-600">
-                                        {{ $msModel['rank_id']['name'] }}
+                                        {{ $this->rankLabel(data_get($msModel, 'rank_id')) ?? '---' }}
                                     </span>
                                 </x-table.td>
                                 <x-table.td>
@@ -140,38 +143,38 @@
     <x-form-card title="Injuries">
         <div class="grid grid-cols-3 gap-2">
             <div class="flex flex-col">
-                <x-label for="injuries.injury_type">{{ __('Injury type') }}</x-label>
+                <x-label for="historyForm.injury.injury_type">{{ __('Injury type') }}</x-label>
                 <div class="flex flex-row">
                     <label class="inline-flex items-center bg-gray-100 rounded shadow-sm py-2 px-2 w-full">
-                        <input type="radio" class="form-radio" name="injuries.injury_type" wire:model="injuries.injury_type" value="other">
+                        <input type="radio" class="form-radio" name="historyForm.injury.injury_type" wire:model="historyForm.injury.injury_type" value="other">
                         <span class="ml-2 text-sm font-normal">{{__('Other')}}</span>
                     </label>
                     <label class="inline-flex items-center ml-4 bg-gray-100 rounded shadow-sm py-2 px-2 w-full">
-                        <input type="radio" class="form-radio" name="injuries.injury_type" wire:model="injuries.injury_type" value="contusion">
+                        <input type="radio" class="form-radio" name="historyForm.injury.injury_type" wire:model="historyForm.injury.injury_type" value="contusion">
                         <span class="ml-2 text-sm font-normal">{{__('Contusion')}}</span>
                     </label>
                 </div>
-                @error('injuries.injury_type')
+                @error('historyForm.injury.injury_type')
                 <x-validation> {{ $message }} </x-validation>
                 @enderror
             </div>
             <div class="flex flex-col">
-                <x-label for="injuries.location">{{ __('Location') }}</x-label>
-                <x-livewire-input mode="gray" name="injuries.location" wire:model="injuries.location"></x-livewire-input>
-                @error('injuries.location')
+                <x-label for="historyForm.injury.location">{{ __('Location') }}</x-label>
+                <x-livewire-input mode="gray" name="historyForm.injury.location" wire:model="historyForm.injury.location"></x-livewire-input>
+                @error('historyForm.injury.location')
                 <x-validation> {{ $message }} </x-validation>
                 @enderror
             </div>
             <div class="flex flex-col">
-                <x-label for="injuries.date_time">{{ __('Date') }}</x-label>
-                <x-pikaday-input mode="gray" name="injuries.date_time" format="Y-MM-DD" wire:model.live="injuries.date_time">
+                <x-label for="historyForm.injury.date_time">{{ __('Date') }}</x-label>
+                <x-pikaday-input mode="gray" name="historyForm.injury.date_time" format="Y-MM-DD" wire:model.live="historyForm.injury.date_time">
                     <x-slot name="script">
                         $el.onchange = function () {
-                        @this.set('injuries.date_time', $el.value);
+                        @this.set('historyForm.injury.date_time', $el.value);
                         }
                     </x-slot>
                 </x-pikaday-input>
-                @error('injuries.date_time')
+                @error('historyForm.injury.date_time')
                 <x-validation> {{ $message }} </x-validation>
                 @enderror
             </div>
@@ -179,9 +182,9 @@
 
         <div class="grid grid-cols-1">
             <div class="flex flex-col">
-                <x-label for="injuries.description">{{ __('Description') }}</x-label>
-                <x-textarea mode="gray" name="injuries.description" placeholder="{{__('')}}"
-                            wire:model="injuries.description"></x-textarea>
+                <x-label for="historyForm.injury.description">{{ __('Description') }}</x-label>
+                <x-textarea mode="gray" name="historyForm.injury.description" placeholder="{{__('')}}"
+                            wire:model="historyForm.injury.description"></x-textarea>
             </div>
         </div>
 
@@ -193,7 +196,7 @@
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
                 <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
                     <x-table.tbl :headers="[__('Type'),__('Location and date'),__('Description'),'action']">
-                        @forelse ($injury_list as $key => $injuryModel)
+                        @forelse ($historyForm->injuryList as $key => $injuryModel)
                             <tr>
                                 <x-table.td>
                                     @if(!empty($injuryModel['injury_type']))
@@ -208,7 +211,9 @@
                                             {{ $injuryModel['location'] }}
                                         </span>
                                         <span class="text-sm font-medium text-gray-900">
-                                            {{ \Carbon\Carbon::parse($injuryModel['date_time'])->format('d.m.Y') }}
+                                            @if(! empty($injuryModel['date_time']))
+                                                {{ \Carbon\Carbon::parse($injuryModel['date_time'])->format('d.m.Y') }}
+                                            @endif
                                         </span>
                                     </div>
                                 </x-table.td>
@@ -253,47 +258,54 @@
 
     <x-form-card title="Participation in war">
         <div class="flex flex-col">
-            <x-label for="personnel_extra.participation_in_war">{{ __('Description') }}</x-label>
-            <x-textarea mode="gray" name="personnel_extra.participation_in_war" placeholder="{{__('')}}"
-                        wire:model="personnel_extra.participation_in_war"></x-textarea>
+            <x-label for="personalForm.personnelExtra.participation_in_war">{{ __('Description') }}</x-label>
+            <x-textarea
+                mode="gray"
+                name="personalForm.personnelExtra.participation_in_war"
+                placeholder="{{ __('') }}"
+                wire:model="personalForm.personnelExtra.participation_in_war"
+            ></x-textarea>
+            @error('personalForm.personnelExtra.participation_in_war')
+            <x-validation> {{ $message }} </x-validation>
+            @enderror
         </div>
     </x-form-card>
 
     <x-form-card title="Been captivity">
         <div class="grid grid-cols-4 gap-2">
             <div class="flex flex-col">
-                <x-label for="captivity.location">{{ __('Location') }}</x-label>
-                <x-livewire-input mode="gray" name="captivity.location" wire:model="captivity.location"></x-livewire-input>
-                @error('captivity.location')
+                <x-label for="historyForm.captivity.location">{{ __('Location') }}</x-label>
+                <x-livewire-input mode="gray" name="historyForm.captivity.location" wire:model="historyForm.captivity.location"></x-livewire-input>
+                @error('historyForm.captivity.location')
                 <x-validation> {{ $message }} </x-validation>
                 @enderror
             </div>
             <div class="flex flex-col">
-                <x-label for="captivity.condition">{{ __('Condition') }}</x-label>
-                <x-livewire-input mode="gray" name="captivity.condition" wire:model="captivity.condition"></x-livewire-input>
-                @error('captivity.condition')
+                <x-label for="historyForm.captivity.condition">{{ __('Condition') }}</x-label>
+                <x-livewire-input mode="gray" name="historyForm.captivity.condition" wire:model="historyForm.captivity.condition"></x-livewire-input>
+                @error('historyForm.captivity.condition')
                 <x-validation> {{ $message }} </x-validation>
                 @enderror
             </div>
             <div class="flex flex-col">
-                <x-label for="captivity.taken_captive_date">{{ __('Taken date') }}</x-label>
-                <x-pikaday-input mode="gray" name="captivity.taken_captive_date" format="Y-MM-DD" wire:model.live="captivity.taken_captive_date">
+                <x-label for="historyForm.captivity.taken_captive_date">{{ __('Taken date') }}</x-label>
+                <x-pikaday-input mode="gray" name="historyForm.captivity.taken_captive_date" format="Y-MM-DD" wire:model.live="historyForm.captivity.taken_captive_date">
                     <x-slot name="script">
                         $el.onchange = function () {
-                            @this.set('captivity.taken_captive_date', $el.value);
+                        @this.set('historyForm.captivity.taken_captive_date', $el.value);
                         }
                     </x-slot>
                 </x-pikaday-input>
-                @error('captivity.taken_captive_date')
+                @error('historyForm.captivity.taken_captive_date')
                 <x-validation> {{ $message }} </x-validation>
                 @enderror
             </div>
             <div class="flex flex-col">
-                <x-label for="captivity.release_date">{{ __('Release date') }}</x-label>
-                <x-pikaday-input mode="gray" name="captivity.release_date" format="Y-MM-DD" wire:model.live="captivity.release_date">
+                <x-label for="historyForm.captivity.release_date">{{ __('Release date') }}</x-label>
+                <x-pikaday-input mode="gray" name="historyForm.captivity.release_date" format="Y-MM-DD" wire:model.live="historyForm.captivity.release_date">
                     <x-slot name="script">
                         $el.onchange = function () {
-                            @this.set('captivity.release_date', $el.value);
+                        @this.set('historyForm.captivity.release_date', $el.value);
                         }
                     </x-slot>
                 </x-pikaday-input>
@@ -308,7 +320,7 @@
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
                 <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
                     <x-table.tbl :headers="[__('Location'),__('Condition'),__('Date'),'action']">
-                        @forelse ($captivity_list as $key => $captivityModel)
+                        @forelse ($historyForm->captivityList as $key => $captivityModel)
                             <tr>
                                 <x-table.td>
                                     <span class="text-sm font-medium text-gray-600">
@@ -325,10 +337,12 @@
                                         <div class="flex flex-col space-y-1 items-start">
                                             <span class="text-sm font-medium text-gray-500 border-b border-dashed border-slate-400">{{ __('Taken date')  }}:</span>
                                             <span class="text-sm font-medium text-gray-900">
-                                                {{ \Carbon\Carbon::parse($captivityModel['taken_captive_date'])->format('d.m.Y') }}
+                                                @if(! empty($captivityModel['taken_captive_date']))
+                                                    {{ \Carbon\Carbon::parse($captivityModel['taken_captive_date'])->format('d.m.Y') }}
+                                                @endif
                                             </span>
                                         </div>
-                                        @if(array_key_exists('release_date',$captivityModel))
+                                        @if(! empty($captivityModel['release_date']))
                                             <div class="flex flex-col space-y-1 items-start">
                                                 <span class="text-sm font-medium text-gray-500 border-b border-dashed border-slate-400">{{ __('Release date')  }}:</span>
                                                 <span class="text-sm font-medium text-emerald-500">

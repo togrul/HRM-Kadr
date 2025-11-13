@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::getConnection()->getDriverName() === 'sqlite') {
+            return;
+        }
+
         Schema::table('components', function (Blueprint $table) {
             $table->dropForeign('components_order_id_foreign');
             $table->dropColumn('order_id');
@@ -23,6 +27,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (Schema::getConnection()->getDriverName() === 'sqlite') {
+            return;
+        }
+
         Schema::table('components', function (Blueprint $table) {
             //
         });

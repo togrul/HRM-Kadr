@@ -16,6 +16,8 @@ class TruncateTablesSeeder extends Seeder
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
 
         // Truncate tables
+        //  DB::table('users')->truncate();
+        //  DB::table('order_statuses')->truncate();
         DB::table('activity_log')->truncate();
         DB::table('structures')->truncate();
         DB::table('weapons')->truncate();

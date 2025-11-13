@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::getConnection()->getDriverName() === 'sqlite') {
+            return;
+        }
+
         Schema::table('order_statuses', function (Blueprint $table) {
             $table->integer('id')->change();
             $table->unique(['id', 'locale']);

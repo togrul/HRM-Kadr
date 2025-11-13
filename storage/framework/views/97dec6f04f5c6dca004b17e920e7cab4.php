@@ -1,23 +1,23 @@
-<div class="sidemenu-title flex flex-col space-y-2">
-    <h2 class="text-xl font-title font-semibold text-gray-500" id="slide-over-title">
+<div class="flex flex-col space-y-2 sidemenu-title">
+    <h2 class="text-xl font-semibold text-gray-500 font-title" id="slide-over-title">
       <?php echo e($title ?? ''); ?>
 
     </h2>
     <!--[if BLOCK]><![endif]--><?php if(auth()->user()->can('confirmation-general') && isset($personnelModel) && $personnelModelData->is_pending): ?>
-    <div class="flex px-4 py-2 rounded-md space-x-3 shadow-lg border border-gray-200 bg-white items-center justify-start">
+    <div class="flex items-center justify-start px-4 py-2 space-x-3 bg-white border border-gray-200 rounded-md shadow-lg">
         <span class="flex-none">
             <svg class="w-6 h-6 text-rose-500" xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6v6l4 2"/><path d="M16 21.16a10 10 0 1 1 5-13.516"/><path d="M20 11.5v6"/><path d="M20 21.5h.01"/></svg>
         </span>
-        <div class="flex justify-between items-center w-full">
+        <div class="flex items-center justify-between w-full">
             <p class="text-sm font-medium text-gray-900"><?php echo e(__('personnel.confirm-message')); ?></p>
-            <button wire:click="confirmPersonnel" class="appearance-none text-sm bg-gray-900 text-white font-semibold px-4 py-2 shadow-sm rounded-lg transition-all duration-200 hover:bg-gray-700"><?php echo e(__('Confirm')); ?></button>
+            <button wire:click="confirmPersonnel" class="px-4 py-2 text-sm font-semibold text-white transition-all duration-200 bg-gray-900 rounded-lg shadow-sm appearance-none hover:bg-gray-700"><?php echo e(__('Confirm')); ?></button>
         </div>
     </div>
     <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 </div>
 
 <div class="flex flex-col w-full p-5 px-0 mx-auto my-1 mb-4 space-y-8 transition duration-500 ease-in-out transform bg-white">
-    <div class="grid grid-cols-8 gap-y-2 items-start">
+    <div class="grid items-start grid-cols-8 gap-y-2">
         <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $steps; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $st): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
             <button wire:click="selectStep(<?php echo e($key); ?>)" class="<?php echo \Illuminate\Support\Arr::toCssClasses([
                 'flex items-center relative flex-col space-y-2 transition-all duration-300 hover:text-green-500 before:content-0 before:rounded-xl before:absolute before:w-1/2 before:left-3/4 before:h-[3px] before:z-0 before:top-[22px] before:transition-all before:duration-300 last:before:w-0',
@@ -45,13 +45,27 @@
     </div>
     <hr class="py-2" />
 
-    <!--[if BLOCK]><![endif]--><?php if($step >= 1 && $step <= 8): ?>
-        <?php echo $__env->make('includes.step' . $step, \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+<?php
+    $stepView = match((int) $step) {
+        1 => 'includes.step1',
+        2 => 'includes.step2',
+        3 => 'includes.step3',
+        4 => 'includes.step4',
+        5 => 'includes.step5',
+        6 => 'includes.step6',
+        7 => 'includes.step7',
+        8 => 'includes.step8',
+        default => null,
+    };
+    ?>
+
+    <!--[if BLOCK]><![endif]--><?php if($stepView): ?>
+        <?php echo $__env->make($stepView, \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
     <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 
-    <div class="flex justify-between items-end w-full">
+    <div class="flex items-end justify-between w-full">
         <!--[if BLOCK]><![endif]--><?php if(! auth()->user()->can('update-personnels') && isset($personnelModel)): ?>
-            <div class="flex space-x-2 items-center">
+            <div class="flex items-center space-x-2">
                 <?php if (isset($component)) { $__componentOriginal197957cb487bb6b611bd5c5b4499498e = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal197957cb487bb6b611bd5c5b4499498e = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.icons.lock-icon','data' => ['color' => 'text-rose-500','hover' => 'text-rose-600','size' => 'w-7 h-7']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>

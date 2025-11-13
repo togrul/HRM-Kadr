@@ -900,15 +900,15 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 
 <?php if (isset($component)) { $__componentOriginal8e3939701bc9c667d1f9e91d04821cb7 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal8e3939701bc9c667d1f9e91d04821cb7 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.form-card','data' => ['title' => ''.e(__('Extra Education')).'','checkbox' => 'hasExtraEducation','checkboxTitle' => ''.e(__('Has extra education?')).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.form-card','data' => ['title' => ''.e(__('Extra Education')).'','checkbox' => 'educationForm.hasExtraEducation','checkboxTitle' => ''.e(__('Has extra education?')).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('form-card'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['title' => ''.e(__('Extra Education')).'','checkbox' => 'hasExtraEducation','checkboxTitle' => ''.e(__('Has extra education?')).'']); ?>
-    <!--[if BLOCK]><![endif]--><?php if($hasExtraEducation): ?>
+<?php $component->withAttributes(['title' => ''.e(__('Extra Education')).'','checkbox' => 'educationForm.hasExtraEducation','checkboxTitle' => ''.e(__('Has extra education?')).'']); ?>
+    <!--[if BLOCK]><![endif]--><?php if(data_get($educationForm ?? null, 'hasExtraEducation')): ?>
         <div class="grid grid-cols-3 gap-2">
             <div class="flex flex-col">
                 <?php if (isset($component)) { $__componentOriginalb7c56d9f0bb75b99472ae2845823c8e9 = $component; } ?>

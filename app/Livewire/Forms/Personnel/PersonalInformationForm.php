@@ -9,9 +9,8 @@ use Livewire\Form;
 /**
  * Encapsulates Step 1 (personal information) state for the personnel wizard.
  *
- * This form is intentionally self-contained so we can hydrate/reset/serialize
- * personal data without keeping the logic inside the Livewire component.
- * Wiring will happen in the next phases of the refactor.
+ * The form is the single source of truth for personal data so Livewire
+ * components no longer maintain parallel arrays or sync helpers.
  */
 class PersonalInformationForm extends Form
 {
@@ -30,17 +29,11 @@ class PersonalInformationForm extends Form
      */
     public bool $hasDisability = false;
 
-    /**
-     * Cached avatar reference (will be managed by the parent component).
-     */
-    public ?string $avatarPath = null;
-
     public function resetForm(): void
     {
         $this->personnel = $this->defaultPersonnel();
         $this->personnelExtra = $this->defaultPersonnelExtra();
         $this->hasDisability = false;
-        $this->avatarPath = null;
     }
 
     /**
@@ -54,7 +47,7 @@ class PersonalInformationForm extends Form
             return;
         }
 
-        $loaded = $personnel->load([
+        $loaded = $personnel->loadMissing([
             'nationality',
             'previousNationality',
             'educationDegree',
@@ -104,9 +97,8 @@ class PersonalInformationForm extends Form
     public function toPayload(): array
     {
         return [
-            'personnel'       => $this->personnel,
+            'personnel' => $this->personnel,
             'personnel_extra' => $this->personnelExtra,
-            'avatar_path'     => $this->avatarPath,
         ];
     }
 

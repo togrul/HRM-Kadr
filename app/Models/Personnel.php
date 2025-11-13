@@ -324,7 +324,26 @@ class Personnel extends Model
     {
         return $this->latestVacation()
             ->where('start_date', '<=', Carbon::now())
-            ->where('return_work_date', '>', \Carbon\Carbon::now());
+            ->where('return_work_date', '>', Carbon::now());
+    }
+
+    public function getActiveVacationAttribute()
+    {
+        if (! $this->relationLoaded('latestVacation')) {
+            return null;
+        }
+
+        $vacation = $this->latestVacation;
+
+        if (! $vacation) {
+            return null;
+        }
+
+        $now = Carbon::now();
+
+        return ($vacation->start_date <= $now && $vacation->return_work_date > $now)
+            ? $vacation
+            : null;
     }
 
     public function businessTrips(): HasMany
@@ -342,6 +361,25 @@ class Personnel extends Model
         return $this->latestBusinessTrip()
             ->where('start_date', '<=', Carbon::now())
             ->where('end_date', '>', Carbon::now());
+    }
+
+    public function getActiveBusinessTripAttribute()
+    {
+        if (! $this->relationLoaded('latestBusinessTrip')) {
+            return null;
+        }
+
+        $trip = $this->latestBusinessTrip;
+
+        if (! $trip) {
+            return null;
+        }
+
+        $now = Carbon::now();
+
+        return ($trip->start_date <= $now && $trip->end_date > $now)
+            ? $trip
+            : null;
     }
 
     public function degreeAndNames(): HasMany

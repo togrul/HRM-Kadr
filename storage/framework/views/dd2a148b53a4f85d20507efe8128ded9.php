@@ -11,26 +11,27 @@
 <?php $component->withAttributes(['title' => 'Awards']); ?>
         <div class="grid grid-cols-6 gap-2">
             <div class="flex flex-col col-span-2">
-                <?php if (isset($component)) { $__componentOriginald384098dd1216f6f264fe579adbe3c2f = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginald384098dd1216f6f264fe579adbe3c2f = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list','data' => ['class' => 'w-full','title' => __('Awards'),'mode' => 'gray','selected' => $awardName,'name' => 'awardId']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
-<?php $component->withName('select-list'); ?>
+                <?php if (isset($component)) { $__componentOriginalb7c56d9f0bb75b99472ae2845823c8e9 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalb7c56d9f0bb75b99472ae2845823c8e9 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.ui.select-dropdown','data' => ['label' => ''.e(__('Awards')).'','placeholder' => '---','mode' => 'gray','class' => 'w-full','wire:model.live' => 'awardsPunishmentsForm.award.award_id','model' => $this->awardOptions]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('ui.select-dropdown'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['class' => 'w-full','title' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(__('Awards')),'mode' => 'gray','selected' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($awardName),'name' => 'awardId']); ?>
+<?php $component->withAttributes(['label' => ''.e(__('Awards')).'','placeholder' => '---','mode' => 'gray','class' => 'w-full','wire:model.live' => 'awardsPunishmentsForm.award.award_id','model' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($this->awardOptions)]); ?>
                     <?php if (isset($component)) { $__componentOriginal9364c0b92ee5ab519273634c79f86a27 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal9364c0b92ee5ab519273634c79f86a27 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.livewire-input','data' => ['@click.stop' => 'open = true','mode' => 'gray','name' => 'searchAward','wire:model.live' => 'searchAward']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.livewire-input','data' => ['mode' => 'gray','name' => 'searchAward','wire:model.live.debounce.300ms' => 'searchAward','@click.stop' => 'isOpen = true','xOn:input.stop' => 'null','xOn:keyup.stop' => 'null','xOn:keydown.stop' => 'null','xOn:change.stop' => 'null']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('livewire-input'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['@click.stop' => 'open = true','mode' => 'gray','name' => 'searchAward','wire:model.live' => 'searchAward']); ?> <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['mode' => 'gray','name' => 'searchAward','wire:model.live.debounce.300ms' => 'searchAward','@click.stop' => 'isOpen = true','x-on:input.stop' => 'null','x-on:keyup.stop' => 'null','x-on:keydown.stop' => 'null','x-on:change.stop' => 'null']); ?>
+<?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal9364c0b92ee5ab519273634c79f86a27)): ?>
 <?php $attributes = $__attributesOriginal9364c0b92ee5ab519273634c79f86a27; ?>
@@ -40,63 +41,17 @@
 <?php $component = $__componentOriginal9364c0b92ee5ab519273634c79f86a27; ?>
 <?php unset($__componentOriginal9364c0b92ee5ab519273634c79f86a27); ?>
 <?php endif; ?>
-
-                    <?php if (isset($component)) { $__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list-item','data' => ['wire:click' => 'setData(\'award\',\'award_id\',\'award\',\'---\',null)','selected' => '---' == $awardName,'wire:model' => 'award.award_id.id']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
-<?php $component->withName('select-list-item'); ?>
-<?php if ($component->shouldRender()): ?>
-<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
-<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
-<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
-<?php endif; ?>
-<?php $component->withAttributes(['wire:click' => 'setData(\'award\',\'award_id\',\'award\',\'---\',null)','selected' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute('---' == $awardName),'wire:model' => 'award.award_id.id']); ?>
-                        ---
-                     <?php echo $__env->renderComponent(); ?>
-<?php endif; ?>
-<?php if (isset($__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee)): ?>
-<?php $attributes = $__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee; ?>
-<?php unset($__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee); ?>
-<?php endif; ?>
-<?php if (isset($__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee)): ?>
-<?php $component = $__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee; ?>
-<?php unset($__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee); ?>
-<?php endif; ?>
-                    <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $awardModel; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $awd): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <?php if (isset($component)) { $__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list-item','data' => ['wire:click' => 'setData(\'award\',\'award_id\',\'award\',\''.e($awd->name).'\','.e($awd->id).')','selected' => $awd->id === $awardId,'wire:model' => 'award.award_id.id']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
-<?php $component->withName('select-list-item'); ?>
-<?php if ($component->shouldRender()): ?>
-<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
-<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
-<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
-<?php endif; ?>
-<?php $component->withAttributes(['wire:click' => 'setData(\'award\',\'award_id\',\'award\',\''.e($awd->name).'\','.e($awd->id).')','selected' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($awd->id === $awardId),'wire:model' => 'award.award_id.id']); ?>
-                            <?php echo e($awd->name); ?>
-
-                         <?php echo $__env->renderComponent(); ?>
-<?php endif; ?>
-<?php if (isset($__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee)): ?>
-<?php $attributes = $__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee; ?>
-<?php unset($__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee); ?>
-<?php endif; ?>
-<?php if (isset($__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee)): ?>
-<?php $component = $__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee; ?>
-<?php unset($__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee); ?>
-<?php endif; ?>
-                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
                  <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
-<?php if (isset($__attributesOriginald384098dd1216f6f264fe579adbe3c2f)): ?>
-<?php $attributes = $__attributesOriginald384098dd1216f6f264fe579adbe3c2f; ?>
-<?php unset($__attributesOriginald384098dd1216f6f264fe579adbe3c2f); ?>
+<?php if (isset($__attributesOriginalb7c56d9f0bb75b99472ae2845823c8e9)): ?>
+<?php $attributes = $__attributesOriginalb7c56d9f0bb75b99472ae2845823c8e9; ?>
+<?php unset($__attributesOriginalb7c56d9f0bb75b99472ae2845823c8e9); ?>
 <?php endif; ?>
-<?php if (isset($__componentOriginald384098dd1216f6f264fe579adbe3c2f)): ?>
-<?php $component = $__componentOriginald384098dd1216f6f264fe579adbe3c2f; ?>
-<?php unset($__componentOriginald384098dd1216f6f264fe579adbe3c2f); ?>
+<?php if (isset($__componentOriginalb7c56d9f0bb75b99472ae2845823c8e9)): ?>
+<?php $component = $__componentOriginalb7c56d9f0bb75b99472ae2845823c8e9; ?>
+<?php unset($__componentOriginalb7c56d9f0bb75b99472ae2845823c8e9); ?>
 <?php endif; ?>
-                <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['award.award_id.id'];
+                <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['awardsPunishmentsForm.award.award_id'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -128,14 +83,14 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
             <div class="flex flex-col col-span-2">
                 <?php if (isset($component)) { $__componentOriginald8ba2b4c22a13c55321e34443c386276 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginald8ba2b4c22a13c55321e34443c386276 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'award.reason']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'awardsPunishmentsForm.award.reason']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('label'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['for' => 'award.reason']); ?><?php echo e(__('Reason')); ?> <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['for' => 'awardsPunishmentsForm.award.reason']); ?><?php echo e(__('Reason')); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginald8ba2b4c22a13c55321e34443c386276)): ?>
 <?php $attributes = $__attributesOriginald8ba2b4c22a13c55321e34443c386276; ?>
@@ -147,14 +102,14 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php endif; ?>
                 <?php if (isset($component)) { $__componentOriginal9364c0b92ee5ab519273634c79f86a27 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal9364c0b92ee5ab519273634c79f86a27 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.livewire-input','data' => ['mode' => 'gray','name' => 'award.reason','wire:model' => 'award.reason']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.livewire-input','data' => ['mode' => 'gray','name' => 'awardsPunishmentsForm.award.reason','wire:model' => 'awardsPunishmentsForm.award.reason']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('livewire-input'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['mode' => 'gray','name' => 'award.reason','wire:model' => 'award.reason']); ?> <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['mode' => 'gray','name' => 'awardsPunishmentsForm.award.reason','wire:model' => 'awardsPunishmentsForm.award.reason']); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal9364c0b92ee5ab519273634c79f86a27)): ?>
 <?php $attributes = $__attributesOriginal9364c0b92ee5ab519273634c79f86a27; ?>
@@ -164,7 +119,7 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php $component = $__componentOriginal9364c0b92ee5ab519273634c79f86a27; ?>
 <?php unset($__componentOriginal9364c0b92ee5ab519273634c79f86a27); ?>
 <?php endif; ?>
-                <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['award.reason'];
+                <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['awardsPunishmentsForm.award.reason'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -196,14 +151,14 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
             <div class="flex flex-col">
                 <?php if (isset($component)) { $__componentOriginald8ba2b4c22a13c55321e34443c386276 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginald8ba2b4c22a13c55321e34443c386276 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'award.given_date']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'awardsPunishmentsForm.award.given_date']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('label'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['for' => 'award.given_date']); ?><?php echo e(__('Given date')); ?> <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['for' => 'awardsPunishmentsForm.award.given_date']); ?><?php echo e(__('Given date')); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginald8ba2b4c22a13c55321e34443c386276)): ?>
 <?php $attributes = $__attributesOriginald8ba2b4c22a13c55321e34443c386276; ?>
@@ -215,17 +170,17 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php endif; ?>
                 <?php if (isset($component)) { $__componentOriginal36038ba5ddba347b69d2b76bc4612d11 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal36038ba5ddba347b69d2b76bc4612d11 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.pikaday-input','data' => ['mode' => 'gray','name' => 'award.given_date','format' => 'Y-MM-DD','wire:model.live' => 'award.given_date']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.pikaday-input','data' => ['mode' => 'gray','name' => 'awardsPunishmentsForm.award.given_date','format' => 'Y-MM-DD','wire:model.live' => 'awardsPunishmentsForm.award.given_date']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('pikaday-input'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['mode' => 'gray','name' => 'award.given_date','format' => 'Y-MM-DD','wire:model.live' => 'award.given_date']); ?>
+<?php $component->withAttributes(['mode' => 'gray','name' => 'awardsPunishmentsForm.award.given_date','format' => 'Y-MM-DD','wire:model.live' => 'awardsPunishmentsForm.award.given_date']); ?>
                      <?php $__env->slot('script', null, []); ?> 
                         $el.onchange = function () {
-                        window.Livewire.find('<?php echo e($_instance->getId()); ?>').set('award.given_date', $el.value);
+                        window.Livewire.find('<?php echo e($_instance->getId()); ?>').set('awardsPunishmentsForm.award.given_date', $el.value);
                         }
                      <?php $__env->endSlot(); ?>
                  <?php echo $__env->renderComponent(); ?>
@@ -238,7 +193,7 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php $component = $__componentOriginal36038ba5ddba347b69d2b76bc4612d11; ?>
 <?php unset($__componentOriginal36038ba5ddba347b69d2b76bc4612d11); ?>
 <?php endif; ?>
-                <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['award.given_date'];
+                <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['awardsPunishmentsForm.award.given_date'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -267,17 +222,17 @@ if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
             </div>
-            <div class="flex flex-row-reverse items-end">
+            <div class="flex items-end space-x-3">
                 <?php if (isset($component)) { $__componentOriginald8ba2b4c22a13c55321e34443c386276 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginald8ba2b4c22a13c55321e34443c386276 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'award.is_old']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['class' => 'mb-1','for' => 'awardsPunishmentsForm.award.is_old']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('label'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['for' => 'award.is_old']); ?><?php echo e(__('Is old?')); ?> <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['class' => 'mb-1','for' => 'awardsPunishmentsForm.award.is_old']); ?><?php echo e(__('Is old?')); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginald8ba2b4c22a13c55321e34443c386276)): ?>
 <?php $attributes = $__attributesOriginald8ba2b4c22a13c55321e34443c386276; ?>
@@ -289,14 +244,14 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php endif; ?>
                 <?php if (isset($component)) { $__componentOriginal74b62b190a03153f11871f645315f4de = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal74b62b190a03153f11871f645315f4de = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.checkbox','data' => ['name' => 'award.is_old','model' => 'award.is_old']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.checkbox','data' => ['name' => 'awardsPunishmentsForm.award.is_old','model' => 'awardsPunishmentsForm.award.is_old']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('checkbox'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['name' => 'award.is_old','model' => 'award.is_old']); ?> <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['name' => 'awardsPunishmentsForm.award.is_old','model' => 'awardsPunishmentsForm.award.is_old']); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal74b62b190a03153f11871f645315f4de)): ?>
 <?php $attributes = $__attributesOriginal74b62b190a03153f11871f645315f4de; ?>
@@ -336,15 +291,15 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                 <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
                     <?php if (isset($component)) { $__componentOriginal3ee30789824fd1cc17cb4ff8e03df656 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal3ee30789824fd1cc17cb4ff8e03df656 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table.tbl','data' => ['headers' => [__('Award'),__('Reason'),__('Date'),'action','action']]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table.tbl','data' => ['headers' => [__('Award'), __('Reason'), __('Date'), 'action', 'action']]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('table.tbl'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['headers' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute([__('Award'),__('Reason'),__('Date'),'action','action'])]); ?>
-                        <!--[if BLOCK]><![endif]--><?php $__empty_1 = true; $__currentLoopData = $award_list; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $awdModel): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+<?php $component->withAttributes(['headers' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute([__('Award'), __('Reason'), __('Date'), 'action', 'action'])]); ?>
+                        <!--[if BLOCK]><![endif]--><?php $__empty_1 = true; $__currentLoopData = $awardsPunishmentsForm->awardList ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $awdModel): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                             <tr>
                                 <?php if (isset($component)) { $__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b = $attributes; } ?>
@@ -357,9 +312,9 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php endif; ?>
 <?php $component->withAttributes([]); ?>
                                     <span class="text-sm font-medium text-gray-700">
-                                        <?php echo e($awdModel['award_id']['name']); ?>
+                                        <?php echo e($this->awardLabel(data_get($awdModel, 'award_id')) ?? '---'); ?>
 
-                                   </span>
+                                    </span>
                                  <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b)): ?>
@@ -381,7 +336,7 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php endif; ?>
 <?php $component->withAttributes([]); ?>
                                    <span class="text-sm font-medium text-gray-700 whitespace-normal truncate line-clamp-3">
-                                        <?php echo e($awdModel['reason']); ?>
+                                        <?php echo e(data_get($awdModel, 'reason')); ?>
 
                                     </span>
                                  <?php echo $__env->renderComponent(); ?>
@@ -405,7 +360,7 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php endif; ?>
 <?php $component->withAttributes([]); ?>
                                     <span class="text-sm font-medium text-gray-700">
-                                        <?php echo e($awdModel['given_date']); ?>
+                                        <?php echo e(data_get($awdModel, 'given_date')); ?>
 
                                     </span>
                                  <?php echo $__env->renderComponent(); ?>
@@ -430,8 +385,8 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php $component->withAttributes([]); ?>
                                     <span class="<?php echo \Illuminate\Support\Arr::toCssClasses([
                                         'w-3 h-3 rounded-full shadow-sm flex',
-                                        'bg-gray-300' => $awdModel['is_old'],
-                                        'bg-green-400' => !$awdModel['is_old']
+                                        'bg-gray-300' => data_get($awdModel, 'is_old'),
+                                        'bg-green-400' => ! data_get($awdModel, 'is_old'),
                                     ]); ?>">
                                     </span>
                                  <?php echo $__env->renderComponent(); ?>
@@ -475,7 +430,7 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                             <tr>
                                 <td colspan="5">
-                                    <div class="flex justify-center items-center py-4">
+                                    <div class="flex items-center justify-center py-4">
                                         <span class="font-medium"><?php echo e(__('No information added')); ?></span>
                                     </div>
                                 </td>
@@ -515,28 +470,29 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
 <?php $component->withAttributes(['title' => 'Punishments']); ?>
-        <div class="grid grid-cols-2 gap-2">
-            <div class="flex flex-col">
-                <?php if (isset($component)) { $__componentOriginald384098dd1216f6f264fe579adbe3c2f = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginald384098dd1216f6f264fe579adbe3c2f = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list','data' => ['class' => 'w-full','title' => __('Punishments'),'mode' => 'gray','selected' => $punishmentName,'name' => 'punishmentId']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
-<?php $component->withName('select-list'); ?>
+        <div class="grid grid-cols-4 gap-2">
+            <div class="flex flex-col col-span-2">
+                <?php if (isset($component)) { $__componentOriginalb7c56d9f0bb75b99472ae2845823c8e9 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalb7c56d9f0bb75b99472ae2845823c8e9 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.ui.select-dropdown','data' => ['label' => ''.e(__('Punishments')).'','placeholder' => '---','mode' => 'gray','class' => 'w-full','wire:model.live' => 'awardsPunishmentsForm.punishment.punishment_id','model' => $this->punishmentOptions]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('ui.select-dropdown'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['class' => 'w-full','title' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(__('Punishments')),'mode' => 'gray','selected' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($punishmentName),'name' => 'punishmentId']); ?>
+<?php $component->withAttributes(['label' => ''.e(__('Punishments')).'','placeholder' => '---','mode' => 'gray','class' => 'w-full','wire:model.live' => 'awardsPunishmentsForm.punishment.punishment_id','model' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($this->punishmentOptions)]); ?>
                     <?php if (isset($component)) { $__componentOriginal9364c0b92ee5ab519273634c79f86a27 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal9364c0b92ee5ab519273634c79f86a27 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.livewire-input','data' => ['@click.stop' => 'open = true','mode' => 'gray','name' => 'searchPunishment','wire:model.live' => 'searchPunishment']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.livewire-input','data' => ['mode' => 'gray','name' => 'searchPunishment','wire:model.live.debounce.300ms' => 'searchPunishment','@click.stop' => 'isOpen = true','xOn:input.stop' => 'null','xOn:keyup.stop' => 'null','xOn:keydown.stop' => 'null','xOn:change.stop' => 'null']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('livewire-input'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['@click.stop' => 'open = true','mode' => 'gray','name' => 'searchPunishment','wire:model.live' => 'searchPunishment']); ?> <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['mode' => 'gray','name' => 'searchPunishment','wire:model.live.debounce.300ms' => 'searchPunishment','@click.stop' => 'isOpen = true','x-on:input.stop' => 'null','x-on:keyup.stop' => 'null','x-on:keydown.stop' => 'null','x-on:change.stop' => 'null']); ?>
+<?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal9364c0b92ee5ab519273634c79f86a27)): ?>
 <?php $attributes = $__attributesOriginal9364c0b92ee5ab519273634c79f86a27; ?>
@@ -546,63 +502,17 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php $component = $__componentOriginal9364c0b92ee5ab519273634c79f86a27; ?>
 <?php unset($__componentOriginal9364c0b92ee5ab519273634c79f86a27); ?>
 <?php endif; ?>
-
-                    <?php if (isset($component)) { $__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list-item','data' => ['wire:click' => 'setData(\'punishment\',\'punishment_id\',\'punishment\',\'---\',null)','selected' => '---' == $awardName,'wire:model' => 'punishment.punishment_id.id']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
-<?php $component->withName('select-list-item'); ?>
-<?php if ($component->shouldRender()): ?>
-<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
-<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
-<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
-<?php endif; ?>
-<?php $component->withAttributes(['wire:click' => 'setData(\'punishment\',\'punishment_id\',\'punishment\',\'---\',null)','selected' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute('---' == $awardName),'wire:model' => 'punishment.punishment_id.id']); ?>
-                        ---
-                     <?php echo $__env->renderComponent(); ?>
-<?php endif; ?>
-<?php if (isset($__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee)): ?>
-<?php $attributes = $__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee; ?>
-<?php unset($__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee); ?>
-<?php endif; ?>
-<?php if (isset($__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee)): ?>
-<?php $component = $__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee; ?>
-<?php unset($__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee); ?>
-<?php endif; ?>
-                    <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $punishmentModel; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $pnsh): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <?php if (isset($component)) { $__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list-item','data' => ['wire:click' => 'setData(\'punishment\',\'punishment_id\',\'punishment\',\''.e($pnsh->name).'\','.e($pnsh->id).')','selected' => $pnsh->id === $punishmentId,'wire:model' => 'punishment.punishment_id.id']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
-<?php $component->withName('select-list-item'); ?>
-<?php if ($component->shouldRender()): ?>
-<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
-<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
-<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
-<?php endif; ?>
-<?php $component->withAttributes(['wire:click' => 'setData(\'punishment\',\'punishment_id\',\'punishment\',\''.e($pnsh->name).'\','.e($pnsh->id).')','selected' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($pnsh->id === $punishmentId),'wire:model' => 'punishment.punishment_id.id']); ?>
-                            <?php echo e($pnsh->name); ?>
-
-                         <?php echo $__env->renderComponent(); ?>
-<?php endif; ?>
-<?php if (isset($__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee)): ?>
-<?php $attributes = $__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee; ?>
-<?php unset($__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee); ?>
-<?php endif; ?>
-<?php if (isset($__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee)): ?>
-<?php $component = $__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee; ?>
-<?php unset($__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee); ?>
-<?php endif; ?>
-                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
                  <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
-<?php if (isset($__attributesOriginald384098dd1216f6f264fe579adbe3c2f)): ?>
-<?php $attributes = $__attributesOriginald384098dd1216f6f264fe579adbe3c2f; ?>
-<?php unset($__attributesOriginald384098dd1216f6f264fe579adbe3c2f); ?>
+<?php if (isset($__attributesOriginalb7c56d9f0bb75b99472ae2845823c8e9)): ?>
+<?php $attributes = $__attributesOriginalb7c56d9f0bb75b99472ae2845823c8e9; ?>
+<?php unset($__attributesOriginalb7c56d9f0bb75b99472ae2845823c8e9); ?>
 <?php endif; ?>
-<?php if (isset($__componentOriginald384098dd1216f6f264fe579adbe3c2f)): ?>
-<?php $component = $__componentOriginald384098dd1216f6f264fe579adbe3c2f; ?>
-<?php unset($__componentOriginald384098dd1216f6f264fe579adbe3c2f); ?>
+<?php if (isset($__componentOriginalb7c56d9f0bb75b99472ae2845823c8e9)): ?>
+<?php $component = $__componentOriginalb7c56d9f0bb75b99472ae2845823c8e9; ?>
+<?php unset($__componentOriginalb7c56d9f0bb75b99472ae2845823c8e9); ?>
 <?php endif; ?>
-                <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['punishment.punishment_id.id'];
+                <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['awardsPunishmentsForm.punishment.punishment_id'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -634,14 +544,14 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
             <div class="flex flex-col">
                 <?php if (isset($component)) { $__componentOriginald8ba2b4c22a13c55321e34443c386276 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginald8ba2b4c22a13c55321e34443c386276 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'punishment.reason']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'awardsPunishmentsForm.punishment.reason']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('label'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['for' => 'punishment.reason']); ?><?php echo e(__('Reason')); ?> <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['for' => 'awardsPunishmentsForm.punishment.reason']); ?><?php echo e(__('Reason')); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginald8ba2b4c22a13c55321e34443c386276)): ?>
 <?php $attributes = $__attributesOriginald8ba2b4c22a13c55321e34443c386276; ?>
@@ -653,14 +563,14 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php endif; ?>
                 <?php if (isset($component)) { $__componentOriginal9364c0b92ee5ab519273634c79f86a27 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal9364c0b92ee5ab519273634c79f86a27 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.livewire-input','data' => ['mode' => 'gray','name' => 'punishment.reason','wire:model' => 'punishment.reason']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.livewire-input','data' => ['mode' => 'gray','name' => 'awardsPunishmentsForm.punishment.reason','wire:model' => 'awardsPunishmentsForm.punishment.reason']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('livewire-input'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['mode' => 'gray','name' => 'punishment.reason','wire:model' => 'punishment.reason']); ?> <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['mode' => 'gray','name' => 'awardsPunishmentsForm.punishment.reason','wire:model' => 'awardsPunishmentsForm.punishment.reason']); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal9364c0b92ee5ab519273634c79f86a27)): ?>
 <?php $attributes = $__attributesOriginal9364c0b92ee5ab519273634c79f86a27; ?>
@@ -670,7 +580,7 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php $component = $__componentOriginal9364c0b92ee5ab519273634c79f86a27; ?>
 <?php unset($__componentOriginal9364c0b92ee5ab519273634c79f86a27); ?>
 <?php endif; ?>
-                <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['punishment.reason'];
+                <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['awardsPunishmentsForm.punishment.reason'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -705,14 +615,14 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
             <div class="flex flex-col">
                 <?php if (isset($component)) { $__componentOriginald8ba2b4c22a13c55321e34443c386276 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginald8ba2b4c22a13c55321e34443c386276 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'punishment.given_date']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'awardsPunishmentsForm.punishment.given_date']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('label'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['for' => 'punishment.given_date']); ?><?php echo e(__('Given date')); ?> <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['for' => 'awardsPunishmentsForm.punishment.given_date']); ?><?php echo e(__('Given date')); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginald8ba2b4c22a13c55321e34443c386276)): ?>
 <?php $attributes = $__attributesOriginald8ba2b4c22a13c55321e34443c386276; ?>
@@ -724,17 +634,17 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php endif; ?>
                 <?php if (isset($component)) { $__componentOriginal36038ba5ddba347b69d2b76bc4612d11 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal36038ba5ddba347b69d2b76bc4612d11 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.pikaday-input','data' => ['mode' => 'gray','name' => 'punishment.given_date','format' => 'Y-MM-DD','wire:model.live' => 'punishment.given_date']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.pikaday-input','data' => ['mode' => 'gray','name' => 'awardsPunishmentsForm.punishment.given_date','format' => 'Y-MM-DD','wire:model.live' => 'awardsPunishmentsForm.punishment.given_date']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('pikaday-input'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['mode' => 'gray','name' => 'punishment.given_date','format' => 'Y-MM-DD','wire:model.live' => 'punishment.given_date']); ?>
+<?php $component->withAttributes(['mode' => 'gray','name' => 'awardsPunishmentsForm.punishment.given_date','format' => 'Y-MM-DD','wire:model.live' => 'awardsPunishmentsForm.punishment.given_date']); ?>
                      <?php $__env->slot('script', null, []); ?> 
                         $el.onchange = function () {
-                        window.Livewire.find('<?php echo e($_instance->getId()); ?>').set('punishment.given_date', $el.value);
+                        window.Livewire.find('<?php echo e($_instance->getId()); ?>').set('awardsPunishmentsForm.punishment.given_date', $el.value);
                         }
                      <?php $__env->endSlot(); ?>
                  <?php echo $__env->renderComponent(); ?>
@@ -747,7 +657,7 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php $component = $__componentOriginal36038ba5ddba347b69d2b76bc4612d11; ?>
 <?php unset($__componentOriginal36038ba5ddba347b69d2b76bc4612d11); ?>
 <?php endif; ?>
-                <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['punishment.given_date'];
+                <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['awardsPunishmentsForm.punishment.given_date'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -779,14 +689,14 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
             <div class="flex flex-col">
                 <?php if (isset($component)) { $__componentOriginald8ba2b4c22a13c55321e34443c386276 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginald8ba2b4c22a13c55321e34443c386276 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'punishment.expired_date']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'awardsPunishmentsForm.punishment.expired_date']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('label'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['for' => 'punishment.expired_date']); ?><?php echo e(__('Expired date')); ?> <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['for' => 'awardsPunishmentsForm.punishment.expired_date']); ?><?php echo e(__('Expired date')); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginald8ba2b4c22a13c55321e34443c386276)): ?>
 <?php $attributes = $__attributesOriginald8ba2b4c22a13c55321e34443c386276; ?>
@@ -798,17 +708,17 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php endif; ?>
                 <?php if (isset($component)) { $__componentOriginal36038ba5ddba347b69d2b76bc4612d11 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal36038ba5ddba347b69d2b76bc4612d11 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.pikaday-input','data' => ['mode' => 'gray','name' => 'punishment.expired_date','format' => 'Y-MM-DD','wire:model.live' => 'punishment.expired_date']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.pikaday-input','data' => ['mode' => 'gray','name' => 'awardsPunishmentsForm.punishment.expired_date','format' => 'Y-MM-DD','wire:model.live' => 'awardsPunishmentsForm.punishment.expired_date']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('pikaday-input'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['mode' => 'gray','name' => 'punishment.expired_date','format' => 'Y-MM-DD','wire:model.live' => 'punishment.expired_date']); ?>
+<?php $component->withAttributes(['mode' => 'gray','name' => 'awardsPunishmentsForm.punishment.expired_date','format' => 'Y-MM-DD','wire:model.live' => 'awardsPunishmentsForm.punishment.expired_date']); ?>
                      <?php $__env->slot('script', null, []); ?> 
                         $el.onchange = function () {
-                        window.Livewire.find('<?php echo e($_instance->getId()); ?>').set('punishment.expired_date', $el.value);
+                        window.Livewire.find('<?php echo e($_instance->getId()); ?>').set('awardsPunishmentsForm.punishment.expired_date', $el.value);
                         }
                      <?php $__env->endSlot(); ?>
                  <?php echo $__env->renderComponent(); ?>
@@ -851,15 +761,15 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                 <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
                     <?php if (isset($component)) { $__componentOriginal3ee30789824fd1cc17cb4ff8e03df656 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal3ee30789824fd1cc17cb4ff8e03df656 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table.tbl','data' => ['headers' => [__('Punishment'),__('Reason'),__('Date'),'action']]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table.tbl','data' => ['headers' => [__('Punishment'), __('Reason'), __('Date'), 'action']]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('table.tbl'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['headers' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute([__('Punishment'),__('Reason'),__('Date'),'action'])]); ?>
-                        <!--[if BLOCK]><![endif]--><?php $__empty_1 = true; $__currentLoopData = $punishment_list; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $pnshModel): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+<?php $component->withAttributes(['headers' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute([__('Punishment'), __('Reason'), __('Date'), 'action'])]); ?>
+                        <!--[if BLOCK]><![endif]--><?php $__empty_1 = true; $__currentLoopData = $awardsPunishmentsForm->punishmentList ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $pnshModel): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                             <tr>
                                 <?php if (isset($component)) { $__componentOriginalc91c98e046a1434e6f8cdd0cdedd160b = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b = $attributes; } ?>
@@ -872,9 +782,9 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php endif; ?>
 <?php $component->withAttributes([]); ?>
                                     <span class="text-sm font-medium text-gray-700">
-                                        <?php echo e($pnshModel['punishment_id']['name']); ?>
+                                        <?php echo e($this->punishmentLabel(data_get($pnshModel, 'punishment_id')) ?? '---'); ?>
 
-                                   </span>
+                                    </span>
                                  <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginalc91c98e046a1434e6f8cdd0cdedd160b)): ?>
@@ -896,7 +806,7 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php endif; ?>
 <?php $component->withAttributes([]); ?>
                                    <span class="text-sm font-medium text-gray-700">
-                                        <?php echo e($pnshModel['reason']); ?>
+                                        <?php echo e(data_get($pnshModel, 'reason')); ?>
 
                                     </span>
                                  <?php echo $__env->renderComponent(); ?>
@@ -920,18 +830,18 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php endif; ?>
 <?php $component->withAttributes([]); ?>
                                     <div class="flex items-center space-x-6">
-                                        <div class="flex flex-col space-y-1 items-start">
-                                            <span class="text-sm text-gray-500 font-medium border-b border-dashed border-slate-400"><?php echo e(__('Given date')); ?>:</span>
+                                        <div class="flex flex-col items-start space-y-1">
+                                            <span class="text-sm font-medium text-gray-500 border-b border-dashed border-slate-400"><?php echo e(__('Given date')); ?>:</span>
                                             <span class="text-sm font-medium text-gray-700">
-                                                <?php echo e($pnshModel['given_date']); ?>
+                                                <?php echo e(data_get($pnshModel, 'given_date')); ?>
 
                                             </span>
                                         </div>
 
-                                        <div class="flex flex-col space-y-1 items-start">
-                                            <span class="text-sm text-gray-500 font-medium border-b border-dashed border-slate-400"><?php echo e(__('Expired date')); ?>:</span>
+                                        <div class="flex flex-col items-start space-y-1">
+                                            <span class="text-sm font-medium text-gray-500 border-b border-dashed border-slate-400"><?php echo e(__('Expired date')); ?>:</span>
                                             <span class="text-sm font-medium text-rose-500">
-                                                <?php echo e($pnshModel['expired_date']); ?>
+                                                <?php echo e(data_get($pnshModel, 'expired_date') ?: '—'); ?>
 
                                             </span>
                                         </div>
@@ -976,8 +886,8 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                             </tr>
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                             <tr>
-                                <td colspan="5">
-                                    <div class="flex justify-center items-center py-4">
+                                <td colspan="4">
+                                    <div class="flex items-center justify-center py-4">
                                         <span class="font-medium"><?php echo e(__('No information added')); ?></span>
                                     </div>
                                 </td>
@@ -1020,14 +930,14 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
         <div class="flex flex-col">
             <?php if (isset($component)) { $__componentOriginald8ba2b4c22a13c55321e34443c386276 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginald8ba2b4c22a13c55321e34443c386276 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'personnel_extra.discrediting_information']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'personalForm.personnelExtra.discrediting_information']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('label'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['for' => 'personnel_extra.discrediting_information']); ?><?php echo e(__('Description')); ?> <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['for' => 'personalForm.personnelExtra.discrediting_information']); ?><?php echo e(__('Description')); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginald8ba2b4c22a13c55321e34443c386276)): ?>
 <?php $attributes = $__attributesOriginald8ba2b4c22a13c55321e34443c386276; ?>
@@ -1039,14 +949,14 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php endif; ?>
             <?php if (isset($component)) { $__componentOriginal4727f9fd7c3055c2cf9c658d89b16886 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal4727f9fd7c3055c2cf9c658d89b16886 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.textarea','data' => ['mode' => 'gray','name' => 'personnel_extra.discrediting_information','placeholder' => ''.e(__('')).'','wire:model' => 'personnel_extra.discrediting_information']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.textarea','data' => ['mode' => 'gray','name' => 'personalForm.personnelExtra.discrediting_information','placeholder' => '','wire:model' => 'personalForm.personnelExtra.discrediting_information']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('textarea'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['mode' => 'gray','name' => 'personnel_extra.discrediting_information','placeholder' => ''.e(__('')).'','wire:model' => 'personnel_extra.discrediting_information']); ?> <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['mode' => 'gray','name' => 'personalForm.personnelExtra.discrediting_information','placeholder' => '','wire:model' => 'personalForm.personnelExtra.discrediting_information']); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal4727f9fd7c3055c2cf9c658d89b16886)): ?>
 <?php $attributes = $__attributesOriginal4727f9fd7c3055c2cf9c658d89b16886; ?>
@@ -1068,104 +978,4 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php unset($__componentOriginal8e3939701bc9c667d1f9e91d04821cb7); ?>
 <?php endif; ?>
 </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 <?php /**PATH /Users/togruljalalli/Desktop/projects/HRM/resources/views/includes/step6.blade.php ENDPATH**/ ?>

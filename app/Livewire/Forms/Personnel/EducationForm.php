@@ -29,24 +29,6 @@ class EducationForm extends Form
         $this->extraEducation = $this->defaultExtraEducation();
     }
 
-    public function fillFromArrays(
-        array $education,
-        array $extraEducation,
-        array $extraEducationList,
-        bool $hasExtraEducation
-    ): void {
-        $this->education = ! empty($education)
-            ? array_replace($this->defaultEducation(), $education)
-            : $this->defaultEducation();
-
-        $this->extraEducation = ! empty($extraEducation)
-            ? array_replace($this->defaultExtraEducation(), $extraEducation)
-            : $this->defaultExtraEducation();
-
-        $this->extraEducationList = $extraEducationList;
-        $this->hasExtraEducation = $hasExtraEducation;
-    }
-
     public function fillFromModel(?Personnel $personnel): void
     {
         $this->resetForm();
@@ -98,6 +80,49 @@ class EducationForm extends Form
             ->all();
 
         $this->hasExtraEducation = ! empty($this->extraEducationList);
+    }
+
+    public function addExtraEducationEntry(?float $coefficientValue = null): void
+    {
+        $entry = $this->extraEducation;
+        $entry['calculate_as_seniority'] = (bool) ($entry['calculate_as_seniority'] ?? false);
+        $entry['is_military'] = (bool) ($entry['is_military'] ?? false);
+        $entry['coefficient'] = $entry['calculate_as_seniority'] ? $coefficientValue : null;
+
+        $this->hasExtraEducation = true;
+        $this->extraEducationList[] = $entry;
+        $this->resetExtraEducation();
+    }
+
+    public function removeExtraEducationEntry(int $index): void
+    {
+        if (! array_key_exists($index, $this->extraEducationList)) {
+            return;
+        }
+
+        unset($this->extraEducationList[$index]);
+        $this->extraEducationList = array_values($this->extraEducationList);
+        $this->hasExtraEducation = ! empty($this->extraEducationList);
+    }
+
+    public function disableExtraEducation(): void
+    {
+        $this->hasExtraEducation = false;
+        $this->extraEducationList = [];
+        $this->resetExtraEducation();
+    }
+
+    public function educationForPersistence(): array
+    {
+        return $this->education;
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function extraEducationsForPersistence(): array
+    {
+        return $this->extraEducationList;
     }
 
     protected function defaultEducation(): array

@@ -189,10 +189,10 @@
 
 <x-form-card
     title="{{ __('Extra Education') }}"
-    checkbox="hasExtraEducation"
+    checkbox="educationForm.hasExtraEducation"
     checkboxTitle="{{ __('Has extra education?') }}"
 >
-    @if($hasExtraEducation)
+    @if(data_get($educationForm ?? null, 'hasExtraEducation'))
         <div class="grid grid-cols-3 gap-2">
             <div class="flex flex-col">
                 <x-ui.select-dropdown

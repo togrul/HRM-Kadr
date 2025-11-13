@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::getConnection()->getDriverName() === 'sqlite') {
+            return;
+        }
+
         Schema::table('personnel_education', function (Blueprint $table) {
             $table->date('admission_year')->change();
             $table->date('graduated_year')->change();
@@ -22,6 +26,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (Schema::getConnection()->getDriverName() === 'sqlite') {
+            return;
+        }
+
         Schema::table('personnel_education', function (Blueprint $table) {
             //
         });
