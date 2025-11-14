@@ -55,9 +55,24 @@
 14. **Service-Level Tests**
    - Added focused unit coverage for `PersonnelRelationsService` (create/update reconciliation) and `EducationDurationService` caching behaviour to lock in the new abstractions.
 15. **Labor Step Preview**
-   - `calculateSeniority()` now includes the in-progress labor entry while you are editing it, so the totals in Step 4 update in real time without needing to add/remove rows first.
+ - `calculateSeniority()` now includes the in-progress labor entry while you are editing it, so the totals in Step 4 update in real time without needing to add/remove rows first.
 16. **Test Harness Improvements**
-   - PHPUnit runs against in-memory SQLite with FK constraints disabled; migrations that rely on `change()` now self-skip on SQLite, and the base `UserFactory` hashes passwords via the configured driver so observer logic no longer explodes during tests.
+ - PHPUnit runs against in-memory SQLite with FK constraints disabled; migrations that rely on `change()` now self-skip on SQLite, and the base `UserFactory` hashes passwords via the configured driver so observer logic no longer explodes during tests.
+17. **Personnel Listing Optimisations**
+  - `AllPersonnel`’s query builder now eager-loads only the localized columns it needs, sorts by structure/position names (via correlated subqueries), and caches the accessible structure id list plus the positions dropdown.
+  - The view stores `$personnels`/`$status` locally and uses the new `activeVacation`/`activeBusinessTrip` accessors so Livewire doesn’t re-run expensive relations per row; dropdown lookups for ranks/rank-reasons read locale-specific columns and leverage cached labels to avoid duplicate queries.
+18. **Personnel Model Filtering Hardening**
+  - Added typed accessors for `activeVacation/activeBusinessTrip` so Livewire consumers know the relations must be eager-loaded, and ensured the `age` accessor safely handles missing birthdates.
+  - `scopeFilter` now ignores only truly empty filter payloads, preserves “0” values, normalises date/number ranges via helpers, and reuses strict `in_array` checks to avoid accidental column matches. This keeps range filters deterministic and prevents surprise N+1 queries when filters contain partially-filled arrays.
+19. **OrderLog Safeguards**
+  - Wrapped `handleDeletion()` in a DB transaction, extracted rollback helpers for EMR personnel, vacation orders, and business trips, and added guards so missing staff schedules or vacations no longer throw errors during cleanup.
+  - Reused the filter helpers to keep `OrderLog::scopeFilter` consistent with other models (trims order numbers, normalises date ranges, ignores empty payloads) and added typed Builder hints for IDE support.
+20. **Candidate Status Lookups**
+  - Added a reusable `LoadsAppealStatuses` concern that caches locale-specific appeal statuses for six hours and wired it into `CandidateList` plus the `CandidateCrud` trait, eliminating duplicate queries on every Livewire render.
+  - `CandidateList` now caches accessible structure IDs per mount (instead of resolving the service per query) and keeps status filters/exports fast even when the page re-renders frequently.
+21. **Staff Schedule Ancestors**
+  - Cached accessible structure ids during `Staffs` mount so the component stops resolving `StructureService` on every render, and expanded `Structure::withRecursive()` to accept a flag that controls whether the `accessible()` macro is applied. The staff schedule now opts out of that filter (so ancestor chains load fully without leaks), while every other consumer keeps their permission-aware recursion.
+  - Marked the cached IDs as a locked public property so Livewire hydrates them across requests; without that change the list emptied whenever the page toggled between “all” and “vacancies”.
 
 ## Next Ideas
 - Verify Step 5–8 UX once more (manual or automated) to ensure draft detection still covers every branch.

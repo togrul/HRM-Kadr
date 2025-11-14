@@ -320,14 +320,14 @@ class Personnel extends Model
         return $this->hasOne(PersonnelVacation::class, 'tabel_no', 'tabel_no')->latestOfMany('return_work_date');
     }
 
-    public function hasActiveVacation()
+    public function hasActiveVacation(): HasOne
     {
         return $this->latestVacation()
             ->where('start_date', '<=', Carbon::now())
             ->where('return_work_date', '>', Carbon::now());
     }
 
-    public function getActiveVacationAttribute()
+    public function getActiveVacationAttribute(): ?PersonnelVacation
     {
         if (! $this->relationLoaded('latestVacation')) {
             return null;
@@ -356,14 +356,14 @@ class Personnel extends Model
         return $this->hasOne(PersonnelBusinessTrip::class, 'tabel_no', 'tabel_no')->latestOfMany('end_date');
     }
 
-    public function hasActiveBusinessTrip()
+    public function hasActiveBusinessTrip(): HasOne
     {
         return $this->latestBusinessTrip()
             ->where('start_date', '<=', Carbon::now())
             ->where('end_date', '>', Carbon::now());
     }
 
-    public function getActiveBusinessTripAttribute()
+    public function getActiveBusinessTripAttribute(): ?PersonnelBusinessTrip
     {
         if (! $this->relationLoaded('latestBusinessTrip')) {
             return null;
@@ -493,8 +493,12 @@ class Personnel extends Model
             ->one();
     }
 
-    public function getAgeAttribute()
+    public function getAgeAttribute(): ?int
     {
+        if (empty($this->birthdate)) {
+            return null;
+        }
+
         return Carbon::parse($this->birthdate)->age;
     }
 
@@ -507,15 +511,18 @@ class Personnel extends Model
     public function scopeFilter($query, array $filters)
     {
         foreach ($filters as $field => $value) {
-            if($value)
-            {
-                if (is_array($value)) {
-                    $this->applyRangeFilter($query, $field, $value);
-                } else {
-                    $this->applyExactFilter($query, $field, $value);
-                }
+            if ($this->filterValueIsEmpty($value)) {
+                continue;
             }
+
+            if (is_array($value)) {
+                $this->applyRangeFilter($query, $field, $value);
+                continue;
+            }
+
+            $this->applyExactFilter($query, $field, $value);
         }
+
         return $query;
     }
 
@@ -527,13 +534,28 @@ class Personnel extends Model
     protected function applyRangeFilter($query, $field, array $value)
     {
         if ($field === 'age') {
-            $query->whereRaw('timestampdiff(year, birthdate, curdate()) between ? and ?', [$value['min'], $value['max']]);
-        } elseif ($field === 'rank') {
-            $query->whereHas('ranks', fn ($q) => $q->whereBetween('given_date', [$value['min'], $value['max']]));
-        } elseif (in_array($field, $this->fillable)) {
-            $min = empty($value['min']) ? '1990-01-01' : Carbon::parse($value['min'])->format('Y-m-d');
-            $max = empty($value['max']) ? Carbon::now()->format('Y-m-d') : Carbon::parse($value['max'])->format('Y-m-d');
-            $query->whereBetween($field, [$min, $max]);
+            [$minAge, $maxAge] = $this->normalizeNumericRange($value, 0, 150);
+
+            $query->whereRaw(
+                'timestampdiff(year, birthdate, curdate()) between ? and ?',
+                [$minAge, $maxAge]
+            );
+
+            return;
+        }
+
+        if ($field === 'rank') {
+            [$start, $end] = $this->normalizeDateRange($value);
+
+            $query->whereHas('ranks', fn ($q) => $q->whereBetween('given_date', [$start, $end]));
+
+            return;
+        }
+
+        if (in_array($field, $this->fillable, true)) {
+            [$start, $end] = $this->normalizeDateRange($value);
+
+            $query->whereBetween($field, [$start, $end]);
         }
     }
 
@@ -580,13 +602,77 @@ class Personnel extends Model
                 break;
 
             default:
-                if (in_array($field, $this->likeFilterFields) && $value !== null) {
+                if (in_array($field, $this->likeFilterFields, true) && $value !== null) {
                     $query->where($field, 'LIKE', "%$value%");
-                } elseif (in_array($field, $this->fillable) && $value !== null) {
+                } elseif (in_array($field, $this->fillable, true) && $value !== null) {
                     $query->where($field, $value);
                 }
                 break;
         }
+    }
+
+    protected function filterValueIsEmpty(mixed $value): bool
+    {
+        if (is_array($value)) {
+            foreach ($value as $item) {
+                if (! $this->filterValueIsEmpty($item)) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        if (is_bool($value)) {
+            return false;
+        }
+
+        if (is_string($value)) {
+            return trim($value) === '';
+        }
+
+        return $value === null;
+    }
+
+    protected function normalizeDateRange(array $value, ?string $defaultMin = null, ?string $defaultMax = null): array
+    {
+        $defaultMin ??= '1990-01-01';
+        $defaultMax ??= Carbon::now()->format('Y-m-d');
+
+        $min = $this->normalizeDateValue($value['min'] ?? null, $defaultMin);
+        $max = $this->normalizeDateValue($value['max'] ?? null, $defaultMax);
+
+        if ($min > $max) {
+            [$min, $max] = [$max, $min];
+        }
+
+        return [$min, $max];
+    }
+
+    protected function normalizeDateValue(?string $value, string $fallback): string
+    {
+        if ($value === null || trim($value) === '') {
+            return $fallback;
+        }
+
+        return Carbon::parse($value)->format('Y-m-d');
+    }
+
+    protected function normalizeNumericRange(array $value, int $defaultMin, int $defaultMax): array
+    {
+        $min = array_key_exists('min', $value) && $value['min'] !== ''
+            ? (int) $value['min']
+            : $defaultMin;
+
+        $max = array_key_exists('max', $value) && $value['max'] !== ''
+            ? (int) $value['max']
+            : $defaultMax;
+
+        if ($min > $max) {
+            [$min, $max] = [$max, $min];
+        }
+
+        return [$min, $max];
     }
 
     protected function applyStructureFilter($query, $value)
@@ -595,7 +681,7 @@ class Personnel extends Model
         $query->whereIn('structure_id', $structureIds);
     }
 
-     public function scopeNameLike(Builder $query, ?string $term): Builder
+    public function scopeNameLike(Builder $query, ?string $term): Builder
     {
         $term = trim((string) $term);
         if ($term === '') {

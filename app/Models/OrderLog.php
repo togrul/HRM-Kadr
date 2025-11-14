@@ -5,18 +5,24 @@ namespace App\Models;
 use App\Traits\CreateDeleteTrait;
 use App\Traits\DateCastTrait;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 class OrderLog extends Model
 {
-    use CreateDeleteTrait,DateCastTrait,HasFactory,LogsActivity, SoftDeletes;
+    use CreateDeleteTrait;
+    use DateCastTrait;
+    use HasFactory;
+    use LogsActivity;
+    use SoftDeletes;
 
     public function getActivitylogOptions(): LogOptions
     {
@@ -49,7 +55,7 @@ class OrderLog extends Model
         'description' => 'array',
     ];
 
-    public function getForeignKeyName()
+    public function getForeignKeyName(): string
     {
         return 'order_no'; // Specify the name of the foreign key you want to use for syncing
     }
@@ -113,64 +119,164 @@ class OrderLog extends Model
 
     public function handleDeletion(): void
     {
-        if ($this->order_id == Order::IG_EMR) {
-            // emre hazir statusuna qaytarmaq
-            // vacancy yenile. bos yerleri coxalt dolunu azalt
-            foreach ($this->personnels as $personnel) {
-                $candidate_id = str_replace('NMZD', '', $personnel->tabel_no);
-                Candidate::where('id', $candidate_id)->update(['status_id' => 30]);
-                $staff_schedule = StaffSchedule::query()
-                    ->where('structure_id', $personnel->structure_id)
-                    ->where('position_id', $personnel->position_id)
-                    ->first();
-
-                $updatedData = [
-                    'total' => max(0, $staff_schedule->total - 1),
-                ];
-
-                $vacancyField = $personnel->is_pending ? 'vacant' : 'filled';
-                $updatedData[$vacancyField] = max(0, $staff_schedule->{$vacancyField} - 1);
-
-                $staff_schedule->update($updatedData);
-                $personnel->delete();
+        DB::transaction(function () {
+            if ($this->isEmrOrder()) {
+                $this->rollbackEmrAssignments();
             }
-        }
 
-        switch ($this->order->blade) {
-            case Order::BLADE_VACATION:
-                // mezuniyyet emrini sil ve ona aid olan verilenleri evvelki veziyyetine geri qaytar.
-                $vacation = $this->vacations->first();
-                $this->vacations()->forceDelete();
-                Vacation::where([
-                    'tabel_no' => $vacation->tabel_no,
-                    'year' => $vacation->start_date->year,
-                ])->increment('remaining_days', $vacation->duration);
-                break;
-            case Order::BLADE_BUSINESS_TRIP:
-                $this->businessTrips()->forceDelete();
-                break;
-        }
+            $blade = optional($this->order)->blade;
 
-        $this->forceDelete();
+            switch ($blade) {
+                case Order::BLADE_VACATION:
+                    $this->rollbackVacationOrder();
+                    break;
+                case Order::BLADE_BUSINESS_TRIP:
+                    $this->rollbackBusinessTripOrder();
+                    break;
+            }
+
+            $this->forceDelete();
+        });
     }
 
-    public function scopeFilter($query, array $filters)
+    public function scopeFilter(Builder $query, array $filters): Builder
     {
         foreach ($filters as $field => $value) {
-            if ($field == 'order_no') {
-                $query->where($field, 'LIKE', "%$value%");
-
+            if ($this->filterValueIsEmpty($value)) {
                 continue;
             }
-            if ($field == 'given_date') {
-                $_min = empty($value['min']) ? '1990-01-01' : Carbon::parse($value['min'])->format('Y-m-d');
-                $_max = empty($value['max'])
-                        ? Carbon::now()->format('Y-m-d')
-                        : Carbon::parse($value['max'])->format('Y-m-d');
-                $query->whereBetween($field, [$_min, $_max]);
+
+            if ($field === 'order_no') {
+                $query->where($field, 'LIKE', '%'.trim((string) $value).'%');
+                continue;
+            }
+
+            if ($field === 'given_date' && is_array($value)) {
+                [$start, $end] = $this->normalizeDateRange($value);
+                $query->whereBetween($field, [$start, $end]);
             }
         }
 
         return $query;
+    }
+
+    protected function rollbackEmrAssignments(): void
+    {
+        $this->loadMissing('personnels');
+
+        foreach ($this->personnels as $personnel) {
+            $this->restoreCandidateFromPersonnel($personnel);
+            $this->rollbackStaffSchedule($personnel);
+            $personnel->delete();
+        }
+    }
+
+    protected function restoreCandidateFromPersonnel(Personnel $personnel): void
+    {
+        $candidateId = (int) str_replace('NMZD', '', (string) $personnel->tabel_no);
+
+        if ($candidateId <= 0) {
+            return;
+        }
+
+        Candidate::whereKey($candidateId)->update(['status_id' => 30]);
+    }
+
+    protected function rollbackStaffSchedule(Personnel $personnel): void
+    {
+        $staffSchedule = StaffSchedule::query()
+            ->where('structure_id', $personnel->structure_id)
+            ->where('position_id', $personnel->position_id)
+            ->first();
+
+        if (! $staffSchedule) {
+            return;
+        }
+
+        $updatedData = [
+            'total' => max(0, (int) $staffSchedule->total - 1),
+        ];
+
+        $vacancyField = $personnel->is_pending ? 'vacant' : 'filled';
+        $updatedData[$vacancyField] = max(0, (int) $staffSchedule->{$vacancyField} - 1);
+
+        $staffSchedule->update($updatedData);
+    }
+
+    protected function rollbackVacationOrder(): void
+    {
+        $vacation = $this->vacations()->first();
+
+        if (! $vacation) {
+            return;
+        }
+
+        $this->vacations()->forceDelete();
+
+        $year = $vacation->start_date instanceof Carbon
+            ? $vacation->start_date->year
+            : Carbon::parse($vacation->start_date)->year;
+
+        Vacation::where([
+            'tabel_no' => $vacation->tabel_no,
+            'year' => $year,
+        ])->increment('remaining_days', (int) $vacation->duration);
+    }
+
+    protected function isEmrOrder(): bool
+    {
+        return (int) $this->order_id === Order::IG_EMR;
+    }
+
+    protected function filterValueIsEmpty(mixed $value): bool
+    {
+        if (is_array($value)) {
+            foreach ($value as $item) {
+                if (! $this->filterValueIsEmpty($item)) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        if (is_bool($value)) {
+            return false;
+        }
+
+        if (is_string($value)) {
+            return trim($value) === '';
+        }
+
+        return $value === null;
+    }
+
+    protected function normalizeDateRange(array $value, ?string $defaultMin = null, ?string $defaultMax = null): array
+    {
+        $defaultMin ??= '1990-01-01';
+        $defaultMax ??= Carbon::now()->format('Y-m-d');
+
+        $min = $this->normalizeDateValue($value['min'] ?? null, $defaultMin);
+        $max = $this->normalizeDateValue($value['max'] ?? null, $defaultMax);
+
+        if ($min > $max) {
+            [$min, $max] = [$max, $min];
+        }
+
+        return [$min, $max];
+    }
+
+    protected function normalizeDateValue(?string $value, string $fallback): string
+    {
+        if ($value === null || trim($value) === '') {
+            return $fallback;
+        }
+
+        return Carbon::parse($value)->format('Y-m-d');
+    }
+
+    protected function rollbackBusinessTripOrder(): void
+    {
+        $this->businessTrips()->forceDelete();
     }
 }

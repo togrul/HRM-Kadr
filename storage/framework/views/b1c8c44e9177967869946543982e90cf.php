@@ -33,35 +33,35 @@ if (isset($__slots)) unset($__slots);
      <?php $__env->endSlot(); ?>
     
 
-    <div class="flex flex-col sm:flex-row justify-between items-center space-y-4 px-6 py-4">
-        <div class="flex flex-col space-y-1 pl-3">
+    <div class="flex flex-col items-center justify-between px-6 py-4 space-y-4 sm:flex-row">
+        <div class="flex flex-col pl-3 space-y-1">
             <!--[if BLOCK]><![endif]--><?php if($selectedPage == 'all'): ?>
-                <button wire:click="showPage('vacancies')"
-                    class="flex items-center justify-center shadow-sm transition-all duration-300 rounded-lg bg-slate-900 text-white hover:bg-slate-200 hover:text-slate-900 space-x-2 px-4 py-2"
+                <button wire:click.prevent="showPage('vacancies')"
+                    class="flex items-center justify-center px-4 py-2 space-x-2 text-white transition-all duration-300 rounded-lg shadow-sm bg-slate-900 hover:bg-slate-200 hover:text-slate-900"
                     type="button">
                     <span><?php echo e(__('Get all vacancies')); ?></span>
                 </button>
             <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
             <!--[if BLOCK]><![endif]--><?php if($selectedPage == 'vacancies'): ?>
-                <button wire:click="showPage('all')"
-                    class="flex items-center justify-center shadow-sm transition-all duration-300 rounded-xl bg-slate-900 text-white hover:bg-slate-200 hover:text-slate-900 space-x-2 px-4 py-2"
+                <button wire:click.prevent="showPage('all')"
+                    class="flex items-center justify-center px-4 py-2 space-x-2 text-white transition-all duration-300 shadow-sm rounded-xl bg-slate-900 hover:bg-slate-200 hover:text-slate-900"
                     type="button">
                     <span><?php echo e(__('All data')); ?></span>
                 </button>
             <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
         </div>
 
-        <div class="flex justify-end items-center space-x-2">
+        <div class="flex items-center justify-end space-x-2">
             <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('add-staff')): ?>
                 <button wire:click="openSideMenu('add-staff')"
-                    class="flex items-center justify-center transition-all duration-300 rounded-xl bg-slate-100 text-slate-500 hover:bg-slate-200 space-x-2 p-2"
+                    class="flex items-center justify-center p-2 space-x-2 transition-all duration-300 rounded-xl bg-slate-100 text-slate-500 hover:bg-slate-200"
                     type="button">
                     <?php echo $__env->make('components.icons.add-icon', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
                 </button>
             <?php endif; ?>
             <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('export-staff')): ?>
                 <button
-                    class="flex items-center justify-center transition-all duration-300 rounded-xl bg-rose-50 text-rose-500 hover:bg-rose-100 space-x-2 p-2"
+                    class="flex items-center justify-center p-2 space-x-2 transition-all duration-300 rounded-xl bg-rose-50 text-rose-500 hover:bg-rose-100"
                     type="button">
                     <?php echo $__env->make('components.icons.print-file', [
                         'color' => 'text-rose-400',
@@ -72,7 +72,7 @@ if (isset($__slots)) unset($__slots);
             <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('export-staff')): ?>
                 <!--[if BLOCK]><![endif]--><?php if($selectedPage == 'vacancies'): ?>
                     <button wire:click.prevent="exportExcel"
-                        class="flex items-center justify-center rounded-xl transition-all duration-300 bg-green-50 text-green-500 hover:bg-green-100 space-x-2 p-2"
+                        class="flex items-center justify-center p-2 space-x-2 text-green-500 transition-all duration-300 rounded-xl bg-green-50 hover:bg-green-100"
                         type="button">
                         <?php if (isset($component)) { $__componentOriginalaac97465df15b1f1f8ecebffe4ef4e28 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalaac97465df15b1f1f8ecebffe4ef4e28 = $attributes; } ?>
@@ -101,7 +101,7 @@ if (isset($__slots)) unset($__slots);
     </div>
 
     <!--[if BLOCK]><![endif]--><?php if($selectedPage == 'all'): ?>
-        <div class="flex flex-col space-y-4 px-4 mt-4">
+        <div class="flex flex-col px-4 mt-4 space-y-4">
             <!--[if BLOCK]><![endif]--><?php if($staffs->isNotEmpty()): ?>
                 <div class="grid grid-cols-1 gap-3">
                     <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $staffs; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $str => $stf): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
@@ -183,14 +183,14 @@ if (isset($__slots)) unset($__slots);
 
     
     <!--[if BLOCK]><![endif]--><?php if($selectedPage == 'vacancies'): ?>
-        <div class="flex flex-col space-y-2 px-6">
-            <div class="flex space-x-4 items-center">
-                <div class="flex space-x-2 items-center">
-                    <span class="text-gray-500 font-medium"><?php echo e(__('Count')); ?>:</span>
+        <div class="flex flex-col px-6 space-y-2">
+            <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-2">
+                    <span class="font-medium text-gray-500"><?php echo e(__('Count')); ?>:</span>
                     <span><?php echo e($staffs->count()); ?></span>
                 </div>
-                <div class="flex space-x-2 items-center">
-                    <span class="text-gray-500 font-medium"><?php echo e(__('Total')); ?>:</span>
+                <div class="flex items-center space-x-2">
+                    <span class="font-medium text-gray-500"><?php echo e(__('Total')); ?>:</span>
                     <span><?php echo e($staffs->sum('vacant')); ?></span>
                 </div>
             </div>

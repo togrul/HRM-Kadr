@@ -2,9 +2,9 @@
 
 namespace App\Livewire\Candidates;
 
+use App\Concerns\LoadsAppealStatuses;
 use App\Exports\CandidateExport;
 use App\Livewire\Traits\SideModalAction;
-use App\Models\AppealStatus;
 use App\Models\Candidate;
 use App\Services\StructureService;
 use Carbon\Carbon;
@@ -18,7 +18,10 @@ use Maatwebsite\Excel\Facades\Excel;
 #[On(['candidateAdded', 'filterSelected', 'candidateWasDeleted'])]
 class CandidateList extends Component
 {
-    use AuthorizesRequests, SideModalAction, WithPagination;
+    use AuthorizesRequests;
+    use LoadsAppealStatuses;
+    use SideModalAction;
+    use WithPagination;
 
     public array $filter = [];
 
@@ -26,6 +29,8 @@ class CandidateList extends Component
 
     #[Url]
     public $status;
+
+    protected array $accessibleStructureIds = [];
 
     public function exportExcel()
     {
@@ -97,9 +102,12 @@ class CandidateList extends Component
     protected function returnData($type = 'normal')
     {
         $result = Candidate::with(['structure', 'status', 'creator', 'personDidDelete'])
-            ->whereIn('structure_id', resolve(StructureService::class)->getAccessibleStructures())
-            ->when(is_numeric($this->status), fn($q) => $q->where('status_id', $this->status))
-            ->when($this->status === 'deleted', fn($q) => $q->onlyTrashed())
+            ->when(
+                ! empty($this->accessibleStructureIds),
+                fn ($query) => $query->whereIn('structure_id', $this->accessibleStructureIds)
+            )
+            ->when(is_numeric($this->status), fn ($q) => $q->where('status_id', $this->status))
+            ->when($this->status === 'deleted', fn ($q) => $q->onlyTrashed())
             ->filter($this->search ?? [])
             ->orderByDesc('appeal_date');
 
@@ -108,15 +116,16 @@ class CandidateList extends Component
             : $result->cursor();
     }
 
-    public function mount(): void
+    public function mount(StructureService $structureService): void
     {
         $this->authorize('show-candidates');
         $this->status = request()->query('status', 'all');
+        $this->accessibleStructureIds = $structureService->getAccessibleStructures();
     }
 
     public function render()
     {
-        $_appeal_statuses = AppealStatus::where('locale', config('app.locale'))->get();
+        $_appeal_statuses = $this->appealStatuses();
 
         $_candidates = $this->returnData();
 

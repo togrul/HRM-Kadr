@@ -9,6 +9,7 @@ use App\Services\StructureService;
 use App\Traits\NestedStructureTrait;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -27,6 +28,9 @@ class Staffs extends Component
 
     #[Url]
     public $selectedPage;
+
+    #[Locked]
+    public array $accessibleStructureIds = [];
 
     protected function queryString()
     {
@@ -62,19 +66,21 @@ class Staffs extends Component
         $this->dispatch('setDeleteStaff', $staffId);
     }
 
-    public function mount()
+    public function mount(StructureService $structureService)
     {
         $this->authorize('show-staff');
-        $this->selectedPage = request()->query('selectedPage')
-                        ? request()->query('selectedPage')
-                        : 'all';
+        $this->selectedPage = request()->query('selectedPage', 'all');
+        $this->accessibleStructureIds = $structureService->getAccessibleStructures();
     }
 
     protected function returnData($type = 'normal')
     {
-        $result = StaffSchedule::with(['structure.parent.parent', 'position'])
+        $result = StaffSchedule::with([
+            'position',
+            'structure' => fn ($q) => $q->withRecursive('parent', false),
+        ])
             ->when(! empty($this->structure), fn ($q) => $q->whereIn('structure_id', $this->structure))
-            ->when(empty($this->structure), fn ($q) => $q->whereIn('structure_id', resolve(StructureService::class)->getAccessibleStructures()))
+            ->when(empty($this->structure), fn ($q) => $q->whereIn('structure_id', $this->accessibleStructureIds))
 
             ->when($this->selectedPage == 'vacancies', function ($query) {
                 $query->where('vacant', '>', 0)
@@ -95,7 +101,7 @@ class Staffs extends Component
     public function render()
     {
         $staffs = $this->returnData();
-
+        
         return view('livewire.staff-schedule.staffs', compact('staffs'));
     }
 }

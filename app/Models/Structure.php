@@ -64,11 +64,15 @@ class Structure extends Model
         return $parent->parent_id == 1 ? $parent->code : $parent->name;
     }
 
-    public function scopeWithRecursive($query, $relationship)
+    public function scopeWithRecursive($query, $relationship, bool $enforceAccessible = true)
     {
         return $query->with([
-            $relationship => function ($q) use ($relationship) {
-                $q->accessible()->withRecursive($relationship);
+            $relationship => function ($q) use ($relationship, $enforceAccessible) {
+                if ($enforceAccessible) {
+                    $q->accessible();
+                }
+
+                $q->withRecursive($relationship, $enforceAccessible);
             },
         ]);
     }

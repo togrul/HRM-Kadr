@@ -1,0 +1,2 @@
+<?php echo $__env->make('partials.leave-partial', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+<?php /**PATH /Users/togruljalalli/Desktop/projects/HRM/resources/views/livewire/outside/edit-leave.blade.php ENDPATH**/ ?>

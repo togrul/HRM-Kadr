@@ -2,13 +2,14 @@
 
 namespace App\Livewire\Traits;
 
+use App\Concerns\LoadsAppealStatuses;
 use App\Enums\AttitudeMilitaryEnum;
-use App\Models\AppealStatus;
 use App\Models\Structure;
 use Illuminate\Validation\Rule;
 
 trait CandidateCrud
 {
+    use LoadsAppealStatuses;
     use SelectListTrait;
 
     public $candidate = [];
@@ -78,7 +79,7 @@ trait CandidateCrud
             ->ordered()
             ->get();
 
-        $statuses = AppealStatus::where('locale', config('app.locale'))->get();
+        $statuses = $this->appealStatuses();
 
         $view_name = ! empty($this->candidateModel)
             ? 'livewire.candidates.edit-candidate'
