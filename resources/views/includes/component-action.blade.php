@@ -6,42 +6,39 @@
 
 <div class="grid grid-cols-1 gap-2 sm:grid-cols-3 mt-4">
     <div class="flex flex-col">
-        <x-select-list class="w-full" :title="__('Order')" mode="gray" :selected="$orderName" name="orderId">
-            <x-livewire-input  @click.stop="open = true" mode="gray" name="searchOrder" wire:model.live="searchOrder"></x-livewire-input>
-
-            <x-select-list-item wire:click="setData('component','order_type_id','order','---',null)" :selected="'---' == $orderName"
-                                wire:model='component.order_type_id.id'>
-                ---
-            </x-select-list-item>
-            @foreach($_orders as $_order)
-                <x-select-list-item wire:click="setData('component','order_type_id','order','{{ $_order->name }}',{{ $_order->id }})"
-                                    :selected="$_order->id === $orderId" wire:model='component.order_type_id.id'>
-                    {{ $_order->name }}
-                </x-select-list-item>
-            @endforeach
-        </x-select-list>
-        @error('component.order_type_id.id')
+        <x-ui.select-dropdown
+            :label="__('Order')"
+            placeholder="---"
+            mode="gray"
+            class="w-full"
+            wire:model.live="component.order_type_id"
+            :model="$this->orderOptions"
+        >
+            <x-livewire-input
+                @click.stop="isOpen = true"
+                mode="gray"
+                name="searchOrder"
+                wire:model.live="searchOrder"
+                x-on:input.stop="null"
+                x-on:keyup.stop="null"
+                x-on:keydown.stop="null"
+                x-on:change.stop="null"
+            ></x-livewire-input>
+        </x-ui.select-dropdown>
+        @error('component.order_type_id')
             <x-validation> {{ $message }} </x-validation>
         @enderror
     </div>
 
     <div class="flex flex-col">
-        @php
-            $selectedName = array_key_exists('rank_id',$this->component) ? $this->component['rank_id']['name'] : '---';
-            $selectedId = array_key_exists('rank_id',$this->component) ? $this->component['rank_id']['id'] : -1;
-        @endphp
-        <x-select-list class="w-full" :title="__('Given rank')" mode="gray" :selected="$selectedName" name="rankId">
-            <x-select-list-item wire:click="setData('component','rank_id',null,'---',null)" :selected="'---' ==  $selectedName"
-                                wire:model='component.rank_id.id'>
-                ---
-            </x-select-list-item>
-            @foreach($_ranks as $_rank)
-                <x-select-list-item wire:click="setData('component','rank_id',null,'{{ trim($_rank->name) }}',{{ $_rank->id }})"
-                                    :selected="$_rank->id === $selectedId" wire:model='component.rank_id.id'>
-                    {{ $_rank->name }}
-                </x-select-list-item>
-            @endforeach
-        </x-select-list>
+        <x-ui.select-dropdown
+            :label="__('Given rank')"
+            placeholder="---"
+            mode="gray"
+            class="w-full"
+            wire:model.live="component.rank_id"
+            :model="$this->rankOptions"
+        />
     </div>
 
     <div class="">

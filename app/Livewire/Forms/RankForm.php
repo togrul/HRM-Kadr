@@ -47,9 +47,8 @@ class RankForm extends Form
         $this->is_active = (bool) $rank->is_active;
     }
 
-    public function create(array $data)
+    public function create()
     {
-        $this->rank_category_id = $data['rank_category_id']['id'];
         $this->validate();
 
         $updateData = Arr::except($this->all(),'rank');
@@ -57,9 +56,8 @@ class RankForm extends Form
         Rank::create($updateData);
     }
 
-    public function update(array $data)
+    public function update()
     {
-        $this->rank_category_id = $data['rank_category_id']['id'];
         $this->validate();
         $updateData = Arr::except($this->all(),'rank');
         $this->rank->update(

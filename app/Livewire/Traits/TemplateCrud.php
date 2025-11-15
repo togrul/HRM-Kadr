@@ -5,18 +5,19 @@ namespace App\Livewire\Traits;
 use App\Models\OrderCategory;
 use Illuminate\Support\Facades\DB;
 use Livewire\WithFileUploads;
+use Livewire\Attributes\Computed;
 
 trait TemplateCrud
 {
-    use SelectListTrait,WithFileUploads;
+    use SelectListTrait;
+    use DropdownConstructTrait;
+    use WithFileUploads;
 
-    public $template_data = [];
+    public $template_data = [
+        'order_category_id' => null,
+    ];
 
-    public $categoryId;
-
-    public $categoryName;
-
-    public $searchCategory;
+    public $searchCategory = '';
 
     public $title;
 
@@ -28,7 +29,7 @@ trait TemplateCrud
             'template_data.id' => 'required|int|min:2|unique:orders,id'.(! empty($this->templateModel) ? ','.$this->templateModel : ''),
             'template_data.name' => 'required|string|min:2',
             'template_data.content' => 'required',
-            'template_data.order_category_id.id' => 'required|int|exists:order_categories,id',
+            'template_data.order_category_id' => 'required|int|exists:order_categories,id',
             'template_data.order_model' => 'required|string',
         ];
     }
@@ -39,14 +40,13 @@ trait TemplateCrud
             'template_data.id' => __('Id'),
             'template_data.name' => __('Name'),
             'template_data.content' => __('Content'),
-            'template_data.order_category_id.id' => __('Category'),
+            'template_data.order_category_id' => __('Category'),
             'template_data.order_model' => __('Model'),
         ];
     }
 
     public function mount()
     {
-        $this->categoryName = '---';
         if (! empty($this->templateModel)) {
             $this->fillTemplate();
             $this->title = __('Edit template');
@@ -55,18 +55,21 @@ trait TemplateCrud
         }
     }
 
-    public function render()
+    #[Computed]
+    public function orderCategoryOptions(): array
     {
-        $_categories = OrderCategory::select('id', DB::raw('name_'.config('app.locale').' as name'))
-            ->when(! empty($this->searchCategory), function ($q) {
-                $q->where('name_'.config('app.locale'), 'LIKE', "%{$this->searchCategory}%");
-            })
-            ->get();
+        $localeColumn = 'name_'.config('app.locale');
 
-        $view_name = ! empty($this->templateModel)
-            ? 'livewire.orders.templates.edit-template'
-            : 'livewire.orders.templates.add-template';
+        $base = OrderCategory::query()
+            ->select('id', DB::raw("{$localeColumn} as label"))
+            ->orderBy($localeColumn);
 
-        return view($view_name, compact('_categories'));
+        return $this->optionsWithSelected(
+            base: $base,
+            searchCol: $localeColumn,
+            searchTerm: $this->searchCategory,
+            selectedId: data_get($this->template_data, 'order_category_id'),
+            limit: 100
+        );
     }
 }

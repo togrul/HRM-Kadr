@@ -16,23 +16,17 @@
             @enderror
         </div>
         <div class="sm:col-span-2">
-            @php
-                $selectedName = array_key_exists('rank_category_id',$data) ? $data['rank_category_id']['name'] : '---';
-                $selectedId = array_key_exists('rank_category_id',$data) ? $data['rank_category_id']['id'] : -1;
-            @endphp
-            <x-select-list class="w-full" mode="gray" :title="__('Rank category')" :selected="$selectedName" name="rankCategoryId">
-                <x-select-list-item wire:click.prevent="setData('data','rank_category_id',null,'---',null)"
-                                    :selected="'---' ==  $selectedName"
-                                    wire:model='data.rank_category_id.id'>
-                    ---
-                </x-select-list-item>
-                @foreach($this->rankCategory as $category)
-                    <x-select-list-item wire:click.prevent="setData('data','rank_category_id',null,'{{ $category->name }}',{{ $category->id }})"
-                                        :selected="$category->id === $selectedId" wire:model='data.rank_category_id.id'>
-                        {{ $category->name }}
-                    </x-select-list-item>
-                @endforeach
-            </x-select-list>
+            <x-ui.select-dropdown
+                :label="__('Rank category')"
+                placeholder="---"
+                mode="gray"
+                class="w-full"
+                wire:model.live="form.rank_category_id"
+                :model="$this->rankCategoryOptions"
+            />
+            @error('form.rank_category_id')
+                <x-validation> {{ $message }} </x-validation>
+            @enderror
         </div>
         <div class="">
             <x-label for="form.name_az">{{ __('Name') }} AZ</x-label>

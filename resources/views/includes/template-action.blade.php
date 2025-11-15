@@ -13,21 +13,26 @@
         @enderror
     </div>
     <div class="flex flex-col">
-        <x-select-list class="w-full" :title="__('Category')" mode="gray" :selected="$categoryName" name="categoryId">
-            <x-livewire-input  @click.stop="open = true" mode="gray" name="searchCategory" wire:model.live="searchCategory"></x-livewire-input>
-
-            <x-select-list-item wire:click="setData('template_data','order_category_id','category','---',null)" :selected="'---' == $categoryName"
-                                wire:model='template_data.order_category_id.id'>
-                ---
-            </x-select-list-item>
-            @foreach($_categories as $_category)
-                <x-select-list-item wire:click="setData('template_data','order_category_id','category','{{ trim($_category->name) }}',{{ $_category->id }})"
-                                    :selected="$_category->id === $categoryId" wire:model='template_data.order_category_id.id'>
-                    {{ $_category->name }}
-                </x-select-list-item>
-            @endforeach
-        </x-select-list>
-        @error('template_data.order_category_id.id')
+        <x-ui.select-dropdown
+            :label="__('Category')"
+            placeholder="---"
+            mode="gray"
+            class="w-full"
+            wire:model.live="template_data.order_category_id"
+            :model="$this->orderCategoryOptions"
+        >
+            <x-livewire-input
+                mode="gray"
+                name="searchCategory"
+                wire:model.live="searchCategory"
+                @click.stop="isOpen = true"
+                x-on:input.stop="null"
+                x-on:keyup.stop="null"
+                x-on:keydown.stop="null"
+                x-on:change.stop="null"
+            ></x-livewire-input>
+        </x-ui.select-dropdown>
+        @error('template_data.order_category_id')
         <x-validation> {{ $message }} </x-validation>
         @enderror
     </div>

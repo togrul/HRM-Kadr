@@ -78,6 +78,16 @@
   - Migrated the shared partials (`includes/component-action.blade.php`, `includes/order-action.blade.php`, `includes/rank-action.blade.php`, `includes/template-action.blade.php`, `includes/candidate-action.blade.php`, `includes/informations/contracts.blade.php`) to the new dropdown so order/candidate/rank workflows, templates, and contract forms all benefit from the modern component.
 23. **Candidate Form Simplification**
   - The candidate create/edit form now mirrors Step 1: `structure_id` and `status_id` are bound directly via `<x-ui.select-dropdown>` (with search support for structures), validation targets the scalar IDs, and edit flows hydrate them without the legacy `{id,name}` proxy arrays.
+24. **Component Form Dropdowns**
+  - Component CRUD now binds `order_type_id`/`rank_id` directly to scalars and renders both selectors with `<x-ui.select-dropdown>` (orders keep their search box). Edit flows hydrate the scalar IDs, and validation plus persistence run on those fields without running `setData` helpers.
+25. **Contract Step Dropdown**
+  - Personnel “Contracts” step switched to the same dropdown pattern: `contracts.rank_id` is a scalar bound to `<x-ui.select-dropdown>` fed by a computed `contractRankOptions()` list, so even archived ranks show up when editing while active ranks stay cached via `DropdownConstructTrait`.
+26. **Order Template Dropdown**
+  - Order CRUD now binds `order.order_type_id` directly to the selected template ID, exposes `templateOptions()` via `DropdownConstructTrait`, and the form uses `<x-ui.select-dropdown>` (with order search input) instead of `<x-select-list>`. Component pickers also use the new dropdown while still dispatching `componentSelected`.
+27. **Rank Category Dropdowns**
+  - Rank add/edit flows now load category options via computed lists and bind `rank_category_id` as a scalar; the shared `includes/rank-action` partial uses `<x-ui.select-dropdown>` just like the candidate form.
+28. **Template Category Dropdown**
+  - Template CRUD switched to scalar `order_category_id`, serves options via `orderCategoryOptions()` (with search support) from `DropdownConstructTrait`, and the Blade partial now uses `<x-ui.select-dropdown>` instead of legacy select lists.
 
 ## Next Ideas
 - Verify Step 5–8 UX once more (manual or automated) to ensure draft detection still covers every branch.

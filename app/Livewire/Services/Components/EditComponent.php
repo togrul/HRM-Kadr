@@ -24,23 +24,8 @@ class EditComponent extends Component
             'title' => $this->componentModelData->title,
         ];
 
-        if (! empty($this->componentModelData->rank_id)) {
-            $this->component['rank_id'] = [
-                'id' => $this->componentModelData->rank->id,
-                'name' => $this->componentModelData->rank->name,
-            ];
-            $this->orderId = $this->component['rank_id']['id'];
-            $this->orderName = $this->component['rank_id']['name'];
-        }
-
-        if (! empty($this->componentModelData->order_type_id)) {
-            $this->component['order_type_id'] = [
-                'id' => $this->componentModelData->orderType->id,
-                'name' => $this->componentModelData->orderType->name,
-            ];
-            $this->orderId = $this->component['order_type_id']['id'];
-            $this->orderName = $this->component['order_type_id']['name'];
-        }
+        $this->component['rank_id'] = $this->componentModelData->rank_id;
+        $this->component['order_type_id'] = $this->componentModelData->order_type_id;
     }
 
     public function store()

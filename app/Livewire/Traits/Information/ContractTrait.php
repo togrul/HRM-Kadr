@@ -5,12 +5,14 @@ namespace App\Livewire\Traits\Information;
 use App\Models\PersonnelContract;
 
 trait ContractTrait {
-    public array $contracts = [];
+    public array $contracts = [
+        'rank_id' => null,
+    ];
 
     protected function getContractRules(): array
     {
         return [
-            'contracts.rank_id.id' => 'required|int|exists:ranks,id',
+            'contracts.rank_id' => 'required|int|exists:ranks,id',
             'contracts.contract_date' => 'required|date',
             'contracts.contract_refresh_date' => 'required|date',
             'contracts.contract_duration' => 'required|int',

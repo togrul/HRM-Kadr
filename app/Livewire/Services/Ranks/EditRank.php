@@ -4,39 +4,46 @@ namespace App\Livewire\Services\Ranks;
 
 use App\Livewire\Forms\RankForm;
 use App\Livewire\Traits\SelectListTrait;
+use App\Livewire\Traits\DropdownConstructTrait;
 use App\Models\Rank;
 use App\Models\RankCategory;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 
 class EditRank extends Component
 {
     use SelectListTrait;
+    use DropdownConstructTrait;
     public string $title;
 
     public RankForm $form;
 
-    public array $data = [];
-
     public function mount(Rank $rankModel)
     {
         $rankModel->load('rankCategory');
-        $this->data['rank_category_id'] = $rankModel->rankCategory
-            ? ['id' => $rankModel->rankCategory->id, 'name' => $rankModel->rankCategory->name]
-            : ['id' => -1, 'name' => '---'];
-
         $this->form->setPost($rankModel);
     }
 
     #[Computed]
-    public function rankCategory()
+    public function rankCategoryOptions(): array
     {
-        return RankCategory::all();
+        $base = RankCategory::query()
+            ->select('id', 'name as label')
+            ->orderBy('name');
+
+        return $this->optionsWithSelected(
+            base: $base,
+            searchCol: null,
+            searchTerm: null,
+            selectedId: $this->form->rank_category_id,
+            limit: 100
+        );
     }
 
     public function store()
     {
-        $this->form->update($this->data);
+        $this->form->update();
 
         $this->dispatch('rankAdded', __('Rank was added successfully!'));
     }

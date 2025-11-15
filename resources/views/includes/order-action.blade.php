@@ -6,12 +6,12 @@
 
 <div class="flex flex-col space-y-4" x-data="{showPersonnelList : -1}">
     <header class="sidemenu-title">
-        <h2 class="text-xl font-title font-semibold text-gray-500" id="slide-over-title">
+        <h2 class="text-xl font-semibold text-gray-500 font-title" id="slide-over-title">
             {{ $title ?? ''}}
         </h2>
     </header>
 
-    <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 mt-4">
+    <div class="grid grid-cols-1 gap-2 mt-4 sm:grid-cols-2">
         <div class="flex flex-col">
             @php
                 $selectedName = array_key_exists('order_type_id',$order) ? $order['order_type_id']['name'] : '---';
@@ -119,9 +119,9 @@
     @if($showComponent)
 
         @for($i = 0; $i < $componentRows; $i++)
-            <div class="grid grid-cols-1 gap-2 border-2 border-slate-200 border-dashed px-4 py-3 rounded-lg relative">
+            <div class="relative grid grid-cols-1 gap-2 px-4 py-3 border-2 border-dashed rounded-lg border-slate-200">
                 @if(($i+1) > count($selectedBlade == \App\Models\Order::BLADE_DEFAULT ? $originalComponents : Arr::except($this->originalComponents,'personnels')))
-                <button class="flex justify-center items-center rounded-lg p-1 shadow-sm absolute right-0 top-0 bg-slate-50 text-rose-500"
+                <button class="absolute top-0 right-0 flex items-center justify-center p-1 rounded-lg shadow-sm bg-slate-50 text-rose-500"
                         wire:click="deleteRow"
                 >
                     <x-icons.remove-icon color="text-slate-500" hover="text-slate-600"></x-icons.remove-icon>
@@ -161,8 +161,8 @@
             </div>
         @endfor
 
-        <div class="flex justify-center items-center">
-            <button class="rounded-lg shadow-sm bg-gray-100 text-slate-900 px-6 py-2 font-medium text-sm flex justify-center items-center space-x-2" wire:click="addRow">
+        <div class="flex items-center justify-center">
+            <button class="flex items-center justify-center px-6 py-2 space-x-2 text-sm font-medium bg-gray-100 rounded-lg shadow-sm text-slate-900" wire:click="addRow">
                 <x-icons.add-icon></x-icons.add-icon>
                 <span class="uppercase">{{ __('Add') }}</span>
             </button>
@@ -175,7 +175,7 @@
             <x-label for="personnel.gender">{{ __('Status') }}</x-label>
             <div class="flex flex-row">
                 @foreach($this->statuses as $_status)
-                    <label class="inline-flex items-center bg-gray-100 rounded shadow-sm py-2 px-2">
+                    <label class="inline-flex items-center px-2 py-2 bg-gray-100 rounded shadow-sm">
                         <input type="radio" class="form-radio" name="order.status_id" wire:model="order.status_id" value={{ $_status->id }}>
                         <span class="ml-2 text-sm font-normal">{{ $_status->name }}</span>
                     </label>
@@ -187,7 +187,7 @@
         </div>
     </div>
 
-    <div class="flex justify-between items-end w-full">
+    <div class="flex items-end justify-between w-full">
         <x-modal-button>{{ __('Save') }}</x-modal-button>
     </div>
 

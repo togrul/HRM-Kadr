@@ -1,23 +1,15 @@
 <div class="flex flex-col space-y-2 w-full">
     <div class="grid grid-cols-3 gap-3">
         <div class="flex flex-col">
-            @php
-                $selectedName = array_key_exists('rank_id',$contracts) ? $contracts['rank_id']['name'] : '---';
-                $selectedId = array_key_exists('rank_id',$contracts) ? $contracts['rank_id']['id'] : -1;
-            @endphp
-            <x-select-list class="w-full" :title="__('Rank')" mode="default" :selected="$selectedName" name="rankId">
-                <x-select-list-item wire:click="setData('contracts','rank_id',null,'---',null)" :selected="'---' ==  $selectedName"
-                                    wire:model='contracts.rank_id.id'>
-                    ---
-                </x-select-list-item>
-                @foreach($this->ranks->toArray() as $key => $rank)
-                    <x-select-list-item wire:click="setData('contracts','rank_id',null,'{{ $rank }}',{{ $key }})"
-                                        :selected="$key === $selectedId" wire:model='contracts.rank_id.id'>
-                        {{ $rank }}
-                    </x-select-list-item>
-                @endforeach
-            </x-select-list>
-            @error('contracts.rank_id.id')
+            <x-ui.select-dropdown
+                :label="__('Rank')"
+                placeholder="---"
+                mode="default"
+                class="w-full"
+                wire:model.live="contracts.rank_id"
+                :model="$this->contractRankOptions"
+            />
+            @error('contracts.rank_id')
                 <x-validation> {{ $message }} </x-validation>
             @enderror
         </div>
@@ -132,4 +124,3 @@
     </div>
 
 </div>
-

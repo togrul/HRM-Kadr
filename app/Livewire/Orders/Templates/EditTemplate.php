@@ -38,14 +38,7 @@ class EditTemplate extends Component
             getFrom: $updatedData
         );
 
-        $this->handleRelatedEntity(
-            entity: 'category',
-            field: 'order_category_id',
-            fillTo: 'template_data',
-            getFrom: $updatedData,
-            titleField: 'name',
-            hasLocale: true
-        );
+        $this->template_data['order_category_id'] = $this->templateModelData->order_category_id;
     }
 
     public function store()

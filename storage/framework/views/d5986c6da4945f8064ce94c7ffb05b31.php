@@ -1,76 +1,27 @@
 <div class="flex flex-col space-y-2 w-full">
     <div class="grid grid-cols-3 gap-3">
         <div class="flex flex-col">
-            <?php
-                $selectedName = array_key_exists('rank_id',$contracts) ? $contracts['rank_id']['name'] : '---';
-                $selectedId = array_key_exists('rank_id',$contracts) ? $contracts['rank_id']['id'] : -1;
-            ?>
-            <?php if (isset($component)) { $__componentOriginald384098dd1216f6f264fe579adbe3c2f = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginald384098dd1216f6f264fe579adbe3c2f = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list','data' => ['class' => 'w-full','title' => __('Rank'),'mode' => 'default','selected' => $selectedName,'name' => 'rankId']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
-<?php $component->withName('select-list'); ?>
+            <?php if (isset($component)) { $__componentOriginalb7c56d9f0bb75b99472ae2845823c8e9 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalb7c56d9f0bb75b99472ae2845823c8e9 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.ui.select-dropdown','data' => ['label' => __('Rank'),'placeholder' => '---','mode' => 'default','class' => 'w-full','wire:model.live' => 'contracts.rank_id','model' => $this->contractRankOptions]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('ui.select-dropdown'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['class' => 'w-full','title' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(__('Rank')),'mode' => 'default','selected' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($selectedName),'name' => 'rankId']); ?>
-                <?php if (isset($component)) { $__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list-item','data' => ['wire:click' => 'setData(\'contracts\',\'rank_id\',null,\'---\',null)','selected' => '---' ==  $selectedName,'wire:model' => 'contracts.rank_id.id']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
-<?php $component->withName('select-list-item'); ?>
-<?php if ($component->shouldRender()): ?>
-<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
-<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
-<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php $component->withAttributes(['label' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(__('Rank')),'placeholder' => '---','mode' => 'default','class' => 'w-full','wire:model.live' => 'contracts.rank_id','model' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($this->contractRankOptions)]); ?>
+<?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['wire:click' => 'setData(\'contracts\',\'rank_id\',null,\'---\',null)','selected' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute('---' ==  $selectedName),'wire:model' => 'contracts.rank_id.id']); ?>
-                    ---
-                 <?php echo $__env->renderComponent(); ?>
+<?php if (isset($__attributesOriginalb7c56d9f0bb75b99472ae2845823c8e9)): ?>
+<?php $attributes = $__attributesOriginalb7c56d9f0bb75b99472ae2845823c8e9; ?>
+<?php unset($__attributesOriginalb7c56d9f0bb75b99472ae2845823c8e9); ?>
 <?php endif; ?>
-<?php if (isset($__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee)): ?>
-<?php $attributes = $__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee; ?>
-<?php unset($__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee); ?>
+<?php if (isset($__componentOriginalb7c56d9f0bb75b99472ae2845823c8e9)): ?>
+<?php $component = $__componentOriginalb7c56d9f0bb75b99472ae2845823c8e9; ?>
+<?php unset($__componentOriginalb7c56d9f0bb75b99472ae2845823c8e9); ?>
 <?php endif; ?>
-<?php if (isset($__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee)): ?>
-<?php $component = $__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee; ?>
-<?php unset($__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee); ?>
-<?php endif; ?>
-                <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $this->ranks->toArray(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $rank): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                    <?php if (isset($component)) { $__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list-item','data' => ['wire:click' => 'setData(\'contracts\',\'rank_id\',null,\''.e($rank).'\','.e($key).')','selected' => $key === $selectedId,'wire:model' => 'contracts.rank_id.id']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
-<?php $component->withName('select-list-item'); ?>
-<?php if ($component->shouldRender()): ?>
-<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
-<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
-<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
-<?php endif; ?>
-<?php $component->withAttributes(['wire:click' => 'setData(\'contracts\',\'rank_id\',null,\''.e($rank).'\','.e($key).')','selected' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($key === $selectedId),'wire:model' => 'contracts.rank_id.id']); ?>
-                        <?php echo e($rank); ?>
-
-                     <?php echo $__env->renderComponent(); ?>
-<?php endif; ?>
-<?php if (isset($__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee)): ?>
-<?php $attributes = $__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee; ?>
-<?php unset($__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee); ?>
-<?php endif; ?>
-<?php if (isset($__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee)): ?>
-<?php $component = $__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee; ?>
-<?php unset($__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee); ?>
-<?php endif; ?>
-                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
-             <?php echo $__env->renderComponent(); ?>
-<?php endif; ?>
-<?php if (isset($__attributesOriginald384098dd1216f6f264fe579adbe3c2f)): ?>
-<?php $attributes = $__attributesOriginald384098dd1216f6f264fe579adbe3c2f; ?>
-<?php unset($__attributesOriginald384098dd1216f6f264fe579adbe3c2f); ?>
-<?php endif; ?>
-<?php if (isset($__componentOriginald384098dd1216f6f264fe579adbe3c2f)): ?>
-<?php $component = $__componentOriginald384098dd1216f6f264fe579adbe3c2f; ?>
-<?php unset($__componentOriginald384098dd1216f6f264fe579adbe3c2f); ?>
-<?php endif; ?>
-            <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['contracts.rank_id.id'];
+            <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['contracts.rank_id'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -565,5 +516,4 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
     </div>
 
 </div>
-
 <?php /**PATH /Users/togruljalalli/Desktop/projects/HRM/resources/views/includes/informations/contracts.blade.php ENDPATH**/ ?>

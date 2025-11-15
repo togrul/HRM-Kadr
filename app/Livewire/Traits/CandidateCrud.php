@@ -110,12 +110,6 @@ trait CandidateCrud
 
     public function render()
     {
-        // $structures = Structure::when(!empty($this->searchStructure), function ($q) {
-        //     $q->where('name', 'LIKE', "%$this->searchStructure%");
-        // })
-        //     ->ordered()
-        //     ->get();
-
         $statuses = $this->appealStatuses();
 
         $view_name = ! empty($this->candidateModel)

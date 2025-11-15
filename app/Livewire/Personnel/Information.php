@@ -9,8 +9,10 @@ use App\Livewire\Traits\Information\EducationRequestTrait;
 use App\Livewire\Traits\Information\MasterDegreeTrait;
 use App\Livewire\Traits\Information\PensionCardTrait;
 use App\Livewire\Traits\SelectListTrait;
+use App\Livewire\Traits\DropdownConstructTrait;
 use App\Models\Personnel;
 use App\Models\Rank;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
@@ -28,6 +30,7 @@ class Information extends Component
     use FillComplexArrayTrait;
     use PensionCardTrait;
     use SelectListTrait;
+    use DropdownConstructTrait;
 
     public string $title;
 
@@ -54,7 +57,7 @@ class Information extends Component
     protected function validationAttributes(): array
     {
         return [
-            'contracts.rank_id.id' => __('Rank'),
+            'contracts.rank_id' => __('Rank'),
             'contracts.contract_date' => __('Contract date'),
             'contracts.contract_refresh_date' => __('Contract refresh date'),
             'contracts.contract_duration' => __('Contract duration'),
@@ -83,9 +86,21 @@ class Information extends Component
     }
 
     #[Computed]
-    public function ranks()
+    public function contractRankOptions(): array
     {
-        return Rank::query()->pluck('name_' . config('app.locale'), 'id');
+        $localeColumn = 'name_'.config('app.locale');
+
+        $base = Rank::query()
+            ->select('id', DB::raw("{$localeColumn} as label"))
+            ->orderBy($localeColumn);
+
+        return $this->optionsWithSelected(
+            base: $base,
+            searchCol: null,
+            searchTerm: null,
+            selectedId: data_get($this->contracts, 'rank_id'),
+            limit: 80
+        );
     }
 
     public function resetSelected(): void
