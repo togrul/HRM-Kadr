@@ -37,21 +37,8 @@ class EditCandidate extends Component
             getFrom: $updatedData
         );
 
-        $this->handleRelatedEntity(
-            entity: 'structure',
-            field: 'structure_id',
-            fillTo: 'candidate',
-            getFrom: $updatedData,
-            titleField: 'name'
-        );
-
-        $this->handleRelatedEntity(
-            entity: 'status',
-            field: 'status_id',
-            fillTo: 'candidate',
-            getFrom: $updatedData,
-            titleField: 'name'
-        );
+        $this->candidate['structure_id'] = $updatedData['structure_id'] ?? null;
+        $this->candidate['status_id'] = $updatedData['status_id'] ?? null;
     }
 
     public function store()

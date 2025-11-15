@@ -1,5 +1,5 @@
 <div class="sidemenu-title">
-    <h2 class="text-xl font-title font-semibold text-gray-500" id="slide-over-title">
+    <h2 class="text-xl font-semibold text-gray-500 font-title" id="slide-over-title">
         <?php echo $title ?? ''; ?>
 
     </h2>
@@ -211,33 +211,28 @@ endif;
 unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
     </div>
 </div>
-
 <div class="grid grid-cols-4 gap-2">
     <div class="flex flex-col">
-        <?php
-            $selectedName = array_key_exists('structure_id', $candidate) ? $candidate['structure_id']['name'] : '---';
-            $selectedId = array_key_exists('structure_id', $candidate) ? $candidate['structure_id']['id'] : -1;
-        ?>
-        <?php if (isset($component)) { $__componentOriginald384098dd1216f6f264fe579adbe3c2f = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginald384098dd1216f6f264fe579adbe3c2f = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list','data' => ['class' => 'w-full','title' => __('Structure'),'mode' => 'gray','selected' => $selectedName,'name' => 'structureId']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
-<?php $component->withName('select-list'); ?>
+        <?php if (isset($component)) { $__componentOriginalb7c56d9f0bb75b99472ae2845823c8e9 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalb7c56d9f0bb75b99472ae2845823c8e9 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.ui.select-dropdown','data' => ['label' => __('Structure'),'placeholder' => '---','mode' => 'gray','class' => 'w-full','wire:model.live' => 'candidate.structure_id','model' => $this->structureOptions]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('ui.select-dropdown'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['class' => 'w-full','title' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(__('Structure')),'mode' => 'gray','selected' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($selectedName),'name' => 'structureId']); ?>
+<?php $component->withAttributes(['label' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(__('Structure')),'placeholder' => '---','mode' => 'gray','class' => 'w-full','wire:model.live' => 'candidate.structure_id','model' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($this->structureOptions)]); ?>
             <?php if (isset($component)) { $__componentOriginal9364c0b92ee5ab519273634c79f86a27 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal9364c0b92ee5ab519273634c79f86a27 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.livewire-input','data' => ['@click.stop' => 'open = true','mode' => 'gray','name' => 'searchStructure','wire:model.live' => 'searchStructure']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.livewire-input','data' => ['mode' => 'gray','name' => 'searchStructure','wire:model.live' => 'searchStructure','@click.stop' => 'isOpen = true','xOn:input.stop' => 'null','xOn:keyup.stop' => 'null','xOn:keydown.stop' => 'null','xOn:change.stop' => 'null']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('livewire-input'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['@click.stop' => 'open = true','mode' => 'gray','name' => 'searchStructure','wire:model.live' => 'searchStructure']); ?> <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['mode' => 'gray','name' => 'searchStructure','wire:model.live' => 'searchStructure','@click.stop' => 'isOpen = true','x-on:input.stop' => 'null','x-on:keyup.stop' => 'null','x-on:keydown.stop' => 'null','x-on:change.stop' => 'null']); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal9364c0b92ee5ab519273634c79f86a27)): ?>
 <?php $attributes = $__attributesOriginal9364c0b92ee5ab519273634c79f86a27; ?>
@@ -247,63 +242,17 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php $component = $__componentOriginal9364c0b92ee5ab519273634c79f86a27; ?>
 <?php unset($__componentOriginal9364c0b92ee5ab519273634c79f86a27); ?>
 <?php endif; ?>
-
-            <?php if (isset($component)) { $__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list-item','data' => ['wire:click' => 'setData(\'candidate\',\'structure_id\',\'structure\',\'---\',null)','selected' => '---' == $selectedName,'wire:model' => 'candidate.structure_id.id']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
-<?php $component->withName('select-list-item'); ?>
-<?php if ($component->shouldRender()): ?>
-<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
-<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
-<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
-<?php endif; ?>
-<?php $component->withAttributes(['wire:click' => 'setData(\'candidate\',\'structure_id\',\'structure\',\'---\',null)','selected' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute('---' == $selectedName),'wire:model' => 'candidate.structure_id.id']); ?>
-                ---
-             <?php echo $__env->renderComponent(); ?>
-<?php endif; ?>
-<?php if (isset($__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee)): ?>
-<?php $attributes = $__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee; ?>
-<?php unset($__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee); ?>
-<?php endif; ?>
-<?php if (isset($__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee)): ?>
-<?php $component = $__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee; ?>
-<?php unset($__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee); ?>
-<?php endif; ?>
-            <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $structures; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $structure): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                <?php if (isset($component)) { $__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list-item','data' => ['wire:click' => 'setData(\'candidate\',\'structure_id\',\'structure\',\''.e($structure->name).'\','.e($structure->id).')','selected' => $structure->id === $selectedId,'wire:model' => 'candidate.structure_id.id']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
-<?php $component->withName('select-list-item'); ?>
-<?php if ($component->shouldRender()): ?>
-<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
-<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
-<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
-<?php endif; ?>
-<?php $component->withAttributes(['wire:click' => 'setData(\'candidate\',\'structure_id\',\'structure\',\''.e($structure->name).'\','.e($structure->id).')','selected' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($structure->id === $selectedId),'wire:model' => 'candidate.structure_id.id']); ?>
-                    <?php echo e($structure->name); ?>
-
-                 <?php echo $__env->renderComponent(); ?>
-<?php endif; ?>
-<?php if (isset($__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee)): ?>
-<?php $attributes = $__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee; ?>
-<?php unset($__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee); ?>
-<?php endif; ?>
-<?php if (isset($__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee)): ?>
-<?php $component = $__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee; ?>
-<?php unset($__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee); ?>
-<?php endif; ?>
-            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
          <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
-<?php if (isset($__attributesOriginald384098dd1216f6f264fe579adbe3c2f)): ?>
-<?php $attributes = $__attributesOriginald384098dd1216f6f264fe579adbe3c2f; ?>
-<?php unset($__attributesOriginald384098dd1216f6f264fe579adbe3c2f); ?>
+<?php if (isset($__attributesOriginalb7c56d9f0bb75b99472ae2845823c8e9)): ?>
+<?php $attributes = $__attributesOriginalb7c56d9f0bb75b99472ae2845823c8e9; ?>
+<?php unset($__attributesOriginalb7c56d9f0bb75b99472ae2845823c8e9); ?>
 <?php endif; ?>
-<?php if (isset($__componentOriginald384098dd1216f6f264fe579adbe3c2f)): ?>
-<?php $component = $__componentOriginald384098dd1216f6f264fe579adbe3c2f; ?>
-<?php unset($__componentOriginald384098dd1216f6f264fe579adbe3c2f); ?>
+<?php if (isset($__componentOriginalb7c56d9f0bb75b99472ae2845823c8e9)): ?>
+<?php $component = $__componentOriginalb7c56d9f0bb75b99472ae2845823c8e9; ?>
+<?php unset($__componentOriginalb7c56d9f0bb75b99472ae2845823c8e9); ?>
 <?php endif; ?>
-        <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['candidate.structure_id.id'];
+        <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['candidate.structure_id'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -687,7 +636,7 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php endif; ?>
         <div class="flex flex-row">
             <!--[if BLOCK]><![endif]--><?php $__currentLoopData = \App\Enums\ResearchResultEnum::values(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $researchResult): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                <label class="inline-flex items-center bg-gray-100 rounded shadow-sm py-2 px-2">
+                <label class="inline-flex items-center px-2 py-2 bg-gray-100 rounded shadow-sm">
                     <input type="radio" class="form-radio" name="candidate.research_result"
                         wire:model="candidate.research_result" value="<?php echo e($researchResult); ?>">
                     <span class="ml-2 text-sm font-normal"><?php echo e($researchResult); ?></span>
@@ -1061,7 +1010,7 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php endif; ?>
         <div class="flex flex-row">
             <!--[if BLOCK]><![endif]--><?php $__currentLoopData = \App\Enums\GenderEnum::genderOptions(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $value => $label): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                <label class="inline-flex items-center bg-gray-100 rounded shadow-sm py-2 px-2">
+                <label class="inline-flex items-center px-2 py-2 bg-gray-100 rounded shadow-sm">
                     <input type="radio" class="form-radio" name="candidate.gender" wire:model="candidate.gender"
                         value="<?php echo e($value); ?>">
                     <span class="ml-2 text-sm font-normal"><?php echo e($label); ?></span>
@@ -1169,7 +1118,7 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php endif; ?>
         <div class="flex flex-row w-full">
             <!--[if BLOCK]><![endif]--><?php $__currentLoopData = \App\Enums\MilitaryStatusEnum::values(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $military): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                <label class="inline-flex items-center bg-gray-100 rounded shadow-sm py-2 px-2">
+                <label class="inline-flex items-center px-2 py-2 bg-gray-100 rounded shadow-sm">
                     <input type="radio" class="form-radio" name="candidate.hhk_result"
                         wire:model.live="candidate.hhk_result" value="<?php echo e($military); ?>">
                     <span class="ml-2 text-sm font-normal"><?php echo e($military); ?></span>
@@ -1243,7 +1192,7 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php endif; ?>
         <div class="flex flex-row">
             <!--[if BLOCK]><![endif]--><?php $__currentLoopData = \App\Enums\AttitudeMilitaryEnum::values(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $attitude): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                <label class="inline-flex items-center bg-gray-100 rounded shadow-sm py-2 px-2">
+                <label class="inline-flex items-center px-2 py-2 bg-gray-100 rounded shadow-sm">
                     <input type="radio" class="form-radio" name="candidate.attitude_to_military"
                         wire:model="candidate.attitude_to_military" value="<?php echo e($attitude); ?>">
                     <span class="ml-2 text-sm font-normal"><?php echo e($attitude); ?></span>
@@ -1446,72 +1395,33 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 
 <div class="grid grid-cols-2 gap-2">
     <div class="flex flex-col">
-        <?php if (isset($component)) { $__componentOriginald384098dd1216f6f264fe579adbe3c2f = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginald384098dd1216f6f264fe579adbe3c2f = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list','data' => ['class' => 'w-full','title' => __('Status'),'mode' => 'gray','selected' => $statusName,'name' => 'statusId']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
-<?php $component->withName('select-list'); ?>
+        <?php
+            $statusOptions = $statuses->map(fn ($status) => [
+                'id' => $status->id,
+                'label' => trim($status->name),
+            ])->values()->all();
+        ?>
+        <?php if (isset($component)) { $__componentOriginalb7c56d9f0bb75b99472ae2845823c8e9 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalb7c56d9f0bb75b99472ae2845823c8e9 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.ui.select-dropdown','data' => ['label' => __('Status'),'placeholder' => '---','mode' => 'gray','class' => 'w-full','wire:model.live' => 'candidate.status_id','model' => $statusOptions]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('ui.select-dropdown'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['class' => 'w-full','title' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(__('Status')),'mode' => 'gray','selected' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($statusName),'name' => 'statusId']); ?>
-            <?php if (isset($component)) { $__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list-item','data' => ['wire:click' => 'setData(\'candidate\',\'status_id\',\'status\',\'---\',null)','selected' => '---' == $statusName,'wire:model' => 'candidate.status_id.id']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
-<?php $component->withName('select-list-item'); ?>
-<?php if ($component->shouldRender()): ?>
-<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
-<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
-<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php $component->withAttributes(['label' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(__('Status')),'placeholder' => '---','mode' => 'gray','class' => 'w-full','wire:model.live' => 'candidate.status_id','model' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($statusOptions)]); ?>
+<?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['wire:click' => 'setData(\'candidate\',\'status_id\',\'status\',\'---\',null)','selected' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute('---' == $statusName),'wire:model' => 'candidate.status_id.id']); ?>
-                ---
-             <?php echo $__env->renderComponent(); ?>
+<?php if (isset($__attributesOriginalb7c56d9f0bb75b99472ae2845823c8e9)): ?>
+<?php $attributes = $__attributesOriginalb7c56d9f0bb75b99472ae2845823c8e9; ?>
+<?php unset($__attributesOriginalb7c56d9f0bb75b99472ae2845823c8e9); ?>
 <?php endif; ?>
-<?php if (isset($__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee)): ?>
-<?php $attributes = $__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee; ?>
-<?php unset($__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee); ?>
+<?php if (isset($__componentOriginalb7c56d9f0bb75b99472ae2845823c8e9)): ?>
+<?php $component = $__componentOriginalb7c56d9f0bb75b99472ae2845823c8e9; ?>
+<?php unset($__componentOriginalb7c56d9f0bb75b99472ae2845823c8e9); ?>
 <?php endif; ?>
-<?php if (isset($__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee)): ?>
-<?php $component = $__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee; ?>
-<?php unset($__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee); ?>
-<?php endif; ?>
-            <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $statuses; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $status): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                <?php if (isset($component)) { $__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list-item','data' => ['wire:click' => 'setData(\'candidate\',\'status_id\',\'status\',\''.e($status->name).'\','.e($status->id).')','selected' => $status->id === $statusId,'wire:model' => 'candidate.status_id.id']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
-<?php $component->withName('select-list-item'); ?>
-<?php if ($component->shouldRender()): ?>
-<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
-<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
-<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
-<?php endif; ?>
-<?php $component->withAttributes(['wire:click' => 'setData(\'candidate\',\'status_id\',\'status\',\''.e($status->name).'\','.e($status->id).')','selected' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($status->id === $statusId),'wire:model' => 'candidate.status_id.id']); ?>
-                    <?php echo e($status->name); ?>
-
-                 <?php echo $__env->renderComponent(); ?>
-<?php endif; ?>
-<?php if (isset($__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee)): ?>
-<?php $attributes = $__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee; ?>
-<?php unset($__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee); ?>
-<?php endif; ?>
-<?php if (isset($__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee)): ?>
-<?php $component = $__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee; ?>
-<?php unset($__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee); ?>
-<?php endif; ?>
-            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
-         <?php echo $__env->renderComponent(); ?>
-<?php endif; ?>
-<?php if (isset($__attributesOriginald384098dd1216f6f264fe579adbe3c2f)): ?>
-<?php $attributes = $__attributesOriginald384098dd1216f6f264fe579adbe3c2f; ?>
-<?php unset($__attributesOriginald384098dd1216f6f264fe579adbe3c2f); ?>
-<?php endif; ?>
-<?php if (isset($__componentOriginald384098dd1216f6f264fe579adbe3c2f)): ?>
-<?php $component = $__componentOriginald384098dd1216f6f264fe579adbe3c2f; ?>
-<?php unset($__componentOriginald384098dd1216f6f264fe579adbe3c2f); ?>
-<?php endif; ?>
-        <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['candidate.status_id.id'];
+        <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['candidate.status_id'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -1542,7 +1452,7 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
     </div>
 </div>
 
-<div class="flex justify-between items-end w-full">
+<div class="flex items-end justify-between w-full">
     <?php if (isset($component)) { $__componentOriginaldc57d0f5eb34c46effd5ce9af16bca01 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginaldc57d0f5eb34c46effd5ce9af16bca01 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.modal-button','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>

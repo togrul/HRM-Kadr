@@ -27,8 +27,6 @@ use Livewire\Attributes\Computed;
 
 trait PersonnelDropdownOptions
 {
-    protected int $dropdownCacheMinutes = 10;
-
     protected array $rankLabelCache = [];
 
     protected array $rankReasonLabelCache = [];
@@ -934,11 +932,6 @@ trait PersonnelDropdownOptions
         return null;
     }
 
-    protected function dropdownSearch(string $property): string
-    {
-        return trim((string) ($this->{$property} ?? ''));
-    }
-
     protected function isDisabilityEnabled(): bool
     {
         return property_exists($this, 'personalForm')
@@ -974,61 +967,5 @@ trait PersonnelDropdownOptions
             selectedId: $selectedId,
             limit: 80
         );
-    }
-
-    protected function cachedOptionsWithSelected(string $cacheKey, Builder $base, $selectedId, int $limit = 50): array
-    {
-        $options = cache()->remember(
-            $cacheKey,
-            now()->addMinutes($this->dropdownCacheMinutes),
-            function () use ($base, $limit) {
-                $query = clone $base;
-                $query->limit($limit);
-
-                return $this->toOptions($query);
-            }
-        );
-
-        return $this->appendSelectedOption($options, $base, $selectedId);
-    }
-
-    protected function appendSelectedOption(array $options, Builder $base, $selectedId): array
-    {
-        if (empty($selectedId)) {
-            return $options;
-        }
-
-        $hasSelected = collect($options)->first(
-            fn ($option) => (int) $option['id'] === (int) $selectedId
-        );
-
-        if ($hasSelected) {
-            return $options;
-        }
-
-        $tableKey = $this->dropdownLabelCacheKey($base);
-        $preloadedLabel = $this->getPreloadedDropdownLabel($tableKey, $selectedId);
-
-        if ($preloadedLabel) {
-            $options[] = [
-                'id' => (int) $selectedId,
-                'label' => $preloadedLabel,
-            ];
-        } else {
-            $selectedRow = $this->fetchSelectedOptionRow($base, $selectedId);
-
-            if ($selectedRow) {
-                $options[] = [
-                    'id' => (int) data_get($selectedRow, 'id'),
-                    'label' => (string) data_get($selectedRow, 'label'),
-                ];
-            }
-        }
-
-        return collect($options)
-            ->unique('id')
-            ->sortBy('label', SORT_NATURAL | SORT_FLAG_CASE)
-            ->values()
-            ->all();
-    }
+    }    
 }

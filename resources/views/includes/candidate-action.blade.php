@@ -1,5 +1,5 @@
 <div class="sidemenu-title">
-    <h2 class="text-xl font-title font-semibold text-gray-500" id="slide-over-title">
+    <h2 class="text-xl font-semibold text-gray-500 font-title" id="slide-over-title">
         {!! $title ?? '' !!}
     </h2>
 </div>
@@ -28,30 +28,28 @@
         @enderror
     </div>
 </div>
-
 <div class="grid grid-cols-4 gap-2">
     <div class="flex flex-col">
-        @php
-            $selectedName = array_key_exists('structure_id', $candidate) ? $candidate['structure_id']['name'] : '---';
-            $selectedId = array_key_exists('structure_id', $candidate) ? $candidate['structure_id']['id'] : -1;
-        @endphp
-        <x-select-list class="w-full" :title="__('Structure')" mode="gray" :selected="$selectedName" name="structureId">
-            <x-livewire-input @click.stop="open = true" mode="gray" name="searchStructure"
-                wire:model.live="searchStructure"></x-livewire-input>
-
-            <x-select-list-item wire:click="setData('candidate','structure_id','structure','---',null)"
-                :selected="'---' == $selectedName" wire:model='candidate.structure_id.id'>
-                ---
-            </x-select-list-item>
-            @foreach ($structures as $structure)
-                <x-select-list-item
-                    wire:click="setData('candidate','structure_id','structure','{{ $structure->name }}',{{ $structure->id }})"
-                    :selected="$structure->id === $selectedId" wire:model='candidate.structure_id.id'>
-                    {{ $structure->name }}
-                </x-select-list-item>
-            @endforeach
-        </x-select-list>
-        @error('candidate.structure_id.id')
+        <x-ui.select-dropdown
+            :label="__('Structure')"
+            placeholder="---"
+            mode="gray"
+            class="w-full"
+            wire:model.live="candidate.structure_id"
+            :model="$this->structureOptions"
+        >
+            <x-livewire-input
+                mode="gray"
+                name="searchStructure"
+                wire:model.live="searchStructure"
+                @click.stop="isOpen = true"
+                x-on:input.stop="null"
+                x-on:keyup.stop="null"
+                x-on:keydown.stop="null"
+                x-on:change.stop="null"
+            ></x-livewire-input>
+        </x-ui.select-dropdown>
+        @error('candidate.structure_id')
             <x-validation> {{ $message }} </x-validation>
         @enderror
     </div>
@@ -105,7 +103,7 @@
         <x-label for="candidate.research_result">{{ __('Research result') }}</x-label>
         <div class="flex flex-row">
             @foreach (\App\Enums\ResearchResultEnum::values() as $researchResult)
-                <label class="inline-flex items-center bg-gray-100 rounded shadow-sm py-2 px-2">
+                <label class="inline-flex items-center px-2 py-2 bg-gray-100 rounded shadow-sm">
                     <input type="radio" class="form-radio" name="candidate.research_result"
                         wire:model="candidate.research_result" value="{{ $researchResult }}">
                     <span class="ml-2 text-sm font-normal">{{ $researchResult }}</span>
@@ -191,7 +189,7 @@
         <x-label for="candidate.gender">{{ __('Gender') }}</x-label>
         <div class="flex flex-row">
             @foreach (\App\Enums\GenderEnum::genderOptions() as $value => $label)
-                <label class="inline-flex items-center bg-gray-100 rounded shadow-sm py-2 px-2">
+                <label class="inline-flex items-center px-2 py-2 bg-gray-100 rounded shadow-sm">
                     <input type="radio" class="form-radio" name="candidate.gender" wire:model="candidate.gender"
                         value="{{ $value }}">
                     <span class="ml-2 text-sm font-normal">{{ $label }}</span>
@@ -221,7 +219,7 @@
         <x-label for="candidate.hhk_result">{{ __('HHK result') }}</x-label>
         <div class="flex flex-row w-full">
             @foreach (\App\Enums\MilitaryStatusEnum::values() as $military)
-                <label class="inline-flex items-center bg-gray-100 rounded shadow-sm py-2 px-2">
+                <label class="inline-flex items-center px-2 py-2 bg-gray-100 rounded shadow-sm">
                     <input type="radio" class="form-radio" name="candidate.hhk_result"
                         wire:model.live="candidate.hhk_result" value="{{ $military }}">
                     <span class="ml-2 text-sm font-normal">{{ $military }}</span>
@@ -242,7 +240,7 @@
         <x-label for="candidate.attitude_to_military">{{ __('Attitude to military') }}</x-label>
         <div class="flex flex-row">
             @foreach (\App\Enums\AttitudeMilitaryEnum::values() as $attitude)
-                <label class="inline-flex items-center bg-gray-100 rounded shadow-sm py-2 px-2">
+                <label class="inline-flex items-center px-2 py-2 bg-gray-100 rounded shadow-sm">
                     <input type="radio" class="form-radio" name="candidate.attitude_to_military"
                         wire:model="candidate.attitude_to_military" value="{{ $attitude }}">
                     <span class="ml-2 text-sm font-normal">{{ $attitude }}</span>
@@ -280,25 +278,26 @@
 
 <div class="grid grid-cols-2 gap-2">
     <div class="flex flex-col">
-        <x-select-list class="w-full" :title="__('Status')" mode="gray" :selected="$statusName" name="statusId">
-            <x-select-list-item wire:click="setData('candidate','status_id','status','---',null)" :selected="'---' == $statusName"
-                wire:model='candidate.status_id.id'>
-                ---
-            </x-select-list-item>
-            @foreach ($statuses as $status)
-                <x-select-list-item
-                    wire:click="setData('candidate','status_id','status','{{ $status->name }}',{{ $status->id }})"
-                    :selected="$status->id === $statusId" wire:model='candidate.status_id.id'>
-                    {{ $status->name }}
-                </x-select-list-item>
-            @endforeach
-        </x-select-list>
-        @error('candidate.status_id.id')
+        @php
+            $statusOptions = $statuses->map(fn ($status) => [
+                'id' => $status->id,
+                'label' => trim($status->name),
+            ])->values()->all();
+        @endphp
+        <x-ui.select-dropdown
+            :label="__('Status')"
+            placeholder="---"
+            mode="gray"
+            class="w-full"
+            wire:model.live="candidate.status_id"
+            :model="$statusOptions"
+        />
+        @error('candidate.status_id')
             <x-validation> {{ $message }} </x-validation>
         @enderror
     </div>
 </div>
 
-<div class="flex justify-between items-end w-full">
+<div class="flex items-end justify-between w-full">
     <x-modal-button>{{ __('Save') }}</x-modal-button>
 </div>

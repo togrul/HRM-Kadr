@@ -73,6 +73,11 @@
 21. **Staff Schedule Ancestors**
   - Cached accessible structure ids during `Staffs` mount so the component stops resolving `StructureService` on every render, and expanded `Structure::withRecursive()` to accept a flag that controls whether the `accessible()` macro is applied. The staff schedule now opts out of that filter (so ancestor chains load fully without leaks), while every other consumer keeps their permission-aware recursion.
   - Marked the cached IDs as a locked public property so Livewire hydrates them across requests; without that change the list emptied whenever the page toggled between “all” and “vacancies”.
+22. **Select Dropdown Migration (Phase 1)**
+  - Upgraded `<x-ui.select-dropdown>` to support Livewire callbacks/dispatch hooks (placeholder payloads, per-option payloads) so it can replace `<x-select-list>` without losing `setData()` side effects.
+  - Migrated the shared partials (`includes/component-action.blade.php`, `includes/order-action.blade.php`, `includes/rank-action.blade.php`, `includes/template-action.blade.php`, `includes/candidate-action.blade.php`, `includes/informations/contracts.blade.php`) to the new dropdown so order/candidate/rank workflows, templates, and contract forms all benefit from the modern component.
+23. **Candidate Form Simplification**
+  - The candidate create/edit form now mirrors Step 1: `structure_id` and `status_id` are bound directly via `<x-ui.select-dropdown>` (with search support for structures), validation targets the scalar IDs, and edit flows hydrate them without the legacy `{id,name}` proxy arrays.
 
 ## Next Ideas
 - Verify Step 5–8 UX once more (manual or automated) to ensure draft detection still covers every branch.
