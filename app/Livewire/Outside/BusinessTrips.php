@@ -3,14 +3,14 @@
 namespace App\Livewire\Outside;
 
 use App\Exports\BusinessTripExport;
-use App\Livewire\Traits\SelectListTrait;
+use App\Livewire\Traits\DropdownConstructTrait;
 use App\Models\OrderType;
 use App\Models\PersonnelBusinessTrip;
 use App\Models\Structure;
 use App\Services\StructureService;
-use App\Services\WordSuffixService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -21,7 +21,7 @@ use PhpOffice\PhpWord\TemplateProcessor;
 class BusinessTrips extends Component
 {
     use AuthorizesRequests;
-    use SelectListTrait;
+    use DropdownConstructTrait;
     use WithPagination;
 
     public array $filter = [];
@@ -56,6 +56,8 @@ class BusinessTrips extends Component
     protected function fillFilter()
     {
         $this->filter = [
+            'structure_id' => null,
+            'order_type_id' => null,
             'business_trip_status' => 'all',
         ];
     }
@@ -158,15 +160,51 @@ class BusinessTrips extends Component
 
     public function render()
     {
-        $_structures = Structure::when(! empty($this->searchStructure), function ($q) {
-            $q->where('name', 'LIKE', "%{$this->searchStructure}%");
-        })
+        return view('livewire.outside.business-trips');
+    }
+
+    #[Computed]
+    public function structureOptions(): array
+    {
+        $search = $this->dropdownSearch('searchStructure');
+
+        $base = Structure::query()
+            ->select('id', DB::raw('name as label'))
             ->accessible()
-            ->ordered()
-            ->get();
+            ->orderBy('level')
+            ->orderBy('code');
 
-        $_order_types = OrderType::where('order_id', 3010)->get();
+        if ($search === '') {
+            return $this->cachedOptionsWithSelected(
+                cacheKey: 'businessTrips:structures',
+                base: $base,
+                selectedId: $this->filter['structure_id'] ?? null,
+                limit: 80
+            );
+        }
 
-        return view('livewire.outside.business-trips', compact('_structures', '_order_types'));
+        return $this->optionsWithSelected(
+            base: $base,
+            searchCol: 'name',
+            searchTerm: $search,
+            selectedId: $this->filter['structure_id'] ?? null,
+            limit: 80
+        );
+    }
+
+    #[Computed]
+    public function orderTypeOptions(): array
+    {
+        $base = OrderType::query()
+            ->select('id', DB::raw('name as label'))
+            ->where('order_id', 3010)
+            ->orderBy('name');
+
+        return $this->cachedOptionsWithSelected(
+            'businessTrips:order_types',
+            $base,
+            $this->filter['order_type_id'] ?? null,
+            50
+        );
     }
 }

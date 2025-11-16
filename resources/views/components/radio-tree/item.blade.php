@@ -3,11 +3,21 @@
     'listData' => "components",
     'field' => "",
     'key' => 0,
-    'isCoded' => false
+    'isCoded' => false,
+    'selectedId' => null,
 ])
 
 @php
     $wordSuffixService = new \App\Services\WordSuffixService();
+    $currentSelection = $selectedId;
+    if ($currentSelection === null) {
+        $rawValue = data_get($this->{$listData}[$key] ?? [], $field);
+        if (method_exists($this, 'componentFieldValue')) {
+            $currentSelection = $this->componentFieldValue($key, $field);
+        } else {
+            $currentSelection = is_array($rawValue) ? ($rawValue['id'] ?? null) : $rawValue;
+        }
+    }
 @endphp
 
 <li x-data="{openSubStructure: false}" class="py-1">
@@ -51,14 +61,14 @@
             wire:click.prevent="setStructure({{ $model->id }},'{{ $listData }}','{{ $field }}',{{ $key }},{{ $isCoded ? 1 : 0 }})"
             @class([
                 'appearance-none rounded-full w-6 h-6 border p-[3px] flex justify-center items-center transition-all duration-300',
-                'border-gray-300 bg-white' => $model->id != (array_key_exists($field,$this->{$listData}[$key]) ? $this->{$listData}[$key][$field]['id'] : 0),
-                'border-green-500 bg-green-200' => $model->id == (array_key_exists($field,$this->{$listData}[$key]) ? $this->{$listData}[$key][$field]['id'] : 0)
+                'border-gray-300 bg-white' => $model->id != $currentSelection,
+                'border-green-500 bg-green-200' => $model->id == $currentSelection
             ])
         >
               <span @class([
                     'w-full h-full rounded-full transition-all duration-300',
-                    'bg-white border-gray-300' => $model->id != (array_key_exists($field,$this->{$listData}[$key]) ? $this->{$listData}[$key][$field]['id'] : 0),
-                    'bg-green-500 border-green-500' => $model->id ==  (array_key_exists($field,$this->{$listData}[$key]) ? $this->{$listData}[$key][$field]['id'] : 0)
+                    'bg-white border-gray-300' => $model->id != $currentSelection,
+                    'bg-green-500 border-green-500' => $model->id ==  $currentSelection
               ])></span>
         </button>
     </div>
@@ -81,7 +91,7 @@
                                    : $sub->name;
                     $isCoded = $isCoded ?: 0;
                 @endphp
-                <x-radio-tree.item :$isCoded :$listData :$field :model="$sub" :$key>
+                <x-radio-tree.item :$isCoded :$listData :$field :model="$sub" :$key :selected-id="$currentSelection">
                     - {{ $_select_value }}
                 </x-radio-tree.item>
             @endforeach

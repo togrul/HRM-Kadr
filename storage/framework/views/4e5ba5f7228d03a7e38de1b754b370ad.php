@@ -12,16 +12,16 @@ Livewire.hook('message.processed', (message, component) => {
         }
     }
 })">
-    <div class="flex flex-col space-y-4 px-6 py-4">
-        <div class="flex justify-between items-center">
-            <div class="flex flex-col items-center justify-between sm:flex-row filter bg-white py-2 px-2 rounded-xl">
+    <div class="flex flex-col px-6 py-4 space-y-4">
+        <div class="flex items-center justify-between">
+            <div class="flex flex-col items-center justify-between px-2 py-2 bg-white sm:flex-row filter rounded-xl">
             </div>
 
             <div class="flex flex-col">
                 <div class="flex space-x-4">
                     <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('export-business_trips')): ?>
                         <button wire:click.prevent="exportExcel"
-                            class="flex items-center justify-center rounded-xl w-12 h-12 transition-all duration-300 hover:bg-green-50"
+                            class="flex items-center justify-center w-12 h-12 transition-all duration-300 rounded-xl hover:bg-green-50"
                             type="button">
                             <?php if (isset($component)) { $__componentOriginalaac97465df15b1f1f8ecebffe4ef4e28 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalaac97465df15b1f1f8ecebffe4ef4e28 = $attributes; } ?>
@@ -45,7 +45,7 @@ Livewire.hook('message.processed', (message, component) => {
 <?php endif; ?>
                         </button>
                         <button wire:click="printPage"
-                            class="flex items-center justify-center rounded-xl w-12 h-12 transition-all duration-300 hover:bg-red-50"
+                            class="flex items-center justify-center w-12 h-12 transition-all duration-300 rounded-xl hover:bg-red-50"
                             type="button">
                             <?php echo $__env->make('components.icons.print-file', [
                                 'color' => 'text-rose-500',
@@ -58,32 +58,28 @@ Livewire.hook('message.processed', (message, component) => {
             </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2">
+        <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
             <div class="flex flex-col xl:col-span-2">
-                <?php
-                    $selectedName = array_key_exists('structure_id', $filter) ? $filter['structure_id']['name'] : '---';
-                    $selectedId = array_key_exists('structure_id', $filter) ? $filter['structure_id']['id'] : -1;
-                ?>
-                <?php if (isset($component)) { $__componentOriginald384098dd1216f6f264fe579adbe3c2f = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginald384098dd1216f6f264fe579adbe3c2f = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list','data' => ['class' => 'w-full','title' => __('Structure'),'mode' => 'gray','selected' => $selectedName,'name' => 'structureId']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
-<?php $component->withName('select-list'); ?>
+                <?php if (isset($component)) { $__componentOriginalb7c56d9f0bb75b99472ae2845823c8e9 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalb7c56d9f0bb75b99472ae2845823c8e9 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.ui.select-dropdown','data' => ['label' => __('Structure'),'placeholder' => '---','mode' => 'gray','class' => 'w-full','wire:model.live' => 'filter.structure_id','model' => $this->structureOptions]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('ui.select-dropdown'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['class' => 'w-full','title' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(__('Structure')),'mode' => 'gray','selected' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($selectedName),'name' => 'structureId']); ?>
+<?php $component->withAttributes(['label' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(__('Structure')),'placeholder' => '---','mode' => 'gray','class' => 'w-full','wire:model.live' => 'filter.structure_id','model' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($this->structureOptions)]); ?>
                     <?php if (isset($component)) { $__componentOriginal9364c0b92ee5ab519273634c79f86a27 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal9364c0b92ee5ab519273634c79f86a27 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.livewire-input','data' => ['@click.stop' => 'open = true','mode' => 'gray','name' => 'searchStructure','wire:model.live' => 'searchStructure']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.livewire-input','data' => ['mode' => 'gray','name' => 'searchStructure','wire:model.live' => 'searchStructure','@click.stop' => 'isOpen = true','xOn:input.stop' => 'null','xOn:keyup.stop' => 'null','xOn:keydown.stop' => 'null','xOn:change.stop' => 'null']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('livewire-input'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['@click.stop' => 'open = true','mode' => 'gray','name' => 'searchStructure','wire:model.live' => 'searchStructure']); ?> <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['mode' => 'gray','name' => 'searchStructure','wire:model.live' => 'searchStructure','@click.stop' => 'isOpen = true','x-on:input.stop' => 'null','x-on:keyup.stop' => 'null','x-on:keydown.stop' => 'null','x-on:change.stop' => 'null']); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal9364c0b92ee5ab519273634c79f86a27)): ?>
 <?php $attributes = $__attributesOriginal9364c0b92ee5ab519273634c79f86a27; ?>
@@ -93,134 +89,37 @@ Livewire.hook('message.processed', (message, component) => {
 <?php $component = $__componentOriginal9364c0b92ee5ab519273634c79f86a27; ?>
 <?php unset($__componentOriginal9364c0b92ee5ab519273634c79f86a27); ?>
 <?php endif; ?>
-
-                    <?php if (isset($component)) { $__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list-item','data' => ['wire:click' => 'setData(\'filter\',\'structure_id\',null,\'---\',null)','selected' => '---' == $selectedName,'wire:model' => 'filter.structure_id.id']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
-<?php $component->withName('select-list-item'); ?>
-<?php if ($component->shouldRender()): ?>
-<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
-<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
-<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
-<?php endif; ?>
-<?php $component->withAttributes(['wire:click' => 'setData(\'filter\',\'structure_id\',null,\'---\',null)','selected' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute('---' == $selectedName),'wire:model' => 'filter.structure_id.id']); ?>
-                        ---
-                     <?php echo $__env->renderComponent(); ?>
-<?php endif; ?>
-<?php if (isset($__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee)): ?>
-<?php $attributes = $__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee; ?>
-<?php unset($__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee); ?>
-<?php endif; ?>
-<?php if (isset($__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee)): ?>
-<?php $component = $__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee; ?>
-<?php unset($__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee); ?>
-<?php endif; ?>
-                    <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $_structures; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $_structure): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <?php if (isset($component)) { $__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list-item','data' => ['wire:click' => 'setData(\'filter\',\'structure_id\',null,\''.e(trim($_structure->name)).'\','.e($_structure->id).')','selected' => $_structure->id === $selectedId,'wire:model' => 'filter.structure_id.id']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
-<?php $component->withName('select-list-item'); ?>
-<?php if ($component->shouldRender()): ?>
-<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
-<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
-<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
-<?php endif; ?>
-<?php $component->withAttributes(['wire:click' => 'setData(\'filter\',\'structure_id\',null,\''.e(trim($_structure->name)).'\','.e($_structure->id).')','selected' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($_structure->id === $selectedId),'wire:model' => 'filter.structure_id.id']); ?>
-                            <?php echo e($_structure->name); ?>
-
-                         <?php echo $__env->renderComponent(); ?>
-<?php endif; ?>
-<?php if (isset($__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee)): ?>
-<?php $attributes = $__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee; ?>
-<?php unset($__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee); ?>
-<?php endif; ?>
-<?php if (isset($__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee)): ?>
-<?php $component = $__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee; ?>
-<?php unset($__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee); ?>
-<?php endif; ?>
-                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
                  <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
-<?php if (isset($__attributesOriginald384098dd1216f6f264fe579adbe3c2f)): ?>
-<?php $attributes = $__attributesOriginald384098dd1216f6f264fe579adbe3c2f; ?>
-<?php unset($__attributesOriginald384098dd1216f6f264fe579adbe3c2f); ?>
+<?php if (isset($__attributesOriginalb7c56d9f0bb75b99472ae2845823c8e9)): ?>
+<?php $attributes = $__attributesOriginalb7c56d9f0bb75b99472ae2845823c8e9; ?>
+<?php unset($__attributesOriginalb7c56d9f0bb75b99472ae2845823c8e9); ?>
 <?php endif; ?>
-<?php if (isset($__componentOriginald384098dd1216f6f264fe579adbe3c2f)): ?>
-<?php $component = $__componentOriginald384098dd1216f6f264fe579adbe3c2f; ?>
-<?php unset($__componentOriginald384098dd1216f6f264fe579adbe3c2f); ?>
+<?php if (isset($__componentOriginalb7c56d9f0bb75b99472ae2845823c8e9)): ?>
+<?php $component = $__componentOriginalb7c56d9f0bb75b99472ae2845823c8e9; ?>
+<?php unset($__componentOriginalb7c56d9f0bb75b99472ae2845823c8e9); ?>
 <?php endif; ?>
             </div>
             <div class="flex flex-col xl:col-span-2">
-                <?php
-                    $selectedName = array_key_exists('order_type_id', $filter)
-                        ? $filter['order_type_id']['name']
-                        : '---';
-                    $selectedId = array_key_exists('order_type_id', $filter) ? $filter['order_type_id']['id'] : -1;
-                ?>
-                <?php if (isset($component)) { $__componentOriginald384098dd1216f6f264fe579adbe3c2f = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginald384098dd1216f6f264fe579adbe3c2f = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list','data' => ['class' => 'w-full','title' => __('Order types'),'mode' => 'gray','selected' => $selectedName,'name' => 'orderTypeId']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
-<?php $component->withName('select-list'); ?>
+                <?php if (isset($component)) { $__componentOriginalb7c56d9f0bb75b99472ae2845823c8e9 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalb7c56d9f0bb75b99472ae2845823c8e9 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.ui.select-dropdown','data' => ['label' => __('Order types'),'placeholder' => '---','mode' => 'gray','class' => 'w-full','wire:model.live' => 'filter.order_type_id','model' => $this->orderTypeOptions]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('ui.select-dropdown'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['class' => 'w-full','title' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(__('Order types')),'mode' => 'gray','selected' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($selectedName),'name' => 'orderTypeId']); ?>
-                    <?php if (isset($component)) { $__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list-item','data' => ['wire:click' => 'setData(\'filter\',\'order_type_id\',null,\'---\',null)','selected' => '---' == $selectedName,'wire:model' => 'filter.order_type_id.id']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
-<?php $component->withName('select-list-item'); ?>
-<?php if ($component->shouldRender()): ?>
-<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
-<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
-<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php $component->withAttributes(['label' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(__('Order types')),'placeholder' => '---','mode' => 'gray','class' => 'w-full','wire:model.live' => 'filter.order_type_id','model' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($this->orderTypeOptions)]); ?>
+<?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['wire:click' => 'setData(\'filter\',\'order_type_id\',null,\'---\',null)','selected' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute('---' == $selectedName),'wire:model' => 'filter.order_type_id.id']); ?>
-                        ---
-                     <?php echo $__env->renderComponent(); ?>
+<?php if (isset($__attributesOriginalb7c56d9f0bb75b99472ae2845823c8e9)): ?>
+<?php $attributes = $__attributesOriginalb7c56d9f0bb75b99472ae2845823c8e9; ?>
+<?php unset($__attributesOriginalb7c56d9f0bb75b99472ae2845823c8e9); ?>
 <?php endif; ?>
-<?php if (isset($__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee)): ?>
-<?php $attributes = $__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee; ?>
-<?php unset($__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee); ?>
-<?php endif; ?>
-<?php if (isset($__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee)): ?>
-<?php $component = $__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee; ?>
-<?php unset($__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee); ?>
-<?php endif; ?>
-                    <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $_order_types; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $type): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <?php if (isset($component)) { $__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list-item','data' => ['wire:click' => 'setData(\'filter\',\'order_type_id\',null,\''.e(trim($type->name)).'\','.e($type->id).')','selected' => $type->id === $selectedId,'wire:model' => 'filter.order_type_id.id']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
-<?php $component->withName('select-list-item'); ?>
-<?php if ($component->shouldRender()): ?>
-<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
-<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
-<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
-<?php endif; ?>
-<?php $component->withAttributes(['wire:click' => 'setData(\'filter\',\'order_type_id\',null,\''.e(trim($type->name)).'\','.e($type->id).')','selected' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($type->id === $selectedId),'wire:model' => 'filter.order_type_id.id']); ?>
-                            <?php echo e($type->name); ?>
-
-                         <?php echo $__env->renderComponent(); ?>
-<?php endif; ?>
-<?php if (isset($__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee)): ?>
-<?php $attributes = $__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee; ?>
-<?php unset($__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee); ?>
-<?php endif; ?>
-<?php if (isset($__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee)): ?>
-<?php $component = $__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee; ?>
-<?php unset($__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee); ?>
-<?php endif; ?>
-                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
-                 <?php echo $__env->renderComponent(); ?>
-<?php endif; ?>
-<?php if (isset($__attributesOriginald384098dd1216f6f264fe579adbe3c2f)): ?>
-<?php $attributes = $__attributesOriginald384098dd1216f6f264fe579adbe3c2f; ?>
-<?php unset($__attributesOriginald384098dd1216f6f264fe579adbe3c2f); ?>
-<?php endif; ?>
-<?php if (isset($__componentOriginald384098dd1216f6f264fe579adbe3c2f)): ?>
-<?php $component = $__componentOriginald384098dd1216f6f264fe579adbe3c2f; ?>
-<?php unset($__componentOriginald384098dd1216f6f264fe579adbe3c2f); ?>
+<?php if (isset($__componentOriginalb7c56d9f0bb75b99472ae2845823c8e9)): ?>
+<?php $component = $__componentOriginalb7c56d9f0bb75b99472ae2845823c8e9; ?>
+<?php unset($__componentOriginalb7c56d9f0bb75b99472ae2845823c8e9); ?>
 <?php endif; ?>
             </div>
             <div class="flex flex-col">
@@ -323,7 +222,7 @@ Livewire.hook('message.processed', (message, component) => {
 <?php $component = $__componentOriginald8ba2b4c22a13c55321e34443c386276; ?>
 <?php unset($__componentOriginald8ba2b4c22a13c55321e34443c386276); ?>
 <?php endif; ?>
-                <div class="flex space-x-1 items-center">
+                <div class="flex items-center space-x-1">
                     <?php if (isset($component)) { $__componentOriginal36038ba5ddba347b69d2b76bc4612d11 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal36038ba5ddba347b69d2b76bc4612d11 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.pikaday-input','data' => ['mode' => 'gray','name' => 'filter.date.min','format' => 'Y-MM-DD','wire:model.live' => 'filter.date.min']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
@@ -417,7 +316,7 @@ Livewire.hook('message.processed', (message, component) => {
 <?php unset($__componentOriginal9364c0b92ee5ab519273634c79f86a27); ?>
 <?php endif; ?>
             </div>
-            <div class="flex flex-col space-y-1 w-full lg:col-span-2">
+            <div class="flex flex-col w-full space-y-1 lg:col-span-2">
                 <?php if (isset($component)) { $__componentOriginald8ba2b4c22a13c55321e34443c386276 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginald8ba2b4c22a13c55321e34443c386276 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.label','data' => ['for' => 'filter.gender']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
@@ -438,29 +337,29 @@ Livewire.hook('message.processed', (message, component) => {
 <?php unset($__componentOriginald8ba2b4c22a13c55321e34443c386276); ?>
 <?php endif; ?>
                 <div class="flex flex-row">
-                    <label class="inline-flex items-center bg-gray-100 rounded shadow-sm py-2 px-2">
+                    <label class="inline-flex items-center px-2 py-2 bg-gray-100 rounded shadow-sm">
                         <input type="radio" class="form-radio" name="filter.business_trip_status"
                             wire:model="filter.business_trip_status" value="all">
                         <span class="ml-2 text-sm font-normal"><?php echo e(__('All')); ?></span>
                     </label>
-                    <label class="inline-flex items-center bg-gray-100 rounded shadow-sm py-2 px-2">
+                    <label class="inline-flex items-center px-2 py-2 bg-gray-100 rounded shadow-sm">
                         <input type="radio" class="form-radio" name="filter.business_trip_status"
                             wire:model="filter.business_trip_status" value="at_work">
                         <span class="ml-2 text-sm font-normal"><?php echo e(__('At work')); ?></span>
                     </label>
-                    <label class="inline-flex items-center bg-gray-100 rounded shadow-sm py-2 px-2">
+                    <label class="inline-flex items-center px-2 py-2 bg-gray-100 rounded shadow-sm">
                         <input type="radio" class="form-radio" name="filter.business_trip_status"
                             wire:model="filter.business_trip_status" value="in_business_trip">
                         <span class="ml-2 text-sm font-normal"><?php echo e(__('In business trip')); ?></span>
                     </label>
-                    <label class="inline-flex items-center bg-gray-100 rounded shadow-sm py-2 px-2">
+                    <label class="inline-flex items-center px-2 py-2 bg-gray-100 rounded shadow-sm">
                         <input type="radio" class="form-radio" name="filter.business_trip_status"
                             wire:model="filter.business_trip_status" value="deleted">
                         <span class="ml-2 text-sm font-normal"><?php echo e(__('Deleted')); ?></span>
                     </label>
                 </div>
             </div>
-            <div class="flex space-x-2 items-end">
+            <div class="flex items-end space-x-2">
                 <?php if (isset($component)) { $__componentOriginald0f1fd2689e4bb7060122a5b91fe8561 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginald0f1fd2689e4bb7060122a5b91fe8561 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.button','data' => ['mode' => 'primary','wire:click' => 'searchFilter']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
@@ -564,9 +463,9 @@ Livewire.hook('message.processed', (message, component) => {
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
 <?php $component->withAttributes([]); ?>
-                                    <div class="flex flex-col space-y-1 items-start">
+                                    <div class="flex flex-col items-start space-y-1">
                                         <span
-                                            class="text-slate-500 flex justify-center items-center text-sm font-medium rounded-lg drop-shadow-2xl">
+                                            class="flex items-center justify-center text-sm font-medium rounded-lg text-slate-500 drop-shadow-2xl">
                                             <?php echo e($_bTrip->attributes['$rank']['value']); ?>
 
                                         </span>
@@ -575,13 +474,13 @@ Livewire.hook('message.processed', (message, component) => {
 
                                         </span>
                                         <span
-                                            class="text-blue-500 text-sm font-medium bg-slate-100 px-2 py-1 rounded-lg">
+                                            class="px-2 py-1 text-sm font-medium text-blue-500 rounded-lg bg-slate-100">
                                             <?php echo e($_bTrip->attributes['$structure']['value']); ?>
 
                                         </span>
                                         <!--[if BLOCK]><![endif]--><?php if($activeBusinessTrip): ?>
                                             <span
-                                                class="text-green-700 flex justify-center items-center text-sm font-medium bg-green-200 px-2 py-1 rounded-lg">
+                                                class="flex items-center justify-center px-2 py-1 text-sm font-medium text-green-700 bg-green-200 rounded-lg">
                                                 <?php echo e(__('In business trip')); ?>
 
                                             </span>
@@ -657,7 +556,7 @@ Livewire.hook('message.processed', (message, component) => {
 <?php $component->withAttributes([]); ?>
                                     <div class="flex flex-col space-y-1 text-sm font-medium">
                                         <span
-                                            class="text-teal-500 text-sm font-medium bg-gray-100 px-2 py-1 rounded-lg">
+                                            class="px-2 py-1 text-sm font-medium text-teal-500 bg-gray-100 rounded-lg">
                                             <?php echo e($_bTrip->order->orderType->name); ?>
 
                                         </span>
@@ -695,7 +594,7 @@ Livewire.hook('message.processed', (message, component) => {
                                             <!--[if BLOCK]><![endif]--><?php if($multi): ?>
                                                 <button
                                                     wire:click="printBusinessTripDocument('<?php echo e($_bTrip->id); ?>',<?php echo e($multi); ?>)"
-                                                    class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 bg-teal-50 rounded-lg text-gray-500 hover:bg-teal-100 hover:text-gray-700">
+                                                    class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg bg-teal-50 hover:bg-teal-100 hover:text-gray-700">
                                                     <?php echo $__env->make('components.icons.document-icon', [
                                                         'color' => 'text-teal-500',
                                                         'hover' => 'text-teal-600',
@@ -738,7 +637,7 @@ Livewire.hook('message.processed', (message, component) => {
                                         <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('export-business_trips')): ?>
                                             <button
                                                 wire:click="printBusinessTripDocument('<?php echo e($_bTrip->id); ?>',<?php echo e($multi); ?>)"
-                                                class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase bg-teal-50 transition duration-300 rounded-lg text-gray-500 hover:bg-teal-100 hover:text-gray-700">
+                                                class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg bg-teal-50 hover:bg-teal-100 hover:text-gray-700">
                                                 <?php echo $__env->make('components.icons.document-icon', [
                                                     'color' => 'text-teal-500',
                                                     'hover' => 'text-teal-600',

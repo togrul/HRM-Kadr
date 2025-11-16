@@ -12,21 +12,21 @@ Livewire.hook('message.processed', (message, component) => {
         }
     }
 })">
-    <div class="flex flex-col space-y-4 px-6 py-4">
-        <div class="flex justify-between items-center">
-            <div class="flex flex-col items-center justify-between sm:flex-row filter bg-white py-2 px-2 rounded-xl">
+    <div class="flex flex-col px-6 py-4 space-y-4">
+        <div class="flex items-center justify-between">
+            <div class="flex flex-col items-center justify-between px-2 py-2 bg-white sm:flex-row filter rounded-xl">
             </div>
 
             <div class="flex flex-col">
                 <div class="flex space-x-4">
                     @can('export-business_trips')
                         <button wire:click.prevent="exportExcel"
-                            class="flex items-center justify-center rounded-xl w-12 h-12 transition-all duration-300 hover:bg-green-50"
+                            class="flex items-center justify-center w-12 h-12 transition-all duration-300 rounded-xl hover:bg-green-50"
                             type="button">
                             <x-icons.excel-icon />
                         </button>
                         <button wire:click="printPage"
-                            class="flex items-center justify-center rounded-xl w-12 h-12 transition-all duration-300 hover:bg-red-50"
+                            class="flex items-center justify-center w-12 h-12 transition-all duration-300 rounded-xl hover:bg-red-50"
                             type="button">
                             @include('components.icons.print-file', [
                                 'color' => 'text-rose-500',
@@ -39,49 +39,37 @@ Livewire.hook('message.processed', (message, component) => {
             </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2">
+        <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
             <div class="flex flex-col xl:col-span-2">
-                @php
-                    $selectedName = array_key_exists('structure_id', $filter) ? $filter['structure_id']['name'] : '---';
-                    $selectedId = array_key_exists('structure_id', $filter) ? $filter['structure_id']['id'] : -1;
-                @endphp
-                <x-select-list class="w-full" :title="__('Structure')" mode="gray" :selected="$selectedName" name="structureId">
-                    <x-livewire-input @click.stop="open = true" mode="gray" name="searchStructure"
-                        wire:model.live="searchStructure"></x-livewire-input>
-
-                    <x-select-list-item wire:click="setData('filter','structure_id',null,'---',null)" :selected="'---' == $selectedName"
-                        wire:model='filter.structure_id.id'>
-                        ---
-                    </x-select-list-item>
-                    @foreach ($_structures as $_structure)
-                        <x-select-list-item
-                            wire:click="setData('filter','structure_id',null,'{{ trim($_structure->name) }}',{{ $_structure->id }})"
-                            :selected="$_structure->id === $selectedId" wire:model='filter.structure_id.id'>
-                            {{ $_structure->name }}
-                        </x-select-list-item>
-                    @endforeach
-                </x-select-list>
+                <x-ui.select-dropdown
+                    :label="__('Structure')"
+                    placeholder="---"
+                    mode="gray"
+                    class="w-full"
+                    wire:model.live="filter.structure_id"
+                    :model="$this->structureOptions"
+                >
+                    <x-livewire-input
+                        mode="gray"
+                        name="searchStructure"
+                        wire:model.live="searchStructure"
+                        @click.stop="isOpen = true"
+                        x-on:input.stop="null"
+                        x-on:keyup.stop="null"
+                        x-on:keydown.stop="null"
+                        x-on:change.stop="null"
+                    ></x-livewire-input>
+                </x-ui.select-dropdown>
             </div>
             <div class="flex flex-col xl:col-span-2">
-                @php
-                    $selectedName = array_key_exists('order_type_id', $filter)
-                        ? $filter['order_type_id']['name']
-                        : '---';
-                    $selectedId = array_key_exists('order_type_id', $filter) ? $filter['order_type_id']['id'] : -1;
-                @endphp
-                <x-select-list class="w-full" :title="__('Order types')" mode="gray" :selected="$selectedName" name="orderTypeId">
-                    <x-select-list-item wire:click="setData('filter','order_type_id',null,'---',null)" :selected="'---' == $selectedName"
-                        wire:model='filter.order_type_id.id'>
-                        ---
-                    </x-select-list-item>
-                    @foreach ($_order_types as $type)
-                        <x-select-list-item
-                            wire:click="setData('filter','order_type_id',null,'{{ trim($type->name) }}',{{ $type->id }})"
-                            :selected="$type->id === $selectedId" wire:model='filter.order_type_id.id'>
-                            {{ $type->name }}
-                        </x-select-list-item>
-                    @endforeach
-                </x-select-list>
+                <x-ui.select-dropdown
+                    :label="__('Order types')"
+                    placeholder="---"
+                    mode="gray"
+                    class="w-full"
+                    wire:model.live="filter.order_type_id"
+                    :model="$this->orderTypeOptions"
+                />
             </div>
             <div class="flex flex-col">
                 <x-label for="filter.fullname">{{ __('Fullname') }}</x-label>
@@ -95,7 +83,7 @@ Livewire.hook('message.processed', (message, component) => {
             </div>
             <div class="flex flex-col lg:col-span-2">
                 <x-label for="filter.date_range">{{ __('Date range') }}</x-label>
-                <div class="flex space-x-1 items-center">
+                <div class="flex items-center space-x-1">
                     <x-pikaday-input mode="gray" name="filter.date.min" format="Y-MM-DD"
                         wire:model.live="filter.date.min">
                         <x-slot name="script">
@@ -120,32 +108,32 @@ Livewire.hook('message.processed', (message, component) => {
                 <x-livewire-input mode="gray" name="filter.location"
                     wire:model.defer="filter.location"></x-livewire-input>
             </div>
-            <div class="flex flex-col space-y-1 w-full lg:col-span-2">
+            <div class="flex flex-col w-full space-y-1 lg:col-span-2">
                 <x-label for="filter.gender">{{ __('Status') }}</x-label>
                 <div class="flex flex-row">
-                    <label class="inline-flex items-center bg-gray-100 rounded shadow-sm py-2 px-2">
+                    <label class="inline-flex items-center px-2 py-2 bg-gray-100 rounded shadow-sm">
                         <input type="radio" class="form-radio" name="filter.business_trip_status"
                             wire:model="filter.business_trip_status" value="all">
                         <span class="ml-2 text-sm font-normal">{{ __('All') }}</span>
                     </label>
-                    <label class="inline-flex items-center bg-gray-100 rounded shadow-sm py-2 px-2">
+                    <label class="inline-flex items-center px-2 py-2 bg-gray-100 rounded shadow-sm">
                         <input type="radio" class="form-radio" name="filter.business_trip_status"
                             wire:model="filter.business_trip_status" value="at_work">
                         <span class="ml-2 text-sm font-normal">{{ __('At work') }}</span>
                     </label>
-                    <label class="inline-flex items-center bg-gray-100 rounded shadow-sm py-2 px-2">
+                    <label class="inline-flex items-center px-2 py-2 bg-gray-100 rounded shadow-sm">
                         <input type="radio" class="form-radio" name="filter.business_trip_status"
                             wire:model="filter.business_trip_status" value="in_business_trip">
                         <span class="ml-2 text-sm font-normal">{{ __('In business trip') }}</span>
                     </label>
-                    <label class="inline-flex items-center bg-gray-100 rounded shadow-sm py-2 px-2">
+                    <label class="inline-flex items-center px-2 py-2 bg-gray-100 rounded shadow-sm">
                         <input type="radio" class="form-radio" name="filter.business_trip_status"
                             wire:model="filter.business_trip_status" value="deleted">
                         <span class="ml-2 text-sm font-normal">{{ __('Deleted') }}</span>
                     </label>
                 </div>
             </div>
-            <div class="flex space-x-2 items-end">
+            <div class="flex items-end space-x-2">
                 <x-button mode="primary" wire:click="searchFilter">{{ __('Search') }}</x-button>
                 <x-button mode="black" wire:click="resetFilter">{{ __('Reset') }}</x-button>
             </div>
@@ -176,21 +164,21 @@ Livewire.hook('message.processed', (message, component) => {
                                 </x-table.td>
 
                                 <x-table.td>
-                                    <div class="flex flex-col space-y-1 items-start">
+                                    <div class="flex flex-col items-start space-y-1">
                                         <span
-                                            class="text-slate-500 flex justify-center items-center text-sm font-medium rounded-lg drop-shadow-2xl">
+                                            class="flex items-center justify-center text-sm font-medium rounded-lg text-slate-500 drop-shadow-2xl">
                                             {{ $_bTrip->attributes['$rank']['value'] }}
                                         </span>
                                         <span class="text-sm font-medium text-slate-900">
                                             {{ $_bTrip->attributes['$fullname']['value'] }}
                                         </span>
                                         <span
-                                            class="text-blue-500 text-sm font-medium bg-slate-100 px-2 py-1 rounded-lg">
+                                            class="px-2 py-1 text-sm font-medium text-blue-500 rounded-lg bg-slate-100">
                                             {{ $_bTrip->attributes['$structure']['value'] }}
                                         </span>
                                         @if ($activeBusinessTrip)
                                             <span
-                                                class="text-green-700 flex justify-center items-center text-sm font-medium bg-green-200 px-2 py-1 rounded-lg">
+                                                class="flex items-center justify-center px-2 py-1 text-sm font-medium text-green-700 bg-green-200 rounded-lg">
                                                 {{ __('In business trip') }}
                                             </span>
                                         @endif
@@ -229,7 +217,7 @@ Livewire.hook('message.processed', (message, component) => {
                                 <x-table.td>
                                     <div class="flex flex-col space-y-1 text-sm font-medium">
                                         <span
-                                            class="text-teal-500 text-sm font-medium bg-gray-100 px-2 py-1 rounded-lg">
+                                            class="px-2 py-1 text-sm font-medium text-teal-500 bg-gray-100 rounded-lg">
                                             {{ $_bTrip->order->orderType->name }}
                                         </span>
                                         <span class="text-sm font-medium text-slate-900">
@@ -247,7 +235,7 @@ Livewire.hook('message.processed', (message, component) => {
                                             @if ($multi)
                                                 <button
                                                     wire:click="printBusinessTripDocument('{{ $_bTrip->id }}',{{ $multi }})"
-                                                    class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 bg-teal-50 rounded-lg text-gray-500 hover:bg-teal-100 hover:text-gray-700">
+                                                    class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg bg-teal-50 hover:bg-teal-100 hover:text-gray-700">
                                                     @include('components.icons.document-icon', [
                                                         'color' => 'text-teal-500',
                                                         'hover' => 'text-teal-600',
@@ -272,7 +260,7 @@ Livewire.hook('message.processed', (message, component) => {
                                         @can('export-business_trips')
                                             <button
                                                 wire:click="printBusinessTripDocument('{{ $_bTrip->id }}',{{ $multi }})"
-                                                class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase bg-teal-50 transition duration-300 rounded-lg text-gray-500 hover:bg-teal-100 hover:text-gray-700">
+                                                class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg bg-teal-50 hover:bg-teal-100 hover:text-gray-700">
                                                 @include('components.icons.document-icon', [
                                                     'color' => 'text-teal-500',
                                                     'hover' => 'text-teal-600',

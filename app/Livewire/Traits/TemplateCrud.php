@@ -72,4 +72,13 @@ trait TemplateCrud
             limit: 100
         );
     }
+
+    public function render()
+    {
+        $view_name = ! empty($this->templateModel)
+            ? 'livewire.orders.templates.edit-template'
+            : 'livewire.orders.templates.add-template';
+
+        return view($view_name);
+    }
 }

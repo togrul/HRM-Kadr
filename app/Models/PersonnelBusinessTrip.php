@@ -86,8 +86,8 @@ class PersonnelBusinessTrip extends Model
         foreach ($filters as $field => $value) {
             switch ($field) {
                 case 'structure_id':
-                    if (isset($value['id'])) {
-                        $structureModel = Structure::with('subs')->find($value['id']);
+                    if (! empty($value)) {
+                        $structureModel = Structure::with('subs')->find($value);
                         if ($structureModel) {
                             $structure = $structureModel->getAllNestedIds();
                             $query->whereHas('personnel.structure', function ($qq) use ($structure) {
@@ -97,9 +97,9 @@ class PersonnelBusinessTrip extends Model
                     }
                     break;
                 case 'order_type_id':
-                    if (isset($value['id'])) {
+                    if (! empty($value)) {
                         $query->whereHas('order.orderType', function ($qq) use ($value) {
-                            $qq->where('order_type_id', $value['id']);
+                            $qq->where('order_type_id', $value);
                         });
                     }
                     break;

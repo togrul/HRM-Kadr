@@ -201,31 +201,27 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
     </div>
 <?php elseif($input == 'select'): ?>
     <div class="flex flex-col">
-        <?php
-            ${$selectedName."Name"} = array_key_exists($key,$list) ? $list[$key][$field]['name'] : '---';
-            ${$selectedName."Id"} = array_key_exists($key,$list) ? $list[$key][$field]['id'] : -1;
-        ?>
-        <?php if (isset($component)) { $__componentOriginald384098dd1216f6f264fe579adbe3c2f = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginald384098dd1216f6f264fe579adbe3c2f = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list','data' => ['class' => 'w-full','disabled' => $disabled,'title' => $title,'mode' => 'gray','selected' => ${$selectedName.'Name'},'name' => ''.e($field).'Id']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
-<?php $component->withName('select-list'); ?>
+        <?php if (isset($component)) { $__componentOriginalb7c56d9f0bb75b99472ae2845823c8e9 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalb7c56d9f0bb75b99472ae2845823c8e9 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.ui.select-dropdown','data' => ['label' => $title,'placeholder' => '---','mode' => 'gray','class' => 'w-full','wire:model.live' => ''.e($list_string).'.'.e($key).'.'.e($field).'','model' => $model ?? [],'disabled' => $disabled,'selectedLabel' => method_exists($this, 'componentFieldLabel') ? $this->componentFieldLabel($key, $field) : null]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('ui.select-dropdown'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['class' => 'w-full','disabled' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($disabled),'title' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($title),'mode' => 'gray','selected' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(${$selectedName.'Name'}),'name' => ''.e($field).'Id']); ?>
+<?php $component->withAttributes(['label' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($title),'placeholder' => '---','mode' => 'gray','class' => 'w-full','wire:model.live' => ''.e($list_string).'.'.e($key).'.'.e($field).'','model' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($model ?? []),'disabled' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($disabled),'selected-label' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(method_exists($this, 'componentFieldLabel') ? $this->componentFieldLabel($key, $field) : null)]); ?>
             <!--[if BLOCK]><![endif]--><?php if(!empty($searchField)): ?>
                 <?php if (isset($component)) { $__componentOriginal9364c0b92ee5ab519273634c79f86a27 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal9364c0b92ee5ab519273634c79f86a27 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.livewire-input','data' => ['@click.stop' => 'open = true','mode' => 'gray','name' => ''.e($searchField).'','wire:model.live' => ''.e($searchField).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.livewire-input','data' => ['mode' => 'gray','name' => ''.e($searchField).'','wire:model.live' => ''.e($searchField).'','@click.stop' => 'isOpen = true','xOn:input.stop' => 'null','xOn:keyup.stop' => 'null','xOn:keydown.stop' => 'null','xOn:change.stop' => 'null']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('livewire-input'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['@click.stop' => 'open = true','mode' => 'gray','name' => ''.e($searchField).'','wire:model.live' => ''.e($searchField).'']); ?> <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['mode' => 'gray','name' => ''.e($searchField).'','wire:model.live' => ''.e($searchField).'','@click.stop' => 'isOpen = true','x-on:input.stop' => 'null','x-on:keyup.stop' => 'null','x-on:keydown.stop' => 'null','x-on:change.stop' => 'null']); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal9364c0b92ee5ab519273634c79f86a27)): ?>
 <?php $attributes = $__attributesOriginal9364c0b92ee5ab519273634c79f86a27; ?>
@@ -236,83 +232,17 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php unset($__componentOriginal9364c0b92ee5ab519273634c79f86a27); ?>
 <?php endif; ?>
             <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
-
-            <?php if (isset($component)) { $__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list-item','data' => ['wire:click' => 'setData(\''.e($list_string).'\',\''.e($field).'\',null,\'---\',null,'.e($key).')','selected' => '---' ==  ${$selectedName.'Name'},'wire:model' => ''.e($list_string).'.'.e($key).'.'.e($field).'.id']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
-<?php $component->withName('select-list-item'); ?>
-<?php if ($component->shouldRender()): ?>
-<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
-<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
-<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
-<?php endif; ?>
-<?php $component->withAttributes(['wire:click' => 'setData(\''.e($list_string).'\',\''.e($field).'\',null,\'---\',null,'.e($key).')','selected' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute('---' ==  ${$selectedName.'Name'}),'wire:model' => ''.e($list_string).'.'.e($key).'.'.e($field).'.id']); ?>
-                ---
-             <?php echo $__env->renderComponent(); ?>
-<?php endif; ?>
-<?php if (isset($__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee)): ?>
-<?php $attributes = $__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee; ?>
-<?php unset($__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee); ?>
-<?php endif; ?>
-<?php if (isset($__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee)): ?>
-<?php $component = $__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee; ?>
-<?php unset($__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee); ?>
-<?php endif; ?>
-            <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $model; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $model_item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                <?php
-                    if(is_array($model_item))
-                    {
-                        $_id = $model_item['id'];
-                        $_optionValue = $model_item['name'];
-                        $_selected = $_id === ${$selectedName.'Id'};
-                    }
-                    else
-                    {
-                        $_id = $model_item->id;
-                        $_optionValue = ($model_item->fullname_max ?? $model_item->name);
-                        $_selected = $_id === ${$selectedName.'Id'};
-                    }
-                ?>
-                <?php if (isset($component)) { $__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.select-list-item','data' => ['wire:click' => '
-                                        setData(\''.e($list_string).'\',\''.e($field).'\',null,\''.e($_optionValue).'\','.e($_id).','.e($key).');
-                                        $dispatch(\'dynamicSelectChanged\',{value: '.e($_id).',field: \''.e($field).'\',rowKey: '.e($key).' })
-                                    ','selected' => $_selected,'wire:model' => ''.e($list_string).'.'.e($key).'.'.e($field).'.id']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
-<?php $component->withName('select-list-item'); ?>
-<?php if ($component->shouldRender()): ?>
-<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
-<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
-<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
-<?php endif; ?>
-<?php $component->withAttributes(['wire:click' => '
-                                        setData(\''.e($list_string).'\',\''.e($field).'\',null,\''.e($_optionValue).'\','.e($_id).','.e($key).');
-                                        $dispatch(\'dynamicSelectChanged\',{value: '.e($_id).',field: \''.e($field).'\',rowKey: '.e($key).' })
-                                    ','selected' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($_selected),'wire:model' => ''.e($list_string).'.'.e($key).'.'.e($field).'.id']); ?>
-                    <?php echo e($_optionValue); ?>
-
-                 <?php echo $__env->renderComponent(); ?>
-<?php endif; ?>
-<?php if (isset($__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee)): ?>
-<?php $attributes = $__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee; ?>
-<?php unset($__attributesOriginalfad9b9ef9db98dab13eefb5c81eb8bee); ?>
-<?php endif; ?>
-<?php if (isset($__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee)): ?>
-<?php $component = $__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee; ?>
-<?php unset($__componentOriginalfad9b9ef9db98dab13eefb5c81eb8bee); ?>
-<?php endif; ?>
-            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
          <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
-<?php if (isset($__attributesOriginald384098dd1216f6f264fe579adbe3c2f)): ?>
-<?php $attributes = $__attributesOriginald384098dd1216f6f264fe579adbe3c2f; ?>
-<?php unset($__attributesOriginald384098dd1216f6f264fe579adbe3c2f); ?>
+<?php if (isset($__attributesOriginalb7c56d9f0bb75b99472ae2845823c8e9)): ?>
+<?php $attributes = $__attributesOriginalb7c56d9f0bb75b99472ae2845823c8e9; ?>
+<?php unset($__attributesOriginalb7c56d9f0bb75b99472ae2845823c8e9); ?>
 <?php endif; ?>
-<?php if (isset($__componentOriginald384098dd1216f6f264fe579adbe3c2f)): ?>
-<?php $component = $__componentOriginald384098dd1216f6f264fe579adbe3c2f; ?>
-<?php unset($__componentOriginald384098dd1216f6f264fe579adbe3c2f); ?>
+<?php if (isset($__componentOriginalb7c56d9f0bb75b99472ae2845823c8e9)): ?>
+<?php $component = $__componentOriginalb7c56d9f0bb75b99472ae2845823c8e9; ?>
+<?php unset($__componentOriginalb7c56d9f0bb75b99472ae2845823c8e9); ?>
 <?php endif; ?>
-        <!--[if BLOCK]><![endif]--><?php $__errorArgs = ["{$list_string}.{$key}.{$field}.id"];
+        <!--[if BLOCK]><![endif]--><?php $__errorArgs = ["{$list_string}.{$key}.{$field}"];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -364,13 +294,22 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php $component = $__componentOriginald8ba2b4c22a13c55321e34443c386276; ?>
 <?php unset($__componentOriginald8ba2b4c22a13c55321e34443c386276); ?>
 <?php endif; ?>
+        <?php
+            $rawFieldValue = data_get($this->{$list_string}[$key] ?? [], $field);
+            $selectedId = method_exists($this, 'componentFieldValue')
+                ? $this->componentFieldValue($key, $field)
+                : (is_array($rawFieldValue) ? ($rawFieldValue['id'] ?? null) : $rawFieldValue);
+            $fieldLabel = method_exists($this, 'componentFieldLabel')
+                ? $this->componentFieldLabel($key, $field)
+                : (is_array($rawFieldValue)
+                    ? ($rawFieldValue['name'] ?? __('Structure'))
+                    : (! empty($rawFieldValue) ? $rawFieldValue : __('Structure')));
+        ?>
         <div class="relative w-full">
             <button @click="showStructures = !showStructures"
-                    class="appearance-none flex justify-center items-center w-full rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium"
+                    class="flex items-center justify-center w-full px-4 py-2 text-sm font-medium bg-gray-100 rounded-lg appearance-none"
             >
-                <?php echo e(array_key_exists($field,$this->{$list_string}[$key])
-                            ? $this->{$list_string}[$key][$field]['name']
-                            : __('Structure')); ?>
+                <?php echo e($fieldLabel); ?>
 
             </button>
             <!--[if BLOCK]><![endif]--><?php if(!$disabled): ?>
@@ -395,8 +334,9 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php $component->withAttributes([]); ?>
                     <?php
                         $wordSuffixService = new \App\Services\WordSuffixService();
+                        $mainStructureId = data_get($this->{$list_string}[$key] ?? [], 'structure_main_id');
                     ?>
-                    <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $model->where('parent_id',$this->{$list_string}[$key]['structure_main_id']['id']); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $model_item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $model->where('parent_id', $mainStructureId); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $model_item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <?php
                             $_level_name = strtolower((collect(\App\Enums\StructureEnum::cases())->pluck('name','value')[$model_item->level]));
 
@@ -406,14 +346,14 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                         ?>
                         <?php if (isset($component)) { $__componentOriginal91d6979f2b66c7dd48cd128b9dd939f7 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal91d6979f2b66c7dd48cd128b9dd939f7 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.radio-tree.item','data' => ['isCoded' => $isCoded,'listData' => $list_string,'field' => $field,'model' => $model_item,'key' => $key]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.radio-tree.item','data' => ['isCoded' => $isCoded,'listData' => $list_string,'field' => $field,'model' => $model_item,'key' => $key,'selectedId' => $selectedId]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('radio-tree.item'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['isCoded' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($isCoded),'listData' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($list_string),'field' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($field),'model' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($model_item),'key' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($key)]); ?>
+<?php $component->withAttributes(['isCoded' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($isCoded),'listData' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($list_string),'field' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($field),'model' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($model_item),'key' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($key),'selected-id' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($selectedId)]); ?>
                             <?php echo e($_select_value); ?>
 
                          <?php echo $__env->renderComponent(); ?>

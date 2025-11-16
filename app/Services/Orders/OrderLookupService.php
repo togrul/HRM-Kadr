@@ -59,7 +59,7 @@ class OrderLookupService
     public function mainStructures(): Collection
     {
         return Structure::query()
-            ->where('code', 0)
+            ->where('code', 1)
             ->orderBy('id')
             ->get(['id', 'name', 'code']);
     }

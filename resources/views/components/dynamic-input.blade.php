@@ -43,45 +43,30 @@
     </div>
 @elseif($input == 'select')
     <div class="flex flex-col">
-        @php
-            ${$selectedName."Name"} = array_key_exists($key,$list) ? $list[$key][$field]['name'] : '---';
-            ${$selectedName."Id"} = array_key_exists($key,$list) ? $list[$key][$field]['id'] : -1;
-        @endphp
-        <x-select-list class="w-full" :$disabled :$title mode="gray" :selected="${$selectedName.'Name'}" name="{{ $field }}Id">
+        <x-ui.select-dropdown
+            :label="$title"
+            placeholder="---"
+            mode="gray"
+            class="w-full"
+            wire:model.live="{{ $list_string }}.{{ $key }}.{{ $field }}"
+            :model="$model ?? []"
+            :disabled="$disabled"
+            :selected-label="method_exists($this, 'componentFieldLabel') ? $this->componentFieldLabel($key, $field) : null"
+        >
             @if(!empty($searchField))
-                <x-livewire-input  @click.stop="open = true" mode="gray" name="{{ $searchField }}" wire:model.live="{{ $searchField }}"></x-livewire-input>
+                <x-livewire-input
+                    mode="gray"
+                    name="{{ $searchField }}"
+                    wire:model.live="{{ $searchField }}"
+                    @click.stop="isOpen = true"
+                    x-on:input.stop="null"
+                    x-on:keyup.stop="null"
+                    x-on:keydown.stop="null"
+                    x-on:change.stop="null"
+                ></x-livewire-input>
             @endif
-
-            <x-select-list-item wire:click="setData('{{ $list_string }}','{{ $field }}',null,'---',null,{{ $key }})" :selected="'---' ==  ${$selectedName.'Name'}"
-                                wire:model='{{ $list_string }}.{{ $key }}.{{ $field }}.id'>
-                ---
-            </x-select-list-item>
-            @foreach($model as $model_item)
-                @php
-                    if(is_array($model_item))
-                    {
-                        $_id = $model_item['id'];
-                        $_optionValue = $model_item['name'];
-                        $_selected = $_id === ${$selectedName.'Id'};
-                    }
-                    else
-                    {
-                        $_id = $model_item->id;
-                        $_optionValue = ($model_item->fullname_max ?? $model_item->name);
-                        $_selected = $_id === ${$selectedName.'Id'};
-                    }
-                @endphp
-                <x-select-list-item wire:click="
-                                        setData('{{ $list_string }}','{{ $field }}',null,'{{ $_optionValue }}',{{ $_id }},{{ $key }});
-                                        $dispatch('dynamicSelectChanged',{value: {{ $_id  }},field: '{{ $field }}',rowKey: {{ $key }} })
-                                    "
-                                    :selected="$_selected"
-                                    wire:model='{{ $list_string }}.{{ $key }}.{{ $field }}.id'>
-                    {{ $_optionValue  }}
-                </x-select-list-item>
-            @endforeach
-        </x-select-list>
-        @error("{$list_string}.{$key}.{$field}.id")
+        </x-ui.select-dropdown>
+        @error("{$list_string}.{$key}.{$field}")
             <x-validation> {{ $message }} </x-validation>
         @enderror
     </div>
@@ -90,15 +75,22 @@
          x-data="{showStructures: false}"
     >
         <x-label for="order.order_no">{{ $title }}</x-label>
+        @php
+            $rawFieldValue = data_get($this->{$list_string}[$key] ?? [], $field);
+            $selectedId = method_exists($this, 'componentFieldValue')
+                ? $this->componentFieldValue($key, $field)
+                : (is_array($rawFieldValue) ? ($rawFieldValue['id'] ?? null) : $rawFieldValue);
+            $fieldLabel = method_exists($this, 'componentFieldLabel')
+                ? $this->componentFieldLabel($key, $field)
+                : (is_array($rawFieldValue)
+                    ? ($rawFieldValue['name'] ?? __('Structure'))
+                    : (! empty($rawFieldValue) ? $rawFieldValue : __('Structure')));
+        @endphp
         <div class="relative w-full">
             <button @click="showStructures = !showStructures"
-                    class="appearance-none flex justify-center items-center w-full rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium"
+                    class="flex items-center justify-center w-full px-4 py-2 text-sm font-medium bg-gray-100 rounded-lg appearance-none"
             >
-                {{
-                    array_key_exists($field,$this->{$list_string}[$key])
-                            ? $this->{$list_string}[$key][$field]['name']
-                            : __('Structure')
-                }}
+                {{ $fieldLabel }}
             </button>
             @if(!$disabled)
             <div x-show="showStructures"
@@ -113,8 +105,9 @@
                 <x-radio-tree.list>
                     @php
                         $wordSuffixService = new \App\Services\WordSuffixService();
+                        $mainStructureId = data_get($this->{$list_string}[$key] ?? [], 'structure_main_id');
                     @endphp
-                    @foreach($model->where('parent_id',$this->{$list_string}[$key]['structure_main_id']['id']) as $model_item)
+                    @foreach($model->where('parent_id', $mainStructureId) as $model_item)
                         @php
                             $_level_name = strtolower((collect(\App\Enums\StructureEnum::cases())->pluck('name','value')[$model_item->level]));
 
@@ -122,7 +115,7 @@
                                             ? $model_item->code."{$wordSuffixService->getNumberSuffix($model_item->code)} {$_level_name}"
                                             : $model_item->name;
                         @endphp
-                        <x-radio-tree.item :$isCoded :listData="$list_string" :$field :model="$model_item" :$key>
+                        <x-radio-tree.item :$isCoded :listData="$list_string" :$field :model="$model_item" :$key :selected-id="$selectedId">
                             {{ $_select_value }}
                         </x-radio-tree.item>
                     @endforeach

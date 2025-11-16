@@ -88,6 +88,26 @@
   - Rank add/edit flows now load category options via computed lists and bind `rank_category_id` as a scalar; the shared `includes/rank-action` partial uses `<x-ui.select-dropdown>` just like the candidate form.
 28. **Template Category Dropdown**
   - Template CRUD switched to scalar `order_category_id`, serves options via `orderCategoryOptions()` (with search support) from `DropdownConstructTrait`, and the Blade partial now uses `<x-ui.select-dropdown>` instead of legacy select lists.
+29. **Order Component Sync**
+  - Order CRUD no longer relies on `componentSelected` events for building `$selectedComponents`; each render hydrates the dynamic-field list directly from the cached component lookup, so the new dropdown bindings instantly reveal the correct fields (and stale selections are cleared) without extra roundtrips or JavaScript hooks.
+30. **Order Template Validation**
+  - Updated `OrderValidationTrait` to validate the scalar `order.order_type_id` introduced by the new dropdown; the template selector now passes validation once chosen instead of tripping on the old `{id,name}` structure.
+31. **Order Lookup Memoization**
+  - `resolveLookupCollections()` now memoizes template/component/personnel/structure/position lookups (keyed by search text & selected template) so Livewire renders reuse cached collections instead of hitting the DB each frame; the existing static cache still handles locale-invariant lists like ranks/main structures.
+  - Validation happens once per submission (`runOrderValidation()`), letting `prepareToCrud()` focus solely on shaping the payload and preventing redundant DB queries when complex dynamic rules are in play.
+32. **Order Persistence Services**
+  - Introduced `OrderComponentPersister` and `OrderPersonnelPersister`, lifted `attachComponents()`/`formatOrderPersonnels()` logic into them, and wired Add/Edit Order flows to call the services (including the vacancy import branch). Component and personnel sync are now isolated, reusable, and easier to profile/extend.
+33. **Business Trip Filters**
+  - BusinessTrips Livewire filter dropdowns now use the shared `<x-ui.select-dropdown>` with cached/computed option lists (structures + order types via `DropdownConstructTrait`); the screen no longer runs full-table queries on every render and the filter payload stores scalar IDs that map directly into `PersonnelBusinessTrip::scopeFilter`.
+34. **OrderCrud Structure Cache & Lean Lookups**
+  - `setStructure()` builds labels from an in-memory structure index (`structureLineageCache`) instead of hitting `structures` twice per click, and the candidate vacancy diff only runs for IG orders. Personnel lookups are skipped entirely for non-default blades, trimming the heaviest query during business-trip/vacation workflows.
+35. **Order Dynamic Inputs**
+  - Dynamic component fields (`personnel_id`, `rank_id`, `structure_main_id`, `position_id`, `transportation`) now bind scalar IDs directly to `<x-ui.select-dropdown>` options. Validation rules, vacancy diffs, and import services were updated to expect scalar payloads, `SelectListTrait` was dropped from `OrderCrud`, and attribute hydration rebuilds the human labels via cached option maps so no `{id,name}` arrays or `setData()` hooks remain.
+36. **Order Dropdown Stabilization**
+  - Reintroduced a single `updated()` interceptor in `OrderCrud` that funnels every `components.*` mutation through the same helper (so component pickers, personnel dropdowns, and date fields always run, even if Livewire skips `updatedComponents()`), while keeping the scalar-ID payloads and `setStructure()` reset logic intact—no more entangle crashes when dependent dropdowns change.
+  - `OrderValidationTrait` now validates `components.*.structure_id` directly, and `CheckVacancyService` extracts scalar IDs + cached structure/position labels before counting vacancies, so vacancy warnings still print human-readable text even though the Livewire payloads no longer ship `{id,name}` arrays.
+  - Added a reusable `componentFieldValue()` helper plus updated the shared `dynamic-input`/`radio-tree` blades to read scalar IDs, keeping the UI labels/highlights in sync without hitting the old “Cannot access offset of type …” errors when a dependent dropdown clears a relation.
+  - `<x-ui.select-dropdown>` accepts an optional `selectedLabel`, and `dynamic-input` now feeds it via `componentFieldLabel`; this keeps the chosen personnel/structure label visible even when the lookup list deliberately excludes already-picked rows, matching the legacy SelectList behaviour.
 
 ## Next Ideas
 - Verify Step 5–8 UX once more (manual or automated) to ensure draft detection still covers every branch.

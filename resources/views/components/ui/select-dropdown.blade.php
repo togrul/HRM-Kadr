@@ -4,6 +4,7 @@
   'mode' => 'default',
   'disabled' => false,
   'model' => [],  // [{id,label}]
+  'selectedLabel' => null,
 ])
 
 @php
@@ -25,6 +26,7 @@
     isOpen: false,
     currentValue: null,
     selectedCache: { id: null, label: '' },
+    initialSelectedLabel: @js($selectedLabel),
 
     resolve(t){
       if (!t) return t;
@@ -36,6 +38,12 @@
 
     init(){
       this.syncValue();
+      if (this.initialSelectedLabel && this.currentValue !== null) {
+        const found = this.cachedOptions.find(o => String(o.id) === String(this.currentValue));
+        if (!found) {
+          this.selectedCache = { id: this.currentValue, label: this.initialSelectedLabel };
+        }
+      }
       this.$watch(() => this.resolve(this.valueProxy), () => this.syncValue());
     },
 
@@ -68,6 +76,9 @@
       if (String(this.selectedCache.id) === String(this.currentValue) && this.selectedCache.label) {
         return this.selectedCache.label;
       }
+      if (this.initialSelectedLabel && this.currentValue !== null) {
+        return this.initialSelectedLabel;
+      }
       return this.placeholder;
     },
 
@@ -85,6 +96,7 @@
       } else {
         this.valueProxy = val;
       }
+      this.initialSelectedLabel = null;
       this.isOpen = false;
     },
 
@@ -124,7 +136,7 @@
 
       {{-- null/placeholder option --}}
       <li class="group relative py-2 pl-3 pr-9 cursor-pointer select-none hover:bg-blue-400 bg-neutral-50 rounded-lg"
-          @click="select(null)">
+          @click="select(null, placeholder)">
         <div class="flex items-center">
           <span class="block ml-3 truncate"> {{ $placeholder }} </span>
         </div>

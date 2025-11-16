@@ -6,7 +6,6 @@ use App\Livewire\Traits\OrderCrud;
 use App\Models\Order;
 use App\Models\OrderLog;
 use App\Models\Personnel;
-use App\Services\ImportCandidateToPersonnel;
 use App\Services\OrderConfirmedService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -81,10 +80,7 @@ class EditOrder extends Component
             'given_by_rank' => $orderData->given_by_rank,
             'status_id' => $orderData->status_id,
             'description' => $orderData->description,
-            'order_type_id' => [
-                'id' => $orderData->order_type_id,
-                'name' => $orderData->orderType->name,
-            ],
+            'order_type_id' => $orderData->order_type_id,
         ];
     }
 
@@ -127,10 +123,7 @@ class EditOrder extends Component
         $rowNumber = $attributes->row_number;
         $component = $this->orderModelData->components[$rowNumber];
 
-        $this->components[$rowNumber]['component_id'] = [
-            'id' => $component->id,
-            'name' => $component->name,
-        ];
+        $this->components[$rowNumber]['component_id'] = $component->id;
 
         foreach ($attributes->attributes as $ka => $attr) {
             $this->processAttribute($rowNumber, $ka, $attr);
@@ -198,11 +191,22 @@ class EditOrder extends Component
         }
         $isIdOrSpecial = ! empty($attr['id']) || $attr['value'] === '---';
 
-        return [
-            'columnName' => $isIdOrSpecial ? "{$key}_id" : $key,
-            'columnValue' => $isIdOrSpecial
+        $columnName = $isIdOrSpecial ? "{$key}_id" : $key;
+
+        if ($isIdOrSpecial && method_exists($this, 'isDropdownField') && $this->isDropdownField($columnName)) {
+            $columnValue = $attr['id'];
+            if ($columnValue && property_exists($this, 'componentOptionLabels')) {
+                $this->componentOptionLabels[$columnName][(int) $columnValue] = $attr['value'];
+            }
+        } else {
+            $columnValue = $isIdOrSpecial
                 ? ['id' => $attr['id'], 'name' => $attr['value']]
-                : $attr['value'],
+                : $attr['value'];
+        }
+
+        return [
+            'columnName' => $columnName,
+            'columnValue' => $columnValue,
         ];
     }
 
@@ -226,7 +230,7 @@ class EditOrder extends Component
     private function updateOrder(): void
     {
         $this->orderModelData->update([
-            'order_type_id' => $this->order['order_type_id']['id'],
+            'order_type_id' => $this->order['order_type_id'],
             'order_id' => $this->order['order_id'],
             'order_no' => $this->order['order_no'],
             'given_date' => Carbon::parse($this->order['given_date'])->format('Y-m-d'),
@@ -239,7 +243,7 @@ class EditOrder extends Component
 
     private function manageComponentsAndAttributes(array $data): void
     {
-        $this->attachComponents($this->orderModelData, $data['component_ids'], 'update');
+        $this->componentPersister->sync($this->orderModelData, $data['component_ids'], true);
 
         //get attributes and insert to attributes table
         $this->saveAttribute($this->orderModelData, $data['attributes'], 'update');
@@ -255,32 +259,25 @@ class EditOrder extends Component
 
     private function handleDefaultBladePersonnel(array $data): void
     {
-        if (! empty($data['vacancy_list'])) {
-            $tabel_no_list = $this->resolvePersonnelTabelNumbers($data['vacancy_list']);
-            $component_ids = collect($data['vacancy_list'])->pluck('component_id.id')->toArray();
-
-            $this->orderModelData->personnels()->attach(
-                $this->formatOrderPersonnels($tabel_no_list, $component_ids)
-            );
-        }
-    }
-
-    private function resolvePersonnelTabelNumbers($vacancyList): array
-    {
-        return $this->order['order_id'] == Order::IG_EMR
-            ? resolve(ImportCandidateToPersonnel::class)->handle($vacancyList, $this->order['status_id'])
-            : Personnel::find(collect($vacancyList)->pluck('personnel_id.id'))->pluck('tabel_no')->toArray();
+        $this->personnelPersister->attachFromVacancies(
+            $this->orderModelData,
+            $data['vacancy_list'],
+            $this->isCandidateOrder(),
+            $this->order['status_id']
+        );
     }
 
     private function handleSpecialBladePersonnel(array $data): void
     {
         $componentIds = collect($this->fillPersonnelsToComponents($this->orderModelData->order->blade))
             ->values()
-            ->pluck('component_id.id')
+            ->pluck('component_id')
             ->all();
 
-        $this->orderModelData->personnels()->sync(
-            $this->formatOrderPersonnels($this->selected_personnel_list['personnels'], $componentIds)
+        $this->personnelPersister->syncAssignments(
+            $this->orderModelData,
+            $this->selected_personnel_list['personnels'],
+            $componentIds
         );
     }
 }

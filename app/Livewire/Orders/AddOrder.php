@@ -25,7 +25,7 @@ class AddOrder extends Component
         [$_attributes,$_personnel_ids,$_component_ids] = [$data['attributes'], $data['personnel_ids'], $data['component_ids']];
         DB::transaction(function () use ($_attributes, $_personnel_ids, $_component_ids, $data) {
             $created = [
-                'order_type_id' => $this->order['order_type_id']['id'],
+                'order_type_id' => $this->order['order_type_id'],
                 'order_id' => $this->order['order_id'],
                 'order_no' => $this->order['order_no'],
                 'given_date' => Carbon::parse($this->order['given_date'])->format('Y-m-d'),
@@ -40,21 +40,18 @@ class AddOrder extends Component
             //create order logs
             $order_log = OrderLog::create($created);
 
-            // insert log components
-            $this->attachComponents($order_log, $_component_ids, 'create');
+            $this->componentPersister->sync($order_log, $_component_ids);
 
             // get attributes and insert to attributes table
             $this->saveAttribute($order_log, $_attributes, 'create');
 
             //insert order log personnels eger candidate dirse.Service cagir
-            $tabel_no_list = $this->order['order_id'] == Order::IG_EMR
+            $tabel_no_list = $this->isCandidateOrder()
                             ? (new ImportCandidateToPersonnel)->handle($this->components, $this->order['status_id'])
                             : $_personnel_ids;
 
             //insert
-            $_order_personnels = $this->formatOrderPersonnels($tabel_no_list, $_component_ids);
-
-            $order_log->personnels()->attach($_order_personnels);
+            $this->personnelPersister->attachAssignments($order_log, $tabel_no_list, $_component_ids);
             // vacation days leri bura gondermek ucun usul. ancaq vacation table i olanda.
             // shert qoymaq ayrica array gondermek.
             $extraData = match ($this->selectedBlade) {

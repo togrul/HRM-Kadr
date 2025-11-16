@@ -13,25 +13,27 @@
 
     <div class="grid grid-cols-1 gap-2 mt-4 sm:grid-cols-2">
         <div class="flex flex-col">
-            @php
-                $selectedName = array_key_exists('order_type_id',$order) ? $order['order_type_id']['name'] : '---';
-                $selectedId = array_key_exists('order_type_id',$order) ? $order['order_type_id']['id'] : -1;
-            @endphp
-            <x-select-list class="w-full" :title="__('Template')" mode="gray" :selected="$selectedName" name="templateId" :disabled="$orderModel">
-                <x-livewire-input  @click.stop="open = true" mode="gray" name="searchTemplate" wire:model.live="searchTemplate"></x-livewire-input>
-
-                <x-select-list-item wire:click="setData('order','order_type_id',null,'---',null);$dispatch('templateSelected',{value: -1})" :selected="'---' ==  $selectedName"
-                                    wire:model='order.order_type_id.id'>
-                    ---
-                </x-select-list-item>
-                @foreach($_templates as $_template)
-                    <x-select-list-item wire:click="setData('order','order_type_id',null,'{{ trim($_template->name) }}',{{ $_template->id }});$dispatch('templateSelected',{ value: {{  $_template->id }} })"
-                                        :selected="$_template->id === $selectedId" wire:model='order.order_type_id.id'>
-                        {{ $_template->name }}
-                    </x-select-list-item>
-                @endforeach
-            </x-select-list>
-            @error('order.order_type_id.id')
+            <x-ui.select-dropdown
+                :label="__('Template')"
+                placeholder="---"
+                mode="gray"
+                class="w-full"
+                wire:model.live="order.order_type_id"
+                :model="$this->templateOptions"
+                :disabled="$orderModel"
+            >
+                <x-livewire-input
+                    mode="gray"
+                    name="searchTemplate"
+                    wire:model.live="searchTemplate"
+                    @click.stop="isOpen = true"
+                    x-on:input.stop="null"
+                    x-on:keyup.stop="null"
+                    x-on:keydown.stop="null"
+                    x-on:change.stop="null"
+                ></x-livewire-input>
+            </x-ui.select-dropdown>
+            @error('order.order_type_id')
             <x-validation> {{ $message }} </x-validation>
             @enderror
         </div>
@@ -130,28 +132,20 @@
                 <div class="flex flex-col space-y-2">
                     <div class="flex flex-col w-1/2">
                         @php
-                            $componentName = array_key_exists($i,$components) ? $components[$i]['component_id']['name'] : '---';
-                            $componentId = array_key_exists($i,$components) ? $components[$i]['component_id']['id'] : -1;
+                            $componentOptions = $_components->map(fn ($component) => [
+                                'id' => $component->id,
+                                'label' => trim((string) $component->name),
+                            ])->values()->all();
                         @endphp
-                        <x-select-list class="w-full" :title="__('Select component')" mode="gray" :selected="$componentName" name="componentId">
-                            <x-select-list-item wire:click="setData('components','component_id',null,'---',null,{{ $i }});$dispatch('componentSelected')"
-                                                :selected="'---' ==  $componentName"
-                                                wire:model='components.component_id.id'>
-                                ---
-                            </x-select-list-item>
-                            @foreach($_components as $_component_item)
-                                <x-select-list-item wire:click="
-                                                        setData('components','component_id',null,'{{ $_component_item->name }}',{{ $_component_item->id }},{{ $i }});
-                                                        $dispatch('componentSelected',{ value: {{  $_component_item }}, rowKey: {{ $i }} })
-                                                    "
-                                                    :selected="$_component_item->id === $componentId"
-                                                    wire:model='components.component_id.id'
-                                >
-                                    {{ $_component_item->name }}
-                                </x-select-list-item>
-                            @endforeach
-                        </x-select-list>
-                        @error("components.{$i}.component_id.id")
+            <x-ui.select-dropdown
+                :label="__('Select component')"
+                placeholder="---"
+                mode="gray"
+                class="w-full"
+                wire:model.live="components.{{ $i }}.component_id"
+                :model="$componentOptions"
+            />
+                        @error("components.{$i}.component_id")
                             <x-validation> {{ $message }} </x-validation>
                         @enderror
                     </div>

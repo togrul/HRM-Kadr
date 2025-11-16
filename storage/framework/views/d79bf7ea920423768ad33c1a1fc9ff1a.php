@@ -5,6 +5,7 @@
   'mode' => 'default',
   'disabled' => false,
   'model' => [],  // [{id,label}]
+  'selectedLabel' => null,
 ]) as $__key => $__value) {
     $$__key = $$__key ?? $__value;
 } ?>
@@ -14,6 +15,7 @@
   'mode' => 'default',
   'disabled' => false,
   'model' => [],  // [{id,label}]
+  'selectedLabel' => null,
 ]); ?>
 <?php foreach (array_filter(([
   'label' => '',
@@ -21,6 +23,7 @@
   'mode' => 'default',
   'disabled' => false,
   'model' => [],  // [{id,label}]
+  'selectedLabel' => null,
 ]), 'is_string', ARRAY_FILTER_USE_KEY) as $__key => $__value) {
     $$__key = $$__key ?? $__value;
 } ?>
@@ -49,6 +52,7 @@
     isOpen: false,
     currentValue: null,
     selectedCache: { id: null, label: '' },
+    initialSelectedLabel: <?php echo \Illuminate\Support\Js::from($selectedLabel)->toHtml() ?>,
 
     resolve(t){
       if (!t) return t;
@@ -60,6 +64,12 @@
 
     init(){
       this.syncValue();
+      if (this.initialSelectedLabel && this.currentValue !== null) {
+        const found = this.cachedOptions.find(o => String(o.id) === String(this.currentValue));
+        if (!found) {
+          this.selectedCache = { id: this.currentValue, label: this.initialSelectedLabel };
+        }
+      }
       this.$watch(() => this.resolve(this.valueProxy), () => this.syncValue());
     },
 
@@ -92,6 +102,9 @@
       if (String(this.selectedCache.id) === String(this.currentValue) && this.selectedCache.label) {
         return this.selectedCache.label;
       }
+      if (this.initialSelectedLabel && this.currentValue !== null) {
+        return this.initialSelectedLabel;
+      }
       return this.placeholder;
     },
 
@@ -109,6 +122,7 @@
       } else {
         this.valueProxy = val;
       }
+      this.initialSelectedLabel = null;
       this.isOpen = false;
     },
 
@@ -168,7 +182,7 @@
 
       
       <li class="group relative py-2 pl-3 pr-9 cursor-pointer select-none hover:bg-blue-400 bg-neutral-50 rounded-lg"
-          @click="select(null)">
+          @click="select(null, placeholder)">
         <div class="flex items-center">
           <span class="block ml-3 truncate"> <?php echo e($placeholder); ?> </span>
         </div>

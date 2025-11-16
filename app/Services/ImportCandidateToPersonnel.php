@@ -13,15 +13,19 @@ class ImportCandidateToPersonnel
     {
         $tabel_no_list = [];
         foreach ($components as $component) {
-            $candidate = Candidate::find($component['personnel_id']['id']);
+            $candidate = Candidate::find($component['personnel_id']);
+            $structureId = is_array($component['structure_id'] ?? null)
+                ? $component['structure_id']['id']
+                : ($component['structure_id'] ?? null);
+            $positionId = $component['position_id'] ?? null;
 
             $personnel = Personnel::create([
                 'surname' => $candidate->surname,
                 'name' => $candidate->name,
                 'patronymic' => $candidate->patronymic,
                 'phone' => $candidate->phone,
-                'structure_id' => $component['structure_id']['id'],
-                'position_id' => $component['position_id']['id'],
+                'structure_id' => $structureId,
+                'position_id' => $positionId,
                 'gender' => $candidate->gender,
                 'referenced_by' => $candidate->presented_by,
                 'birthdate' => Carbon::parse($candidate->birthdate)->format('Y-m-d'),

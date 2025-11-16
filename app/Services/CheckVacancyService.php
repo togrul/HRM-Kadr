@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\Models\Position;
 use App\Models\StaffSchedule;
+use App\Models\Structure;
 
 class CheckVacancyService
 {
@@ -10,6 +12,28 @@ class CheckVacancyService
     {
         $result = [];
         $counts = collect();
+        $messages = [];
+
+        $structureIds = collect($components)
+            ->map(fn ($component) => $this->extractId($component, 'structure_id'))
+            ->filter()
+            ->unique()
+            ->values();
+
+        $positionIds = collect($components)
+            ->map(fn ($component) => $this->extractId($component, 'position_id'))
+            ->filter()
+            ->unique()
+            ->values();
+
+        $structureLabels = Structure::query()
+            ->whereIn('id', $structureIds)
+            ->pluck('name', 'id');
+
+        $positionLabels = Position::query()
+            ->whereIn('id', $positionIds)
+            ->pluck('name', 'id');
+
         $staffs = StaffSchedule::select('structure_id', 'position_id', 'vacant')
             ->where('structure_id', '>', 2)
             ->get()
@@ -19,12 +43,23 @@ class CheckVacancyService
             ->collapse();
 
         foreach ($components as $component) {
-            $_generated_key = "{$component['structure_id']['id']}-{$component['position_id']['id']}";
+            $structureId = $this->extractId($component, 'structure_id');
+            $positionId = $this->extractId($component, 'position_id');
+
+            if (! $structureId || ! $positionId) {
+                continue;
+            }
+
+            $_generated_key = "{$structureId}-{$positionId}";
 
             $counts[$_generated_key] = $counts->has($_generated_key) ? $counts[$_generated_key] + 1 : 1;
 
-            $messages[$_generated_key] =
-                "{$component['structure_id']['name']} {$component['position_id']['name']} vakansiyası üzrə yer yoxdur.";
+            $structureName = data_get($component, 'structure_id.name')
+                ?? $structureLabels->get($structureId, (string) $structureId);
+            $positionName = data_get($component, 'position_id.name')
+                ?? $positionLabels->get($positionId, (string) $positionId);
+
+            $messages[$_generated_key] = "{$structureName} {$positionName} vakansiyası üzrə yer yoxdur.";
         }
 
         foreach ($counts as $key => $count) {
@@ -41,5 +76,15 @@ class CheckVacancyService
         }
 
         return $result;
+    }
+
+    protected function extractId(array $component, string $field): ?int
+    {
+        $value = $component[$field] ?? null;
+        if (is_array($value)) {
+            $value = $value['id'] ?? null;
+        }
+
+        return $value !== null ? (int) $value : null;
     }
 }

@@ -9,10 +9,10 @@ trait BladeDataPreparation
     private function prepareDefaultBladeData(): array
     {
         $_attrData = $this->components;
-        $_personnel_ids_list = collect($_attrData)->pluck('personnel_id.id')->toArray();
+        $_personnel_ids_list = collect($_attrData)->pluck('personnel_id')->toArray();
         $_personnel_ids = Personnel::find($_personnel_ids_list)->pluck('tabel_no')->toArray();
 
-        $_component_ids = collect($_attrData)->pluck('component_id.id')->toArray();
+        $_component_ids = collect($_attrData)->pluck('component_id')->toArray();
         return $this->returnResponse($_attrData, $_personnel_ids, $_component_ids);
     }
 
@@ -23,7 +23,7 @@ trait BladeDataPreparation
         $_component_ids = collect($_attrData)
             ->unique('row')
             ->values()
-            ->pluck('component_id.id')
+            ->pluck('component_id')
             ->all();
 
         return $this->returnResponse($_attrData, $_personnel_ids, $_component_ids);
@@ -36,7 +36,7 @@ trait BladeDataPreparation
         $_component_ids = collect($_attrData)
             ->unique('days')
             ->values()
-            ->pluck('component_id.id')
+            ->pluck('component_id')
             ->all();
         return $this->returnResponse($_attrData, $_personnel_ids, $_component_ids);
     }
