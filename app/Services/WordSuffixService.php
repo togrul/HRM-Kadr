@@ -114,7 +114,7 @@ class WordSuffixService
         if (! $text) {
             return '';
         }
-
+        
         $append = $mainStructure ? 'nin' : ' sinin';
 
         $suffix = is_numeric($text)

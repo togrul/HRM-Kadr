@@ -18,9 +18,9 @@
 } ?>
 <?php unset($__defined_vars); ?>
 
-<nav class="items-center justify-between flex-col text-sm sm:flex">
+<nav class="flex-col items-center justify-between text-sm sm:flex">
      <ul class="<?php echo \Illuminate\Support\Arr::toCssClasses([
-          'flex py-1 px-2 border font-medium rounded-lg',
+          'flex py-[1px] px-[1px] border font-medium rounded-lg space-x-[1px]',
           'border-gray-200 bg-gray-100' => $mode == 'default',
           'border-slate-800 bg-slate-900' => $mode == 'dark'
      ]); ?>">

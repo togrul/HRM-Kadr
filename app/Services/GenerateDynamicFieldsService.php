@@ -12,7 +12,7 @@ class GenerateDynamicFieldsService
                 'title' => __('Select personnel'),
                 'model' => '_personnels',
                 'selectedName' => 'personnel',
-                'searchField' => 'searchPersonnel',
+                'searchField' => 'search.personnel',
             ],
             '$rank' => [
                 'field' => 'rank_id',
@@ -51,7 +51,7 @@ class GenerateDynamicFieldsService
                 'title' => __('Select structure'),
                 'model' => '_structures',
                 'selectedName' => 'structure',
-                'searchField' => 'searchStructure',
+                'searchField' => 'search.structure',
             ],
 
             '$position' => [
@@ -59,7 +59,7 @@ class GenerateDynamicFieldsService
                 'title' => __('Select position'),
                 'model' => '_positions',
                 'selectedName' => 'position',
-                'searchField' => 'searchPosition',
+                'searchField' => 'search.position',
             ],
 
             '$start_date' => [

@@ -10,11 +10,11 @@ trait OrderValidationTrait
     {
         return [
             'main' => [
-                'order.order_type_id' => 'required|int|exists:order_types,id',
-                'order.order_no' => 'required|min:3|unique:order_logs,order_no'.(! empty($this->orderModel) ? ','.$this->orderModelData->id : ''),
-                'order.given_date' => 'required',
-                'order.status_id' => 'required|exists:order_statuses,id',
-                'order.description.description' => $this->isForeignBusinessTrip() ? 'required|min:2' : '',
+                'orderForm.order_type_id' => 'required|int|exists:order_types,id',
+                'orderForm.order_no' => 'required|min:3|unique:order_logs,order_no'.(! empty($this->orderModel) ? ','.$this->orderModelData->id : ''),
+                'orderForm.given_date' => 'required',
+                'orderForm.status_id' => 'required|exists:order_statuses,id',
+                'orderForm.description.description' => $this->isForeignBusinessTrip() ? 'required|min:2' : '',
             ],
             'dynamic' => [
                 'components.*.component_id' => 'required|int|exists:components,id',
@@ -42,11 +42,11 @@ trait OrderValidationTrait
     protected function validationAttributes()
     {
         return [
-            'order.order_type_id' => __('Template'),
-            'order.order_no' => __('Order number'),
-            'order.given_date' => __('Given date'),
-            'order.status_id' => __('Status'),
-            'order.description.description' => __('Description'),
+            'orderForm.order_type_id' => __('Template'),
+            'orderForm.order_no' => __('Order number'),
+            'orderForm.given_date' => __('Given date'),
+            'orderForm.status_id' => __('Status'),
+            'orderForm.description.description' => __('Description'),
             'components.*.component_id' => __('Component'),
             'components.*.personnel_id' => __('Personnel'),
             'components.*.rank_id' => __('Rank'),

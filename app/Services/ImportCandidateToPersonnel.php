@@ -14,10 +14,8 @@ class ImportCandidateToPersonnel
         $tabel_no_list = [];
         foreach ($components as $component) {
             $candidate = Candidate::find($component['personnel_id']);
-            $structureId = is_array($component['structure_id'] ?? null)
-                ? $component['structure_id']['id']
-                : ($component['structure_id'] ?? null);
-            $positionId = $component['position_id'] ?? null;
+            $structureId = $this->valueAsInt($component, 'structure_id');
+            $positionId = $this->valueAsInt($component, 'position_id');
 
             $personnel = Personnel::create([
                 'surname' => $candidate->surname,
@@ -45,5 +43,15 @@ class ImportCandidateToPersonnel
         }
 
         return $tabel_no_list;
+    }
+
+    protected function valueAsInt(array $component, string $field): ?int
+    {
+        $value = $component[$field] ?? null;
+        if (is_array($value)) {
+            $value = $value['id'] ?? null;
+        }
+
+        return $value !== null ? (int) $value : null;
     }
 }

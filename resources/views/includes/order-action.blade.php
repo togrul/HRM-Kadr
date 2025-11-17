@@ -18,14 +18,14 @@
                 placeholder="---"
                 mode="gray"
                 class="w-full"
-                wire:model.live="order.order_type_id"
+                wire:model.live="orderForm.order_type_id"
                 :model="$this->templateOptions"
                 :disabled="$orderModel"
             >
                 <x-livewire-input
                     mode="gray"
-                    name="searchTemplate"
-                    wire:model.live="searchTemplate"
+                    name="search.template"
+                    wire:model.live="search.template"
                     @click.stop="isOpen = true"
                     x-on:input.stop="null"
                     x-on:keyup.stop="null"
@@ -33,15 +33,15 @@
                     x-on:change.stop="null"
                 ></x-livewire-input>
             </x-ui.select-dropdown>
-            @error('order.order_type_id')
+            @error('orderForm.order_type_id')
             <x-validation> {{ $message }} </x-validation>
             @enderror
         </div>
 
         <div class="">
-            <x-label for="order.order_no">{{ __('Order #') }}</x-label>
-            <x-livewire-input mode="gray"  name="order.order_no" wire:model="order.order_no"></x-livewire-input>
-            @error('order.order_no')
+            <x-label for="orderForm.order_no">{{ __('Order #') }}</x-label>
+            <x-livewire-input mode="gray"  name="orderForm.order_no" wire:model="orderForm.order_no"></x-livewire-input>
+            @error('orderForm.order_no')
             <x-validation> {{ $message }} </x-validation>
             @enderror
         </div>
@@ -49,23 +49,23 @@
 
     <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
         <div class="">
-            <x-label for="order.given_by">{{ __('Given by') }}</x-label>
-            <x-livewire-input mode="gray" disabled="true" name="order.given_by" wire:model="order.given_by"></x-livewire-input>
+            <x-label for="orderForm.given_by">{{ __('Given by') }}</x-label>
+            <x-livewire-input mode="gray" disabled="true" name="orderForm.given_by" wire:model="orderForm.given_by"></x-livewire-input>
         </div>
         <div class="">
-            <x-label for="order.given_by_rank">{{ __('Rank') }}</x-label>
-            <x-livewire-input mode="gray"  name="order.given_by_rank" wire:model="order.given_by_rank"></x-livewire-input>
+            <x-label for="orderForm.given_by_rank">{{ __('Rank') }}</x-label>
+            <x-livewire-input mode="gray"  name="orderForm.given_by_rank" wire:model="orderForm.given_by_rank"></x-livewire-input>
         </div>
         <div class="">
-            <x-label for="order.given_date">{{ __('Given date') }}</x-label>
-            <x-pikaday-input mode="gray" name="order.given_date" format="Y-MM-DD" wire:model.live="order.given_date">
+            <x-label for="orderForm.given_date">{{ __('Given date') }}</x-label>
+            <x-pikaday-input mode="gray" name="orderForm.given_date" format="Y-MM-DD" wire:model.live="orderForm.given_date">
                 <x-slot name="script">
                     $el.onchange = function () {
-                    @this.set('order.given_date', $el.value);
+                    @this.set('orderForm.given_date', $el.value);
                     }
                 </x-slot>
             </x-pikaday-input>
-            @error('order.given_date')
+            @error('orderForm.given_date')
                 <x-validation> {{ $message }} </x-validation>
             @enderror
         </div>
@@ -74,43 +74,43 @@
     @if($selectedBlade === \App\Models\Order::BLADE_BUSINESS_TRIP)
         <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3">
             <div class="flex flex-col">
-                <x-label for="order.description.start_date">{{ __('Start date') }}</x-label>
-                <x-pikaday-input mode="gray" name="order.description.start_date" format="Y-MM-DD" wire:model.live="order.description.start_date">
+                <x-label for="orderForm.description.start_date">{{ __('Start date') }}</x-label>
+                <x-pikaday-input mode="gray" name="orderForm.description.start_date" format="Y-MM-DD" wire:model.live="orderForm.description.start_date">
                     <x-slot name="script">
                         $el.onchange = function () {
-                        @this.set('order.description.start_date', $el.value);
+                        @this.set('orderForm.description.start_date', $el.value);
                         }
                     </x-slot>
                 </x-pikaday-input>
-                @error("order.description.start_date")
+                @error("orderForm.description.start_date")
                     <x-validation> {{ $message }} </x-validation>
                 @enderror
             </div>
             <div class="flex flex-col">
-                <x-label for="order.description.end_date">{{ __('End date') }}</x-label>
-                <x-pikaday-input mode="gray" name="order.description.end_date" format="Y-MM-DD" wire:model.live="order.description.end_date">
+                <x-label for="orderForm.description.end_date">{{ __('End date') }}</x-label>
+                <x-pikaday-input mode="gray" name="orderForm.description.end_date" format="Y-MM-DD" wire:model.live="orderForm.description.end_date">
                     <x-slot name="script">
                         $el.onchange = function () {
-                        @this.set('order.description.end_date', $el.value);
+                        @this.set('orderForm.description.end_date', $el.value);
                         }
                     </x-slot>
                 </x-pikaday-input>
-                @error("order.description.end_date")
+                @error("orderForm.description.end_date")
                     <x-validation> {{ $message }} </x-validation>
                 @enderror
             </div>
             <div class="">
-                <x-label for="order.description.location">{{ __('Location') }}</x-label>
-                <x-livewire-input mode="gray"  name="order.description.location" wire:model="order.description.location"></x-livewire-input>
-                @error('order.description.location')
+                <x-label for="orderForm.description.location">{{ __('Location') }}</x-label>
+                <x-livewire-input mode="gray"  name="orderForm.description.location" wire:model="orderForm.description.location"></x-livewire-input>
+                @error('orderForm.description.location')
                     <x-validation> {{ $message }} </x-validation>
                 @enderror
             </div>
             @if($selectedTemplate == \App\Models\PersonnelBusinessTrip::FOREIGN_BUSINESS_TRIP)
                 <div class="flex flex-col sm:col-span-2 md:col-span-3">
-                    <x-label for="order.description.description">{{ __('Title') }}</x-label>
-                    <x-textarea mode="gray" placeholder=""  name="order.description.description" wire:model="order.description.description"></x-textarea>
-                    @error('order.description.description')
+                    <x-label for="orderForm.description.description">{{ __('Title') }}</x-label>
+                    <x-textarea mode="gray" placeholder=""  name="orderForm.description.description" wire:model="orderForm.description.description"></x-textarea>
+                    @error('orderForm.description.description')
                     <x-validation> {{ $message }} </x-validation>
                     @enderror
                 </div>
@@ -170,12 +170,12 @@
             <div class="flex flex-row">
                 @foreach($this->statuses as $_status)
                     <label class="inline-flex items-center px-2 py-2 bg-gray-100 rounded shadow-sm">
-                        <input type="radio" class="form-radio" name="order.status_id" wire:model="order.status_id" value={{ $_status->id }}>
+                        <input type="radio" class="form-radio" name="orderForm.status_id" wire:model="orderForm.status_id" value={{ $_status->id }}>
                         <span class="ml-2 text-sm font-normal">{{ $_status->name }}</span>
                     </label>
                 @endforeach
             </div>
-            @error('order.status_id')
+            @error('orderForm.status_id')
                 <x-validation> {{ $message }} </x-validation>
             @enderror
         </div>

@@ -35,6 +35,18 @@ trait SelectListTrait
             return;
         }
 
+        if (property_exists($this, 'search') && isset($this->search)) {
+            if (property_exists($this->search, 'personnel')) {
+                $this->search->personnel = '';
+            }
+            if (property_exists($this->search, 'structure')) {
+                $this->search->structure = '';
+            }
+            if (property_exists($this->search, 'position')) {
+                $this->search->position = '';
+            }
+        }
+
         if (property_exists($this, 'searchPersonnel')) {
             $this->searchPersonnel = '';
         }

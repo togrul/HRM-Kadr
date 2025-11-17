@@ -74,7 +74,7 @@
     <div class="flex flex-col space-y-1"
          x-data="{showStructures: false}"
     >
-        <x-label for="order.order_no">{{ $title }}</x-label>
+        <x-label for="orderForm.order_no">{{ $title }}</x-label>
         @php
             $rawFieldValue = data_get($this->{$list_string}[$key] ?? [], $field);
             $selectedId = method_exists($this, 'componentFieldValue')

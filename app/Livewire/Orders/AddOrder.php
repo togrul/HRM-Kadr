@@ -14,7 +14,8 @@ use Livewire\Component;
 
 class AddOrder extends Component
 {
-    use AuthorizesRequests,OrderCrud;
+    use AuthorizesRequests;
+    use OrderCrud;
 
     public function store()
     {
@@ -24,18 +25,20 @@ class AddOrder extends Component
         }
         [$_attributes,$_personnel_ids,$_component_ids] = [$data['attributes'], $data['personnel_ids'], $data['component_ids']];
         DB::transaction(function () use ($_attributes, $_personnel_ids, $_component_ids, $data) {
+            $payload = $this->orderForm->payload();
+
             $created = [
-                'order_type_id' => $this->order['order_type_id'],
-                'order_id' => $this->order['order_id'],
-                'order_no' => $this->order['order_no'],
-                'given_date' => Carbon::parse($this->order['given_date'])->format('Y-m-d'),
-                'given_by' => $this->order['given_by'],
-                'given_by_rank' => $this->order['given_by_rank'],
-                'status_id' => $this->order['status_id'],
+                'order_type_id' => $payload['order_type_id'],
+                'order_id' => $payload['order_id'],
+                'order_no' => $payload['order_no'],
+                'given_date' => Carbon::parse($payload['given_date'])->format('Y-m-d'),
+                'given_by' => $payload['given_by'],
+                'given_by_rank' => $payload['given_by_rank'],
+                'status_id' => $payload['status_id'],
             ];
 
             if ($this->selectedBlade == Order::BLADE_BUSINESS_TRIP) {
-                $created['description'] = $this->order['description'];
+                $created['description'] = $payload['description'];
             }
             //create order logs
             $order_log = OrderLog::create($created);
@@ -47,7 +50,7 @@ class AddOrder extends Component
 
             //insert order log personnels eger candidate dirse.Service cagir
             $tabel_no_list = $this->isCandidateOrder()
-                            ? (new ImportCandidateToPersonnel)->handle($this->components, $this->order['status_id'])
+                            ? (new ImportCandidateToPersonnel)->handle($this->components, $payload['status_id'])
                             : $_personnel_ids;
 
             //insert

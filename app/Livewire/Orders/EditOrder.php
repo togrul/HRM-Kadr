@@ -14,7 +14,8 @@ use Livewire\Component;
 
 class EditOrder extends Component
 {
-    use AuthorizesRequests,OrderCrud;
+    use AuthorizesRequests;
+    use OrderCrud;
 
     public $orderModelData;
 
@@ -71,17 +72,7 @@ class EditOrder extends Component
 
     private function setOrderBasicData(): void
     {
-        $orderData = $this->orderModelData;
-        $this->order = [
-            'order_id' => $orderData->order_id,
-            'order_no' => $orderData->order_no,
-            'given_date' => Carbon::parse($orderData->given_date)->format(self::DATE_FORMAT),
-            'given_by' => $orderData->given_by,
-            'given_by_rank' => $orderData->given_by_rank,
-            'status_id' => $orderData->status_id,
-            'description' => $orderData->description,
-            'order_type_id' => $orderData->order_type_id,
-        ];
+        $this->orderForm->fillFromModel($this->orderModelData);
     }
 
     private function setComponentData(): void
@@ -199,9 +190,7 @@ class EditOrder extends Component
                 $this->componentOptionLabels[$columnName][(int) $columnValue] = $attr['value'];
             }
         } else {
-            $columnValue = $isIdOrSpecial
-                ? ['id' => $attr['id'], 'name' => $attr['value']]
-                : $attr['value'];
+            $columnValue = $attr['value'];
         }
 
         return [
@@ -229,15 +218,17 @@ class EditOrder extends Component
 
     private function updateOrder(): void
     {
+        $payload = $this->orderForm->payload();
+
         $this->orderModelData->update([
-            'order_type_id' => $this->order['order_type_id'],
-            'order_id' => $this->order['order_id'],
-            'order_no' => $this->order['order_no'],
-            'given_date' => Carbon::parse($this->order['given_date'])->format('Y-m-d'),
-            'given_by' => $this->order['given_by'],
-            'given_by_rank' => $this->order['given_by_rank'],
-            'description' => $this->order['description'],
-            'status_id' => $this->order['status_id'],
+            'order_type_id' => $payload['order_type_id'],
+            'order_id' => $payload['order_id'],
+            'order_no' => $payload['order_no'],
+            'given_date' => Carbon::parse($payload['given_date'])->format('Y-m-d'),
+            'given_by' => $payload['given_by'],
+            'given_by_rank' => $payload['given_by_rank'],
+            'description' => $payload['description'],
+            'status_id' => $payload['status_id'],
         ]);
     }
 
@@ -263,7 +254,7 @@ class EditOrder extends Component
             $this->orderModelData,
             $data['vacancy_list'],
             $this->isCandidateOrder(),
-            $this->order['status_id']
+            $payload['status_id']
         );
     }
 
