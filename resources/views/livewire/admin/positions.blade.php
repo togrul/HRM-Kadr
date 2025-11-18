@@ -44,23 +44,29 @@
                     @enderror
                 </div>
                 <div class="flex flex-col">
-                    @php
-                        $selectedName = array_key_exists('rank_category_id',$form) ? $form['rank_category_id']['name'] : '---';
-                        $selectedId = array_key_exists('rank_category_id',$form) ? $form['rank_category_id']['id'] : -1;
-                    @endphp
-                    <x-select-list class="w-full" mode="default" :title="__('Rank category')" :selected="$selectedName" name="rankCategoryId">
-                        <x-select-list-item wire:click.prevent="setData('form','rank_category_id',null,'---',null)"
-                                            :selected="'---' ==  $selectedName"
-                                            wire:model='form.rank_category_id.id'>
-                            ---
-                        </x-select-list-item>
-                        @foreach($this->rankCategory as $category)
-                            <x-select-list-item wire:click.prevent="setData('form','rank_category_id',null,'{{ $category->name }}',{{ $category->id }})"
-                                                :selected="$category->id === $selectedId" wire:model='form.rank_category_id.id'>
-                                {{ $category->name }}
-                            </x-select-list-item>
-                        @endforeach
-                    </x-select-list>
+                    <x-ui.select-dropdown
+                        :label="__('Rank category')"
+                        placeholder="---"
+                        mode="default"
+                        class="w-full"
+                        wire:model.live="form.rank_category_id"
+                        :model="$this->rankCategoryOptions()"
+                    >
+                        <x-livewire-input
+                            mode="gray"
+                            name="searchRankCategory"
+                            wire:model.live.debounce.300ms="searchRankCategory"
+                            placeholder="{{ __('Search...') }}"
+                            @click.stop="isOpen = true"
+                            x-on:input.stop="null"
+                            x-on:keyup.stop="null"
+                            x-on:keydown.stop="null"
+                            x-on:change.stop="null"
+                        ></x-livewire-input>
+                    </x-ui.select-dropdown>
+                    @error('form.rank_category_id')
+                    <x-validation> {{ $message }} </x-validation>
+                    @enderror
                 </div>
                 <div class="flex flex-col">
                     <x-label for="form.name">{{ __('Name') }}</x-label>

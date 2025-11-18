@@ -4,7 +4,9 @@ namespace App\Providers;
 
 use App\Models\Menu;
 use App\Models\Setting;
+use App\Models\Structure;
 use App\Observers\SettingsObserver;
+use App\Observers\StructureObserver;
 use App\Services\NumberToWordsService;
 use App\Services\StructureService;
 use Illuminate\Database\Eloquent\Builder;
@@ -45,6 +47,7 @@ class AppServiceProvider extends ServiceProvider
     private function registerObservers(): void
     {
         Setting::observe(SettingsObserver::class);
+        Structure::observe(StructureObserver::class);
     }
 
     private function registerViewComposers(): void
@@ -73,16 +76,6 @@ class AppServiceProvider extends ServiceProvider
      */
     private function registerMacros(): void
     {
-        // Builder::macro('accessible', function () {
-        //     if (auth()->check()) {
-        //         $accessibleIds = resolve(StructureService::class)->getAccessibleStructures();
-
-        //         return $this->whereIn('id', $accessibleIds);
-        //     }
-
-        //     return $this;
-        // });
-
         Builder::macro('accessible', function (?User $user = null) {
             $ids = resolve(StructureService::class)->getAccessibleStructures($user);
             return empty($ids) ? $this : $this->whereIn('id', $ids);

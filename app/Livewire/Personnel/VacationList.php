@@ -3,7 +3,6 @@
 namespace App\Livewire\Personnel;
 
 use App\Helpers\UsefulHelpers;
-use App\Livewire\Traits\SelectListTrait;
 use App\Models\Personnel;
 use App\Models\Vacation;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -15,7 +14,6 @@ use Livewire\Component;
 class VacationList extends Component
 {
     use AuthorizesRequests;
-    use SelectListTrait;
 
     public string $title;
 
@@ -24,7 +22,7 @@ class VacationList extends Component
 
     public $personnelModelData;
 
-    public array $month = [];
+    public ?int $reservedMonthId = null;
 
     public Vacation $selectedVacation;
 
@@ -33,18 +31,13 @@ class VacationList extends Component
     public function updateMonth(Vacation $vacation): void
     {
         $this->selectedVacation = $vacation;
-        $this->month['reserved_date_month'] = $vacation->reserved_date_month
-            ? [
-                'id' => $vacation->reserved_date_month,
-                'name' => array_search($vacation->reserved_date_month, $this->months),
-            ]
-            : ['id' => null, 'name' => '---'];
+        $this->reservedMonthId = $vacation->reserved_date_month;
     }
 
     public function setMonth(): void
     {
         $this->selectedVacation->update([
-            'reserved_date_month' => $this->month['reserved_date_month']['id'] ?? null,
+            'reserved_date_month' => $this->reservedMonthId ?: null,
         ]);
         $this->resetVacation();
         $this->dispatch('vacation-updated', __('Vacation is updated!'));
@@ -66,7 +59,7 @@ class VacationList extends Component
 
     public function resetVacation(): void
     {
-        $this->reset('selectedVacation');
+        $this->reset('selectedVacation', 'reservedMonthId');
     }
 
     public function mount()
@@ -84,5 +77,13 @@ class VacationList extends Component
     public function render()
     {
         return view('livewire.personnel.vacation-list');
+    }
+
+    public function monthOptions(): array
+    {
+        return collect($this->months)
+            ->map(fn ($value, $label) => ['id' => $value, 'label' => $label])
+            ->values()
+            ->all();
     }
 }

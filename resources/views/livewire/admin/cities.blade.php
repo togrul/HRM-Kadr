@@ -49,47 +49,54 @@
                     @enderror
                 </div>
                 <div class="flex flex-col">
-                    @php
-                        $key = $model ? 'title' : 'name';
-                        $selectedName = array_key_exists('country_id',$form) ? $form['country_id'][$key] : '---';
-                        $selectedId = array_key_exists('country_id',$form) ? $form['country_id']['id'] : -1;
-                    @endphp
-                    <x-select-list class="w-full" :title="__('Country')" mode="default" :selected="$selectedName" name="awardTypeId">
-                        <x-livewire-input @click.stop="open = true" mode="gray" name="searchCountry" wire:model.live.debounce.500ms="searchCountry"></x-livewire-input>
-                        <x-select-list-item wire:click="setData('form','country_id',title,'---',null)" :selected="'---' ==  $selectedName"
-                                            wire:model='form.country_id.id'>
-                            ---
-                        </x-select-list-item>
-                        @foreach($countries as $country)
-                            <x-select-list-item wire:click="setData('form','country_id',null,'{{ trim($country->title) }}',{{ $country->id }})"
-                                                :selected="$country->id === $selectedId" wire:model='form.country_id.id'>
-                                {{ $country->title }}
-                            </x-select-list-item>
-                        @endforeach
-                    </x-select-list>
-                    @error('form.country_id.id')
+                    <x-ui.select-dropdown
+                        :label="__('Country')"
+                        placeholder="---"
+                        mode="default"
+                        class="w-full"
+                        wire:model.live="form.country_id"
+                        :model="$this->countryOptions()"
+                    >
+                        <x-livewire-input
+                            mode="gray"
+                            name="searchCountry"
+                            wire:model.live.debounce.300ms="searchCountry"
+                            placeholder="{{ __('Search...') }}"
+                            @click.stop="isOpen = true"
+                            x-on:input.stop="null"
+                            x-on:keyup.stop="null"
+                            x-on:keydown.stop="null"
+                            x-on:change.stop="null"
+                        ></x-livewire-input>
+                    </x-ui.select-dropdown>
+                    @error('form.country_id')
                     <x-validation> {{ $message }} </x-validation>
                     @enderror
                 </div>
                 <div class="flex flex-col">
-                    @php
-                        $parent = $form['parent_id'] ?? null;
-                        $selectedNameParent = $parent['name'] ?? '---';
-                        $selectedIdParent = $parent['id'] ?? -1;
-                    @endphp
-                    <x-select-list class="w-full" :title="__('Parent')" mode="default" :selected="$selectedNameParent" name="selectedIdParent">
-                        <x-livewire-input @click.stop="open = true" mode="gray" name="searchParent"  wire:model.live.debounce.500ms="searchParent"></x-livewire-input>
-                        <x-select-list-item wire:click="setData('form','parent_id',null,'---',null)" :selected="'---' ==  $selectedNameParent"
-                                            wire:model='form.parent_id.id'>
-                            ---
-                        </x-select-list-item>
-                        @foreach($all_cities as $cityListData)
-                            <x-select-list-item wire:click="setData('form','parent_id',null,'{{ $cityListData->name }}',{{ $cityListData->id }})"
-                                                :selected="$cityListData->id === $selectedIdParent" wire:model='form.parent_id.id'>
-                                {{ $cityListData->name }}
-                            </x-select-list-item>
-                        @endforeach
-                    </x-select-list>
+                    <x-ui.select-dropdown
+                        :label="__('Parent')"
+                        placeholder="---"
+                        mode="default"
+                        class="w-full"
+                        wire:model.live="form.parent_id"
+                        :model="$this->parentCityOptions()"
+                    >
+                        <x-livewire-input
+                            mode="gray"
+                            name="searchParent"
+                            wire:model.live.debounce.300ms="searchParent"
+                            placeholder="{{ __('Search...') }}"
+                            @click.stop="isOpen = true"
+                            x-on:input.stop="null"
+                            x-on:keyup.stop="null"
+                            x-on:keydown.stop="null"
+                            x-on:change.stop="null"
+                        ></x-livewire-input>
+                    </x-ui.select-dropdown>
+                    @error('form.parent_id')
+                    <x-validation> {{ $message }} </x-validation>
+                    @enderror
                 </div>
                 <div class="flex flex-col">
                     <x-label for="form.name">{{ __('Name') }}</x-label>
@@ -170,4 +177,3 @@
     </div>
 </div>
 @include('includes.sweetalert-push')
-

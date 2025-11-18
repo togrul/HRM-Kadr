@@ -4,7 +4,7 @@ namespace App\Livewire\Admin;
 
 use App\Livewire\Traits\Admin\AdminCrudTrait;
 use App\Livewire\Traits\Admin\CallSwalTrait;
-use App\Livewire\Traits\SelectListTrait;
+use App\Livewire\Traits\DropdownConstructTrait;
 use App\Models\City;
 use App\Models\CountryTranslation;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -18,18 +18,19 @@ class Cities extends Component
     use AdminCrudTrait;
     use AuthorizesRequests;
     use CallSwalTrait;
-    use SelectListTrait;
+    use DropdownConstructTrait;
     use WithPagination;
 
-    public string $searchCountry;
+    public string $searchCountry = '';
 
-    public string $searchParent;
+    public string $searchParent = '';
 
     public function rules(): array
     {
         return [
             'form.name' => 'required|string|min:2',
-            'form.country_id.id' => 'required|integer|min:1|exists:countries,id',
+            'form.country_id' => 'required|integer|min:1|exists:countries,id',
+            'form.parent_id' => 'nullable|integer|exists:cities,id',
         ];
     }
 
@@ -37,7 +38,18 @@ class Cities extends Component
     {
         return [
             'form.name' => __('Name'),
-            'form.country_id.id' => __('Country'),
+            'form.country_id' => __('Country'),
+            'form.parent_id' => __('Parent'),
+        ];
+    }
+
+    protected function formDefaults(): array
+    {
+        return [
+            'id' => null,
+            'name' => '',
+            'country_id' => null,
+            'parent_id' => null,
         ];
     }
 
@@ -47,20 +59,13 @@ class Cities extends Component
             ? City::with(['country.currentCountryTranslations:country_id,id,title', 'parent:id,name'])->findOrFail($id)
             : null;
 
-        if ($this->model) {
-            $this->form = $this->model->toArray();
-            unset($this->form['country']['current_country_translations']['country_id']);
-            $this->form['country_id'] = data_get($this->form, 'country.current_country_translations');
-//            $this->form['country_id'] = fluent($this->form)->get('country.current_country_translations');
-            $this->form['parent_id'] = $this->form['parent'] ?? [
-                'id' => null,
-                'name' => '---',
-            ];
+        $this->form = $this->formDefaults();
 
-            unset($this->form['country']);
-            unset($this->form['parent']);
-        } else {
-            $this->form = [];
+        if ($this->model) {
+            $this->form['id'] = $this->model->id;
+            $this->form['name'] = $this->model->name;
+            $this->form['country_id'] = $this->model->country_id;
+            $this->form['parent_id'] = $this->model->parent_id;
         }
 
         $this->isAdded = true;
@@ -79,11 +84,9 @@ class Cities extends Component
 
     public function store(): void
     {
-
         $this->validate();
 
-        $this->form['country_id'] = $this->form['country_id']['id'];
-        $this->form['parent_id'] = array_key_exists('parent_id', $this->form) ? $this->form['parent_id']['id'] : null;
+        $this->form['parent_id'] = $this->form['parent_id'] ?? null;
 
         $this->model
             ? $this->model->update($this->form)
@@ -98,21 +101,39 @@ class Cities extends Component
 
     public function render()
     {
-        $countries = CountryTranslation::query()
-            ->when(! empty($this->searchCountry), function ($q) {
-                $q->where('title', 'LIKE', "%$this->searchCountry%");
-            })
-            ->where('locale', config('app.locale'))
-            ->get();
-
-        $all_cities = City::query()
-            ->when(! empty($this->searchParent), function ($query) {
-                $query->where('name', 'LIKE', "%$this->searchParent%");
-            })
-            ->get();
-
         $cities = City::with('country.currentCountryTranslations')->paginate(20);
 
-        return view('livewire.admin.cities', compact('cities', 'all_cities', 'countries'));
+        return view('livewire.admin.cities', compact('cities'));
+    }
+
+    public function countryOptions(): array
+    {
+        $base = CountryTranslation::query()
+            ->selectRaw('country_id as id, title as label')
+            ->where('locale', config('app.locale'))
+            ->orderBy('title');
+
+        return $this->optionsWithSelected(
+            base: $base,
+            searchCol: 'title',
+            searchTerm: $this->dropdownSearch('searchCountry'),
+            selectedId: data_get($this->form, 'country_id'),
+            limit: 100
+        );
+    }
+
+    public function parentCityOptions(): array
+    {
+        $base = City::query()
+            ->select('id', 'name as label')
+            ->orderBy('name');
+
+        return $this->optionsWithSelected(
+            base: $base,
+            searchCol: 'name',
+            searchTerm: $this->dropdownSearch('searchParent'),
+            selectedId: data_get($this->form, 'parent_id'),
+            limit: 100
+        );
     }
 }

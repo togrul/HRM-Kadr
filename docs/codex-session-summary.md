@@ -149,6 +149,13 @@
 47. **Staff Schedule Auto Fill Balancing**
   - `StaffCrud` now listens to `staff.*` updates the modern way (Livewire `updatedStaff`) so selecting a structure and/or position immediately recalculates the `filled` count from active personnels and keeps `vacant = total - filled`.
   - Global structure changes reset row-level positions, hide the position dropdown when pointing to a top-level structure, and reuse the new helpers to fetch nested structure IDs before counting personnels, matching how the old SelectList-driven flow behaved.
+48. **Select Dropdown Migration (Phase 2)**
+  - Admin CRUD screens for punishments, cities, positions, and structures dropped `SelectListTrait` in favour of `DropdownConstructTrait`, so their forms now bind scalar IDs, expose cached option builders with inline search, and hydrate defaults without juggling `{id,name}` arrays.
+  - Personnel vacation editors (monthly reserved-date picker) and the vacations list filters now render `<x-ui.select-dropdown>` with Livewire bindings; month/structure filters store plain integers, reuse the shared options helpers, and the `PersonnelVacation` scope accepts either scalars or the legacy `{id}` payload for backwards compatibility.
+  - With no legacy usages left, the `<x-select-list>` components were removed entirely and `SelectListTrait` now only exposes the `modifyArray()` helper for payload casting.
+49. **Structure Cache Invalidation**
+  - `StructureObserver` now clears every dropdown/view cache that depends on the tree (`staff:structures`, `candidate:structures`, `businessTrips:structures`, and the order lookup main-structure cache) whenever a structure is created/updated/deleted, so new entries show up immediately without a manual `cache:clear`.
+  - Fixed the model attribute to use Laravel’s `#[ObservedBy(StructureObserver::class)]` syntax _and_ registered the observer inside `AppServiceProvider` to ensure it’s wired even on older Laravel builds; previously the observer never fired so caches stayed stale.
 
 ## Next Ideas
 - Verify Step 5–8 UX once more (manual or automated) to ensure draft detection still covers every branch.

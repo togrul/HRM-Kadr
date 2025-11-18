@@ -87,8 +87,9 @@ class PersonnelVacation extends Model
         foreach ($filters as $field => $value) {
             switch ($field) {
                 case 'structure_id':
-                    if (isset($value['id'])) {
-                        $structureModel = Structure::with('subs')->find($value['id']);
+                    $structureId = is_array($value) ? ($value['id'] ?? null) : $value;
+                    if ($structureId) {
+                        $structureModel = Structure::with('subs')->find($structureId);
                         if ($structureModel) {
                             $structure = $structureModel->getAllNestedIds();
                             $query->whereHas('personnel.structure', function ($qq) use ($structure) {

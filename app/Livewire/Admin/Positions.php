@@ -4,11 +4,10 @@ namespace App\Livewire\Admin;
 
 use App\Livewire\Traits\Admin\AdminCrudTrait;
 use App\Livewire\Traits\Admin\CallSwalTrait;
-use App\Livewire\Traits\SelectListTrait;
+use App\Livewire\Traits\DropdownConstructTrait;
 use App\Models\Position;
 use App\Models\RankCategory;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -18,13 +17,16 @@ class Positions extends Component
     use AdminCrudTrait;
     use AuthorizesRequests;
     use CallSwalTrait;
-    use SelectListTrait;
+    use DropdownConstructTrait;
+
+    public string $searchRankCategory = '';
 
     public function rules(): array
     {
         return [
             'form.id' => 'required|integer|min:1|unique:positions,id'.($this->model ? ','.$this->form['id'] : ''),
             'form.name' => 'required|string|min:2',
+            'form.rank_category_id' => 'nullable|integer|exists:rank_categories,id',
         ];
     }
 
@@ -33,6 +35,16 @@ class Positions extends Component
         return [
             'form.id' => __('ID'),
             'form.name' => __('Name'),
+            'form.rank_category_id' => __('Rank category'),
+        ];
+    }
+
+    protected function formDefaults(): array
+    {
+        return [
+            'id' => null,
+            'name' => '',
+            'rank_category_id' => null,
         ];
     }
 
@@ -42,17 +54,12 @@ class Positions extends Component
             ? Position::with('rankCategory:id,name')->find($id)
             : null;
 
-        if ($this->model) {
-            $this->form = $this->model->toArray();
-            $this->form['rank_category_id'] = $this->form['rank_category'] ?? [
-                'id' => null,
-                'name' => '---',
-            ];
+        $this->form = $this->formDefaults();
 
-            unset($this->form['rank_category']);
-        }
-        else {
-            $this->form = [];
+        if ($this->model) {
+            $this->form['id'] = $this->model->id;
+            $this->form['name'] = $this->model->name;
+            $this->form['rank_category_id'] = $this->model->rank_category_id;
         }
         $this->isAdded = true;
     }
@@ -72,8 +79,6 @@ class Positions extends Component
     {
         $this->validate();
 
-        $this->form['rank_category_id'] = array_key_exists('rank_category_id', $this->form) ? $this->form['rank_category_id']['id'] : null;
-
         $this->model
             ? $this->model->update($this->form)
             : Position::create($this->form);
@@ -84,15 +89,24 @@ class Positions extends Component
         $this->closeCrud();
     }
 
-    #[Computed]
-    public function rankCategory()
-    {
-        return RankCategory::all();
-    }
-
     public function render()
     {
         $positions = Position::all();
         return view('livewire.admin.positions', compact('positions'));
+    }
+
+    public function rankCategoryOptions(): array
+    {
+        $base = RankCategory::query()
+            ->select('id', 'name as label')
+            ->orderBy('name');
+
+        return $this->optionsWithSelected(
+            base: $base,
+            searchCol: 'name',
+            searchTerm: $this->dropdownSearch('searchRankCategory'),
+            selectedId: data_get($this->form, 'rank_category_id'),
+            limit: 80
+        );
     }
 }

@@ -3,7 +3,7 @@
 namespace App\Livewire\Vacation;
 
 use App\Exports\VacationExport;
-use App\Livewire\Traits\SelectListTrait;
+use App\Livewire\Traits\DropdownConstructTrait;
 use App\Livewire\Traits\SideModalAction;
 use App\Models\PersonnelVacation;
 use App\Models\Structure;
@@ -22,13 +22,13 @@ use PhpOffice\PhpWord\TemplateProcessor;
 
 class Vacations extends Component
 {
-    use AuthorizesRequests, SelectListTrait, SideModalAction, WithPagination;
+    use AuthorizesRequests, DropdownConstructTrait, SideModalAction, WithPagination;
 
     public array $filter = [];
 
     public array $search = [];
 
-    public $searchStructure;
+    public string $searchStructure = '';
 
     #[Url]
     public $status;
@@ -140,6 +140,7 @@ class Vacations extends Component
     {
         $this->filter = [
             'vacation_status' => 'all',
+            'structure_id' => null,
         ];
     }
 
@@ -190,6 +191,9 @@ class Vacations extends Component
         $this->fillYear();
         if (session()->has('vacation-updated')) {
             $sessionData = session()->pull('vacation-updated');
+            if (isset($sessionData['structure_id'])) {
+                $sessionData['structure_id'] = $this->normalizeStructureId($sessionData['structure_id']);
+            }
             $this->filter = array_merge($this->filter, $sessionData);
             $this->searchFilter();
         }
@@ -197,13 +201,65 @@ class Vacations extends Component
 
     public function render()
     {
-        $_structures = Structure::when(! empty($this->searchStructure), function ($q) {
-            $q->where('name', 'LIKE', "%{$this->searchStructure}%");
-        })
-            ->accessible()
-            ->ordered()
-            ->get();
+        return view('livewire.vacation.vacations');
+    }
 
-        return view('livewire.vacation.vacations', compact('_structures'));
+    #[Computed]
+    public function structureOptions(): array
+    {
+        $search = $this->dropdownSearch('searchStructure');
+        $selected = $this->selectedStructureFilterId();
+
+        $query = Structure::query()
+            ->select('id', 'name')
+            ->accessible()
+            ->ordered();
+
+        if ($search === '') {
+            $query->limit(120);
+        } else {
+            $query->where('name', 'LIKE', "%{$search}%");
+        }
+
+        $options = $query->get()
+            ->map(fn ($structure) => [
+                'id' => (int) $structure->id,
+                'label' => trim((string) $structure->name),
+            ])
+            ->filter(fn ($option) => $option['label'] !== '')
+            ->values();
+
+        if ($selected && $options->firstWhere('id', $selected) === null) {
+            if ($selectedStructure = Structure::find($selected)) {
+                $options->push([
+                    'id' => (int) $selectedStructure->id,
+                    'label' => trim((string) $selectedStructure->name),
+                ]);
+            }
+        }
+
+        return $options
+            ->unique('id')
+            ->sortBy('label', SORT_NATURAL | SORT_FLAG_CASE)
+            ->values()
+            ->all();
+    }
+
+    protected function selectedStructureFilterId(): ?int
+    {
+        return $this->normalizeStructureId(data_get($this->filter, 'structure_id'));
+    }
+
+    protected function normalizeStructureId($value): ?int
+    {
+        if (is_array($value)) {
+            return isset($value['id']) ? (int) $value['id'] : null;
+        }
+
+        if ($value === '' || $value === null) {
+            return null;
+        }
+
+        return (int) $value;
     }
 }

@@ -9,8 +9,17 @@ class StructureObserver
 {
     use ObservableTrait;
 
-    private $caches = [
+    /**
+     * Cache keys that should be flushed whenever the structure tree changes.
+     *
+     * @var array<int,string>
+     */
+    protected array $caches = [
         'structures',
+        'staff:structures',
+        'candidate:structures',
+        'businessTrips:structures',
+        'order_lookup:main_structures',
     ];
     /**
      * Handle the Structure "created" event.

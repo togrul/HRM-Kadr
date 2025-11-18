@@ -48,26 +48,26 @@ Livewire.hook('message.processed', (message, component) => {
 
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2">
             <div class="flex flex-col xl:col-span-2">
-                @php
-                    $selectedName = array_key_exists('structure_id', $filter) ? $filter['structure_id']['name'] : '---';
-                    $selectedId = array_key_exists('structure_id', $filter) ? $filter['structure_id']['id'] : -1;
-                @endphp
-                <x-select-list class="w-full" :title="__('Structure')" mode="gray" :selected="$selectedName" name="structureId">
-                    <x-livewire-input @click.stop="open = true" mode="gray" name="searchStructure"
-                        wire:model.live="searchStructure"></x-livewire-input>
-
-                    <x-select-list-item wire:click="setData('filter','structure_id',null,'---',null)" :selected="'---' == $selectedName"
-                        wire:model='filter.structure_id.id'>
-                        ---
-                    </x-select-list-item>
-                    @foreach ($_structures as $_structure)
-                        <x-select-list-item
-                            wire:click="setData('filter','structure_id',null,'{{ trim($_structure->name) }}',{{ $_structure->id }})"
-                            :selected="$_structure->id === $selectedId" wire:model='filter.structure_id.id'>
-                            {{ $_structure->name }}
-                        </x-select-list-item>
-                    @endforeach
-                </x-select-list>
+                <x-ui.select-dropdown
+                    :label="__('Structure')"
+                    placeholder="---"
+                    mode="gray"
+                    class="w-full"
+                    wire:model.live="filter.structure_id"
+                    :model="$this->structureOptions()"
+                >
+                    <x-livewire-input
+                        mode="gray"
+                        name="searchStructure"
+                        wire:model.live.debounce.300ms="searchStructure"
+                        placeholder="{{ __('Search...') }}"
+                        @click.stop="isOpen = true"
+                        x-on:input.stop="null"
+                        x-on:keyup.stop="null"
+                        x-on:keydown.stop="null"
+                        x-on:change.stop="null"
+                    ></x-livewire-input>
+                </x-ui.select-dropdown>
             </div>
             <div class="flex flex-col">
                 <x-label for="filter.fullname">{{ __('Fullname') }}</x-label>

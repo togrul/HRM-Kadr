@@ -10,22 +10,14 @@
     @if($selectedVacation)
     <div class="flex space-x-2 items-center">
         <div class="flex flex-col w-1/3">
-            @php
-                $selectedName = array_key_exists('reserved_date_month',$month) ? $month['reserved_date_month']['name'] : '---';
-                $selectedId = array_key_exists('reserved_date_month',$month) ? $month['reserved_date_month']['id'] : -1;
-            @endphp
-            <x-select-list class="w-full" title="" mode="gray" :selected="$selectedName" name="reservedMonth">
-                <x-select-list-item wire:click="setData('month','reserved_date_month',null,'---',null)" :selected="'---' ==  $selectedName"
-                                    wire:model='month.reserved_date_month.id'>
-                    ---
-                </x-select-list-item>
-                @foreach($months as $mValue => $mKey)
-                    <x-select-list-item wire:click="setData('month','reserved_date_month',null,'{{ $mValue }}',{{ $mKey }})"
-                                        :selected="$mKey === $selectedId" wire:model='month.reserved_date_month.id'>
-                        {{ $mValue }}
-                    </x-select-list-item>
-                @endforeach
-            </x-select-list>
+            <x-ui.select-dropdown
+                :label="__('Reserved month')"
+                placeholder="---"
+                mode="gray"
+                class="w-full"
+                wire:model.live="reservedMonthId"
+                :model="$this->monthOptions()"
+            />
         </div>
         <button wire:click="setMonth"
                 class="appearance-none bg-slate-900 text-slate-100 px-4 py-2 mt-1 rounded-md shadow-sm text-sm font-medium flex items-center space-x-2 justify-end transition-all duration-300 hover:bg-slate-700 hover:text-slate-100 hover:shadow-none"

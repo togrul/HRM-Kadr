@@ -37,24 +37,29 @@
             </button>
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 mt-4 w-full">
                 <div class="flex flex-col">
-                    @php
-                        $parent = $form['parent_id'] ?? null;
-                        $selectedNameParent = $parent['name'] ?? '---';
-                        $selectedIdParent = $parent['id'] ?? -1;
-                    @endphp
-                    <x-select-list class="w-full" :title="__('Parent')" mode="default" :selected="$selectedNameParent" name="selectedIdParent">
-                        <x-livewire-input @click.stop="open = true" mode="gray" name="searchParent"  wire:model.live.debounce.500ms="searchParent"></x-livewire-input>
-                        <x-select-list-item wire:click="setData('form','parent_id',null,'---',null)" :selected="'---' == $selectedNameParent"
-                                            wire:model='form.parent_id.id'>
-                            ---
-                        </x-select-list-item>
-                        @foreach($allStructures as $struct)
-                            <x-select-list-item wire:click="setData('form','parent_id',null,'{{ $struct->name }}',{{ $struct->id }})"
-                                                :selected="$struct->id === $selectedIdParent" wire:model='form.parent_id.id'>
-                                {{ $struct->name }}
-                            </x-select-list-item>
-                        @endforeach
-                    </x-select-list>
+                    <x-ui.select-dropdown
+                        :label="__('Parent')"
+                        placeholder="---"
+                        mode="default"
+                        class="w-full"
+                        wire:model.live="form.parent_id"
+                        :model="$this->parentStructureOptions()"
+                    >
+                        <x-livewire-input
+                            mode="gray"
+                            name="searchParent"
+                            wire:model.live.debounce.300ms="searchParent"
+                            placeholder="{{ __('Search...') }}"
+                            @click.stop="isOpen = true"
+                            x-on:input.stop="null"
+                            x-on:keyup.stop="null"
+                            x-on:keydown.stop="null"
+                            x-on:change.stop="null"
+                        ></x-livewire-input>
+                    </x-ui.select-dropdown>
+                    @error('form.parent_id')
+                    <x-validation>{{ $message }}</x-validation>
+                    @enderror
                 </div>
                 <div class="flex flex-col">
                     <x-label for="form.name">{{ __('Name') }}</x-label>

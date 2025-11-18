@@ -1,0 +1,5 @@
+<ul class="flex flex-col px-4 py-3 w-full">
+    <?php echo e($slot); ?>
+
+</ul>
+<?php /**PATH /Users/togruljalalli/Desktop/projects/HRM/resources/views/components/nested/list.blade.php ENDPATH**/ ?>

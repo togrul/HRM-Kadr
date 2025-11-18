@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[ObservedBy(classes: StructureObserver::class)]
+#[ObservedBy(StructureObserver::class)]
 class Structure extends Model
 {
     use HasFactory;
