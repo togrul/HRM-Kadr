@@ -30,13 +30,20 @@ class CheckVacancyService
             $messages[$key] = "{$structureName} {$positionName} vakansiyası üzrə yer yoxdur.";
         }
 
-        $staffs = StaffSchedule::select('structure_id', 'position_id', 'vacant')
-            ->where('structure_id', '>', 2)
+        if (empty($counts)) {
+            return [];
+        }
+
+        [$structureIds, $positionIds] = $this->extractLookupIds(array_keys($counts));
+
+        $staffs = StaffSchedule::query()
+            ->select('structure_id', 'position_id', 'vacant')
+            ->when(! empty($structureIds), fn ($q) => $q->whereIn('structure_id', $structureIds))
+            ->when(! empty($positionIds), fn ($q) => $q->whereIn('position_id', $positionIds))
             ->get()
-            ->map(function ($item) {
-                return [$item['structure_id'].'-'.$item['position_id'] => $item['vacant']];
-            })
-            ->collapse();
+            ->mapWithKeys(fn ($item) => [
+                $item->structure_id.'-'.$item->position_id => (int) $item->vacant,
+            ]);
 
         foreach ($counts as $key => $count) {
             $available = $staffs[$key] ?? 0;
@@ -52,5 +59,19 @@ class CheckVacancyService
         }
 
         return $result;
+    }
+
+    private function extractLookupIds(array $keys): array
+    {
+        $structureIds = [];
+        $positionIds = [];
+
+        foreach ($keys as $key) {
+            [$structureId, $positionId] = array_map('intval', explode('-', $key));
+            $structureIds[] = $structureId;
+            $positionIds[] = $positionId;
+        }
+
+        return [array_values(array_unique($structureIds)), array_values(array_unique($positionIds))];
     }
 }

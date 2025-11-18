@@ -49,23 +49,26 @@
         </div>
         <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <div class="flex flex-col">
-                @php
-                    $selectedName = array_key_exists('permission_id', $menu) ? $menu['permission_id']['name'] : '---';
-                    $selectedId = array_key_exists('permission_id', $menu) ? $menu['permission_id']['id'] : -1;
-                @endphp
-                <x-select-list class="w-full" :title="__('Permissions')" mode="gray" :selected="$selectedName" name="permissionId">
-                    <x-select-list-item wire:click="setData('menu','permission_id',null,'---',null)" :selected="'---' == $selectedName"
-                                        wire:model='menu.permission_id.id'>
-                        ---
-                    </x-select-list-item>
-                    @foreach($permissions as $permission)
-                        <x-select-list-item wire:click="setData('menu','permission_id',null,'{{ $permission->name }}',{{ $permission->id }})"
-                                            :selected="$permission->id === $selectedId" wire:model='menu.permission_id.id'>
-                            {{ $permission->name }}
-                        </x-select-list-item>
-                    @endforeach
-                </x-select-list>
-                @error('menu.permission_id.id')
+                <x-ui.select-dropdown
+                    :label="__('Permissions')"
+                    placeholder="---"
+                    mode="gray"
+                    class="w-full"
+                    wire:model.live="menu.permission_id"
+                    :model="$this->permissionOptions"
+                >
+                    <x-livewire-input
+                        mode="gray"
+                        name="search.permission"
+                        wire:model.live="searchPermission"
+                        @click.stop="isOpen = true"
+                        x-on:input.stop="null"
+                        x-on:keyup.stop="null"
+                        x-on:keydown.stop="null"
+                        x-on:change.stop="null"
+                    ></x-livewire-input>
+                </x-ui.select-dropdown>
+                @error('menu.permission_id')
                 <x-validation> {{ $message }} </x-validation>
                 @enderror
             </div>

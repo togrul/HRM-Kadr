@@ -77,23 +77,27 @@
                     @enderror
                 </div>
                 <div class="flex flex-col">
-                    @php
-                        $selectedName = array_key_exists('award_type_id',$form) ? $form['award_type_id']['name'] : '---';
-                        $selectedId = array_key_exists('award_type_id',$form) ? $form['award_type_id']['id'] : -1;
-                    @endphp
-                    <x-select-list class="w-full" :title="__('Award types')" mode="default" :selected="$selectedName" name="awardTypeId">
-                        <x-select-list-item wire:click="setData('form','award_type_id',null,'---',null)" :selected="'---' ==  $selectedName"
-                                            wire:model='form.award_type_id.id'>
-                            ---
-                        </x-select-list-item>
-                        @foreach($award_types as $type)
-                            <x-select-list-item wire:click="setData('form','award_type_id',null,'{{ trim($type->name) }}',{{ $type->id }})"
-                                                :selected="$type->id === $selectedId" wire:model='form.award_type_id.id'>
-                                {{ $type->name }}
-                            </x-select-list-item>
-                        @endforeach
-                    </x-select-list>
-                    @error('form.award_type_id.id')
+                    <x-ui.select-dropdown
+                        :label="__('Award types')"
+                        placeholder="---"
+                        mode="default"
+                        class="w-full"
+                        wire:model.live="form.award_type_id"
+                        :model="$this->awardTypeOptions()"
+                    >
+                        <x-livewire-input
+                            mode="gray"
+                            name="searchAwardType"
+                            wire:model.live.debounce.300ms="searchAwardType"
+                            placeholder="{{ __('Search...') }}"
+                            @click.stop="isOpen = true"
+                            x-on:input.stop="null"
+                            x-on:keyup.stop="null"
+                            x-on:keydown.stop="null"
+                            x-on:change.stop="null"
+                        ></x-livewire-input>
+                    </x-ui.select-dropdown>
+                    @error('form.award_type_id')
                         <x-validation> {{ $message }} </x-validation>
                     @enderror
                 </div>

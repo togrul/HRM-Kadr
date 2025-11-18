@@ -104,8 +104,8 @@
 35. **Order Dynamic Inputs**
   - Dynamic component fields (`personnel_id`, `rank_id`, `structure_main_id`, `position_id`, `transportation`) now bind scalar IDs directly to `<x-ui.select-dropdown>` options. Validation rules, vacancy diffs, and import services were updated to expect scalar payloads, `SelectListTrait` was dropped from `OrderCrud`, and attribute hydration rebuilds the human labels via cached option maps so no `{id,name}` arrays or `setData()` hooks remain.
 36. **Order Dropdown Stabilization**
-  - Reintroduced a single `updated()` interceptor in `OrderCrud` that funnels every `components.*` mutation through the same helper (so component pickers, personnel dropdowns, and date fields always run, even if Livewire skips `updatedComponents()`), while keeping the scalar-ID payloads and `setStructure()` reset logic intact—no more entangle crashes when dependent dropdowns change.
-  - `OrderValidationTrait` now validates `components.*.structure_id` directly, and `CheckVacancyService` extracts scalar IDs + cached structure/position labels before counting vacancies, so vacancy warnings still print human-readable text even though the Livewire payloads no longer ship `{id,name}` arrays.
+  - Reintroduced a single `updated()` interceptor in `OrderCrud` that funnels every `componentForms.*` mutation through the same helper (so component pickers, personnel dropdowns, and date fields always run, even if Livewire skips `updatedComponents()`), while keeping the scalar-ID payloads and `setStructure()` reset logic intact—no more entangle crashes when dependent dropdowns change.
+  - `OrderValidationTrait` now validates `componentForms.*.structure_id` directly, and `CheckVacancyService` extracts scalar IDs + cached structure/position labels before counting vacancies, so vacancy warnings still print human-readable text even though the Livewire payloads no longer ship `{id,name}` arrays.
   - Added a reusable `componentFieldValue()` helper plus updated the shared `dynamic-input`/`radio-tree` blades to read scalar IDs, keeping the UI labels/highlights in sync without hitting the old “Cannot access offset of type …” errors when a dependent dropdown clears a relation.
   - `<x-ui.select-dropdown>` accepts an optional `selectedLabel`, and `dynamic-input` now feeds it via `componentFieldLabel`; this keeps the chosen personnel/structure label visible even when the lookup list deliberately excludes already-picked rows, matching the legacy SelectList behaviour.
 37. **Order Components Cache & Validation Merge**
@@ -120,8 +120,35 @@
   - Added `Orders\VacancyDiffService` to encapsulate the candidate diff logic; OrderCrud now simply hands it the current/original arrays and reuses the result when calling `CheckVacancyService`, keeping the trait focused on orchestration.
   - `BladeDataPreparation` now relies on `PersonnelResolver` to fetch tabel numbers for default orders, removing the inline `Personnel::find` inside the trait and giving us a single, cache-friendly place to adjust how personnel IDs are resolved.
   - Component row/search state lives in dedicated helpers: `ManagesOrderComponents` centralises component/selection arrays, and `OrderSearchForm` backs all template/personnel/structure search inputs (Blade bindings now use `search.*`). This keeps the Livewire trait smaller and avoids duplicating array reset logic.
-  - `CheckVacancyService` now consumes pre-normalised scalar payloads (structure/position IDs plus labels) so it no longer queries `structures`/`positions` per request; OrderCrud normalises the diff payload only for IG/default orders before invoking the service.
-  - Order add/edit components now bind to `OrderForm` (Livewire form object) instead of juggling a raw `$order` array; the form seeds defaults, hydrates from existing logs, and exposes a `payload()` helper so the trait/components stay slimmer and validation references (`orderForm.*`) are explicit.
+  - Component rows are now stored under `componentForms.*.*`, so Livewire validation/bindings all target the same structured namespace (order templates + dynamic inputs reference `componentForms` everywhere).
+ - `CheckVacancyService` now consumes pre-normalised scalar payloads (structure/position IDs plus labels) so it no longer queries `structures`/`positions` per request; OrderCrud normalises the diff payload only for IG/default orders before invoking the service.
+ - Order add/edit components now bind to `OrderForm` (Livewire form object) instead of juggling a raw `$order` array; the form seeds defaults, hydrates from existing logs, and exposes a `payload()` helper so the trait/components stay slimmer and validation references (`orderForm.*`) are explicit.
+38. **Selected Personnel Form**
+  - Introduced `SelectedPersonnelForm` so the business-trip/vacation flows no longer juggle the nested `$selected_personnel_list` array by hand—Livewire now exposes `selectedPersonnel.rows` for the row-specific payload and `selectedPersonnel.personnels` for the flat tabel-no list.
+  - `addToList`/`removeFromList`, vacancy normalization, and the business-trip/vacation partials were updated to mutate/bind this form directly, giving us helpers to add/remove rows, flatten them for persistence, and keep duplicate prevention working without manual array surgery.
+  - Order edit flows hydrate the form from stored attributes/personnels, `OrderCollectionListsService` receives the flat tabel array, and `CheckVacancyService`/persisters simply read from the form, reducing the risk of desyncs.
+39. **Order Component Traits & Validation**
+  - Split the monolithic `ManagesOrderComponents` into `HandlesComponentRows` (row lifecycle, coded toggles) and `HandlesPersonnelSelections` (search/add/remove personnel, blade-specific payload shaping). The root trait now just mixes in these focused helpers, making the responsibilities clearer and future extensions safer.
+  - Blade-specific validation now lives in dedicated helpers inside `OrderValidationTrait`; instead of building giant rule arrays full of empty strings, `mainValidationRules()` and per-blade dynamic rule methods return only the rules that matter. This trims per-submit validation work and makes the constraints easier to reason about.
+40. **Lookup Caching (Phase 2)**
+  - `OrderLookupService` now caches rank/main-structure lists, structure trees (per accessible structure set), component lists per template, position lists, and template lists per order ID when no search query is present—cutting duplicate queries when editing orders or toggling filters. Searches still hit the DB, but steady-state renders reuse cached collections.
+  - `getStatusesProperty()` now caches localized order status lists (both add/edit and all-orders list) for 10 minutes so the same table isn’t queried twice per render.
+41. **Vacancy Lookup Slimming**
+  - `CheckVacancyService` now queries `staff_schedules` only for the structure/position pairs present in the diff payload (instead of pulling the entire table). That drops memory usage and DB time whenever IG orders trigger the vacancy check, while non-default blades continue to skip the diff entirely.
+42. **Order Render Builder**
+  - Extracted the dataset preparation logic from `OrderCrud::render()` into `OrderRenderPayloadBuilder`, so the Livewire trait focuses on state/event handling while the builder assembles lookup collections + blade-specific lists (and registers dropdown labels) in one place.
+43. **Dynamic Input Cleanup**
+  - `<x-dynamic-input>` now receives the resolved field label/value from the parent view; the component no longer runs `method_exists` checks on every render (and the default template computes the label/value only once per field), trimming CPU time for large order forms.
+44. **Structure Selector Component**
+  - The radio-tree logic (word suffixes, Alpine toggles, structure traversal) moved into a dedicated `<x-structure-selector>` component, keeping `<x-dynamic-input>` lean while still supporting coded labels and nested lists.
+45. **Global Caching (Menus & Notifications)**
+  - Header menus are cached for 10 minutes, and the notifications dropdown caches both the unread count and the recent list per user (invalidated when notifications are marked read) to eliminate repeated queries every render.
+46. **Admin Awards Dropdown Refresh**
+  - Replaced the legacy `<x-select-list>` in the awards CRUD with `<x-ui.select-dropdown>` backed by `DropdownConstructTrait`, so the form now binds `form.award_type_id` as a scalar, supports inline search, and automatically keeps the selected type in the option list.
+  - `Awards` now seeds clean defaults (id/name/type/is_foreign), loads award-type options through a cached builder, and no longer relies on `SelectListTrait`/`setData`, cutting duplicated Livewire reactivity work on every render.
+47. **Staff Schedule Auto Fill Balancing**
+  - `StaffCrud` now listens to `staff.*` updates the modern way (Livewire `updatedStaff`) so selecting a structure and/or position immediately recalculates the `filled` count from active personnels and keeps `vacant = total - filled`.
+  - Global structure changes reset row-level positions, hide the position dropdown when pointing to a top-level structure, and reuse the new helpers to fetch nested structure IDs before counting personnels, matching how the old SelectList-driven flow behaved.
 
 ## Next Ideas
 - Verify Step 5–8 UX once more (manual or automated) to ensure draft detection still covers every branch.

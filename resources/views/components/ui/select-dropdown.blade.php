@@ -144,12 +144,12 @@
 
       @foreach($model as $idx => $opt)
         <li
-          wire:key="{{ $uid }}-{{ $opt['id'] }}"
+          wire:key="{{ $uid }}-{{ data_get($opt,'id') }}"
           class="group relative py-2 pl-3 pr-9 cursor-pointer select-none hover:bg-blue-400 bg-neutral-50 rounded-lg"
-          @click="select('{{ $opt['id'] }}', '{{ e($opt['label']) }}')"
+          @click="select('{{ data_get($opt,'id') }}', '{{ e(data_get($opt,'label')) }}')"
         >
           <div class="flex items-center">
-            <span class="block ml-3 truncate">{{ $opt['label'] }}</span>
+            <span class="block ml-3 truncate">{{ data_get($opt,'label') }}</span>
           </div>
         </li>
       @endforeach

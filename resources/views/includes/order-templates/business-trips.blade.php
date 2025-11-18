@@ -1,59 +1,59 @@
 <div class="flex flex-col space-y-2">
     <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3">
         <div class="flex flex-col">
-            <x-label for="components.{{$i}}.start_date">{{ __('Trip date') }}</x-label>
-            <x-pikaday-input mode="gray" name="components.{{$i}}.start_date" format="Y-MM-DD" wire:model.live="components.{{$i}}.start_date">
+            <x-label for="componentForms.{{$i}}.start_date">{{ __('Trip date') }}</x-label>
+            <x-pikaday-input mode="gray" name="componentForms.{{$i}}.start_date" format="Y-MM-DD" wire:model.live="componentForms.{{$i}}.start_date">
                 <x-slot name="script">
                     $el.onchange = function () {
-                    @this.set('components.{{$i}}.start_date', $el.value);
+                    @this.set('componentForms.{{$i}}.start_date', $el.value);
                     }
                 </x-slot>
             </x-pikaday-input>
-            @error("components.{$i}.start_date")
+            @error("componentForms.{$i}.start_date")
                 <x-validation> {{ $message }} </x-validation>
             @enderror
         </div>
         <div class="flex flex-col">
-            <x-label for="components.{{$i}}.end_date">{{ __('Return date') }}</x-label>
-            <x-pikaday-input mode="gray" name="components.{{$i}}.end_date" format="Y-MM-DD" wire:model.live="components.{{$i}}.end_date">
+            <x-label for="componentForms.{{$i}}.end_date">{{ __('Return date') }}</x-label>
+            <x-pikaday-input mode="gray" name="componentForms.{{$i}}.end_date" format="Y-MM-DD" wire:model.live="componentForms.{{$i}}.end_date">
                 <x-slot name="script">
                     $el.onchange = function () {
-                    @this.set('components.{{$i}}.end_date', $el.value);
+                    @this.set('componentForms.{{$i}}.end_date', $el.value);
                     }
                 </x-slot>
             </x-pikaday-input>
-            @error("components.{$i}.end_date")
+            @error("componentForms.{$i}.end_date")
                 <x-validation> {{ $message }} </x-validation>
             @enderror
         </div>
 
         <div class="flex flex-col">
-            <x-label for="components.{{$i}}.location">{{ __('Location') }}</x-label>
-            <x-livewire-input mode="gray" name="components.{{$i}}.location" wire:model="components.{{$i}}.location"></x-livewire-input>
-            @error("components.{$i}.location")
+            <x-label for="componentForms.{{$i}}.location">{{ __('Location') }}</x-label>
+            <x-livewire-input mode="gray" name="componentForms.{{$i}}.location" wire:model="componentForms.{{$i}}.location"></x-livewire-input>
+            @error("componentForms.{$i}.location")
                 <x-validation> {{ $message }} </x-validation>
             @enderror
         </div>
 
         @if($selectedTemplate == \App\Models\PersonnelBusinessTrip::INTERNAL_BUSINESS_TRIP)
         <div class="flex flex-col">
-            <x-label for="components.{{$i}}.meeting_hour">{{ __('Meeting hour') }}</x-label>
-            <x-livewire-input mode="gray" name="components.{{$i}}.meeting_hour" wire:model="components.{{$i}}.meeting_hour"></x-livewire-input>
-            @error("components.{$i}.meeting_hour")
+            <x-label for="componentForms.{{$i}}.meeting_hour">{{ __('Meeting hour') }}</x-label>
+            <x-livewire-input mode="gray" name="componentForms.{{$i}}.meeting_hour" wire:model="componentForms.{{$i}}.meeting_hour"></x-livewire-input>
+            @error("componentForms.{$i}.meeting_hour")
                 <x-validation> {{ $message }} </x-validation>
             @enderror
         </div>
         <div class="flex flex-col">
-            <x-label for="components.{{$i}}.return_month">{{ __('Return month') }}</x-label>
-            <x-livewire-input mode="gray" name="components.{{$i}}.return_month" wire:model="components.{{$i}}.return_month"></x-livewire-input>
-            @error("components.{$i}.return_month")
+            <x-label for="componentForms.{{$i}}.return_month">{{ __('Return month') }}</x-label>
+            <x-livewire-input mode="gray" name="componentForms.{{$i}}.return_month" wire:model="componentForms.{{$i}}.return_month"></x-livewire-input>
+            @error("componentForms.{$i}.return_month")
                 <x-validation> {{ $message }} </x-validation>
             @enderror
         </div>
         <div class="flex flex-col">
-            <x-label for="components.{{$i}}.return_day">{{ __('Return day') }}</x-label>
-            <x-livewire-input mode="gray" type="number" name="components.{{$i}}.return_day" wire:model="components.{{$i}}.return_day"></x-livewire-input>
-            @error("components.{$i}.return_day")
+            <x-label for="componentForms.{{$i}}.return_day">{{ __('Return day') }}</x-label>
+            <x-livewire-input mode="gray" type="number" name="componentForms.{{$i}}.return_day" wire:model="componentForms.{{$i}}.return_day"></x-livewire-input>
+            @error("componentForms.{$i}.return_day")
                 <x-validation> {{ $message }} </x-validation>
             @enderror
         </div>
@@ -81,8 +81,9 @@
         </div>
 
         <div class="px-2 py-3 bg-slate-100 rounded-lg flex flex-col space-y-2">
-            @if(array_key_exists($i,$this->selected_personnel_list))
-                @foreach($this->selected_personnel_list[$i] as $keyPerson => $selectPerson)
+            @php($businessRows = $selectedPersonnel->rows[$i] ?? [])
+            @if(!empty($businessRows))
+                @foreach($businessRows as $keyPerson => $selectPerson)
                     <div class="w-full bg-slate-50 border border-slate-200 gap-3 px-3 py-1 rounded-lg flex items-center justify-between">
                         <p
                            @class([
@@ -97,46 +98,45 @@
                         </p>
                         @if($selectedTemplate == \App\Models\PersonnelBusinessTrip::INTERNAL_BUSINESS_TRIP)
                         <div class="flex flex-col">
-{{--                            <x-label for="selected_personnel_list.{{$i}}.{{ $keyPerson }}.car">{{ __('Transportation') }}</x-label>--}}
+{{--                            <x-label for="selectedPersonnel.rows.{{$i}}.{{ $keyPerson }}.car">{{ __('Transportation') }}</x-label>--}}
                             <select
                                 class="block border-none font-normal w-full mt-1 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition duration-100 ease-in-out transform text-gray-500 bg-white"
-                                wire:model.live="selected_personnel_list.{{$i}}.{{ $keyPerson }}.transportation"
-                                name="selected_personnel_list.{{$i}}.{{ $keyPerson }}.transportation"
+                                wire:model.live="selectedPersonnel.rows.{{$i}}.{{ $keyPerson }}.transportation"
+                                name="selectedPersonnel.rows.{{$i}}.{{ $keyPerson }}.transportation"
                             >
                                 <option value="">--{{ __('Select Transportation') }}--</option>
                                 @foreach(\App\Enums\TransportationEnum::list() as $tKey => $tValue)
                                     <option value="{{ $tKey }}">{{ __($tValue) }}</option>
                                 @endforeach
                             </select>
-                            @if((isset($selected_personnel_list[$i][$keyPerson]['transportation'])
-                                    && $selected_personnel_list[$i][$keyPerson]['transportation'] === \App\Enums\TransportationEnum::CAR->name))
+                            @if((($selectPerson['transportation'] ?? null) === \App\Enums\TransportationEnum::CAR->name))
                                 <x-livewire-input
                                     mode="default"
-                                    name="selected_personnel_list.{{$i}}.{{ $keyPerson }}.car"
-                                    wire:model="selected_personnel_list.{{$i}}.{{ $keyPerson }}.car"
+                                    name="selectedPersonnel.rows.{{$i}}.{{ $keyPerson }}.car"
+                                    wire:model="selectedPersonnel.rows.{{$i}}.{{ $keyPerson }}.car"
                                 ></x-livewire-input>
                             @endif
                         </div>
 
                         <div class="flex flex-col">
-                            <x-label for="selected_personnel_list.{{$i}}.{{ $keyPerson }}.weapon">{{ __('Weapon') }}</x-label>
+                            <x-label for="selectedPersonnel.rows.{{$i}}.{{ $keyPerson }}.weapon">{{ __('Weapon') }}</x-label>
                             <x-livewire-input
                                 mode="default"
-                                name="selected_personnel_list.{{$i}}.{{ $keyPerson }}.weapon"
-                                wire:model="selected_personnel_list.{{$i}}.{{ $keyPerson }}.weapon"
+                                name="selectedPersonnel.rows.{{$i}}.{{ $keyPerson }}.weapon"
+                                wire:model="selectedPersonnel.rows.{{$i}}.{{ $keyPerson }}.weapon"
                             ></x-livewire-input>
                         </div>
 
                         <div class="flex flex-col">
                             <div class="flex flex-col">
-                                <x-label for="selected_personnel_list.{{$i}}.{{ $keyPerson }}.bullet">{{ __('Bullet') }}</x-label>
+                                <x-label for="selectedPersonnel.rows.{{$i}}.{{ $keyPerson }}.bullet">{{ __('Bullet') }}</x-label>
                                 <x-livewire-input
                                     mode="default"
-                                    name="selected_personnel_list.{{$i}}.{{ $keyPerson }}.bullet"
-                                    wire:model="selected_personnel_list.{{$i}}.{{ $keyPerson }}.bullet"
+                                    name="selectedPersonnel.rows.{{$i}}.{{ $keyPerson }}.bullet"
+                                    wire:model="selectedPersonnel.rows.{{$i}}.{{ $keyPerson }}.bullet"
                                 ></x-livewire-input>
                             </div>
-                            <x-checkbox name="hasServiceDog" model="selected_personnel_list.{{$i}}.{{ $keyPerson }}.service_dog">{{ __('Service dog?') }}</x-checkbox>
+                            <x-checkbox name="hasServiceDog" model="selectedPersonnel.rows.{{$i}}.{{ $keyPerson }}.service_dog">{{ __('Service dog?') }}</x-checkbox>
                         </div>
                         @endif
                         <button wire:click="removeFromList({{$keyPerson}},{{ $i }})"

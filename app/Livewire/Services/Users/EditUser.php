@@ -2,15 +2,18 @@
 
 namespace App\Livewire\Services\Users;
 
+use App\Livewire\Traits\DropdownConstructTrait;
 use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Livewire\Attributes\Computed;
 use Livewire\Component;
+use Spatie\Permission\Models\Role;
 
 class EditUser extends Component
 {
     use AuthorizesRequests;
+    use DropdownConstructTrait;
 
     public $userModel;
 
@@ -18,9 +21,9 @@ class EditUser extends Component
 
     public $user;
 
-    public $roleId;
+    public ?int $roleId = null;
 
-    public $roleName;
+    public string $searchRole = '';
 
     protected function rules()
     {
@@ -57,25 +60,14 @@ class EditUser extends Component
         ];
     }
 
-    public function selectRole($name, $id)
-    {
-        $this->roleId = $id;
-        $this->roleName = $name;
-    }
-
     public function mount()
     {
         // $this->authorize('manage-settings',$this->user);
         $this->title = __('Edit user');
         $this->userModel = User::where('id', $this->userModel['id'])->first();
         $this->userModel->load('roles');
-        if (count($this->userModel->roles) > 0) {
-            $this->roleName = $this->userModel->roles[0]->name;
-            $this->roleId = $this->userModel->roles[0]->id;
-        } else {
-            $this->roleName = '---';
-            $this->roleId = -1;
-        }
+        $role = $this->userModel->roles->first();
+        $this->roleId = $role?->id;
 
         $this->user['name'] = $this->userModel->name;
         $this->user['email'] = $this->userModel->email;
@@ -90,20 +82,44 @@ class EditUser extends Component
             $this->user['password'] = Hash::make($this->user['password']);
         }
 
-        DB::transaction(function () {
-            $this->userModel->update($this->user);
+        $this->userModel->update($this->user);
+        if ($this->roleId) {
             $this->userModel->roles()->sync($this->roleId);
-        });
+        }
 
         $this->dispatch('userAdded', __('User was updated successfully!'));
     }
 
     public function render()
     {
-        $roles = DB::table('roles')
-            ->select('id', 'name')
-            ->get();
+        return view('livewire.services.users.edit-user');
+    }
 
-        return view('livewire.services.users.edit-user', compact('roles'));
+    #[Computed]
+    public function roleOptions(): array
+    {
+        $selected = $this->roleId;
+        $search = $this->dropdownSearch('searchRole');
+
+        $base = Role::query()
+            ->select('id', \DB::raw('name as label'))
+            ->orderBy('name');
+
+        if ($search === '') {
+            return $this->cachedOptionsWithSelected(
+                cacheKey: 'users:roles',
+                base: $base,
+                selectedId: $selected,
+                limit: 80
+            );
+        }
+
+        return $this->optionsWithSelected(
+            base: $base,
+            searchCol: 'name',
+            searchTerm: $search,
+            selectedId: $selected,
+            limit: 50
+        );
     }
 }

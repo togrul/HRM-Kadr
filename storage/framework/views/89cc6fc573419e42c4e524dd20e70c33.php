@@ -1,6 +1,6 @@
 <?php $attributes ??= new \Illuminate\View\ComponentAttributeBag; ?>
 <?php foreach($attributes->onlyProps([
-    'list', // arrayin adi
+    'list', // array values (kept for BC)
     'field', // hansi columndursa
     'title', // inputun basligi
     'type', // deyisenin adi
@@ -10,12 +10,15 @@
     'searchField' => null,
     'isCoded' => false, // kodu yoxsa tam adi gelsin
     'row',
-    'disabled' => false
+    'disabled' => false,
+    'listProperty' => 'componentForms',
+    'selectedLabel' => null,
+    'selectedValue' => null,
 ]) as $__key => $__value) {
     $$__key = $$__key ?? $__value;
 } ?>
 <?php $attributes = $attributes->exceptProps([
-    'list', // arrayin adi
+    'list', // array values (kept for BC)
     'field', // hansi columndursa
     'title', // inputun basligi
     'type', // deyisenin adi
@@ -25,10 +28,13 @@
     'searchField' => null,
     'isCoded' => false, // kodu yoxsa tam adi gelsin
     'row',
-    'disabled' => false
+    'disabled' => false,
+    'listProperty' => 'componentForms',
+    'selectedLabel' => null,
+    'selectedValue' => null,
 ]); ?>
 <?php foreach (array_filter(([
-    'list', // arrayin adi
+    'list', // array values (kept for BC)
     'field', // hansi columndursa
     'title', // inputun basligi
     'type', // deyisenin adi
@@ -38,7 +44,10 @@
     'searchField' => null,
     'isCoded' => false, // kodu yoxsa tam adi gelsin
     'row',
-    'disabled' => false
+    'disabled' => false,
+    'listProperty' => 'componentForms',
+    'selectedLabel' => null,
+    'selectedValue' => null,
 ]), 'is_string', ARRAY_FILTER_USE_KEY) as $__key => $__value) {
     $$__key = $$__key ?? $__value;
 } ?>
@@ -58,7 +67,7 @@
         '$start_date','$end_date' => 'date-input'
     };
 
-    $list_string = 'components';
+    $list_string = $listProperty;
 ?>
 
 <!--[if BLOCK]><![endif]--><?php if($input == 'text-input'): ?>
@@ -203,14 +212,14 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
     <div class="flex flex-col">
         <?php if (isset($component)) { $__componentOriginalb7c56d9f0bb75b99472ae2845823c8e9 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalb7c56d9f0bb75b99472ae2845823c8e9 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.ui.select-dropdown','data' => ['label' => $title,'placeholder' => '---','mode' => 'gray','class' => 'w-full','wire:model.live' => ''.e($list_string).'.'.e($key).'.'.e($field).'','model' => $model ?? [],'disabled' => $disabled,'selectedLabel' => method_exists($this, 'componentFieldLabel') ? $this->componentFieldLabel($key, $field) : null]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.ui.select-dropdown','data' => ['label' => $title,'placeholder' => '---','mode' => 'gray','class' => 'w-full','wire:model.live' => ''.e($list_string).'.'.e($key).'.'.e($field).'','model' => $model ?? [],'disabled' => $disabled,'selectedLabel' => $selectedLabel]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('ui.select-dropdown'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['label' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($title),'placeholder' => '---','mode' => 'gray','class' => 'w-full','wire:model.live' => ''.e($list_string).'.'.e($key).'.'.e($field).'','model' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($model ?? []),'disabled' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($disabled),'selected-label' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(method_exists($this, 'componentFieldLabel') ? $this->componentFieldLabel($key, $field) : null)]); ?>
+<?php $component->withAttributes(['label' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($title),'placeholder' => '---','mode' => 'gray','class' => 'w-full','wire:model.live' => ''.e($list_string).'.'.e($key).'.'.e($field).'','model' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($model ?? []),'disabled' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($disabled),'selected-label' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($selectedLabel)]); ?>
             <!--[if BLOCK]><![endif]--><?php if(!empty($searchField)): ?>
                 <?php if (isset($component)) { $__componentOriginal9364c0b92ee5ab519273634c79f86a27 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal9364c0b92ee5ab519273634c79f86a27 = $attributes; } ?>
@@ -295,15 +304,11 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php unset($__componentOriginald8ba2b4c22a13c55321e34443c386276); ?>
 <?php endif; ?>
         <?php
-            $rawFieldValue = data_get($this->{$list_string}[$key] ?? [], $field);
-            $selectedId = method_exists($this, 'componentFieldValue')
-                ? $this->componentFieldValue($key, $field)
-                : (is_array($rawFieldValue) ? ($rawFieldValue['id'] ?? null) : $rawFieldValue);
-            $fieldLabel = method_exists($this, 'componentFieldLabel')
-                ? $this->componentFieldLabel($key, $field)
-                : (is_array($rawFieldValue)
-                    ? ($rawFieldValue['name'] ?? __('Structure'))
-                    : (! empty($rawFieldValue) ? $rawFieldValue : __('Structure')));
+            $fallbackValue = data_get($this->{$list_string}[$key] ?? [], $field);
+            $selectedId = $selectedValue ?? (is_array($fallbackValue) ? ($fallbackValue['id'] ?? null) : $fallbackValue);
+            $fieldLabel = $selectedLabel ?? (is_array($fallbackValue)
+                    ? ($fallbackValue['name'] ?? __('Structure'))
+                    : (! empty($fallbackValue) ? $fallbackValue : __('Structure')));
         ?>
         <div class="relative w-full">
             <button @click="showStructures = !showStructures"

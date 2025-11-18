@@ -50,7 +50,7 @@ class AddOrder extends Component
 
             //insert order log personnels eger candidate dirse.Service cagir
             $tabel_no_list = $this->isCandidateOrder()
-                            ? (new ImportCandidateToPersonnel)->handle($this->components, $payload['status_id'])
+                            ? (new ImportCandidateToPersonnel)->handle($this->componentForms, $payload['status_id'])
                             : $_personnel_ids;
 
             //insert

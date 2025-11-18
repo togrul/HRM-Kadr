@@ -1,6 +1,6 @@
 @props([
     'model',
-    'listData' => "components",
+    'listData' => 'componentForms',
     'field' => "",
     'key' => 0,
     'isCoded' => false,

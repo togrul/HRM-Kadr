@@ -2,20 +2,26 @@
 
 namespace App\Livewire\Services\Menus;
 
-use App\Livewire\Traits\SelectListTrait;
+use App\Livewire\Traits\DropdownConstructTrait;
 use App\Models\Menu;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Spatie\Permission\Models\Permission;
 
 class AddMenu extends Component
 {
     use AuthorizesRequests;
-    use SelectListTrait;
+    use DropdownConstructTrait;
 
     public $title;
 
-    public $menu = [];
+    public $menu = [
+        'permission_id' => null,
+    ];
+
+    public string $searchPermission = '';
 
     protected function rules()
     {
@@ -25,7 +31,7 @@ class AddMenu extends Component
             'menu.order' => 'required|integer',
             'menu.url' => 'required|string|min:1',
             'menu.icon' => 'required|string|min:1',
-            'menu.permission_id.id' => 'required|integer|exists:permissions,id'
+            'menu.permission_id' => 'required|integer|exists:permissions,id',
         ];
     }
 
@@ -37,30 +43,54 @@ class AddMenu extends Component
             'menu.order' => __('Order'),
             'menu.url' => __('URL'),
             'menu.icon' => __('Icon'),
-            'menu.permission_id.id' => __('Permissions')
+            'menu.permission_id' => __('Permissions'),
         ];
+    }
+
+    #[Computed]
+    public function permissionOptions(): array
+    {
+        $selected = data_get($this->menu, 'permission_id');
+        $search = $this->dropdownSearch('searchPermission');
+
+        $base = Permission::query()
+            ->select('id', DB::raw('name as label'))
+            ->orderBy('name');
+
+        if ($search === '') {
+            return $this->cachedOptionsWithSelected(
+                cacheKey: 'menus:permissions',
+                base: $base,
+                selectedId: $selected,
+                limit: 80
+            );
+        }
+
+        return $this->optionsWithSelected(
+            base: $base,
+            searchCol: 'name',
+            searchTerm: $search,
+            selectedId: $selected,
+            limit: 50
+        );
     }
 
     public function store()
     {
         $this->validate();
 
-        $data = $this->menu;
-        $data['permission_id'] = $data['permission_id']['id'];
-        Menu::create($data);
+        Menu::create($this->menu);
 
         $this->dispatch('menuAdded', __('Menu was added successfully!'));
     }
 
     public function mount()
     {
-        // $this->authorize('manage-settings',$this->user);
         $this->title = __('Add menu');
     }
 
     public function render()
     {
-        $permissions = Permission::select('id','name')->get();
-        return view('livewire.services.menus.add-menu', compact('permissions'));
+        return view('livewire.services.menus.add-menu');
     }
 }

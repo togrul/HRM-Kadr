@@ -25,29 +25,25 @@
         @enderror
       </div>
        <div>
-            <x-select-list
-                :title="__('Role')"
+            <x-ui.select-dropdown
+                :label="__('Role')"
+                placeholder="---"
                 mode="gray"
-                :selected="$roleName"
-                name="roleId"
+                class="w-full"
+                wire:model.live="roleId"
+                :model="$this->roleOptions"
             >
-              <x-select-list-item
-                  wire:click="selectRole('---',-1)"
-                  :selected="'---' == $roleName"
-                  wire:model='roleId'
-              >
-                  ---
-              </x-select-list-item>
-              @foreach ($roles as $role)
-              <x-select-list-item
-                  wire:click="selectRole('{{ $role->name }}',{{ $role->id }})"
-                  :selected="$role->name === $roleName"
-                  wire:model='roleId'
-              >
-                   {{ $role->name }}
-              </x-select-list-item>
-              @endforeach
-          </x-select-list>
+                <x-livewire-input
+                    mode="gray"
+                    name="search.role"
+                    wire:model.live="searchRole"
+                    @click.stop="isOpen = true"
+                    x-on:input.stop="null"
+                    x-on:keyup.stop="null"
+                    x-on:keydown.stop="null"
+                    x-on:change.stop="null"
+                ></x-livewire-input>
+            </x-ui.select-dropdown>
         @error('roleId')
           <x-validation> {{ $message }} </x-validation>
         @enderror

@@ -1,5 +1,5 @@
 @props([
-    'list', // arrayin adi
+    'list', // array values (kept for BC)
     'field', // hansi columndursa
     'title', // inputun basligi
     'type', // deyisenin adi
@@ -9,7 +9,10 @@
     'searchField' => null,
     'isCoded' => false, // kodu yoxsa tam adi gelsin
     'row',
-    'disabled' => false
+    'disabled' => false,
+    'listProperty' => 'componentForms',
+    'selectedLabel' => null,
+    'selectedValue' => null,
 ])
 
 @php
@@ -22,7 +25,7 @@
         '$start_date','$end_date' => 'date-input'
     };
 
-    $list_string = 'components';
+    $list_string = $listProperty;
 @endphp
 
 @if($input == 'text-input')
@@ -51,7 +54,7 @@
             wire:model.live="{{ $list_string }}.{{ $key }}.{{ $field }}"
             :model="$model ?? []"
             :disabled="$disabled"
-            :selected-label="method_exists($this, 'componentFieldLabel') ? $this->componentFieldLabel($key, $field) : null"
+            :selected-label="$selectedLabel"
         >
             @if(!empty($searchField))
                 <x-livewire-input
@@ -76,15 +79,11 @@
     >
         <x-label for="orderForm.order_no">{{ $title }}</x-label>
         @php
-            $rawFieldValue = data_get($this->{$list_string}[$key] ?? [], $field);
-            $selectedId = method_exists($this, 'componentFieldValue')
-                ? $this->componentFieldValue($key, $field)
-                : (is_array($rawFieldValue) ? ($rawFieldValue['id'] ?? null) : $rawFieldValue);
-            $fieldLabel = method_exists($this, 'componentFieldLabel')
-                ? $this->componentFieldLabel($key, $field)
-                : (is_array($rawFieldValue)
-                    ? ($rawFieldValue['name'] ?? __('Structure'))
-                    : (! empty($rawFieldValue) ? $rawFieldValue : __('Structure')));
+            $fallbackValue = data_get($this->{$list_string}[$key] ?? [], $field);
+            $selectedId = $selectedValue ?? (is_array($fallbackValue) ? ($fallbackValue['id'] ?? null) : $fallbackValue);
+            $fieldLabel = $selectedLabel ?? (is_array($fallbackValue)
+                    ? ($fallbackValue['name'] ?? __('Structure'))
+                    : (! empty($fallbackValue) ? $fallbackValue : __('Structure')));
         @endphp
         <div class="relative w-full">
             <button @click="showStructures = !showStructures"

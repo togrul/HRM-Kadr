@@ -7,6 +7,7 @@ use App\Livewire\Traits\SideModalAction;
 use App\Models\Order;
 use App\Models\OrderLog;
 use App\Models\OrderStatus;
+use Illuminate\Support\Facades\Cache;
 use App\Models\Structure;
 use App\Services\GenerateWordReplaceContent;
 use App\Services\StructureService;
@@ -287,7 +288,11 @@ class AllOrders extends Component
     #[Isolate]
     public function getStatusesProperty()
     {
-        return OrderStatus::where('locale', config('app.locale'))->get();
+        $locale = config('app.locale');
+
+        return Cache::remember("order_statuses:{$locale}", now()->addMinutes(10), function () use ($locale) {
+            return OrderStatus::where('locale', $locale)->get();
+        });
     }
 
     public function mount()

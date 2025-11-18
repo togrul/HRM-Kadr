@@ -640,14 +640,14 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                         ?>
             <?php if (isset($component)) { $__componentOriginalb7c56d9f0bb75b99472ae2845823c8e9 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalb7c56d9f0bb75b99472ae2845823c8e9 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.ui.select-dropdown','data' => ['label' => __('Select component'),'placeholder' => '---','mode' => 'gray','class' => 'w-full','wire:model.live' => 'components.'.e($i).'.component_id','model' => $componentOptions]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.ui.select-dropdown','data' => ['label' => __('Select component'),'placeholder' => '---','mode' => 'gray','class' => 'w-full','wire:model.live' => 'componentForms.'.e($i).'.component_id','model' => $componentOptions]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('ui.select-dropdown'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['label' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(__('Select component')),'placeholder' => '---','mode' => 'gray','class' => 'w-full','wire:model.live' => 'components.'.e($i).'.component_id','model' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($componentOptions)]); ?>
+<?php $component->withAttributes(['label' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(__('Select component')),'placeholder' => '---','mode' => 'gray','class' => 'w-full','wire:model.live' => 'componentForms.'.e($i).'.component_id','model' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($componentOptions)]); ?>
 <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginalb7c56d9f0bb75b99472ae2845823c8e9)): ?>
@@ -658,7 +658,7 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 <?php $component = $__componentOriginalb7c56d9f0bb75b99472ae2845823c8e9; ?>
 <?php unset($__componentOriginalb7c56d9f0bb75b99472ae2845823c8e9); ?>
 <?php endif; ?>
-                        <!--[if BLOCK]><![endif]--><?php $__errorArgs = ["components.{$i}.component_id"];
+                        <!--[if BLOCK]><![endif]--><?php $__errorArgs = ["componentForms.{$i}.component_id"];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }

@@ -4,6 +4,7 @@ namespace App\Livewire\Notification;
 
 use Illuminate\Http\Response;
 use Illuminate\Notifications\DatabaseNotification;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -23,7 +24,10 @@ class Notifications extends Component
 
     public function getNotificationCount(): void
     {
-        $this->notificationCount = auth()->user()->unreadNotifications()->count();
+        $user = auth()->user();
+        $cacheKey = $this->cacheKey('count', $user->id);
+
+        $this->notificationCount = Cache::remember($cacheKey, 60, fn () => $user->unreadNotifications()->count());
 
         if($this->notificationCount > self::NOTIFICATION_TRESHOLD) {
             $this->notificationCount = self::NOTIFICATION_TRESHOLD.'+';
@@ -33,12 +37,14 @@ class Notifications extends Component
     #[On('getNotifications')]
     public function getNotifications(): void
     {
-        $this->notifications = auth()->user()
-            ->notifications()
+        $user = auth()->user();
+        $cacheKey = $this->cacheKey('list', $user->id);
+
+        $this->notifications = Cache::remember($cacheKey, 60, fn () => $user->notifications()
             ->orderBy('read_at')
             ->latest()
             ->take(self::NOTIFICATION_TRESHOLD)
-            ->get();
+            ->get());
 
         $this->isLoading = false;
     }
@@ -47,7 +53,9 @@ class Notifications extends Component
     {
         auth()->guest() && abort(Response::HTTP_FORBIDDEN);
 
-        auth()->user()->unreadNotifications->markAsRead();
+        $user = auth()->user();
+        $user->unreadNotifications->markAsRead();
+        $this->flushCache($user->id);
 
         $this->getNotificationCount();
         $this->getNotifications();
@@ -64,11 +72,23 @@ class Notifications extends Component
         };
 
         $notification->markAsRead();
+        $this->flushCache($notification->notifiable_id);
         return redirect()->route($route);
     }
 
     public function render()
     {
         return view('livewire.notification.notifications');
+    }
+
+    private function cacheKey(string $type, int $userId): string
+    {
+        return "notifications:{$type}:{$userId}";
+    }
+
+    private function flushCache(int $userId): void
+    {
+        Cache::forget($this->cacheKey('count', $userId));
+        Cache::forget($this->cacheKey('list', $userId));
     }
 }

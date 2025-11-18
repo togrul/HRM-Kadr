@@ -1,7 +1,7 @@
 <?php $attributes ??= new \Illuminate\View\ComponentAttributeBag; ?>
 <?php foreach($attributes->onlyProps([
     'model',
-    'listData' => "components",
+    'listData' => 'componentForms',
     'field' => "",
     'key' => 0,
     'isCoded' => false,
@@ -11,7 +11,7 @@
 } ?>
 <?php $attributes = $attributes->exceptProps([
     'model',
-    'listData' => "components",
+    'listData' => 'componentForms',
     'field' => "",
     'key' => 0,
     'isCoded' => false,
@@ -19,7 +19,7 @@
 ]); ?>
 <?php foreach (array_filter(([
     'model',
-    'listData' => "components",
+    'listData' => 'componentForms',
     'field' => "",
     'key' => 0,
     'isCoded' => false,

@@ -10,6 +10,7 @@ use App\Models\Position;
 use App\Models\Rank;
 use App\Models\Structure;
 use App\Services\StructureService;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
@@ -21,11 +22,22 @@ class OrderLookupService
 
     public function templates(?int $orderId, ?string $search = null): Collection
     {
-        return OrderType::query()
-            ->when($search, fn (Builder $query) => $query->where('name', 'LIKE', "%{$search}%"))
-            ->when($orderId, fn (Builder $query) => $query->where('order_id', $orderId))
-            ->orderBy('name')
-            ->get();
+        if ($search) {
+            return OrderType::query()
+                ->where('name', 'LIKE', "%{$search}%")
+                ->when($orderId, fn (Builder $query) => $query->where('order_id', $orderId))
+                ->orderBy('name')
+                ->get();
+        }
+
+        $cacheKey = 'order_lookup:templates:'.($orderId ?? 'all');
+
+        return Cache::remember($cacheKey, 600, function () use ($orderId) {
+            return OrderType::query()
+                ->when($orderId, fn (Builder $query) => $query->where('order_id', $orderId))
+                ->orderBy('name')
+                ->get();
+        });
     }
 
     public function components(?int $templateId): Collection
@@ -34,11 +46,13 @@ class OrderLookupService
             return collect();
         }
 
-        return Component::query()
-            ->with('orderType')
-            ->where('order_type_id', $templateId)
-            ->orderBy('name')
-            ->get();
+        return Cache::remember("order_lookup:components:{$templateId}", 600, function () use ($templateId) {
+            return Component::query()
+                ->with('orderType')
+                ->where('order_type_id', $templateId)
+                ->orderBy('name')
+                ->get();
+        });
     }
 
     public function personnels(bool $forCandidates, array $excludeIds, ?string $search = null): Collection
@@ -50,38 +64,53 @@ class OrderLookupService
 
     public function ranks(): Collection
     {
-        return Rank::query()
-            ->where('is_active', true)
-            ->orderBy('id')
-            ->get();
+        return Cache::remember('order_lookup:ranks', 600, function () {
+            return Rank::query()
+                ->where('is_active', true)
+                ->orderBy('id')
+                ->get();
+        });
     }
 
     public function mainStructures(): Collection
     {
-        return Structure::query()
-            ->where('code', 1)
-            ->orderBy('id')
-            ->get(['id', 'name', 'code']);
+        return Cache::remember('order_lookup:main_structures', 600, function () {
+            return Structure::query()
+                ->with('parent')
+                ->where('code', 1)
+                ->orderBy('id')
+                ->get();
+        });
     }
 
     public function structures(?string $search = null): Collection
     {
-        return Structure::query()
-            ->withRecursive('subs')
-            ->accessible()
-            ->when($search, fn (Builder $query) => $query->where('name', 'LIKE', "%{$search}%"))
-            ->whereNotNull('parent_id')
-            ->where('code', '<>', 0)
-            ->orderBy('code')
-            ->get();
+        if ($search) {
+            return $this->structureQuery()
+                ->where('name', 'LIKE', "%{$search}%")
+                ->get();
+        }
+
+        $accessible = implode('-', $this->structureService->getAccessibleStructures());
+        $cacheKey = 'order_lookup:structures:'.md5($accessible ?: 'all');
+
+        return Cache::remember($cacheKey, 600, fn () => $this->structureQuery()->get());
     }
 
     public function positions(?string $search = null): Collection
     {
-        return Position::query()
-            ->when($search, fn (Builder $query) => $query->where('name', 'LIKE', "%{$search}%"))
-            ->orderBy('name')
-            ->get(['id', 'name']);
+        if ($search) {
+            return Position::query()
+                ->where('name', 'LIKE', "%{$search}%")
+                ->orderBy('name')
+                ->get(['id', 'name']);
+        }
+
+        return Cache::remember('order_lookup:positions', 600, function () {
+            return Position::query()
+                ->orderBy('name')
+                ->get(['id', 'name']);
+        });
     }
 
     private function activePersonnelQuery(array $excludeIds, ?string $search): Builder
@@ -111,5 +140,15 @@ class OrderLookupService
             })
             ->whereNotIn('id', $excludeIds)
             ->where('status_id', 30);
+    }
+
+    private function structureQuery(): Builder
+    {
+        return Structure::query()
+            ->withRecursive('subs')
+            ->accessible()
+            ->whereNotNull('parent_id')
+            ->where('code', '<>', 0)
+            ->orderBy('code');
     }
 }

@@ -8,7 +8,7 @@ trait BladeDataPreparation
 {
     private function prepareDefaultBladeData(): array
     {
-        $_attrData = $this->components;
+        $_attrData = $this->componentForms;
         $_personnel_ids_list = collect($_attrData)->pluck('personnel_id')->toArray();
         $_personnel_ids = Personnel::find($_personnel_ids_list)->pluck('tabel_no')->toArray();
 
@@ -19,7 +19,7 @@ trait BladeDataPreparation
     private function prepareBusinessTripBladeData(): array
     {
         $_attrData = $this->fillPersonnelsToComponents($this->selectedBlade);
-        $_personnel_ids = $this->selected_personnel_list['personnels'];
+        $_personnel_ids = $this->selectedPersonnel->personnels;
         $_component_ids = collect($_attrData)
             ->unique('row')
             ->values()
@@ -32,7 +32,7 @@ trait BladeDataPreparation
     private function prepareVacationBladeData(): array
     {
         $_attrData = $this->fillPersonnelsToComponents($this->selectedBlade);
-        $_personnel_ids = $this->selected_personnel_list['personnels'];
+        $_personnel_ids = $this->selectedPersonnel->personnels;
         $_component_ids = collect($_attrData)
             ->unique('days')
             ->values()

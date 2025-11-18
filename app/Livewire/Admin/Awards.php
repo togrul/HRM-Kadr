@@ -4,7 +4,7 @@ namespace App\Livewire\Admin;
 
 use App\Livewire\Traits\Admin\AdminCrudTrait;
 use App\Livewire\Traits\Admin\CallSwalTrait;
-use App\Livewire\Traits\SelectListTrait;
+use App\Livewire\Traits\DropdownConstructTrait;
 use App\Models\Award;
 use App\Models\AwardType;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -18,10 +18,11 @@ class Awards extends Component
     use AdminCrudTrait;
     use AuthorizesRequests;
     use CallSwalTrait;
-    use SelectListTrait;
+    use DropdownConstructTrait;
     use WithPagination;
 
     public string $selectedType;
+    public string $searchAwardType = '';
 
     public bool $showChild = false;
     public $childModel = null;
@@ -31,7 +32,7 @@ class Awards extends Component
         return [
             'form.id' => 'required|integer|min:1|unique:awards,id'.($this->model ? ','.$this->form['id'] : ''),
             'form.name' => 'required|string|min:2',
-            'form.award_type_id.id' => 'required|integer|exists:award_types,id',
+            'form.award_type_id' => 'required|integer|exists:award_types,id',
         ];
     }
 
@@ -40,7 +41,17 @@ class Awards extends Component
         return [
             'form.id' => __('ID'),
             'form.name' => __('Name'),
-            'form.award_type_id.id' => __('Type'),
+            'form.award_type_id' => __('Type'),
+        ];
+    }
+
+    protected function formDefaults(): array
+    {
+        return [
+            'id' => null,
+            'name' => '',
+            'award_type_id' => null,
+            'is_foreign' => false,
         ];
     }
 
@@ -57,15 +68,15 @@ class Awards extends Component
             ? Award::with('type')->findOrFail($id)
             : null;
 
+        $this->form = $this->formDefaults();
+
         if ($this->model) {
-            $this->form = $this->model->toArray();
-            $this->form['award_type_id'] = $this->form['type'];
-            $this->form['is_foreign'] = $this->form['is_foreign'] ? true : false;
-        } else {
-            $this->form = [];
+            $this->form['id'] = $this->model->id;
+            $this->form['name'] = $this->model->name;
+            $this->form['award_type_id'] = $this->model->award_type_id;
+            $this->form['is_foreign'] = (bool) $this->model->is_foreign;
         }
 
-        unset($this->form['type']);
         $this->isAdded = true;
         $this->showChild = false;
     }
@@ -98,7 +109,6 @@ class Awards extends Component
     {
         $this->validate();
 
-        $this->form['award_type_id'] = $this->form['award_type_id']['id'];
         $this->form['is_foreign'] = $this->form['is_foreign'] ?? false;
         $this->model
             ? $this->model->update($this->form)
@@ -116,6 +126,22 @@ class Awards extends Component
         $this->isAdded = false;
     }
 
+    public function awardTypeOptions(): array
+    {
+        $selected = data_get($this->form, 'award_type_id');
+
+        $base = AwardType::query()
+            ->select('id', 'name as label')
+            ->orderBy('name');
+
+        return $this->optionsWithSelected(
+            $base,
+            'name',
+            $this->dropdownSearch('searchAwardType'),
+            $selected,
+            80
+        );
+    }
 
     public function render()
     {

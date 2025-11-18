@@ -6,14 +6,13 @@ use App\Enums\TransportationEnum;
 use App\Models\Order;
 use App\Models\Personnel;
 use App\Models\Weapon;
-use Illuminate\Support\Arr;
 
 class OrderCollectionListsService
 {
     public function __construct(
         public ?string $selectedBlade,
         public ?string $personnel_name,
-        public ?array $selected_personnel_list
+        public array $selectedPersonnelNumbers = []
     ) {}
 
     public function handle(): array
@@ -70,7 +69,7 @@ class OrderCollectionListsService
                  })
                  ->active()
                  ->whereNull('deleted_at')
-                 ->whereNotIn('tabel_no', Arr::get($this->selected_personnel_list, 'personnels', []))
+                 ->whereNotIn('tabel_no', $this->selectedPersonnelNumbers)
                  ->get()
              : [];
     }

@@ -32,8 +32,8 @@ class EditOrder extends Component
         $this->initializeOrderData();
 
         $this->originalComponents = match ($this->selectedBlade) {
-            'default' => $this->components,
-            'vacation','business-trips' => $this->selected_personnel_list,
+            'default' => $this->componentForms,
+            'vacation','business-trips' => $this->selectedPersonnel->rows,
         };
     }
 
@@ -51,7 +51,7 @@ class EditOrder extends Component
         $this->processOrderAttributes();
 
         if ($this->isSpecialBlade()) {
-            $this->selected_personnel_list['personnels'] = $this->orderModelData->personnels->pluck('tabel_no')->all();
+            $this->selectedPersonnel->personnels = $this->orderModelData->personnels->pluck('tabel_no')->all();
         }
 
         $this->originalComponents = $this->determineOriginalComponents();
@@ -65,8 +65,8 @@ class EditOrder extends Component
     private function determineOriginalComponents(): array
     {
         return match ($this->selectedBlade) {
-            'default' => $this->components,
-            'vacation', 'business-trips' => $this->selected_personnel_list,
+            'default' => $this->componentForms,
+            'vacation', 'business-trips' => $this->selectedPersonnel->rows,
         };
     }
 
@@ -114,7 +114,7 @@ class EditOrder extends Component
         $rowNumber = $attributes->row_number;
         $component = $this->orderModelData->components[$rowNumber];
 
-        $this->components[$rowNumber]['component_id'] = $component->id;
+        $this->componentForms[$rowNumber]['component_id'] = $component->id;
 
         foreach ($attributes->attributes as $ka => $attr) {
             $this->processAttribute($rowNumber, $ka, $attr);
@@ -126,7 +126,7 @@ class EditOrder extends Component
     private function setSelectedPersonnelList(): void
     {
         if ($this->isSpecialBlade()) {
-            $this->selected_personnel_list = $this->mapPersonnelAttributes();
+            $this->selectedPersonnel->rows = $this->mapPersonnelAttributes();
         }
     }
 
@@ -160,7 +160,7 @@ class EditOrder extends Component
         $colData = $this->formatAttributeValue($key, $attr);
 
         if ($this->isDefaultBlade() || $this->isValidComponentColumn($colData['columnName'])) {
-            $this->components[$rowNumber][$colData['columnName']] = $colData['columnValue'];
+            $this->componentForms[$rowNumber][$colData['columnName']] = $colData['columnValue'];
         }
     }
 
@@ -267,7 +267,7 @@ class EditOrder extends Component
 
         $this->personnelPersister->syncAssignments(
             $this->orderModelData,
-            $this->selected_personnel_list['personnels'],
+            $this->selectedPersonnel->personnels,
             $componentIds
         );
     }

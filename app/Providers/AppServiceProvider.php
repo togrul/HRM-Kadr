@@ -51,10 +51,12 @@ class AppServiceProvider extends ServiceProvider
     {
         // Share menus with the header view
         view()->composer('includes.header', function ($view) {
-            $menus = Menu::with('permission')
-                ->active()
-                ->ordered()
-                ->get();
+            $menus = Cache::rememberForever('menus:header', function () {
+                return Menu::with('permission')
+                    ->active()
+                    ->ordered()
+                    ->get();
+            });
 
             $view->with('menus', $menus);
         });

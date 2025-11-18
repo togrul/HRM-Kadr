@@ -190,12 +190,12 @@
 
       <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $model; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $idx => $opt): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
         <li
-          wire:key="<?php echo e($uid); ?>-<?php echo e($opt['id']); ?>"
+          wire:key="<?php echo e($uid); ?>-<?php echo e(data_get($opt,'id')); ?>"
           class="group relative py-2 pl-3 pr-9 cursor-pointer select-none hover:bg-blue-400 bg-neutral-50 rounded-lg"
-          @click="select('<?php echo e($opt['id']); ?>', '<?php echo e(e($opt['label'])); ?>')"
+          @click="select('<?php echo e(data_get($opt,'id')); ?>', '<?php echo e(e(data_get($opt,'label'))); ?>')"
         >
           <div class="flex items-center">
-            <span class="block ml-3 truncate"><?php echo e($opt['label']); ?></span>
+            <span class="block ml-3 truncate"><?php echo e(data_get($opt,'label')); ?></span>
           </div>
         </li>
       <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->

@@ -10,11 +10,9 @@ class AddStaff extends Component
 {
     use StaffCrud;
 
-    public $structureData;
-
     protected function checkStructure()
     {
-        return StaffSchedule::where('structure_id', $this->structureData[0]['structure_id'])->first();
+        return StaffSchedule::where('structure_id', $this->structureId)->first();
     }
 
     public function store()
@@ -29,7 +27,10 @@ class AddStaff extends Component
             return;
         }
 
-        $this->validate();
+        $this->validate(array_merge(
+            $this->rules(),
+            ['structureId' => 'required|int|exists:structures,id']
+        ));
 
         foreach ($this->staff as $sta) {
             $data = $sta;
@@ -44,14 +45,6 @@ class AddStaff extends Component
     {
         $this->authorize('add-staff');
         $this->title = __('New staff');
-        $this->structureData = [
-            [
-                'structure_id' => -1,
-                'structure' => [
-                    'id' => -1,
-                    'name' => '---',
-                ],
-            ],
-        ];
+        $this->structureId = null;
     }
 }

@@ -142,10 +142,10 @@
                 placeholder="---"
                 mode="gray"
                 class="w-full"
-                wire:model.live="components.{{ $i }}.component_id"
+                wire:model.live="componentForms.{{ $i }}.component_id"
                 :model="$componentOptions"
             />
-                        @error("components.{$i}.component_id")
+                        @error("componentForms.{$i}.component_id")
                             <x-validation> {{ $message }} </x-validation>
                         @enderror
                     </div>

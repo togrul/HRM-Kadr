@@ -2,23 +2,26 @@
 
 namespace App\Livewire\Services\Users;
 
+use App\Livewire\Traits\DropdownConstructTrait;
 use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Livewire\Attributes\Computed;
 use Livewire\Component;
+use Spatie\Permission\Models\Role;
 
 class AddUser extends Component
 {
     use AuthorizesRequests;
+    use DropdownConstructTrait;
 
     public $title;
 
     public $user = [];
 
-    public $roleId;
+    public ?int $roleId = null;
 
-    public $roleName;
+    public string $searchRole = '';
 
     protected function rules()
     {
@@ -42,22 +45,19 @@ class AddUser extends Component
         ];
     }
 
-    public function selectRole($name, $id)
-    {
-        $this->roleId = $id;
-        $this->roleName = $name;
-    }
-
     public function store()
     {
         $this->validate();
 
         $this->user['password'] = Hash::make($this->user['password']);
 
-        DB::transaction(function () {
-            $user = User::create($this->user);
-            $user->assignRole($this->roleName);
-        });
+        $user = User::create($this->user);
+        if ($this->roleId) {
+            $role = Role::find($this->roleId);
+            if ($role) {
+                $user->assignRole($role->name);
+            }
+        }
 
         $this->dispatch('userAdded', __('User was added successfully!'));
     }
@@ -66,15 +66,39 @@ class AddUser extends Component
     {
         // $this->authorize('manage-settings',$this->user);
         $this->title = __('Add user');
-        $this->roleName = '---';
+        $this->roleId = null;
     }
 
     public function render()
     {
-        $roles = DB::table('roles')
-            ->select('id', 'name')
-            ->get();
+        return view('livewire.services.users.add-user');
+    }
 
-        return view('livewire.services.users.add-user', compact('roles'));
+    #[Computed]
+    public function roleOptions(): array
+    {
+        $selected = $this->roleId;
+        $search = $this->dropdownSearch('searchRole');
+
+        $base = Role::query()
+            ->select('id', \DB::raw('name as label'))
+            ->orderBy('name');
+
+        if ($search === '') {
+            return $this->cachedOptionsWithSelected(
+                cacheKey: 'users:roles',
+                base: $base,
+                selectedId: $selected,
+                limit: 80
+            );
+        }
+
+        return $this->optionsWithSelected(
+            base: $base,
+            searchCol: 'name',
+            searchTerm: $search,
+            selectedId: $selected,
+            limit: 50
+        );
     }
 }

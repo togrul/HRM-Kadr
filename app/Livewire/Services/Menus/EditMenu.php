@@ -2,24 +2,25 @@
 
 namespace App\Livewire\Services\Menus;
 
-use App\Livewire\Traits\Helpers\FillComplexArrayTrait;
-use App\Livewire\Traits\SelectListTrait;
 use App\Models\Menu;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Component;
+use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Permission;
+use App\Livewire\Traits\DropdownConstructTrait;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class EditMenu extends Component
 {
     use AuthorizesRequests;
-    use SelectListTrait;
-    use FillComplexArrayTrait;
+    use DropdownConstructTrait;
 
     public $menuModel;
 
     public $title;
 
     public $menu;
+
+    public string $searchPermission = '';
 
     protected function rules()
     {
@@ -29,7 +30,7 @@ class EditMenu extends Component
             'menu.order' => 'required|integer',
             'menu.url' => 'required|string|min:1',
             'menu.icon' => 'required|string|min:1',
-            'menu.permission_id.id' => 'required|integer|exists:permissions,id'
+            'menu.permission_id' => 'required|integer|exists:permissions,id'
         ];
     }
 
@@ -41,7 +42,7 @@ class EditMenu extends Component
             'menu.order' => __('Order'),
             'menu.url' => __('URL'),
             'menu.icon' => __('Icon'),
-            'menu.permission_id.id' => __('Permissions')
+            'menu.permission_id' => __('Permissions')
         ];
     }
 
@@ -56,31 +57,48 @@ class EditMenu extends Component
         $this->menu['color'] = $this->menuModel->color;
         $this->menu['order'] = $this->menuModel->order;
         $this->menu['icon'] = $this->menuModel->icon;
-        $this->menu['is_active'] = $this->menuModel->is_active == 1 ? true : false;
-        $this->handleRelatedEntity(
-            entity: 'permission',
-            field: 'permission_id',
-            fillTo: 'menu',
-            getFrom: $this->menuModel->toArray(),
-            titleField: 'name',
-            hasSelectedField: false
-        );
+        $this->menu['is_active'] = $this->menuModel->is_active == 1;
+        $this->menu['permission_id'] = $this->menuModel->permission_id;
     }
 
     public function store()
     {
         $this->validate();
-        $data = $this->menu;
-        $data['permission_id'] = $data['permission_id']['id'];
-        $this->menuModel->update($data);
+        $this->menuModel->update($this->menu);
 
         $this->dispatch('menuAdded', __('Menu was updated successfully!'));
     }
 
     public function render()
     {
-        $permissions = Permission::select('id','name')->get();
+        return view('livewire.services.menus.edit-menu');
+    }
 
-        return view('livewire.services.menus.edit-menu', compact('permissions'));
+    #[\Livewire\Attributes\Computed]
+    public function permissionOptions(): array
+    {
+        $selected = data_get($this->menu, 'permission_id');
+        $search = $this->dropdownSearch('searchPermission');
+
+        $base = Permission::query()
+            ->select('id', DB::raw('name as label'))
+            ->orderBy('name');
+
+        if ($search === '') {
+            return $this->cachedOptionsWithSelected(
+                cacheKey: 'menus:permissions',
+                base: $base,
+                selectedId: $selected,
+                limit: 80
+            );
+        }
+
+        return $this->optionsWithSelected(
+            base: $base,
+            searchCol: 'name',
+            searchTerm: $search,
+            selectedId: $selected,
+            limit: 50
+        );
     }
 }
