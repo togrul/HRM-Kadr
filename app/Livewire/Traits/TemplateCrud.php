@@ -3,14 +3,15 @@
 namespace App\Livewire\Traits;
 
 use App\Models\OrderCategory;
+use App\Traits\NormalizesDropdownPayloads;
 use Illuminate\Support\Facades\DB;
 use Livewire\WithFileUploads;
 use Livewire\Attributes\Computed;
 
 trait TemplateCrud
 {
-    use SelectListTrait;
     use DropdownConstructTrait;
+    use NormalizesDropdownPayloads;
     use WithFileUploads;
 
     public $template_data = [

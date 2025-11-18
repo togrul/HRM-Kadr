@@ -206,9 +206,11 @@ class EditOrder extends Component
             return $data;
         }
 
-        DB::transaction(function () use ($data) {
-            $this->updateOrder();
-            $this->manageComponentsAndAttributes(data: $data);
+        $payload = $this->orderForm->payload();
+
+        DB::transaction(function () use ($data, $payload) {
+            $this->updateOrder($payload);
+            $this->manageComponentsAndAttributes(data: $data, orderPayload: $payload);
         });
 
         $this->dispatch('orderAdded', __('Order was updated successfully!'));
@@ -216,10 +218,8 @@ class EditOrder extends Component
         return null;
     }
 
-    private function updateOrder(): void
+    private function updateOrder(array $payload): void
     {
-        $payload = $this->orderForm->payload();
-
         $this->orderModelData->update([
             'order_type_id' => $payload['order_type_id'],
             'order_id' => $payload['order_id'],
@@ -232,7 +232,7 @@ class EditOrder extends Component
         ]);
     }
 
-    private function manageComponentsAndAttributes(array $data): void
+    private function manageComponentsAndAttributes(array $data, array $orderPayload): void
     {
         $this->componentPersister->sync($this->orderModelData, $data['component_ids'], true);
 
@@ -240,7 +240,7 @@ class EditOrder extends Component
         $this->saveAttribute($this->orderModelData, $data['attributes'], 'update');
 
         if ($this->isDefaultBlade()) {
-            $this->handleDefaultBladePersonnel($data);
+            $this->handleDefaultBladePersonnel($data, $orderPayload);
         } else {
             $this->handleSpecialBladePersonnel($data);
         }
@@ -248,13 +248,13 @@ class EditOrder extends Component
         (new OrderConfirmedService($this->orderModelData))->handle($data['personnel_ids'], 'update');
     }
 
-    private function handleDefaultBladePersonnel(array $data): void
+    private function handleDefaultBladePersonnel(array $data, array $orderPayload): void
     {
         $this->personnelPersister->attachFromVacancies(
             $this->orderModelData,
             $data['vacancy_list'],
             $this->isCandidateOrder(),
-            $payload['status_id']
+            $orderPayload['status_id']
         );
     }
 

@@ -156,6 +156,10 @@
 49. **Structure Cache Invalidation**
   - `StructureObserver` now clears every dropdown/view cache that depends on the tree (`staff:structures`, `candidate:structures`, `businessTrips:structures`, and the order lookup main-structure cache) whenever a structure is created/updated/deleted, so new entries show up immediately without a manual `cache:clear`.
   - Fixed the model attribute to use Laravel’s `#[ObservedBy(StructureObserver::class)]` syntax _and_ registered the observer inside `AppServiceProvider` to ensure it’s wired even on older Laravel builds; previously the observer never fired so caches stayed stale.
+50. **Dropdown Cache Observers & Tooling**
+  - Added `NormalizesDropdownPayloads` so every component/service that still needs `modifyArray()` can mix in that tiny helper without dragging the legacy SelectList behaviour around; the old `<x-select-list>` components and trait were removed entirely.
+  - Hooked the lookup tables (`CountryTranslation`, `City`, `Position`, `Disability`, `RankReason`, `SocialOrigin`, `EducationDegree`, `WorkNorm`) into small observers that call `CallPersonnelInfo::forgetCacheKey(...)` (plus custom keys like `staff:positions` and `city:baki`), which keeps dropdown caches in sync with admin CRUD changes.
+  - Dropped a `psysh.php` config so Artisan Tinker writes its history under `storage/logs`, and updated `.gitignore` to exclude `storage/framework/{cache,sessions,views}` along with the PsySH history file—run `git rm -r --cached storage/framework/views` locally once to purge the tracked cache files (index.lock creation is blocked in this sandbox).
 
 ## Next Ideas
 - Verify Step 5–8 UX once more (manual or automated) to ensure draft detection still covers every branch.

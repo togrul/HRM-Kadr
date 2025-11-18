@@ -4,14 +4,15 @@ namespace App\Livewire\Traits;
 
 use App\Models\OrderType;
 use App\Models\Rank;
+use App\Traits\NormalizesDropdownPayloads;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 
 trait ComponentCrud
 {
-    use SelectListTrait;
     use DropdownConstructTrait;
+    use NormalizesDropdownPayloads;
 
     public $component = [];
 

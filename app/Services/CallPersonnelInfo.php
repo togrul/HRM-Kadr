@@ -40,6 +40,12 @@ class CallPersonnelInfo
         }
     }
 
+    public static function forgetCacheKey(string $prefix, $suffix = null): void
+    {
+        $service = resolve(static::class);
+        Cache::forget($service->cacheKey($prefix, $suffix));
+    }
+
     public function getAll($isDisability, $_this): array
     {
         $nationalities = $this->rememberCollection(

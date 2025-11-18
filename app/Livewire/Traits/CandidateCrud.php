@@ -5,6 +5,7 @@ namespace App\Livewire\Traits;
 use App\Concerns\LoadsAppealStatuses;
 use App\Enums\AttitudeMilitaryEnum;
 use App\Models\Structure;
+use App\Traits\NormalizesDropdownPayloads;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
@@ -12,8 +13,8 @@ use Livewire\Attributes\Computed;
 trait CandidateCrud
 {
     use LoadsAppealStatuses;
-    use SelectListTrait;
     use DropdownConstructTrait;
+    use NormalizesDropdownPayloads;
 
     public $candidate = [];
 

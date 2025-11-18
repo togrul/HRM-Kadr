@@ -3,7 +3,6 @@
 namespace App\Livewire\Services\Ranks;
 
 use App\Livewire\Forms\RankForm;
-use App\Livewire\Traits\SelectListTrait;
 use App\Livewire\Traits\DropdownConstructTrait;
 use App\Models\Rank;
 use App\Models\RankCategory;
@@ -13,7 +12,6 @@ use Livewire\Component;
 
 class EditRank extends Component
 {
-    use SelectListTrait;
     use DropdownConstructTrait;
     public string $title;
 

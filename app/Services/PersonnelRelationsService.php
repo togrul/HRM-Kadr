@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Livewire\Traits\SelectListTrait;
+use App\Traits\NormalizesDropdownPayloads;
 use App\Models\Personnel;
 use App\Models\PersonnelAward;
 use App\Models\PersonnelCard;
@@ -24,7 +24,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class PersonnelRelationsService
 {
-    use SelectListTrait;
+    use NormalizesDropdownPayloads;
 
     /**
      * @param  array<string, mixed>  $payloads
@@ -258,4 +258,3 @@ class PersonnelRelationsService
         return $value !== null && $value !== '';
     }
 }
-

@@ -8,8 +8,8 @@ use App\Livewire\Traits\Information\DisposalTrait;
 use App\Livewire\Traits\Information\EducationRequestTrait;
 use App\Livewire\Traits\Information\MasterDegreeTrait;
 use App\Livewire\Traits\Information\PensionCardTrait;
-use App\Livewire\Traits\SelectListTrait;
 use App\Livewire\Traits\DropdownConstructTrait;
+use App\Traits\NormalizesDropdownPayloads;
 use App\Models\Personnel;
 use App\Models\Rank;
 use Illuminate\Support\Facades\DB;
@@ -29,8 +29,8 @@ class Information extends Component
     use MasterDegreeTrait;
     use FillComplexArrayTrait;
     use PensionCardTrait;
-    use SelectListTrait;
     use DropdownConstructTrait;
+    use NormalizesDropdownPayloads;
 
     public string $title;
 

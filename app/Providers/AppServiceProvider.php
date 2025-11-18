@@ -2,11 +2,27 @@
 
 namespace App\Providers;
 
+use App\Models\City;
+use App\Models\CountryTranslation;
+use App\Models\EducationDegree;
 use App\Models\Menu;
+use App\Models\Position;
+use App\Models\RankReason;
 use App\Models\Setting;
+use App\Models\SocialOrigin;
 use App\Models\Structure;
+use App\Models\WorkNorm;
+use App\Models\Disability;
+use App\Observers\CityObserver;
+use App\Observers\CountryTranslationObserver;
+use App\Observers\EducationDegreeObserver;
+use App\Observers\PositionObserver;
+use App\Observers\RankReasonObserver;
 use App\Observers\SettingsObserver;
+use App\Observers\SocialOriginObserver;
 use App\Observers\StructureObserver;
+use App\Observers\WorkNormObserver;
+use App\Observers\DisabilityObserver;
 use App\Services\NumberToWordsService;
 use App\Services\StructureService;
 use Illuminate\Database\Eloquent\Builder;
@@ -48,6 +64,14 @@ class AppServiceProvider extends ServiceProvider
     {
         Setting::observe(SettingsObserver::class);
         Structure::observe(StructureObserver::class);
+        CountryTranslation::observe(CountryTranslationObserver::class);
+        City::observe(CityObserver::class);
+        Position::observe(PositionObserver::class);
+        Disability::observe(DisabilityObserver::class);
+        RankReason::observe(RankReasonObserver::class);
+        SocialOrigin::observe(SocialOriginObserver::class);
+        EducationDegree::observe(EducationDegreeObserver::class);
+        WorkNorm::observe(WorkNormObserver::class);
     }
 
     private function registerViewComposers(): void

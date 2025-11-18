@@ -14,6 +14,7 @@ use App\Models\CountryTranslation;
 use App\Services\CalculateSeniorityService;
 use App\Services\EducationDurationService;
 use App\Services\CallPersonnelInfo;
+use App\Traits\NormalizesDropdownPayloads;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\Isolate;
@@ -25,7 +26,7 @@ trait PersonnelCrud
     use FillComplexArrayTrait;
     use PersonnelDropdownOptions;
     use PersonnelValidationTrait;
-    use SelectListTrait;
+    use NormalizesDropdownPayloads;
     use WithFileUploads;
 
     public $title;
