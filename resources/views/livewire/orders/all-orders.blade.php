@@ -18,9 +18,9 @@ Livewire.hook('message.processed', (message, component) => {
     </x-slot>
     {{-- end sidebar --}}
 
-    <div class="flex flex-col space-y-4 px-6 py-4">
-        <div class="flex justify-between items-center">
-            <div class="flex flex-col items-center justify-between sm:flex-row filter bg-white py-2 px-2 rounded-xl">
+    <div class="flex flex-col px-6 py-4 space-y-4">
+        <div class="flex items-center justify-between">
+            <div class="flex flex-col items-center justify-between px-2 py-2 bg-white sm:flex-row filter rounded-xl">
                 <x-filter.nav>
                     <x-filter.item wire:click.prevent="setStatus('all')" :active="$status === 'all'">
                         {{ __('All') }}
@@ -41,20 +41,20 @@ Livewire.hook('message.processed', (message, component) => {
                 <div class="flex space-x-4">
                     @can('add-orders')
                         <button wire:click="openSideMenu('add-order',{{ $selectedOrder }})"
-                            class="flex items-center justify-center rounded-xl w-12 h-12 transition-all duration-300 hover:bg-blue-50"
+                            class="flex items-center justify-center w-12 h-12 transition-all duration-300 rounded-xl hover:bg-blue-50"
                             type="button">
                             @include('components.icons.add-file')
                         </button>
                     @endcan
                     @can('export-orders')
                         <button wire:click.prevent="exportExcel"
-                            class="flex items-center justify-center rounded-xl w-12 h-12 transition-all duration-300 hover:bg-green-50"
+                            class="flex items-center justify-center w-12 h-12 transition-all duration-300 rounded-xl hover:bg-green-50"
                             type="button">
                             <x-icons.excel-icon />
                         </button>
 
                         <button wire:click.prevent="wordEdit"
-                            class="flex items-center justify-center rounded-xl w-12 h-12 transition-all duration-300 hover:bg-rose-50"
+                            class="flex items-center justify-center w-12 h-12 transition-all duration-300 rounded-xl hover:bg-rose-50"
                             type="button">
                             @include('components.icons.print-file', [
                                 'color' => 'text-rose-500',
@@ -67,7 +67,7 @@ Livewire.hook('message.processed', (message, component) => {
             </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 lg:grid-cols-4">
+        <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
             <div class="flex flex-col">
                 <x-label for="search.order_no">{{ __('Search') }}</x-label>
                 <x-livewire-input mode="gray" name="search.order_no"
@@ -75,7 +75,7 @@ Livewire.hook('message.processed', (message, component) => {
             </div>
             <div class="flex flex-col lg:col-span-2">
                 <x-label for="search.given_date">{{ __('Given date') }}</x-label>
-                <div class="flex space-x-1 items-center">
+                <div class="flex items-center space-x-1">
                     <x-pikaday-input mode="gray" name="search.given_date.min" format="Y-MM-DD"
                         wire:model.live="search.given_date.min">
                         <x-slot name="script">
@@ -117,12 +117,16 @@ Livewire.hook('message.processed', (message, component) => {
 
                                 <x-table.td>
                                     <div class="flex flex-col space-y-1">
-                                        <span class="text-sm font-medium text-blue-500">
+                                        <span class="px-3 py-1 text-xs font-medium text-white bg-blue-600 rounded-lg w-max">
                                             {{ $_order->order_no }}
                                         </span>
-                                        <div class="flex space-x-1 items-center">
+                                    </div>
+                                </x-table.td>
+
+                                <x-table.td>
+                                   <div class="flex items-center space-x-1">
                                             <span
-                                                class="text-sm shadow-sm font-medium px-3 py-1 rounded-lg bg-teal-50 text-teal-600 border border-teal-200 flex justify-center items-center">
+                                                class="flex items-center justify-center px-3 py-1 text-xs font-medium text-teal-600 uppercase border border-teal-200 rounded-lg shadow-sm bg-teal-50">
                                                 {{ $_order->order->name }}
                                             </span>
                                             <span>
@@ -134,11 +138,10 @@ Livewire.hook('message.processed', (message, component) => {
                                                 </svg>
                                             </span>
                                             <span
-                                                class="text-sm shadow-sm font-medium px-2 py-1 rounded-lg border border-neutral-200 bg-neutral-100 text-neutral-500 flex justify-center items-center">
+                                                class="flex items-center justify-center px-2 py-1 text-xs font-normal uppercase border rounded-lg shadow-sm medium border-neutral-200 bg-neutral-100 text-neutral-500">
                                                 {{ $_order->orderType->name }}
                                             </span>
                                         </div>
-                                    </div>
                                 </x-table.td>
 
                                 <x-table.td>
@@ -166,8 +169,8 @@ Livewire.hook('message.processed', (message, component) => {
                                 </x-table.td>
 
                                 <x-table.td>
-                                    <div class="flex flex-col space-y-1">
-                                        <span class="text-sm font-semibold text-gray-900">
+                                    <div class="flex flex-col space-y-0">
+                                        <span class="text-sm font-medium text-gray-900">
                                             {{ $_order->given_by }}
                                         </span>
                                         <span class="text-sm font-medium text-gray-500">
@@ -192,7 +195,7 @@ Livewire.hook('message.processed', (message, component) => {
                                     @can('export-orders')
                                         @if ($_order->order->blade != \App\Models\Order::BLADE_BUSINESS_TRIP)
                                             <button wire:click="printOrder('{{ $_order->order_no }}')"
-                                                class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 bg-teal-50 hover:bg-teal-100 hover:text-gray-700">
+                                                class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg bg-teal-50 hover:bg-teal-100 hover:text-gray-700">
                                                 @include('components.icons.print-file', [
                                                     'color' => 'text-teal-500',
                                                     'hover' => 'text-teal-600',
@@ -206,14 +209,14 @@ Livewire.hook('message.processed', (message, component) => {
                                     @if ($status != 'deleted')
                                         @can('edit-orders')
                                             <button wire:click="openSideMenu('edit-order','{{ $_order->order_no }}')"
-                                                class="appearance-none flex items-center justify-center w-8 h-8 text-xs font-medium uppercase rounded-lg text-gray-500 bg-gray-100 hover:bg-gray-200 hover:text-gray-700">
+                                                class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase bg-gray-100 rounded-lg appearance-none hover:bg-gray-200 hover:text-gray-700">
                                                 @include('components.icons.document-icon')
                                             </button>
                                         @endcan
                                     @else
                                         @can('edit-orders')
                                             <button wire:click="restoreData('{{ $_order->order_no }}')"
-                                                class="flex items-center justify-center w-9 h-9 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 bg-teal-50 hover:bg-teal-100 hover:text-gray-700">
+                                                class="flex items-center justify-center text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg w-9 h-9 bg-teal-50 hover:bg-teal-100 hover:text-gray-700">
                                                 @include('components.icons.recover', [
                                                     'color' => 'text-teal-500',
                                                     'hover' => 'text-teal-600',
@@ -227,7 +230,7 @@ Livewire.hook('message.processed', (message, component) => {
                                     @if ($status != 'deleted')
                                         @can('delete-orders')
                                             <button wire:click="setDeleteOrder('{{ $_order->order_no }}')"
-                                                class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-100 hover:text-gray-700">
+                                                class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-100 hover:text-gray-700">
                                                 @include('components.icons.delete-icon')
                                             </button>
                                         @endcan
@@ -235,7 +238,7 @@ Livewire.hook('message.processed', (message, component) => {
                                         @can('delete-orders')
                                             <button wire:click="forceDeleteData('{{ $_order->order_no }}')"
                                                 wire:confirm="{{ __('Are you sure you want to remove this data?') }}"
-                                                class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-50 hover:text-gray-700">
+                                                class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700">
                                                 @include('components.icons.force-delete')
                                             </button>
                                         @endcan

@@ -63,6 +63,7 @@ class AllOrders extends Component
         return [
             __('#'),
             __('Order #'),
+            __('Type'),
             __('Given date'),
             __('Given by'),
             __('Status'),

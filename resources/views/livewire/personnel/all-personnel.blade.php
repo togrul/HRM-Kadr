@@ -57,7 +57,7 @@
 
                                 <x-table.td>
                                     <div class="flex flex-col space-y-1">
-                                        <span class="text-sm font-medium text-blue-500">
+                                        <span class="text-sm font-medium text-blue-500 border-b border-blue-500 border-dashed">
                                             {{ $personnel->tabel_no }}
                                         </span>
 
@@ -105,16 +105,19 @@
                                             <span class="text-sm font-medium text-zinc-900">
                                                 {{ $personnel->fullname }}
                                             </span>
-                                            <span
-                                                class="px-3 py-1 text-sm font-medium shadow-sm w-max text-neutral-600 rounded-xl bg-neutral-200/70">
-                                                {{ $personnel->gender == 1 ? __('Man') : __('Woman') }}
-                                            </span>
-                                            @if (!empty($personnel->latestRank))
-                                                <span
-                                                    class="px-3 py-1 text-sm font-medium text-yellow-400 shadow-sm rounded-xl w-max bg-green-950">
-                                                    {{ $personnel->latestRank?->rank->name }}
-                                                </span>
-                                            @endif
+                                            <div class="flex items-center space-x-1">
+                                               <span
+                                                  class="px-3 py-1 text-sm font-medium shadow-sm w-max text-neutral-600 rounded-xl bg-neutral-200/70">
+                                                  {{ $personnel->gender == 1 ? __('Man') : __('Woman') }}
+                                              </span>
+                                                @if (!empty($personnel->latestRank))
+                                                    <span
+                                                        class="px-3 py-1 text-sm font-medium text-emerald-600 w-max">
+                                                        {{ $personnel->latestRank?->rank->name }}
+                                                    </span>
+                                                @endif
+                                            </div>
+                                          
                                         </div>
                                     </div>
                                 </x-table.td>

@@ -1,6 +1,6 @@
 <div class="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4" x-data>
 
-    <div class="flex flex-col space-y-2 bg-slate-100">
+    <div class="flex flex-col space-y-2 bg-white border-r border-dashed border-neutral-200">
         @livewire('structure.services', key('structure'))
     </div>
 
@@ -16,8 +16,8 @@
         </div>
 
         @if (!$selectedService)
-            <div class="bg-slate-100 rounded-xl px-4 py-6 flex justify-center items-center w-full">
-                <div class="flex flex-col space-y-3 items-center">
+            <div class="flex items-center justify-center w-full px-4 py-6 bg-neutral-100 rounded-xl">
+                <div class="flex flex-col items-center space-y-3">
                     <svg class="w-20 h-20 text-emerald-500" xmlns="http://www.w3.org/2000/svg"
                         xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24">
                         <defs />
@@ -46,7 +46,7 @@
                     @break
 
                     @case('roles')
-                        <div class="grid grid-cols-1 sm:grid-cols-5 gap-3">
+                        <div class="grid grid-cols-1 gap-3 sm:grid-cols-5">
                             <div class="sm:col-span-2" wire:key="roles-section">
                                 @livewire('roles.manage-roles', key('roles'))
                             </div>
