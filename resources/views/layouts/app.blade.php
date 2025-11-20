@@ -14,7 +14,7 @@
     @stack('css')
 </head>
 
-<body class="font-sans subpixel-antialiased min-h-screen pb-1 bg-neutral-100 dark:bg-neutral-900/80" x-data>
+<body class="min-h-screen pb-1 font-sans subpixel-antialiased bg-neutral-200/60 dark:bg-neutral-900/80" x-data>
     <div class="min-h-full">
         @includeWhen(!\request()->is('admin/*'), 'includes.layout.default')
         @includeWhen(\request()->is('admin/*'), 'includes.layout.admin')
