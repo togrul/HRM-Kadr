@@ -16,6 +16,33 @@ return [
     'class_namespace' => 'App\\Livewire',
 
     /*
+    |--------------------------------------------------------------------------
+    | Discovery Namespaces
+    |--------------------------------------------------------------------------
+    |
+    | Additional namespaces that Livewire should scan for components when
+    | using auto-discovery or shorthand tags. Module namespaces are added
+    | here so aliases keep working without manual registration.
+    |
+    */
+
+    'discover_namespaces' => [
+        'App\\Livewire',
+        'App\\Modules\\Personnel\\Livewire',
+        'App\\Modules\\Staff\\Livewire',
+        'App\\Modules\\Orders\\Livewire',
+        'App\\Modules\\Candidates\\Livewire',
+        'App\\Modules\\Leaves\\Livewire',
+        'App\\Modules\\BusinessTrips\\Livewire',
+        'App\\Modules\\Vacation\\Livewire',
+        'App\\Modules\\Admin\\Livewire',
+        'App\\Modules\\Services\\Livewire',
+        'App\\Modules\\Notifications\\Livewire',
+        'App\\Modules\\SidebarStructure\\Livewire',
+        'App\\Modules\\UI\\Livewire',
+    ],
+
+    /*
     |---------------------------------------------------------------------------
     | View Path
     |---------------------------------------------------------------------------

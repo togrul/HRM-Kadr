@@ -1,0 +1,56 @@
+<?php
+
+use App\Modules\Admin\Livewire\AppealStatus;
+use App\Modules\Admin\Livewire\AwardTypes;
+use App\Modules\Admin\Livewire\Awards;
+use App\Modules\Admin\Livewire\Cities;
+use App\Modules\Admin\Livewire\Countries;
+use App\Modules\Admin\Livewire\Dashboard;
+use App\Modules\Admin\Livewire\DocumentTypes;
+use App\Modules\Admin\Livewire\EducationDegrees;
+use App\Modules\Admin\Livewire\EducationForms;
+use App\Modules\Admin\Livewire\EducationTypes;
+use App\Modules\Admin\Livewire\EducationalInstitutions;
+use App\Modules\Admin\Livewire\Kinships;
+use App\Modules\Admin\Livewire\Languages;
+use App\Modules\Admin\Livewire\LeaveTypes;
+use App\Modules\Admin\Livewire\OrderCategories;
+use App\Modules\Admin\Livewire\OrderStatuses;
+use App\Modules\Admin\Livewire\Positions;
+use App\Modules\Admin\Livewire\Punishments;
+use App\Modules\Admin\Livewire\RankCategories;
+use App\Modules\Admin\Livewire\RankReasons;
+use App\Modules\Admin\Livewire\ScientificDegrees;
+use App\Modules\Admin\Livewire\SocialOrigins;
+use App\Modules\Admin\Livewire\Structures;
+use App\Modules\Admin\Livewire\Weapons;
+use App\Modules\Admin\Livewire\WorkNorms;
+use Illuminate\Support\Facades\Route;
+
+Route::middleware(['web', 'auth', 'can:access-admin'])->prefix('/admin')->group(function () {
+    Route::get('/dashboard', Dashboard::class)->name('admin');
+    Route::get('/appeal-statuses',AppealStatus::class)->name('admin.appeal-status');
+    Route::get('/award-types', AwardTypes::class)->name('admin.award-types');
+    Route::get('/awards', Awards::class)->name('admin.awards');
+    Route::get('/cities', Cities::class)->name('admin.cities');
+    Route::get('/countries', Countries::class)->name('admin.countries');
+    Route::get('/document-types', DocumentTypes::class)->name('admin.document-types');
+    Route::get('/education-degrees', EducationDegrees::class)->name('admin.education-degrees');
+    Route::get('/education-forms', EducationForms::class)->name('admin.education-forms');
+    Route::get('/education-types', EducationTypes::class)->name('admin.education-types');
+    Route::get('/educational-institutions', EducationalInstitutions::class)->name('admin.educational-institutions');
+    Route::get('/kinship', Kinships::class)->name('admin.kinship');
+    Route::get('/languages', Languages::class)->name('admin.languages');
+    Route::get('/leave-types', LeaveTypes::class)->name('admin.leave-types');
+    Route::get('/order-categories', OrderCategories::class)->name('admin.order-categories');
+    Route::get('/order-statuses', OrderStatuses::class)->name('admin.order-statuses');
+    Route::get('/positions', Positions::class)->name('admin.positions');
+    Route::get('/punishments', Punishments::class)->name('admin.punishments');
+    Route::get('/rank-categories', RankCategories::class)->name('admin.rank-categories');
+    Route::get('/rank-reasons', RankReasons::class)->name('admin.rank-reasons');
+    Route::get('/scientific-degrees', ScientificDegrees::class)->name('admin.scientific-degrees');
+    Route::get('/social-origins', SocialOrigins::class)->name('admin.social-origins');
+    Route::get('/structures', Structures::class)->name('admin.structures');
+    Route::get('/weapons', Weapons::class)->name('admin.weapons');
+    Route::get('/work-norms', WorkNorms::class)->name('admin.work-norms');
+});

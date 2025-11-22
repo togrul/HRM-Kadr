@@ -1080,8 +1080,8 @@ trait PersonnelCrud
             : [];
 
         $view_name = ! empty($this->personnelModel)
-                    ? 'livewire.personnel.edit-personnel'
-                    : 'livewire.personnel.add-personnel';
+                    ? 'personnel::livewire.personnel.edit-personnel'
+                    : 'personnel::livewire.personnel.add-personnel';
 
         return view($view_name, array_merge($steps, array_merge($view_data, $this->isolated)));
     }

@@ -158,8 +158,8 @@ trait StaffCrud
     public function render()
     {
         $view_name = ! empty($this->staffModel)
-            ? 'livewire.staff-schedule.edit-staff'
-            : 'livewire.staff-schedule.add-staff';
+            ? 'staff::livewire.staff-schedule.edit-staff'
+            : 'staff::livewire.staff-schedule.add-staff';
 
         return view($view_name);
     }

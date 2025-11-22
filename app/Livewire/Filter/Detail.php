@@ -274,5 +274,5 @@ class Detail extends Component
     }
 
     public function mount() { $this->filterResetted(); }
-    public function render() { return view('livewire.filter.detail'); }
+    public function render() { return view('ui::livewire.filter.detail'); }
 }

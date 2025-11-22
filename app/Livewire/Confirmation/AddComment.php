@@ -74,6 +74,6 @@ class AddComment extends Component
 
     public function render()
     {
-        return view('livewire.confirmation.add-comment');
+        return view('ui::livewire.confirmation.add-comment');
     }
 }

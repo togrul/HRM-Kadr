@@ -1,0 +1,75 @@
+<?php
+
+namespace App\Modules\Admin\Livewire;
+
+use App\Livewire\Traits\Admin\AdminCrudTrait;
+use App\Livewire\Traits\Admin\CallSwalTrait;
+use App\Models\OrderCategory;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Livewire\Attributes\On;
+use Livewire\Component;
+
+#[On(['orderCategoryUpdated', 'deleted'])]
+class OrderCategories extends Component
+{
+    use AdminCrudTrait;
+    use AuthorizesRequests;
+    use CallSwalTrait;
+
+    public function rules(): array
+    {
+        return [
+            'form.id' => 'required|integer|min:1|unique:order_categories,id'.($this->model ? ','.$this->form['id'] : ''),
+            'form.name_az' => 'required|string|min:2',
+        ];
+    }
+
+    protected function validationAttributes(): array
+    {
+        return [
+            'form.id' => __('ID'),
+            'form.title_az' => __('Name'),
+        ];
+    }
+
+    public function openCrud(?int $id = null): void
+    {
+        $this->model = $id
+            ? OrderCategory::find($id)
+            : null;
+
+        $this->form = $this->model ? $this->model->toArray() : [];
+        $this->isAdded = true;
+    }
+
+    public function deleteModel(?int $id = null): void
+    {
+        if ($id) {
+            $this->model = OrderCategory::find($id);
+
+            if ($this->model) {
+                $this->callDeletePromptSwal();
+            }
+        }
+    }
+
+    public function store(): void
+    {
+        $this->validate();
+
+        $this->model
+            ? $this->model->update($this->form)
+            : OrderCategory::create($this->form);
+
+        $this->callSuccessSwal();
+
+        $this->dispatch('orderCategoryUpdated');
+        $this->closeCrud();
+    }
+
+    public function render()
+    {
+        $orderCategories = OrderCategory::all();
+        return view('admin::livewire.admin.order-categories', compact('orderCategories'));
+    }
+}

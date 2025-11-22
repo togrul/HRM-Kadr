@@ -114,8 +114,8 @@ trait CandidateCrud
         $statuses = $this->appealStatuses();
 
         $view_name = ! empty($this->candidateModel)
-            ? 'livewire.candidates.edit-candidate'
-            : 'livewire.candidates.add-candidate';
+            ? 'candidates::livewire.candidates.edit-candidate'
+            : 'candidates::livewire.candidates.add-candidate';
 
         return view($view_name, compact('statuses'));
     }

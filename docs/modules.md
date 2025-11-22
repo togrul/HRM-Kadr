@@ -1,0 +1,39 @@
+# Modules Overview
+
+This project is split into self-contained modules. Each module ships its own
+Livewire components, routes, views, and service provider. Shared patterns:
+
+- Namespace: `App\Modules\<Name>\Livewire`
+- Views namespace: `<name>::` (passed to `loadViewsFrom`)
+- Routes: `app/Modules/<Name>/Routes/web.php` (loaded in provider)
+- Livewire discovery: `config/livewire.php` lists module namespaces
+- Alias registration: module providers register `Livewire::component` aliases (via `App\Providers\Concerns\RegistersLivewireAliases` for consistent prefix + map handling)
+
+## Enabled Modules
+- Personnel (`personnel::`) – CRUD, files, information, vacation list
+- Orders (`orders::`) – order CRUD, templates
+- Staff (`staff::`) – staff schedule
+- Candidates (`candidates::`) – candidate CRUD/list
+- Leaves (`leaves::`) – leave CRUD/list
+- BusinessTrips (`business-trips::`) – business trip list
+- Vacation (`vacation::`) – vacation list
+- Admin (`admin::`) – admin settings/masters
+- Services (`services::`) – settings, menus, users, ranks, components, roles
+- Notifications (`notification::`) – bell dropdown and list
+- SidebarStructure (`structure::`) – structure sidebar/orders/services Livewire snippets used across screens
+- UI (`ui::`) – shared confirmation/filter/notification blade partials
+
+## Provider pattern
+- Load module routes/views in `boot()`
+- Register Livewire aliases in a dedicated `registerLivewireComponents()` method
+- Keep alias naming consistent: `<module>.<area>.<component>`
+
+## Rendering pattern
+- Livewire components return module-scoped views (e.g., `orders::livewire.orders.add-order`)
+- Blade `@livewire` tags use registered aliases (e.g., `@livewire('services.roles.manage-roles')`)
+
+## Adding a new module
+1) Create `app/Modules/<Name>/Providers/<Name>ServiceProvider.php`; load routes/views and register aliases.
+2) Add provider to `config/modules.php`; add namespace to `config/livewire.php` discovery.
+3) Place Livewire classes under `app/Modules/<Name>/Livewire`; views under `app/Modules/<Name>/Resources/views`.
+4) Update traits/render paths to use `<module>::` view prefixes.

@@ -158,8 +158,42 @@
   - Fixed the model attribute to use Laravel’s `#[ObservedBy(StructureObserver::class)]` syntax _and_ registered the observer inside `AppServiceProvider` to ensure it’s wired even on older Laravel builds; previously the observer never fired so caches stayed stale.
 50. **Dropdown Cache Observers & Tooling**
   - Added `NormalizesDropdownPayloads` so every component/service that still needs `modifyArray()` can mix in that tiny helper without dragging the legacy SelectList behaviour around; the old `<x-select-list>` components and trait were removed entirely.
+51. **Modularisation (Phase 1)**
+  - Introduced `ModuleServiceProvider` + `config/modules.php` to register enabled modules (`Personnel`, `Orders`, `Staff`), PSR-4 autoload for `App\Modules\`, and stub module providers/routes.
+  - Moved Personnel Livewire components into `App\Modules\Personnel\Livewire` with views under `personnel::` namespace; Livewire aliases (`personnel.*`) are re-registered inside `PersonnelServiceProvider` to keep existing Blade tags working.
+52. **Staff Module Migration (Phase 1)**
+  - Staff schedule listing (`Staffs`) moved to `App\Modules\Staff\Livewire`, view under `staff::livewire.staff-schedule.staffs`, and provider registers the Livewire alias. Routes for `/staffs` now live inside the Staff module provider.
+  - Remaining staff Livewire components (`add/edit/delete/show staff`) and their views were migrated into the Staff module, with aliases (`staff-schedule.*`) re-registered and old `resources/views/livewire/staff-schedule/*` files removed.
+53. **Orders Module Migration (Phase 1)**
+  - Orders CRUD + templates (`AllOrder`, `Add/Edit/DeleteOrder`, `Templates/AddTemplate`, `Templates/EditTemplate`) moved under `App\Modules\Orders\Livewire`, views under `orders::livewire.orders.*`, and aliases registered in `OrdersServiceProvider`. Module routes handle `/orders`; legacy order views removed from the root.
+  - Recreated the module-scoped delete-order blade and wired OrderCrud render to the module view namespace so `<livewire:orders.delete-order>` resolves correctly.
+54. **Livewire Discovery for Modules**
+  - Added module namespaces to `config/livewire.php` (`App\Modules\Personnel|Staff|Orders\Livewire`) so component auto-discovery/shorthand tags work without manual alias registration in the future.
+55. **Candidates Module Migration (Phase 1)**
+  - Moved candidate CRUD/list Livewire components to `App\Modules\Candidates\Livewire`, views under `candidates::livewire.candidates.*`, and registered aliases in `CandidatesServiceProvider`; module route serves `/candidates`.
+  - Enabled the module via `config/modules.php` and added `App\Modules\Candidates\Livewire` to Livewire discover namespaces; legacy candidate blade copies remain only in the module.
+56. **Leaves & Business Trips Modules**
+  - Split the old Outside module into two: Leaves (`App\Modules\Leaves\Livewire`, views `leaves::...`, provider + routes for `/leaves`) and BusinessTrips (`App\Modules\BusinessTrips\Livewire`, views `business-trips::...`, provider + routes for `/business-trips`).
+  - Both providers registered in `config/modules.php` and Livewire discovery; legacy Outside module removed.
+57. **Vacation Module**
+  - Vacation listing Livewire moved to `App\Modules\Vacation\Livewire`, views under `vacation::livewire.vacation.vacations`, with its own provider, routes, and discovery entry. Root route now removed in favour of the module route.
+58. **Admin & Services Modules**
+  - Admin Livewire screens moved to `App\Modules\Admin\Livewire` with views under `admin::...`; provider registers the aliases and admin routes under `/admin`. Services (settings) page moved to `App\Modules\Services\Livewire` with views under `services::...` and its own route `/services`.
   - Hooked the lookup tables (`CountryTranslation`, `City`, `Position`, `Disability`, `RankReason`, `SocialOrigin`, `EducationDegree`, `WorkNorm`) into small observers that call `CallPersonnelInfo::forgetCacheKey(...)` (plus custom keys like `staff:positions` and `city:baki`), which keeps dropdown caches in sync with admin CRUD changes.
   - Dropped a `psysh.php` config so Artisan Tinker writes its history under `storage/logs`, and updated `.gitignore` to exclude `storage/framework/{cache,sessions,views}` along with the PsySH history file—run `git rm -r --cached storage/framework/views` locally once to purge the tracked cache files (index.lock creation is blocked in this sandbox).
+51. **Module Scaffold**
+  - Added a lightweight module loader (`ModuleServiceProvider`) and PSR-4 autoloading for `App\Modules\`. Example Personnel/Orders service providers are registered via `config/modules.php`, and each module now has its own route/view loader stub plus health routes under `/personnel-module/health` and `/orders-module/health`. No behaviour change yet; this just sets the foundation for migrating domains into modules.
+52. **Personnel Routes Modularised**
+  - Personnel domain routes (`/`, `/personal-affairs`) moved into the Personnel module route file, and print routes moved into a dedicated module route group. Core web routes now only handle shared/non-personnel pages, keeping domain concerns inside the module.
+53. **Staff Module Skeleton**
+  - Created a dedicated Staff module with its own provider/routes; `/staffs` now lives under that module instead of the Personnel module, keeping domains isolated for future modularization.
+54. **Orders Route Modularised**
+  - Orders list route (`/orders`) now lives under the Orders module; the health stub was removed. Core web routes are slimmer, and domain routes sit inside their respective modules.
+55. **Personnel Module (Phase 1)**
+  - Staff and orders routes were pulled out of the core web file and into their modules; personnel home and print routes remain in the Personnel module. AllPersonnel Livewire class now lives under `App\Modules\Personnel\Livewire`, and the module loads its own views namespace.
+56. **Personnel Component Move (Phase 2)**
+  - Add/Edit/Delete/Files/Information/VacationList Livewire classes were moved under `app/Modules/Personnel/Livewire` and their views under the module’s view path. Rendering uses the `personnel::livewire.personnel.*` namespace to decouple from core views.
+  - ModuleServiceProvider now registers enabled module providers in `boot()` to ensure routes are loaded after config is available.
 
 ## Next Ideas
 - Verify Step 5–8 UX once more (manual or automated) to ensure draft detection still covers every branch.

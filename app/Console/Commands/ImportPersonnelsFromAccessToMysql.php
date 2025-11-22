@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Livewire\Admin\EducationDegrees;
+use App\Modules\Admin\Livewire\EducationDegrees;
 use App\Models\CountryTranslation;
 use App\Models\EducationDegree;
 use App\Models\Personnel;

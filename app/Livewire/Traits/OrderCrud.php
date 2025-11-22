@@ -563,8 +563,8 @@ trait OrderCrud
         );
 
         $viewName = ! empty($this->orderModel)
-            ? 'livewire.orders.edit-order'
-            : 'livewire.orders.add-order';
+            ? 'orders::livewire.orders.edit-order'
+            : 'orders::livewire.orders.add-order';
 
         return view($viewName, $payload);
     }

@@ -121,8 +121,8 @@ trait ComponentCrud
     public function render()
     {
         $view_name = ! empty($this->candidateModel)
-            ? 'livewire.services.components.edit-component'
-            : 'livewire.services.components.add-component';
+            ? 'services::livewire.services.components.edit-component'
+            : 'services::livewire.services.components.add-component';
 
         return view($view_name);
     }
