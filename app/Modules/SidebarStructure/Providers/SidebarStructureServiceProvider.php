@@ -5,6 +5,7 @@ namespace App\Modules\SidebarStructure\Providers;
 use App\Models\Structure;
 use App\Observers\StructureObserver;
 use App\Providers\Concerns\RegistersLivewireAliases;
+use App\Services\Modules\ModuleState;
 use Illuminate\Support\ServiceProvider;
 
 class SidebarStructureServiceProvider extends ServiceProvider
@@ -18,6 +19,10 @@ class SidebarStructureServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        if (! $this->app->make(ModuleState::class)->enabled('structure')) {
+            return;
+        }
+
         $this->loadViewsFrom(__DIR__.'/../Resources/views', 'structure');
         $this->registerObservers();
         $this->registerLivewireComponents();

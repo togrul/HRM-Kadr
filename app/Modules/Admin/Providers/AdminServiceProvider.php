@@ -19,6 +19,7 @@ use App\Observers\RankReasonObserver;
 use App\Observers\SocialOriginObserver;
 use App\Observers\WorkNormObserver;
 use App\Providers\Concerns\RegistersLivewireAliases;
+use App\Services\Modules\ModuleState;
 use Illuminate\Support\ServiceProvider;
 
 class AdminServiceProvider extends ServiceProvider
@@ -32,6 +33,10 @@ class AdminServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        if (! $this->app->make(ModuleState::class)->enabled('admin')) {
+            return;
+        }
+
         $this->loadRoutesFrom(__DIR__.'/../Routes/web.php');
         $this->loadViewsFrom(__DIR__.'/../Resources/views', 'admin');
         $this->registerObservers();

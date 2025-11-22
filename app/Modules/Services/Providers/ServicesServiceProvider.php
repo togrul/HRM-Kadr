@@ -9,6 +9,7 @@ use App\Observers\MenuObserver;
 use App\Observers\RoleStructureObserver;
 use App\Observers\SettingsObserver;
 use App\Providers\Concerns\RegistersLivewireAliases;
+use App\Services\Modules\ModuleState;
 use Illuminate\Support\ServiceProvider;
 
 class ServicesServiceProvider extends ServiceProvider
@@ -22,6 +23,10 @@ class ServicesServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        if (! $this->app->make(ModuleState::class)->enabled('services')) {
+            return;
+        }
+
         $this->loadRoutesFrom(__DIR__.'/../Routes/web.php');
         $this->loadViewsFrom(__DIR__.'/../Resources/views', 'services');
         $this->registerObservers();

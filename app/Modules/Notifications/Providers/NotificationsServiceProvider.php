@@ -3,6 +3,7 @@
 namespace App\Modules\Notifications\Providers;
 
 use App\Providers\Concerns\RegistersLivewireAliases;
+use App\Services\Modules\ModuleState;
 use Illuminate\Support\ServiceProvider;
 
 class NotificationsServiceProvider extends ServiceProvider
@@ -16,6 +17,10 @@ class NotificationsServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        if (! $this->app->make(ModuleState::class)->enabled('notifications')) {
+            return;
+        }
+
         $this->loadRoutesFrom(__DIR__.'/../Routes/web.php');
         $this->loadViewsFrom(__DIR__.'/../Resources/views', 'notification');
         $this->registerLivewireComponents();

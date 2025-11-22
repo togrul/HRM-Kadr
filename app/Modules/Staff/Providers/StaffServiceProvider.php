@@ -3,6 +3,7 @@
 namespace App\Modules\Staff\Providers;
 
 use App\Providers\Concerns\RegistersLivewireAliases;
+use App\Services\Modules\ModuleState;
 use Illuminate\Support\ServiceProvider;
 
 class StaffServiceProvider extends ServiceProvider
@@ -15,6 +16,10 @@ class StaffServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        if (! $this->app->make(ModuleState::class)->enabled('staff')) {
+            return;
+        }
+
         $this->loadRoutesFrom(__DIR__.'/../Routes/web.php');
         $this->loadViewsFrom(__DIR__.'/../Resources/views', 'staff');
         $this->registerLivewireComponents();

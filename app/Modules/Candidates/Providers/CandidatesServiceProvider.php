@@ -3,6 +3,7 @@
 namespace App\Modules\Candidates\Providers;
 
 use App\Providers\Concerns\RegistersLivewireAliases;
+use App\Services\Modules\ModuleState;
 use Illuminate\Support\ServiceProvider;
 
 class CandidatesServiceProvider extends ServiceProvider
@@ -16,6 +17,10 @@ class CandidatesServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        if (! $this->app->make(ModuleState::class)->enabled('candidates')) {
+            return;
+        }
+
         $this->loadRoutesFrom(__DIR__.'/../Routes/web.php');
         $this->loadViewsFrom(__DIR__.'/../Resources/views', 'candidates');
         $this->registerLivewireComponents();

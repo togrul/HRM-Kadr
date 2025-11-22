@@ -3,6 +3,7 @@
 namespace App\Modules\Vacation\Providers;
 
 use App\Providers\Concerns\RegistersLivewireAliases;
+use App\Services\Modules\ModuleState;
 use Illuminate\Support\ServiceProvider;
 
 class VacationServiceProvider extends ServiceProvider
@@ -16,6 +17,10 @@ class VacationServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        if (! $this->app->make(ModuleState::class)->enabled('vacation')) {
+            return;
+        }
+
         $this->loadRoutesFrom(__DIR__.'/../Routes/web.php');
         $this->loadViewsFrom(__DIR__.'/../Resources/views', 'vacation');
         $this->registerLivewireComponents();

@@ -3,6 +3,7 @@
 namespace App\Modules\UI\Providers;
 
 use App\Providers\Concerns\RegistersLivewireAliases;
+use App\Services\Modules\ModuleState;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 
@@ -17,6 +18,10 @@ class UIServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        if (! $this->app->make(ModuleState::class)->enabled('ui')) {
+            return;
+        }
+
         $this->loadViewsFrom(__DIR__.'/../Resources/views', 'ui');
         $this->registerLivewireComponents();
     }

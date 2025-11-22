@@ -3,6 +3,7 @@
 namespace App\Modules\Personnel\Providers;
 
 use App\Providers\Concerns\RegistersLivewireAliases;
+use App\Services\Modules\ModuleState;
 use Illuminate\Support\ServiceProvider;
 
 class PersonnelServiceProvider extends ServiceProvider
@@ -15,6 +16,10 @@ class PersonnelServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        if (! $this->app->make(ModuleState::class)->enabled('personnel')) {
+            return;
+        }
+
         $this->loadRoutesFrom(__DIR__.'/../Routes/web.php');
         $this->loadRoutesFrom(__DIR__.'/../Routes/print.php');
         $this->loadViewsFrom(__DIR__.'/../Resources/views', 'personnel');

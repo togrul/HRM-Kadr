@@ -3,6 +3,7 @@
 namespace App\Modules\Leaves\Providers;
 
 use App\Providers\Concerns\RegistersLivewireAliases;
+use App\Services\Modules\ModuleState;
 use Illuminate\Support\ServiceProvider;
 
 class LeavesServiceProvider extends ServiceProvider
@@ -16,9 +17,23 @@ class LeavesServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        if (! $this->app->make(ModuleState::class)->enabled('leaves')) {
+            return;
+        }
+
         $this->loadRoutesFrom(__DIR__.'/../Routes/web.php');
         $this->loadViewsFrom(__DIR__.'/../Resources/views', 'leaves');
+        $this->loadMigrations();
         $this->registerLivewireComponents();
+    }
+
+    protected function loadMigrations(): void
+    {
+        $path = $this->app->make(ModuleState::class)->migrationPath('leaves');
+
+        if ($path) {
+            $this->loadMigrationsFrom($path);
+        }
     }
 
     protected function registerLivewireComponents(): void

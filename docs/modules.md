@@ -46,3 +46,4 @@ Livewire components, routes, views, and service provider. Shared patterns:
 - `componentMap()` returns `['alias-name' => \App\Modules\<Name>\Livewire\MyComponent::class]`; aliases become `<prefix>.alias-name`.
 - Register model observers in the same provider (e.g., `Setting::observe(SettingsObserver::class);`) so cache flushes stay within the module.
 - Add the module namespace to `config/livewire.php` `discover.namespaces` to keep `@livewire('<prefix>.<alias>')` working without manual `Livewire::component` calls.
+- Optional: to make a module togglable, add it to `config/modules.php` under `catalog` with `enabled => true/false` and (if needed) `migrations => app_path('Modules/<Name>/Database/Migrations')`, then guard the provider with `ModuleState::enabled('<slug>')` and call `loadMigrationsFrom` conditionally.

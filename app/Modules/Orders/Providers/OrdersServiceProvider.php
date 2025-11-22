@@ -3,8 +3,8 @@
 namespace App\Modules\Orders\Providers;
 
 use App\Providers\Concerns\RegistersLivewireAliases;
+use App\Services\Modules\ModuleState;
 use Illuminate\Support\ServiceProvider;
-use Livewire\Livewire;
 
 class OrdersServiceProvider extends ServiceProvider
 {
@@ -16,6 +16,10 @@ class OrdersServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        if (! $this->app->make(ModuleState::class)->enabled('orders')) {
+            return;
+        }
+
         $this->loadRoutesFrom(__DIR__.'/../Routes/web.php');
         $this->loadViewsFrom(__DIR__.'/../Resources/views', 'orders');
         $this->registerLivewireComponents();

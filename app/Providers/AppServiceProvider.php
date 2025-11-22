@@ -8,9 +8,11 @@ use App\Services\NumberToWordsService;
 use App\Services\StructureService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
+use function Laravel\Prompts\confirm;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -34,6 +36,7 @@ class AppServiceProvider extends ServiceProvider
         $this->configureModels();
         $this->registerViewComposers();
         $this->registerMacros();
+        $this->registerBladeDirectives();
 
     }
 
@@ -80,5 +83,20 @@ class AppServiceProvider extends ServiceProvider
                 info("Attempted to lazy load [$relation] on model [$class]");
             });
         }
+    }
+
+    private function registerBladeDirectives(): void
+    {
+        if (! function_exists('module_enabled')) {
+            /**
+             * Check if a module is enabled.
+             */
+            function module_enabled(string $slug): bool
+            {
+                return app(\App\Services\Modules\ModuleState::class)->enabled($slug);
+            }
+        }
+
+        Blade::if('module', fn (string $slug) => module_enabled($slug));
     }
 }

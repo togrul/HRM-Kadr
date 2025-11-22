@@ -13,25 +13,33 @@
 
                 <!-- Navigation Links -->
                 <div class="items-center hidden space-x-2 sm:-my-px sm:ml-10 sm:flex">
+                   @module('candidates')
                     <x-nav-link class="space-x-2 text-xs uppercase" wire:navigate :href="route('candidates')" :active="request()->routeIs('candidates')">
                         <x-icons.candidate-icon size="w-5 h-5"
                             color="{{ request()->routeIs('candidates') ? 'text-gray-900' : 'text-gray-400' }}"></x-icons.candidate-icon>
                         <span>{{ __('Candidates') }}</span>
                     </x-nav-link>
+                    @endmodule
+                     @module('vacation')
                     <x-nav-link class="space-x-2 text-xs uppercase" wire:navigate :href="route('vacations.list')" :active="request()->routeIs('vacations.list')">
                         <x-icons.vacation-icon size="w-5 h-5"
                             color="{{ request()->routeIs('vacations.list') ? 'text-gray-900' : 'text-gray-400' }}"></x-icons.vacation-icon>
                         <span>{{ __('Vacations') }}</span>
                     </x-nav-link>
+                    @endmodule
+                    @module('business-trips')
                     <x-nav-link class="space-x-2 text-xs uppercase" wire:navigate :href="route('business-trips.list')" :active="request()->routeIs('business-trips.list')">
                         <x-icons.holiday-icon size="w-5 h-5"
                             color="{{ request()->routeIs('business-trips.list') ? 'text-gray-900' : 'text-gray-400' }}"></x-icons.holiday-icon>
                         <span>{{ __('Business trips') }}</span>
                     </x-nav-link>
+                    @endmodule
+                    @module('leaves')
                      <x-nav-link class="space-x-2 text-xs uppercase" wire:navigate :href="route('leaves')" :active="request()->routeIs('leaves')">
                         <x-icons.calendar-icon size="w-5 h-5" color="{{ request()->routeIs('leaves') ? 'text-gray-900' : 'text-gray-400' }}" size="w-7 h-7"></x-icons.calendar-icon>
                         <span>{{ __('Time off') }}</span>
                     </x-nav-link>
+                    @endmodule
                 </div>
             </div>
 
@@ -106,12 +114,16 @@
     <!-- Responsive Navigation Menu -->
     <div :class="{ 'block': open, 'hidden': !open }" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
+           @module('candidates')
             <x-responsive-nav-link wire:navigate :href="route('candidates')" :active="request()->routeIs('candidates')">
                 {{ __('Candidates') }}
             </x-responsive-nav-link>
+            @endmodule
+             @module('vacation')
             <x-responsive-nav-link wire:navigate :href="route('vacations.list')" :active="request()->routeIs('vacations.list')">
                 {{ __('Vacations') }}
             </x-responsive-nav-link>
+            @endmodule
         </div>
 
         <!-- Responsive Settings Options -->
