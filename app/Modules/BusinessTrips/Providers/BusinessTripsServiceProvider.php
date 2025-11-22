@@ -2,11 +2,13 @@
 
 namespace App\Modules\BusinessTrips\Providers;
 
+use App\Providers\Concerns\RegistersLivewireAliases;
 use Illuminate\Support\ServiceProvider;
-use Livewire\Livewire;
 
 class BusinessTripsServiceProvider extends ServiceProvider
 {
+    use RegistersLivewireAliases;
+
     public function register(): void
     {
         //
@@ -21,6 +23,13 @@ class BusinessTripsServiceProvider extends ServiceProvider
 
     protected function registerLivewireComponents(): void
     {
-        Livewire::component('business-trips.list', \App\Modules\BusinessTrips\Livewire\BusinessTrips::class);
+        $this->registerAliases($this->componentMap(), 'business-trips');
+    }
+
+    protected function componentMap(): array
+    {
+        return [
+            'list' => \App\Modules\BusinessTrips\Livewire\BusinessTrips::class,
+        ];
     }
 }

@@ -2,11 +2,13 @@
 
 namespace App\Modules\Vacation\Providers;
 
+use App\Providers\Concerns\RegistersLivewireAliases;
 use Illuminate\Support\ServiceProvider;
-use Livewire\Livewire;
 
 class VacationServiceProvider extends ServiceProvider
 {
+    use RegistersLivewireAliases;
+
     public function register(): void
     {
         //
@@ -21,6 +23,13 @@ class VacationServiceProvider extends ServiceProvider
 
     protected function registerLivewireComponents(): void
     {
-        Livewire::component('vacation.vacations', \App\Modules\Vacation\Livewire\Vacations::class);
+        $this->registerAliases($this->componentMap(), 'vacation');
+    }
+
+    protected function componentMap(): array
+    {
+        return [
+            'vacations' => \App\Modules\Vacation\Livewire\Vacations::class,
+        ];
     }
 }

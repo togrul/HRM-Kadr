@@ -2,10 +2,13 @@
 
 namespace App\Modules\Staff\Providers;
 
+use App\Providers\Concerns\RegistersLivewireAliases;
 use Illuminate\Support\ServiceProvider;
 
 class StaffServiceProvider extends ServiceProvider
 {
+    use RegistersLivewireAliases;
+
     public function register(): void
     {
     }
@@ -19,10 +22,17 @@ class StaffServiceProvider extends ServiceProvider
 
     protected function registerLivewireComponents(): void
     {
-        \Livewire\Livewire::component('staff-schedule.staffs', \App\Modules\Staff\Livewire\Staffs::class);
-        \Livewire\Livewire::component('staff-schedule.add-staff', \App\Modules\Staff\Livewire\AddStaff::class);
-        \Livewire\Livewire::component('staff-schedule.edit-staff', \App\Modules\Staff\Livewire\EditStaff::class);
-        \Livewire\Livewire::component('staff-schedule.delete-staff', \App\Modules\Staff\Livewire\DeleteStaff::class);
-        \Livewire\Livewire::component('staff-schedule.show-staff', \App\Modules\Staff\Livewire\ShowStaff::class);
+        $this->registerAliases($this->componentMap(), 'staff-schedule');
+    }
+
+    protected function componentMap(): array
+    {
+        return [
+            'staffs' => \App\Modules\Staff\Livewire\Staffs::class,
+            'add-staff' => \App\Modules\Staff\Livewire\AddStaff::class,
+            'edit-staff' => \App\Modules\Staff\Livewire\EditStaff::class,
+            'delete-staff' => \App\Modules\Staff\Livewire\DeleteStaff::class,
+            'show-staff' => \App\Modules\Staff\Livewire\ShowStaff::class,
+        ];
     }
 }

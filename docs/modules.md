@@ -37,3 +37,12 @@ Livewire components, routes, views, and service provider. Shared patterns:
 2) Add provider to `config/modules.php`; add namespace to `config/livewire.php` discovery.
 3) Place Livewire classes under `app/Modules/<Name>/Livewire`; views under `app/Modules/<Name>/Resources/views`.
 4) Update traits/render paths to use `<module>::` view prefixes.
+
+### Quick recipe (providers + aliases + observers)
+- In the provider `boot()`, call:
+  - `$this->loadRoutesFrom(__DIR__.'/../Routes/web.php');`
+  - `$this->loadViewsFrom(__DIR__.'/../Resources/views', '<prefix>');`
+  - `$this->registerAliases($this->componentMap(), '<prefix>');` (via `RegistersLivewireAliases`)
+- `componentMap()` returns `['alias-name' => \App\Modules\<Name>\Livewire\MyComponent::class]`; aliases become `<prefix>.alias-name`.
+- Register model observers in the same provider (e.g., `Setting::observe(SettingsObserver::class);`) so cache flushes stay within the module.
+- Add the module namespace to `config/livewire.php` `discover.namespaces` to keep `@livewire('<prefix>.<alias>')` working without manual `Livewire::component` calls.

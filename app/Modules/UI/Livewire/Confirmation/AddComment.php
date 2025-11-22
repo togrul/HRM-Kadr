@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Confirmation;
+namespace App\Modules\UI\Livewire\Confirmation;
 
 use App\Models\Leave;
 use RuntimeException;

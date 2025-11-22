@@ -2,11 +2,13 @@
 
 namespace App\Modules\Candidates\Providers;
 
+use App\Providers\Concerns\RegistersLivewireAliases;
 use Illuminate\Support\ServiceProvider;
-use Livewire\Livewire;
 
 class CandidatesServiceProvider extends ServiceProvider
 {
+    use RegistersLivewireAliases;
+
     public function register(): void
     {
         //
@@ -21,9 +23,16 @@ class CandidatesServiceProvider extends ServiceProvider
 
     protected function registerLivewireComponents(): void
     {
-        Livewire::component('candidates.candidate-list', \App\Modules\Candidates\Livewire\CandidateList::class);
-        Livewire::component('candidates.add-candidate', \App\Modules\Candidates\Livewire\AddCandidate::class);
-        Livewire::component('candidates.edit-candidate', \App\Modules\Candidates\Livewire\EditCandidate::class);
-        Livewire::component('candidates.delete-candidate', \App\Modules\Candidates\Livewire\DeleteCandidate::class);
+        $this->registerAliases($this->componentMap(), 'candidates');
+    }
+
+    protected function componentMap(): array
+    {
+        return [
+            'candidate-list' => \App\Modules\Candidates\Livewire\CandidateList::class,
+            'add-candidate' => \App\Modules\Candidates\Livewire\AddCandidate::class,
+            'edit-candidate' => \App\Modules\Candidates\Livewire\EditCandidate::class,
+            'delete-candidate' => \App\Modules\Candidates\Livewire\DeleteCandidate::class,
+        ];
     }
 }

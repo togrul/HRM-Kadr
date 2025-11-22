@@ -2,11 +2,13 @@
 
 namespace App\Modules\Personnel\Providers;
 
+use App\Providers\Concerns\RegistersLivewireAliases;
 use Illuminate\Support\ServiceProvider;
-use Livewire\Livewire;
 
 class PersonnelServiceProvider extends ServiceProvider
 {
+    use RegistersLivewireAliases;
+
     public function register(): void
     {
     }
@@ -21,12 +23,19 @@ class PersonnelServiceProvider extends ServiceProvider
 
     protected function registerLivewireComponents(): void
     {
-        Livewire::component('personnel.all-personnel', \App\Modules\Personnel\Livewire\AllPersonnel::class);
-        Livewire::component('personnel.add-personnel', \App\Modules\Personnel\Livewire\AddPersonnel::class);
-        Livewire::component('personnel.edit-personnel', \App\Modules\Personnel\Livewire\EditPersonnel::class);
-        Livewire::component('personnel.delete-personnel', \App\Modules\Personnel\Livewire\DeletePersonnel::class);
-        Livewire::component('personnel.files', \App\Modules\Personnel\Livewire\Files::class);
-        Livewire::component('personnel.information', \App\Modules\Personnel\Livewire\Information::class);
-        Livewire::component('personnel.vacation-list', \App\Modules\Personnel\Livewire\VacationList::class);
+        $this->registerAliases($this->componentMap(), 'personnel');
+    }
+
+    protected function componentMap(): array
+    {
+        return [
+            'all-personnel' => \App\Modules\Personnel\Livewire\AllPersonnel::class,
+            'add-personnel' => \App\Modules\Personnel\Livewire\AddPersonnel::class,
+            'edit-personnel' => \App\Modules\Personnel\Livewire\EditPersonnel::class,
+            'delete-personnel' => \App\Modules\Personnel\Livewire\DeletePersonnel::class,
+            'files' => \App\Modules\Personnel\Livewire\Files::class,
+            'information' => \App\Modules\Personnel\Livewire\Information::class,
+            'vacation-list' => \App\Modules\Personnel\Livewire\VacationList::class,
+        ];
     }
 }

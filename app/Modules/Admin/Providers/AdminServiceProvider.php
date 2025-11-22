@@ -2,6 +2,22 @@
 
 namespace App\Modules\Admin\Providers;
 
+use App\Models\City;
+use App\Models\CountryTranslation;
+use App\Models\Disability;
+use App\Models\EducationDegree;
+use App\Models\Position;
+use App\Models\RankReason;
+use App\Models\SocialOrigin;
+use App\Models\WorkNorm;
+use App\Observers\CityObserver;
+use App\Observers\CountryTranslationObserver;
+use App\Observers\DisabilityObserver;
+use App\Observers\EducationDegreeObserver;
+use App\Observers\PositionObserver;
+use App\Observers\RankReasonObserver;
+use App\Observers\SocialOriginObserver;
+use App\Observers\WorkNormObserver;
 use App\Providers\Concerns\RegistersLivewireAliases;
 use Illuminate\Support\ServiceProvider;
 
@@ -18,7 +34,20 @@ class AdminServiceProvider extends ServiceProvider
     {
         $this->loadRoutesFrom(__DIR__.'/../Routes/web.php');
         $this->loadViewsFrom(__DIR__.'/../Resources/views', 'admin');
+        $this->registerObservers();
         $this->registerLivewireComponents();
+    }
+
+    protected function registerObservers(): void
+    {
+        CountryTranslation::observe(CountryTranslationObserver::class);
+        City::observe(CityObserver::class);
+        Position::observe(PositionObserver::class);
+        Disability::observe(DisabilityObserver::class);
+        RankReason::observe(RankReasonObserver::class);
+        SocialOrigin::observe(SocialOriginObserver::class);
+        EducationDegree::observe(EducationDegreeObserver::class);
+        WorkNorm::observe(WorkNormObserver::class);
     }
 
     protected function registerLivewireComponents(): void

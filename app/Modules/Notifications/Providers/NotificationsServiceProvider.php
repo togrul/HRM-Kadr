@@ -2,11 +2,13 @@
 
 namespace App\Modules\Notifications\Providers;
 
+use App\Providers\Concerns\RegistersLivewireAliases;
 use Illuminate\Support\ServiceProvider;
-use Livewire\Livewire;
 
 class NotificationsServiceProvider extends ServiceProvider
 {
+    use RegistersLivewireAliases;
+
     public function register(): void
     {
         //
@@ -21,7 +23,14 @@ class NotificationsServiceProvider extends ServiceProvider
 
     protected function registerLivewireComponents(): void
     {
-        Livewire::component('notification.notifications', \App\Modules\Notifications\Livewire\Notifications::class);
-        Livewire::component('notification.notification-list', \App\Modules\Notifications\Livewire\NotificationList::class);
+        $this->registerAliases($this->componentMap(), 'notification');
+    }
+
+    protected function componentMap(): array
+    {
+        return [
+            'notifications' => \App\Modules\Notifications\Livewire\Notifications::class,
+            'notification-list' => \App\Modules\Notifications\Livewire\NotificationList::class,
+        ];
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Filter;
+namespace App\Modules\UI\Livewire\Filter;
 
 use Livewire\Component;
 use Livewire\Attributes\Lazy;

@@ -12,12 +12,12 @@ Livewire.hook('message.processed', (message, component) => {
         }
     }
 })">
-    <div class="flex flex-col space-y-4 px-6 py-4">
-        <div class="flex justify-between items-center">
-            <div class="flex flex-row space-x-2 items-center justify-start py-2 px-2 rounded-xl">
+    <div class="flex flex-col px-6 py-4 space-y-4">
+        <div class="flex items-center justify-between">
+            <div class="flex flex-row items-center justify-start px-2 py-2 space-x-2 rounded-xl">
                 <x-label>{{ __('Year') }} </x-label>
                 <select name="selectedYear" id="selectedYear" wire:model.live="selectedYear" @disabled(!empty($filter['date']['min'] ?? null) || !empty($filter['date']['max'] ?? null))
-                    class="block w-full text-base bg-slate-800 border-slate-600 text-white focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm rounded-md">
+                    class="block w-full text-base text-white rounded-md bg-neutral-800 border-slate-600 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm">
                     @foreach ($years as $year)
                         <option value="{{ $year }}" @selected($year == $selectedYear)>{{ $year }}</option>
                     @endforeach
@@ -28,12 +28,12 @@ Livewire.hook('message.processed', (message, component) => {
                 <div class="flex space-x-4">
                     @can('export-vacations')
                         <button wire:click.prevent="exportExcel"
-                            class="flex items-center justify-center rounded-xl w-12 h-12 transition-all duration-300 hover:bg-green-50"
+                            class="flex items-center justify-center w-12 h-12 transition-all duration-300 rounded-xl hover:bg-green-50"
                             type="button">
                             <x-icons.excel-icon />
                         </button>
                         <button wire:click="printPage"
-                            class="flex items-center justify-center rounded-xl w-12 h-12 transition-all duration-300 hover:bg-red-50"
+                            class="flex items-center justify-center w-12 h-12 transition-all duration-300 rounded-xl hover:bg-red-50"
                             type="button">
                             @include('components.icons.print-file', [
                                 'color' => 'text-rose-500',
@@ -46,7 +46,7 @@ Livewire.hook('message.processed', (message, component) => {
             </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2">
+        <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
             <div class="flex flex-col xl:col-span-2">
                 <x-ui.select-dropdown
                     :label="__('Structure')"
@@ -81,7 +81,7 @@ Livewire.hook('message.processed', (message, component) => {
             </div>
             <div class="flex flex-col lg:col-span-2">
                 <x-label for="filter.date_range">{{ __('Date range') }}</x-label>
-                <div class="flex space-x-1 items-center">
+                <div class="flex items-center space-x-1">
                     <x-pikaday-input mode="gray" name="filter.date.min" format="Y-MM-DD"
                         wire:model.defer="filter.date.min">
                         <x-slot name="script">
@@ -119,27 +119,27 @@ Livewire.hook('message.processed', (message, component) => {
                 <x-livewire-input type="number" mode="gray" name="filter.duration"
                     wire:model.defer="filter.duration"></x-livewire-input>
             </div>
-            <div class="flex flex-col space-y-1 w-full lg:col-span-2">
+            <div class="flex flex-col w-full space-y-1 lg:col-span-2">
                 <x-label for="filter.gender">{{ __('Status') }}</x-label>
                 <div class="flex flex-row">
-                    <label class="inline-flex items-center bg-gray-100 rounded shadow-sm py-2 px-2">
+                    <label class="inline-flex items-center px-2 py-2 bg-gray-100 rounded shadow-sm">
                         <input type="radio" class="form-radio" name="filter.vacation_status"
                             wire:model="filter.vacation_status" value="all">
                         <span class="ml-2 text-sm font-normal">{{ __('All') }}</span>
                     </label>
-                    <label class="inline-flex items-center bg-gray-100 rounded shadow-sm py-2 px-2">
+                    <label class="inline-flex items-center px-2 py-2 bg-gray-100 rounded shadow-sm">
                         <input type="radio" class="form-radio" name="filter.vacation_status"
                             wire:model="filter.vacation_status" value="at_work">
                         <span class="ml-2 text-sm font-normal">{{ __('At work') }}</span>
                     </label>
-                    <label class="inline-flex items-center bg-gray-100 rounded shadow-sm py-2 px-2">
+                    <label class="inline-flex items-center px-2 py-2 bg-gray-100 rounded shadow-sm">
                         <input type="radio" class="form-radio" name="filter.vacation_status"
                             wire:model="filter.vacation_status" value="in_vacation">
                         <span class="ml-2 text-sm font-normal">{{ __('In vacation') }}</span>
                     </label>
                 </div>
             </div>
-            <div class="flex space-x-2 items-end">
+            <div class="flex items-end space-x-2">
                 <x-button mode="primary" wire:click="searchFilter()">{{ __('Search') }}</x-button>
                 <x-button mode="black" wire:click="resetFilter">{{ __('Reset') }}</x-button>
             </div>
@@ -166,9 +166,9 @@ Livewire.hook('message.processed', (message, component) => {
                                 </x-table.td>
 
                                 <x-table.td>
-                                    <div class="flex flex-col space-y-1 items-start">
+                                    <div class="flex flex-col items-start space-y-1">
                                         <span
-                                            class="text-slate-500 flex justify-center items-center text-sm font-medium rounded-lg drop-shadow-2xl">
+                                            class="flex items-center justify-center text-sm font-medium rounded-lg text-slate-500 drop-shadow-2xl">
                                             {{ $_vacation->personnel?->latestRank?->rank->name }}
                                         </span>
                                         <span class="text-sm font-medium text-slate-900">
@@ -176,7 +176,7 @@ Livewire.hook('message.processed', (message, component) => {
                                         </span>
                                         @if ($activeVacation)
                                             <span
-                                                class="text-green-700 flex justify-center items-center text-sm font-medium bg-green-200 px-2 py-1 rounded-lg">
+                                                class="flex items-center justify-center px-2 py-1 text-sm font-medium text-green-700 bg-green-200 rounded-lg">
                                                 {{ __('In vacation') }}
                                             </span>
                                         @endif
@@ -186,11 +186,11 @@ Livewire.hook('message.processed', (message, component) => {
                                 <x-table.td>
                                     <div class="flex flex-col space-y-1">
                                         <span
-                                            class="text-blue-500 text-sm font-medium bg-slate-100 px-2 py-1 rounded-lg">
+                                            class="px-2 py-1 text-sm font-medium text-blue-500 rounded-lg bg-slate-100">
                                             {{ $_vacation->personnel?->structure?->name }}
                                         </span>
                                         <span
-                                            class="text-rose-500 text-sm font-medium bg-slate-100 px-2 py-1 rounded-lg">
+                                            class="px-2 py-1 text-sm font-medium rounded-lg text-rose-500 bg-slate-100">
                                             {{ $_vacation->personnel?->position?->name }}
                                         </span>
                                     </div>
@@ -229,15 +229,15 @@ Livewire.hook('message.processed', (message, component) => {
                                                 };
                                             @endphp
                                             <span
-                                                class="text-sm text-gray-500 flex-shrink-0">{{ __('Vacation days') }}:
+                                                class="flex-shrink-0 text-sm text-gray-500">{{ __('Vacation days') }}:
                                             </span>
                                             <div
-                                                class="rounded-lg h-2 bg-slate-200 relative w-20 overflow-hidden flex justify-center items-center">
+                                                class="relative flex items-center justify-center w-20 h-2 overflow-hidden rounded-lg bg-slate-200">
                                                 <div class="absolute left-0 h-full bg-{{ $color }}-500 shadow-sm"
                                                     style="width: {{ $percentage }}%"></div>
                                             </div>
                                             <span
-                                                class="text-sm z-10 text-slate-900 font-medium">{{ $_vacation->remaining_days }}/{{ $_vacation->vacation_days_total }}</span>
+                                                class="z-10 text-sm font-medium text-slate-900">{{ $_vacation->remaining_days }}/{{ $_vacation->vacation_days_total }}</span>
                                         </div>
                                     </div>
                                 </x-table.td>
@@ -270,7 +270,7 @@ Livewire.hook('message.processed', (message, component) => {
                                 <x-table.td :isButton="true">
                                     @can('export-vacations')
                                         <button wire:click="printVacationDocument('{{ $_vacation->id }}')"
-                                            class="flex items-center justify-center w-8 h-8 bg-teal-50 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-teal-50 hover:text-gray-700">
+                                            class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg bg-teal-50 hover:bg-teal-50 hover:text-gray-700">
                                             @include('components.icons.document-icon', [
                                                 'color' => 'text-teal-500',
                                                 'hover' => 'text-teal-600',

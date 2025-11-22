@@ -2,6 +2,12 @@
 
 namespace App\Modules\Services\Providers;
 
+use App\Models\Menu;
+use App\Models\RoleStructure;
+use App\Models\Setting;
+use App\Observers\MenuObserver;
+use App\Observers\RoleStructureObserver;
+use App\Observers\SettingsObserver;
 use App\Providers\Concerns\RegistersLivewireAliases;
 use Illuminate\Support\ServiceProvider;
 
@@ -18,7 +24,15 @@ class ServicesServiceProvider extends ServiceProvider
     {
         $this->loadRoutesFrom(__DIR__.'/../Routes/web.php');
         $this->loadViewsFrom(__DIR__.'/../Resources/views', 'services');
+        $this->registerObservers();
         $this->registerLivewireComponents();
+    }
+
+    protected function registerObservers(): void
+    {
+        Setting::observe(SettingsObserver::class);
+        Menu::observe(MenuObserver::class);
+        RoleStructure::observe(RoleStructureObserver::class);
     }
 
     protected function registerLivewireComponents(): void

@@ -2,11 +2,13 @@
 
 namespace App\Modules\Leaves\Providers;
 
+use App\Providers\Concerns\RegistersLivewireAliases;
 use Illuminate\Support\ServiceProvider;
-use Livewire\Livewire;
 
 class LeavesServiceProvider extends ServiceProvider
 {
+    use RegistersLivewireAliases;
+
     public function register(): void
     {
         //
@@ -21,9 +23,16 @@ class LeavesServiceProvider extends ServiceProvider
 
     protected function registerLivewireComponents(): void
     {
-        Livewire::component('leaves.leaves', \App\Modules\Leaves\Livewire\Leaves::class);
-        Livewire::component('leaves.add-leave', \App\Modules\Leaves\Livewire\AddLeave::class);
-        Livewire::component('leaves.edit-leave', \App\Modules\Leaves\Livewire\EditLeave::class);
-        Livewire::component('leaves.delete-leave', \App\Modules\Leaves\Livewire\DeleteLeave::class);
+        $this->registerAliases($this->componentMap(), 'leaves');
+    }
+
+    protected function componentMap(): array
+    {
+        return [
+            'leaves' => \App\Modules\Leaves\Livewire\Leaves::class,
+            'add-leave' => \App\Modules\Leaves\Livewire\AddLeave::class,
+            'edit-leave' => \App\Modules\Leaves\Livewire\EditLeave::class,
+            'delete-leave' => \App\Modules\Leaves\Livewire\DeleteLeave::class,
+        ];
     }
 }

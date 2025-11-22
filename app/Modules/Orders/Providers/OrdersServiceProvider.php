@@ -2,10 +2,14 @@
 
 namespace App\Modules\Orders\Providers;
 
+use App\Providers\Concerns\RegistersLivewireAliases;
 use Illuminate\Support\ServiceProvider;
+use Livewire\Livewire;
 
 class OrdersServiceProvider extends ServiceProvider
 {
+    use RegistersLivewireAliases;
+
     public function register(): void
     {
     }
@@ -19,14 +23,21 @@ class OrdersServiceProvider extends ServiceProvider
 
     protected function registerLivewireComponents(): void
     {
-        \Livewire\Livewire::component('orders.all-orders', \App\Modules\Orders\Livewire\AllOrders::class);
-        \Livewire\Livewire::component('orders.add-order', \App\Modules\Orders\Livewire\AddOrder::class);
-        \Livewire\Livewire::component('orders.edit-order', \App\Modules\Orders\Livewire\EditOrder::class);
-        \Livewire\Livewire::component('orders.delete-order', \App\Modules\Orders\Livewire\DeleteOrder::class);
-        \Livewire\Livewire::component('orders.templates.all-templates', \App\Modules\Orders\Livewire\Templates\AllTemplates::class);
-        \Livewire\Livewire::component('orders.templates.add-template', \App\Modules\Orders\Livewire\Templates\AddTemplate::class);
-        \Livewire\Livewire::component('orders.templates.edit-template', \App\Modules\Orders\Livewire\Templates\EditTemplate::class);
-        \Livewire\Livewire::component('orders.templates.delete-template', \App\Modules\Orders\Livewire\Templates\DeleteTemplate::class);
-        \Livewire\Livewire::component('orders.templates.set-type', \App\Modules\Orders\Livewire\Templates\SetType::class);
+        $this->registerAliases($this->componentMap(), 'orders');
+    }
+
+    protected function componentMap(): array
+    {
+        return [
+            'all-orders' => \App\Modules\Orders\Livewire\AllOrders::class,
+            'add-order' => \App\Modules\Orders\Livewire\AddOrder::class,
+            'edit-order' => \App\Modules\Orders\Livewire\EditOrder::class,
+            'delete-order' => \App\Modules\Orders\Livewire\DeleteOrder::class,
+            'templates.all-templates' => \App\Modules\Orders\Livewire\Templates\AllTemplates::class,
+            'templates.add-template' => \App\Modules\Orders\Livewire\Templates\AddTemplate::class,
+            'templates.edit-template' => \App\Modules\Orders\Livewire\Templates\EditTemplate::class,
+            'templates.delete-template' => \App\Modules\Orders\Livewire\Templates\DeleteTemplate::class,
+            'templates.set-type' => \App\Modules\Orders\Livewire\Templates\SetType::class,
+        ];
     }
 }

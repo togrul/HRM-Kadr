@@ -345,7 +345,7 @@
     </div>
 
     <div class="" x-data>
-        @livewire('confirmation.add-comment')
+        @livewire('ui.confirmation.add-comment')
     </div>
 
     <x-side-modal>
