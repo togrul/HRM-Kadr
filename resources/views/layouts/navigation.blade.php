@@ -53,9 +53,11 @@
                     </div>
                 @endcan
 
-                @can('get-notification')
-                    @livewire('notification.notifications')
-                @endcan
+                @module('notifications')
+                  @can('get-notification')
+                      @livewire('notification.notifications')
+                  @endcan
+                @endmodule
                 <!-- Settings Dropdown -->
                 <div class="hidden sm:flex sm:items-center sm:ml-6">
                     <x-dropdown align="right">

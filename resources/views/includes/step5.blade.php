@@ -91,23 +91,23 @@
                                 </x-table.td>
                                 <x-table.td>
                                     <div class="flex items-center space-x-6">
-                                        <div class="flex flex-col space-y-1 items-start">
-                                            <span class="text-sm text-gray-500 font-medium border-b border-dashed border-slate-400">{{ __('Given date') }}:</span>
+                                        <div class="flex flex-col items-start space-y-1">
+                                            <span class="text-sm font-medium text-gray-500 border-b border-dashed border-slate-400">{{ __('Given date') }}:</span>
                                             <span class="text-sm font-medium text-teal-600">
                                                 {{ $msModel['given_date'] }}
                                             </span>
                                         </div>
                                         @if(array_key_exists('start_date',$msModel))
-                                            <div class="flex flex-col space-y-1 items-start">
-                                                <span class="text-sm text-gray-500 font-medium border-b border-dashed border-slate-400">{{ __('Start date') }}:</span>
+                                            <div class="flex flex-col items-start space-y-1">
+                                                <span class="text-sm font-medium text-gray-500 border-b border-dashed border-slate-400">{{ __('Start date') }}:</span>
                                                 <span class="text-sm font-medium text-gray-600">
                                                     {{ $msModel['start_date'] }}
                                                 </span>
                                             </div>
                                         @endif
                                         @if(array_key_exists('end_date',$msModel))
-                                            <div class="flex flex-col space-y-1 items-start">
-                                                <span class="text-sm text-gray-500 font-medium border-b border-dashed border-slate-400">{{ __('End date') }}:</span>
+                                            <div class="flex flex-col items-start space-y-1">
+                                                <span class="text-sm font-medium text-gray-500 border-b border-dashed border-slate-400">{{ __('End date') }}:</span>
                                                 <span class="text-sm font-medium text-rose-500">
                                                     {{ $msModel['end_date'] }}
                                                 </span>
@@ -119,7 +119,7 @@
                                     <button
                                         onclick="confirm('Are you sure you want to remove this data?') || event.stopImmediatePropagation()"
                                         wire:click="forceDeleteMilitary({{ $key }})"
-                                        class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-50 hover:text-gray-700"
+                                        class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700"
                                     >
                                         @include('components.icons.force-delete')
                                     </button>
@@ -128,7 +128,7 @@
                         @empty
                             <tr>
                                 <td colspan="4">
-                                    <div class="flex justify-center items-center py-4">
+                                    <div class="flex items-center justify-center py-4">
                                         <span class="font-medium">{{ __('No information added') }}</span>
                                     </div>
                                 </td>
@@ -145,11 +145,11 @@
             <div class="flex flex-col">
                 <x-label for="historyForm.injury.injury_type">{{ __('Injury type') }}</x-label>
                 <div class="flex flex-row">
-                    <label class="inline-flex items-center bg-gray-100 rounded shadow-sm py-2 px-2 w-full">
+                    <label class="inline-flex items-center w-full px-2 py-2 bg-gray-100 rounded shadow-sm">
                         <input type="radio" class="form-radio" name="historyForm.injury.injury_type" wire:model="historyForm.injury.injury_type" value="other">
                         <span class="ml-2 text-sm font-normal">{{__('Other')}}</span>
                     </label>
-                    <label class="inline-flex items-center ml-4 bg-gray-100 rounded shadow-sm py-2 px-2 w-full">
+                    <label class="inline-flex items-center w-full px-2 py-2 ml-4 bg-gray-100 rounded shadow-sm">
                         <input type="radio" class="form-radio" name="historyForm.injury.injury_type" wire:model="historyForm.injury.injury_type" value="contusion">
                         <span class="ml-2 text-sm font-normal">{{__('Contusion')}}</span>
                     </label>
@@ -206,7 +206,7 @@
                                     @endif
                                 </x-table.td>
                                 <x-table.td>
-                                    <div class="flex flex-col space-y-1">
+                                    <div class="flex flex-col space-y-1 w-max">
                                          <span class="text-sm font-medium text-gray-600 border-b border-dashed border-slate-400">
                                             {{ $injuryModel['location'] }}
                                         </span>
@@ -219,12 +219,12 @@
                                 </x-table.td>
                                 <x-table.td>
                                     <div
-                                        class="flex space-x-2 items-center"
+                                        class="flex items-center space-x-2"
                                         x-data="{showFull: ''}"
                                         @click="showFull = (showFull === '' ? '{{ $key }}' : '')"
                                     >
                                         <span
-                                            class="text-sm font-medium text-gray-700 whitespace-normal truncate"
+                                            class="text-sm font-medium text-gray-700 truncate whitespace-normal"
                                             :class="{ 'line-clamp-2': showFull === '' }"
                                         >
                                             {{ $injuryModel['description']}}
@@ -235,7 +235,7 @@
                                     <button
                                         onclick="confirm('Are you sure you want to remove this data?') || event.stopImmediatePropagation()"
                                         wire:click="forceDeleteInjury({{ $key }})"
-                                        class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-50 hover:text-gray-700"
+                                        class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700"
                                     >
                                         @include('components.icons.force-delete')
                                     </button>
@@ -244,7 +244,7 @@
                         @empty
                             <tr>
                                 <td colspan="4">
-                                    <div class="flex justify-center items-center py-4">
+                                    <div class="flex items-center justify-center py-4">
                                         <span class="font-medium">{{ __('No information added') }}</span>
                                     </div>
                                 </td>
@@ -334,7 +334,7 @@
                                 </x-table.td>
                                 <x-table.td>
                                     <div class="flex items-center space-x-6">
-                                        <div class="flex flex-col space-y-1 items-start">
+                                        <div class="flex flex-col items-start space-y-1">
                                             <span class="text-sm font-medium text-gray-500 border-b border-dashed border-slate-400">{{ __('Taken date')  }}:</span>
                                             <span class="text-sm font-medium text-gray-900">
                                                 @if(! empty($captivityModel['taken_captive_date']))
@@ -343,7 +343,7 @@
                                             </span>
                                         </div>
                                         @if(! empty($captivityModel['release_date']))
-                                            <div class="flex flex-col space-y-1 items-start">
+                                            <div class="flex flex-col items-start space-y-1">
                                                 <span class="text-sm font-medium text-gray-500 border-b border-dashed border-slate-400">{{ __('Release date')  }}:</span>
                                                 <span class="text-sm font-medium text-emerald-500">
                                                     {{ \Carbon\Carbon::parse($captivityModel['release_date'])->format('d.m.Y') }}
@@ -356,7 +356,7 @@
                                     <button
                                         onclick="confirm('Are you sure you want to remove this data?') || event.stopImmediatePropagation()"
                                         wire:click="forceDeleteCaptivity({{ $key }})"
-                                        class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-50 hover:text-gray-700"
+                                        class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700"
                                     >
                                         @include('components.icons.force-delete')
                                     </button>
@@ -365,7 +365,7 @@
                         @empty
                             <tr>
                                 <td colspan="4">
-                                    <div class="flex justify-center items-center py-4">
+                                    <div class="flex items-center justify-center py-4">
                                         <span class="font-medium">{{ __('No information added') }}</span>
                                     </div>
                                 </td>

@@ -155,7 +155,7 @@
         @if(Arr::has($educationState, ['admission_year']) && ! empty(Arr::get($educationState, 'admission_year')))
             <div class="flex items-center justify-between p-2 my-2 border border-gray-200 rounded-lg shadow-sm bg-gray-50">
                 <div class="flex items-center space-x-2">
-                    <span class="font-medium text-gray-500">{{ __('Duration') }}:</span>
+                    <span class="text-sm font-medium text-gray-500 uppercase">{{ __('Duration') }}:</span>
                     @if(! empty($calculatedDataEducation))
                         <span class="font-medium text-gray-900">
                             {{ $calculatedDataEducation['diff'] }} {{ __('month') }}
@@ -168,11 +168,11 @@
 
                 @if(Arr::get($educationState, 'coefficient') > 0)
                     <div class="flex items-center space-x-2">
-                        <span class="font-medium text-gray-500">{{ __('Coefficient') }}:</span>
+                        <span class="text-sm font-medium text-gray-500 uppercase">{{ __('Coefficient') }}:</span>
                         <span class="font-medium text-teal-500">{{ $educationState['coefficient'] }}</span>
                     </div>
                     <div class="flex items-center space-x-2">
-                        <span class="font-medium text-gray-500">{{ __('Extra seniority') }}:</span>
+                        <span class="text-sm font-medium text-gray-500 uppercase">{{ __('Extra seniority') }}:</span>
                         @if(! empty($calculatedDataEducation))
                             <span class="font-medium text-rose-500">
                                 {{ $calculatedDataEducation['duration'] }} {{ __('month') }}
