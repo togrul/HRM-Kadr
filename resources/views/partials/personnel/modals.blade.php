@@ -1,4 +1,4 @@
-<livewire:ui.filter.detail/>
+<livewire:ui.filter.detail :filter="$filters"/>
 
 <x-side-modal size="x-large">
     @can('add-personnels')

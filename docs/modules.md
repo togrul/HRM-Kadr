@@ -47,3 +47,8 @@ Livewire components, routes, views, and service provider. Shared patterns:
 - Register model observers in the same provider (e.g., `Setting::observe(SettingsObserver::class);`) so cache flushes stay within the module.
 - Add the module namespace to `config/livewire.php` `discover.namespaces` to keep `@livewire('<prefix>.<alias>')` working without manual `Livewire::component` calls.
 - Optional: to make a module togglable, add it to `config/modules.php` under `catalog` with `enabled => true/false` and (if needed) `migrations => app_path('Modules/<Name>/Database/Migrations')`, then guard the provider with `ModuleState::enabled('<slug>')` and call `loadMigrationsFrom` conditionally.
+
+## Feature flags (organization profiles)
+- `config/profiles.php` defines profiles (default/military/public/private). Active profile: `APP_PROFILE` or `profiles.active`.
+- Each profile can override modules (on/off) and feature flags (e.g., `ranks`, `military_service`, `weapons`). Defaults live in the `default` profile.
+- `feature_enabled('ranks')` helper and `@feature('ranks') ... @endfeature` Blade directive check FeatureState, which is built from the active profile. Use them to hide UI or relax validation when a feature is off.

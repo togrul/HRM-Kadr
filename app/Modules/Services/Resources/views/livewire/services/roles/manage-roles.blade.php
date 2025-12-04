@@ -8,12 +8,15 @@
                 <div class="px-0 py-5 space-y-6">
 
                     <div class="flex items-end space-x-2">
-                        <div class="">
+                        <div>
                             <x-label for="role_name" :value="__('Role')" />
 
                             <x-livewire-input id="role_name" name="role_name" mode="gray"
                                 class="block mt-1 w-full sm:text-sm outline-none font-medium h-10 dark:bg-gray-700 {{ $errors->any() ? 'border-red-600' : '' }}"
                                 type="text" :value="old('role_name')" wire:model="role_name" required autofocus />
+                                  @error('role_name')
+                                      <x-validation> {{ $message }} </x-validation>
+                                  @enderror
                         </div>
                         <x-button mode="primary" class="space-x-2">
                             <x-icons.key-icon color="text-white" hover="text-gray-50"></x-icons.key-icon>

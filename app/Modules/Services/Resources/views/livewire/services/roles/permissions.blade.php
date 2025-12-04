@@ -5,13 +5,16 @@
             <form wire:submit.prevent="store">
                 @csrf
 
-                <div class="px-0 py-5 space-y-6 flex items-end space-x-2">
+                <div class="flex items-start px-0 py-5 space-x-2 space-y-6">
                     <div>
                         <x-label for="permission_name" :value="__('Permission')" />
 
                         <x-livewire-input mode="gray" name="permission_name" id="permission_name"
                             class="block mt-1 w-full sm:text-sm outline-none font-medium h-10 dark:bg-gray-700 {{ $errors->any() ? 'border-red-600' : '' }}"
                             type="text" :value="old('permission_name')" wire:model="permission_name" autofocus />
+                            @error('permission_name')
+                                <x-validation> {{ $message }} </x-validation>
+                            @enderror
                     </div>
                     <div>
                         <x-button mode="primary" class="space-x-2">
@@ -77,7 +80,7 @@
                             <x-table.td :isButton="true">
                                 {{-- @can('manage-settings') --}}
                                 <button wire:click.prevent = "setDeletePermission({{ $permission->id }})"
-                                    class="flex items-center justify-center w-8 h-8 text-xs font-semibold uppercase transition duration-300 rounded-lg text-red-500 hover:bg-red-100">
+                                    class="flex items-center justify-center w-8 h-8 text-xs font-semibold text-red-500 uppercase transition duration-300 rounded-lg hover:bg-red-100">
                                     <x-icons.delete-icon color="text-rose-400"
                                         hover="text-rose-300"></x-icons.delete-icon>
                                 </button>

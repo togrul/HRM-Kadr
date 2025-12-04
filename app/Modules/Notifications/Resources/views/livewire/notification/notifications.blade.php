@@ -20,7 +20,7 @@
             </div>
         @endif
     </button>
-    <div class="absolute z-40 text-left text-gray-700 bg-white border shadow-2xl shadow-slate-200 border-slate-200 -right-24 md:-right-8 w-72 md:w-96 rounded-xl"
+    <div class="absolute z-40 text-left bg-white border shadow-2xl text-neutral-700 shadow-neutral-200 border-neutral-200 -right-24 md:-right-8 w-72 md:w-[500px] rounded-xl"
          style="display:none;"
          x-show="isOpen"
          x-transition:enter="transition duration-200 transform ease-out"
@@ -29,7 +29,8 @@
          x-transition:leave-end="opacity-0 scale-90"
          @click.away="isOpen = false"
          @keydown.escape.window="isOpen = false">
-        <ul class="overflow-y-auto text-xs font-normal divide-y max-h-96 rounded-tl-xl rounded-tr-xl"
+          
+        <ul class="overflow-y-auto text-xs font-normal divide-y divide-dashed max-h-96 rounded-tl-xl rounded-tr-xl"
         >
             @forelse($notifications as $notification)
                 <x-notification.item :notification="$notification" />
@@ -53,14 +54,14 @@
                 @endif
             @endforelse
         </ul>
-        <div class="flex justify-between text-center border-t border-gray-300">
-            <a wire:navigate href="{{ route('notifications') }}" class="px-5 py-3 text-sm font-medium transition duration-300 text-slate-600 hover:text-green-400">
+        <div class="flex justify-between text-center border-t border-dashed border-neutral-300">
+            <a wire:navigate href="{{ route('notifications') }}" class="px-5 py-3 text-sm font-medium transition duration-300 text-neutral-500 hover:text-green-400">
                 {{__('Show all notifications')}}
             </a>
             <button
                 wire:click="markAllAsRead"
                 @click="isOpen = false"
-                class="px-5 py-3 text-sm font-medium transition duration-150 ease-in appearance-none hover:text-blue-500"
+                class="px-5 py-3 text-sm font-medium transition duration-150 ease-in appearance-none text-neutral-500 hover:text-blue-500"
             >
                 {{ __('Mark all as read') }}
             </button>

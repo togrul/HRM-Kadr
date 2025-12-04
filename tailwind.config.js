@@ -40,7 +40,11 @@ export default {
         'bg-orange-500',
         'bg-neutral-200/60',
         'border-neutral-200/70',
-        'border-amber-200'
+        'border-amber-200',
+        'border-emerald-200',
+        'border-rose-200',
+        'border-blue-200',
+        'border-gray-200'
       ],
     darkMode: 'class',
     theme: {

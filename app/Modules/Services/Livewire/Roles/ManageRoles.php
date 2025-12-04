@@ -6,6 +6,7 @@ use App\Livewire\Traits\SideModalAction;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\On;
 use Livewire\Component;
+use Illuminate\Validation\Rule;
 use Spatie\Permission\Models\Role;
 
 #[On(['permissionSet', 'roleWasDeleted'])]
@@ -19,9 +20,15 @@ class ManageRoles extends Component
 
     public $isUpdate;
 
-    protected $rules = [
-        'role_name' => 'required|unique:roles,name',
-    ];
+    protected function rules(): array
+    {
+        return [
+            'role_name' => [
+                'required',
+                Rule::unique('roles', 'name')->ignore($this->role_id),
+            ],
+        ];
+    }
 
     public function editRole($id)
     {
@@ -38,10 +45,15 @@ class ManageRoles extends Component
     public function store()
     {
         $this->validate();
-        $data = [
-            'name' => $this->role_name,
-        ];
-        Role::updateOrCreate($data);
+
+        $payload = ['name' => $this->role_name];
+
+        if ($this->role_id) {
+            Role::findOrFail($this->role_id)->update($payload);
+        } else {
+            Role::create($payload);
+        }
+
         $this->dispatch('roleUpdated', __('Role was updated successfully!'));
         $this->cancel();
     }

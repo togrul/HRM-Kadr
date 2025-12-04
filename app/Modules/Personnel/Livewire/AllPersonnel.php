@@ -32,6 +32,7 @@ class AllPersonnel extends Component
     #[Url]
     public ?string $status = null;
 
+    #[Url]
     public array $filters = [];
 
     #[Url]

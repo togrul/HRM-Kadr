@@ -392,7 +392,7 @@
                             <span>{{ data_get($election, 'location') ?? '---' }}</span>
                         </div>
                         <div class="flex flex-col p-2 space-y-1 border border-gray-300 rounded-md bg-neutral-200/50">
-                            <span class="font-medium text-neutral-500">{{ __('Election date') }}</span>
+                            <span class="font-medium text-neutral-500">{{ __('Elected date') }}</span>
                             <span>{{ data_get($election, 'elected_date') ?? '---' }}</span>
                         </div>
                     </div>

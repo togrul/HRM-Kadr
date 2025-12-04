@@ -208,6 +208,7 @@
     "Has elected on electorals?": "Seçki orqanlarına seçilib?",
     "Election type": "Seçilmə növü",
     "Elected date": "Seçilmə tarixi",
+    "Election date": "Seçilmə tarixi",
     "Total duration": "Ümumi müddət",
     "Been captivity": "Əsirlikdə olma",
     "Criminal": "Cinayət",
@@ -503,8 +504,14 @@
     "Order given by": "Əmr kim tərəfindən verilib",
     "Add type": "Növ əlavə et",
     "Leave Types": "İcazə növləri",
+    "Leave type": "İcazə növləri",
     "Leaves": "İcazələr",
     "Max days": "Maksimum günlər",
     "Requires document?": "Sənəd tələb olunur?",
-    "Settings": "Tənzimləmələr"
+    "Settings": "Tənzimləmələr",
+    "request" : "müraciət",
+    "Time off" : "İcazələr",
+    "Approved" : "Təsdiqlənmiş",
+    "Rejected" : "Rədd edilmiş",
+    "Cancelled" : "Ləğv edilmiş"
 }

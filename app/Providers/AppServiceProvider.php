@@ -5,6 +5,9 @@ namespace App\Providers;
 use App\Models\Menu;
 use App\Models\Setting;
 use App\Services\NumberToWordsService;
+use App\Services\Features\FeatureState;
+use App\Services\Modules\ModuleState;
+use App\Services\Profiles\ProfileState;
 use App\Services\StructureService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -21,8 +24,16 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->app->singleton(ProfileState::class, fn () => new ProfileState(
+            config('profiles.profiles', []),
+            config('profiles.active', env('APP_PROFILE', 'default')),
+            config('modules.catalog', []),
+        ));
+
         $this->app->singleton(NumberToWordsService::class, fn () => new NumberToWordsService);
         $this->app->singleton(StructureService::class, fn () => new StructureService);
+        $this->app->singleton(ModuleState::class, fn () => new ModuleState($this->app->make(ProfileState::class)->modules()));
+        $this->app->singleton(FeatureState::class, fn () => new FeatureState($this->app->make(ProfileState::class)->features()));
     }
 
     /**
@@ -97,6 +108,17 @@ class AppServiceProvider extends ServiceProvider
             }
         }
 
+        if (! function_exists('feature_enabled')) {
+            /**
+             * Check if a feature flag is enabled.
+             */
+            function feature_enabled(string $feature): bool
+            {
+                return app(\App\Services\Features\FeatureState::class)->enabled($feature);
+            }
+        }
+
         Blade::if('module', fn (string $slug) => module_enabled($slug));
+        Blade::if('feature', fn (string $feature) => feature_enabled($feature));
     }
 }

@@ -15,6 +15,8 @@ use App\Livewire\Traits\SideModalAction;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use App\Livewire\Traits\DropdownConstructTrait;
 use App\Data\LeaveFilterData;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\LeaveExport;
 
 #[On(['leaveAdded', 'filterSelected', 'leaveWasDeleted', 'leaveApproved', 'leaveRejected'])]
 class Leaves extends Component
@@ -29,6 +31,8 @@ class Leaves extends Component
     #[Url]
     public $status;
 
+    protected ?array $statsCache = null;
+
     public function applyFilter(?array $payload = null): void
     {
         if ($payload !== null) {
@@ -37,6 +41,7 @@ class Leaves extends Component
 
         $this->search = LeaveFilterData::fromArray($this->filter->toArray());
         $this->resetPage();
+        $this->statsCache = null;
     }
 
     public function resetFilter(): void
@@ -54,6 +59,15 @@ class Leaves extends Component
     {
         $this->status = $newStatus;
         $this->resetPage();
+        $this->statsCache = null;
+    }
+
+    public function exportExcel()
+    {
+        $rows = $this->returnData('cursor');
+        $name = now()->format('d.m.Y H:i');
+
+        return Excel::download(new LeaveExport($rows), "leaves-{$name}.xlsx");
     }
 
     public function updatedFilter($value, $key): void
@@ -148,15 +162,53 @@ class Leaves extends Component
 
     protected function returnData($type = 'normal')
     {
-        $result = Leave::with(['personnel.structure','personnel.position','leaveType', 'status', 'latestLog.changedBy'])
+        $base = Leave::query()
             ->when(is_numeric($this->status), fn($q) => $q->where('status_id', $this->status))
             ->when($this->status === 'deleted', fn($q) => $q->onlyTrashed())
-            ->filter($this->search)
+            ->filter($this->search);
+
+        // Liste (eager load + paginate)
+        $result = $base->clone()
+            ->with(['personnel.structure','personnel.position','leaveType','status','latestLog.changedBy'])
             ->orderByDesc('created_at');
 
-        return $type == 'normal'
-            ? $result->paginate(15)->withQueryString()
-            : $result->cursor();
+        return match($type) {
+            'stats' => $this->computeStats($base),
+            default => $this->finalizePagination($result, $type),
+        };
+    }
+
+    protected function computeStats($base): array
+    {
+        if ($this->statsCache !== null) {
+            return $this->statsCache;
+        }
+
+        return $this->statsCache = $base->clone()
+            ->join('leave_types as t', 't.id', '=', 'leaves.leave_type_id')
+            ->select(
+                't.name as name',
+                DB::raw('COUNT(*) as count'),
+                DB::raw('SUM(DATEDIFF(ends_at, starts_at) + 1) as total_days')
+            )
+            ->groupBy('t.name')
+            ->get()
+            ->mapWithKeys(fn ($row) => [
+                $row->name => [
+                    'total_days' => (int) $row->total_days,
+                    'count' => (int) $row->count,
+                ],
+            ])
+            ->toArray();
+    }
+
+    protected function finalizePagination($query, $type)
+    {
+        if ($type === 'cursor') {
+            return $query->cursor();
+        }
+
+        return $query->paginate(15)->withQueryString();
     }
 
     public function render()
@@ -165,7 +217,9 @@ class Leaves extends Component
 
         $_appeal_statuses = OrderStatus::query()->where('locale', config('app.locale'))->get();
 
-        return view('leaves::livewire.leaves.leaves', compact('permits', '_appeal_statuses'));
+        $stats = $this->returnData('stats');
+
+        return view('leaves::livewire.leaves.leaves', compact('permits', '_appeal_statuses', 'stats'));
     }
 
     public function filterSelected(array $filters): void

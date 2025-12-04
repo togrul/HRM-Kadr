@@ -2,9 +2,10 @@
 
 namespace App\Services\Modules;
 
+use App\Contracts\ToggleStateInterface;
 use Illuminate\Support\Arr;
 
-class ModuleState
+class ModuleState implements ToggleStateInterface
 {
     public function __construct(private array $catalog = [])
     {
@@ -62,5 +63,10 @@ class ModuleState
     private function get(string $slug): array
     {
         return Arr::get($this->catalog, $slug, []);
+    }
+
+    public function all(): array
+    {
+        return $this->catalog;
     }
 }

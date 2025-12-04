@@ -80,6 +80,27 @@
 
     {{-- start --}}
     <div class="flex flex-col px-6 py-4 space-y-4">
+        @if (!empty($stats))
+            <div class="grid w-full gap-2 md:grid-cols-3 lg:grid-cols-4">
+                @foreach ($stats as $type => $row)
+                    <div class="px-3 py-2 space-y-1 border rounded-lg shadow-sm bg-slate-100/50 border-slate-200/70 dark:bg-white/2 dark:border-white/5">
+                        <span class="inline-flex items-center px-2 py-1 text-[12px] uppercase font-bold text-slate-700 bg-zinc-200 rounded-md">
+                            {{ $type }}
+                        </span>
+                        <div class="flex items-center justify-between text-slate-800">
+                            <div class="flex items-baseline space-x-1">
+                                <span class="text-lg font-bold">{{ $row['total_days'] }}</span>
+                                <span class="text-[11px] font-medium text-gray-500 uppercase">{{ __('day') }}</span>
+                            </div>
+                            <div class="flex items-baseline space-x-1 text-emerald-700">
+                                <span class="text-lg font-bold">{{ $row['count'] }}</span>
+                                <span class="text-[11px] font-medium text-emerald-600 uppercase">{{ __('request') }}</span>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        @endif
         {{-- start  --}}
         <div class="flex items-center justify-between">
              <div class="px-2 py-2 bg-white filter rounded-xl">
@@ -181,7 +202,7 @@
                                 </x-table.td>
 
                                <x-table.td>
-                                    <span class="text-sm font-medium text-gray-700 whitespace-normal flex w-[160px] bg-white rounded-xl shadow-lg px-3 py-2">
+                                    <span class="text-sm font-medium text-gray-700 whitespace-normal flex w-[160px] bg-white rounded-xl shadow-sm border border-gray-200 px-3 py-2">
                                         {{ $leave->reason }}
                                     </span>
                                 </x-table.td>
@@ -198,7 +219,7 @@
                                             @if($leave?->latestLog?->comment)
                                             <div class="relative top-1" x-data="{showComment: false}">
                                                 <button @click="showComment = true" class="appearance-none">
-                                                    <x-icons.comment-icon color="text-indigo-500" hover="text-indigo-700" />
+                                                    <x-icons.comment-icon color="text-sky-500" hover="text-indigo-700" />
                                                 </button>
                                                  <div @class([
                                                     'absolute px-3 py-2 rounded-md shadow-2xl bg-white border border-neutral-200/80 w-[200px] z-10',

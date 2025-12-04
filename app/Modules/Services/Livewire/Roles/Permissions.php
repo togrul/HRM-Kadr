@@ -4,6 +4,7 @@ namespace App\Modules\Services\Livewire\Roles;
 
 use Livewire\Attributes\On;
 use Livewire\Component;
+use Illuminate\Validation\Rule;
 use Spatie\Permission\Models\Permission;
 
 #[On('permissionWasDeleted')]
@@ -13,9 +14,15 @@ class Permissions extends Component
 
     public $permission_name;
 
-    protected $rules = [
-        'permission_name' => 'required|unique:permissions,name',
-    ];
+    protected function rules(): array
+    {
+        return [
+            'permission_name' => [
+                'required',
+                Rule::unique('permissions', 'name')->ignore($this->permission_id),
+            ],
+        ];
+    }
 
     public function editPermission($id)
     {
@@ -27,11 +34,10 @@ class Permissions extends Component
     public function store()
     {
         $this->validate();
-        $data = [
-            'name' => $this->permission_name,
-        ];
+        $data = ['name' => $this->permission_name];
+
         if ($this->permission_id) {
-            Permission::updateOrCreate(['id' => $this->permission_id], $data);
+            Permission::findOrFail($this->permission_id)->update($data);
         } else {
             Permission::create($data);
         }

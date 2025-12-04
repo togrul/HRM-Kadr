@@ -273,6 +273,11 @@ class Detail extends Component
         );
     }
 
-    public function mount() { $this->filterResetted(); }
+    public function mount(array $filter = []): void
+    {
+        // Merge incoming filter (from parent/query) with defaults so selections stay visible.
+        $this->filter = array_merge($this->defaultFilter(), array_filter($filter, fn ($v) => $v !== null && $v !== ''));
+    }
+
     public function render() { return view('ui::livewire.filter.detail'); }
 }
