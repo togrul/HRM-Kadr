@@ -66,14 +66,17 @@ class Notifications extends Component
         auth()->guest() && abort(Response::HTTP_FORBIDDEN);
 
         $notification = DatabaseNotification::findOrFail($notificationId);
-        $route = match($notification->data['type']) {
+        $type = $notification->data['type'] ?? 'default';
+
+        $route = match($type) {
             'Personnel', 'Birthday' => 'home',
-            'default' => 'notifications',
+            'Leave', 'leave' => 'leaves',
+            default => 'notifications',
         };
 
         $notification->markAsRead();
         $this->flushCache($notification->notifiable_id);
-        return redirect()->route($route);
+        return $this->redirectRoute($route);
     }
 
     public function render()

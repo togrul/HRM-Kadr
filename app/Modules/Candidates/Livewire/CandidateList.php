@@ -3,7 +3,7 @@
 namespace App\Modules\Candidates\Livewire;
 
 use App\Concerns\LoadsAppealStatuses;
-use App\Exports\CandidateExport;
+use App\Modules\Candidates\Exports\CandidateExport;
 use App\Livewire\Traits\SideModalAction;
 use App\Models\Candidate;
 use App\Services\StructureService;

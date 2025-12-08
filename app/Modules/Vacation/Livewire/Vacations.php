@@ -2,7 +2,7 @@
 
 namespace App\Modules\Vacation\Livewire;
 
-use App\Exports\VacationExport;
+use App\Modules\Vacation\Exports\VacationExport;
 use App\Livewire\Traits\DropdownConstructTrait;
 use App\Livewire\Traits\SideModalAction;
 use App\Models\PersonnelVacation;

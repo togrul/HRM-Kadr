@@ -16,7 +16,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use App\Livewire\Traits\DropdownConstructTrait;
 use App\Data\LeaveFilterData;
 use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\LeaveExport;
+use App\Modules\Leaves\Exports\LeaveExport;
 
 #[On(['leaveAdded', 'filterSelected', 'leaveWasDeleted', 'leaveApproved', 'leaveRejected'])]
 class Leaves extends Component

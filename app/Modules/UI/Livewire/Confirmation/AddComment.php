@@ -25,23 +25,20 @@ class AddComment extends Component
                 OrderStatusEnum::CANCELLED->value,
             ];
 
-            $updates = ['status_id' => $toStatus->value];
+            $leave = Leave::lockForUpdate()->findOrFail($id);
 
-            if ($toStatus === OrderStatusEnum::APPROVED) {
-                $updates['approved_at'] = $now;
-                $updates['approved_by'] = $userId;
-            }
-
-            $affected = Leave::whereKey($id)
-                ->whereNotIn('status_id', $finalStatuses)
-                ->update($updates);
-
-            if ($affected !== 1) {
+            if (in_array((int) $leave->status_id, $finalStatuses, true)) {
                 throw new RuntimeException('This leave request is already finalized.');
             }
 
-            // Log üçün modeli götür
-            $leave = Leave::findOrFail($id);
+            $leave->status_id = $toStatus->value;
+
+            if ($toStatus === OrderStatusEnum::APPROVED) {
+                $leave->approved_at = $now;
+                $leave->approved_by = $userId;
+            }
+
+            $leave->save();
 
             $leave->logs()->create([
                 'status_id'  => $toStatus->value,
@@ -59,7 +56,7 @@ class AddComment extends Component
             OrderStatusEnum::label($action)
         );
 
-        if ($action === OrderStatusEnum::APPROVED) {
+        if ($action === OrderStatusEnum::APPROVED->name) {
             $successEvent = 'leaveApproved';
             $successMsg   =  __('Leave was approved successfully!');
         }

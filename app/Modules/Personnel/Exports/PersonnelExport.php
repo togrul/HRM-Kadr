@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Exports;
+namespace App\Modules\Personnel\Exports;
 
 use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromView;
@@ -16,6 +16,6 @@ class PersonnelExport implements FromView
 
     public function view(): View
     {
-        return view('exports.personnel', ['report' => $this->report]);
+        return view('personnel::exports.personnel', ['report' => $this->report]);
     }
 }

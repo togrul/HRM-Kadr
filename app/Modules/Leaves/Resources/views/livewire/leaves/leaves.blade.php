@@ -84,7 +84,7 @@
             <div class="grid w-full gap-2 md:grid-cols-3 lg:grid-cols-4">
                 @foreach ($stats as $type => $row)
                     <div class="px-3 py-2 space-y-1 border rounded-lg shadow-sm bg-slate-100/50 border-slate-200/70 dark:bg-white/2 dark:border-white/5">
-                        <span class="inline-flex items-center px-2 py-1 text-[12px] uppercase font-bold text-slate-700 bg-zinc-200 rounded-md">
+                        <span class="inline-flex items-center py-1 text-[12px] border-b border-slate-400 border-dashed uppercase font-bold text-slate-600">
                             {{ $type }}
                         </span>
                         <div class="flex items-center justify-between text-slate-800">

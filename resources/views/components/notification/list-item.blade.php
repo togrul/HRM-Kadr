@@ -2,43 +2,56 @@
 
 @php
      $data = $notification->data;
-     $type = $data['type'];
+     $type = $data['type'] ?? 'notification';
      $action = $data['action'] ?? '';
      $isRead = !empty($notification->read_at);
+     $category = $data['category'] ?? ucfirst($type);
+     $addedBy = $data['added_by'] ?? null;
+     $message = $data['message'] ?? __('has a notification');
+
      switch ($action) {
             case 'create':
                 $color = 'teal';
-                $message = __('has created new personnel');
-                $category = __('New '. strtolower($type));
-                $addedBy = $data['added_by'];
+                $message = $data['message'] ?? __('has created new personnel');
+                $category = $data['category'] ?? __('New '. strtolower($type));
                 break;
             case 'delete':
                 $color = 'rose';
-                $message = __('has deleted personnel');
-                $category = __($type . ' deleted');
-                $addedBy = $data['added_by'];
+                $message = $data['message'] ?? __('has deleted personnel');
+                $category = $data['category'] ?? __($type . ' deleted');
                 break;
             case 'birthday':
                 $color = 'blue';
                 $message = '';
-                $category = $type;
+                $category = $data['category'] ?? $type;
                 $addedBy = null;
+                break;
+            case 'leave':
+                $color = 'amber';
+                $message = $data['message'] ?? __('New leave request has created');
+                $category = $data['category'] ?? $data['leave_type'] ??'Leave';
+                $addedBy = $data['fullname'] ?? null;
+                break;
+            case 'leaveStatusChanged':
+                $color = 'indigo';
+                $message = $data['message'] ?? __('Leave request has been' . ' ' . strtolower($data['status'] ?? '') );
+                $category = __($data['category'] ?? $data['leave_type'] ?? 'Leave');
+                $addedBy = $data['fullname'] ?? null;
                 break;
             default:
                  $color = 'gray';
-                 $message = __('has a notification');
         };
 @endphp
-<div class="border-t-8 border-gray-50 px-8 py-4 relative">
+<div class="relative px-8 py-4 border-t-8 border-gray-50">
      <div class="flex items-center justify-between space-x-2">
           <div class="flex items-center space-x-3">
                <span class="rounded-tl-lg rounded-br-lg px-2 py-1 text-sm font-medium bg-{{$color}}-100 text-{{$color}}-500">
                   {{ __($category) }}
                </span>
-               <p class="text-base flex items-center space-x-1">
+               <p class="flex items-center space-x-1 text-base">
                    @if($action == 'birthday')
                        <x-icons.cake-icon color="text-yellow-800"></x-icons.cake-icon>
-                       <span class="text-black text-base flex items-center">
+                       <span class="flex items-center text-base text-black">
                            <span class="text-sm text-gray-500">{{ __('Age') }}:</span>{{ \Carbon\Carbon::parse($data['added_by'])->age }}
                        </span>
                    @else
@@ -49,8 +62,8 @@
                 </p>
           </div>
          <div class="flex items-center space-x-2">
-             <span class="font-light text-sm text-gray-900">{{ $notification->created_at->format('d.m.Y H:i') }}</span>
-             <span class="font-light text-sm text-gray-500">({{ $notification->created_at->diffForHumans() }})</span>
+             <span class="text-sm font-light text-gray-900">{{ $notification->created_at->format('d.m.Y H:i') }}</span>
+             <span class="text-sm font-light text-gray-500">({{ $notification->created_at->diffForHumans() }})</span>
          </div>
      </div>
 </div>

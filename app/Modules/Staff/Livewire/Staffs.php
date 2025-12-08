@@ -2,7 +2,7 @@
 
 namespace App\Modules\Staff\Livewire;
 
-use App\Exports\VacancyExport;
+use App\Modules\Staff\Exports\VacancyExport;
 use App\Livewire\Traits\SideModalAction;
 use App\Models\StaffSchedule;
 use App\Services\StructureService;

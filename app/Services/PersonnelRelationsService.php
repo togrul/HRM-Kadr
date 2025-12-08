@@ -248,7 +248,7 @@ class PersonnelRelationsService
 
     /**
      * @param  mixed  $value
-     */
+    */
     private function isScalarValueFilled($value): bool
     {
         if (is_bool($value)) {

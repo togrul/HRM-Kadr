@@ -136,7 +136,7 @@
                 @enderror
             </div>
         </div>
-        <div class="grid grid-cols-3 gap-2">
+        <div class="grid items-end grid-cols-3 gap-2">
             <div class="flex flex-col">
                 <x-label for="educationForm.education.coefficient">{{ __('Coefficient') }}</x-label>
                 <x-livewire-input mode="gray" type="number" name="educationForm.education.coefficient" wire:model.live="educationForm.education.coefficient"></x-livewire-input>

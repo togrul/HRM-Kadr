@@ -2,7 +2,7 @@
 
 namespace App\Modules\Personnel\Livewire;
 
-use App\Exports\PersonnelExport;
+use App\Modules\Personnel\Exports\PersonnelExport;
 use App\Livewire\Traits\SideModalAction;
 use App\Models\Personnel;
 use App\Models\Position;

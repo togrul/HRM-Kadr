@@ -91,6 +91,7 @@ class LeaveForm extends Form
         $this->ends_at       = optional($leave->ends_at)->format('Y-m-d');
         $this->total_days    = $leave->total_days;
         $this->reason        = $leave->reason;
+        $this->document_path = $leave->document_path;
     }
 
     public function toPayload(): array
@@ -104,6 +105,7 @@ class LeaveForm extends Form
             'reason'        => $this->reason,
             'status_id'     => $this->status_id !== null ? (int) $this->status_id : null,
             'assigned_to'   => data_get($this->assigned_to, 'tabel_no'),
+            'document_path' => is_string($this->document_path) ? $this->document_path : null,
         ];
     }
 

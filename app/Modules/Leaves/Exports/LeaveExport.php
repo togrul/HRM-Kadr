@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Exports;
+namespace App\Modules\Leaves\Exports;
 
 use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromView;
@@ -16,6 +16,6 @@ class LeaveExport implements FromView
 
     public function view(): View
     {
-        return view('exports.leaves', ['rows' => $this->rows]);
+        return view('leaves::exports.leaves', ['rows' => $this->rows]);
     }
 }

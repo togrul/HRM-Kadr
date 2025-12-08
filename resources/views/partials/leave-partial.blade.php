@@ -87,7 +87,7 @@
         <x-textarea name="leave.reason" :placeholder="__('Reason')" mode="gray" wire:model="leave.reason"></x-textarea>
     </div>
 
-    <div class="grid items-start grid-cols-1 gap-2 sm:grid-cols-3">
+    <div class="grid items-start items-end grid-cols-1 gap-2 sm:grid-cols-3">
         <div class="flex flex-col">
             <x-ui.select-dropdown
                 label="{{ __('Status') }}"

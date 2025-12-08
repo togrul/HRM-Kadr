@@ -1176,9 +1176,9 @@ trait PersonnelCrud
 
     protected function historyFormInstance(): ?ServiceHistoryForm
     {
-        if (property_exists($this, 'historyForm') && $this->historyForm instanceof ServiceHistoryForm) {
+      if (property_exists($this, 'historyForm') && $this->historyForm instanceof ServiceHistoryForm) {
             return $this->historyForm;
-        }
+      }
 
         return null;
     }

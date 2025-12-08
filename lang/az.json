@@ -513,5 +513,8 @@
     "Time off" : "İcazələr",
     "Approved" : "Təsdiqlənmiş",
     "Rejected" : "Rədd edilmiş",
-    "Cancelled" : "Ləğv edilmiş"
+    "Cancelled" : "Ləğv edilmiş",
+    "New leave request has created" : "Yeni icazə müraciəti yaradıldı",
+    "Leave request has been approved" : "İcazə müraciəti təsdiqləndi",
+    "Leave request has been rejected" : "İcazə müraciəti rədd edildi"
 }

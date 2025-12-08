@@ -1,18 +1,14 @@
-@props([
-    'model',
-    'data'
-])
+@props(['model', 'data'])
 
 @php
-    [$modelName, $modelKey] = explode('.',$model);
+    [$modelName, $modelKey] = explode('.', $model);
 @endphp
 
-<div class="bg-neutral-100 rounded-lg shadow-sm p-1">
-    <div class="flex flex-col py-1" x-data="{ isUploading: false, progress: 0 }"
-        x-on:livewire-upload-start="isUploading = true" x-on:livewire-upload-finish="isUploading = false"
-        x-on:livewire-upload-error="isUploading = false"
+<div class="p-1 rounded-lg shadow-sm bg-neutral-100">
+    <div class="flex flex-col py-1" x-data="{ isUploading: false, progress: 0 }" x-on:livewire-upload-start="isUploading = true"
+        x-on:livewire-upload-finish="isUploading = false" x-on:livewire-upload-error="isUploading = false"
         x-on:livewire-upload-progress="progress = $event.detail.progress">
-        <div class="flex flex-col space-y-2 items-center">
+        <div class="flex flex-col items-center space-y-2">
             <label
                 class="flex cursor-pointer bg-neutral-200/80 py-2 px-3 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 h-[40px]">
                 <span class="text-sm leading-normal">
@@ -25,12 +21,26 @@
                 </span>
                 <input type='file' class="hidden" wire:model="{{ $model }}" />
             </label>
-             @if ($data)
-                <span class="text-sm text-neutral-600">{{ $data->getClientOriginalName() }}</span>
-            @endif
+
         </div>
         <div x-show="isUploading">
-            <progress class="w-full rounded-lg overflow-hidden" max="100" x-bind:value="progress"></progress>
+            <progress class="w-full overflow-hidden rounded-lg" max="100" x-bind:value="progress"></progress>
         </div>
     </div>
+    @if ($data)
+        @php
+            $filename = is_string($data) ? basename($data) : $data->getClientOriginalName();
+        @endphp
+        <div class="px-2">
+            <a
+                class="inline-flex max-w-full text-sm text-indigo-600 hover:underline break-all"
+                href="{{ is_string($data) ? \Illuminate\Support\Facades\Storage::url($data) : '#' }}"
+                target="_blank"
+                rel="noreferrer"
+                title="{{ $filename }}"
+            >
+                <span class="inline-block max-w-full truncate">{{ $filename }}</span>
+            </a>
+        </div>
+    @endif
 </div>

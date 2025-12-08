@@ -2,7 +2,7 @@
 
 namespace App\Modules\BusinessTrips\Livewire;
 
-use App\Exports\BusinessTripExport;
+use App\Modules\BusinessTrips\Exports\BusinessTripExport;
 use App\Livewire\Traits\DropdownConstructTrait;
 use App\Models\OrderType;
 use App\Models\PersonnelBusinessTrip;

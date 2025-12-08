@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Exports;
+namespace App\Modules\Staff\Exports;
 
 use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromView;
 
-class BusinessTripExport implements FromView
+class VacancyExport implements FromView
 {
     public iterable $report;
 
@@ -16,6 +16,6 @@ class BusinessTripExport implements FromView
 
     public function view(): View
     {
-        return view('exports.business-trips', ['report' => $this->report]);
+        return view('staff::exports.vacancies', ['report' => $this->report]);
     }
 }

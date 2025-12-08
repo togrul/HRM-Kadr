@@ -1,7 +1,7 @@
 <div class="flex flex-col space-y-8"
      x-data
 >
-    <div class="flex items-center justify-between space-x-2 action-section py-2">
+    <div class="flex items-center justify-between py-2 space-x-2 action-section">
         <div class="">
             <x-label for="search">{{ __('Name') }}</x-label>
             <x-livewire-input mode="gray" name="search" wire:model.live="search"></x-livewire-input>
@@ -18,26 +18,26 @@
 
         <div class="grid grid-cols-1 gap-2">
             @forelse ($_components as $key => $_component)
-                <div class="flex justify-between items-center px-4 py-3 rounded-xl shadow-sm bg-slate-100">
-                    <span class="text-slate-900 font-medium w-20">
+                <div class="flex items-center justify-between px-4 py-3 shadow-sm rounded-xl bg-neutral-100">
+                    <span class="w-20 font-medium text-neutral-900">
                         {{ ($_components->currentpage()-1) * $_components->perpage() + $key + 1 }}
                     </span>
-                    <span class="bg-slate-200 text-slate-700 font-medium px-3 py-1 text-sm rounded-lg">
+                    <span class="px-3 py-1 text-sm font-medium rounded-lg bg-neutral-200 text-neutral-700">
                         {{ $_component->orderType->name }}
                     </span>
-                    <span class="text-slate-600 font-medium text-sm">
+                    <span class="text-sm font-medium text-neutral-600">
                         {{ $_component->name }}
                     </span>
-                    <div class="flex justify-end items-center space-x-2 w-20">
+                    <div class="flex items-center justify-end w-20 space-x-2">
                         <button
                             wire:click.prevent="openSideMenu('edit-component',{{ $_component->id }})"
-                            class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase rounded-lg text-gray-500 hover:bg-gray-200 hover:text-gray-700"
+                            class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase rounded-lg hover:bg-gray-200 hover:text-gray-700"
                         >
                             <x-icons.edit-icon color="text-slate-600" hover="text-slate-700"></x-icons.edit-icon>
                         </button>
                         <button
                             wire:click.prevent="setDeleteComponent({{ $_component->id  }})"
-                            class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-50 hover:text-gray-700"
+                            class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700"
                         >
                             <x-icons.delete-icon color="text-rose-500" hover="text-rose-600"></x-icons.delete-icon>
                         </button>
