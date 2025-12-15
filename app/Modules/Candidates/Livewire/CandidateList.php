@@ -34,6 +34,8 @@ class CandidateList extends Component
 
     public function exportExcel()
     {
+        $this->authorize('export', Candidate::class);
+
         $report = $this->returnData(type: 'excel');
         $name = Carbon::now()->format('d.m.Y H:i');
 
@@ -118,7 +120,7 @@ class CandidateList extends Component
 
     public function mount(StructureService $structureService): void
     {
-        $this->authorize('show-candidates');
+        $this->authorize('viewAny', Candidate::class);
         $this->status = request()->query('status', 'all');
         $this->accessibleStructureIds = $structureService->getAccessibleStructures();
     }

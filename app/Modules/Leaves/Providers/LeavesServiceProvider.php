@@ -7,6 +7,7 @@ use App\Services\Modules\ModuleState;
 use App\Models\Leave;
 use App\Observers\LeaveObserver;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Gate;
 
 class LeavesServiceProvider extends ServiceProvider
 {
@@ -27,6 +28,7 @@ class LeavesServiceProvider extends ServiceProvider
         $this->loadViewsFrom(__DIR__.'/../Resources/views', 'leaves');
         $this->loadMigrations();
         $this->registerObservers();
+        $this->registerPolicies();
         $this->registerLivewireComponents();
     }
 
@@ -42,6 +44,14 @@ class LeavesServiceProvider extends ServiceProvider
     protected function registerObservers(): void
     {
         Leave::observe(LeaveObserver::class);
+    }
+
+    protected function registerPolicies(): void
+    {
+        Gate::policy(
+            \App\Models\Leave::class,
+            \App\Modules\Leaves\Policies\LeavePolicy::class
+        );
     }
 
     protected function registerLivewireComponents(): void

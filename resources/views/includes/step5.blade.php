@@ -1,6 +1,6 @@
 <div class="flex flex-col space-y-4">
     <x-form-card title="Military">
-        <div class="grid grid-cols-2 gap-2">
+        <div class="grid grid-cols-3 gap-2">
             <div class="flex flex-col">
                 <x-ui.select-dropdown
                     label="{{ __('Ranks') }}"
@@ -31,6 +31,10 @@
                 @error('historyForm.military.attitude_to_military_service')
                 <x-validation> {{ $message }} </x-validation>
                 @enderror
+            </div>
+             <div class="flex flex-col">
+                <x-label for="historyForm.military.location">{{ __('Service place') }}</x-label>
+                <x-livewire-input mode="gray" name="historyForm.military.location" wire:model="historyForm.military.location"></x-livewire-input>
             </div>
         </div>
         <div class="grid grid-cols-3 gap-2">
@@ -76,7 +80,7 @@
         <div class="relative -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
                 <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
-                    <x-table.tbl :headers="[__('Attitude'),__('Rank'),__('Date'),'action']">
+                    <x-table.tbl :headers="[__('Attitude'),__('Service place'),__('Rank'),__('Date'),'action']">
                         @forelse ($historyForm->militaryList as $key => $msModel)
                             <tr>
                                 <x-table.td>
@@ -84,6 +88,11 @@
                                         {{ $msModel['attitude_to_military_service'] }}
                                    </span>
                                 </x-table.td>
+                                 <x-table.td>
+                                    <span class="text-sm font-medium text-gray-900">
+                                        {{ $msModel['location'] }}
+                                    </span>
+                                 </x-table.td>
                                 <x-table.td>
                                    <span class="text-sm font-medium text-teal-600">
                                         {{ $this->rankLabel(data_get($msModel, 'rank_id')) ?? '---' }}

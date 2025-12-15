@@ -17,7 +17,7 @@
     @foreach($rows as $leave)
         <tr>
             <td>{{ $leave->personnel?->fullname ?? '' }}</td>
-            <td>{{ $leave->personnel?->position?->name ?? '' }}</td>
+            <td>{{ $leave->personnel?->position_label ?? '' }}</td>
             <td>{{ $leave->personnel?->structure?->name ?? '' }}</td>
             <td>{{ $leave->leaveType?->name ?? '' }}</td>
             <td>{{ optional($leave->starts_at)->format('d.m.Y') }}</td>

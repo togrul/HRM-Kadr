@@ -133,17 +133,24 @@ trait OrderCrud
     protected function normalizeVacancyEntries(array $entries): array
     {
         return collect($entries)
-            ->map(function ($entry) {
+            ->values()
+            ->map(function ($entry, $idx) {
                 $structureId = $this->valueAsInt($entry, 'structure_id');
                 $positionId = $this->valueAsInt($entry, 'position_id');
+                $personnelId = $this->valueAsInt($entry, 'personnel_id')
+                    ?? $this->valueAsInt($this->componentForms[$idx] ?? [], 'personnel_id');
+                $componentId = $this->valueAsInt($entry, 'component_id')
+                    ?? $this->valueAsInt($this->componentForms[$idx] ?? [], 'component_id');
 
-                if (! $structureId || ! $positionId) {
+                if (! $structureId || ! $positionId || ! $componentId) {
                     return null;
                 }
 
                 return [
                     'structure_id' => $structureId,
                     'position_id' => $positionId,
+                    'personnel_id' => $personnelId,
+                    'component_id' => $componentId,
                     'structure_label' => $this->dropdownFieldLabel('structure_id', $structureId),
                     'position_label' => $this->dropdownFieldLabel('position_id', $positionId),
                 ];
@@ -456,7 +463,6 @@ trait OrderCrud
         }
 
         [$list_for_vacancy, $message] = $this->resolveVacancyData($bladeData);
-
         return [
             'attributes' => $bladeData['attributes'] ?? [],
             'personnel_ids' => $bladeData['personnel_ids'] ?? [],

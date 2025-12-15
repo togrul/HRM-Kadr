@@ -61,25 +61,49 @@
                     model="awardsPunishmentsForm.award.is_old"
                 ></x-checkbox>
             </div>
+
+            <div class="flex flex-col col-span-2">
+                <x-label for="awardsPunishmentsForm.award.order_given_by">{{ __('Order issued by') }}</x-label>
+                <x-livewire-input mode="gray" name="awardsPunishmentsForm.award.order_given_by" wire:model="awardsPunishmentsForm.award.order_given_by"></x-livewire-input>
+            </div>
+            <div class="flex flex-col col-span-2">
+                <x-label for="awardsPunishmentsForm.award.order_no">{{ __('Order number') }}</x-label>
+                <x-livewire-input mode="gray" name="awardsPunishmentsForm.award.order_no" wire:model="awardsPunishmentsForm.award.order_no"></x-livewire-input>
+            </div>
+            <div class="flex flex-col col-span-2">
+                <x-label for="awardsPunishmentsForm.award.order_date">{{ __('Order date') }}</x-label>
+                <x-pikaday-input
+                    mode="gray"
+                    name="awardsPunishmentsForm.award.order_date"
+                    format="Y-MM-DD"
+                    wire:model.live="awardsPunishmentsForm.award.order_date"
+                >
+                    <x-slot name="script">
+                        $el.onchange = function () {
+                        @this.set('awardsPunishmentsForm.award.order_date', $el.value);
+                        }
+                    </x-slot>
+                </x-pikaday-input>
+          </div>
         </div>
 
-        <div class="flex justify-end">
+        <div class="flex justify-end w-full">
             <x-button mode="black" wire:click="addAward">{{ __('Add') }}</x-button>
         </div>
 
         <div class="relative -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
                 <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
-                    <x-table.tbl :headers="[__('Award'), __('Reason'), __('Date'), 'action', 'action']">
+                    <x-table.tbl :headers="[__('Award'), __('Reason'), __('Date'), __('Info') ,'action', 'action']">
                         @forelse ($awardsPunishmentsForm->awardList ?? [] as $key => $awdModel)
                             <tr>
                                 <x-table.td>
-                                    <span class="text-sm font-medium text-gray-700">
+                                    <span class="px-2 py-1 text-sm font-medium text-gray-700 rounded-md bg-zinc-200">
                                         {{ $this->awardLabel(data_get($awdModel, 'award_id')) ?? '---' }}
                                     </span>
                                 </x-table.td>
                                 <x-table.td>
-                                   <span class="text-sm font-medium text-gray-700 whitespace-normal truncate line-clamp-3">
+                                   <span class="text-sm font-medium text-gray-700 truncate whitespace-normal line-clamp-3">
                                         {{ data_get($awdModel, 'reason') }}
                                     </span>
                                 </x-table.td>
@@ -88,6 +112,36 @@
                                         {{ data_get($awdModel, 'given_date') }}
                                     </span>
                                 </x-table.td>
+                                <x-table.td>
+                                <div class="flex items-start space-x-6">
+                                    <div class="flex flex-col items-start space-y-1">
+                                         <span class="text-sm font-medium text-gray-500 border-b border-dashed border-slate-400">
+                                                {{ __('Issued by') }}:
+                                         </span>
+                                        <span class="text-sm font-medium text-gray-900">
+                                                {{ data_get($awdModel, 'order_given_by', '---') }}
+                                        </span>
+                                    </div>
+                                    <div class="flex flex-col items-start space-y-1">
+                                        <span class="text-sm font-medium text-gray-500 border-b border-dashed border-slate-400">
+                                            {{ __('Number') }} #:
+                                        </span>
+                                        <span class="text-sm font-medium text-blue-500">
+                                            {{ data_get($awdModel, 'order_no', '---') }}
+                                        </span>
+                                    </div>
+                                    <div class="flex flex-col items-start space-y-1">
+                                        <span class="text-sm font-medium text-gray-500 border-b border-dashed border-slate-400">
+                                            {{ __('Date') }}:
+                                        </span>
+                                        <span class="text-sm font-medium text-gray-700">
+                                            @if(! empty($awdModel['order_date']))
+                                                {{ \Carbon\Carbon::parse($awdModel['order_date'])->format('d.m.Y') }}
+                                            @endif
+                                        </span>
+                                    </div>
+                                </div>
+                            </x-table.td>
                                 <x-table.td>
                                     <span @class([
                                         'w-3 h-3 rounded-full shadow-sm flex',
@@ -100,7 +154,7 @@
                                     <button
                                         onclick="confirm('Are you sure you want to remove this data?') || event.stopImmediatePropagation()"
                                         wire:click="forceDeleteAward({{ $key }})"
-                                        class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-50 hover:text-gray-700"
+                                        class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700"
                                     >
                                         @include('components.icons.force-delete')
                                     </button>
@@ -147,7 +201,7 @@
                 <x-validation> {{ $message }} </x-validation>
                 @enderror
             </div>
-            <div class="flex flex-col">
+            <div class="flex flex-col col-span-2">
                 <x-label for="awardsPunishmentsForm.punishment.reason">{{ __('Reason') }}</x-label>
                 <x-livewire-input
                     mode="gray"
@@ -160,7 +214,7 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-2">
+        <div class="grid grid-cols-7 gap-2">
             <div class="flex flex-col">
                 <x-label for="awardsPunishmentsForm.punishment.given_date">{{ __('Given date') }}</x-label>
                 <x-pikaday-input
@@ -194,6 +248,29 @@
                     </x-slot>
                 </x-pikaday-input>
             </div>
+            <div class="flex flex-col col-span-2">
+                <x-label for="awardsPunishmentsForm.punishment.order_given_by">{{ __('Order issued by') }}</x-label>
+                <x-livewire-input mode="gray" name="awardsPunishmentsForm.punishment.order_given_by" wire:model="awardsPunishmentsForm.punishment.order_given_by"></x-livewire-input>
+            </div>
+            <div class="flex flex-col col-span-2">
+                <x-label for="awardsPunishmentsForm.punishment.order_no">{{ __('Order number') }}</x-label>
+                <x-livewire-input mode="gray" name="awardsPunishmentsForm.punishment.order_no" wire:model="awardsPunishmentsForm.punishment.order_no"></x-livewire-input>
+            </div>
+             <div class="flex flex-col">
+                <x-label for="awardsPunishmentsForm.punishment.order_date">{{ __('Order date') }}</x-label>
+                <x-pikaday-input
+                    mode="gray"
+                    name="awardsPunishmentsForm.punishment.order_date"
+                    format="Y-MM-DD"
+                    wire:model.live="awardsPunishmentsForm.punishment.order_date"
+                >
+                    <x-slot name="script">
+                        $el.onchange = function () {
+                        @this.set('awardsPunishmentsForm.punishment.order_date', $el.value);
+                        }
+                    </x-slot>
+                </x-pikaday-input>
+            </div>
         </div>
 
         <div class="flex justify-end">
@@ -203,7 +280,7 @@
         <div class="relative -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
                 <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
-                    <x-table.tbl :headers="[__('Punishment'), __('Reason'), __('Date'), 'action']">
+                    <x-table.tbl :headers="[__('Punishment'), __('Reason'), __('Date'), __('Info') ,'action']">
                         @forelse ($awardsPunishmentsForm->punishmentList ?? [] as $key => $pnshModel)
                             <tr>
                                 <x-table.td>
@@ -233,11 +310,41 @@
                                         </div>
                                     </div>
                                 </x-table.td>
+                                <x-table.td>
+                                <div class="flex items-center space-x-6">
+                                    <div class="flex flex-col items-start space-y-1">
+                                         <span class="text-sm font-medium text-gray-500 border-b border-dashed border-slate-400">
+                                                {{ __('Issued by') }}:
+                                         </span>
+                                        <span class="text-sm font-medium text-gray-900">
+                                                {{ data_get($pnshModel, 'order_given_by', '---') }}
+                                        </span>
+                                    </div>
+                                    <div class="flex flex-col items-start space-y-1">
+                                        <span class="text-sm font-medium text-gray-500 border-b border-dashed border-slate-400">
+                                            {{ __('Number') }} #:
+                                        </span>
+                                        <span class="text-sm font-medium text-blue-500">
+                                            {{ data_get($pnshModel, 'order_no', '---') }}
+                                        </span>
+                                    </div>
+                                    <div class="flex flex-col items-start space-y-1">
+                                        <span class="text-sm font-medium text-gray-500 border-b border-dashed border-slate-400">
+                                            {{ __('Date') }}:
+                                        </span>
+                                        <span class="text-sm font-medium text-gray-700">
+                                            @if(! empty($pnshModel['order_date']))
+                                                {{ \Carbon\Carbon::parse($pnshModel['order_date'])->format('d.m.Y') }}
+                                            @endif
+                                        </span>
+                                    </div>
+                                </div>
+                            </x-table.td>
                                 <x-table.td :isButton="true">
                                     <button
                                         onclick="confirm('Are you sure you want to remove this data?') || event.stopImmediatePropagation()"
                                         wire:click="forceDeletePunishment({{ $key }})"
-                                        class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-50 hover:text-gray-700"
+                                        class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700"
                                     >
                                         @include('components.icons.force-delete')
                                     </button>

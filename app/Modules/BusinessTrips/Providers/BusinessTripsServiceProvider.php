@@ -4,6 +4,7 @@ namespace App\Modules\BusinessTrips\Providers;
 
 use App\Providers\Concerns\RegistersLivewireAliases;
 use App\Services\Modules\ModuleState;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
 class BusinessTripsServiceProvider extends ServiceProvider
@@ -23,6 +24,7 @@ class BusinessTripsServiceProvider extends ServiceProvider
 
         $this->loadRoutesFrom(__DIR__.'/../Routes/web.php');
         $this->loadViewsFrom(__DIR__.'/../Resources/views', 'business-trips');
+        $this->registerPolicies();
         $this->registerLivewireComponents();
     }
 
@@ -36,5 +38,10 @@ class BusinessTripsServiceProvider extends ServiceProvider
         return [
             'list' => \App\Modules\BusinessTrips\Livewire\BusinessTrips::class,
         ];
+    }
+
+    protected function registerPolicies(): void
+    {
+        Gate::policy(\App\Models\PersonnelBusinessTrip::class, \App\Modules\BusinessTrips\Policies\BusinessTripPolicy::class);
     }
 }

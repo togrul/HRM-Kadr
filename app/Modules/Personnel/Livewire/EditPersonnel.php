@@ -14,10 +14,12 @@ use App\Livewire\Traits\PersonnelCrud;
 use App\Livewire\Traits\RelationCruds\RelationCrudTrait;
 use App\Models\Personnel;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Component;
 
 class EditPersonnel extends Component
 {
+    use AuthorizesRequests;
     use PersonnelCrud;
     use RelationCrudTrait;
 
@@ -48,11 +50,12 @@ class EditPersonnel extends Component
 
     public function mount()
     {
-        $this->authorize('edit-personnels', $this->personnelModel);
-        $this->title = __('Edit personnel');
-        $this->step = 1;
         $this->personnelModelData = Personnel::query()
             ->findOrFail($this->personnelModel);
+
+        $this->authorize('update', $this->personnelModelData);
+        $this->title = __('Edit personnel');
+        $this->step = 1;
         $this->resetStepTrackingFor($this->personnelModelData->getKey());
         $this->loadStepData(1);
     }
@@ -65,7 +68,7 @@ class EditPersonnel extends Component
 
     public function store()
     {
-        $this->authorize('update-personnels', $this->personnelModel);
+        $this->authorize('update', $this->personnelModelData);
         $currentStep = (int) $this->step;
 
         $this->loadAllStepData();

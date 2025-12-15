@@ -344,9 +344,6 @@
                     x-on:change.stop="null"
                 />
             </x-ui.select-dropdown>
-            @error('laborActivityForm.rank.rank_reason_id')
-            <x-validation> {{ $message }} </x-validation>
-            @enderror
         </div>
         <div class="flex flex-col">
             <x-label for="laborActivityForm.rank.name">{{ __('Name') }}</x-label>

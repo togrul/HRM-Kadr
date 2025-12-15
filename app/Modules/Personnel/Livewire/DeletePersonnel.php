@@ -28,7 +28,7 @@ class DeletePersonnel extends Component
             return;
         }
 
-        $this->authorize('delete-personnels', $personnel);
+        $this->authorize('delete', $personnel);
         $this->personnelId = (int) $personnel->id;
 
         $this->dispatch('deletePersonnelWasSet');
@@ -50,7 +50,7 @@ class DeletePersonnel extends Component
             return;
         }
 
-        $this->authorize('delete-personnels', $personnel);
+        $this->authorize('delete', $personnel);
 
         $personnel->delete();
 

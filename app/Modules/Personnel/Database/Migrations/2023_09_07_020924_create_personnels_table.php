@@ -28,9 +28,9 @@ return new class extends Migration
             $table->string('initials_change_reason')->nullable();
             $table->date('birthdate');
             $table->smallInteger('gender')->default(1);
-            $table->string('phone');
+            $table->string('phone')->nullable();
             $table->string('mobile');
-            $table->string('email');
+            $table->string('email')->nullable();
             $table->integer('nationality_id');
             $table->foreign('nationality_id')->references('id')->on('countries');
             $table->boolean('has_changed_nationality')->default(false);

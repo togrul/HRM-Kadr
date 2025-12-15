@@ -29,7 +29,7 @@ class DeleteOrder extends Component
             return;
         }
 
-        $this->authorize('delete-orders', $orderLog);
+        $this->authorize('delete', $orderLog);
 
         $this->orderLogId = (int) $orderLog->id;
 
@@ -52,7 +52,7 @@ class DeleteOrder extends Component
             return;
         }
 
-        $this->authorize('delete-orders', $orderLog);
+        $this->authorize('delete', $orderLog);
 
         $orderLog->delete();
 

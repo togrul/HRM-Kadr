@@ -57,6 +57,7 @@ class Leaves extends Component
 
     public function setStatus($newStatus): void
     {
+        $this->authorize('viewAny', \App\Models\Leave::class);
         $this->status = $newStatus;
         $this->resetPage();
         $this->statsCache = null;
@@ -64,6 +65,8 @@ class Leaves extends Component
 
     public function exportExcel()
     {
+        $this->authorize('export', \App\Models\Leave::class);
+
         $rows = $this->returnData('cursor');
         $name = now()->format('d.m.Y H:i');
 
@@ -107,6 +110,7 @@ class Leaves extends Component
     public function forceDeleteData($id)
     {
         $model = Leave::withTrashed()->find($id);
+        $this->authorize('delete', $model);
         $model->forceDelete();
         $this->dispatch('leaveWasDeleted', __('Leave was deleted!'));
     }
@@ -114,6 +118,7 @@ class Leaves extends Component
     public function restoreData($id)
     {
         $model = Leave::withTrashed()->find($id);
+        $this->authorize('restore', $model);
         $model->restore();
         $this->dispatch('leaveAdded', __('Leave was updated successfully!'));
     }
@@ -154,7 +159,7 @@ class Leaves extends Component
 
     public function mount(): void
     {
-        // $this->authorize('show-candidates');
+        $this->authorize('viewAny', \App\Models\Leave::class);
         $this->status = request()->query('status', 'all');
         $this->filter = LeaveFilterData::make();
         $this->search = LeaveFilterData::make();
@@ -169,7 +174,14 @@ class Leaves extends Component
 
         // Liste (eager load + paginate)
         $result = $base->clone()
-            ->with(['personnel.structure','personnel.position','leaveType','status','latestLog.changedBy'])
+            ->with([
+                 'personnel' => fn ($q) => $q
+                    ->withStructureTree()   // burada parent zincirini preload eder
+                    ->with('position'),
+                'leaveType',
+                'status',
+                'latestLog.changedBy'
+            ])
             ->orderByDesc('created_at');
 
         return match($type) {

@@ -115,18 +115,6 @@ class Information extends Component
 
     public function mount()
     {
-        $this->authorize('edit-personnels', $this->personnelModel);
-        $this->title = __('Edit personnel');
-        $this->steps = [
-            'Contracts',
-            'Education requests',
-            'Master degrees',
-            'Pension cards',
-            'Disposals',
-        ];
-
-        $this->currentStep = 0;
-
         $this->personnelModelData = Personnel::with([
             'contracts.rank',
             'educationRequests',
@@ -137,6 +125,19 @@ class Information extends Component
             ->withTrashed()
             ->where('tabel_no', $this->personnelModel)
             ->firstOrFail();
+
+        $this->authorize('update', $this->personnelModelData);
+
+        $this->title = __('Edit personnel');
+        $this->steps = [
+            'Contracts',
+            'Education requests',
+            'Master degrees',
+            'Pension cards',
+            'Disposals',
+        ];
+
+        $this->currentStep = 0;
     }
 
     public function render()

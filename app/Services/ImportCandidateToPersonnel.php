@@ -12,8 +12,20 @@ class ImportCandidateToPersonnel
     public function handle(array $components, $status): array
     {
         $tabel_no_list = [];
+        // dd($components);
         foreach ($components as $component) {
-            $candidate = Candidate::find($component['personnel_id']);
+            $candidateId = $component['personnel_id'] ?? null;
+            if (is_array($candidateId)) {
+                $candidateId = $candidateId['id'] ?? null;
+            }
+            if (! $candidateId) {
+                continue;
+            }
+
+            $candidate = Candidate::find($candidateId);
+            if (! $candidate) {
+                continue;
+            }
             $structureId = $this->valueAsInt($component, 'structure_id');
             $positionId = $this->valueAsInt($component, 'position_id');
 

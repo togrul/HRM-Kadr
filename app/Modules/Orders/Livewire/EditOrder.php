@@ -23,11 +23,14 @@ class EditOrder extends Component
 
     protected function fillOrder()
     {
-        $this->authorize('edit-orders', $this->orderModelData);
-
-        if (! $this->orderModelData = $this->fetchOrderData()) {
-            abort(403);
+        $orderLog = $this->fetchOrderData();
+        if (! $orderLog) {
+            abort(404);
         }
+
+        $this->authorize('update', $orderLog);
+
+        $this->orderModelData = $orderLog;
 
         $this->initializeOrderData();
 
@@ -205,7 +208,6 @@ class EditOrder extends Component
         if (! is_array($data)) {
             return $data;
         }
-
         $payload = $this->orderForm->payload();
 
         DB::transaction(function () use ($data, $payload) {
@@ -239,18 +241,24 @@ class EditOrder extends Component
         //get attributes and insert to attributes table
         $this->saveAttribute($this->orderModelData, $data['attributes'], 'update');
 
+        $assignedTabels = [];
+
         if ($this->isDefaultBlade()) {
-            $this->handleDefaultBladePersonnel($data, $orderPayload);
+            $assignedTabels = $this->handleDefaultBladePersonnel($data, $orderPayload);
         } else {
-            $this->handleSpecialBladePersonnel($data);
+            $assignedTabels = $this->handleSpecialBladePersonnel($data);
         }
 
-        (new OrderConfirmedService($this->orderModelData))->handle($data['personnel_ids'], 'update');
+        $confirmedPayload = $this->isCandidateOrder()
+            ? ($assignedTabels['candidate_ids'] ?? [])
+            : ($assignedTabels['tabels'] ?? $assignedTabels);
+
+        (new OrderConfirmedService($this->orderModelData))->handle($confirmedPayload, 'update');
     }
 
-    private function handleDefaultBladePersonnel(array $data, array $orderPayload): void
+    private function handleDefaultBladePersonnel(array $data, array $orderPayload): array
     {
-        $this->personnelPersister->attachFromVacancies(
+        return $this->personnelPersister->attachFromVacancies(
             $this->orderModelData,
             $data['vacancy_list'],
             $this->isCandidateOrder(),
@@ -258,7 +266,7 @@ class EditOrder extends Component
         );
     }
 
-    private function handleSpecialBladePersonnel(array $data): void
+    private function handleSpecialBladePersonnel(array $data): array
     {
         $componentIds = collect($this->fillPersonnelsToComponents($this->orderModelData->order->blade))
             ->values()
@@ -270,5 +278,10 @@ class EditOrder extends Component
             $this->selectedPersonnel->personnels,
             $componentIds
         );
+
+        return [
+            'tabels' => $this->selectedPersonnel->personnels,
+            'candidate_ids' => [],
+        ];
     }
 }

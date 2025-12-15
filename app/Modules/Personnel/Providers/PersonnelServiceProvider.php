@@ -4,6 +4,7 @@ namespace App\Modules\Personnel\Providers;
 
 use App\Providers\Concerns\RegistersLivewireAliases;
 use App\Services\Modules\ModuleState;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
 class PersonnelServiceProvider extends ServiceProvider
@@ -23,12 +24,18 @@ class PersonnelServiceProvider extends ServiceProvider
         $this->loadRoutesFrom(__DIR__.'/../Routes/web.php');
         $this->loadRoutesFrom(__DIR__.'/../Routes/print.php');
         $this->loadViewsFrom(__DIR__.'/../Resources/views', 'personnel');
+        $this->registerPolicies();
         $this->registerLivewireComponents();
     }
 
     protected function registerLivewireComponents(): void
     {
         $this->registerAliases($this->componentMap(), 'personnel');
+    }
+
+    protected function registerPolicies(): void
+    {
+        Gate::policy(\App\Models\Personnel::class, \App\Modules\Personnel\Policies\PersonnelPolicy::class);
     }
 
     protected function componentMap(): array

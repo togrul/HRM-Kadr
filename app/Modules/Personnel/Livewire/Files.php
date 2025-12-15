@@ -72,6 +72,8 @@ class Files extends Component
             ->withTrashed()
             ->first();
 
+       $this->authorize('update', $this->personnelFiles);
+
         $this->title = __('Files') . "( {$this->personnelFiles->fullname} )";
 
         $this->file_list = $this->personnelFiles->files->toArray();

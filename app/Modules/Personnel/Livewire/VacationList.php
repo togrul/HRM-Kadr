@@ -64,12 +64,14 @@ class VacationList extends Component
 
     public function mount()
     {
-        $this->authorize('edit-personnels', $this->personnelModel);
-        $this->months = UsefulHelpers::monthsList(config('app.locale'));
         $this->personnelModelData = Personnel::with(['yearlyVacation'])
             ->where('tabel_no', $this->personnelModel)
             ->withTrashed()
             ->firstOrFail();
+
+        $this->authorize('update', $this->personnelModelData);
+
+        $this->months = UsefulHelpers::monthsList(config('app.locale'));
 
         $this->title = __('Vacations') . ' - ' . "<span class='text-blue-500'>{$this->personnelModelData->fullname}</span>";
     }

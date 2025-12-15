@@ -14,13 +14,14 @@ class EditCandidate extends Component
     use FillComplexArrayTrait;
     use AuthorizesRequests;
 
-    public $candidateModelData;
-
     protected function fillCandidate()
     {
         $this->candidateModelData = Candidate::with(['status', 'structure'])
-            ->where('id', $this->candidateModel)
-            ->first();
+           ->find($this->candidateModel);
+
+        if (! $this->candidateModelData) abort(404);
+
+        $this->authorize('update', $this->candidateModelData);
 
         $updatedData = $this->candidateModelData->toArray();
 

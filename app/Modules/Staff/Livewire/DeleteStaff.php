@@ -29,8 +29,6 @@ class DeleteStaff extends Component
             return;
         }
 
-        $this->authorize('delete-staff', $ids);
-
         $this->staffIds = $ids;
 
         $this->dispatch('deleteStaffWasSet');

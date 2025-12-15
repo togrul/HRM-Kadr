@@ -35,7 +35,7 @@
                                 <x-table.td>
                                     <div class="absolute top-0 left-0 flex flex-col justify-between h-full">
                                         @if ($activeVacation)
-                                            @php($vacationStart = $activeVacation->start_date)
+                                            @php($vacationStart = $activeVacation->start_date) 
                                             @php($vacationEnd = $activeVacation->return_work_date)
                                             <x-progress :startDate="$vacationStart" :endDate="$vacationEnd" color="emerald">
                                                 {{ __('In vacation') }}
@@ -57,20 +57,20 @@
 
                                 <x-table.td>
                                     <div class="flex flex-col space-y-1">
-                                        <span class="text-sm font-medium text-blue-500 border-b border-blue-500 border-dashed">
+                                        <span class="text-sm font-medium text-blue-500 border-b border-blue-500 border-dashed w-max">
                                             {{ $personnel->tabel_no }}
                                         </span>
 
                                         @if ($personnel->is_pending)
                                             <div
-                                                class="flex items-center px-4 py-1 space-x-2 text-xs font-medium text-teal-500 border border-teal-200 rounded-lg shadow-sm bg-teal-50">
+                                                class="flex items-center px-2 py-1 space-x-2 text-xs font-medium text-teal-500 border border-teal-200 rounded-lg shadow-sm bg-teal-50">
                                                 <svg class="w-5 h-5 text-teal-500" xmlns="http://www.w3.org/2000/svg"
                                                     fill="none" viewBox="0 0 24 24" stroke-width="2"
                                                     stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
                                                         d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                                                 </svg>
-                                                <span class="">{{ __('Waiting for approval') }}</span>
+                                                <span class="uppercase">{{ __('Waiting for approval') }}</span>
                                             </div>
                                         @endif
 
@@ -125,9 +125,11 @@
                                 <x-table.td>
                                     <div class="flex flex-col space-y-1">
                                         <span
-                                            class="text-sm font-medium text-zinc-900">{{ $personnel->structure->name }}</span>
+                                            class="text-sm font-medium text-zinc-900"> 
+                                            {{ implode(' ', $personnel->structure->getAllParentName()) }}
+                                          </span>
                                         <span
-                                            class="text-sm font-medium text-zinc-600">{{ $personnel->position->name }}</span>
+                                            class="text-sm font-medium text-zinc-600">{{ $personnel->position_label }}</span>
                                     </div>
                                 </x-table.td>
 
@@ -212,6 +214,20 @@
                                                                  role="tooltip"
                                                             >
                                                                 {{ __('Print') }}
+                                                            </div>
+                                                        </a>
+                                                        <a href="{{ route('print.cv', $personnel->id) }}"
+                                                            class="flex items-center justify-start w-full px-4 py-2 space-x-2 text-sm font-medium appearance-none hover:bg-slate-100"
+                                                            target="_blank"
+                                                            @mouseover="showTooltip = 'cv'"
+                                                            @mouseleave="showTooltip = ''"
+                                                       >
+                                                            <x-icons.cv-outline hover="text-blue-500"  />
+                                                            <div x-show="showTooltip == 'cv'"
+                                                                 class="absolute z-10 px-2 py-1 text-sm text-center transition-all ease-out -translate-x-1/2 bg-white border shadow-lg opacity-100 -top-9 left-1/2 whitespace-nowrap shadow-black/5 border-neutral-200/70 text-neutral-600 dark:bg-neutral-900/80 dark:text-neutral-50"
+                                                                 role="tooltip"
+                                                            >
+                                                                {{ __('CV') }}
                                                             </div>
                                                         </a>
                                                         <button

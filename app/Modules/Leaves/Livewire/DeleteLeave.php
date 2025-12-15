@@ -6,24 +6,28 @@ use App\Models\Leave;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class DeleteLeave extends Component
 {
+    use AuthorizesRequests;
+
     #[Locked]
     public ?int $leaveId = null;
 
     #[On('setDeleteLeave')]
     public function setDeleteLeave($leaveId)
     {
-        $id = Leave::query()->whereKey($leaveId)->value('id');
+        $leave = Leave::query()->select('id')->find($leaveId);
 
-        if (! $id) {
+        if (! $leave) {
             $this->leaveId = null;
-
             return;
         }
 
-        $this->leaveId = (int) $id;
+        $this->authorize('delete', $leave);
+
+        $this->leaveId = (int) $leave->id;
 
         $this->dispatch('deleteLeaveWasSet');
     }
@@ -34,7 +38,16 @@ class DeleteLeave extends Component
             return;
         }
 
-        Leave::query()->whereKey($this->leaveId)->delete();
+        $leave = Leave::query()->select('id')->find($this->leaveId);
+
+        if (! $leave) {
+            $this->leaveId = null;
+            return;
+        }
+
+        $this->authorize('delete', $leave);
+
+        $leave->delete();
 
         $this->leaveId = null;
 

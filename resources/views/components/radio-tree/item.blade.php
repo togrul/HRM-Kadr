@@ -21,11 +21,11 @@
 @endphp
 
 <li x-data="{openSubStructure: false}" class="py-1">
-    <div class="flex justify-between w-full items-center">
-        <div class="flex justify-start items-center space-x-2">
+    <div class="flex items-center justify-between w-full">
+        <div class="flex items-center justify-start space-x-2">
             @if(count($model->subs) > 0)
             {{-- arrow animasiyali deyisen--}}
-            <button @click="openSubStructure = !openSubStructure" class="appearance-none flex justify-center items-center">
+            <button @click="openSubStructure = !openSubStructure" class="flex items-center justify-center appearance-none">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-gray-500">
                     <path x-show="openSubStructure"
                           stroke-linecap="round"
@@ -74,7 +74,7 @@
     </div>
 
     @if(count($model->subs) > 0)
-        <ul class="pl-2 pt-1 rounded-lg flex-col flex shadow-sm bg-white"
+        <ul class="flex flex-col pt-1 pl-2 bg-white rounded-lg shadow-sm"
             x-show="openSubStructure"
             x-transition:enter="transition ease-in-out duration-300"
             x-transition:enter-start="opacity-0 transform scale-y-0 -translate-y-1/2"
@@ -85,14 +85,14 @@
         >
             @foreach ($model->subs as $sub)
                 @php
-                    $_level_name = strtolower((collect(\App\Enums\StructureEnum::cases())->pluck('name','value')[$sub->level]));
+                    $_level_name = __(strtolower((collect(\App\Enums\StructureEnum::cases())->pluck('name','value')[$sub->level])));
                     $_select_value = ($field == 'structure_id' && $isCoded)
                                    ? $sub->code."{$wordSuffixService->getNumberSuffix($sub->code)} {$_level_name}"
                                    : $sub->name;
                     $isCoded = $isCoded ?: 0;
                 @endphp
                 <x-radio-tree.item :$isCoded :$listData :$field :model="$sub" :$key :selected-id="$currentSelection">
-                    - {{ $_select_value }}
+                    - {{ __($_select_value) }}
                 </x-radio-tree.item>
             @endforeach
         </ul>

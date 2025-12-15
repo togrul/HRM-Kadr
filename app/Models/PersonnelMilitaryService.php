@@ -32,6 +32,7 @@ class PersonnelMilitaryService extends Model
         'given_date',
         'start_date',
         'end_date',
+        'location',
     ];
 
     protected $dates = [

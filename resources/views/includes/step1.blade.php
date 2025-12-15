@@ -4,8 +4,8 @@
     $hasDisability = $personalForm->hasDisability ?? false;
 @endphp
 
-<div class="flex justify-between items-start space-x-4 w-full">
-    <div class="flex flex-col space-y-4 flex-1">
+<div class="flex items-start justify-between w-full space-x-4">
+    <div class="flex flex-col flex-1 space-y-4">
         <div class="grid grid-cols-3 gap-2">
             <div class="flex flex-col">
                 <x-label for="personnel.name">{{ __('Name') }}</x-label>
@@ -15,7 +15,7 @@
                 @enderror
             </div>
             <div class="flex flex-col">
-                <div class="flex items-center space-x-2 justify-between">
+                <div class="flex items-center justify-between space-x-2">
                     <x-label for="personnel.surname">{{ __('Surname') }}</x-label>
                     <x-checkbox name="addManual" model="personalForm.personnel.has_changed_initials">{{ __('changed?') }}</x-checkbox>
                 </div>
@@ -98,7 +98,7 @@
                 <x-label for="personnel.gender">{{ __('Gender') }}</x-label>
                 <div class="flex flex-row">
                     @foreach(\App\Enums\GenderEnum::genderOptions() as $value => $label)
-                        <label class="inline-flex items-center bg-gray-100 rounded shadow-sm py-2 px-2">
+                        <label class="inline-flex items-center px-2 py-2 bg-gray-100 rounded shadow-sm">
                             <input type="radio" class="form-radio" name="personnel.gender" wire:model="personalForm.personnel.gender" value="{{ $value }}">
                             <span class="ml-2 text-sm font-normal">{{ $label }}</span>
                         </label>
@@ -109,7 +109,7 @@
                 @enderror
               </div>
             <div class="flex flex-col">
-                <div class="flex items-center space-x-2 justify-between">
+                <div class="flex items-center justify-between space-x-2">
                     <x-label for="personnel.name">{{ __('Nationality') }}</x-label>
                     <x-checkbox name="hasChangedNationality" model="personalForm.personnel.has_changed_nationality">{{ __('changed?') }}</x-checkbox>
                 </div>
@@ -190,9 +190,6 @@
             <div class="flex flex-col">
                 <x-label for="personnel.phone">{{ __('Phone') }}</x-label>
                 <x-livewire-input mode="gray" name="personnel.phone" wire:model="personalForm.personnel.phone"></x-livewire-input>
-                @error('personalForm.personnel.phone')
-                <x-validation> {{ $message }} </x-validation>
-                @enderror
             </div>
             <div class="flex flex-col">
                 <x-label for="personnel.mobile">{{ __('Mobile') }}</x-label>
@@ -204,9 +201,6 @@
             <div class="flex flex-col">
                 <x-label for="personnel.email">{{ __('Email') }}</x-label>
                 <x-livewire-input mode="gray" name="personnel.email" wire:model="personalForm.personnel.email"></x-livewire-input>
-                @error('personalForm.personnel.email')
-                <x-validation> {{ $message }} </x-validation>
-                @enderror
             </div>
             <div class="flex flex-col">
                 <x-label for="personnel.pin">{{ __('PIN') }}</x-label>
@@ -472,7 +466,7 @@
         @endif
         <div class="grid grid-cols-2 gap-2">
             <div class="flex flex-col">
-                <div class="flex items-center space-x-2 justify-between">
+                <div class="flex items-center justify-between space-x-2">
                     <x-label for="personnel.extra_important_information">{{ __('Extra information') }}</x-label>
                     <x-checkbox name="isDisability" model="personalForm.hasDisability">{{ __('has disability?') }}</x-checkbox>
                 </div>
@@ -500,20 +494,20 @@
                 <x-validation> {{ $message }} </x-validation>
                 @enderror
             </div>
-            <div class="border border-gray-300 rounded-lg shadow-sm p-1">
+            <div class="p-1 border border-gray-300 rounded-lg shadow-sm">
                 <div class="flex flex-col space-y-4">
-                    <div class="mt-2 flex flex-col" x-data="{ isUploading: false, progress: 0 }"
+                    <div class="flex flex-col mt-2" x-data="{ isUploading: false, progress: 0 }"
                          x-on:livewire-upload-start="isUploading = true"
                          x-on:livewire-upload-finish="isUploading = false"
                          x-on:livewire-upload-error="isUploading = false"
                          x-on:livewire-upload-progress="progress = $event.detail.progress"
                     >
-                      <div class="flex flex-col space-y-2 items-center">
+                      <div class="flex flex-col items-center space-y-2">
                         @if ($avatar)
-                        <img alt="avatar" class="w-full h-full object-cover" src="{{ $avatar->temporaryUrl() }}">
+                        <img alt="avatar" class="object-cover w-full h-full" src="{{ $avatar->temporaryUrl() }}">
                         @elseif(!empty($personnelModel) && $personnelModelData->photo)
-{{--                        <img alt="avatar" class="w-full h-full object-cover" src="{{ asset('/storage/'.$personnelModelData->photo) }}">--}}
-                           <img alt="avatar" class="w-full h-full object-cover" src="{{ \Illuminate\Support\Facades\Storage::url($personnelModelData->photo) }}">
+{{--                        <img alt="avatar" class="object-cover w-full h-full" src="{{ asset('/storage/'.$personnelModelData->photo) }}">--}}
+                           <img alt="avatar" class="object-cover w-full h-full" src="{{ \Illuminate\Support\Facades\Storage::url($personnelModelData->photo) }}">
                         @else
                         <img class="w-full h-full" src="{{ asset('assets/images/id-photo.jpeg') }}" alt="id photo">
                         @endif

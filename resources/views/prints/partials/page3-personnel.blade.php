@@ -31,14 +31,21 @@
 
         </thead>
         <tbody>
-         @foreach($personnel->laborActivities as $labor)
+         @forelse($personnel->laborActivities as $labor)
              <tr>
                  <td>{{ \Carbon\Carbon::parse($labor->join_date)->format('d.m.Y') }}</td>
                  <td>{{ \Carbon\Carbon::parse($labor->leave_date)->format('d.m.Y') }}</td>
                  <td>{{ $labor->company_name }}</td>
                  <td>{{ $labor->position }}</td>
              </tr>
-         @endforeach
+         @empty
+             <tr>
+                 <td></td>
+                 <td></td>
+                 <td>Əmək fəaliyyəti yoxdur</td>
+                 <td></td>
+             </tr>
+         @endforelse
          @for($i = 0;$i < 2;$i++)
              <tr>
                  <td></td>

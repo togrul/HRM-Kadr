@@ -27,6 +27,7 @@ class EditLeave extends Component
 
     public function mount(?int $leaveModel = null): void
     {
+        $this->authorize('viewAny', Leave::class);
         $this->title = __('Edit leave');
         $this->leave->resetForm();
 
@@ -43,6 +44,7 @@ class EditLeave extends Component
             return;
         }
 
+        $this->authorize('update', $this->record);
         $this->leave->fillFromModel($this->record);
     }
 
@@ -52,6 +54,7 @@ class EditLeave extends Component
             return;
         }
 
+        $this->authorize('update', $this->record);
         $this->leave->validate();
 
         $payload = $this->leave->toPayload();

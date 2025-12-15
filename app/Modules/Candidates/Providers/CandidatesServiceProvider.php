@@ -23,7 +23,16 @@ class CandidatesServiceProvider extends ServiceProvider
 
         $this->loadRoutesFrom(__DIR__.'/../Routes/web.php');
         $this->loadViewsFrom(__DIR__.'/../Resources/views', 'candidates');
+        $this->registerPolicies();
         $this->registerLivewireComponents();
+    }
+
+    protected function registerPolicies(): void
+    {
+        \Illuminate\Support\Facades\Gate::policy(
+            \App\Models\Candidate::class,
+            \App\Modules\Candidates\Policies\CandidatePolicy::class
+        );
     }
 
     protected function registerLivewireComponents(): void

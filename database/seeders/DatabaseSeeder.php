@@ -56,9 +56,9 @@ class DatabaseSeeder extends Seeder
             //  OrderSeeder::class,
             //  StructureSeeder::class,
             //  CandidateSeeder::class,
-             CitiesSeeder::class,
-             GlobalSeeder::class,
-            RankCategorySeeder::class,
+            //  CitiesSeeder::class,
+            //  GlobalSeeder::class,
+            // RankCategorySeeder::class,
             StructureSeeder::class
         ];
     }

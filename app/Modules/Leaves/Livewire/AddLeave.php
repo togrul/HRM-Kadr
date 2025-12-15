@@ -25,12 +25,14 @@ class AddLeave extends Component
 
     public function mount(): void
     {
+        $this->authorize('create', Leave::class);
         $this->title = __('Add leave');
         $this->leave->resetForm();
     }
 
     public function store(): void
     {
+        $this->authorize('create', Leave::class);
         $this->leave->validate();
 
         $payload = $this->leave->toPayload();

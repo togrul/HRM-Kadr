@@ -40,6 +40,8 @@ class Vacations extends Component
 
     public function exportExcel()
     {
+        $this->authorize('export', PersonnelVacation::class);
+
         $report = $this->returnData(type: 'excel');
         $name = Carbon::now()->format('d.m.Y H:i');
 
@@ -186,7 +188,7 @@ class Vacations extends Component
 
     public function mount()
     {
-        $this->authorize('show-vacations');
+        $this->authorize('viewAny', PersonnelVacation::class);
         $this->fillFilter();
         $this->fillYear();
         if (session()->has('vacation-updated')) {

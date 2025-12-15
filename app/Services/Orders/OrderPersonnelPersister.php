@@ -31,23 +31,32 @@ class OrderPersonnelPersister
         }
     }
 
-    public function attachFromVacancies(OrderLog $orderLog, array $vacancyList, bool $isCandidateOrder, int $statusId): void
+    public function attachFromVacancies(OrderLog $orderLog, array $vacancyList, bool $isCandidateOrder, int $statusId): array
     {
+        $vacancyList = array_values(array_filter($vacancyList, fn ($row) => ! empty($row['component_id'])));
+
         if (empty($vacancyList)) {
-            return;
+            return ['tabels' => [], 'candidate_ids' => []];
         }
 
         $componentIds = collect($vacancyList)->pluck('component_id')->toArray();
 
         if (empty($componentIds)) {
-            return;
+            return ['tabels' => [], 'candidate_ids' => []];
         }
+
+        $candidateIds = collect($vacancyList)->pluck('personnel_id')->filter()->map(fn ($id) => (int) $id)->all();
 
         $tabelNumbers = $isCandidateOrder
             ? $this->importCandidateToPersonnel->handle($vacancyList, $statusId)
             : $this->resolvePersonnelTabelNumbers($vacancyList);
 
         $this->attachAssignments($orderLog, $tabelNumbers, $componentIds);
+
+        return [
+            'tabels' => $tabelNumbers,
+            'candidate_ids' => $candidateIds,
+        ];
     }
 
     protected function resolvePersonnelTabelNumbers(array $vacancyList): array

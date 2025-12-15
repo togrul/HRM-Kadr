@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Str;
+
 class WordSuffixService
 {
     private array $vowels = ['a', 'ı', 'u', 'o', 'i', 'ə', 'ü', 'e', 'ö'];
@@ -19,9 +21,8 @@ class WordSuffixService
     private function determineSuffix(string $text): string
     {
         [$lastChar,$isVowel] = $this->checkLastCharAndVowel(text: $text);
-
         if (! $isVowel) {
-            [$lastChar, $isVowel] = $this->checkLastCharAndVowel(text: $text, offset: -2);
+            [$lastChar,] = $this->checkLastCharAndVowel(text: $text, offset: -2);
         }
 
         return match ($lastChar) {
@@ -37,12 +38,39 @@ class WordSuffixService
         [$lastChar,$isVowel] = $this->checkLastCharAndVowel(text: $text);
 
         if (! $isVowel) {
-            [$lastChar, $isVowel] = $this->checkLastCharAndVowel(text: $text, offset: -2);
+            [$lastChar,] = $this->checkLastCharAndVowel(text: $text, offset: -2);
         }
 
         return match ($lastChar) {
             'a', 'ı', 'u', 'o' => $isVowel ? 'ya' : 'a',
             'i', 'ə', 'ü', 'e', 'ö' => $isVowel ? 'yə' : 'ə',
+        };
+    }
+
+     public function educationSuffix(string $text): string
+    {
+        [$lastChar,$isVowel] = $this->checkLastCharAndVowel(text: $text);
+
+        if (! $isVowel) {
+            [$lastChar,] = $this->checkLastCharAndVowel(text: $text, offset: -2);
+        }                                       
+
+        return match ($lastChar) {
+            'a', 'ı' => $isVowel ? 'sını' : 'ını',
+            'ə', 'e' => $isVowel ? 'sini' : 'ini',
+            'u', 'o' => $isVowel ? 'nu' : 'unu',
+            'ü', 'ö' => $isVowel ? 'nü' : 'ünü',
+            'i' => $isVowel ? 'ni' : 'ini',
+        };
+    }
+
+    public function getMilitarySuffix(string $text): string
+    {
+        [$lastChar,] = $this->checkLastCharAndVowel(text: $text);
+
+        return match (Str::lower($lastChar)) {
+            'q', 'o', 'a' => 'da',
+            'n', 'x', 'm' => 'də',
         };
     }
 
@@ -54,7 +82,7 @@ class WordSuffixService
             if ($lastChar === 'k') {
                 $text = str_replace($lastChar, 'y', $text);
             }
-            [$lastChar, $isVowel] = $this->checkLastCharAndVowel(text: $text, offset: -2);
+            [$lastChar,] = $this->checkLastCharAndVowel(text: $text, offset: -2);
         }
 
         return match ($lastChar) {
@@ -92,7 +120,6 @@ class WordSuffixService
         }
 
         $suffix = $this->determineSuffix($text);
-
         return $multi
                 ? $text.$suffix.$this->getStructureSuffix($text, true)
                 : $text.$suffix;
@@ -109,17 +136,17 @@ class WordSuffixService
         return $text.$suffix;
     }
 
-    public function getStructureSuffix($text, $onlySuffix = false, $mainStructure = false): string
+    public function getStructureSuffix($text, $onlySuffix = false, $mainStructure = false, $useDetermine = false): string
     {
         if (! $text) {
             return '';
         }
-        
+
         $append = $mainStructure ? 'nin' : ' sinin';
 
         $suffix = is_numeric($text)
             ? $this->getNumberSuffix((int) $text)." idarə{$append}"
-            : $this->determineStructureSuffix($text);
+            : ($useDetermine ? trim($append) : $this->determineStructureSuffix($text));
 
         return $onlySuffix ? $suffix : $text.$suffix;
     }

@@ -4,6 +4,7 @@ namespace App\Modules\Staff\Providers;
 
 use App\Providers\Concerns\RegistersLivewireAliases;
 use App\Services\Modules\ModuleState;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
 class StaffServiceProvider extends ServiceProvider
@@ -22,12 +23,18 @@ class StaffServiceProvider extends ServiceProvider
 
         $this->loadRoutesFrom(__DIR__.'/../Routes/web.php');
         $this->loadViewsFrom(__DIR__.'/../Resources/views', 'staff');
+        $this->registerPolicies();
         $this->registerLivewireComponents();
     }
 
     protected function registerLivewireComponents(): void
     {
         $this->registerAliases($this->componentMap(), 'staff-schedule');
+    }
+
+    protected function registerPolicies(): void
+    {
+        Gate::policy(\App\Models\StaffSchedule::class, \App\Modules\Staff\Policies\StaffSchedulePolicy::class);
     }
 
     protected function componentMap(): array

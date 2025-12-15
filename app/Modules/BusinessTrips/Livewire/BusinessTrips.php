@@ -35,7 +35,7 @@ class BusinessTrips extends Component
 
     public function exportExcel()
     {
-        $this->authorize('export-business_trips');
+        $this->authorize('export', PersonnelBusinessTrip::class);
         $report = $this->returnData(type: 'excel');
         $name = Carbon::now()->format('d.m.Y H:i');
 
@@ -154,7 +154,7 @@ class BusinessTrips extends Component
 
     public function mount()
     {
-        $this->authorize('show-business_trips');
+        $this->authorize('viewAny', PersonnelBusinessTrip::class);
         $this->fillFilter();
     }
 

@@ -56,6 +56,8 @@ class AllPersonnel extends Component
 
     public function exportExcel()
     {
+        $this->authorize('export', Personnel::class);
+
         $report['data'] = $this->returnData(type: 'excel');
         $report['filter'] = $this->filters;
         $name = Carbon::now()->format('d.m.Y H:i');
@@ -84,6 +86,13 @@ class AllPersonnel extends Component
     public function restoreData($id)
     {
         $personnel = Personnel::withTrashed()->where('tabel_no', $id)->first();
+
+        if (! $personnel) {
+            return;
+        }
+
+        $this->authorize('restore', $personnel);
+
         $personnel->restore();
         $personnel->update([
             'deleted_by' => null,
@@ -94,6 +103,13 @@ class AllPersonnel extends Component
     public function forceDeleteData($id)
     {
         $model = Personnel::withTrashed()->where('tabel_no', $id)->first();
+
+        if (! $model) {
+            return;
+        }
+
+        $this->authorize('forceDelete', $model);
+
         $model->forceDelete();
         $this->dispatch('personnelWasDeleted', __('Personnel was deleted!'));
     }
@@ -183,7 +199,7 @@ class AllPersonnel extends Component
 
     public function mount()
     {
-        $this->authorize('show-personnels');
+        $this->authorize('viewAny', Personnel::class);
         $this->fillFilter();
         $this->filters = $this->filters ?? [];
     }
@@ -208,14 +224,17 @@ class AllPersonnel extends Component
                 'latestRank.rank' => function ($query) use ($locale) {
                     $query->select('id', "name_{$locale}");
                 },
-                'structure:id,name',
                 'latestVacation',
                 'latestBusinessTrip',
                 'position:id,name',
                 'creator:id,name',
                 'deletedBy:id,name',
                 'personDidDelete:id,name',
+                'hasActiveDisposal',
             ])
+                ->withStructureTree()
+                ->withExists(['hasActiveDisposal as has_active_disposal'])
+
             ->when(! empty($structureIds), function (Builder $query) use ($structureIds) {
                 $query->whereIn('structure_id', $structureIds);
             }, function (Builder $query) {

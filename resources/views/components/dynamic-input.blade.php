@@ -108,14 +108,15 @@
                     @endphp
                     @foreach($model->where('parent_id', $mainStructureId) as $model_item)
                         @php
-                            $_level_name = strtolower((collect(\App\Enums\StructureEnum::cases())->pluck('name','value')[$model_item->level]));
-
+                            $_level_name = __(strtolower((collect(\App\Enums\StructureEnum::cases())->pluck('name','value')[$model_item->level])));
                             $_select_value = ($field == 'structure_id' && $isCoded)
                                             ? $model_item->code."{$wordSuffixService->getNumberSuffix($model_item->code)} {$_level_name}"
                                             : $model_item->name;
+
+                                
                         @endphp
                         <x-radio-tree.item :$isCoded :listData="$list_string" :$field :model="$model_item" :$key :selected-id="$selectedId">
-                            {{ $_select_value }}
+                            {{ __($_select_value) }}
                         </x-radio-tree.item>
                     @endforeach
                 </x-radio-tree.list>

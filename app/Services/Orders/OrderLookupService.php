@@ -77,7 +77,7 @@ class OrderLookupService
         return Cache::remember('order_lookup:main_structures', 600, function () {
             return Structure::query()
                 ->with('parent')
-                ->where('code', 1)
+                ->where('level', 0)
                 ->orderBy('id')
                 ->get();
         });

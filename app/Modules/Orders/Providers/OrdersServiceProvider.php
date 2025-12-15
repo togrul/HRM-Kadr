@@ -4,6 +4,7 @@ namespace App\Modules\Orders\Providers;
 
 use App\Providers\Concerns\RegistersLivewireAliases;
 use App\Services\Modules\ModuleState;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
 class OrdersServiceProvider extends ServiceProvider
@@ -22,12 +23,19 @@ class OrdersServiceProvider extends ServiceProvider
 
         $this->loadRoutesFrom(__DIR__.'/../Routes/web.php');
         $this->loadViewsFrom(__DIR__.'/../Resources/views', 'orders');
+        $this->registerPolicies();
         $this->registerLivewireComponents();
     }
 
     protected function registerLivewireComponents(): void
     {
         $this->registerAliases($this->componentMap(), 'orders');
+    }
+
+    protected function registerPolicies(): void
+    {
+        Gate::policy(\App\Models\Order::class, \App\Modules\Orders\Policies\OrderPolicy::class);
+        Gate::policy(\App\Models\OrderLog::class, \App\Modules\Orders\Policies\OrderLogPolicy::class);
     }
 
     protected function componentMap(): array
@@ -40,7 +48,7 @@ class OrdersServiceProvider extends ServiceProvider
             'templates.all-templates' => \App\Modules\Orders\Livewire\Templates\AllTemplates::class,
             'templates.add-template' => \App\Modules\Orders\Livewire\Templates\AddTemplate::class,
             'templates.edit-template' => \App\Modules\Orders\Livewire\Templates\EditTemplate::class,
-            'templates.delete-template' => \App\Modules\Orders\Livewire\Templates\DeleteTemplate::class,
+          'templates.delete-template' => \App\Modules\Orders\Livewire\Templates\DeleteTemplate::class,
             'templates.set-type' => \App\Modules\Orders\Livewire\Templates\SetType::class,
         ];
     }

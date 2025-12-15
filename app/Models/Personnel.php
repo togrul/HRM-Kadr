@@ -141,6 +141,15 @@ class Personnel extends Model
         return $this->belongsTo(Structure::class);
     }
 
+    public function scopeWithStructureTree($query): void
+    {
+        $query->with([
+            'structure' => fn ($q) => $q
+                ->select('id','parent_id','name')
+                ->withRecursive('parent', false),
+        ]);
+    }
+
     public function position(): BelongsTo
     {
         return $this->belongsTo(Position::class, 'position_id', 'id');
@@ -446,6 +455,15 @@ class Personnel extends Model
         return $this->latestDisposal()
             ->where('disposal_date', '<=', Carbon::now())
             ->whereNull('disposal_end_date');
+    }
+
+    public function getPositionLabelAttribute(): string
+    {
+        $name = $this->position?->name ?? '';
+        if (! $name) return '';
+        $hasDisposal = $this->has_active_disposal ?? $this->hasActiveDisposal()->exists();
+
+        return $hasDisposal ? "{$name} VMİE" : $name;
     }
 
     public function educationRequests(): HasMany

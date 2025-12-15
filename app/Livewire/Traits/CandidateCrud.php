@@ -5,6 +5,7 @@ namespace App\Livewire\Traits;
 use App\Concerns\LoadsAppealStatuses;
 use App\Enums\AttitudeMilitaryEnum;
 use App\Models\Structure;
+use App\Models\Candidate;
 use App\Traits\NormalizesDropdownPayloads;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
@@ -23,6 +24,8 @@ trait CandidateCrud
     public $title;
 
     public $candidateModel;
+
+    public ?Candidate $candidateModelData = null;
 
     public function rules()
     {
@@ -61,11 +64,10 @@ trait CandidateCrud
     public function mount()
     {
         if (! empty($this->candidateModel)) {
-            $this->authorize('edit-candidates', $this->candidateModelData);
             $this->fillCandidate();
             $this->title = __('Edit candidate') . ' - ' . "<span class='text-teal-500'>{$this->candidateModelData->fullname}</span>";
         } else {
-            $this->authorize('add-candidates');
+            $this->authorize('create', Candidate::class);
             $this->title = __('Add candidate');
             $this->candidate = [
               'structure_id' => null,

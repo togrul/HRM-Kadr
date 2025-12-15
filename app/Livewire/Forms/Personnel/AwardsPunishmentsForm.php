@@ -48,7 +48,7 @@ class AwardsPunishmentsForm extends Form
             ->map(function ($award) {
                 $payload = array_replace(
                     $this->defaultAward(),
-                    Arr::only($award->toArray(), ['reason', 'given_date', 'is_old'])
+                    Arr::only($award->toArray(), ['reason', 'given_date', 'is_old', 'order_given_by', 'order_no', 'order_date'])
                 );
 
                 $payload['award_id'] = $award->award_id;
@@ -118,6 +118,9 @@ class AwardsPunishmentsForm extends Form
             'reason' => null,
             'given_date' => null,
             'is_old' => false,
+            'order_given_by' => null,
+            'order_no' => null,
+            'order_date' => null,
         ];
     }
 
@@ -128,6 +131,9 @@ class AwardsPunishmentsForm extends Form
             'reason' => null,
             'given_date' => null,
             'expired_date' => null,
+            'order_given_by' => null,
+            'order_no' => null,
+            'order_date' => null,
         ];
     }
 

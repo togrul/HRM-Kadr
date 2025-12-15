@@ -36,7 +36,8 @@ class OrderConfirmedService
     {
         // eger ise girme emridirse ve statusu tesdiqlenmisdirse
         if ($this->orderLog->order_id == Order::IG_EMR) {
-            $this->approveEmploymentOrder($personnelIds, $this->orderLog, $action);
+            $candidateIds = $this->resolveCandidateIds($personnelIds);
+            $this->approveEmploymentOrder($candidateIds, $this->orderLog, $action);
         }
 
         switch ($order->blade) {
@@ -63,16 +64,18 @@ class OrderConfirmedService
         }
     }
 
-    private function approveEmploymentOrder($personnelIds, $orderLog, $action): void
+    private function approveEmploymentOrder(array $candidateIds, $orderLog, $action): void
     {
         // Change status to accepted
-        Candidate::whereIn('id', $personnelIds)->update(['status_id' => 70]);
+        if (! empty($candidateIds)) {
+            Candidate::whereIn('id', $candidateIds)->update(['status_id' => 70]);
+        }
 
-        $convertedIds = array_map(fn($x) => "NMZD{$x}", $personnelIds);
+        $tabelNos = array_map(fn($x) => "NMZD{$x}", $candidateIds);
 
         $personnelModel = $action == 'create'
             ? $orderLog->personnels
-            : Personnel::whereIn('tabel_no', $convertedIds)
+            : Personnel::whereIn('tabel_no', $tabelNos)
             ->where('is_pending', true)
             ->with(['ranks', 'structure', 'position', 'laborActivities'])
             ->get();
@@ -80,6 +83,38 @@ class OrderConfirmedService
         foreach ($personnelModel as $_personnel) {
             $this->updatePersonnelEmployment($_personnel, $orderLog);
         }
+    }
+
+    private function resolveCandidateIds(array $payload): array
+    {
+        $ids = [];
+
+        foreach ($payload as $value) {
+            // Already a numeric candidate id
+            if (is_numeric($value)) {
+                $ids[] = (int) $value;
+                continue;
+            }
+
+            // Tabel no pattern NMZD123
+            if (is_string($value) && preg_match('/NMZD(\d+)/', $value, $m)) {
+                $ids[] = (int) $m[1];
+            }
+        }
+
+        if (! empty($ids)) {
+            return array_values(array_unique($ids));
+        }
+
+        // Fallback: infer from attached personnels
+        $this->orderLog->loadMissing('personnels');
+        foreach ($this->orderLog->personnels as $personnel) {
+            if (preg_match('/NMZD(\d+)/', (string) $personnel->tabel_no, $m)) {
+                $ids[] = (int) $m[1];
+            }
+        }
+
+        return array_values(array_unique($ids));
     }
 
     private function updatePersonnelEmployment($_personnel, $orderLog): void
@@ -106,6 +141,9 @@ class OrderConfirmedService
                 'rank_id' => $_attr['$rank']['id'] ?? 10,
                 'name' => 'İşə qəbul',
                 'given_date' => $date,
+                'order_no' => $orderLog->order_no,
+                'order_date' => Carbon::parse($orderLog->given_date)->format('Y-m-d'),
+                'order_given_by' => "{$orderLog->given_by_rank} {$orderLog->given_by}",
             ]);
 
             event(new StaffScheduleUpdated(

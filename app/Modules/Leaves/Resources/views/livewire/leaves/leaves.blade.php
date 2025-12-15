@@ -113,32 +113,33 @@
                             {{ $_status->name }}
                         </x-filter.item>
                     @endforeach
-                    {{-- @can('manage-candidates') --}}
-                    <x-filter.item wire:click.prevent="setStatus('deleted')" :active="$status === 'deleted'">
-                        {{ __('Deleted') }}
-                    </x-filter.item>
-                    {{-- @endcan --}}
+                    @can('delete', App\Models\Leave::class)
+                        <x-filter.item wire:click.prevent="setStatus('deleted')" :active="$status === 'deleted'">
+                            {{ __('Deleted') }}
+                        </x-filter.item>
+                    @endcan
                 </x-filter.nav>
-            </div>
+           </div>
 
-            <div class="flex space-x-4">
-                 {{-- @can('add-candidates') --}}
-                 <button wire:click="openSideMenu('add-leave')"
-                        class="flex items-center justify-center w-12 h-12 transition-all duration-300 rounded-xl hover:bg-blue-50"
-                        type="button"
-                >
-                        @include('components.icons.add-file')
-                 </button>
-                {{-- @endcan --}}
-                {{-- @can('export-candidates') --}}
-                <button wire:click.prevent="exportExcel"
-                        wire:loading.attr="disabled"
-                        wire:target="exportExcel"
-                        class="flex items-center justify-center w-12 h-12 transition-all duration-300 rounded-xl hover:bg-green-50"
-                        type="button"
-                >
-                        <x-icons.excel-icon />
-                </button>
+           <div class="flex space-x-4">
+                @can('create', App\Models\Leave::class)
+                    <button wire:click="openSideMenu('add-leave')"
+                           class="flex items-center justify-center w-12 h-12 transition-all duration-300 rounded-xl hover:bg-blue-50"
+                           type="button"
+                   >
+                           @include('components.icons.add-file')
+                    </button>
+                @endcan
+                @can('export', App\Models\Leave::class)
+                    <button wire:click.prevent="exportExcel"
+                           wire:loading.attr="disabled"
+                           wire:target="exportExcel"
+                           class="flex items-center justify-center w-12 h-12 transition-all duration-300 rounded-xl hover:bg-green-50"
+                           type="button"
+                   >
+                           <x-icons.excel-icon />
+                    </button>
+                @endcan
                 <button
                         class="flex items-center justify-center w-12 h-12 transition-all duration-300 rounded-xl hover:bg-red-50"
                         type="button">
@@ -175,10 +176,10 @@
                                             {{ $leave->personnel->fullname_max }}
                                         </span>
                                         <span class="text-sm font-medium text-neutral-600/80">
-                                            {{ $leave->personnel->structure->name }}
+                                            {{ implode(' ', $leave->personnel->structure->getAllParentName()) }}
                                         </span>
                                         <span class="text-sm font-medium text-emerald-600">
-                                            {{ $leave->personnel->position->name }}
+                                            {{ $leave->personnel->position_label }}
                                         </span>
                                     </div>
                                 </x-table.td>
@@ -299,7 +300,7 @@
 
                                 <x-table.td isButton>
                                     @if ($status != 'deleted')
-                                        {{-- @can('edit-candidates') --}}
+                                        @can('update', $leave)
                                             <button
                                                 wire:click="openSideMenu('edit-leave',{{ $leave->id }})"
                                                 wire:loading.attr="disabled"
@@ -308,9 +309,9 @@
                                             >
                                                 @include('components.icons.document-icon')
                                             </button>
-                                        {{-- @endcan --}}
+                                        @endcan
                                     @else
-                                        @role('Admin')
+                                        @can('restore', $leave)
                                             <button wire:click="restoreData('{{ $leave->id }}')"
                                                     wire:loading.attr="disabled"
                                                     wire:target="restoreData('{{ $leave->id }}')"
@@ -321,34 +322,34 @@
                                                     'hover' => 'text-teal-600',
                                                 ])
                                             </button>
-                                        @endrole
+                                        @endcan
                                     @endif
                                 </x-table.td>
 
                                 <x-table.td isButton>
                                     @if ($status != 'deleted')
-                                        {{-- @can('delete-leaves') --}}
-                                        <button
-                                            wire:click="setDeleteLeave('{{ $leave->id }}')"
-                                            wire:loading.attr="disabled"
-                                            wire:target="setDeleteLeave('{{ $leave->id }}')"
-                                            class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-100 hover:text-gray-700"
-                                        >
-                                            @include('components.icons.delete-icon')
-                                        </button>
-                                        {{-- @endcan --}}
+                                        @can('delete', $leave)
+                                            <button
+                                                wire:click="setDeleteLeave('{{ $leave->id }}')"
+                                                wire:loading.attr="disabled"
+                                                wire:target="setDeleteLeave('{{ $leave->id }}')"
+                                                class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-100 hover:text-gray-700"
+                                            >
+                                                @include('components.icons.delete-icon')
+                                            </button>
+                                        @endcan
                                     @else
-                                        {{-- @can('delete-leaves') --}}
-                                        <button
-                                            wire:confirm="{{ __('Are you sure you want to remove this data?') }}"
-                                            wire:click="forceDeleteData('{{ $leave->id }}')"
-                                            wire:loading.attr="disabled"
-                                            wire:target="forceDeleteData('{{ $leave->id }}')"
-                                            class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700"
-                                        >
-                                            @include('components.icons.force-delete')
-                                        </button>
-                                        {{-- @endcan --}}
+                                        @can('forceDelete', $leave)
+                                            <button
+                                                wire:confirm="{{ __('Are you sure you want to remove this data?') }}"
+                                                wire:click="forceDeleteData('{{ $leave->id }}')"
+                                                wire:loading.attr="disabled"
+                                                wire:target="forceDeleteData('{{ $leave->id }}')"
+                                                class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700"
+                                            >
+                                                @include('components.icons.force-delete')
+                                            </button>
+                                        @endcan
                                     @endif
                                 </x-table.td>
                             </tr>
@@ -370,26 +371,26 @@
     </div>
 
     <x-side-modal>
-        {{-- @can('add-candidates') --}}
+        @can('create', App\Models\Leave::class)
             @if ($showSideMenu == 'add-leave')
                 <livewire:leaves.add-leave />
             @endif
-        {{-- @endcan --}}
+        @endcan
 
-        {{-- @can('edit-candidates') --}}
+        @can('update', App\Models\Leave::class)
             @if ($showSideMenu == 'edit-leave')
                 <livewire:leaves.edit-leave :leaveModel="$modelName" />
             @endif
-        {{-- @endcan --}}
+        @endcan
     </x-side-modal>
 
-    {{-- @can('delete-candidates') --}}
-        <div>
-            @auth
+    <div>
+        @auth
+            @can('delete', App\Models\Leave::class)
                 @livewire('leaves.delete-leave')
-            @endauth
-        </div>
-    {{-- @endcan --}}
+            @endcan
+        @endauth
+    </div>
 
     <x-datepicker :auto=false></x-datepicker>
 </div>

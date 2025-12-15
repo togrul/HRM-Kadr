@@ -14,10 +14,12 @@ use App\Livewire\Traits\PersonnelCrud;
 use App\Livewire\Traits\RelationCruds\RelationCrudTrait;
 use App\Models\Personnel;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Component;
 
 class AddPersonnel extends Component
 {
+    use AuthorizesRequests;
     use PersonnelCrud;
     use RelationCrudTrait;
 
@@ -104,7 +106,7 @@ class AddPersonnel extends Component
 
     public function mount()
     {
-        $this->authorize('add-personnels');
+        $this->authorize('create', Personnel::class);
         $this->title = __('New personnel');
         $this->step = 1;
 

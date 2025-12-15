@@ -44,7 +44,15 @@ export default {
         'border-emerald-200',
         'border-rose-200',
         'border-blue-200',
-        'border-gray-200'
+        'border-gray-200',
+        'bg-lime-100',
+        'bg-lime-200',
+        'bg-lime-50',
+        'text-lime-600',
+        'border-lime-200',
+        'border-lime-400',
+        'border-lime-300',
+        'border-lime-100'
       ],
     darkMode: 'class',
     theme: {

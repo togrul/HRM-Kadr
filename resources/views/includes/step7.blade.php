@@ -150,7 +150,7 @@
                     </div>
 
                     @if(data_get($knshModel, 'marriage_certificate_number'))
-                        <div class="flex flex-col p-2 space-y-1 border border-gray-300 rounded-md bg-neutral-200/50">
+                        <div class="flex flex-col p-2 space-y-1 text-sm border border-gray-300 rounded-md bg-neutral-200/50">
                             <span class="font-medium text-neutral-500">{{ __('Marriage certificate number') }}</span>
                             <span>{{ data_get($knshModel, 'marriage_certificate_number') }}</span>
                         </div>

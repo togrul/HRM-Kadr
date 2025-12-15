@@ -11,7 +11,6 @@ trait BladeDataPreparation
         $_attrData = $this->componentForms;
         $_personnel_ids_list = collect($_attrData)->pluck('personnel_id')->toArray();
         $_personnel_ids = Personnel::find($_personnel_ids_list)->pluck('tabel_no')->toArray();
-
         $_component_ids = collect($_attrData)->pluck('component_id')->toArray();
         return $this->returnResponse($_attrData, $_personnel_ids, $_component_ids);
     }

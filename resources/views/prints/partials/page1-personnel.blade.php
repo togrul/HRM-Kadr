@@ -4,7 +4,7 @@
     </div>
 
     <div class="flex-center">
-        <h1 style="font-size: 16px;text-align: center;margin: 0;font-weight: bold;">Azərbaycan Respublikası <br/> Prezidentinin Təhlükəsizlik Xidməti</h1>
+        <h1 style="font-size: 16px;text-align: center;margin: 0;font-weight: bold;">Azərbaycan Respublikası <br/> Dövlət Mühafizə Xidməti</h1>
     </div>
 </div>
 
@@ -13,17 +13,19 @@
 <div class="flex-center" style="padding: 10px 0;">
     <div style="display: flex;align-items: end;">
         <span style="font-weight: 600;padding: 1px 0;font-size: 12px;">Şəxsi nömrəsi</span>
-        <span style="margin-left: 0.5rem;line-height:2;width: 150px;height: 30px;border-bottom: 1px solid #000;">{{ $personnel->tabel_no }}</span>
+        <span style="margin-left: 0.5rem;line-height:2;width: 150px;height: 30px;border-bottom: 1px solid #000;">
+          {{-- {{ $personnel->tabel_no }} --}}
+        </span>
     </div>
 </div>
 
 <div class="flex-col" style="justify-content: center;align-items: center;">
-    <span style="width: 100%;height: 30px;border-bottom: 1px solid #000;line-height: 2;font-style: italic;text-align: center">{{ $personnel->fullname }}</span>
+    <span style="width: 100%;height: 30px;border-bottom: 1px solid #000;line-height: 2;font-style: italic;text-align: center">{{ $personnel->surname }}</span>
     <span style="font-weight: 500;font-style: italic;font-size: 11px;">( soyadı,</span>
 </div>
 
 <div class="flex-col" style="justify-content: center;align-items: center;">
-    <span style="width: 100%;height: 30px;border-bottom: 1px solid #000;"></span>
+    <span style="width: 100%;height: 30px;border-bottom: 1px solid #000;line-height: 2;font-style: italic;text-align: center">{{ $personnel->name }} {{ $personnel->patronymic }}</span>
     <span style="font-weight: 500;font-style: italic; font-size: 11px;">adı və atasının adı )</span>
 </div>
 

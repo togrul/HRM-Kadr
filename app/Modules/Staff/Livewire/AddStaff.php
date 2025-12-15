@@ -4,10 +4,12 @@ namespace App\Modules\Staff\Livewire;
 
 use App\Livewire\Traits\StaffCrud;
 use App\Models\StaffSchedule;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Component;
 
 class AddStaff extends Component
 {
+    use AuthorizesRequests;
     use StaffCrud;
 
     protected function checkStructure()
@@ -17,6 +19,8 @@ class AddStaff extends Component
 
     public function store()
     {
+        $this->authorize('create', StaffSchedule::class);
+
         if (empty($this->staff)) {
             return;
         }
@@ -43,7 +47,7 @@ class AddStaff extends Component
 
     public function mount()
     {
-        $this->authorize('add-staff');
+        $this->authorize('create', StaffSchedule::class);
         $this->title = __('New staff');
         $this->structureId = null;
     }

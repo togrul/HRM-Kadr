@@ -82,6 +82,12 @@ class AllOrders extends Component
     public function restoreData($order_no)
     {
         $orderLog = OrderLog::withTrashed()->where('order_no', $order_no)->first();
+        if (! $orderLog) {
+            return;
+        }
+
+        $this->authorize('restore', $orderLog);
+
         $orderLog->restore();
         $orderLog->update([
             'deleted_by' => null,
@@ -94,6 +100,12 @@ class AllOrders extends Component
     {
         $model = OrderLog::withTrashed()->where('order_no', $order_no)->first();
 
+        if (! $model) {
+            return;
+        }
+
+        $this->authorize('forceDelete', $model);
+
         $model->handleDeletion();
 
         $this->dispatch('orderWasDeleted', __('Order was deleted!'));
@@ -102,6 +114,11 @@ class AllOrders extends Component
     public function printOrder(string $order_no)
     {
         $order = OrderLog::with(['order', 'components', 'attributes'])->where('order_no', $order_no)->first();
+        if (! $order || ! $order->order) {
+            abort(404);
+        }
+
+        $this->authorize('view', $order->order);
         $givenDate = $order->given_date;
         $suffixService = new WordSuffixService;
         $bladeType = $order->order->blade;
@@ -298,7 +315,7 @@ class AllOrders extends Component
 
     public function mount()
     {
-        $this->authorize('show-orders');
+        $this->authorize('viewAny', Order::class);
         $this->fillFilter();
         $this->selectedOrder = $this->selectedOrder ?? request()->query('selectedOrder');
     }

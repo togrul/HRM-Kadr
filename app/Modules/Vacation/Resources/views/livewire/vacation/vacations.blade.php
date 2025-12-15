@@ -191,7 +191,7 @@ Livewire.hook('message.processed', (message, component) => {
                                         </span>
                                         <span
                                             class="px-2 py-1 text-sm font-medium rounded-lg text-rose-500 bg-slate-100">
-                                            {{ $_vacation->personnel?->position?->name }}
+                                            {{ $_vacation->personnel?->position_label }}
                                         </span>
                                     </div>
                                 </x-table.td>

@@ -4,11 +4,13 @@ namespace App\Modules\Staff\Livewire;
 
 use App\Livewire\Traits\StaffCrud;
 use App\Models\StaffSchedule;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 
 class EditStaff extends Component
 {
+    use AuthorizesRequests;
     use StaffCrud;
 
     #[Computed]

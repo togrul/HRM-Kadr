@@ -28,7 +28,7 @@ class DeleteCandidate extends Component
             return;
         }
 
-        $this->authorize('delete-candidates', $candidate);
+        $this->authorize('delete', $candidate);
 
         $this->candidateId = (int) $candidate->id;
 
@@ -51,7 +51,7 @@ class DeleteCandidate extends Component
             return;
         }
 
-        $this->authorize('delete-candidates', $candidate);
+        $this->authorize('delete', $candidate);
 
         $candidate->delete();
 

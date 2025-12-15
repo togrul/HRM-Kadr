@@ -142,6 +142,7 @@ class ServiceHistoryForm extends Form
             'given_date' => null,
             'start_date' => null,
             'end_date' => null,
+            'location' => null,
         ];
     }
 

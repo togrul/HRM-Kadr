@@ -25,13 +25,27 @@
             </tr>
         </thead>
         <tbody>
+        @foreach ($personnel->military as $personnelMilitary)
+            <tr>
+                <td>{{ \Carbon\Carbon::parse($personnelMilitary->start_date)->format('d.m.Y') }}</td>
+                <td>{{ \Carbon\Carbon::parse($personnelMilitary->end_date)->format('d.m.Y') }}</td>
+                <td>{{ $personnelMilitary->rank->name }}</td>
+                <td>{{ $personnelMilitary->location }}</td>
+                <td>{{ \Carbon\Carbon::parse($personnelMilitary->given_date)->format('d.m.Y') }}</td>
+            </tr>
+          
+        @endforeach
         @foreach($personnel->specialServices as $special)
             <tr>
                 <td>{{ \Carbon\Carbon::parse($special->join_date)->format('d.m.Y') }}</td>
                 <td>{{ \Carbon\Carbon::parse($special->leave_date)->format('d.m.Y') }}</td>
                 <td>{{ $special->position }}</td>
                 <td>{{ $special->company_name }}</td>
-                <td>{{ $special->order_given_by }}, {{ $special->order_no }}, {{ \Carbon\Carbon::parse($special->order_date)->format('d.m.Y') }}</td>
+                <td>
+                  {{ $special->order_given_by }} 
+                  {{ !empty($special->order_no) ? ', '.$special->order_no : ''}} 
+                  {{ !empty($special->order_date) ? ', '. \Carbon\Carbon::parse($special->order_date)->format('d.m.Y') : ''}}
+                </td>
             </tr>
         @endforeach
         @for($i = 0;$i < 2;$i++)

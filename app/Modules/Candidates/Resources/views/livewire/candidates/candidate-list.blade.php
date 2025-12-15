@@ -12,16 +12,16 @@ Livewire.hook('message.processed', (message, component) => {
         }
     }
 })">
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 lg:grid-cols-4 px-6 py-4">
+    <div class="grid grid-cols-1 gap-2 px-6 py-4 sm:grid-cols-2 lg:grid-cols-4">
         <div class="flex flex-col">
             <x-label for="filter.fullname">{{ __('Fullname') }}</x-label>
             <x-livewire-input mode="gray" name="filter.fullname" wire:model="filter.fullname"></x-livewire-input>
         </div>
-        <div class="flex flex-col space-y-1 w-full">
+        <div class="flex flex-col w-full space-y-1">
             <x-label for="filter.gender">{{ __('Gender') }}</x-label>
             <div class="flex space-x-2">
                 @foreach (\App\Enums\GenderEnum::genderOptions() as $value => $label)
-                    <label class="inline-flex items-center bg-gray-100 rounded shadow-sm py-2 px-2 w-full">
+                    <label class="inline-flex items-center w-full px-2 py-2 bg-gray-100 rounded shadow-sm">
                         <input type="radio" class="form-radio" name="filter.gender" wire:model="filter.gender"
                             value="{{ $value }}">
                         <span class="ml-2 text-sm font-normal">{{ $label }}</span>
@@ -29,7 +29,7 @@ Livewire.hook('message.processed', (message, component) => {
                 @endforeach
             </div>
         </div>
-        <div class="flex space-x-2 items-center">
+        <div class="flex items-center space-x-2">
             <div class="flex flex-col">
                 <x-label for="filter.results">{{ __('Test results') }}</x-label>
                 <x-livewire-input mode="gray" type="number" name="filter.results"
@@ -44,7 +44,7 @@ Livewire.hook('message.processed', (message, component) => {
 
         <div class="flex flex-col">
             <x-label for="filter.appeal_date">{{ __('Appeal date') }}</x-label>
-            <div class="flex space-x-1 items-center">
+            <div class="flex items-center space-x-1">
                 <x-pikaday-input mode="gray" name="filter.appeal_date.min" format="Y-MM-DD"
                     wire:model="filter.appeal_date.min">
                     <x-slot name="script">
@@ -70,9 +70,9 @@ Livewire.hook('message.processed', (message, component) => {
         </div>
     </div>
 
-    <div class="flex flex-col space-y-4 px-6 py-4">
-        <div class="flex justify-between items-center">
-            <div class="flex flex-col items-center justify-between sm:flex-row filter bg-white py-2 px-2 rounded-xl">
+    <div class="flex flex-col px-6 py-4 space-y-4">
+        <div class="flex items-center justify-between">
+            <div class="flex flex-col items-center justify-between px-2 py-2 bg-white sm:flex-row filter rounded-xl">
                 <x-filter.nav>
                     <x-filter.item wire:click.prevent="setStatus('all')" :active="$status === 'all'">
                         {{ __('All') }}
@@ -92,21 +92,21 @@ Livewire.hook('message.processed', (message, component) => {
 
             <div class="flex flex-col">
                 <div class="flex space-x-4">
-                    @can('add-candidates')
+                    @can('create', App\Models\Candidate::class)
                         <button wire:click="openSideMenu('add-candidate')"
-                            class="flex items-center justify-center rounded-xl w-12 h-12 transition-all duration-300 hover:bg-blue-50"
+                            class="flex items-center justify-center w-12 h-12 transition-all duration-300 rounded-xl hover:bg-blue-50"
                             type="button">
                             @include('components.icons.add-file')
                         </button>
                     @endcan
-                    @can('export-candidates')
+                    @can('export', App\Models\Candidate::class)
                         <button wire:click.prevent="exportExcel"
-                            class="flex items-center justify-center rounded-xl w-12 h-12 transition-all duration-300 hover:bg-green-50"
+                            class="flex items-center justify-center w-12 h-12 transition-all duration-300 rounded-xl hover:bg-green-50"
                             type="button">
                             <x-icons.excel-icon />
                         </button>
                         <button
-                            class="flex items-center justify-center rounded-xl w-12 h-12 transition-all duration-300 hover:bg-red-50"
+                            class="flex items-center justify-center w-12 h-12 transition-all duration-300 rounded-xl hover:bg-red-50"
                             type="button">
                             @include('components.icons.print-file', [
                                 'color' => 'text-rose-500',
@@ -157,7 +157,7 @@ Livewire.hook('message.processed', (message, component) => {
 
                                 <x-table.td>
                                     <span
-                                        class="text-gray-900 text-sm font-medium bg-slate-100 px-2 py-2 rounded-lg">{{ $_candidate->structure->name }}</span>
+                                        class="px-2 py-2 text-sm font-medium text-gray-900 rounded-lg bg-slate-100">{{ $_candidate->structure->name }}</span>
                                 </x-table.td>
 
                                 <x-table.td>
@@ -172,15 +172,15 @@ Livewire.hook('message.processed', (message, component) => {
                                         ];
                                     @endphp
                                     <div class="flex flex-col space-y-1">
-                                        <div class="flex space-x-1 items-center">
+                                        <div class="flex items-center space-x-1">
                                             <span
-                                                class="text-gray-500 text-sm font-medium">{{ __('Knowledge') }}:</span>
+                                                class="text-sm font-medium text-gray-500">{{ __('Knowledge') }}:</span>
                                             <span
                                                 class="text-sm font-medium px-2 py-1 rounded-lg bg-{{ $_status_color[$_candidate->knowledge_test] }}-100 text-{{ $_status_color[$_candidate->knowledge_test] }}-500">{{ $_candidate->knowledge_test }}</span>
                                         </div>
-                                        <div class="flex space-x-1 items-center">
+                                        <div class="flex items-center space-x-1">
                                             <span
-                                                class="text-gray-500 text-sm font-medium">{{ __('Physical fitness') }}:</span>
+                                                class="text-sm font-medium text-gray-500">{{ __('Physical fitness') }}:</span>
                                             <span
                                                 class="text-sm font-medium px-2 py-1 rounded-lg bg-{{ $_status_color[$_candidate->physical_fitness_exam] }}-100 text-{{ $_status_color[$_candidate->physical_fitness_exam] }}-500">{{ $_candidate->physical_fitness_exam }}</span>
                                         </div>
@@ -201,17 +201,17 @@ Livewire.hook('message.processed', (message, component) => {
 
                                 <x-table.td :isButton="true">
                                     @if ($status != 'deleted')
-                                        @can('edit-candidates')
+                                        @can('update', $_candidate)
                                             <a href="#"
                                                 wire:click="openSideMenu('edit-candidate',{{ $_candidate->id }})"
-                                                class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase rounded-lg text-gray-500 bg-gray-100 hover:bg-gray-200 hover:text-gray-700">
+                                                class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase bg-gray-100 rounded-lg hover:bg-gray-200 hover:text-gray-700">
                                                 @include('components.icons.profile-icon')
                                             </a>
                                         @endcan
                                     @else
                                         @role('Admin')
                                             <button wire:click="restoreData('{{ $_candidate->id }}')"
-                                                class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-teal-50 hover:text-gray-700">
+                                                class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-teal-50 hover:text-gray-700">
                                                 @include('components.icons.recover', [
                                                     'color' => 'text-teal-500',
                                                     'hover' => 'text-teal-600',
@@ -223,17 +223,17 @@ Livewire.hook('message.processed', (message, component) => {
 
                                 <x-table.td :isButton="true">
                                     @if ($status != 'deleted')
-                                        @can('delete-candidates')
+                                        @can('delete', $_candidate)
                                             <button wire:click="setDeleteCandidate('{{ $_candidate->id }}')"
-                                                class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-100 hover:text-gray-700">
+                                                class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-100 hover:text-gray-700">
                                                 @include('components.icons.delete-icon')
                                             </button>
                                         @endcan
                                     @else
-                                        @can('delete-candidates')
+                                        @can('delete', $_candidate)
                                             <button wire:confirm="{{ __('Are you sure you want to remove this data?') }}"
                                                 wire:click="forceDeleteData('{{ $_candidate->id }}')"
-                                                class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-50 hover:text-gray-700">
+                                                class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700">
                                                 @include('components.icons.force-delete')
                                             </button>
                                         @endcan
@@ -255,20 +255,18 @@ Livewire.hook('message.processed', (message, component) => {
     </div>
 
     <x-side-modal>
-        @can('add-candidates')
+        @can('create', App\Models\Candidate::class)
             @if ($showSideMenu == 'add-candidate')
                 @livewire('candidates.add-candidate')
             @endif
         @endcan
 
-        @can('edit-candidates')
-            @if ($showSideMenu == 'edit-candidate')
-                <livewire:candidates.edit-candidate :candidateModel="$modelName" />
-            @endif
-        @endcan
+        @if ($showSideMenu === 'edit-candidate')
+            <livewire:candidates.edit-candidate :candidateModel="$modelName" />
+        @endif
     </x-side-modal>
 
-    @can('delete-candidates')
+    @can('delete', App\Models\Candidate::class)
         <div>
             @livewire('candidates.delete-candidate')
         </div>

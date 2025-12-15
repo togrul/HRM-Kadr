@@ -19,6 +19,8 @@ class AddOrder extends Component
 
     public function store()
     {
+        $this->authorize('create', Order::class);
+
         $data = $this->fillCrudData();
         if (! is_array($data)) {
             return $data;
@@ -49,11 +51,18 @@ class AddOrder extends Component
             $this->saveAttribute($order_log, $_attributes, 'create');
 
             //insert order log personnels eger candidate dirse.Service cagir
-            $tabel_no_list = $this->isCandidateOrder()
-                            ? (new ImportCandidateToPersonnel)->handle($this->componentForms, $payload['status_id'])
-                            : $_personnel_ids;
+            $tabelResult = $this->personnelPersister->attachFromVacancies(
+                $order_log,
+                $data['vacancy_list'],
+                $this->isCandidateOrder(),
+                $payload['status_id']
+            );
 
-            //insert
+            $tabel_no_list = $this->isCandidateOrder()
+                ? ($tabelResult['tabels'] ?? [])
+                : $_personnel_ids;
+
+            // Always attach order personnels to the pivot (both candidate and non-candidate orders)
             $this->personnelPersister->attachAssignments($order_log, $tabel_no_list, $_component_ids);
             // vacation days leri bura gondermek ucun usul. ancaq vacation table i olanda.
             // shert qoymaq ayrica array gondermek.
@@ -61,7 +70,11 @@ class AddOrder extends Component
                 Order::BLADE_VACATION => collect($data['vacancy_list'])->except('personnels')->toArray(),
                 default => []
             };
-            (new OrderConfirmedService($order_log, $extraData))->handle($_personnel_ids);
+            $confirmedPayload = $this->isCandidateOrder()
+                ? ($tabelResult['candidate_ids'] ?? [])
+                : $tabel_no_list;
+
+            (new OrderConfirmedService($order_log, $extraData))->handle($confirmedPayload);
         });
 
         $this->dispatch('orderAdded', __('Order was added successfully!'));

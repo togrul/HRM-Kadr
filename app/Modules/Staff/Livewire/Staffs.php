@@ -43,6 +43,8 @@ class Staffs extends Component
 
     public function exportExcel()
     {
+        $this->authorize('export', StaffSchedule::class);
+
         $report = $this->returnData(type: 'excel');
         $name = Carbon::now()->format('d.m.Y H:i');
 
@@ -68,7 +70,7 @@ class Staffs extends Component
 
     public function mount(StructureService $structureService)
     {
-        $this->authorize('show-staff');
+        $this->authorize('viewAny', StaffSchedule::class);
         $this->selectedPage = request()->query('selectedPage', 'all');
         $this->accessibleStructureIds = $structureService->getAccessibleStructures();
     }
