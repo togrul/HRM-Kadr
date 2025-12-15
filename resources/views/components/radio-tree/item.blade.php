@@ -11,18 +11,10 @@
 ])
 
 @php
-    $suffixService = $suffixService ?? app(\App\Services\WordSuffixService::class);
-    $structureLevels = $structureLevels ?? collect(\App\Enums\StructureEnum::cases())->mapWithKeys(fn($c) => [$c->value => strtolower($c->name)]);
-    $resolveSelected = $selectedResolver ?? function ($component, $list, $row, $field, $preset = null) {
-        if ($preset !== null) {
-            return $preset;
-        }
-        $rawValue = data_get($component->{$list}[$row] ?? [], $field);
-        if (method_exists($component, 'componentFieldValue')) {
-            return $component->componentFieldValue($row, $field);
-        }
-        return is_array($rawValue) ? ($rawValue['id'] ?? null) : $rawValue;
-    };
+    $suffixService = \App\Support\StructureSelect::suffixService($suffixService);
+    $structureLevels = \App\Support\StructureSelect::levels($structureLevels);
+    $resolveSelected = $selectedResolver ?? fn ($component, $list, $row, $field, $preset = null)
+        => \App\Support\StructureSelect::resolveSelected($component, $list, $row, $field, $preset);
     $currentSelection = $resolveSelected($this, $listData, $key, $field, $selectedId);
 @endphp
 

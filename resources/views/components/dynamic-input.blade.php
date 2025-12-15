@@ -48,12 +48,11 @@
 
     $input = $resolvedInputTypes[$type] ?? 'text-input';
     $list_string = $listProperty;
-    $suffixService = $suffixService ?? app(\App\Services\WordSuffixService::class);
-    $structureLevels = $structureLevels ?? collect(\App\Enums\StructureEnum::cases())->mapWithKeys(fn($c) => [$c->value => strtolower($c->name)]);
+    $suffixService = \App\Support\StructureSelect::suffixService($suffixService);
+    $structureLevels = \App\Support\StructureSelect::levels($structureLevels);
     $resolveSelected = $selectedResolver ?? function ($component, $field, $key, $defaultLabel = null, $defaultId = null) use ($list_string) {
+        $selectedId = \App\Support\StructureSelect::resolveSelected($component, $list_string, $key, $field, $defaultId);
         $fallbackValue = data_get($component->{$list_string}[$key] ?? [], $field);
-        $selectedId = $defaultId ?? (is_array($fallbackValue) ? ($fallbackValue['id'] ?? null) : $fallbackValue);
-
         $fieldLabel = $defaultLabel ?? (is_array($fallbackValue)
                 ? ($fallbackValue['name'] ?? __('Structure'))
                 : (! empty($fallbackValue) ? $fallbackValue : __('Structure')));
