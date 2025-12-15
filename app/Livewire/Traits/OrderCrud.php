@@ -284,8 +284,17 @@ trait OrderCrud
         $this->personnelPersister = $personnelPersister;
     }
 
-    public function setStructure($id, $list, $field, $key, $isCoded)
+    public function setStructure($id, $list = null, $field = null, $key = null, $isCoded = null)
     {
+        // Allow payload array/object for convenience
+        if (is_array($id)) {
+            $list = $id['list'] ?? $list;
+            $field = $id['field'] ?? $field;
+            $key = $id['row'] ?? $id['key'] ?? $key;
+            $isCoded = $id['coded'] ?? $isCoded;
+            $id = $id['id'] ?? null;
+        }
+
         $id = (int) $id;
         $lineage = $this->structureLineage($id);
 
@@ -293,6 +302,10 @@ trait OrderCrud
 
         if ($field === 'structure_id' && ! $isCoded) {
             $label = optional(collect($lineage)->last())['name'] ?? $label;
+        }
+
+        if ($list === null || $field === null || $key === null) {
+            return;
         }
 
         $this->{$list}[$key][$field] = $id;
@@ -402,8 +415,10 @@ trait OrderCrud
             ? Candidate::find($value)
             : Personnel::find($value);
 
-        $this->componentForms[$rowKey]['name'] = $personnelModel->name;
-        $this->componentForms[$rowKey]['surname'] = $personnelModel->surname;
+        if ($personnelModel) {
+            $this->componentForms[$rowKey]['name'] = $personnelModel->name;
+            $this->componentForms[$rowKey]['surname'] = $personnelModel->surname;
+        }
     }
 
     protected function modifyComponentList(array $componentForms): array

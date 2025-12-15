@@ -5,27 +5,39 @@
     'key' => 0,
     'isCoded' => false,
     'selectedId' => null,
+    'suffixService' => null,
+    'structureLevels' => null,
+    'selectedResolver' => null,
 ])
 
 @php
-    $wordSuffixService = new \App\Services\WordSuffixService();
-    $currentSelection = $selectedId;
-    if ($currentSelection === null) {
-        $rawValue = data_get($this->{$listData}[$key] ?? [], $field);
-        if (method_exists($this, 'componentFieldValue')) {
-            $currentSelection = $this->componentFieldValue($key, $field);
-        } else {
-            $currentSelection = is_array($rawValue) ? ($rawValue['id'] ?? null) : $rawValue;
+    $suffixService = $suffixService ?? app(\App\Services\WordSuffixService::class);
+    $structureLevels = $structureLevels ?? collect(\App\Enums\StructureEnum::cases())->mapWithKeys(fn($c) => [$c->value => strtolower($c->name)]);
+    $resolveSelected = $selectedResolver ?? function ($component, $list, $row, $field, $preset = null) {
+        if ($preset !== null) {
+            return $preset;
         }
-    }
+        $rawValue = data_get($component->{$list}[$row] ?? [], $field);
+        if (method_exists($component, 'componentFieldValue')) {
+            return $component->componentFieldValue($row, $field);
+        }
+        return is_array($rawValue) ? ($rawValue['id'] ?? null) : $rawValue;
+    };
+    $currentSelection = $resolveSelected($this, $listData, $key, $field, $selectedId);
 @endphp
 
-<li x-data="{openSubStructure: false}" class="py-1">
+<li x-data="{
+        openSubStructure: openNodes[{{ $model->id }}] ?? false,
+        toggle() {
+            this.openSubStructure = !this.openSubStructure;
+            openNodes[{{ $model->id }}] = this.openSubStructure;
+        }
+    }" class="py-1">
     <div class="flex items-center justify-between w-full">
         <div class="flex items-center justify-start space-x-2">
-            @if(count($model->subs) > 0)
+            @if($model->subs->isNotEmpty())
             {{-- arrow animasiyali deyisen--}}
-            <button @click="openSubStructure = !openSubStructure" class="flex items-center justify-center appearance-none">
+            <button @click="toggle()" class="flex items-center justify-center appearance-none">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-gray-500">
                     <path x-show="openSubStructure"
                           stroke-linecap="round"
@@ -58,7 +70,7 @@
         </div>
         {{-- button checkbox secmek ucun hansini --}}
         <button
-            wire:click.prevent="setStructure({{ $model->id }},'{{ $listData }}','{{ $field }}',{{ $key }},{{ $isCoded ? 1 : 0 }})"
+            wire:click.prevent="setStructure(@js(['id' => $model->id, 'list' => $listData, 'field' => $field, 'row' => $key, 'coded' => $isCoded ? 1 : 0]))"
             @class([
                 'appearance-none rounded-full w-6 h-6 border p-[3px] flex justify-center items-center transition-all duration-300',
                 'border-gray-300 bg-white' => $model->id != $currentSelection,
@@ -85,13 +97,23 @@
         >
             @foreach ($model->subs as $sub)
                 @php
-                    $_level_name = __(strtolower((collect(\App\Enums\StructureEnum::cases())->pluck('name','value')[$sub->level])));
+                    $_level_name = __($structureLevels[$sub->level] ?? '');
                     $_select_value = ($field == 'structure_id' && $isCoded)
-                                   ? $sub->code."{$wordSuffixService->getNumberSuffix($sub->code)} {$_level_name}"
+                                   ? $sub->code."{$suffixService->getNumberSuffix($sub->code)} {$_level_name}"
                                    : $sub->name;
                     $isCoded = $isCoded ?: 0;
                 @endphp
-                <x-radio-tree.item :$isCoded :$listData :$field :model="$sub" :$key :selected-id="$currentSelection">
+                <x-radio-tree.item
+                    :$isCoded
+                    :$listData
+                    :$field
+                    :model="$sub"
+                    :$key
+                    :selected-id="$currentSelection"
+                    :suffix-service="$suffixService"
+                    :structure-levels="$structureLevels"
+                    :selected-resolver="$resolveSelected"
+                >
                     - {{ __($_select_value) }}
                 </x-radio-tree.item>
             @endforeach

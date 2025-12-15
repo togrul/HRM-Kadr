@@ -13,19 +13,53 @@
     'listProperty' => 'componentForms',
     'selectedLabel' => null,
     'selectedValue' => null,
+    'suffixService' => null,
+    'structureLevels' => null,
+    'inputTypes' => null,
+    'selectedResolver' => null,
 ])
 
 @php
-    $input = match ($type)
-    {
-        '$structure_main','$position','$fullname','$rank','$transportation' => 'select',
-        '$month','$name','$surname','$days','$location','$trip_start_month','$meeting_hour','$return_month','$car', '$weapon' => 'text-input',
-        '$day','$year','$trip_start_day','$trip_start_year','$return_day' => 'numeric-input',
+    $resolvedInputTypes = $inputTypes ?? [
+        '$structure_main' => 'select',
+        '$position' => 'select',
+        '$fullname' => 'select',
+        '$rank' => 'select',
+        '$transportation' => 'select',
+        '$month' => 'text-input',
+        '$name' => 'text-input',
+        '$surname' => 'text-input',
+        '$days' => 'text-input',
+        '$location' => 'text-input',
+        '$trip_start_month' => 'text-input',
+        '$meeting_hour' => 'text-input',
+        '$return_month' => 'text-input',
+        '$car' => 'text-input',
+        '$weapon' => 'text-input',
+        '$day' => 'numeric-input',
+        '$year' => 'numeric-input',
+        '$trip_start_day' => 'numeric-input',
+        '$trip_start_year' => 'numeric-input',
+        '$return_day' => 'numeric-input',
         '$structure' => 'radio-list',
-        '$start_date','$end_date' => 'date-input'
-    };
+        '$start_date' => 'date-input',
+        '$end_date' => 'date-input',
+    ];
 
+    $input = $resolvedInputTypes[$type] ?? 'text-input';
     $list_string = $listProperty;
+    $suffixService = $suffixService ?? app(\App\Services\WordSuffixService::class);
+    $structureLevels = $structureLevels ?? collect(\App\Enums\StructureEnum::cases())->mapWithKeys(fn($c) => [$c->value => strtolower($c->name)]);
+    $resolveSelected = $selectedResolver ?? function ($component, $field, $key, $defaultLabel = null, $defaultId = null) use ($list_string) {
+        $fallbackValue = data_get($component->{$list_string}[$key] ?? [], $field);
+        $selectedId = $defaultId ?? (is_array($fallbackValue) ? ($fallbackValue['id'] ?? null) : $fallbackValue);
+
+        $fieldLabel = $defaultLabel ?? (is_array($fallbackValue)
+                ? ($fallbackValue['name'] ?? __('Structure'))
+                : (! empty($fallbackValue) ? $fallbackValue : __('Structure')));
+
+        return [$selectedId, $fieldLabel];
+    };
 @endphp
 
 @if($input == 'text-input')
@@ -62,10 +96,6 @@
                     name="{{ $searchField }}"
                     wire:model.live="{{ $searchField }}"
                     @click.stop="isOpen = true"
-                    x-on:input.stop="null"
-                    x-on:keyup.stop="null"
-                    x-on:keydown.stop="null"
-                    x-on:change.stop="null"
                 ></x-livewire-input>
             @endif
         </x-ui.select-dropdown>
@@ -79,13 +109,9 @@
     >
         <x-label for="orderForm.order_no">{{ $title }}</x-label>
         @php
-            $fallbackValue = data_get($this->{$list_string}[$key] ?? [], $field);
-            $selectedId = $selectedValue ?? (is_array($fallbackValue) ? ($fallbackValue['id'] ?? null) : $fallbackValue);
-            $fieldLabel = $selectedLabel ?? (is_array($fallbackValue)
-                    ? ($fallbackValue['name'] ?? __('Structure'))
-                    : (! empty($fallbackValue) ? $fallbackValue : __('Structure')));
+            [$selectedId, $fieldLabel] = $resolveSelected($this, $field, $key, $selectedLabel, $selectedValue);
         @endphp
-        <div class="relative w-full">
+        <div class="relative w-full" x-data="{showStructures: false, openNodes: $store.structureTree ?? ($store.structureTree = {})}">
             <button @click="showStructures = !showStructures"
                     class="flex items-center justify-center w-full px-4 py-2 text-sm font-medium bg-gray-100 rounded-lg appearance-none"
             >
@@ -99,23 +125,29 @@
                  x-transition:leave="transition ease-in-out duration-300"
                  x-transition:leave-start="opacity-100 transform scale-y-100 translate-y-0"
                  x-transition:leave-end="opacity-0 transform scale-y-0 -translate-y-1/2"
-                 class="z-[99999] flex px-4 py-3 bg-neutral-50 border border-gray-200 shadow-xl rounded absolute top-9 {{ $row % 3 == 0 ? 'left-0' : 'right-0' }} w-full sm:max-w-xl md:max-w-screen-sm lg:max-w-screen-md min-w-full sm:w-screen "
+                 class="z-40 flex px-4 py-3 bg-neutral-50 border border-gray-200 shadow-xl rounded absolute top-9 {{ ($row % 3) === 0 ? 'left-0' : 'right-0' }} w-full sm:max-w-xl md:max-w-screen-sm lg:max-w-screen-md min-w-full sm:w-screen "
             >
                 <x-radio-tree.list>
                     @php
-                        $wordSuffixService = new \App\Services\WordSuffixService();
                         $mainStructureId = data_get($this->{$list_string}[$key] ?? [], 'structure_main_id');
                     @endphp
-                    @foreach($model->where('parent_id', $mainStructureId) as $model_item)
+                    @foreach($model?->where('parent_id', $mainStructureId) ?? [] as $model_item)
                         @php
-                            $_level_name = __(strtolower((collect(\App\Enums\StructureEnum::cases())->pluck('name','value')[$model_item->level])));
+                            $_level_name = __($structureLevels[$model_item->level] ?? '');
                             $_select_value = ($field == 'structure_id' && $isCoded)
-                                            ? $model_item->code."{$wordSuffixService->getNumberSuffix($model_item->code)} {$_level_name}"
-                                            : $model_item->name;
-
-                                
+                                                    ? $model_item->code."{$suffixService->getNumberSuffix($model_item->code)} {$_level_name}"
+                                                    : $model_item->name;         
                         @endphp
-                        <x-radio-tree.item :$isCoded :listData="$list_string" :$field :model="$model_item" :$key :selected-id="$selectedId">
+                        <x-radio-tree.item
+                            :$isCoded
+                            :listData="$list_string"
+                            :$field
+                            :model="$model_item"
+                            :$key
+                            :selected-id="$selectedId"
+                            :suffix-service="$suffixService"
+                            :structure-levels="$structureLevels"
+                        >
                             {{ __($_select_value) }}
                         </x-radio-tree.item>
                     @endforeach
