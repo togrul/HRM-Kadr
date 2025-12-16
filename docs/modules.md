@@ -7,7 +7,7 @@ Livewire components, routes, views, and service provider. Shared patterns:
 - Views namespace: `<name>::` (passed to `loadViewsFrom`)
 - Routes: `app/Modules/<Name>/Routes/web.php` (loaded in provider)
 - Livewire discovery: `config/livewire.php` lists module namespaces
-- Alias registration: module providers register `Livewire::component` aliases (via `App\Providers\Concerns\RegistersLivewireAliases` for consistent prefix + map handling)
+- Alias registration: module providers auto-register Livewire aliases (via `App\Providers\Concerns\RegistersLivewireAliases`) by scanning each module’s `Livewire` directory with the module prefix.
 
 ## Enabled Modules
 - Personnel (`personnel::`) – CRUD, files, information, vacation list
@@ -25,7 +25,7 @@ Livewire components, routes, views, and service provider. Shared patterns:
 
 ## Provider pattern
 - Load module routes/views in `boot()`
-- Register Livewire aliases in a dedicated `registerLivewireComponents()` method
+- Register Livewire aliases in a dedicated `registerLivewireComponents()` method using a manual `componentMap()` and `registerAliases($map, '<prefix>')` for deterministic aliases (e.g., `orders.add-order` → `App\Modules\Orders\Livewire\AddOrder`).
 - Keep alias naming consistent: `<module>.<area>.<component>`
 
 ## Rendering pattern
@@ -42,11 +42,12 @@ Livewire components, routes, views, and service provider. Shared patterns:
 - In the provider `boot()`, call:
   - `$this->loadRoutesFrom(__DIR__.'/../Routes/web.php');`
   - `$this->loadViewsFrom(__DIR__.'/../Resources/views', '<prefix>');`
-  - `$this->registerAliases($this->componentMap(), '<prefix>');` (via `RegistersLivewireAliases`)
-- `componentMap()` returns `['alias-name' => \App\Modules\<Name>\Livewire\MyComponent::class]`; aliases become `<prefix>.alias-name`.
+  - `$this->registerAliases($this->componentMap(), '<prefix>');`
+- Alias map: explicit entries, kebab-cased where helpful (e.g., `orders.templates.add-template`).
 - Register model observers in the same provider (e.g., `Setting::observe(SettingsObserver::class);`) so cache flushes stay within the module.
 - Add the module namespace to `config/livewire.php` `discover.namespaces` to keep `@livewire('<prefix>.<alias>')` working without manual `Livewire::component` calls.
 - Optional: to make a module togglable, add it to `config/modules.php` under `catalog` with `enabled => true/false` and (if needed) `migrations => app_path('Modules/<Name>/Database/Migrations')`, then guard the provider with `ModuleState::enabled('<slug>')` and call `loadMigrationsFrom` conditionally.
+- Observers/cache flush: register model observers in the module provider (e.g., `Setting::observe(SettingsObserver::class)`) so cache invalidation stays module-scoped.
 
 ## Feature flags (organization profiles)
 - `config/profiles.php` defines profiles (default/military/public/private). Active profile: `APP_PROFILE` or `profiles.active`.

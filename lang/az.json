@@ -543,5 +543,6 @@
     "Assigned person" : "Təyin edilmiş şəxs",
     "Search...": "Axtar...",
     "manage" : "idarə et",
-    "Order was updated successfully!" : "Əmr uğurla yeniləndi!"
+    "Order was updated successfully!" : "Əmr uğurla yeniləndi!",
+    "Staff was updated successfully!" : "Ştat uğurla yeniləndi!"
 }

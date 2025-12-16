@@ -2,7 +2,7 @@
 
 namespace App\Modules\Staff\Livewire;
 
-use App\Livewire\Traits\StaffCrud;
+use App\Modules\Staff\Support\Traits\StaffCrud;
 use App\Models\StaffSchedule;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Component;

@@ -11,6 +11,7 @@ use App\Observers\SettingsObserver;
 use App\Providers\Concerns\RegistersLivewireAliases;
 use App\Services\Modules\ModuleState;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Cache;
 
 class ServicesServiceProvider extends ServiceProvider
 {
@@ -30,6 +31,7 @@ class ServicesServiceProvider extends ServiceProvider
         $this->loadRoutesFrom(__DIR__.'/../Routes/web.php');
         $this->loadViewsFrom(__DIR__.'/../Resources/views', 'services');
         $this->registerObservers();
+        $this->registerViewComposers();
         $this->registerLivewireComponents();
     }
 
@@ -43,6 +45,27 @@ class ServicesServiceProvider extends ServiceProvider
     protected function registerLivewireComponents(): void
     {
         $this->registerAliases($this->componentMap(), 'services');
+    }
+
+    protected function registerViewComposers(): void
+    {
+        // Share menus with the header view
+        view()->composer('includes.header', function ($view) {
+            $menus = Cache::rememberForever('menus:header', function () {
+                return Menu::with('permission')
+                    ->active()
+                    ->ordered()
+                    ->get();
+            });
+
+            $view->with('menus', $menus);
+        });
+
+        // Share settings globally across all views
+        view()->composer('*', function ($view) {
+            $settings = Cache::rememberForever('settings', fn () => Setting::pluck('value', 'name')->toArray());
+            $view->with('_settings', $settings);
+        });
     }
 
     protected function componentMap(): array

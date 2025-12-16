@@ -2,7 +2,7 @@
 
 namespace App\Modules\Orders\Livewire;
 
-use App\Livewire\Traits\OrderCrud;
+use App\Modules\Orders\Support\Traits\OrderCrud;
 use App\Models\Order;
 use App\Models\OrderLog;
 use App\Models\Personnel;

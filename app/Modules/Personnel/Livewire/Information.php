@@ -3,11 +3,11 @@
 namespace App\Modules\Personnel\Livewire;
 
 use App\Livewire\Traits\Helpers\FillComplexArrayTrait;
-use App\Livewire\Traits\Information\ContractTrait;
-use App\Livewire\Traits\Information\DisposalTrait;
-use App\Livewire\Traits\Information\EducationRequestTrait;
-use App\Livewire\Traits\Information\MasterDegreeTrait;
-use App\Livewire\Traits\Information\PensionCardTrait;
+use App\Modules\Personnel\Support\Traits\Information\ContractTrait;
+use App\Modules\Personnel\Support\Traits\Information\DisposalTrait;
+use App\Modules\Personnel\Support\Traits\Information\EducationRequestTrait;
+use App\Modules\Personnel\Support\Traits\Information\MasterDegreeTrait;
+use App\Modules\Personnel\Support\Traits\Information\PensionCardTrait;
 use App\Livewire\Traits\DropdownConstructTrait;
 use App\Traits\NormalizesDropdownPayloads;
 use App\Models\Personnel;

@@ -48,7 +48,7 @@ class OrdersServiceProvider extends ServiceProvider
             'templates.all-templates' => \App\Modules\Orders\Livewire\Templates\AllTemplates::class,
             'templates.add-template' => \App\Modules\Orders\Livewire\Templates\AddTemplate::class,
             'templates.edit-template' => \App\Modules\Orders\Livewire\Templates\EditTemplate::class,
-          'templates.delete-template' => \App\Modules\Orders\Livewire\Templates\DeleteTemplate::class,
+            'templates.delete-template' => \App\Modules\Orders\Livewire\Templates\DeleteTemplate::class,
             'templates.set-type' => \App\Modules\Orders\Livewire\Templates\SetType::class,
         ];
     }

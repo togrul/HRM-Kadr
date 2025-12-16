@@ -50,4 +50,5 @@ class PersonnelServiceProvider extends ServiceProvider
             'vacation-list' => \App\Modules\Personnel\Livewire\VacationList::class,
         ];
     }
+
 }

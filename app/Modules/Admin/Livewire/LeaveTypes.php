@@ -7,8 +7,8 @@ use App\Models\LeaveType;
 use Illuminate\Support\Arr;
 use Livewire\Attributes\On;
 use Livewire\WithPagination as LivewireWithPagination;
-use App\Livewire\Traits\Admin\CallSwalTrait as AdminCallSwalTrait;
-use App\Livewire\Traits\Admin\AdminCrudTrait as AdminAdminCrudTrait;
+use App\Modules\Admin\Support\Traits\Admin\CallSwalTrait as AdminCallSwalTrait;
+use App\Modules\Admin\Support\Traits\Admin\AdminCrudTrait as AdminAdminCrudTrait;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests as AccessAuthorizesRequests;
 
 #[On(['leaveTypeUpdated', 'deleted'])]

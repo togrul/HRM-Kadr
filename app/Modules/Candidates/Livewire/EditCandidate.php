@@ -2,7 +2,7 @@
 
 namespace App\Modules\Candidates\Livewire;
 
-use App\Livewire\Traits\CandidateCrud;
+use App\Modules\Candidates\Support\Traits\CandidateCrud;
 use App\Livewire\Traits\Helpers\FillComplexArrayTrait;
 use App\Models\Candidate;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;

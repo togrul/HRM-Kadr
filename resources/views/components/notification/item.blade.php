@@ -51,7 +51,7 @@
         ])>
         <div class="flex flex-col items-start w-full space-y-1">
             <div class="flex items-start justify-between w-full">
-                <p class="flex items-start gap-1 text-sm font-medium text-left text-neutral-500">
+                <p class="flex items-start gap-1 pr-2 text-sm font-medium text-left text-neutral-500">
                     <span class="flex flex-wrap items-center gap-1">
                         @if ($action === 'birthday' && $addedBy)
                             <x-icons.cake-icon color="text-yellow-800"></x-icons.cake-icon>

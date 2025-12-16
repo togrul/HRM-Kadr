@@ -32,7 +32,7 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton(NumberToWordsService::class, fn () => new NumberToWordsService);
         $this->app->singleton(StructureService::class, fn () => new StructureService);
-        $this->app->singleton(ModuleState::class, fn () => new ModuleState($this->app->make(ProfileState::class)->modules()));
+        $this->app->singleton(ModuleState::class, fn () => new ModuleState(config('modules.catalog', [])));
         $this->app->singleton(FeatureState::class, fn () => new FeatureState($this->app->make(ProfileState::class)->features()));
     }
 
@@ -45,31 +45,8 @@ class AppServiceProvider extends ServiceProvider
         //            $this->app->isProduction(),
         //        );
         $this->configureModels();
-        $this->registerViewComposers();
         $this->registerMacros();
         $this->registerBladeDirectives();
-
-    }
-
-    private function registerViewComposers(): void
-    {
-        // Share menus with the header view
-        view()->composer('includes.header', function ($view) {
-            $menus = Cache::rememberForever('menus:header', function () {
-                return Menu::with('permission')
-                    ->active()
-                    ->ordered()
-                    ->get();
-            });
-
-            $view->with('menus', $menus);
-        });
-
-        // Share settings globally across all views
-        view()->composer('*', function ($view) {
-            $settings = Cache::rememberForever('settings', fn () => Setting::pluck('value', 'name')->toArray());
-            $view->with('_settings', $settings);
-        });
     }
 
     /**

@@ -2,8 +2,8 @@
 
 namespace App\Modules\Admin\Livewire;
 
-use App\Livewire\Traits\Admin\AdminCrudTrait;
-use App\Livewire\Traits\Admin\CallSwalTrait;
+use App\Modules\Admin\Support\Traits\Admin\AdminCrudTrait;
+use App\Modules\Admin\Support\Traits\Admin\CallSwalTrait;
 use App\Models\OrderCategory;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\On;

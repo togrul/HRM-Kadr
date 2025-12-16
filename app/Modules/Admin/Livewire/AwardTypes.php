@@ -2,7 +2,7 @@
 
 namespace App\Modules\Admin\Livewire;
 
-use App\Livewire\Traits\Admin\CallSwalTrait;
+use App\Modules\Admin\Support\Traits\Admin\CallSwalTrait;
 use App\Models\AwardType;
 use Livewire\Attributes\On;
 use Livewire\Component;

@@ -201,7 +201,7 @@
 - Monitor the new education duration service in production—if recalculation volume is still high, consider pushing the cache behind Laravel’s cache driver rather than in-memory.
 
 ## Modularisation Notes (how to add/maintain modules)
-- Every module has its own provider that loads routes/views with a view prefix (e.g., `orders::`) and registers Livewire aliases via `RegistersLivewireAliases` (`orders.add-order` → `App\Modules\Orders\Livewire\AddOrder`).
+- Every module has its own provider that loads routes/views with a view prefix (e.g., `orders::`) and registers Livewire aliases via a manual `componentMap()` + `registerAliases($map, '<prefix>')` (e.g., `orders.templates.add-template` → `App\Modules\Orders\Livewire\Templates\AddTemplate`).
 - Livewire components live under `app/Modules/<Name>/Livewire`; views under `app/Modules/<Name>/Resources/views`. Blade renders use the module prefix (`@livewire('orders.add-order')`, `return view('orders::livewire.orders.add-order')`).
 - Observers for module-owned caches are registered in that module’s provider (e.g., Admin: city/position/rank-reason observers; Services: setting/menu/role-structure; SidebarStructure: structure). Keep cache invalidation close to the domain.
-- When adding a module: create provider, add to `config/modules.php`, add namespace to `config/livewire.php` discovery, wire aliases via `componentMap()`, and register any observers there. This keeps AppServiceProvider slim and domain concerns isolated.
+- When adding a module: create provider, add to `config/modules.php`, add namespace to `config/livewire.php` discovery, wire aliases via `componentMap()`, and register observers there. This keeps AppServiceProvider slim and domain concerns isolated.

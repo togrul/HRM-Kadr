@@ -33,15 +33,18 @@ class BusinessTripsServiceProvider extends ServiceProvider
         $this->registerAliases($this->componentMap(), 'business-trips');
     }
 
+    protected function registerPolicies(): void
+    {
+        Gate::policy(\App\Models\PersonnelBusinessTrip::class, \App\Modules\BusinessTrips\Policies\BusinessTripPolicy::class);
+    }
+
     protected function componentMap(): array
     {
         return [
             'list' => \App\Modules\BusinessTrips\Livewire\BusinessTrips::class,
+            'add-trip' => \App\Modules\BusinessTrips\Livewire\AddBusinessTrip::class,
+            'edit-trip' => \App\Modules\BusinessTrips\Livewire\EditBusinessTrip::class,
+            'delete-trip' => \App\Modules\BusinessTrips\Livewire\DeleteBusinessTrip::class,
         ];
-    }
-
-    protected function registerPolicies(): void
-    {
-        Gate::policy(\App\Models\PersonnelBusinessTrip::class, \App\Modules\BusinessTrips\Policies\BusinessTripPolicy::class);
     }
 }
