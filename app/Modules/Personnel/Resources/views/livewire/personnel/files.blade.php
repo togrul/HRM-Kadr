@@ -32,12 +32,12 @@
 
                 <div class="flex items-center justify-start space-x-4">
                     <span class="font-semibold text-gray-500">{{ $key + 1 }}</span>
-                     <span class="flex items-center justify-center w-10 h-10 p-2 rounded-lg bg-teal-50">
-                        <svg class="w-6 h-6 text-teal-500" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                     <span class="flex items-center justify-center w-10 h-10 p-2 rounded-lg bg-slate-200">
+                        <svg class="w-6 h-6 text-slate-600" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                           <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"></path>
                         </svg>
                     </span>
-                    <a target="_blank" class="font-medium text-blue-500" href="{{ $route }}">{{ $file['filename'] }}</a>
+                    <a target="_blank" class="font-medium text-blue-600 underline" href="{{ $route }}">{{ $file['filename'] }}</a>
                 </div>
                 <button
                     onclick="confirm('Are you sure you want to remove this data?') || event.stopImmediatePropagation()"

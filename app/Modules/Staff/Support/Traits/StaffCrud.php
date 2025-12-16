@@ -284,7 +284,7 @@ trait StaffCrud
 
         if ($field === 'total') {
             $this->recalculateVacant($index, (int) $value);
-
+            $this->recalculateFilledCounts($index);
             return;
         }
 
@@ -310,5 +310,6 @@ trait StaffCrud
 
             $this->recalculateFilledCounts($index);
         }
+        
     }
 }
