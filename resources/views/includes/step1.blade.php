@@ -287,6 +287,7 @@
                     class="w-full"
                     wire:model.live="personalForm.personnel.structure_id"
                     :model="$this->structureOptions"
+                    :disabled="!empty($personnelModel)"
                 >
                     <x-livewire-input
                         mode="gray"
@@ -312,6 +313,7 @@
                     class="w-full"
                     wire:model.live="personalForm.personnel.position_id"
                     :model="$this->positionOptions"
+                    :disabled="!empty($personnelModel)"
                 >
                     <x-livewire-input
                         mode="gray"

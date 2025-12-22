@@ -24,6 +24,7 @@
     placeholder: @js($placeholder),
     uid: @js($uid),
     isOpen: false,
+    isDisabled: @js((bool) $disabled),
     currentValue: null,
     selectedCache: { id: null, label: '' },
     initialSelectedLabel: @js($selectedLabel),
@@ -100,7 +101,10 @@
       this.isOpen = false;
     },
 
-    toggle(){ this.isOpen = !this.isOpen; },
+    toggle(){
+      if (this.isDisabled) return;
+      this.isOpen = !this.isOpen;
+    },
   }"
   @click.window="if (!$el.contains($event.target)) isOpen = false"
   @keydown.escape.window="isOpen = false"
@@ -113,8 +117,9 @@
   <div class="relative mt-1">
     <button
       type="button" id="{{ $uid }}-button"
-      class="relative w-full py-2 pl-3 pr-10 text-left rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm {{ $bg }}"
+      class="relative w-full py-2 pl-3 pr-10 text-left rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm {{ $bg }} {{ $disabled ? 'opacity-60 cursor-not-allowed' : '' }}"
       :aria-expanded="isOpen" aria-labelledby="{{ $labelId }}"
+      :disabled="isDisabled"
       @click="toggle()"
     >
       <span class="flex items-center">
@@ -128,7 +133,7 @@
     </button>
 
     <ul
-      x-show="isOpen" x-transition.opacity.duration.100ms x-cloak
+      x-show="isOpen && !isDisabled" x-transition.opacity.duration.100ms x-cloak
       class="absolute z-10 w-full px-3 py-2 mt-1 space-y-2 overflow-auto text-base bg-white rounded-md shadow-xl max-h-56 focus:outline-none sm:text-sm"
     >
       {{-- slot: search input --}}
@@ -139,6 +144,12 @@
           @click="select(null, placeholder)">
         <div class="flex items-center">
           <span class="block ml-3 truncate"> {{ $placeholder }} </span>
+          <span
+            x-show="currentValue === null"
+            class="absolute inset-y-0 right-0 flex items-center pr-4 text-blue-600"
+          >
+            ✓
+          </span>
         </div>
       </li>
 
@@ -150,6 +161,12 @@
         >
           <div class="flex items-center">
             <span class="block ml-3 truncate">{{ data_get($opt,'label') }}</span>
+            <span
+              x-show="toId(currentValue) === toId('{{ data_get($opt,'id') }}')"
+              class="absolute inset-y-0 right-0 flex items-center pr-4 text-blue-600"
+            >
+              ✓
+            </span>
           </div>
         </li>
       @endforeach
