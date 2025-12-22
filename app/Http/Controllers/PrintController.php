@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Personnel;
+use App\Helpers\UsefulHelpers;
 use App\Services\WordSuffixService;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
@@ -90,7 +91,7 @@ class PrintController extends Controller
                     ->sortBy(fn ($service) => optional($service->start_date ?? $service->end_date)?->timestamp ?? 0)
                     ->map(function ($service) use($suffixService) { 
                       return [
-                        'location' => $service->location . '-' . $suffixService->getMilitarySuffix($service->location). ' müddətli həqiqi hərbi xidmətdə',
+                        'location' => $service->location ? $service->location . '-' . $suffixService->getMilitarySuffix($service->location). ' müddətli həqiqi hərbi xidmətdə' : null,
                         'start_date' => optional($service->start_date)?->format('d.m.Y'),
                         'end_date' => optional($service->end_date)?->format('d.m.Y'),
                       ];
@@ -103,7 +104,7 @@ class PrintController extends Controller
                     ->sortBy(fn ($activity) => optional($activity->join_date ?? $activity->leave_date)?->timestamp ?? 0)
                     ->map(function ($activity) use ($suffixService, $hasActiveDisposal) {
                         $company = $suffixService->getStructureSuffix(trim($activity->company_name), false, true, false);
-                        $position = trim($activity->position) . " {$hasActiveDisposal}" ;
+                        $position = trim($activity->position_label) ;
                         $structureText = trim(implode(' ', array_filter([$company, $position])));
 
                         return [
@@ -139,7 +140,9 @@ class PrintController extends Controller
             'awards_count' => $personnel->awards_count > 0 ? ($personnel->awards_count < 10 ? '0' . $personnel->awards_count : $personnel->awards_count) . ' dəfə' : 'Mükafatlandırılmayıb.',
             'punishments_count' => $personnel->punishments_count > 0 ? ($personnel->punishments_count < 10 ? '0' . $personnel->punishments_count : $personnel->punishments_count) . 'dəfə' : "Cəzalandırılmayıb.",
             'family_status' => $personnel->idDocuments?->is_married ? 'Evli.' : 'Subay',
-            'address' => $personnel->residental_address,
+            'residental_address' => $personnel->residental_address,
+            'registered_address' => $personnel->registered_address,
+            'similarity_percentage' => app(UsefulHelpers::class)->getSimilarityPercentage($personnel->residental_address ?? '', $personnel->registered_address ?? ''),
             'service_history' => $serviceHistory,
             'totalCountLabor' => collect($serviceHistory)->flatten(1)->count(),
             'hasActiveDisposal' => $hasActiveDisposal,

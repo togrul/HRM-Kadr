@@ -232,10 +232,13 @@
 </head>
 
 <body>
+    <img src="{{ asset('assets/images/gerb.png') }}" alt="gerb" style="width: 100%;position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.1; z-index: 0;filter:grayscale(100);">
+
     <div class="container">
         <div class="header">
             <div></div>
             <div class="flex-col-center">
+                {{-- <img src="{{ asset('assets/images/gerb.png') }}" alt="gerb" style="width: 64px;"> --}}
                 <h1 class="title">
                     {{ $cvData['rank'] ?? '' }}
                     <br />
@@ -316,7 +319,12 @@
                 Ünvan:
             </div>
             <div class="info-value">
-                {{ $cvData['address'] ?? '' }}
+                @if($cvData['similarity_percentage'] > 90)
+                  {{ $cvData['residental_address'] ?? '' }}
+                @else
+                  Qeyd: {{ $cvData['registered_address'] ?? '' }} <br>
+                  Yaş: {{ $cvData['residental_address'] ?? '' }}
+                @endif
             </div>
         </div>
 

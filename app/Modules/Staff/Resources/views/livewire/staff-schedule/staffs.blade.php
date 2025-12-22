@@ -1,17 +1,22 @@
-<div class="flex flex-col" x-data x-init="paginator = document.querySelector('span[aria-current=page]>span');
-if (paginator != null) {
-    paginator.classList.add('bg-blue-50', 'text-blue-600')
-}
-Livewire.hook('message.processed', (message, component) => {
-    const paginator = document.querySelector('span[aria-current=page]>span')
-    if (
-        ['gotoPage', 'previousPage', 'nextPage', 'resetFilter'].includes(message.updateQueue[0].payload.method) || ['openSideMenu', 'closeSideMenu', 'staffAdded', 'staffWasDeleted'].includes(message.updateQueue[0].payload.event)
-    ) {
-        if (paginator != null) {
-            paginator.classList.add('bg-green-100', 'text-green-600')
-        }
-    }
-})">
+<div 
+    class="flex flex-col" 
+    x-data 
+    x-init="
+            paginator = document.querySelector('span[aria-current=page]>span');
+            if (paginator != null) {
+                paginator.classList.add('bg-blue-50', 'text-blue-600')
+            }
+            Livewire.hook('message.processed', (message, component) => {
+                const paginator = document.querySelector('span[aria-current=page]>span')
+                if (
+                    ['gotoPage', 'previousPage', 'nextPage', 'resetFilter'].includes(message.updateQueue[0].payload.method) || ['openSideMenu', 'closeSideMenu', 'staffAdded', 'staffWasDeleted'].includes(message.updateQueue[0].payload.event)
+                ) {
+                    if (paginator != null) {
+                        paginator.classList.add('bg-green-100', 'text-green-600')
+                    }
+                }
+            })
+    ">
     {{-- sidebar  --}}
     <x-slot name="sidebar">
         @livewire('structure.sidebar')

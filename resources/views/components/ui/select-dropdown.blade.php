@@ -118,7 +118,7 @@
       @click="toggle()"
     >
       <span class="flex items-center">
-        <span class="block ml-3 font-normal text-neutral-900 truncate" x-text="selectedLabel()">{{ $placeholder }}</span>
+        <span class="block ml-3 font-normal truncate text-neutral-900" x-text="selectedLabel()">{{ $placeholder }}</span>
       </span>
       <span class="absolute inset-y-0 right-0 flex items-center pr-2 ml-3 pointer-events-none">
         <svg class="w-5 h-5 text-neutral-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -135,7 +135,7 @@
       {{ $slot }}
 
       {{-- null/placeholder option --}}
-      <li class="group relative py-2 pl-3 pr-9 cursor-pointer select-none hover:bg-blue-400 bg-neutral-50 rounded-lg"
+      <li class="relative py-2 pl-3 rounded-lg cursor-pointer select-none group pr-9 hover:bg-blue-400 bg-neutral-50"
           @click="select(null, placeholder)">
         <div class="flex items-center">
           <span class="block ml-3 truncate"> {{ $placeholder }} </span>
@@ -145,7 +145,7 @@
       @foreach($model as $idx => $opt)
         <li
           wire:key="{{ $uid }}-{{ data_get($opt,'id') }}"
-          class="group relative py-2 pl-3 pr-9 cursor-pointer select-none hover:bg-blue-400 bg-neutral-50 rounded-lg"
+          class="relative py-2 pl-3 rounded-lg cursor-pointer select-none group pr-9 hover:bg-blue-400 bg-neutral-50"
           @click="select('{{ data_get($opt,'id') }}', '{{ e(data_get($opt,'label')) }}')"
         >
           <div class="flex items-center">

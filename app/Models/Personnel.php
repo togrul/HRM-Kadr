@@ -461,9 +461,41 @@ class Personnel extends Model
     {
         $name = $this->position?->name ?? '';
         if (! $name) return '';
-        $hasDisposal = $this->has_active_disposal ?? $this->hasActiveDisposal()->exists();
 
-        return $hasDisposal ? "{$name} VMİE" : $name;
+        $positionStart = $this->currentWork->join_date ?? $this->join_date ?? Carbon::now();
+        $positionEnd = $this->currentWork->leave_date ?? $this->leave_date ?? Carbon::now();
+
+        return $this->disposalTaggedLabel($name, $positionStart, $positionEnd);
+    }
+
+    /**
+     * Tag a label with VMİE if there is an overlapping disposal in the given period.
+     */
+    public function disposalTaggedLabel(string $label, $periodStart, $periodEnd): string
+    {
+        if ($label === '') {
+            return '';
+        }
+
+        $disposal = $this->relationLoaded('latestDisposal')
+            ? $this->latestDisposal
+            : $this->latestDisposal()->first();
+
+        if (! $disposal) {
+            return $label;
+        }
+
+        $disposalStart = Carbon::parse($disposal->disposal_date);
+        $disposalEnd = $disposal->disposal_end_date
+            ? Carbon::parse($disposal->disposal_end_date)
+            : Carbon::now();
+
+        $posStart = Carbon::parse($periodStart ?? Carbon::now());
+        $posEnd = Carbon::parse($periodEnd ?? Carbon::now());
+
+        $overlaps = $disposalStart < $posEnd && $disposalEnd >= $posStart;
+
+        return $overlaps ? "{$label} VMİE" : $label;
     }
 
     public function educationRequests(): HasMany

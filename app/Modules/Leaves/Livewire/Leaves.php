@@ -177,7 +177,7 @@ class Leaves extends Component
             ->with([
                  'personnel' => fn ($q) => $q
                     ->withStructureTree()   // burada parent zincirini preload eder
-                    ->with('position'),
+                    ->with(['position:id,name', 'latestDisposal']),
                 'leaveType',
                 'status',
                 'latestLog.changedBy'
@@ -199,6 +199,7 @@ class Leaves extends Component
         return $this->statsCache = $base->clone()
             ->join('leave_types as t', 't.id', '=', 'leaves.leave_type_id')
             ->select(
+                'leaves.*',
                 't.name as name',
                 DB::raw('COUNT(*) as count'),
                 DB::raw('SUM(DATEDIFF(ends_at, starts_at) + 1) as total_days')

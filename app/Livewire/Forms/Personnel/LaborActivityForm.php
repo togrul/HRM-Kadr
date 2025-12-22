@@ -72,6 +72,7 @@ class LaborActivityForm extends Form
                     Arr::only($activity->toArray(), array_keys($this->defaultLaborActivity()))
                 );
 
+                $payload['position'] = $activity->position_label;
                 $payload['is_special_service'] = (bool) ($payload['is_special_service'] ?? false);
                 $payload['is_current'] = (bool) ($payload['is_current'] ?? false);
                 $payload['time'] = '12:00';

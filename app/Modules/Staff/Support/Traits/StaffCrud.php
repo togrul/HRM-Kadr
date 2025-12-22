@@ -27,14 +27,23 @@ trait StaffCrud
 
     public ?int $structureId = null;
 
+    /**
+     * Simple per-request caches to avoid repeating lookups.
+     */
+    protected array $positionLabels = [];
+    protected array $structureParents = [];
+    protected array $structureNestedIds = [];
+
     public function rules(): array
     {
+        $positionRule = $this->hidePosition ? 'nullable' : 'required|int|exists:positions,id';
+
         return [
             'staff.*.structure_id' => 'required|int|exists:structures,id',
-            'staff.*.position_id' => ! $this->hidePosition ? 'required|int|exists:positions,id' : '',
-            'staff.*.total' => 'required',
-            'staff.*.filled' => 'required',
-            'staff.*.vacant' => 'required',
+            'staff.*.position_id' => $positionRule,
+            'staff.*.total' => 'required|integer|min:0',
+            'staff.*.filled' => 'required|integer|min:0',
+            'staff.*.vacant' => 'required|integer|min:0',
         ];
     }
 
@@ -62,16 +71,21 @@ trait StaffCrud
             return '---';
         }
 
-        $position = Position::select('name')->find($id);
+        if (! isset($this->positionLabels[$id])) {
+            $this->positionLabels[$id] = Position::whereKey($id)->value('name') ?? '---';
+        }
 
-        return $position?->name ?? '---';
+        return $this->positionLabels[$id];
     }
 
     public function addRow()
     {
         $structureId = $this->staffModel ?? $this->structureId;
 
-        $this->staff[] = [
+        $lastKey = array_key_last($this->staff);
+        $nextKey = is_null($lastKey) ? 0 : $lastKey + 1;
+
+        $this->staff[$nextKey] = [
             'structure_id' => $structureId,
             'position_id' => null,
             'total' => 0,
@@ -83,14 +97,12 @@ trait StaffCrud
             ],
         ];
 
-        $key = array_key_last($this->staff) > 0 ? array_key_last($this->staff) : 0;
-        $this->hidePositionAction($key);
+        $this->hidePositionAction($nextKey);
     }
 
     public function deleteRow($row)
     {
         unset($this->staff[$row]);
-        $this->staff = array_values($this->staff);
     }
 
     public function setData($array_key, $model, $key, $content, $name, $id)
@@ -106,7 +118,8 @@ trait StaffCrud
 
     protected function hidePositionAction($array_key)
     {
-        $parent_id = Structure::where('id', $this->staff[$array_key]['structure_id'])->value('parent_id');
+        $structureId = $this->staff[$array_key]['structure_id'] ?? null;
+        $parent_id = $structureId ? $this->resolveParentId((int) $structureId) : null;
         $this->hidePosition = empty($parent_id);
     }
 
@@ -263,13 +276,21 @@ trait StaffCrud
 
     protected function resolveStructureTreeIds(int $structureId): array
     {
-        $structure = Structure::with('subs')->find($structureId);
-
-        if (! $structure) {
-            return [$structureId];
+        if (! isset($this->structureNestedIds[$structureId])) {
+            $structure = Structure::with('subs')->find($structureId);
+            $this->structureNestedIds[$structureId] = $structure ? $structure->getAllNestedIds() : [$structureId];
         }
 
-        return $structure->getAllNestedIds();
+        return $this->structureNestedIds[$structureId];
+    }
+
+    protected function resolveParentId(int $structureId): ?int
+    {
+        if (! array_key_exists($structureId, $this->structureParents)) {
+            $this->structureParents[$structureId] = Structure::whereKey($structureId)->value('parent_id');
+        }
+
+        return $this->structureParents[$structureId];
     }
 
     protected function handleStaffPropertyUpdate(string $propertyName, $value): void

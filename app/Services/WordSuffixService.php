@@ -66,11 +66,11 @@ class WordSuffixService
 
     public function getMilitarySuffix(string $text): string
     {
-        [$lastChar,] = $this->checkLastCharAndVowel(text: $text);
-
+        [$lastChar,] = $this->checkLastCharAndVowel(text: trim($text));
         return match (Str::lower($lastChar)) {
-            'q', 'o', 'a' => 'da',
+            'o', 'a' => 'da',
             'n', 'x', 'm' => 'də',
+            default => 'də',
         };
     }
 
@@ -84,8 +84,9 @@ class WordSuffixService
             }
             [$lastChar,] = $this->checkLastCharAndVowel(text: $text, offset: -2);
         }
-
-        return match ($lastChar) {
+        $prefix = ($lastChar === strtoupper($lastChar)) ? '-' : '';
+        
+        $suffix = match ($lastChar) {
             'a', 'ı' => $isVowel ? 'nın' : 'ın',
             'i', 'ə', 'e' => $isVowel ? 'nin' : 'in',
             'u', 'o' => $isVowel ? 'nun' : 'un',
@@ -93,7 +94,10 @@ class WordSuffixService
             '1' => 'in',
             '2' => 'nin',
             '3' => 'ün',
+            default => 'nin',
         };
+        
+        return "{$prefix}{$suffix}";
     }
 
     public function getNumberSuffix(int $year): string

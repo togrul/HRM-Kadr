@@ -86,4 +86,10 @@ class UsefulHelpers
     {
         return array_combine(array_keys($array), array_column($array, 'value'));
     }
+
+    public static function getSimilarityPercentage($string1, $string2): float
+    {
+        similar_text($string1, $string2, $percent);
+        return $percent;
+    }
 }

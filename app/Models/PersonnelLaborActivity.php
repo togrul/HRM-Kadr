@@ -6,6 +6,7 @@ use App\Traits\DateCastTrait;
 use App\Traits\PersonnelTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -49,4 +50,25 @@ class PersonnelLaborActivity extends Model
         'leave_date' => self::FORMAT_CAST,
         'order_date' => self::FORMAT_CAST,
     ];
+
+    public function getPositionLabelAttribute(): string
+    {
+        $label = (string) ($this->position ?? '');
+        if ($label === '') {
+            return '';
+        }
+
+        $personnel = $this->relationLoaded('personnel')
+            ? $this->personnel
+            : $this->personnel()->with('latestDisposal')->first();
+
+        if (! $personnel) {
+            return $label;
+        }
+
+        $start = $this->join_date ? Carbon::parse($this->join_date) : Carbon::now();
+        $end = $this->leave_date ? Carbon::parse($this->leave_date) : Carbon::now();
+
+        return $personnel->disposalTaggedLabel($label, $start, $end);
+    }
 }

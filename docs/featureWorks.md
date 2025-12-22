@@ -1,16 +1,13 @@
-# Feature/Module Toggle Plan
+Özet (düzeltme planı, henüz kod değiştirmedim)
 
-## Mevcut altyapı
-- `config/profiles.php` ile profil bazlı modül/feature seti (APP_PROFILE ile seçiliyor). `ProfileState` → `ModuleState`/`FeatureState`.
-- Blade/PHP: `module_enabled()` / `feature_enabled()` helper ve `@module` / `@feature` direktifleri.
-- Modül migration path’leri ModuleServiceProvider üzerinden açık modüller için otomatik yükleniyor.
-
-## Yapılacaklar (askıda)
-- UI/Validation koşulları: ranks, rank_categories, service_cards, weapons, contracts, pension_cards, disposal, military_service bloklarını `@feature(...)` / `feature_enabled(...)` ile koşullandırmak; validation’da required/nullable ayarlamak.
-- Migration guard stratejisi: Opsiyonel tablolar için (ranks/servis kartları vs.) profil kapalıysa migration’ı koşullu çalıştırma veya path’i yüklememe kararı.
-- Menü/cache temizliği: Profil/modül toggle sonrası menü cache’lerini temizleme akışı.
-- Locked modüller: Admin/Services gibi çekirdek modüller için “kapatılamaz” meta eklemek.
-
-## Notlar
-- Military/profiles: `military` profili her şeyi açık; `public`/`private` profilleri rank/rank_categories/service_cards/weapons/military_service/contract/pension/disposal kapalı, vacation_tracking ve education açık.
-- Migration taşıma: Orders/Staff/Candidates/Leaves/BusinessTrips/Vacation/Notifications/Personnel migration’ları modül klasörlerinde; Admin/Services root’ta.
+Kök Livewire kalıntıları: app/Livewire altında hâlâ yardımcılar/traitler var (ör. ComponentCrud, TemplateCrud, DropdownConstructTrait). Bunlar ortak kalacaksa “core” altında toplanmalı; module‑spesifik olanlar (Filter/Confirmation vb.) için kök kopya kalmadığından emin olmak adına kısa bir tarama yapman iyi olur.
+SidebarStructure/UI modüllerini birleştirme: Tek “Core/UI” modülü yaparsan alias sayısı düşer, her zaman açık olması garanti olur, paylaşılan Blade parçaları tek yerde toplanır. Kapatılabilir modül mantığına ihtiyacın yoksa, birleşik ve değişmez bir “core” modülü yönetimi basitleştirir.
+Migrations: Cross‑cutting tablolar (users/roles/permissions) hâlâ kök migration’larda; modül kapatıldığında bağımlı tablo eksikliği riski olmaması için bunları “core” veya “services” gibi kapanmayacak bir pakette tutmak doğru. Modül spesifik tablolar ilgili module migrations dizininde kalmalı.
+Seeders: Tüm seed’ler hâlâ database/seeders’da. Modül bazlı seed dizinlerine (Modules/<Name>/Database/Seeders) bölüp DatabaseSeeder’dan modül durumuna göre çağırırsan toggle senaryosunda temiz kalır.
+Routes: print.php gibi kök dosyalar varsa ilgili modüle (Personnel/Orders) alınabilir; kök rotalar daha da sadeleşir.
+config/livewire.php: Artık alias’lar manuel componentMap ile kayıtlı; discovery zorunlu değil. İstersen yalnızca App\Livewire + ihtiyaç duyduğun modül namespace’lerini bırakıp temizleyebilirsin.
+config/modules.php bağımlılık notu: Kapanması desteklenmeyen modüller (users/permissions vb.) için “kapatılamaz” uyarısı veya dependency listesi eklemek faydalı olur; böylece toggle ile tablo/özellik eksikliği yaşanmaz.
+Personnel/Order ağır modeller: Sık kullanılan label/id map’lerini (structures, positions, ranks) kısa süreli cache veya preload ile beslemek (zaten bazı yerlerde yapılıyor) withRecursive maliyetini düşürür. Eager load listelerinde gerçekten kullanılan kolonlarla sınırlı kalın.
+Staff doldurma hesapları: Liste tarafı hâlâ satır satır count atıyor; tek aggregate map (structure_id+position_id → filled) ya da kısa süreli cache ile DB turu azaltılabilir. Edit tarafında state’i yeniden indislememen iyi; sadece aggregate map eklemek performansı net iyileştirir.
+Shared Blade bileşenleri: notification/dynamic-input/radio-tree gibi ortak komponentleri “ui::components” prefix’iyle modülerleştirmek, kaynakları tek yerde tutup çakışmaları önler; şart değil ama bakım kolaylığı sağlar.
+İstersen yukarıdaki maddeleri sırayla uygulayabiliriz; ilk adım olarak seed/migration temizliği ve Staff doldurma aggregate’ı en hızlı kazanım sağlar.
