@@ -462,19 +462,28 @@ class Personnel extends Model
         $name = $this->position?->name ?? '';
         if (! $name) return '';
 
-        $positionStart = $this->currentWork->join_date ?? $this->join_date ?? Carbon::now();
-        $positionEnd = $this->currentWork->leave_date ?? $this->leave_date ?? Carbon::now();
+        $currentWork = $this->relationLoaded('currentWork') ? $this->currentWork : $this->currentWork()->first();
+        if (! $currentWork || ! $currentWork->is_current || $currentWork->leave_date) {
+            return $name;
+        }
+        $name = $currentWork->position ?? $name;
+        $positionStart = $currentWork->join_date ?? $this->join_date ?? Carbon::now();
 
-        return $this->disposalTaggedLabel($name, $positionStart, $positionEnd);
+        return $this->disposalTaggedLabel($name, $positionStart, true);
     }
 
     /**
      * Tag a label with VMİE if there is an overlapping disposal in the given period.
      */
-    public function disposalTaggedLabel(string $label, $periodStart, $periodEnd): string
+    public function disposalTaggedLabel(string $label, $periodStart, bool $isCurrent = true): string
     {
         if ($label === '') {
             return '';
+        }
+
+        // Only current/active position rows should be tagged.
+        if (! $isCurrent) {
+            return $label;
         }
 
         $disposal = $this->relationLoaded('latestDisposal')
@@ -485,15 +494,17 @@ class Personnel extends Model
             return $label;
         }
 
+        $now = Carbon::now();
+
         $disposalStart = Carbon::parse($disposal->disposal_date);
         $disposalEnd = $disposal->disposal_end_date
             ? Carbon::parse($disposal->disposal_end_date)
-            : Carbon::now();
+            : $now;
 
-        $posStart = Carbon::parse($periodStart ?? Carbon::now());
-        $posEnd = Carbon::parse($periodEnd ?? Carbon::now());
+        $posStart = Carbon::parse($periodStart ?? $now);
+        $posEnd = $now;
 
-        $overlaps = $disposalStart < $posEnd && $disposalEnd >= $posStart;
+        $overlaps = $disposalStart < $posEnd && $disposalEnd > $posStart;
 
         return $overlaps ? "{$label} VMİE" : $label;
     }

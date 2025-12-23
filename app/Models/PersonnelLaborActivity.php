@@ -67,8 +67,21 @@ class PersonnelLaborActivity extends Model
         }
 
         $start = $this->join_date ? Carbon::parse($this->join_date) : Carbon::now();
-        $end = $this->leave_date ? Carbon::parse($this->leave_date) : Carbon::now();
 
-        return $personnel->disposalTaggedLabel($label, $start, $end);
+        $isCurrent = (bool) ($this->is_current ?? false);
+        if (! $isCurrent || $this->leave_date) {
+            return $label;
+        }
+
+        // Tag only if this activity is the person's current work record.
+        $currentWork = $personnel->relationLoaded('currentWork')
+            ? $personnel->currentWork
+            : $personnel->currentWork()->first();
+
+        if (! $currentWork || $currentWork->id !== $this->id) {
+            return $label;
+        }
+
+        return $personnel->disposalTaggedLabel($label, $start, true);
     }
 }

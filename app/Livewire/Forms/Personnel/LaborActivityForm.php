@@ -72,7 +72,8 @@ class LaborActivityForm extends Form
                     Arr::only($activity->toArray(), array_keys($this->defaultLaborActivity()))
                 );
 
-                $payload['position'] = $activity->position_label;
+                $payload['position'] = $activity->position;
+                $payload['position_label'] = $activity->position_label;
                 $payload['is_special_service'] = (bool) ($payload['is_special_service'] ?? false);
                 $payload['is_current'] = (bool) ($payload['is_current'] ?? false);
                 $payload['time'] = '12:00';
@@ -110,6 +111,20 @@ class LaborActivityForm extends Form
         }
 
         unset($entry['time']);
+        unset($entry['position_label']);
+
+        if ($entry['is_current']) {
+            // Only one current entry allowed; unset others and end the previous current at new start date
+            $this->laborActivityList = collect($this->laborActivityList)
+                ->map(function ($item) use ($entry) {
+                    if (! empty($item['is_current'])) {
+                        $item['leave_date'] = $entry['join_date'] ?? $item['leave_date'] ?? null;
+                    }
+                    $item['is_current'] = false;
+                    return $item;
+                })
+                ->all();
+        }
 
         $this->laborActivityList[] = $entry;
         $this->resetLaborActivity();
@@ -174,7 +189,7 @@ class LaborActivityForm extends Form
     public function laborActivitiesForPersistence(): array
     {
         return collect($this->laborActivityList ?? [])
-            ->map(fn ($activity) => Arr::except($activity, ['time']))
+            ->map(fn ($activity) => Arr::except($activity, ['time', 'position_label']))
             ->all();
     }
 

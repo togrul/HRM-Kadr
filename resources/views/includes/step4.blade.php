@@ -122,7 +122,7 @@
                 </span>
                 @endif
                 <span>-</span>
-                <span class="text-sm font-medium text-slate-500">{{ $laModel['position'] }}</span>
+                <span class="text-sm font-medium text-slate-500">{{ $laModel['position_label'] ?? ($laModel['position'] ?? '') }}</span>
             </div>
             <div class="grid w-full grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-4">
                 <div class="flex flex-col space-y-1">
