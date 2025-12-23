@@ -12,8 +12,9 @@
             @module($moduleName)
             @can($menuItem->permission?->name)
                 <a href="{{ route($menuItem->url) }}" wire:navigate @class([
-                    "bg-$menuItem->color-100 rounded-lg shadow-sm px-4 py-1 flex items-center space-x-2 cursor-pointer transition-all duration-300 hover:bg-$menuItem->color-200",
-                    "border border-$menuItem->color-400" => request()->routeIs($menuItem->url),
+                    "bg-$menuItem->color-100 border-2 rounded-lg shadow-sm px-4 py-1 flex items-center space-x-2 cursor-pointer transition-all duration-300 hover:bg-$menuItem->color-200",
+                    "border-$menuItem->color-400" => request()->routeIs($menuItem->url),
+                    "border-transparent" => !request()->routeIs($menuItem->url)
                 ])>
                     {!! $menuItem->icon !!}
                     <span class="text-sm font-medium text-gray-700 uppercase">{{ __($menuItem->name) }}</span>

@@ -12,7 +12,7 @@ trait NormalizesDropdownPayloads
      * @param  array<string,mixed>  $array
      * @param  array<int,string>|null  $_castedDates
      * @return array<string,mixed>
-     */
+    */
     protected function modifyArray($array, $_castedDates = null)
     {
         $filteredArray = array_filter($array, function ($key) {

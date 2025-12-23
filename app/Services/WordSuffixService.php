@@ -7,23 +7,38 @@ use Illuminate\Support\Str;
 class WordSuffixService
 {
     private array $vowels = ['a', 'ı', 'u', 'o', 'i', 'ə', 'ü', 'e', 'ö'];
+    private array $vowelLookup;
+
+    public function __construct()
+    {
+        $this->vowelLookup = array_flip($this->vowels);
+    }
 
     private function checkLastCharAndVowel(string $text, int $offset = -1): array
     {
         $lastChar = mb_substr($text, $offset, 1);
-        $isVowel = in_array($lastChar, $this->vowels);
+        $isVowel = isset($this->vowelLookup[$lastChar]);
 
         return [
             $lastChar, $isVowel,
         ];
     }
 
+    private function resolveLastChar(string $text, int $primaryOffset = -1, int $fallbackOffset = -2, bool $checkSpecialChar = false): array
+    {
+        [$lastChar,$isVowel] = $this->checkLastCharAndVowel(text: $text, offset: $primaryOffset);
+        if (!$isVowel) {
+            if ($checkSpecialChar) {
+                $text = $this->checkSpecialChar($lastChar, $text);
+            }
+            [$lastChar,] = $this->checkLastCharAndVowel(text: $text, offset: $fallbackOffset);
+        }
+        return [$lastChar, $isVowel];
+    }
+
     private function determineSuffix(string $text): string
     {
-        [$lastChar,$isVowel] = $this->checkLastCharAndVowel(text: $text);
-        if (! $isVowel) {
-            [$lastChar,] = $this->checkLastCharAndVowel(text: $text, offset: -2);
-        }
+        [$lastChar,$isVowel] = $this->resolveLastChar(text: $text);
 
         return match ($lastChar) {
             'a', 'ı' => $isVowel ? 'sı' : 'ı',
@@ -35,11 +50,7 @@ class WordSuffixService
 
     private function determineSurnameSuffix(string $text): string
     {
-        [$lastChar,$isVowel] = $this->checkLastCharAndVowel(text: $text);
-
-        if (! $isVowel) {
-            [$lastChar,] = $this->checkLastCharAndVowel(text: $text, offset: -2);
-        }
+        [$lastChar,$isVowel] = $this->resolveLastChar(text: $text);
 
         return match ($lastChar) {
             'a', 'ı', 'u', 'o' => $isVowel ? 'ya' : 'a',
@@ -49,11 +60,7 @@ class WordSuffixService
 
      public function educationSuffix(string $text): string
     {
-        [$lastChar,$isVowel] = $this->checkLastCharAndVowel(text: $text);
-
-        if (! $isVowel) {
-            [$lastChar,] = $this->checkLastCharAndVowel(text: $text, offset: -2);
-        }                                       
+        [$lastChar,$isVowel] = $this->resolveLastChar(text: $text);                                 
 
         return match ($lastChar) {
             'a', 'ı' => $isVowel ? 'sını' : 'ını',
@@ -74,16 +81,17 @@ class WordSuffixService
         };
     }
 
+    private function checkSpecialChar(string $lastChar, string $text)
+    {
+         if ($lastChar === 'k') {
+            $text = str_replace($lastChar, 'y', $text);
+         }
+         return $text;
+    }
+
     private function determineStructureSuffix(string $text): string
     {
-        [$lastChar,$isVowel] = $this->checkLastCharAndVowel(text: $text);
-
-        if (! $isVowel) {
-            if ($lastChar === 'k') {
-                $text = str_replace($lastChar, 'y', $text);
-            }
-            [$lastChar,] = $this->checkLastCharAndVowel(text: $text, offset: -2);
-        }
+        [$lastChar,$isVowel] = $this->resolveLastChar(text: $text, checkSpecialChar: true);
         $prefix = ($lastChar === strtoupper($lastChar)) ? '-' : '';
         
         $suffix = match ($lastChar) {
