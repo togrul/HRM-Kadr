@@ -63,20 +63,34 @@ class LaborActivityForm extends Form
             return;
         }
 
-        $personnel->loadMissing(['laborActivities', 'ranks.rank', 'ranks.rankReason']);
+        $personnel->loadMissing([
+            'laborActivities',
+            'latestDisposal',
+            'currentWork',
+            'ranks.rank',
+            'ranks.rankReason',
+        ]);
 
         $this->laborActivityList = $personnel->laborActivities
-            ->map(function ($activity) {
+            ->map(function ($activity) use ($personnel) {
                 $payload = array_replace(
                     $this->defaultLaborActivity(),
-                    Arr::only($activity->toArray(), array_keys($this->defaultLaborActivity()))
+                    Arr::only($activity->getAttributes(), array_keys($this->defaultLaborActivity()))
                 );
 
                 $payload['position'] = $activity->position;
-                $payload['position_label'] = $activity->position_label;
+                $payload['position_id'] = $activity->position_id ?? null;
+                $payload['structure_id'] = $activity->structure_id ?? null;
                 $payload['is_special_service'] = (bool) ($payload['is_special_service'] ?? false);
                 $payload['is_current'] = (bool) ($payload['is_current'] ?? false);
                 $payload['time'] = '12:00';
+
+                $start = $activity->join_date ? \Carbon\Carbon::parse($activity->join_date) : \Carbon\Carbon::now();
+                $payload['position_label'] = $personnel->disposalTaggedLabel(
+                    $payload['position'],
+                    $start,
+                    $payload['is_current'] && empty($activity->leave_date)
+                );
 
                 return $payload;
             })

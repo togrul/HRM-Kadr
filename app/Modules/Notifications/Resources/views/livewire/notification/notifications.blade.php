@@ -9,7 +9,7 @@
             Livewire.dispatch('getNotifications')
         }
     "
-            class="inline-flex justify-center w-full px-3 py-2 text-sm font-medium text-blue-500 transition duration-300 ease-in bg-transparent rounded-lg hover:bg-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white focus:bg-white focus:ring-white"
+        class="inline-flex justify-center w-full px-3 py-2 text-sm font-medium text-blue-500 transition duration-300 ease-in bg-transparent rounded-lg hover:bg-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white focus:bg-white focus:ring-white"
     >
         <svg  fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 font-normal text-slate-500">
             <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0M3.124 7.5A8.969 8.969 0 015.292 3m13.416 0a8.969 8.969 0 012.168 4.5" />
