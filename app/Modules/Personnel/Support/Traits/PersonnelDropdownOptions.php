@@ -530,58 +530,36 @@ trait PersonnelDropdownOptions
     #[Computed]
     public function structureOptions(): array
     {
-        $base = Structure::query()
-            ->select('id', DB::raw('name as label'))
-            ->accessible()
-            ->orderBy('level')
-            ->orderBy('code');
+        return $this->structureOptionsFor(
+            searchKey: 'searchStructure',
+            selectedId: $this->dropdownSelected('structure_id')
+        );
+    }
 
-        $search = $this->dropdownSearch('searchStructure');
-        $selected = $this->dropdownSelected('structure_id');
-
-        if ($search === '') {
-            return $this->cachedOptionsWithSelected(
-                cacheKey: 'personnel:structures',
-                base: $base,
-                selectedId: $selected,
-                limit: 80
-            );
-        }
-
-        return $this->optionsWithSelected(
-            base: $base,
-            searchCol: 'name',
-            searchTerm: $search,
-            selectedId: $selected,
-            limit: 80
+    #[Computed]
+    public function laborStructureOptions(): array
+    {
+        return $this->structureOptionsFor(
+            searchKey: 'searchLaborStructure',
+            selectedId: $this->laborSelected('structure_id')
         );
     }
 
     #[Computed]
     public function positionOptions(): array
     {
-        $base = Position::query()
-            ->select('id', DB::raw('name as label'))
-            ->orderBy('name');
+        return $this->positionOptionsFor(
+            searchKey: 'searchPosition',
+            selectedId: $this->dropdownSelected('position_id')
+        );
+    }
 
-        $search = $this->dropdownSearch('searchPosition');
-        $selected = $this->dropdownSelected('position_id');
-
-        if ($search === '') {
-            return $this->cachedOptionsWithSelected(
-                cacheKey: 'personnel:positions',
-                base: $base,
-                selectedId: $selected,
-                limit: 80
-            );
-        }
-
-        return $this->optionsWithSelected(
-            base: $base,
-            searchCol: 'name',
-            searchTerm: $search,
-            selectedId: $selected,
-            limit: 80
+    #[Computed]
+    public function laborPositionOptions(): array
+    {
+        return $this->positionOptionsFor(
+            searchKey: 'searchLaborPosition',
+            selectedId: $this->laborSelected('position_id')
         );
     }
 
@@ -732,6 +710,69 @@ trait PersonnelDropdownOptions
         }
 
         return null;
+    }
+
+    protected function laborSelected(string $key): int|string|null
+    {
+        if (! property_exists($this, 'laborActivityForm') || ! $this->laborActivityForm) {
+            return null;
+        }
+
+        return data_get($this->laborActivityForm->laborActivity ?? [], $key);
+    }
+
+    protected function structureOptionsFor(string $searchKey, int|string|null $selectedId): array
+    {
+        $base = Structure::query()
+            ->select('id', DB::raw('name as label'))
+            ->accessible()
+            ->orderBy('level')
+            ->orderBy('code');
+
+        $search = $this->dropdownSearch($searchKey);
+
+        if ($search === '') {
+            return $this->cachedOptionsWithSelected(
+                cacheKey: 'personnel:structures',
+                base: $base,
+                selectedId: $selectedId,
+                limit: 80
+            );
+        }
+
+        return $this->optionsWithSelected(
+            base: $base,
+            searchCol: 'name',
+            searchTerm: $search,
+            selectedId: $selectedId,
+            limit: 80
+        );
+    }
+
+    protected function positionOptionsFor(string $searchKey, int|string|null $selectedId): array
+    {
+        $base = Position::query()
+            ->select('id', DB::raw('name as label'))
+            ->orderBy('name');
+
+        $search = $this->dropdownSearch($searchKey);
+
+        if ($search === '') {
+            return $this->cachedOptionsWithSelected(
+                cacheKey: 'personnel:positions',
+                base: $base,
+                selectedId: $selectedId,
+                limit: 80
+            );
+        }
+
+        return $this->optionsWithSelected(
+            base: $base,
+            searchCol: 'name',
+            searchTerm: $search,
+            selectedId: $selectedId,
+            limit: 80
+        );
     }
 
     protected function currentAwardSelection()

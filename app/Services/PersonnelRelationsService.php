@@ -37,7 +37,8 @@ class PersonnelRelationsService
         $this->createMultipleRelatedData($personnel, 'passports', PersonnelPassports::class, $payloads['passports'] ?? []);
         $this->createRelatedData($personnel, 'education', PersonnelEducation::class, $payloads['education'] ?? [], $completedSteps);
         $this->createMultipleRelatedData($personnel, 'extraEducations', PersonnelExtraEducation::class, $payloads['extra_educations'] ?? []);
-        $this->createMultipleRelatedData($personnel, 'laborActivities', PersonnelLaborActivity::class, $payloads['labor_activities'] ?? []);
+        $laborActivities = $this->prepareLaborActivities($payloads['labor_activities'] ?? [], $personnel);
+        $this->createMultipleRelatedData($personnel, 'laborActivities', PersonnelLaborActivity::class, $laborActivities);
         $this->createMultipleRelatedData($personnel, 'ranks', PersonnelRank::class, $payloads['ranks'] ?? []);
         $this->createMultipleRelatedData($personnel, 'military', PersonnelMilitaryService::class, $payloads['military'] ?? []);
         $this->createMultipleRelatedData($personnel, 'injuries', PersonnelInjury::class, $payloads['injuries'] ?? []);
@@ -61,7 +62,8 @@ class PersonnelRelationsService
         $this->handleAssociations($personnel, relation: 'passports', list: $payloads['passports'] ?? [], uniqueKeys: 'serial_number', model: PersonnelPassports::class);
         $this->handleSingleAssociation($personnel, relation: 'education', data: $payloads['education'] ?? [], model: PersonnelEducation::class);
         $this->handleAssociations($personnel, relation: 'extraEducations', list: $payloads['extra_educations'] ?? [], uniqueKeys: 'diplom_no', model: PersonnelExtraEducation::class);
-        $this->handleAssociations($personnel, relation: 'laborActivities', list: $payloads['labor_activities'] ?? [], uniqueKeys: 'join_date', model: PersonnelLaborActivity::class);
+        $laborActivities = $this->prepareLaborActivities($payloads['labor_activities'] ?? [], $personnel);
+        $this->handleAssociations($personnel, relation: 'laborActivities', list: $laborActivities, uniqueKeys: 'join_date', model: PersonnelLaborActivity::class);
         $this->handleAssociations($personnel, relation: 'ranks', list: $payloads['ranks'] ?? [], uniqueKeys: 'given_date', model: PersonnelRank::class, tabelCheck: true);
         $this->handleAssociations($personnel, relation: 'military', list: $payloads['military'] ?? [], uniqueKeys: 'start_date', model: PersonnelMilitaryService::class, tabelCheck: true);
         $this->handleAssociations($personnel, relation: 'injuries', list: $payloads['injuries'] ?? [], uniqueKeys: ['description', 'date_time'], model: PersonnelInjury::class, tabelCheck: true);
@@ -188,6 +190,61 @@ class PersonnelRelationsService
             ->get()
             ->each
             ->delete();
+    }
+
+    /**
+     * Normalize labor activities and sync current position/structure IDs onto personnel
+     * when the entry comes from list selection.
+     *
+     * @param  array<int, array<string, mixed>>  $list
+     * @return array<int, array<string, mixed>>
+     */
+    private function prepareLaborActivities(array $list, Personnel $personnel): array
+    {
+        $currentPositionId = null;
+        $currentStructureId = null;
+        $currentJoinDate = null;
+
+        $normalized = collect($list)
+            ->map(function (array $item) use (&$currentPositionId, &$currentStructureId, &$currentJoinDate) {
+                $useLookup = ! empty($item['use_lookup']);
+                $positionId = $item['position_id'] ?? null;
+                $structureId = $item['structure_id'] ?? null;
+
+                if (! empty($item['is_current']) && empty($item['leave_date'])) {
+                    if (! empty($item['join_date'])) {
+                        try {
+                            $currentJoinDate = \Carbon\Carbon::parse($item['join_date'])->toDateString();
+                        } catch (\Throwable $exception) {
+                            $currentJoinDate = null;
+                        }
+                    }
+                    if ($useLookup) {
+                        $currentPositionId = $positionId ?? $currentPositionId;
+                        $currentStructureId = $structureId ?? $currentStructureId;
+                    }
+                }
+
+                unset($item['use_lookup'], $item['position_label'], $item['structure_label'], $item['position_id'], $item['structure_id']);
+
+                return $item;
+            })
+            ->all();
+
+        if ($currentPositionId && $personnel->position_id !== $currentPositionId) {
+            $personnel->position_id = $currentPositionId;
+        }
+        if ($currentStructureId && $personnel->structure_id !== $currentStructureId) {
+            $personnel->structure_id = $currentStructureId;
+        }
+        if ($currentJoinDate && $personnel->join_work_date !== $currentJoinDate) {
+            $personnel->join_work_date = $currentJoinDate;
+        }
+        if ($currentPositionId || $currentStructureId || $currentJoinDate) {
+            $personnel->save();
+        }
+
+        return $normalized;
     }
 
     /**

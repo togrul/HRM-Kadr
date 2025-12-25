@@ -58,9 +58,23 @@ class PersonnelLaborActivity extends Model
             return '';
         }
 
-        $personnel = $this->relationLoaded('personnel')
-            ? $this->personnel
-            : $this->personnel()->with('latestDisposal')->first();
+        static $personnelCache = [];
+
+        $personnel = $this->relationLoaded('personnel') ? $this->personnel : null;
+        $cacheKey = $this->tabel_no ?? null;
+
+        if (! $personnel && $cacheKey !== null && array_key_exists($cacheKey, $personnelCache)) {
+            $personnel = $personnelCache[$cacheKey];
+        }
+
+        if (! $personnel) {
+            $personnel = $this->personnel()
+                ->with(['latestDisposal', 'currentWork'])
+                ->first();
+            if ($cacheKey !== null) {
+                $personnelCache[$cacheKey] = $personnel;
+            }
+        }
 
         if (! $personnel) {
             return $label;

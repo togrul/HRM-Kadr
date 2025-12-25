@@ -125,8 +125,23 @@ class LaborActivityForm extends Form
         }
 
         unset($entry['time']);
-        unset($entry['position_label']);
 
+        if (! empty($entry['use_lookup'])) {
+            $positionName = trim((string) ($entry['position_label'] ?? ''));
+            $structureName = trim((string) ($entry['structure_label'] ?? ''));
+
+            if ($structureName !== '') {
+                $companyName = trim((string) ($entry['company_name'] ?? ''));
+                $entry['company_name'] = $companyName === '' ? $structureName : "{$companyName} - {$structureName}";
+            }
+
+            $entry['position'] = trim($positionName);
+            $entry['position_label'] = $entry['position'];
+        } else {
+            $entry['position_label'] = $entry['position'] ?? null;
+            $entry['position_id'] = null;
+            $entry['structure_id'] = null;
+        }
         if ($entry['is_current']) {
             // Only one current entry allowed; unset others and end the previous current at new start date
             $this->laborActivityList = collect($this->laborActivityList)
@@ -175,6 +190,11 @@ class LaborActivityForm extends Form
         return [
             'company_name' => null,
             'position' => null,
+            'position_label' => null,
+            'structure_label' => null,
+            'position_id' => null,
+            'structure_id' => null,
+            'use_lookup' => false,
             'coefficient' => null,
             'join_date' => null,
             'leave_date' => null,
@@ -203,7 +223,7 @@ class LaborActivityForm extends Form
     public function laborActivitiesForPersistence(): array
     {
         return collect($this->laborActivityList ?? [])
-            ->map(fn ($activity) => Arr::except($activity, ['time', 'position_label']))
+            ->map(fn ($activity) => Arr::except($activity, ['time', 'position_label', 'structure_label']))
             ->all();
     }
 

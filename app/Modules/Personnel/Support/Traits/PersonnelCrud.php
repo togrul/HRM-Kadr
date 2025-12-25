@@ -54,6 +54,10 @@ trait PersonnelCrud
 
     public $searchPosition = '';
 
+    public $searchLaborStructure = '';
+
+    public $searchLaborPosition = '';
+
     public $searchWorkNorm = '';
 
     public $searchDisability = '';
@@ -109,6 +113,20 @@ trait PersonnelCrud
         $this->validate([
             'avatar' => 'image|max:2048',
         ]);
+    }
+
+    public function updatedLaborActivityFormLaborActivityUseLookup($value): void
+    {
+        if (! property_exists($this, 'laborActivityForm') || ! $this->laborActivityForm) {
+            return;
+        }
+
+        if ($value) {
+            $this->laborActivityForm->laborActivity['position'] = '';
+        } else {
+            $this->laborActivityForm->laborActivity['position_id'] = null;
+            $this->laborActivityForm->laborActivity['structure_id'] = null;
+        }
     }
 
     public function previousStep()
@@ -707,6 +725,20 @@ trait PersonnelCrud
 
         $this->validate($this->laborActivityRuleSet());
 
+        if (! empty($this->laborActivityForm->laborActivity['use_lookup'])) {
+            $structureId = data_get($this->laborActivityForm->laborActivity, 'structure_id');
+            $positionId = data_get($this->laborActivityForm->laborActivity, 'position_id');
+
+            $this->laborActivityForm->laborActivity['structure_label'] = $this->optionLabelFor(
+                $this->laborStructureOptions,
+                $structureId
+            );
+            $this->laborActivityForm->laborActivity['position_label'] = $this->optionLabelFor(
+                $this->laborPositionOptions,
+                $positionId
+            );
+        }
+
         $this->laborActivityForm->addLaborActivityEntry((bool) $this->isSpecialService);
 
         $this->calculateSeniority();
@@ -769,7 +801,7 @@ trait PersonnelCrud
         $list = $this->laborActivityForm->laborActivityList ?? [];
 
         if ($this->laborActivityDraftHasValues()) {
-            $draft = Arr::except($this->laborActivityForm->laborActivity ?? [], ['time']);
+            $draft = Arr::except($this->laborActivityForm->laborActivity ?? [], ['time', 'use_lookup']);
             $list[] = $draft;
         }
 
@@ -782,9 +814,20 @@ trait PersonnelCrud
             return false;
         }
 
-        $draft = Arr::except($this->laborActivityForm->laborActivity ?? [], ['time']);
+        $draft = Arr::except($this->laborActivityForm->laborActivity ?? [], ['time', 'use_lookup']);
 
         return $this->payloadHasValues($draft);
+    }
+
+    protected function optionLabelFor(array $options, $id): ?string
+    {
+        foreach ($options as $option) {
+            if ((int) ($option['id'] ?? 0) === (int) $id) {
+                return (string) ($option['label'] ?? '');
+            }
+        }
+
+        return null;
     }
 
     public function addMilitary(): void

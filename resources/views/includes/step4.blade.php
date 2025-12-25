@@ -8,9 +8,66 @@
                 <x-validation> {{ $message }} </x-validation>
                 @enderror
             </div>
-            <div class="flex flex-col">
-                <x-label for="laborActivityForm.laborActivity.position">{{ __('Position') }}</x-label>
-                <x-livewire-input mode="gray" name="laborActivityForm.laborActivity.position" wire:model="laborActivityForm.laborActivity.position"></x-livewire-input>
+            <div class="flex flex-col space-y-2">
+                <div class="flex items-center justify-between">
+                    <x-label for="laborActivityForm.laborActivity.position">{{ __('Position') }}</x-label>
+                    <label class="flex items-center space-x-2 text-sm text-slate-600">
+                        <input type="checkbox" wire:model.live="laborActivityForm.laborActivity.use_lookup" class="text-indigo-600 rounded border-slate-300 focus:ring-indigo-500">
+                        <span>{{ __('Select from list') }}</span>
+                    </label>
+                </div>
+                @if($laborActivityForm->laborActivity['use_lookup'] ?? false)
+                    <x-ui.select-dropdown
+                        label=""
+                        placeholder="---"
+                        mode="gray"
+                        class="w-full"
+                        wire:model.live="laborActivityForm.laborActivity.structure_id"
+                        :model="$this->laborStructureOptions"
+                    >
+                        <x-livewire-input
+                            mode="gray"
+                            name="searchLaborStructure"
+                            wire:model.live.debounce.300ms="searchLaborStructure"
+                            @click.stop="isOpen = true"
+                            x-on:input.stop="null"
+                            x-on:keyup.stop="null"
+                            x-on:keydown.stop="null"
+                            x-on:change.stop="null"
+                        />
+                    </x-ui.select-dropdown>
+                    @error('laborActivityForm.laborActivity.structure_id')
+                    <x-validation> {{ $message }} </x-validation>
+                    @enderror
+                    <x-ui.select-dropdown
+                        label=""
+                        placeholder="---"
+                        mode="gray"
+                        class="w-full"
+                        wire:model.live="laborActivityForm.laborActivity.position_id"
+                        :model="$this->laborPositionOptions"
+                    >
+                        <x-livewire-input
+                            mode="gray"
+                            name="searchLaborPosition"
+                            wire:model.live.debounce.300ms="searchLaborPosition"
+                            @click.stop="isOpen = true"
+                            x-on:input.stop="null"
+                            x-on:keyup.stop="null"
+                            x-on:keydown.stop="null"
+                            x-on:change.stop="null"
+                        />
+                    </x-ui.select-dropdown>
+                    @error('laborActivityForm.laborActivity.position_id')
+                    <x-validation> {{ $message }} </x-validation>
+                    @enderror
+                @else
+                    <x-livewire-input
+                        mode="gray"
+                        name="laborActivityForm.laborActivity.position"
+                        wire:model="laborActivityForm.laborActivity.position"
+                    ></x-livewire-input>
+                @endif
                 @error('laborActivityForm.laborActivity.position')
                 <x-validation> {{ $message }} </x-validation>
                 @enderror

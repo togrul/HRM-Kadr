@@ -328,11 +328,21 @@ trait PersonnelValidationTrait
 
     protected function laborActivityRuleSet(): array
     {
-        return [
+        $useLookup = (bool) data_get($this->laborActivityForm?->laborActivity ?? [], 'use_lookup');
+
+        $rules = [
             'laborActivityForm.laborActivity.company_name' => 'required|min:2',
-            'laborActivityForm.laborActivity.position' => 'required|min:2',
             'laborActivityForm.laborActivity.join_date' => 'required|date',
         ];
+
+        if ($useLookup) {
+            $rules['laborActivityForm.laborActivity.position_id'] = 'required|exists:positions,id';
+            $rules['laborActivityForm.laborActivity.structure_id'] = 'required|exists:structures,id';
+        } else {
+            $rules['laborActivityForm.laborActivity.position'] = 'required|min:2';
+        }
+
+        return $rules;
     }
 
     protected function laborActivitySpecialServiceRules(): array
@@ -458,6 +468,8 @@ trait PersonnelValidationTrait
             'educationForm.extraEducation.diplom_given_date' => __('Diplom given date'),
             'laborActivityForm.laborActivity.company_name' => __('Company'),
             'laborActivityForm.laborActivity.position' => __('Position'),
+            'laborActivityForm.laborActivity.position_id' => __('Position'),
+            'laborActivityForm.laborActivity.structure_id' => __('Structure'),
             'laborActivityForm.laborActivity.join_date' => __('Join date'),
             'laborActivityForm.laborActivity.coefficient' => __('Coefficient'),
             'laborActivityForm.laborActivity.order_given_by' => __('Order issued by'),
