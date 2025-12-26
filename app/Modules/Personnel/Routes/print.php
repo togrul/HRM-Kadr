@@ -9,4 +9,5 @@ Route::middleware(['web', 'auth'])
         Route::get('personnel/{id?}', [PrintController::class, 'personnel_service_book'])->name('print.personnel');
         Route::get('page/{model?}', [PrintController::class, 'print_page'])->name('print.page');
         Route::get('personnel/cv/{model?}', [PrintController::class, 'cv'])->name('print.cv');
+        Route::get('personnel/cv/{model?}/word', [PrintController::class, 'cvWord'])->name('print.cv.word');
     });

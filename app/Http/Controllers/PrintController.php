@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Personnel;
 use App\Helpers\UsefulHelpers;
+use App\Services\CvWordExportService;
 use App\Services\WordSuffixService;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
@@ -53,6 +54,25 @@ class PrintController extends Controller
     }
 
     public function cv($personnelId)
+    {
+        [, $cvData] = $this->buildCvData($personnelId);
+
+        return view('prints.cv', compact('cvData'));
+    }
+
+    public function cvWord($personnelId)
+    {
+        [$personnel, $cvData] = $this->buildCvData($personnelId);
+
+        $path = app(CvWordExportService::class)->export($personnel, $cvData);
+
+        return response()
+            ->download($path, basename($path))
+            ->deleteFileAfterSend(true);
+    }
+
+
+    private function buildCvData($personnelId): array
     {
         $personnel = Personnel::query()
             ->withCount(['awards', 'punishments'])
@@ -119,6 +139,7 @@ class PrintController extends Controller
         ];
 
         $cvData = [
+            'id' => $personnel->id,
             'rank' => $personnel->latestRank?->name,
             'fullname' => $personnel->full_name,
             'structure_label' => trim($structureLabel),
@@ -148,7 +169,7 @@ class PrintController extends Controller
             'hasActiveDisposal' => $hasActiveDisposal,
         ];
 
-        return view('prints.cv', compact('cvData'));
+        return [$personnel, $cvData];
     }
 
     public function print_page($model = null)

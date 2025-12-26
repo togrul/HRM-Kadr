@@ -545,5 +545,6 @@
     "manage" : "idarə et",
     "Order was updated successfully!" : "Əmr uğurla yeniləndi!",
     "Staff was updated successfully!" : "Ştat uğurla yeniləndi!",
-    "Select from list" : "Siyahıdan seç"
+    "Select from list" : "Siyahıdan seç",
+    "Export to Word" : "Word-ə ixrac et"
 }

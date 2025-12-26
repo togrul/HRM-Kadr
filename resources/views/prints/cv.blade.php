@@ -17,6 +17,10 @@
             @page {
                 margin: 0.1in 0.3in 0.3in 0.7in !important;
             }
+
+            .export-word-btn{
+              display: none;
+            }
         }
 
         body {
@@ -228,12 +232,38 @@
             flex-direction: column;
             align-items: center;
         }
+
+        .export-word-btn{
+          position: absolute;
+          top: 20px;
+          left: 20px;
+          padding: 10px 15px;
+          background-color: #2196F3; 
+          border-radius: 10px;
+          appearance: none;
+          border: none;
+          color: white;
+          font-size: 14px;
+          cursor: pointer;
+          transition: background-color 0.3s ease;
+        }
+        .export-word-btn:hover{
+          background-color: #0b7dda;
+        }
     </style>
 </head>
 
 <body>
-    <img src="{{ asset('assets/images/gerb.png') }}" alt="gerb" style="width: 100%;position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.1; z-index: 0;filter:grayscale(100);">
-
+    @php
+        $hideWatermark = $hideWatermark ?? false;
+        $watermarkUrl = $cvData['watermark_url'] ?? asset('assets/images/gerb.png');
+    @endphp
+    @if(! $hideWatermark)
+        <img src="{{ $watermarkUrl }}" alt="gerb" style="width: 100%;position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.1; z-index: 0;filter:grayscale(100);">
+    @endif
+    @if(empty($exportWord))
+        <a class="export-word-btn" href="{{ route('print.cv.word', $cvData['id'] ?? null) }}">{{ __('Export to Word') }}</a>
+    @endif
     <div class="container">
         <div class="header">
             <div></div>
