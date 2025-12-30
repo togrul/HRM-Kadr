@@ -5,9 +5,6 @@ namespace App\Services;
 use App\Models\Personnel;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
-use PhpOffice\PhpWord\IOFactory;
-use PhpOffice\PhpWord\PhpWord;
-use PhpOffice\PhpWord\Settings;
 use PhpOffice\PhpWord\Shared\Converter;
 use PhpOffice\PhpWord\SimpleType\Jc;
 use PhpOffice\PhpWord\SimpleType\VerticalJc;
@@ -15,15 +12,11 @@ use PhpOffice\PhpWord\Style\Cell;
 use PhpOffice\PhpWord\Style\Image;
 use PhpOffice\PhpWord\Style\Tab;
 
-class CvWordExportService
+class CvWordExportService extends BaseWordExportService
 {
     public function export(Personnel $personnel, array $cvData): string
     {
-        Settings::setDefaultFontName('Arial');
-        Settings::setDefaultFontSize(12);
-
-        $phpWord = new PhpWord();
-        $section = $phpWord->addSection([
+        [$phpWord, $section] = $this->bootWord([
             'paperSize' => 'A4',
             'marginTop' => Converter::inchToTwip(0.1),
             'marginRight' => Converter::inchToTwip(0.3),
@@ -226,14 +219,7 @@ class CvWordExportService
             $serviceTable->addCell($descWidth)->addText($row['desc'], ['italic' => true]);
         }
 
-        $dir = storage_path('app/tmp');
-        File::ensureDirectoryExists($dir);
-        $filename = 'cv_'.$personnel->id.'.docx';
-        $path = $dir.'/'.$filename;
-
-        IOFactory::createWriter($phpWord, 'Word2007')->save($path);
-
-        return $path;
+        return $this->saveWord($phpWord, 'cv_'.$personnel->id);
     }
 
     private function addInfoLine($section, string $label, string $value, array $labelStyle, array $valueStyle, int $tabStop): void
@@ -275,6 +261,9 @@ class CvWordExportService
         $dir = storage_path('app/tmp');
         File::ensureDirectoryExists($dir);
         $target = $dir.'/cv-watermark.png';
+        if (is_file($target) && filemtime($target) >= filemtime($source)) {
+            return $target;
+        }
 
         $img = imagecreatefrompng($source);
         if (! $img) {

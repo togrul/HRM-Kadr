@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Personnel;
 use App\Helpers\UsefulHelpers;
 use App\Services\CvWordExportService;
+use App\Services\PersonnelServiceBookWordExportService;
 use App\Services\WordSuffixService;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
@@ -13,44 +14,19 @@ class PrintController extends Controller
 {
     public function personnel_service_book($personnelId)
     {
-        $personnel = Personnel::findOrFail($personnelId);
-        $personnel->load([
-            'nationality',
-            'previousNationality',
-            'idDocuments',
-            'idDocuments.bornCountry',
-            'idDocuments.bornCity',
-            'laborActivities',
-            'specialServices',
-            'foreignLanguages',
-            'foreignLanguages.language',
-            'educationDegree',
-            'education',
-            'education.institution',
-            'extraEducations',
-            'extraEducations.institution',
-            'latestRank.rank',
-            'ranksASC',
-            'ranksASC.rank',
-            'awards',
-            'awards.award',
-            'injuries',
-            'structure',
-            'position',
-            'socialOrigin',
-            'degreeAndNames',
-            'degreeAndNames.degreeAndName',
-            'elections',
-            'captives',
-            'fatherMother',
-            'fatherMother.kinship',
-            'wifeChildren',
-            'wifeChildren.kinship',
-            'businessTrips',
-            'military.rank'
-        ]);
+        $personnel = $this->loadPersonnelServiceBook($personnelId);
 
         return view('prints.personnel', compact('personnel'));
+    }
+
+    public function personnelServiceBookWord($personnelId)
+    {
+        $personnel = $this->loadPersonnelServiceBook($personnelId);
+        $path = app(PersonnelServiceBookWordExportService::class)->export($personnel);
+
+        return response()
+            ->download($path, basename($path))
+            ->deleteFileAfterSend(true);
     }
 
     public function cv($personnelId)
@@ -170,6 +146,52 @@ class PrintController extends Controller
         ];
 
         return [$personnel, $cvData];
+    }
+
+    private function loadPersonnelServiceBook($personnelId): Personnel
+    {
+        $personnel = Personnel::query()
+            ->with([
+                'nationality',
+                'previousNationality',
+                'idDocuments',
+                'idDocuments.bornCountry',
+                'idDocuments.bornCity',
+                'laborActivities',
+                'specialServices',
+                'foreignLanguages',
+                'foreignLanguages.language',
+                'educationDegree',
+                'education',
+                'education.institution',
+                'extraEducations',
+                'extraEducations.institution',
+                'latestRank.rank',
+                'ranksASC',
+                'ranksASC.rank',
+                'awards',
+                'awards.award',
+                'injuries',
+                'structure',
+                'position',
+                'socialOrigin',
+                'degreeAndNames',
+                'degreeAndNames.degreeAndName',
+                'elections',
+                'captives',
+                'fatherMother',
+                'fatherMother.kinship',
+                'wifeChildren',
+                'wifeChildren.kinship',
+                'businessTrips',
+                'businessTrips.order',
+                'military.rank',
+            ])
+            ->findOrFail($personnelId);
+
+        Gate::authorize('view', $personnel);
+
+        return $personnel;
     }
 
     public function print_page($model = null)

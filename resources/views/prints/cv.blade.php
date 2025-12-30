@@ -70,13 +70,13 @@
         .placeholder {
             padding: 0 15px;
             text-align: center;
-            font-size: 12pt;
+            font-size: 11pt;
         }
 
         .info-row {
             display: flex;
             width: 100%;
-            font-size: 12pt;
+            font-size: 11pt;
             margin-top: 2px;
         }
 
@@ -119,7 +119,7 @@
         }
 
         .history-table tbody td {
-           font-size: 12pt !important;
+           font-size: 11pt !important;
         }
 
         .history-head {
@@ -250,6 +250,23 @@
         .export-word-btn:hover{
           background-color: #0b7dda;
         }
+
+        .watermark-img{
+          width: 100%;
+          position: fixed; 
+          top: 50%; 
+          left: 50%; 
+          transform: translate(-50%, -50%);
+          opacity: 0.1; 
+          z-index: -1;
+          print-color-adjust: exact;
+          -webkit-print-color-adjust: exact;
+          filter: gray; /* IE */
+          -webkit-filter: grayscale(1); /* Old WebKit */
+          -webkit-filter: grayscale(100%); /* New WebKit */
+          filter: url(resources.svg#desaturate); /* older Firefox */
+          filter: grayscale(100%); 
+        }
     </style>
 </head>
 
@@ -259,7 +276,7 @@
         $watermarkUrl = $cvData['watermark_url'] ?? asset('assets/images/gerb.png');
     @endphp
     @if(! $hideWatermark)
-        <img src="{{ $watermarkUrl }}" alt="gerb" style="width: 100%;position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.1; z-index: 0;filter:grayscale(100);">
+        <img src="{{ $watermarkUrl }}" alt="gerb" class="watermark-img">
     @endif
     @if(empty($exportWord))
         <a class="export-word-btn" href="{{ route('print.cv.word', $cvData['id'] ?? null) }}">{{ __('Export to Word') }}</a>
@@ -398,7 +415,7 @@
                         </tr>
                     @endforeach
                     @foreach($cvData['service_history']['labor'] as $labor)
-                        <tr style="font-style: italic;font-size:12pt;">
+                        <tr style="font-style: italic;font-size:11pt;">
                             <td style="text-align:center;">{{ $labor['join_date'] }}</td>
                             <td style="text-align:center;">{{ $labor['leave_date'] ?? 'hal/hazıra kimi' }}</td>
                             <td>{{ $labor['structure'] }};</td>

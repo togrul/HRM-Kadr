@@ -16,6 +16,9 @@
             {
                 margin: 0.3in 0.6in 0.3in 0.6in !important;
             }
+            .no-print {
+                display: none !important;
+            }
         }
 
         table { page-break-inside:auto }
@@ -106,9 +109,25 @@
         .seperated-column span{
             text-align: justify;
         }
+
+        .print-action{
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            padding: 8px 12px;
+            font-size: 14px;
+            background: #2563eb;
+            color: #fff;
+            border-radius: 6px;
+            text-decoration: none;
+        }
     </style>
 </head>
 <body>
+
+<a class="no-print print-action" href="{{ route('print.personnel.word', $personnel->id) }}">
+   {{ __('Export to Word') }}
+</a>
 
 <div class="content">
     @include('prints.partials.page1-personnel')

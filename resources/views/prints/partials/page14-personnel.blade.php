@@ -14,7 +14,14 @@
         <tr>
             <td>{{ $award->award->name }}</td>
             <td>{{ $award->reason }}</td>
-            <td>{{ $award->order_given_by ? $award->order_given_by . ',' : '' }} {{ $award->order_no ? '№' . $award->order_no . ',' : '' }} {{ \Carbon\Carbon::parse($award->order_date)->format('d.m.Y') }}</td>
+            @php
+                $orderParts = array_filter([
+                    $award->order_given_by ?: null,
+                    $award->order_no ? '№'.$award->order_no : null,
+                    $award->order_date ? \Carbon\Carbon::parse($award->order_date)->format('d.m.Y') : null,
+                ]);
+            @endphp
+            <td>{{ implode(', ', $orderParts) }}</td>
         </tr>
     @endforeach
     @for($i = 0;$i < (18 - $personnel->awards->count());$i++)
