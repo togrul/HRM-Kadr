@@ -17,9 +17,13 @@ class PersonnelWeaponSeeder extends Seeder
         $personnel = Personnel::all();
         $currentTime = now();
 
+        if ($weapons->isEmpty() || $personnel->isEmpty()) {
+            return;
+        }
+
         foreach ($personnel as $person) {
             // Get a random number of weapons for the person (between 1 and 3)
-            $randomWeapons = $weapons->random(rand(1, 3));
+            $randomWeapons = $weapons->random(rand(1, min(3, $weapons->count())));
 
             // Prepare weapon assignments in bulk
             $weaponData = [];

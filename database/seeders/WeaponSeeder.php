@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Weapon;
 use Illuminate\Database\Seeder;
 
 class WeaponSeeder extends Seeder
@@ -21,11 +22,12 @@ class WeaponSeeder extends Seeder
             'UZI',
         ];
 
-        foreach ($weapons as $weapon) {
-            \App\Models\Weapon::firstOrCreate(['name' => $weapon], [
-                'capacity' => 30,
-                'production_year' => 2014,
-            ]);
-        }
+        $rows = array_map(fn ($weapon) => [
+            'name' => $weapon,
+            'capacity' => 30,
+            'production_year' => 2014,
+        ], $weapons);
+
+        Weapon::upsert($rows, ['name'], ['capacity', 'production_year']);
     }
 }

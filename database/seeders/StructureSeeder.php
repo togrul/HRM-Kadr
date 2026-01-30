@@ -13,10 +13,13 @@ class StructureSeeder extends Seeder
      */
     public function run(): void
     {
-      if(env('DB_DATABASE') == 'dmx_hr')
-          $this->militaryStructureData();
-      else
-          $this->fakeStructureData();
+        $appType = (string) config('app.app_type', env('APP_TYPE', 'public'));
+        if ($appType === 'military') {
+            $this->militaryStructureData();
+            return;
+        }
+
+        $this->fakeStructureData();
     }
 
     private function fakeStructureData(): void
@@ -227,9 +230,10 @@ class StructureSeeder extends Seeder
             ],
         ];
 
-        foreach ($structures as $structure) {
-            Structure::updateOrCreate(['id' => $structure['id']], $structure);
-        }
+        $updateColumns = array_keys($structures[0] ?? []);
+        $updateColumns = array_values(array_diff($updateColumns, ['id']));
+
+        Structure::upsert($structures, ['id'], $updateColumns);
     }
 
     private function militaryStructureData(): void
@@ -487,8 +491,9 @@ class StructureSeeder extends Seeder
             ],
         ];
 
-        foreach ($structures as $structure) {
-            Structure::updateOrCreate(['id' => $structure['id']], $structure);
-        }
+        $updateColumns = array_keys($structures[0] ?? []);
+        $updateColumns = array_values(array_diff($updateColumns, ['id']));
+
+        Structure::upsert($structures, ['id'], $updateColumns);
     }
 }

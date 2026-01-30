@@ -67,9 +67,7 @@ class PersonnelSeeder extends Seeder
             ],
         ];
 
-        foreach ($data as $ed) {
-            EducationDegree::firstOrCreate($ed);
-        }
+        $this->upsert(EducationDegree::class, $data, ['id'], ['title_az']);
 
         $languages = [
             [
@@ -90,9 +88,7 @@ class PersonnelSeeder extends Seeder
             ],
         ];
 
-        foreach ($languages as $lang) {
-            Language::firstOrCreate($lang);
-        }
+        $this->upsert(Language::class, $languages, ['id'], ['name']);
 
         $kinships = [
             [
@@ -165,9 +161,7 @@ class PersonnelSeeder extends Seeder
             ],
         ];
 
-        foreach ($kinships as $ks) {
-            Kinship::firstOrCreate($ks);
-        }
+        $this->upsert(Kinship::class, $kinships, ['id'], ['name_az', 'is_active']);
 
         $educationForms = [
             [
@@ -184,74 +178,35 @@ class PersonnelSeeder extends Seeder
             ],
         ];
 
-        foreach ($educationForms as $ef) {
-            EducationForm::firstOrCreate($ef);
-        }
+        $this->upsert(EducationForm::class, $educationForms, ['id'], ['name_az']);
 
-        AwardType::firstOrCreate([
-            'id' => 10,
-            'name' => 'dövlət təltifi',
-        ]);
+        $this->upsert(AwardType::class, [
+            ['id' => 10, 'name' => 'dövlət təltifi'],
+            ['id' => 20, 'name' => 'mükafatlar'],
+        ], ['id'], ['name']);
 
-        AwardType::firstOrCreate([
-            'id' => 20,
-            'name' => 'mükafatlar',
-        ]);
+        $this->upsert(PunishmentType::class, [
+            ['id' => 10, 'name' => 'cinayət məsuliyyəti'],
+            ['id' => 90, 'name' => 'digər'],
+        ], ['id'], ['name']);
 
-        PunishmentType::firstOrCreate([
-            'id' => 10,
-            'name' => 'cinayət məsuliyyəti',
-        ]);
+        $this->upsert(EducationType::class, [
+            ['id' => 10, 'name' => 'ikinci ali təhsil'],
+            ['id' => 20, 'name' => 'ixtisasartırma'],
+        ], ['id'], ['name']);
 
-        PunishmentType::firstOrCreate([
-            'id' => 90,
-            'name' => 'digər',
-        ]);
+        $this->upsert(EducationDocumentType::class, [
+            ['id' => 10, 'name' => 'diplom'],
+            ['id' => 20, 'name' => 'sertifikat'],
+            ['id' => 30, 'name' => 'arayış'],
+        ], ['id'], ['name']);
 
-        EducationType::firstOrCreate([
-            'id' => 10,
-            'name' => 'ikinci ali təhsil',
-        ]);
-
-        EducationType::firstOrCreate([
-            'id' => 20,
-            'name' => 'ixtisasartırma',
-        ]);
-
-        EducationDocumentType::firstOrCreate([
-            'id' => 10,
-            'name' => 'diplom',
-        ]);
-
-        EducationDocumentType::firstOrCreate([
-            'id' => 20,
-            'name' => 'sertifikat',
-        ]);
-
-        EducationDocumentType::firstOrCreate([
-            'id' => 30,
-            'name' => 'arayış',
-        ]);
-
-        ScientificDegreeAndName::firstOrCreate([
-            'id' => 10,
-            'name' => 'fəlsəfə doktoru',
-        ]);
-
-        ScientificDegreeAndName::firstOrCreate([
-            'id' => 20,
-            'name' => 'elmlər doktoru',
-        ]);
-
-        ScientificDegreeAndName::firstOrCreate([
-            'id' => 30,
-            'name' => 'dosent',
-        ]);
-
-        ScientificDegreeAndName::firstOrCreate([
-            'id' => 40,
-            'name' => 'professor',
-        ]);
+        $this->upsert(ScientificDegreeAndName::class, [
+            ['id' => 10, 'name' => 'fəlsəfə doktoru'],
+            ['id' => 20, 'name' => 'elmlər doktoru'],
+            ['id' => 30, 'name' => 'dosent'],
+            ['id' => 40, 'name' => 'professor'],
+        ], ['id'], ['name']);
 
         $criminals = [
             'İnsanlıq əlaeyhinə cinayət',
@@ -266,13 +221,15 @@ class PersonnelSeeder extends Seeder
             'Ədalət mühakiməsi əleyhinə cinayət',
         ];
 
+        $criminalRows = [];
         foreach ($criminals as $key => $crim) {
-            Punishment::firstOrCreate([
+            $criminalRows[] = [
                 'id' => 1000 + ($key + 1),
                 'punishment_type_id' => 10,
                 'name' => $crim,
-            ]);
+            ];
         }
+        $this->upsert(Punishment::class, $criminalRows, ['id'], ['punishment_type_id', 'name']);
 
         $punishments = [
             'Xidməti vəzifəsinin icrasına məsuliyyətsiz yanaşdığına görə',
@@ -315,13 +272,15 @@ class PersonnelSeeder extends Seeder
             'Etibarsız xidməti vəsiqədən istifadə etdiyinə görə',
         ];
 
+        $punishmentRows = [];
         foreach ($punishments as $key => $punish) {
-            Punishment::firstOrCreate([
+            $punishmentRows[] = [
                 'id' => 9000 + ($key + 1),
                 'punishment_type_id' => 90,
                 'name' => $punish,
-            ]);
+            ];
         }
+        $this->upsert(Punishment::class, $punishmentRows, ['id'], ['punishment_type_id', 'name']);
 
         $awards = [
             'Xidməti vəzifəsini layiqincə yerinə yetirdiyinə görə',
@@ -356,25 +315,29 @@ class PersonnelSeeder extends Seeder
             'Tədris müddətində fəal iştirak etdiyinə, əla və yaxşı qiymətlərlə oxuduğuna görə',
         ];
 
+        $awardRows = [];
         foreach ($awards as $key => $award) {
-            Award::firstOrCreate([
+            $awardRows[] = [
                 'id' => 2000 + ($key + 1),
                 'award_type_id' => 20,
                 'name' => $award,
-            ]);
+            ];
         }
+        $this->upsert(Award::class, $awardRows, ['id'], ['award_type_id', 'name']);
 
         $work_norms = [
             'ştat',
             'saathesabı',
         ];
 
+        $workNormRows = [];
         foreach ($work_norms as $key => $wn) {
-            WorkNorm::firstOrCreate([
+            $workNormRows[] = [
                 'id' => 10 * ($key + 1),
                 'name_az' => $wn,
-            ]);
+            ];
         }
+        $this->upsert(WorkNorm::class, $workNormRows, ['id'], ['name_az']);
 
         $reasons_join_work = [
             'Ali məktəbdən',
@@ -401,26 +364,15 @@ class PersonnelSeeder extends Seeder
             'Müəssisə ləğv edilib',
         ];
 
-        EducationalInstitution::firstOrCreate([
-            'id' => 10,
-            'name' => 'Bakı Dövlət Universiteti',
-            'shortname' => 'BDU',
-        ]);
+        $this->upsert(EducationalInstitution::class, [
+            ['id' => 10, 'name' => 'Bakı Dövlət Universiteti', 'shortname' => 'BDU'],
+        ], ['id'], ['name', 'shortname']);
 
-        SocialOrigin::firstOrCreate([
-            'id' => 10,
-            'name' => 'Fəhlə',
-        ]);
-
-        SocialOrigin::firstOrCreate([
-            'id' => 20,
-            'name' => 'Kəndli',
-        ]);
-
-        SocialOrigin::firstOrCreate([
-            'id' => 30,
-            'name' => 'Qulluqçu',
-        ]);
+        $this->upsert(SocialOrigin::class, [
+            ['id' => 10, 'name' => 'Fəhlə'],
+            ['id' => 20, 'name' => 'Kəndli'],
+            ['id' => 30, 'name' => 'Qulluqçu'],
+        ], ['id'], ['name']);
 
         $medals = [
             0 => '"Heydər Əliyev" ordeni',
@@ -502,13 +454,15 @@ class PersonnelSeeder extends Seeder
             76 => 'Nizami Gəncəvi adına Qızıl medal',
         ];
 
+        $medalRows = [];
         foreach ($medals as $key => $medal) {
-            Award::firstOrCreate([
+            $medalRows[] = [
                 'id' => 1000 + ($key + 1),
                 'award_type_id' => 10,
                 'name' => $medal,
-            ]);
+            ];
         }
+        $this->upsert(Award::class, $medalRows, ['id'], ['award_type_id', 'name']);
 
         $statuses = [
             10 => 'Baxılır',
@@ -518,12 +472,23 @@ class PersonnelSeeder extends Seeder
             90 => 'Dayandırıldı',
         ];
 
+        $appealRows = [];
         foreach ($statuses as $key => $status) {
-            AppealStatus::firstOrCreate([
+            $appealRows[] = [
                 'id' => $key,
                 'name' => $status,
-            ]);
+            ];
+        }
+        $this->upsert(AppealStatus::class, $appealRows, ['id'], ['name']);
+
+    }
+
+    private function upsert(string $modelClass, array $rows, array $uniqueBy, array $updateColumns): void
+    {
+        if (empty($rows)) {
+            return;
         }
 
+        $modelClass::upsert($rows, $uniqueBy, $updateColumns);
     }
 }

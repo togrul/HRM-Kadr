@@ -15,6 +15,10 @@ class CandidateSeeder extends Seeder
      */
     public function run(): void
     {
+        if (Candidate::query()->exists()) {
+            return;
+        }
+
         $surnames = [
             'Əhmədov',
             'Hüseynov',

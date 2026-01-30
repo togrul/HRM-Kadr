@@ -105,16 +105,6 @@ class CitiesSeeder extends Seeder
             ['id' => 1191, 'country_id' => 11, 'parent_id' => null, 'name' => 'Hadrut'],
         ];
 
-        foreach ($cities as $key => $city) {
-            City::updateOrCreate(
-                [
-                    'id' => $city['id'],
-                ],
-                [
-                    'country_id' => $city['country_id'],
-                    'parent_id' => $city['parent_id'],
-                    'name' => $city['name'],
-                ]);
-        }
+        City::upsert($cities, ['id'], ['country_id', 'parent_id', 'name']);
     }
 }

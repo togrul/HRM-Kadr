@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\RankCategory;
 use Illuminate\Database\Seeder;
 
 class RankCategorySeeder extends Seeder
@@ -36,8 +37,10 @@ class RankCategorySeeder extends Seeder
             ],
         ];
 
-        foreach ($categories as $category) {
-            \App\Models\RankCategory::create($category);
-        }
+        RankCategory::upsert(
+            $categories,
+            ['id'],
+            ['name', 'vacation_days_count', 'contract_duration', 'next_contract_duration', 'vacation_days_per_month']
+        );
     }
 }

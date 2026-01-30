@@ -1,8 +1,8 @@
 <?php
 
 return [
-    // Aktif profil (env ile de ayarlanabilir: APP_PROFILE)
-    'active' => env('APP_PROFILE', 'default'),
+    // Aktif profil (env ile de ayarlanabilir: APP_TYPE)
+    'active' => env('APP_TYPE', 'default'),
 
     // Profil tanımları
     'profiles' => [

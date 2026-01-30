@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\LeaveType;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class LeaveTypeSeeder extends Seeder
@@ -16,23 +15,21 @@ class LeaveTypeSeeder extends Seeder
         $types = [
             [
                 'name' => 'Xəstəlik',
-                'max_days' => '3',
-                'requires_document' => true
+                'max_days' => 3,
+                'requires_document' => true,
             ],
             [
                 'name' => 'İllik',
-                'max_days' => '30',
-                'requires_document' => false
+                'max_days' => 30,
+                'requires_document' => false,
             ],
             [
                 'name' => 'Xüsusi səbəb',
-                'max_days' => '7',
-                'requires_document' => false
-            ]
+                'max_days' => 7,
+                'requires_document' => false,
+            ],
         ];
 
-        foreach ($types as $type) {
-            LeaveType::create($type);
-        }
+        LeaveType::upsert($types, ['name'], ['max_days', 'requires_document']);
     }
 }

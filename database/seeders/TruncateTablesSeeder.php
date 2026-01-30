@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class TruncateTablesSeeder extends Seeder
 {
@@ -15,53 +14,63 @@ class TruncateTablesSeeder extends Seeder
     {
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
 
-        // Truncate tables
-        //  DB::table('users')->truncate();
-        //  DB::table('order_statuses')->truncate();
-        DB::table('activity_log')->truncate();
-        DB::table('structures')->truncate();
-        DB::table('weapons')->truncate();
-        DB::table('notifications')->truncate();
-        DB::table('order_log_component_attributes')->truncate();
-        DB::table('order_log_components')->truncate();
-        DB::table('order_log_personnels')->truncate();
-        DB::table('order_logs')->truncate();
-        DB::table('orders')->truncate();
-        DB::table('personnel_awards')->truncate();
-        DB::table('personnel_business_trips')->truncate();
-        DB::table('personnel_cards')->truncate();
-        DB::table('personnel_contracts')->truncate();
-        DB::table('personnel_criminals')->truncate();
-        DB::table('personnel_disposals')->truncate();
-        DB::table('personnel_documents')->truncate();
-        DB::table('personnel_education')->truncate();
-        DB::table('personnel_education_requests')->truncate();
-        DB::table('personnel_elected_electorals')->truncate();
-        DB::table('personnel_extra_education')->truncate();
-        DB::table('personnel_foreign_languages')->truncate();
-        DB::table('personnel_identity_documents')->truncate();
-        DB::table('personnel_injuries')->truncate();
-        DB::table('personnel_kinships')->truncate();
-        DB::table('personnel_labor_activities')->truncate();
-        DB::table('personnel_master_degrees')->truncate();
-        DB::table('personnel_military_services')->truncate();
-        DB::table('personnel_participation_events')->truncate();
-        DB::table('personnel_passports')->truncate();
-        DB::table('personnel_pension_cards')->truncate();
-        DB::table('personnel_punishments')->truncate();
-        DB::table('personnel_ranks')->truncate();
-        DB::table('personnel_scientific_degree_and_names')->truncate();
-        DB::table('personnel_taken_captives')->truncate();
-        DB::table('personnel_vacations')->truncate();
-        DB::table('personnel_weapons')->truncate();
-        DB::table('personnels')->truncate();
-        DB::table('settings')->truncate();
-        DB::table('staff_schedules')->truncate();
-        DB::table('vacations')->truncate();
-        DB::table('kohne')->delete();
-        DB::table('kohne2')->delete();
-        DB::table('kohne3')->delete();
-        DB::table('namized')->delete();
+        $truncateTables = [
+            'activity_log',
+            'structures',
+            'weapons',
+            'notifications',
+            'order_log_component_attributes',
+            'order_log_components',
+            'order_log_personnels',
+            'order_logs',
+            'orders',
+            'personnel_awards',
+            'personnel_business_trips',
+            'personnel_cards',
+            'personnel_contracts',
+            'personnel_criminals',
+            'personnel_disposals',
+            'personnel_documents',
+            'personnel_education',
+            'personnel_education_requests',
+            'personnel_elected_electorals',
+            'personnel_extra_education',
+            'personnel_foreign_languages',
+            'personnel_identity_documents',
+            'personnel_injuries',
+            'personnel_kinships',
+            'personnel_labor_activities',
+            'personnel_master_degrees',
+            'personnel_military_services',
+            'personnel_participation_events',
+            'personnel_passports',
+            'personnel_pension_cards',
+            'personnel_punishments',
+            'personnel_ranks',
+            'personnel_scientific_degree_and_names',
+            'personnel_taken_captives',
+            'personnel_vacations',
+            'personnel_weapons',
+            'personnels',
+            'settings',
+            'staff_schedules',
+            'vacations',
+        ];
+
+        $deleteTables = [
+            'kohne',
+            'kohne2',
+            'kohne3',
+            'namized',
+        ];
+
+        foreach ($truncateTables as $table) {
+            DB::table($table)->truncate();
+        }
+
+        foreach ($deleteTables as $table) {
+            DB::table($table)->delete();
+        }
 
         // Re-enable foreign key checks
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');

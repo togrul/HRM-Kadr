@@ -70,15 +70,11 @@ class PositionSeeder extends Seeder
                 'name' => 'Şəbəkə inzibatçısı',
             ],
             [
-                'id' => 1010,
+                'id' => 1020,
                 'name' => 'Əməliyyatçı',
             ],
         ];
 
-        foreach ($positions as $ps) {
-            Position::updateOrCreate([
-                'id' => $ps['id'],
-            ], $ps);
-        }
+        Position::upsert($positions, ['id'], ['name']);
     }
 }
