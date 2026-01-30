@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "laravel-boost": {
+      "command": "/Users/togruljalalli/Library/Application Support/Herd/bin/php83",
+      "args": [
+        "/Users/togruljalalli/Desktop/projects/HRM/artisan",
+        "boost:mcp"
+      ]
+    },
+    "herd": {
+      "command": "/Users/togruljalalli/Library/Application Support/Herd/bin/php83",
+      "args": [
+        "/Applications/Herd.app/Contents/Resources/herd-mcp.phar"
+      ],
+      "env": {
+        "SITE_PATH": "/Users/togruljalalli/Desktop/projects/HRM"
+      }
+    }
+  }
+}

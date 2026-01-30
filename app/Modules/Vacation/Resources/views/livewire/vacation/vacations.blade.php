@@ -54,7 +54,7 @@ Livewire.hook('message.processed', (message, component) => {
                     mode="gray"
                     class="w-full"
                     wire:model.live="filter.structure_id"
-                    :model="$this->structureOptions()"
+                    :model="$this->structureOptions"
                 >
                     <x-livewire-input
                         mode="gray"

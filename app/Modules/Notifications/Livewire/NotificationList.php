@@ -25,6 +25,7 @@ class NotificationList extends Component
     {
         $notifications = auth()->user()
             ->notifications()
+            ->with('notifiable')
             ->orderBy('read_at')
             ->latest()
             ->paginate(self::NOTIFICATION_THRESHOLD);

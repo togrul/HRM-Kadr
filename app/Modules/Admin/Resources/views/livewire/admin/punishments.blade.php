@@ -83,7 +83,7 @@
                         mode="default"
                         class="w-full"
                         wire:model.live="form.punishment_type_id"
-                        :model="$this->punishmentTypeOptions()"
+                        :model="$this->punishmentTypeOptions"
                     >
                         <x-livewire-input
                             mode="gray"

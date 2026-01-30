@@ -77,7 +77,7 @@ trait CandidateCrud
         }
     }
 
-    #[Computed]
+    #[Computed(persist: true)]
     public function structureOptions(): array
     {
         return $this->structureOptionsFor(

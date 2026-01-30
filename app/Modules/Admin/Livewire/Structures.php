@@ -144,9 +144,12 @@ class Structures extends Component
             'staff:structures',
             'candidate:structures',
             'businessTrips:structures',
-            'order_lookup:main_structures',
         ] as $cacheKey) {
             Cache::forget($cacheKey);
         }
+
+        \App\Support\PersonnelDropdownCache::forgetStructures();
+        \App\Support\OrderLookupCache::bump('main_structures');
+        \App\Support\OrderLookupCache::bump('structures');
     }
 }

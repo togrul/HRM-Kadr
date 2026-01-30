@@ -177,7 +177,16 @@ class Leaves extends Component
             ->with([
                  'personnel' => fn ($q) => $q
                     ->withStructureTree()   // burada parent zincirini preload eder
-                    ->with(['position:id,name', 'latestDisposal']),
+                    ->with([
+                        'position:id,name',
+                        'latestDisposal' => fn ($q) => $q->select(
+                            'personnel_disposals.id',
+                            'personnel_disposals.tabel_no',
+                            'personnel_disposals.disposal_date',
+                            'personnel_disposals.disposal_end_date'
+                        ),
+                        'currentWork:id,tabel_no,join_date,leave_date,is_current,position',
+                    ]),
                 'leaveType',
                 'status',
                 'latestLog.changedBy'

@@ -163,7 +163,7 @@ class BusinessTrips extends Component
         return view('business-trips::livewire.business-trips.business-trips');
     }
 
-    #[Computed]
+    #[Computed(persist: true)]
     public function structureOptions(): array
     {
         $search = $this->dropdownSearch('searchStructure');
@@ -192,7 +192,7 @@ class BusinessTrips extends Component
         );
     }
 
-    #[Computed]
+    #[Computed(persist: true)]
     public function orderTypeOptions(): array
     {
         $base = OrderType::query()

@@ -55,7 +55,7 @@
                         mode="default"
                         class="w-full"
                         wire:model.live="form.country_id"
-                        :model="$this->countryOptions()"
+                        :model="$this->countryOptions"
                     >
                         <x-livewire-input
                             mode="gray"
@@ -80,7 +80,7 @@
                         mode="default"
                         class="w-full"
                         wire:model.live="form.parent_id"
-                        :model="$this->parentCityOptions()"
+                        :model="$this->parentCityOptions"
                     >
                         <x-livewire-input
                             mode="gray"

@@ -16,7 +16,7 @@
                 mode="gray"
                 class="w-full"
                 wire:model.live="reservedMonthId"
-                :model="$this->monthOptions()"
+                :model="$this->monthOptions"
             />
         </div>
         <button wire:click="setMonth"

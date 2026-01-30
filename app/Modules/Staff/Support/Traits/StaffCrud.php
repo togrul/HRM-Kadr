@@ -178,7 +178,7 @@ trait StaffCrud
         return view($view_name);
     }
 
-    #[\Livewire\Attributes\Computed]
+    #[\Livewire\Attributes\Computed(persist: true)]
     public function structureOptions(): array
     {
         $selected = $this->staffModel ?? $this->structureId;
@@ -207,7 +207,7 @@ trait StaffCrud
         );
     }
 
-    #[\Livewire\Attributes\Computed]
+    #[\Livewire\Attributes\Computed(persist: true)]
     public function positionOptions(): array
     {
         $search = $this->dropdownSearch('searchPosition');

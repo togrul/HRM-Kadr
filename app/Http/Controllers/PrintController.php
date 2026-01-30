@@ -64,9 +64,35 @@ class PrintController extends Controller
                 'structure',
                 'position',
                 'education.institution',
-                'hasActiveDisposal'
+                'hasActiveDisposal',
+                'currentWork',
             ])
             ->findOrFail($personnelId);
+
+        $personnel->loadMissing([
+            'laborActivities' => fn ($q) => $q->select(
+                'id',
+                'tabel_no',
+                'company_name',
+                'position',
+                'position_label',
+                'join_date',
+                'leave_date'
+            ),
+            'military' => fn ($q) => $q->select(
+                'id',
+                'tabel_no',
+                'location',
+                'start_date',
+                'end_date'
+            ),
+            'currentWork' => fn ($q) => $q->select(
+                'id',
+                'tabel_no',
+                'join_date',
+                'leave_date'
+            ),
+        ]);
 
         Gate::authorize('view', $personnel);
 

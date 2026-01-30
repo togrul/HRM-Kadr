@@ -50,7 +50,7 @@
                         mode="default"
                         class="w-full"
                         wire:model.live="form.rank_category_id"
-                        :model="$this->rankCategoryOptions()"
+                        :model="$this->rankCategoryOptions"
                     >
                         <x-livewire-input
                             mode="gray"

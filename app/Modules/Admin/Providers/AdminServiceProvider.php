@@ -2,20 +2,38 @@
 
 namespace App\Modules\Admin\Providers;
 
+use App\Models\Award;
 use App\Models\City;
 use App\Models\CountryTranslation;
 use App\Models\Disability;
 use App\Models\EducationDegree;
+use App\Models\EducationDocumentType;
+use App\Models\EducationForm;
+use App\Models\EducationType;
+use App\Models\EducationalInstitution;
+use App\Models\Kinship;
+use App\Models\Language;
 use App\Models\Position;
+use App\Models\Punishment;
 use App\Models\RankReason;
+use App\Models\ScientificDegreeAndName;
 use App\Models\SocialOrigin;
 use App\Models\WorkNorm;
+use App\Observers\AwardObserver;
 use App\Observers\CityObserver;
 use App\Observers\CountryTranslationObserver;
 use App\Observers\DisabilityObserver;
 use App\Observers\EducationDegreeObserver;
+use App\Observers\EducationDocumentTypeObserver;
+use App\Observers\EducationFormObserver;
+use App\Observers\EducationTypeObserver;
+use App\Observers\EducationalInstitutionObserver;
+use App\Observers\KinshipObserver;
+use App\Observers\LanguageObserver;
 use App\Observers\PositionObserver;
+use App\Observers\PunishmentObserver;
 use App\Observers\RankReasonObserver;
+use App\Observers\ScientificDegreeObserver;
 use App\Observers\SocialOriginObserver;
 use App\Observers\WorkNormObserver;
 use App\Providers\Concerns\RegistersLivewireAliases;
@@ -53,6 +71,15 @@ class AdminServiceProvider extends ServiceProvider
         SocialOrigin::observe(SocialOriginObserver::class);
         EducationDegree::observe(EducationDegreeObserver::class);
         WorkNorm::observe(WorkNormObserver::class);
+        Award::observe(AwardObserver::class);
+        Punishment::observe(PunishmentObserver::class);
+        EducationalInstitution::observe(EducationalInstitutionObserver::class);
+        EducationForm::observe(EducationFormObserver::class);
+        EducationType::observe(EducationTypeObserver::class);
+        EducationDocumentType::observe(EducationDocumentTypeObserver::class);
+        Kinship::observe(KinshipObserver::class);
+        Language::observe(LanguageObserver::class);
+        ScientificDegreeAndName::observe(ScientificDegreeObserver::class);
     }
 
     protected function registerLivewireComponents(): void

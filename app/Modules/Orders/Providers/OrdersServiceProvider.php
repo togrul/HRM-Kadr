@@ -2,6 +2,8 @@
 
 namespace App\Modules\Orders\Providers;
 
+use App\Models\OrderType;
+use App\Observers\OrderTypeObserver;
 use App\Providers\Concerns\RegistersLivewireAliases;
 use App\Services\Modules\ModuleState;
 use Illuminate\Support\Facades\Gate;
@@ -23,6 +25,7 @@ class OrdersServiceProvider extends ServiceProvider
 
         $this->loadRoutesFrom(__DIR__.'/../Routes/web.php');
         $this->loadViewsFrom(__DIR__.'/../Resources/views', 'orders');
+        $this->registerObservers();
         $this->registerPolicies();
         $this->registerLivewireComponents();
     }
@@ -52,4 +55,10 @@ class OrdersServiceProvider extends ServiceProvider
             'templates.set-type' => \App\Modules\Orders\Livewire\Templates\SetType::class,
         ];
     }
+
+    protected function registerObservers(): void
+    {
+        OrderType::observe(OrderTypeObserver::class);
+    }
 }
+

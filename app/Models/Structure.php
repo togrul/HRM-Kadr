@@ -90,7 +90,7 @@ class Structure extends Model
         return collect($list)->map(
             fn($item) => $item === $lastItem
                 ? "<span class='text-zinc-900/80'>{$item}</span>"
-                : "<span class='text-zinc-500'>{$item}</span>"
+                : "<span class='text-zinc-500'>{$item}</span>" 
         )->implode('');
     }
 

@@ -281,8 +281,8 @@ class AllOrders extends Component
             'order',
             'components',
             'status',
-            'personDidDelete',
-            'creator',
+            'personDidDelete:id,name',
+            'creator:id,name',
             'orderType',
         ])
            ->where(fn ($query) => $query

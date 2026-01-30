@@ -4,6 +4,8 @@ namespace App\Observers;
 
 use App\Models\Position;
 use App\Observers\Concerns\FlushesCallPersonnelCache;
+use App\Support\OrderLookupCache;
+use App\Support\PersonnelDropdownCache;
 use Illuminate\Support\Facades\Cache;
 
 class PositionObserver
@@ -14,6 +16,8 @@ class PositionObserver
     {
         $this->forgetCallPersonnelCache('positions');
         Cache::forget('staff:positions');
+        PersonnelDropdownCache::forgetPositions();
+        OrderLookupCache::bump('positions');
     }
 
     public function deleted(Position $position): void

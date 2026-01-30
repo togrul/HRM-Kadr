@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Models\CountryTranslation;
 use App\Observers\Concerns\FlushesCallPersonnelCache;
+use App\Support\PersonnelDropdownCache;
 use Illuminate\Support\Facades\Cache;
 
 class CountryTranslationObserver
@@ -14,6 +15,7 @@ class CountryTranslationObserver
     {
         $this->forgetCallPersonnelCache('nationalities');
         Cache::forget('nationality:azerbaijan');
+        PersonnelDropdownCache::forgetCountries();
     }
 
     public function deleted(CountryTranslation $translation): void

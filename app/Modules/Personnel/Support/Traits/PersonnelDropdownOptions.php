@@ -43,7 +43,7 @@ trait PersonnelDropdownOptions
 
     protected array $educationDocumentLabelCache = [];
 
-    #[Computed]
+    #[Computed(persist: true)]
     public function nationalityOptions(): array
     {
         return $this->countryOptions(
@@ -52,7 +52,7 @@ trait PersonnelDropdownOptions
         );
     }
 
-    #[Computed]
+    #[Computed(persist: true)]
     public function previousNationalityOptions(): array
     {
         $search = $this->dropdownSearch('searchPreviousNationality');
@@ -64,7 +64,7 @@ trait PersonnelDropdownOptions
         );
     }
 
-    #[Computed]
+    #[Computed(persist: true)]
     public function documentNationalityOptions(): array
     {
         return $this->countryOptions(
@@ -74,7 +74,7 @@ trait PersonnelDropdownOptions
         );
     }
 
-    #[Computed]
+    #[Computed(persist: true)]
     public function documentBornCountryOptions(): array
     {
         return $this->countryOptions(
@@ -84,7 +84,7 @@ trait PersonnelDropdownOptions
         );
     }
 
-    #[Computed]
+    #[Computed(persist: true)]
     public function documentCityOptions(): array
     {
         $base = City::query()
@@ -104,7 +104,7 @@ trait PersonnelDropdownOptions
         );
     }
 
-    #[Computed]
+    #[Computed(persist: true)]
     public function educationInstitutionOptions(): array
     {
         return $this->educationInstitutionOptionsFor(
@@ -114,7 +114,7 @@ trait PersonnelDropdownOptions
         );
     }
 
-    #[Computed]
+    #[Computed(persist: true)]
     public function extraEducationInstitutionOptions(): array
     {
         return $this->educationInstitutionOptionsFor(
@@ -148,7 +148,7 @@ trait PersonnelDropdownOptions
         );
     }
 
-    #[Computed]
+    #[Computed(persist: true)]
     public function educationFormOptions(): array
     {
         return $this->educationFormOptionsFor(
@@ -158,7 +158,7 @@ trait PersonnelDropdownOptions
         );
     }
 
-    #[Computed]
+    #[Computed(persist: true)]
     public function extraEducationFormOptions(): array
     {
         return $this->educationFormOptionsFor(
@@ -195,7 +195,7 @@ trait PersonnelDropdownOptions
         );
     }
 
-    #[Computed]
+    #[Computed(persist: true)]
     public function educationTypeOptions(): array
     {
         $base = EducationType::query()
@@ -220,7 +220,7 @@ trait PersonnelDropdownOptions
         );
     }
 
-    #[Computed]
+    #[Computed(persist: true)]
     public function educationDocumentTypeOptions(): array
     {
         $base = EducationDocumentType::query()
@@ -245,7 +245,7 @@ trait PersonnelDropdownOptions
         );
     }
 
-    #[Computed]
+    #[Computed(persist: true)]
     public function rankOptions(): array
     {
         return $this->rankOptionsFor(
@@ -254,7 +254,7 @@ trait PersonnelDropdownOptions
         );
     }
 
-    #[Computed]
+    #[Computed(persist: true)]
     public function militaryRankOptions(): array
     {
         return $this->rankOptionsFor(
@@ -263,7 +263,7 @@ trait PersonnelDropdownOptions
         );
     }
 
-    #[Computed]
+    #[Computed(persist: true)]
     public function rankReasonOptions(): array
     {
         return $this->rankReasonOptionsFor(
@@ -272,7 +272,7 @@ trait PersonnelDropdownOptions
         );
     }
 
-    #[Computed]
+    #[Computed(persist: true)]
     public function awardOptions(): array
     {
         return $this->awardOptionsFor(
@@ -281,7 +281,7 @@ trait PersonnelDropdownOptions
         );
     }
 
-    #[Computed]
+    #[Computed(persist: true)]
     public function punishmentOptions(): array
     {
         return $this->punishmentOptionsFor(
@@ -290,7 +290,7 @@ trait PersonnelDropdownOptions
         );
     }
 
-    #[Computed]
+    #[Computed(persist: true)]
     public function kinshipOptions(): array
     {
         return $this->kinshipOptionsFor(
@@ -327,7 +327,7 @@ trait PersonnelDropdownOptions
         );
     }
 
-    #[Computed]
+    #[Computed(persist: true)]
     public function languageOptions(): array
     {
         return $this->languageOptionsFor(
@@ -336,7 +336,7 @@ trait PersonnelDropdownOptions
         );
     }
 
-    #[Computed]
+    #[Computed(persist: true)]
     public function scientificDegreeOptions(): array
     {
         return $this->scientificDegreeOptionsFor(
@@ -345,7 +345,7 @@ trait PersonnelDropdownOptions
         );
     }
 
-    #[Computed]
+    #[Computed(persist: true)]
     public function step8DocumentTypeOptions(): array
     {
         return $this->step8DocumentTypeOptionsFor(
@@ -527,7 +527,7 @@ trait PersonnelDropdownOptions
         );
     }
 
-    #[Computed]
+    #[Computed(persist: true)]
     public function structureOptions(): array
     {
         return $this->structureOptionsFor(
@@ -536,7 +536,7 @@ trait PersonnelDropdownOptions
         );
     }
 
-    #[Computed]
+    #[Computed(persist: true)]
     public function laborStructureOptions(): array
     {
         return $this->structureOptionsFor(
@@ -545,7 +545,7 @@ trait PersonnelDropdownOptions
         );
     }
 
-    #[Computed]
+    #[Computed(persist: true)]
     public function positionOptions(): array
     {
         return $this->positionOptionsFor(
@@ -554,7 +554,7 @@ trait PersonnelDropdownOptions
         );
     }
 
-    #[Computed]
+    #[Computed(persist: true)]
     public function laborPositionOptions(): array
     {
         return $this->positionOptionsFor(
@@ -563,7 +563,7 @@ trait PersonnelDropdownOptions
         );
     }
 
-    #[Computed]
+    #[Computed(persist: true)]
     public function educationDegreeOptions(): array
     {
         $locale = app()->getLocale();
@@ -593,7 +593,7 @@ trait PersonnelDropdownOptions
         );
     }
 
-    #[Computed]
+    #[Computed(persist: true)]
     public function workNormOptions(): array
     {
         $locale = app()->getLocale();
@@ -623,7 +623,7 @@ trait PersonnelDropdownOptions
         );
     }
 
-    #[Computed]
+    #[Computed(persist: true)]
     public function socialOriginOptions(): array
     {
         $base = SocialOrigin::query()
@@ -651,7 +651,7 @@ trait PersonnelDropdownOptions
         );
     }
 
-    #[Computed]
+    #[Computed(persist: true)]
     public function disabilityOptions(): array
     {
         if (! $this->isDisabilityEnabled()) {

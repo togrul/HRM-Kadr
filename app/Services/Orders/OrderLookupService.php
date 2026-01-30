@@ -10,6 +10,7 @@ use App\Models\Position;
 use App\Models\Rank;
 use App\Models\Structure;
 use App\Services\StructureService;
+use App\Support\OrderLookupCache;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -30,7 +31,7 @@ class OrderLookupService
                 ->get();
         }
 
-        $cacheKey = 'order_lookup:templates:'.($orderId ?? 'all');
+        $cacheKey = OrderLookupCache::key('templates', (string) ($orderId ?? 'all'));
 
         return Cache::remember($cacheKey, 600, function () use ($orderId) {
             return OrderType::query()
@@ -46,7 +47,9 @@ class OrderLookupService
             return collect();
         }
 
-        return Cache::remember("order_lookup:components:{$templateId}", 600, function () use ($templateId) {
+        $cacheKey = OrderLookupCache::key('components', (string) $templateId);
+
+        return Cache::remember($cacheKey, 600, function () use ($templateId) {
             return Component::query()
                 ->with('orderType')
                 ->where('order_type_id', $templateId)
@@ -64,7 +67,9 @@ class OrderLookupService
 
     public function ranks(): Collection
     {
-        return Cache::remember('order_lookup:ranks', 600, function () {
+        $cacheKey = OrderLookupCache::key('ranks', 'all');
+
+        return Cache::remember($cacheKey, 600, function () {
             return Rank::query()
                 ->where('is_active', true)
                 ->orderBy('id')
@@ -74,7 +79,9 @@ class OrderLookupService
 
     public function mainStructures(): Collection
     {
-        return Cache::remember('order_lookup:main_structures', 600, function () {
+        $cacheKey = OrderLookupCache::key('main_structures', 'all');
+
+        return Cache::remember($cacheKey, 600, function () {
             return Structure::query()
                 ->with('parent')
                 ->where('level', 0)
@@ -92,7 +99,7 @@ class OrderLookupService
         }
 
         $accessible = implode('-', $this->structureService->getAccessibleStructures());
-        $cacheKey = 'order_lookup:structures:'.md5($accessible ?: 'all');
+        $cacheKey = OrderLookupCache::key('structures', md5($accessible ?: 'all'));
 
         return Cache::remember($cacheKey, 600, fn () => $this->structureQuery()->get());
     }
@@ -106,7 +113,9 @@ class OrderLookupService
                 ->get(['id', 'name']);
         }
 
-        return Cache::remember('order_lookup:positions', 600, function () {
+        $cacheKey = OrderLookupCache::key('positions', 'all');
+
+        return Cache::remember($cacheKey, 600, function () {
             return Position::query()
                 ->orderBy('name')
                 ->get(['id', 'name']);

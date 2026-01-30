@@ -3,6 +3,8 @@
 namespace App\Observers;
 
 use App\Models\Structure;
+use App\Support\OrderLookupCache;
+use App\Support\PersonnelDropdownCache;
 use App\Traits\ObservableTrait;
 
 class StructureObserver
@@ -19,14 +21,14 @@ class StructureObserver
         'staff:structures',
         'candidate:structures',
         'businessTrips:structures',
-        'order_lookup:main_structures',
+        'personnel:structures',
     ];
     /**
      * Handle the Structure "created" event.
      */
     public function created(Structure $structure): void
     {
-        $this->clearCaches();
+        $this->flushRelatedCaches();
     }
 
     /**
@@ -34,7 +36,7 @@ class StructureObserver
      */
     public function updated(Structure $structure): void
     {
-        $this->clearCaches();
+        $this->flushRelatedCaches();
     }
 
     /**
@@ -42,7 +44,7 @@ class StructureObserver
      */
     public function deleted(Structure $structure): void
     {
-        $this->clearCaches();
+        $this->flushRelatedCaches();
     }
 
     /**
@@ -50,7 +52,7 @@ class StructureObserver
      */
     public function restored(Structure $structure): void
     {
-        $this->clearCaches();
+        $this->flushRelatedCaches();
     }
 
     /**
@@ -58,6 +60,14 @@ class StructureObserver
      */
     public function forceDeleted(Structure $structure): void
     {
+        $this->flushRelatedCaches();
+    }
+
+    protected function flushRelatedCaches(): void
+    {
         $this->clearCaches();
+        PersonnelDropdownCache::forgetStructures();
+        OrderLookupCache::bump('main_structures');
+        OrderLookupCache::bump('structures');
     }
 }

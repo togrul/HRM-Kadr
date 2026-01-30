@@ -2,10 +2,14 @@
 
 namespace App\Modules\Services\Providers;
 
+use App\Models\Component;
 use App\Models\Menu;
+use App\Models\Rank;
 use App\Models\RoleStructure;
 use App\Models\Setting;
+use App\Observers\ComponentObserver;
 use App\Observers\MenuObserver;
+use App\Observers\RankObserver;
 use App\Observers\RoleStructureObserver;
 use App\Observers\SettingsObserver;
 use App\Providers\Concerns\RegistersLivewireAliases;
@@ -40,6 +44,8 @@ class ServicesServiceProvider extends ServiceProvider
         Setting::observe(SettingsObserver::class);
         Menu::observe(MenuObserver::class);
         RoleStructure::observe(RoleStructureObserver::class);
+        Rank::observe(RankObserver::class);
+        Component::observe(ComponentObserver::class);
     }
 
     protected function registerLivewireComponents(): void

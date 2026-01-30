@@ -41,6 +41,7 @@ class Notifications extends Component
         $cacheKey = $this->cacheKey('list', $user->id);
 
         $this->notifications = Cache::remember($cacheKey, 60, fn () => $user->notifications()
+            ->with('notifiable')
             ->orderBy('read_at')
             ->latest()
             ->take(self::NOTIFICATION_TRESHOLD)

@@ -384,7 +384,7 @@ trait OrderCrud
         $this->templateSelected((int) $value);
     }
 
-    #[Computed]
+    #[Computed(persist: true)]
     public function templateOptions(): array
     {
         $collection = $this->orderLookupService

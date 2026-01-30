@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -37,6 +38,12 @@ class StaffSchedule extends Model
     public function position(): BelongsTo
     {
         return $this->belongsTo(Position::class, 'position_id', 'id');
+    }
+
+    public function personnels(): HasMany
+    {
+        return $this->hasMany(Personnel::class, 'position_id', 'position_id')
+            ->whereColumn('structure_id', 'staff_schedules.structure_id');
     }
 
     protected static function updateMainStructureVacancy(): void

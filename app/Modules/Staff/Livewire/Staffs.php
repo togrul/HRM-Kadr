@@ -81,6 +81,9 @@ class Staffs extends Component
             'position',
             'structure' => fn ($q) => $q->withRecursive('parent', false),
         ])
+            ->withCount([
+                'personnels as filled_count' => fn ($q) => $q->whereNull('leave_work_date'),
+            ])
             ->when(! empty($this->structure), fn ($q) => $q->whereIn('structure_id', $this->structure))
             ->when(empty($this->structure), fn ($q) => $q->whereIn('structure_id', $this->accessibleStructureIds))
 
@@ -90,6 +93,11 @@ class Staffs extends Component
             })
             ->orderBy('structure_id')
             ->get();
+
+        $result->each(function ($row) {
+            $row->filled = (int) ($row->filled_count ?? $row->filled ?? 0);
+            $row->vacant = max(0, (int) ($row->total ?? 0) - $row->filled);
+        });
 
         if ($type === 'normal') {
             return $this->selectedPage === 'all'
