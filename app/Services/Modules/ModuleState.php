@@ -7,10 +7,7 @@ use Illuminate\Support\Arr;
 
 class ModuleState implements ToggleStateInterface
 {
-    public function __construct(private array $catalog = [])
-    {
-      
-    }
+    public function __construct(private array $catalog = []) {}
 
     public function enabled(string $slug): bool
     {
@@ -35,6 +32,7 @@ class ModuleState implements ToggleStateInterface
 
     public function allEnabledProviders(): array
     {
+      dd($this->catalog);
         return collect($this->catalog)
             ->filter(fn ($entry) => ($entry['enabled'] ?? false) && ! empty($entry['provider']))
             ->pluck('provider')

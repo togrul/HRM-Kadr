@@ -43,7 +43,7 @@
                         mode="default"
                         class="w-full"
                         wire:model.live="form.parent_id"
-                        :model="$this->parentStructureOptions"
+                        :model="$this->parentStructureOptions()"
                     >
                         <x-livewire-input
                             mode="gray"
