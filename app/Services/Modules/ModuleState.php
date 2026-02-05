@@ -32,7 +32,6 @@ class ModuleState implements ToggleStateInterface
 
     public function allEnabledProviders(): array
     {
-      dd($this->catalog);
         return collect($this->catalog)
             ->filter(fn ($entry) => ($entry['enabled'] ?? false) && ! empty($entry['provider']))
             ->pluck('provider')
