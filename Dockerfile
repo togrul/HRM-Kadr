@@ -29,7 +29,8 @@ RUN chown -R unit:unit /var/www/html/storage bootstrap/cache && chmod -R 775 /va
 
 COPY . .
 
-RUN chown -R unit:unit storage bootstrap/cache && chmod -R 775 storage bootstrap/cache
+RUN chown -R unit:unit /var/www/html/storage /var/www/html/bootstrap/cache
+RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
 RUN composer install --prefer-dist --optimize-autoloader --no-interaction
 
