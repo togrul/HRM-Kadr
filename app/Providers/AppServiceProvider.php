@@ -2,20 +2,16 @@
 
 namespace App\Providers;
 
-use App\Models\Menu;
-use App\Models\Setting;
-use App\Services\NumberToWordsService;
 use App\Services\Features\FeatureState;
 use App\Services\Modules\ModuleState;
+use App\Services\NumberToWordsService;
 use App\Services\Profiles\ProfileState;
 use App\Services\StructureService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
-use function Laravel\Prompts\confirm;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -56,6 +52,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Builder::macro('accessible', function (?User $user = null) {
             $ids = resolve(StructureService::class)->getAccessibleStructures($user);
+
             return empty($ids) ? $this : $this->whereIn('id', $ids);
         });
     }
@@ -75,27 +72,7 @@ class AppServiceProvider extends ServiceProvider
 
     private function registerBladeDirectives(): void
     {
-        if (! function_exists('module_enabled')) {
-            /**
-             * Check if a module is enabled.
-             */
-            function module_enabled(string $slug): bool
-            {
-                return app(\App\Services\Modules\ModuleState::class)->enabled($slug);
-            }
-        }
-
-        if (! function_exists('feature_enabled')) {
-            /**
-             * Check if a feature flag is enabled.
-             */
-            function feature_enabled(string $feature): bool
-            {
-                return app(\App\Services\Features\FeatureState::class)->enabled($feature);
-            }
-        }
-
-        Blade::if('module', fn (string $slug) => module_enabled($slug));
-        Blade::if('feature', fn (string $feature) => feature_enabled($feature));
+        Blade::if('module', fn (string $slug) => app(\App\Services\Modules\ModuleState::class)->enabled($slug));
+        Blade::if('feature', fn (string $feature) => app(\App\Services\Features\FeatureState::class)->enabled($feature));
     }
 }
