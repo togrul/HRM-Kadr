@@ -28,8 +28,8 @@ class PersonnelSeeder extends Seeder
     public function run(): void
     {
         User::firstOrCreate([
-            'name' => 'Togrul Calalli',
-            'email' => 'togrul@gmail.com',
+            'name' => 'Admin admin',
+            'email' => 'admin@gmail.com',
         ],
             [
                 'password' => '$2y$10$YST3QEd6by44ecuzGsuDI.E4lUmkwMKSRcjaAVwNOFCoLkQ8TLb1q',
