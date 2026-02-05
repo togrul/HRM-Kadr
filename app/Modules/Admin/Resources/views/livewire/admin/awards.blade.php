@@ -83,7 +83,7 @@
                         mode="default"
                         class="w-full"
                         wire:model.live="form.award_type_id"
-                        :model="$this->awardTypeOptions"
+                        :model="$this->awardTypeOptions()"
                     >
                         <x-livewire-input
                             mode="gray"
