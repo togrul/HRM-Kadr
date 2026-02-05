@@ -20,7 +20,10 @@ class ModuleServiceProvider extends ServiceProvider
 
         $catalogProviders = collect($state->allEnabledProviders());
 
-        dd($catalogProviders, $state->all());
+        if (! app()->runningInConsole()) {
+          dd($catalogProviders, $state->all());
+      }
+      
 
         $legacyProviders = collect(config('modules.enabled', []))
             ->filter(fn ($provider) => is_string($provider) && class_exists($provider));
