@@ -16,8 +16,9 @@ return new class extends Migration
         }
 
         Schema::table('order_statuses', function (Blueprint $table) {
-            $table->integer('id')->change();
-            $table->unique(['id', 'locale']);
+            if (Schema::hasColumn('order_statuses', 'locale')) {
+                $table->unique(['id', 'locale']);
+            }
         });
     }
 
