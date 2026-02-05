@@ -161,6 +161,10 @@ class PersonnelSeeder extends Seeder
             ],
         ];
 
+        $kinships = array_map(
+            fn (array $row) => $row + ['is_active' => true],
+            $kinships
+        );
         $this->upsert(Kinship::class, $kinships, ['id'], ['name_az', 'is_active']);
 
         $educationForms = [

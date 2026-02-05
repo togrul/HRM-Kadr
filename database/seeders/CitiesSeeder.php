@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\City;
+use App\Models\Country;
 use Illuminate\Database\Seeder;
 
 class CitiesSeeder extends Seeder
@@ -12,6 +13,14 @@ class CitiesSeeder extends Seeder
      */
     public function run(): void
     {
+        Country::upsert(
+            [
+                ['id' => 11, 'code' => 'AZ'],
+            ],
+            ['id'],
+            ['code']
+        );
+
         $cities = [
             ['id' => 1101, 'country_id' => 11, 'parent_id' => null, 'name' => 'Bakı'],
             ['id' => 1102, 'country_id' => 11, 'parent_id' => null, 'name' => 'Ağcabədi'],

@@ -22,9 +22,9 @@ class GlobalSeeder extends Seeder
         $this->seedOrderStatuses();
         $this->seedMenus();
         $this->seedRolesAndPermissions();
-        if($this->appType() === 'military') {
-             $this->seedRanks();
-             $this->seedSettings();
+        if ($this->appType() === 'military') {
+            $this->seedRanks();
+            $this->seedSettings();
         }
     }
 
@@ -42,6 +42,7 @@ class GlobalSeeder extends Seeder
         ];
 
         foreach ($orderStatuses as $status) {
+            OrderStatus::updateOrCreate(
                 ['id' => $status['id']],
                 Arr::only($status, ['locale', 'name'])
             );
@@ -97,6 +98,7 @@ class GlobalSeeder extends Seeder
             foreach (User::all() as $user) {
                 $user->syncRoles($role);
             }
+
             return;
         }
 
