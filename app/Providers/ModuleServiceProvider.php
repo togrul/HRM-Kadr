@@ -19,12 +19,7 @@ class ModuleServiceProvider extends ServiceProvider
         $state = $this->app->make(ModuleState::class);
 
         $catalogProviders = collect($state->allEnabledProviders());
-
-        if (! app()->runningInConsole()) {
-          dd($catalogProviders, $state->all());
-      }
       
-
         $legacyProviders = collect(config('modules.enabled', []))
             ->filter(fn ($provider) => is_string($provider) && class_exists($provider));
 
@@ -32,6 +27,10 @@ class ModuleServiceProvider extends ServiceProvider
             ->merge($legacyProviders)
             ->unique()
             ->each(fn ($provider) => $this->app->register($provider));
+
+            if (! app()->runningInConsole()) {
+              dd($catalogProviders, $legacyProviders);
+          }
 
         collect($state->enabledMigrationPaths())
             ->each(fn ($path) => $this->loadMigrationsFrom($path));
