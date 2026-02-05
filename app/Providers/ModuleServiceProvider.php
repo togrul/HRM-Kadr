@@ -28,10 +28,6 @@ class ModuleServiceProvider extends ServiceProvider
             ->unique()
             ->each(fn ($provider) => $this->app->register($provider));
 
-            if (! app()->runningInConsole()) {
-              dd($catalogProviders, $legacyProviders);
-          }
-
         collect($state->enabledMigrationPaths())
             ->each(fn ($path) => $this->loadMigrationsFrom($path));
     }
