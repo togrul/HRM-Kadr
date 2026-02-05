@@ -48,12 +48,11 @@ class GlobalSeeder extends Seeder
     private function seedMenus(): void
     {
         $appType = $this->appType();
-        $menus = (array) config('menus.global', []);
 
         foreach ($menus as $menu) {
             $types = $menu['types'] ?? [];
-            if (! empty($types) && ! in_array($appType, $types, true)) {
-                continue;
+            if (! empty($types) && ! in_array(strtolower($appType), $types, true)) {
+              continue;
             }
 
             Menu::updateOrCreate(
