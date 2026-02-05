@@ -19,6 +19,8 @@ use App\Models\SocialOrigin;
 use App\Models\User;
 use App\Models\WorkNorm;
 use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class PersonnelSeeder extends Seeder
 {
@@ -27,7 +29,7 @@ class PersonnelSeeder extends Seeder
      */
     public function run(): void
     {
-        User::firstOrCreate([
+        $adminUser = User::firstOrCreate([
             'name' => 'Admin admin',
             'email' => 'admin@gmail.com',
         ],
@@ -35,6 +37,7 @@ class PersonnelSeeder extends Seeder
                 'password' => '$2y$10$YST3QEd6by44ecuzGsuDI.E4lUmkwMKSRcjaAVwNOFCoLkQ8TLb1q',
                 'is_active' => 1,
             ]);
+        $this->seedPermissionsAndRoles($adminUser);
 
         $data = [
             [
@@ -485,6 +488,77 @@ class PersonnelSeeder extends Seeder
         }
         $this->upsert(AppealStatus::class, $appealRows, ['id'], ['name']);
 
+    }
+
+    private function seedPermissionsAndRoles(User $adminUser): void
+    {
+        $permissionNames = [
+            'access-admin',
+            'add-business_trips',
+            'add-candidates',
+            'add-leaves',
+            'add-orders',
+            'add-personnels',
+            'add-staff',
+            'add-vacations',
+            'confirmation-general',
+            'delete-business_trips',
+            'delete-candidates',
+            'delete-leaves',
+            'delete-orders',
+            'delete-personnels',
+            'delete-staff',
+            'delete-vacations',
+            'edit-business_trips',
+            'edit-candidates',
+            'edit-leaves',
+            'edit-orders',
+            'edit-personnels',
+            'edit-staff',
+            'edit-vacations',
+            'export-business_trips',
+            'export-candidates',
+            'export-leaves',
+            'export-orders',
+            'export-personnels',
+            'export-staff',
+            'export-vacations',
+            'get-notification',
+            'manage-candidates',
+            'manage-components',
+            'manage-orders',
+            'manage-settings',
+            'manage-templates',
+            'show-business_trips',
+            'show-candidates',
+            'show-leaves',
+            'show-orders',
+            'show-personnels',
+            'show-staff',
+            'show-vacations',
+            'update-personnels',
+        ];
+
+        $now = now();
+        $permissionRows = array_map(
+            fn (string $name) => [
+                'name' => $name,
+                'guard_name' => 'web',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            $permissionNames
+        );
+
+        Permission::upsert($permissionRows, ['name', 'guard_name'], ['updated_at']);
+
+        $role = Role::firstOrCreate(
+            ['name' => 'Admin', 'guard_name' => 'web'],
+            ['created_at' => $now, 'updated_at' => $now]
+        );
+
+        $role->syncPermissions($permissionNames);
+        $adminUser->syncRoles($role);
     }
 
     private function upsert(string $modelClass, array $rows, array $uniqueBy, array $updateColumns): void

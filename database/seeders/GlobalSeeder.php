@@ -6,11 +6,8 @@ use App\Models\Menu;
 use App\Models\OrderStatus;
 use App\Models\Rank;
 use App\Models\Setting;
-use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Arr;
-use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
 
 class GlobalSeeder extends Seeder
 {
@@ -21,7 +18,6 @@ class GlobalSeeder extends Seeder
     {
         $this->seedOrderStatuses();
         $this->seedMenus();
-        $this->seedRolesAndPermissions();
         if ($this->appType() === 'military') {
             $this->seedRanks();
             $this->seedSettings();
@@ -64,47 +60,6 @@ class GlobalSeeder extends Seeder
                 ['name' => $menu['name']],
                 Arr::only($menu, ['icon', 'color', 'order', 'is_active', 'url'])
             );
-        }
-    }
-
-    private function seedRolesAndPermissions(): void
-    {
-        $role = Role::updateOrCreate(
-            ['name' => 'Admin'],
-            [
-                'guard_name' => 'web',
-                'created_at' => '2023-11-03 23:49:10',
-                'updated_at' => '2023-11-03 23:50:32',
-            ]
-        );
-
-        $permissions = [
-            ['name' => 'show-staff', 'guard_name' => 'web', 'created_at' => '2023-11-04 23:01:35', 'updated_at' => '2023-11-04 23:01:35'],
-            ['name' => 'manage-staff', 'guard_name' => 'web', 'created_at' => '2023-11-04 23:01:35', 'updated_at' => '2023-11-04 23:01:35'],
-        ];
-
-        foreach ($permissions as $permission) {
-            Permission::updateOrCreate(
-                ['name' => $permission['name']],
-                Arr::only($permission, ['guard_name', 'created_at', 'updated_at'])
-            );
-        }
-
-        foreach (Permission::all() as $permission) {
-            $role->givePermissionTo($permission);
-        }
-
-        if (filter_var(env('SEED_ASSIGN_ALL_USERS', false), FILTER_VALIDATE_BOOL)) {
-            foreach (User::all() as $user) {
-                $user->syncRoles($role);
-            }
-
-            return;
-        }
-
-        $firstUser = User::query()->orderBy('id')->first();
-        if ($firstUser) {
-            $firstUser->syncRoles($role);
         }
     }
 
