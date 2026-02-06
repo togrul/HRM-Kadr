@@ -68,9 +68,9 @@ class TruncateTablesSeeder extends Seeder
             DB::table($table)->truncate();
         }
 
-        foreach ($deleteTables as $table) {
-            DB::table($table)->delete();
-        }
+        // foreach ($deleteTables as $table) {
+        //     DB::table($table)->delete();
+        // }
 
         // Re-enable foreign key checks
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
