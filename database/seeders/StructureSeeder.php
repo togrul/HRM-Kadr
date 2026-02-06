@@ -2,9 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Enums\StructureEnum;
 use App\Models\Structure;
+use App\Enums\StructureEnum;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class StructureSeeder extends Seeder
 {
@@ -24,10 +25,11 @@ class StructureSeeder extends Seeder
 
     private function fakeStructureData(): void
     {
+        DB::table('structures')->truncate();
         $structures = [
             [
                 'id' => 1,
-                'parent_id' => 0,
+                'parent_id' => null,
                 'name' => 'Azərbaycan Respublikası Təhsil Nazirliyi',
                 'shortname' => 'Təhsil Nazirliyi',
                 'code' => 1,
