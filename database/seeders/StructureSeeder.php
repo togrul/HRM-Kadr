@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Enums\StructureEnum;
 use App\Models\Structure;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Schema;
 
 class StructureSeeder extends Seeder
 {
@@ -14,7 +13,7 @@ class StructureSeeder extends Seeder
      */
     public function run(): void
     {
-        $appType = (string) config('app.app_type', env('APP_TYPE', 'public'));
+        $appType = (string) config('app.app_type', 'public');
         if ($appType === 'military') {
             $this->militaryStructureData();
 
@@ -26,9 +25,6 @@ class StructureSeeder extends Seeder
 
     private function fakeStructureData(): void
     {
-        Schema::disableForeignKeyConstraints();
-        Structure::query()->delete();
-        Schema::enableForeignKeyConstraints();
         $structures = [
             [
                 'id' => 1,

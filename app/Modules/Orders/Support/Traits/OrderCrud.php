@@ -5,57 +5,61 @@ namespace App\Modules\Orders\Support\Traits;
 use App\Livewire\Forms\Orders\OrderForm;
 use App\Livewire\Forms\Orders\OrderSearchForm;
 use App\Livewire\Forms\Orders\SelectedPersonnelForm;
+use App\Models\Candidate;
+use App\Models\Component;
+use App\Models\Order;
+use App\Models\OrderStatus;
+use App\Models\OrderType;
+use App\Models\Personnel;
+use App\Models\PersonnelBusinessTrip;
 use App\Modules\Admin\Support\Traits\Admin\CallSwalTrait;
 use App\Modules\Orders\Support\Traits\Orders\DropdownLabelCache;
+use App\Modules\Orders\Support\Traits\Orders\HandlesOrderComponentFieldState;
 use App\Modules\Orders\Support\Traits\Orders\HandlesOrderVacancy;
 use App\Modules\Orders\Support\Traits\Orders\ManagesOrderComponents;
 use App\Modules\Orders\Support\Traits\Orders\ResolvesOrderLookups;
 use App\Modules\Orders\Support\Traits\SRP\BladeDataPreparation;
 use App\Modules\Orders\Support\Traits\Validations\OrderValidationTrait;
-use App\Models\Candidate;
-use App\Models\Order;
-use App\Models\OrderStatus;
-use App\Models\OrderType;
-use App\Models\Component;
-use App\Models\Personnel;
-use App\Models\PersonnelBusinessTrip;
-use App\Models\PersonnelVacation;
-use App\Models\Position;
-use App\Models\Rank;
-use App\Services\CheckVacancyService;
 use App\Services\Orders\OrderAttributePersister;
 use App\Services\Orders\OrderComponentPersister;
+use App\Services\Orders\OrderCrudPipelineService;
 use App\Services\Orders\OrderLookupService;
 use App\Services\Orders\OrderPersonnelPersister;
 use App\Services\Orders\OrderRenderPayloadBuilder;
 use App\Services\Orders\VacancyDiffService;
 use App\Services\Orders\VacationCleanupService;
-use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
-use Livewire\Attributes\Isolate;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Isolate;
 use Livewire\Attributes\On;
 
 trait OrderCrud
 {
     use BladeDataPreparation;
-    use OrderValidationTrait;
     use CallSwalTrait;
     use DropdownLabelCache;
-    use ManagesOrderComponents;
-    use ResolvesOrderLookups;
+    use HandlesOrderComponentFieldState;
     use HandlesOrderVacancy;
+    use ManagesOrderComponents;
+    use OrderValidationTrait;
+    use ResolvesOrderLookups;
 
     protected OrderLookupService $orderLookupService;
+
     protected OrderComponentPersister $componentPersister;
+
+    protected OrderCrudPipelineService $crudPipelineService;
+
     protected OrderPersonnelPersister $personnelPersister;
 
     /**
      * Cheap in-memory cache for lookup datasets that rarely change during a component lifecycle.
      */
     public OrderForm $orderForm;
+
     public OrderSearchForm $search;
+
     public SelectedPersonnelForm $selectedPersonnel;
 
     public string $title;
@@ -84,203 +88,15 @@ trait OrderCrud
      */
     protected array $componentDefinitions = [];
 
-    public function updated($propertyName, $value)
-    {
-        if ($this->handleComponentPropertyMutation($propertyName, $value)) {
-            return;
-        }
-    }
-    protected function structureLabelForRow(?int $row, int $structureId): string
-    {
-        $lineage = $this->structureLineage($structureId);
-
-        if (empty($lineage)) {
-            return '---';
-        }
-
-        $isCoded = $row !== null ? (bool) ($this->coded_list[$row] ?? false) : false;
-
-        if ($isCoded) {
-            return $this->buildStructureValue($lineage, true);
-        }
-
-        return optional(collect($lineage)->last())['name'] ?? '---';
-    }
-
-    protected function resolveStructureLabel(int $id, bool $isCoded): string
-    {
-        $lineage = $this->structureLineage($id);
-
-        if (empty($lineage)) {
-            return '---';
-        }
-
-        return $this->buildStructureValue($lineage, $isCoded);
-    }
-
-    protected function optionsFromCollection(Collection $collection, callable $labelResolver): array
-    {
-        return $collection
-            ->map(fn ($item) => [
-                'id' => (int) data_get($item, 'id'),
-                'label' => (string) $labelResolver($item),
-            ])
-            ->unique('id')
-            ->values()
-            ->all();
-    }
-
-    protected function normalizeVacancyEntries(array $entries): array
-    {
-        return collect($entries)
-            ->values()
-            ->map(function ($entry, $idx) {
-                $structureId = $this->valueAsInt($entry, 'structure_id');
-                $positionId = $this->valueAsInt($entry, 'position_id');
-                $personnelId = $this->valueAsInt($entry, 'personnel_id')
-                    ?? $this->valueAsInt($this->componentForms[$idx] ?? [], 'personnel_id');
-                $componentId = $this->valueAsInt($entry, 'component_id')
-                    ?? $this->valueAsInt($this->componentForms[$idx] ?? [], 'component_id');
-
-                if (! $structureId || ! $positionId || ! $componentId) {
-                    return null;
-                }
-
-                return [
-                    'structure_id' => $structureId,
-                    'position_id' => $positionId,
-                    'personnel_id' => $personnelId,
-                    'component_id' => $componentId,
-                    'structure_label' => $this->dropdownFieldLabel('structure_id', $structureId),
-                    'position_label' => $this->dropdownFieldLabel('position_id', $positionId),
-                ];
-            })
-            ->filter()
-            ->values()
-            ->all();
-    }
-
-    protected function valueAsInt($entry, string $field): ?int
-    {
-        $value = data_get($entry, $field);
-
-        if (is_array($value)) {
-            $value = $value['id'] ?? null;
-        }
-
-        return $value !== null ? (int) $value : null;
-    }
-
-    protected function personnelOptionLabel($model): string
-    {
-        $parts = array_filter([
-            data_get($model, 'surname'),
-            data_get($model, 'name'),
-            data_get($model, 'patronymic'),
-        ]);
-
-        if (! empty($parts)) {
-            return trim(implode(' ', $parts));
-        }
-
-        return (string) data_get($model, 'fullname', '');
-    }
-
-    protected function attributeValuePayload(string $field, $value, int $row = null)
-    {
-        if (! $this->isDropdownField($field)) {
-            return $value;
-        }
-
-        $id = $value !== null ? (int) $value : null;
-
-        return [
-            'id' => $id,
-            'name' => $id ? $this->dropdownFieldLabel($field, $id, $row) : '---',
-        ];
-    }
-
-    public function componentFieldLabel(int $row, string $field): string
-    {
-        $value = data_get($this->componentForms[$row] ?? [], $field);
-
-        if (is_array($value) && array_key_exists('name', $value)) {
-            return (string) $value['name'];
-        }
-
-        if ($this->isDropdownField($field)) {
-            $resolvedValue = is_array($value) ? ($value['id'] ?? null) : $value;
-
-            return $this->dropdownFieldLabel($field, $resolvedValue, $row);
-        }
-
-        return $value ?: '---';
-    }
-
-    public function componentFieldValue(int $row, string $field)
-    {
-        $value = data_get($this->componentForms[$row] ?? [], $field);
-
-        if (is_array($value)) {
-            return $value['id'] ?? null;
-        }
-
-        return $value;
-    }
-
-    protected function handleComponentPropertyMutation(string $propertyName, $value): bool
-    {
-        if (! str_starts_with($propertyName, 'componentForms.')) {
-            return false;
-        }
-
-        $segments = explode('.', $propertyName);
-        if (count($segments) < 3) {
-            return false;
-        }
-
-        [, $rowIndex, $field] = $segments;
-        $row = is_numeric($rowIndex) ? (int) $rowIndex : null;
-
-        if ($row !== null && $this->isDropdownField($field)) {
-            $value = $value !== null ? (int) $value : null;
-            $this->componentForms[$row][$field] = $value;
-        }
-
-        if ($field === 'component_id') {
-            $this->componentSelected($value, $row);
-
-            return true;
-        }
-
-        if ($field === 'personnel_id' && $row !== null) {
-            $this->updatePersonnelName($value, $row);
-        }
-
-        if ($field === 'structure_main_id' && $row !== null) {
-            $this->coded_list[$row] = (int) $value === 1;
-            $this->componentForms[$row]['structure_id'] = null;
-            unset($this->componentForms[$row]['structure'], $this->componentForms[$row]['structure_name']);
-        }
-
-        if (in_array($field, ['start_date', 'end_date'], true) && $row !== null) {
-            if (! empty($this->componentForms[$row]['start_date']) && ! empty($this->componentForms[$row]['end_date'])) {
-                $start_dt = Carbon::createFromDate($this->componentForms[$row]['start_date']);
-                $end_dt = Carbon::createFromDate($this->componentForms[$row]['end_date']);
-                $this->componentForms[$row]['days'] = $start_dt->diffInDays($end_dt);
-            }
-        }
-
-        return true;
-    }
-
     public function bootOrderCrud(
         OrderLookupService $orderLookupService,
         OrderComponentPersister $componentPersister,
+        OrderCrudPipelineService $crudPipelineService,
         OrderPersonnelPersister $personnelPersister
     ): void {
         $this->orderLookupService = $orderLookupService;
         $this->componentPersister = $componentPersister;
+        $this->crudPipelineService = $crudPipelineService;
         $this->personnelPersister = $personnelPersister;
     }
 
@@ -433,7 +249,7 @@ trait OrderCrud
                     'structure_id' => '$structure',
                     'position_id' => '$position',
                     'component_id', 'row' => $keyComponent,
-                    default => '$' . $keyComponent
+                    default => '$'.$keyComponent
                 };
 
                 $_modified_component[$key][$_edit_key] = $this->attributeValuePayload($keyComponent, $valueComponent, $key);
@@ -445,8 +261,15 @@ trait OrderCrud
 
     private function fillCrudData(): array|\Livewire\Features\SupportEvents\Event
     {
-        $this->runOrderValidation();
-        $data = $this->prepareToCrud();
+        $data = $this->crudPipelineService->validateAndPrepare(
+            selectedBlade: (string) $this->selectedBlade,
+            validationRules: $this->validationRules(),
+            validate: fn (array $rules) => $this->validate($rules),
+            prepareDefaultBladeData: fn () => $this->prepareDefaultBladeData(),
+            prepareBusinessTripBladeData: fn () => $this->prepareBusinessTripBladeData(),
+            prepareVacationBladeData: fn () => $this->prepareVacationBladeData(),
+            resolveVacancyData: fn (array $bladeData) => $this->resolveVacancyData($bladeData),
+        );
         $message = $data['message'];
 
         if (! empty($message)) {
@@ -459,54 +282,6 @@ trait OrderCrud
             'component_ids' => $data['component_ids'],
             'vacancy_list' => $data['vacancy_list'],
         ];
-    }
-
-    private function prepareToCrud(): array
-    {
-        $message = '';
-        $list_for_vacancy = [];
-
-        switch ($this->selectedBlade) {
-            case Order::BLADE_DEFAULT:
-                $bladeData = $this->prepareDefaultBladeData();
-                break;
-            case Order::BLADE_BUSINESS_TRIP:
-                $bladeData = $this->prepareBusinessTripBladeData();
-                break;
-            default:
-                $bladeData = $this->prepareVacationBladeData();
-        }
-
-        [$list_for_vacancy, $message] = $this->resolveVacancyData($bladeData);
-        return [
-            'attributes' => $bladeData['attributes'] ?? [],
-            'personnel_ids' => $bladeData['personnel_ids'] ?? [],
-            'component_ids' => $bladeData['component_ids'] ?? [],
-            'vacancy_list' => $list_for_vacancy,
-            'message' => $message,
-        ];
-    }
-
-    protected function runOrderValidation(): void
-    {
-        $rules = $this->validationRules();
-        $this->validate($this->mergeValidationRules($rules['main'], $rules['dynamic']));
-    }
-
-    protected function mergeValidationRules(array ...$buckets): array
-    {
-        $merged = [];
-
-        foreach ($buckets as $bucket) {
-            foreach ($bucket as $key => $rule) {
-                if ($rule === '' || $rule === null) {
-                    continue;
-                }
-                $merged[$key] = $rule;
-            }
-        }
-
-        return $merged;
     }
 
     private function diffVacancyPayload(array $current, array $original): array
@@ -528,6 +303,7 @@ trait OrderCrud
             $this->selectedPersonnel->resetState();
         }
     }
+
     private function saveAttribute($orderModel, $_attributes, $method): void
     {
         (new OrderAttributePersister)->persist($orderModel, $_attributes, $method);
@@ -596,6 +372,7 @@ trait OrderCrud
             $componentId = $component['component_id'] ?? null;
             if (empty($componentId)) {
                 $this->selectedComponents[$row] = [];
+
                 continue;
             }
 

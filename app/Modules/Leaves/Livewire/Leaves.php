@@ -2,21 +2,22 @@
 
 namespace App\Modules\Leaves\Livewire;
 
+use App\Data\LeaveFilterData;
+use App\Livewire\Traits\DropdownConstructTrait;
+use App\Livewire\Traits\SideModalAction;
 use App\Models\Leave;
-use Livewire\Component;
 use App\Models\OrderStatus;
-use Livewire\Attributes\On;
+use App\Modules\Leaves\Exports\LeaveExport;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
+use Livewire\Component;
 use Livewire\WithPagination;
-use Illuminate\Support\Facades\DB;
-use App\Livewire\Traits\SideModalAction;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use App\Livewire\Traits\DropdownConstructTrait;
-use App\Data\LeaveFilterData;
 use Maatwebsite\Excel\Facades\Excel;
-use App\Modules\Leaves\Exports\LeaveExport;
 
 #[On(['leaveAdded', 'filterSelected', 'leaveWasDeleted', 'leaveApproved', 'leaveRejected'])]
 class Leaves extends Component
@@ -126,7 +127,7 @@ class Leaves extends Component
     public function getTableHeaders(): array
     {
         return [
-           '#',
+            '#',
             __('Fullname'),
             __('Type'),
             __('Dates'),
@@ -139,18 +140,18 @@ class Leaves extends Component
         ];
     }
 
-    #[Computed(cache:true)]
+    #[Computed(cache: true)]
     public function leaveTypes(): array
     {
         $selected = $this->filter->leave_type_id;
 
         $base = \App\Models\LeaveType::query()
-            ->select('id', DB::raw("name as label"))
+            ->select('id', DB::raw('name as label'))
             ->orderBy('id');
 
         return $this->optionsWithSelected(
             base: $base,
-            searchCol: '',   
+            searchCol: '',
             searchTerm: '',
             selectedId: $selected,
             limit: 80
@@ -168,14 +169,14 @@ class Leaves extends Component
     protected function returnData($type = 'normal')
     {
         $base = Leave::query()
-            ->when(is_numeric($this->status), fn($q) => $q->where('status_id', $this->status))
-            ->when($this->status === 'deleted', fn($q) => $q->onlyTrashed())
+            ->when(is_numeric($this->status), fn ($q) => $q->where('status_id', $this->status))
+            ->when($this->status === 'deleted', fn ($q) => $q->onlyTrashed())
             ->filter($this->search);
 
         // Liste (eager load + paginate)
         $result = $base->clone()
             ->with([
-                 'personnel' => fn ($q) => $q
+                'personnel' => fn ($q) => $q
                     ->withStructureTree()   // burada parent zincirini preload eder
                     ->with([
                         'position:id,name',
@@ -189,11 +190,11 @@ class Leaves extends Component
                     ]),
                 'leaveType',
                 'status',
-                'latestLog.changedBy'
+                'latestLog.changedBy',
             ])
             ->orderByDesc('created_at');
 
-        return match($type) {
+        return match ($type) {
             'stats' => $this->computeStats($base),
             default => $this->finalizePagination($result, $type),
         };
@@ -208,7 +209,6 @@ class Leaves extends Component
         return $this->statsCache = $base->clone()
             ->join('leave_types as t', 't.id', '=', 'leaves.leave_type_id')
             ->select(
-                'leaves.*',
                 't.name as name',
                 DB::raw('COUNT(*) as count'),
                 DB::raw('SUM(DATEDIFF(ends_at, starts_at) + 1) as total_days')
@@ -236,8 +236,7 @@ class Leaves extends Component
     public function render()
     {
         $permits = $this->returnData();
-
-        $_appeal_statuses = OrderStatus::query()->where('locale', config('app.locale'))->get();
+        $_appeal_statuses = $this->appealStatuses();
 
         $stats = $this->returnData('stats');
 
@@ -248,5 +247,19 @@ class Leaves extends Component
     {
         $this->filter = LeaveFilterData::fromArray($filters);
         $this->applyFilter();
+    }
+
+    #[Computed(cache: true, persist: true)]
+    public function appealStatuses()
+    {
+        $locale = config('app.locale');
+
+        return Cache::remember(
+            "leaves:statuses:{$locale}",
+            now()->addMinutes(10),
+            fn () => OrderStatus::query()
+                ->where('locale', $locale)
+                ->get()
+        );
     }
 }

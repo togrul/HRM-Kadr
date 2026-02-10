@@ -3,7 +3,6 @@
 namespace App\Modules\Notifications\Livewire;
 
 use Illuminate\Http\Response;
-use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -11,8 +10,11 @@ use Livewire\Component;
 class Notifications extends Component
 {
     const NOTIFICATION_TRESHOLD = 10;
+
     public $notifications;
+
     public $notificationCount;
+
     public bool $isLoading;
 
     public function mount()
@@ -29,7 +31,7 @@ class Notifications extends Component
 
         $this->notificationCount = Cache::remember($cacheKey, 60, fn () => $user->unreadNotifications()->count());
 
-        if($this->notificationCount > self::NOTIFICATION_TRESHOLD) {
+        if ($this->notificationCount > self::NOTIFICATION_TRESHOLD) {
             $this->notificationCount = self::NOTIFICATION_TRESHOLD.'+';
         }
     }
@@ -55,7 +57,7 @@ class Notifications extends Component
         auth()->guest() && abort(Response::HTTP_FORBIDDEN);
 
         $user = auth()->user();
-        $user->unreadNotifications->markAsRead();
+        $user->unreadNotifications()->update(['read_at' => now()]);
         $this->flushCache($user->id);
 
         $this->getNotificationCount();
@@ -66,17 +68,19 @@ class Notifications extends Component
     {
         auth()->guest() && abort(Response::HTTP_FORBIDDEN);
 
-        $notification = DatabaseNotification::findOrFail($notificationId);
+        $user = auth()->user();
+        $notification = $user->notifications()->whereKey($notificationId)->firstOrFail();
         $type = $notification->data['type'] ?? 'default';
 
-        $route = match($type) {
+        $route = match ($type) {
             'Personnel', 'Birthday' => 'home',
             'Leave', 'leave' => 'leaves',
             default => 'notifications',
         };
 
         $notification->markAsRead();
-        $this->flushCache($notification->notifiable_id);
+        $this->flushCache($user->id);
+
         return $this->redirectRoute($route);
     }
 

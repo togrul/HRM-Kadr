@@ -2,20 +2,20 @@
 
 namespace App\Models;
 
-use Carbon\Carbon;
-use App\Traits\DateCastTrait;
-use Spatie\Activitylog\LogOptions;
 use App\Observers\PersonnelObserver;
+use App\Traits\DateCastTrait;
 use App\Traits\NestedStructureTrait;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
-use Spatie\Activitylog\Traits\LogsActivity;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 #[ObservedBy(PersonnelObserver::class)]
 class Personnel extends Model
@@ -104,6 +104,8 @@ class Personnel extends Model
         'surname', 'name', 'patronymic', 'tabel_no', 'pin',
     ];
 
+    protected ?string $positionLabelCache = null;
+
     public function getFullnameAttribute(): string
     {
         return "{$this->surname} {$this->name} {$this->patronymic}";
@@ -145,7 +147,7 @@ class Personnel extends Model
     {
         $query->with([
             'structure' => fn ($q) => $q
-                ->select('id','parent_id','name')
+                ->select('id', 'parent_id', 'name')
                 ->withRecursive('parent', false),
         ]);
     }
@@ -459,17 +461,23 @@ class Personnel extends Model
 
     public function getPositionLabelAttribute(): string
     {
-        $name = $this->position?->name ?? '';
-        if (! $name) return '';
+        if ($this->positionLabelCache !== null) {
+            return $this->positionLabelCache;
+        }
 
-        $currentWork = $this->relationLoaded('currentWork') ? $this->currentWork : $this->currentWork()->first();
+        $name = $this->position?->name ?? '';
+        if (! $name) {
+            return $this->positionLabelCache = '';
+        }
+
+        $currentWork = $this->relationLoaded('currentWork') ? $this->currentWork : null;
         if (! $currentWork || ! $currentWork->is_current || $currentWork->leave_date) {
-            return $name;
+            return $this->positionLabelCache = $name;
         }
         $name = $currentWork->position ?? $name;
         $positionStart = $currentWork->join_date ?? $this->join_date ?? Carbon::now();
 
-        return $this->disposalTaggedLabel($name, $positionStart, true);
+        return $this->positionLabelCache = $this->disposalTaggedLabel($name, $positionStart, true);
     }
 
     /**
@@ -488,7 +496,7 @@ class Personnel extends Model
 
         $disposal = $this->relationLoaded('latestDisposal')
             ? $this->latestDisposal
-            : $this->latestDisposal()->first();
+            : null;
 
         if (! $disposal) {
             return $label;
@@ -578,6 +586,7 @@ class Personnel extends Model
 
             if (is_array($value)) {
                 $this->applyRangeFilter($query, $field, $value);
+
                 continue;
             }
 
@@ -751,7 +760,7 @@ class Personnel extends Model
 
         return $query->where(function (Builder $q) use ($term) {
             $q->where('name', 'like', "%{$term}%")
-              ->orWhere('surname', 'like', "%{$term}%");
+                ->orWhere('surname', 'like', "%{$term}%");
         });
     }
 

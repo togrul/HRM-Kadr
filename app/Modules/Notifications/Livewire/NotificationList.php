@@ -11,9 +11,11 @@ class NotificationList extends Component
 
     const NOTIFICATION_THRESHOLD = 20;
 
-    public function mount()
+    public function mount(): void
     {
-        auth()->user()->unreadNotifications->markAsRead();
+        auth()->user()
+            ?->unreadNotifications()
+            ->update(['read_at' => now()]);
     }
 
     public function clearNotifications(): void

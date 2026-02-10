@@ -2,15 +2,14 @@
 
 namespace App\Providers;
 
+use App\Models\User;
 use App\Services\Features\FeatureState;
-use App\Services\Modules\ModuleState;
 use App\Services\NumberToWordsService;
 use App\Services\Profiles\ProfileState;
 use App\Services\StructureService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -22,13 +21,12 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->singleton(ProfileState::class, fn () => new ProfileState(
             config('profiles.profiles', []),
-            config('profiles.active', env('APP_PROFILE', 'default')),
+            (string) config('profiles.active', 'default'),
             config('modules.catalog', []),
         ));
 
         $this->app->singleton(NumberToWordsService::class, fn () => new NumberToWordsService);
         $this->app->singleton(StructureService::class, fn () => new StructureService);
-        $this->app->singleton(ModuleState::class, fn () => new ModuleState(config('modules.catalog', [])));
         $this->app->singleton(FeatureState::class, fn () => new FeatureState($this->app->make(ProfileState::class)->features()));
     }
 

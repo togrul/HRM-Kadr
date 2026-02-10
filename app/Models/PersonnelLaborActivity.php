@@ -4,9 +4,9 @@ namespace App\Models;
 
 use App\Traits\DateCastTrait;
 use App\Traits\PersonnelTrait;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Carbon\Carbon;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -57,24 +57,7 @@ class PersonnelLaborActivity extends Model
         if ($label === '') {
             return '';
         }
-
-        static $personnelCache = [];
-
         $personnel = $this->relationLoaded('personnel') ? $this->personnel : null;
-        $cacheKey = $this->tabel_no ?? null;
-
-        if (! $personnel && $cacheKey !== null && array_key_exists($cacheKey, $personnelCache)) {
-            $personnel = $personnelCache[$cacheKey];
-        }
-
-        if (! $personnel) {
-            $personnel = $this->personnel()
-                ->with(['latestDisposal', 'currentWork'])
-                ->first();
-            if ($cacheKey !== null) {
-                $personnelCache[$cacheKey] = $personnel;
-            }
-        }
 
         if (! $personnel) {
             return $label;
@@ -90,7 +73,7 @@ class PersonnelLaborActivity extends Model
         // Tag only if this activity is the person's current work record.
         $currentWork = $personnel->relationLoaded('currentWork')
             ? $personnel->currentWork
-            : $personnel->currentWork()->first();
+            : null;
 
         if (! $currentWork || $currentWork->id !== $this->id) {
             return $label;
