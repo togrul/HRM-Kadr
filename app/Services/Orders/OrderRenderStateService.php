@@ -1,15 +1,17 @@
 <?php
 
-namespace App\Modules\Orders\Support\Traits\Orders;
+namespace App\Services\Orders;
 
-use App\Services\Orders\OrderLookupService;
-use Illuminate\Support\Collection;
-
-trait ResolvesOrderLookups
+class OrderRenderStateService
 {
-    protected OrderLookupService $orderLookupService;
     protected array $staticLookups = [];
+
     protected array $lookupCache = [];
+
+    public function __construct(
+        protected OrderLookupService $orderLookupService,
+        protected OrderRenderPayloadBuilder $payloadBuilder
+    ) {}
 
     protected function cachedLookup(string $key, callable $resolver)
     {
@@ -31,7 +33,7 @@ trait ResolvesOrderLookups
         return $this->lookupCache[$hash];
     }
 
-    protected function resolveLookupCollections(
+    public function resolveLookupCollections(
         bool $needsPersonnelLookup,
         bool $isCandidateOrder,
         ?int $selectedOrder,
@@ -40,7 +42,8 @@ trait ResolvesOrderLookups
         string $searchPersonnel,
         string $searchStructure,
         string $searchPosition,
-        array $personnelIdList
+        array $personnelIdList,
+        callable $rememberComponentDefinitions
     ): array {
         $components = $this->memoizedLookup(
             'components',
@@ -76,10 +79,26 @@ trait ResolvesOrderLookups
             ),
         ];
 
-        $this->rememberComponentDefinitions($components);
+        $rememberComponentDefinitions($components);
 
         return $lookups;
     }
 
-    abstract protected function rememberComponentDefinitions(Collection $components): void;
+    public function buildRenderPayload(
+        array $lookups,
+        ?string $selectedBlade,
+        ?string $personnelName,
+        array $selectedPersonnelNumbers,
+        callable $registerOptionLabels,
+        callable $personnelLabelResolver
+    ): array {
+        return $this->payloadBuilder->build(
+            $lookups,
+            $selectedBlade,
+            $personnelName,
+            $selectedPersonnelNumbers,
+            $registerOptionLabels,
+            $personnelLabelResolver
+        );
+    }
 }

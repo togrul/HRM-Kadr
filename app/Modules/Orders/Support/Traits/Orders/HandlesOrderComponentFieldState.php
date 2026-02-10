@@ -169,4 +169,34 @@ trait HandlesOrderComponentFieldState
 
         return true;
     }
+
+    protected function syncSelectedComponentsFromLookup(): void
+    {
+        foreach ($this->componentForms as $row => $component) {
+            $componentId = $component['component_id'] ?? null;
+            if (empty($componentId)) {
+                $this->selectedComponents[$row] = [];
+
+                continue;
+            }
+
+            $definition = $this->componentDefinitions[(int) $componentId]['dynamic_fields'] ?? null;
+
+            $this->selectedComponents[$row] = $definition
+                ? array_filter(explode(',', (string) $definition))
+                : [];
+        }
+    }
+
+    protected function rememberComponentDefinitions(Collection $componentForms): void
+    {
+        $this->componentDefinitions = $componentForms
+            ->mapWithKeys(fn ($component) => [
+                (int) $component->id => [
+                    'id' => (int) $component->id,
+                    'dynamic_fields' => $component->dynamic_fields,
+                ],
+            ])
+            ->all();
+    }
 }
