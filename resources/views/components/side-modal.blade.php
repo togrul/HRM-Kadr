@@ -92,9 +92,21 @@
               {{ $slot }}
              </div>
              <div class="relative flex-1 px-4 sm:px-6" wire:loading>
-                <div class="flex flex-col items-center justify-center w-full h-full">
-                  <h1 class="text-2xl font-medium uppercase">{{ __('Loading') }}...</h1>
-                  <x-modal-loading />
+                <div class="w-full space-y-4 animate-pulse">
+                    <div class="h-6 rounded-md w-52 bg-slate-200"></div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="h-10 rounded-lg bg-slate-200"></div>
+                        <div class="h-10 rounded-lg bg-slate-200"></div>
+                        <div class="h-10 rounded-lg bg-slate-200"></div>
+                        <div class="h-10 rounded-lg bg-slate-200"></div>
+                    </div>
+                    <div class="h-24 rounded-lg bg-slate-200"></div>
+                    <div class="grid grid-cols-3 gap-3">
+                        <div class="h-10 rounded-lg bg-slate-200"></div>
+                        <div class="h-10 rounded-lg bg-slate-200"></div>
+                        <div class="h-10 rounded-lg bg-slate-200"></div>
+                    </div>
+                    <div class="h-12 rounded-lg bg-slate-200"></div>
                 </div>
              </div>
 

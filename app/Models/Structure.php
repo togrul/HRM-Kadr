@@ -25,8 +25,6 @@ class Structure extends Model
         'level',
     ];
 
-    protected $appends = ['name_with_parent'];
-
     public $timestamps = false;
 
     public function parent(): BelongsTo

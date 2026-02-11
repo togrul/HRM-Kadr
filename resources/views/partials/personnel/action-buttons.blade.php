@@ -18,7 +18,7 @@
             </x-action-button>
         @endcan
 
-        <x-filter-button :filters="$filters" />
+        <x-filter-button :filters="$filters" wire:click="openFilter" />
     </div>
 
     @if (count($filters) > 0)

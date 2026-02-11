@@ -15,8 +15,10 @@ use App\Modules\Personnel\Support\Traits\RelationCruds\RelationCrudTrait;
 use App\Models\Personnel;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Livewire\Attributes\Isolate;
 use Livewire\Component;
 
+#[Isolate]
 class EditPersonnel extends Component
 {
     use AuthorizesRequests;
@@ -45,6 +47,8 @@ class EditPersonnel extends Component
 
     public ?int $loadedPersonnelId = null;
 
+    public bool $stepDataInitialized = false;
+
     /** @var array<string> */
     protected array $relationGroupsLoaded = [];
 
@@ -57,7 +61,16 @@ class EditPersonnel extends Component
         $this->title = __('Edit personnel');
         $this->step = 1;
         $this->resetStepTrackingFor($this->personnelModelData->getKey());
-        $this->loadStepData(1);
+    }
+
+    public function initStepData(): void
+    {
+        if ($this->stepDataInitialized) {
+            return;
+        }
+
+        $this->loadStepData((int) $this->step);
+        $this->stepDataInitialized = true;
     }
 
     public function confirmPersonnel(): void
@@ -68,6 +81,7 @@ class EditPersonnel extends Component
 
     public function store()
     {
+        $this->initStepData();
         $this->authorize('update', $this->personnelModelData);
         $currentStep = (int) $this->step;
 
@@ -172,6 +186,7 @@ class EditPersonnel extends Component
     protected function onStepChanged(int $step): void
     {
         $this->loadStepData($step);
+        $this->stepDataInitialized = true;
     }
 
     protected function loadStepData(int $step): void
@@ -213,21 +228,25 @@ class EditPersonnel extends Component
     protected function loadPersonalFormData(): void
     {
         if (isset($this->personalForm)) {
-            $this->ensureRelationsLoaded('personal', function () {
+            $locale = app()->getLocale();
+            $educationDegreeColumn = "title_{$locale}";
+            $workNormColumn = "name_{$locale}";
+
+            $this->ensureRelationsLoaded('personal', function () use ($educationDegreeColumn, $workNormColumn) {
                 $this->personnelModelData->loadMissing([
-                    'nationality',
-                    'previousNationality',
-                    'educationDegree',
-                    'structure',
-                    'position',
-                    'disability',
-                    'workNorm',
-                    'socialOrigin',
+                    'nationality:country_id,locale,title',
+                    'previousNationality:country_id,locale,title',
+                    "educationDegree:id,{$educationDegreeColumn}",
+                    'structure:id,name,parent_id',
+                    'position:id,name',
+                    'disability:id,name',
+                    "workNorm:id,{$workNormColumn}",
+                    'socialOrigin:id,name',
                 ]);
             });
 
             $this->registerPersonalDropdownLabels();
-            $this->personalForm->fillFromModel($this->personnelModelData);
+            $this->personalForm->fillFromModel($this->personnelModelData, false);
         }
     }
 
@@ -355,6 +374,7 @@ class EditPersonnel extends Component
         $this->loadedSteps = [];
         $this->loadedAllSteps = false;
         $this->relationGroupsLoaded = [];
+        $this->stepDataInitialized = false;
         $this->resetDropdownLabelCache();
     }
 

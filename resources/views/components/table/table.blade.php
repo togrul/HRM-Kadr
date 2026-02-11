@@ -16,7 +16,7 @@
         </tr>
         </thead>
 
-        <tbody class="pb-4 md:pb-12 content-visibility-auto contain-intrinsic-size-auto max-md:flex max-md:w-full max-md:flex-col max-md:gap-4">
+      <tbody class="pb-4 md:pb-12 content-visibility-auto contain-intrinsic-size-auto max-md:flex max-md:w-full max-md:flex-col max-md:gap-4">
         {{ $slot }}
         </tbody>
     </table>

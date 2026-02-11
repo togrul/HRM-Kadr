@@ -13,7 +13,7 @@ use Livewire\Attributes\Computed;
 
 trait PersonnelDropdownGeoEducationOptions
 {
-    #[Computed(persist: true)]
+    #[Computed]
     public function nationalityOptions(): array
     {
         return $this->countryOptions(
@@ -22,7 +22,7 @@ trait PersonnelDropdownGeoEducationOptions
         );
     }
 
-    #[Computed(persist: true)]
+    #[Computed]
     public function previousNationalityOptions(): array
     {
         $search = $this->dropdownSearch('searchPreviousNationality');
@@ -34,7 +34,7 @@ trait PersonnelDropdownGeoEducationOptions
         );
     }
 
-    #[Computed(persist: true)]
+    #[Computed]
     public function documentNationalityOptions(): array
     {
         return $this->countryOptions(
@@ -44,7 +44,7 @@ trait PersonnelDropdownGeoEducationOptions
         );
     }
 
-    #[Computed(persist: true)]
+    #[Computed]
     public function documentBornCountryOptions(): array
     {
         return $this->countryOptions(
@@ -54,7 +54,7 @@ trait PersonnelDropdownGeoEducationOptions
         );
     }
 
-    #[Computed(persist: true)]
+    #[Computed]
     public function documentCityOptions(): array
     {
         $base = City::query()
@@ -74,7 +74,7 @@ trait PersonnelDropdownGeoEducationOptions
         );
     }
 
-    #[Computed(persist: true)]
+    #[Computed]
     public function educationInstitutionOptions(): array
     {
         return $this->educationInstitutionOptionsFor(
@@ -84,7 +84,7 @@ trait PersonnelDropdownGeoEducationOptions
         );
     }
 
-    #[Computed(persist: true)]
+    #[Computed]
     public function extraEducationInstitutionOptions(): array
     {
         return $this->educationInstitutionOptionsFor(
@@ -105,7 +105,7 @@ trait PersonnelDropdownGeoEducationOptions
                 cacheKey: "personnel:education:institutions:{$cacheSuffix}",
                 base: $base,
                 selectedId: $selectedId,
-                limit: 80
+                limit: 40
             );
         }
 
@@ -114,11 +114,11 @@ trait PersonnelDropdownGeoEducationOptions
             searchCol: 'name',
             searchTerm: $search,
             selectedId: $selectedId,
-            limit: 80
+            limit: 40
         );
     }
 
-    #[Computed(persist: true)]
+    #[Computed]
     public function educationFormOptions(): array
     {
         return $this->educationFormOptionsFor(
@@ -128,7 +128,7 @@ trait PersonnelDropdownGeoEducationOptions
         );
     }
 
-    #[Computed(persist: true)]
+    #[Computed]
     public function extraEducationFormOptions(): array
     {
         return $this->educationFormOptionsFor(
@@ -152,7 +152,7 @@ trait PersonnelDropdownGeoEducationOptions
                 cacheKey: "personnel:education:forms:{$cacheSuffix}:{$locale}",
                 base: $base,
                 selectedId: $selectedId,
-                limit: 80
+                limit: 40
             );
         }
 
@@ -161,11 +161,11 @@ trait PersonnelDropdownGeoEducationOptions
             searchCol: $labelColumn,
             searchTerm: $search,
             selectedId: $selectedId,
-            limit: 80
+            limit: 40
         );
     }
 
-    #[Computed(persist: true)]
+    #[Computed]
     public function educationTypeOptions(): array
     {
         $base = EducationType::query()
@@ -190,7 +190,7 @@ trait PersonnelDropdownGeoEducationOptions
         );
     }
 
-    #[Computed(persist: true)]
+    #[Computed]
     public function educationDocumentTypeOptions(): array
     {
         $base = EducationDocumentType::query()
@@ -232,7 +232,7 @@ trait PersonnelDropdownGeoEducationOptions
                 cacheKey: "personnel:country:{$cacheKeySuffix}:{$locale}",
                 base: $base,
                 selectedId: $selectedId,
-                limit: 80
+                limit: 40
             );
         }
 
@@ -241,7 +241,7 @@ trait PersonnelDropdownGeoEducationOptions
             searchCol: 'ct.title',
             searchTerm: $searchTerm,
             selectedId: $selectedId,
-            limit: 80
+            limit: 40
         );
     }
 }

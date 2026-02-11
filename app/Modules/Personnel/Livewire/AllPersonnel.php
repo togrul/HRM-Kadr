@@ -6,7 +6,6 @@ use App\Modules\Personnel\Exports\PersonnelExport;
 use App\Livewire\Traits\SideModalAction;
 use App\Models\Personnel;
 use App\Models\Position;
-use App\Models\Structure;
 use App\Services\StructureService;
 use App\Traits\NestedStructureTrait;
 use Carbon\Carbon;
@@ -40,6 +39,10 @@ class AllPersonnel extends Component
 
     #[Url(as: 'position')]
     public ?int $selectedPosition = null;
+
+    public bool $filterMounted = false;
+
+    public bool $openFilterOnMount = false;
 
     protected ?array $accessibleStructureCache = null;
 
@@ -76,6 +79,24 @@ class AllPersonnel extends Component
     {
         $this->filters = $filter;
         $this->reset(['structure']);
+    }
+
+    public function openFilter(): void
+    {
+        if (! $this->filterMounted) {
+            $this->filterMounted = true;
+            $this->openFilterOnMount = true;
+
+            return;
+        }
+
+        $this->dispatch('setOpenFilter');
+    }
+
+    #[On('openFilterWasSet')]
+    public function consumeFilterAutoOpenFlag(): void
+    {
+        $this->openFilterOnMount = false;
     }
 
     public function setDeletePersonnel($personnelId)
@@ -181,7 +202,7 @@ class AllPersonnel extends Component
         return $this->returnData();
     }
 
-    #[Computed]
+    #[Computed(persist: true)]
     public function positions()
     {
         return $this->positionCache
@@ -202,6 +223,8 @@ class AllPersonnel extends Component
         $this->authorize('viewAny', Personnel::class);
         $this->fillFilter();
         $this->filters = $this->filters ?? [];
+        $this->filterMounted = false;
+        $this->openFilterOnMount = false;
     }
 
     protected function returnData($type = 'normal')
@@ -219,59 +242,71 @@ class AllPersonnel extends Component
 
         $locale = app()->getLocale();
 
+        $relations = [
+            'latestRank',
+            "latestRank.rank:id,name_{$locale}",
+            'latestVacation',
+            'latestBusinessTrip',
+            'position:id,name',
+            'currentWork',
+            'latestDisposal',
+        ];
+
+        if ($this->status === 'deleted') {
+            $relations[] = 'personDidDelete:id,name';
+        }
+
         $builder = Personnel::query()
-            ->with([
-                'latestRank.rank' => function ($query) use ($locale) {
-                    $query->select('id', "name_{$locale}");
-                },
-                'latestVacation',
-                'latestBusinessTrip',
-                'position:id,name',
-                'creator:id,name',
-                'deletedBy:id,name',
-                'personDidDelete:id,name',
-                'hasActiveDisposal',
+            ->select([
+                'personnels.id',
+                'personnels.tabel_no',
+                'personnels.surname',
+                'personnels.name',
+                'personnels.patronymic',
+                'personnels.photo',
+                'personnels.gender',
+                'personnels.structure_id',
+                'personnels.position_id',
+                'personnels.join_work_date',
+                'personnels.leave_work_date',
+                'personnels.is_pending',
+                'personnels.deleted_at',
+                'personnels.deleted_by',
             ])
-                ->withStructureTree()
-                ->withExists(['hasActiveDisposal as has_active_disposal'])
+            ->leftJoin('positions as position_sort', 'position_sort.id', '=', 'personnels.position_id')
+            ->leftJoin('structures as structure_sort', 'structure_sort.id', '=', 'personnels.structure_id')
+            ->with($relations)
+            ->withStructureTree()
 
             ->when(! empty($structureIds), function (Builder $query) use ($structureIds) {
-                $query->whereIn('structure_id', $structureIds);
+                $query->whereIn('personnels.structure_id', $structureIds);
             }, function (Builder $query) {
-                $query->whereIn('structure_id', $this->accessibleStructureIds());
+                $query->whereIn('personnels.structure_id', $this->accessibleStructureIds());
             })
             ->when(! empty($this->selectedPosition), function (Builder $query) {
-                $query->where('position_id', $this->selectedPosition);
+                $query->where('personnels.position_id', $this->selectedPosition);
             })
             ->when($this->status, function (Builder $query) {
                 switch ($this->status) {
                     case 'current':
-                        $query->whereNull('leave_work_date');
+                        $query->whereNull('personnels.leave_work_date');
                         break;
                     case 'leaves':
-                        $query->whereNotNull('leave_work_date');
+                        $query->whereNotNull('personnels.leave_work_date');
                         break;
                     case 'deleted':
                         $query->onlyTrashed();
                         break;
                     case 'pending':
-                        $query->where('is_pending', true);
+                        $query->where('personnels.is_pending', true);
                         break;
                     default:
-                        $query->where('is_pending', false);
+                        $query->where('personnels.is_pending', false);
                 }
             })
             ->when(! empty($this->filters), fn ($q) => $q->filter($this->filters))
-            ->orderBy(
-                Position::select('name')
-                    ->whereColumn('positions.id', 'personnels.position_id')
-                    ->limit(1)
-            )
-            ->orderBy(
-                Structure::select('name')
-                    ->whereColumn('structures.id', 'personnels.structure_id')
-                    ->limit(1)
-            );
+            ->orderBy('position_sort.name')
+            ->orderBy('structure_sort.name');
 
         return $builder;
     }

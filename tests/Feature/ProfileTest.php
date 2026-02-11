@@ -64,7 +64,7 @@ test('user can delete their account', function () {
         ->assertRedirect('/');
 
     $this->assertGuest();
-    $this->assertNull($user->fresh());
+    $this->assertSoftDeleted('users', ['id' => $user->id]);
 });
 
 test('correct password must be provided to delete account', function () {
@@ -81,5 +81,8 @@ test('correct password must be provided to delete account', function () {
         ->assertSessionHasErrorsIn('userDeletion', 'password')
         ->assertRedirect('/profile');
 
-    $this->assertNotNull($user->fresh());
+    $this->assertDatabaseHas('users', [
+        'id' => $user->id,
+        'deleted_at' => null,
+    ]);
 });

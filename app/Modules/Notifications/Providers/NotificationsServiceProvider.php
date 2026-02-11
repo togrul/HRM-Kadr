@@ -35,6 +35,7 @@ class NotificationsServiceProvider extends ServiceProvider
     {
         return [
             'notifications' => \App\Modules\Notifications\Livewire\Notifications::class,
+            'notifications-counter' => \App\Modules\Notifications\Livewire\NotificationsCounter::class,
             'notification-list' => \App\Modules\Notifications\Livewire\NotificationList::class,
         ];
     }

@@ -21,7 +21,7 @@ use Livewire\Attributes\Computed;
 
 trait PersonnelDropdownCareerOptions
 {
-    #[Computed(persist: true)]
+    #[Computed]
     public function rankOptions(): array
     {
         return $this->rankOptionsFor(
@@ -30,7 +30,7 @@ trait PersonnelDropdownCareerOptions
         );
     }
 
-    #[Computed(persist: true)]
+    #[Computed]
     public function militaryRankOptions(): array
     {
         return $this->rankOptionsFor(
@@ -39,7 +39,7 @@ trait PersonnelDropdownCareerOptions
         );
     }
 
-    #[Computed(persist: true)]
+    #[Computed]
     public function rankReasonOptions(): array
     {
         return $this->rankReasonOptionsFor(
@@ -48,7 +48,7 @@ trait PersonnelDropdownCareerOptions
         );
     }
 
-    #[Computed(persist: true)]
+    #[Computed]
     public function awardOptions(): array
     {
         return $this->awardOptionsFor(
@@ -57,7 +57,7 @@ trait PersonnelDropdownCareerOptions
         );
     }
 
-    #[Computed(persist: true)]
+    #[Computed]
     public function punishmentOptions(): array
     {
         return $this->punishmentOptionsFor(
@@ -66,7 +66,7 @@ trait PersonnelDropdownCareerOptions
         );
     }
 
-    #[Computed(persist: true)]
+    #[Computed]
     public function kinshipOptions(): array
     {
         return $this->kinshipOptionsFor(
@@ -75,7 +75,7 @@ trait PersonnelDropdownCareerOptions
         );
     }
 
-    #[Computed(persist: true)]
+    #[Computed]
     public function languageOptions(): array
     {
         return $this->languageOptionsFor(
@@ -84,7 +84,7 @@ trait PersonnelDropdownCareerOptions
         );
     }
 
-    #[Computed(persist: true)]
+    #[Computed]
     public function scientificDegreeOptions(): array
     {
         return $this->scientificDegreeOptionsFor(
@@ -93,7 +93,7 @@ trait PersonnelDropdownCareerOptions
         );
     }
 
-    #[Computed(persist: true)]
+    #[Computed]
     public function step8DocumentTypeOptions(): array
     {
         return $this->step8DocumentTypeOptionsFor(
@@ -303,7 +303,7 @@ trait PersonnelDropdownCareerOptions
         );
     }
 
-    #[Computed(persist: true)]
+    #[Computed]
     public function structureOptions(): array
     {
         return $this->structureOptionsFor(
@@ -312,7 +312,7 @@ trait PersonnelDropdownCareerOptions
         );
     }
 
-    #[Computed(persist: true)]
+    #[Computed]
     public function laborStructureOptions(): array
     {
         return $this->structureOptionsFor(
@@ -321,7 +321,7 @@ trait PersonnelDropdownCareerOptions
         );
     }
 
-    #[Computed(persist: true)]
+    #[Computed]
     public function positionOptions(): array
     {
         return $this->positionOptionsFor(
@@ -330,7 +330,7 @@ trait PersonnelDropdownCareerOptions
         );
     }
 
-    #[Computed(persist: true)]
+    #[Computed]
     public function laborPositionOptions(): array
     {
         return $this->positionOptionsFor(
@@ -339,7 +339,7 @@ trait PersonnelDropdownCareerOptions
         );
     }
 
-    #[Computed(persist: true)]
+    #[Computed]
     public function educationDegreeOptions(): array
     {
         $locale = app()->getLocale();
@@ -356,7 +356,7 @@ trait PersonnelDropdownCareerOptions
                 cacheKey: "personnel:education_degree:{$locale}",
                 base: $base,
                 selectedId: $selected,
-                limit: 60
+                limit: 40
             );
         }
 
@@ -365,11 +365,11 @@ trait PersonnelDropdownCareerOptions
             searchCol: $labelColumn,
             searchTerm: $search,
             selectedId: $selected,
-            limit: 60
+            limit: 40
         );
     }
 
-    #[Computed(persist: true)]
+    #[Computed]
     public function workNormOptions(): array
     {
         $locale = app()->getLocale();
@@ -386,7 +386,7 @@ trait PersonnelDropdownCareerOptions
                 cacheKey: "personnel:work_norms:{$locale}",
                 base: $base,
                 selectedId: $selected,
-                limit: 50
+                limit: 40
             );
         }
 
@@ -395,11 +395,11 @@ trait PersonnelDropdownCareerOptions
             searchCol: $labelColumn,
             searchTerm: $search,
             selectedId: $selected,
-            limit: 50
+            limit: 40
         );
     }
 
-    #[Computed(persist: true)]
+    #[Computed]
     public function socialOriginOptions(): array
     {
         $base = SocialOrigin::query()
@@ -414,7 +414,7 @@ trait PersonnelDropdownCareerOptions
                 cacheKey: 'personnel:social_origin',
                 base: $base,
                 selectedId: $selected,
-                limit: 50
+                limit: 40
             );
         }
 
@@ -423,11 +423,11 @@ trait PersonnelDropdownCareerOptions
             searchCol: 'name',
             searchTerm: $search,
             selectedId: $selected,
-            limit: 50
+            limit: 40
         );
     }
 
-    #[Computed(persist: true)]
+    #[Computed]
     public function disabilityOptions(): array
     {
         if (! $this->isDisabilityEnabled()) {
@@ -446,7 +446,7 @@ trait PersonnelDropdownCareerOptions
                 cacheKey: 'personnel:disabilities',
                 base: $base,
                 selectedId: $selected,
-                limit: 50
+                limit: 40
             );
         }
 
@@ -455,7 +455,7 @@ trait PersonnelDropdownCareerOptions
             searchCol: 'name',
             searchTerm: $search,
             selectedId: $selected,
-            limit: 50
+            limit: 40
         );
     }
 
@@ -474,7 +474,7 @@ trait PersonnelDropdownCareerOptions
                 cacheKey: 'personnel:structures',
                 base: $base,
                 selectedId: $selectedId,
-                limit: 80
+                limit: 40
             );
         }
 
@@ -483,7 +483,7 @@ trait PersonnelDropdownCareerOptions
             searchCol: 'name',
             searchTerm: $search,
             selectedId: $selectedId,
-            limit: 80
+            limit: 40
         );
     }
 
@@ -500,7 +500,7 @@ trait PersonnelDropdownCareerOptions
                 cacheKey: 'personnel:positions',
                 base: $base,
                 selectedId: $selectedId,
-                limit: 80
+                limit: 40
             );
         }
 
@@ -509,7 +509,7 @@ trait PersonnelDropdownCareerOptions
             searchCol: 'name',
             searchTerm: $search,
             selectedId: $selectedId,
-            limit: 80
+            limit: 40
         );
     }
 }

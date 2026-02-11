@@ -1,14 +1,21 @@
 @props([
-     'isButton' => false,
-     'extraClasses',
-     'standartWidth' => false
+    'isButton' => false,
+    'extraClasses' => '',
+    'standartWidth' => false,
 ])
 
 @php
-     $extraClasses = $isButton ? 'text-sm font-medium text-right px-3' : 'px-6';
-     $extraClasses .= !$standartWidth ? ' whitespace-nowrap':'';
+    $baseClasses = $isButton
+        ? 'text-sm font-medium text-right px-3'
+        : 'px-6';
+
+    if (! $standartWidth) {
+        $baseClasses .= ' whitespace-nowrap';
+    }
+
+    $cellClasses = trim("{$baseClasses} {$extraClasses}");
 @endphp
 
-<td {{ $attributes->merge(['class' => "py-4 {$extraClasses}"]) }}>
-     {{ $slot }}
+<td {{ $attributes->merge(['class' => $cellClasses]) }}>
+    {{ $slot }}
 </td>

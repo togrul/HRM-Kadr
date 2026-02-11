@@ -4,10 +4,12 @@ namespace App\Modules\SidebarStructure\Livewire;
 
 use App\Models\Structure;
 use Illuminate\Support\Facades\Cache;
+use Livewire\Attributes\Lazy;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 
+#[Lazy]
 class Sidebar extends Component
 {
     #[Url]
@@ -32,5 +34,10 @@ class Sidebar extends Component
         });
 
         return view('structure::livewire.structure.sidebar', compact('structures'));
+    }
+
+    public function placeholder()
+    {
+        return view('structure::livewire.structure.placeholders.sidebar');
     }
 }

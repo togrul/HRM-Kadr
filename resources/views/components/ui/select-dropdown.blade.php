@@ -9,8 +9,10 @@
 
 @php
   use Illuminate\Support\Str;
-  $wireModelDirective = $attributes->wire('model'); // 'filter.structure_id' vb.
-  $wireModel = optional($wireModelDirective)->value();
+  $wireModelKeys = ['wire:model.live', 'wire:model.blur', 'wire:model.lazy', 'wire:model.defer', 'wire:model'];
+  $wireModel = collect($wireModelKeys)
+      ->map(fn ($key) => $attributes->get($key))
+      ->first(fn ($value) => filled($value));
   $uid = 'ui-select-'.Str::slug($wireModel ?? Str::uuid(), '_');
   $labelId = $uid.'-label';
   $bg = $mode === 'gray' ? 'bg-neutral-100' : 'bg-white';
@@ -19,84 +21,61 @@
 <div
   wire:key="select-{{ $uid }}"
   x-data="{
-    valueProxy: @if($wireModel) @entangle($wireModel).live @else null @endif,
+    currentValue: @if($wireModel) @entangle($wireModel).live @else null @endif,
     cachedOptions: @js($model),
     placeholder: @js($placeholder),
-    uid: @js($uid),
     isOpen: false,
     isDisabled: @js((bool) $disabled),
-    currentValue: null,
     selectedCache: { id: null, label: '' },
     initialSelectedLabel: @js($selectedLabel),
-
-    resolve(t){
-      if (!t) return t;
-      if (typeof t.get === 'function') return t.get();
-      if (typeof t.value !== 'undefined') return t.value;
-      return t;
+    toId(v){ return (v===null||v===undefined||v==='') ? null : String(v).trim(); },
+    toWireValue(v){
+      if (v===null || v===undefined || v==='') return null;
+      const s = String(v).trim();
+      return /^[0-9]+$/.test(s) ? Number(s) : s;
     },
-    toId(v){ return (v===null||v===undefined||v==='') ? null : String(v); },
 
     init(){
-      this.syncValue();
-      if (this.initialSelectedLabel && this.currentValue !== null) {
-        const found = this.cachedOptions.find(o => String(o.id) === String(this.currentValue));
+      const currentId = this.toId(this.currentValue);
+      if (this.initialSelectedLabel && currentId !== null) {
+        const found = this.cachedOptions.find(o => this.toId(o.id) === currentId);
         if (!found) {
-          this.selectedCache = { id: this.currentValue, label: this.initialSelectedLabel };
+          this.selectedCache = { id: currentId, label: this.initialSelectedLabel };
         }
       }
-      this.$watch(() => this.resolve(this.valueProxy), () => this.syncValue());
-    },
-
-    // when Livewire re-renders, Blade re-passes :model — Alpine sees it via x-bind below
-    applyOptions(next){
-      if (!Array.isArray(next)) return;
-      // replace, preserve selection label if missing
-      this.cachedOptions = next;
-      // try refresh cache if selected exists in new list
-      const found = this.cachedOptions.find(o => String(o.id) === String(this.currentValue));
-      if (found) this.selectedCache = { id: found.id, label: found.label };
-    },
-
-    syncValue(){
-      const next = this.toId(this.resolve(this.valueProxy));
-      if (next === this.currentValue) return;
-      this.currentValue = next;
-      // try to find label in current list
-      const found = this.cachedOptions.find(o => String(o.id) === String(this.currentValue));
-      if (found) {
-        this.selectedCache = { id: found.id, label: found.label };
-      }
-      // else keep previous selectedCache (so text stays) until server returns item
+      this.$watch('currentValue', (next) => {
+        const nextId = this.toId(next);
+        const found = this.cachedOptions.find(o => this.toId(o.id) === nextId);
+        if (found) {
+          this.selectedCache = { id: this.toId(found.id), label: found.label };
+        }
+      });
     },
 
     selectedLabel(){
-      if (this.currentValue == null || this.currentValue === '') return this.placeholder;
-      const found = this.cachedOptions.find(o => String(o.id) === String(this.currentValue));
+      const currentId = this.toId(this.currentValue);
+      if (currentId == null || currentId === '') return this.placeholder;
+      const found = this.cachedOptions.find(o => this.toId(o.id) === currentId);
       if (found) return found.label;
-      if (String(this.selectedCache.id) === String(this.currentValue) && this.selectedCache.label) {
+      if (this.toId(this.selectedCache.id) === currentId && this.selectedCache.label) {
         return this.selectedCache.label;
       }
-      if (this.initialSelectedLabel && this.currentValue !== null) {
+      if (this.initialSelectedLabel && currentId !== null) {
         return this.initialSelectedLabel;
       }
       return this.placeholder;
     },
 
     select(id, label = null){
-      const val = this.toId(id);
-      this.currentValue = val;
+      const wireValue = this.toWireValue(id);
+      const val = this.toId(wireValue);
       if (label !== null && label !== undefined) {
         this.selectedCache = { id: val, label: String(label) };
       } else {
-        const found = this.cachedOptions.find(o => String(o.id) === String(val));
-        this.selectedCache = found ? { id: found.id, label: found.label } : { id: val, label: '' };
+        const found = this.cachedOptions.find(o => this.toId(o.id) === val);
+        this.selectedCache = found ? { id: this.toId(found.id), label: found.label } : { id: val, label: '' };
       }
-      if (this.valueProxy && typeof this.valueProxy.set === 'function') {
-        this.valueProxy.set(val);
-      } else {
-        this.valueProxy = val;
-      }
+      this.currentValue = wireValue;
       this.initialSelectedLabel = null;
       this.isOpen = false;
     },
@@ -108,7 +87,7 @@
   }"
   @click.window="if (!$el.contains($event.target)) isOpen = false"
   @keydown.escape.window="isOpen = false"
-  {{ $attributes->except(['wire:model','wire:model.defer','wire:model.lazy'])->class('w-full') }}
+  {{ $attributes->except(['wire:model','wire:model.live','wire:model.defer','wire:model.lazy','wire:model.blur'])->class('w-full') }}
 >
   @if($label)
     <x-label id="{{ $labelId }}" for="{{ $uid }}">{{ $label }}</x-label>
@@ -120,7 +99,7 @@
       class="relative w-full py-2 pl-3 pr-10 text-left rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm {{ $bg }} {{ $disabled ? 'opacity-60 cursor-not-allowed' : '' }}"
       :aria-expanded="isOpen" aria-labelledby="{{ $labelId }}"
       :disabled="isDisabled"
-      @click="toggle()"
+      @click.prevent.stop="toggle()"
     >
       <span class="flex items-center">
         <span class="block ml-3 font-normal truncate text-neutral-900" x-text="selectedLabel()">{{ $placeholder }}</span>
@@ -141,11 +120,11 @@
 
       {{-- null/placeholder option --}}
       <li class="relative py-2 pl-3 rounded-lg cursor-pointer select-none group pr-9 hover:bg-blue-400 bg-neutral-50"
-          @click="select(null, placeholder)">
+          @click.prevent.stop="select(null, placeholder)">
         <div class="flex items-center">
           <span class="block ml-3 truncate"> {{ $placeholder }} </span>
           <span
-            x-show="currentValue === null"
+            x-show="toId(currentValue) === null"
             class="absolute inset-y-0 right-0 flex items-center pr-4 text-blue-600"
           >
             ✓
@@ -157,12 +136,14 @@
         <li
           wire:key="{{ $uid }}-{{ data_get($opt,'id') }}"
           class="relative py-2 pl-3 rounded-lg cursor-pointer select-none group pr-9 hover:bg-blue-400 bg-neutral-50"
-          @click="select('{{ data_get($opt,'id') }}', '{{ e(data_get($opt,'label')) }}')"
+          data-option-id="{{ data_get($opt,'id') }}"
+          data-option-label="{{ data_get($opt,'label') }}"
+          @click.prevent.stop="select($el.dataset.optionId, $el.dataset.optionLabel)"
         >
           <div class="flex items-center">
             <span class="block ml-3 truncate">{{ data_get($opt,'label') }}</span>
             <span
-              x-show="toId(currentValue) === toId('{{ data_get($opt,'id') }}')"
+              x-show="toId(currentValue) === toId(@js(data_get($opt,'id')))"
               class="absolute inset-y-0 right-0 flex items-center pr-4 text-blue-600"
             >
               ✓

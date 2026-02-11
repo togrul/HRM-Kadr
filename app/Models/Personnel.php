@@ -295,7 +295,9 @@ class Personnel extends Model
 
     public function latestRank(): HasOne
     {
-        return $this->hasOne(PersonnelRank::class, 'tabel_no', 'tabel_no')->latestOfMany('given_date');
+        return $this->hasOne(PersonnelRank::class, 'tabel_no', 'tabel_no')
+            ->latestOfMany('given_date')
+            ->select('personnel_ranks.*');
     }
 
     public function weapons(): HasMany
@@ -328,7 +330,9 @@ class Personnel extends Model
 
     public function latestVacation(): HasOne
     {
-        return $this->hasOne(PersonnelVacation::class, 'tabel_no', 'tabel_no')->latestOfMany('return_work_date');
+        return $this->hasOne(PersonnelVacation::class, 'tabel_no', 'tabel_no')
+            ->latestOfMany('return_work_date')
+            ->select('personnel_vacations.*');
     }
 
     public function hasActiveVacation(): HasOne
@@ -364,7 +368,9 @@ class Personnel extends Model
 
     public function latestBusinessTrip(): HasOne
     {
-        return $this->hasOne(PersonnelBusinessTrip::class, 'tabel_no', 'tabel_no')->latestOfMany('end_date');
+        return $this->hasOne(PersonnelBusinessTrip::class, 'tabel_no', 'tabel_no')
+            ->latestOfMany('end_date')
+            ->select('personnel_business_trips.*');
     }
 
     public function hasActiveBusinessTrip(): HasOne
@@ -415,7 +421,9 @@ class Personnel extends Model
 
     public function latestContract(): HasOne
     {
-        return $this->hasOne(PersonnelContract::class, 'tabel_no', 'tabel_no')->latestOfMany('contract_ends_at');
+        return $this->hasOne(PersonnelContract::class, 'tabel_no', 'tabel_no')
+            ->latestOfMany('contract_ends_at')
+            ->select('personnel_contracts.*');
     }
 
     public function hasActiveContract(): HasOne
@@ -432,7 +440,9 @@ class Personnel extends Model
 
     public function latestPensionCard(): HasOne
     {
-        return $this->hasOne(PersonnelPensionCard::class, 'tabel_no', 'tabel_no')->latestOfMany('expiry_date');
+        return $this->hasOne(PersonnelPensionCard::class, 'tabel_no', 'tabel_no')
+            ->latestOfMany('expiry_date')
+            ->select('personnel_pension_cards.*');
     }
 
     public function hasActivePensionCard(): HasOne
@@ -449,7 +459,9 @@ class Personnel extends Model
 
     public function latestDisposal(): HasOne
     {
-        return $this->hasOne(PersonnelDisposal::class, 'tabel_no', 'tabel_no')->latestOfMany('disposal_date');
+        return $this->hasOne(PersonnelDisposal::class, 'tabel_no', 'tabel_no')
+            ->latestOfMany('disposal_date')
+            ->select('personnel_disposals.*');
     }
 
     public function hasActiveDisposal(): HasOne
@@ -524,7 +536,9 @@ class Personnel extends Model
 
     public function latestEducationRequest(): HasOne
     {
-        return $this->hasOne(PersonnelEducationRequest::class, 'tabel_no', 'tabel_no')->latestOfMany('request_date');
+        return $this->hasOne(PersonnelEducationRequest::class, 'tabel_no', 'tabel_no')
+            ->latestOfMany('request_date')
+            ->select('personnel_education_requests.*');
     }
 
     public function masterDegrees(): HasMany
@@ -534,7 +548,9 @@ class Personnel extends Model
 
     public function latestMasterDegree(): HasOne
     {
-        return $this->hasOne(PersonnelMasterDegree::class, 'tabel_no', 'tabel_no')->latestOfMany('given_date');
+        return $this->hasOne(PersonnelMasterDegree::class, 'tabel_no', 'tabel_no')
+            ->latestOfMany('given_date')
+            ->select('personnel_master_degrees.*');
     }
 
     public function captives(): HasMany
@@ -607,7 +623,7 @@ class Personnel extends Model
             [$minAge, $maxAge] = $this->normalizeNumericRange($value, 0, 150);
 
             $query->whereRaw(
-                'timestampdiff(year, birthdate, curdate()) between ? and ?',
+                'timestampdiff(year, '.$this->qualifiedColumn('birthdate').', curdate()) between ? and ?',
                 [$minAge, $maxAge]
             );
 
@@ -625,7 +641,7 @@ class Personnel extends Model
         if (in_array($field, $this->fillable, true)) {
             [$start, $end] = $this->normalizeDateRange($value);
 
-            $query->whereBetween($field, [$start, $end]);
+            $query->whereBetween($this->qualifiedColumn($field), [$start, $end]);
         }
     }
 
@@ -673,9 +689,9 @@ class Personnel extends Model
 
             default:
                 if (in_array($field, $this->likeFilterFields, true) && $value !== null) {
-                    $query->where($field, 'LIKE', "%$value%");
+                    $query->where($this->qualifiedColumn($field), 'LIKE', "%$value%");
                 } elseif (in_array($field, $this->fillable, true) && $value !== null) {
-                    $query->where($field, $value);
+                    $query->where($this->qualifiedColumn($field), $value);
                 }
                 break;
         }
@@ -748,7 +764,7 @@ class Personnel extends Model
     protected function applyStructureFilter($query, $value)
     {
         $structureIds = $this->getNestedStructure($value);
-        $query->whereIn('structure_id', $structureIds);
+        $query->whereIn($this->qualifiedColumn('structure_id'), $structureIds);
     }
 
     public function scopeNameLike(Builder $query, ?string $term): Builder
@@ -759,9 +775,14 @@ class Personnel extends Model
         }
 
         return $query->where(function (Builder $q) use ($term) {
-            $q->where('name', 'like', "%{$term}%")
-                ->orWhere('surname', 'like', "%{$term}%");
+            $q->where($this->qualifiedColumn('name'), 'like', "%{$term}%")
+                ->orWhere($this->qualifiedColumn('surname'), 'like', "%{$term}%");
         });
+    }
+
+    protected function qualifiedColumn(string $field): string
+    {
+        return str_contains($field, '.') ? $field : $this->getTable().'.'.$field;
     }
 
     protected static function boot()

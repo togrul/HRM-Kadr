@@ -3,7 +3,6 @@
 namespace App\Modules\UI\Livewire\Filter;
 
 use Livewire\Component;
-use Livewire\Attributes\Lazy;
 use Livewire\Attributes\On;
 use App\Livewire\Traits\DropdownConstructTrait;
 use Livewire\Attributes\Computed;
@@ -19,6 +18,7 @@ class Detail extends Component
     use DropdownConstructTrait;
     // --- State ---
     public array $filter = [];
+    public bool $ready = false;
 
     // Search terms (debounce/lazy in Blade)
     public string $searchStructure = '';
@@ -42,10 +42,14 @@ class Detail extends Component
     #[On('setOpenFilter')]
     public function setOpenFilter(): void
     {
+        $this->ready = true;
         $this->dispatch('openFilterWasSet');
     }
 
-    // No explicit placeholder here—lazy instances render the Blade placeholder passed from the parent.
+    public function placeholder()
+    {
+        return view('ui::livewire.filter.placeholders.detail');
+    }
 
     private function defaultFilter(): array
     {
@@ -84,6 +88,10 @@ class Detail extends Component
     #[Computed()]
     public function structureOptions(): array
     {
+        if (! $this->ready) {
+            return [];
+        }
+
         $selected = data_get($this->filter, 'structure_id');
 
         $base = \App\Models\Structure::query()
@@ -102,6 +110,10 @@ class Detail extends Component
     #[Computed]
     public function positions(): array
     {
+        if (! $this->ready) {
+            return [];
+        }
+
         $selected = data_get($this->filter, 'position_id');
 
         $base = \App\Models\Position::query()
@@ -120,6 +132,10 @@ class Detail extends Component
     #[Computed]
     public function rankOptions(): array
     {
+        if (! $this->ready) {
+            return [];
+        }
+
         $selected = data_get($this->filter, 'rank_id');
         $localeCol = 'name_'.app()->getLocale(); // real column
         $base = \App\Models\Rank::query()
@@ -138,6 +154,10 @@ class Detail extends Component
    #[Computed]
     public function institutionOptions(): array
     {
+        if (! $this->ready) {
+            return [];
+        }
+
         $selected = data_get($this->filter, 'educational_institution_id');
 
         $base = \App\Models\EducationalInstitution::query()
@@ -155,6 +175,10 @@ class Detail extends Component
     #[Computed]
     public function educationDegreeOptions(): array
     {
+        if (! $this->ready) {
+            return [];
+        }
+
         $selected  = data_get($this->filter, 'education_degree_id');
         $localeCol = 'title_'.app()->getLocale();
 
@@ -173,6 +197,10 @@ class Detail extends Component
     #[Computed]
     public function awardOptions(): array
     {
+        if (! $this->ready) {
+            return [];
+        }
+
         $selected = data_get($this->filter, 'award_id');
 
         $base = \App\Models\Award::query()
@@ -191,6 +219,10 @@ class Detail extends Component
     #[Computed]
     public function punishmentOptions(): array
     {
+        if (! $this->ready) {
+            return [];
+        }
+
         $selected = data_get($this->filter, 'punishment_id');
 
         $base = \App\Models\Punishment::query()
@@ -210,6 +242,10 @@ class Detail extends Component
     #[Computed]
     public function cities(): array
     {
+        if (! $this->ready) {
+            return [];
+        }
+
         $countryId = data_get($this->filter, 'born_country_id');
         if (!$countryId) return [];
 
@@ -244,6 +280,10 @@ class Detail extends Component
     #[Computed]
     public function nationalityOptions(): array
     {
+        if (! $this->ready) {
+            return [];
+        }
+
         $selected = data_get($this->filter, 'nationality_id');
 
         $base = $this->getBaseQueryCountry();
@@ -260,6 +300,10 @@ class Detail extends Component
     #[Computed]
     public function bornCountryOptions(): array
     {
+        if (! $this->ready) {
+            return [];
+        }
+
         $selected = data_get($this->filter, 'born_country_id');
 
         $base = $this->getBaseQueryCountry();
@@ -273,10 +317,15 @@ class Detail extends Component
         );
     }
 
-    public function mount(array $filter = []): void
+    public function mount(array $filter = [], bool $autoOpen = false): void
     {
         // Merge incoming filter (from parent/query) with defaults so selections stay visible.
         $this->filter = array_merge($this->defaultFilter(), array_filter($filter, fn ($v) => $v !== null && $v !== ''));
+
+        if ($autoOpen) {
+            $this->ready = true;
+            $this->dispatch('openFilterWasSet');
+        }
     }
 
     public function render() { return view('ui::livewire.filter.detail'); }

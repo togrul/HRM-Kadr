@@ -2,7 +2,7 @@
     <!-- Primary Navigation Menu -->
     <div class="px-4 mx-auto max-w-7xl lg:px-0">
         <div class="flex justify-between h-16">
-            <div class="flex">
+            <div class="flex items-center gap-1">
                 <!-- Logo -->
                 <div class="flex items-center px-2 shrink-0">
                     <a href="{{ route('home') }}">
@@ -55,11 +55,13 @@
 
                 @module('notifications')
                   @can('get-notification')
-                      @livewire('notification.notifications')
+                      <div class="flex items-center">
+                          <livewire:notification.notifications lazy="on-load" />
+                      </div>
                   @endcan
                 @endmodule
                 <!-- Settings Dropdown -->
-                <div class="hidden sm:flex sm:items-center sm:ml-6">
+                <div class="hidden sm:flex sm:items-center sm:ml-4">
                     <x-dropdown align="right">
                         <x-slot name="trigger">
                             <button

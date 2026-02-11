@@ -39,7 +39,7 @@ class PersonalInformationForm extends Form
     /**
      * Fill the form from an existing Personnel model.
      */
-    public function fillFromModel(?Personnel $personnel): void
+    public function fillFromModel(?Personnel $personnel, bool $loadRelations = true): void
     {
         $this->resetForm();
 
@@ -47,16 +47,18 @@ class PersonalInformationForm extends Form
             return;
         }
 
-        $loaded = $personnel->loadMissing([
-            'nationality',
-            'previousNationality',
-            'educationDegree',
-            'structure',
-            'position',
-            'workNorm',
-            'disability',
-            'socialOrigin',
-        ]);
+        $loaded = $loadRelations
+            ? $personnel->loadMissing([
+                'nationality',
+                'previousNationality',
+                'educationDegree',
+                'structure',
+                'position',
+                'workNorm',
+                'disability',
+                'socialOrigin',
+            ])
+            : $personnel;
 
         $payload = $loaded->toArray();
 
@@ -152,7 +154,13 @@ class PersonalInformationForm extends Form
             return;
         }
 
-        $this->personnel[$target] = data_get($entity, 'id');
+        // Some localized relations (e.g. country_translations) expose `country_id`
+        // instead of plain `id`. Prefer `country_id` when present.
+        $this->personnel[$target] = data_get(
+            $entity,
+            'country_id',
+            data_get($entity, 'id', data_get($this->personnel, $target))
+        );
 
         if (is_callable($extraCallback)) {
             $extraCallback($entity);

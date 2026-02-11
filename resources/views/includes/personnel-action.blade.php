@@ -15,7 +15,10 @@
     @endif
 </div>
 
-<div class="flex flex-col w-full p-5 px-0 mx-auto my-1 mb-4 space-y-8 transition duration-500 ease-in-out transform bg-white">
+<div
+    class="flex flex-col w-full p-5 px-0 mx-auto my-1 mb-4 space-y-8 transition duration-500 ease-in-out transform bg-white"
+    @isset($personnelModel) wire:init="initStepData" @endisset
+>
     <div class="grid items-start grid-cols-8 gap-y-2">
         @foreach ($steps as $key => $st)
             <button wire:click="selectStep({{ $key }})" @class([
@@ -58,7 +61,15 @@
     };
     @endphp
 
-    @if ($stepView)
+    @if(isset($personnelModel) && isset($stepDataInitialized) && ! $stepDataInitialized)
+        <div class="space-y-3">
+            <div class="h-10 rounded-lg bg-neutral-100 animate-pulse"></div>
+            <div class="h-10 rounded-lg bg-neutral-100 animate-pulse"></div>
+            <div class="h-10 rounded-lg bg-neutral-100 animate-pulse"></div>
+            <div class="h-10 rounded-lg bg-neutral-100 animate-pulse"></div>
+            <div class="h-10 rounded-lg bg-neutral-100 animate-pulse"></div>
+        </div>
+    @elseif ($stepView)
         @include($stepView)
     @endif
 

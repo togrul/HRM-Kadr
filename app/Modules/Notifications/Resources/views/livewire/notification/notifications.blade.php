@@ -1,26 +1,22 @@
 <div
-    wire:poll.10000ms='getNotificationCount'
-    class="relative my-auto"
-    x-data={isOpen:false}
+    class="relative flex items-center"
+    x-data="{ isOpen: false }"
 >
     <button @click="
         isOpen=!isOpen
         if(isOpen){
-            Livewire.dispatch('getNotifications')
+            $wire.getNotifications()
         }
     "
-        class="inline-flex justify-center w-full px-3 py-2 text-sm font-medium text-blue-500 transition duration-300 ease-in bg-transparent rounded-lg hover:bg-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white focus:bg-white focus:ring-white"
+        class="relative inline-flex items-center justify-center w-10 h-10 text-sm font-medium text-blue-500 transition duration-200 ease-in bg-transparent rounded-md hover:bg-white/80 focus:outline-none"
     >
         <svg  fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 font-normal text-slate-500">
             <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0M3.124 7.5A8.969 8.969 0 015.292 3m13.416 0a8.969 8.969 0 012.168 4.5" />
         </svg>
-        @if($notificationCount)
-            <div class="absolute flex items-center justify-center w-4 h-4 font-medium text-rose-500 bg-rose-200 rounded-full border-1 text-[11px] top-0 right-0">
-                {{ $notificationCount }}
-            </div>
-        @endif
+        <livewire:notification.notifications-counter :key="'notifications-counter-'.auth()->id()" />
     </button>
-    <div class="absolute z-40 text-left bg-white border shadow-2xl text-neutral-700 shadow-neutral-200 border-neutral-200 -right-24 md:-right-8 w-72 md:w-[500px] rounded-xl"
+    <div x-cloak
+         class="absolute top-full right-0 z-50 mt-2 text-left bg-white border shadow-2xl text-neutral-700 shadow-neutral-200 border-neutral-200 w-[22rem] md:w-[24rem] max-w-[calc(100vw-1rem)] rounded-xl origin-top-right"
          style="display:none;"
          x-show="isOpen"
          x-transition:enter="transition duration-200 transform ease-out"

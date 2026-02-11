@@ -20,19 +20,10 @@
         @includeWhen(\request()->is('admin/*'), 'includes.layout.admin')
     </div>
 
-    <x-notification />
-
-    @if (session()->has('success'))
-        <x-notification :redirect="true" :message-to-display="session('success')" />
-    @endif
-
-    @if (session()->has('error'))
-        <x-notification type="error" :redirect="false" :message-to-display="session('error')" />
-    @endif
-
-    @if (session()->has('error_message'))
-        <x-notification type="error" :redirect="true" :message-to-display="session('error_message')" />
-    @endif
+    <x-notification
+        :initial-type="session()->has('error') || session()->has('error_message') ? 'error' : (session()->has('success') ? 'success' : null)"
+        :initial-message="session('error_message') ?? session('error') ?? session('success')"
+    />
 
     @livewireScripts
     @stack('js')

@@ -70,10 +70,10 @@ class User extends Authenticatable
     protected static function boot()
     {
         parent::boot();
-        static::deleting(function ($model) {
-            $model->deleted_by = auth()->user()->id;
+        static::deleting(function (self $model): void {
+            $model->deleted_by = auth()->id();
             $model->is_active = false;
-            $model->save();
+            $model->saveQuietly();
         });
     }
 }

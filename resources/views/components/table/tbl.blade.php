@@ -1,3 +1,4 @@
+
 @props(['headers','divide' => true])
 
 <table {{ $attributes->merge(['class' => 'min-w-full divide-y divide-neutral-200 rounded-xl overflow-hidden shadow-md shadow-black/5']) }}>
