@@ -16,7 +16,7 @@
         <livewire:notification.notifications-counter :key="'notifications-counter-'.auth()->id()" />
     </button>
     <div x-cloak
-         class="absolute top-full right-0 z-50 mt-2 text-left bg-white border shadow-2xl text-neutral-700 shadow-neutral-200 border-neutral-200 w-[22rem] md:w-[24rem] max-w-[calc(100vw-1rem)] rounded-xl origin-top-right"
+         class="absolute top-full right-0 z-50 mt-2 text-left bg-white border shadow-2xl text-neutral-700 shadow-neutral-200 border-neutral-200 w-[32rem] max-w-[calc(100vw-2rem)] rounded-xl origin-top-right"
          style="display:none;"
          x-show="isOpen"
          x-transition:enter="transition duration-200 transform ease-out"

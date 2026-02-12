@@ -1,117 +1,161 @@
 @props([
-    'size' => 'large'
+    'size' => 'large',
+    'showHeaderClose' => true,
 ])
 
 @php
-    $sizeClass = match($size){
+    $sizeClass = match ($size) {
         'large' => 'md:max-w-3xl lg:max-w-4xl',
         'x-large' => 'md:max-w-4xl lg:max-w-5xl',
-        'xx-large' => 'md:max-w-5xl lg:max-w-6xl'
+        'xx-large' => 'md:max-w-5xl lg:max-w-6xl',
+        default => 'md:max-w-3xl lg:max-w-4xl',
     };
+
+    $closeOnEvents = [
+        'personnelAdded',
+        'permissionSet',
+        'staffAdded',
+        'userAdded',
+        'menuAdded',
+        'fileAdded',
+        'candidateAdded',
+        'templateAdded',
+        'componentAdded',
+        'orderAdded',
+        'rankAdded',
+        'leaveAdded',
+        'leaveUpdated',
+    ];
 @endphp
 
-<div x-data="{
+<div
+    x-data="{
         isOpen: @entangle('isSideModalOpen').live,
-        toggleBody(open) {
-            document.body.classList.toggle('overflow-hidden', open)
+        closeEvents: @js($closeOnEvents),
+        previousFocus: null,
+        lockBody() {
+            document.body.classList.add('overflow-hidden');
+            document.body.classList.add('side-modal-open');
+            document.documentElement.classList.add('overflow-hidden');
+        },
+        unlockBody() {
+            document.body.classList.remove('overflow-hidden');
+            document.body.classList.remove('side-modal-open');
+            document.documentElement.classList.remove('overflow-hidden');
+        },
+        onOpen() {
+            this.previousFocus = document.activeElement;
+            this.lockBody();
+            this.$nextTick(() => {
+                if (this.$refs.closeBtn) {
+                    this.$refs.closeBtn.focus();
+                }
+            });
+        },
+        onClose() {
+            this.unlockBody();
+            if (this.previousFocus && typeof this.previousFocus.focus === 'function') {
+                this.$nextTick(() => this.previousFocus.focus());
+            }
+        },
+        close() {
+            this.isOpen = false;
+            $wire.call('closeSideMenu');
         }
     }"
-     class="fixed inset-0 z-50 overflow-hidden"
-     aria-labelledby="slide-over-title"
-     role="dialog"
-     aria-modal="true"
-     x-show="isOpen"
-     @keydown.escape.window="isOpen = false; $wire.dispatch('closeSideMenu'); toggleBody(false);"
-     x-init="
-      @php
-        $arrEvents = ['personnelAdded','permissionSet','staffAdded','userAdded','menuAdded','fileAdded','candidateAdded','templateAdded','componentAdded','orderAdded','rankAdded', 'leaveAdded', 'leaveUpdated'];
-      @endphp
-          toggleBody(isOpen);
-          $watch('isOpen', (value) => toggleBody(value));
-          $wire.on('openSideMenu',() => {
-               console.info('[SideModal] open event received');
-               isOpen = true
-          })
-          @foreach ($arrEvents as $event)
-          $wire.on('{{$event}}',() => {
-            console.warn('[SideModal] closing because event `{{$event}}` fired');
-            isOpen = false
-            $wire.dispatch('closeSideMenu')
-          })
-        @endforeach
-     "
-     style="display: none;margin-top:0 !important"
+    x-init="
+        if (isOpen) onOpen();
+
+        $watch('isOpen', value => {
+            if (value) {
+                onOpen();
+            } else {
+                onClose();
+            }
+        });
+
+        $wire.on('openSideMenu', () => {
+            isOpen = true;
+        });
+
+        closeEvents.forEach((eventName) => {
+            $wire.on(eventName, () => {
+                if (isOpen) close();
+            });
+        });
+    "
+    class="fixed inset-0 z-80"
+    x-show="isOpen"
+    x-cloak
+    aria-labelledby="slide-over-title"
+    role="dialog"
+    aria-modal="true"
+    @keydown.escape.window="if (isOpen) close()"
 >
-     <div class="absolute inset-0 overflow-hidden">
+    <div class="absolute inset-0 overflow-hidden">
+        <div
+            class="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]"
+            x-show="isOpen"
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            @click="close()"
+            aria-hidden="true"
+        ></div>
 
-       <div
-          class="absolute inset-0 transition-opacity bg-gray-500 bg-opacity-75"
-          aria-hidden="true"
-          x-show="isOpen"
-          x-transition:enter="transition ease-in-out duration-500"
-          x-transition:enter-start="transform opacity-0"
-          x-transition:enter-end="transform opacity-100"
-          x-transition:leave="transition ease-in-out duration-500"
-          x-transition:leave-start="transform opacity-100"
-          x-transition:leave-end="transform opacity-0"
-          style="display: none;"
-     ></div>
+        <div class="fixed inset-y-0 right-0 flex max-w-full sm:pl-10">
+            <section
+                class="pointer-events-auto relative w-screen {{ $sizeClass }}"
+                x-show="isOpen"
+                x-transition:enter="transform transition ease-out duration-250"
+                x-transition:enter-start="translate-x-full"
+                x-transition:enter-end="translate-x-0"
+                x-transition:leave="transform transition ease-in duration-200"
+                x-transition:leave-start="translate-x-0"
+                x-transition:leave-end="translate-x-full"
+            >
+                <div class="flex h-full flex-col overflow-hidden rounded-l-3xl border border-slate-200 bg-white shadow-2xl">
+                    @if($showHeaderClose)
+                        <div class="absolute top-3 right-3 z-30">
+                            <button
+                                x-ref="closeBtn"
+                                type="button"
+                                @click="close()"
+                                class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white/95 text-slate-500 shadow-sm backdrop-blur transition hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-300"
+                            >
+                                <span class="sr-only">{{ __('Close') }}</span>
+                                <x-icons.remove-icon size="w-6 h-6" color="text-slate-500" hover="text-slate-900"></x-icons.remove-icon>
+                            </button>
+                        </div>
+                    @endif
 
-       <div class="fixed inset-y-0 right-0 flex max-w-full pl-10">
-
-         <div class="relative w-screen {{$sizeClass}}"
-               x-show="isOpen"
-               x-transition:enter="transform transition ease-in-out duration-500 sm:duration-700"
-               x-transition:enter-start="transform translate-x-full"
-               x-transition:enter-end="transform translate-x-0"
-               x-transition:leave="transform transition ease-in-out duration-500 sm:duration-700"
-               x-transition:leave-start="transform translate-x-0"
-               x-transition:leave-end="transform translate-x-full"
-               style="display: none;"
-         >
-
-           <div class="absolute top-0 right-0 flex pt-5 pr-2 sm:pr-4"
-               x-show="isOpen"
-               x-transition:enter="transition ease-in-out duration-500"
-               x-transition:enter-start="transform opacity-0"
-               x-transition:enter-end="transform opacity-100"
-               x-transition:leave="transition ease-in-out duration-500"
-               x-transition:leave-start="transform opacity-100"
-               x-transition:leave-end="transform opacity-0"
-               style="display: none;"
-           >
-             <button @click="isOpen=false;toggleBody(false);$wire.call('closeSideMenu')" class="z-20 p-1 text-white rounded-lg hover:text-white focus:outline-none focus:ring-2 focus:ring-white">
-               <span class="sr-only">{{ __('Close') }}</span>
-                 <x-icons.remove-icon size="w-7 h-7" color="text-slate-500" hover="text-slate-900"></x-icons.remove-icon>
-             </button>
-           </div>
-
-           <div class="flex flex-col h-full py-6 overflow-y-scroll bg-white shadow-xl rounded-tl-2xl rounded-bl-2xl">
-
-             <div class="relative flex-1 px-4 sm:px-6" wire:loading.remove>
-              {{ $slot }}
-             </div>
-             <div class="relative flex-1 px-4 sm:px-6" wire:loading>
-                <div class="w-full space-y-4 animate-pulse">
-                    <div class="h-6 rounded-md w-52 bg-slate-200"></div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="h-10 rounded-lg bg-slate-200"></div>
-                        <div class="h-10 rounded-lg bg-slate-200"></div>
-                        <div class="h-10 rounded-lg bg-slate-200"></div>
-                        <div class="h-10 rounded-lg bg-slate-200"></div>
+                    <div class="relative flex-1 overflow-y-auto px-4 py-4 pr-14 sm:px-6 sm:pr-16" wire:loading.remove>
+                        {{ $slot }}
                     </div>
-                    <div class="h-24 rounded-lg bg-slate-200"></div>
-                    <div class="grid grid-cols-3 gap-3">
-                        <div class="h-10 rounded-lg bg-slate-200"></div>
-                        <div class="h-10 rounded-lg bg-slate-200"></div>
-                        <div class="h-10 rounded-lg bg-slate-200"></div>
+
+                    <div class="relative flex-1 overflow-y-auto px-4 py-4 sm:px-6" wire:loading>
+                        <div class="w-full space-y-4 animate-pulse">
+                            <div class="h-6 w-52 rounded-md bg-slate-200"></div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="h-10 rounded-lg bg-slate-200"></div>
+                                <div class="h-10 rounded-lg bg-slate-200"></div>
+                                <div class="h-10 rounded-lg bg-slate-200"></div>
+                                <div class="h-10 rounded-lg bg-slate-200"></div>
+                            </div>
+                            <div class="h-24 rounded-lg bg-slate-200"></div>
+                            <div class="grid grid-cols-3 gap-3">
+                                <div class="h-10 rounded-lg bg-slate-200"></div>
+                                <div class="h-10 rounded-lg bg-slate-200"></div>
+                                <div class="h-10 rounded-lg bg-slate-200"></div>
+                            </div>
+                            <div class="h-12 rounded-lg bg-slate-200"></div>
+                        </div>
                     </div>
-                    <div class="h-12 rounded-lg bg-slate-200"></div>
                 </div>
-             </div>
-
-           </div>
-         </div>
-       </div>
-     </div>
-   </div>
+            </section>
+        </div>
+    </div>
+</div>

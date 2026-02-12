@@ -1,4 +1,5 @@
 @php
+    use App\Support\ViewNumberFormatter;
     use Illuminate\Support\Arr;
 
     $educationState = $educationForm->education ?? [];
@@ -158,7 +159,7 @@
                     <span class="text-sm font-medium text-gray-500 uppercase">{{ __('Duration') }}:</span>
                     @if(! empty($calculatedDataEducation))
                         <span class="font-medium text-gray-900">
-                            {{ $calculatedDataEducation['diff'] }} {{ __('month') }}
+                            {{ ViewNumberFormatter::decimal($calculatedDataEducation['diff']) }} {{ __('month') }}
                             ({{ $calculatedDataEducation['year'] }} {{ __('year') }}
                             {{ $calculatedDataEducation['month'] }} {{ __('month') }}
                             {{ $calculatedDataEducation['day'] ?? 0 }} {{ __('day') }})
@@ -169,13 +170,13 @@
                 @if(Arr::get($educationState, 'coefficient') > 0)
                     <div class="flex items-center space-x-2">
                         <span class="text-sm font-medium text-gray-500 uppercase">{{ __('Coefficient') }}:</span>
-                        <span class="font-medium text-teal-500">{{ $educationState['coefficient'] }}</span>
+                        <span class="font-medium text-teal-500">{{ ViewNumberFormatter::decimal($educationState['coefficient']) }}</span>
                     </div>
                     <div class="flex items-center space-x-2">
                         <span class="text-sm font-medium text-gray-500 uppercase">{{ __('Extra seniority') }}:</span>
                         @if(! empty($calculatedDataEducation))
                             <span class="font-medium text-rose-500">
-                                {{ $calculatedDataEducation['duration'] }} {{ __('month') }}
+                                {{ ViewNumberFormatter::decimal($calculatedDataEducation['duration']) }} {{ __('month') }}
                                 ({{ $calculatedDataEducation['year_coefficient'] }} {{ __('year') }}
                                 {{ $calculatedDataEducation['month_coefficient'] }} {{ __('month') }})
                             </span>
@@ -447,7 +448,7 @@
                 <div class="flex items-center space-x-2">
                     <span class="font-medium text-gray-500">{{ __('Total duration') }}:</span>
                     <span class="font-medium text-gray-900">
-                        {{ data_get($calculatedDataExtraEducation, 'total_duration', 0) }} {{ __('month') }}
+                        {{ ViewNumberFormatter::decimal(data_get($calculatedDataExtraEducation, 'total_duration', 0)) }} {{ __('month') }}
                         ({{ data_get($calculatedDataExtraEducation, 'total_duration_diff.year', 0) }} {{ __('year') }}
                         {{ data_get($calculatedDataExtraEducation, 'total_duration_diff.month', 0) }} {{ __('month') }})
                         — {{ data_get($calculatedDataExtraEducation, 'total_duration_days', 0) }} {{ __('day') }}
@@ -456,7 +457,7 @@
                 <div class="flex items-center space-x-2">
                     <span class="font-medium text-gray-500">{{ __('Extra seniority') }}:</span>
                     <span class="font-medium text-rose-500">
-                        {{ data_get($calculatedDataExtraEducation, 'extra_seniority', 0) }} {{ __('month') }}
+                        {{ ViewNumberFormatter::decimal(data_get($calculatedDataExtraEducation, 'extra_seniority', 0)) }} {{ __('month') }}
                         ({{ data_get($calculatedDataExtraEducation, 'extra_seniority_full.year', 0) }} {{ __('year') }}
                         {{ data_get($calculatedDataExtraEducation, 'extra_seniority_full.month', 0) }} {{ __('month') }})
                         — {{ data_get($calculatedDataExtraEducation, 'extra_seniority_days', 0) }} {{ __('day') }}

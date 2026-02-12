@@ -29,14 +29,14 @@
     };
 @endphp
 
-@if ($type == 'button')
+@if ($type !== 'link')
     <button @disabled($disabled)
-        {{ $attributes->merge(['type' => 'submit', 'class' => 'camelcase inline-flex justify-center items-center px-3 py-2 border rounded-md font-medium shadow-md text-sm focus:outline-none focus:ring ring-gray-300 disabled:opacity-25 transition-all ease-in-out duration-150 ' . $extraClasses]) }}>
+        {{ $attributes->merge(['type' => $type, 'class' => 'camelcase inline-flex justify-center items-center px-3 py-2 border rounded-md font-medium shadow-md text-sm focus:outline-none focus:ring ring-gray-300 disabled:opacity-25 transition-all ease-in-out duration-150 ' . $extraClasses]) }}>
         {{ $slot }}
     </button>
 @else
     <a
-        {{ $attributes->merge(['type' => 'submit', 'class' => 'camelcase inline-flex justify-center items-center px-3 py-2 border border-transparent rounded-md font-medium shadow-md text-sm focus:outline-none focus:ring ring-gray-300 disabled:opacity-25 transition-all ease-in-out duration-150 ' . $extraClasses]) }}>
+        {{ $attributes->merge(['class' => 'camelcase inline-flex justify-center items-center px-3 py-2 border border-transparent rounded-md font-medium shadow-md text-sm focus:outline-none focus:ring ring-gray-300 disabled:opacity-25 transition-all ease-in-out duration-150 ' . $extraClasses]) }}>
         {{ $slot }}
     </a>
 @endif

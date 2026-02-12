@@ -40,7 +40,7 @@
                     role="menu" aria-orientation="vertical" aria-labelledby="menu-button"
                     tabindex="-1"
                 >
-                    <div class="flex items-center divide-x divide-neutral-100" role="none">
+                    <div class="flex items-center divide-x divide-neutral-100" role="none" @click="showContextMenu = false">
                         <button
                             wire:click="openSideMenu('show-files','{{ $personnel->tabel_no }}')"
                             class="relative flex items-center justify-start w-full px-4 py-2 space-x-2 text-sm font-medium appearance-none hover:bg-slate-100"

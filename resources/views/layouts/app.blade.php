@@ -27,13 +27,6 @@
 
     @livewireScripts
     @stack('js')
-    <script>
-        Livewire.on('refresh-page', () => {
-            setTimeout(() => {
-                location.reload();
-            }, 2000); // 2000 milliseconds = 2 seconds
-        });
-    </script>
 </body>
 
 </html>

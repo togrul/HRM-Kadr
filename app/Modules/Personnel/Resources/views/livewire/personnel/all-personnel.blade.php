@@ -18,8 +18,8 @@
         {{-- Position Filters --}}
         @include('partials.personnel.position-filters')
 
-        <div class="relative min-h-[300px] -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-            <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+        <div class="relative min-h-[300px] overflow-x-auto">
+            <div class="inline-block min-w-full py-2 align-middle sm:px-1">
                 <div class="border-b border-gray-200 shadow overflow-inherit sm:rounded-xl">
                     <x-table.tbl :headers="$this->getTableHeaders()">
                         @forelse ($personnels as $key => $personnel)

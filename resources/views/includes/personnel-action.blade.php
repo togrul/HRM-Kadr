@@ -21,7 +21,7 @@
 >
     <div class="grid items-start grid-cols-8 gap-y-2">
         @foreach ($steps as $key => $st)
-            <button wire:click="selectStep({{ $key }})" @class([
+            <button type="button" wire:click.prevent="selectStep({{ $key }})" @class([
                 'flex items-center relative flex-col space-y-2 transition-all duration-300 hover:text-green-500 before:content-0 before:rounded-xl before:absolute before:w-1/2 before:left-3/4 before:h-[3px] before:z-0 before:top-[22px] before:transition-all before:duration-300 last:before:w-0',
                 'before:bg-gray-200' => $step <= $key,
                 'before:bg-emerald-500' => $step > $key

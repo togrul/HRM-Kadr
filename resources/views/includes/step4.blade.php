@@ -1,3 +1,7 @@
+@php
+    use App\Support\ViewNumberFormatter;
+@endphp
+
 <div class="flex flex-col space-y-4">
     <x-form-card title="Labor activities">
         <div class="grid grid-cols-5 gap-2">
@@ -210,7 +214,7 @@
                     <span class="text-sm font-medium text-slate-900">
                         {{ $calculatedData['data'][$key]['duration']['year'] }} {{ __('year') }}
                         {{ $calculatedData['data'][$key]['duration']['month'] }} {{ __('month') }}
-                        ({{ $calculatedData['data'][$key]['duration']['diff'] }} {{ __('month') }})
+                        ({{ ViewNumberFormatter::decimal($calculatedData['data'][$key]['duration']['diff']) }} {{ __('month') }})
                     </span>
                 </div>
 
@@ -222,7 +226,7 @@
                         </svg>
                         <span class="text-sm font-medium text-slate-500">{{ __('Coefficient') }}</span>
                     </div>
-                    <span class="text-sm font-medium text-slate-900">x{{ $laModel['coefficient'] }}</span>
+                    <span class="text-sm font-medium text-slate-900">x{{ ViewNumberFormatter::decimal($laModel['coefficient']) }}</span>
                 </div>
 
 
@@ -234,7 +238,7 @@
                         <span class="text-sm font-medium text-slate-500">{{ __('Total') }}</span>
                     </div>
                     <span class="text-sm font-medium text-slate-900">
-                        {{ $calculatedData['data'][$key]['duration']['duration'] }} {{ __('month') }}
+                        {{ ViewNumberFormatter::decimal($calculatedData['data'][$key]['duration']['duration']) }} {{ __('month') }}
                     </span>
                 </div>
                 @endif
@@ -291,7 +295,7 @@
                     <div class="flex items-center self-start space-x-2 text-sm">
                         <span class="font-medium text-teal-500">{{ __('Property') }}:</span>
                         <span class="font-medium text-gray-900">
-                            {{ $calculatedData['sum_month_old'] }} {{ __('month') }}
+                            {{ ViewNumberFormatter::decimal($calculatedData['sum_month_old']) }} {{ __('month') }}
                             ({{ $calculatedData['sum_old']['year'] }} {{ __('year') }}
                             {{ $calculatedData['sum_old']['month'] }} {{ __('month') }})
                         </span>
@@ -300,7 +304,7 @@
                     <div class="flex items-center self-start space-x-2 text-sm">
                         <span class="font-medium text-yellow-400">{{ __('Military') }}:</span>
                         <span class="font-medium text-gray-900">
-                            {{ $calculatedData['sum_month_military_old'] }} {{ __('month') }}
+                            {{ ViewNumberFormatter::decimal($calculatedData['sum_month_military_old']) }} {{ __('month') }}
                             ({{ $calculatedData['sum_old_military']['year'] }} {{ __('year') }}
                             {{ $calculatedData['sum_old_military']['month'] }} {{ __('month') }})
                         </span>
@@ -314,7 +318,7 @@
                     <div class="flex items-center self-start space-x-2 text-sm">
                         <span class="font-medium text-teal-500">{{ __('Standart') }}:</span>
                         <span class="font-medium text-gray-900">
-                            {{ $calculatedData['sum_month_current_diff'] }} {{ __('month') }}
+                            {{ ViewNumberFormatter::decimal($calculatedData['sum_month_current_diff']) }} {{ __('month') }}
                             ({{ $calculatedData['sum_current_diff']['year'] }} {{ __('year') }}
                             {{ $calculatedData['sum_current_diff']['month'] }} {{ __('month') }})
                     </span>
@@ -322,7 +326,7 @@
                     <div class="flex items-center self-start space-x-2 text-sm">
                         <span class="font-medium text-blue-500">{{ __('Coefficient') }}:</span>
                         <span class="font-medium text-gray-900">
-                            {{ $calculatedData['sum_month_current'] }} {{ __('month') }}
+                            {{ ViewNumberFormatter::decimal($calculatedData['sum_month_current']) }} {{ __('month') }}
                             ({{ $calculatedData['sum_current']['year'] }} {{ __('year') }}
                             {{ $calculatedData['sum_current']['month'] }} {{ __('month') }})
                     </span>
@@ -336,7 +340,7 @@
                     <div class="flex items-center self-start space-x-2 text-sm">
                         <span class="font-medium text-teal-500">{{ __('Property') }}:</span>
                         <span class="font-medium text-gray-900">
-                            {{ $calculatedData['sum_total'] }} {{ __('month') }}
+                            {{ ViewNumberFormatter::decimal($calculatedData['sum_total']) }} {{ __('month') }}
                             ({{ $calculatedData['sum_total_full']['year'] }} {{ __('year') }}
                             {{ $calculatedData['sum_total_full']['month'] }} {{ __('month') }})
                         </span>
@@ -344,7 +348,7 @@
                     <div class="flex items-center self-start space-x-2 text-sm">
                         <span class="font-medium text-yellow-400">{{ __('Military') }}:</span>
                         <span class="font-medium text-gray-900">
-                            {{ $calculatedData['sum_total_military'] }} {{ __('month') }}
+                            {{ ViewNumberFormatter::decimal($calculatedData['sum_total_military']) }} {{ __('month') }}
                             ({{ $calculatedData['sum_total_military_full']['year'] }} {{ __('year') }}
                             {{ $calculatedData['sum_total_military_full']['month'] }} {{ __('month') }})
                         </span>

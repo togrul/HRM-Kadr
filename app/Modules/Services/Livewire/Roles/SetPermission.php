@@ -56,7 +56,6 @@ class SetPermission extends Component
 
         $this->clearCacheAndSelections();
         $this->dispatch('permissionSet', __('Permission was added to role successfully!'));
-        $this->dispatch('refresh-page');
     }
 
     private function updateRoleData(): void

@@ -16,6 +16,6 @@
     $cellClasses = trim("{$baseClasses} {$extraClasses}");
 @endphp
 
-<td {{ $attributes->merge(['class' => $cellClasses]) }}>
+<td {{ $attributes->merge(['class' => 'py-1 ' . $cellClasses]) }}>
     {{ $slot }}
 </td>
