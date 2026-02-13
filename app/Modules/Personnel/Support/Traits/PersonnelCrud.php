@@ -11,9 +11,12 @@ use App\Livewire\Traits\DropdownConstructTrait;
 use App\Livewire\Traits\Helpers\FillComplexArrayTrait;
 use App\Models\City;
 use App\Models\CountryTranslation;
+use App\Modules\Personnel\Support\Traits\DispatchesPersonnelUiEvents;
 use App\Modules\Personnel\Support\Traits\Personnel\HandlesPersonnelStepValidation;
 use App\Modules\Personnel\Support\Traits\Personnel\ManagesPersonnelRelationRows;
 use App\Modules\Personnel\Support\Traits\Validations\PersonnelValidationTrait;
+use App\Modules\Personnel\Services\PersonnelStepNavigationService;
+use App\Modules\Personnel\Services\PersonnelStepState;
 use App\Services\CalculateSeniorityService;
 use App\Services\CallPersonnelInfo;
 use App\Services\EducationDurationService;
@@ -25,6 +28,7 @@ use Livewire\WithFileUploads;
 
 trait PersonnelCrud
 {
+    use DispatchesPersonnelUiEvents;
     use DropdownConstructTrait;
     use FillComplexArrayTrait;
     use HandlesPersonnelStepValidation;
@@ -112,6 +116,10 @@ trait PersonnelCrud
 
     protected ?EducationDurationService $educationDurationServiceInstance = null;
 
+    protected ?PersonnelStepNavigationService $stepNavigationServiceInstance = null;
+
+    protected ?PersonnelStepState $stepStateServiceInstance = null;
+
     public function updatedAvatar(): void
     {
         $this->validate([
@@ -137,7 +145,7 @@ trait PersonnelCrud
     {
         $this->validateNavigationStepIfNeeded();
 
-        $this->step = max(1, $this->step - 1);
+        $this->step = $this->stepNavigationService()->previous((int) $this->step);
         $this->handleStepChanged();
     }
 
@@ -154,7 +162,7 @@ trait PersonnelCrud
     {
         $this->validateNavigationStepIfNeeded();
 
-        $this->step = $step;
+        $this->step = $this->stepNavigationService()->select((int) $step);
         $this->handleStepChanged();
     }
 
@@ -170,11 +178,7 @@ trait PersonnelCrud
             return;
         }
 
-        $stepName = match ($step) {
-            1 => 'personnel',
-            2 => 'document',
-            3 => 'education'
-        };
+        $stepName = $this->stepStateService()->completionStepName($step);
 
         if (! $stepName) {
             return;
@@ -197,22 +201,13 @@ trait PersonnelCrud
 
         $this->validateNavigationStepIfNeeded();
 
-        $this->step++;
+        $this->step = $this->stepNavigationService()->next((int) $this->step);
         $this->handleStepChanged();
     }
 
     private function getSteps(): array
     {
-        return [
-            1 => __('Personal Information'),
-            2 => __('Cards'),
-            3 => __('Education'),
-            4 => __('Labor activities'),
-            5 => __('Military'),
-            6 => __('Awards and punishments'),
-            7 => __('Kinships'),
-            8 => __('Other'),
-        ];
+        return $this->stepNavigationService()->steps();
     }
 
     #[Isolate]
@@ -432,20 +427,28 @@ trait PersonnelCrud
 
     protected function shouldLoadLookupData(): bool
     {
-        $step = $this->step;
-
-        if (is_null($step) || (is_numeric($step) && (int) $step <= 0)) {
-            return false;
-        }
-
-        return ! in_array((int) $step, [1, 2, 3, 4, 5, 6, 7, 8], true);
+        return $this->stepStateService()->shouldLoadLookupData($this->step);
     }
 
     protected function handleStepChanged(): void
     {
-        if (method_exists($this, 'onStepChanged')) {
-            $this->onStepChanged((int) $this->step);
-        }
+        $this->stepNavigationService()->handleStepChanged((int) $this->step, function (int $step): void {
+            if (method_exists($this, 'onStepChanged')) {
+                $this->onStepChanged($step);
+            }
+        });
+    }
+
+    protected function stepNavigationService(): PersonnelStepNavigationService
+    {
+        return $this->stepNavigationServiceInstance
+            ??= resolve(PersonnelStepNavigationService::class);
+    }
+
+    protected function stepStateService(): PersonnelStepState
+    {
+        return $this->stepStateServiceInstance
+            ??= resolve(PersonnelStepState::class);
     }
 
     protected function personalFormHasDisability(): bool

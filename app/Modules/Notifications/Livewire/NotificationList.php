@@ -2,6 +2,7 @@
 
 namespace App\Modules\Notifications\Livewire;
 
+use App\Modules\Notifications\Support\NotificationCountCache;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -13,14 +14,27 @@ class NotificationList extends Component
 
     public function mount(): void
     {
-        auth()->user()
+        $user = auth()->user();
+        $user
             ?->unreadNotifications()
             ->update(['read_at' => now()]);
+
+        if ($user) {
+            app(NotificationCountCache::class)->forgetUser((int) $user->id);
+            $this->dispatch('notifications-refresh-count');
+        }
     }
 
     public function clearNotifications(): void
     {
-        auth()->user()->notifications()->delete();
+        $user = auth()->user();
+        if (! $user) {
+            return;
+        }
+
+        $user->notifications()->delete();
+        app(NotificationCountCache::class)->forgetUser((int) $user->id);
+        $this->dispatch('notifications-refresh-count');
     }
 
     public function render()

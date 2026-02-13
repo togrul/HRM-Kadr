@@ -29,6 +29,7 @@ trait ContractTrait {
         $this->personnelModelData->contracts()->create($contractData);
 
         $this->dispatch('contractAdded', __('Contract was added successfully!'));
+        $this->dispatchModalCloseEvent();
         $this->reset('contracts');
     }
 
@@ -36,5 +37,6 @@ trait ContractTrait {
     {
         $contractModel->delete();
         $this->dispatch('contractAdded', __('Contract was deleted successfully!'));
+        $this->dispatchModalCloseEvent();
     }
 }

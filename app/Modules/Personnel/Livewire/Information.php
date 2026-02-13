@@ -3,6 +3,7 @@
 namespace App\Modules\Personnel\Livewire;
 
 use App\Livewire\Traits\Helpers\FillComplexArrayTrait;
+use App\Modules\Personnel\Support\Traits\DispatchesPersonnelUiEvents;
 use App\Modules\Personnel\Support\Traits\Information\ContractTrait;
 use App\Modules\Personnel\Support\Traits\Information\DisposalTrait;
 use App\Modules\Personnel\Support\Traits\Information\EducationRequestTrait;
@@ -23,6 +24,7 @@ use Livewire\Component;
 class Information extends Component
 {
     use AuthorizesRequests;
+    use DispatchesPersonnelUiEvents;
     use ContractTrait;
     use DisposalTrait;
     use EducationRequestTrait;

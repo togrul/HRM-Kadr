@@ -10,8 +10,10 @@ use App\Livewire\Forms\Personnel\LaborActivityForm;
 use App\Livewire\Forms\Personnel\MiscellaneousForm;
 use App\Livewire\Forms\Personnel\ServiceHistoryForm;
 use App\Livewire\Forms\Personnel\PersonalInformationForm;
+use App\Modules\Personnel\Services\PersonnelFormAssembler;
 use App\Modules\Personnel\Support\Traits\PersonnelCrud;
 use App\Modules\Personnel\Support\Traits\RelationCruds\RelationCrudTrait;
+use App\Modules\Personnel\Services\PersonnelPersistenceService;
 use App\Models\Personnel;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -42,8 +44,6 @@ class EditPersonnel extends Component
 
     /** @var array<int> */
     public array $loadedSteps = [];
-
-    public bool $loadedAllSteps = false;
 
     public ?int $loadedPersonnelId = null;
 
@@ -85,8 +85,6 @@ class EditPersonnel extends Component
         $this->authorize('update', $this->personnelModelData);
         $currentStep = (int) $this->step;
 
-        $this->loadAllStepData();
-
         if ($currentStep === 1) {
             $this->validate($this->validationRules()[1]);
         } elseif ($currentStep === 2 && $this->shouldValidateStep(2)) {
@@ -110,68 +108,39 @@ class EditPersonnel extends Component
             $this->personalForm->personnel['photo'] = $this->avatar->store('personnel', 'public');
         }
 
-        $personalPayload = $this->personalForm->toPayload();
-        $personnelData = $this->modifyArray(
-            $personalPayload['personnel'] ?? [],
-            $this->personnelModelData->dateList()
+        $assembled = app(PersonnelFormAssembler::class)->buildForStore(
+            personalForm: $this->personalForm,
+            documentForm: $this->documentForm,
+            educationForm: $this->educationForm,
+            laborActivityForm: $this->laborActivityForm,
+            historyForm: $this->historyForm,
+            awardsPunishmentsForm: $this->awardsPunishmentsForm,
+            kinshipForm: $this->kinshipForm,
+            miscForm: $this->miscForm,
+            dateFields: $this->personnelModelData->dateList(),
+            dateNormalizer: fn (array $payload, array $dates): array => $this->modifyArray($payload, $dates)
         );
-        $personnelExtra = $personalPayload['personnel_extra'] ?? [];
-
-        $documentPayload = $this->documentPayload();
-        $documentData = data_get($documentPayload, 'document', []);
-        $serviceCardsList = data_get($documentPayload, 'service_cards.list', []);
-        $passportsList = data_get($documentPayload, 'passports.list', []);
-        $education = $this->educationForm->educationForPersistence();
-        $extraEducations = $this->educationForm->extraEducationsForPersistence();
 
         if (in_array($this->step, [2, 3, 4], true)) {
             $this->completeStep(actionSave: true);
         }
 
-        $laborActivities = $this->laborActivityForm->laborActivitiesForPersistence();
-        $ranks = $this->laborActivityForm->ranksForPersistence();
+        $relationPayloads = app(PersonnelPersistenceService::class)->payloadsForLoadedSteps(
+            payloads: $assembled['relation_payloads'],
+            loadedSteps: $this->loadedSteps
+        );
 
-        $militaryServices = $this->historyForm->militaryForPersistence();
-        $injuries = $this->historyForm->injuriesForPersistence();
-        $captivities = $this->historyForm->captivitiesForPersistence();
-        $awards = $this->awardsPunishmentsForm->awardsForPersistence();
-        $punishments = $this->awardsPunishmentsForm->punishmentsForPersistence();
-        $kinships = $this->kinshipForm->kinshipsForPersistence();
-        $languages = $this->miscForm->languagesForPersistence();
-        $events = $this->miscForm->eventsForPersistence();
-        $degrees = $this->miscForm->degreesForPersistence();
-        $elections = $this->miscForm->electionsForPersistence();
-
-        $relationPayloads = [
-            'document' => $documentData,
-            'service_cards' => $serviceCardsList,
-            'passports' => $passportsList,
-            'education' => $education,
-            'extra_educations' => $extraEducations,
-            'labor_activities' => $laborActivities,
-            'ranks' => $ranks,
-            'military' => $militaryServices,
-            'injuries' => $injuries,
-            'captivities' => $captivities,
-            'awards' => $awards,
-            'punishments' => $punishments,
-            'kinships' => $kinships,
-            'languages' => $languages,
-            'events' => $events,
-            'degrees' => $degrees,
-            'elections' => $elections,
-        ];
-
-        DB::transaction(function () use ($personnelData, $relationPayloads, $personnelExtra) {
-            $this->personnelModelData->update($personnelData);
+        DB::transaction(function () use ($assembled, $relationPayloads) {
+            $this->personnelModelData->update($assembled['personnel_data']);
             $this->updatePersonnelRelations($relationPayloads);
 
-            if (! empty($personnelExtra)) {
-                $this->personnelModelData->update($personnelExtra);
+            if (! empty($assembled['personnel_extra'])) {
+                $this->personnelModelData->update($assembled['personnel_extra']);
             }
         });
 
-        $this->dispatch('personnelAdded', __('Personnel was updated successfully!'));
+        $this->dispatchPersonnelStored(__('Personnel was updated successfully!'));
+        $this->dispatchModalCloseEvent();
     }
 
     public function updatedStep($value): void
@@ -208,21 +177,6 @@ class EditPersonnel extends Component
         };
 
         $this->loadedSteps[] = $step;
-    }
-
-    protected function loadAllStepData(): void
-    {
-        if ($this->loadedAllSteps) {
-            return;
-        }
-
-        foreach (range(1, 8) as $step) {
-            if (! in_array($step, $this->loadedSteps, true)) {
-                $this->loadStepData($step);
-            }
-        }
-
-        $this->loadedAllSteps = true;
     }
 
     protected function loadPersonalFormData(): void
@@ -372,7 +326,6 @@ class EditPersonnel extends Component
 
         $this->loadedPersonnelId = $personnelId;
         $this->loadedSteps = [];
-        $this->loadedAllSteps = false;
         $this->relationGroupsLoaded = [];
         $this->stepDataInitialized = false;
         $this->resetDropdownLabelCache();

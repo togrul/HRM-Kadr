@@ -5,13 +5,13 @@ namespace App\Modules\Personnel\Livewire;
 use App\Modules\Personnel\Exports\PersonnelExport;
 use App\Livewire\Traits\SideModalAction;
 use App\Models\Personnel;
-use App\Models\Position;
+use App\Modules\Personnel\Services\PersonnelLookupService;
+use App\Modules\Personnel\Services\PersonnelQueryService;
+use App\Modules\Personnel\Services\PersonnelRowViewModelService;
 use App\Services\StructureService;
 use App\Traits\NestedStructureTrait;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
@@ -45,8 +45,6 @@ class AllPersonnel extends Component
     public bool $openFilterOnMount = false;
 
     protected ?array $accessibleStructureCache = null;
-
-    protected ?Collection $positionCache = null;
 
     protected function queryString()
     {
@@ -205,17 +203,7 @@ class AllPersonnel extends Component
     #[Computed(persist: true)]
     public function positions()
     {
-        return $this->positionCache
-            ??= Cache::remember(
-                'personnel:positions:list',
-                now()->addMinutes(30),
-                function () {
-                    return Position::query()
-                        ->select('id', 'name')
-                        ->orderBy('id')
-                        ->get();
-                }
-            );
+        return app(PersonnelLookupService::class)->positions();
     }
 
     public function mount()
@@ -230,85 +218,26 @@ class AllPersonnel extends Component
     protected function returnData($type = 'normal')
     {
         $query = $this->personnelQuery();
+        $rowViewModelService = app(PersonnelRowViewModelService::class);
 
-        return $type == 'normal'
-            ? $query->paginate(10)->withQueryString()
-            : $query->cursor();
+        if ($type === 'normal') {
+            $paginator = $query->paginate(10)->withQueryString();
+
+            return $rowViewModelService->decoratePaginator($paginator);
+        }
+
+        return $query->cursor();
     }
 
     protected function personnelQuery(): Builder
     {
-        $structureIds = $this->selectedStructureIds();
-
-        $locale = app()->getLocale();
-
-        $relations = [
-            'latestRank',
-            "latestRank.rank:id,name_{$locale}",
-            'latestVacation',
-            'latestBusinessTrip',
-            'position:id,name',
-            'currentWork',
-            'latestDisposal',
-        ];
-
-        if ($this->status === 'deleted') {
-            $relations[] = 'personDidDelete:id,name';
-        }
-
-        $builder = Personnel::query()
-            ->select([
-                'personnels.id',
-                'personnels.tabel_no',
-                'personnels.surname',
-                'personnels.name',
-                'personnels.patronymic',
-                'personnels.photo',
-                'personnels.gender',
-                'personnels.structure_id',
-                'personnels.position_id',
-                'personnels.join_work_date',
-                'personnels.leave_work_date',
-                'personnels.is_pending',
-                'personnels.deleted_at',
-                'personnels.deleted_by',
-            ])
-            ->leftJoin('positions as position_sort', 'position_sort.id', '=', 'personnels.position_id')
-            ->leftJoin('structures as structure_sort', 'structure_sort.id', '=', 'personnels.structure_id')
-            ->with($relations)
-            ->withStructureTree()
-
-            ->when(! empty($structureIds), function (Builder $query) use ($structureIds) {
-                $query->whereIn('personnels.structure_id', $structureIds);
-            }, function (Builder $query) {
-                $query->whereIn('personnels.structure_id', $this->accessibleStructureIds());
-            })
-            ->when(! empty($this->selectedPosition), function (Builder $query) {
-                $query->where('personnels.position_id', $this->selectedPosition);
-            })
-            ->when($this->status, function (Builder $query) {
-                switch ($this->status) {
-                    case 'current':
-                        $query->whereNull('personnels.leave_work_date');
-                        break;
-                    case 'leaves':
-                        $query->whereNotNull('personnels.leave_work_date');
-                        break;
-                    case 'deleted':
-                        $query->onlyTrashed();
-                        break;
-                    case 'pending':
-                        $query->where('personnels.is_pending', true);
-                        break;
-                    default:
-                        $query->where('personnels.is_pending', false);
-                }
-            })
-            ->when(! empty($this->filters), fn ($q) => $q->filter($this->filters))
-            ->orderBy('position_sort.name')
-            ->orderBy('structure_sort.name');
-
-        return $builder;
+        return app(PersonnelQueryService::class)->build(
+            status: $this->status,
+            filters: $this->filters,
+            selectedStructureIds: $this->selectedStructureIds(),
+            accessibleStructureIds: $this->accessibleStructureIds(),
+            selectedPosition: $this->selectedPosition
+        );
     }
 
     protected function accessibleStructureIds(): array

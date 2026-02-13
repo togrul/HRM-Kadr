@@ -49,6 +49,7 @@
 
                         <div class="block mt-4">
                             <x-button
+                                type="submit"
                                 class="flex transition w-full py-4 duration-300 justify-center items-center font-medium text-base"
                                 mode="gray">
                                 {{ __('Log in') }}

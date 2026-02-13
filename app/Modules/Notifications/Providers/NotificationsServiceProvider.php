@@ -2,8 +2,10 @@
 
 namespace App\Modules\Notifications\Providers;
 
+use App\Modules\Notifications\Observers\DatabaseNotificationObserver;
 use App\Providers\Concerns\RegistersLivewireAliases;
 use App\Services\Modules\ModuleState;
+use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\ServiceProvider;
 
 class NotificationsServiceProvider extends ServiceProvider
@@ -23,6 +25,7 @@ class NotificationsServiceProvider extends ServiceProvider
 
         $this->loadRoutesFrom(__DIR__.'/../Routes/web.php');
         $this->loadViewsFrom(__DIR__.'/../Resources/views', 'notification');
+        DatabaseNotification::observe(DatabaseNotificationObserver::class);
         $this->registerLivewireComponents();
     }
 

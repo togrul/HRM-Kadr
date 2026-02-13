@@ -3,6 +3,7 @@
 namespace App\Modules\Personnel\Livewire;
 
 use App\Models\Personnel;
+use App\Modules\Personnel\Support\Traits\DispatchesPersonnelUiEvents;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
@@ -11,6 +12,7 @@ use Livewire\WithFileUploads;
 class Files extends Component
 {
     use AuthorizesRequests, WithFileUploads;
+    use DispatchesPersonnelUiEvents;
 
     public $title;
 
@@ -63,6 +65,7 @@ class Files extends Component
             $this->personnelFiles->files()->delete();
         }
         $this->dispatch('fileAdded', __('File has added successfully!'));
+        $this->dispatchModalCloseEvent();
     }
 
     public function mount()

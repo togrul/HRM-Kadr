@@ -30,6 +30,7 @@ trait EducationRequestTrait {
         );
 
         $this->dispatch('contractAdded', __('Education request was added successfully!'));
+        $this->dispatchModalCloseEvent();
         $this->reset('education', 'selectedRequest');
     }
 
@@ -46,5 +47,6 @@ trait EducationRequestTrait {
     {
         $requestModel->delete();
         $this->dispatch('contractAdded', __('Education request was deleted successfully!'));
+        $this->dispatchModalCloseEvent();
     }
 }

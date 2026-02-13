@@ -23,27 +23,23 @@
                 <div class="border-b border-gray-200 shadow overflow-inherit sm:rounded-xl">
                     <x-table.tbl :headers="$this->getTableHeaders()">
                         @forelse ($personnels as $key => $personnel)
-                            @php
-                                $activeVacation = $personnel->activeVacation;
-                                $activeBusinessTrip = $personnel->activeBusinessTrip;
-                            @endphp
                             <tr wire:key="personnel-row-{{ $personnel->id }}-{{ $status ?? 'all' }}" @class([
                                 'relative',
                                 'bg-rose-100' => !empty($personnel->leave_work_date),
-                                'bg-white' => $activeVacation || $activeBusinessTrip,
+                                'bg-white' => $personnel->active_vacation || $personnel->active_business_trip,
                             ])>
                                 <x-table.td>
                                     <div class="absolute top-0 left-0 flex flex-col justify-between h-full">
-                                        @if ($activeVacation)
-                                            @php($vacationStart = $activeVacation->start_date) 
-                                            @php($vacationEnd = $activeVacation->return_work_date)
+                                        @if ($personnel->active_vacation)
+                                            @php($vacationStart = $personnel->active_vacation->start_date)
+                                            @php($vacationEnd = $personnel->active_vacation->return_work_date)
                                             <x-progress :startDate="$vacationStart" :endDate="$vacationEnd" color="emerald">
                                                 {{ __('In vacation') }}
                                             </x-progress>
                                         @endif
-                                        @if ($activeBusinessTrip)
-                                            @php($startDate = $activeBusinessTrip->start_date)
-                                            @php($endDate = $activeBusinessTrip->end_date)
+                                        @if ($personnel->active_business_trip)
+                                            @php($startDate = $personnel->active_business_trip->start_date)
+                                            @php($endDate = $personnel->active_business_trip->end_date)
                                             <x-progress :$startDate :$endDate color="rose">
                                                 {{ __('In business trip') }}
                                             </x-progress>
@@ -78,13 +74,11 @@
                                             <div class="flex flex-col text-xs font-medium">
                                                 <div class="flex items-center space-x-1">
                                                     <span class="text-gray-500">{{ __('Deleted date') }}:</span>
-                                                    <span
-                                                        class="text-black">{{ \Carbon\Carbon::parse($personnel->deleted_at)->format('d.m.Y H:i') }}</span>
+                                                    <span class="text-black">{{ $personnel->deleted_at_fmt }}</span>
                                                 </div>
                                                 <div class="flex items-center space-x-1">
                                                     <span class="text-gray-500">{{ __('Deleted by') }}:</span>
-                                                    <span
-                                                        class="text-black">{{ $personnel->personDidDelete->name }}</span>
+                                                    <span class="text-black">{{ $personnel->deleted_by_name }}</span>
                                                 </div>
                                             </div>
                                         @endif
@@ -93,14 +87,8 @@
 
                                 <x-table.td>
                                     <div class="flex items-center px-2 space-x-2">
-                                        @if (!empty($personnel->photo))
-                                            <img src="{{ \Illuminate\Support\Facades\Storage::url($personnel->photo) }}"
-                                                alt=""
-                                                class="flex-none object-cover border-2 shadow-lg rounded-xl w-14 h-14 border-zinc-200">
-                                        @else
-                                            <img src="{{ asset('assets/images/no-image.png') }}" alt=""
-                                                class="flex-none object-cover border-2 shadow-lg rounded-xl w-14 h-14 border-zinc-200">
-                                        @endif
+                                        <img src="{{ $personnel->photo_url }}" alt=""
+                                            class="flex-none object-cover border-2 shadow-lg rounded-xl w-14 h-14 border-zinc-200">
                                         <div class="flex flex-col space-y-1">
                                             <span class="text-sm font-medium text-zinc-900">
                                                 {{ $personnel->fullname }}
@@ -108,12 +96,12 @@
                                             <div class="flex items-center space-x-1">
                                                <span
                                                   class="px-3 py-1 text-sm font-medium shadow-sm w-max text-neutral-600 rounded-xl bg-neutral-200/70">
-                                                  {{ $personnel->gender == 1 ? __('Man') : __('Woman') }}
+                                                  {{ $personnel->gender_label }}
                                               </span>
-                                                @if (!empty($personnel->latestRank))
+                                                @if ($personnel->rank_label !== '')
                                                     <span
                                                         class="px-3 py-1 text-sm font-medium text-emerald-600 w-max">
-                                                        {{ $personnel->latestRank?->rank->name }}
+                                                        {{ $personnel->rank_label }}
                                                     </span>
                                                 @endif
                                             </div>
@@ -124,10 +112,9 @@
 
                                 <x-table.td>
                                     <div class="flex flex-col space-y-1">
-                                        <span
-                                            class="text-sm font-medium text-zinc-900"> 
-                                            {{ implode(' ', $personnel->structure->getAllParentName()) }}
-                                          </span>
+                                        <span class="text-sm font-medium text-zinc-900">
+                                            {{ $personnel->structure_path }}
+                                        </span>
                                         <span
                                             class="text-sm font-medium text-zinc-600">{{ $personnel->position_label }}</span>
                                     </div>
@@ -135,11 +122,11 @@
 
                                 <x-table.td>
                                     <x-table.cell-vertical title="Join date">
-                                        {{ \Carbon\Carbon::parse($personnel->join_work_date)->format('d.m.Y') }}
+                                        {{ $personnel->join_work_date_fmt }}
                                     </x-table.cell-vertical>
                                     @if (!empty($personnel->leave_work_date))
                                         <x-table.cell-vertical title="Leave date" text-color="text-rose-500">
-                                            {{ \Carbon\Carbon::parse($personnel->leave_work_date)->format('d.m.Y') }}
+                                            {{ $personnel->leave_work_date_fmt }}
                                         </x-table.cell-vertical>
                                     @endif
                                 </x-table.td>

@@ -19,48 +19,18 @@
             <x-label for="filter.patronymic">{{ __('Patronymic') }}</x-label>
             <x-livewire-input mode="gray" name="filter.patronymic" wire:model.defer="filter.patronymic"></x-livewire-input>
         </div>
-        <div class="flex flex-col">
-            <x-ui.select-dropdown
-                label="{{ __('Structure') }}"
-                placeholder="---"
-                mode="gray"
-                class="w-full"
-                wire:model.live="filter.structure_id"
-                :model="$this->structureOptions"
-            >
-                <x-livewire-input
-                    mode="gray"
-                    name="searchStructure"
-                    wire:model.live.debounce.300ms="searchStructure"
-                    @click.stop="isOpen = true"
-                    x-on:input.stop="null"
-                    x-on:keyup.stop="null"
-                    x-on:keydown.stop="null"
-                    x-on:change.stop="null"
-                />
-            </x-ui.select-dropdown>
-          </div>
-          <div class="flex flex-col">
-            <x-ui.select-dropdown
-                label="{{ __('Position') }}"
-                placeholder="---"
-                mode="gray"
-                class="w-full"
-                wire:model.defer="filter.position_id"
-                :model="$this->positions"
-            >
-                <x-livewire-input
-                    mode="gray"
-                    name="searchPosition"
-                    wire:model.live="searchPosition"
-                    @click.stop="isOpen = true"
-                    x-on:input.stop="null"
-                    x-on:keyup.stop="null"
-                    x-on:keydown.stop="null"
-                    x-on:change.stop="null"
-                />
-            </x-ui.select-dropdown>
-          </div>
+        <x-ui.filter-select
+            :label="__('Structure')"
+            :options="$this->structureOptions"
+            searchModel="searchStructure"
+            wire:model.live="filter.structure_id"
+        />
+        <x-ui.filter-select
+            :label="__('Position')"
+            :options="$this->positions"
+            searchModel="searchPosition"
+            wire:model.defer="filter.position_id"
+        />
         <div class="flex flex-col w-full space-y-1">
             <x-label for="filter.gender">{{ __('Gender') }}</x-label>
             <div class="flex flex-col">
@@ -120,69 +90,24 @@
                 />
             </div>
         </div>
-        <div class="flex flex-col">
-            <x-ui.select-dropdown
-                label="{{ __('Nationality') }}"
-                placeholder="---"
-                mode="gray"
-                class="w-full"
-                wire:model.defer="filter.nationality_id"
-                :model="$this->nationalityOptions"
-            >
-                <x-livewire-input
-                    mode="gray"
-                    name="searchNationality"
-                    wire:model.live="searchNationality"
-                    @click.stop="isOpen = true"
-                    x-on:input.stop="null"
-                    x-on:keyup.stop="null"
-                    x-on:keydown.stop="null"
-                    x-on:change.stop="null"
-                />
-            </x-ui.select-dropdown>
-        </div>
-        <div class="flex flex-col">
-             <x-ui.select-dropdown
-                label="{{ __('Born country') }}"
-                placeholder="---"
-                mode="gray"
-                class="w-full"
-                wire:model.defer="filter.born_country_id"
-                :model="$this->bornCountryOptions"
-            >
-                <x-livewire-input
-                    mode="gray"
-                    name="searchPreviousNationality"
-                    wire:model.live="searchPreviousNationality"
-                    @click.stop="isOpen = true"
-                    x-on:input.stop="null"
-                    x-on:keyup.stop="null"
-                    x-on:keydown.stop="null"
-                    x-on:change.stop="null"
-                />
-            </x-ui.select-dropdown>
-        </div>
-        <div class="flex flex-col">
-            <x-ui.select-dropdown
-                label="{{ __('City') }}"
-                placeholder="---"
-                mode="gray"
-                class="w-full"
-                wire:model.defer="filter.born_city_id"
-                :model="$this->cities"
-            >
-                <x-livewire-input
-                    mode="gray"
-                    name="searchCity"
-                    wire:model.live="searchCity"
-                    @click.stop="isOpen = true"
-                    x-on:input.stop="null"
-                    x-on:keyup.stop="null"
-                    x-on:keydown.stop="null"
-                    x-on:change.stop="null"
-                />
-            </x-ui.select-dropdown>
-        </div>
+        <x-ui.filter-select
+            :label="__('Nationality')"
+            :options="$this->nationalityOptions"
+            searchModel="searchNationality"
+            wire:model.defer="filter.nationality_id"
+        />
+        <x-ui.filter-select
+            :label="__('Born country')"
+            :options="$this->bornCountryOptions"
+            searchModel="searchPreviousNationality"
+            wire:model.defer="filter.born_country_id"
+        />
+        <x-ui.filter-select
+            :label="__('City')"
+            :options="$this->cities"
+            searchModel="searchCity"
+            wire:model.defer="filter.born_city_id"
+        />
         <div class="flex flex-col">
             <x-label for="filter.pin">{{ __('PIN') }}</x-label>
             <x-livewire-input mode="gray" name="filter.pin" wire:model.defer="filter.pin"></x-livewire-input>
@@ -207,119 +132,44 @@
                   </x-pikaday-input>
             </div>
         </div>
-        <div class="flex flex-col">
-             <x-ui.select-dropdown
-                label="{{ __('Ranks') }}"
-                placeholder="---"
-                mode="gray"
-                class="w-full"
-                wire:model.defer="filter.rank_id"
-                :model="$this->rankOptions"
-            >
-                <x-livewire-input
-                    mode="gray"
-                    name="searchRank"
-                    wire:model.live="searchRank"
-                    @click.stop="isOpen = true"
-                    x-on:input.stop="null"
-                    x-on:keyup.stop="null"
-                    x-on:keydown.stop="null"
-                    x-on:change.stop="null"
-                />
-            </x-ui.select-dropdown>
-        </div>
+        <x-ui.filter-select
+            :label="__('Ranks')"
+            :options="$this->rankOptions"
+            searchModel="searchRank"
+            wire:model.defer="filter.rank_id"
+        />
         <div class="flex flex-col">
             <x-label for="filter.rank_name">{{ __('Rank name') }}</x-label>
             <x-livewire-input mode="gray" name="filter.rank_name" wire:model.defer="filter.rank_name"></x-livewire-input>
         </div>
-        <div class="flex flex-col">
-             <x-ui.select-dropdown
-                label="{{ __('Education degree') }}"
-                placeholder="---"
-                mode="gray"
-                class="w-full"
-                wire:model.defer="filter.education_degree_id"
-                :model="$this->educationDegreeOptions"
-            >
-                <x-livewire-input
-                    mode="gray"
-                    name="searchEducationDegree"
-                    wire:model.live="searchEducationDegree"
-                    @click.stop="isOpen = true"
-                    x-on:input.stop="null"
-                    x-on:keyup.stop="null"
-                    x-on:keydown.stop="null"
-                    x-on:change.stop="null"
-                />
-            </x-ui.select-dropdown>
-        </div>
+        <x-ui.filter-select
+            :label="__('Education degree')"
+            :options="$this->educationDegreeOptions"
+            searchModel="searchEducationDegree"
+            wire:model.defer="filter.education_degree_id"
+        />
         <div class="flex flex-col">
             <x-label for="filter.specialty">{{ __('Specialty') }}</x-label>
             <x-livewire-input mode="gray" name="filter.specialty" wire:model.defer="filter.specialty"></x-livewire-input>
         </div>
-        <div class="flex flex-col">
-             <x-ui.select-dropdown
-                label="{{ __('Education place') }}"
-                placeholder="---"
-                mode="gray"
-                class="w-full"
-                wire:model.defer="filter.educational_institution_id"
-                :model="$this->institutionOptions"
-            >
-                <x-livewire-input
-                    mode="gray"
-                    name="searchInstitution"
-                    wire:model.live="searchInstitution"
-                    @click.stop="isOpen = true"
-                    x-on:input.stop="null"
-                    x-on:keyup.stop="null"
-                    x-on:keydown.stop="null"
-                    x-on:change.stop="null"
-                />
-            </x-ui.select-dropdown>
-        </div>
-        <div class="flex flex-col">
-             <x-ui.select-dropdown
-                label="{{ __('Awards') }}"
-                placeholder="---"
-                mode="gray"
-                class="w-full"
-                wire:model.defer="filter.award_id"
-                :model="$this->awardOptions"
-            >
-                <x-livewire-input
-                    mode="gray"
-                    name="searchAward"
-                    wire:model.live="searchAward"
-                    @click.stop="isOpen = true"
-                    x-on:input.stop="null"
-                    x-on:keyup.stop="null"
-                    x-on:keydown.stop="null"
-                    x-on:change.stop="null"
-                />
-            </x-ui.select-dropdown>
-        </div>
-        <div class="flex flex-col">
-             <x-ui.select-dropdown
-                label="{{ __('Punishments') }}"
-                placeholder="---"
-                mode="gray"
-                class="w-full"
-                wire:model.defer="filter.punishment_id"
-                :model="$this->punishmentOptions"
-            >
-                <x-livewire-input
-                    mode="gray"
-                    name="searchPunishment"
-                    wire:model.live="searchPunishment"
-                    @click.stop="isOpen = true"
-                    x-on:input.stop="null"
-                    x-on:keyup.stop="null"
-                    x-on:keydown.stop="null"
-                    x-on:change.stop="null"
-                />
-            </x-ui.select-dropdown>
-        </div>
+        <x-ui.filter-select
+            :label="__('Education place')"
+            :options="$this->institutionOptions"
+            searchModel="searchInstitution"
+            wire:model.defer="filter.educational_institution_id"
+        />
+        <x-ui.filter-select
+            :label="__('Awards')"
+            :options="$this->awardOptions"
+            searchModel="searchAward"
+            wire:model.defer="filter.award_id"
+        />
+        <x-ui.filter-select
+            :label="__('Punishments')"
+            :options="$this->punishmentOptions"
+            searchModel="searchPunishment"
+            wire:model.defer="filter.punishment_id"
+        />
     </div>
     <div class="grid grid-cols-1 gap-2 lg:grid-cols-5">
         <div class="flex flex-col">

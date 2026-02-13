@@ -2,6 +2,7 @@
 
 namespace App\Modules\Notifications\Livewire;
 
+use App\Modules\Notifications\Support\NotificationCountCache;
 use Illuminate\Http\Response;
 use Livewire\Attributes\Isolate;
 use Livewire\Attributes\Lazy;
@@ -43,6 +44,7 @@ class Notifications extends Component
 
         $user = auth()->user();
         $user->unreadNotifications()->update(['read_at' => now()]);
+        app(NotificationCountCache::class)->forgetUser((int) $user->id);
 
         $this->dispatch('notifications-refresh-count');
         $this->getNotifications();
@@ -63,6 +65,7 @@ class Notifications extends Component
         };
 
         $notification->markAsRead();
+        app(NotificationCountCache::class)->forgetUser((int) $user->id);
         $this->dispatch('notifications-refresh-count');
 
         return $this->redirectRoute($route);

@@ -2,6 +2,7 @@
 
 namespace App\Modules\Notifications\Livewire;
 
+use App\Modules\Notifications\Support\NotificationCountCache;
 use Livewire\Attributes\Isolate;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -28,7 +29,7 @@ class NotificationsCounter extends Component
             return;
         }
 
-        $count = $user->unreadNotifications()->count();
+        $count = app(NotificationCountCache::class)->unreadCount((int) $user->id);
 
         $this->notificationCount = $count > self::NOTIFICATION_THRESHOLD
             ? self::NOTIFICATION_THRESHOLD.'+'

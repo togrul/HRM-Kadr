@@ -57,24 +57,58 @@ class PersonnelRelationsService
      */
     public function update(Personnel $personnel, array $payloads): void
     {
-        $this->handleSingleAssociation($personnel, relation: 'document', data: $payloads['document'] ?? [], model: PersonnelIdentityDocument::class, differentRelationName: 'idDocuments');
-        $this->handleAssociations($personnel, relation: 'cards', list: $payloads['service_cards'] ?? [], uniqueKeys: 'card_number', model: PersonnelCard::class);
-        $this->handleAssociations($personnel, relation: 'passports', list: $payloads['passports'] ?? [], uniqueKeys: 'serial_number', model: PersonnelPassports::class);
-        $this->handleSingleAssociation($personnel, relation: 'education', data: $payloads['education'] ?? [], model: PersonnelEducation::class);
-        $this->handleAssociations($personnel, relation: 'extraEducations', list: $payloads['extra_educations'] ?? [], uniqueKeys: 'diplom_no', model: PersonnelExtraEducation::class);
-        $laborActivities = $this->prepareLaborActivities($payloads['labor_activities'] ?? [], $personnel);
-        $this->handleAssociations($personnel, relation: 'laborActivities', list: $laborActivities, uniqueKeys: 'join_date', model: PersonnelLaborActivity::class);
-        $this->handleAssociations($personnel, relation: 'ranks', list: $payloads['ranks'] ?? [], uniqueKeys: 'given_date', model: PersonnelRank::class, tabelCheck: true);
-        $this->handleAssociations($personnel, relation: 'military', list: $payloads['military'] ?? [], uniqueKeys: 'start_date', model: PersonnelMilitaryService::class, tabelCheck: true);
-        $this->handleAssociations($personnel, relation: 'injuries', list: $payloads['injuries'] ?? [], uniqueKeys: ['description', 'date_time'], model: PersonnelInjury::class, tabelCheck: true);
-        $this->handleAssociations($personnel, relation: 'captives', list: $payloads['captivities'] ?? [], uniqueKeys: 'taken_captive_date', model: PersonnelTakenCaptive::class, tabelCheck: true);
-        $this->handleAssociations($personnel, relation: 'awards', list: $payloads['awards'] ?? [], uniqueKeys: ['award_id', 'given_date'], model: PersonnelAward::class, tabelCheck: true);
-        $this->handleAssociations($personnel, relation: 'punishments', list: $payloads['punishments'] ?? [], uniqueKeys: ['punishment_id', 'given_date'], model: PersonnelPunishment::class, tabelCheck: true);
-        $this->handleAssociations($personnel, relation: 'kinships', list: $payloads['kinships'] ?? [], uniqueKeys: 'kinship_id', model: PersonnelKinship::class);
-        $this->handleAssociations($personnel, relation: 'foreignLanguages', list: $payloads['languages'] ?? [], uniqueKeys: 'language_id');
-        $this->handleAssociations($personnel, relation: 'participations', list: $payloads['events'] ?? [], uniqueKeys: 'event_name', model: PersonnelParticipationEvent::class);
-        $this->handleAssociations($personnel, relation: 'degreeAndNames', list: $payloads['degrees'] ?? [], uniqueKeys: 'degree_and_name_id', model: PersonnelScientificDegreeAndName::class);
-        $this->handleAssociations($personnel, relation: 'elections', list: $payloads['elections'] ?? [], uniqueKeys: 'elected_date', model: PersonnelElectedElectoral::class);
+        if (array_key_exists('document', $payloads)) {
+            $this->handleSingleAssociation($personnel, relation: 'document', data: $payloads['document'] ?? [], model: PersonnelIdentityDocument::class, differentRelationName: 'idDocuments');
+        }
+        if (array_key_exists('service_cards', $payloads)) {
+            $this->handleAssociations($personnel, relation: 'cards', list: $payloads['service_cards'] ?? [], uniqueKeys: 'card_number', model: PersonnelCard::class);
+        }
+        if (array_key_exists('passports', $payloads)) {
+            $this->handleAssociations($personnel, relation: 'passports', list: $payloads['passports'] ?? [], uniqueKeys: 'serial_number', model: PersonnelPassports::class);
+        }
+        if (array_key_exists('education', $payloads)) {
+            $this->handleSingleAssociation($personnel, relation: 'education', data: $payloads['education'] ?? [], model: PersonnelEducation::class);
+        }
+        if (array_key_exists('extra_educations', $payloads)) {
+            $this->handleAssociations($personnel, relation: 'extraEducations', list: $payloads['extra_educations'] ?? [], uniqueKeys: 'diplom_no', model: PersonnelExtraEducation::class);
+        }
+        if (array_key_exists('labor_activities', $payloads)) {
+            $laborActivities = $this->prepareLaborActivities($payloads['labor_activities'] ?? [], $personnel);
+            $this->handleAssociations($personnel, relation: 'laborActivities', list: $laborActivities, uniqueKeys: 'join_date', model: PersonnelLaborActivity::class);
+        }
+        if (array_key_exists('ranks', $payloads)) {
+            $this->handleAssociations($personnel, relation: 'ranks', list: $payloads['ranks'] ?? [], uniqueKeys: 'given_date', model: PersonnelRank::class, tabelCheck: true);
+        }
+        if (array_key_exists('military', $payloads)) {
+            $this->handleAssociations($personnel, relation: 'military', list: $payloads['military'] ?? [], uniqueKeys: 'start_date', model: PersonnelMilitaryService::class, tabelCheck: true);
+        }
+        if (array_key_exists('injuries', $payloads)) {
+            $this->handleAssociations($personnel, relation: 'injuries', list: $payloads['injuries'] ?? [], uniqueKeys: ['description', 'date_time'], model: PersonnelInjury::class, tabelCheck: true);
+        }
+        if (array_key_exists('captivities', $payloads)) {
+            $this->handleAssociations($personnel, relation: 'captives', list: $payloads['captivities'] ?? [], uniqueKeys: 'taken_captive_date', model: PersonnelTakenCaptive::class, tabelCheck: true);
+        }
+        if (array_key_exists('awards', $payloads)) {
+            $this->handleAssociations($personnel, relation: 'awards', list: $payloads['awards'] ?? [], uniqueKeys: ['award_id', 'given_date'], model: PersonnelAward::class, tabelCheck: true);
+        }
+        if (array_key_exists('punishments', $payloads)) {
+            $this->handleAssociations($personnel, relation: 'punishments', list: $payloads['punishments'] ?? [], uniqueKeys: ['punishment_id', 'given_date'], model: PersonnelPunishment::class, tabelCheck: true);
+        }
+        if (array_key_exists('kinships', $payloads)) {
+            $this->handleAssociations($personnel, relation: 'kinships', list: $payloads['kinships'] ?? [], uniqueKeys: 'kinship_id', model: PersonnelKinship::class);
+        }
+        if (array_key_exists('languages', $payloads)) {
+            $this->handleAssociations($personnel, relation: 'foreignLanguages', list: $payloads['languages'] ?? [], uniqueKeys: 'language_id');
+        }
+        if (array_key_exists('events', $payloads)) {
+            $this->handleAssociations($personnel, relation: 'participations', list: $payloads['events'] ?? [], uniqueKeys: 'event_name', model: PersonnelParticipationEvent::class);
+        }
+        if (array_key_exists('degrees', $payloads)) {
+            $this->handleAssociations($personnel, relation: 'degreeAndNames', list: $payloads['degrees'] ?? [], uniqueKeys: 'degree_and_name_id', model: PersonnelScientificDegreeAndName::class);
+        }
+        if (array_key_exists('elections', $payloads)) {
+            $this->handleAssociations($personnel, relation: 'elections', list: $payloads['elections'] ?? [], uniqueKeys: 'elected_date', model: PersonnelElectedElectoral::class);
+        }
     }
 
     /**

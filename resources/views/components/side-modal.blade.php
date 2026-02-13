@@ -4,6 +4,7 @@
 ])
 
 @php
+    $uiEvents = app(\App\Modules\Personnel\Services\PersonnelUiEvents::class);
     $sizeClass = match ($size) {
         'large' => 'md:max-w-3xl lg:max-w-4xl',
         'x-large' => 'md:max-w-4xl lg:max-w-5xl',
@@ -11,21 +12,7 @@
         default => 'md:max-w-3xl lg:max-w-4xl',
     };
 
-    $closeOnEvents = [
-        'personnelAdded',
-        'permissionSet',
-        'staffAdded',
-        'userAdded',
-        'menuAdded',
-        'fileAdded',
-        'candidateAdded',
-        'templateAdded',
-        'componentAdded',
-        'orderAdded',
-        'rankAdded',
-        'leaveAdded',
-        'leaveUpdated',
-    ];
+    $closeOnEvents = $uiEvents->sideModalCloseEvents();
 @endphp
 
 <div
