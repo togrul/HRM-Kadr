@@ -5,6 +5,23 @@ namespace App\Modules\Personnel\Services;
 class PersonnelStepState
 {
     /**
+     * @return array<int, string>
+     */
+    public function stepTemplateMap(): array
+    {
+        return [
+            1 => 'includes.step1',
+            2 => 'includes.step2',
+            3 => 'includes.step3',
+            4 => 'includes.step4',
+            5 => 'includes.step5',
+            6 => 'includes.step6',
+            7 => 'includes.step7',
+            8 => 'includes.step8',
+        ];
+    }
+
+    /**
      * @return array<int, bool>
      */
     public function wizardStepSet(): array
@@ -31,19 +48,11 @@ class PersonnelStepState
         };
     }
 
-    public function shouldLoadLookupData(mixed $step): bool
+    public function shouldLoadLookupData(int $step): bool
     {
-        if (is_null($step) || ! is_numeric($step)) {
-            return false;
-        }
+        $stepConfig = $this->wizardStepSet();
 
-        $step = (int) $step;
-
-        if ($step <= 0) {
-            return false;
-        }
-
-        return ! isset($this->wizardStepSet()[$step]);
+        return isset($stepConfig[$step]) ? ! $stepConfig[$step] : true;
     }
 
     /**
@@ -85,5 +94,25 @@ class PersonnelStepState
         }
 
         return array_keys($keys);
+    }
+
+    public function isStepLoaded(array $loadedSteps, int $step): bool
+    {
+        return in_array($step, $loadedSteps, true);
+    }
+
+    public function hasLoadedAnyStep(array $loadedSteps): bool
+    {
+        return ! empty($loadedSteps);
+    }
+
+    public function stepTemplate(int $step): string
+    {
+        return $this->stepTemplateMap()[$step] ?? $this->stepTemplateMap()[1];
+    }
+
+    public function stepComponent(int $step): string
+    {
+        return $this->stepTemplate($step);
     }
 }

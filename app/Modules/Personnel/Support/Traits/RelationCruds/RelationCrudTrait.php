@@ -27,10 +27,14 @@ trait RelationCrudTrait
      */
     protected function updatePersonnelRelations(array $payloads): void
     {
-        if (! isset($this->personnelModelData)) {
+        $personnel = method_exists($this, 'personnelModelDataInstance')
+            ? $this->personnelModelDataInstance()
+            : ($this->personnelModelData ?? null);
+
+        if (! $personnel) {
             return;
         }
 
-        $this->relationService()->update($this->personnelModelData, $payloads);
+        $this->relationService()->update($personnel, $payloads);
     }
 }

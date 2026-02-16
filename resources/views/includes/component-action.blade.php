@@ -13,17 +13,8 @@
             class="w-full"
             wire:model.live="component.order_type_id"
             :model="$this->orderOptions"
+                    search-model="searchOrder"
         >
-            <x-livewire-input
-                @click.stop="isOpen = true"
-                mode="gray"
-                name="searchOrder"
-                wire:model.live="searchOrder"
-                x-on:input.stop="null"
-                x-on:keyup.stop="null"
-                x-on:keydown.stop="null"
-                x-on:change.stop="null"
-            ></x-livewire-input>
         </x-ui.select-dropdown>
         @error('component.order_type_id')
             <x-validation> {{ $message }} </x-validation>

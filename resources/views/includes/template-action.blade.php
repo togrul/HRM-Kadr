@@ -20,17 +20,8 @@
             class="w-full"
             wire:model.live="template_data.order_category_id"
             :model="$this->orderCategoryOptions"
+                    search-model="searchCategory"
         >
-            <x-livewire-input
-                mode="gray"
-                name="searchCategory"
-                wire:model.live="searchCategory"
-                @click.stop="isOpen = true"
-                x-on:input.stop="null"
-                x-on:keyup.stop="null"
-                x-on:keydown.stop="null"
-                x-on:change.stop="null"
-            ></x-livewire-input>
         </x-ui.select-dropdown>
         @error('template_data.order_category_id')
         <x-validation> {{ $message }} </x-validation>

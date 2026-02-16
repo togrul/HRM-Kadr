@@ -29,15 +29,22 @@ class PersonnelRowViewModelService
      */
     public function decorateCollection(Collection $collection): Collection
     {
-        return $collection->map(function (Personnel $personnel) {
+        return $collection->map(function (Personnel $personnel, int $index) {
+            $vacation = $personnel->activeVacation;
+            $businessTrip = $personnel->activeBusinessTrip;
+
             $personnel->setAttribute('structure_path', $this->resolveStructurePath($personnel->structure));
             $personnel->setAttribute('join_work_date_fmt', $this->formatDate($personnel->join_work_date));
             $personnel->setAttribute('leave_work_date_fmt', $this->formatDate($personnel->leave_work_date));
             $personnel->setAttribute('deleted_at_fmt', $this->formatDateTime($personnel->deleted_at));
             $personnel->setAttribute('gender_label', (int) $personnel->gender === 1 ? __('Man') : __('Woman'));
             $personnel->setAttribute('rank_label', (string) optional($personnel->latestRank?->rank)->name);
-            $personnel->setAttribute('active_vacation', $personnel->activeVacation);
-            $personnel->setAttribute('active_business_trip', $personnel->activeBusinessTrip);
+            $personnel->setAttribute('active_vacation', $vacation);
+            $personnel->setAttribute('active_business_trip', $businessTrip);
+            $personnel->setAttribute('active_vacation_start', $this->formatDate($vacation?->start_date));
+            $personnel->setAttribute('active_vacation_end', $this->formatDate($vacation?->return_work_date));
+            $personnel->setAttribute('active_business_trip_start', $this->formatDate($businessTrip?->start_date));
+            $personnel->setAttribute('active_business_trip_end', $this->formatDate($businessTrip?->end_date));
             $personnel->setAttribute('photo_url', $this->photoUrl($personnel->photo));
             $personnel->setAttribute('deleted_by_name', (string) optional($personnel->personDidDelete)->name);
 

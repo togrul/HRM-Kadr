@@ -18,17 +18,9 @@
                     class="w-full"
                     wire:model.live="educationForm.education.educational_institution_id"
                     :model="$this->educationInstitutionOptions"
+                    :search-model="data_get($stepSearchModels, 'searchEducationInstitution', 'searchEducationInstitution')"
+                    :search-placeholder="data_get($stepSearchPlaceholders, 'searchEducationInstitution', __('Search...'))"
                 >
-                    <x-livewire-input
-                        mode="gray"
-                        name="searchEducationInstitution"
-                        wire:model.live.debounce.300ms="searchEducationInstitution"
-                        @click.stop="isOpen = true"
-                        x-on:input.stop="null"
-                        x-on:keyup.stop="null"
-                        x-on:keydown.stop="null"
-                        x-on:change.stop="null"
-                    />
                 </x-ui.select-dropdown>
                 @error('educationForm.education.educational_institution_id')
                 <x-validation>{{ $message }}</x-validation>
@@ -42,17 +34,9 @@
                     class="w-full"
                     wire:model.live="educationForm.education.education_form_id"
                     :model="$this->educationFormOptions"
+                    :search-model="data_get($stepSearchModels, 'searchEducationForm', 'searchEducationForm')"
+                    :search-placeholder="data_get($stepSearchPlaceholders, 'searchEducationForm', __('Search...'))"
                 >
-                    <x-livewire-input
-                        mode="gray"
-                        name="searchEducationForm"
-                        wire:model.live.debounce.300ms="searchEducationForm"
-                        @click.stop="isOpen = true"
-                        x-on:input.stop="null"
-                        x-on:keyup.stop="null"
-                        x-on:keydown.stop="null"
-                        x-on:change.stop="null"
-                    />
                 </x-ui.select-dropdown>
                 @error('educationForm.education.education_form_id')
                 <x-validation>{{ $message }}</x-validation>
@@ -203,17 +187,9 @@
                     class="w-full"
                     wire:model.live="educationForm.extraEducation.education_type_id"
                     :model="$this->educationTypeOptions"
+                    :search-model="data_get($stepSearchModels, 'searchEducationType', 'searchEducationType')"
+                    :search-placeholder="data_get($stepSearchPlaceholders, 'searchEducationType', __('Search...'))"
                 >
-                    <x-livewire-input
-                        mode="gray"
-                        name="searchEducationType"
-                        wire:model.live.debounce.300ms="searchEducationType"
-                        @click.stop="isOpen = true"
-                        x-on:input.stop="null"
-                        x-on:keyup.stop="null"
-                        x-on:keydown.stop="null"
-                        x-on:change.stop="null"
-                    />
                 </x-ui.select-dropdown>
                 @error('educationForm.extraEducation.education_type_id')
                 <x-validation>{{ $message }}</x-validation>
@@ -227,17 +203,9 @@
                     class="w-full"
                     wire:model.live="educationForm.extraEducation.educational_institution_id"
                     :model="$this->extraEducationInstitutionOptions"
+                    :search-model="data_get($stepSearchModels, 'searchExtraEducationInstitution', 'searchExtraEducationInstitution')"
+                    :search-placeholder="data_get($stepSearchPlaceholders, 'searchExtraEducationInstitution', __('Search...'))"
                 >
-                    <x-livewire-input
-                        mode="gray"
-                        name="searchExtraEducationInstitution"
-                        wire:model.live.debounce.300ms="searchExtraEducationInstitution"
-                        @click.stop="isOpen = true"
-                        x-on:input.stop="null"
-                        x-on:keyup.stop="null"
-                        x-on:keydown.stop="null"
-                        x-on:change.stop="null"
-                    />
                 </x-ui.select-dropdown>
                 @error('educationForm.extraEducation.educational_institution_id')
                 <x-validation>{{ $message }}</x-validation>
@@ -251,17 +219,9 @@
                     class="w-full"
                     wire:model.live="educationForm.extraEducation.education_form_id"
                     :model="$this->extraEducationFormOptions"
+                    :search-model="data_get($stepSearchModels, 'searchExtraEducationForm', 'searchExtraEducationForm')"
+                    :search-placeholder="data_get($stepSearchPlaceholders, 'searchExtraEducationForm', __('Search...'))"
                 >
-                    <x-livewire-input
-                        mode="gray"
-                        name="searchExtraEducationForm"
-                        wire:model.live.debounce.300ms="searchExtraEducationForm"
-                        @click.stop="isOpen = true"
-                        x-on:input.stop="null"
-                        x-on:keyup.stop="null"
-                        x-on:keydown.stop="null"
-                        x-on:change.stop="null"
-                    />
                 </x-ui.select-dropdown>
                 @error('educationForm.extraEducation.education_form_id')
                 <x-validation>{{ $message }}</x-validation>
@@ -335,17 +295,9 @@
                     class="w-full"
                     wire:model.live="educationForm.extraEducation.education_document_type_id"
                     :model="$this->educationDocumentTypeOptions"
+                    :search-model="data_get($stepSearchModels, 'searchEducationDocumentType', 'searchEducationDocumentType')"
+                    :search-placeholder="data_get($stepSearchPlaceholders, 'searchEducationDocumentType', __('Search...'))"
                 >
-                    <x-livewire-input
-                        mode="gray"
-                        name="searchEducationDocumentType"
-                        wire:model.live.debounce.300ms="searchEducationDocumentType"
-                        @click.stop="isOpen = true"
-                        x-on:input.stop="null"
-                        x-on:keyup.stop="null"
-                        x-on:keydown.stop="null"
-                        x-on:change.stop="null"
-                    />
                 </x-ui.select-dropdown>
                 @error('educationForm.extraEducation.education_document_type_id')
                 <x-validation>{{ $message }}</x-validation>

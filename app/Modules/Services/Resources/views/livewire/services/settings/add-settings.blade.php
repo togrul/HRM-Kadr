@@ -9,7 +9,7 @@
     "
     x-data={showMiniModal:false}
     x-show="showMiniModal"
-    @keydown.escape.window="showMiniModal = false;"
+    x-on:keydown.escape.window="showMiniModal = false;"
     class="fixed inset-0 z-50 overflow-y-auto" 
     aria-labelledby="modal-title" 
     role="dialog" 

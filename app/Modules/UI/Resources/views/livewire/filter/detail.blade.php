@@ -23,12 +23,16 @@
             :label="__('Structure')"
             :options="$this->structureOptions"
             searchModel="searchStructure"
+            load-on-open="structure"
+            load-on-focus="structure" 
             wire:model.live="filter.structure_id"
         />
         <x-ui.filter-select
             :label="__('Position')"
             :options="$this->positions"
             searchModel="searchPosition"
+            load-on-open="position"
+            load-on-focus="position"
             wire:model.defer="filter.position_id"
         />
         <div class="flex flex-col w-full space-y-1">
@@ -94,18 +98,24 @@
             :label="__('Nationality')"
             :options="$this->nationalityOptions"
             searchModel="searchNationality"
+            load-on-open="nationality"
+            load-on-focus="nationality"
             wire:model.defer="filter.nationality_id"
         />
         <x-ui.filter-select
             :label="__('Born country')"
             :options="$this->bornCountryOptions"
             searchModel="searchPreviousNationality"
+            load-on-open="bornCountry"
+            load-on-focus="bornCountry"
             wire:model.defer="filter.born_country_id"
         />
         <x-ui.filter-select
             :label="__('City')"
             :options="$this->cities"
             searchModel="searchCity"
+            load-on-open="city"
+            load-on-focus="city"
             wire:model.defer="filter.born_city_id"
         />
         <div class="flex flex-col">
@@ -136,6 +146,8 @@
             :label="__('Ranks')"
             :options="$this->rankOptions"
             searchModel="searchRank"
+            load-on-open="rank"
+            load-on-focus="rank"
             wire:model.defer="filter.rank_id"
         />
         <div class="flex flex-col">
@@ -146,6 +158,8 @@
             :label="__('Education degree')"
             :options="$this->educationDegreeOptions"
             searchModel="searchEducationDegree"
+            load-on-open="educationDegree"
+            load-on-focus="educationDegree"
             wire:model.defer="filter.education_degree_id"
         />
         <div class="flex flex-col">
@@ -156,18 +170,24 @@
             :label="__('Education place')"
             :options="$this->institutionOptions"
             searchModel="searchInstitution"
+            load-on-open="institution"
+            load-on-focus="institution"
             wire:model.defer="filter.educational_institution_id"
         />
         <x-ui.filter-select
             :label="__('Awards')"
             :options="$this->awardOptions"
             searchModel="searchAward"
+            load-on-open="award"
+            load-on-focus="award"
             wire:model.defer="filter.award_id"
         />
         <x-ui.filter-select
             :label="__('Punishments')"
             :options="$this->punishmentOptions"
             searchModel="searchPunishment"
+            load-on-open="punishment"
+            load-on-focus="punishment"
             wire:model.defer="filter.punishment_id"
         />
     </div>

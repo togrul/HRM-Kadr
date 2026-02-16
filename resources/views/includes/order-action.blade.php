@@ -20,18 +20,9 @@
                 class="w-full"
                 wire:model.live="orderForm.order_type_id"
                 :model="$this->templateOptions"
+                    search-model="search.template"
                 :disabled="$orderModel"
             >
-                <x-livewire-input
-                    mode="gray"
-                    name="search.template"
-                    wire:model.live="search.template"
-                    @click.stop="isOpen = true"
-                    x-on:input.stop="null"
-                    x-on:keyup.stop="null"
-                    x-on:keydown.stop="null"
-                    x-on:change.stop="null"
-                ></x-livewire-input>
             </x-ui.select-dropdown>
             @error('orderForm.order_type_id')
             <x-validation> {{ $message }} </x-validation>

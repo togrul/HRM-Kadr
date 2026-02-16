@@ -44,18 +44,8 @@
                         class="w-full"
                         wire:model.live="form.parent_id"
                         :model="$this->parentStructureOptions()"
+                    search-model="searchParent"
                     >
-                        <x-livewire-input
-                            mode="gray"
-                            name="searchParent"
-                            wire:model.live.debounce.300ms="searchParent"
-                            placeholder="{{ __('Search...') }}"
-                            @click.stop="isOpen = true"
-                            x-on:input.stop="null"
-                            x-on:keyup.stop="null"
-                            x-on:keydown.stop="null"
-                            x-on:change.stop="null"
-                        ></x-livewire-input>
                     </x-ui.select-dropdown>
                     @error('form.parent_id')
                     <x-validation>{{ $message }}</x-validation>

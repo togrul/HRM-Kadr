@@ -3,27 +3,24 @@
     'options' => [],
     'searchModel',
     'placeholder' => '---',
+    'loadOnFocus' => null,
+    'loadOnOpen' => null,
 ])
+
+@php
+    $resolvedLoadOnOpen = $loadOnOpen ?? $loadOnFocus;
+@endphp
 
 <div class="flex flex-col">
     <x-ui.select-dropdown
         :label="$label"
         :placeholder="$placeholder"
         mode="gray"
+        :load-on-open="$resolvedLoadOnOpen"
+        :search-model="$searchModel"
+        :search-placeholder="__('Search...')"
         class="w-full"
         :model="$options"
         {{ $attributes }}
-    >
-        <x-livewire-input
-            mode="gray"
-            :name="$searchModel"
-            wire:model.live.debounce.300ms="{{ $searchModel }}"
-            @click.stop="isOpen = true"
-            x-on:input.stop="null"
-            x-on:keyup.stop="null"
-            x-on:keydown.stop="null"
-            x-on:change.stop="null"
-        />
-    </x-ui.select-dropdown>
+    />
 </div>
-

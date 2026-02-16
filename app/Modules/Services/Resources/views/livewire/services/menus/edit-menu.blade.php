@@ -56,17 +56,8 @@
                     class="w-full"
                     wire:model.live="menu.permission_id"
                     :model="$this->permissionOptions"
+                    search-model="search.permission"
                 >
-                    <x-livewire-input
-                        mode="gray"
-                        name="search.permission"
-                        wire:model.live="searchPermission"
-                        @click.stop="isOpen = true"
-                        x-on:input.stop="null"
-                        x-on:keyup.stop="null"
-                        x-on:keydown.stop="null"
-                        x-on:change.stop="null"
-                    ></x-livewire-input>
                 </x-ui.select-dropdown>
                 @error('menu.permission_id')
                 <x-validation> {{ $message }} </x-validation>

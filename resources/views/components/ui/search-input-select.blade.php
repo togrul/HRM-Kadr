@@ -52,8 +52,8 @@
             aria-autocomplete="list"
             aria-controls="{{ $listboxId }}"
             x-bind:aria-expanded="open.toString()"
-            @click.stop="open = true"
-            @keydown.escape.stop="open = false"
+            x-on:click.stop="open = true"
+            x-on:keydown.escape.stop="open = false"
         />
     @endif
 
@@ -61,9 +61,9 @@
         x-cloak
         x-show="open"
         x-transition.opacity.scale
-        @click.outside="open = false"
-        @click.away="open = false"
-        @mousedown.outside="open = false"
+        x-on:click.outside="open = false"
+        x-on:click.away="open = false"
+        x-on:mousedown.outside="open = false"
         id="{{ $listboxId }}"
         role="listbox"
         class="absolute z-[99] top-[60px] left-0 w-full px-1 py-2 bg-neutral-50 rounded-lg border border-neutral-200 drop-shadow-md flex flex-col max-h-40 overflow-y-auto"

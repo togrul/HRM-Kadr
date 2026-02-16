@@ -17,6 +17,7 @@ use App\Modules\Personnel\Services\PersonnelPersistenceService;
 use App\Models\Personnel;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Livewire\Attributes\Isolate;
 use Livewire\Component;
 
@@ -38,7 +39,7 @@ class EditPersonnel extends Component
 
     public $updatePersonnel;
 
-    public $personnelModelData;
+    protected ?Personnel $personnelModelData = null;
 
     public $personnelModel;
 
@@ -47,42 +48,36 @@ class EditPersonnel extends Component
 
     public ?int $loadedPersonnelId = null;
 
-    public bool $stepDataInitialized = false;
-
     /** @var array<string> */
     protected array $relationGroupsLoaded = [];
 
     public function mount()
     {
-        $this->personnelModelData = Personnel::query()
-            ->findOrFail($this->personnelModel);
+        $personnel = $this->personnelModelDataInstance();
 
-        $this->authorize('update', $this->personnelModelData);
+        $this->authorize('update', $personnel);
         $this->title = __('Edit personnel');
         $this->step = 1;
-        $this->resetStepTrackingFor($this->personnelModelData->getKey());
+        $this->resetStepTrackingFor($personnel->getKey());
+        $this->loadStepData((int) $this->step);
     }
 
-    public function initStepData(): void
+    protected function ensureCurrentStepDataLoaded(): void
     {
-        if ($this->stepDataInitialized) {
-            return;
-        }
-
         $this->loadStepData((int) $this->step);
-        $this->stepDataInitialized = true;
     }
 
     public function confirmPersonnel(): void
     {
-        $this->personnelModelData->update(['is_pending' => false]);
+        $this->personnelModelDataInstance()->update(['is_pending' => false]);
         $this->dispatch('addError', __('Personnel was updated successfully!'));
     }
 
     public function store()
     {
-        $this->initStepData();
-        $this->authorize('update', $this->personnelModelData);
+        $personnel = $this->personnelModelDataInstance();
+        $this->ensureCurrentStepDataLoaded();
+        $this->authorize('update', $personnel);
         $currentStep = (int) $this->step;
 
         if ($currentStep === 1) {
@@ -117,7 +112,7 @@ class EditPersonnel extends Component
             awardsPunishmentsForm: $this->awardsPunishmentsForm,
             kinshipForm: $this->kinshipForm,
             miscForm: $this->miscForm,
-            dateFields: $this->personnelModelData->dateList(),
+            dateFields: $personnel->dateList(),
             dateNormalizer: fn (array $payload, array $dates): array => $this->modifyArray($payload, $dates)
         );
 
@@ -131,11 +126,12 @@ class EditPersonnel extends Component
         );
 
         DB::transaction(function () use ($assembled, $relationPayloads) {
-            $this->personnelModelData->update($assembled['personnel_data']);
+            $personnel = $this->personnelModelDataInstance();
+            $personnel->update($assembled['personnel_data']);
             $this->updatePersonnelRelations($relationPayloads);
 
             if (! empty($assembled['personnel_extra'])) {
-                $this->personnelModelData->update($assembled['personnel_extra']);
+                $personnel->update($assembled['personnel_extra']);
             }
         });
 
@@ -143,19 +139,9 @@ class EditPersonnel extends Component
         $this->dispatchModalCloseEvent();
     }
 
-    public function updatedStep($value): void
-    {
-        if (! is_numeric($value)) {
-            return;
-        }
-
-        $this->loadStepData((int) $value);
-    }
-
     protected function onStepChanged(int $step): void
     {
         $this->loadStepData($step);
-        $this->stepDataInitialized = true;
     }
 
     protected function loadStepData(int $step): void
@@ -182,12 +168,13 @@ class EditPersonnel extends Component
     protected function loadPersonalFormData(): void
     {
         if (isset($this->personalForm)) {
+            $personnel = $this->personnelModelDataInstance();
             $locale = app()->getLocale();
             $educationDegreeColumn = "title_{$locale}";
             $workNormColumn = "name_{$locale}";
 
             $this->ensureRelationsLoaded('personal', function () use ($educationDegreeColumn, $workNormColumn) {
-                $this->personnelModelData->loadMissing([
+                $this->personnelModelDataInstance()->loadMissing([
                     'nationality:country_id,locale,title',
                     'previousNationality:country_id,locale,title',
                     "educationDegree:id,{$educationDegreeColumn}",
@@ -200,7 +187,7 @@ class EditPersonnel extends Component
             });
 
             $this->registerPersonalDropdownLabels();
-            $this->personalForm->fillFromModel($this->personnelModelData, false);
+            $this->personalForm->fillFromModel($personnel, false);
         }
     }
 
@@ -208,7 +195,7 @@ class EditPersonnel extends Component
     {
         if (isset($this->documentForm)) {
             $this->ensureRelationsLoaded('documents', function () {
-                $this->personnelModelData->loadMissing([
+                $this->personnelModelDataInstance()->loadMissing([
                     'idDocuments.nationality',
                     'idDocuments.bornCountry',
                     'idDocuments.bornCity',
@@ -217,7 +204,7 @@ class EditPersonnel extends Component
                 ]);
             });
 
-            $this->documentForm->fillFromModel($this->personnelModelData);
+            $this->documentForm->fillFromModel($this->personnelModelDataInstance());
         }
     }
 
@@ -225,7 +212,7 @@ class EditPersonnel extends Component
     {
         if (isset($this->educationForm)) {
             $this->ensureRelationsLoaded('education', function () {
-                $this->personnelModelData->loadMissing([
+                $this->personnelModelDataInstance()->loadMissing([
                     'education.educationalInstitution',
                     'education.educationForm',
                     'extraEducations.educationalInstitution',
@@ -235,7 +222,7 @@ class EditPersonnel extends Component
                 ]);
             });
 
-            $this->educationForm->fillFromModel($this->personnelModelData);
+            $this->educationForm->fillFromModel($this->personnelModelDataInstance());
             $this->recalculateEducationDurations();
         }
     }
@@ -244,13 +231,13 @@ class EditPersonnel extends Component
     {
         if (isset($this->laborActivityForm)) {
             $this->ensureRelationsLoaded('labor', function () {
-                $this->personnelModelData->loadMissing([
+                $this->personnelModelDataInstance()->loadMissing([
                     'laborActivities',
                     'ranks',
                 ]);
             });
 
-            $this->laborActivityForm->fillFromModel($this->personnelModelData);
+            $this->laborActivityForm->fillFromModel($this->personnelModelDataInstance());
             $this->calculateSeniority();
         }
     }
@@ -259,13 +246,13 @@ class EditPersonnel extends Component
     {
         if (isset($this->historyForm)) {
             $this->ensureRelationsLoaded('history', function () {
-                $this->personnelModelData->loadMissing([
+                $this->personnelModelDataInstance()->loadMissing([
                     'military',
                     'participations',
                 ]);
             });
 
-            $this->historyForm->fillFromModel($this->personnelModelData);
+            $this->historyForm->fillFromModel($this->personnelModelDataInstance());
         }
     }
 
@@ -273,13 +260,13 @@ class EditPersonnel extends Component
     {
         if (isset($this->awardsPunishmentsForm)) {
             $this->ensureRelationsLoaded('awards_punishments', function () {
-                $this->personnelModelData->loadMissing([
+                $this->personnelModelDataInstance()->loadMissing([
                     'awards',
                     'punishments',
                 ]);
             });
 
-            $this->awardsPunishmentsForm->fillFromModel($this->personnelModelData);
+            $this->awardsPunishmentsForm->fillFromModel($this->personnelModelDataInstance());
         }
     }
 
@@ -287,10 +274,10 @@ class EditPersonnel extends Component
     {
         if (isset($this->kinshipForm)) {
             $this->ensureRelationsLoaded('kinships', function () {
-                $this->personnelModelData->loadMissing('kinships');
+                $this->personnelModelDataInstance()->loadMissing('kinships');
             });
 
-            $this->kinshipForm->fillFromModel($this->personnelModelData);
+            $this->kinshipForm->fillFromModel($this->personnelModelDataInstance());
         }
     }
 
@@ -298,13 +285,13 @@ class EditPersonnel extends Component
     {
         if (isset($this->miscForm)) {
             $this->ensureRelationsLoaded('misc', function () {
-                $this->personnelModelData->loadMissing([
+                $this->personnelModelDataInstance()->loadMissing([
                     'foreignLanguages',
                     'degreeAndNames',
                 ]);
             });
 
-            $this->miscForm->fillFromModel($this->personnelModelData);
+            $this->miscForm->fillFromModel($this->personnelModelDataInstance());
         }
     }
 
@@ -327,13 +314,12 @@ class EditPersonnel extends Component
         $this->loadedPersonnelId = $personnelId;
         $this->loadedSteps = [];
         $this->relationGroupsLoaded = [];
-        $this->stepDataInitialized = false;
         $this->resetDropdownLabelCache();
     }
 
     protected function registerPersonalDropdownLabels(): void
     {
-        $personnel = $this->personnelModelData;
+        $personnel = $this->personnelModelDataInstance();
         $locale = app()->getLocale();
 
         $this->registerDropdownLabel('countries', $personnel->nationality_id, optional($personnel->nationality)->title);
@@ -348,5 +334,22 @@ class EditPersonnel extends Component
 
         $educationDegreeLabel = optional($personnel->educationDegree)->{"title_{$locale}"} ?? null;
         $this->registerDropdownLabel('education_degrees', optional($personnel->educationDegree)->id, $educationDegreeLabel);
+    }
+
+    protected function personnelModelDataInstance(): Personnel
+    {
+        $modelId = (int) $this->personnelModel;
+
+        if ($modelId <= 0) {
+            throw new ModelNotFoundException('Invalid personnel model id.');
+        }
+
+        if ($this->personnelModelData && (int) $this->personnelModelData->getKey() === $modelId) {
+            return $this->personnelModelData;
+        }
+
+        $this->personnelModelData = Personnel::query()->findOrFail($modelId);
+
+        return $this->personnelModelData;
     }
 }

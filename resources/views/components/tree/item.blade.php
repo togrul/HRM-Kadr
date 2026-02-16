@@ -24,8 +24,8 @@
                         <button
                             type="button"
                             @click="openSub = !openSub"
-                            @keydown.enter.prevent="openSub = !openSub"
-                            @keydown.space.prevent="openSub = !openSub"
+                            x-on:keydown.enter.prevent="openSub = !openSub"
+                            x-on:keydown.space.prevent="openSub = !openSub"
                             :aria-expanded="openSub.toString()"
                             aria-controls="subs-{{ $model->id }}"
                             class="rounded focus:outline-none"

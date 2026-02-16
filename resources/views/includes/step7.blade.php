@@ -9,17 +9,9 @@
                     class="w-full"
                     wire:model.live="kinshipForm.kinship.kinship_id"
                     :model="$this->kinshipOptions"
+                    :search-model="data_get($stepSearchModels, 'searchKinship', 'searchKinship')"
+                    :search-placeholder="data_get($stepSearchPlaceholders, 'searchKinship', __('Search...'))"
                 >
-                    <x-livewire-input
-                        mode="gray"
-                        name="searchKinship"
-                        wire:model.live.debounce.300ms="searchKinship"
-                        @click.stop="isOpen = true"
-                        x-on:input.stop="null"
-                        x-on:keyup.stop="null"
-                        x-on:keydown.stop="null"
-                        x-on:change.stop="null"
-                    />
                 </x-ui.select-dropdown>
                 @error('kinshipForm.kinship.kinship_id')
                 <x-validation> {{ $message }} </x-validation>

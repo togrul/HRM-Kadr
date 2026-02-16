@@ -3,12 +3,14 @@
 namespace App\Modules\Notifications\Livewire;
 
 use App\Modules\Notifications\Support\NotificationCountCache;
+use App\Modules\Notifications\Support\DispatchesNotificationRefresh;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 class NotificationList extends Component
 {
     use WithPagination;
+    use DispatchesNotificationRefresh;
 
     const NOTIFICATION_THRESHOLD = 20;
 
@@ -21,7 +23,7 @@ class NotificationList extends Component
 
         if ($user) {
             app(NotificationCountCache::class)->forgetUser((int) $user->id);
-            $this->dispatch('notifications-refresh-count');
+            $this->dispatchNotificationRefresh();
         }
     }
 
@@ -34,7 +36,7 @@ class NotificationList extends Component
 
         $user->notifications()->delete();
         app(NotificationCountCache::class)->forgetUser((int) $user->id);
-        $this->dispatch('notifications-refresh-count');
+        $this->dispatchNotificationRefresh();
     }
 
     public function render()

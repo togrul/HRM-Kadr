@@ -51,18 +51,8 @@
                         class="w-full"
                         wire:model.live="form.rank_category_id"
                         :model="$this->rankCategoryOptions()"
+                    search-model="searchRankCategory"
                     >
-                        <x-livewire-input
-                            mode="gray"
-                            name="searchRankCategory"
-                            wire:model.live.debounce.300ms="searchRankCategory"
-                            placeholder="{{ __('Search...') }}"
-                            @click.stop="isOpen = true"
-                            x-on:input.stop="null"
-                            x-on:keyup.stop="null"
-                            x-on:keydown.stop="null"
-                            x-on:change.stop="null"
-                        ></x-livewire-input>
                     </x-ui.select-dropdown>
                     @error('form.rank_category_id')
                     <x-validation> {{ $message }} </x-validation>

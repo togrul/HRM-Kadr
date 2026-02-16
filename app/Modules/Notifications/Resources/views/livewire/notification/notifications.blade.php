@@ -23,8 +23,8 @@
          x-transition:enter-start="scale-75"
          x-transition:leave="transition duration-100 transform ease-in"
          x-transition:leave-end="opacity-0 scale-90"
-         @click.away="isOpen = false"
-         @keydown.escape.window="isOpen = false">
+         x-on:click.away="isOpen = false"
+         x-on:keydown.escape.window="isOpen = false">
           
         <ul class="overflow-y-auto text-xs font-normal divide-y divide-dashed max-h-96 rounded-tl-xl rounded-tr-xl"
         >

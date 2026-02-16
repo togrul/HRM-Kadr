@@ -2,7 +2,7 @@
     <div class="flex flex-col justify-between sm:flex-row filter mb-4">
         <div class="flex items-center justify-center space-x-2 action-section">
             {{-- @can('manage-settings') --}}
-            <x-button class="space-x-2" mode="primary" @click.prevent="Livewire.dispatch('settingsWasSet')">
+            <x-button class="space-x-2" mode="primary" x-on:click.prevent="Livewire.dispatch('settingsWasSet')">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                     stroke="currentColor" class="w-6 h-6">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />

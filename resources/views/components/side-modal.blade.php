@@ -46,8 +46,10 @@
             }
         },
         close() {
+            if ($wire && typeof $wire.call === 'function') {
+                $wire.call('closeSideMenu');
+            }
             this.isOpen = false;
-            $wire.call('closeSideMenu');
         }
     }"
     x-init="
@@ -61,15 +63,21 @@
             }
         });
 
-        $wire.on('openSideMenu', () => {
-            isOpen = true;
-        });
-
-        closeEvents.forEach((eventName) => {
-            $wire.on(eventName, () => {
-                if (isOpen) close();
+        if ($wire && typeof $wire.on === 'function') {
+            $wire.on('openSideMenu', () => {
+                isOpen = true;
             });
-        });
+
+            if (Array.isArray(closeEvents)) {
+                closeEvents.forEach((eventName) => {
+                    $wire.on(eventName, () => {
+                        if (isOpen) {
+                            close();
+                        }
+                    });
+                });
+            }
+        }
     "
     class="fixed inset-0 z-80"
     x-show="isOpen"
@@ -77,7 +85,7 @@
     aria-labelledby="slide-over-title"
     role="dialog"
     aria-modal="true"
-    @keydown.escape.window="if (isOpen) close()"
+    x-on:keydown.escape.window="if (isOpen) close()"
 >
     <div class="absolute inset-0 overflow-hidden">
         <div
@@ -89,7 +97,7 @@
             x-transition:leave="transition ease-in duration-150"
             x-transition:leave-start="opacity-100"
             x-transition:leave-end="opacity-0"
-            @click="close()"
+            x-on:click="close()"
             aria-hidden="true"
         ></div>
 

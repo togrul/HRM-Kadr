@@ -3,30 +3,44 @@
 namespace App\Modules\Notifications\Livewire;
 
 use App\Modules\Notifications\Support\NotificationCountCache;
+use App\Modules\Notifications\Support\DispatchesNotificationRefresh;
 use Illuminate\Http\Response;
 use Livewire\Attributes\Isolate;
-use Livewire\Attributes\Lazy;
 use Livewire\Component;
 
-#[Lazy]
 #[Isolate]
 class Notifications extends Component
 {
+    use DispatchesNotificationRefresh;
+
     private const NOTIFICATION_THRESHOLD = 10;
 
     public $notifications;
 
     public bool $isLoading;
 
+    public bool $hasLoaded;
+
     public function mount()
     {
         $this->notifications = collect([]);
         $this->isLoading = true;
+        $this->hasLoaded = false;
     }
 
     public function getNotifications(): void
     {
+        $this->isLoading = true;
+
         $user = auth()->user();
+        if (! $user) {
+            $this->notifications = collect([]);
+            $this->isLoading = false;
+            $this->hasLoaded = true;
+
+            return;
+        }
+
         $this->notifications = $user->notifications()
             ->with('notifiable')
             ->orderBy('read_at')
@@ -35,7 +49,8 @@ class Notifications extends Component
             ->get();
 
         $this->isLoading = false;
-        $this->dispatch('notifications-refresh-count');
+        $this->hasLoaded = true;
+        $this->dispatchNotificationRefresh();
     }
 
     public function markAllAsRead()
@@ -46,7 +61,7 @@ class Notifications extends Component
         $user->unreadNotifications()->update(['read_at' => now()]);
         app(NotificationCountCache::class)->forgetUser((int) $user->id);
 
-        $this->dispatch('notifications-refresh-count');
+        $this->dispatchNotificationRefresh();
         $this->getNotifications();
     }
 
@@ -66,7 +81,7 @@ class Notifications extends Component
 
         $notification->markAsRead();
         app(NotificationCountCache::class)->forgetUser((int) $user->id);
-        $this->dispatch('notifications-refresh-count');
+        $this->dispatchNotificationRefresh();
 
         return $this->redirectRoute($route);
     }

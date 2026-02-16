@@ -56,7 +56,7 @@
                 @module('notifications')
                   @can('get-notification')
                       <div class="flex items-center">
-                          <livewire:notification.notifications lazy="on-load" />
+                          <livewire:notification.notifications />
                       </div>
                   @endcan
                 @endmodule

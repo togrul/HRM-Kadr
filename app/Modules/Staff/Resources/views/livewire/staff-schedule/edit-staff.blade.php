@@ -15,25 +15,16 @@
       @if(!$hidePosition)
         <div class="flex flex-col sm:col-span-2">
           <x-ui.select-dropdown
-              :label="__('Position')"
-              placeholder="---"
-              mode="gray"
-              class="w-full"
-              wire:model.live="staff.{{ $key }}.position_id"
-              :model="$this->positionOptions"
-              :selected-label="data_get($staff[$key]['position'] ?? [], 'name')"
-          >
-              <x-livewire-input
-                  mode="gray"
-                  name="search.position"
-                  wire:model.live.debounce.300ms="searchPosition"
-                  @click.stop="isOpen = true"
-                  x-on:input.stop="null"
-                  x-on:keyup.stop="null"
-                  x-on:keydown.stop="null"
-                  x-on:change.stop="null"
-              ></x-livewire-input>
-          </x-ui.select-dropdown>
+                :label="__('Position')"
+                placeholder="---"
+                mode="gray"
+                class="w-full"
+                wire:model.live="staff.{{ $key }}.position_id"
+                :model="$this->positionOptions"
+                    search-model="searchPosition"
+                :selected-label="data_get($staff[$key]['position'] ?? [], 'name')"
+            >
+            </x-ui.select-dropdown>
           @error("staff.$key.position_id")
           <x-validation> {{ $message }} </x-validation>
           @enderror

@@ -32,17 +32,8 @@
                 class="w-full"
                 wire:model.live="roleId"
                 :model="$this->roleOptions"
+                    search-model="search.role"
             >
-                <x-livewire-input
-                    mode="gray"
-                    name="search.role"
-                    wire:model.live="searchRole"
-                    @click.stop="isOpen = true"
-                    x-on:input.stop="null"
-                    x-on:keyup.stop="null"
-                    x-on:keydown.stop="null"
-                    x-on:change.stop="null"
-                ></x-livewire-input>
             </x-ui.select-dropdown>
         @error('roleId')
           <x-validation> {{ $message }} </x-validation>

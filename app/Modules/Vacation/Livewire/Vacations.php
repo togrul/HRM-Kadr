@@ -12,8 +12,10 @@ use App\Services\StructureService;
 use App\Services\WordSuffixService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -30,6 +32,9 @@ class Vacations extends Component
 
     public string $searchStructure = '';
 
+    #[Locked]
+    public array $accessibleStructureIds = [];
+
     #[Url]
     public $status;
 
@@ -37,6 +42,8 @@ class Vacations extends Component
 
     #[Url(as: 'year', keep: true)]
     public $selectedYear;
+
+    protected array $runtimeStructureOptionsCache = [];
 
     public function exportExcel()
     {
@@ -155,15 +162,43 @@ class Vacations extends Component
                 'latestRank.rank',
             ]),
         ])
-            ->whereHas('personnel', fn($query) => $query->whereIn('structure_id', resolve(StructureService::class)->getAccessibleStructures()))
+            ->whereHas('personnel', fn($query) => $query->whereIn('structure_id', $this->accessibleStructureIds))
             ->filter($this->search)
             ->when((empty($this->search['date']['min'] ?? null) && empty($this->search['date']['max'] ?? null)), fn($qq) => $qq->whereDateInYear($this->selectedYear))
             ->orderByDesc('end_date')
             ->orderByDesc('return_work_date');
 
         return $type == 'normal'
-            ? $result->paginate(15)->withQueryString()
+            ? $this->decoratePagination($result->paginate(15)->withQueryString())
             : $result->cursor();
+    }
+
+    protected function decoratePagination(LengthAwarePaginator $paginated): LengthAwarePaginator
+    {
+        $start = ($paginated->currentPage() - 1) * $paginated->perPage();
+        $now = Carbon::now();
+
+        $paginated->setCollection(
+            $paginated->getCollection()->values()->map(function (PersonnelVacation $vacation, int $index) use ($start, $now) {
+                $vacation->row_no = $start + $index + 1;
+                $vacation->is_active_vacation = $vacation->start_date <= $now && $vacation->return_work_date > $now;
+
+                $totalDays = max((int) $vacation->vacation_days_total, 1);
+                $remaining = max(0, (int) $vacation->remaining_days);
+                $percentage = ($remaining * 100) / $totalDays;
+
+                $vacation->remaining_percentage = $percentage;
+                $vacation->remaining_color = match (true) {
+                    $percentage < 30 => 'rose',
+                    $percentage < 60 => 'blue',
+                    default => 'teal',
+                };
+
+                return $vacation;
+            })
+        );
+
+        return $paginated;
     }
 
     #[Computed]
@@ -189,6 +224,7 @@ class Vacations extends Component
     public function mount()
     {
         $this->authorize('viewAny', PersonnelVacation::class);
+        $this->accessibleStructureIds = resolve(StructureService::class)->getAccessibleStructures();
         $this->fillFilter();
         $this->fillYear();
         if (session()->has('vacation-updated')) {
@@ -211,6 +247,11 @@ class Vacations extends Component
     {
         $search = $this->dropdownSearch('searchStructure');
         $selected = $this->selectedStructureFilterId();
+        $runtimeCacheKey = md5($search . '|' . ($selected ?? 'none'));
+
+        if (array_key_exists($runtimeCacheKey, $this->runtimeStructureOptionsCache)) {
+            return $this->runtimeStructureOptionsCache[$runtimeCacheKey];
+        }
 
         $query = Structure::query()
             ->select('id', 'name')
@@ -240,7 +281,7 @@ class Vacations extends Component
             }
         }
 
-        return $options
+        return $this->runtimeStructureOptionsCache[$runtimeCacheKey] = $options
             ->unique('id')
             ->sortBy('label', SORT_NATURAL | SORT_FLAG_CASE)
             ->values()

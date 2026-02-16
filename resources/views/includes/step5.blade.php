@@ -9,17 +9,9 @@
                     class="w-full"
                     wire:model.live="historyForm.military.rank_id"
                     :model="$this->militaryRankOptions"
+                    :search-model="data_get($stepSearchModels, 'searchMilitaryRank', 'searchMilitaryRank')"
+                    :search-placeholder="data_get($stepSearchPlaceholders, 'searchMilitaryRank', __('Search...'))"
                 >
-                    <x-livewire-input
-                        mode="gray"
-                        name="searchMilitaryRank"
-                        wire:model.live.debounce.300ms="searchMilitaryRank"
-                        @click.stop="isOpen = true"
-                        x-on:input.stop="null"
-                        x-on:keyup.stop="null"
-                        x-on:keydown.stop="null"
-                        x-on:change.stop="null"
-                    />
                 </x-ui.select-dropdown>
                 @error('historyForm.military.rank_id')
                 <x-validation> {{ $message }} </x-validation>

@@ -5,6 +5,9 @@
   'disabled' => false,
   'model' => [],  // [{id,label}]
   'selectedLabel' => null,
+  'loadOnOpen' => null,
+  'searchModel' => null,
+  'searchPlaceholder' => null,
 ])
 
 @php
@@ -26,6 +29,7 @@
     placeholder: @js($placeholder),
     isOpen: false,
     isDisabled: @js((bool) $disabled),
+    loadOnOpen: @js($loadOnOpen),
     selectedCache: { id: null, label: '' },
     initialSelectedLabel: @js($selectedLabel),
     toId(v){ return (v===null||v===undefined||v==='') ? null : String(v).trim(); },
@@ -83,10 +87,13 @@
     toggle(){
       if (this.isDisabled) return;
       this.isOpen = !this.isOpen;
+      if (this.isOpen && this.loadOnOpen && $wire && typeof $wire.loadOptionGroup === 'function') {
+        $wire.loadOptionGroup(this.loadOnOpen);
+      }
     },
   }"
-  @click.window="if (!$el.contains($event.target)) isOpen = false"
-  @keydown.escape.window="isOpen = false"
+  x-on:click.window="if (!$el.contains($event.target)) isOpen = false"
+  x-on:keydown.escape.window="isOpen = false"
   {{ $attributes->except(['wire:model','wire:model.live','wire:model.defer','wire:model.lazy','wire:model.blur'])->class('w-full') }}
 >
   @if($label)
@@ -99,7 +106,7 @@
       class="relative w-full py-2 pl-3 pr-10 text-left rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm {{ $bg }} {{ $disabled ? 'opacity-60 cursor-not-allowed' : '' }}"
       :aria-expanded="isOpen" aria-labelledby="{{ $labelId }}"
       :disabled="isDisabled"
-      @click.prevent.stop="toggle()"
+      x-on:click.prevent.stop="toggle()"
     >
       <span class="flex items-center">
         <span class="block ml-3 font-normal truncate text-neutral-900" x-text="selectedLabel()">{{ $placeholder }}</span>
@@ -116,11 +123,33 @@
       class="absolute z-10 w-full px-3 py-2 mt-1 space-y-2 overflow-auto text-base bg-white rounded-md shadow-xl max-h-56 focus:outline-none sm:text-sm"
     >
       {{-- slot: search input --}}
-      {{ $slot }}
+      @if ($searchModel)
+        <li class="sticky top-0 bg-white pt-1 pb-2 z-20">
+          <div class="px-1">
+            <x-livewire-input
+              mode="gray"
+              :name="$searchModel"
+              wire:model.live.debounce.300ms="{{ $searchModel }}"
+              placeholder="{{ $searchPlaceholder ?? __('Search...') }}"
+              x-on:click.stop="$event.stopPropagation()"
+              x-on:input.stop="null"
+              x-on:keyup.stop="null"
+              x-on:keydown.stop="null"
+              x-on:change.stop="null"
+            />
+          </div>
+        </li>
+      @elseif (isset($slot) && ! $slot->isEmpty())
+        <li class="sticky top-0 bg-white pt-1 pb-2 z-20">
+          <div class="px-1">
+            {{ $slot }}
+          </div>
+        </li>
+      @endif
 
       {{-- null/placeholder option --}}
       <li class="relative py-2 pl-3 rounded-lg cursor-pointer select-none group pr-9 hover:bg-blue-400 bg-neutral-50"
-          @click.prevent.stop="select(null, placeholder)">
+          x-on:click.prevent.stop="select(null, placeholder)">
         <div class="flex items-center">
           <span class="block ml-3 truncate"> {{ $placeholder }} </span>
           <span
@@ -138,7 +167,7 @@
           class="relative py-2 pl-3 rounded-lg cursor-pointer select-none group pr-9 hover:bg-blue-400 bg-neutral-50"
           data-option-id="{{ data_get($opt,'id') }}"
           data-option-label="{{ data_get($opt,'label') }}"
-          @click.prevent.stop="select($el.dataset.optionId, $el.dataset.optionLabel)"
+          x-on:click.prevent.stop="select($el.dataset.optionId, $el.dataset.optionLabel)"
         >
           <div class="flex items-center">
             <span class="block ml-3 truncate">{{ data_get($opt,'label') }}</span>

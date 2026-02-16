@@ -59,6 +59,8 @@
 
         return [$selectedId, $fieldLabel];
     };
+
+    $resolvedSearchModel = blank($searchField) ? null : $searchField;
 @endphp
 
 @if($input == 'text-input')
@@ -87,17 +89,9 @@
             wire:model.live="{{ $list_string }}.{{ $key }}.{{ $field }}"
             :model="$model ?? []"
             :disabled="$disabled"
+            :search-model="$resolvedSearchModel"
             :selected-label="$selectedLabel"
-        >
-            @if(!empty($searchField))
-                <x-livewire-input
-                    mode="gray"
-                    name="{{ $searchField }}"
-                    wire:model.live="{{ $searchField }}"
-                    @click.stop="isOpen = true"
-                ></x-livewire-input>
-            @endif
-        </x-ui.select-dropdown>
+        />
         @error("{$list_string}.{$key}.{$field}")
             <x-validation> {{ $message }} </x-validation>
         @enderror

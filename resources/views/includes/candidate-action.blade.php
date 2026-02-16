@@ -37,17 +37,8 @@
             class="w-full"
             wire:model.live="candidate.structure_id"
             :model="$this->structureOptions"
+                    search-model="searchStructure"
         >
-            <x-livewire-input
-                mode="gray"
-                name="searchStructure"
-                wire:model.live="searchStructure"
-                @click.stop="isOpen = true"
-                x-on:input.stop="null"
-                x-on:keyup.stop="null"
-                x-on:keydown.stop="null"
-                x-on:change.stop="null"
-            ></x-livewire-input>
         </x-ui.select-dropdown>
         @error('candidate.structure_id')
             <x-validation> {{ $message }} </x-validation>

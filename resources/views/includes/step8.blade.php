@@ -10,17 +10,9 @@
                         class="w-full"
                         wire:model.live="miscForm.language.language_id"
                         :model="$this->languageOptions"
+                    :search-model="data_get($stepSearchModels, 'searchLanguage', 'searchLanguage')"
+                    :search-placeholder="data_get($stepSearchPlaceholders, 'searchLanguage', __('Search...'))"
                     >
-                        <x-livewire-input
-                            mode="gray"
-                            name="searchLanguage"
-                            wire:model.live.debounce.300ms="searchLanguage"
-                            @click.stop="isOpen = true"
-                            x-on:input.stop="null"
-                            x-on:keyup.stop="null"
-                            x-on:keydown.stop="null"
-                            x-on:change.stop="null"
-                        />
                     </x-ui.select-dropdown>
                     @error('miscForm.language.language_id')
                     <x-validation> {{ $message }} </x-validation>
@@ -170,17 +162,9 @@
                         class="w-full"
                         wire:model.live="miscForm.degree.degree_and_name_id"
                         :model="$this->scientificDegreeOptions"
+                    :search-model="data_get($stepSearchModels, 'searchDegree', 'searchDegree')"
+                    :search-placeholder="data_get($stepSearchPlaceholders, 'searchDegree', __('Search...'))"
                     >
-                        <x-livewire-input
-                            mode="gray"
-                            name="searchDegree"
-                            wire:model.live.debounce.300ms="searchDegree"
-                            @click.stop="isOpen = true"
-                            x-on:input.stop="null"
-                            x-on:keyup.stop="null"
-                            x-on:keydown.stop="null"
-                            x-on:change.stop="null"
-                        />
                     </x-ui.select-dropdown>
                     @error('miscForm.degree.degree_and_name_id')
                     <x-validation> {{ $message }} </x-validation>
@@ -223,17 +207,9 @@
                         class="w-full"
                         wire:model.live="miscForm.degree.edu_doc_type_id"
                         :model="$this->step8DocumentTypeOptions"
+                    :search-model="data_get($stepSearchModels, 'searchDegreeDocumentType', 'searchDegreeDocumentType')"
+                    :search-placeholder="data_get($stepSearchPlaceholders, 'searchDegreeDocumentType', __('Search...'))"
                     >
-                        <x-livewire-input
-                            mode="gray"
-                            name="searchDegreeDocumentType"
-                            wire:model.live.debounce.300ms="searchDegreeDocumentType"
-                            @click.stop="isOpen = true"
-                            x-on:input.stop="null"
-                            x-on:keyup.stop="null"
-                            x-on:keydown.stop="null"
-                            x-on:change.stop="null"
-                        />
                     </x-ui.select-dropdown>
                     @error('miscForm.degree.edu_doc_type_id')
                     <x-validation> {{ $message }} </x-validation>

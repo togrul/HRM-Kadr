@@ -48,17 +48,8 @@ Livewire.hook('message.processed', (message, component) => {
                     class="w-full"
                     wire:model.live="filter.structure_id"
                     :model="$this->structureOptions"
+                    search-model="searchStructure"
                 >
-                    <x-livewire-input
-                        mode="gray"
-                        name="searchStructure"
-                        wire:model.live="searchStructure"
-                        @click.stop="isOpen = true"
-                        x-on:input.stop="null"
-                        x-on:keyup.stop="null"
-                        x-on:keydown.stop="null"
-                        x-on:change.stop="null"
-                    ></x-livewire-input>
                 </x-ui.select-dropdown>
             </div>
             <div class="flex flex-col xl:col-span-2">

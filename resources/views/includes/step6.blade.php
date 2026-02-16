@@ -9,17 +9,9 @@
                     class="w-full"
                     wire:model.live="awardsPunishmentsForm.award.award_id"
                     :model="$this->awardOptions"
+                    :search-model="data_get($stepSearchModels, 'searchAward', 'searchAward')"
+                    :search-placeholder="data_get($stepSearchPlaceholders, 'searchAward', __('Search...'))"
                 >
-                    <x-livewire-input
-                        mode="gray"
-                        name="searchAward"
-                        wire:model.live.debounce.300ms="searchAward"
-                        @click.stop="isOpen = true"
-                        x-on:input.stop="null"
-                        x-on:keyup.stop="null"
-                        x-on:keydown.stop="null"
-                        x-on:change.stop="null"
-                    />
                 </x-ui.select-dropdown>
                 @error('awardsPunishmentsForm.award.award_id')
                 <x-validation> {{ $message }} </x-validation>
@@ -185,17 +177,9 @@
                     class="w-full"
                     wire:model.live="awardsPunishmentsForm.punishment.punishment_id"
                     :model="$this->punishmentOptions"
+                    :search-model="data_get($stepSearchModels, 'searchPunishment', 'searchPunishment')"
+                    :search-placeholder="data_get($stepSearchPlaceholders, 'searchPunishment', __('Search...'))"
                 >
-                    <x-livewire-input
-                        mode="gray"
-                        name="searchPunishment"
-                        wire:model.live.debounce.300ms="searchPunishment"
-                        @click.stop="isOpen = true"
-                        x-on:input.stop="null"
-                        x-on:keyup.stop="null"
-                        x-on:keydown.stop="null"
-                        x-on:change.stop="null"
-                    />
                 </x-ui.select-dropdown>
                 @error('awardsPunishmentsForm.punishment.punishment_id')
                 <x-validation> {{ $message }} </x-validation>

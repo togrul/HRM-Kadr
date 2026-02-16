@@ -56,18 +56,8 @@
                         class="w-full"
                         wire:model.live="form.country_id"
                         :model="$this->countryOptions()"
+                    search-model="searchCountry"
                     >
-                        <x-livewire-input
-                            mode="gray"
-                            name="searchCountry"
-                            wire:model.live.debounce.300ms="searchCountry"
-                            placeholder="{{ __('Search...') }}"
-                            @click.stop="isOpen = true"
-                            x-on:input.stop="null"
-                            x-on:keyup.stop="null"
-                            x-on:keydown.stop="null"
-                            x-on:change.stop="null"
-                        ></x-livewire-input>
                     </x-ui.select-dropdown>
                     @error('form.country_id')
                     <x-validation> {{ $message }} </x-validation>
@@ -81,18 +71,8 @@
                         class="w-full"
                         wire:model.live="form.parent_id"
                         :model="$this->parentCityOptions()"
+                    search-model="searchParent"
                     >
-                        <x-livewire-input
-                            mode="gray"
-                            name="searchParent"
-                            wire:model.live.debounce.300ms="searchParent"
-                            placeholder="{{ __('Search...') }}"
-                            @click.stop="isOpen = true"
-                            x-on:input.stop="null"
-                            x-on:keyup.stop="null"
-                            x-on:keydown.stop="null"
-                            x-on:change.stop="null"
-                        ></x-livewire-input>
                     </x-ui.select-dropdown>
                     @error('form.parent_id')
                     <x-validation> {{ $message }} </x-validation>

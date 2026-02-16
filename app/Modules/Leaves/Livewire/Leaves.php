@@ -7,8 +7,10 @@ use App\Livewire\Traits\DropdownConstructTrait;
 use App\Livewire\Traits\SideModalAction;
 use App\Models\Leave;
 use App\Models\OrderStatus;
+use App\Models\Structure;
 use App\Modules\Leaves\Exports\LeaveExport;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
@@ -33,6 +35,7 @@ class Leaves extends Component
     public $status;
 
     protected ?array $statsCache = null;
+    protected array $structurePathCache = [];
 
     public function applyFilter(?array $payload = null): void
     {
@@ -230,7 +233,57 @@ class Leaves extends Component
             return $query->cursor();
         }
 
-        return $query->paginate(15)->withQueryString();
+        $paginated = $query->paginate(15)->withQueryString();
+
+        return $this->decoratePagination($paginated);
+    }
+
+    protected function decoratePagination(LengthAwarePaginator $paginated): LengthAwarePaginator
+    {
+        $start = ($paginated->currentPage() - 1) * $paginated->perPage();
+
+        $paginated->setCollection(
+            $paginated->getCollection()->values()->map(function (Leave $leave, int $index) use ($start) {
+                $leave->row_no = $start + $index + 1;
+                $leave->personnel_structure_path = $this->resolveStructurePath($leave->personnel?->structure);
+
+                return $leave;
+            })
+        );
+
+        return $paginated;
+    }
+
+    protected function resolveStructurePath(?Structure $structure): string
+    {
+        if (! $structure) {
+            return '';
+        }
+
+        $cacheKey = (int) $structure->id;
+
+        if (array_key_exists($cacheKey, $this->structurePathCache)) {
+            return $this->structurePathCache[$cacheKey];
+        }
+
+        $segments = [];
+        $cursor = $structure;
+
+        while ($cursor) {
+            if (is_null($cursor->parent_id)) {
+                break;
+            }
+
+            $segments[] = (string) $cursor->name;
+
+            if (! $cursor->relationLoaded('parent')) {
+                break;
+            }
+
+            $cursor = $cursor->parent;
+        }
+
+        return $this->structurePathCache[$cacheKey] = implode(' ', array_reverse($segments));
     }
 
     public function render()

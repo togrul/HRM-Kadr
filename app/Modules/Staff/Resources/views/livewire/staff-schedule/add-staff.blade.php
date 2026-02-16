@@ -13,17 +13,8 @@
                 class="w-full"
                 wire:model.live="structureId"
                 :model="$this->structureOptions"
+                    search-model="searchStructure"
             >
-                <x-livewire-input
-                    mode="gray"
-                    name="search.structure"
-                    wire:model.live.debounce.300ms="searchStructure"
-                    @click.stop="isOpen = true"
-                    x-on:input.stop="null"
-                    x-on:keyup.stop="null"
-                    x-on:keydown.stop="null"
-                    x-on:change.stop="null"
-                ></x-livewire-input>
             </x-ui.select-dropdown>
             @error('structureId')
             <x-validation> {{ $message }} </x-validation>
@@ -49,18 +40,9 @@
                 class="w-full"
                 wire:model.live="staff.{{ $key }}.position_id"
                 :model="$this->positionOptions"
+                    search-model="searchPosition"
                 :selected-label="data_get($staff[$key]['position'] ?? [], 'name')"
             >
-                <x-livewire-input
-                    mode="gray"
-                    name="search.position"
-                    wire:model.live.debounce.300ms="searchPosition"
-                    @click.stop="isOpen = true"
-                    x-on:input.stop="null"
-                    x-on:keyup.stop="null"
-                    x-on:keydown.stop="null"
-                    x-on:change.stop="null"
-                ></x-livewire-input>
             </x-ui.select-dropdown>
             @error("staff.$key.position_id")
             <x-validation> {{ $message }} </x-validation>

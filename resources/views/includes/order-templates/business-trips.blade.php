@@ -63,9 +63,9 @@
     <div class="grid grid-cols-1 gap-2 sm:grid-cols-1 md:grid-cols-1">
         <div class="flex flex-col relative">
             <x-label for="personnel_name">{{ __('Search personnel') }}</x-label>
-            <x-livewire-input @click.stop="showPersonnelList = {{ $i }}" mode="gray" name="personnel_name" wire:model.live="personnel_name"></x-livewire-input>
+            <x-livewire-input x-on:click.stop="showPersonnelList = {{ $i }}" mode="gray" name="personnel_name" wire:model.live="personnel_name"></x-livewire-input>
             <div x-show="showPersonnelList == {{ $i }}"
-                 @click.away = "showPersonnelList = -1"
+                 x-on:click.away = "showPersonnelList = -1"
                  class="absolute z-[99] top-[60px] left-0 w-full px-1 py-2 bg-slate-50 rounded-lg border border-slate-100 drop-shadow-sm flex flex-col max-h-40 overflow-y-auto">
                     @forelse($_personnel_list_by_name as $pl)
                         <p @if(! $pl->inActiveBusinessTrip) wire:click="addToList('{{ $pl->tabel_no }}',{{ $i }})" @endif

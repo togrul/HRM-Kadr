@@ -8,6 +8,7 @@ use App\Models\Personnel;
 use App\Modules\Personnel\Services\PersonnelLookupService;
 use App\Modules\Personnel\Services\PersonnelQueryService;
 use App\Modules\Personnel\Services\PersonnelRowViewModelService;
+use App\Modules\Personnel\Services\PersonnelRowActionService;
 use App\Services\StructureService;
 use App\Traits\NestedStructureTrait;
 use Carbon\Carbon;
@@ -28,32 +29,25 @@ class AllPersonnel extends Component
     use SideModalAction;
     use WithPagination;
 
-    #[Url]
-    public ?string $status = null;
+    #[Url(as: 'status')]
+    public string $status = 'current';
 
     #[Url]
     public array $filters = [];
 
-    #[Url]
-    public array|string $structure = '';
+    #[Url(as: 'structure')]
+    public array $structure = [];
 
     #[Url(as: 'position')]
     public ?int $selectedPosition = null;
 
-    public bool $filterMounted = false;
+    public bool $filterDetailMounted = false;
 
-    public bool $openFilterOnMount = false;
+    public bool $pendingFilterOpen = false;
 
     protected ?array $accessibleStructureCache = null;
 
-    protected function queryString()
-    {
-        return [
-            'structure' => [
-                'compact' => ',',
-            ],
-        ];
-    }
+    protected array $allowedStatuses = ['current', 'leaves', 'all', 'deleted', 'pending'];
 
     public function exportExcel()
     {
@@ -66,24 +60,25 @@ class AllPersonnel extends Component
         return Excel::download(new PersonnelExport($report), "personnel-$name.xlsx");
     }
 
-    public function printPage($personnel, $headers = null): void
-    {
-        $headers = [__('#'), __('Tabel'), __('Fullname'), __('Gender'), __('Position'), 'action', 'action', 'action', 'action'];
-        redirect()->route('print.page', ['model' => $personnel, 'headers' => $headers]);
-    }
-
     #[On('filterSelected')]
     public function filterSelected(array $filter)
     {
-        $this->filters = $filter;
-        $this->reset(['structure']);
+        $normalized = $this->normalizeAndPersistFilters($filter);
+
+        if ($this->filters === $normalized) {
+            return;
+        }
+
+        $this->filters = $normalized;
+        $this->structure = [];
+        $this->resetPage();
     }
 
     public function openFilter(): void
     {
-        if (! $this->filterMounted) {
-            $this->filterMounted = true;
-            $this->openFilterOnMount = true;
+        if (! $this->filterDetailMounted) {
+            $this->filterDetailMounted = true;
+            $this->pendingFilterOpen = true;
 
             return;
         }
@@ -91,10 +86,15 @@ class AllPersonnel extends Component
         $this->dispatch('setOpenFilter');
     }
 
-    #[On('openFilterWasSet')]
-    public function consumeFilterAutoOpenFlag(): void
+    #[On('filterDetailReady')]
+    public function handleFilterDetailReady(): void
     {
-        $this->openFilterOnMount = false;
+        if (! $this->pendingFilterOpen) {
+            return;
+        }
+
+        $this->pendingFilterOpen = false;
+        $this->dispatch('setOpenFilter');
     }
 
     public function setDeletePersonnel($personnelId)
@@ -134,9 +134,35 @@ class AllPersonnel extends Component
     }
 
     #[On('selectStructure')]
-    public function selectStructure($id)
+    public function selectStructure(mixed $payload = null): void
     {
+        $id = $this->resolveSelectStructureId($payload);
+
+        if ($id === null) {
+            return;
+        }
+
         $this->structure = $this->getNestedStructure($id);
+        $this->resetPage();
+    }
+
+    protected function resolveSelectStructureId(mixed $payload): ?int
+    {
+        if (is_array($payload)) {
+            if (array_key_exists('id', $payload)) {
+                $payload = $payload['id'];
+            } elseif (! empty($payload) && array_is_list($payload)) {
+                $payload = $payload[0];
+            }
+        }
+
+        if (! is_numeric($payload)) {
+            return null;
+        }
+
+        $id = (int) $payload;
+
+        return $id > 0 ? $id : null;
     }
 
     public function getStatusFilters(): array
@@ -164,13 +190,31 @@ class AllPersonnel extends Component
 
     public function setStatus($newStatus)
     {
+        if (! is_string($newStatus) || ! in_array($newStatus, $this->allowedStatuses, true)) {
+            return;
+        }
+
+        if ($this->status === $newStatus) {
+            return;
+        }
+
         $this->status = $newStatus;
         $this->resetPage();
     }
 
     public function setPosition($new)
     {
-        $this->selectedPosition = $new;
+        if (! is_numeric($new)) {
+            return;
+        }
+
+        $newPosition = (int) $new;
+
+        if ($this->selectedPosition === $newPosition) {
+            return;
+        }
+
+        $this->selectedPosition = $newPosition;
         $this->resetPage();
     }
 
@@ -185,19 +229,40 @@ class AllPersonnel extends Component
         $this->filters = [];
         $this->resetPage();
         $this->fillFilter();
-        $this->dispatch('filterResetted');
+        if ($this->filterDetailMounted) {
+            $this->dispatch('filterResetted');
+        }
     }
 
     public function fillFilter()
     {
-        $this->status = request()->query('status', 'current');
+        $this->status = in_array($this->status, $this->allowedStatuses, true) ? $this->status : 'current';
         $this->filters ??= [];
+        $this->structure = $this->normalizeStructureState($this->structure);
+        $this->selectedPosition = is_numeric($this->selectedPosition) ? (int) $this->selectedPosition : null;
     }
 
     #[Computed]
     public function personnels()
     {
         return $this->returnData();
+    }
+
+    public function rowActions(Personnel $personnel): array
+    {
+        return app(PersonnelRowActionService::class)->build($personnel, $this->status);
+    }
+
+    protected function getSafeFilterPayload(): array
+    {
+        $filters = is_array($this->filters) ? $this->filters : [];
+
+        return array_filter($filters, fn ($value, $key) => $value !== null && $value !== '' && $value !== [] && $key !== '__identity', ARRAY_FILTER_USE_BOTH);
+    }
+
+    protected function normalizeAndPersistFilters(array $filter): array
+    {
+        return array_filter($filter, fn ($value, $key) => $value !== null && $value !== '' && $value !== [] && $key !== '__identity', ARRAY_FILTER_USE_BOTH);
     }
 
     #[Computed(persist: true)]
@@ -210,33 +275,71 @@ class AllPersonnel extends Component
     {
         $this->authorize('viewAny', Personnel::class);
         $this->fillFilter();
-        $this->filters = $this->filters ?? [];
-        $this->filterMounted = false;
-        $this->openFilterOnMount = false;
+        $this->filters = $this->getSafeFilterPayload();
+    }
+
+    public function canEditPersonnels(): bool
+    {
+        return auth()->user()?->can('edit-personnels') ?? false;
+    }
+
+    public function canDeletePersonnels(): bool
+    {
+        return auth()->user()?->can('delete-personnels') ?? false;
+    }
+
+    public function handleRowAction(string $type, mixed $payload = null): void
+    {
+        if (is_object($payload)) {
+            $payload = (array) $payload;
+        } elseif (! is_array($payload)) {
+            $payload = [];
+        }
+
+        $actionType = data_get($payload, 'type');
+        if (! is_string($actionType)) {
+            $actionType = in_array($type, ['edit', 'files', 'information', 'vacations'], true) ? 'open' : $type;
+        }
+        $value = (string) data_get($payload, 'value', '');
+
+        if ($actionType === 'open' && ! $this->canEditPersonnels()) {
+            return;
+        }
+
+        if (! $this->canDeletePersonnels() && in_array($actionType, ['delete', 'force-delete'], true)) {
+            return;
+        }
+
+        match ($actionType) {
+            'open' => $this->openSideMenu(data_get($payload, 'menu'), $value),
+            'restore' => $this->restoreData($value),
+            'delete' => $this->setDeletePersonnel($value),
+            'force-delete' => $this->forceDeleteData($value),
+            default => null,
+        };
     }
 
     protected function returnData($type = 'normal')
     {
-        $query = $this->personnelQuery();
+        $query = $this->personnelQuery(withStructureTree: $type === 'normal');
         $rowViewModelService = app(PersonnelRowViewModelService::class);
 
         if ($type === 'normal') {
-            $paginator = $query->paginate(10)->withQueryString();
-
-            return $rowViewModelService->decoratePaginator($paginator);
+            return $rowViewModelService->decoratePaginator($query->paginate(10)->withQueryString());
         }
 
         return $query->cursor();
     }
 
-    protected function personnelQuery(): Builder
+    protected function personnelQuery(bool $withStructureTree = true): Builder
     {
         return app(PersonnelQueryService::class)->build(
             status: $this->status,
             filters: $this->filters,
             selectedStructureIds: $this->selectedStructureIds(),
             accessibleStructureIds: $this->accessibleStructureIds(),
-            selectedPosition: $this->selectedPosition
+            selectedPosition: $this->selectedPosition,
+            withStructureTree: $withStructureTree
         );
     }
 
@@ -251,17 +354,26 @@ class AllPersonnel extends Component
 
     protected function selectedStructureIds(): array
     {
-        if (is_array($this->structure)) {
-            return array_filter(array_map('intval', $this->structure));
+        return $this->normalizeStructureState($this->structure);
+    }
+
+    protected function normalizeStructureState(mixed $value): array
+    {
+        if (is_array($value)) {
+            return array_values(array_filter(array_map('intval', $value)));
         }
 
-        if (is_string($this->structure)) {
-            $value = trim($this->structure);
+        if (is_numeric($value)) {
+            return [ (int) $value ];
+        }
+
+        if (is_string($value)) {
+            $value = trim($value);
             if ($value === '') {
                 return [];
             }
 
-            return array_filter(array_map('intval', explode(',', $value)));
+            return array_values(array_filter(array_map('intval', explode(',', $value))));
         }
 
         return [];

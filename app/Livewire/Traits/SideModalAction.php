@@ -20,7 +20,6 @@ trait SideModalAction
         $this->modelName = $modelName;
         $this->secondModel = $secondModel;
         $this->isSideModalOpen = true;
-
         $this->dispatch('openSideMenu', showSideMenu: $showSideMenu);
     }
 

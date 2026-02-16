@@ -162,11 +162,11 @@
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
                 <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
                     <x-table.tbl :headers="$this->getTableHeaders()">
-                        @forelse ($permits as $key => $leave)
+                        @forelse ($permits as $leave)
                             <tr wire:key="leave-row-{{ $leave->id }}">
                                 <x-table.td>
                                     <span class="text-sm font-medium text-gray-700">
-                                        {{ ($permits->currentpage() - 1) * $permits->perpage() + $key + 1 }}
+                                        {{ $leave->row_no }}
                                     </span>
                                 </x-table.td>
 
@@ -176,7 +176,7 @@
                                             {{ $leave->personnel->fullname_max }}
                                         </span>
                                         <span class="text-sm font-medium text-neutral-600/80">
-                                            {{ implode(' ', $leave->personnel->structure->getAllParentName()) }}
+                                            {{ $leave->personnel_structure_path }}
                                         </span>
                                         <span class="text-sm font-medium text-emerald-600">
                                             {{ $leave->personnel->position_label }}

@@ -32,7 +32,7 @@
                         <span class="uppercase text-xs">{{ $award_type->name }}</span>
                     </x-filter.item>
                     <button
-                        @click.prevent="
+                        x-on:click.prevent="
                             $dispatch('close-child');
                             $wire.loadChildComponent({{ $award_type->id }});
                         "
@@ -84,18 +84,8 @@
                         class="w-full"
                         wire:model.live="form.award_type_id"
                         :model="$this->awardTypeOptions()"
+                    search-model="searchAwardType"
                     >
-                        <x-livewire-input
-                            mode="gray"
-                            name="searchAwardType"
-                            wire:model.live.debounce.300ms="searchAwardType"
-                            placeholder="{{ __('Search...') }}"
-                            @click.stop="isOpen = true"
-                            x-on:input.stop="null"
-                            x-on:keyup.stop="null"
-                            x-on:keydown.stop="null"
-                            x-on:change.stop="null"
-                        ></x-livewire-input>
                     </x-ui.select-dropdown>
                     @error('form.award_type_id')
                         <x-validation> {{ $message }} </x-validation>

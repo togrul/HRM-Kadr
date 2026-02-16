@@ -44,7 +44,7 @@
     }
 @endphp
 <li class="w-full">
-    <button @click.prevent="isOpen = false" wire:click.prevent="markAsRead('{{ $notification->id }}');"
+    <button x-on:click.prevent="isOpen = false" wire:click.prevent="markAsRead('{{ $notification->id }}');"
         @class([
             'flex w-full px-5 py-3 transition duration-150 ease-in hover:bg-neutral-100',
             'bg-neutral-50' => !empty($notification->read_at),

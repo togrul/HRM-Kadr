@@ -107,7 +107,7 @@ trait StaffCrud
 
     public function setData($array_key, $model, $key, $content, $name, $id)
     {
-        $this->searchPosition = null;
+        $this->searchPosition = '';
         $this->{$model}[$array_key][$key] = $id;
         $this->{$model}[$array_key][$content] = [
             'id' => $id,
@@ -178,7 +178,7 @@ trait StaffCrud
         return view($view_name);
     }
 
-    #[\Livewire\Attributes\Computed(persist: true)]
+    #[\Livewire\Attributes\Computed]
     public function structureOptions(): array
     {
         $selected = $this->staffModel ?? $this->structureId;
@@ -207,7 +207,7 @@ trait StaffCrud
         );
     }
 
-    #[\Livewire\Attributes\Computed(persist: true)]
+    #[\Livewire\Attributes\Computed]
     public function positionOptions(): array
     {
         $search = $this->dropdownSearch('searchPosition');

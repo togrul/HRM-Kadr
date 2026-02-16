@@ -1,4 +1,6 @@
-@include('layouts.navigation')
+@persist('app-navigation-shell')
+    @include('layouts.navigation')
+@endpersist
 
 @include('includes.header')
 

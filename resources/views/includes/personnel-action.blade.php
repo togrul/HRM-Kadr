@@ -17,10 +17,12 @@
 
 <div
     class="flex flex-col w-full p-5 px-0 mx-auto my-1 mb-4 space-y-8 transition duration-500 ease-in-out transform bg-white"
-    @isset($personnelModel) wire:init="initStepData" @endisset
 >
+    @php
+        $stepItems = $this->getSteps();
+    @endphp
     <div class="grid items-start grid-cols-8 gap-y-2">
-        @foreach ($steps as $key => $st)
+        @foreach ($stepItems as $key => $st)
             <button type="button" wire:click.prevent="selectStep({{ $key }})" @class([
                 'flex items-center relative flex-col space-y-2 transition-all duration-300 hover:text-green-500 before:content-0 before:rounded-xl before:absolute before:w-1/2 before:left-3/4 before:h-[3px] before:z-0 before:top-[22px] before:transition-all before:duration-300 last:before:w-0',
                 'before:bg-gray-200' => $step <= $key,
@@ -47,31 +49,16 @@
     </div>
     <hr class="py-2" />
 
-@php
-    $stepView = match((int) $step) {
-        1 => 'includes.step1',
-        2 => 'includes.step2',
-        3 => 'includes.step3',
-        4 => 'includes.step4',
-        5 => 'includes.step5',
-        6 => 'includes.step6',
-        7 => 'includes.step7',
-        8 => 'includes.step8',
-        default => null,
-    };
-    @endphp
+    <div wire:key="personnel-step-container-{{ (int) $step }}">
+        @php
+            $activeStepComponent = $this->activeStepComponent;
+            $stepPayload = $this->activeStepPayload();
+            $stepSearchModels = data_get($stepPayload, 'stepSearchModels', []);
+            $stepSearchPlaceholders = data_get($stepPayload, 'stepSearchPlaceholders', []);
+        @endphp
 
-    @if(isset($personnelModel) && isset($stepDataInitialized) && ! $stepDataInitialized)
-        <div class="space-y-3">
-            <div class="h-10 rounded-lg bg-neutral-100 animate-pulse"></div>
-            <div class="h-10 rounded-lg bg-neutral-100 animate-pulse"></div>
-            <div class="h-10 rounded-lg bg-neutral-100 animate-pulse"></div>
-            <div class="h-10 rounded-lg bg-neutral-100 animate-pulse"></div>
-            <div class="h-10 rounded-lg bg-neutral-100 animate-pulse"></div>
-        </div>
-    @elseif ($stepView)
-        @include($stepView)
-    @endif
+        @include($activeStepComponent, $stepPayload)
+    </div>
 
     <div class="flex items-end justify-between w-full">
         @if(! auth()->user()->can('update-personnels') && isset($personnelModel))
@@ -84,10 +71,10 @@
         @endif
 
         <div class="flex items-center space-x-2">
-            @if($step > 1)
-                <x-button mode="warning" wire:click.prevent="previousStep">{{ __('Previous') }}</x-button>
-            @endif
-            @if(array_key_last($steps) != $step)
+        @if($step > 1)
+            <x-button mode="warning" wire:click.prevent="previousStep">{{ __('Previous') }}</x-button>
+        @endif
+            @if(array_key_last($stepItems) != $step)
                 <x-button mode="success" wire:click.prevent="nextStep">{{ __('Next') }}</x-button>
             @endif
         </div>

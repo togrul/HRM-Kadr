@@ -16,8 +16,10 @@ use App\Modules\Personnel\Support\Traits\RelationCruds\RelationCrudTrait;
 use App\Models\Personnel;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Livewire\Attributes\Isolate;
 use Livewire\Component;
 
+#[Isolate]
 class AddPersonnel extends Component
 {
     use AuthorizesRequests;

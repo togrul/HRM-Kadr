@@ -1,17 +1,38 @@
-<div class="flex flex-col" x-data x-init="paginator = document.querySelector('span[aria-current=page]>span');
-if (paginator != null) {
-    paginator.classList.add('bg-blue-50', 'text-blue-600')
-}
-Livewire.hook('message.processed', (message, component) => {
-    const paginator = document.querySelector('span[aria-current=page]>span')
-    if (
-        ['gotoPage', 'previousPage', 'nextPage', 'filterSelected'].includes(message.updateQueue[0].payload.method) || ['openSideMenu', 'closeSideMenu', 'vacationUpdated', 'filterResetted'].includes(message.updateQueue[0].payload.event) || ['search'].includes(message.updateQueue[0].name)
-    ) {
-        if (paginator != null) {
-            paginator.classList.add('bg-green-100', 'text-green-600')
+<div
+    class="flex flex-col"
+    x-data
+    x-init="
+        const applyPaginatorTheme = (isUpdate = false) => {
+            const paginator = document.querySelector('span[aria-current=page]>span');
+            if (!paginator) return;
+            paginator.classList.remove('bg-blue-50', 'text-blue-600', 'bg-green-100', 'text-green-600');
+            paginator.classList.add(isUpdate ? 'bg-green-100' : 'bg-blue-50', isUpdate ? 'text-green-600' : 'text-blue-600');
+        };
+
+        applyPaginatorTheme(false);
+
+        const currentComponentId = $wire.__instance?.id ?? $wire.$id ?? null;
+        window.__vacationPaginatorHooks ??= {};
+
+        if (currentComponentId && !window.__vacationPaginatorHooks[currentComponentId]) {
+            window.__vacationPaginatorHooks[currentComponentId] = true;
+
+            Livewire.hook('message.processed', (message, component) => {
+                if (!component || component.id !== currentComponentId) return;
+
+                const payload = message?.updateQueue?.[0]?.payload ?? {};
+                const name = message?.updateQueue?.[0]?.name;
+
+                const methods = ['gotoPage', 'previousPage', 'nextPage', 'filterSelected'];
+                const events = ['openSideMenu', 'closeSideMenu', 'vacationUpdated', 'filterResetted'];
+
+                if (methods.includes(payload.method) || events.includes(payload.event) || name === 'search') {
+                    applyPaginatorTheme(true);
+                }
+            });
         }
-    }
-})">
+    "
+>
     <div class="flex flex-col px-6 py-4 space-y-4">
         <div class="flex items-center justify-between">
             <div class="flex flex-row items-center justify-start px-2 py-2 space-x-2 rounded-xl">
@@ -55,18 +76,8 @@ Livewire.hook('message.processed', (message, component) => {
                     class="w-full"
                     wire:model.live="filter.structure_id"
                     :model="$this->structureOptions"
+                    search-model="searchStructure"
                 >
-                    <x-livewire-input
-                        mode="gray"
-                        name="searchStructure"
-                        wire:model.live.debounce.300ms="searchStructure"
-                        placeholder="{{ __('Search...') }}"
-                        @click.stop="isOpen = true"
-                        x-on:input.stop="null"
-                        x-on:keyup.stop="null"
-                        x-on:keydown.stop="null"
-                        x-on:change.stop="null"
-                    ></x-livewire-input>
                 </x-ui.select-dropdown>
             </div>
             <div class="flex flex-col">
@@ -150,18 +161,13 @@ Livewire.hook('message.processed', (message, component) => {
                 <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
 
                     <x-table.tbl :headers="$this->getTableHeaders()">
-                        @forelse ($this->vacations as $key => $_vacation)
-                            @php
-                                $activeVacation =
-                                    $_vacation->start_date <= \Carbon\Carbon::now() &&
-                                    $_vacation->return_work_date > \Carbon\Carbon::now();
-                            @endphp
+                        @forelse ($this->vacations as $_vacation)
                             <tr @class([
-                                'bg-teal-50' => $activeVacation,
+                                'bg-teal-50' => $_vacation->is_active_vacation,
                             ])>
                                 <x-table.td>
                                     <span class="text-sm font-medium text-gray-700">
-                                        {{ ($this->vacations->currentpage() - 1) * $this->vacations->perpage() + $key + 1 }}
+                                        {{ $_vacation->row_no }}
                                     </span>
                                 </x-table.td>
 
@@ -174,7 +180,7 @@ Livewire.hook('message.processed', (message, component) => {
                                         <span class="text-sm font-medium text-slate-900">
                                             {{ $_vacation->personnel?->fullname }}
                                         </span>
-                                        @if ($activeVacation)
+                                        @if ($_vacation->is_active_vacation)
                                             <span
                                                 class="flex items-center justify-center px-2 py-1 text-sm font-medium text-green-700 bg-green-200 rounded-lg">
                                                 {{ __('In vacation') }}
@@ -219,22 +225,13 @@ Livewire.hook('message.processed', (message, component) => {
                                                 class="text-green-500">{{ \Carbon\Carbon::parse($_vacation->return_work_date)->format('d.m.Y') }}</span>
                                         </div>
                                         <div class="flex items-center space-x-2">
-                                            @php
-                                                $totalDays = max($_vacation->vacation_days_total, 1); // Avoid division by zero
-                                                $percentage = ($_vacation->remaining_days * 100) / $totalDays;
-                                                $color = match (true) {
-                                                    $percentage < 30 => 'rose',
-                                                    $percentage < 60 => 'blue',
-                                                    default => 'teal', // Handles $percentage >= 60
-                                                };
-                                            @endphp
                                             <span
                                                 class="flex-shrink-0 text-sm text-gray-500">{{ __('Vacation days') }}:
                                             </span>
                                             <div
                                                 class="relative flex items-center justify-center w-20 h-2 overflow-hidden rounded-lg bg-slate-200">
-                                                <div class="absolute left-0 h-full bg-{{ $color }}-500 shadow-sm"
-                                                    style="width: {{ $percentage }}%"></div>
+                                                <div class="absolute left-0 h-full bg-{{ $_vacation->remaining_color }}-500 shadow-sm"
+                                                    style="width: {{ $_vacation->remaining_percentage }}%"></div>
                                             </div>
                                             <span
                                                 class="z-10 text-sm font-medium text-slate-900">{{ $_vacation->remaining_days }}/{{ $_vacation->vacation_days_total }}</span>

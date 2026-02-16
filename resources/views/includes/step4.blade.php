@@ -28,17 +28,9 @@
                         class="w-full"
                         wire:model.live="laborActivityForm.laborActivity.structure_id"
                         :model="$this->laborStructureOptions"
+                    :search-model="data_get($stepSearchModels, 'searchLaborStructure', 'searchLaborStructure')"
+                    :search-placeholder="data_get($stepSearchPlaceholders, 'searchLaborStructure', __('Search...'))"
                     >
-                        <x-livewire-input
-                            mode="gray"
-                            name="searchLaborStructure"
-                            wire:model.live.debounce.300ms="searchLaborStructure"
-                            @click.stop="isOpen = true"
-                            x-on:input.stop="null"
-                            x-on:keyup.stop="null"
-                            x-on:keydown.stop="null"
-                            x-on:change.stop="null"
-                        />
                     </x-ui.select-dropdown>
                     @error('laborActivityForm.laborActivity.structure_id')
                     <x-validation> {{ $message }} </x-validation>
@@ -50,17 +42,9 @@
                         class="w-full"
                         wire:model.live="laborActivityForm.laborActivity.position_id"
                         :model="$this->laborPositionOptions"
+                    :search-model="data_get($stepSearchModels, 'searchLaborPosition', 'searchLaborPosition')"
+                    :search-placeholder="data_get($stepSearchPlaceholders, 'searchLaborPosition', __('Search...'))"
                     >
-                        <x-livewire-input
-                            mode="gray"
-                            name="searchLaborPosition"
-                            wire:model.live.debounce.300ms="searchLaborPosition"
-                            @click.stop="isOpen = true"
-                            x-on:input.stop="null"
-                            x-on:keyup.stop="null"
-                            x-on:keydown.stop="null"
-                            x-on:change.stop="null"
-                        />
                     </x-ui.select-dropdown>
                     @error('laborActivityForm.laborActivity.position_id')
                     <x-validation> {{ $message }} </x-validation>
@@ -369,17 +353,9 @@
                 class="w-full"
                 wire:model.live="laborActivityForm.rank.rank_id"
                 :model="$this->rankOptions"
+                    :search-model="data_get($stepSearchModels, 'searchRank', 'searchRank')"
+                    :search-placeholder="data_get($stepSearchPlaceholders, 'searchRank', __('Search...'))"
             >
-                <x-livewire-input
-                    mode="gray"
-                    name="searchRank"
-                    wire:model.live.debounce.300ms="searchRank"
-                    @click.stop="isOpen = true"
-                    x-on:input.stop="null"
-                    x-on:keyup.stop="null"
-                    x-on:keydown.stop="null"
-                    x-on:change.stop="null"
-                />
             </x-ui.select-dropdown>
             @error('laborActivityForm.rank.rank_id')
             <x-validation> {{ $message }} </x-validation>
@@ -393,17 +369,9 @@
                 class="w-full"
                 wire:model.live="laborActivityForm.rank.rank_reason_id"
                 :model="$this->rankReasonOptions"
+                    :search-model="data_get($stepSearchModels, 'searchRankReason', 'searchRankReason')"
+                    :search-placeholder="data_get($stepSearchPlaceholders, 'searchRankReason', __('Search...'))"
             >
-                <x-livewire-input
-                    mode="gray"
-                    name="searchRankReason"
-                    wire:model.live.debounce.300ms="searchRankReason"
-                    @click.stop="isOpen = true"
-                    x-on:input.stop="null"
-                    x-on:keyup.stop="null"
-                    x-on:keydown.stop="null"
-                    x-on:change.stop="null"
-                />
             </x-ui.select-dropdown>
         </div>
         <div class="flex flex-col">

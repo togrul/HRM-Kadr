@@ -120,17 +120,9 @@
                     class="w-full"
                     wire:model.live="personalForm.personnel.nationality_id"
                     :model="$this->nationalityOptions"
+                    :search-model="data_get($stepSearchModels, 'searchNationality', 'searchNationality')"
+                    :search-placeholder="data_get($stepSearchPlaceholders, 'searchNationality', __('Search...'))"
                 >
-                    <x-livewire-input
-                        mode="gray"
-                        name="searchNationality"
-                        wire:model.live.debounce.300ms="searchNationality"
-                        @click.stop="isOpen = true"
-                        x-on:input.stop="null"
-                        x-on:keyup.stop="null"
-                        x-on:keydown.stop="null"
-                        x-on:change.stop="null"
-                    />
                 </x-ui.select-dropdown>
                 @error('personalForm.personnel.nationality_id')
                 <x-validation> {{ $message }} </x-validation>
@@ -148,17 +140,9 @@
                     class="w-full"
                     wire:model.live="personalForm.personnel.previous_nationality_id"
                     :model="$this->previousNationalityOptions"
+                    :search-model="data_get($stepSearchModels, 'searchPreviousNationality', 'searchPreviousNationality')"
+                    :search-placeholder="data_get($stepSearchPlaceholders, 'searchPreviousNationality', __('Search...'))"
                 >
-                    <x-livewire-input
-                        mode="gray"
-                        name="searchPreviousNationality"
-                        wire:model.live.debounce.300ms="searchPreviousNationality"
-                        @click.stop="isOpen = true"
-                        x-on:input.stop="null"
-                        x-on:keyup.stop="null"
-                        x-on:keydown.stop="null"
-                        x-on:change.stop="null"
-                    />
                 </x-ui.select-dropdown>
                 @error('personalForm.personnel.previous_nationality_id')
                 <x-validation> {{ $message }} </x-validation>
@@ -221,17 +205,9 @@
                     class="w-full"
                     wire:model.live="personalForm.personnel.social_origin_id"
                     :model="$this->socialOriginOptions"
+                    :search-model="data_get($stepSearchModels, 'searchSocialOrigin', 'searchSocialOrigin')"
+                    :search-placeholder="data_get($stepSearchPlaceholders, 'searchSocialOrigin', __('Search...'))"
                 >
-                    <x-livewire-input
-                        mode="gray"
-                        name="searchSocialOrigin"
-                        wire:model.live.debounce.300ms="searchSocialOrigin"
-                        @click.stop="isOpen = true"
-                        x-on:input.stop="null"
-                        x-on:keyup.stop="null"
-                        x-on:keydown.stop="null"
-                        x-on:change.stop="null"
-                    />
                 </x-ui.select-dropdown>
                 @error('personalForm.personnel.social_origin_id')
                 <x-validation> {{ $message }} </x-validation>
@@ -262,17 +238,9 @@
                     class="w-full"
                     wire:model.live="personalForm.personnel.education_degree_id"
                     :model="$this->educationDegreeOptions"
+                    :search-model="data_get($stepSearchModels, 'searchEducationDegree', 'searchEducationDegree')"
+                    :search-placeholder="data_get($stepSearchPlaceholders, 'searchEducationDegree', __('Search...'))"
                 >
-                    <x-livewire-input
-                        mode="gray"
-                        name="searchEducationDegree"
-                        wire:model.live.debounce.300ms="searchEducationDegree"
-                        @click.stop="isOpen = true"
-                        x-on:input.stop="null"
-                        x-on:keyup.stop="null"
-                        x-on:keydown.stop="null"
-                        x-on:change.stop="null"
-                    />
                 </x-ui.select-dropdown>
                 @error('personalForm.personnel.education_degree_id')
                 <x-validation> {{ $message }} </x-validation>
@@ -287,18 +255,10 @@
                     class="w-full"
                     wire:model.live="personalForm.personnel.structure_id"
                     :model="$this->structureOptions"
+                    :search-model="data_get($stepSearchModels, 'searchStructure', 'searchStructure')"
+                    :search-placeholder="data_get($stepSearchPlaceholders, 'searchStructure', __('Search...'))"
                     :disabled="!empty($personnelModel)"
                 >
-                    <x-livewire-input
-                        mode="gray"
-                        name="searchStructure"
-                        wire:model.live.debounce.300ms="searchStructure"
-                        @click.stop="isOpen = true"
-                        x-on:input.stop="null"
-                        x-on:keyup.stop="null"
-                        x-on:keydown.stop="null"
-                        x-on:change.stop="null"
-                    />
                 </x-ui.select-dropdown>
                 @error('personalForm.personnel.structure_id')
                 <x-validation> {{ $message }} </x-validation>
@@ -313,18 +273,10 @@
                     class="w-full"
                     wire:model.live="personalForm.personnel.position_id"
                     :model="$this->positionOptions"
+                    :search-model="data_get($stepSearchModels, 'searchPosition', 'searchPosition')"
+                    :search-placeholder="data_get($stepSearchPlaceholders, 'searchPosition', __('Search...'))"
                     :disabled="!empty($personnelModel)"
                 >
-                    <x-livewire-input
-                        mode="gray"
-                        name="searchPosition"
-                        wire:model.live.debounce.300ms="searchPosition"
-                        @click.stop="isOpen = true"
-                        x-on:input.stop="null"
-                        x-on:keyup.stop="null"
-                        x-on:keydown.stop="null"
-                        x-on:change.stop="null"
-                    />
                 </x-ui.select-dropdown>
                 @error('personalForm.personnel.position_id')
                 <x-validation> {{ $message }} </x-validation>
@@ -341,17 +293,9 @@
                     class="w-full"
                     wire:model.live="personalForm.personnel.work_norm_id"
                     :model="$this->workNormOptions"
+                    :search-model="data_get($stepSearchModels, 'searchWorkNorm', 'searchWorkNorm')"
+                    :search-placeholder="data_get($stepSearchPlaceholders, 'searchWorkNorm', __('Search...'))"
                 >
-                    <x-livewire-input
-                        mode="gray"
-                        name="searchWorkNorm"
-                        wire:model.live.debounce.300ms="searchWorkNorm"
-                        @click.stop="isOpen = true"
-                        x-on:input.stop="null"
-                        x-on:keyup.stop="null"
-                        x-on:keydown.stop="null"
-                        x-on:change.stop="null"
-                    />
                 </x-ui.select-dropdown>
                 @error('personalForm.personnel.work_norm_id')
                 <x-validation> {{ $message }} </x-validation>
@@ -435,17 +379,9 @@
                     class="w-full"
                     wire:model.live="personalForm.personnel.disability_id"
                     :model="$this->disabilityOptions"
+                    :search-model="data_get($stepSearchModels, 'searchDisability', 'searchDisability')"
+                    :search-placeholder="data_get($stepSearchPlaceholders, 'searchDisability', __('Search...'))"
                 >
-                    <x-livewire-input
-                        mode="gray"
-                        name="searchDisability"
-                        wire:model.live.debounce.300ms="searchDisability"
-                        @click.stop="isOpen = true"
-                        x-on:input.stop="null"
-                        x-on:keyup.stop="null"
-                        x-on:keydown.stop="null"
-                        x-on:change.stop="null"
-                    />
                 </x-ui.select-dropdown>
                 @error('personalForm.personnel.disability_id')
                 <x-validation> {{ $message }} </x-validation>

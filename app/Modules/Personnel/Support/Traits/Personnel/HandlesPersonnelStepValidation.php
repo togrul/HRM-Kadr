@@ -79,8 +79,15 @@ trait HandlesPersonnelStepValidation
             return;
         }
 
-        $this->recalculateEducationDurations();
-        $this->calculateSeniority();
+        $currentStep = (int) $this->step;
+
+        if ($currentStep === 3 && property_exists($this, 'educationForm') && $this->educationForm) {
+            $this->recalculateEducationDurations();
+        }
+
+        if ($currentStep === 4 && property_exists($this, 'laborActivityForm') && $this->laborActivityForm) {
+            $this->calculateSeniority();
+        }
 
         if (! $this->shouldValidateCurrentStep()) {
             return;

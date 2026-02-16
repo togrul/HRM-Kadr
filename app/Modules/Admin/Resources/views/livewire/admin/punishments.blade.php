@@ -32,7 +32,7 @@
                         <span class="uppercase text-xs">{{ $type->name }}</span>
                     </x-filter.item>
                     <button
-                        @click.prevent="
+                        x-on:click.prevent="
                             $dispatch('close-child');
                             $wire.loadChildComponent({{ $type->id }});
                         "
@@ -84,18 +84,8 @@
                         class="w-full"
                         wire:model.live="form.punishment_type_id"
                         :model="$this->punishmentTypeOptions()"
+                    search-model="searchPunishmentType"
                     >
-                        <x-livewire-input
-                            mode="gray"
-                            name="searchPunishmentType"
-                            wire:model.live.debounce.300ms="searchPunishmentType"
-                            placeholder="{{ __('Search...') }}"
-                            @click.stop="isOpen = true"
-                            x-on:input.stop="null"
-                            x-on:keyup.stop="null"
-                            x-on:keydown.stop="null"
-                            x-on:change.stop="null"
-                        ></x-livewire-input>
                     </x-ui.select-dropdown>
                     @error('form.punishment_type_id')
                     <x-validation> {{ $message }} </x-validation>

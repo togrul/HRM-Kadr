@@ -2,7 +2,6 @@
 
 namespace App\Modules\Personnel\Support\Traits;
 
-use App\Enums\KnowledgeStatusEnum;
 use App\Livewire\Forms\Personnel\AwardsPunishmentsForm;
 use App\Livewire\Forms\Personnel\KinshipForm;
 use App\Livewire\Forms\Personnel\MiscellaneousForm;
@@ -12,18 +11,16 @@ use App\Livewire\Traits\Helpers\FillComplexArrayTrait;
 use App\Models\City;
 use App\Models\CountryTranslation;
 use App\Modules\Personnel\Support\Traits\DispatchesPersonnelUiEvents;
+use App\Modules\Personnel\Support\Traits\Personnel\HandlesPersonnelStepFlow;
 use App\Modules\Personnel\Support\Traits\Personnel\HandlesPersonnelStepValidation;
 use App\Modules\Personnel\Support\Traits\Personnel\ManagesPersonnelRelationRows;
 use App\Modules\Personnel\Support\Traits\Validations\PersonnelValidationTrait;
-use App\Modules\Personnel\Services\PersonnelStepNavigationService;
-use App\Modules\Personnel\Services\PersonnelStepState;
 use App\Services\CalculateSeniorityService;
 use App\Services\CallPersonnelInfo;
 use App\Services\EducationDurationService;
 use App\Traits\NormalizesDropdownPayloads;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
-use Livewire\Attributes\Isolate;
 use Livewire\WithFileUploads;
 
 trait PersonnelCrud
@@ -32,6 +29,7 @@ trait PersonnelCrud
     use DropdownConstructTrait;
     use FillComplexArrayTrait;
     use HandlesPersonnelStepValidation;
+    use HandlesPersonnelStepFlow;
     use ManagesPersonnelRelationRows;
     use NormalizesDropdownPayloads;
     use PersonnelDropdownOptions;
@@ -49,6 +47,8 @@ trait PersonnelCrud
     public array $calculatedDataExtraEducation = [];
 
     public array $calculatedData = [];
+
+    public array $isolated = [];
 
     public $avatar;
 
@@ -116,10 +116,6 @@ trait PersonnelCrud
 
     protected ?EducationDurationService $educationDurationServiceInstance = null;
 
-    protected ?PersonnelStepNavigationService $stepNavigationServiceInstance = null;
-
-    protected ?PersonnelStepState $stepStateServiceInstance = null;
-
     public function updatedAvatar(): void
     {
         $this->validate([
@@ -141,14 +137,6 @@ trait PersonnelCrud
         }
     }
 
-    public function previousStep()
-    {
-        $this->validateNavigationStepIfNeeded();
-
-        $this->step = $this->stepNavigationService()->previous((int) $this->step);
-        $this->handleStepChanged();
-    }
-
     public function exceptArray($arrayKey)
     {
         $filtered = array_filter($this->validationRules()[$this->step], function ($key) use ($arrayKey) {
@@ -156,66 +144,6 @@ trait PersonnelCrud
         }, ARRAY_FILTER_USE_KEY);
 
         return Arr::except($this->validationRules()[$this->step], array_keys($filtered));
-    }
-
-    public function selectStep($step): void
-    {
-        $this->validateNavigationStepIfNeeded();
-
-        $this->step = $this->stepNavigationService()->select((int) $step);
-        $this->handleStepChanged();
-    }
-
-    protected function completeStep(bool $actionSave = false): void
-    {
-        if ($actionSave) {
-            return;
-        }
-
-        $step = (int) $this->step;
-
-        if (! $this->shouldValidateStep($step)) {
-            return;
-        }
-
-        $stepName = $this->stepStateService()->completionStepName($step);
-
-        if (! $stepName) {
-            return;
-        }
-
-        $validator = $this->getValidationRulesForStep();
-
-        if (! empty($validator)) {
-            $this->validate($validator);
-        }
-
-        if (! in_array($stepName, $this->completedSteps)) {
-            $this->completedSteps[] = $stepName;
-        }
-    }
-
-    public function nextStep(): void
-    {
-        $this->isAddedRank = false;
-
-        $this->validateNavigationStepIfNeeded();
-
-        $this->step = $this->stepNavigationService()->next((int) $this->step);
-        $this->handleStepChanged();
-    }
-
-    private function getSteps(): array
-    {
-        return $this->stepNavigationService()->steps();
-    }
-
-    #[Isolate]
-    public function getIsolatedProperty(): array
-    {
-        return [
-            'knowledges' => KnowledgeStatusEnum::values(),
-        ];
     }
 
     protected function validateCommon($exclude)
@@ -413,6 +341,11 @@ trait PersonnelCrud
     public function render()
     {
         $steps = ['steps' => $this->getSteps()];
+        $personnelContext = [
+            'personnelModelData' => method_exists($this, 'personnelModelDataInstance')
+                ? $this->personnelModelDataInstance()
+                : ($this->personnelModelData ?? null),
+        ];
 
         $view_data = $this->shouldLoadLookupData()
             ? resolve(CallPersonnelInfo::class)->getAll($this->personalFormHasDisability(), $this)
@@ -422,33 +355,7 @@ trait PersonnelCrud
                     ? 'personnel::livewire.personnel.edit-personnel'
                     : 'personnel::livewire.personnel.add-personnel';
 
-        return view($view_name, array_merge($steps, array_merge($view_data, $this->isolated)));
-    }
-
-    protected function shouldLoadLookupData(): bool
-    {
-        return $this->stepStateService()->shouldLoadLookupData($this->step);
-    }
-
-    protected function handleStepChanged(): void
-    {
-        $this->stepNavigationService()->handleStepChanged((int) $this->step, function (int $step): void {
-            if (method_exists($this, 'onStepChanged')) {
-                $this->onStepChanged($step);
-            }
-        });
-    }
-
-    protected function stepNavigationService(): PersonnelStepNavigationService
-    {
-        return $this->stepNavigationServiceInstance
-            ??= resolve(PersonnelStepNavigationService::class);
-    }
-
-    protected function stepStateService(): PersonnelStepState
-    {
-        return $this->stepStateServiceInstance
-            ??= resolve(PersonnelStepState::class);
+        return view($view_name, array_merge($steps, array_merge($view_data, array_merge($this->isolated, $personnelContext))));
     }
 
     protected function personalFormHasDisability(): bool

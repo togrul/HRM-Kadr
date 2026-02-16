@@ -1,28 +1,34 @@
 <div class="flex flex-col">
     {{-- sidebar  --}}
     <x-slot name="sidebar">
-        <livewire:structure.sidebar lazy />
+        <livewire:structure.sidebar wire:key="personnel-structure-sidebar" />
     </x-slot>
     {{-- end sidebar --}}
 
     <div class="flex flex-col px-6 py-4 space-y-4">
-        @php
-            $personnels = $this->personnels;
-            $status = $this->status;
-        @endphp
+@php
+    $personnels = $this->personnels;
+    $status = $this->status;
+    $rowStart = ($personnels->currentPage() - 1) * $personnels->perPage();
+@endphp
         {{-- header section --}}
         <div class="flex items-center justify-between">
-            @include('partials.personnel.status-filters')
-            @include('partials.personnel.action-buttons')
-        </div>
-        {{-- Position Filters --}}
-        @include('partials.personnel.position-filters')
+        @include('partials.personnel.status-filters')
+        @include('partials.personnel.action-buttons')
+    </div>
+
+    {{-- Position Filters --}}
+    @include('partials.personnel.position-filters')
 
         <div class="relative min-h-[300px] overflow-x-auto">
             <div class="inline-block min-w-full py-2 align-middle sm:px-1">
                 <div class="border-b border-gray-200 shadow overflow-inherit sm:rounded-xl">
                     <x-table.tbl :headers="$this->getTableHeaders()">
-                        @forelse ($personnels as $key => $personnel)
+                        @forelse ($personnels as $personnel)
+                            @php
+                                $rowNumber = $rowStart + $loop->iteration;
+                                $rowActions = $this->rowActions($personnel);
+                            @endphp
                             <tr wire:key="personnel-row-{{ $personnel->id }}-{{ $status ?? 'all' }}" @class([
                                 'relative',
                                 'bg-rose-100' => !empty($personnel->leave_work_date),
@@ -31,23 +37,19 @@
                                 <x-table.td>
                                     <div class="absolute top-0 left-0 flex flex-col justify-between h-full">
                                         @if ($personnel->active_vacation)
-                                            @php($vacationStart = $personnel->active_vacation->start_date)
-                                            @php($vacationEnd = $personnel->active_vacation->return_work_date)
-                                            <x-progress :startDate="$vacationStart" :endDate="$vacationEnd" color="emerald">
+                                            <x-progress :startDate="$personnel->active_vacation_start" :endDate="$personnel->active_vacation_end" color="emerald">
                                                 {{ __('In vacation') }}
                                             </x-progress>
                                         @endif
                                         @if ($personnel->active_business_trip)
-                                            @php($startDate = $personnel->active_business_trip->start_date)
-                                            @php($endDate = $personnel->active_business_trip->end_date)
-                                            <x-progress :$startDate :$endDate color="rose">
+                                            <x-progress :startDate="$personnel->active_business_trip_start" :endDate="$personnel->active_business_trip_end" color="rose">
                                                 {{ __('In business trip') }}
                                             </x-progress>
                                         @endif
                                     </div>
 
                                     <span class="text-sm font-medium text-gray-700">
-                                        {{ ($personnels->currentPage() - 1) * $personnels->perPage() + $key + 1 }}
+                                        {{ $rowNumber }}
                                     </span>
                                 </x-table.td>
 
@@ -131,11 +133,10 @@
                                     @endif
                                 </x-table.td>
 
-                                @include('personnel::livewire.personnel.partials.row-actions', [
-                                    'personnel' => $personnel,
-                                    'status' => $status,
-                                    'index' => $loop->index,
-                                ])
+                                <x-personnel.row-actions
+                                    :actions="$rowActions"
+                                    :force-up="$loop->last"
+                                />
                             </tr>
                         @empty
                             <x-table.empty :rows="count($this->getTableHeaders())"></x-table.empty>

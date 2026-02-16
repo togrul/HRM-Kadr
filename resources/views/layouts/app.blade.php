@@ -20,10 +20,12 @@
         @includeWhen(\request()->is('admin/*'), 'includes.layout.admin')
     </div>
 
-    <x-notification
-        :initial-type="session()->has('error') || session()->has('error_message') ? 'error' : (session()->has('success') ? 'success' : null)"
-        :initial-message="session('error_message') ?? session('error') ?? session('success')"
-    />
+    @persist('app-toast-shell')
+        <x-notification
+            :initial-type="session()->has('error') || session()->has('error_message') ? 'error' : (session()->has('success') ? 'success' : null)"
+            :initial-message="session('error_message') ?? session('error') ?? session('success')"
+        />
+    @endpersist
 
     @livewireScripts
     @stack('js')

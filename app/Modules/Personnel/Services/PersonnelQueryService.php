@@ -19,7 +19,8 @@ class PersonnelQueryService
         array $filters,
         array $selectedStructureIds,
         array $accessibleStructureIds,
-        ?int $selectedPosition = null
+        ?int $selectedPosition = null,
+        bool $withStructureTree = true
     ): Builder {
         $locale = app()->getLocale();
 
@@ -57,7 +58,7 @@ class PersonnelQueryService
             ->leftJoin('positions as position_sort', 'position_sort.id', '=', 'personnels.position_id')
             ->leftJoin('structures as structure_sort', 'structure_sort.id', '=', 'personnels.structure_id')
             ->with($relations)
-            ->withStructureTree()
+            ->when($withStructureTree, fn (Builder $query) => $query->withStructureTree())
             ->when(! empty($selectedStructureIds), function (Builder $query) use ($selectedStructureIds) {
                 $query->whereIn('personnels.structure_id', $selectedStructureIds);
             }, function (Builder $query) use ($accessibleStructureIds) {
@@ -89,4 +90,3 @@ class PersonnelQueryService
             ->orderBy('structure_sort.name');
     }
 }
-

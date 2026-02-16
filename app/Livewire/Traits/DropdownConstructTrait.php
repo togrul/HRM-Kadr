@@ -175,7 +175,7 @@ trait DropdownConstructTrait
     {
         $options = cache()->remember(
             $cacheKey,
-            now()->addMinutes($this->dropdownCacheMinutes),
+            now()->addMinutes($this->dropdownCacheTtlMinutes()),
             function () use ($base, $limit) {
                 $query = clone $base;
                 $query->limit($limit);

@@ -8,8 +8,10 @@
             }
             Livewire.hook('message.processed', (message, component) => {
                 const paginator = document.querySelector('span[aria-current=page]>span')
+                const payload = message?.updateQueue?.[0]?.payload ?? {};
                 if (
-                    ['gotoPage', 'previousPage', 'nextPage', 'resetFilter'].includes(message.updateQueue[0].payload.method) || ['openSideMenu', 'closeSideMenu', 'staffAdded', 'staffWasDeleted'].includes(message.updateQueue[0].payload.event)
+                    ['gotoPage', 'previousPage', 'nextPage', 'resetFilter'].includes(payload.method) ||
+                    ['openSideMenu', 'closeSideMenu', 'staffAdded', 'staffWasDeleted'].includes(payload.event)
                 ) {
                     if (paginator != null) {
                         paginator.classList.add('bg-green-100', 'text-green-600')
@@ -19,7 +21,7 @@
     ">
     {{-- sidebar  --}}
     <x-slot name="sidebar">
-        @livewire('structure.sidebar')
+        <livewire:structure.sidebar wire:key="staff-structure-sidebar" />
     </x-slot>
     {{-- end sidebar --}}
 
@@ -75,18 +77,17 @@
         <div class="flex flex-col px-4 mt-4 space-y-4">
             @if ($staffs->isNotEmpty())
                 <div class="grid grid-cols-1 gap-3">
-                    @foreach ($staffs as $str => $stf)
-                        @php
-                            $structure = $stf[0]->structure;
-                            $hasParent = !empty($structure->parent_id);
-                            $total_sum = $stf->sum('total');
-                            $total_filled = $stf->sum('filled');
-                            $total_vacant = $stf->sum('vacant');
-                        @endphp
-                        <x-staff.root :title="$str" :structureId="$stf[0]->structure_id" :$hasParent :$total_sum :$total_filled
-                            :$total_vacant>
-                            @foreach ($stf as $st)
-                                <x-staff.item :$hasParent :model="$st" />
+                    @foreach ($staffs as $group)
+                        <x-staff.root
+                            :title="$group['title']"
+                            :structureId="$group['structure_id']"
+                            :hasParent="$group['has_parent']"
+                            :total_sum="$group['total_sum']"
+                            :total_filled="$group['total_filled']"
+                            :total_vacant="$group['total_vacant']"
+                        >
+                            @foreach ($group['items'] as $st)
+                                <x-staff.item :hasParent="$group['has_parent']" :model="$st" />
                             @endforeach
                         </x-staff.root>
                     @endforeach
@@ -152,26 +153,33 @@
     <x-side-modal>
         @can('add-staff')
             @if ($showSideMenu == 'add-staff')
-                <livewire:staff-schedule.add-staff />
+                <livewire:staff-schedule.add-staff wire:key="staff-add-modal" />
             @endif
         @endcan
 
         @can('edit-staff')
             @if ($showSideMenu == 'edit-staff')
-                <livewire:staff-schedule.edit-staff :staffModel="$modelName" />
+                <livewire:staff-schedule.edit-staff
+                    :staffModel="$modelName"
+                    :key="'staff-edit-staff-modal-' . ($modelName ?? 'none')"
+                />
             @endif
         @endcan
 
         @can('show-staff')
             @if ($showSideMenu == 'show-staff')
-                <livewire:staff-schedule.show-staff :structureModel="$modelName" :positionModel="$secondModel" />
+                <livewire:staff-schedule.show-staff
+                    :structureModel="$modelName"
+                    :positionModel="$secondModel"
+                    :key="'staff-show-staff-modal-' . ($modelName ?? 'none') . '-' . ($secondModel ?? 'none')"
+                />
             @endif
         @endcan
     </x-side-modal>
     {{-- @endcan --}}
     @can('delete-staff')
         <div>
-            <livewire:staff-schedule.delete-staff />
+            <livewire:staff-schedule.delete-staff wire:key="staff-delete-modal" />
         </div>
     @endcan
 </div>

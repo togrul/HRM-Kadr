@@ -23,7 +23,7 @@
         "
     x-data={openDeleteModal:false}
     x-show="openDeleteModal"
-    @keydown.escape.window="openDeleteModal = false"
+    x-on:keydown.escape.window="openDeleteModal = false"
     @if( $eventToOpenModal)
     {{ '@'.$eventToOpenModal }}.window="
         openDeleteModal = true

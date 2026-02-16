@@ -46,17 +46,9 @@
                     class="w-full"
                     wire:model.live="documentForm.document.nationality_id"
                     :model="$this->documentNationalityOptions"
+                    :search-model="data_get($stepSearchModels, 'searchDocumentNationality', 'searchDocumentNationality')"
+                    :search-placeholder="data_get($stepSearchPlaceholders, 'searchDocumentNationality', __('Search...'))"
                 >
-                    <x-livewire-input
-                        mode="gray"
-                        name="searchDocumentNationality"
-                        wire:model.live.debounce.300ms="searchDocumentNationality"
-                        @click.stop="isOpen = true"
-                        x-on:input.stop="null"
-                        x-on:keyup.stop="null"
-                        x-on:keydown.stop="null"
-                        x-on:change.stop="null"
-                    />
                 </x-ui.select-dropdown>
                 @error('documentForm.document.nationality_id')
                 <x-validation> {{ $message }} </x-validation>
@@ -85,17 +77,9 @@
                     class="w-full"
                     wire:model.live="documentForm.document.born_country_id"
                     :model="$this->documentBornCountryOptions"
+                    :search-model="data_get($stepSearchModels, 'searchDocumentBornCountry', 'searchDocumentBornCountry')"
+                    :search-placeholder="data_get($stepSearchPlaceholders, 'searchDocumentBornCountry', __('Search...'))"
                 >
-                    <x-livewire-input
-                        mode="gray"
-                        name="searchDocumentBornCountry"
-                        wire:model.live.debounce.300ms="searchDocumentBornCountry"
-                        @click.stop="isOpen = true"
-                        x-on:input.stop="null"
-                        x-on:keyup.stop="null"
-                        x-on:keydown.stop="null"
-                        x-on:change.stop="null"
-                    />
                 </x-ui.select-dropdown>
                 @error('documentForm.document.born_country_id')
                 <x-validation> {{ $message }} </x-validation>
@@ -110,17 +94,9 @@
                     class="w-full"
                     wire:model.live="documentForm.document.born_city_id"
                     :model="$this->documentCityOptions"
+                    :search-model="data_get($stepSearchModels, 'searchDocumentCity', 'searchDocumentCity')"
+                    :search-placeholder="data_get($stepSearchPlaceholders, 'searchDocumentCity', __('Search...'))"
                 >
-                    <x-livewire-input
-                        mode="gray"
-                        name="searchDocumentCity"
-                        wire:model.live.debounce.300ms="searchDocumentCity"
-                        @click.stop="isOpen = true"
-                        x-on:input.stop="null"
-                        x-on:keyup.stop="null"
-                        x-on:keydown.stop="null"
-                        x-on:change.stop="null"
-                    />
                 </x-ui.select-dropdown>
                 @error('documentForm.document.born_city_id')
                 <x-validation> {{ $message }} </x-validation>
