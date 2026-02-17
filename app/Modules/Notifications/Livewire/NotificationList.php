@@ -43,7 +43,7 @@ class NotificationList extends Component
     {
         $notifications = auth()->user()
             ->notifications()
-            ->with('notifiable')
+            ->select(['id', 'type', 'data', 'read_at', 'created_at', 'notifiable_id', 'notifiable_type'])
             ->orderBy('read_at')
             ->latest()
             ->paginate(self::NOTIFICATION_THRESHOLD);

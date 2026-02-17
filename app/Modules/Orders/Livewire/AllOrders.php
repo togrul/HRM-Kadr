@@ -14,7 +14,9 @@ use App\Services\StructureService;
 use App\Services\WordSuffixService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\Isolate;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Url;
@@ -34,6 +36,9 @@ class AllOrders extends Component
 
     #[Url]
     public $search = [];
+
+    #[Locked]
+    public array $accessibleStructureIds = [];
 
     #[On('selectOrder')]
     public function selectOrder($id): void
@@ -275,8 +280,6 @@ class AllOrders extends Component
 
     protected function returnData($type = 'normal')
     {
-        $structureService = app(StructureService::class);
-        $accessible = $structureService->getAccessibleStructures();
         $result = OrderLog::with([
             'order',
             'components',
@@ -285,11 +288,11 @@ class AllOrders extends Component
             'creator:id,name',
             'orderType',
         ])
-           ->where(fn ($query) => $query
+            ->where(fn ($query) => $query
                 ->where('order_id', 1010)
                 ->orWhere(fn ($query) => $query
                     ->where('order_id', '!=', 1010)
-                    ->whereHas('personnels', fn ($query) => $query->whereIn('structure_id', $accessible))
+                    ->whereHas('personnels', fn ($query) => $query->whereIn('structure_id', $this->accessibleStructureIds))
                 )
             )
             ->filter($this->search ?? [])
@@ -299,8 +302,28 @@ class AllOrders extends Component
             ->orderByDesc('given_date');
 
         return $type == 'normal'
-            ? $result->paginate(20)->withQueryString()
+            ? $this->decoratePagination($result->paginate(20)->withQueryString())
             : $result->cursor();
+    }
+
+    protected function decoratePagination(LengthAwarePaginator $paginated): LengthAwarePaginator
+    {
+        $start = ($paginated->currentPage() - 1) * $paginated->perPage();
+
+        $paginated->setCollection(
+            $paginated->getCollection()->values()->map(function (OrderLog $order, int $index) use ($start) {
+                $order->row_no = $start + $index + 1;
+                $order->status_color_id = match ((int) $order->status_id) {
+                    20 => 70,
+                    30 => 90,
+                    default => (int) $order->status_id,
+                };
+
+                return $order;
+            })
+        );
+
+        return $paginated;
     }
 
     #[Isolate]
@@ -313,11 +336,12 @@ class AllOrders extends Component
         });
     }
 
-    public function mount()
+    public function mount(StructureService $structureService)
     {
         $this->authorize('viewAny', Order::class);
         $this->fillFilter();
         $this->selectedOrder = $this->selectedOrder ?? request()->query('selectedOrder');
+        $this->accessibleStructureIds = $structureService->getAccessibleStructures();
     }
 
     public function render()

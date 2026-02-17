@@ -9,6 +9,7 @@ use App\Models\Candidate;
 use App\Services\StructureService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -31,6 +32,15 @@ class CandidateList extends Component
     public $status;
 
     protected array $accessibleStructureIds = [];
+
+    protected const TEST_SCORE_COLOR_MAP = [
+        0 => 'slate',
+        1 => 'gray',
+        2 => 'rose',
+        3 => 'orange',
+        4 => 'blue',
+        5 => 'green',
+    ];
 
     public function exportExcel()
     {
@@ -114,8 +124,25 @@ class CandidateList extends Component
             ->orderByDesc('appeal_date');
 
         return $type == 'normal'
-            ? $result->paginate(15)->withQueryString()
+            ? $this->decoratePagination($result->paginate(15)->withQueryString())
             : $result->cursor();
+    }
+
+    protected function decoratePagination(LengthAwarePaginator $paginated): LengthAwarePaginator
+    {
+        $start = ($paginated->currentPage() - 1) * $paginated->perPage();
+
+        $paginated->setCollection(
+            $paginated->getCollection()->values()->map(function (Candidate $candidate, int $index) use ($start) {
+                $candidate->row_no = $start + $index + 1;
+                $candidate->knowledge_test_color = self::TEST_SCORE_COLOR_MAP[(int) ($candidate->knowledge_test ?? 0)] ?? 'slate';
+                $candidate->physical_fitness_exam_color = self::TEST_SCORE_COLOR_MAP[(int) ($candidate->physical_fitness_exam ?? 0)] ?? 'slate';
+
+                return $candidate;
+            })
+        );
+
+        return $paginated;
     }
 
     public function mount(StructureService $structureService): void

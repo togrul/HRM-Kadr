@@ -9,9 +9,9 @@
         Livewire.hook('message.processed', (message,component) => {
             const paginator = document.querySelector('span[aria-current=page]>span')
             if(
-                ['gotoPage','previousPage','nextPage','setStatus','resetFilter'].includes(message.updateQueue[0].payload.method)
-                || ['educationFormUpdated'].includes(message.updateQueue[0].payload.event)
-                || ['q'].includes(message.updateQueue[0].name)
+                ['gotoPage','previousPage','nextPage','setStatus','resetFilter'].includes(message?.updateQueue?.[0]?.payload?.method)
+                || ['educationFormUpdated'].includes(message?.updateQueue?.[0]?.payload?.event)
+                || ['q'].includes(message?.updateQueue?.[0]?.name)
             ){
                 if(paginator != null)
                 {

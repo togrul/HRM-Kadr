@@ -1,17 +1,36 @@
-<div class="flex flex-col" x-data x-init="paginator = document.querySelector('span[aria-current=page]>span');
-if (paginator != null) {
-    paginator.classList.add('bg-blue-50', 'text-blue-600')
-}
-Livewire.hook('message.processed', (message, component) => {
-    const paginator = document.querySelector('span[aria-current=page]>span')
-    if (
-        ['gotoPage', 'previousPage', 'nextPage', 'filterSelected'].includes(message.updateQueue[0].payload.method) || ['openSideMenu', 'closeSideMenu', 'businessTripUpdated', 'filterResetted'].includes(message.updateQueue[0].payload.event) || ['search'].includes(message.updateQueue[0].name)
-    ) {
-        if (paginator != null) {
-            paginator.classList.add('bg-green-100', 'text-green-600')
+<div
+    class="flex flex-col"
+    x-data
+    x-init="
+        const applyPaginatorTheme = (isUpdate = false) => {
+            const paginator = document.querySelector('span[aria-current=page]>span');
+            if (!paginator) return;
+            paginator.classList.remove('bg-blue-50', 'text-blue-600', 'bg-green-100', 'text-green-600');
+            paginator.classList.add(isUpdate ? 'bg-green-100' : 'bg-blue-50', isUpdate ? 'text-green-600' : 'text-blue-600');
+        };
+        applyPaginatorTheme(false);
+
+        const currentComponentId = $wire.__instance?.id ?? $wire.$id ?? null;
+        window.__businessTripPaginatorHooks ??= {};
+
+        if (currentComponentId && !window.__businessTripPaginatorHooks[currentComponentId]) {
+            window.__businessTripPaginatorHooks[currentComponentId] = true;
+            Livewire.hook('message.processed', (message, component) => {
+                if (!component || component.id !== currentComponentId) return;
+                const payload = message?.updateQueue?.[0]?.payload ?? {};
+                const name = message?.updateQueue?.[0]?.name;
+
+                if (
+                    ['gotoPage', 'previousPage', 'nextPage', 'filterSelected'].includes(payload.method)
+                    || ['openSideMenu', 'closeSideMenu', 'businessTripUpdated', 'filterResetted'].includes(payload.event)
+                    || name === 'search'
+                ) {
+                    applyPaginatorTheme(true);
+                }
+            });
         }
-    }
-})">
+    "
+>
     <div class="flex flex-col px-6 py-4 space-y-4">
         <div class="flex items-center justify-between">
             <div class="flex flex-col items-center justify-between px-2 py-2 bg-white sm:flex-row filter rounded-xl">
@@ -135,22 +154,13 @@ Livewire.hook('message.processed', (message, component) => {
                 <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
 
                     <x-table.tbl :headers="$this->getTableHeaders()">
-                        @forelse ($this->businessTrips as $key => $_bTrip)
-                            @php
-                                $multi =
-                                    $_bTrip->order->businessTrips->count() > 1 &&
-                                    $_bTrip->order->order_type_id !=
-                                        \App\Models\PersonnelBusinessTrip::FOREIGN_BUSINESS_TRIP;
-                                $activeBusinessTrip =
-                                    \Carbon\Carbon::parse($_bTrip->start_date) <= \Carbon\Carbon::now() &&
-                                    \Carbon\Carbon::parse($_bTrip->end_date) > \Carbon\Carbon::now();
-                            @endphp
+                        @forelse ($this->businessTrips as $_bTrip)
                             <tr @class([
-                                'bg-teal-50' => $activeBusinessTrip,
+                                'bg-teal-50' => $_bTrip->is_active_trip,
                             ])>
                                 <x-table.td>
                                     <span class="text-sm font-medium text-gray-700">
-                                        {{ ($this->businessTrips->currentpage() - 1) * $this->businessTrips->perpage() + $key + 1 }}
+                                        {{ $_bTrip->row_no }}
                                     </span>
                                 </x-table.td>
 
@@ -167,7 +177,7 @@ Livewire.hook('message.processed', (message, component) => {
                                             class="px-2 py-1 text-sm font-medium text-blue-500 rounded-lg bg-slate-100">
                                             {{ $_bTrip->attributes['$structure']['value'] }}
                                         </span>
-                                        @if ($activeBusinessTrip)
+                                        @if ($_bTrip->is_active_trip)
                                             <span
                                                 class="flex items-center justify-center px-2 py-1 text-sm font-medium text-green-700 bg-green-200 rounded-lg">
                                                 {{ __('In business trip') }}
@@ -180,20 +190,17 @@ Livewire.hook('message.processed', (message, component) => {
                                     <div class="flex flex-col text-sm font-medium">
                                         <div class="flex items-center space-x-1">
                                             <span class="text-gray-500">{{ __('Start date') }}:</span>
-                                            <span
-                                                class="text-sky-500">{{ \Carbon\Carbon::parse($_bTrip->start_date)->format('d.m.Y') }}</span>
+                                            <span class="text-sky-500">{{ $_bTrip->start_date_label }}</span>
                                         </div>
                                         <div class="flex items-center space-x-1">
                                             <span class="text-gray-500">{{ __('End date') }}:</span>
-                                            <span
-                                                class="text-rose-500">{{ \Carbon\Carbon::parse($_bTrip->end_date)->format('d.m.Y') }}</span>
+                                            <span class="text-rose-500">{{ $_bTrip->end_date_label }}</span>
                                         </div>
                                         @if (\Illuminate\Support\Arr::get($search, 'business_trip_status', '') == 'deleted')
                                             <div class="flex flex-col text-sm font-medium">
                                                 <div class="flex items-center space-x-1">
                                                     <span class="text-gray-500">{{ __('Deleted date') }}:</span>
-                                                    <span
-                                                        class="text-black">{{ \Carbon\Carbon::parse($_bTrip->deleted_at)->format('d.m.Y H:i') }}</span>
+                                                    <span class="text-black">{{ $_bTrip->deleted_at_label ?? '' }}</span>
                                                 </div>
                                                 <div class="flex items-center space-x-1">
                                                     <span class="text-gray-500">{{ __('Deleted by') }}:</span>
@@ -223,9 +230,9 @@ Livewire.hook('message.processed', (message, component) => {
                                             <span class="text-gray-500">{{ __('Order #') }}:</span>
                                             <a href="{{ route('orders', ['search' => ['order_no' => $_bTrip->order_no]]) }}"
                                                 class="text-blue-600">{{ $_bTrip->order_no }}</a>
-                                            @if ($multi)
+                                            @if ($_bTrip->is_multi_order_trip)
                                                 <button
-                                                    wire:click="printBusinessTripDocument('{{ $_bTrip->id }}',{{ $multi }})"
+                                                    wire:click="printBusinessTripDocument('{{ $_bTrip->id }}',{{ $_bTrip->is_multi_order_trip ? 'true' : 'false' }})"
                                                     class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg bg-teal-50 hover:bg-teal-100 hover:text-gray-700">
                                                     @include('components.icons.document-icon', [
                                                         'color' => 'text-teal-500',
@@ -240,17 +247,16 @@ Livewire.hook('message.processed', (message, component) => {
                                         </div>
                                         <div class="flex items-center space-x-1">
                                             <span class="text-gray-500">{{ __('Given date') }}:</span>
-                                            <span
-                                                class="text-black">{{ \Carbon\Carbon::parse($_bTrip->order_date)->format('d.m.Y') }}</span>
+                                            <span class="text-black">{{ $_bTrip->order_date_label }}</span>
                                         </div>
                                     </div>
                                 </x-table.td>
 
                                 <x-table.td :isButton="true">
-                                    @if (!$multi)
+                                    @if (!$_bTrip->is_multi_order_trip)
                                         @can('export-business_trips')
                                             <button
-                                                wire:click="printBusinessTripDocument('{{ $_bTrip->id }}',{{ $multi }})"
+                                                wire:click="printBusinessTripDocument('{{ $_bTrip->id }}',{{ $_bTrip->is_multi_order_trip ? 'true' : 'false' }})"
                                                 class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg bg-teal-50 hover:bg-teal-100 hover:text-gray-700">
                                                 @include('components.icons.document-icon', [
                                                     'color' => 'text-teal-500',

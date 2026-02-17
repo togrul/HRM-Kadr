@@ -5,7 +5,7 @@ if (paginator != null) {
 Livewire.hook('message.processed', (message, component) => {
     const paginator = document.querySelector('span[aria-current=page]>span')
     if (
-        ['gotoPage', 'previousPage', 'nextPage', 'setStatus', 'resetFilter'].includes(message.updateQueue[0].payload.method) || ['openSideMenu', 'closeSideMenu', 'userAdded'].includes(message.updateQueue[0].payload.event) || ['q'].includes(message.updateQueue[0].name)
+        ['gotoPage', 'previousPage', 'nextPage', 'setStatus', 'resetFilter'].includes(message?.updateQueue?.[0]?.payload?.method) || ['openSideMenu', 'closeSideMenu', 'userAdded'].includes(message?.updateQueue?.[0]?.payload?.event) || ['q'].includes(message?.updateQueue?.[0]?.name)
     ) {
         if (paginator != null) {
             paginator.classList.add('bg-blue-50', 'text-blue-600')

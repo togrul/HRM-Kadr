@@ -42,7 +42,7 @@ class Notifications extends Component
         }
 
         $this->notifications = $user->notifications()
-            ->with('notifiable')
+            ->select(['id', 'type', 'data', 'read_at', 'created_at', 'notifiable_id', 'notifiable_type'])
             ->orderBy('read_at')
             ->latest()
             ->take(self::NOTIFICATION_THRESHOLD)

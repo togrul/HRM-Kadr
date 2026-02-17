@@ -1,17 +1,37 @@
-<div class="flex flex-col" x-data x-init="paginator = document.querySelector('span[aria-current=page]>span');
-if (paginator != null) {
-    paginator.classList.add('bg-blue-50', 'text-blue-600')
-}
-Livewire.hook('message.processed', (message, component) => {
-    const paginator = document.querySelector('span[aria-current=page]>span')
-    if (
-        ['gotoPage', 'previousPage', 'nextPage', 'filterSelected'].includes(message.updateQueue[0].payload.method) || ['openSideMenu', 'closeSideMenu', 'candidateAdded', 'filterResetted', 'candidateWasDeleted'].includes(message.updateQueue[0].payload.event) || ['search'].includes(message.updateQueue[0].name)
-    ) {
-        if (paginator != null) {
-            paginator.classList.add('bg-green-100', 'text-green-600')
+<div
+    class="flex flex-col"
+    x-data
+    x-init="
+        const applyPaginatorTheme = (isUpdate = false) => {
+            const paginator = document.querySelector('span[aria-current=page]>span');
+            if (!paginator) return;
+            paginator.classList.remove('bg-blue-50', 'text-blue-600', 'bg-green-100', 'text-green-600');
+            paginator.classList.add(isUpdate ? 'bg-green-100' : 'bg-blue-50', isUpdate ? 'text-green-600' : 'text-blue-600');
+        };
+
+        applyPaginatorTheme(false);
+
+        const currentComponentId = $wire.__instance?.id ?? $wire.$id ?? null;
+        window.__candidatePaginatorHooks ??= {};
+
+        if (currentComponentId && !window.__candidatePaginatorHooks[currentComponentId]) {
+            window.__candidatePaginatorHooks[currentComponentId] = true;
+
+            Livewire.hook('message.processed', (message, component) => {
+                if (!component || component.id !== currentComponentId) return;
+
+                const payload = message?.updateQueue?.[0]?.payload ?? {};
+                const name = message?.updateQueue?.[0]?.name;
+                const methods = ['gotoPage', 'previousPage', 'nextPage', 'filterSelected'];
+                const events = ['openSideMenu', 'closeSideMenu', 'candidateAdded', 'filterResetted', 'candidateWasDeleted'];
+
+                if (methods.includes(payload.method) || events.includes(payload.event) || name === 'search') {
+                    applyPaginatorTheme(true);
+                }
+            });
         }
-    }
-})">
+    "
+>
     <div class="grid grid-cols-1 gap-2 px-6 py-4 sm:grid-cols-2 lg:grid-cols-4">
         <div class="flex flex-col">
             <x-label for="filter.fullname">{{ __('Fullname') }}</x-label>
@@ -124,11 +144,11 @@ Livewire.hook('message.processed', (message, component) => {
                 <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
 
                     <x-table.tbl :headers="$this->getTableHeaders()">
-                        @forelse ($_candidates as $key => $_candidate)
-                            <tr>
+                        @forelse ($_candidates as $_candidate)
+                            <tr wire:key="candidate-row-{{ $_candidate->id }}">
                                 <x-table.td>
                                     <span class="text-sm font-medium text-gray-700">
-                                        {{ ($_candidates->currentpage() - 1) * $_candidates->perpage() + $key + 1 }}
+                                        {{ $_candidate->row_no }}
                                     </span>
                                 </x-table.td>
 
@@ -161,28 +181,18 @@ Livewire.hook('message.processed', (message, component) => {
                                 </x-table.td>
 
                                 <x-table.td>
-                                    @php
-                                        $_status_color = [
-                                            0 => 'slate',
-                                            1 => 'gray',
-                                            2 => 'rose',
-                                            3 => 'orange',
-                                            4 => 'blue',
-                                            5 => 'green',
-                                        ];
-                                    @endphp
                                     <div class="flex flex-col space-y-1">
                                         <div class="flex items-center space-x-1">
                                             <span
                                                 class="text-sm font-medium text-gray-500">{{ __('Knowledge') }}:</span>
                                             <span
-                                                class="text-sm font-medium px-2 py-1 rounded-lg bg-{{ $_status_color[$_candidate->knowledge_test] }}-100 text-{{ $_status_color[$_candidate->knowledge_test] }}-500">{{ $_candidate->knowledge_test }}</span>
+                                                class="text-sm font-medium px-2 py-1 rounded-lg bg-{{ $_candidate->knowledge_test_color }}-100 text-{{ $_candidate->knowledge_test_color }}-500">{{ $_candidate->knowledge_test }}</span>
                                         </div>
                                         <div class="flex items-center space-x-1">
                                             <span
                                                 class="text-sm font-medium text-gray-500">{{ __('Physical fitness') }}:</span>
                                             <span
-                                                class="text-sm font-medium px-2 py-1 rounded-lg bg-{{ $_status_color[$_candidate->physical_fitness_exam] }}-100 text-{{ $_status_color[$_candidate->physical_fitness_exam] }}-500">{{ $_candidate->physical_fitness_exam }}</span>
+                                                class="text-sm font-medium px-2 py-1 rounded-lg bg-{{ $_candidate->physical_fitness_exam_color }}-100 text-{{ $_candidate->physical_fitness_exam_color }}-500">{{ $_candidate->physical_fitness_exam }}</span>
                                         </div>
                                     </div>
                                 </x-table.td>
@@ -257,18 +267,18 @@ Livewire.hook('message.processed', (message, component) => {
     <x-side-modal>
         @can('create', App\Models\Candidate::class)
             @if ($showSideMenu == 'add-candidate')
-                @livewire('candidates.add-candidate')
+                <livewire:candidates.add-candidate wire:key="candidate-add-modal" />
             @endif
         @endcan
 
         @if ($showSideMenu === 'edit-candidate')
-            <livewire:candidates.edit-candidate :candidateModel="$modelName" />
+            <livewire:candidates.edit-candidate :candidateModel="$modelName" :key="'candidate-edit-modal-' . ($modelName ?? 'none')" />
         @endif
     </x-side-modal>
 
     @can('delete', App\Models\Candidate::class)
         <div>
-            @livewire('candidates.delete-candidate')
+            <livewire:candidates.delete-candidate wire:key="candidate-delete-modal" />
         </div>
     @endcan
 

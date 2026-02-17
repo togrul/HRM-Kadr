@@ -79,7 +79,7 @@ trait OrderCrud
     public $orderModel;
 
     //selected order category - from all order list
-    public ?int $selectedOrder;
+    public ?int $selectedOrder = null;
 
     //template secilende asagida komponentlerin gorunusu
     public $showComponent = false;
@@ -187,7 +187,7 @@ trait OrderCrud
         $this->templateSelected((int) $value);
     }
 
-    #[Computed(persist: true)]
+    #[Computed]
     public function templateOptions(): array
     {
         $collection = $this->orderLookupService

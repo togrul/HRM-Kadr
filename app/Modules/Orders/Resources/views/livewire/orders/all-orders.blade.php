@@ -1,20 +1,40 @@
-<div class="flex flex-col" x-data x-init="paginator = document.querySelector('span[aria-current=page]>span');
-if (paginator != null) {
-    paginator.classList.add('bg-blue-50', 'text-blue-600')
-}
-Livewire.hook('message.processed', (message, component) => {
-    const paginator = document.querySelector('span[aria-current=page]>span')
-    if (
-        ['gotoPage', 'previousPage', 'nextPage', 'selectOrder'].includes(message.updateQueue[0].payload.method) || ['openSideMenu', 'closeSideMenu', 'orderAdded', 'selectOrder', 'orderWasDeleted'].includes(message.updateQueue[0].payload.event) || ['search'].includes(message.updateQueue[0].name)
-    ) {
-        if (paginator != null) {
-            paginator.classList.add('bg-green-100', 'text-green-600')
+<div
+    class="flex flex-col"
+    x-data
+    x-init="
+        const applyPaginatorTheme = (isUpdate = false) => {
+            const paginator = document.querySelector('span[aria-current=page]>span');
+            if (!paginator) return;
+            paginator.classList.remove('bg-blue-50', 'text-blue-600', 'bg-green-100', 'text-green-600');
+            paginator.classList.add(isUpdate ? 'bg-green-100' : 'bg-blue-50', isUpdate ? 'text-green-600' : 'text-blue-600');
+        };
+
+        applyPaginatorTheme(false);
+
+        const currentComponentId = $wire.__instance?.id ?? $wire.$id ?? null;
+        window.__ordersPaginatorHooks ??= {};
+
+        if (currentComponentId && !window.__ordersPaginatorHooks[currentComponentId]) {
+            window.__ordersPaginatorHooks[currentComponentId] = true;
+
+            Livewire.hook('message.processed', (message, component) => {
+                if (!component || component.id !== currentComponentId) return;
+
+                const payload = message?.updateQueue?.[0]?.payload ?? {};
+                const name = message?.updateQueue?.[0]?.name;
+                const methods = ['gotoPage', 'previousPage', 'nextPage', 'selectOrder'];
+                const events = ['openSideMenu', 'closeSideMenu', 'orderAdded', 'selectOrder', 'orderWasDeleted'];
+
+                if (methods.includes(payload.method) || events.includes(payload.event) || name === 'search') {
+                    applyPaginatorTheme(true);
+                }
+            });
         }
-    }
-})">
+    "
+>
     {{-- sidebar  --}}
     <x-slot name="sidebar">
-        @livewire('structure.orders')
+        <livewire:structure.orders wire:key="orders-structure-sidebar" />
     </x-slot>
     {{-- end sidebar --}}
 
@@ -104,14 +124,14 @@ Livewire.hook('message.processed', (message, component) => {
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
                 <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
                     <x-table.tbl :headers="$this->getTableHeaders()">
-                        @forelse ($orders as $key => $_order)
-                            <tr @class([
+                        @forelse ($orders as $_order)
+                            <tr wire:key="order-row-{{ $_order->id }}" @class([
                                 '' => $_order->status_id != 30,
                                 'bg-rose-50' => $_order->status_id == 30,
                             ])>
                                 <x-table.td>
                                     <span class="text-sm font-medium text-gray-700">
-                                        {{ ($orders->currentpage() - 1) * $orders->perpage() + $key + 1 }}
+                                        {{ $_order->row_no }}
                                     </span>
                                 </x-table.td>
 
@@ -180,15 +200,7 @@ Livewire.hook('message.processed', (message, component) => {
                                 </x-table.td>
 
                                 <x-table.td>
-                                    @php
-                                        $_color = match($_order->status->id)
-                                        {
-                                            20 => 70,
-                                            30 => 90,
-                                            default => $_order->status->id
-                                        };
-                                    @endphp
-                                         <x-status :status-id="$_color" :label="$_order->status->name"></x-status>
+                                         <x-status :status-id="$_order->status_color_id" :label="$_order->status->name"></x-status>
                                 </x-table.td>
 
                                 <x-table.td :isButton="true">
@@ -260,19 +272,19 @@ Livewire.hook('message.processed', (message, component) => {
     <x-side-modal>
         @can('add-orders')
             @if ($showSideMenu == 'add-order')
-                <livewire:orders.add-order :$selectedOrder />
+                <livewire:orders.add-order :$selectedOrder :key="'order-add-modal-' . ($selectedOrder ?? 'none')" />
             @endif
         @endcan
         @can('edit-orders')
             @if ($showSideMenu == 'edit-order')
-                <livewire:orders.edit-order :orderModel="$modelName" />
+                <livewire:orders.edit-order :orderModel="$modelName" :key="'order-edit-modal-' . ($modelName ?? 'none')" />
             @endif
         @endcan
     </x-side-modal>
 
     @can('delete-orders')
         <div>
-            <livewire:orders.delete-order />
+            <livewire:orders.delete-order wire:key="order-delete-modal" />
         </div>
     @endcan
 
