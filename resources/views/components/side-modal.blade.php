@@ -103,7 +103,7 @@
 
         <div class="fixed inset-y-0 right-0 flex max-w-full sm:pl-10">
             <section
-                class="pointer-events-auto relative w-screen {{ $sizeClass }}"
+                class="side-modal-shell pointer-events-auto relative w-screen {{ $sizeClass }}"
                 x-show="isOpen"
                 x-transition:enter="transform transition ease-out duration-250"
                 x-transition:enter-start="translate-x-full"

@@ -6,37 +6,41 @@
 
 @php
     $extraClasses = match ($mode) {
-        'default' => 'bg-white hover:bg-gray-200 active:bg-gray-200 focus:border-gray-200 text-gray-600',
-        'gray' => 'bg-zinc-900/90 hover:bg-zinc-800/90 active:bg-zinc-900 focus:border-zinc-900/80 text-zinc-100',
-        'primary' => 'border-blue-500 bg-blue-600 hover:bg-blue-600/90 active:bg-blue-500 focus:border-blue-500 text-blue-50',
-        'success' => 'bg-green-500 hover:bg-green-600 active:bg-green-500 focus:border-green-500 text-white',
-        'warning' => 'bg-yellow-500 hover:bg-yellow-600 active:bg-yellow-500 focus:border-yellow-500 text-white',
-        'danger' => 'bg-red-500 hover:bg-red-600 active:bg-red-500 focus:border-red-500 text-white',
+        'default' => 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50 active:bg-gray-100',
+        'gray' => 'border-zinc-800 bg-zinc-900 text-zinc-100 hover:bg-zinc-800 active:bg-zinc-900',
+        'primary' => 'border-blue-600 bg-blue-600 text-blue-50 hover:bg-blue-700 active:bg-blue-700',
+        'success' => 'border-green-600 bg-green-600 text-white hover:bg-green-700 active:bg-green-700',
+        'warning' => 'border-yellow-500 bg-yellow-500 text-white hover:bg-yellow-600 active:bg-yellow-600',
+        'danger' => 'border-red-600 bg-red-600 text-white hover:bg-red-700 active:bg-red-700',
         'light-green'
-            => 'bg-green-100 border border-green-500 hover:bg-green-200 active:bg-green-100 focus:bg-green-100 text-green-500',
+            => 'border-emerald-200 bg-emerald-100 text-emerald-800 hover:bg-emerald-200 active:bg-emerald-200',
         'teal'
-            => 'bg-teal-100 border border-teal-500 hover:bg-teal-200 active:bg-teal-100 focus:bg-teal-100 text-teal-500',
+            => 'border-teal-500 bg-teal-100 text-teal-600 hover:bg-teal-200 active:bg-teal-200',
         'slate'
-            => 'bg-neutral-100 border border-neutral-200 hover:bg-neutral-200 active:bg-neutral-100 focus:bg-neutral-100 text-neutral-500',
+            => 'border-slate-200 bg-slate-100 text-slate-700 hover:bg-slate-200 active:bg-slate-200',
         'light-red'
-            => 'bg-red-100 border border-red-500 hover:bg-red-200 active:bg-red-100 focus:bg-red-100 text-red-500',
+            => 'border-red-500 bg-red-100 text-red-600 hover:bg-red-200 active:bg-red-200',
         'light-blue'
-            => 'bg-blue-100 border border-blue-500 hover:bg-blue-200 active:bg-blue-100 focus:bg-blue-100 text-blue-500',
+            => 'border-blue-500 bg-blue-100 text-blue-600 hover:bg-blue-200 active:bg-blue-200',
         'black'
-            => 'bg-black border border-gray-900 hover:bg-gray-800 active:bg-gray-800 focus:bg-gray-800 text-gray-100',
+            => 'border-gray-900 bg-gray-900 text-gray-100 hover:bg-gray-800 active:bg-gray-800',
         'rose'
-            => 'bg-rose-50 border border-rose-500 hover:bg-rose-100 active:bg-rose-100 focus:bg-rose-100 text-rose-500',
+            => 'border-rose-500 bg-rose-50 text-rose-600 hover:bg-rose-100 active:bg-rose-100',
+        'step-prev'
+            => 'border-transparent bg-slate-100 text-slate-700 hover:bg-slate-200 active:bg-slate-200',
+        'step-next'
+            => 'border-transparent bg-emerald-700 text-white hover:bg-emerald-800 active:bg-emerald-800',
     };
 @endphp
 
 @if ($type !== 'link')
     <button @disabled($disabled)
-        {{ $attributes->merge(['type' => $type, 'class' => 'camelcase inline-flex justify-center items-center px-3 py-2 border rounded-md font-medium shadow-md text-sm focus:outline-none focus:ring ring-gray-300 disabled:opacity-25 transition-all ease-in-out duration-150 ' . $extraClasses]) }}>
+        {{ $attributes->merge(['type' => $type, 'class' => 'camelcase inline-flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-md border px-4 py-2 text-sm font-medium shadow-sm transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 disabled:pointer-events-none disabled:opacity-50 ' . $extraClasses]) }}>
         {{ $slot }}
     </button>
 @else
     <a
-        {{ $attributes->merge(['class' => 'camelcase inline-flex justify-center items-center px-3 py-2 border border-transparent rounded-md font-medium shadow-md text-sm focus:outline-none focus:ring ring-gray-300 disabled:opacity-25 transition-all ease-in-out duration-150 ' . $extraClasses]) }}>
+        {{ $attributes->merge(['class' => 'camelcase inline-flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-md border px-4 py-2 text-sm font-medium shadow-sm transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 disabled:pointer-events-none disabled:opacity-50 ' . $extraClasses]) }}>
         {{ $slot }}
     </a>
 @endif

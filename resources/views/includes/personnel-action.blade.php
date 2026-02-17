@@ -72,10 +72,10 @@
 
         <div class="flex items-center space-x-2">
         @if($step > 1)
-            <x-button mode="warning" wire:click.prevent="previousStep">{{ __('Previous') }}</x-button>
+            <x-button mode="step-prev" wire:click.prevent="previousStep">{{ __('Previous') }}</x-button>
         @endif
             @if(array_key_last($stepItems) != $step)
-                <x-button mode="success" wire:click.prevent="nextStep">{{ __('Next') }}</x-button>
+                <x-button mode="step-next" wire:click.prevent="nextStep">{{ __('Next') }}</x-button>
             @endif
         </div>
     </div>
