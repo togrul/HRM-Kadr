@@ -5,6 +5,7 @@ namespace App\Modules\Admin\Livewire;
 use Livewire\Component;
 use App\Models\LeaveType;
 use Illuminate\Support\Arr;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\On;
 use Livewire\WithPagination as LivewireWithPagination;
 use App\Modules\Admin\Support\Traits\Admin\CallSwalTrait as AdminCallSwalTrait;
@@ -87,6 +88,21 @@ class LeaveTypes extends Component
         $leave_types = LeaveType::query()
             ->paginate(20);
 
+        $leave_types = $this->decorateLeaveTypes($leave_types);
+
         return view('admin::livewire.admin.leave-types', compact('leave_types'));
+    }
+
+    protected function decorateLeaveTypes(LengthAwarePaginator $paginated): LengthAwarePaginator
+    {
+        $paginated->setCollection(
+            $paginated->getCollection()->values()->map(function (LeaveType $leaveType) {
+                $leaveType->requires_document_label = (bool) $leaveType->requires_document;
+
+                return $leaveType;
+            })
+        );
+
+        return $paginated;
     }
 }

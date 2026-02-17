@@ -8,6 +8,7 @@ use App\Livewire\Traits\DropdownConstructTrait;
 use App\Models\City;
 use App\Models\CountryTranslation;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -101,9 +102,25 @@ class Cities extends Component
 
     public function render()
     {
-        $cities = City::with('country.currentCountryTranslations')->paginate(20);
+        $cities = City::with(['country.currentCountryTranslations', 'parent:id,name'])->paginate(20);
+
+        $cities = $this->decorateCities($cities);
 
         return view('admin::livewire.admin.cities', compact('cities'));
+    }
+
+    protected function decorateCities(LengthAwarePaginator $paginated): LengthAwarePaginator
+    {
+        $paginated->setCollection(
+            $paginated->getCollection()->values()->map(function (City $city) {
+                $city->country_label = $city->country?->currentCountryTranslations?->title ?? '';
+                $city->parent_label = $city->parent?->name ?? '';
+
+                return $city;
+            })
+        );
+
+        return $paginated;
     }
 
     public function countryOptions(): array

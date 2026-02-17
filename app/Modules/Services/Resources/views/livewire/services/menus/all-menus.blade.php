@@ -58,7 +58,7 @@
 
                                 <x-table.td :isButton="true">
                                     {{-- @can('manage-settings') --}}
-                                    <a href="#" wire:click.prevent="openSideMenu('edit-menu',{{ $menu }})"
+                                    <a href="#" wire:click.prevent="openSideMenu('edit-menu',{{ $menu->id }})"
                                         class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase rounded-lg text-gray-500 bg-gray-100 hover:bg-gray-200 hover:text-gray-700">
                                         <x-icons.edit-icon color="text-slate-400"
                                             hover="text-slate-500"></x-icons.edit-icon>
@@ -94,17 +94,17 @@
 
     <x-side-modal>
         @if ($showSideMenu == 'add-menu')
-            <livewire:services.menus.add-menu />
+            <livewire:services.menus.add-menu wire:key="services-menu-add-modal" />
         @endif
 
         @if ($showSideMenu == 'edit-menu')
-            <livewire:services.menus.edit-menu :menuModel="$modelName" />
+            <livewire:services.menus.edit-menu :menuModel="$modelName" :key="'services-menu-edit-modal-' . ($modelName ?? 'none')" />
         @endif
     </x-side-modal>
 
     <div class="">
         @auth
-            @livewire('services.menus.delete-menu')
+            <livewire:services.menus.delete-menu wire:key="services-menu-delete-modal" />
         @endauth
     </div>
 </div>

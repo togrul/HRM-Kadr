@@ -1,24 +1,21 @@
-<div class="flex flex-col"
-     x-data
-     x-init="
-        paginator = document.querySelector('span[aria-current=page]>span');
-        if(paginator != null)
-        {
-            paginator.classList.add('bg-blue-50','text-blue-600')
-        }
-        Livewire.hook('message.processed', (message,component) => {
-            const paginator = document.querySelector('span[aria-current=page]>span')
-            if(
-                ['gotoPage','previousPage','nextPage','setStatus','resetFilter'].includes(message?.updateQueue?.[0]?.payload?.method)
-                || ['openSideMenu','closeSideMenu','rankAdded'].includes(message?.updateQueue?.[0]?.payload?.event)
-                || ['q'].includes(message?.updateQueue?.[0]?.name)
-            ){
-                if(paginator != null)
-                {
-                    paginator.classList.add('bg-blue-50','text-blue-600')
-                }
+<div
+    class="flex flex-col"
+    x-data
+    x-init="
+        const root = $el;
+        const paintPaginator = () => {
+            const paginator = root.querySelector('span[aria-current=page]>span');
+            if (paginator) {
+                paginator.classList.add('bg-blue-50', 'text-blue-600');
             }
-        })
+        };
+        paintPaginator();
+        if (typeof Livewire !== 'undefined') {
+            Livewire.hook('commit', ({ component, succeed }) => {
+                if (component.id !== $wire.__instance.id) return;
+                succeed(() => queueMicrotask(paintPaginator));
+            });
+        }
     "
 >
 
@@ -49,7 +46,7 @@
                 <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
                     <x-table.tbl :headers="[__('ID'),__('Category'),__('Name'),__('Duration'),__('Active?'),'action','action']">
                         @forelse ($_ranks as $rank)
-                            <tr>
+                            <tr wire:key="rank-row-{{ $rank->id }}">
                                 <x-table.td>
                                       <span class="text-sm font-medium">
                                           {{ $rank->id }}
@@ -115,8 +112,8 @@
                                 </x-table.td>
 
                                 <x-table.td :isButton="true">
-                                    <button
-                                        wire:click.prevent="openSideMenu('edit-rank',{{ $rank }})"
+                                        <button
+                                        wire:click.prevent="openSideMenu('edit-rank',{{ $rank->id }})"
                                         class="appearance-none flex items-center justify-center w-8 h-8 text-xs font-medium uppercase rounded-lg text-gray-500 bg-gray-100 hover:bg-gray-200 hover:text-gray-700"
                                     >
                                         <x-icons.edit-icon color="text-slate-400" hover="text-slate-500"></x-icons.edit-icon>
@@ -159,18 +156,18 @@
     {{-- @can('manage-settings') --}}
     <x-side-modal>
         @if($showSideMenu == 'add-rank')
-            <livewire:services.ranks.add-rank />
+            <livewire:services.ranks.add-rank wire:key="services-rank-add-modal" />
         @endif
 
         @if($showSideMenu == 'edit-rank')
-            <livewire:services.ranks.edit-rank :rankModel="$modelName" />
+            <livewire:services.ranks.edit-rank :rankModel="$modelName" :key="'services-rank-edit-modal-' . ($modelName ?? 'none')" />
         @endif
     </x-side-modal>
     {{-- @endcan --}}
 
     <div class="">
         @auth
-            @livewire('services.ranks.delete-rank')
+            <livewire:services.ranks.delete-rank wire:key="services-rank-delete-modal" />
         @endauth
     </div>
 </div>

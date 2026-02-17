@@ -113,13 +113,13 @@
     {{-- @can('manage-settings') --}}
     <x-side-modal>
         @if ($showSideMenu == 'set-permission')
-            @livewire('services.roles.set-permission', ['roleModel' => $modelName])
+            <livewire:services.roles.set-permission :roleModel="$modelName" :key="'services-role-permission-modal-' . ($modelName ?? 'none')" />
         @endif
     </x-side-modal>
     {{-- @endcan --}}
     <div>
         @auth
-            @livewire('services.roles.delete-role')
+            <livewire:services.roles.delete-role wire:key="services-role-delete-modal" />
         @endauth
     </div>
 </div>

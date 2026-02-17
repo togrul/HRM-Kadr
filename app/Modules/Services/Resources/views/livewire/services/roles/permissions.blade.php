@@ -1,4 +1,4 @@
-<div class="flex flex-col space-y-4" x-data wire:key="permissions">
+<div class="flex flex-col space-y-4 z-1" x-data wire:key="permissions">
     @if (empty($permission_id))
         {{-- @can('manage-settings') --}}
         <div>
@@ -28,13 +28,26 @@
         {{-- @endcan --}}
     @endif
 
+    <div class="flex items-center justify-start px-2">
+        <div class="w-full max-w-sm">
+            <x-livewire-input
+                mode="gray"
+                id="permission_search"
+                name="permission_search"
+                type="text"
+                wire:model.live.debounce.300ms="search"
+                :placeholder="__('Search permission')"
+            />
+        </div>
+    </div>
+
     <div class="relative min-h-[300px] overflow-x-auto px-2">
         <div class="inline-block min-w-full py-2 align-middle">
             <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
 
                 <x-table.tbl :headers="[__('Name'), 'action', 'action']">
                     @foreach ($permissions as $permission)
-                        <tr>
+                        <tr wire:key="permission-row-{{ $permission->id }}">
                             <x-table.td>
                                 <div class="flex flex-row items-center space-x-2">
                                     <span @class([
@@ -90,6 +103,9 @@
                         </tr>
                     @endforeach
                 </x-table.tbl>
+            </div>
+            <div class="mt-3">
+                {{ $permissions->links() }}
             </div>
         </div>
     </div>

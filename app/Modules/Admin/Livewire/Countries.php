@@ -6,6 +6,7 @@ use App\Modules\Admin\Support\Traits\Admin\AdminCrudTrait;
 use App\Modules\Admin\Support\Traits\Admin\CallSwalTrait;
 use App\Models\Country;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -158,6 +159,23 @@ class Countries extends Component
             }])
             ->paginate(20);
 
+        $countries = $this->decorateCountries($countries);
+
         return view('admin::livewire.admin.countries', compact('countries'));
+    }
+
+    protected function decorateCountries(LengthAwarePaginator $paginated): LengthAwarePaginator
+    {
+        $paginated->setCollection(
+            $paginated->getCollection()->values()->map(function (Country $country) {
+                $translation = $country->countryTranslations->first();
+                $country->locale_code = $translation?->locale ?? '';
+                $country->locale_title = $translation?->title ?? '';
+
+                return $country;
+            })
+        );
+
+        return $paginated;
     }
 }

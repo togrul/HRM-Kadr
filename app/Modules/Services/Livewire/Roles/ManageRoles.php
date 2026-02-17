@@ -88,7 +88,10 @@ class ManageRoles extends Component
 
     public function render()
     {
-        $roles = Role::all();
+        $roles = Role::query()
+            ->select('id', 'name')
+            ->orderBy('name')
+            ->get();
 
         return view('services::livewire.services.roles.manage-roles', compact('roles'));
     }

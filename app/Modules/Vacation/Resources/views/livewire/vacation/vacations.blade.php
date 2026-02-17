@@ -2,33 +2,19 @@
     class="flex flex-col"
     x-data
     x-init="
+        const root = $el;
         const applyPaginatorTheme = (isUpdate = false) => {
-            const paginator = document.querySelector('span[aria-current=page]>span');
+            const paginator = root.querySelector('span[aria-current=page]>span');
             if (!paginator) return;
             paginator.classList.remove('bg-blue-50', 'text-blue-600', 'bg-green-100', 'text-green-600');
             paginator.classList.add(isUpdate ? 'bg-green-100' : 'bg-blue-50', isUpdate ? 'text-green-600' : 'text-blue-600');
         };
 
         applyPaginatorTheme(false);
-
-        const currentComponentId = $wire.__instance?.id ?? $wire.$id ?? null;
-        window.__vacationPaginatorHooks ??= {};
-
-        if (currentComponentId && !window.__vacationPaginatorHooks[currentComponentId]) {
-            window.__vacationPaginatorHooks[currentComponentId] = true;
-
-            Livewire.hook('message.processed', (message, component) => {
-                if (!component || component.id !== currentComponentId) return;
-
-                const payload = message?.updateQueue?.[0]?.payload ?? {};
-                const name = message?.updateQueue?.[0]?.name;
-
-                const methods = ['gotoPage', 'previousPage', 'nextPage', 'filterSelected'];
-                const events = ['openSideMenu', 'closeSideMenu', 'vacationUpdated', 'filterResetted'];
-
-                if (methods.includes(payload.method) || events.includes(payload.event) || name === 'search') {
-                    applyPaginatorTheme(true);
-                }
+        if (typeof Livewire !== 'undefined') {
+            Livewire.hook('commit', ({ component, succeed }) => {
+                if (component.id !== $wire.__instance.id) return;
+                succeed(() => queueMicrotask(() => applyPaginatorTheme(true)));
             });
         }
     "

@@ -8,6 +8,7 @@ use App\Livewire\Traits\DropdownConstructTrait;
 use App\Models\Punishment;
 use App\Models\PunishmentType;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -150,6 +151,21 @@ class Punishments extends Component
             })
             ->paginate(20);
 
+        $punishments = $this->decoratePunishments($punishments);
+
         return view('admin::livewire.admin.punishments', compact('punishments', 'punishment_types'));
+    }
+
+    protected function decoratePunishments(LengthAwarePaginator $paginated): LengthAwarePaginator
+    {
+        $paginated->setCollection(
+            $paginated->getCollection()->values()->map(function (Punishment $punishment) {
+                $punishment->type_label = $punishment->type?->name ?? '';
+
+                return $punishment;
+            })
+        );
+
+        return $paginated;
     }
 }

@@ -1,17 +1,23 @@
-<div class="flex flex-col" x-data x-init="paginator = document.querySelector('span[aria-current=page]>span');
-if (paginator != null) {
-    paginator.classList.add('bg-blue-50', 'text-blue-600')
-}
-Livewire.hook('message.processed', (message, component) => {
-    const paginator = document.querySelector('span[aria-current=page]>span')
-    if (
-        ['gotoPage', 'previousPage', 'nextPage', 'setStatus', 'resetFilter'].includes(message?.updateQueue?.[0]?.payload?.method) || ['openSideMenu', 'closeSideMenu', 'userAdded'].includes(message?.updateQueue?.[0]?.payload?.event) || ['q'].includes(message?.updateQueue?.[0]?.name)
-    ) {
-        if (paginator != null) {
-            paginator.classList.add('bg-blue-50', 'text-blue-600')
+<div
+    class="flex flex-col"
+    x-data
+    x-init="
+        const root = $el;
+        const paintPaginator = () => {
+            const paginator = root.querySelector('span[aria-current=page]>span');
+            if (paginator) {
+                paginator.classList.add('bg-blue-50', 'text-blue-600');
+            }
+        };
+        paintPaginator();
+        if (typeof Livewire !== 'undefined') {
+            Livewire.hook('commit', ({ component, succeed }) => {
+                if (component.id !== $wire.__instance.id) return;
+                succeed(() => queueMicrotask(paintPaginator));
+            });
         }
-    }
-})">
+    "
+>
 
     <div class="flex flex-col items-center justify-between sm:flex-row filter bg-white py-2 px-2 rounded-xl">
         <x-filter.nav>
@@ -49,24 +55,24 @@ Livewire.hook('message.processed', (message, component) => {
         </div>
     </div>
 
-    <div class="flex flex-col space-y-2">
+    <div class="flex flex-col space-y-2 mt-2">
         <div class="relative min-h-[300px] -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
                 <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
                     <x-table.tbl :headers="[__('User'), __('Role'), __('Email'), __('Active?'), 'action', 'action']">
                         @forelse ($_users as $user)
-                            <tr>
+                            <tr wire:key="user-row-{{ $user->id }}">
                                 <x-table.td>
                                     <span class="text-sm font-medium">
-                                        {{ $user->name }}
+                                        {{ $user->row_no }}. {{ $user->name }}
                                     </span>
                                 </x-table.td>
 
                                 <x-table.td>
-                                    @if (count($user->roles) > 0)
+                                    @if ($user->primary_role)
                                         <span
                                             class="bg-blue-100 text-blue-500 rounded-lg px-2 py-1 text-sm font-normal lowercase whitespace-no-wrap">
-                                            {{ $user->roles[0]->name }}
+                                            {{ $user->primary_role }}
                                         </span>
                                     @endif
                                 </x-table.td>
@@ -89,18 +95,17 @@ Livewire.hook('message.processed', (message, component) => {
                                         <div class="flex flex-col text-xs font-medium">
                                             <div class="flex items-center space-x-1">
                                                 <span class="text-gray-500">{{ __('Deleted date') }}:</span>
-                                                <span
-                                                    class="text-black">{{ \Carbon\Carbon::parse($user->deleted_at)->format('d-m-Y H:i') }}</span>
+                                                <span class="text-black">{{ $user->deleted_at_label }}</span>
                                             </div>
                                             <div class="flex items-center space-x-1">
                                                 <span class="text-gray-500">{{ __('Deleted by') }}:</span>
-                                                <span class="text-black">{{ $user->personDidDelete->name }}</span>
+                                                <span class="text-black">{{ $user->deleted_by_name }}</span>
                                             </div>
                                         </div>
                                     @else
                                         {{-- @can('manage-settings') --}}
                                         <a href="#"
-                                            wire:click.prevent="openSideMenu('edit-user',{{ $user }})"
+                                            wire:click.prevent="openSideMenu('edit-user',{{ $user->id }})"
                                             class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase rounded-lg text-gray-500 bg-gray-100 hover:bg-gray-200 hover:text-gray-700">
                                             <x-icons.edit-icon color="text-slate-400"
                                                 hover="text-slate-500"></x-icons.edit-icon>
@@ -159,18 +164,18 @@ Livewire.hook('message.processed', (message, component) => {
     {{-- @can('manage-settings') --}}
     <x-side-modal>
         @if ($showSideMenu == 'add-user')
-            <livewire:services.users.add-user />
+            <livewire:services.users.add-user wire:key="services-user-add-modal" />
         @endif
 
         @if ($showSideMenu == 'edit-user')
-            <livewire:services.users.edit-user :userModel="$modelName" />
+            <livewire:services.users.edit-user :userModel="$modelName" :key="'services-user-edit-modal-' . ($modelName ?? 'none')" />
         @endif
     </x-side-modal>
     {{-- @endcan --}}
 
     <div class="">
         @auth
-            @livewire('services.users.delete-user')
+            <livewire:services.users.delete-user wire:key="services-user-delete-modal" />
         @endauth
     </div>
 </div>

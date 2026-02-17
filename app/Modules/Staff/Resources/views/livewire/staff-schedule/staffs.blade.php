@@ -2,22 +2,20 @@
     class="flex flex-col" 
     x-data 
     x-init="
-            paginator = document.querySelector('span[aria-current=page]>span');
-            if (paginator != null) {
-                paginator.classList.add('bg-blue-50', 'text-blue-600')
-            }
-            Livewire.hook('message.processed', (message, component) => {
-                const paginator = document.querySelector('span[aria-current=page]>span')
-                const payload = message?.updateQueue?.[0]?.payload ?? {};
-                if (
-                    ['gotoPage', 'previousPage', 'nextPage', 'resetFilter'].includes(payload.method) ||
-                    ['openSideMenu', 'closeSideMenu', 'staffAdded', 'staffWasDeleted'].includes(payload.event)
-                ) {
-                    if (paginator != null) {
-                        paginator.classList.add('bg-green-100', 'text-green-600')
-                    }
-                }
-            })
+        const root = $el;
+        const paintPaginator = (isUpdate = false) => {
+            const paginator = root.querySelector('span[aria-current=page]>span');
+            if (!paginator) return;
+            paginator.classList.remove('bg-blue-50', 'text-blue-600', 'bg-green-100', 'text-green-600');
+            paginator.classList.add(isUpdate ? 'bg-green-100' : 'bg-blue-50', isUpdate ? 'text-green-600' : 'text-blue-600');
+        };
+        paintPaginator();
+        if (typeof Livewire !== 'undefined') {
+            Livewire.hook('commit', ({ component, succeed }) => {
+                if (component.id !== $wire.__instance.id) return;
+                succeed(() => queueMicrotask(() => paintPaginator(true)));
+            });
+        }
     ">
     {{-- sidebar  --}}
     <x-slot name="sidebar">

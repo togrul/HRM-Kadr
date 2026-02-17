@@ -79,7 +79,7 @@
             }
         }
     "
-    class="fixed inset-0 z-80"
+    class="fixed inset-0 z-[100] !m-0"
     x-show="isOpen"
     x-cloak
     aria-labelledby="slide-over-title"

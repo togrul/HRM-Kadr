@@ -3,16 +3,24 @@
 namespace App\Modules\Services\Livewire\Roles;
 
 use Livewire\Attributes\On;
+use Livewire\WithPagination;
 use Livewire\Component;
+use Livewire\WithoutUrlPagination;
 use Illuminate\Validation\Rule;
 use Spatie\Permission\Models\Permission;
 
 #[On('permissionWasDeleted')]
 class Permissions extends Component
 {
+    use WithPagination, WithoutUrlPagination;
+
     public $permission_id;
 
     public $permission_name;
+
+    public string $search = '';
+
+    public int $perPage = 25;
 
     protected function rules(): array
     {
@@ -58,6 +66,11 @@ class Permissions extends Component
         $this->resetErrorBag();
     }
 
+    public function updatingSearch(): void
+    {
+        $this->resetPage();
+    }
+
     private function resetInputFields()
     {
         $this->permission_name = '';
@@ -66,7 +79,13 @@ class Permissions extends Component
 
     public function render()
     {
-        $permissions = Permission::all();
+        $permissions = Permission::query()
+            ->select('id', 'name')
+            ->when($this->search !== '', function ($query) {
+                $query->where('name', 'like', '%'.$this->search.'%');
+            })
+            ->orderBy('name')
+            ->paginate($this->perPage);
 
         return view('services::livewire.services.roles.permissions', compact('permissions'));
     }

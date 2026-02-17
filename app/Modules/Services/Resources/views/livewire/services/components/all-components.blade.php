@@ -17,10 +17,10 @@
     <div class="flex flex-col space-y-2">
 
         <div class="grid grid-cols-1 gap-2">
-            @forelse ($_components as $key => $_component)
-                <div class="flex items-center justify-between px-4 py-3 shadow-sm rounded-xl bg-neutral-100">
+            @forelse ($_components as $_component)
+                <div class="flex items-center justify-between px-4 py-3 shadow-sm rounded-xl bg-neutral-100" wire:key="component-row-{{ $_component->id }}">
                     <span class="w-20 font-medium text-neutral-900">
-                        {{ ($_components->currentpage()-1) * $_components->perpage() + $key + 1 }}
+                        {{ $_component->row_no }}
                     </span>
                     <span class="px-3 py-1 text-sm font-medium rounded-lg bg-neutral-200 text-neutral-700">
                         {{ $_component->orderType->name }}
@@ -58,11 +58,11 @@
     <div>
         <x-side-modal>
             @if($showSideMenu == 'add-component')
-                <livewire:services.components.add-component />
+                <livewire:services.components.add-component wire:key="services-component-add-modal" />
             @endif
 
             @if($showSideMenu == 'edit-component')
-                <livewire:services.components.edit-component :componentModel="$modelName" />
+                <livewire:services.components.edit-component :componentModel="$modelName" :key="'services-component-edit-modal-' . ($modelName ?? 'none')" />
             @endif
         </x-side-modal>
     </div>
@@ -70,7 +70,7 @@
 
     <div class="">
         @auth
-            @livewire('services.components.delete-component')
+            <livewire:services.components.delete-component wire:key="services-component-delete-modal" />
         @endauth
     </div>
 </div>

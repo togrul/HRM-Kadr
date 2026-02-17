@@ -1,24 +1,21 @@
-<div class="flex flex-col"
-     x-data
-     x-init="
-        paginator = document.querySelector('span[aria-current=page]>span');
-        if(paginator != null)
-        {
-            paginator.classList.add('bg-blue-50','text-blue-600')
-        }
-        Livewire.hook('message.processed', (message,component) => {
-            const paginator = document.querySelector('span[aria-current=page]>span')
-            if(
-                ['gotoPage','previousPage','nextPage','setStatus','resetFilter'].includes(message?.updateQueue?.[0]?.payload?.method)
-                || ['citiesUpdated'].includes(message?.updateQueue?.[0]?.payload?.event)
-                || ['q'].includes(message?.updateQueue?.[0]?.name)
-            ){
-                if(paginator != null)
-                {
-                    paginator.classList.add('bg-blue-50','text-blue-600')
-                }
+<div
+    class="flex flex-col"
+    x-data
+    x-init="
+        const root = $el;
+        const paintPaginator = () => {
+            const paginator = root.querySelector('span[aria-current=page]>span');
+            if (paginator) {
+                paginator.classList.add('bg-blue-50', 'text-blue-600');
             }
-        })
+        };
+        paintPaginator();
+        if (typeof Livewire !== 'undefined') {
+            Livewire.hook('commit', ({ component, succeed }) => {
+                if (component.id !== $wire.__instance.id) return;
+                succeed(() => queueMicrotask(paintPaginator));
+            });
+        }
     "
 >
     <div class="flex flex-col items-center justify-between sm:flex-row filter bg-white py-2 px-2 rounded-xl">
@@ -98,7 +95,7 @@
                 <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
                     <x-table.tbl :headers="[__('ID'),__('Country'),__('Parent'),__('Name'),'action']">
                         @forelse ($cities as $city)
-                            <tr>
+                            <tr wire:key="city-row-{{ $city->id }}">
                                 <x-table.td>
                                       <span class="text-sm text-gray-500 font-medium">
                                           {{ $city->id }}
@@ -106,14 +103,14 @@
                                 </x-table.td>
                                 <x-table.td>
                                     <span class="text-xs font-medium flex justify-center items-center px-1 py-1 rounded-md border border-gray-300 bg-gray-50 text-gray-600">
-                                        {{ $city->country->currentCountryTranslations->title }}
+                                        {{ $city->country_label }}
                                     </span>
                                 </x-table.td>
 
                                 <x-table.td>
-                                    @if($city->parent)
+                                    @if($city->parent_label)
                                     <span class="text-xs font-medium flex justify-center items-center px-1 py-1 rounded-md border border-blue-300 bg-blue-50 text-gray-600">
-                                        {{ $city->parent?->name }}
+                                        {{ $city->parent_label }}
                                     </span>
                                     @endif
                                 </x-table.td>

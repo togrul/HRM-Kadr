@@ -41,13 +41,13 @@
 
     {{-- @can('manage-settings') --}}
     <div>
-        @livewire('services.settings.add-settings')
+        <livewire:services.settings.add-settings wire:key="services-settings-add-modal" />
     </div>
     {{-- @endcan --}}
 
     <div class="">
         @auth
-            @livewire('services.settings.delete-settings')
+            <livewire:services.settings.delete-settings wire:key="services-settings-delete-modal" />
         @endauth
     </div>
 </div>

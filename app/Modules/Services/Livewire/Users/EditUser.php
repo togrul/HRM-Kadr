@@ -64,7 +64,11 @@ class EditUser extends Component
     {
         // $this->authorize('manage-settings',$this->user);
         $this->title = __('Edit user');
-        $this->userModel = User::where('id', $this->userModel['id'])->first();
+        $userId = is_array($this->userModel)
+            ? ($this->userModel['id'] ?? null)
+            : $this->userModel;
+
+        $this->userModel = User::where('id', $userId)->firstOrFail();
         $this->userModel->load('roles');
         $role = $this->userModel->roles->first();
         $this->roleId = $role?->id;

@@ -5,6 +5,7 @@ namespace App\Modules\Services\Livewire\Users;
 use App\Livewire\Traits\SideModalAction;
 use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -75,10 +76,12 @@ class AllUsers extends Component
 
     public function render()
     {
-        $_users = User::with('roles')
+        $_users = User::with(['roles:id,name', 'personDidDelete:id,name'])
             ->when(! empty($this->q), function ($q) {
-                return $q->where('name', 'LIKE', "%$this->q%")
-                    ->orWhere('email', 'LIKE', "%$this->q%");
+                return $q->where(function ($nested) {
+                    $nested->where('name', 'LIKE', "%{$this->q}%")
+                        ->orWhere('email', 'LIKE', "%{$this->q}%");
+                });
             })
             ->when($this->status != 2, function ($q) {
                 $q->where('is_active', $this->status);
@@ -89,6 +92,29 @@ class AllUsers extends Component
             ->paginate(15)
             ->withQueryString();
 
+        $_users = $this->decorateUsers($_users);
+
         return view('services::livewire.services.users.all-users', compact('_users'));
+    }
+
+    protected function decorateUsers(LengthAwarePaginator $paginated): LengthAwarePaginator
+    {
+        $start = ($paginated->currentPage() - 1) * $paginated->perPage();
+
+        $paginated->setCollection(
+            $paginated->getCollection()->values()->map(function (User $user, int $index) use ($start) {
+                $user->row_no = $start + $index + 1;
+                $user->primary_role = $user->roles->first()?->name;
+
+                if ($user->deleted_at) {
+                    $user->deleted_at_label = $user->deleted_at->format('d-m-Y H:i');
+                    $user->deleted_by_name = $user->personDidDelete?->name ?? '';
+                }
+
+                return $user;
+            })
+        );
+
+        return $paginated;
     }
 }

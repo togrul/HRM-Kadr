@@ -50,7 +50,11 @@ class EditMenu extends Component
     {
         // $this->authorize('manage-settings',$this->user);
         $this->title = __('Edit menu');
-        $this->menuModel = Menu::with('permission')->where('id', $this->menuModel['id'])->first();
+        $menuId = is_array($this->menuModel)
+            ? ($this->menuModel['id'] ?? null)
+            : $this->menuModel;
+
+        $this->menuModel = Menu::with('permission')->where('id', $menuId)->firstOrFail();
 
         $this->menu['name'] = $this->menuModel->name;
         $this->menu['url'] = $this->menuModel->url;

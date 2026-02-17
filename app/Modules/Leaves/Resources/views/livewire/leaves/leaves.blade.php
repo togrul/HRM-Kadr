@@ -399,27 +399,20 @@
 <script>
     function leavesIndex() {
         return {
+            componentId: null,
             init() {
-            // first paint
-            this.highlightPager();
+                this.componentId = this.$root?.getAttribute('wire:id');
+                this.highlightPager();
 
-            // only react to specific Livewire actions/events
-            Livewire.hook('message.processed', (m, c) => {
-                    const method = m.updateQueue?.[0]?.payload?.method;
-                    const event  = m.updateQueue?.[0]?.payload?.event;
-                    const name   = m.updateQueue?.[0]?.name;
-
-                    const methods = ['gotoPage','previousPage','nextPage','filterSelected'];
-                    const events  = ['openSideMenu','closeSideMenu','leaveAdded','leaveUpdated','filterResetted','leaveWasDeleted', 'leaveApproved', 'leaveRejected'];
-                    const names   = ['search'];
-
-                    if (methods.includes(method) || events.includes(event) || names.includes(name)) {
-                    this.highlightPager(true);
+                if (typeof Livewire !== 'undefined') {
+                    Livewire.hook('commit', ({ component, succeed }) => {
+                        if (!this.componentId || component.id !== this.componentId) return;
+                        succeed(() => queueMicrotask(() => this.highlightPager(true)));
+                    });
                 }
-            });
             },
-                highlightPager(isUpdate = false) {
-                const el = document.querySelector('span[aria-current=page]>span');
+            highlightPager(isUpdate = false) {
+                const el = this.$root?.querySelector('span[aria-current=page]>span');
                 if (!el) return;
                 el.classList.remove('bg-blue-50','text-blue-600','bg-green-100','text-green-600');
                 el.classList.add(isUpdate ? 'bg-green-100' : 'bg-blue-50', isUpdate ? 'text-green-600' : 'text-blue-600');
