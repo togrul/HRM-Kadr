@@ -137,6 +137,22 @@ class Detail extends Component
         $this->dispatch('filterSelected', $this->filter);
     }
 
+    public function clearAllFilters(): void
+    {
+        $this->filter = $this->defaultFilter();
+        $this->searchStructure = '';
+        $this->searchPosition = '';
+        $this->searchNationality = '';
+        $this->searchPreviousNationality = '';
+        $this->searchCity = '';
+        $this->searchRank = '';
+        $this->searchInstitution = '';
+        $this->searchEducationDegree = '';
+        $this->searchAward = '';
+        $this->searchPunishment = '';
+        $this->loadedOptionGroups = [];
+    }
+
     #[On('filterSelected')]
     public function pauseOptionLoading(): void
     {
