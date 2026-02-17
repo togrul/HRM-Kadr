@@ -15,8 +15,9 @@ class Detail extends Component
 
     // --- State ---
     public array $filter = [];
-    public bool $ready = false;
+    public bool $ready = true;
     public array $loadedOptionGroups = [];
+    public int $openSequence = 0;
 
     // Search terms (debounce/lazy in Blade)
     public string $searchStructure = '';
@@ -37,8 +38,17 @@ class Detail extends Component
     }
 
     #[On('setOpenFilter')]
-    public function setOpenFilter(): void
+    public function setOpenFilter(array $filter = []): void
     {
+        $normalized = $this->normalizeIncomingFilter($filter);
+
+        if ($this->hasAnyActiveFilter($normalized)) {
+            $this->filter = $normalized;
+        } elseif (empty($this->filter)) {
+            $this->filter = $this->defaultFilter();
+        }
+
+        $this->openSequence++;
         $this->ready = true;
         $this->loadedOptionGroups = [];
         $this->dispatch('openFilterWasSet');
@@ -76,6 +86,7 @@ class Detail extends Component
         int $limit = 50
     ): array {
         if (! data_get($this->loadedOptionGroups, $optionKey, false)) {
+            // Keep selected value visible without loading the full option list.
             return $this->appendSelectedOption([], $base, $selectedId);
         }
 
@@ -101,6 +112,10 @@ class Detail extends Component
 
     public function loadOptionGroup(string $group): void
     {
+        if (data_get($this->loadedOptionGroups, $group, false)) {
+            return;
+        }
+
         $this->loadedOptionGroups[$group] = true;
     }
 
@@ -112,6 +127,7 @@ class Detail extends Component
 
         if ($name === 'born_country_id') {
             $this->filter['born_city_id'] = null;
+            $this->loadedOptionGroups['city'] = false;
         }
     }
 
@@ -381,8 +397,8 @@ class Detail extends Component
 
     public function mount(array $filter = [], bool $autoOpen = false): void
     {
-        // Merge incoming filter (from parent/query) with defaults so selections stay visible.
-        $this->filter = array_merge($this->defaultFilter(), array_filter($filter, fn ($v) => $v !== null && $v !== ''));
+        $this->filter = $this->normalizeIncomingFilter($filter);
+        $this->ready = true;
         $this->loadedOptionGroups = [];
         $this->dispatch('filterDetailReady');
 
@@ -390,6 +406,37 @@ class Detail extends Component
             $this->ready = true;
             $this->dispatch('openFilterWasSet');
         }
+    }
+
+    private function normalizeIncomingFilter(array $filter): array
+    {
+        if (array_key_exists('filter', $filter) && is_array($filter['filter'])) {
+            $filter = $filter['filter'];
+        }
+
+        return array_merge(
+            $this->defaultFilter(),
+            array_filter($filter, fn ($value) => $value !== null && $value !== '')
+        );
+    }
+
+    private function hasAnyActiveFilter(array $filter): bool
+    {
+        foreach ($filter as $value) {
+            if (is_array($value)) {
+                if (! empty(array_filter($value, fn ($nested) => $nested !== null && $nested !== ''))) {
+                    return true;
+                }
+
+                continue;
+            }
+
+            if ($value !== null && $value !== '') {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function render() { return view('ui::livewire.filter.detail'); }

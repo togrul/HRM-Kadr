@@ -7,7 +7,7 @@ Livewire components, routes, views, and service provider. Shared patterns:
 - Views namespace: `<name>::` (passed to `loadViewsFrom`)
 - Routes: `app/Modules/<Name>/Routes/web.php` (loaded in provider)
 - Livewire discovery: `config/livewire.php` lists module namespaces
-- Alias registration: module providers auto-register Livewire aliases (via `App\Providers\Concerns\RegistersLivewireAliases`) by scanning each module’s `Livewire` directory with the module prefix.
+- Alias registration: module providers register deterministic aliases via explicit `componentMap()` + `registerAliases($map, '<prefix>')`.
 
 ## Enabled Modules
 - Personnel (`personnel::`) – CRUD, files, information, vacation list

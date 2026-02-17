@@ -21,23 +21,6 @@ class PersonnelStepState
         ];
     }
 
-    /**
-     * @return array<int, bool>
-     */
-    public function wizardStepSet(): array
-    {
-        return [
-            1 => true,
-            2 => true,
-            3 => true,
-            4 => true,
-            5 => true,
-            6 => true,
-            7 => true,
-            8 => true,
-        ];
-    }
-
     public function completionStepName(int $step): ?string
     {
         return match ($step) {
@@ -46,13 +29,6 @@ class PersonnelStepState
             3 => 'education',
             default => null,
         };
-    }
-
-    public function shouldLoadLookupData(int $step): bool
-    {
-        $stepConfig = $this->wizardStepSet();
-
-        return isset($stepConfig[$step]) ? ! $stepConfig[$step] : true;
     }
 
     /**

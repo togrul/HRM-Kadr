@@ -193,11 +193,6 @@ trait HandlesPersonnelStepFlow
         });
     }
 
-    protected function shouldLoadLookupData(): bool
-    {
-        return $this->stepStateService()->shouldLoadLookupData($this->step);
-    }
-
     public function isCurrentStepLoaded(): bool
     {
         $currentStep = (int) $this->step;

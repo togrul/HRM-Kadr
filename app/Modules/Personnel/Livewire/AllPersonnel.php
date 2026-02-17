@@ -83,7 +83,7 @@ class AllPersonnel extends Component
             return;
         }
 
-        $this->dispatch('setOpenFilter');
+        $this->dispatch('setOpenFilter', filter: $this->filters);
     }
 
     #[On('filterDetailReady')]
@@ -94,7 +94,7 @@ class AllPersonnel extends Component
         }
 
         $this->pendingFilterOpen = false;
-        $this->dispatch('setOpenFilter');
+        $this->dispatch('setOpenFilter', filter: $this->filters);
     }
 
     public function setDeletePersonnel($personnelId)

@@ -6,6 +6,7 @@
     :modal-confirm-button-text="__('Search')"
     wire-click="search"
 >
+    <div wire:key="filter-detail-open-{{ $openSequence }}">
     <div class="grid grid-cols-3 gap-2 lg:grid-cols-5">
         <div class="flex flex-col">
             <x-label for="filter.surname">{{ __('Surname') }}</x-label>
@@ -236,6 +237,7 @@
                   </x-pikaday-input>
             </div>
         </div>
+    </div>
     </div>
   </x-modal-confirm-lg>
 </div>

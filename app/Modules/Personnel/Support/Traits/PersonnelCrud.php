@@ -16,7 +16,6 @@ use App\Modules\Personnel\Support\Traits\Personnel\HandlesPersonnelStepValidatio
 use App\Modules\Personnel\Support\Traits\Personnel\ManagesPersonnelRelationRows;
 use App\Modules\Personnel\Support\Traits\Validations\PersonnelValidationTrait;
 use App\Services\CalculateSeniorityService;
-use App\Services\CallPersonnelInfo;
 use App\Services\EducationDurationService;
 use App\Traits\NormalizesDropdownPayloads;
 use Illuminate\Support\Arr;
@@ -347,22 +346,11 @@ trait PersonnelCrud
                 : ($this->personnelModelData ?? null),
         ];
 
-        $view_data = $this->shouldLoadLookupData()
-            ? resolve(CallPersonnelInfo::class)->getAll($this->personalFormHasDisability(), $this)
-            : [];
-
         $view_name = ! empty($this->personnelModel)
                     ? 'personnel::livewire.personnel.edit-personnel'
                     : 'personnel::livewire.personnel.add-personnel';
 
-        return view($view_name, array_merge($steps, array_merge($view_data, array_merge($this->isolated, $personnelContext))));
-    }
-
-    protected function personalFormHasDisability(): bool
-    {
-        return property_exists($this, 'personalForm')
-            && $this->personalForm
-            && (bool) $this->personalForm->hasDisability;
+        return view($view_name, array_merge($steps, array_merge($this->isolated, $personnelContext)));
     }
 
     protected function payloadHasValues($data): bool

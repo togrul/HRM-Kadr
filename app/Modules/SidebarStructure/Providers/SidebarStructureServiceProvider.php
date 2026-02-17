@@ -2,8 +2,6 @@
 
 namespace App\Modules\SidebarStructure\Providers;
 
-use App\Models\Structure;
-use App\Observers\StructureObserver;
 use App\Providers\Concerns\RegistersLivewireAliases;
 use App\Services\Modules\ModuleState;
 use Illuminate\Support\ServiceProvider;
@@ -24,13 +22,7 @@ class SidebarStructureServiceProvider extends ServiceProvider
         }
 
         $this->loadViewsFrom(__DIR__.'/../Resources/views', 'structure');
-        $this->registerObservers();
         $this->registerLivewireComponents();
-    }
-
-    protected function registerObservers(): void
-    {
-        Structure::observe(StructureObserver::class);
     }
 
     protected function registerLivewireComponents(): void

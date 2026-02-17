@@ -125,34 +125,29 @@ trait StaffCrud
 
     protected function fillAutoData($array_key, $model)
     {
-        if (empty($this->staff)) return;
+        if (empty($this->staff)) {
+            return;
+        }
 
         $this->hidePosition = false;
         if (empty($this->staffModel) && $this->structureId) {
             $this->staff[$array_key]['structure_id'] = $this->structureId;
         }
 
-        if (Arr::has($this->staff[$array_key], ['structure_id', 'position_id'])) {
-            $_structureId = $this->staff[$array_key]['structure_id'];
-            $_positionId = $this->staff[$array_key]['position_id'];
-            if ($model == 'structureId') {
-                $this->hidePositionAction($array_key);
-                $this->staff[$array_key]['position_id'] = null;
-                if ($_structureId > 0) {
-                    $_ids = Structure::with('subs')->find($_structureId)->getAllNestedIds();
-                    $this->staff[$array_key]['filled'] = Personnel::whereNull('leave_work_date')
-                        ->whereIn('structure_id', $_ids)
-                        ->count();
-                }
-            } else {
-                if ($_structureId > 0 && $_positionId > 0) {
-                    $this->staff[$array_key]['filled'] = Personnel::whereNull('leave_work_date')
-                        ->where('structure_id', $_structureId)
-                        ->where('position_id', $_positionId)
-                        ->count();
-                }
-            }
+        if (! Arr::has($this->staff[$array_key], ['structure_id', 'position_id'])) {
+            return;
         }
+
+        if ($model === 'structureId') {
+            $this->hidePositionAction($array_key);
+            $this->staff[$array_key]['position_id'] = null;
+            $this->staff[$array_key]['position'] = [
+                'id' => null,
+                'name' => '---',
+            ];
+        }
+
+        $this->recalculateFilledCounts($array_key);
     }
 
     public function updatedStructureId($value): void
