@@ -5,6 +5,7 @@
     </x-slot>
     {{-- end sidebar --}}
 
+    <div class="">
     <div class="flex flex-col px-6 py-4 space-y-4">
 @php
     $personnels = $this->personnels;
@@ -12,7 +13,7 @@
     $rowStart = ($personnels->currentPage() - 1) * $personnels->perPage();
 @endphp
         {{-- header section --}}
-        <div class="flex items-center justify-between">
+    <div class="flex items-center justify-between">
         @include('partials.personnel.status-filters')
         @include('partials.personnel.action-buttons')
     </div>
@@ -146,7 +147,8 @@
             </div>
         </div>
 
-        <div class="mt-2">
+    </div>
+        <div class="border-t border-zinc-200 px-6 py-3">
             {{ $personnels->links() }}
         </div>
     </div>

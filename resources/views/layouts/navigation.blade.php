@@ -1,3 +1,10 @@
+@php
+    $candidatesActive = request()->routeIs('candidates') || request()->routeIs('candidates.*');
+    $vacationsActive = request()->routeIs('vacations.list') || request()->routeIs('vacations.*');
+    $businessTripsActive = request()->routeIs('business-trips.list') || request()->routeIs('business-trips.*');
+    $leavesActive = request()->routeIs('leaves') || request()->routeIs('leaves.*');
+@endphp
+
 <nav x-data="{ open: false }" class="bg-transparent dark:bg-neutral-800/90">
     <!-- Primary Navigation Menu -->
     <div class="px-4 mx-auto max-w-7xl lg:px-0">
@@ -14,29 +21,29 @@
                 <!-- Navigation Links -->
                 <div class="items-center hidden space-x-2 sm:-my-px sm:ml-10 sm:flex">
                    @module('candidates')
-                    <x-nav-link class="space-x-2 text-xs uppercase" wire:navigate :href="route('candidates')" :active="request()->routeIs('candidates')">
+                    <x-nav-link class="space-x-2 text-xs uppercase" wire:navigate :href="route('candidates')" :active="$candidatesActive">
                         <x-icons.candidate-icon size="w-5 h-5"
-                            color="{{ request()->routeIs('candidates') ? 'text-gray-900' : 'text-gray-400' }}"></x-icons.candidate-icon>
+                            color="{{ $candidatesActive ? 'text-gray-900' : 'text-gray-400' }}"></x-icons.candidate-icon>
                         <span>{{ __('Candidates') }}</span>
                     </x-nav-link>
                     @endmodule
                      @module('vacation')
-                    <x-nav-link class="space-x-2 text-xs uppercase" wire:navigate :href="route('vacations.list')" :active="request()->routeIs('vacations.list')">
+                    <x-nav-link class="space-x-2 text-xs uppercase" wire:navigate :href="route('vacations.list')" :active="$vacationsActive">
                         <x-icons.vacation-icon size="w-5 h-5"
-                            color="{{ request()->routeIs('vacations.list') ? 'text-gray-900' : 'text-gray-400' }}"></x-icons.vacation-icon>
+                            color="{{ $vacationsActive ? 'text-gray-900' : 'text-gray-400' }}"></x-icons.vacation-icon>
                         <span>{{ __('Vacations') }}</span>
                     </x-nav-link>
                     @endmodule
                     @module('business-trips')
-                    <x-nav-link class="space-x-2 text-xs uppercase" wire:navigate :href="route('business-trips.list')" :active="request()->routeIs('business-trips.list')">
+                    <x-nav-link class="space-x-2 text-xs uppercase" wire:navigate :href="route('business-trips.list')" :active="$businessTripsActive">
                         <x-icons.holiday-icon size="w-5 h-5"
-                            color="{{ request()->routeIs('business-trips.list') ? 'text-gray-900' : 'text-gray-400' }}"></x-icons.holiday-icon>
+                            color="{{ $businessTripsActive ? 'text-gray-900' : 'text-gray-400' }}"></x-icons.holiday-icon>
                         <span>{{ __('Business trips') }}</span>
                     </x-nav-link>
                     @endmodule
                     @module('leaves')
-                     <x-nav-link class="space-x-2 text-xs uppercase" wire:navigate :href="route('leaves')" :active="request()->routeIs('leaves')">
-                        <x-icons.calendar-icon size="w-5 h-5" color="{{ request()->routeIs('leaves') ? 'text-gray-900' : 'text-gray-400' }}" size="w-7 h-7"></x-icons.calendar-icon>
+                     <x-nav-link class="space-x-2 text-xs uppercase" wire:navigate :href="route('leaves')" :active="$leavesActive">
+                        <x-icons.calendar-icon size="w-5 h-5" color="{{ $leavesActive ? 'text-gray-900' : 'text-gray-400' }}" size="w-7 h-7"></x-icons.calendar-icon>
                         <span>{{ __('Time off') }}</span>
                     </x-nav-link>
                     @endmodule
@@ -119,12 +126,12 @@
     <div :class="{ 'block': open, 'hidden': !open }" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
            @module('candidates')
-            <x-responsive-nav-link wire:navigate :href="route('candidates')" :active="request()->routeIs('candidates')">
+            <x-responsive-nav-link wire:navigate :href="route('candidates')" :active="$candidatesActive">
                 {{ __('Candidates') }}
             </x-responsive-nav-link>
             @endmodule
              @module('vacation')
-            <x-responsive-nav-link wire:navigate :href="route('vacations.list')" :active="request()->routeIs('vacations.list')">
+            <x-responsive-nav-link wire:navigate :href="route('vacations.list')" :active="$vacationsActive">
                 {{ __('Vacations') }}
             </x-responsive-nav-link>
             @endmodule
