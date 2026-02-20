@@ -87,7 +87,7 @@
                                 </x-table.td>
 
                                 <x-table.td>
-                                    <div class="flex items-center px-2 space-x-2">
+                                    <div class="flex items-center space-x-2">
                                         <img src="{{ $personnel->photo_url }}" alt=""
                                             class="flex-none object-cover border shadow-sm rounded-md w-12 h-12 border-zinc-200">
                                         <div class="flex flex-col space-y-1">

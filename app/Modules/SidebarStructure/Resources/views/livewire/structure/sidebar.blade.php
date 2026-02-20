@@ -1,6 +1,6 @@
 <div class="flex h-full min-h-0 flex-col overflow-hidden rounded-[18px] border border-zinc-200 bg-white">
     <div class="flex items-center justify-between border-b border-zinc-200 px-3 py-3">
-        <h3 class="text-base font-medium uppercase tracking-tight text-zinc-600">
+        <h3 class="text-base font-medium tracking-tight text-zinc-600">
             {{ __('Structure') }}
         </h3>
 

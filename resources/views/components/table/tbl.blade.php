@@ -15,16 +15,22 @@
 
     <div class="px-1 pb-1">
         <div class="overflow-hidden rounded-xl border border-zinc-200 bg-white">
-        <table {{ $attributes->merge(['class' => 'min-w-full w-full border-separate border-spacing-0 bg-white text-sm']) }}>
-            <thead class="bg-zinc-50">
-                <tr>
+        <table {{ $attributes->merge(['class' => 'min-w-full w-full p-[5px] pb-0 border-separate border-spacing-0 bg-white text-sm']) }}>
+            <thead class="bg-transparent">
+                <tr class="align-middle">
                     @foreach ($headers as $header)
                         @if ($header != 'action')
-                            <th scope="col" class="px-4 py-2.5 text-left text-[15px] font-normal tracking-tight text-slate-500 whitespace-nowrap border-b border-zinc-200">
+                            <th
+                                scope="col"
+                                class="px-4 py-2.5 text-left text-[15px] font-normal tracking-tight text-slate-500 whitespace-nowrap bg-zinc-100/70 border-y border-zinc-200 first:rounded-l-xl first:border-l last:rounded-r-xl last:border-r"
+                            >
                                 {{ $header }}
                             </th>
                         @else
-                            <th scope="col" class="relative px-4 py-2.5 border-b border-zinc-200">
+                            <th
+                                scope="col"
+                                class="relative px-4 py-2.5 bg-zinc-100/70 border-y border-zinc-200 first:rounded-l-xl first:border-l last:rounded-r-xl last:border-r"
+                            >
                                 <span class="sr-only">{{ __('Edit') }}</span>
                             </th>
                         @endif
