@@ -17,7 +17,7 @@
 @endphp
 
 <x-table.td :isButton="true" style="text-align: center !important;">
-    <div class="flex items-center space-x-2">
+    <div class="flex items-center space-x-1.5">
         @if (! empty($menuActions))
             <x-personnel.row-actions.context-menu
                 :$menuActions
@@ -33,7 +33,7 @@
                         target="_blank"
                         rel="noopener noreferrer"
                     @endif
-                    class="flex items-center justify-center w-9 h-9 text-xs font-medium text-gray-500 uppercase rounded-lg bg-gray-100 hover:bg-gray-200 hover:text-gray-700"
+                    class="inline-flex items-center justify-center w-8 h-8 text-zinc-500 rounded-md bg-zinc-100/80 hover:bg-zinc-200 hover:text-zinc-700 transition-colors"
                     title="{{ $action->label }}"
                 >
                     <x-dynamic-component :component="$action->icon" />
@@ -51,7 +51,7 @@
                         wire:loading.attr="disabled"
                         wire:target="handleRowAction"
                     @endif
-                    class="flex items-center justify-center text-xs font-medium text-gray-500 uppercase bg-gray-100 rounded-lg w-9 h-9 hover:bg-gray-200 hover:text-gray-700"
+                    class="inline-flex items-center justify-center w-8 h-8 text-zinc-500 rounded-md bg-zinc-100/80 hover:bg-zinc-200 hover:text-zinc-700 transition-colors"
                     title="{{ $action->label }}"
                 >
                     <x-dynamic-component

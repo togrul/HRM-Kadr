@@ -43,7 +43,7 @@
 
     <div class="relative min-h-[300px] overflow-x-auto px-2">
         <div class="inline-block min-w-full py-2 align-middle">
-            <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
+            <div class="overflow-visible">
 
                 <x-table.tbl :headers="[__('Name'), 'action', 'action']">
                     @foreach ($permissions as $permission)

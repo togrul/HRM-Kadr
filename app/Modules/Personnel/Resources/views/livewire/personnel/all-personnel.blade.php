@@ -22,18 +22,16 @@
     @include('partials.personnel.position-filters')
 
         <div class="relative min-h-[300px] overflow-x-auto">
-            <div class="inline-block min-w-full py-2 align-middle sm:px-1">
-                <div class="border-b border-gray-200 shadow overflow-inherit sm:rounded-xl">
-                    <x-table.tbl :headers="$this->getTableHeaders()">
+            <div class="inline-block min-w-full align-middle sm:px-1">
+                        <x-table.tbl :headers="$this->getTableHeaders()" title="{{ __('Personnels') }}">
                         @forelse ($personnels as $personnel)
                             @php
                                 $rowNumber = $rowStart + $loop->iteration;
                                 $rowActions = $this->rowActions($personnel);
                             @endphp
                             <tr wire:key="personnel-row-{{ $personnel->id }}-{{ $status ?? 'all' }}" @class([
-                                'relative',
-                                'bg-rose-100' => !empty($personnel->leave_work_date),
-                                'bg-white' => $personnel->active_vacation || $personnel->active_business_trip,
+                                'relative bg-white',
+                                'bg-rose-50/70' => !empty($personnel->leave_work_date),
                             ])>
                                 <x-table.td>
                                     <div class="absolute top-0 left-0 flex flex-col justify-between h-full">
@@ -49,7 +47,7 @@
                                         @endif
                                     </div>
 
-                                    <span class="text-sm font-medium text-gray-700">
+                                    <span class="text-sm font-medium text-zinc-600">
                                         {{ $rowNumber }}
                                     </span>
                                 </x-table.td>
@@ -91,7 +89,7 @@
                                 <x-table.td>
                                     <div class="flex items-center px-2 space-x-2">
                                         <img src="{{ $personnel->photo_url }}" alt=""
-                                            class="flex-none object-cover border shadow-sm rounded-sm w-12 h-12 border-zinc-200">
+                                            class="flex-none object-cover border shadow-sm rounded-md w-12 h-12 border-zinc-200">
                                         <div class="flex flex-col space-y-1">
                                             <span class="text-sm font-medium text-zinc-900">
                                                 {{ $personnel->fullname }}
@@ -136,8 +134,7 @@
                         @empty
                             <x-table.empty :rows="count($this->getTableHeaders())"></x-table.empty>
                         @endforelse
-                    </x-table.tbl>
-                </div>
+                        </x-table.tbl>
             </div>
         </div>
 
