@@ -23,9 +23,7 @@
                 </div>
 
                 <button type="button" class="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700" @click="open = false">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+                  <x-icons.default.close-icon size="w-6 h-6" color="text-slate-500" hover="text-slate-900"></x-icons.default.close-icon>
                 </button>
             </header>
 

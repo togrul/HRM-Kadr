@@ -3,15 +3,17 @@
     'hover' => 'text-gray-900',
     'size' => 'w-6 h-6',
     'show' => null,
+    'active' => false,
 ])
 
 <x-icons.root animated="true" x-show="{{ $show ?? 'true' }}" :$size :$color :$hover>
-    <g fill="currentColor">
-        <path
-            d="M3 13.037c0-1.103 0-1.655.393-1.976c.139-.114.308-.206.497-.269c.532-.177 1.231-.002 2.629.346c1.067.267 1.6.4 2.14.386c.198-.005.395-.025.588-.059c.525-.093.993-.326 1.929-.793l1.382-.69c1.2-.599 1.799-.898 2.487-.967c.688-.069 1.372.102 2.739.443l1.165.29c.99.247 1.485.371 1.768.665c.283.294.283.685.283 1.466v6.084c0 1.103 0 1.655-.393 1.976a1.563 1.563 0 0 1-.497.269c-.532.177-1.231.003-2.629-.346c-1.067-.267-1.6-.4-2.14-.386a3.951 3.951 0 0 0-.588.059c-.525.093-.993.326-1.929.793l-1.382.69c-1.2.599-1.799.898-2.487.967c-.688.069-1.372-.102-2.739-.443l-1.165-.29c-.99-.247-1.485-.371-1.768-.665C3 20.293 3 19.902 3 19.121v-6.084Z"
-            opacity=".5" />
-        <path fill-rule="evenodd"
-            d="M12 2C8.686 2 6 4.552 6 7.7c0 3.124 1.915 6.769 4.903 8.072a2.755 2.755 0 0 0 2.194 0C16.085 14.47 18 10.824 18 7.7C18 4.552 15.314 2 12 2Zm0 8a2 2 0 1 0 0-4a2 2 0 0 0 0 4Z"
-            clip-rule="evenodd" />
+    <g transform="scale(0.5)">
+        <path d="M7 38c1.368 -5.675 8.458 -10 17 -10s15.632 4.325 17 10" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+        <path d="M35 11c4.771 0 9 3.907 9 9" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+        <path d="M35.14 21c2.572 -2.773 2.431 -7.227 -0.14 -10" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+        <path d="M33.39 2.648C36.228 4.286 36.638 8.162 35 11" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+        <path d="M35 11c-3.005 -4.52 -8.356 -5.396 -12 -1.669" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+        <path d="M19 28c0 -9.389 7.611 -17 17 -17 -5.007 0 -9.067 7.611 -9.067 17" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+        <path d="M3 45c1.89 0 3.78 -0.556 5.42 -1.67a2.858 2.858 0 0 1 3.16 0A9.643 9.643 0 0 0 17 45c1.89 0 3.78 -0.556 5.42 -1.67a2.858 2.858 0 0 1 3.16 0A9.643 9.643 0 0 0 31 45c1.89 0 3.78 -0.556 5.42 -1.67a2.858 2.858 0 0 1 3.16 0A9.643 9.643 0 0 0 45 45" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
     </g>
 </x-icons.root>

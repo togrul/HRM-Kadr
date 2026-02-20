@@ -54,8 +54,10 @@
                     ])
                 >
                     @if ($isRoot)
-                        <svg class="mt-0.5 h-3.5 w-3.5 shrink-0 text-blue-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                            <path d="M3.4 6.6a.75.75 0 0 1 .38-.66l6-3.4a.75.75 0 0 1 .74 0l6 3.4A.75.75 0 0 1 16.8 7H3.2a.75.75 0 0 1-.74-.4ZM4.5 8.5h1.6v6.1H4.5V8.5Zm3.1 0h1.6v6.1H7.6V8.5Zm3.1 0h1.6v6.1h-1.6V8.5Zm3.1 0h1.6v6.1h-1.6V8.5ZM3 15.6h14a.75.75 0 0 1 0 1.5H3a.75.75 0 0 1 0-1.5Z"/>
+                        <svg class="mt-0.5 h-5 w-5 shrink-0 text-blue-500" viewBox="0 0 24 24" stroke-width="1.5" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M10 18V15C10 13.8954 10.8954 13 12 13V13C13.1046 13 14 13.8954 14 15V18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                          <path d="M2 8L11.7317 3.13416C11.9006 3.04971 12.0994 3.0497 12.2683 3.13416L22 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                          <path d="M20 11V19C20 20.1046 19.1046 21 18 21H6C4.89543 21 4 20.1046 4 19V11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
                         </svg>
                     @endif
                     <span class="block min-w-0 break-words leading-5">{{ $slot }}</span>

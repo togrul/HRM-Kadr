@@ -21,29 +21,26 @@
                 <!-- Navigation Links -->
                 <div class="items-center hidden space-x-2 sm:-my-px sm:ml-10 sm:flex">
                    @module('candidates')
-                    <x-nav-link class="space-x-2 text-xs uppercase" wire:navigate :href="route('candidates')" :active="$candidatesActive">
-                        <x-icons.candidate-icon size="w-5 h-5"
-                            color="{{ $candidatesActive ? 'text-gray-900' : 'text-gray-400' }}"></x-icons.candidate-icon>
+                    <x-nav-link class="space-x-2 text-sm" wire:navigate :href="route('candidates')" :active="$candidatesActive">
+                        <x-icons.candidate-icon size="w-6 h-6" :active="$candidatesActive" color="{{ $candidatesActive ? 'text-white' : 'text-neutral-600' }}" hover="{{ $candidatesActive ? 'text-white' : 'text-neutral-900' }}" />
                         <span>{{ __('Candidates') }}</span>
                     </x-nav-link>
                     @endmodule
                      @module('vacation')
-                    <x-nav-link class="space-x-2 text-xs uppercase" wire:navigate :href="route('vacations.list')" :active="$vacationsActive">
-                        <x-icons.vacation-icon size="w-5 h-5"
-                            color="{{ $vacationsActive ? 'text-gray-900' : 'text-gray-400' }}"></x-icons.vacation-icon>
+                    <x-nav-link class="space-x-2 text-sm " wire:navigate :href="route('vacations.list')" :active="$vacationsActive">
+                        <x-icons.vacation-icon size="w-6 h-6" :active="$vacationsActive" color="{{ $vacationsActive ? 'text-white' : 'text-neutral-600' }}" hover="{{ $vacationsActive ? 'text-white' : 'text-neutral-900' }}" />
                         <span>{{ __('Vacations') }}</span>
                     </x-nav-link>
                     @endmodule
                     @module('business-trips')
-                    <x-nav-link class="space-x-2 text-xs uppercase" wire:navigate :href="route('business-trips.list')" :active="$businessTripsActive">
-                        <x-icons.holiday-icon size="w-5 h-5"
-                            color="{{ $businessTripsActive ? 'text-gray-900' : 'text-gray-400' }}"></x-icons.holiday-icon>
+                    <x-nav-link class="space-x-2 text-sm" wire:navigate :href="route('business-trips.list')" :active="$businessTripsActive">
+                        <x-icons.holiday-icon size="w-6 h-6" :active="$businessTripsActive" color="{{ $businessTripsActive ? 'text-white' : 'text-neutral-600' }}" hover="{{ $businessTripsActive ? 'text-white' : 'text-neutral-900' }}" />
                         <span>{{ __('Business trips') }}</span>
                     </x-nav-link>
                     @endmodule
                     @module('leaves')
-                     <x-nav-link class="space-x-2 text-xs uppercase" wire:navigate :href="route('leaves')" :active="$leavesActive">
-                        <x-icons.calendar-icon size="w-5 h-5" color="{{ $leavesActive ? 'text-gray-900' : 'text-gray-400' }}" size="w-7 h-7"></x-icons.calendar-icon>
+                     <x-nav-link class="space-x-2 text-sm" wire:navigate :href="route('leaves')" :active="$leavesActive">
+                        <x-icons.calendar-icon size="w-6 h-6" :active="$leavesActive" color="{{ $leavesActive ? 'text-white' : 'text-neutral-600' }}" hover="{{ $leavesActive ? 'text-white' : 'text-neutral-900' }}" />
                         <span>{{ __('Time off') }}</span>
                     </x-nav-link>
                     @endmodule

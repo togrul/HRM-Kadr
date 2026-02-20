@@ -56,7 +56,7 @@
 
                                 <x-table.td>
                                     <div class="flex flex-col space-y-1">
-                                        <span class="text-sm font-medium text-blue-500 border-b border-blue-500 border-dashed w-max">
+                                        <span class="text-sm font-mono font-medium text-blue-500 w-max">
                                             {{ $personnel->tabel_no }}
                                         </span>
 
@@ -91,21 +91,15 @@
                                 <x-table.td>
                                     <div class="flex items-center px-2 space-x-2">
                                         <img src="{{ $personnel->photo_url }}" alt=""
-                                            class="flex-none object-cover border-2 shadow-lg rounded-xl w-14 h-14 border-zinc-200">
+                                            class="flex-none object-cover border shadow-sm rounded-sm w-12 h-12 border-zinc-200">
                                         <div class="flex flex-col space-y-1">
                                             <span class="text-sm font-medium text-zinc-900">
                                                 {{ $personnel->fullname }}
                                             </span>
                                             <div class="flex items-center space-x-1">
-                                               <span
-                                                  class="px-3 py-1 text-sm font-medium shadow-sm w-max text-neutral-600 rounded-xl bg-neutral-200/70">
-                                                  {{ $personnel->gender_label }}
-                                              </span>
+                                              <x-small-badge> {{ $personnel->gender_label }}</x-small-badge>
                                                 @if ($personnel->rank_label !== '')
-                                                    <span
-                                                        class="px-3 py-1 text-sm font-medium text-emerald-600 w-max">
-                                                        {{ $personnel->rank_label }}
-                                                    </span>
+                                                    <x-small-badge mode="green">{{ $personnel->rank_label }}</x-small-badge>
                                                 @endif
                                             </div>
                                           

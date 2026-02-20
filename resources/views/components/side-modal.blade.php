@@ -119,10 +119,10 @@
                                 x-ref="closeBtn"
                                 type="button"
                                 @click="close()"
-                                class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white/95 text-slate-500 shadow-sm backdrop-blur transition hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-300"
+                                class="inline-flex h-9 w-9 items-center justify-center rounded-lg  bg-white/95 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus:outline-none"
                             >
                                 <span class="sr-only">{{ __('Close') }}</span>
-                                <x-icons.remove-icon size="w-6 h-6" color="text-slate-500" hover="text-slate-900"></x-icons.remove-icon>
+                                <x-icons.default.close-icon size="w-6 h-6" color="text-slate-500" hover="text-slate-900"></x-icons.default.close-icon>
                             </button>
                         </div>
                     @endif

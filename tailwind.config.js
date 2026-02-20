@@ -61,6 +61,9 @@ export default {
                 sans: ['CircularSpotify', ...defaultTheme.fontFamily.sans],
                 title: ['CircularSpTitle', ...defaultTheme.fontFamily.sans],
             },
+            borderRadius: {
+                '4xl': 'calc(.625rem + 16px)',
+            },
         },
     },
 

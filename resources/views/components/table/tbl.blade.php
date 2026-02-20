@@ -19,7 +19,7 @@
      </thead>
 
      <tbody @class([
-        'bg-neutral-50',
+        'bg-white',
         'divide-y divide-neutral-200' => $divide
      ])>
          {{ $slot }}
