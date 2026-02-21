@@ -5,9 +5,9 @@
 ])
 
 <div class="overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-100/80 shadow-[0_1px_2px_rgba(16,24,40,0.04)]">
-    <div class="min-h-[46px] px-4 py-2.5">
+    <div class="px-4 py-2.5">
         @if (filled($title))
-            <h3 class="text-base font-medium text-slate-600 tracking-tight">
+            <h3 class="text-sm uppercase font-mono font-medium text-slate-600 tracking-tight">
                 {{ $title }}
             </h3>
         @endif
@@ -17,12 +17,12 @@
         <div class="overflow-hidden rounded-xl border border-zinc-200 bg-white">
         <table {{ $attributes->merge(['class' => 'min-w-full w-full p-[5px] pb-0 border-separate border-spacing-0 bg-white text-sm']) }}>
             <thead class="bg-transparent">
-                <tr class="align-middle">
+                <tr class="align-middle font-mono text-xs uppercase">
                     @foreach ($headers as $header)
                         @if ($header != 'action')
                             <th
                                 scope="col"
-                                class="px-4 py-2.5 text-left text-[15px] font-normal tracking-tight text-slate-500 whitespace-nowrap bg-zinc-100/70 border-y border-zinc-200 first:rounded-l-xl first:border-l last:rounded-r-xl last:border-r"
+                                class="px-4 py-2.5 text-left text-[14px] font-medium tracking-normal text-slate-500 whitespace-nowrap bg-zinc-100/70 border-y border-zinc-200 first:rounded-l-xl first:border-l last:rounded-r-xl last:border-r"
                             >
                                 {{ $header }}
                             </th>

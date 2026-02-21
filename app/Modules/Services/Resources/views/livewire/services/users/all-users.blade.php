@@ -71,7 +71,7 @@
                                 <x-table.td>
                                     @if ($user->primary_role)
                                         <span
-                                            class="bg-blue-100 text-blue-500 rounded-lg px-2 py-1 text-sm font-normal lowercase whitespace-no-wrap">
+                                            class="bg-blue-100 text-blue-500 rounded-lg px-2 py-1 text-xs font-medium uppercase font-mono whitespace-no-wrap">
                                             {{ $user->primary_role }}
                                         </span>
                                     @endif

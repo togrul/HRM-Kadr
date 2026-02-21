@@ -47,7 +47,7 @@
                                         @endif
                                     </div>
 
-                                    <span class="text-sm font-medium text-zinc-600">
+                                    <span class="text-sm font-mono font-medium text-zinc-600">
                                         {{ $rowNumber }}
                                     </span>
                                 </x-table.td>

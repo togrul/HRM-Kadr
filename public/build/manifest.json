@@ -1,6 +1,6 @@
 {
   "resources/css/app.css": {
-    "file": "assets/app-ce045a8a.css",
+    "file": "assets/app-846cf321.css",
     "isEntry": true,
     "src": "resources/css/app.css"
   },
@@ -59,6 +59,34 @@
   "resources/fonts/DMSans-Thin.ttf": {
     "file": "assets/DMSans-Thin-e6ba3eb2.ttf",
     "src": "resources/fonts/DMSans-Thin.ttf"
+  },
+  "resources/fonts/IBMPlexMono-Bold.ttf": {
+    "file": "assets/IBMPlexMono-Bold-dbd2a2fb.ttf",
+    "src": "resources/fonts/IBMPlexMono-Bold.ttf"
+  },
+  "resources/fonts/IBMPlexMono-ExtraLight.ttf": {
+    "file": "assets/IBMPlexMono-ExtraLight-f80cb365.ttf",
+    "src": "resources/fonts/IBMPlexMono-ExtraLight.ttf"
+  },
+  "resources/fonts/IBMPlexMono-Light.ttf": {
+    "file": "assets/IBMPlexMono-Light-9c829b8f.ttf",
+    "src": "resources/fonts/IBMPlexMono-Light.ttf"
+  },
+  "resources/fonts/IBMPlexMono-Medium.ttf": {
+    "file": "assets/IBMPlexMono-Medium-8ae92574.ttf",
+    "src": "resources/fonts/IBMPlexMono-Medium.ttf"
+  },
+  "resources/fonts/IBMPlexMono-Regular.ttf": {
+    "file": "assets/IBMPlexMono-Regular-ab08018c.ttf",
+    "src": "resources/fonts/IBMPlexMono-Regular.ttf"
+  },
+  "resources/fonts/IBMPlexMono-SemiBold.ttf": {
+    "file": "assets/IBMPlexMono-SemiBold-b1a936f9.ttf",
+    "src": "resources/fonts/IBMPlexMono-SemiBold.ttf"
+  },
+  "resources/fonts/IBMPlexMono-Thin.ttf": {
+    "file": "assets/IBMPlexMono-Thin-daa3e938.ttf",
+    "src": "resources/fonts/IBMPlexMono-Thin.ttf"
   },
   "resources/js/app.js": {
     "file": "assets/app-ddee773b.js",
