@@ -17,6 +17,11 @@
             });
         }
     ">
+    @php
+        $canEditStaff = auth()->user()?->can('edit-staff') ?? false;
+        $canDeleteStaff = auth()->user()?->can('delete-staff') ?? false;
+    @endphp
+
     {{-- sidebar  --}}
     <x-slot name="sidebar">
         <livewire:structure.sidebar wire:key="staff-structure-sidebar" />
@@ -66,18 +71,24 @@
             @if ($staffs->isNotEmpty())
                 <div class="grid grid-cols-1 gap-3">
                     @foreach ($staffs as $group)
-                        <x-staff.root
-                            :title="$group['title']"
-                            :structureId="$group['structure_id']"
-                            :hasParent="$group['has_parent']"
-                            :total_sum="$group['total_sum']"
-                            :total_filled="$group['total_filled']"
-                            :total_vacant="$group['total_vacant']"
-                        >
-                            @foreach ($group['items'] as $st)
-                                <x-staff.item :hasParent="$group['has_parent']" :model="$st" />
-                            @endforeach
-                        </x-staff.root>
+                        <div wire:key="staff-group-{{ $group['structure_id'] }}">
+                            <x-staff.root
+                                :title="$group['title']"
+                                :structureId="$group['structure_id']"
+                                :hasParent="$group['has_parent']"
+                                :total_sum="$group['total_sum']"
+                                :total_filled="$group['total_filled']"
+                                :total_vacant="$group['total_vacant']"
+                                :canEditStaff="$canEditStaff"
+                                :canDeleteStaff="$canDeleteStaff"
+                            >
+                                @foreach ($group['items'] as $st)
+                                    <div wire:key="staff-item-{{ $st->id ?? ($group['structure_id'] . '-' . $loop->index) }}">
+                                        <x-staff.item :hasParent="$group['has_parent']" :model="$st" />
+                                    </div>
+                                @endforeach
+                            </x-staff.root>
+                        </div>
                     @endforeach
                 </div>
             @else
