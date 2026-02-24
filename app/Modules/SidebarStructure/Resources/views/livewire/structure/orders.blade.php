@@ -7,7 +7,7 @@
           @foreach ($category->orders as $order)
           <button wire:key="{{ $order->id }}" wire:click="selectOrder('{{ $order->id }}')"
               @class([
-                  'appearance-none w-full bg-neutral-200/40 shadow-sm rounded-xl border border-neutral-100 py-2 px-4 hover:shadow-md transition-all duration-300',
+                  'appearance-none text-sm w-full bg-zinc-100 shadow-none rounded-xl border border-neutral-200/70 py-1.5 px-4 hover:bg-black hover:text-white transition-all duration-300',
                   'text-neutral-600' => $order->id != $selectedOrder,
                   'text-emerald-500' => $order->id == $selectedOrder,
                   'mb-2' => !$loop->last

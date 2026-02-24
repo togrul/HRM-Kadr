@@ -33,6 +33,7 @@ trait StaffCrud
     protected array $positionLabels = [];
     protected array $structureParents = [];
     protected array $structureNestedIds = [];
+    protected ?array $structureChildrenByParent = null;
 
     public function rules(): array
     {
@@ -160,8 +161,9 @@ trait StaffCrud
                 'id' => null,
                 'name' => '---',
             ];
-            $this->recalculateFilledCounts($index);
         }
+
+        $this->syncComputedStaffRows();
     }
 
     public function render()
@@ -254,8 +256,7 @@ trait StaffCrud
             return;
         }
 
-        $query = Personnel::query()
-            ->whereNull('leave_work_date');
+        $query = Personnel::query()->active();
 
         if ($positionId > 0 && ! $this->hidePosition) {
             $query->where('structure_id', $structureId)
@@ -269,14 +270,165 @@ trait StaffCrud
         $this->recalculateVacant($index);
     }
 
+    protected function syncComputedStaffRows(): void
+    {
+        $indexes = collect(array_keys($this->staff))
+            ->filter(fn ($index) => is_numeric($index))
+            ->map(fn ($index) => (int) $index)
+            ->values()
+            ->all();
+
+        if (empty($indexes)) {
+            return;
+        }
+
+        $structureIds = collect($indexes)
+            ->map(fn (int $index) => (int) ($this->staff[$index]['structure_id'] ?? $this->structureId ?? 0))
+            ->filter(fn (int $id) => $id > 0)
+            ->unique()
+            ->values()
+            ->all();
+
+        if (empty($structureIds)) {
+            foreach ($indexes as $index) {
+                $this->staff[$index]['filled'] = 0;
+                $this->recalculateVacant($index);
+            }
+
+            return;
+        }
+
+        $nestedIdsByStructure = $this->buildNestedIdsByStructure($structureIds);
+        $relevantStructureIds = collect($nestedIdsByStructure)
+            ->flatten()
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values()
+            ->all();
+
+        $activeByStructure = Personnel::query()
+            ->active()
+            ->whereIn('structure_id', $relevantStructureIds)
+            ->select('structure_id', DB::raw('count(*) as aggregate'))
+            ->groupBy('structure_id')
+            ->pluck('aggregate', 'structure_id')
+            ->map(fn ($value) => (int) $value)
+            ->all();
+
+        $positionIds = collect($indexes)
+            ->map(fn (int $index) => (int) ($this->staff[$index]['position_id'] ?? 0))
+            ->filter(fn (int $id) => $id > 0)
+            ->unique()
+            ->values()
+            ->all();
+
+        $activeByStructurePosition = [];
+        if (! empty($positionIds) && ! $this->hidePosition) {
+            $activeByStructurePosition = Personnel::query()
+                ->active()
+                ->whereIn('structure_id', $structureIds)
+                ->whereIn('position_id', $positionIds)
+                ->select('structure_id', 'position_id', DB::raw('count(*) as aggregate'))
+                ->groupBy('structure_id', 'position_id')
+                ->get()
+                ->reduce(function (array $carry, $row) {
+                    $structureId = (int) $row->structure_id;
+                    $positionId = (int) $row->position_id;
+                    $carry[$structureId][$positionId] = (int) $row->aggregate;
+
+                    return $carry;
+                }, []);
+        }
+
+        foreach ($indexes as $index) {
+            $structureId = (int) ($this->staff[$index]['structure_id'] ?? $this->structureId ?? 0);
+            $positionId = (int) ($this->staff[$index]['position_id'] ?? 0);
+
+            if ($structureId <= 0) {
+                $this->staff[$index]['filled'] = 0;
+                $this->recalculateVacant($index);
+
+                continue;
+            }
+
+            if ($positionId > 0 && ! $this->hidePosition) {
+                $filled = (int) ($activeByStructurePosition[$structureId][$positionId] ?? 0);
+            } else {
+                $filled = 0;
+                foreach ($nestedIdsByStructure[$structureId] ?? [$structureId] as $nestedId) {
+                    $filled += (int) ($activeByStructure[(int) $nestedId] ?? 0);
+                }
+            }
+
+            $this->staff[$index]['filled'] = $filled;
+            $this->recalculateVacant($index);
+        }
+    }
+
     protected function resolveStructureTreeIds(int $structureId): array
     {
         if (! isset($this->structureNestedIds[$structureId])) {
-            $structure = Structure::with('subs')->find($structureId);
-            $this->structureNestedIds[$structureId] = $structure ? $structure->getAllNestedIds() : [$structureId];
+            $nested = $this->buildNestedIdsByStructure([$structureId]);
+            $this->structureNestedIds[$structureId] = $nested[$structureId] ?? [$structureId];
         }
 
         return $this->structureNestedIds[$structureId];
+    }
+
+    protected function buildNestedIdsByStructure(array $structureIds): array
+    {
+        if (empty($structureIds)) {
+            return [];
+        }
+
+        $childrenByParent = $this->resolveChildrenByParent();
+        $memo = $this->structureNestedIds;
+
+        $collectNestedIds = function (int $id) use (&$collectNestedIds, &$memo, $childrenByParent): array {
+            if (isset($memo[$id])) {
+                return $memo[$id];
+            }
+
+            $ids = [$id];
+            foreach ($childrenByParent[$id] ?? [] as $childId) {
+                $ids = array_merge($ids, $collectNestedIds((int) $childId));
+            }
+
+            return $memo[$id] = array_values(array_unique($ids));
+        };
+
+        $nestedIdsByStructure = [];
+        foreach ($structureIds as $structureId) {
+            $structureId = (int) $structureId;
+            if ($structureId <= 0) {
+                continue;
+            }
+
+            $nestedIdsByStructure[$structureId] = $collectNestedIds($structureId);
+        }
+
+        $this->structureNestedIds = $memo;
+
+        return $nestedIdsByStructure;
+    }
+
+    protected function resolveChildrenByParent(): array
+    {
+        if ($this->structureChildrenByParent !== null) {
+            return $this->structureChildrenByParent;
+        }
+
+        $this->structureChildrenByParent = Structure::query()
+            ->select('id', 'parent_id')
+            ->get()
+            ->reduce(function (array $carry, Structure $structure) {
+                $parentId = (int) ($structure->parent_id ?? 0);
+                $carry[$parentId][] = (int) $structure->id;
+
+                return $carry;
+            }, []);
+
+        return $this->structureChildrenByParent;
     }
 
     protected function resolveParentId(int $structureId): ?int

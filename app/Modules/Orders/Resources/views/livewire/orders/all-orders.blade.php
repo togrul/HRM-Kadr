@@ -72,16 +72,6 @@
                             type="button">
                             <x-icons.excel-icon />
                         </button>
-
-                        <button wire:click.prevent="wordEdit"
-                            class="flex items-center justify-center w-12 h-12 transition-all duration-300 rounded-xl hover:bg-rose-50"
-                            type="button">
-                            @include('components.icons.print-file', [
-                                'color' => 'text-rose-500',
-                                'hover' => 'text-rose-600',
-                                'size' => 'w-8 h-8',
-                            ])
-                        </button>
                     @endcan
                 </div>
             </div>
@@ -123,21 +113,21 @@
         <div class="relative min-h-[300px] -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
                 <div class="overflow-visible">
-                    <x-table.tbl :headers="$this->getTableHeaders()">
+                    <x-table.tbl :headers="$this->getTableHeaders()" title="{{ __('Orders') }}">
                         @forelse ($orders as $_order)
                             <tr wire:key="order-row-{{ $_order->id }}" @class([
                                 '' => $_order->status_id != 30,
                                 'bg-rose-50' => $_order->status_id == 30,
                             ])>
                                 <x-table.td>
-                                    <span class="text-sm font-medium text-gray-700">
+                                    <span class="text-sm font-mono font-medium text-gray-700">
                                         {{ $_order->row_no }}
                                     </span>
                                 </x-table.td>
 
                                 <x-table.td>
                                     <div class="flex flex-col space-y-1">
-                                        <span class="px-3 py-1 text-xs font-medium text-white bg-blue-600 rounded-lg w-max">
+                                        <span class="text-sm font-mono font-medium w-max text-blue-600">
                                             {{ $_order->order_no }}
                                         </span>
                                     </div>
@@ -146,7 +136,7 @@
                                 <x-table.td>
                                    <div class="flex items-center space-x-1">
                                             <span
-                                                class="flex items-center justify-center px-3 py-1 text-xs font-medium text-teal-600 uppercase border border-teal-200 rounded-lg shadow-sm bg-teal-50">
+                                                class="flex items-center justify-center px-3 py-1 text-xs font-medium text-zinc-100 uppercase border border-zinc-900 rounded-lg shadow-sm bg-zinc-900">
                                                 {{ $_order->order->name }}
                                             </span>
                                             <span>
@@ -200,7 +190,7 @@
                                 </x-table.td>
 
                                 <x-table.td>
-                                         <x-status :status-id="$_order->status_color_id" :label="$_order->status->name"></x-status>
+                                    <x-status design="modern" :status-id="$_order->status_color_id" :label="$_order->status->name"></x-status>
                                 </x-table.td>
 
                                 <x-table.td :isButton="true">

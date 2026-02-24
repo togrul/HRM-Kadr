@@ -28,10 +28,12 @@ class EditStaff extends Component
         $this->staff = $this->getStaffs()[$this->staffModel]->toArray();
         $this->title = __('Edit').'( '.$this->staff[0]['structure']['name'].' )';
         $this->hidePosition = is_null($this->staff[0]['structure']['parent_id']);
+        $this->syncComputedStaffRows();
     }
 
     public function store()
     {
+        $this->syncComputedStaffRows();
         $this->validate();
         $existingData = $this->getStaffs()[$this->staffModel]->toArray();
 

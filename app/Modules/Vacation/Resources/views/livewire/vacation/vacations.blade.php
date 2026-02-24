@@ -39,15 +39,6 @@
                             type="button">
                             <x-icons.excel-icon />
                         </button>
-                        <button wire:click="printPage"
-                            class="flex items-center justify-center w-12 h-12 transition-all duration-300 rounded-xl hover:bg-red-50"
-                            type="button">
-                            @include('components.icons.print-file', [
-                                'color' => 'text-rose-500',
-                                'hover' => 'text-rose-600',
-                                'size' => 'w-8 h-8',
-                            ])
-                        </button>
                     @endcan
                 </div>
             </div>
@@ -146,7 +137,7 @@
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
                 <div class="overflow-visible">
 
-                    <x-table.tbl :headers="$this->getTableHeaders()">
+                    <x-table.tbl :headers="$this->getTableHeaders()" title="{{ __('Vacations') }}">
                         @forelse ($this->vacations as $_vacation)
                             <tr @class([
                                 'bg-teal-50' => $_vacation->is_active_vacation,

@@ -50,16 +50,6 @@
                 </button>
             @endcan
             @can('export-staff')
-                <button
-                    class="flex items-center justify-center p-2 space-x-2 transition-all duration-300 rounded-xl bg-rose-50 text-rose-500 hover:bg-rose-100"
-                    type="button">
-                    @include('components.icons.print-file', [
-                        'color' => 'text-rose-400',
-                        'hover' => 'text-rose-500',
-                    ])
-                </button>
-            @endcan
-            @can('export-staff')
                 @if ($selectedPage == 'vacancies')
                     <button wire:click.prevent="exportExcel"
                         class="flex items-center justify-center p-2 space-x-2 text-green-500 transition-all duration-300 rounded-xl bg-green-50 hover:bg-green-100"

@@ -68,7 +68,7 @@
         @if($hasSubs)
             <ul
                 id="subs-{{ $model->id }}"
-                class="relative ml-4 flex flex-col border-l border-zinc-200 pl-1"
+                class="relative ml-[.6rem] flex flex-col border-l border-zinc-200 pl-1"
                 x-show="openSub"
                 x-collapse
                 x-cloak

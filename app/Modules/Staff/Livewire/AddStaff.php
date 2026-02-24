@@ -31,6 +31,8 @@ class AddStaff extends Component
             return;
         }
 
+        $this->syncComputedStaffRows();
+
         $this->validate(array_merge(
             $this->rules(),
             ['structureId' => 'required|int|exists:structures,id']

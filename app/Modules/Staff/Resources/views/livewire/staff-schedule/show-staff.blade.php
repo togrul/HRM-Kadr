@@ -5,9 +5,9 @@
         </h2>
     </div>
 
-    <div class="relative min-h-[300px] -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-        <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-        <div class="overflow-visible">
+    <div class="relative min-h-[300px] -my-2 overflow-x-auto">
+        <div class="inline-block min-w-full py-2 align-middle">
+        <div class="overflow-visible w-full">
             <x-table.tbl :headers="[__('#'),__('Tabel'),__('Fullname'),__('Gender')]">
                 @foreach ($staffs as $staff)
                     <tr>

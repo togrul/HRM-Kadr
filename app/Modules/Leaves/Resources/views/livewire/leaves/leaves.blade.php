@@ -139,16 +139,7 @@
                    >
                            <x-icons.excel-icon />
                     </button>
-                @endcan
-                <button
-                        class="flex items-center justify-center w-12 h-12 transition-all duration-300 rounded-xl hover:bg-red-50"
-                        type="button">
-                        @include('components.icons.print-file', [
-                                'color' => 'text-rose-500',
-                                'hover' => 'text-rose-600',
-                                'size' => 'w-8 h-8',
-                        ])
-                </button>
+                @endcan  
                 {{-- @endcan --}}
             </div>
         </div>
@@ -161,7 +152,7 @@
     <div class="relative min-h-[300px] overflow-x-auto">
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
                 <div class="overflow-visible">
-                    <x-table.tbl :headers="$this->getTableHeaders()">
+                    <x-table.tbl :headers="$this->getTableHeaders()" title="{{ __('Leaves') }}">
                         @forelse ($permits as $leave)
                             <tr wire:key="leave-row-{{ $leave->id }}">
                                 <x-table.td>

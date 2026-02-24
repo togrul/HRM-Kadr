@@ -13,7 +13,6 @@
     @livewireStyles
     @stack('css')
 </head>
-
 <body class="min-h-screen pb-1 font-sans antialiased bg-neutral-200/60 dark:bg-neutral-900/80" x-data>
     <div class="min-h-full">
         @includeWhen(!\request()->is('admin/*'), 'includes.layout.default')
