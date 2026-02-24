@@ -97,12 +97,41 @@ class Leave extends Model
         return Attribute::get(fn () => (int)$this->status_id === OrderStatusEnum::PENDING->value);
     }
 
-    public function canBeApprovedBy(?\App\Models\User $user): bool
+    public function canBeApprovedBy(?User $user): bool
     {
-        $personnelId = optional($user)->personnel_id;
+        if (! $this->isPending) {
+            return false;
+        }
 
-        return $this->isPending
-            && (is_null($this->assigned_to) || (int)$this->assigned_to === (int)$personnelId);
+        if (is_null($this->assigned_to)) {
+            return true;
+        }
+
+        if (! $user) {
+            return false;
+        }
+
+        $assignedTo = (int) $this->assigned_to;
+        $userId = (int) $user->getKey();
+
+        // Backward compatibility: some old rows may still carry users.id.
+        if ($assignedTo === $userId) {
+            return true;
+        }
+
+        static $personnelIdCache = [];
+
+        if (! array_key_exists($userId, $personnelIdCache)) {
+            $personnelId = $user->relationLoaded('personnel')
+                ? $user->personnel?->id
+                : $user->personnel()->value('id');
+
+            $personnelIdCache[$userId] = $personnelId ? (int) $personnelId : null;
+        }
+
+        $personnelId = $personnelIdCache[$userId];
+
+        return $personnelId !== null && $assignedTo === $personnelId;
     }
 
     /* --------------------------------- Scopes -------------------------------- */

@@ -96,21 +96,36 @@ trait DropdownLabelCache
         $suffixService = new WordSuffixService;
 
         foreach ($lineage as $parent) {
-            if(empty($parent['parent_id']))
+            if (empty($parent['parent_id'])) {
                 continue;
-            $level_name = __(strtolower((collect(StructureEnum::cases())->pluck('name', 'value')[$parent['level']])));
-            $level_with_suffix = $parent['level'] > 1
-                ? $suffixService->getMultiSuffix($level_name)
-                : $suffixService->getStructureSuffix($level_name);
+            }
 
-            $data = $isCoded 
-                ? $parent['code'] . $suffixService->getNumberSuffix($parent['code']) . ' ' . $level_with_suffix . ' '
+            $level_name = __(strtolower((collect(StructureEnum::cases())->pluck('name', 'value')[$parent['level']])));
+
+            $data = $isCoded
+                ? $this->codedStructureLabelWithNormalizedSuffix($parent, $level_name, $suffixService)
                 : $suffixService->getStructureSuffix($parent['name']) . ' ';
 
             $value .= $data;
         }
 
         return $value;
+    }
+
+    protected function codedStructureLabelWithNormalizedSuffix(array $parent, string $levelName, WordSuffixService $suffixService): string
+    {
+        $levelWithSuffix = (int) ($parent['level'] ?? 0) > 1
+            ? $suffixService->getMultiSuffix($levelName)
+            : $suffixService->getStructureSuffix($levelName);
+
+        // User-facing requirement: keep suffix (e.g. "nin"), but remove hyphen form ("-nin").
+        $levelWithSuffix = preg_replace('/-(nın|nin|nun|nün|ın|in|un|ün)$/u', '$1', $levelWithSuffix) ?? $levelWithSuffix;
+
+        return (string) ($parent['code'] ?? '')
+            . $suffixService->getNumberSuffix((int) ($parent['code'] ?? 0))
+            . ' '
+            . $levelWithSuffix
+            . ' ';
     }
 
     protected function structureLineage(int $structureId): array

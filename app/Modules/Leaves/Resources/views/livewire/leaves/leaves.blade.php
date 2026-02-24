@@ -83,21 +83,18 @@
         @if (!empty($stats))
             <div class="grid w-full gap-2 md:grid-cols-3 lg:grid-cols-4">
                 @foreach ($stats as $type => $row)
-                    <div class="px-3 py-2 space-y-1 border rounded-lg shadow-sm bg-slate-100/50 border-slate-200/70 dark:bg-white/2 dark:border-white/5">
-                        <span class="inline-flex items-center py-1 text-[12px] border-b border-slate-400 border-dashed uppercase font-bold text-slate-600">
-                            {{ $type }}
-                        </span>
-                        <div class="flex items-center justify-between text-slate-800">
-                            <div class="flex items-baseline space-x-1">
-                                <span class="text-lg font-bold">{{ $row['total_days'] }}</span>
-                                <span class="text-[11px] font-medium text-gray-500 uppercase">{{ __('day') }}</span>
-                            </div>
-                            <div class="flex items-baseline space-x-1 text-emerald-700">
-                                <span class="text-lg font-bold">{{ $row['count'] }}</span>
-                                <span class="text-[11px] font-medium text-emerald-600 uppercase">{{ __('request') }}</span>
-                            </div>
+                    <x-surface-card :title="$type" class="" icon="icons.calendar-icon">
+                      <div class="flex items-center justify-between text-slate-800">
+                        <div class="flex items-baseline space-x-1">
+                            <span class="text-lg font-bold font-title">{{ $row['total_days'] }}</span>
+                            <span class="text-[12px] font-medium font-mono text-gray-500 uppercase">{{ __('day') }}</span>
+                        </div>
+                        <div class="flex items-baseline space-x-1 text-emerald-700">
+                            <span class="text-lg font-bold font-title">{{ $row['count'] }}</span>
+                            <span class="text-[12px] font-medium font-mono text-emerald-600 uppercase">{{ __('request') }}</span>
                         </div>
                     </div>
+                    </x-surface-card>
                 @endforeach
             </div>
         @endif
@@ -153,6 +150,7 @@
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
                 <div class="overflow-visible">
                     <x-table.tbl :headers="$this->getTableHeaders()" title="{{ __('Leaves') }}">
+                        @php($authUser = auth()->user())
                         @forelse ($permits as $leave)
                             <tr wire:key="leave-row-{{ $leave->id }}">
                                 <x-table.td>
@@ -258,11 +256,10 @@
                                             class="flex flex-col gap-1 text-sm font-medium"
                                             style="word-break: break-word;"
                                         >
-                                            <x-icons.files-icon color="text-blue-500" hover="text-sky-300" />
-                                            <span class="text-blue-500">{{ __('File') }}</span>
+                                            <x-icons.link-icon size="w-6 h-6" color="text-blue-600" hover="text-sky-300" />
                                         </a>
                                         @endif
-                                        @if($leave->canBeApprovedBy(auth()->user()))
+                                        @if($leave->canBeApprovedBy($authUser))
                                         <div class="flex items-center space-x-2">
                                             <button
                                                 wire:loading.attr="disabled"

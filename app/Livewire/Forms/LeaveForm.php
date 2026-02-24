@@ -30,6 +30,7 @@ class LeaveForm extends Form
             'status_id'         => ['required', 'integer', Rule::exists('order_statuses', 'id')],
             'starts_at'         => ['required', 'date'],
             'ends_at'           => ['nullable', 'date', 'after_or_equal:starts_at'],
+            'assigned_to.id'    => ['nullable', 'integer', Rule::exists('personnels', 'id')],
         ];
     }
 
@@ -72,15 +73,15 @@ class LeaveForm extends Form
                 $assigned = $leave->assigned;
             } else {
                 $assigned = Personnel::query()
-                    ->select('tabel_no', 'surname', 'name', 'patronymic')
-                    ->where('tabel_no', $leave->assigned_to)
+                    ->select('id', 'tabel_no', 'surname', 'name', 'patronymic')
+                    ->where('id', $leave->assigned_to)
                     ->first();
             }
         }
 
         $this->assigned_to = $assigned
             ? [
-                'tabel_no' => $assigned->tabel_no,
+                'id' => (int) $assigned->id,
                 'fullname' => $assigned->fullname,
             ]
             : null;
@@ -104,7 +105,7 @@ class LeaveForm extends Form
             'total_days'    => $this->total_days,
             'reason'        => $this->reason,
             'status_id'     => $this->status_id !== null ? (int) $this->status_id : null,
-            'assigned_to'   => data_get($this->assigned_to, 'tabel_no'),
+            'assigned_to'   => data_get($this->assigned_to, 'id'),
             'document_path' => is_string($this->document_path) ? $this->document_path : null,
         ];
     }

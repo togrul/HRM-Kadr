@@ -108,14 +108,14 @@
             searchModel="assignedSearch"
             :selected="$leave->assigned_to"
             displayKey="fullname"
-            idKey="tabel_no"
+            idKey="id"
             onClear="removePersonnel"
             clearField="assigned_to"
             placeholder="Search..."
         >
             @forelse($this->personnelList as $pl)
                 <p
-                    wire:click="selectPersonnel('{{ $pl->tabel_no }}', '{{ $pl->fullname }}','assigned_to')"
+                    wire:click="selectPersonnel('{{ $pl->tabel_no }}', '{{ $pl->fullname }}','assigned_to', {{ $pl->id }})"
                     class="flex flex-col px-2 py-1 transition-all duration-300 rounded-md cursor-pointer hover:bg-white text-slate-600 drop-shadow-sm"
                 >
                     <span>{{ $pl->fullname }}</span>

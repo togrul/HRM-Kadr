@@ -22,7 +22,7 @@ trait InteractsWithLeaveForm
         $this->recalculateLeaveDuration();
     }
 
-    public function selectPersonnel(string $tabelNo, string $fullname, string $key): void
+    public function selectPersonnel(string $tabelNo, string $fullname, string $key, ?int $personnelId = null): void
     {
         if ($key === 'tabel_no') {
             $this->leave->tabel_no = [
@@ -37,7 +37,7 @@ trait InteractsWithLeaveForm
 
         if ($key === 'assigned_to') {
             $this->leave->assigned_to = [
-                'tabel_no' => $tabelNo,
+                'id' => $personnelId,
                 'fullname' => $fullname,
             ];
 

@@ -22,6 +22,7 @@ use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
+use PhpOffice\PhpWord\Settings as PhpWordSettings;
 use PhpOffice\PhpWord\TemplateProcessor;
 
 #[On(['orderAdded', 'orderWasDeleted'])]
@@ -118,6 +119,10 @@ class AllOrders extends Component
 
     public function printOrder(string $order_no)
     {
+        // Important: TemplateProcessor::setValue does not escape XML by default.
+        // Enabling output escaping prevents malformed DOCX XML and Word "recovery/converter" errors.
+        PhpWordSettings::setOutputEscapingEnabled(true);
+
         $order = OrderLog::with(['order', 'components', 'attributes'])->where('order_no', $order_no)->first();
         if (! $order || ! $order->order) {
             abort(404);
@@ -128,7 +133,9 @@ class AllOrders extends Component
         $suffixService = new WordSuffixService;
         $bladeType = $order->order->blade;
 
-        $templateProcessor = new TemplateProcessor('storage/' . $order->order->content);
+        $templateProcessor = new TemplateProcessor(
+            $this->resolveTemplatePath((string) $order->order->content)
+        );
         $templateProcessor->setValue('day', $givenDate->format('d'));
         $templateProcessor->setValue('month', $givenDate->locale('AZ')->monthName);
         $templateProcessor->setValue('year', $givenDate->format('Y'));
@@ -241,18 +248,33 @@ class AllOrders extends Component
             ['content' => $content, 'title' => $title] = (new GenerateWordReplaceContent($bladeType, $_replace_texts))
                 ->handle($key, $text, $secondIndex);
             $secondIndex++;
-            $text = ! empty($title) ? $this->convertWordIntoBold($title) . PHP_EOL . '<w:p/>' . $content : $content;
+            $text = ! empty($title) ? $this->convertWordIntoBold($title) . PHP_EOL . $content : $content;
 
             $replacements[] = [
                 'content_text' => match ($bladeType) {
-                    Order::BLADE_VACATION, Order::BLADE_BUSINESS_TRIP => str_replace("\n", '<w:br/>', $text),
-                    Order::BLADE_DEFAULT => ($key + 1) . '. ' . str_replace("\n", '<w:br/>', $text),
+                    Order::BLADE_VACATION, Order::BLADE_BUSINESS_TRIP => $text,
+                    Order::BLADE_DEFAULT => ($key + 1) . '. ' . $text,
                 },
             ];
         }
 
-        $templateProcessor->replaceBlock('newline', PHP_EOL);
-        $templateProcessor->cloneBlock('content', 0, true, false, $replacements);
+        if (empty($replacements)) {
+            $templateProcessor->cloneBlock('content', 0, true, false, []);
+        } else {
+            $templateProcessor->cloneBlock('content', count($replacements), true, true, null);
+
+            foreach ($replacements as $index => $replacementRow) {
+                $rowNo = $index + 1;
+                foreach ($replacementRow as $macro => $value) {
+                    $templateProcessor->setValue($macro.'#'.$rowNo, (string) $value);
+                }
+
+                // Replacing nested newline block with replaceBlock() corrupts this template.
+                // Instead, blank block markers safely per cloned row.
+                $templateProcessor->setValue('newline#'.$rowNo, '');
+                $templateProcessor->setValue('/newline#'.$rowNo, '');
+            }
+        }
         // end export to word file
 
         $filename = "{$order->order->name}_" . Carbon::now()->format('d.m.Y H:i:s');
@@ -273,9 +295,28 @@ class AllOrders extends Component
 
     private function convertWordIntoBold(string $word): string
     {
-        return '<w:rPr><w:b w:val="true"/></w:rPr>'
-            . $word
-            . '<w:rPr><w:b w:val="false"/></w:rPr>';
+        // Returning plain text avoids malformed WordprocessingML being injected into placeholders.
+        return $word;
+    }
+
+    private function resolveTemplatePath(string $storedPath): string
+    {
+        $path = ltrim($storedPath, '/');
+        $candidates = [
+            storage_path($path),
+            storage_path('app/'.$path),
+            public_path('storage/'.$path),
+            base_path('storage/'.$path),
+            base_path($path),
+        ];
+
+        foreach ($candidates as $candidate) {
+            if (is_file($candidate)) {
+                return $candidate;
+            }
+        }
+
+        throw new \RuntimeException("Order template file not found: {$storedPath}");
     }
 
     protected function returnData($type = 'normal')

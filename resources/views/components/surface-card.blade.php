@@ -6,8 +6,8 @@
     'contentClass' => 'p-4',
 ])
 
-<div {{ $attributes->merge(['class' => 'overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-100/80 shadow-[0_1px_2px_rgba(16,24,40,0.04)]']) }}>
-    <div class="flex min-h-[52px] items-center justify-between px-4 py-2.5">
+<div {{ $attributes->merge(['class' => 'overflow-hidden rounded-xl border border-zinc-200 bg-zinc-100/80 shadow-[0_1px_2px_rgba(16,24,40,0.04)]']) }}>
+    <div class="flex items-center justify-between px-4 py-2.5">
         <div class="text-base font-medium text-slate-600 tracking-tight">
             {{ $title }}
         </div>
@@ -23,7 +23,7 @@
     </div>
 
     <div class="px-1 pb-1">
-        <div class="rounded-xl border border-zinc-200 bg-white {{ $bodyClass }}">
+        <div class="rounded-lg border border-zinc-200 bg-white {{ $bodyClass }}">
             <div class="{{ $contentClass }}">
                 {{ $slot }}
             </div>

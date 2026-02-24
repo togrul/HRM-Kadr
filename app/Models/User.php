@@ -67,6 +67,11 @@ class User extends Authenticatable
         );
     }
 
+    public function personnel(): BelongsTo
+    {
+        return $this->belongsTo(Personnel::class, 'email', 'email');
+    }
+
     protected static function boot()
     {
         parent::boot();
