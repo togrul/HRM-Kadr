@@ -32,10 +32,17 @@ trait DropdownLabelCache
         return in_array($field, $this->componentDropdownFields, true);
     }
 
-    protected function registerComponentOptionLabels(string $field, array $options): void
+    protected function registerComponentOptionLabels(string $field, array $options, bool $overrideExisting = false): void
     {
         foreach ($options as $option) {
-            $this->componentOptionLabels[$field][(int) $option['id']] = (string) $option['label'];
+            $id = (int) $option['id'];
+            $label = (string) $option['label'];
+
+            if (! $overrideExisting && isset($this->componentOptionLabels[$field][$id])) {
+                continue;
+            }
+
+            $this->componentOptionLabels[$field][$id] = $label;
         }
     }
 

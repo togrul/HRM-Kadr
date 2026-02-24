@@ -189,8 +189,11 @@ class EditOrder extends Component
 
         if ($isIdOrSpecial && method_exists($this, 'isDropdownField') && $this->isDropdownField($columnName)) {
             $columnValue = $attr['id'];
-            if ($columnValue && property_exists($this, 'componentOptionLabels')) {
-                $this->componentOptionLabels[$columnName][(int) $columnValue] = $attr['value'];
+            if ($columnValue && method_exists($this, 'registerComponentOptionLabels')) {
+                $this->registerComponentOptionLabels($columnName, [[
+                    'id' => (int) $columnValue,
+                    'label' => (string) $attr['value'],
+                ]], true);
             }
         } else {
             $columnValue = $attr['value'];

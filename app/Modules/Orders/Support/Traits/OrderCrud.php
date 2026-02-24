@@ -144,7 +144,7 @@ trait OrderCrud
         $this->registerComponentOptionLabels($selection['field'], [[
             'id' => $selection['id'],
             'label' => $selection['label'],
-        ]]);
+        ]], true);
     }
 
     #[On('componentSelected')]
