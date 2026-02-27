@@ -53,6 +53,7 @@ class OrdersServiceProvider extends ServiceProvider
             'templates.edit-template' => \App\Modules\Orders\Livewire\Templates\EditTemplate::class,
             'templates.delete-template' => \App\Modules\Orders\Livewire\Templates\DeleteTemplate::class,
             'templates.set-type' => \App\Modules\Orders\Livewire\Templates\SetType::class,
+            'templates.onboarding-wizard' => \App\Modules\Orders\Livewire\Templates\OnboardingWizard::class,
         ];
     }
 
@@ -61,4 +62,3 @@ class OrdersServiceProvider extends ServiceProvider
         OrderType::observe(OrderTypeObserver::class);
     }
 }
-

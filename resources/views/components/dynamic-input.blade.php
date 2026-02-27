@@ -13,6 +13,7 @@
     'listProperty' => 'componentForms',
     'selectedLabel' => null,
     'selectedValue' => null,
+    'input' => null,
     'suffixService' => null,
     'structureLevels' => null,
     'inputTypes' => null,
@@ -46,7 +47,7 @@
         '$end_date' => 'date-input',
     ];
 
-    $input = $resolvedInputTypes[$type] ?? 'text-input';
+    $input = $input ?? ($resolvedInputTypes[$type] ?? 'text-input');
     $list_string = $listProperty;
     $suffixService = \App\Support\StructureSelect::suffixService($suffixService);
     $structureLevels = \App\Support\StructureSelect::levels($structureLevels);
@@ -80,6 +81,30 @@
         @enderror
     </div>
 @elseif($input == 'select')
+    @php
+        $selectModel = collect($model ?? [])
+            ->map(function ($option) use ($field, $key) {
+                $id = data_get($option, 'id', data_get($option, 'value'));
+                if ($id === null || $id === '') {
+                    return null;
+                }
+
+                $id = (int) $id;
+                $label = (string) data_get($option, 'label', data_get($option, 'name', data_get($option, 'title', data_get($option, 'text', ''))));
+
+                if ($field === 'structure_id' && method_exists($this, 'dropdownFieldLabel')) {
+                    $label = (string) $this->dropdownFieldLabel('structure_id', $id, (int) $key);
+                }
+
+                return [
+                    'id' => $id,
+                    'label' => $label,
+                ];
+            })
+            ->filter()
+            ->values()
+            ->all();
+    @endphp
     <div class="flex flex-col">
         <x-ui.select-dropdown
             :label="$title"
@@ -87,7 +112,7 @@
             mode="gray"
             class="w-full"
             wire:model.live="{{ $list_string }}.{{ $key }}.{{ $field }}"
-            :model="$model ?? []"
+            :model="$selectModel"
             :disabled="$disabled"
             :search-model="$resolvedSearchModel"
             :selected-label="$selectedLabel"

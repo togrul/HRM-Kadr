@@ -45,6 +45,17 @@ class OrderRenderStateService
         array $personnelIdList,
         callable $rememberComponentDefinitions
     ): array {
+        $trimmedPersonnelSearch = trim($searchPersonnel);
+        $selectedPersonnelIds = collect($personnelIdList)
+            ->map(fn ($id) => (int) $id)
+            ->filter(fn ($id) => $id > 0)
+            ->unique()
+            ->values()
+            ->all();
+
+        $shouldResolvePersonnel = $needsPersonnelLookup;
+        $personnelDefaultLimit = (int) config('orders.form.personnel_default_limit', 15);
+
         $components = $this->memoizedLookup(
             'components',
             [$selectedTemplate],
@@ -58,11 +69,16 @@ class OrderRenderStateService
                 fn () => $this->orderLookupService->templates($selectedOrder, $searchTemplate)
             ),
             'components' => $components,
-            'personnels' => $needsPersonnelLookup
+            'personnels' => $shouldResolvePersonnel
                 ? $this->memoizedLookup(
                     'personnels',
-                    [$isCandidateOrder, $personnelIdList, $searchPersonnel],
-                    fn () => $this->orderLookupService->personnels($isCandidateOrder, $personnelIdList, $searchPersonnel)
+                    [$isCandidateOrder, $selectedPersonnelIds, $trimmedPersonnelSearch],
+                    fn () => $this->orderLookupService->personnels(
+                        $isCandidateOrder,
+                        $selectedPersonnelIds,
+                        $trimmedPersonnelSearch,
+                        $personnelDefaultLimit
+                    )
                 )
                 : collect(),
             'ranks' => $this->cachedLookup('ranks', fn () => $this->orderLookupService->ranks()),

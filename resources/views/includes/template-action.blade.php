@@ -39,7 +39,20 @@
     </div>
     <div class="">
         <x-label for="template_data.order_model">{{ __('Model') }}</x-label>
-        <x-livewire-input mode="gray" name="template_data.order_model" wire:model="template_data.order_model"></x-livewire-input>
+        <select
+            wire:model="template_data.order_model"
+            @disabled(!empty($templateModel))
+            class="w-full h-12 rounded-xl border border-slate-100 bg-gray-100 px-3 text-slate-800 focus:border-primary focus:ring-0 disabled:opacity-100 disabled:text-slate-600"
+        >
+            @foreach($this->templateModelOptions() as $option)
+                <option value="{{ $option['value'] }}">{{ $option['label'] }} ({{ $option['value'] }})</option>
+            @endforeach
+        </select>
+        @if(!empty($templateModel))
+            <p class="mt-1 text-xs text-slate-500">
+                {{ __('Model is locked in edit mode. Create a new template if model type must change.') }}
+            </p>
+        @endif
         @error('template_data.order_model')
         <x-validation> {{ $message }} </x-validation>
         @enderror
@@ -49,7 +62,17 @@
 <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
     <div class="">
         <x-label for="template_data.blade">{{ __('Page') }}</x-label>
-        <x-livewire-input mode="gray" name="template_data.blade" wire:model="template_data.blade"></x-livewire-input>
+        <select
+            wire:model="template_data.blade"
+            class="w-full h-12 rounded-xl border border-slate-100 bg-gray-100 px-3 text-slate-800 focus:border-primary focus:ring-0"
+        >
+            @foreach($this->bladeOptions() as $option)
+                <option value="{{ $option['value'] }}">{{ $option['label'] }}</option>
+            @endforeach
+        </select>
+        @error('template_data.blade')
+            <x-validation> {{ $message }} </x-validation>
+        @enderror
     </div>
     <div class="flex flex-col space-y-4 ">
         <x-label for="template_data.content">{{ __('File') }}</x-label>
@@ -91,8 +114,79 @@
                 </a>
             @endif
         @endif
+
+        @if(!empty($currentTemplateChecksum) || !empty($uploadedTemplateChecksum))
+            <div class="rounded-lg border border-slate-200 bg-slate-50 p-3 space-y-1 text-xs">
+                @if(!empty($currentTemplateChecksum))
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="text-slate-500">{{ __('Current file checksum (sha256)') }}</span>
+                        <span class="font-mono text-slate-700 break-all">{{ $currentTemplateChecksum }}</span>
+                    </div>
+                @endif
+                @if(!empty($uploadedTemplateChecksum))
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="text-slate-500">{{ __('Uploaded file checksum (sha256)') }}</span>
+                        <span class="font-mono text-slate-700 break-all">{{ $uploadedTemplateChecksum }}</span>
+                    </div>
+                @endif
+            </div>
+        @endif
     </div>
 </div>
+
+@if(!empty($templateModel))
+    <div class="rounded-lg border border-slate-200 bg-slate-50 p-3 space-y-3">
+        <div class="space-y-1">
+            <h4 class="text-sm font-semibold text-slate-700">{{ __('Template flow') }}</h4>
+            <p class="text-xs text-slate-500">
+                {{ __('This modal manages template master data (ID, category, model, blade, DOCX file).') }}
+            </p>
+            <p class="text-xs text-slate-500">
+                {{ __('Set Type > UI config manages dynamic fields, mappings, section blocks, and template version lifecycle.') }}
+            </p>
+        </div>
+        <button
+            type="button"
+            class="h-9 px-4 rounded-lg bg-sky-100 hover:bg-sky-200 text-sm font-medium text-sky-800 transition-colors"
+            wire:click.prevent="openSetTypeUiConfig"
+        >
+            {{ __('Open Set Type / UI config') }}
+        </button>
+
+        @if(!empty($activeVersionBindings))
+            <div class="overflow-x-auto rounded-lg border border-slate-200 bg-white">
+                <table class="w-full text-xs text-left">
+                    <thead>
+                    <tr class="bg-slate-50 text-slate-500 border-b border-slate-200">
+                        <th class="px-2 py-2 min-w-[140px]">{{ __('Type') }}</th>
+                        <th class="px-2 py-2 min-w-[100px]">{{ __('Active version') }}</th>
+                        <th class="px-2 py-2 min-w-[110px]">{{ __('Status') }}</th>
+                        <th class="px-2 py-2 min-w-[220px]">{{ __('Checksum') }}</th>
+                        <th class="px-2 py-2 min-w-[110px]">{{ __('Linked') }}</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach($activeVersionBindings as $binding)
+                        <tr class="border-b border-slate-100">
+                            <td class="px-2 py-2 text-slate-700">{{ $binding['type_name'] }}</td>
+                            <td class="px-2 py-2">v{{ $binding['version_no'] ?: '-' }}</td>
+                            <td class="px-2 py-2 text-slate-600">{{ $binding['status'] ?: '-' }}</td>
+                            <td class="px-2 py-2 font-mono text-slate-600 text-[11px] break-all">{{ $binding['checksum'] ?: '-' }}</td>
+                            <td class="px-2 py-2">
+                                @if(!empty($binding['linked']))
+                                    <span class="text-emerald-700">{{ __('Yes') }}</span>
+                                @else
+                                    <span class="text-rose-600">{{ __('No') }}</span>
+                                @endif
+                            </td>
+                        </tr>
+                    @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @endif
+    </div>
+@endif
 
 <div class="flex justify-between items-end w-full">
     <x-modal-button>{{ __('Save') }}</x-modal-button>

@@ -5,7 +5,9 @@ namespace App\Modules\Orders\Livewire;
 use App\Modules\Orders\Support\Traits\OrderCrud;
 use App\Models\Order;
 use App\Models\OrderLog;
+use App\Models\OrderType;
 use App\Services\ImportCandidateToPersonnel;
+use App\Services\Orders\OrderTemplateSnapshotService;
 use App\Services\OrderConfirmedService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -38,6 +40,21 @@ class AddOrder extends Component
                 'given_by_rank' => $payload['given_by_rank'],
                 'status_id' => $payload['status_id'],
             ];
+
+            $legacyTemplatePath = (string) optional(
+                OrderType::query()
+                    ->with('order:id,content')
+                    ->find((int) $payload['order_type_id'])
+                    ?->order
+            )->content;
+
+            $snapshot = app(OrderTemplateSnapshotService::class)->capture(
+                (int) $payload['order_type_id'],
+                $legacyTemplatePath
+            );
+            $created['order_template_version_id'] = $snapshot['order_template_version_id'];
+            $created['template_render_mode'] = $snapshot['template_render_mode'];
+            $created['template_snapshot'] = $snapshot['template_snapshot'];
 
             if ($this->selectedBlade == Order::BLADE_BUSINESS_TRIP) {
                 $created['description'] = $payload['description'];

@@ -52,6 +52,7 @@ class GenerateDynamicFieldsService
                 'model' => '_structures',
                 'selectedName' => 'structure',
                 'searchField' => 'search.structure',
+                'input' => 'radio-list',
             ],
 
             '$position' => [

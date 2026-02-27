@@ -5,12 +5,21 @@ namespace App\Modules\Orders\Livewire\Templates;
 use App\Livewire\Traits\SideModalAction;
 use App\Models\Order;
 use App\Models\OrderType;
+use App\Modules\Orders\Support\Traits\Templates\HandlesSetTypeMetadataBootstrap;
+use App\Modules\Orders\Support\Traits\Templates\HandlesSetTypeUiConfigLifecycle;
+use App\Modules\Orders\Support\Traits\Templates\HandlesSetTypeUiConfigMutations;
+use App\Modules\Orders\Support\Traits\Templates\HandlesSetTypeUiConfigSupport;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Component;
 
 class SetType extends Component
 {
-    use AuthorizesRequests,SideModalAction;
+    use AuthorizesRequests;
+    use SideModalAction;
+    use HandlesSetTypeUiConfigSupport;
+    use HandlesSetTypeMetadataBootstrap;
+    use HandlesSetTypeUiConfigLifecycle;
+    use HandlesSetTypeUiConfigMutations;
 
     public $types = [];
 
@@ -21,6 +30,44 @@ class SetType extends Component
     public $selectedType;
 
     public $selectedModel;
+
+    public ?int $uiConfigOrderTypeId = null;
+
+    public ?int $uiConfigVersionId = null;
+
+    public array $uiConfigFieldMeta = [];
+
+    public array $uiConfigDraft = [];
+
+    public array $sectionBlocksDraft = [];
+
+    public array $mappingDraft = [];
+
+    public array $uiPlaceholderCoverage = [];
+
+    public array $uiConfigAuditTrail = [];
+
+    public array $uiConfigVersions = [];
+
+    public array $uiInputTypes = [];
+
+    public string $newFieldKey = '';
+
+    public string $newFieldLabel = '';
+
+    public string $newFieldAlias = '';
+
+    public string $newFieldInput = 'text-input';
+
+    public string $newFieldModel = '';
+
+    public string $newFieldSelectedName = '';
+
+    public string $newFieldSearchField = '';
+
+    public bool $newFieldRequired = false;
+
+    public string $newFieldRules = '';
 
     public function rules()
     {
@@ -83,12 +130,16 @@ class SetType extends Component
     {
         $this->title = __('Set Type');
         $this->templateModel = Order::findOrFail($this->templateModel);
+        $this->uiInputTypes = $this->inputTypeOptions();
+        $this->resetNewFieldDraft();
 
     }
 
     public function render()
     {
-        $_order_types = $this->templateModel->types;
+        $_order_types = $this->templateModel->types()
+            ->with('templateSet.activeVersion')
+            ->get();
 
         return view('orders::livewire.orders.templates.set-type', compact('_order_types'));
     }

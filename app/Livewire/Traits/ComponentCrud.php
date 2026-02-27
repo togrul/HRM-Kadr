@@ -28,6 +28,8 @@ trait ComponentCrud
             'component.name' => 'required|string|min:2',
             'component.content' => 'required',
             'component.order_type_id' => 'required|int|exists:order_types,id',
+            'component.title' => 'nullable|string|max:5000',
+            'component.dynamic_fields' => 'nullable|string|max:2000',
         ];
     }
 
@@ -37,23 +39,20 @@ trait ComponentCrud
             'component.name' => __('Name'),
             'component.content' => __('Content'),
             'component.order_type_id' => __('Category'),
+            'component.title' => __('Title'),
+            'component.dynamic_fields' => __('Dynamic fields'),
         ];
     }
 
     public function updated($name, $value)
     {
-        $data = ($this->component['title'] ?? '').' '.($this->component['content'] ?? '');
+        if (! in_array($name, ['component.content', 'component.title'], true)) {
+            return;
+        }
 
-        $dollarStrings = array_filter(
-            array_map(
-                function ($string) {
-                    return Str::startsWith($string, '$') ? $string : null;
-                },
-                explode(' ', str_replace(['“', '”'], '', trim($data)))
-            )
-        );
-
-        $this->component['dynamic_fields'] = implode(',', array_unique($dollarStrings));
+        $data = (string) (($this->component['title'] ?? '').' '.($this->component['content'] ?? ''));
+        $tokens = $this->extractDynamicTokens($data);
+        $this->component['dynamic_fields'] = implode(',', $tokens);
     }
 
     public function mount()
@@ -120,10 +119,49 @@ trait ComponentCrud
 
     public function render()
     {
-        $view_name = ! empty($this->candidateModel)
+        $view_name = ! empty($this->componentModel)
             ? 'services::livewire.services.components.edit-component'
             : 'services::livewire.services.components.add-component';
 
         return view($view_name);
+    }
+
+    public function dynamicFieldTokens(): array
+    {
+        $raw = (string) ($this->component['dynamic_fields'] ?? '');
+
+        return collect(explode(',', $raw))
+            ->map(fn ($token) => trim((string) $token))
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    private function extractDynamicTokens(string $content): array
+    {
+        if (trim($content) === '') {
+            return [];
+        }
+
+        preg_match_all('/\$\{?[a-zA-Z0-9_#]+\}?/u', $content, $matches);
+        $found = $matches[0] ?? [];
+
+        return collect($found)
+            ->map(function (string $raw): string {
+                $token = trim($raw);
+                $token = trim($token, '{}');
+                $token = ltrim($token, '$');
+                $token = preg_replace('/#\d+$/', '', $token);
+                if (! is_string($token) || trim($token) === '') {
+                    return '';
+                }
+
+                return '$'.trim($token);
+            })
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
     }
 }

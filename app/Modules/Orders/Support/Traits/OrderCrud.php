@@ -27,6 +27,7 @@ use App\Services\Orders\OrderInteractionStateService;
 use App\Services\Orders\OrderLookupService;
 use App\Services\Orders\OrderPersonnelPersister;
 use App\Services\Orders\OrderRenderStateService;
+use App\Services\Orders\OrderTemplateFormSchemaService;
 use App\Services\Orders\VacancyDiffService;
 use App\Services\Orders\VacationCleanupService;
 use Illuminate\Support\Facades\Cache;
@@ -55,6 +56,8 @@ trait OrderCrud
     protected OrderRenderStateService $renderStateService;
 
     protected OrderInteractionStateService $interactionStateService;
+
+    protected OrderTemplateFormSchemaService $templateFormSchemaService;
 
     protected OrderAttributeMappingService $attributeMappingService;
 
@@ -99,6 +102,20 @@ trait OrderCrud
      */
     protected array $componentDefinitions = [];
 
+    public array $templateRowFieldKeys = [];
+
+    public array $templateRowGroups = [];
+
+    public array $templateSectionBlocks = [];
+
+    public array $dynamicFieldCatalog = [];
+
+    public array $dynamicDropdownFields = [];
+
+    protected ?int $resolvedTemplateSchemaOrderTypeId = null;
+
+    public string $templateSchemaSource = 'legacy';
+
     public function bootOrderCrud(
         OrderLookupService $orderLookupService,
         OrderComponentPersister $componentPersister,
@@ -106,6 +123,7 @@ trait OrderCrud
         OrderPersonnelPersister $personnelPersister,
         OrderRenderStateService $renderStateService,
         OrderInteractionStateService $interactionStateService,
+        OrderTemplateFormSchemaService $templateFormSchemaService,
         OrderAttributeMappingService $attributeMappingService,
         OrderAttributePersister $attributePersister,
         VacancyDiffService $vacancyDiffService,
@@ -117,6 +135,7 @@ trait OrderCrud
         $this->personnelPersister = $personnelPersister;
         $this->renderStateService = $renderStateService;
         $this->interactionStateService = $interactionStateService;
+        $this->templateFormSchemaService = $templateFormSchemaService;
         $this->attributeMappingService = $attributeMappingService;
         $this->attributePersister = $attributePersister;
         $this->vacancyDiffService = $vacancyDiffService;
@@ -150,6 +169,11 @@ trait OrderCrud
     #[On('componentSelected')]
     public function componentSelected($componentId, $rowKey = null): void
     {
+        if (! empty($this->templateRowFieldKeys)) {
+            $this->selectedComponents[$rowKey] = $this->templateRowFieldKeys;
+            return;
+        }
+
         $this->selectedComponents[$rowKey] = $this->interactionStateService->resolveSelectedComponentFields(
             componentId: $componentId,
             componentDefinitions: $this->componentDefinitions,
@@ -178,6 +202,7 @@ trait OrderCrud
             $this->selectedBlade = $selection['selectedBlade'];
         }
 
+        $this->refreshTemplateFormSchema();
         $this->reset('selectedComponents');
         $this->fillEmptyComponent();
     }
@@ -271,12 +296,14 @@ trait OrderCrud
             $this->authorize('edit-orders');
             $this->title = __('Edit order');
             $this->fillOrder();
+            $this->refreshTemplateFormSchema();
         } else {
             $this->authorize('add-orders');
             $this->title = __('Add order');
             $this->orderForm->fillDefaults($this->selectedOrder, cache('settings'));
             $this->resetComponentState();
             $this->selectedPersonnel->resetState();
+            $this->refreshTemplateFormSchema();
         }
     }
 
@@ -335,6 +362,9 @@ trait OrderCrud
             personnelLabelResolver: fn ($person) => $this->personnelOptionLabel($person),
         );
 
+        $this->registerTemplateDropdownOptionLabels($payload);
+        $payload['dynamicFieldCatalog'] = $this->dynamicFieldCatalog;
+
         $viewName = ! empty($this->orderModel)
             ? 'orders::livewire.orders.edit-order'
             : 'orders::livewire.orders.add-order';
@@ -392,5 +422,63 @@ trait OrderCrud
             'order_id' => (int) $order->order_id,
             'selected_blade' => $order->order?->blade,
         ];
+    }
+
+    protected function refreshTemplateFormSchema(bool $force = false): void
+    {
+        $orderTypeId = (int) ($this->selectedTemplate ?? $this->orderForm->order_type_id ?? 0);
+
+        if (
+            ! $force
+            && $this->resolvedTemplateSchemaOrderTypeId === $orderTypeId
+            && ! empty($this->dynamicFieldCatalog)
+        ) {
+            return;
+        }
+
+        $resolved = $this->templateFormSchemaService->resolveForOrderType($orderTypeId);
+
+        $this->templateSchemaSource = (string) ($resolved['source'] ?? 'legacy');
+        $this->templateRowFieldKeys = $resolved['row_field_keys'] ?? [];
+        $this->templateRowGroups = $resolved['row_groups'] ?? [];
+        $this->templateSectionBlocks = $resolved['section_blocks'] ?? [];
+        $this->dynamicFieldCatalog = $resolved['field_catalog'] ?? [];
+        $this->dynamicDropdownFields = $resolved['dropdown_fields'] ?? [];
+        $this->resolvedTemplateSchemaOrderTypeId = $orderTypeId;
+    }
+
+    protected function registerTemplateDropdownOptionLabels(array $payload): void
+    {
+        foreach ($this->dynamicFieldCatalog as $definition) {
+            $field = (string) ($definition['field'] ?? '');
+            $modelKey = (string) ($definition['model'] ?? '');
+            $input = (string) ($definition['input'] ?? '');
+
+            if ($field === '' || $modelKey === '' || ! in_array($input, ['select'], true)) {
+                continue;
+            }
+
+            $options = collect($payload[$modelKey] ?? [])
+                ->map(function ($item) {
+                    $id = data_get($item, 'id');
+                    $label = data_get($item, 'label', data_get($item, 'name'));
+
+                    if ($id === null || $label === null || $label === '') {
+                        return null;
+                    }
+
+                    return [
+                        'id' => (int) $id,
+                        'label' => (string) $label,
+                    ];
+                })
+                ->filter()
+                ->values()
+                ->all();
+
+            if (! empty($options)) {
+                $this->registerComponentOptionLabels($field, $options);
+            }
+        }
     }
 }

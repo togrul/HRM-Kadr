@@ -23,6 +23,12 @@ class AllTemplates extends Component
         $this->dispatch('setDeleteTemplate', $templateId);
     }
 
+    #[On('openSetTypeFromTemplateEdit')]
+    public function openSetTypeFromTemplateEdit(int $templateId): void
+    {
+        $this->openSideMenu('set-type', $templateId);
+    }
+
     public function setStatus($newStatus)
     {
         $this->status = $newStatus;

@@ -100,14 +100,14 @@ trait HandlesOrderComponentFieldState
     {
         $value = data_get($this->componentForms[$row] ?? [], $field);
 
-        if (is_array($value) && array_key_exists('name', $value)) {
-            return (string) $value['name'];
-        }
-
         if ($this->isDropdownField($field)) {
             $resolvedValue = is_array($value) ? ($value['id'] ?? null) : $value;
 
             return $this->dropdownFieldLabel($field, $resolvedValue, $row);
+        }
+
+        if (is_array($value) && array_key_exists('name', $value)) {
+            return (string) $value['name'];
         }
 
         return $value ?: '---';
@@ -172,6 +172,21 @@ trait HandlesOrderComponentFieldState
 
     protected function syncSelectedComponentsFromLookup(): void
     {
+        if (! empty($this->templateRowFieldKeys)) {
+            foreach ($this->componentForms as $row => $component) {
+                $componentId = $component['component_id'] ?? null;
+
+                if (empty($componentId)) {
+                    $this->selectedComponents[$row] = [];
+                    continue;
+                }
+
+                $this->selectedComponents[$row] = $this->templateRowFieldKeys;
+            }
+
+            return;
+        }
+
         foreach ($this->componentForms as $row => $component) {
             $componentId = $component['component_id'] ?? null;
             if (empty($componentId)) {

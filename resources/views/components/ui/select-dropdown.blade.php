@@ -16,7 +16,8 @@
   $wireModel = collect($wireModelKeys)
       ->map(fn ($key) => $attributes->get($key))
       ->first(fn ($value) => filled($value));
-  $uid = 'ui-select-'.Str::slug($wireModel ?? Str::uuid(), '_');
+  $optionsFingerprint = md5((string) json_encode($model));
+  $uid = 'ui-select-'.Str::slug(($wireModel ?? Str::uuid()).'-'.$optionsFingerprint, '_');
   $labelId = $uid.'-label';
   $bg = $mode === 'gray' ? 'bg-neutral-100' : 'bg-white';
 @endphp
@@ -38,8 +39,32 @@
       const s = String(v).trim();
       return /^[0-9]+$/.test(s) ? Number(s) : s;
     },
+    optionLabel(option){
+      if (!option) return '';
+      return option.label ?? option.name ?? option.title ?? option.text ?? '';
+    },
+    optionId(option){
+      if (!option) return null;
+      return option.id ?? option.value ?? null;
+    },
+    normalizeOptions(options){
+      return (Array.isArray(options) ? options : [])
+        .map((option) => {
+          const id = this.optionId(option);
+          const normalizedId = this.toId(id);
+          if (normalizedId === null) return null;
+
+          return {
+            ...option,
+            id: normalizedId,
+            label: String(this.optionLabel(option) ?? '').trim(),
+          };
+        })
+        .filter(Boolean);
+    },
 
     init(){
+      this.cachedOptions = this.normalizeOptions(this.cachedOptions);
       const currentId = this.toId(this.currentValue);
       if (this.initialSelectedLabel && currentId !== null) {
         const found = this.cachedOptions.find(o => this.toId(o.id) === currentId);
@@ -94,7 +119,8 @@
   }"
   x-on:click.window="if (!$el.contains($event.target)) isOpen = false"
   x-on:keydown.escape.window="isOpen = false"
-  {{ $attributes->except(['wire:model','wire:model.live','wire:model.defer','wire:model.lazy','wire:model.blur'])->class('w-full') }}
+  {{ $attributes->except(['wire:model','wire:model.live','wire:model.defer','wire:model.lazy','wire:model.blur'])->class('relative w-full') }}
+  x-bind:class="isOpen ? 'z-[140]' : 'z-10'"
 >
   @if($label)
     <x-label id="{{ $labelId }}" for="{{ $uid }}">{{ $label }}</x-label>
@@ -120,7 +146,7 @@
 
     <ul
       x-show="isOpen && !isDisabled" x-transition.opacity.duration.100ms x-cloak
-      class="absolute z-10 w-full px-3 py-2 mt-1 space-y-2 overflow-auto text-base bg-white rounded-md shadow-xl max-h-56 focus:outline-none sm:text-sm"
+      class="absolute z-[150] w-full px-3 py-2 mt-1 space-y-2 overflow-auto text-base bg-white rounded-md shadow-xl max-h-56 focus:outline-none sm:text-sm"
     >
       {{-- slot: search input --}}
       @if ($searchModel)
@@ -166,11 +192,11 @@
           wire:key="{{ $uid }}-{{ data_get($opt,'id') }}"
           class="relative py-2 pl-3 rounded-lg cursor-pointer select-none group pr-9 hover:bg-blue-400 bg-neutral-50"
           data-option-id="{{ data_get($opt,'id') }}"
-          data-option-label="{{ data_get($opt,'label') }}"
+          data-option-label="{{ data_get($opt,'label', data_get($opt,'name', data_get($opt,'title', data_get($opt,'text')))) }}"
           x-on:click.prevent.stop="select($el.dataset.optionId, $el.dataset.optionLabel)"
         >
           <div class="flex items-center">
-            <span class="block ml-3 truncate">{{ data_get($opt,'label') }}</span>
+            <span class="block ml-3 truncate">{{ data_get($opt,'label', data_get($opt,'name', data_get($opt,'title', data_get($opt,'text')))) }}</span>
             <span
               x-show="toId(currentValue) === toId(@js(data_get($opt,'id')))"
               class="absolute inset-y-0 right-0 flex items-center pr-4 text-blue-600"

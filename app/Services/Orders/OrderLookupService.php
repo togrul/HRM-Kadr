@@ -58,11 +58,27 @@ class OrderLookupService
         });
     }
 
-    public function personnels(bool $forCandidates, array $excludeIds, ?string $search = null): Collection
+    public function personnels(
+        bool $forCandidates,
+        array $excludeIds,
+        ?string $search = null,
+        int $nonCandidateDefaultLimit = 15
+    ): Collection
     {
-        return $forCandidates
-            ? $this->candidatePersonnelQuery($excludeIds, $search)->get()
-            : $this->activePersonnelQuery($excludeIds, $search)->get();
+        $normalizedSearch = trim((string) $search);
+
+        if ($forCandidates) {
+            return $this->candidatePersonnelQuery($excludeIds, $normalizedSearch)
+                ->orderBy('surname')
+                ->orderBy('name')
+                ->get();
+        }
+
+        return $this->activePersonnelQuery($excludeIds, $normalizedSearch)
+            ->when($normalizedSearch === '', fn (Builder $query) => $query->limit(max(1, $nonCandidateDefaultLimit)))
+            ->orderBy('surname')
+            ->orderBy('name')
+            ->get();
     }
 
     public function ranks(): Collection
@@ -124,31 +140,63 @@ class OrderLookupService
 
     private function activePersonnelQuery(array $excludeIds, ?string $search): Builder
     {
+        $normalizedSearch = trim((string) $search);
+
         return Personnel::query()
-            ->when($search, function (Builder $query) use ($search) {
-                $query->where(function (Builder $nested) use ($search) {
-                    $nested->where('name', 'LIKE', "%{$search}%")
-                        ->orWhere('surname', 'LIKE', "%{$search}%");
-                });
+            ->when($normalizedSearch !== '', function (Builder $query) use ($normalizedSearch) {
+                $this->applyMultiTermSearch($query, $normalizedSearch, [
+                    'name',
+                    'surname',
+                    'patronymic',
+                    'tabel_no',
+                ]);
             })
+            ->active()
             ->whereIn('structure_id', $this->structureService->getAccessibleStructures())
             ->whereNotIn('id', $excludeIds)
-            ->whereNull('leave_work_date')
             ->orderBy('position_id')
             ->orderBy('structure_id');
     }
 
     private function candidatePersonnelQuery(array $excludeIds, ?string $search): Builder
     {
+        $normalizedSearch = trim((string) $search);
+
         return Candidate::query()
-            ->when($search, function (Builder $query) use ($search) {
-                $query->where(function (Builder $nested) use ($search) {
-                    $nested->where('name', 'LIKE', "%{$search}%")
-                        ->orWhere('surname', 'LIKE', "%{$search}%");
-                });
+            ->when($normalizedSearch !== '', function (Builder $query) use ($normalizedSearch) {
+                $this->applyMultiTermSearch($query, $normalizedSearch, [
+                    'name',
+                    'surname',
+                    'patronymic',
+                ], 'id');
             })
             ->whereNotIn('id', $excludeIds)
             ->where('status_id', 30);
+    }
+
+    private function applyMultiTermSearch(Builder $query, string $search, array $columns, ?string $numericColumn = null): void
+    {
+        $terms = collect(preg_split('/\s+/', $search))
+            ->map(fn ($term) => trim((string) $term))
+            ->filter()
+            ->values();
+
+        foreach ($terms as $term) {
+            $query->where(function (Builder $nested) use ($columns, $term, $numericColumn) {
+                foreach ($columns as $index => $column) {
+                    if ($index === 0) {
+                        $nested->where($column, 'LIKE', "%{$term}%");
+                        continue;
+                    }
+
+                    $nested->orWhere($column, 'LIKE', "%{$term}%");
+                }
+
+                if ($numericColumn !== null && ctype_digit($term)) {
+                    $nested->orWhere($numericColumn, (int) $term);
+                }
+            });
+        }
     }
 
     private function structureQuery(): Builder

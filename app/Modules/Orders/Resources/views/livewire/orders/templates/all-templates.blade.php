@@ -15,10 +15,17 @@
             </x-filter.nav>
         </div>
         {{-- @can('manage-templates') --}}
-        <x-button mode="primary" wire:click="openSideMenu('add-template')" class="space-x-2">
-            <x-icons.add-icon color="text-white" hover="text-gray-50"></x-icons.add-icon>
-            <span>{{ __('Add template') }}</span>
-        </x-button>
+        <div class="flex items-center gap-2">
+            <x-button mode="default" wire:click="openSideMenu('onboarding-wizard')" class="space-x-2">
+                <x-icons.components-icon color="text-zinc-600" hover="text-zinc-700"></x-icons.components-icon>
+                <span>{{ __('Onboarding wizard') }}</span>
+            </x-button>
+
+            <x-button mode="primary" wire:click="openSideMenu('add-template')" class="space-x-2">
+                <x-icons.add-icon color="text-white" hover="text-gray-50"></x-icons.add-icon>
+                <span>{{ __('Add template') }}</span>
+            </x-button>
+        </div>
         {{-- @endcan --}}
     </div>
 
@@ -100,6 +107,10 @@
 
                 @if($showSideMenu == 'set-type')
                     <livewire:orders.templates.set-type :templateModel="$modelName" />
+                @endif
+
+                @if($showSideMenu == 'onboarding-wizard')
+                    <livewire:orders.templates.onboarding-wizard />
                 @endif
         </x-side-modal>
     </div>

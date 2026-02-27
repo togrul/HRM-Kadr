@@ -15,6 +15,6 @@ class AddComponent extends Component
 
         \App\Models\Component::create($this->modifyArray($this->component));
 
-        $this->dispatch('candidateAdded', __('Candidate was added successfully!'));
+        $this->dispatch('componentAdded', __('Component was added successfully!'));
     }
 }

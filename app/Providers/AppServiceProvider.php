@@ -5,6 +5,10 @@ namespace App\Providers;
 use App\Models\User;
 use App\Services\Features\FeatureState;
 use App\Services\NumberToWordsService;
+use App\Services\Orders\OrderTemplateAuditLogger;
+use App\Services\Orders\OrderTemplateSnapshotService;
+use App\Services\Orders\OrderTemplateVersionLifecycleService;
+use App\Services\Orders\TemplateRegistry;
 use App\Services\Profiles\ProfileState;
 use App\Services\StructureService;
 use Illuminate\Database\Eloquent\Builder;
@@ -28,6 +32,10 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(NumberToWordsService::class, fn () => new NumberToWordsService);
         $this->app->singleton(StructureService::class, fn () => new StructureService);
         $this->app->singleton(FeatureState::class, fn () => new FeatureState($this->app->make(ProfileState::class)->features()));
+        $this->app->singleton(TemplateRegistry::class);
+        $this->app->singleton(OrderTemplateAuditLogger::class);
+        $this->app->singleton(OrderTemplateSnapshotService::class);
+        $this->app->singleton(OrderTemplateVersionLifecycleService::class);
     }
 
     /**

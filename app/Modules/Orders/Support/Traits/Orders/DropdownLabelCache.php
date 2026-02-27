@@ -29,7 +29,15 @@ trait DropdownLabelCache
 
     protected function isDropdownField(string $field): bool
     {
-        return in_array($field, $this->componentDropdownFields, true);
+        if (in_array($field, $this->componentDropdownFields, true)) {
+            return true;
+        }
+
+        if (property_exists($this, 'dynamicDropdownFields') && is_array($this->dynamicDropdownFields)) {
+            return in_array($field, $this->dynamicDropdownFields, true);
+        }
+
+        return false;
     }
 
     protected function registerComponentOptionLabels(string $field, array $options, bool $overrideExisting = false): void
@@ -54,6 +62,20 @@ trait DropdownLabelCache
 
         $value = (int) $value;
 
+        if ($field === 'structure_id') {
+            $isCoded = $row !== null ? (bool) ($this->coded_list[$row] ?? false) : false;
+            $variantKey = ($isCoded ? 'coded' : 'plain').':'.$value;
+
+            if (isset($this->componentOptionLabels[$field][$variantKey])) {
+                return $this->componentOptionLabels[$field][$variantKey];
+            }
+
+            $label = $this->structureLabelForRow($row, $value);
+            $this->componentOptionLabels[$field][$variantKey] = $label;
+
+            return $label;
+        }
+
         if (isset($this->componentOptionLabels[$field][$value])) {
             return $this->componentOptionLabels[$field][$value];
         }
@@ -77,13 +99,7 @@ trait DropdownLabelCache
             return '---';
         }
 
-        $isCoded = $row !== null ? (bool) ($this->coded_list[$row] ?? false) : false;
-
-        if ($isCoded) {
-            return $this->buildStructureValue($lineage, true);
-        }
-
-        return optional(collect($lineage)->last())['name'] ?? '---';
+        return $this->codedStructureLabelSimple($lineage);
     }
 
     protected function resolveStructureLabel(int $id, bool $isCoded): string
@@ -92,6 +108,10 @@ trait DropdownLabelCache
 
         if (empty($lineage)) {
             return '---';
+        }
+
+        if ($isCoded) {
+            return $this->codedStructureLabelSimple($lineage);
         }
 
         return $this->buildStructureValue($lineage, $isCoded);
@@ -126,13 +146,34 @@ trait DropdownLabelCache
             : $suffixService->getStructureSuffix($levelName);
 
         // User-facing requirement: keep suffix (e.g. "nin"), but remove hyphen form ("-nin").
-        $levelWithSuffix = preg_replace('/-(nın|nin|nun|nün|ın|in|un|ün)$/u', '$1', $levelWithSuffix) ?? $levelWithSuffix;
+        $levelWithSuffix = preg_replace('/[-‐‑‒–—](nın|nin|nun|nün|ın|in|un|ün)$/u', '$1', $levelWithSuffix) ?? $levelWithSuffix;
 
         return (string) ($parent['code'] ?? '')
             . $suffixService->getNumberSuffix((int) ($parent['code'] ?? 0))
             . ' '
             . $levelWithSuffix
             . ' ';
+    }
+
+    protected function codedStructureLabelSimple(array $lineage): string
+    {
+        $node = collect($lineage)->last();
+        if (! is_array($node)) {
+            return '---';
+        }
+
+        $code = (int) ($node['code'] ?? 0);
+        if ($code <= 0) {
+            return (string) ($node['name'] ?? '---');
+        }
+
+        $levelName = __(strtolower((string) (collect(StructureEnum::cases())->pluck('name', 'value')[$node['level']] ?? '')));
+        $suffixService = new WordSuffixService;
+        $levelBase = mb_strtolower((string) $levelName);
+        $levelWithSuffix = $suffixService->getStructureSuffix($levelBase);
+        $levelWithSuffix = preg_replace('/-(nın|nin|nun|nün|ın|in|un|ün)$/u', '$1', $levelWithSuffix) ?? $levelWithSuffix;
+
+        return trim($code.$suffixService->getNumberSuffix($code).' '.$levelWithSuffix);
     }
 
     protected function structureLineage(int $structureId): array

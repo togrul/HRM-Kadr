@@ -5,7 +5,9 @@ namespace App\Modules\Orders\Livewire;
 use App\Modules\Orders\Support\Traits\OrderCrud;
 use App\Models\Order;
 use App\Models\OrderLog;
+use App\Models\OrderType;
 use App\Models\Personnel;
+use App\Services\Orders\OrderTemplateSnapshotService;
 use App\Services\OrderConfirmedService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -225,6 +227,18 @@ class EditOrder extends Component
 
     private function updateOrder(array $payload): void
     {
+        $legacyTemplatePath = (string) optional(
+            OrderType::query()
+                ->with('order:id,content')
+                ->find((int) $payload['order_type_id'])
+                ?->order
+        )->content;
+
+        $snapshot = app(OrderTemplateSnapshotService::class)->capture(
+            (int) $payload['order_type_id'],
+            $legacyTemplatePath
+        );
+
         $this->orderModelData->update([
             'order_type_id' => $payload['order_type_id'],
             'order_id' => $payload['order_id'],
@@ -233,6 +247,9 @@ class EditOrder extends Component
             'given_by' => $payload['given_by'],
             'given_by_rank' => $payload['given_by_rank'],
             'description' => $payload['description'],
+            'order_template_version_id' => $snapshot['order_template_version_id'],
+            'template_render_mode' => $snapshot['template_render_mode'],
+            'template_snapshot' => $snapshot['template_snapshot'],
             'status_id' => $payload['status_id'],
         ]);
     }

@@ -40,6 +40,9 @@ class OrderLog extends Model
         'given_by',
         'given_by_rank',
         'description',
+        'order_template_version_id',
+        'template_render_mode',
+        'template_snapshot',
         'status_id',
         'creator_id',
         'deleted_by',
@@ -53,6 +56,7 @@ class OrderLog extends Model
         'deleted_at' => self::FORMAT_CAST,
         'given_date' => self::FORMAT_CAST,
         'description' => 'array',
+        'template_snapshot' => 'array',
     ];
 
     public function getForeignKeyName(): string
@@ -102,6 +106,11 @@ class OrderLog extends Model
         return $this->belongsTo(OrderType::class);
     }
 
+    public function templateVersion(): BelongsTo
+    {
+        return $this->belongsTo(OrderTemplateVersion::class, 'order_template_version_id');
+    }
+
     public function attributes(): HasMany
     {
         return $this->hasMany(OrderLogComponentAttributes::class, 'order_no', 'order_no');
@@ -115,6 +124,11 @@ class OrderLog extends Model
     public function businessTrips(): HasMany
     {
         return $this->hasMany(PersonnelBusinessTrip::class, 'order_no', 'order_no');
+    }
+
+    public function generationLogs(): HasMany
+    {
+        return $this->hasMany(OrderGenerationLog::class);
     }
 
     public function handleDeletion(): void
