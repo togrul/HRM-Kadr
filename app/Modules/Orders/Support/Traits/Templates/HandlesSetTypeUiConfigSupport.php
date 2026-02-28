@@ -8,6 +8,13 @@ use Illuminate\Support\Str;
 
 trait HandlesSetTypeUiConfigSupport
 {
+    private const TEMPLATE_UI_PERMISSION_MATRIX = [
+        'view' => ['show-orders', 'edit-orders'],
+        'metadata' => ['manage-order-template-metadata', 'edit-orders'],
+        'version' => ['manage-order-template-versions', 'edit-orders'],
+        'set' => ['manage-order-template-sets', 'edit-orders'],
+    ];
+
     public function resolveUiAuditActionLabel(string $action): string
     {
         return match (trim($action)) {
@@ -20,6 +27,68 @@ trait HandlesSetTypeUiConfigSupport
             'version_rolled_back' => __('Version rolled back'),
             default => Str::headline(str_replace('_', ' ', trim($action))),
         };
+    }
+
+    public function summarizeUiAuditPayload(array $payload): array
+    {
+        $summary = is_array($payload['summary'] ?? null) ? $payload['summary'] : [];
+        $diff = is_array($payload['diff'] ?? null) ? $payload['diff'] : [];
+        $highlights = collect(is_array($payload['diff_highlights'] ?? null) ? $payload['diff_highlights'] : [])
+            ->map(fn ($item) => is_string($item) ? trim($item) : '')
+            ->filter()
+            ->values()
+            ->take(4)
+            ->all();
+
+        $fieldStats = is_array($summary['fields'] ?? null) ? $summary['fields'] : [];
+        $mappingStats = is_array($summary['mappings'] ?? null) ? $summary['mappings'] : [];
+        $sectionStats = is_array($summary['sections'] ?? null) ? $summary['sections'] : [];
+
+        $resolved = [
+            'fields' => [
+                'added' => (int) ($fieldStats['added'] ?? 0),
+                'removed' => (int) ($fieldStats['removed'] ?? 0),
+                'updated' => (int) ($fieldStats['updated'] ?? 0),
+            ],
+            'mappings' => [
+                'added' => (int) ($mappingStats['added'] ?? 0),
+                'removed' => (int) ($mappingStats['removed'] ?? 0),
+                'updated' => (int) ($mappingStats['updated'] ?? 0),
+            ],
+            'sections' => [
+                'added' => (int) ($sectionStats['added'] ?? 0),
+                'removed' => (int) ($sectionStats['removed'] ?? 0),
+                'updated' => (int) ($sectionStats['updated'] ?? 0),
+            ],
+            'highlights' => $highlights,
+            'changed_keys' => [
+                'fields' => collect(is_array(data_get($diff, 'fields.updated', [])) ? data_get($diff, 'fields.updated', []) : [])->pluck('key')->filter()->take(5)->values()->all(),
+                'mappings' => collect(is_array(data_get($diff, 'mappings.updated', [])) ? data_get($diff, 'mappings.updated', []) : [])->pluck('key')->filter()->take(5)->values()->all(),
+                'sections' => collect(is_array(data_get($diff, 'sections.updated', [])) ? data_get($diff, 'sections.updated', []) : [])->pluck('key')->filter()->take(5)->values()->all(),
+            ],
+        ];
+
+        return $resolved;
+    }
+
+    private function ensureTemplateUiPermission(string $scope, string $messageEvent = 'typesUpdated'): bool
+    {
+        $user = auth()->user();
+        if (! $user) {
+            $this->dispatch($messageEvent, __('You do not have permission to perform this action.'));
+            return false;
+        }
+
+        $permissions = self::TEMPLATE_UI_PERMISSION_MATRIX[$scope] ?? ['edit-orders'];
+        foreach ($permissions as $permission) {
+            if ($user->can($permission)) {
+                return true;
+            }
+        }
+
+        $this->dispatch($messageEvent, __('You do not have permission to perform this action.'));
+
+        return false;
     }
 
     private function normalizeUiConfigDraft(
@@ -160,20 +229,6 @@ trait HandlesSetTypeUiConfigSupport
         return is_string($normalized) ? $normalized : '';
     }
 
-    private function resolveLegacyInput(array $legacyDefinition): string
-    {
-        $configured = trim((string) ($legacyDefinition['input'] ?? ''));
-        if ($configured !== '') {
-            return $configured;
-        }
-
-        if (! empty($legacyDefinition['model']) || ! empty($legacyDefinition['searchField']) || ! empty($legacyDefinition['selectedName'])) {
-            return 'select';
-        }
-
-        return 'text-input';
-    }
-
     private function mapInputToFieldType(string $input): string
     {
         return match (trim($input)) {
@@ -192,46 +247,6 @@ trait HandlesSetTypeUiConfigSupport
             'integer' => 'numeric-input',
             default => 'text-input',
         };
-    }
-
-    private function fallbackTokensForBlade(string $blade): array
-    {
-        return match ($blade) {
-            Order::BLADE_VACATION => ['$start_date', '$end_date', '$days', '$fullname', '$location'],
-            Order::BLADE_BUSINESS_TRIP => ['$start_date', '$end_date', '$location', '$fullname', '$transportation'],
-            default => ['$fullname', '$rank', '$day', '$month', '$year', '$structure_main', '$structure', '$position'],
-        };
-    }
-
-    private function extractDynamicTokens(mixed $fields): array
-    {
-        if (is_array($fields)) {
-            return collect($fields)
-                ->map(fn ($field) => is_string($field) ? trim($field) : '')
-                ->filter()
-                ->values()
-                ->all();
-        }
-
-        if (is_string($fields)) {
-            $trimmed = trim($fields);
-            if ($trimmed === '') {
-                return [];
-            }
-
-            $decoded = json_decode($trimmed, true);
-            if (is_array($decoded)) {
-                return $this->extractDynamicTokens($decoded);
-            }
-
-            return collect(explode(',', $trimmed))
-                ->map(fn ($field) => trim((string) $field))
-                ->filter()
-                ->values()
-                ->all();
-        }
-
-        return [];
     }
 
     private function mergeUiConfigDefaults(array $current, array $defaults): array

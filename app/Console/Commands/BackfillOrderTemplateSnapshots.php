@@ -3,9 +3,9 @@
 namespace App\Console\Commands;
 
 use App\Models\OrderLog;
-use App\Models\OrderType;
 use App\Services\Orders\OrderTemplateSnapshotService;
 use Illuminate\Console\Command;
+use RuntimeException;
 
 class BackfillOrderTemplateSnapshots extends Command
 {
@@ -18,31 +18,27 @@ class BackfillOrderTemplateSnapshots extends Command
         $chunkSize = max(50, (int) $this->option('chunk'));
         $force = (bool) $this->option('force');
         $updated = 0;
-        $legacyPathByOrderType = [];
+        $skipped = 0;
 
         OrderLog::query()
             ->select(['id', 'order_type_id', 'template_snapshot'])
             ->when(! $force, fn ($query) => $query->whereNull('template_snapshot'))
             ->orderBy('id')
-            ->chunkById($chunkSize, function ($rows) use (&$updated, $snapshotService): void {
+            ->chunkById($chunkSize, function ($rows) use (&$updated, &$skipped, $snapshotService): void {
                 foreach ($rows as $row) {
                     $orderTypeId = is_numeric($row->order_type_id) ? (int) $row->order_type_id : 0;
-                    $legacyTemplatePath = '';
-
-                    if ($orderTypeId > 0) {
-                        if (! array_key_exists($orderTypeId, $legacyPathByOrderType)) {
-                            $legacyPathByOrderType[$orderTypeId] = (string) optional(
-                                OrderType::query()
-                                    ->with('order:id,content')
-                                    ->find($orderTypeId)
-                                    ?->order
-                            )->content;
-                        }
-
-                        $legacyTemplatePath = (string) ($legacyPathByOrderType[$orderTypeId] ?? '');
+                    if ($orderTypeId <= 0) {
+                        $skipped++;
+                        continue;
                     }
 
-                    $snapshot = $snapshotService->capture($orderTypeId, $legacyTemplatePath);
+                    try {
+                        $snapshot = $snapshotService->capture($orderTypeId);
+                    } catch (RuntimeException $exception) {
+                        $this->warn("Skipped order_log #{$row->id}: {$exception->getMessage()}");
+                        $skipped++;
+                        continue;
+                    }
 
                     $row->update([
                         'order_template_version_id' => $snapshot['order_template_version_id'],
@@ -54,7 +50,7 @@ class BackfillOrderTemplateSnapshots extends Command
                 }
             });
 
-        $this->info("Snapshot backfill finished. Updated rows: {$updated}");
+        $this->info("Snapshot backfill finished. Updated rows: {$updated}, skipped rows: {$skipped}");
 
         return self::SUCCESS;
     }

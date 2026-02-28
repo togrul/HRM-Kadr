@@ -4,7 +4,6 @@ namespace App\Services\Orders;
 
 use App\Models\OrderTemplateSet;
 use App\Models\OrderTemplateVersion;
-use App\Models\OrderType;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Cache;
@@ -12,16 +11,10 @@ use Illuminate\Support\Facades\Schema;
 
 class TemplateRegistry
 {
+    private bool $strictMode;
     private int $cacheMinutes;
     private int $readyCacheMinutes;
     private string $readinessMode;
-    private bool $metadataOnly;
-    private bool $allowLegacyFallbackForm;
-    private bool $allowLegacyFallbackPrint;
-    private bool $metadataRequiredWhenTemplateSetExists;
-    private bool $logLegacyFallback;
-    /** @var array<int,true> */
-    private array $metadataOnlyOrderTypeMap;
     /** @var array<int,bool> */
     private array $templateSetExistsMemory = [];
 
@@ -34,18 +27,10 @@ class TemplateRegistry
 
     public function __construct()
     {
+        $this->strictMode = (bool) config('orders.engine.strict_mode', false);
         $this->cacheMinutes = max(1, (int) config('orders.template_registry.active_version_cache_minutes', 15));
         $this->readyCacheMinutes = max(1, (int) config('orders.template_registry.readiness_cache_minutes', 60));
         $this->readinessMode = (string) config('orders.template_registry.readiness_mode', 'schema_cached');
-        $this->metadataOnly = (bool) config('orders.engine.metadata_only', false);
-        $this->allowLegacyFallbackForm = (bool) config('orders.engine.allow_legacy_fallback.form', true);
-        $this->allowLegacyFallbackPrint = (bool) config('orders.engine.allow_legacy_fallback.print', true);
-        $this->metadataRequiredWhenTemplateSetExists = (bool) config('orders.engine.metadata_required_when_template_set_exists', false);
-        $this->logLegacyFallback = (bool) config('orders.engine.log_legacy_fallback', true);
-        $this->metadataOnlyOrderTypeMap = collect(config('orders.engine.metadata_only_order_type_ids', []))
-            ->filter(fn ($id) => is_numeric($id))
-            ->mapWithKeys(fn ($id) => [(int) $id => true])
-            ->all();
     }
 
     public function activeVersionForOrderType(int $orderTypeId, bool $fresh = false): ?OrderTemplateVersion
@@ -92,22 +77,14 @@ class TemplateRegistry
         return $this->activeVersionForOrderType($orderTypeId, true);
     }
 
-    public function resolveTemplatePathForOrderType(int $orderTypeId, ?string $fallbackPath = null): ?string
+    public function resolveTemplatePathForOrderType(int $orderTypeId): ?string
     {
         $version = $this->activeVersionForOrderType($orderTypeId);
         if ($version) {
             return (string) $version->template_path;
         }
 
-        if ($fallbackPath !== null && trim($fallbackPath) !== '') {
-            return $fallbackPath;
-        }
-
-        return OrderType::query()
-            ->with('order:id,content')
-            ->find($orderTypeId)
-            ?->order
-            ?->content;
+        return null;
     }
 
     public function invalidate(int $orderTypeId): void
@@ -122,24 +99,6 @@ class TemplateRegistry
     {
         Cache::forget($this->readyCacheKey());
         $this->isReadyCache = null;
-    }
-
-    public function metadataOnlyForOrderType(?int $orderTypeId): bool
-    {
-        if (! $this->metadataOnly) {
-            return false;
-        }
-
-        $resolvedOrderTypeId = is_numeric($orderTypeId) ? (int) $orderTypeId : 0;
-        if ($resolvedOrderTypeId <= 0) {
-            return false;
-        }
-
-        if (empty($this->metadataOnlyOrderTypeMap)) {
-            return true;
-        }
-
-        return isset($this->metadataOnlyOrderTypeMap[$resolvedOrderTypeId]);
     }
 
     public function hasTemplateSetForOrderType(?int $orderTypeId): bool
@@ -166,36 +125,9 @@ class TemplateRegistry
         return $this->templateSetExistsMemory[$resolvedOrderTypeId] = $exists;
     }
 
-    public function shouldBlockLegacyFallback(?int $orderTypeId, string $context = 'form'): bool
+    public function strictModeEnabled(): bool
     {
-        $resolvedOrderTypeId = is_numeric($orderTypeId) ? (int) $orderTypeId : 0;
-        if ($resolvedOrderTypeId <= 0) {
-            return false;
-        }
-
-        if ($this->metadataOnlyForOrderType($resolvedOrderTypeId)) {
-            return true;
-        }
-
-        $contextAllowsFallback = match (strtolower(trim($context))) {
-            'print' => $this->allowLegacyFallbackPrint,
-            default => $this->allowLegacyFallbackForm,
-        };
-
-        if (! $contextAllowsFallback) {
-            return true;
-        }
-
-        if ($this->metadataRequiredWhenTemplateSetExists && $this->hasTemplateSetForOrderType($resolvedOrderTypeId)) {
-            return true;
-        }
-
-        return false;
-    }
-
-    public function shouldLogLegacyFallback(): bool
-    {
-        return $this->logLegacyFallback;
+        return $this->strictMode;
     }
 
     private function isReady(): bool

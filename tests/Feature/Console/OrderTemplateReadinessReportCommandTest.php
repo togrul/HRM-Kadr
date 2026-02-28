@@ -17,9 +17,9 @@ class OrderTemplateReadinessReportCommandTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_it_reports_metadata_and_legacy_statuses(): void
+    public function test_it_reports_metadata_and_blocked_statuses(): void
     {
-        [$metadataType, $legacyType] = $this->seedOrderTypes();
+        [$metadataType, $missingSetType] = $this->seedOrderTypes();
         $this->attachMetadataVersion($metadataType);
 
         $exitCode = Artisan::call('orders:templates:readiness');
@@ -27,10 +27,10 @@ class OrderTemplateReadinessReportCommandTest extends TestCase
 
         $this->assertSame(0, $exitCode);
         $this->assertStringContainsString('metadata_ready', $output);
-        $this->assertStringContainsString('legacy_fallback', $output);
+        $this->assertStringContainsString('no_template_set', $output);
         $this->assertStringContainsString('order_types_total', $output);
         $this->assertStringContainsString((string) $metadataType->name, $output);
-        $this->assertStringContainsString((string) $legacyType->name, $output);
+        $this->assertStringContainsString((string) $missingSetType->name, $output);
     }
 
     public function test_it_can_print_json_summary(): void
@@ -46,7 +46,8 @@ class OrderTemplateReadinessReportCommandTest extends TestCase
         $this->assertIsArray($decoded);
         $this->assertSame(2, data_get($decoded, 'summary.order_types_total'));
         $this->assertSame(1, data_get($decoded, 'summary.metadata_ready'));
-        $this->assertSame(1, data_get($decoded, 'summary.legacy_fallback'));
+        $this->assertSame(1, data_get($decoded, 'summary.no_template_set'));
+        $this->assertSame(0, data_get($decoded, 'summary.version_not_active'));
     }
 
     private function seedOrderTypes(): array
@@ -81,12 +82,12 @@ class OrderTemplateReadinessReportCommandTest extends TestCase
             'name' => 'İşə qəbul',
         ]);
 
-        $legacyType = OrderType::query()->create([
+        $missingSetType = OrderType::query()->create([
             'order_id' => 9302,
             'name' => 'Məzuniyyət',
         ]);
 
-        return [$metadataType, $legacyType];
+        return [$metadataType, $missingSetType];
     }
 
     private function attachMetadataVersion(OrderType $orderType): void

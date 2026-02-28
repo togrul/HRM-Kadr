@@ -17,16 +17,39 @@ class OrderTemplateFormSchemaServiceTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_it_falls_back_to_legacy_catalog_when_no_metadata_version_exists(): void
+    public function test_it_returns_metadata_required_when_no_metadata_version_exists(): void
     {
-        $orderType = $this->seedOrderType('Legacy');
+        $orderType = $this->seedOrderType('NoMetadata');
 
         $result = app(OrderTemplateFormSchemaService::class)->resolveForOrderType((int) $orderType->id);
 
-        $this->assertSame('legacy', $result['source']);
+        $this->assertSame('metadata_required', $result['source']);
         $this->assertSame([], $result['row_field_keys']);
-        $this->assertArrayHasKey('$fullname', $result['field_catalog']);
-        $this->assertSame('personnel_id', $result['field_catalog']['$fullname']['field']);
+        $this->assertSame([], $result['field_catalog']);
+    }
+
+    public function test_it_returns_metadata_required_when_active_version_has_no_row_mappings(): void
+    {
+        $orderType = $this->seedOrderType('NoMappings');
+        $set = OrderTemplateSet::query()->create([
+            'order_type_id' => $orderType->id,
+            'name' => 'Set',
+        ]);
+
+        OrderTemplateVersion::query()->create([
+            'order_template_set_id' => $set->id,
+            'version_no' => 1,
+            'template_path' => 'templates/no-mappings.docx',
+            'status' => 'published',
+            'is_active' => true,
+            'published_at' => now(),
+        ]);
+
+        $result = app(OrderTemplateFormSchemaService::class)->resolveForOrderType((int) $orderType->id);
+
+        $this->assertSame('metadata_required', $result['source']);
+        $this->assertSame([], $result['row_field_keys']);
+        $this->assertSame([], $result['field_catalog']);
     }
 
     public function test_it_uses_metadata_row_fields_and_ui_config_when_available(): void
@@ -128,7 +151,11 @@ class OrderTemplateFormSchemaServiceTest extends TestCase
             'name_ru' => 'Test',
         ]);
 
-        $orderId = $suffix === 'Legacy' ? 9701 : 9702;
+        $orderId = match ($suffix) {
+            'NoMetadata' => 9701,
+            'NoMappings' => 9702,
+            default => 9703,
+        };
         Order::query()->create([
             'id' => $orderId,
             'order_category_id' => 9700,

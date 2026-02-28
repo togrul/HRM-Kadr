@@ -53,7 +53,8 @@ These are legacy-ish but still part of current runtime behavior.
 - Still used as template file path fallback and in registry resolution.
 
 2. `components.dynamic_fields`
-- Still used for metadata bootstrap and legacy dynamic field flow.
+- Metadata bootstrap üçün artıq istifadə olunmur.
+- Hələ runtime component-level fallback/state üçün istifadə olunur (`OrderInteractionStateService`, `OrderCrud`, `HandlesOrderComponentFieldState`).
 
 3. `order_logs.order_id` together with `order_logs.order_type_id`
 - `order_id` is still used in listing/filter/permission flow (for example IG_EMR logic).
@@ -83,8 +84,8 @@ These are code artifacts that appear non-essential or risky.
 
 ## 4) Do not drop yet (high-risk now)
 
-Do not remove these yet; they are part of hybrid runtime:
-- Legacy render helpers used by fallback path (`OrderLegacyRenderPayloadBuilder`, `GenerateWordReplaceContent` flow).
+Do not remove these yet; they are part of current runtime:
+- Docx content generation helpers (`GenerateWordReplaceContent` flow).
 - Table pivots: `order_log_personnels`, `order_log_components`, `order_log_component_attributes`.
 - `orders.content` and `components.dynamic_fields`.
 

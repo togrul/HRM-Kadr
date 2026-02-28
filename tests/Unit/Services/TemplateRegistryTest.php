@@ -101,13 +101,22 @@ class TemplateRegistryTest extends TestCase
         $this->assertSame('templates/v2.docx', $service->resolveTemplatePathForOrderType((int) $orderType->id));
     }
 
-    public function test_it_falls_back_to_order_content_when_no_active_version_exists(): void
+    public function test_it_returns_null_when_no_active_version_exists(): void
     {
         $orderType = $this->makeOrderType('templates/legacy.docx');
 
         $path = app(TemplateRegistry::class)->resolveTemplatePathForOrderType((int) $orderType->id);
 
-        $this->assertSame('templates/legacy.docx', $path);
+        $this->assertNull($path);
+    }
+
+    public function test_strict_mode_flag_is_exposed(): void
+    {
+        config()->set('orders.engine.strict_mode', true);
+
+        $registry = app(TemplateRegistry::class);
+
+        $this->assertTrue($registry->strictModeEnabled());
     }
 
     private function makeOrderType(string $contentPath): OrderType

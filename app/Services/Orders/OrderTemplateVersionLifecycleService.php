@@ -6,7 +6,9 @@ use App\Models\OrderTemplateField;
 use App\Models\OrderTemplateMapping;
 use App\Models\OrderTemplateSet;
 use App\Models\OrderTemplateVersion;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Facades\DB;
+use RuntimeException;
 
 class OrderTemplateVersionLifecycleService
 {
@@ -14,6 +16,7 @@ class OrderTemplateVersionLifecycleService
         private readonly TemplateRegistry $templateRegistry,
         private readonly OrderTemplateFormSchemaService $schemaService,
         private readonly OrderTemplateAuditLogger $auditLogger,
+        private readonly TemplatePlaceholderCoverageService $coverageService,
     ) {
     }
 
@@ -46,7 +49,18 @@ class OrderTemplateVersionLifecycleService
         ]);
 
         $newVersion = DB::transaction(function () use ($set, $baseVersion, $actorId) {
-            $nextVersionNo = ((int) ($set->versions()->max('version_no') ?? 0)) + 1;
+            OrderTemplateSet::query()
+                ->whereKey((int) $set->id)
+                ->lockForUpdate()
+                ->first(['id']);
+
+            /** @var EloquentCollection<int, OrderTemplateVersion> $lockedVersions */
+            $lockedVersions = OrderTemplateVersion::query()
+                ->where('order_template_set_id', (int) $set->id)
+                ->lockForUpdate()
+                ->get(['id', 'version_no']);
+
+            $nextVersionNo = ((int) ($lockedVersions->max('version_no') ?? 0)) + 1;
 
             /** @var OrderTemplateVersion $created */
             $created = $set->versions()->create([
@@ -106,23 +120,52 @@ class OrderTemplateVersionLifecycleService
     public function publishVersion(int $versionId, ?int $actorId = null, string $action = 'version_published'): ?OrderTemplateVersion
     {
         $version = OrderTemplateVersion::query()
-            ->with('templateSet')
+            ->with([
+                'templateSet:id,order_type_id',
+                'mappings' => fn ($query) => $query->orderBy('sort_order')->orderBy('id'),
+            ])
             ->find($versionId);
 
         if (! $version || ! $version->templateSet) {
             return null;
         }
 
-        $orderTypeId = (int) $version->templateSet->order_type_id;
+        $coverage = $this->coverageService->analyzeForVersion(
+            $version,
+            $version->mappings
+                ->map(fn (OrderTemplateMapping $mapping) => [
+                    'placeholder' => (string) $mapping->placeholder,
+                    'field_key' => (string) $mapping->field_key,
+                    'scope' => (string) $mapping->scope,
+                ])
+                ->values()
+                ->all()
+        );
 
-        DB::transaction(function () use ($version, $actorId): void {
-            OrderTemplateVersion::query()
-                ->where('order_template_set_id', (int) $version->order_template_set_id)
+        if (empty($coverage['inspectable'])) {
+            throw new RuntimeException('Template coverage is unavailable. Upload DOCX and run coverage first.');
+        }
+
+        if (! empty($coverage['missing_placeholders'])) {
+            throw new RuntimeException('Cannot publish. Missing mappings: '.implode(', ', $coverage['missing_placeholders']));
+        }
+
+        $orderTypeId = (int) $version->templateSet->order_type_id;
+        $templateSetId = (int) $version->order_template_set_id;
+
+        DB::transaction(function () use ($version, $actorId, $templateSetId): void {
+            /** @var EloquentCollection<int, OrderTemplateVersion> $lockedVersions */
+            $lockedVersions = OrderTemplateVersion::query()
+                ->where('order_template_set_id', $templateSetId)
                 ->lockForUpdate()
                 ->get(['id']);
 
+            if ($lockedVersions->doesntContain(fn (OrderTemplateVersion $item) => (int) $item->id === (int) $version->id)) {
+                throw new RuntimeException('Selected template version does not exist.');
+            }
+
             OrderTemplateVersion::query()
-                ->where('order_template_set_id', (int) $version->order_template_set_id)
+                ->where('order_template_set_id', $templateSetId)
                 ->where('id', '!=', (int) $version->id)
                 ->update([
                     'is_active' => false,
@@ -132,11 +175,13 @@ class OrderTemplateVersionLifecycleService
             OrderTemplateVersion::query()
                 ->where('id', (int) $version->id)
                 ->update([
-                'status' => 'published',
-                'is_active' => true,
-                'published_at' => now(),
-                'updated_by' => $actorId,
-            ]);
+                    'status' => 'published',
+                    'is_active' => true,
+                    'published_at' => now(),
+                    'updated_by' => $actorId,
+                ]);
+
+            $this->assertSingleActiveInvariant($templateSetId);
         });
 
         $this->templateRegistry->invalidate($orderTypeId);
@@ -159,47 +204,52 @@ class OrderTemplateVersionLifecycleService
 
     public function reconcileSingleActiveForSet(int $templateSetId, ?int $actorId = null, ?int $orderTypeId = null): ?OrderTemplateVersion
     {
-        $versions = OrderTemplateVersion::query()
-            ->where('order_template_set_id', $templateSetId)
-            ->orderByDesc('version_no')
-            ->orderByDesc('id')
-            ->get();
-
-        if ($versions->isEmpty()) {
-            return null;
-        }
-
-        $activeVersions = $versions->where('is_active', true);
-
-        $winner = $activeVersions->isNotEmpty()
-            ? $activeVersions->sortByDesc('version_no')->first()
-            : ($versions->firstWhere('status', 'published') ?? $versions->first());
-
-        if (! $winner) {
-            return null;
-        }
-
-        $needsReconcile = $activeVersions->count() !== 1 || (int) $activeVersions->first()?->id !== (int) $winner->id;
-
-        if (! $needsReconcile) {
-            return $winner;
-        }
-
-        DB::transaction(function () use ($templateSetId, $winner, $actorId): void {
-            OrderTemplateVersion::query()
+        $winnerId = DB::transaction(function () use ($templateSetId, $actorId): ?int {
+            /** @var EloquentCollection<int, OrderTemplateVersion> $lockedVersions */
+            $lockedVersions = OrderTemplateVersion::query()
                 ->where('order_template_set_id', $templateSetId)
-                ->update([
-                    'is_active' => false,
-                    'updated_by' => $actorId,
-                ]);
+                ->orderByDesc('version_no')
+                ->orderByDesc('id')
+                ->lockForUpdate()
+                ->get(['id', 'status', 'is_active', 'version_no']);
 
-            OrderTemplateVersion::query()
-                ->where('id', (int) $winner->id)
-                ->update([
-                    'is_active' => true,
-                    'updated_by' => $actorId,
-                ]);
+            if ($lockedVersions->isEmpty()) {
+                return null;
+            }
+
+            $winner = $this->resolveWinnerFromVersions($lockedVersions);
+            if (! $winner) {
+                return null;
+            }
+
+            $activeVersions = $lockedVersions->where('is_active', true);
+            $needsReconcile = $activeVersions->count() !== 1
+                || (int) $activeVersions->first()?->id !== (int) $winner->id;
+
+            if ($needsReconcile) {
+                OrderTemplateVersion::query()
+                    ->where('order_template_set_id', $templateSetId)
+                    ->update([
+                        'is_active' => false,
+                        'updated_by' => $actorId,
+                    ]);
+
+                OrderTemplateVersion::query()
+                    ->where('id', (int) $winner->id)
+                    ->update([
+                        'is_active' => true,
+                        'updated_by' => $actorId,
+                    ]);
+            }
+
+            $this->assertSingleActiveInvariant($templateSetId);
+
+            return (int) $winner->id;
         });
+
+        if (! $winnerId) {
+            return null;
+        }
 
         $resolvedOrderTypeId = $orderTypeId;
         if (! $resolvedOrderTypeId) {
@@ -213,44 +263,97 @@ class OrderTemplateVersionLifecycleService
             $this->schemaService->invalidateCachedSchema($resolvedOrderTypeId);
         }
 
-        return OrderTemplateVersion::query()->find((int) $winner->id);
+        return OrderTemplateVersion::query()->find((int) $winnerId);
     }
 
     public function deleteDraftVersion(int $versionId, ?int $actorId = null): bool
     {
-        $version = OrderTemplateVersion::query()
-            ->with('templateSet')
-            ->find($versionId);
+        $orderTypeId = 0;
+        $deleted = DB::transaction(function () use ($versionId, $actorId, &$orderTypeId): bool {
+            /** @var OrderTemplateVersion|null $version */
+            $version = OrderTemplateVersion::query()
+                ->with('templateSet:id,order_type_id')
+                ->lockForUpdate()
+                ->find($versionId);
 
-        if (! $version || ! $version->templateSet) {
-            return false;
-        }
+            if (! $version || ! $version->templateSet) {
+                return false;
+            }
 
-        if ((bool) $version->is_active) {
-            return false;
-        }
+            if ((bool) $version->is_active) {
+                return false;
+            }
 
-        if (! in_array((string) $version->status, ['draft', 'published'], true)) {
-            return false;
-        }
+            if (! in_array((string) $version->status, ['draft', 'published'], true)) {
+                return false;
+            }
 
-        $remainingVersions = OrderTemplateVersion::query()
-            ->where('order_template_set_id', (int) $version->order_template_set_id)
-            ->count();
+            $templateSetId = (int) $version->order_template_set_id;
+            $orderTypeId = (int) $version->templateSet->order_type_id;
 
-        if ($remainingVersions <= 1) {
-            return false;
-        }
+            /** @var EloquentCollection<int, OrderTemplateVersion> $lockedVersions */
+            $lockedVersions = OrderTemplateVersion::query()
+                ->where('order_template_set_id', $templateSetId)
+                ->orderByDesc('version_no')
+                ->orderByDesc('id')
+                ->lockForUpdate()
+                ->get(['id', 'status', 'is_active', 'version_no']);
 
-        $orderTypeId = (int) $version->templateSet->order_type_id;
+            if ($lockedVersions->count() <= 1) {
+                return false;
+            }
 
-        DB::transaction(function () use ($version): void {
-            $version->delete();
+            OrderTemplateVersion::query()->whereKey((int) $version->id)->delete();
+
+            $remainingVersions = $lockedVersions->reject(fn (OrderTemplateVersion $item) => (int) $item->id === (int) $version->id);
+            if ($remainingVersions->isNotEmpty() && $remainingVersions->where('is_active', true)->isEmpty()) {
+                $winner = $this->resolveWinnerFromVersions($remainingVersions);
+                if ($winner) {
+                    OrderTemplateVersion::query()
+                        ->whereKey((int) $winner->id)
+                        ->update([
+                            'is_active' => true,
+                            'updated_by' => $actorId,
+                        ]);
+                }
+            }
+
+            if ($remainingVersions->isNotEmpty()) {
+                $this->assertSingleActiveInvariant($templateSetId);
+            }
+
+            return true;
         });
+
+        if (! $deleted || $orderTypeId <= 0) {
+            return false;
+        }
 
         $this->templateRegistry->invalidate($orderTypeId);
         $this->schemaService->invalidateCachedSchema($orderTypeId);
 
         return true;
+    }
+
+    private function resolveWinnerFromVersions(EloquentCollection $versions): ?OrderTemplateVersion
+    {
+        $activeVersions = $versions->where('is_active', true);
+        if ($activeVersions->isNotEmpty()) {
+            return $activeVersions->first();
+        }
+
+        return $versions->firstWhere('status', 'published') ?? $versions->first();
+    }
+
+    private function assertSingleActiveInvariant(int $templateSetId): void
+    {
+        $activeCount = OrderTemplateVersion::query()
+            ->where('order_template_set_id', $templateSetId)
+            ->where('is_active', true)
+            ->count();
+
+        if ($activeCount !== 1) {
+            throw new RuntimeException("Single active version invariant failed for template_set={$templateSetId}");
+        }
     }
 }

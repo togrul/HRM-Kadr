@@ -114,7 +114,7 @@ trait OrderCrud
 
     protected ?int $resolvedTemplateSchemaOrderTypeId = null;
 
-    public string $templateSchemaSource = 'legacy';
+    public string $templateSchemaSource = 'metadata_required';
 
     public function bootOrderCrud(
         OrderLookupService $orderLookupService,
@@ -171,6 +171,11 @@ trait OrderCrud
     {
         if (! empty($this->templateRowFieldKeys)) {
             $this->selectedComponents[$rowKey] = $this->templateRowFieldKeys;
+            return;
+        }
+
+        if ($this->templateSchemaSource === 'metadata_required') {
+            $this->selectedComponents[$rowKey] = [];
             return;
         }
 
@@ -262,6 +267,10 @@ trait OrderCrud
 
     private function fillCrudData(): array|\Livewire\Features\SupportEvents\Event
     {
+        if (! $this->ensureTemplateSchemaReadyForSave()) {
+            return $this->dispatch('addError', __('Active metadata template version with mappings is required for this order type.'));
+        }
+
         $data = $this->crudPipelineService->validateAndPrepare(
             selectedBlade: (string) $this->selectedBlade,
             validationRules: $this->validationRules(),
@@ -283,6 +292,16 @@ trait OrderCrud
             'component_ids' => $data['component_ids'],
             'vacancy_list' => $data['vacancy_list'],
         ];
+    }
+
+    protected function ensureTemplateSchemaReadyForSave(): bool
+    {
+        $orderTypeId = (int) ($this->selectedTemplate ?? $this->orderForm->order_type_id ?? 0);
+        if ($orderTypeId <= 0) {
+            return true;
+        }
+
+        return $this->templateSchemaSource !== 'metadata_required';
     }
 
     private function diffVacancyPayload(array $current, array $original): array
@@ -438,7 +457,7 @@ trait OrderCrud
 
         $resolved = $this->templateFormSchemaService->resolveForOrderType($orderTypeId);
 
-        $this->templateSchemaSource = (string) ($resolved['source'] ?? 'legacy');
+        $this->templateSchemaSource = (string) ($resolved['source'] ?? 'metadata_required');
         $this->templateRowFieldKeys = $resolved['row_field_keys'] ?? [];
         $this->templateRowGroups = $resolved['row_groups'] ?? [];
         $this->templateSectionBlocks = $resolved['section_blocks'] ?? [];

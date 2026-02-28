@@ -502,7 +502,7 @@
                 </div>
             @else
                 <div class="rounded-lg border border-amber-200 bg-amber-50 text-amber-700 px-3 py-2 text-sm flex items-center justify-between gap-3">
-                    <span>{{ __('This template version has no metadata fields yet. Use Generate metadata to build fields from legacy dynamic definitions.') }}</span>
+                    <span>{{ __('This template version has no metadata fields yet. Use Generate metadata to build fields from template placeholders.') }}</span>
                 </div>
             @endif
 
@@ -757,18 +757,49 @@
                         @foreach($uiConfigAuditTrail as $audit)
                             @php
                                 $payload = is_array($audit['payload'] ?? null) ? $audit['payload'] : [];
+                                $auditSummary = $this->summarizeUiAuditPayload($payload);
+                                $fieldSummary = is_array($auditSummary['fields'] ?? null) ? $auditSummary['fields'] : [];
+                                $mappingSummary = is_array($auditSummary['mappings'] ?? null) ? $auditSummary['mappings'] : [];
+                                $sectionSummary = is_array($auditSummary['sections'] ?? null) ? $auditSummary['sections'] : [];
+                                $highlights = is_array($auditSummary['highlights'] ?? null) ? $auditSummary['highlights'] : [];
                             @endphp
                             <div class="px-3 py-2 text-xs text-slate-600 flex items-start justify-between gap-3">
-                                <div class="flex flex-col">
+                                <div class="flex flex-col gap-1.5">
                                     <span class="font-medium text-slate-700">{{ $this->resolveUiAuditActionLabel((string) ($audit['action'] ?? '')) }}</span>
                                     @if(!empty($payload['field_key']))
                                         <span class="text-slate-500">{{ __('Field') }}: {{ $payload['field_key'] }}</span>
                                     @endif
+                                    @if(($fieldSummary['added'] ?? 0) + ($fieldSummary['removed'] ?? 0) + ($fieldSummary['updated'] ?? 0) > 0)
+                                        <div class="flex flex-wrap items-center gap-1">
+                                            <span class="rounded-full px-2 py-0.5 bg-sky-100 text-sky-700">{{ __('F') }} +{{ (int) ($fieldSummary['added'] ?? 0) }}</span>
+                                            <span class="rounded-full px-2 py-0.5 bg-rose-100 text-rose-700">{{ __('F') }} -{{ (int) ($fieldSummary['removed'] ?? 0) }}</span>
+                                            <span class="rounded-full px-2 py-0.5 bg-amber-100 text-amber-700">{{ __('F') }} ~{{ (int) ($fieldSummary['updated'] ?? 0) }}</span>
+                                        </div>
+                                    @endif
+                                    @if(($mappingSummary['added'] ?? 0) + ($mappingSummary['removed'] ?? 0) + ($mappingSummary['updated'] ?? 0) > 0)
+                                        <div class="flex flex-wrap items-center gap-1">
+                                            <span class="rounded-full px-2 py-0.5 bg-emerald-100 text-emerald-700">{{ __('M') }} +{{ (int) ($mappingSummary['added'] ?? 0) }}</span>
+                                            <span class="rounded-full px-2 py-0.5 bg-rose-100 text-rose-700">{{ __('M') }} -{{ (int) ($mappingSummary['removed'] ?? 0) }}</span>
+                                            <span class="rounded-full px-2 py-0.5 bg-amber-100 text-amber-700">{{ __('M') }} ~{{ (int) ($mappingSummary['updated'] ?? 0) }}</span>
+                                        </div>
+                                    @endif
+                                    @if(($sectionSummary['added'] ?? 0) + ($sectionSummary['removed'] ?? 0) + ($sectionSummary['updated'] ?? 0) > 0)
+                                        <div class="flex flex-wrap items-center gap-1">
+                                            <span class="rounded-full px-2 py-0.5 bg-violet-100 text-violet-700">{{ __('S') }} +{{ (int) ($sectionSummary['added'] ?? 0) }}</span>
+                                            <span class="rounded-full px-2 py-0.5 bg-rose-100 text-rose-700">{{ __('S') }} -{{ (int) ($sectionSummary['removed'] ?? 0) }}</span>
+                                            <span class="rounded-full px-2 py-0.5 bg-amber-100 text-amber-700">{{ __('S') }} ~{{ (int) ($sectionSummary['updated'] ?? 0) }}</span>
+                                        </div>
+                                    @endif
+                                    @if(!empty($highlights))
+                                        <div class="flex flex-wrap gap-1">
+                                            @foreach($highlights as $highlight)
+                                                <span class="rounded-md border border-slate-200 bg-white px-1.5 py-0.5 text-[11px] text-slate-600">{{ $highlight }}</span>
+                                            @endforeach
+                                        </div>
+                                    @endif
                                     @if(isset($payload['fields_count']) || isset($payload['mappings_count']) || isset($payload['section_blocks_count']))
-                                        <span class="text-slate-500">
-                                            {{ __('Fields') }}: {{ (int) ($payload['fields_count'] ?? 0) }},
-                                            {{ __('Mappings') }}: {{ (int) ($payload['mappings_count'] ?? 0) }},
-                                            {{ __('Sections') }}: {{ (int) ($payload['section_blocks_count'] ?? 0) }}
+                                        <span class="text-slate-500 text-[11px]">
+                                            {{ __('Snapshot') }}: {{ __('Fields') }} {{ (int) ($payload['fields_count'] ?? 0) }}, {{ __('Mappings') }} {{ (int) ($payload['mappings_count'] ?? 0) }}, {{ __('Sections') }} {{ (int) ($payload['section_blocks_count'] ?? 0) }}
                                         </span>
                                     @endif
                                 </div>

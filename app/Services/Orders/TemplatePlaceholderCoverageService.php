@@ -9,6 +9,29 @@ use Throwable;
 
 class TemplatePlaceholderCoverageService
 {
+    /**
+     * @return array<int,string>
+     */
+    public function extractRelevantPlaceholdersForVersion(?OrderTemplateVersion $version): array
+    {
+        $templatePath = trim((string) ($version?->template_path ?? ''));
+        if ($templatePath === '') {
+            return [];
+        }
+
+        $absolutePath = Storage::disk('public')->path($templatePath);
+        if (! is_file($absolutePath)) {
+            return [];
+        }
+
+        $variables = $this->readTemplateVariables($absolutePath);
+        if ($variables === null) {
+            return [];
+        }
+
+        return $this->normalizeRelevantPlaceholders($variables);
+    }
+
     public function analyzeForVersion(?OrderTemplateVersion $version, array $mappings): array
     {
         $templatePath = trim((string) ($version?->template_path ?? ''));
@@ -33,23 +56,13 @@ class TemplatePlaceholderCoverageService
             return $result;
         }
 
-        try {
-            $templateProcessor = new TemplateProcessor($absolutePath);
-            $variables = $templateProcessor->getVariables();
-        } catch (Throwable) {
+        $variables = $this->readTemplateVariables($absolutePath);
+        if ($variables === null) {
             $result['error'] = 'template_read_failed';
 
             return $result;
         }
-
-        $templatePlaceholders = collect($variables)
-            ->filter(fn ($token) => is_string($token) && trim((string) $token) !== '')
-            ->map(fn ($token) => $this->normalizePlaceholder((string) $token))
-            ->filter(fn ($placeholder) => $this->isCoverageRelevantPlaceholder($placeholder))
-            ->unique()
-            ->sort()
-            ->values()
-            ->all();
+        $templatePlaceholders = $this->normalizeRelevantPlaceholders($variables);
 
         $mappedPlaceholders = collect($mappings)
             ->map(function ($mapping): array {
@@ -101,6 +114,33 @@ class TemplatePlaceholderCoverageService
         $result['orphan_mappings'] = $orphanMappings;
 
         return $result;
+    }
+
+    private function readTemplateVariables(string $absolutePath): ?array
+    {
+        try {
+            $templateProcessor = new TemplateProcessor($absolutePath);
+
+            return $templateProcessor->getVariables();
+        } catch (Throwable) {
+            return null;
+        }
+    }
+
+    /**
+     * @param  array<int,string>  $variables
+     * @return array<int,string>
+     */
+    private function normalizeRelevantPlaceholders(array $variables): array
+    {
+        return collect($variables)
+            ->filter(fn ($token) => is_string($token) && trim((string) $token) !== '')
+            ->map(fn ($token) => $this->normalizePlaceholder((string) $token))
+            ->filter(fn ($placeholder) => $this->isCoverageRelevantPlaceholder($placeholder))
+            ->unique()
+            ->sort()
+            ->values()
+            ->all();
     }
 
     private function normalizePlaceholder(string $placeholder): string

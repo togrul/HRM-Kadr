@@ -1,9 +1,3 @@
-@inject('legacyDynamicFieldsService', 'App\Services\GenerateDynamicFieldsService')
-
-@php
-    $service = $dynamicFieldCatalog ?? $legacyDynamicFieldsService->handle();
-@endphp
-
 <div class="flex flex-col space-y-4" x-data="{showPersonnelList : -1}">
     <header class="sidemenu-title">
         <h2 class="text-xl font-semibold text-gray-500 font-title" id="slide-over-title">

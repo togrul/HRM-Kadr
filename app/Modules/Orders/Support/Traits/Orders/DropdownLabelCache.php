@@ -145,8 +145,7 @@ trait DropdownLabelCache
             ? $suffixService->getMultiSuffix($levelName)
             : $suffixService->getStructureSuffix($levelName);
 
-        // User-facing requirement: keep suffix (e.g. "nin"), but remove hyphen form ("-nin").
-        $levelWithSuffix = preg_replace('/[-‐‑‒–—](nın|nin|nun|nün|ın|in|un|ün)$/u', '$1', $levelWithSuffix) ?? $levelWithSuffix;
+        $levelWithSuffix = $this->normalizeStructureSuffixLabel($levelName, $levelWithSuffix, $suffixService);
 
         return (string) ($parent['code'] ?? '')
             . $suffixService->getNumberSuffix((int) ($parent['code'] ?? 0))
@@ -170,10 +169,33 @@ trait DropdownLabelCache
         $levelName = __(strtolower((string) (collect(StructureEnum::cases())->pluck('name', 'value')[$node['level']] ?? '')));
         $suffixService = new WordSuffixService;
         $levelBase = mb_strtolower((string) $levelName);
-        $levelWithSuffix = $suffixService->getStructureSuffix($levelBase);
-        $levelWithSuffix = preg_replace('/-(nın|nin|nun|nün|ın|in|un|ün)$/u', '$1', $levelWithSuffix) ?? $levelWithSuffix;
+        $levelWithSuffix = $this->normalizeStructureSuffixLabel(
+            $levelBase,
+            $suffixService->getStructureSuffix($levelBase),
+            $suffixService
+        );
 
         return trim($code.$suffixService->getNumberSuffix($code).' '.$levelWithSuffix);
+    }
+
+    protected function normalizeStructureSuffixLabel(
+        string $baseText,
+        string $value,
+        WordSuffixService $suffixService
+    ): string {
+        $normalized = trim($value);
+
+        // Keep suffix, but normalize "-nin" -> "nin" form.
+        $normalized = preg_replace('/[-‐‑‒–—](nın|nin|nun|nün|ın|in|un|ün)$/u', '$1', $normalized) ?? $normalized;
+
+        if (preg_match('/(nın|nin|nun|nün|ın|in|un|ün)$/u', $normalized)) {
+            return $normalized;
+        }
+
+        $suffixOnly = $suffixService->getStructureSuffix($baseText, true);
+        $suffixOnly = preg_replace('/^[-‐‑‒–—]/u', '', (string) $suffixOnly) ?? (string) $suffixOnly;
+
+        return trim($normalized.$suffixOnly);
     }
 
     protected function structureLineage(int $structureId): array

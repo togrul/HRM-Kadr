@@ -5,7 +5,6 @@ namespace App\Modules\Orders\Livewire;
 use App\Modules\Orders\Support\Traits\OrderCrud;
 use App\Models\Order;
 use App\Models\OrderLog;
-use App\Models\OrderType;
 use App\Services\ImportCandidateToPersonnel;
 use App\Services\Orders\OrderTemplateSnapshotService;
 use App\Services\OrderConfirmedService;
@@ -13,6 +12,7 @@ use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
+use RuntimeException;
 
 class AddOrder extends Component
 {
@@ -28,71 +28,67 @@ class AddOrder extends Component
             return $data;
         }
         [$_attributes,$_personnel_ids,$_component_ids] = [$data['attributes'], $data['personnel_ids'], $data['component_ids']];
-        DB::transaction(function () use ($_attributes, $_personnel_ids, $_component_ids, $data) {
-            $payload = $this->orderForm->payload();
+        try {
+            DB::transaction(function () use ($_attributes, $_personnel_ids, $_component_ids, $data) {
+                $payload = $this->orderForm->payload();
 
-            $created = [
-                'order_type_id' => $payload['order_type_id'],
-                'order_id' => $payload['order_id'],
-                'order_no' => $payload['order_no'],
-                'given_date' => Carbon::parse($payload['given_date'])->format('Y-m-d'),
-                'given_by' => $payload['given_by'],
-                'given_by_rank' => $payload['given_by_rank'],
-                'status_id' => $payload['status_id'],
-            ];
+                $created = [
+                    'order_type_id' => $payload['order_type_id'],
+                    'order_id' => $payload['order_id'],
+                    'order_no' => $payload['order_no'],
+                    'given_date' => Carbon::parse($payload['given_date'])->format('Y-m-d'),
+                    'given_by' => $payload['given_by'],
+                    'given_by_rank' => $payload['given_by_rank'],
+                    'status_id' => $payload['status_id'],
+                ];
 
-            $legacyTemplatePath = (string) optional(
-                OrderType::query()
-                    ->with('order:id,content')
-                    ->find((int) $payload['order_type_id'])
-                    ?->order
-            )->content;
+                $snapshot = app(OrderTemplateSnapshotService::class)->capture((int) $payload['order_type_id']);
+                $created['order_template_version_id'] = $snapshot['order_template_version_id'];
+                $created['template_render_mode'] = $snapshot['template_render_mode'];
+                $created['template_snapshot'] = $snapshot['template_snapshot'];
 
-            $snapshot = app(OrderTemplateSnapshotService::class)->capture(
-                (int) $payload['order_type_id'],
-                $legacyTemplatePath
-            );
-            $created['order_template_version_id'] = $snapshot['order_template_version_id'];
-            $created['template_render_mode'] = $snapshot['template_render_mode'];
-            $created['template_snapshot'] = $snapshot['template_snapshot'];
+                if ($this->selectedBlade == Order::BLADE_BUSINESS_TRIP) {
+                    $created['description'] = $payload['description'];
+                }
+                //create order logs
+                $order_log = OrderLog::create($created);
 
-            if ($this->selectedBlade == Order::BLADE_BUSINESS_TRIP) {
-                $created['description'] = $payload['description'];
-            }
-            //create order logs
-            $order_log = OrderLog::create($created);
+                $this->componentPersister->sync($order_log, $_component_ids);
 
-            $this->componentPersister->sync($order_log, $_component_ids);
+                // get attributes and insert to attributes table
+                $this->saveAttribute($order_log, $_attributes, 'create');
 
-            // get attributes and insert to attributes table
-            $this->saveAttribute($order_log, $_attributes, 'create');
+                //insert order log personnels eger candidate dirse.Service cagir
+                $tabelResult = $this->personnelPersister->attachFromVacancies(
+                    $order_log,
+                    $data['vacancy_list'],
+                    $this->isCandidateOrder(),
+                    $payload['status_id']
+                );
 
-            //insert order log personnels eger candidate dirse.Service cagir
-            $tabelResult = $this->personnelPersister->attachFromVacancies(
-                $order_log,
-                $data['vacancy_list'],
-                $this->isCandidateOrder(),
-                $payload['status_id']
-            );
+                $tabel_no_list = $this->isCandidateOrder()
+                    ? ($tabelResult['tabels'] ?? [])
+                    : $_personnel_ids;
 
-            $tabel_no_list = $this->isCandidateOrder()
-                ? ($tabelResult['tabels'] ?? [])
-                : $_personnel_ids;
+                // Always attach order personnels to the pivot (both candidate and non-candidate orders)
+                $this->personnelPersister->attachAssignments($order_log, $tabel_no_list, $_component_ids);
+                // vacation days leri bura gondermek ucun usul. ancaq vacation table i olanda.
+                // shert qoymaq ayrica array gondermek.
+                $extraData = match ($this->selectedBlade) {
+                    Order::BLADE_VACATION => collect($data['vacancy_list'])->except('personnels')->toArray(),
+                    default => []
+                };
+                $confirmedPayload = $this->isCandidateOrder()
+                    ? ($tabelResult['candidate_ids'] ?? [])
+                    : $tabel_no_list;
 
-            // Always attach order personnels to the pivot (both candidate and non-candidate orders)
-            $this->personnelPersister->attachAssignments($order_log, $tabel_no_list, $_component_ids);
-            // vacation days leri bura gondermek ucun usul. ancaq vacation table i olanda.
-            // shert qoymaq ayrica array gondermek.
-            $extraData = match ($this->selectedBlade) {
-                Order::BLADE_VACATION => collect($data['vacancy_list'])->except('personnels')->toArray(),
-                default => []
-            };
-            $confirmedPayload = $this->isCandidateOrder()
-                ? ($tabelResult['candidate_ids'] ?? [])
-                : $tabel_no_list;
+                (new OrderConfirmedService($order_log, $extraData))->handle($confirmedPayload);
+            });
+        } catch (RuntimeException $exception) {
+            $this->dispatch('addError', __($exception->getMessage()));
 
-            (new OrderConfirmedService($order_log, $extraData))->handle($confirmedPayload);
-        });
+            return null;
+        }
 
         $this->dispatch('orderAdded', __('Order was added successfully!'));
 

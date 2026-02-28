@@ -5,6 +5,7 @@ namespace App\Modules\Orders\Support\Traits\Templates;
 use App\Models\OrderType;
 use App\Services\Orders\TemplatePlaceholderCoverageService;
 use App\Services\Orders\OrderTemplateVersionLifecycleService;
+use Throwable;
 use Illuminate\Support\Str;
 
 trait HandlesSetTypeUiConfigLifecycle
@@ -44,6 +45,10 @@ trait HandlesSetTypeUiConfigLifecycle
 
     public function openUiConfig(int $orderTypeId, ?int $versionId = null): void
     {
+        if (! $this->ensureTemplateUiPermission('view')) {
+            return;
+        }
+
         $orderType = OrderType::query()
             ->with([
                 'templateSet:id,order_type_id',
@@ -194,6 +199,10 @@ trait HandlesSetTypeUiConfigLifecycle
 
     public function createUiDraftVersion(OrderTemplateVersionLifecycleService $lifecycleService): void
     {
+        if (! $this->ensureTemplateUiPermission('version')) {
+            return;
+        }
+
         if (! $this->uiConfigOrderTypeId) {
             return;
         }
@@ -215,6 +224,10 @@ trait HandlesSetTypeUiConfigLifecycle
 
     public function publishUiConfigVersion(int $versionId, OrderTemplateVersionLifecycleService $lifecycleService): void
     {
+        if (! $this->ensureTemplateUiPermission('version')) {
+            return;
+        }
+
         if (! $this->uiConfigOrderTypeId) {
             return;
         }
@@ -254,7 +267,13 @@ trait HandlesSetTypeUiConfigLifecycle
             return;
         }
 
-        $published = $lifecycleService->publishVersion($versionId, auth()->id());
+        try {
+            $published = $lifecycleService->publishVersion($versionId, auth()->id());
+        } catch (Throwable $exception) {
+            $this->dispatch('typesUpdated', $exception->getMessage());
+            return;
+        }
+
         if (! $published) {
             $this->dispatch('typesUpdated', __('Could not publish this version.'));
             return;
@@ -266,11 +285,21 @@ trait HandlesSetTypeUiConfigLifecycle
 
     public function rollbackUiConfigVersion(int $versionId, OrderTemplateVersionLifecycleService $lifecycleService): void
     {
+        if (! $this->ensureTemplateUiPermission('version')) {
+            return;
+        }
+
         if (! $this->uiConfigOrderTypeId) {
             return;
         }
 
-        $rolledBack = $lifecycleService->rollbackToVersion($versionId, auth()->id());
+        try {
+            $rolledBack = $lifecycleService->rollbackToVersion($versionId, auth()->id());
+        } catch (Throwable $exception) {
+            $this->dispatch('typesUpdated', $exception->getMessage());
+            return;
+        }
+
         if (! $rolledBack) {
             $this->dispatch('typesUpdated', __('Could not rollback to this version.'));
             return;
@@ -282,6 +311,10 @@ trait HandlesSetTypeUiConfigLifecycle
 
     public function deleteUiDraftVersion(int $versionId, OrderTemplateVersionLifecycleService $lifecycleService): void
     {
+        if (! $this->ensureTemplateUiPermission('version')) {
+            return;
+        }
+
         if (! $this->uiConfigOrderTypeId) {
             return;
         }
@@ -298,6 +331,10 @@ trait HandlesSetTypeUiConfigLifecycle
 
     public function bootstrapUiConfigMetadata(): void
     {
+        if (! $this->ensureTemplateUiPermission('metadata')) {
+            return;
+        }
+
         if (! $this->uiConfigOrderTypeId) {
             $this->dispatch('typesUpdated', __('Please open UI config for an order type first.'));
             return;
@@ -325,7 +362,7 @@ trait HandlesSetTypeUiConfigLifecycle
         $this->openUiConfig((int) $this->uiConfigOrderTypeId);
 
         if ($currentCount === 0) {
-            $this->dispatch('typesUpdated', __('No dynamic fields found for this template. Add component dynamic fields first.'));
+            $this->dispatch('typesUpdated', __('No placeholders detected from template version. Upload DOCX or add metadata fields manually.'));
             return;
         }
 

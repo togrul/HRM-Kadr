@@ -51,6 +51,7 @@ class OrderMetadataRenderPayloadBuilder
             foreach (array_keys($rowSource) as $rowNumber) {
                 $rowData = $rowSource[$rowNumber] ?? [];
                 $resolved = [];
+                $resolvedFieldValues = [];
 
                 foreach ($rowMappings as $mapping) {
                     $fieldKey = $this->normalizeFieldKey((string) $mapping->field_key);
@@ -61,9 +62,27 @@ class OrderMetadataRenderPayloadBuilder
                         ?? $scalarSource[$fieldKey]
                         ?? $field?->default_value;
 
-                    $resolved[$placeholder] = $this->transformPipeline->apply(
+                    $resolvedValue = $this->transformPipeline->apply(
                         $rawValue,
                         $this->resolveTransformConfig($mapping->mapping_config, $field?->transform_config)
+                    );
+                    $resolved[$placeholder] = $resolvedValue;
+                    if ($fieldKey !== '') {
+                        $resolvedFieldValues[$fieldKey] = $resolvedValue;
+                    }
+                    $resolvedFieldValues[$placeholder] = $resolvedValue;
+                }
+
+                if (
+                    ! array_key_exists('content_text', $resolved)
+                    && is_string($rowData['component_content'] ?? null)
+                    && trim((string) $rowData['component_content']) !== ''
+                ) {
+                    $resolved['content_text'] = $this->renderComponentContent(
+                        template: (string) $rowData['component_content'],
+                        rowData: $rowData,
+                        scalarValues: $scalarValues,
+                        resolvedFieldValues: $resolvedFieldValues
                     );
                 }
 
@@ -189,5 +208,51 @@ class OrderMetadataRenderPayloadBuilder
         }
 
         return $defaults;
+    }
+
+    private function renderComponentContent(
+        string $template,
+        array $rowData,
+        array $scalarValues,
+        array $resolvedFieldValues
+    ): string {
+        $replacementSource = array_merge($scalarValues, $rowData, $resolvedFieldValues);
+        $replacements = [];
+
+        foreach ($replacementSource as $key => $value) {
+            if (! is_string($key) || trim($key) === '') {
+                continue;
+            }
+
+            $normalizedKey = $this->normalizeFieldKey($key);
+            if ($normalizedKey === '') {
+                continue;
+            }
+
+            $stringValue = $this->stringifyReplacementValue($value);
+            $replacements['$'.$normalizedKey] = $stringValue;
+            $replacements['${'.$normalizedKey.'}'] = $stringValue;
+        }
+
+        if (empty($replacements)) {
+            return $template;
+        }
+
+        uksort($replacements, fn (string $left, string $right) => strlen($right) <=> strlen($left));
+
+        return str_replace(array_keys($replacements), array_values($replacements), $template);
+    }
+
+    private function stringifyReplacementValue(mixed $value): string
+    {
+        if ($value === null) {
+            return '';
+        }
+
+        if (is_scalar($value)) {
+            return (string) $value;
+        }
+
+        return json_encode($value, JSON_UNESCAPED_UNICODE) ?: '';
     }
 }

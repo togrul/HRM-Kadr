@@ -3,34 +3,10 @@
 return [
     'engine' => [
         /*
-         * When enabled, order types must have metadata template mappings to render.
-         * If `metadata_only_order_type_ids` is empty, it applies to all order types.
+         * Global strict mode: disables all legacy fallback for form/print contexts.
+         * Use for gradual no-legacy rollout (recommended with staging-first validation).
          */
-        'metadata_only' => (bool) env('ORDERS_ENGINE_METADATA_ONLY', false),
-        'metadata_only_order_type_ids' => array_values(array_filter(array_map(
-            static fn ($value) => is_numeric($value) ? (int) $value : null,
-            explode(',', (string) env('ORDERS_ENGINE_METADATA_ONLY_ORDER_TYPE_IDS', ''))
-        ))),
-
-        /*
-         * Legacy fallback gates per context. Keep true during transition.
-         * Set false to force metadata-only behavior for that context.
-         */
-        'allow_legacy_fallback' => [
-            'form' => (bool) env('ORDERS_ENGINE_ALLOW_LEGACY_FALLBACK_FORM', true),
-            'print' => (bool) env('ORDERS_ENGINE_ALLOW_LEGACY_FALLBACK_PRINT', true),
-        ],
-
-        /*
-         * If enabled, order types that already have a template set are treated as
-         * metadata-required (legacy fallback blocked) for selected context gates.
-         */
-        'metadata_required_when_template_set_exists' => (bool) env('ORDERS_ENGINE_METADATA_REQUIRED_WHEN_TEMPLATE_SET_EXISTS', false),
-
-        /*
-         * Log when runtime falls back to legacy payload/schema in form or print.
-         */
-        'log_legacy_fallback' => (bool) env('ORDERS_ENGINE_LOG_LEGACY_FALLBACK', true),
+        'strict_mode' => (bool) env('ORDERS_ENGINE_STRICT_MODE', false),
     ],
 
     'template_registry' => [
@@ -61,6 +37,32 @@ return [
          * Cache TTL for metadata-driven form schema payloads.
          */
         'schema_cache_minutes' => (int) env('ORDERS_FORM_SCHEMA_CACHE_MINUTES', 15),
+    ],
+
+    'observability' => [
+        'query_budget' => [
+            'add_form_schema' => (int) env('ORDERS_QUERY_BUDGET_ADD_FORM_SCHEMA', 15),
+            'edit_order_load' => (int) env('ORDERS_QUERY_BUDGET_EDIT_ORDER_LOAD', 15),
+            'print_payload_build' => (int) env('ORDERS_QUERY_BUDGET_PRINT_PAYLOAD_BUILD', 20),
+        ],
+        'reports' => [
+            'enabled' => (bool) env('ORDERS_TEMPLATE_REPORTS_ENABLED', false),
+            'daily_at' => env('ORDERS_TEMPLATE_REPORTS_DAILY_AT', '09:00'),
+            'weekly_day' => (int) env('ORDERS_TEMPLATE_REPORTS_WEEKLY_DAY', 1), // 0 (Sun) ... 6 (Sat)
+            'weekly_at' => env('ORDERS_TEMPLATE_REPORTS_WEEKLY_AT', '09:00'),
+            'channels' => array_values(array_filter(array_map(
+                static fn ($channel) => trim((string) $channel),
+                explode(',', (string) env('ORDERS_TEMPLATE_REPORT_CHANNELS', 'log'))
+            ))),
+            'log_file' => env('ORDERS_TEMPLATE_REPORT_LOG_FILE', 'logs/orders-template-metrics.log'),
+            'slack_webhook' => env('ORDERS_TEMPLATE_REPORT_SLACK_WEBHOOK'),
+            'telegram_bot_token' => env('ORDERS_TEMPLATE_REPORT_TELEGRAM_BOT_TOKEN'),
+            'telegram_chat_id' => env('ORDERS_TEMPLATE_REPORT_TELEGRAM_CHAT_ID'),
+            'metrics_max_error_rate' => env('ORDERS_TEMPLATE_REPORT_METRICS_MAX_ERROR_RATE'),
+            'metrics_max_p95' => env('ORDERS_TEMPLATE_REPORT_METRICS_MAX_P95'),
+            'metrics_max_p99' => env('ORDERS_TEMPLATE_REPORT_METRICS_MAX_P99'),
+            'metrics_min_total' => (int) env('ORDERS_TEMPLATE_REPORT_METRICS_MIN_TOTAL', 1),
+        ],
     ],
 
     'template_master' => [

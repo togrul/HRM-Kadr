@@ -5,7 +5,6 @@ namespace App\Modules\Orders\Livewire;
 use App\Modules\Orders\Support\Traits\OrderCrud;
 use App\Models\Order;
 use App\Models\OrderLog;
-use App\Models\OrderType;
 use App\Models\Personnel;
 use App\Services\Orders\OrderTemplateSnapshotService;
 use App\Services\OrderConfirmedService;
@@ -13,6 +12,7 @@ use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
+use RuntimeException;
 
 class EditOrder extends Component
 {
@@ -215,10 +215,16 @@ class EditOrder extends Component
         }
         $payload = $this->orderForm->payload();
 
-        DB::transaction(function () use ($data, $payload) {
-            $this->updateOrder($payload);
-            $this->manageComponentsAndAttributes(data: $data, orderPayload: $payload);
-        });
+        try {
+            DB::transaction(function () use ($data, $payload) {
+                $this->updateOrder($payload);
+                $this->manageComponentsAndAttributes(data: $data, orderPayload: $payload);
+            });
+        } catch (RuntimeException $exception) {
+            $this->dispatch('addError', __($exception->getMessage()));
+
+            return null;
+        }
 
         $this->dispatch('orderAdded', __('Order was updated successfully!'));
 
@@ -227,17 +233,7 @@ class EditOrder extends Component
 
     private function updateOrder(array $payload): void
     {
-        $legacyTemplatePath = (string) optional(
-            OrderType::query()
-                ->with('order:id,content')
-                ->find((int) $payload['order_type_id'])
-                ?->order
-        )->content;
-
-        $snapshot = app(OrderTemplateSnapshotService::class)->capture(
-            (int) $payload['order_type_id'],
-            $legacyTemplatePath
-        );
+        $snapshot = app(OrderTemplateSnapshotService::class)->capture((int) $payload['order_type_id']);
 
         $this->orderModelData->update([
             'order_type_id' => $payload['order_type_id'],

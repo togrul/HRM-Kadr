@@ -3,8 +3,6 @@
 namespace App\Services\Orders;
 
 use App\Models\OrderTemplateVersion;
-use App\Services\GenerateDynamicFieldsService;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Cache;
 
@@ -19,31 +17,19 @@ class OrderTemplateFormSchemaService
 
     public function __construct(
         private readonly TemplateRegistry $templateRegistry,
-        private readonly GenerateDynamicFieldsService $legacyFieldService,
     ) {
         $this->schemaCacheMinutes = max(1, (int) config('orders.form.schema_cache_minutes', 15));
     }
 
     public function resolveForOrderType(?int $orderTypeId): array
     {
-        $legacyCatalog = $this->legacyFieldService->handle();
-
         if (! $orderTypeId || $orderTypeId <= 0) {
-            return $this->legacyPayload($legacyCatalog);
+            return $this->metadataRequiredPayload();
         }
 
         $version = $this->templateRegistry->activeVersionForOrderType($orderTypeId);
         if (! $version || $version->mappings->isEmpty()) {
-            if ($this->templateRegistry->shouldBlockLegacyFallback($orderTypeId, 'form')) {
-                return $this->metadataRequiredPayload();
-            }
-
-            $this->logLegacyFallback(
-                orderTypeId: $orderTypeId,
-                reason: ! $version ? 'no_active_template_version' : 'active_template_without_mappings'
-            );
-
-            return $this->legacyPayload($legacyCatalog);
+            return $this->metadataRequiredPayload();
         }
 
         $cacheKey = $this->schemaCacheKey((int) $orderTypeId, (int) $version->id);
@@ -51,7 +37,7 @@ class OrderTemplateFormSchemaService
             return $this->resolvedSchemaMemory[$cacheKey];
         }
 
-        $resolver = fn () => $this->buildMetadataPayload($legacyCatalog, $version, (int) $orderTypeId);
+        $resolver = fn () => $this->buildMetadataPayload($version);
 
         if (app()->runningUnitTests()) {
             return $this->resolvedSchemaMemory[$cacheKey] = $resolver();
@@ -64,7 +50,7 @@ class OrderTemplateFormSchemaService
         );
     }
 
-    private function buildMetadataPayload(array $legacyCatalog, OrderTemplateVersion $version, int $orderTypeId): array
+    private function buildMetadataPayload(OrderTemplateVersion $version): array
     {
         $version->loadMissing(['fields', 'mappings']);
 
@@ -77,20 +63,11 @@ class OrderTemplateFormSchemaService
             ->values();
 
         if ($rowMappings->isEmpty()) {
-            if ($this->templateRegistry->shouldBlockLegacyFallback($orderTypeId, 'form')) {
-                return $this->metadataRequiredPayload();
-            }
-
-            $this->logLegacyFallback(
-                orderTypeId: $orderTypeId,
-                reason: 'row_mappings_empty'
-            );
-
-            return $this->legacyPayload($legacyCatalog);
+            return $this->metadataRequiredPayload();
         }
 
         $rowFieldKeys = [];
-        $fieldCatalog = $legacyCatalog;
+        $fieldCatalog = [];
         $dropdownFields = [];
 
         foreach ($rowMappings as $mapping) {
@@ -104,14 +81,13 @@ class OrderTemplateFormSchemaService
                 $rowFieldKeys[] = $token;
             }
 
-            $legacyDefinition = $legacyCatalog[$token] ?? [];
             $fieldDefinition = $fieldDefinitions->get($normalizedFieldKey);
             $uiConfig = is_array($fieldDefinition?->ui_config) ? $fieldDefinition->ui_config : [];
 
-            $resolvedField = (string) ($uiConfig['field'] ?? ($legacyDefinition['field'] ?? $normalizedFieldKey));
+            $resolvedField = (string) ($uiConfig['field'] ?? $normalizedFieldKey);
             $resolvedInput = (string) (
                 $uiConfig['input']
-                ?? ($legacyDefinition['input'] ?? $this->mapFieldTypeToInput((string) ($fieldDefinition?->field_type ?? '')))
+                ?? $this->mapFieldTypeToInput((string) ($fieldDefinition?->field_type ?? ''))
             );
 
             // Keep structure picker on legacy tree-list behavior regardless of stored metadata input.
@@ -121,16 +97,15 @@ class OrderTemplateFormSchemaService
 
             $resolvedTitle = (string) (
                 $fieldDefinition?->label
-                ?? $legacyDefinition['title']
                 ?? Str::headline(str_replace('_', ' ', $normalizedFieldKey))
             );
 
             $resolvedDefinition = array_filter([
                 'field' => $resolvedField,
                 'title' => __($resolvedTitle),
-                'model' => $uiConfig['model'] ?? ($legacyDefinition['model'] ?? null),
-                'selectedName' => $uiConfig['selectedName'] ?? ($legacyDefinition['selectedName'] ?? null),
-                'searchField' => $uiConfig['searchField'] ?? ($legacyDefinition['searchField'] ?? null),
+                'model' => $uiConfig['model'] ?? null,
+                'selectedName' => $uiConfig['selectedName'] ?? null,
+                'searchField' => $uiConfig['searchField'] ?? null,
                 'input' => $resolvedInput,
                 'required' => (bool) ($fieldDefinition?->is_required ?? false),
                 'field_order' => (int) ($uiConfig['field_order'] ?? ($fieldDefinition?->sort_order ?? 0)),
@@ -177,26 +152,6 @@ class OrderTemplateFormSchemaService
         return "orders:template_form_schema:{$locale}:{$orderTypeId}:{$versionId}";
     }
 
-    private function legacyPayload(array $legacyCatalog): array
-    {
-        $dropdownFields = collect($legacyCatalog)
-            ->filter(fn ($definition) => in_array((string) ($definition['input'] ?? $this->mapFieldTypeToInput('text')), ['select', 'radio-list'], true))
-            ->map(fn ($definition) => (string) ($definition['field'] ?? ''))
-            ->filter()
-            ->values()
-            ->all();
-
-        return [
-            'source' => 'legacy',
-            'row_field_keys' => [],
-            'row_groups' => [],
-            'section_blocks' => [],
-            'field_catalog' => $legacyCatalog,
-            'dropdown_fields' => $dropdownFields,
-            'template_version_id' => null,
-        ];
-    }
-
     private function metadataRequiredPayload(): array
     {
         return [
@@ -208,18 +163,6 @@ class OrderTemplateFormSchemaService
             'dropdown_fields' => [],
             'template_version_id' => null,
         ];
-    }
-
-    private function logLegacyFallback(int $orderTypeId, string $reason): void
-    {
-        if (! $this->templateRegistry->shouldLogLegacyFallback()) {
-            return;
-        }
-
-        Log::warning('orders.template.form_legacy_fallback', [
-            'order_type_id' => $orderTypeId,
-            'reason' => $reason,
-        ]);
     }
 
     public function invalidateCachedSchema(int $orderTypeId, ?int $versionId = null): void

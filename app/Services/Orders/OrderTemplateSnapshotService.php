@@ -6,6 +6,7 @@ use App\Models\OrderTemplateField;
 use App\Models\OrderTemplateMapping;
 use App\Models\OrderTemplateVersion;
 use Illuminate\Support\Collection;
+use RuntimeException;
 
 class OrderTemplateSnapshotService
 {
@@ -13,26 +14,17 @@ class OrderTemplateSnapshotService
     {
     }
 
-    public function capture(?int $orderTypeId, ?string $legacyTemplatePath = null): array
+    public function capture(?int $orderTypeId): array
     {
         $resolvedOrderTypeId = is_numeric($orderTypeId) ? (int) $orderTypeId : 0;
-        $resolvedLegacyPath = trim((string) ($legacyTemplatePath ?? ''));
 
         if ($resolvedOrderTypeId <= 0) {
-            return [
-                'order_template_version_id' => null,
-                'template_render_mode' => 'legacy',
-                'template_snapshot' => $this->buildLegacySnapshot($resolvedLegacyPath),
-            ];
+            throw new RuntimeException('Order type is required for template snapshot capture.');
         }
 
         $version = $this->templateRegistry->activeVersionForOrderType($resolvedOrderTypeId);
         if (! $version) {
-            return [
-                'order_template_version_id' => null,
-                'template_render_mode' => 'legacy',
-                'template_snapshot' => $this->buildLegacySnapshot($resolvedLegacyPath),
-            ];
+            throw new RuntimeException('Active metadata template version not found for this order type.');
         }
 
         $version->loadMissing([
@@ -44,17 +36,22 @@ class OrderTemplateSnapshotService
         $hasRowMappings = $version->mappings->contains(
             fn (OrderTemplateMapping $mapping) => (string) $mapping->scope !== 'scalar'
         );
-        $renderMode = $hasRowMappings ? 'metadata' : 'legacy';
-        $templatePath = trim((string) $version->template_path) !== ''
-            ? (string) $version->template_path
-            : $resolvedLegacyPath;
+
+        if (! $hasRowMappings) {
+            throw new RuntimeException('Metadata template mappings are required for this order type.');
+        }
+
+        $templatePath = trim((string) $version->template_path);
+        if ($templatePath === '') {
+            throw new RuntimeException('Active metadata template file is missing for this order type.');
+        }
 
         return [
             'order_template_version_id' => (int) $version->id,
-            'template_render_mode' => $renderMode,
+            'template_render_mode' => 'metadata',
             'template_snapshot' => [
                 'captured_at' => now()->toISOString(),
-                'render_mode' => $renderMode,
+                'render_mode' => 'metadata',
                 'template_path' => $templatePath,
                 'version' => [
                     'id' => (int) $version->id,
@@ -120,22 +117,10 @@ class OrderTemplateSnapshotService
         ]);
         $version->id = is_numeric($versionData['id'] ?? null) ? (int) $versionData['id'] : null;
 
-        $version->setRelation('fields', $fields->map(fn (array $row) => new OrderTemplateField($row)));
-        $version->setRelation('mappings', $mappings->map(fn (array $row) => new OrderTemplateMapping($row)));
+        $version->setRelation('fields', $fields->map(fn (array $row) => $this->hydrateFieldFromSnapshot($row)));
+        $version->setRelation('mappings', $mappings->map(fn (array $row) => $this->hydrateMappingFromSnapshot($row)));
 
         return $version;
-    }
-
-    private function buildLegacySnapshot(string $legacyTemplatePath): array
-    {
-        return [
-            'captured_at' => now()->toISOString(),
-            'render_mode' => 'legacy',
-            'template_path' => $legacyTemplatePath,
-            'version' => null,
-            'fields' => [],
-            'mappings' => [],
-        ];
     }
 
     private function normalizeSnapshotRows(mixed $rows): Collection
@@ -148,5 +133,20 @@ class OrderTemplateSnapshotService
             ->filter(fn ($row) => is_array($row))
             ->values();
     }
-}
 
+    private function hydrateFieldFromSnapshot(array $row): OrderTemplateField
+    {
+        $field = new OrderTemplateField;
+        $field->forceFill($row);
+
+        return $field;
+    }
+
+    private function hydrateMappingFromSnapshot(array $row): OrderTemplateMapping
+    {
+        $mapping = new OrderTemplateMapping;
+        $mapping->forceFill($row);
+
+        return $mapping;
+    }
+}

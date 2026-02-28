@@ -2,28 +2,35 @@
 
 namespace App\Modules\Orders\Livewire\Templates;
 
-use App\Models\Component as OrderComponent;
 use App\Models\Order;
 use App\Models\OrderTemplateSet;
 use App\Models\OrderTemplateVersion;
 use App\Models\OrderTemplateMapping;
 use App\Models\OrderTemplateField;
 use App\Models\OrderType;
-use App\Services\GenerateDynamicFieldsService;
 use App\Services\Orders\OrderTemplateAuditLogger;
 use App\Services\Orders\OrderTemplateFormSchemaService;
+use App\Services\Orders\OrderTemplateMetadataSyncService;
+use App\Services\Orders\OrderTemplateRenderer;
 use App\Services\Orders\OrderTemplateVersionLifecycleService;
 use App\Services\Orders\TemplatePlaceholderCoverageService;
 use App\Services\Orders\TemplateRegistry;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Throwable;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
 class OnboardingWizard extends Component
 {
     use WithFileUploads;
+
+    private const TEMPLATE_WIZARD_PERMISSION_MATRIX = [
+        'view' => ['show-orders', 'edit-orders'],
+        'metadata' => ['manage-order-template-metadata', 'edit-orders'],
+        'version' => ['manage-order-template-versions', 'edit-orders'],
+        'set' => ['manage-order-template-sets', 'edit-orders'],
+    ];
 
     public ?int $templateId = null;
     public ?int $orderTypeId = null;
@@ -36,9 +43,13 @@ class OnboardingWizard extends Component
     public string $uploadResult = '';
     public string $metadataResult = '';
     public string $publishResult = '';
+    public string $previewResult = '';
 
     public ?string $currentChecksum = null;
     public ?string $uploadedChecksum = null;
+    public ?string $previewOutputPath = null;
+    public ?string $previewOutputName = null;
+    public bool $previewSucceeded = false;
 
     public array $coverage = [];
 
@@ -130,6 +141,7 @@ class OnboardingWizard extends Component
         $this->orderTypeId = null;
         $this->versionId = null;
         $this->coverage = [];
+        $this->resetPreviewState();
 
         $firstType = collect($this->orderTypeOptions)->first();
         if ($firstType && isset($firstType['id'])) {
@@ -152,6 +164,7 @@ class OnboardingWizard extends Component
         $this->metadataResult = '';
         $this->publishResult = '';
         $this->coverage = [];
+        $this->resetPreviewState();
 
         $firstVersion = collect($this->versionOptions)->first();
         $this->versionId = $firstVersion['id'] ?? null;
@@ -169,11 +182,16 @@ class OnboardingWizard extends Component
         $this->uploadResult = '';
         $this->metadataResult = '';
         $this->publishResult = '';
+        $this->previewResult = '';
         $this->refreshVersionState();
     }
 
     public function openUiConfigForSelectedTemplate(): void
     {
+        if (! $this->ensureWizardPermission('view')) {
+            return;
+        }
+
         if (! $this->templateId) {
             $this->dispatch('addError', __('Please select a template first.'));
 
@@ -185,6 +203,10 @@ class OnboardingWizard extends Component
 
     public function createDraftVersion(OrderTemplateVersionLifecycleService $lifecycleService): void
     {
+        if (! $this->ensureWizardPermission('version')) {
+            return;
+        }
+
         if (! $this->orderTypeId) {
             $this->dispatch('addError', __('Please select an order type first.'));
             return;
@@ -240,12 +262,17 @@ class OnboardingWizard extends Component
 
         $this->versionId = (int) $created->id;
         $this->versionResult = __('Draft version created: v:version', ['version' => (int) $created->version_no]);
+        $this->resetPreviewState();
         $this->refreshVersionState();
         $this->dispatch('typesUpdated', __('Draft version created successfully.'));
     }
 
     public function uploadDocxForSelectedVersion(): void
     {
+        if (! $this->ensureWizardPermission('version')) {
+            return;
+        }
+
         if (! $this->orderTypeId || ! $this->versionId) {
             $this->dispatch('addError', __('Please create/select a version first.'));
             return;
@@ -291,16 +318,21 @@ class OnboardingWizard extends Component
         $this->docxFile = null;
         $this->uploadedChecksum = $checksum;
         $this->uploadResult = __('DOCX uploaded and linked to selected version.');
+        $this->resetPreviewState();
         $this->refreshVersionState();
         $this->dispatch('typesUpdated', __('DOCX uploaded successfully.'));
     }
 
     public function generateMetadataAndMappings(
-        GenerateDynamicFieldsService $dynamicFieldsService,
+        OrderTemplateMetadataSyncService $metadataSyncService,
         TemplateRegistry $templateRegistry,
         OrderTemplateFormSchemaService $schemaService,
         OrderTemplateAuditLogger $auditLogger
     ): void {
+        if (! $this->ensureWizardPermission('metadata')) {
+            return;
+        }
+
         if (! $this->orderTypeId || ! $this->versionId) {
             $this->dispatch('addError', __('Please select an order type/version first.'));
             return;
@@ -316,108 +348,51 @@ class OnboardingWizard extends Component
             return;
         }
 
-        $tokens = OrderComponent::query()
-            ->where('order_type_id', (int) $this->orderTypeId)
-            ->pluck('dynamic_fields')
-            ->flatMap(fn ($fields) => $this->extractDynamicTokens($fields))
-            ->filter(fn ($field) => is_string($field) && trim((string) $field) !== '')
-            ->map(fn ($field) => '$'.ltrim(trim((string) $field), '$'))
-            ->unique()
-            ->values();
+        $result = $metadataSyncService->sync(
+            $version,
+            (int) $this->orderTypeId,
+            (string) ($version->templateSet->orderType?->order?->blade ?? ''),
+            true,
+            auth()->id()
+        );
 
-        if ($tokens->isEmpty()) {
-            $tokens = collect($this->fallbackTokensForBlade((string) ($version->templateSet->orderType?->order?->blade ?? '')));
-        }
-
-        $legacyCatalog = $dynamicFieldsService->handle();
-        $createdFields = 0;
-        $createdMappings = 0;
-
-        DB::transaction(function () use ($version, $tokens, $legacyCatalog, &$createdFields, &$createdMappings): void {
-            foreach ($tokens->values() as $index => $token) {
-                $fieldKey = ltrim((string) $token, '$');
-                if ($fieldKey === '') {
-                    continue;
-                }
-
-                $legacyDefinition = is_array($legacyCatalog[$token] ?? null) ? $legacyCatalog[$token] : [];
-                $resolvedInput = $this->resolveLegacyInput($legacyDefinition);
-                if ($fieldKey === 'structure' || (string) ($legacyDefinition['field'] ?? '') === 'structure_id') {
-                    $resolvedInput = 'radio-list';
-                }
-
-                $uiConfig = array_filter([
-                    'field' => (string) ($legacyDefinition['field'] ?? $fieldKey),
-                    'input' => $resolvedInput,
-                    'model' => $legacyDefinition['model'] ?? null,
-                    'selectedName' => $legacyDefinition['selectedName'] ?? null,
-                    'searchField' => $legacyDefinition['searchField'] ?? null,
-                    'group' => 'main',
-                    'group_order' => 0,
-                    'field_order' => (($index + 1) * 10),
-                    'grid_cols' => ['default' => 1, 'sm' => 2, 'md' => 3],
-                    'col_span' => ['default' => 1],
-                ], static fn ($value) => $value !== null && $value !== '');
-
-                $field = OrderTemplateField::query()
-                    ->where('order_template_version_id', (int) $version->id)
-                    ->where('field_key', $fieldKey)
-                    ->first();
-
-                if (! $field) {
-                    OrderTemplateField::query()->create([
-                        'order_template_version_id' => (int) $version->id,
-                        'field_key' => $fieldKey,
-                        'label' => (string) ($legacyDefinition['title'] ?? Str::headline(str_replace('_', ' ', $fieldKey))),
-                        'field_type' => $this->mapInputToFieldType($resolvedInput),
-                        'is_required' => false,
-                        'sort_order' => (($index + 1) * 10),
-                        'default_value' => null,
-                        'data_source' => null,
-                        'ui_config' => $uiConfig,
-                        'transform_config' => null,
-                        'validation_config' => null,
-                    ]);
-                    $createdFields++;
-                }
-
-                $mapping = OrderTemplateMapping::query()
-                    ->where('order_template_version_id', (int) $version->id)
-                    ->where('placeholder', (string) $token)
-                    ->where('scope', 'row')
-                    ->first();
-
-                if (! $mapping) {
-                    OrderTemplateMapping::query()->create([
-                        'order_template_version_id' => (int) $version->id,
-                        'placeholder' => (string) $token,
-                        'field_key' => $fieldKey,
-                        'scope' => 'row',
-                        'sort_order' => (($index + 1) * 10),
-                        'mapping_config' => null,
-                    ]);
-                    $createdMappings++;
-                }
-            }
-        });
+        $createdFields = (int) ($result['created_fields'] ?? 0);
+        $createdMappings = (int) ($result['created_mappings'] ?? 0);
+        $deletedFields = (int) ($result['deleted_fields'] ?? 0);
+        $deletedMappings = (int) ($result['deleted_mappings'] ?? 0);
+        $updatedFields = (int) ($result['updated_fields'] ?? 0);
+        $updatedMappings = (int) ($result['updated_mappings'] ?? 0);
 
         $templateRegistry->invalidate((int) $this->orderTypeId);
         $schemaService->invalidateCachedSchema((int) $this->orderTypeId, (int) $this->versionId);
         $auditLogger->log((int) $this->versionId, 'wizard_metadata_generated', [
             'created_fields' => $createdFields,
             'created_mappings' => $createdMappings,
+            'updated_fields' => $updatedFields,
+            'updated_mappings' => $updatedMappings,
+            'deleted_fields' => $deletedFields,
+            'deleted_mappings' => $deletedMappings,
         ], auth()->id());
 
-        $this->metadataResult = __('Metadata generated. Fields: :fields, Mappings: :mappings', [
+        $this->metadataResult = __('Metadata synced. Fields +: :fields, ~: :updated_fields, -: :deleted_fields | Mappings +: :mappings, ~: :updated_mappings, -: :deleted_mappings', [
             'fields' => $createdFields,
+            'updated_fields' => $updatedFields,
+            'deleted_fields' => $deletedFields,
             'mappings' => $createdMappings,
+            'updated_mappings' => $updatedMappings,
+            'deleted_mappings' => $deletedMappings,
         ]);
+        $this->resetPreviewState();
         $this->refreshVersionState();
         $this->dispatch('typesUpdated', __('Metadata + mappings generated successfully.'));
     }
 
     public function runCoverageScan(TemplatePlaceholderCoverageService $coverageService): void
     {
+        if (! $this->ensureWizardPermission('view')) {
+            return;
+        }
+
         if (! $this->versionId) {
             $this->dispatch('addError', __('Please select a version first.'));
             return;
@@ -447,8 +422,17 @@ class OnboardingWizard extends Component
 
     public function publishSelectedVersion(OrderTemplateVersionLifecycleService $lifecycleService): void
     {
+        if (! $this->ensureWizardPermission('version')) {
+            return;
+        }
+
         if (! $this->versionId || ! $this->orderTypeId) {
             $this->dispatch('addError', __('Please select a version first.'));
+            return;
+        }
+
+        if (! $this->previewSucceeded || ! $this->previewOutputPath || ! is_file($this->previewOutputPath)) {
+            $this->dispatch('addError', __('Run preview render before publishing.'));
             return;
         }
 
@@ -466,7 +450,13 @@ class OnboardingWizard extends Component
             return;
         }
 
-        $published = $lifecycleService->publishVersion((int) $this->versionId, auth()->id());
+        try {
+            $published = $lifecycleService->publishVersion((int) $this->versionId, auth()->id());
+        } catch (Throwable $exception) {
+            $this->dispatch('addError', $exception->getMessage());
+            return;
+        }
+
         if (! $published) {
             $this->dispatch('addError', __('Could not publish selected version.'));
             return;
@@ -478,8 +468,113 @@ class OnboardingWizard extends Component
         $this->dispatch('typesUpdated', __('Version published successfully.'));
     }
 
+    public function runPreviewRender(
+        OrderTemplateRenderer $renderer,
+        TemplatePlaceholderCoverageService $coverageService
+    ): void
+    {
+        if (! $this->ensureWizardPermission('metadata')) {
+            return;
+        }
+
+        if (! $this->orderTypeId || ! $this->versionId) {
+            $this->dispatch('addError', __('Please select an order type/version first.'));
+            return;
+        }
+
+        /** @var OrderTemplateVersion|null $version */
+        $version = OrderTemplateVersion::query()
+            ->with([
+                'templateSet:id,order_type_id,name',
+                'mappings' => fn ($query) => $query->orderBy('sort_order')->orderBy('id'),
+                'fields' => fn ($query) => $query->orderBy('sort_order')->orderBy('id'),
+            ])
+            ->find((int) $this->versionId);
+
+        if (! $version || ! $version->templateSet || (int) $version->templateSet->order_type_id !== (int) $this->orderTypeId) {
+            $this->dispatch('addError', __('Selected version is invalid.'));
+            return;
+        }
+
+        $coverage = $coverageService->analyzeForVersion(
+            $version,
+            $version->mappings
+                ->map(fn (OrderTemplateMapping $mapping) => [
+                    'placeholder' => (string) $mapping->placeholder,
+                    'field_key' => (string) $mapping->field_key,
+                    'scope' => (string) $mapping->scope,
+                ])
+                ->values()
+                ->all()
+        );
+        $this->coverage = $coverage;
+
+        if (empty($coverage['inspectable'])) {
+            $this->dispatch('addError', __('Template coverage is unavailable. Upload DOCX and run coverage first.'));
+            return;
+        }
+
+        if (! empty($coverage['missing_placeholders'])) {
+            $this->dispatch('addError', __('Cannot run preview. Missing mappings: :placeholders', [
+                'placeholders' => implode(', ', $coverage['missing_placeholders']),
+            ]));
+            return;
+        }
+
+        try {
+            $fieldMap = $version->fields
+                ->keyBy(fn (OrderTemplateField $field) => ltrim((string) $field->field_key, '$'));
+
+            $scalarValues = $this->buildPreviewScalarValues($version->mappings, $fieldMap->all());
+            $rowValues = $this->buildPreviewRowValues($version->mappings, $fieldMap->all());
+            $rows = empty($rowValues) ? [] : [$rowValues];
+
+            $outputPath = $renderer->render(
+                (string) $version->template_path,
+                $scalarValues,
+                $rows,
+                sprintf('preview-v%s', (int) $version->version_no),
+                [
+                    'order_type_id' => (int) $this->orderTypeId,
+                    'template_version_id' => (int) $version->id,
+                    'is_preview' => true,
+                ]
+            );
+        } catch (Throwable $exception) {
+            $this->previewSucceeded = false;
+            $this->previewOutputPath = null;
+            $this->previewOutputName = null;
+            $this->previewResult = '';
+            $this->dispatch('addError', $exception->getMessage());
+            return;
+        }
+
+        $this->previewSucceeded = true;
+        $this->previewOutputPath = $outputPath;
+        $this->previewOutputName = basename($outputPath);
+        $this->previewResult = __('Preview rendered successfully.');
+        $this->dispatch('typesUpdated', __('Preview render completed.'));
+    }
+
+    public function downloadPreview()
+    {
+        if (! $this->previewOutputPath || ! is_file($this->previewOutputPath)) {
+            $this->dispatch('addError', __('Preview file is not available. Run preview render first.'));
+            return null;
+        }
+
+        return response()->download(
+            $this->previewOutputPath,
+            $this->previewOutputName ?: basename($this->previewOutputPath)
+        );
+    }
+
     public function ensureTemplateSetsForSelectedTemplate(): void
     {
+        if (! $this->ensureWizardPermission('set')) {
+            return;
+        }
+
         if (! $this->templateId) {
             $this->dispatch('addError', __('Please select a template first.'));
 
@@ -557,6 +652,26 @@ class OnboardingWizard extends Component
         $this->runCoverageScan(app(TemplatePlaceholderCoverageService::class));
     }
 
+    private function ensureWizardPermission(string $scope): bool
+    {
+        $user = auth()->user();
+        if (! $user) {
+            $this->dispatch('addError', __('You do not have permission to perform this action.'));
+            return false;
+        }
+
+        $permissions = self::TEMPLATE_WIZARD_PERMISSION_MATRIX[$scope] ?? ['edit-orders'];
+        foreach ($permissions as $permission) {
+            if ($user->can($permission)) {
+                return true;
+            }
+        }
+
+        $this->dispatch('addError', __('You do not have permission to perform this action.'));
+
+        return false;
+    }
+
     private function resetStepMessages(): void
     {
         $this->setEnsureResult = '';
@@ -564,9 +679,19 @@ class OnboardingWizard extends Component
         $this->uploadResult = '';
         $this->metadataResult = '';
         $this->publishResult = '';
+        $this->previewResult = '';
         $this->currentChecksum = null;
         $this->uploadedChecksum = null;
         $this->docxFile = null;
+        $this->resetPreviewState();
+    }
+
+    private function resetPreviewState(): void
+    {
+        $this->previewSucceeded = false;
+        $this->previewOutputPath = null;
+        $this->previewOutputName = null;
+        $this->previewResult = '';
     }
 
     private function resolveTypeContext(int $orderTypeId): ?OrderType
@@ -596,67 +721,101 @@ class OnboardingWizard extends Component
         return is_string($hash) && $hash !== '' ? $hash : null;
     }
 
-    private function extractDynamicTokens(mixed $fields): array
+    /**
+     * @param  \Illuminate\Database\Eloquent\Collection<int,OrderTemplateMapping>  $mappings
+     * @param  array<string,OrderTemplateField>  $fieldMap
+     * @return array<string,string>
+     */
+    private function buildPreviewScalarValues($mappings, array $fieldMap): array
     {
-        if (is_array($fields)) {
-            return collect($fields)
-                ->map(fn ($field) => is_string($field) ? trim($field) : '')
-                ->filter()
-                ->values()
-                ->all();
-        }
+        $today = now();
+        $defaultScalars = [
+            'day' => $today->format('d'),
+            'month' => $today->translatedFormat('F'),
+            'year' => $today->format('Y'),
+            'rank_director' => 'general-mayor',
+            'name_director' => (string) (auth()->user()?->name ?? 'Director'),
+        ];
 
-        if (is_string($fields)) {
-            $trimmed = trim($fields);
-            if ($trimmed === '') {
-                return [];
+        foreach ($mappings as $mapping) {
+            if ((string) $mapping->scope !== 'scalar') {
+                continue;
             }
 
-            $decoded = json_decode($trimmed, true);
-            if (is_array($decoded)) {
-                return $this->extractDynamicTokens($decoded);
+            $placeholder = $this->normalizePlaceholderForPreview((string) $mapping->placeholder);
+            if ($placeholder === '') {
+                continue;
             }
 
-            return collect(explode(',', $trimmed))
-                ->map(fn ($field) => trim((string) $field))
-                ->filter()
-                ->values()
-                ->all();
+            $fieldKey = ltrim((string) $mapping->field_key, '$');
+            $field = $fieldMap[$fieldKey] ?? null;
+            $defaultScalars[$placeholder] = $this->sampleValueForField($fieldKey, $field);
         }
 
-        return [];
+        return $defaultScalars;
     }
 
-    private function fallbackTokensForBlade(string $blade): array
+    /**
+     * @param  \Illuminate\Database\Eloquent\Collection<int,OrderTemplateMapping>  $mappings
+     * @param  array<string,OrderTemplateField>  $fieldMap
+     * @return array<string,string>
+     */
+    private function buildPreviewRowValues($mappings, array $fieldMap): array
     {
-        return match ($blade) {
-            Order::BLADE_VACATION => ['$start_date', '$end_date', '$days', '$fullname', '$location'],
-            Order::BLADE_BUSINESS_TRIP => ['$start_date', '$end_date', '$location', '$fullname', '$transportation'],
-            default => ['$fullname', '$rank', '$day', '$month', '$year', '$structure_main', '$structure', '$position'],
-        };
-    }
+        $rowValues = [];
 
-    private function resolveLegacyInput(array $legacyDefinition): string
-    {
-        $configured = trim((string) ($legacyDefinition['input'] ?? ''));
-        if ($configured !== '') {
-            return $configured;
+        foreach ($mappings as $mapping) {
+            if ((string) $mapping->scope === 'scalar') {
+                continue;
+            }
+
+            $placeholder = $this->normalizePlaceholderForPreview((string) $mapping->placeholder);
+            if ($placeholder === '') {
+                continue;
+            }
+
+            $fieldKey = ltrim((string) $mapping->field_key, '$');
+            $field = $fieldMap[$fieldKey] ?? null;
+            $rowValues[$placeholder] = $this->sampleValueForField($fieldKey, $field);
         }
 
-        if (! empty($legacyDefinition['model']) || ! empty($legacyDefinition['searchField']) || ! empty($legacyDefinition['selectedName'])) {
-            return 'select';
-        }
-
-        return 'text-input';
+        return $rowValues;
     }
 
-    private function mapInputToFieldType(string $input): string
+    private function normalizePlaceholderForPreview(string $placeholder): string
     {
-        return match (trim($input)) {
-            'select', 'radio-list' => 'relation',
-            'date-input' => 'date',
-            'numeric-input' => 'integer',
-            default => 'text',
+        $normalized = trim($placeholder);
+        if ($normalized === '') {
+            return '';
+        }
+
+        $normalized = preg_replace('/^\$\{(.+)\}$/', '$1', $normalized) ?: $normalized;
+        $normalized = trim($normalized, '{} ');
+        $normalized = ltrim($normalized, '$');
+        $normalized = preg_replace('/#\d+$/', '', $normalized) ?: $normalized;
+
+        return trim($normalized);
+    }
+
+    private function sampleValueForField(string $fieldKey, ?OrderTemplateField $field): string
+    {
+        $normalizedKey = ltrim(trim($fieldKey), '$');
+        $fieldType = strtolower(trim((string) ($field?->field_type ?? '')));
+
+        return match ($normalizedKey) {
+            'fullname', 'name' => 'Test User',
+            'rank', 'rank_director' => 'Leytenant',
+            'day' => now()->format('d'),
+            'month' => now()->translatedFormat('F'),
+            'year' => now()->format('Y'),
+            'structure_main' => '1-ci əsas strukturun',
+            'structure' => '18-ci idarenin',
+            'position' => 'Proqramçı',
+            default => match ($fieldType) {
+                'integer', 'int', 'number', 'numeric' => '1',
+                'date', 'datetime' => now()->format('Y-m-d'),
+                default => Str::headline(str_replace('_', ' ', $normalizedKey)),
+            },
         };
     }
 

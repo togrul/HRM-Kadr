@@ -49,6 +49,7 @@ class OrderMetadataRenderPayloadBuilderTest extends TestCase
         $this->assertSame('Nigar Nur', $payload['rows'][0]['fullname']);
         $this->assertSame('Proqramçı', $payload['rows'][0]['position']);
         $this->assertSame('leytenant', $payload['rows'][0]['rank']);
+        $this->assertSame('Nigar Nur - Proqramçı', $payload['rows'][0]['content_text']);
     }
 
     private function createOrderContext(): array

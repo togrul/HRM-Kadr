@@ -22,6 +22,10 @@ trait HandlesSetTypeUiConfigMutations
         OrderTemplateFormSchemaService $schemaService,
         OrderTemplateAuditLogger $auditLogger
     ): void {
+        if (! $this->ensureTemplateUiPermission('metadata')) {
+            return;
+        }
+
         if (! $this->uiConfigOrderTypeId || ! $this->uiConfigVersionId) {
             $this->dispatch('typesUpdated', __('Please open UI config for an order type first.'));
             return;
@@ -178,6 +182,10 @@ trait HandlesSetTypeUiConfigMutations
         OrderTemplateFormSchemaService $schemaService,
         OrderTemplateAuditLogger $auditLogger
     ): void {
+        if (! $this->ensureTemplateUiPermission('metadata')) {
+            return;
+        }
+
         if (! $this->uiConfigOrderTypeId || ! $this->uiConfigVersionId) {
             return;
         }
@@ -213,6 +221,10 @@ trait HandlesSetTypeUiConfigMutations
 
     public function addMappingRow(): void
     {
+        if (! $this->ensureTemplateUiPermission('metadata')) {
+            return;
+        }
+
         $nextOrder = collect($this->mappingDraft)
             ->pluck('order')
             ->filter(fn ($value) => is_numeric($value))
@@ -231,6 +243,10 @@ trait HandlesSetTypeUiConfigMutations
 
     public function removeMappingRow(int $index): void
     {
+        if (! $this->ensureTemplateUiPermission('metadata')) {
+            return;
+        }
+
         if (! array_key_exists($index, $this->mappingDraft)) {
             return;
         }
@@ -244,6 +260,10 @@ trait HandlesSetTypeUiConfigMutations
         OrderTemplateFormSchemaService $schemaService,
         OrderTemplateAuditLogger $auditLogger
     ): void {
+        if (! $this->ensureTemplateUiPermission('metadata')) {
+            return;
+        }
+
         if (! $this->uiConfigOrderTypeId || ! $this->uiConfigVersionId) {
             return;
         }
@@ -282,6 +302,19 @@ trait HandlesSetTypeUiConfigMutations
             ->where('order_template_version_id', (int) $this->uiConfigVersionId)
             ->get();
 
+        $templateVersion = OrderTemplateVersion::query()
+            ->with([
+                'fields' => fn ($query) => $query->orderBy('sort_order')->orderBy('id'),
+                'mappings' => fn ($query) => $query->orderBy('sort_order')->orderBy('id'),
+            ])
+            ->find((int) $this->uiConfigVersionId);
+        if (! $templateVersion) {
+            $this->dispatch('typesUpdated', __('Active metadata template version not found.'));
+            return;
+        }
+
+        $stateBefore = $this->captureUiConfigState($templateVersion);
+
         $this->resetValidation(['uiConfigDraft.*.model', 'mappingDraft.*.placeholder', 'mappingDraft.*.mapping_config_json']);
 
         foreach ($fields as $field) {
@@ -311,12 +344,6 @@ trait HandlesSetTypeUiConfigMutations
 
         if ($normalizedMappings->isEmpty()) {
             $this->addError('mappingDraft', __('At least one mapping is required.'));
-        }
-
-        $templateVersion = OrderTemplateVersion::query()->find((int) $this->uiConfigVersionId);
-        if (! $templateVersion) {
-            $this->dispatch('typesUpdated', __('Active metadata template version not found.'));
-            return;
         }
 
         $coverage = app(TemplatePlaceholderCoverageService::class)
@@ -369,12 +396,24 @@ trait HandlesSetTypeUiConfigMutations
             }
         });
 
+        $templateVersion->refresh()->load([
+            'fields' => fn ($query) => $query->orderBy('sort_order')->orderBy('id'),
+            'mappings' => fn ($query) => $query->orderBy('sort_order')->orderBy('id'),
+        ]);
+        $stateAfter = $this->captureUiConfigState($templateVersion);
+        $diff = $this->buildUiConfigStateDiff($stateBefore, $stateAfter);
+        $summary = $this->summarizeUiConfigDiff($diff);
+        $highlights = $this->buildUiConfigDiffHighlights($diff);
+
         $templateRegistry->invalidate((int) $this->uiConfigOrderTypeId);
         $schemaService->invalidateCachedSchema((int) $this->uiConfigOrderTypeId, (int) $this->uiConfigVersionId);
         $auditLogger->log((int) $this->uiConfigVersionId, 'ui_config_saved', [
             'fields_count' => $fields->count(),
             'mappings_count' => $normalizedMappings->count(),
             'section_blocks_count' => count($this->sectionBlocksDraft),
+            'summary' => $summary,
+            'diff' => $diff,
+            'diff_highlights' => $highlights,
         ]);
 
         $this->openUiConfig((int) $this->uiConfigOrderTypeId, (int) $this->uiConfigVersionId);
@@ -563,5 +602,234 @@ trait HandlesSetTypeUiConfigMutations
                 'ui_config' => $uiConfig,
             ]);
         }
+    }
+
+    private function captureUiConfigState(OrderTemplateVersion $templateVersion): array
+    {
+        $fieldState = $templateVersion->fields
+            ->mapWithKeys(function (OrderTemplateField $field): array {
+                $uiConfig = is_array($field->ui_config) ? $field->ui_config : [];
+                $validation = is_array($field->validation_config) ? $field->validation_config : [];
+
+                return [
+                    ltrim((string) $field->field_key, '$') => [
+                        'label' => (string) $field->label,
+                        'field_type' => (string) $field->field_type,
+                        'required' => (bool) $field->is_required,
+                        'field' => ltrim((string) ($uiConfig['field'] ?? $field->field_key), '$'),
+                        'input' => (string) ($uiConfig['input'] ?? $this->mapFieldTypeToInput((string) $field->field_type)),
+                        'model' => (string) ($uiConfig['model'] ?? ''),
+                        'selectedName' => (string) ($uiConfig['selectedName'] ?? ''),
+                        'searchField' => (string) ($uiConfig['searchField'] ?? ''),
+                        'rules' => is_string($validation['rules'] ?? null)
+                            ? trim((string) $validation['rules'])
+                            : implode('|', collect($validation['rules'] ?? [])->filter()->map(fn ($rule) => trim((string) $rule))->all()),
+                        'group' => (string) ($uiConfig['group'] ?? ''),
+                        'group_title' => (string) ($uiConfig['group_title'] ?? ''),
+                        'group_order' => (int) ($uiConfig['group_order'] ?? 0),
+                        'field_order' => (int) ($uiConfig['field_order'] ?? $field->sort_order),
+                        'grid_cols' => [
+                            'default' => (int) data_get($uiConfig, 'grid_cols.default', 1),
+                            'sm' => (int) data_get($uiConfig, 'grid_cols.sm', 2),
+                            'md' => (int) data_get($uiConfig, 'grid_cols.md', 3),
+                        ],
+                        'col_span' => [
+                            'default' => (int) data_get($uiConfig, 'col_span.default', 1),
+                            'sm' => (int) data_get($uiConfig, 'col_span.sm', 1),
+                            'md' => (int) data_get($uiConfig, 'col_span.md', 1),
+                        ],
+                    ],
+                ];
+            })
+            ->all();
+
+        $mappingState = $templateVersion->mappings
+            ->mapWithKeys(function (OrderTemplateMapping $mapping): array {
+                $key = sprintf('%s|%s', (string) $mapping->placeholder, (string) $mapping->scope);
+
+                return [
+                    $key => [
+                        'placeholder' => (string) $mapping->placeholder,
+                        'field_key' => ltrim((string) $mapping->field_key, '$'),
+                        'scope' => (string) $mapping->scope,
+                        'sort_order' => (int) $mapping->sort_order,
+                        'mapping_config' => is_array($mapping->mapping_config) ? $mapping->mapping_config : [],
+                    ],
+                ];
+            })
+            ->all();
+
+        $sectionState = collect(data_get($templateVersion->meta, 'form.section_blocks', []))
+            ->filter(fn ($block) => is_array($block) && trim((string) ($block['key'] ?? '')) !== '')
+            ->mapWithKeys(fn ($block) => [
+                (string) $block['key'] => [
+                    'title' => (string) ($block['title'] ?? ''),
+                    'enabled' => (bool) ($block['enabled'] ?? true),
+                    'order' => (int) ($block['order'] ?? 0),
+                ],
+            ])
+            ->all();
+
+        ksort($fieldState);
+        ksort($mappingState);
+        ksort($sectionState);
+
+        return [
+            'fields' => $fieldState,
+            'mappings' => $mappingState,
+            'sections' => $sectionState,
+        ];
+    }
+
+    private function buildUiConfigStateDiff(array $before, array $after): array
+    {
+        return [
+            'fields' => $this->buildBucketDiff(
+                is_array($before['fields'] ?? null) ? $before['fields'] : [],
+                is_array($after['fields'] ?? null) ? $after['fields'] : []
+            ),
+            'mappings' => $this->buildBucketDiff(
+                is_array($before['mappings'] ?? null) ? $before['mappings'] : [],
+                is_array($after['mappings'] ?? null) ? $after['mappings'] : []
+            ),
+            'sections' => $this->buildBucketDiff(
+                is_array($before['sections'] ?? null) ? $before['sections'] : [],
+                is_array($after['sections'] ?? null) ? $after['sections'] : []
+            ),
+        ];
+    }
+
+    private function buildBucketDiff(array $before, array $after): array
+    {
+        $addedKeys = array_values(array_diff(array_keys($after), array_keys($before)));
+        $removedKeys = array_values(array_diff(array_keys($before), array_keys($after)));
+        $candidateKeys = array_values(array_intersect(array_keys($before), array_keys($after)));
+
+        $updated = [];
+        foreach ($candidateKeys as $key) {
+            $changes = $this->buildItemChanges(
+                is_array($before[$key] ?? null) ? $before[$key] : [],
+                is_array($after[$key] ?? null) ? $after[$key] : []
+            );
+
+            if (! empty($changes)) {
+                $updated[] = [
+                    'key' => (string) $key,
+                    'changes' => $changes,
+                ];
+            }
+        }
+
+        return [
+            'added' => collect($addedKeys)->map(fn ($key) => ['key' => (string) $key, 'value' => $after[$key] ?? null])->values()->all(),
+            'removed' => collect($removedKeys)->map(fn ($key) => ['key' => (string) $key, 'value' => $before[$key] ?? null])->values()->all(),
+            'updated' => $updated,
+        ];
+    }
+
+    private function buildItemChanges(array $before, array $after): array
+    {
+        $beforeFlat = $this->flattenDiffValue($before);
+        $afterFlat = $this->flattenDiffValue($after);
+
+        $keys = array_values(array_unique(array_merge(array_keys($beforeFlat), array_keys($afterFlat))));
+        sort($keys);
+
+        $changes = [];
+        foreach ($keys as $key) {
+            $old = $beforeFlat[$key] ?? null;
+            $new = $afterFlat[$key] ?? null;
+            if ($old === $new) {
+                continue;
+            }
+
+            $changes[$key] = [
+                'from' => $old,
+                'to' => $new,
+            ];
+        }
+
+        return $changes;
+    }
+
+    private function flattenDiffValue(array $value, string $prefix = ''): array
+    {
+        $result = [];
+
+        foreach ($value as $key => $item) {
+            $path = $prefix === '' ? (string) $key : $prefix.'.'.$key;
+            if (is_array($item)) {
+                $result = [...$result, ...$this->flattenDiffValue($item, $path)];
+                continue;
+            }
+
+            $result[$path] = is_bool($item) ? (int) $item : $item;
+        }
+
+        return $result;
+    }
+
+    private function summarizeUiConfigDiff(array $diff): array
+    {
+        return [
+            'fields' => [
+                'added' => count(data_get($diff, 'fields.added', [])),
+                'removed' => count(data_get($diff, 'fields.removed', [])),
+                'updated' => count(data_get($diff, 'fields.updated', [])),
+            ],
+            'mappings' => [
+                'added' => count(data_get($diff, 'mappings.added', [])),
+                'removed' => count(data_get($diff, 'mappings.removed', [])),
+                'updated' => count(data_get($diff, 'mappings.updated', [])),
+            ],
+            'sections' => [
+                'added' => count(data_get($diff, 'sections.added', [])),
+                'removed' => count(data_get($diff, 'sections.removed', [])),
+                'updated' => count(data_get($diff, 'sections.updated', [])),
+            ],
+        ];
+    }
+
+    private function buildUiConfigDiffHighlights(array $diff): array
+    {
+        $highlights = collect();
+
+        foreach (['fields', 'mappings', 'sections'] as $bucket) {
+            $added = collect(data_get($diff, "{$bucket}.added", []))
+                ->pluck('key')
+                ->filter()
+                ->take(2)
+                ->map(fn ($key) => sprintf('%s + %s', Str::title($bucket), $key));
+
+            $removed = collect(data_get($diff, "{$bucket}.removed", []))
+                ->pluck('key')
+                ->filter()
+                ->take(2)
+                ->map(fn ($key) => sprintf('%s - %s', Str::title($bucket), $key));
+
+            $updated = collect(data_get($diff, "{$bucket}.updated", []))
+                ->take(2)
+                ->map(function ($item) use ($bucket) {
+                    $key = (string) ($item['key'] ?? '');
+                    $changedPaths = collect(is_array($item['changes'] ?? null) ? array_keys($item['changes']) : [])
+                        ->take(2)
+                        ->implode(', ');
+
+                    return $changedPaths !== ''
+                        ? sprintf('%s ~ %s (%s)', Str::title($bucket), $key, $changedPaths)
+                        : sprintf('%s ~ %s', Str::title($bucket), $key);
+                });
+
+            $highlights = $highlights
+                ->merge($added)
+                ->merge($removed)
+                ->merge($updated);
+        }
+
+        return $highlights
+            ->filter()
+            ->take(8)
+            ->values()
+            ->all();
     }
 }

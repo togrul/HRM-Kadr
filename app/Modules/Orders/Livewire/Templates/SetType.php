@@ -85,6 +85,10 @@ class SetType extends Component
 
     public function addType()
     {
+        if (! $this->ensureTemplateUiPermission('set')) {
+            return;
+        }
+
         $this->validate();
 
         $this->templateModel->types()->create($this->types);
@@ -96,12 +100,20 @@ class SetType extends Component
 
     public function removeType($_typeId)
     {
+        if (! $this->ensureTemplateUiPermission('set')) {
+            return;
+        }
+
         OrderType::find($_typeId)->delete();
         $this->dispatch('typesUpdated', __('Type was updated successfully!'));
     }
 
     public function editType($_typeId)
     {
+        if (! $this->ensureTemplateUiPermission('set')) {
+            return;
+        }
+
         $this->selectedType = $_typeId;
         $this->selectedModel = OrderType::find($_typeId);
         $this->types['name'] = $this->selectedModel->name;
@@ -109,6 +121,10 @@ class SetType extends Component
 
     public function updateModel()
     {
+        if (! $this->ensureTemplateUiPermission('set')) {
+            return;
+        }
+
         $this->selectedModel->update($this->types);
         $this->clearField();
         $this->dispatch('typesUpdated', __('Type was added successfully!'));

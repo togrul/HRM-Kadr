@@ -36,16 +36,16 @@ class OrderTemplateReadinessReport extends Command
                 ?->versions
                 ?->first(fn ($version) => (bool) $version->is_active);
 
-            $hasLegacyTemplate = trim((string) ($type->order?->content ?? '')) !== '';
             $fieldsCount = (int) ($activeVersion?->fields_count ?? 0);
             $mappingsCount = (int) ($activeVersion?->mappings_count ?? 0);
             $hasActiveTemplate = ! empty($activeVersion?->template_path);
+            $hasTemplateSet = $type->templateSet !== null;
 
             $status = match (true) {
                 $hasActiveTemplate && $mappingsCount > 0 => 'metadata_ready',
                 $hasActiveTemplate && $mappingsCount === 0 => 'version_without_mappings',
-                $hasLegacyTemplate => 'legacy_fallback',
-                default => 'no_template',
+                $hasTemplateSet => 'version_not_active',
+                default => 'no_template_set',
             };
 
             return [
@@ -55,7 +55,7 @@ class OrderTemplateReadinessReport extends Command
                 'active_version' => $activeVersion?->version_no,
                 'fields' => $fieldsCount,
                 'mappings' => $mappingsCount,
-                'render_mode' => $status === 'metadata_ready' ? 'metadata' : 'legacy',
+                'render_mode' => $status === 'metadata_ready' ? 'metadata' : 'blocked',
                 'status' => $status,
             ];
         })->values();
@@ -63,8 +63,8 @@ class OrderTemplateReadinessReport extends Command
             $orderTypeId = (int) ($row['order_type_id'] ?? 0);
 
             $row['has_template_set'] = $templateRegistry->hasTemplateSetForOrderType($orderTypeId) ? 'yes' : 'no';
-            $row['legacy_form'] = $templateRegistry->shouldBlockLegacyFallback($orderTypeId, 'form') ? 'blocked' : 'allowed';
-            $row['legacy_print'] = $templateRegistry->shouldBlockLegacyFallback($orderTypeId, 'print') ? 'blocked' : 'allowed';
+            $row['legacy_form'] = $orderTypeId > 0 ? 'blocked' : 'n/a';
+            $row['legacy_print'] = $orderTypeId > 0 ? 'blocked' : 'n/a';
 
             return $row;
         })->values();
@@ -72,11 +72,12 @@ class OrderTemplateReadinessReport extends Command
         $summary = [
             'order_types_total' => $rows->count(),
             'metadata_ready' => $rows->where('status', 'metadata_ready')->count(),
-            'legacy_fallback' => $rows->where('status', 'legacy_fallback')->count(),
             'version_without_mappings' => $rows->where('status', 'version_without_mappings')->count(),
-            'no_template' => $rows->where('status', 'no_template')->count(),
+            'version_not_active' => $rows->where('status', 'version_not_active')->count(),
+            'no_template_set' => $rows->where('status', 'no_template_set')->count(),
             'legacy_form_blocked' => $rows->where('legacy_form', 'blocked')->count(),
             'legacy_print_blocked' => $rows->where('legacy_print', 'blocked')->count(),
+            'strict_mode' => $templateRegistry->strictModeEnabled() ? 'enabled' : 'disabled',
         ];
 
         if ((bool) $this->option('json')) {

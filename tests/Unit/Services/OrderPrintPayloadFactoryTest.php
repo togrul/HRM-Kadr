@@ -10,13 +10,13 @@ use App\Models\OrderTemplateMapping;
 use App\Models\OrderTemplateVersion;
 use App\Models\OrderType;
 use App\Models\User;
-use App\Services\Orders\OrderLegacyRenderPayloadBuilder;
 use App\Services\Orders\OrderMetadataRenderPayloadBuilder;
 use App\Services\Orders\OrderPrintPayloadFactory;
 use App\Services\Orders\OrderTemplateSnapshotService;
 use App\Services\Orders\TemplateRegistry;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery;
+use RuntimeException;
 use Tests\TestCase;
 
 class OrderPrintPayloadFactoryTest extends TestCase
@@ -35,13 +35,13 @@ class OrderPrintPayloadFactoryTest extends TestCase
 
         $templateVersion = new OrderTemplateVersion;
         $templateVersion->id = 501;
+        $templateVersion->template_path = 'templates/active.docx';
         $mapping = new OrderTemplateMapping;
         $mapping->id = 1;
         $templateVersion->setRelation('mappings', collect([$mapping]));
 
         $registry = Mockery::mock(TemplateRegistry::class);
         $snapshotService = Mockery::mock(OrderTemplateSnapshotService::class);
-        $legacyBuilder = Mockery::mock(OrderLegacyRenderPayloadBuilder::class);
         $metadataBuilder = Mockery::mock(OrderMetadataRenderPayloadBuilder::class);
 
         $snapshotService->shouldReceive('versionFromSnapshot')
@@ -49,28 +49,10 @@ class OrderPrintPayloadFactoryTest extends TestCase
             ->with([])
             ->andReturn(null);
 
-        $registry->shouldReceive('shouldBlockLegacyFallback')
-            ->once()
-            ->with($context['orderType']->id, 'print')
-            ->andReturnFalse();
         $registry->shouldReceive('activeVersionForOrderType')
             ->once()
             ->with($context['orderType']->id)
             ->andReturn($templateVersion);
-        $registry->shouldReceive('resolveTemplatePathForOrderType')
-            ->once()
-            ->with($context['orderType']->id, 'templates/legacy.docx')
-            ->andReturn('templates/active.docx');
-
-        $legacyBuilder->shouldReceive('build')
-            ->once()
-            ->with(Mockery::type(OrderLog::class))
-            ->andReturn([
-                'scalar_values' => ['day' => '25', 'month' => 'fevral', 'year' => '2026'],
-                'rows' => [['content_text' => 'Legacy row']],
-                'mode' => 'legacy',
-                'template_version_id' => null,
-            ]);
         $metadataBuilder->shouldReceive('build')
             ->once()
             ->with(Mockery::type(OrderLog::class), $templateVersion)
@@ -81,26 +63,29 @@ class OrderPrintPayloadFactoryTest extends TestCase
                 'template_version_id' => 501,
             ]);
 
-        $payload = (new OrderPrintPayloadFactory($registry, $snapshotService, $legacyBuilder, $metadataBuilder))
+        $payload = (new OrderPrintPayloadFactory($registry, $snapshotService, $metadataBuilder))
             ->build($context['orderLog']);
 
         $this->assertSame('templates/active.docx', $payload['template_path']);
         $this->assertSame('İşə qəbul', $payload['output_base_name']);
         $this->assertSame('metadata', $payload['context']['render_mode']);
         $this->assertSame(501, $payload['context']['template_version_id']);
+        $this->assertSame('registry', $payload['context']['template_source']);
     }
 
-    public function test_it_falls_back_to_legacy_builder_when_template_version_has_no_mappings(): void
+    public function test_it_throws_when_active_template_version_has_no_row_mappings(): void
     {
         $context = $this->createOrderContext('ORD-LEGACY-1');
 
         $templateVersion = new OrderTemplateVersion;
         $templateVersion->id = 777;
-        $templateVersion->setRelation('mappings', collect());
+        $scalarOnly = new OrderTemplateMapping;
+        $scalarOnly->id = 2;
+        $scalarOnly->scope = 'scalar';
+        $templateVersion->setRelation('mappings', collect([$scalarOnly]));
 
         $registry = Mockery::mock(TemplateRegistry::class);
         $snapshotService = Mockery::mock(OrderTemplateSnapshotService::class);
-        $legacyBuilder = Mockery::mock(OrderLegacyRenderPayloadBuilder::class);
         $metadataBuilder = Mockery::mock(OrderMetadataRenderPayloadBuilder::class);
 
         $snapshotService->shouldReceive('versionFromSnapshot')
@@ -108,39 +93,108 @@ class OrderPrintPayloadFactoryTest extends TestCase
             ->with([])
             ->andReturn(null);
 
-        $registry->shouldReceive('shouldBlockLegacyFallback')
-            ->once()
-            ->with($context['orderType']->id, 'print')
-            ->andReturnFalse();
         $registry->shouldReceive('activeVersionForOrderType')
             ->once()
             ->with($context['orderType']->id)
             ->andReturn($templateVersion);
-        $registry->shouldReceive('resolveTemplatePathForOrderType')
-            ->once()
-            ->with($context['orderType']->id, 'templates/legacy.docx')
-            ->andReturn('templates/legacy.docx');
-        $registry->shouldReceive('shouldLogLegacyFallback')
-            ->once()
-            ->andReturnFalse();
-
         $metadataBuilder->shouldNotReceive('build');
-        $legacyBuilder->shouldReceive('build')
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Metadata template mappings are required for this order type.');
+
+        (new OrderPrintPayloadFactory($registry, $snapshotService, $metadataBuilder))
+            ->build($context['orderLog']);
+    }
+
+    public function test_it_throws_when_snapshot_version_has_only_scalar_mappings(): void
+    {
+        $context = $this->createOrderContext('ORD-SNAPSHOT-SCALAR-1');
+
+        $templateVersion = new OrderTemplateVersion;
+        $templateVersion->id = 881;
+        $templateVersion->template_path = 'templates/strict.docx';
+        $scalarOnly = new OrderTemplateMapping;
+        $scalarOnly->id = 3;
+        $scalarOnly->scope = 'scalar';
+        $templateVersion->setRelation('mappings', collect([$scalarOnly]));
+
+        $snapshot = [
+            'render_mode' => 'metadata',
+            'template_path' => 'templates/strict.docx',
+        ];
+        $context['orderLog']->update([
+            'template_snapshot' => $snapshot,
+            'template_render_mode' => 'metadata',
+        ]);
+        $context['orderLog']->refresh();
+
+        $registry = Mockery::mock(TemplateRegistry::class);
+        $snapshotService = Mockery::mock(OrderTemplateSnapshotService::class);
+        $metadataBuilder = Mockery::mock(OrderMetadataRenderPayloadBuilder::class);
+
+        $snapshotService->shouldReceive('versionFromSnapshot')
             ->once()
-            ->with(Mockery::type(OrderLog::class))
+            ->with($snapshot)
+            ->andReturn($templateVersion);
+        $metadataBuilder->shouldNotReceive('build');
+        $registry->shouldNotReceive('activeVersionForOrderType');
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Metadata template mappings are required for this order type.');
+
+        (new OrderPrintPayloadFactory($registry, $snapshotService, $metadataBuilder))
+            ->build($context['orderLog']);
+    }
+
+    public function test_it_uses_snapshot_version_and_template_path_when_snapshot_exists(): void
+    {
+        $context = $this->createOrderContext('ORD-SNAPSHOT-1');
+
+        $templateVersion = new OrderTemplateVersion;
+        $templateVersion->id = 880;
+        $templateVersion->template_path = 'templates/strict.docx';
+        $mapping = new OrderTemplateMapping;
+        $mapping->id = 1;
+        $templateVersion->setRelation('mappings', collect([$mapping]));
+
+        $snapshot = [
+            'render_mode' => 'metadata',
+            'template_path' => 'templates/strict.docx',
+        ];
+        $context['orderLog']->update([
+            'template_snapshot' => $snapshot,
+            'template_render_mode' => 'metadata',
+        ]);
+        $context['orderLog']->refresh();
+
+        $registry = Mockery::mock(TemplateRegistry::class);
+        $snapshotService = Mockery::mock(OrderTemplateSnapshotService::class);
+        $metadataBuilder = Mockery::mock(OrderMetadataRenderPayloadBuilder::class);
+
+        $snapshotService->shouldReceive('versionFromSnapshot')
+            ->once()
+            ->with($snapshot)
+            ->andReturn($templateVersion);
+        $registry->shouldNotReceive('activeVersionForOrderType');
+        $registry->shouldNotReceive('resolveTemplatePathForOrderType');
+
+        $metadataBuilder->shouldReceive('build')
+            ->once()
+            ->with(Mockery::type(OrderLog::class), $templateVersion)
             ->andReturn([
-                'scalar_values' => ['x' => '1'],
-                'rows' => [['content_text' => 'Legacy row']],
-                'mode' => 'legacy',
-                'template_version_id' => null,
+                'scalar_values' => ['a' => '1'],
+                'rows' => [['content_text' => 'Metadata row']],
+                'mode' => 'metadata',
+                'template_version_id' => 880,
             ]);
 
-        $payload = (new OrderPrintPayloadFactory($registry, $snapshotService, $legacyBuilder, $metadataBuilder))
+        $payload = (new OrderPrintPayloadFactory($registry, $snapshotService, $metadataBuilder))
             ->build($context['orderLog']);
 
-        $this->assertSame('templates/legacy.docx', $payload['template_path']);
-        $this->assertSame('legacy', $payload['context']['render_mode']);
-        $this->assertNull($payload['context']['template_version_id']);
+        $this->assertSame('templates/strict.docx', $payload['template_path']);
+        $this->assertSame('metadata', $payload['context']['render_mode']);
+        $this->assertSame(880, $payload['context']['template_version_id']);
+        $this->assertSame('snapshot', $payload['context']['template_source']);
     }
 
     private function createOrderContext(string $orderNo): array

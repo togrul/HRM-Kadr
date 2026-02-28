@@ -54,6 +54,10 @@
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"
         ],
+        "ci:orders-template-gate": [
+            "@php artisan orders:templates:metrics --json --min-total=1",
+            "@php artisan orders:templates:query-budget --json --allow-empty"
+        ],
         "post-update-cmd": [
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
         ],

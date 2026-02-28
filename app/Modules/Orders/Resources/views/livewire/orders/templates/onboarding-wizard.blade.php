@@ -28,7 +28,11 @@
             </li>
             <li class="flex items-start gap-2">
                 <span class="mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-xs font-semibold text-blue-700">4</span>
-                <span>{{ __('Check placeholder coverage and publish') }}</span>
+                <span>{{ __('Check placeholder coverage and readiness') }}</span>
+            </li>
+            <li class="flex items-start gap-2">
+                <span class="mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-xs font-semibold text-blue-700">5</span>
+                <span>{{ __('Run preview render and publish') }}</span>
             </li>
         </ol>
     </x-surface-card>
@@ -156,7 +160,7 @@
     </x-surface-card>
 
     <x-surface-card
-        :title="__('Step 3: Metadata + Coverage + Publish')"
+        :title="__('Step 3: Metadata + Coverage')"
         class="bg-white shadow-none"
         contentClass="p-3 space-y-3"
     >
@@ -196,17 +200,10 @@
             <x-button mode="gray" wire:click="runCoverageScan">
                 {{ __('Run coverage') }}
             </x-button>
-
-            <x-button mode="success" wire:click="publishSelectedVersion" :disabled="!$publishReady">
-                {{ __('Publish version') }}
-            </x-button>
         </div>
 
         @if(filled($metadataResult))
             <p class="text-xs text-emerald-700">{{ $metadataResult }}</p>
-        @endif
-        @if(filled($publishResult))
-            <p class="text-xs text-emerald-700">{{ $publishResult }}</p>
         @endif
 
         <x-orders.publish-readiness
@@ -261,6 +258,47 @@
                     </div>
                 @endif
             </div>
+        @endif
+    </x-surface-card>
+
+    <x-surface-card
+        :title="__('Step 5: Preview + Publish')"
+        class="bg-white shadow-none"
+        contentClass="p-3 space-y-3"
+    >
+        <div class="flex flex-wrap items-center gap-2">
+            <x-button mode="default" wire:click="runPreviewRender" :disabled="!$publishReady">
+                {{ __('Run preview render') }}
+            </x-button>
+
+            <x-button mode="gray" wire:click="downloadPreview" :disabled="!$previewSucceeded">
+                {{ __('Download preview') }}
+            </x-button>
+
+            <x-button mode="success" wire:click="publishSelectedVersion" :disabled="!$publishReady || !$previewSucceeded">
+                {{ __('Publish version') }}
+            </x-button>
+        </div>
+
+        @if(!$previewSucceeded)
+            <div class="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                {{ __('Publish is enabled after a successful preview render.') }}
+            </div>
+        @endif
+
+        @if(filled($previewResult))
+            <p class="text-xs text-emerald-700">{{ $previewResult }}</p>
+        @endif
+
+        @if($previewSucceeded && filled($previewOutputName))
+            <div class="rounded-md border border-slate-200 bg-slate-50 p-2 text-xs text-slate-700">
+                <span class="font-semibold">{{ __('Preview file') }}:</span>
+                <span class="font-mono">{{ $previewOutputName }}</span>
+            </div>
+        @endif
+
+        @if(filled($publishResult))
+            <p class="text-xs text-emerald-700">{{ $publishResult }}</p>
         @endif
     </x-surface-card>
 
