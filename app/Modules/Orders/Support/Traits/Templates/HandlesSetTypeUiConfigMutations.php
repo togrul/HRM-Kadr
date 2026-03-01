@@ -5,23 +5,18 @@ namespace App\Modules\Orders\Support\Traits\Templates;
 use App\Models\OrderTemplateField;
 use App\Models\OrderTemplateMapping;
 use App\Models\OrderTemplateVersion;
-use App\Modules\Orders\Domain\Contracts\OrderTemplateRegistry;
+use App\Modules\Orders\Application\UseCases\Templates\SetTypeUiConfigWriteUseCase;
 use App\Services\Orders\OrderTemplateAuditLogger;
-use App\Services\Orders\OrderTemplateFormSchemaService;
 use App\Services\Orders\TemplatePlaceholderCoverageService;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
 trait HandlesSetTypeUiConfigMutations
 {
-    public function addUiMetadataField(
-        TemplateRegistry $templateRegistry,
-        OrderTemplateFormSchemaService $schemaService,
-        OrderTemplateAuditLogger $auditLogger
-    ): void {
+    public function addUiMetadataField(): void
+    {
         if (! $this->ensureTemplateUiPermission('metadata')) {
             return;
         }
@@ -134,54 +129,26 @@ trait HandlesSetTypeUiConfigMutations
             $uiConfig['searchField'] = $searchField;
         }
 
-        DB::transaction(function () use ($fieldKey, $fieldLabel, $input, $isRequired, $nextSort, $uiConfig, $rules): void {
-            OrderTemplateField::query()->create([
-                'order_template_version_id' => (int) $this->uiConfigVersionId,
-                'field_key' => $fieldKey,
-                'label' => $fieldLabel,
-                'field_type' => $this->mapInputToFieldType($input),
-                'is_required' => $isRequired,
-                'sort_order' => $nextSort,
-                'default_value' => null,
-                'data_source' => null,
-                'ui_config' => $uiConfig,
-                'transform_config' => null,
-                'validation_config' => ['rules' => $rules],
-            ]);
-
-            OrderTemplateMapping::query()->firstOrCreate(
-                [
-                    'order_template_version_id' => (int) $this->uiConfigVersionId,
-                    'placeholder' => '$'.$fieldKey,
-                    'scope' => 'row',
-                ],
-                [
-                    'field_key' => $fieldKey,
-                    'sort_order' => $nextSort,
-                    'mapping_config' => null,
-                ]
-            );
-        });
-
-        $templateRegistry->invalidate((int) $this->uiConfigOrderTypeId);
-        $schemaService->invalidateCachedSchema((int) $this->uiConfigOrderTypeId, (int) $this->uiConfigVersionId);
-        $auditLogger->log((int) $this->uiConfigVersionId, 'metadata_field_added', [
-            'field_key' => $fieldKey,
-            'input' => $input,
-            'required' => $isRequired,
-        ]);
+        app(SetTypeUiConfigWriteUseCase::class)->addMetadataField(
+            (int) $this->uiConfigOrderTypeId,
+            (int) $this->uiConfigVersionId,
+            $fieldKey,
+            $fieldLabel,
+            $this->mapInputToFieldType($input),
+            $isRequired,
+            $nextSort,
+            $uiConfig,
+            $rules,
+            auth()->id()
+        );
 
         $this->resetNewFieldDraft();
         $this->openUiConfig((int) $this->uiConfigOrderTypeId);
         $this->dispatch('typesUpdated', __('Metadata field added successfully.'));
     }
 
-    public function removeUiMetadataField(
-        int $fieldId,
-        TemplateRegistry $templateRegistry,
-        OrderTemplateFormSchemaService $schemaService,
-        OrderTemplateAuditLogger $auditLogger
-    ): void {
+    public function removeUiMetadataField(int $fieldId): void
+    {
         if (! $this->ensureTemplateUiPermission('metadata')) {
             return;
         }
@@ -190,30 +157,16 @@ trait HandlesSetTypeUiConfigMutations
             return;
         }
 
-        $field = OrderTemplateField::query()
-            ->where('order_template_version_id', (int) $this->uiConfigVersionId)
-            ->find($fieldId);
+        $removed = app(SetTypeUiConfigWriteUseCase::class)->removeMetadataField(
+            (int) $this->uiConfigOrderTypeId,
+            (int) $this->uiConfigVersionId,
+            $fieldId,
+            auth()->id()
+        );
 
-        if (! $field) {
+        if (! $removed) {
             return;
         }
-
-        $fieldKey = (string) $field->field_key;
-        DB::transaction(function () use ($field, $fieldKey): void {
-            $field->delete();
-
-            OrderTemplateMapping::query()
-                ->where('order_template_version_id', (int) $this->uiConfigVersionId)
-                ->where('field_key', $fieldKey)
-                ->delete();
-        });
-
-        $templateRegistry->invalidate((int) $this->uiConfigOrderTypeId);
-        $schemaService->invalidateCachedSchema((int) $this->uiConfigOrderTypeId, (int) $this->uiConfigVersionId);
-        $auditLogger->log((int) $this->uiConfigVersionId, 'metadata_field_removed', [
-            'field_key' => $fieldKey,
-            'field_id' => $fieldId,
-        ]);
 
         $this->openUiConfig((int) $this->uiConfigOrderTypeId);
         $this->dispatch('typesUpdated', __('Metadata field removed successfully.'));
@@ -255,11 +208,8 @@ trait HandlesSetTypeUiConfigMutations
         $this->mappingDraft = array_values($this->mappingDraft);
     }
 
-    public function saveUiConfig(
-        TemplateRegistry $templateRegistry,
-        OrderTemplateFormSchemaService $schemaService,
-        OrderTemplateAuditLogger $auditLogger
-    ): void {
+    public function saveUiConfig(): void
+    {
         if (! $this->ensureTemplateUiPermission('metadata')) {
             return;
         }
@@ -364,57 +314,38 @@ trait HandlesSetTypeUiConfigMutations
             return;
         }
 
-        DB::transaction(function () use ($fields, $templateVersion, $normalizedMappings): void {
-            $this->persistUiFieldDrafts($fields);
+        $fieldUpdatePayloads = $this->buildUiFieldUpdatePayloads($fields);
+        $sectionBlocks = collect($this->sectionBlocksDraft)
+            ->map(fn ($draft) => $this->normalizeSectionBlockPayload($draft))
+            ->filter()
+            ->values()
+            ->all();
 
-            $meta = is_array($templateVersion->meta) ? $templateVersion->meta : [];
-            data_set(
-                $meta,
-                'form.section_blocks',
-                collect($this->sectionBlocksDraft)
-                    ->map(fn ($draft) => $this->normalizeSectionBlockPayload($draft))
-                    ->filter()
-                    ->sortBy('order')
-                    ->values()
-                    ->all()
-            );
-            $templateVersion->update(['meta' => $meta]);
-
-            OrderTemplateMapping::query()
-                ->where('order_template_version_id', (int) $templateVersion->id)
-                ->delete();
-
-            foreach ($normalizedMappings as $mapping) {
-                OrderTemplateMapping::query()->create([
-                    'order_template_version_id' => (int) $templateVersion->id,
-                    'placeholder' => $mapping['placeholder'],
-                    'field_key' => $mapping['field_key'],
-                    'scope' => $mapping['scope'],
-                    'sort_order' => $mapping['sort_order'],
-                    'mapping_config' => $mapping['mapping_config'],
-                ]);
-            }
-        });
-
-        $templateVersion->refresh()->load([
-            'fields' => fn ($query) => $query->orderBy('sort_order')->orderBy('id'),
-            'mappings' => fn ($query) => $query->orderBy('sort_order')->orderBy('id'),
-        ]);
+        $templateVersion = app(SetTypeUiConfigWriteUseCase::class)->saveUiConfig(
+            (int) $this->uiConfigOrderTypeId,
+            (int) $this->uiConfigVersionId,
+            $fields,
+            $fieldUpdatePayloads,
+            $sectionBlocks,
+            $normalizedMappings
+        );
+        if (! $templateVersion) {
+            $this->dispatch('typesUpdated', __('Active metadata template version not found.'));
+            return;
+        }
         $stateAfter = $this->captureUiConfigState($templateVersion);
         $diff = $this->buildUiConfigStateDiff($stateBefore, $stateAfter);
         $summary = $this->summarizeUiConfigDiff($diff);
         $highlights = $this->buildUiConfigDiffHighlights($diff);
 
-        $templateRegistry->invalidate((int) $this->uiConfigOrderTypeId);
-        $schemaService->invalidateCachedSchema((int) $this->uiConfigOrderTypeId, (int) $this->uiConfigVersionId);
-        $auditLogger->log((int) $this->uiConfigVersionId, 'ui_config_saved', [
+        app(OrderTemplateAuditLogger::class)->log((int) $this->uiConfigVersionId, 'ui_config_saved', [
             'fields_count' => $fields->count(),
             'mappings_count' => $normalizedMappings->count(),
             'section_blocks_count' => count($this->sectionBlocksDraft),
             'summary' => $summary,
             'diff' => $diff,
             'diff_highlights' => $highlights,
-        ]);
+        ], auth()->id());
 
         $this->openUiConfig((int) $this->uiConfigOrderTypeId, (int) $this->uiConfigVersionId);
         $this->dispatch('typesUpdated', __('UI config was updated successfully.'));
@@ -501,8 +432,10 @@ trait HandlesSetTypeUiConfigMutations
     /**
      * @param EloquentCollection<int, OrderTemplateField> $fields
      */
-    private function persistUiFieldDrafts(EloquentCollection $fields): void
+    private function buildUiFieldUpdatePayloads(EloquentCollection $fields): array
     {
+        $payloads = [];
+
         foreach ($fields as $field) {
             $draft = $this->uiConfigDraft[(int) $field->id] ?? null;
             if (! is_array($draft)) {
@@ -595,13 +528,15 @@ trait HandlesSetTypeUiConfigMutations
                 'md' => max(1, (int) ($draft['col_span_md'] ?? 1)),
             ];
 
-            $field->update([
+            $payloads[(int) $field->id] = [
                 'field_type' => $this->mapInputToFieldType($resolvedInput),
                 'is_required' => $isRequired,
                 'validation_config' => $nextValidationConfig,
                 'ui_config' => $uiConfig,
-            ]);
+            ];
         }
+
+        return $payloads;
     }
 
     private function captureUiConfigState(OrderTemplateVersion $templateVersion): array

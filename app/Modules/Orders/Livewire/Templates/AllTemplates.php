@@ -3,7 +3,7 @@
 namespace App\Modules\Orders\Livewire\Templates;
 
 use App\Livewire\Traits\SideModalAction;
-use App\Models\Order;
+use App\Modules\Orders\Domain\Contracts\OrderTemplateReadRepository;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
@@ -37,7 +37,10 @@ class AllTemplates extends Component
 
     public function restoreData($id)
     {
-        $template = Order::withTrashed()->where('id', $id)->first();
+        $template = app(OrderTemplateReadRepository::class)->findTemplateWithTrashed((int) $id);
+        if (! $template) {
+            return;
+        }
         $template->restore();
         $template->update([
             'deleted_by' => null,
@@ -47,7 +50,10 @@ class AllTemplates extends Component
 
     public function forceDeleteData($id)
     {
-        $model = Order::withTrashed()->where('id', $id)->first();
+        $model = app(OrderTemplateReadRepository::class)->findTemplateWithTrashed((int) $id);
+        if (! $model) {
+            return;
+        }
         $model->forceDelete();
         $this->dispatch('templateWasDeleted', __('Template was deleted!'));
     }
@@ -61,11 +67,7 @@ class AllTemplates extends Component
 
     public function render()
     {
-        $templates = Order::with('category')
-            ->when($this->status == 'deleted', function ($q) {
-                $q->onlyTrashed();
-            })
-            ->paginate(24);
+        $templates = app(OrderTemplateReadRepository::class)->paginateTemplates((string) $this->status, 24);
 
         return view('orders::livewire.orders.templates.all-templates', compact('templates'));
     }

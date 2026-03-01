@@ -4,8 +4,10 @@ namespace App\Modules\Orders\Providers;
 
 use App\Models\OrderType;
 use App\Modules\Orders\Domain\Contracts\OrderTemplateAdmin;
+use App\Modules\Orders\Domain\Contracts\OrderTemplateReadRepository;
 use App\Modules\Orders\Domain\Contracts\OrderTemplateRegistry;
 use App\Modules\Orders\Domain\Contracts\OrderTemplateRepository;
+use App\Modules\Orders\Infrastructure\Persistence\Eloquent\EloquentOrderTemplateReadRepository;
 use App\Modules\Orders\Infrastructure\Persistence\Eloquent\EloquentOrderTemplateRepository;
 use App\Observers\OrderTypeObserver;
 use App\Providers\Concerns\RegistersLivewireAliases;
@@ -22,6 +24,7 @@ class OrdersServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(OrderTemplateRepository::class, EloquentOrderTemplateRepository::class);
+        $this->app->bind(OrderTemplateReadRepository::class, EloquentOrderTemplateReadRepository::class);
         $this->app->bind(OrderTemplateAdmin::class, TemplateAdminService::class);
         $this->app->bind(OrderTemplateRegistry::class, TemplateRegistryService::class);
     }

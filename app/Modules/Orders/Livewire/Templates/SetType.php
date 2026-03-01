@@ -3,8 +3,8 @@
 namespace App\Modules\Orders\Livewire\Templates;
 
 use App\Livewire\Traits\SideModalAction;
-use App\Models\Order;
-use App\Models\OrderType;
+use App\Modules\Orders\Application\UseCases\Templates\ManageSetTypeOrderTypesUseCase;
+use App\Modules\Orders\Domain\Contracts\OrderTemplateReadRepository;
 use App\Modules\Orders\Support\Traits\Templates\HandlesSetTypeMetadataBootstrap;
 use App\Modules\Orders\Support\Traits\Templates\HandlesSetTypeUiConfigLifecycle;
 use App\Modules\Orders\Support\Traits\Templates\HandlesSetTypeUiConfigMutations;
@@ -91,7 +91,7 @@ class SetType extends Component
 
         $this->validate();
 
-        $this->templateModel->types()->create($this->types);
+        app(ManageSetTypeOrderTypesUseCase::class)->addType($this->templateModel, $this->types);
 
         $this->clearField();
 
@@ -104,14 +104,14 @@ class SetType extends Component
             return;
         }
 
-        $type = $this->resolveOwnedType((int) $_typeId);
-        if (! $type) {
+        $removed = app(ManageSetTypeOrderTypesUseCase::class)
+            ->removeType($this->templateModel, (int) $_typeId);
+
+        if (! $removed) {
             $this->dispatch('addError', __('Type not found.'));
 
             return;
         }
-
-        $type->delete();
 
         if ((int) $this->selectedType === (int) $_typeId) {
             $this->clearField();
@@ -143,14 +143,15 @@ class SetType extends Component
             return;
         }
 
-        $type = $this->resolveOwnedType((int) $this->selectedType);
-        if (! $type) {
+        $updated = app(ManageSetTypeOrderTypesUseCase::class)
+            ->updateType($this->templateModel, (int) $this->selectedType, $this->types);
+
+        if (! $updated) {
             $this->dispatch('addError', __('Type not found.'));
 
             return;
         }
 
-        $type->update($this->types);
         $this->clearField();
         $this->dispatch('typesUpdated', __('Type was added successfully!'));
     }
@@ -170,21 +171,20 @@ class SetType extends Component
     public function mount()
     {
         $this->title = __('Set Type');
-        $this->templateModel = Order::findOrFail($this->templateModel);
+        $this->templateModel = app(OrderTemplateReadRepository::class)->findTemplateOrFail((int) $this->templateModel);
         $this->uiInputTypes = $this->inputTypeOptions();
         $this->resetNewFieldDraft();
     }
 
     public function render()
     {
-        $_order_types = $this->templateModel->types()
-            ->with('templateSet.activeVersion')
-            ->get();
+        $_order_types = app(OrderTemplateReadRepository::class)
+            ->orderTypesWithActiveVersion((int) $this->templateModel->id);
 
         return view('orders::livewire.orders.templates.set-type', compact('_order_types'));
     }
 
-    private function resolveOwnedType(int $typeId): ?OrderType
+    private function resolveOwnedType(int $typeId): ?\App\Models\OrderType
     {
         return $this->templateModel
             ->types()

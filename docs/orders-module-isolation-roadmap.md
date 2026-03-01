@@ -44,6 +44,35 @@ Tasks:
 2. Move transaction boundaries from Livewire traits/components to use-cases.
 3. Replace direct `Order::query()` calls in UI with read repositories.
 
+Progress:
+
+- Added `OrderTemplateReadRepository` contract:
+  - `app/Modules/Orders/Domain/Contracts/OrderTemplateReadRepository.php`
+- Added Eloquent read adapter:
+  - `app/Modules/Orders/Infrastructure/Persistence/Eloquent/EloquentOrderTemplateReadRepository.php`
+- Bound read contract in provider.
+- Migrated direct reads to repository in:
+  - `AllTemplates` (list/restore/delete lookup)
+  - `SetType` (template load + order type read)
+  - `OnboardingWizard` (template/type/version options)
+- Added Application use-case for onboarding flows:
+  - `app/Modules/Orders/Application/UseCases/Templates/TemplateOnboardingWizardUseCase.php`
+- Moved `OnboardingWizard` write/query-heavy actions into use-case:
+  - ensure sets
+  - create draft version
+  - upload docx to selected version
+  - generate metadata + mappings
+  - coverage scan
+  - preview render
+  - version checksum refresh
+- Moved `OnboardingWizard::publishSelectedVersion` into application use-case (`TemplateOnboardingWizardUseCase`).
+- Added SetType write-focused use-cases:
+  - `ManageSetTypeOrderTypesUseCase` (add/remove/update type)
+  - `SetTypeUiConfigLifecycleUseCase` (create draft/publish/rollback/delete/reconcile version)
+  - `SetTypeUiConfigWriteUseCase` (metadata field add/remove + ui config persistence transaction)
+  - `SetTypeMetadataBootstrapUseCase` (metadata bootstrap/auto-init writes)
+- Refactored SetType component + traits so write boundaries are executed through application use-cases instead of direct DB writes in Livewire layer.
+
 ## Phase 3
 
 Goal: isolate cross-module reads and writes.
@@ -77,4 +106,3 @@ Tasks:
 1. Move module config, migrations, routes, views under package-like boundaries.
 2. Introduce internal DTOs/VOs for render payloads and template schema.
 3. Finalize adapter-only persistence access.
-

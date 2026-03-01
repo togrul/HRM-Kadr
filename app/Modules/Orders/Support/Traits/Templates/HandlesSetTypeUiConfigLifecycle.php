@@ -3,8 +3,8 @@
 namespace App\Modules\Orders\Support\Traits\Templates;
 
 use App\Models\OrderType;
+use App\Modules\Orders\Application\UseCases\Templates\SetTypeUiConfigLifecycleUseCase;
 use App\Services\Orders\TemplatePlaceholderCoverageService;
-use App\Services\Orders\OrderTemplateVersionLifecycleService;
 use Throwable;
 use Illuminate\Support\Str;
 
@@ -60,7 +60,7 @@ trait HandlesSetTypeUiConfigLifecycle
         }
 
         if ($orderType->templateSet) {
-            app(OrderTemplateVersionLifecycleService::class)->reconcileSingleActiveForSet(
+            app(SetTypeUiConfigLifecycleUseCase::class)->reconcileSingleActiveForSet(
                 (int) $orderType->templateSet->id,
                 auth()->id(),
                 (int) $orderType->id
@@ -197,7 +197,7 @@ trait HandlesSetTypeUiConfigLifecycle
             ->all();
     }
 
-    public function createUiDraftVersion(OrderTemplateVersionLifecycleService $lifecycleService): void
+    public function createUiDraftVersion(): void
     {
         if (! $this->ensureTemplateUiPermission('version')) {
             return;
@@ -207,7 +207,7 @@ trait HandlesSetTypeUiConfigLifecycle
             return;
         }
 
-        $created = $lifecycleService->createDraftFromVersion(
+        $created = app(SetTypeUiConfigLifecycleUseCase::class)->createDraftVersion(
             (int) $this->uiConfigOrderTypeId,
             $this->uiConfigVersionId ? (int) $this->uiConfigVersionId : null,
             auth()->id()
@@ -222,7 +222,7 @@ trait HandlesSetTypeUiConfigLifecycle
         $this->dispatch('typesUpdated', __('Draft version created successfully.'));
     }
 
-    public function publishUiConfigVersion(int $versionId, OrderTemplateVersionLifecycleService $lifecycleService): void
+    public function publishUiConfigVersion(int $versionId): void
     {
         if (! $this->ensureTemplateUiPermission('version')) {
             return;
@@ -268,7 +268,8 @@ trait HandlesSetTypeUiConfigLifecycle
         }
 
         try {
-            $published = $lifecycleService->publishVersion($versionId, auth()->id());
+            $published = app(SetTypeUiConfigLifecycleUseCase::class)
+                ->publishVersion($versionId, auth()->id());
         } catch (Throwable $exception) {
             $this->dispatch('typesUpdated', $exception->getMessage());
             return;
@@ -283,7 +284,7 @@ trait HandlesSetTypeUiConfigLifecycle
         $this->dispatch('typesUpdated', __('Template version published.'));
     }
 
-    public function rollbackUiConfigVersion(int $versionId, OrderTemplateVersionLifecycleService $lifecycleService): void
+    public function rollbackUiConfigVersion(int $versionId): void
     {
         if (! $this->ensureTemplateUiPermission('version')) {
             return;
@@ -294,7 +295,8 @@ trait HandlesSetTypeUiConfigLifecycle
         }
 
         try {
-            $rolledBack = $lifecycleService->rollbackToVersion($versionId, auth()->id());
+            $rolledBack = app(SetTypeUiConfigLifecycleUseCase::class)
+                ->rollbackVersion($versionId, auth()->id());
         } catch (Throwable $exception) {
             $this->dispatch('typesUpdated', $exception->getMessage());
             return;
@@ -309,7 +311,7 @@ trait HandlesSetTypeUiConfigLifecycle
         $this->dispatch('typesUpdated', __('Rollback completed.'));
     }
 
-    public function deleteUiDraftVersion(int $versionId, OrderTemplateVersionLifecycleService $lifecycleService): void
+    public function deleteUiDraftVersion(int $versionId): void
     {
         if (! $this->ensureTemplateUiPermission('version')) {
             return;
@@ -319,7 +321,8 @@ trait HandlesSetTypeUiConfigLifecycle
             return;
         }
 
-        $deleted = $lifecycleService->deleteDraftVersion($versionId, auth()->id());
+        $deleted = app(SetTypeUiConfigLifecycleUseCase::class)
+            ->deleteVersion($versionId, auth()->id());
         if (! $deleted) {
             $this->dispatch('typesUpdated', __('Only non-active draft/published versions can be deleted. At least one version must remain.'));
             return;
