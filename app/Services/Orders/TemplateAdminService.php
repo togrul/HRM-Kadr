@@ -3,12 +3,18 @@
 namespace App\Services\Orders;
 
 use App\Models\Order;
+use App\Modules\Orders\Domain\Contracts\OrderTemplateAdmin;
+use App\Modules\Orders\Domain\Contracts\OrderTemplateRepository;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
-class TemplateAdminService
+class TemplateAdminService implements OrderTemplateAdmin
 {
+    public function __construct(
+        private readonly OrderTemplateRepository $templates
+    ) {}
+
     /**
      * Create order template with explicit/manual primary key assignment.
      *
@@ -21,20 +27,13 @@ class TemplateAdminService
             throw new RuntimeException(__('Template id is required.'));
         }
 
-        if (Order::query()->whereKey($id)->exists()) {
+        if ($this->templates->existsById($id)) {
             throw new RuntimeException(__('Template id already exists.'));
         }
 
         $attributes = Arr::except($payload, ['id']);
 
-        return DB::transaction(function () use ($id, $attributes): Order {
-            $template = new Order;
-            $template->fill($attributes);
-            $template->id = $id;
-            $template->save();
-
-            return $template->fresh();
-        });
+        return DB::transaction(fn (): Order => $this->templates->createWithId($id, $attributes));
     }
 
     /**
@@ -57,21 +56,17 @@ class TemplateAdminService
                 $template->id = $targetId;
             }
 
-            $template->fill($attributes);
-            $template->save();
-
-            return $template->fresh();
+            return $this->templates->update($template, $attributes);
         });
     }
 
     private function guardTemplateIdChange(Order $template, int $targetId): void
     {
-        if (Order::query()->whereKey($targetId)->exists()) {
+        if ($this->templates->existsById($targetId)) {
             throw new RuntimeException(__('Template id already exists.'));
         }
 
-        $hasDependencies = $template->orderLogs()->exists()
-            || $template->types()->exists();
+        $hasDependencies = $this->templates->hasDependencies($template);
 
         if ($hasDependencies) {
             throw new RuntimeException(

@@ -4,12 +4,13 @@ namespace App\Services\Orders;
 
 use App\Models\OrderTemplateSet;
 use App\Models\OrderTemplateVersion;
+use App\Modules\Orders\Domain\Contracts\OrderTemplateRegistry as OrderTemplateRegistryContract;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
 
-class TemplateRegistry
+class TemplateRegistry implements OrderTemplateRegistryContract
 {
     private bool $strictMode;
     private int $cacheMinutes;

@@ -5,7 +5,7 @@ namespace App\Modules\Orders\Livewire\Templates;
 use App\Livewire\Traits\Helpers\FillComplexArrayTrait;
 use App\Livewire\Traits\TemplateCrud;
 use App\Models\Order;
-use App\Services\Orders\TemplateAdminService;
+use App\Modules\Orders\Domain\Contracts\OrderTemplateAdmin;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
@@ -79,7 +79,7 @@ class EditTemplate extends Component
         }
 
         try {
-            $updated = app(TemplateAdminService::class)->update(
+            $updated = app(OrderTemplateAdmin::class)->update(
                 $this->templateModelData,
                 $this->modifyArray($this->template_data)
             );

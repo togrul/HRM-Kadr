@@ -3,7 +3,7 @@
 namespace App\Modules\Orders\Livewire\Templates;
 
 use App\Livewire\Traits\TemplateCrud;
-use App\Services\Orders\TemplateAdminService;
+use App\Modules\Orders\Domain\Contracts\OrderTemplateAdmin;
 use Livewire\Component;
 use RuntimeException;
 
@@ -20,7 +20,7 @@ class AddTemplate extends Component
         $this->template_data['content'] = $this->template_data['content']->storeAs('templates', $filename, 'public');
 
         try {
-            app(TemplateAdminService::class)->create($this->modifyArray($this->template_data));
+            app(OrderTemplateAdmin::class)->create($this->modifyArray($this->template_data));
         } catch (RuntimeException $exception) {
             $this->dispatch('addError', __($exception->getMessage()));
 

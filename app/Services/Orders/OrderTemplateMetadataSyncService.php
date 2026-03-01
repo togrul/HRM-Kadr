@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Models\OrderTemplateField;
 use App\Models\OrderTemplateMapping;
 use App\Models\OrderTemplateVersion;
+use App\Modules\Orders\Domain\Contracts\OrderTemplateRegistry;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 

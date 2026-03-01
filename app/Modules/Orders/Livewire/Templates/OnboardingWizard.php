@@ -14,7 +14,7 @@ use App\Services\Orders\OrderTemplateMetadataSyncService;
 use App\Services\Orders\OrderTemplateRenderer;
 use App\Services\Orders\OrderTemplateVersionLifecycleService;
 use App\Services\Orders\TemplatePlaceholderCoverageService;
-use App\Services\Orders\TemplateRegistry;
+use App\Modules\Orders\Domain\Contracts\OrderTemplateRegistry;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Throwable;

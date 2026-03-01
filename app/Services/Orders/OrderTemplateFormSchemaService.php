@@ -3,6 +3,7 @@
 namespace App\Services\Orders;
 
 use App\Models\OrderTemplateVersion;
+use App\Modules\Orders\Domain\Contracts\OrderTemplateRegistry;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Cache;
 

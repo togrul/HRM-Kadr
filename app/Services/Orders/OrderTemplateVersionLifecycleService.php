@@ -6,6 +6,7 @@ use App\Models\OrderTemplateField;
 use App\Models\OrderTemplateMapping;
 use App\Models\OrderTemplateSet;
 use App\Models\OrderTemplateVersion;
+use App\Modules\Orders\Domain\Contracts\OrderTemplateRegistry;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;

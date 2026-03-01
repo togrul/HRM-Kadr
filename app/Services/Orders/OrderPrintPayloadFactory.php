@@ -3,6 +3,7 @@
 namespace App\Services\Orders;
 
 use App\Models\OrderLog;
+use App\Modules\Orders\Domain\Contracts\OrderTemplateRegistry;
 use RuntimeException;
 
 class OrderPrintPayloadFactory

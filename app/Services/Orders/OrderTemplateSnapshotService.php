@@ -5,6 +5,7 @@ namespace App\Services\Orders;
 use App\Models\OrderTemplateField;
 use App\Models\OrderTemplateMapping;
 use App\Models\OrderTemplateVersion;
+use App\Modules\Orders\Domain\Contracts\OrderTemplateRegistry;
 use Illuminate\Support\Collection;
 use RuntimeException;
 
