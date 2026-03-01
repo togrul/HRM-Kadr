@@ -5,9 +5,11 @@ namespace App\Modules\Orders\Livewire\Templates;
 use App\Livewire\Traits\Helpers\FillComplexArrayTrait;
 use App\Livewire\Traits\TemplateCrud;
 use App\Models\Order;
+use App\Services\Orders\TemplateAdminService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
+use RuntimeException;
 
 class EditTemplate extends Component
 {
@@ -76,8 +78,19 @@ class EditTemplate extends Component
             $this->currentTemplateChecksum = $this->resolveStoredChecksum((string) $this->template_data['content']);
         }
 
-        $this->templateModelData->update($this->modifyArray($this->template_data));
-        $this->templateModelData->refresh()->load('types.templateSet.activeVersion');
+        try {
+            $updated = app(TemplateAdminService::class)->update(
+                $this->templateModelData,
+                $this->modifyArray($this->template_data)
+            );
+        } catch (RuntimeException $exception) {
+            $this->dispatch('addError', __($exception->getMessage()));
+
+            return;
+        }
+
+        $this->templateModelData = $updated->load('types.templateSet.activeVersion');
+        $this->templateModel = (int) $updated->id;
         $this->activeVersionBindings = $this->buildActiveVersionBindings();
 
         $this->dispatch('templateAdded', __('Template was added successfully!'));

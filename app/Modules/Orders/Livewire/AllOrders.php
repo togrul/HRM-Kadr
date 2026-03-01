@@ -135,6 +135,8 @@ class AllOrders extends Component
 
     protected function returnData($type = 'normal')
     {
+        $globalOrderIds = Order::globalVisibilityOrderIds();
+
         $result = OrderLog::query()
             ->with([
                 'order:id,name,blade',
@@ -142,13 +144,19 @@ class AllOrders extends Component
                 'orderType:id,name',
             ])
             ->when($this->status === 'deleted', fn ($query) => $query->with('personDidDelete:id,name'))
-            ->where(fn ($query) => $query
-                ->where('order_id', 1010)
-                ->orWhere(fn ($query) => $query
-                    ->where('order_id', '!=', 1010)
-                    ->whereHas('personnels', fn ($query) => $query->whereIn('structure_id', $this->accessibleStructureIds))
-                )
-            )
+            ->where(function ($query) use ($globalOrderIds) {
+                if ($globalOrderIds !== []) {
+                    $query->whereIn('order_id', $globalOrderIds)
+                        ->orWhere(function ($innerQuery) use ($globalOrderIds) {
+                            $innerQuery->whereNotIn('order_id', $globalOrderIds)
+                                ->whereHas('personnels', fn ($personnelQuery) => $personnelQuery->whereIn('structure_id', $this->accessibleStructureIds));
+                        });
+
+                    return;
+                }
+
+                $query->whereHas('personnels', fn ($personnelQuery) => $personnelQuery->whereIn('structure_id', $this->accessibleStructureIds));
+            })
             ->filter($this->search ?? [])
             ->when($this->selectedOrder, fn($q) => $q->where('order_id', $this->selectedOrder))
             ->when(is_numeric($this->status), fn($q) => $q->where('status_id', $this->status))

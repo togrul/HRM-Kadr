@@ -104,7 +104,19 @@ class SetType extends Component
             return;
         }
 
-        OrderType::find($_typeId)->delete();
+        $type = $this->resolveOwnedType((int) $_typeId);
+        if (! $type) {
+            $this->dispatch('addError', __('Type not found.'));
+
+            return;
+        }
+
+        $type->delete();
+
+        if ((int) $this->selectedType === (int) $_typeId) {
+            $this->clearField();
+        }
+
         $this->dispatch('typesUpdated', __('Type was updated successfully!'));
     }
 
@@ -114,8 +126,14 @@ class SetType extends Component
             return;
         }
 
-        $this->selectedType = $_typeId;
-        $this->selectedModel = OrderType::find($_typeId);
+        $this->selectedModel = $this->resolveOwnedType((int) $_typeId);
+        if (! $this->selectedModel) {
+            $this->dispatch('addError', __('Type not found.'));
+
+            return;
+        }
+
+        $this->selectedType = (int) $_typeId;
         $this->types['name'] = $this->selectedModel->name;
     }
 
@@ -125,7 +143,14 @@ class SetType extends Component
             return;
         }
 
-        $this->selectedModel->update($this->types);
+        $type = $this->resolveOwnedType((int) $this->selectedType);
+        if (! $type) {
+            $this->dispatch('addError', __('Type not found.'));
+
+            return;
+        }
+
+        $type->update($this->types);
         $this->clearField();
         $this->dispatch('typesUpdated', __('Type was added successfully!'));
     }
@@ -148,7 +173,6 @@ class SetType extends Component
         $this->templateModel = Order::findOrFail($this->templateModel);
         $this->uiInputTypes = $this->inputTypeOptions();
         $this->resetNewFieldDraft();
-
     }
 
     public function render()
@@ -158,5 +182,13 @@ class SetType extends Component
             ->get();
 
         return view('orders::livewire.orders.templates.set-type', compact('_order_types'));
+    }
+
+    private function resolveOwnedType(int $typeId): ?OrderType
+    {
+        return $this->templateModel
+            ->types()
+            ->whereKey($typeId)
+            ->first();
     }
 }

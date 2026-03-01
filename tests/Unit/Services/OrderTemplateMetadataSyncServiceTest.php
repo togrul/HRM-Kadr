@@ -105,7 +105,7 @@ class OrderTemplateMetadataSyncServiceTest extends TestCase
         ]);
 
         $orderId = 9801 + random_int(1, 500);
-        Order::query()->create([
+        app(\App\Services\Orders\TemplateAdminService::class)->create([
             'id' => $orderId,
             'order_category_id' => 9800,
             'name' => "Order {$suffix}",

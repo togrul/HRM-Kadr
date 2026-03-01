@@ -115,7 +115,7 @@ class OrderTemplateVersionLifecycleServiceTest extends TestCase
             'name_ru' => 'Test',
         ]);
 
-        Order::query()->create([
+        app(\App\Services\Orders\TemplateAdminService::class)->create([
             'id' => 9811,
             'order_category_id' => 9810,
             'name' => 'Template',

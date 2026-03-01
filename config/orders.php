@@ -39,6 +39,17 @@ return [
         'schema_cache_minutes' => (int) env('ORDERS_FORM_SCHEMA_CACHE_MINUTES', 15),
     ],
 
+    'listing' => [
+        /*
+         * Order IDs visible globally in orders listing, without structure-based
+         * personnel scope filtering.
+         */
+        'global_visible_order_ids' => array_values(array_filter(array_map(
+            static fn ($id) => (int) trim((string) $id),
+            explode(',', (string) env('ORDERS_GLOBAL_VISIBLE_ORDER_IDS', (string) \App\Models\Order::IG_EMR))
+        ), static fn ($id) => $id > 0)),
+    ],
+
     'observability' => [
         'query_budget' => [
             'add_form_schema' => (int) env('ORDERS_QUERY_BUDGET_ADD_FORM_SCHEMA', 15),

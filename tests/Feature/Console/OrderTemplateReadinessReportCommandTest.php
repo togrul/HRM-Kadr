@@ -59,7 +59,7 @@ class OrderTemplateReadinessReportCommandTest extends TestCase
             'name_ru' => 'Test',
         ]);
 
-        Order::query()->create([
+        app(\App\Services\Orders\TemplateAdminService::class)->create([
             'id' => 9301,
             'order_category_id' => 9300,
             'name' => 'İşə qəbul',
@@ -68,7 +68,7 @@ class OrderTemplateReadinessReportCommandTest extends TestCase
             'blade' => Order::BLADE_DEFAULT,
         ]);
 
-        Order::query()->create([
+        app(\App\Services\Orders\TemplateAdminService::class)->create([
             'id' => 9302,
             'order_category_id' => 9300,
             'name' => 'Məzuniyyət',

@@ -156,7 +156,7 @@ class OrderTemplateFormSchemaServiceTest extends TestCase
             'NoMappings' => 9702,
             default => 9703,
         };
-        Order::query()->create([
+        app(\App\Services\Orders\TemplateAdminService::class)->create([
             'id' => $orderId,
             'order_category_id' => 9700,
             'name' => "Order {$suffix}",

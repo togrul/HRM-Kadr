@@ -21,13 +21,7 @@ class ModuleServiceProvider extends ServiceProvider
     {
         $state = $this->app->make(ModuleState::class);
 
-        $catalogProviders = collect($state->allEnabledProviders());
-
-        $legacyProviders = collect(config('modules.enabled', []))
-            ->filter(fn ($provider) => is_string($provider) && class_exists($provider));
-
-        $catalogProviders
-            ->merge($legacyProviders)
+        collect($state->allEnabledProviders())
             ->unique()
             ->each(fn ($provider) => $this->app->register($provider));
 

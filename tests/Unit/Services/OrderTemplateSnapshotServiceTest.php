@@ -155,7 +155,7 @@ class OrderTemplateSnapshotServiceTest extends TestCase
             default => 9903,
         };
 
-        Order::query()->create([
+        app(\App\Services\Orders\TemplateAdminService::class)->create([
             'id' => $orderId,
             'order_category_id' => 9900,
             'name' => "Order {$suffix}",

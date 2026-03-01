@@ -76,7 +76,7 @@ class OrderTemplateQueryBudgetCheckCommandTest extends TestCase
             'name_ru' => 'Test',
         ]);
 
-        $order = Order::query()->create([
+        $order = app(\App\Services\Orders\TemplateAdminService::class)->create([
             'id' => 9501,
             'order_category_id' => 9500,
             'name' => 'İşə qəbul',

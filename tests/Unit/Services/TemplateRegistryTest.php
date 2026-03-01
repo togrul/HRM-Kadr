@@ -128,7 +128,7 @@ class TemplateRegistryTest extends TestCase
             'name_ru' => 'Test',
         ]);
 
-        Order::query()->create([
+        app(\App\Services\Orders\TemplateAdminService::class)->create([
             'id' => 9101,
             'order_category_id' => 9001,
             'name' => 'Template',

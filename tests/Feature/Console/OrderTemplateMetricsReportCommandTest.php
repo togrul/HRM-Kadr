@@ -94,7 +94,7 @@ class OrderTemplateMetricsReportCommandTest extends TestCase
             'name_ru' => 'Test',
         ]);
 
-        $order = Order::query()->create([
+        $order = app(\App\Services\Orders\TemplateAdminService::class)->create([
             'id' => 9401,
             'order_category_id' => 9400,
             'name' => 'İşə qəbul',
