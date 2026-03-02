@@ -22,7 +22,7 @@ trait HandlesSetTypeMetadataBootstrap
         );
     }
 
-    private function bootstrapLegacyMetadata(OrderType $orderType, OrderTemplateVersion $version, bool $strictSync = false): void
+    private function bootstrapMetadataFromTemplate(OrderType $orderType, OrderTemplateVersion $version, bool $strictSync = false): void
     {
         app(SetTypeMetadataBootstrapUseCase::class)->syncLegacyMetadata(
             $orderType,

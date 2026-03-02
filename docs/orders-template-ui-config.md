@@ -66,7 +66,7 @@ This document defines the `order_template_fields.ui_config` keys currently suppo
 ## Notes
 
 - Layout grouping is applied only when metadata mode is active (`row_field_keys` is not empty).
-- Legacy mode continues using current hardcoded fallback form blocks.
+- Orders form rendering is metadata-driven only; active metadata version + row mappings are mandatory.
 - UI config mutations (generate metadata, add/remove field, save config) are recorded in
   `order_template_version_audits` for traceability.
 - Set Type UI config modal shows latest audit entries (`Recent changes`) from

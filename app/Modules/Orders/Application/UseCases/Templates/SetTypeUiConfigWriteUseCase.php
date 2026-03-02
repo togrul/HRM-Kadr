@@ -174,4 +174,12 @@ class SetTypeUiConfigWriteUseCase
 
         return $templateVersion;
     }
+
+    /**
+     * @param  array<string,mixed>  $payload
+     */
+    public function logUiConfigSaved(int $versionId, array $payload, ?int $actorId): void
+    {
+        $this->auditLogger->log($versionId, 'ui_config_saved', $payload, $actorId);
+    }
 }

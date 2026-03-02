@@ -4,6 +4,7 @@ namespace App\Services\Orders;
 
 use App\Models\OrderLog;
 use App\Modules\Orders\Domain\Contracts\OrderTemplateRegistry;
+use App\Services\Orders\DTO\OrderPrintPayloadData;
 use RuntimeException;
 
 class OrderPrintPayloadFactory
@@ -40,20 +41,13 @@ class OrderPrintPayloadFactory
                 throw new RuntimeException('Metadata print payload could not be generated.');
             }
 
-            return [
-                ...$payload,
-                'template_path' => $templatePath,
-                'output_base_name' => (string) $orderLog->order->name,
-                'context' => [
-                    'order_no' => (string) $orderLog->order_no,
-                    'order_id' => (int) $orderLog->order_id,
-                    'order_type_id' => $orderTypeId,
-                    'blade' => (string) ($orderLog->order->blade ?? ''),
-                    'render_mode' => 'metadata',
-                    'template_version_id' => $payload['template_version_id'] ?? null,
-                    'template_source' => 'snapshot',
-                ],
-            ];
+            return $this->toPayloadDto(
+                templatePath: $templatePath,
+                payload: $payload,
+                orderLog: $orderLog,
+                orderTypeId: $orderTypeId,
+                templateSource: 'snapshot',
+            )->toArray();
         }
 
         $templateVersion = $orderTypeId > 0 ? $this->templateRegistry->activeVersionForOrderType($orderTypeId) : null;
@@ -75,20 +69,13 @@ class OrderPrintPayloadFactory
             throw new RuntimeException('Metadata print payload could not be generated.');
         }
 
-        return [
-            ...$payload,
-            'template_path' => $templatePath,
-            'output_base_name' => (string) $orderLog->order->name,
-            'context' => [
-                'order_no' => (string) $orderLog->order_no,
-                'order_id' => (int) $orderLog->order_id,
-                'order_type_id' => $orderTypeId,
-                'blade' => (string) ($orderLog->order->blade ?? ''),
-                'render_mode' => 'metadata',
-                'template_version_id' => $payload['template_version_id'] ?? null,
-                'template_source' => 'registry',
-            ],
-        ];
+        return $this->toPayloadDto(
+            templatePath: $templatePath,
+            payload: $payload,
+            orderLog: $orderLog,
+            orderTypeId: $orderTypeId,
+            templateSource: 'registry',
+        )->toArray();
     }
 
     private function resolveTemplatePath(
@@ -124,5 +111,32 @@ class OrderPrintPayloadFactory
     {
         return collect($version->mappings ?? [])
             ->contains(fn ($mapping) => trim((string) ($mapping->scope ?? 'row')) !== 'scalar');
+    }
+
+    /**
+     * @param  array<string,mixed>  $payload
+     */
+    private function toPayloadDto(
+        string $templatePath,
+        array $payload,
+        OrderLog $orderLog,
+        int $orderTypeId,
+        string $templateSource
+    ): OrderPrintPayloadData {
+        return new OrderPrintPayloadData(
+            templatePath: $templatePath,
+            scalarValues: (array) ($payload['scalar_values'] ?? []),
+            rows: (array) ($payload['rows'] ?? []),
+            outputBaseName: (string) $orderLog->order->name,
+            context: [
+                'order_no' => (string) $orderLog->order_no,
+                'order_id' => (int) $orderLog->order_id,
+                'order_type_id' => $orderTypeId,
+                'blade' => (string) ($orderLog->order->blade ?? ''),
+                'render_mode' => 'metadata',
+                'template_version_id' => $payload['template_version_id'] ?? null,
+                'template_source' => $templateSource,
+            ],
+        );
     }
 }

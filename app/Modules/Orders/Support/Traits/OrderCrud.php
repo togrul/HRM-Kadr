@@ -5,14 +5,12 @@ namespace App\Modules\Orders\Support\Traits;
 use App\Livewire\Forms\Orders\OrderForm;
 use App\Livewire\Forms\Orders\OrderSearchForm;
 use App\Livewire\Forms\Orders\SelectedPersonnelForm;
-use App\Models\Candidate;
 use App\Models\Component;
 use App\Models\Order;
-use App\Models\OrderStatus;
-use App\Models\OrderType;
-use App\Models\Personnel;
 use App\Models\PersonnelBusinessTrip;
 use App\Modules\Admin\Support\Traits\Admin\CallSwalTrait;
+use App\Modules\Orders\Domain\Contracts\OrderTypeStatusLookupReadRepository;
+use App\Modules\Orders\Domain\Contracts\PersonnelLookupReadRepository;
 use App\Modules\Orders\Support\Traits\Orders\DropdownLabelCache;
 use App\Modules\Orders\Support\Traits\Orders\HandlesOrderComponentFieldState;
 use App\Modules\Orders\Support\Traits\Orders\HandlesOrderVacancy;
@@ -46,6 +44,10 @@ trait OrderCrud
     use OrderValidationTrait;
 
     protected OrderLookupService $orderLookupService;
+
+    protected OrderTypeStatusLookupReadRepository $orderTypeStatusLookup;
+
+    protected PersonnelLookupReadRepository $personnelLookupReadRepository;
 
     protected OrderComponentPersister $componentPersister;
 
@@ -118,6 +120,8 @@ trait OrderCrud
 
     public function bootOrderCrud(
         OrderLookupService $orderLookupService,
+        OrderTypeStatusLookupReadRepository $orderTypeStatusLookup,
+        PersonnelLookupReadRepository $personnelLookupReadRepository,
         OrderComponentPersister $componentPersister,
         OrderCrudPipelineService $crudPipelineService,
         OrderPersonnelPersister $personnelPersister,
@@ -130,6 +134,8 @@ trait OrderCrud
         VacationCleanupService $vacationCleanupService
     ): void {
         $this->orderLookupService = $orderLookupService;
+        $this->orderTypeStatusLookup = $orderTypeStatusLookup;
+        $this->personnelLookupReadRepository = $personnelLookupReadRepository;
         $this->componentPersister = $componentPersister;
         $this->crudPipelineService = $crudPipelineService;
         $this->personnelPersister = $personnelPersister;
@@ -229,7 +235,7 @@ trait OrderCrud
 
         $selected = $this->orderForm->order_type_id;
         if ($selected && ! $collection->contains(fn ($option) => (int) $option['id'] === (int) $selected)) {
-            $label = optional(OrderType::find($selected))->name;
+            $label = $this->orderTypeStatusLookup->orderTypeNameById((int) $selected);
             if ($label) {
                 $collection->prepend([
                     'id' => $selected,
@@ -247,8 +253,8 @@ trait OrderCrud
             value: $value,
             orderId: (int) ($this->orderForm->order_id ?? 0),
             candidateOrderId: Order::IG_EMR,
-            candidateResolver: fn (int $id) => Candidate::find($id),
-            personnelResolver: fn (int $id) => Personnel::find($id)
+            candidateResolver: fn (int $id) => $this->personnelLookupReadRepository->findCandidateNameParts($id),
+            personnelResolver: fn (int $id) => $this->personnelLookupReadRepository->findPersonnelNameParts($id)
         );
 
         if ($resolved) {
@@ -345,9 +351,11 @@ trait OrderCrud
     {
         $locale = config('app.locale');
 
-        return Cache::remember("order_statuses:{$locale}", now()->addMinutes(10), function () use ($locale) {
-            return OrderStatus::where('locale', $locale)->get();
-        });
+        return Cache::remember(
+            "order_statuses:{$locale}",
+            now()->addMinutes(10),
+            fn () => $this->orderTypeStatusLookup->localizedStatuses((string) $locale)
+        );
     }
 
     private function isForeignBusinessTrip(): bool
@@ -426,9 +434,7 @@ trait OrderCrud
      */
     protected function resolveTemplateOrderContext(int $templateId): array
     {
-        $order = OrderType::with('order')
-            ->where('id', $templateId)
-            ->first();
+        $order = $this->orderTypeStatusLookup->findOrderType($templateId, ['order']);
 
         if (! $order) {
             return [

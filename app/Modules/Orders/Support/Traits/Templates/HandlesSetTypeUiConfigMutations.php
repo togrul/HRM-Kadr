@@ -6,7 +6,6 @@ use App\Models\OrderTemplateField;
 use App\Models\OrderTemplateMapping;
 use App\Models\OrderTemplateVersion;
 use App\Modules\Orders\Application\UseCases\Templates\SetTypeUiConfigWriteUseCase;
-use App\Services\Orders\OrderTemplateAuditLogger;
 use App\Services\Orders\TemplatePlaceholderCoverageService;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
@@ -338,7 +337,7 @@ trait HandlesSetTypeUiConfigMutations
         $summary = $this->summarizeUiConfigDiff($diff);
         $highlights = $this->buildUiConfigDiffHighlights($diff);
 
-        app(OrderTemplateAuditLogger::class)->log((int) $this->uiConfigVersionId, 'ui_config_saved', [
+        app(SetTypeUiConfigWriteUseCase::class)->logUiConfigSaved((int) $this->uiConfigVersionId, [
             'fields_count' => $fields->count(),
             'mappings_count' => $normalizedMappings->count(),
             'section_blocks_count' => count($this->sectionBlocksDraft),

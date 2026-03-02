@@ -86,6 +86,32 @@ Tasks:
 2. Implement adapters in `Infrastructure/Persistence/Eloquent`.
 3. Remove direct external model usage from `OrderRenderStateService` and `OrderLookupService`.
 
+Progress:
+
+- Added cross-module read contracts:
+  - `PersonnelLookupReadRepository`
+  - `StructureLookupReadRepository`
+  - `RankPositionLookupReadRepository`
+  - `OrderTypeStatusLookupReadRepository`
+- Added Eloquent adapters:
+  - `EloquentPersonnelLookupReadRepository`
+  - `EloquentStructureLookupReadRepository`
+  - `EloquentRankPositionLookupReadRepository`
+  - `EloquentOrderTypeStatusLookupReadRepository`
+- Bound contracts in Orders provider.
+- Refactored `OrderLookupService` to use read contracts for Personnel/Candidate/Structure access (no direct model usage for those entities).
+- Added architecture guard test:
+  - `tests/Unit/Architecture/OrdersCrossModuleReadIsolationTest.php`
+- Refactored `OrderLookupService` rank/position reads to `RankPositionLookupReadRepository` adapter.
+- Refactored OrderType/OrderStatus lookup reads (`OrderLookupService`, `OrderCrud`, `AllOrders`, SetType UI lifecycle) to `OrderTypeStatusLookupReadRepository`.
+- Refactored `OrderCrud` personnel name lookup (`Candidate::find` / `Personnel::find`) to `PersonnelLookupReadRepository`.
+- Expanded architecture guard to scan Orders Livewire/trait layer for forbidden direct Rank/Position model queries.
+- Expanded architecture guard to also block direct OrderType/OrderStatus query tokens in Orders Livewire/traits.
+- Expanded architecture guard (targeted orchestration files) to block direct Candidate/Personnel/Structure/OrderType/OrderStatus import/query tokens.
+- Added `AccessibleStructureScopeReadRepository` port and moved Orders read-side `StructureService` dependency behind adapter.
+- Introduced `SetTypeReadUseCase` to centralize SetType/UI-config read path orchestration.
+- Added `OrderPrintPayloadData` DTO to make print payload assembly typed before final array export.
+
 ## Phase 4
 
 Goal: enforce boundaries by tests and static checks.
@@ -96,6 +122,11 @@ Tasks:
    - Orders Livewire must not use Eloquent models directly.
    - Orders Domain/Application must not depend on `App\Models` except through contracts.
 2. Add CI guard for architecture tests.
+
+Progress:
+
+- Added `OrdersDomainApplicationBoundaryTest`:
+  - blocks direct external model usage tokens in `Domain` + `Application` layers (Personnel/Candidate/Structure/Rank/Position/OrderStatus).
 
 ## Phase 5
 

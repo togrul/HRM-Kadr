@@ -4,6 +4,7 @@ Bu sənədin məqsədi:
 - Yeni verilən `order_type` + `.docx` şablonunu sistemə problemsiz əlavə etmək.
 - Formun dinamik çıxması, mapping-lərin doğru qurulması və Word generation-un düzgün işləməsini təmin etmək.
 - Prosesi başqa komanda üzvünə birbaşa təhvil verilə biləcək səviyyədə standartlaşdırmaq.
+- Operativ no-legacy release/check üçün əlavə sənəd: `scenario/orders-no-legacy-operations-checklist.md`.
 
 ---
 
@@ -238,4 +239,3 @@ Yeni order type yalnız o zaman “tam hazır” sayılır:
 8. Qalan risklər:
 
 Bu 8 maddə doldurulmadan release etməyin.
-

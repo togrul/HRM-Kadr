@@ -5,11 +5,11 @@ namespace App\Modules\Orders\Livewire;
 use App\Livewire\Traits\SideModalAction;
 use App\Models\Order;
 use App\Models\OrderLog;
-use App\Models\OrderStatus;
+use App\Modules\Orders\Domain\Contracts\AccessibleStructureScopeReadRepository;
+use App\Modules\Orders\Domain\Contracts\OrderTypeStatusLookupReadRepository;
 use Illuminate\Support\Facades\Cache;
 use App\Services\Orders\OrderPrintPayloadFactory;
 use App\Services\Orders\OrderTemplateRenderer;
-use App\Services\StructureService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\Isolate;
@@ -24,6 +24,8 @@ use Livewire\WithPagination;
 class AllOrders extends Component
 {
     use AuthorizesRequests, SideModalAction, WithPagination;
+
+    protected OrderTypeStatusLookupReadRepository $orderTypeStatusLookup;
 
     public $selectedOrder;
 
@@ -193,17 +195,23 @@ class AllOrders extends Component
     {
         $locale = config('app.locale');
 
-        return Cache::remember("order_statuses:{$locale}", now()->addMinutes(10), function () use ($locale) {
-            return OrderStatus::where('locale', $locale)->get();
-        });
+        return Cache::remember(
+            "order_statuses:{$locale}",
+            now()->addMinutes(10),
+            fn () => $this->orderTypeStatusLookup->localizedStatuses((string) $locale)
+        );
     }
 
-    public function mount(StructureService $structureService)
+    public function mount(
+        AccessibleStructureScopeReadRepository $accessibleStructureScopeReadRepository,
+        OrderTypeStatusLookupReadRepository $orderTypeStatusLookup
+    )
     {
         $this->authorize('viewAny', Order::class);
+        $this->orderTypeStatusLookup = $orderTypeStatusLookup;
         $this->fillFilter();
         $this->selectedOrder = $this->selectedOrder ?? request()->query('selectedOrder');
-        $this->accessibleStructureIds = $structureService->getAccessibleStructures();
+        $this->accessibleStructureIds = $accessibleStructureScopeReadRepository->accessibleStructureIds();
     }
 
     public function render()

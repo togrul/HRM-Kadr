@@ -102,8 +102,8 @@ class OrderInteractionStateService
     }
 
     /**
-     * @param  callable(int):?object  $candidateResolver
-     * @param  callable(int):?object  $personnelResolver
+     * @param  callable(int):array{name:string,surname:string}|null  $candidateResolver
+     * @param  callable(int):array{name:string,surname:string}|null  $personnelResolver
      * @return array{name:string,surname:string}|null
      */
     public function resolvePersonnelName(

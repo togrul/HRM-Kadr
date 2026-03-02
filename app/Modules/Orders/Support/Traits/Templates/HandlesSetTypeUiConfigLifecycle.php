@@ -2,11 +2,11 @@
 
 namespace App\Modules\Orders\Support\Traits\Templates;
 
-use App\Models\OrderType;
+use App\Modules\Orders\Application\UseCases\Templates\SetTypeReadUseCase;
 use App\Modules\Orders\Application\UseCases\Templates\SetTypeUiConfigLifecycleUseCase;
 use App\Services\Orders\TemplatePlaceholderCoverageService;
-use Throwable;
 use Illuminate\Support\Str;
+use Throwable;
 
 trait HandlesSetTypeUiConfigLifecycle
 {
@@ -49,11 +49,7 @@ trait HandlesSetTypeUiConfigLifecycle
             return;
         }
 
-        $orderType = OrderType::query()
-            ->with([
-                'templateSet:id,order_type_id',
-            ])
-            ->find($orderTypeId);
+        $orderType = app(SetTypeReadUseCase::class)->orderTypeForUiConfig($orderTypeId);
 
         if (! $orderType) {
             return;
@@ -115,7 +111,7 @@ trait HandlesSetTypeUiConfigLifecycle
             ->isNotEmpty();
 
         if ($targetVersion->fields->isEmpty() || ! $hasTargetRowMappings) {
-            $this->bootstrapLegacyMetadata($orderType, $targetVersion, false);
+            $this->bootstrapMetadataFromTemplate($orderType, $targetVersion, false);
             $targetVersion->refresh()->load([
                 'fields' => fn ($query) => $query->orderBy('sort_order')->orderBy('id'),
                 'mappings' => fn ($query) => $query->orderBy('sort_order')->orderBy('id'),
@@ -343,9 +339,8 @@ trait HandlesSetTypeUiConfigLifecycle
             return;
         }
 
-        $orderType = OrderType::query()
-            ->with('templateSet.activeVersion')
-            ->find((int) $this->uiConfigOrderTypeId);
+        $orderType = app(SetTypeReadUseCase::class)
+            ->orderTypeForMetadataBootstrap((int) $this->uiConfigOrderTypeId);
 
         if (! $orderType) {
             $this->dispatch('typesUpdated', __('Order type not found.'));

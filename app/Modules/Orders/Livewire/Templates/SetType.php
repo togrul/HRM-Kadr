@@ -4,7 +4,7 @@ namespace App\Modules\Orders\Livewire\Templates;
 
 use App\Livewire\Traits\SideModalAction;
 use App\Modules\Orders\Application\UseCases\Templates\ManageSetTypeOrderTypesUseCase;
-use App\Modules\Orders\Domain\Contracts\OrderTemplateReadRepository;
+use App\Modules\Orders\Application\UseCases\Templates\SetTypeReadUseCase;
 use App\Modules\Orders\Support\Traits\Templates\HandlesSetTypeMetadataBootstrap;
 use App\Modules\Orders\Support\Traits\Templates\HandlesSetTypeUiConfigLifecycle;
 use App\Modules\Orders\Support\Traits\Templates\HandlesSetTypeUiConfigMutations;
@@ -171,24 +171,20 @@ class SetType extends Component
     public function mount()
     {
         $this->title = __('Set Type');
-        $this->templateModel = app(OrderTemplateReadRepository::class)->findTemplateOrFail((int) $this->templateModel);
+        $this->templateModel = app(SetTypeReadUseCase::class)->loadTemplateOrFail((int) $this->templateModel);
         $this->uiInputTypes = $this->inputTypeOptions();
         $this->resetNewFieldDraft();
     }
 
     public function render()
     {
-        $_order_types = app(OrderTemplateReadRepository::class)
-            ->orderTypesWithActiveVersion((int) $this->templateModel->id);
+        $_order_types = app(SetTypeReadUseCase::class)->orderTypesWithActiveVersion((int) $this->templateModel->id);
 
         return view('orders::livewire.orders.templates.set-type', compact('_order_types'));
     }
 
     private function resolveOwnedType(int $typeId): ?\App\Models\OrderType
     {
-        return $this->templateModel
-            ->types()
-            ->whereKey($typeId)
-            ->first();
+        return app(SetTypeReadUseCase::class)->resolveOwnedType((int) $this->templateModel->id, $typeId);
     }
 }
