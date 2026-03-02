@@ -14,7 +14,23 @@
     $listboxId = $inputId . '_listbox';
 @endphp
 
-<div x-data="{ open: false }" class="flex flex-col relative">
+<div
+    x-data="{
+        uid: @js($inputId),
+        open: false,
+        init() {
+            if (!window.__searchInputSelectOpenState) {
+                window.__searchInputSelectOpenState = {};
+            }
+            this.open = !!window.__searchInputSelectOpenState[this.uid];
+        },
+        setOpen(next) {
+            this.open = !!next;
+            window.__searchInputSelectOpenState[this.uid] = this.open;
+        },
+    }"
+    class="flex flex-col relative"
+>
     @if(!empty($label))
         <x-label for="{{ $inputId }}">{{ __($label) }}</x-label>
     @endif
@@ -52,8 +68,10 @@
             aria-autocomplete="list"
             aria-controls="{{ $listboxId }}"
             x-bind:aria-expanded="open.toString()"
-            x-on:click.stop="open = true"
-            x-on:keydown.escape.stop="open = false"
+            x-on:click.stop="setOpen(true)"
+            x-on:focus.stop="setOpen(true)"
+            x-on:input.stop="setOpen(true)"
+            x-on:keydown.escape.stop="setOpen(false)"
         />
     @endif
 
@@ -61,9 +79,9 @@
         x-cloak
         x-show="open"
         x-transition.opacity.scale
-        x-on:click.outside="open = false"
-        x-on:click.away="open = false"
-        x-on:mousedown.outside="open = false"
+        x-on:click.outside="setOpen(false)"
+        x-on:click.away="setOpen(false)"
+        x-on:mousedown.outside="setOpen(false)"
         id="{{ $listboxId }}"
         role="listbox"
         class="absolute z-[99] top-[60px] left-0 w-full px-1 py-2 bg-neutral-50 rounded-lg border border-neutral-200 drop-shadow-md flex flex-col max-h-40 overflow-y-auto"

@@ -16,8 +16,13 @@
   $wireModel = collect($wireModelKeys)
       ->map(fn ($key) => $attributes->get($key))
       ->first(fn ($value) => filled($value));
-  $optionsFingerprint = md5((string) json_encode($model));
-  $uid = 'ui-select-'.Str::slug(($wireModel ?? Str::uuid()).'-'.$optionsFingerprint, '_');
+  $identitySource = (string) ($wireModel
+      ?? $attributes->get('name')
+      ?? $attributes->get('id')
+      ?? $searchModel
+      ?? $label
+      ?? 'select-dropdown');
+  $uid = 'ui-select-'.Str::slug($identitySource, '_');
   $labelId = $uid.'-label';
   $bg = $mode === 'gray' ? 'bg-neutral-100' : 'bg-white';
 @endphp
@@ -25,6 +30,7 @@
 <div
   wire:key="select-{{ $uid }}"
   x-data="{
+    uid: @js($uid),
     currentValue: @if($wireModel) @entangle($wireModel).live @else null @endif,
     cachedOptions: @js($model),
     placeholder: @js($placeholder),
@@ -64,6 +70,10 @@
     },
 
     init(){
+      if (!window.__uiSelectOpenState) {
+        window.__uiSelectOpenState = {};
+      }
+      this.isOpen = !!window.__uiSelectOpenState[this.uid];
       this.cachedOptions = this.normalizeOptions(this.cachedOptions);
       const currentId = this.toId(this.currentValue);
       if (this.initialSelectedLabel && currentId !== null) {
@@ -79,6 +89,11 @@
           this.selectedCache = { id: this.toId(found.id), label: found.label };
         }
       });
+    },
+
+    setOpen(next){
+      this.isOpen = !!next;
+      window.__uiSelectOpenState[this.uid] = this.isOpen;
     },
 
     selectedLabel(){
@@ -106,19 +121,19 @@
       }
       this.currentValue = wireValue;
       this.initialSelectedLabel = null;
-      this.isOpen = false;
+      this.setOpen(false);
     },
 
     toggle(){
       if (this.isDisabled) return;
-      this.isOpen = !this.isOpen;
+      this.setOpen(!this.isOpen);
       if (this.isOpen && this.loadOnOpen && $wire && typeof $wire.loadOptionGroup === 'function') {
         $wire.loadOptionGroup(this.loadOnOpen);
       }
     },
   }"
-  x-on:click.window="if (!$el.contains($event.target)) isOpen = false"
-  x-on:keydown.escape.window="isOpen = false"
+  x-on:click.window="if (!$el.contains($event.target)) setOpen(false)"
+  x-on:keydown.escape.window="setOpen(false)"
   {{ $attributes->except(['wire:model','wire:model.live','wire:model.defer','wire:model.lazy','wire:model.blur'])->class('relative w-full') }}
   x-bind:class="isOpen ? 'z-[140]' : 'z-10'"
 >
@@ -158,9 +173,10 @@
               wire:model.live.debounce.300ms="{{ $searchModel }}"
               placeholder="{{ $searchPlaceholder ?? __('Search...') }}"
               x-on:click.stop="$event.stopPropagation()"
-              x-on:input.stop="null"
-              x-on:keyup.stop="null"
-              x-on:keydown.stop="null"
+              x-on:focus.stop="setOpen(true)"
+              x-on:input.stop="setOpen(true)"
+              x-on:keyup.stop="setOpen(true)"
+              x-on:keydown.stop="setOpen(true)"
               x-on:change.stop="null"
             />
           </div>
