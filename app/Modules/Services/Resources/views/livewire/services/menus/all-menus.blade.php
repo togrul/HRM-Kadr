@@ -19,7 +19,11 @@
                                     <div class="flex space-x-2 items-center">
                                         <div
                                             class="flex justify-center items-center p-2 rounded-xl bg-{{ $menu->color }}-100">
-                                            {!! $menu->icon !!}
+                                            <x-dynamic-component
+                                                  :component="'icons.' . $menu->icon"
+                                                  color="text-zinc-600"
+                                                  size="w-6 h-6"
+                                              />
                                         </div>
 
                                         <span class="text-sm font-medium">
