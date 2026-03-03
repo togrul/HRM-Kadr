@@ -62,9 +62,9 @@
                                         @if ($personnel->is_pending)
                                             <div
                                                 class="flex items-center px-2 py-0 space-x-2 text-xs font-medium text-amber-500 border border-amber-200 rounded-lg shadow-sm bg-amber-50">
-                                                <x-icons.clock-icon size="w-5 h-5"
-                                                    color="text-amber-600"></x-icons.clock-icon>
-                                                <span class="uppercase">{{ __('Waiting for approval') }}</span>
+                                                <x-icons.pending-icon size="w-5 h-5"
+                                                    color="text-amber-600"></x-icons.pending-icon>
+                                                <span class="uppercase tracking-tight">{{ __('Waiting for approval') }}</span>
                                             </div>
                                         @endif
 

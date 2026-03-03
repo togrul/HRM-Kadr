@@ -10,6 +10,7 @@ use App\Models\Personnel;
 use App\Enums\OrderStatusEnum;
 use App\Helpers\UsefulHelpers;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Events\StaffScheduleUpdated;
 
 class OrderConfirmedService
@@ -71,14 +72,30 @@ class OrderConfirmedService
             Candidate::whereIn('id', $candidateIds)->update(['status_id' => 70]);
         }
 
-        $tabelNos = array_map(fn($x) => "NMZD{$x}", $candidateIds);
-
-        $personnelModel = $action == 'create'
-            ? $orderLog->personnels
-            : Personnel::whereIn('tabel_no', $tabelNos)
-            ->where('is_pending', true)
+        $personnelModel = $orderLog->personnels()
+            ->where('personnels.is_pending', true)
             ->with(['ranks', 'structure', 'position', 'laborActivities'])
             ->get();
+
+        if (! empty($candidateIds)) {
+            $candidateIdMap = array_fill_keys($candidateIds, true);
+            $filtered = $personnelModel->filter(function (Personnel $personnel) use ($candidateIdMap) {
+                $candidateId = $this->extractCandidateIdFromValue($personnel->tabel_no);
+                return $candidateId !== null && isset($candidateIdMap[$candidateId]);
+            })->values();
+
+            if ($filtered->isNotEmpty()) {
+                $personnelModel = $filtered;
+            }
+        }
+
+        // Backstop for update flow: if payload was stale/invalid, still resolve attached pending personnels.
+        if ($personnelModel->isEmpty() && $action === 'update') {
+            $this->orderLog->load('personnels');
+            $personnelModel = $this->orderLog->personnels
+                ->where('is_pending', true)
+                ->load(['ranks', 'structure', 'position', 'laborActivities']);
+        }
 
         foreach ($personnelModel as $_personnel) {
             $this->updatePersonnelEmployment($_personnel, $orderLog);
@@ -90,15 +107,9 @@ class OrderConfirmedService
         $ids = [];
 
         foreach ($payload as $value) {
-            // Already a numeric candidate id
-            if (is_numeric($value)) {
-                $ids[] = (int) $value;
-                continue;
-            }
-
-            // Tabel no pattern NMZD123
-            if (is_string($value) && preg_match('/NMZD(\d+)/', $value, $m)) {
-                $ids[] = (int) $m[1];
+            $candidateId = $this->extractCandidateIdFromValue($value);
+            if ($candidateId !== null) {
+                $ids[] = $candidateId;
             }
         }
 
@@ -106,15 +117,35 @@ class OrderConfirmedService
             return array_values(array_unique($ids));
         }
 
-        // Fallback: infer from attached personnels
-        $this->orderLog->loadMissing('personnels');
+        // Fallback: infer from attached personnels (force refresh for stale relation data)
+        $this->orderLog->load('personnels');
         foreach ($this->orderLog->personnels as $personnel) {
-            if (preg_match('/NMZD(\d+)/', (string) $personnel->tabel_no, $m)) {
-                $ids[] = (int) $m[1];
+            $candidateId = $this->extractCandidateIdFromValue($personnel->tabel_no);
+            if ($candidateId !== null) {
+                $ids[] = $candidateId;
             }
         }
 
         return array_values(array_unique($ids));
+    }
+
+    private function extractCandidateIdFromValue(mixed $value): ?int
+    {
+        if (is_array($value)) {
+            $value = $value['id'] ?? null;
+        }
+
+        if (is_numeric($value)) {
+            $resolved = (int) $value;
+            return $resolved > 0 ? $resolved : null;
+        }
+
+        if (is_string($value) && preg_match('/NMZD(\d+)/', $value, $matches)) {
+            $resolved = (int) ($matches[1] ?? 0);
+            return $resolved > 0 ? $resolved : null;
+        }
+
+        return null;
     }
 
     private function updatePersonnelEmployment($_personnel, $orderLog): void
@@ -123,13 +154,43 @@ class OrderConfirmedService
             ->where('order_log_personnels.tabel_no', $_personnel->tabel_no)
             ->value('component_id');
 
+        if (! $component_id) {
+            Log::warning('Order approval skipped: component_id not found for personnel.', [
+                'order_no' => $orderLog->order_no,
+                'tabel_no' => $_personnel->tabel_no,
+            ]);
+            return;
+        }
+
         $_attr = $orderLog->attributes()
             ->where('component_id', $component_id)
             ->value('attributes');
 
-        $month = UsefulHelpers::convertToMonthNumber($_attr['$month']['value'], config('app.locale'));
+        if (! is_array($_attr)) {
+            Log::warning('Order approval skipped: attributes not found for component.', [
+                'order_no' => $orderLog->order_no,
+                'component_id' => $component_id,
+                'tabel_no' => $_personnel->tabel_no,
+            ]);
+            return;
+        }
 
-        $date = "{$_attr['$year']['value']}-{$month}-{$_attr['$day']['value']}";
+        $monthLabel = data_get($_attr, '$month.value');
+        $year = data_get($_attr, '$year.value');
+        $day = data_get($_attr, '$day.value');
+        $month = $monthLabel ? UsefulHelpers::convertToMonthNumber((string) $monthLabel, config('app.locale')) : null;
+
+        if (! $year || ! $month || ! $day) {
+            Log::warning('Order approval skipped: required date attributes are missing.', [
+                'order_no' => $orderLog->order_no,
+                'component_id' => $component_id,
+                'tabel_no' => $_personnel->tabel_no,
+                'attributes_keys' => array_keys($_attr),
+            ]);
+            return;
+        }
+
+        $date = "{$year}-{$month}-{$day}";
 
         DB::transaction(function () use ($_personnel, $date, $_attr, $orderLog) {
             $_personnel->update([
@@ -146,10 +207,14 @@ class OrderConfirmedService
                 'order_given_by' => "{$orderLog->given_by_rank} {$orderLog->given_by}",
             ]);
 
-            event(new StaffScheduleUpdated(
-                structure_id: $_personnel->structure_id,
-                position_id: $_personnel->position_id
-            ));
+            DB::afterCommit(function () use ($_personnel) {
+                if ($_personnel->structure_id && $_personnel->position_id) {
+                    event(new StaffScheduleUpdated(
+                        structure_id: (int) $_personnel->structure_id,
+                        position_id: (int) $_personnel->position_id
+                    ));
+                }
+            });
 
             $this->endCurrentLaborActivity($_personnel, $date);
 

@@ -15,6 +15,7 @@ use App\Modules\Personnel\Support\Traits\PersonnelCrud;
 use App\Modules\Personnel\Support\Traits\RelationCruds\RelationCrudTrait;
 use App\Modules\Personnel\Services\PersonnelPersistenceService;
 use App\Models\Personnel;
+use App\Services\PersonnelPendingApprovalService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -69,7 +70,7 @@ class EditPersonnel extends Component
 
     public function confirmPersonnel(): void
     {
-        $this->personnelModelDataInstance()->update(['is_pending' => false]);
+        app(PersonnelPendingApprovalService::class)->approve($this->personnelModelDataInstance());
         $this->dispatch('addError', __('Personnel was updated successfully!'));
     }
 

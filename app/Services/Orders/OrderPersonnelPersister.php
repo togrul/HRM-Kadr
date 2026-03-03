@@ -45,7 +45,12 @@ class OrderPersonnelPersister
             return ['tabels' => [], 'candidate_ids' => []];
         }
 
-        $candidateIds = collect($vacancyList)->pluck('personnel_id')->filter()->map(fn ($id) => (int) $id)->all();
+        $candidateIds = collect($vacancyList)
+            ->map(fn (array $row) => $this->extractCandidateId($row['personnel_id'] ?? null))
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
 
         $tabelNumbers = $isCandidateOrder
             ? $this->importCandidateToPersonnel->handle($vacancyList, $statusId)
@@ -57,6 +62,24 @@ class OrderPersonnelPersister
             'tabels' => $tabelNumbers,
             'candidate_ids' => $candidateIds,
         ];
+    }
+
+    protected function extractCandidateId(mixed $value): ?int
+    {
+        if (is_array($value)) {
+            $value = $value['id'] ?? null;
+        }
+
+        if (is_string($value) && preg_match('/NMZD(\d+)/', $value, $matches)) {
+            return (int) ($matches[1] ?? 0) ?: null;
+        }
+
+        if (is_numeric($value)) {
+            $resolved = (int) $value;
+            return $resolved > 0 ? $resolved : null;
+        }
+
+        return null;
     }
 
     protected function resolvePersonnelTabelNumbers(array $vacancyList): array
