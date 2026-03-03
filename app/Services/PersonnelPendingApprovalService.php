@@ -9,6 +9,11 @@ use Illuminate\Support\Facades\DB;
 
 class PersonnelPendingApprovalService
 {
+    public function __construct(
+        protected PersonnelTabelNoGeneratorService $tabelNoGenerator
+    ) {
+    }
+
     public function approve(Personnel $personnel): void
     {
         DB::transaction(function () use ($personnel) {
@@ -22,9 +27,12 @@ class PersonnelPendingApprovalService
                 ? Carbon::parse($personnel->join_work_date)->format('Y-m-d')
                 : now()->format('Y-m-d');
 
+            $resolvedTabelNo = $this->tabelNoGenerator->resolveForApprovedPersonnel($personnel, $joinDate);
+
             $personnel->update([
                 'is_pending' => false,
                 'join_work_date' => $joinDate,
+                'tabel_no' => $resolvedTabelNo,
             ]);
 
             $personnel->loadMissing(['position:id,name', 'structure:id,coefficient']);
@@ -56,4 +64,3 @@ class PersonnelPendingApprovalService
         });
     }
 }
-

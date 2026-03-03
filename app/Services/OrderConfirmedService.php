@@ -15,6 +15,8 @@ use App\Events\StaffScheduleUpdated;
 
 class OrderConfirmedService
 {
+    private ?PersonnelTabelNoGeneratorService $tabelNoGenerator = null;
+
     public function __construct(public OrderLog $orderLog, public array $extraData = []) {}
 
     public function handle($personnelIds = [], $action = 'create'): void
@@ -73,7 +75,10 @@ class OrderConfirmedService
         }
 
         $personnelModel = $orderLog->personnels()
-            ->where('personnels.is_pending', true)
+            ->where(function ($query) {
+                $query->where('personnels.is_pending', true)
+                    ->orWhere('personnels.tabel_no', 'like', 'NMZD%');
+            })
             ->with(['ranks', 'structure', 'position', 'laborActivities'])
             ->get();
 
@@ -196,6 +201,7 @@ class OrderConfirmedService
             $_personnel->update([
                 'join_work_date' => $date,
                 'is_pending' => false,
+                'tabel_no' => $this->tabelNoGenerator()->resolveForApprovedPersonnel($_personnel, $date),
             ]);
 
             $_personnel->ranks()->create([
@@ -250,6 +256,11 @@ class OrderConfirmedService
             'order_date' => $orderLog->given_date,
             'is_current' => true,
         ];
+    }
+
+    private function tabelNoGenerator(): PersonnelTabelNoGeneratorService
+    {
+        return $this->tabelNoGenerator ??= app(PersonnelTabelNoGeneratorService::class);
     }
 
     private function processVacationOrder($orderLog): void

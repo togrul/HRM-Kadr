@@ -9,6 +9,11 @@ use Carbon\Carbon;
 
 class ImportCandidateToPersonnel
 {
+    public function __construct(
+        protected PersonnelTabelNoGeneratorService $tabelNoGenerator
+    ) {
+    }
+
     public function handle(array $components, $status): array
     {
         $tabel_no_list = [];
@@ -29,6 +34,9 @@ class ImportCandidateToPersonnel
             $structureId = $this->valueAsInt($component, 'structure_id');
             $positionId = $this->valueAsInt($component, 'position_id');
 
+            $isPending = $status != OrderStatusEnum::APPROVED->value;
+            $joinDate = Carbon::now()->format('Y-m-d');
+
             $personnel = Personnel::create([
                 'surname' => $candidate->surname,
                 'name' => $candidate->name,
@@ -39,8 +47,10 @@ class ImportCandidateToPersonnel
                 'gender' => $candidate->gender,
                 'referenced_by' => $candidate->presented_by,
                 'birthdate' => Carbon::parse($candidate->birthdate)->format('Y-m-d'),
-                'is_pending' => $status != OrderStatusEnum::APPROVED->value,
-                'tabel_no' => "NMZD{$candidate->id}",
+                'is_pending' => $isPending,
+                'tabel_no' => $isPending
+                    ? "NMZD{$candidate->id}"
+                    : $this->tabelNoGenerator->generateForJoinDate($joinDate),
                 'mobile' => '1234567',
                 'email' => 'email@example.com',
                 'nationality_id' => 11,
@@ -49,7 +59,7 @@ class ImportCandidateToPersonnel
                 'residental_address' => 'yoxdur',
                 'registered_address' => 'yoxdur',
                 'work_norm_id' => 10,
-                'join_work_date' => Carbon::now()->format('Y-m-d'),
+                'join_work_date' => $joinDate,
             ]);
             $tabel_no_list[] = $personnel->tabel_no;
         }
