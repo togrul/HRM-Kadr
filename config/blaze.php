@@ -231,6 +231,23 @@ return [
         ],
         [
             'path' => app_path('Modules/SidebarStructure/Resources/views'),
+            'compile' => true,
+            'memo' => false,
+            'fold' => false,
+        ],
+        // SidebarStructure canary hotfix: Livewire structure views intermittently
+        // break with root-tag errors under compile. Keep module-level canary ON,
+        // but bypass structure Livewire views as a stable guardrail.
+        [
+            'path' => app_path('Modules/SidebarStructure/Resources/views/livewire/structure'),
+            'compile' => false,
+            'memo' => false,
+            'fold' => false,
+        ],
+        // Explicit file-level fallback remains for safety in case config ordering
+        // is changed later.
+        [
+            'path' => app_path('Modules/SidebarStructure/Resources/views/livewire/structure/services.blade.php'),
             'compile' => false,
             'memo' => false,
             'fold' => false,

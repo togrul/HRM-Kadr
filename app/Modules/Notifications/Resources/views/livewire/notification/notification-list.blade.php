@@ -1,32 +1,35 @@
-<div class="flex flex-col"
-     x-data
-     x-init="
-        const applyPaginatorTheme = () => {
-            const paginator = document.querySelector('span[aria-current=page]>span');
-            if (paginator) {
-                paginator.classList.add('bg-blue-50', 'text-blue-600');
-            }
+<div
+    class="flex flex-col"
+    x-data
+    x-init="
+        const root = $el;
+        const applyPaginatorTheme = (isUpdate = false) => {
+            const paginator = root.querySelector('span[aria-current=page]>span');
+            if (!paginator) return;
+            paginator.classList.remove('bg-blue-50', 'text-blue-600', 'bg-green-100', 'text-green-600');
+            paginator.classList.add(isUpdate ? 'bg-green-100' : 'bg-blue-50', isUpdate ? 'text-green-600' : 'text-blue-600');
         };
 
-        applyPaginatorTheme();
+        applyPaginatorTheme(false);
 
         const currentComponentId = $wire.__instance?.id ?? $wire.$id ?? null;
         if (!window.__notificationPaginatorHooks) {
             window.__notificationPaginatorHooks = {};
         }
 
-        if (currentComponentId && !window.__notificationPaginatorHooks[currentComponentId]) {
+        if (typeof Livewire !== 'undefined' && currentComponentId && !window.__notificationPaginatorHooks[currentComponentId]) {
             window.__notificationPaginatorHooks[currentComponentId] = true;
 
-            Livewire.hook('message.processed', (_message, component) => {
-                if (! component || component.id !== currentComponentId) {
+            Livewire.hook('commit', ({ component, succeed }) => {
+                if (!component || component.id !== currentComponentId) {
                     return;
                 }
 
-                applyPaginatorTheme();
+                succeed(() => queueMicrotask(() => applyPaginatorTheme(true)));
             });
         }
-">
+    "
+>
     <div class="flex justify-between items-center px-8 py-4">
         <span class="font-medium text-slate-600">{{__('Count')}}: {{$notifications->total()}}</span>
         <button wire:click.prevent="clearNotifications" class="appearance-none font-medium space-x-2 flex items-center justify-center">
@@ -36,9 +39,13 @@
     </div>
 
     <div class="flex flex-col">
-        @foreach ($notifications as $notification)
+        @forelse ($notifications as $notification)
             <x-notification.list-item :$notification />
-        @endforeach
+        @empty
+            <div class="px-8 py-10 text-center text-sm text-slate-400">
+                {{ __('No notifications found') }}
+            </div>
+        @endforelse
         <div>
             {{$notifications->links()}}
         </div>

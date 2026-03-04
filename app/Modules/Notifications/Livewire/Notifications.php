@@ -6,6 +6,7 @@ use App\Modules\Notifications\Support\NotificationCountCache;
 use App\Modules\Notifications\Support\DispatchesNotificationRefresh;
 use Illuminate\Http\Response;
 use Livewire\Attributes\Isolate;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 #[Isolate]
@@ -21,11 +22,14 @@ class Notifications extends Component
 
     public bool $hasLoaded;
 
+    public int|string|null $notificationCount = null;
+
     public function mount()
     {
         $this->notifications = collect([]);
         $this->isLoading = true;
         $this->hasLoaded = false;
+        $this->refreshCount();
     }
 
     public function getNotifications(): void
@@ -50,6 +54,7 @@ class Notifications extends Component
 
         $this->isLoading = false;
         $this->hasLoaded = true;
+        $this->refreshCount();
         $this->dispatchNotificationRefresh();
     }
 
@@ -61,6 +66,7 @@ class Notifications extends Component
         $user->unreadNotifications()->update(['read_at' => now()]);
         app(NotificationCountCache::class)->forgetUser((int) $user->id);
 
+        $this->refreshCount();
         $this->dispatchNotificationRefresh();
         $this->getNotifications();
     }
@@ -81,9 +87,27 @@ class Notifications extends Component
 
         $notification->markAsRead();
         app(NotificationCountCache::class)->forgetUser((int) $user->id);
+        $this->refreshCount();
         $this->dispatchNotificationRefresh();
 
         return $this->redirectRoute($route);
+    }
+
+    #[On('notifications-refresh-count')]
+    public function refreshCount(): void
+    {
+        $user = auth()->user();
+        if (! $user) {
+            $this->notificationCount = null;
+
+            return;
+        }
+
+        $count = app(NotificationCountCache::class)->unreadCount((int) $user->id);
+
+        $this->notificationCount = $count > self::NOTIFICATION_THRESHOLD
+            ? self::NOTIFICATION_THRESHOLD.'+'
+            : $count;
     }
 
     public function placeholder()

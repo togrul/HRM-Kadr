@@ -1,10 +1,21 @@
-<div class="relative flex items-center" x-data="{ isOpen: false }" x-on:keydown.escape.window="isOpen = false">
+<div
+    class="relative flex items-center"
+    x-data="{ isOpen: false, loadingRequest: false }"
+    x-on:keydown.escape.window="isOpen = false"
+    x-on:livewire:navigating.window="isOpen = false"
+>
     <button
         type="button"
         @click="
-            isOpen = !isOpen;
             if (isOpen) {
-                $wire.getNotifications();
+                isOpen = false;
+            } else {
+                isOpen = true;
+                if (! $wire.hasLoaded && !loadingRequest) {
+                    loadingRequest = true;
+                    Promise.resolve($wire.getNotifications())
+                        .finally(() => { loadingRequest = false; });
+                }
             }
         "
         class="relative inline-flex items-center justify-center w-10 h-10 text-sm font-medium text-blue-500 transition duration-200 ease-in bg-transparent rounded-md hover:bg-white/80 focus:outline-none"
@@ -12,7 +23,11 @@
         <svg  fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 font-normal text-slate-500">
             <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0M3.124 7.5A8.969 8.969 0 015.292 3m13.416 0a8.969 8.969 0 012.168 4.5" />
         </svg>
-        <livewire:notification.notifications-counter :key="'notifications-counter-'.auth()->id()" />
+        @if ($notificationCount)
+            <span class="absolute top-0 right-0 flex items-center justify-center w-4 h-4 font-medium text-rose-500 bg-rose-200 rounded-full border-1 text-[11px]">
+                {{ $notificationCount }}
+            </span>
+        @endif
     </button>
 
     <div
@@ -23,7 +38,8 @@
         x-transition:enter-start="scale-75"
         x-transition:leave="transition duration-100 transform ease-in"
         x-transition:leave-end="opacity-0 scale-90"
-        x-on:click.away="isOpen = false"
+        x-on:click.away="if (!loadingRequest) { isOpen = false }"
+        x-on:click.stop
         class="absolute right-0 z-50 mt-2 origin-top-right border bg-white text-left text-neutral-700 shadow-2xl shadow-neutral-200 border-neutral-200 top-full w-[32rem] max-w-[calc(100vw-2rem)] rounded-xl"
     >
         <ul class="overflow-y-auto text-xs font-normal divide-y divide-dashed max-h-96 rounded-tl-xl rounded-tr-xl">

@@ -68,6 +68,24 @@ class PersonnelTabelNoGeneratorService
     private function resolveMaxExistingSequence(string $companyCode, int $year): int
     {
         $prefix = sprintf('%s-%02d-', $companyCode, $year % 100);
+        $driver = DB::connection()->getDriverName();
+
+        if ($driver === 'sqlite') {
+            $regex = '/^'.preg_quote($prefix, '/').'(\d{6})$/';
+            $max = 0;
+
+            Personnel::query()
+                ->where('tabel_no', 'like', $prefix.'%')
+                ->pluck('tabel_no')
+                ->each(function ($value) use (&$max, $regex): void {
+                    if (preg_match($regex, (string) $value, $matches)) {
+                        $max = max($max, (int) ($matches[1] ?? 0));
+                    }
+                });
+
+            return $max;
+        }
+
         $startIndex = strlen($prefix) + 1;
         $regexp = '^'.preg_quote($prefix, '/').'[0-9]{6}$';
 
@@ -94,4 +112,3 @@ class PersonnelTabelNoGeneratorService
         return $normalized !== '' ? $normalized : 'HRM';
     }
 }
-

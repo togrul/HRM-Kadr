@@ -4,6 +4,7 @@ namespace App\Modules\Notifications\Livewire;
 
 use App\Modules\Notifications\Support\NotificationCountCache;
 use App\Modules\Notifications\Support\DispatchesNotificationRefresh;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -41,8 +42,24 @@ class NotificationList extends Component
 
     public function render()
     {
-        $notifications = auth()->user()
-            ->notifications()
+        $user = auth()->user();
+
+        if (! $user) {
+            $notifications = new LengthAwarePaginator(
+                collect([]),
+                0,
+                self::NOTIFICATION_THRESHOLD,
+                1,
+                [
+                    'path' => request()->url(),
+                    'pageName' => 'page',
+                ]
+            );
+
+            return view('notification::livewire.notification.notification-list', compact('notifications'));
+        }
+
+        $notifications = $user->notifications()
             ->select(['id', 'type', 'data', 'read_at', 'created_at', 'notifiable_id', 'notifiable_type'])
             ->orderBy('read_at')
             ->latest()

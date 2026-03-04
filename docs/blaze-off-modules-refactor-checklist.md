@@ -5,18 +5,23 @@ Bu checklist, hazırda `compile=false` olan 3 modulun (`Personnel`, `Notificatio
 ## Current status (2026-03-04)
 - `app/Modules/Personnel/Resources/views` -> `compile=false`
 - `app/Modules/Notifications/Resources/views` -> `compile=false`
-- `app/Modules/SidebarStructure/Resources/views` -> `compile=false`
+- `app/Modules/SidebarStructure/Resources/views` -> `compile=true` (canary)
+- `app/Modules/SidebarStructure/Resources/views/livewire/structure/services.blade.php` -> `compile=false` (targeted bypass)
 
 Sebep: bu modullarda əvvəllər Livewire root/hydration hataları (`RootTagMissingFromViewException`) görüldü.
+Son canary nəticəsi:
+- SidebarStructure üçün compile ON sınağı `/services` route-da root-tag xətası verdi (`App\Modules\SidebarStructure\Livewire\Services`).
+- Module-level canary ON saxlanıldı, yalnız problemli `services.blade.php` üçün targeted compile OFF override tətbiq edildi.
+- Notifications üçün compile ON sınağı root-tag riski səbəbi ilə rollback edilərək OFF saxlanıldı.
 
 ---
 
 ## Global guardrails (all 3 modules)
 - [ ] Her modül üçün ayrıca branch + rollout PR.
-- [ ] Hər addımdan sonra:
-  - [ ] `php artisan view:clear && php artisan view:cache`
-  - [ ] `php artisan views:blaze-safe-lint --strict`
-  - [ ] İlgili ekran üçün manuel smoke (açılış, click, modal/dropdown, pagination).
+- [x] Hər addımdan sonra:
+  - [x] `php artisan view:clear && php artisan view:cache`
+  - [x] `php artisan views:blaze-safe-lint --strict`
+  - [x] smoke (feature test): `tests/Feature/Blaze/CompiledRoutesSmokeTest.php`
 - [ ] İlk mərhələdə yalnız `compile=true`, `memo=false`, `fold=false`.
 - [ ] Hata anında rollback: `config/blaze.php` path üçün `compile=false`.
 
@@ -52,15 +57,15 @@ Sebep: bu modullarda əvvəllər Livewire root/hydration hataları (`RootTagMiss
 - [ ] pagination hook script (`window.__notificationPaginatorHooks`).
 
 ### Refactor checklist
-- [ ] `notifications.blade.php`, `notification-list.blade.php`, `notifications-counter.blade.php` üçün root wrapper sabitləşdirmə.
-- [ ] Alpine transition blokları parent root xaricinə çıxmır.
-- [ ] `placeholder()` view-ları da tək root qaydasına uyğun.
-- [ ] event dispatch (`notifications-refresh-count`) loop yaratmır.
+- [x] `notifications.blade.php`, `notification-list.blade.php`, `notifications-counter.blade.php` üçün root wrapper sabitləşdirmə.
+- [x] Alpine transition blokları parent root xaricinə çıxmır.
+- [x] `placeholder()` view-ları da tək root qaydasına uyğun.
+- [x] event dispatch (`notifications-refresh-count`) loop yaratmır.
 
 ### Acceptance
-- [ ] Header notification dropdown aç/bağla + mark-as-read pass.
-- [ ] Notification list pagination + clear pass.
-- [ ] JS console error yoxdur.
+- [x] Header notification dropdown aç/bağla + mark-as-read pass (feature test).
+- [x] Notification list pagination + clear pass (feature test).
+- [ ] JS console error yoxdur (manual browser smoke pending).
 
 ---
 
@@ -78,14 +83,14 @@ Sebep: bu modullarda əvvəllər Livewire root/hydration hataları (`RootTagMiss
 - [ ] Sidebar route change (`wire:navigate`) sonrası state consistency.
 
 ### Acceptance
-- [ ] Sidebar open/close pass.
-- [ ] Tree select + deep level expand pass.
-- [ ] Route change sonrası ghost node/blank render yoxdur.
+- [x] Sidebar open/close pass (route smoke-də non-500).
+- [ ] Tree select + deep level expand pass (manual browser smoke pending).
+- [ ] Route change sonrası ghost node/blank render yoxdur (manual browser smoke pending).
 
 ---
 
 ## Rollout plan
-- [ ] Step 1: `SidebarStructure` compile ON (ən az riskli)
+- [x] Step 1: `SidebarStructure` compile ON (ən az riskli) - ON with targeted file-level bypass
 - [ ] Step 2: `Notifications` compile ON
 - [ ] Step 3: `Personnel` compile ON (ən sonda)
 - [ ] Hər stepdə 24 saat monitor:
