@@ -2,6 +2,11 @@
     <h2 class="text-xl font-semibold text-gray-500 font-title" id="slide-over-title">
         {!! $title ?? '' !!}
     </h2>
+    <div class="mt-1">
+        <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">
+            {{ __('Mode') }}: {{ $this->candidateModeLabel() }}
+        </span>
+    </div>
 </div>
 
 <div class="grid grid-cols-3 gap-2">
@@ -51,11 +56,13 @@
             <x-validation> {{ $message }} </x-validation>
         @enderror
     </div>
-    <div class="flex flex-col">
-        <x-label for="candidate.military_service">{{ __('Military service') }}</x-label>
-        <x-livewire-input mode="gray" name="candidate.military_service"
-            wire:model="candidate.military_service"></x-livewire-input>
-    </div>
+    @if ($this->isMilitaryCandidateMode())
+        <div class="flex flex-col">
+            <x-label for="candidate.military_service">{{ __('Military service') }}</x-label>
+            <x-livewire-input mode="gray" name="candidate.military_service"
+                wire:model="candidate.military_service"></x-livewire-input>
+        </div>
+    @endif
     <div class="flex flex-col">
         <x-label for="candidate.phone">{{ __('Phone') }}</x-label>
         <x-livewire-input mode="gray" name="candidate.phone" wire:model="candidate.phone"></x-livewire-input>
@@ -71,14 +78,16 @@
             <x-validation> {{ $message }} </x-validation>
         @enderror
     </div>
-    <div class="flex flex-col">
-        <x-label for="candidate.physical_fitness_exam">{{ __('Physical fitness') }}</x-label>
-        <x-livewire-input mode="gray" name="candidate.physical_fitness_exam"
-            wire:model="candidate.physical_fitness_exam"></x-livewire-input>
-        @error('candidate.physical_fitness_exam')
-            <x-validation> {{ $message }} </x-validation>
-        @enderror
-    </div>
+    @if ($this->isMilitaryCandidateMode())
+        <div class="flex flex-col">
+            <x-label for="candidate.physical_fitness_exam">{{ __('Physical fitness') }}</x-label>
+            <x-livewire-input mode="gray" name="candidate.physical_fitness_exam"
+                wire:model="candidate.physical_fitness_exam"></x-livewire-input>
+            @error('candidate.physical_fitness_exam')
+                <x-validation> {{ $message }} </x-validation>
+            @enderror
+        </div>
+    @endif
     <div class="flex flex-col col-span-2">
         <x-label for="candidate.research_date">{{ __('Research date') }}</x-label>
         <x-pikaday-input mode="gray" name="candidate.research_date" format="Y-MM-DD"
@@ -193,55 +202,60 @@
     </div>
 </div>
 
-<div class="grid grid-cols-4 gap-2">
-    <div class="flex flex-col">
-        <x-label for="candidate.hhk_date">{{ __('HHK date') }}</x-label>
-        <x-pikaday-input mode="gray" name="candidate.hhk_date" format="Y-MM-DD"
-            wire:model.live="candidate.hhk_date">
-            <x-slot name="script">
-                $el.onchange = function () {
-                @this.set('candidate.hhk_date', $el.value);
-                }
-            </x-slot>
-        </x-pikaday-input>
-    </div>
-
-    <div class="flex flex-col space-y-1">
-        <x-label for="candidate.hhk_result">{{ __('HHK result') }}</x-label>
-        <div class="flex flex-row w-full">
-            @foreach (\App\Enums\MilitaryStatusEnum::values() as $military)
-                <label class="inline-flex items-center px-2 py-2 bg-gray-100 rounded shadow-sm">
-                    <input type="radio" class="form-radio" name="candidate.hhk_result"
-                        wire:model.live="candidate.hhk_result" value="{{ $military }}">
-                    <span class="ml-2 text-sm font-normal">{{ $military }}</span>
-                </label>
-            @endforeach
-        </div>
-    </div>
-    @if (array_key_exists('hhk_result', $candidate) &&
-            $candidate['hhk_result'] == \App\Enums\MilitaryStatusEnum::Useless->value)
+@if ($this->isMilitaryCandidateMode())
+    <div class="grid grid-cols-4 gap-2">
         <div class="flex flex-col">
-            <x-label for="candidate.useless_info">{{ __('Useless information') }}</x-label>
-            <x-livewire-input mode="gray" name="candidate.useless_info"
-                wire:model="candidate.useless_info"></x-livewire-input>
+            <x-label for="candidate.hhk_date">{{ __('HHK date') }}</x-label>
+            <x-pikaday-input mode="gray" name="candidate.hhk_date" format="Y-MM-DD"
+                wire:model.live="candidate.hhk_date">
+                <x-slot name="script">
+                    $el.onchange = function () {
+                    @this.set('candidate.hhk_date', $el.value);
+                    }
+                </x-slot>
+            </x-pikaday-input>
         </div>
-    @endif
 
-    <div class="flex flex-col space-y-1">
-        <x-label for="candidate.attitude_to_military">{{ __('Attitude to military') }}</x-label>
-        <div class="flex flex-row">
-            @foreach (\App\Enums\AttitudeMilitaryEnum::values() as $attitude)
-                <label class="inline-flex items-center px-2 py-2 bg-gray-100 rounded shadow-sm">
-                    <input type="radio" class="form-radio" name="candidate.attitude_to_military"
-                        wire:model="candidate.attitude_to_military" value="{{ $attitude }}">
-                    <span class="ml-2 text-sm font-normal">{{ $attitude }}</span>
-                </label>
-            @endforeach
+        <div class="flex flex-col space-y-1">
+            <x-label for="candidate.hhk_result">{{ __('HHK result') }}</x-label>
+            <div class="flex flex-row w-full">
+                @foreach (\App\Enums\MilitaryStatusEnum::values() as $military)
+                    <label class="inline-flex items-center px-2 py-2 bg-gray-100 rounded shadow-sm">
+                        <input type="radio" class="form-radio" name="candidate.hhk_result"
+                            wire:model.live="candidate.hhk_result" value="{{ $military }}">
+                        <span class="ml-2 text-sm font-normal">{{ $military }}</span>
+                    </label>
+                @endforeach
+            </div>
         </div>
-        @error('candidate.attitude_to_military')
-            <x-validation> {{ $message }} </x-validation>
-        @enderror
+        @if (array_key_exists('hhk_result', $candidate) &&
+                $candidate['hhk_result'] == \App\Enums\MilitaryStatusEnum::Useless->value)
+            <div class="flex flex-col">
+                <x-label for="candidate.useless_info">{{ __('Useless information') }}</x-label>
+                <x-livewire-input mode="gray" name="candidate.useless_info"
+                    wire:model="candidate.useless_info"></x-livewire-input>
+            </div>
+        @endif
+
+        <div class="flex flex-col space-y-1">
+            <x-label for="candidate.attitude_to_military">{{ __('Attitude to military') }}</x-label>
+            <div class="flex flex-row">
+                @foreach (\App\Enums\AttitudeMilitaryEnum::values() as $attitude)
+                    <label class="inline-flex items-center px-2 py-2 bg-gray-100 rounded shadow-sm">
+                        <input type="radio" class="form-radio" name="candidate.attitude_to_military"
+                            wire:model="candidate.attitude_to_military" value="{{ $attitude }}">
+                        <span class="ml-2 text-sm font-normal">{{ $attitude }}</span>
+                    </label>
+                @endforeach
+            </div>
+            @error('candidate.attitude_to_military')
+                <x-validation> {{ $message }} </x-validation>
+            @enderror
+        </div>
     </div>
+@endif
+
+<div class="grid grid-cols-3 gap-2">
     <div class="flex flex-col">
         <x-label for="candidate.characteristics">{{ __('Characteristics') }}</x-label>
         <x-livewire-input mode="gray" name="candidate.characteristics"

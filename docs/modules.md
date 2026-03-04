@@ -53,3 +53,4 @@ Livewire components, routes, views, and service provider. Shared patterns:
 - `config/profiles.php` defines profiles (default/military/public/private). Active profile: `APP_PROFILE` or `profiles.active`.
 - Each profile can override modules (on/off) and feature flags (e.g., `ranks`, `military_service`, `weapons`). Defaults live in the `default` profile.
 - `feature_enabled('ranks')` helper and `@feature('ranks') ... @endfeature` Blade directive check FeatureState, which is built from the active profile. Use them to hide UI or relax validation when a feature is off.
+- Candidates dual-mode can be controlled via `APP_CANDIDATE_MODE` (`military|civilian|auto`) in `config/candidates.php`.

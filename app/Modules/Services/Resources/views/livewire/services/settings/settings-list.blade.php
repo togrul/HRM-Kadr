@@ -14,6 +14,138 @@
     </div>
 
 
+    <div class="mb-6 p-4 bg-white rounded-xl border border-gray-200">
+        <div class="flex flex-col gap-3">
+            <div class="text-sm font-semibold text-gray-700">{{ __('Candidate status whitelist presets') }}</div>
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div class="flex flex-col space-y-2">
+                    <span class="text-sm font-medium text-gray-500">{{ __('Military mode status ids') }}</span>
+                    <div class="grid grid-cols-1 gap-2 md:grid-cols-2">
+                        <div class="flex flex-col space-y-1">
+                            <span class="text-xs text-gray-500">{{ __('Default status') }}</span>
+                            <select wire:model.live="candidatePresetSettings.military.default_status"
+                                class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500">
+                                <option value="all">{{ __('All') }}</option>
+                                <option value="deleted">{{ __('Deleted') }}</option>
+                                @foreach($candidateStatuses as $statusOption)
+                                    <option value="{{ $statusOption['id'] }}">#{{ $statusOption['id'] }} - {{ $statusOption['name'] }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="flex items-end">
+                            <label class="inline-flex items-center gap-2 rounded-md bg-white px-3 py-2 text-sm border border-gray-200">
+                                <input type="checkbox" wire:model.live="candidatePresetSettings.military.show_deleted_tab"
+                                    class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                <span class="text-gray-700">{{ __('Show deleted tab') }}</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <x-button mode="slate" class="!py-1 !px-3 !text-xs"
+                            wire:click="selectAllCandidateStatuses('military')">{{ __('All') }}</x-button>
+                        <x-button mode="slate" class="!py-1 !px-3 !text-xs"
+                            wire:click="clearAllCandidateStatuses('military')">{{ __('Clear') }}</x-button>
+                    </div>
+                    <div class="max-h-48 overflow-auto rounded-lg border border-gray-200 bg-gray-50 p-2 space-y-2">
+                        @forelse($candidateStatuses as $statusOption)
+                            <label class="flex items-center justify-between rounded-md bg-white px-3 py-2 text-sm">
+                                <span class="text-gray-700">{{ $statusOption['name'] }}</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs text-gray-400">#{{ $statusOption['id'] }}</span>
+                                    <input type="checkbox" value="{{ $statusOption['id'] }}"
+                                        wire:model.live="candidateStatusWhitelist.military"
+                                        class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                </div>
+                            </label>
+                        @empty
+                            <div class="text-xs text-gray-500 px-2 py-1">{{ __('No statuses found for current locale.') }}
+                            </div>
+                        @endforelse
+                    </div>
+                    <div class="flex flex-col space-y-2">
+                        <span class="text-xs text-gray-500">{{ __('Enabled filters') }}</span>
+                        <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                            @foreach($this->candidateFilterOptionsForMode('military') as $filterOption)
+                                <label class="inline-flex items-center gap-2 rounded-md bg-white px-3 py-2 text-sm border border-gray-200">
+                                    <input type="checkbox" value="{{ $filterOption['key'] }}"
+                                        wire:model.live="candidateEnabledFilters.military"
+                                        class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                    <span class="text-gray-700">{{ $filterOption['label'] }}</span>
+                                </label>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-col space-y-2">
+                    <span class="text-sm font-medium text-gray-500">{{ __('Civilian mode status ids') }}</span>
+                    <div class="grid grid-cols-1 gap-2 md:grid-cols-2">
+                        <div class="flex flex-col space-y-1">
+                            <span class="text-xs text-gray-500">{{ __('Default status') }}</span>
+                            <select wire:model.live="candidatePresetSettings.civilian.default_status"
+                                class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500">
+                                <option value="all">{{ __('All') }}</option>
+                                <option value="deleted">{{ __('Deleted') }}</option>
+                                @foreach($candidateStatuses as $statusOption)
+                                    <option value="{{ $statusOption['id'] }}">#{{ $statusOption['id'] }} - {{ $statusOption['name'] }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="flex items-end">
+                            <label class="inline-flex items-center gap-2 rounded-md bg-white px-3 py-2 text-sm border border-gray-200">
+                                <input type="checkbox" wire:model.live="candidatePresetSettings.civilian.show_deleted_tab"
+                                    class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                <span class="text-gray-700">{{ __('Show deleted tab') }}</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <x-button mode="slate" class="!py-1 !px-3 !text-xs"
+                            wire:click="selectAllCandidateStatuses('civilian')">{{ __('All') }}</x-button>
+                        <x-button mode="slate" class="!py-1 !px-3 !text-xs"
+                            wire:click="clearAllCandidateStatuses('civilian')">{{ __('Clear') }}</x-button>
+                    </div>
+                    <div class="max-h-48 overflow-auto rounded-lg border border-gray-200 bg-gray-50 p-2 space-y-2">
+                        @forelse($candidateStatuses as $statusOption)
+                            <label class="flex items-center justify-between rounded-md bg-white px-3 py-2 text-sm">
+                                <span class="text-gray-700">{{ $statusOption['name'] }}</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs text-gray-400">#{{ $statusOption['id'] }}</span>
+                                    <input type="checkbox" value="{{ $statusOption['id'] }}"
+                                        wire:model.live="candidateStatusWhitelist.civilian"
+                                        class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                </div>
+                            </label>
+                        @empty
+                            <div class="text-xs text-gray-500 px-2 py-1">{{ __('No statuses found for current locale.') }}
+                            </div>
+                        @endforelse
+                    </div>
+                    <div class="flex flex-col space-y-2">
+                        <span class="text-xs text-gray-500">{{ __('Enabled filters') }}</span>
+                        <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                            @foreach($this->candidateFilterOptionsForMode('civilian') as $filterOption)
+                                <label class="inline-flex items-center gap-2 rounded-md bg-white px-3 py-2 text-sm border border-gray-200">
+                                    <input type="checkbox" value="{{ $filterOption['key'] }}"
+                                        wire:model.live="candidateEnabledFilters.civilian"
+                                        class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                    <span class="text-gray-700">{{ $filterOption['label'] }}</span>
+                                </label>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="text-xs text-gray-500">
+                {{ __('Pick statuses directly by name. Empty selection means all statuses are visible.') }}
+            </div>
+            <div>
+                <x-button mode="primary" wire:click="saveCandidateStatusWhitelist">
+                    {{ __('Save presets') }}
+                </x-button>
+            </div>
+        </div>
+    </div>
+
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
         @foreach ($settings as $key => $settingValue)
             <div class="flex space-x-2 justify-between items-end w-full">

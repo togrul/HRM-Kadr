@@ -20,57 +20,67 @@
     "
 >
     <div class="grid grid-cols-1 gap-2 px-6 py-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div class="flex flex-col">
-            <x-label for="filter.fullname">{{ __('Fullname') }}</x-label>
-            <x-livewire-input mode="gray" name="filter.fullname" wire:model="filter.fullname"></x-livewire-input>
-        </div>
-        <div class="flex flex-col w-full space-y-1">
-            <x-label for="filter.gender">{{ __('Gender') }}</x-label>
-            <div class="flex space-x-2">
-                @foreach (\App\Enums\GenderEnum::genderOptions() as $value => $label)
-                    <label class="inline-flex items-center w-full px-2 py-2 bg-gray-100 rounded shadow-sm">
-                        <input type="radio" class="form-radio" name="filter.gender" wire:model="filter.gender"
-                            value="{{ $value }}">
-                        <span class="ml-2 text-sm font-normal">{{ $label }}</span>
-                    </label>
-                @endforeach
+        @if ($this->filterEnabled('fullname'))
+            <div class="flex flex-col">
+                <x-label for="filter.fullname">{{ __('Fullname') }}</x-label>
+                <x-livewire-input mode="gray" name="filter.fullname" wire:model="filter.fullname"></x-livewire-input>
             </div>
-        </div>
+        @endif
+        @if ($this->filterEnabled('gender'))
+            <div class="flex flex-col w-full space-y-1">
+                <x-label for="filter.gender">{{ __('Gender') }}</x-label>
+                <div class="flex space-x-2">
+                    @foreach (\App\Enums\GenderEnum::genderOptions() as $value => $label)
+                        <label class="inline-flex items-center w-full px-2 py-2 bg-gray-100 rounded shadow-sm">
+                            <input type="radio" class="form-radio" name="filter.gender" wire:model="filter.gender"
+                                value="{{ $value }}">
+                            <span class="ml-2 text-sm font-normal">{{ $label }}</span>
+                        </label>
+                    @endforeach
+                </div>
+            </div>
+        @endif
         <div class="flex items-center space-x-2">
-            <div class="flex flex-col">
-                <x-label for="filter.results">{{ __('Test results') }}</x-label>
-                <x-livewire-input mode="gray" type="number" name="filter.results"
-                    wire:model="filter.results"></x-livewire-input>
-            </div>
-            <div class="flex flex-col">
-                <x-label for="filter.age">{{ __('Age') }}</x-label>
-                <x-livewire-input mode="gray" type="number" name="filter.age"
-                    wire:model="filter.age"></x-livewire-input>
-            </div>
+            @if ($this->filterEnabled('results') && $this->isMilitaryCandidateMode())
+                <div class="flex flex-col">
+                    <x-label for="filter.results">{{ __('Test results') }}</x-label>
+                    <x-livewire-input mode="gray" type="number" name="filter.results"
+                        wire:model="filter.results"></x-livewire-input>
+                </div>
+            @endif
+            @if ($this->filterEnabled('age'))
+                <div class="flex flex-col">
+                    <x-label for="filter.age">{{ __('Age') }}</x-label>
+                    <x-livewire-input mode="gray" type="number" name="filter.age"
+                        wire:model="filter.age"></x-livewire-input>
+                </div>
+            @endif
         </div>
 
-        <div class="flex flex-col">
-            <x-label for="filter.appeal_date">{{ __('Appeal date') }}</x-label>
-            <div class="flex items-center space-x-1">
-                <x-pikaday-input mode="gray" name="filter.appeal_date.min" format="Y-MM-DD"
-                    wire:model="filter.appeal_date.min">
-                    <x-slot name="script">
-                        $el.onchange = function () {
-                        @this.set('filter.appeal_date.min', $el.value);
-                        }
-                    </x-slot>
-                </x-pikaday-input>
-                <span>-</span>
-                <x-pikaday-input mode="gray" name="filter.appeal_date.max" format="Y-MM-DD"
-                    wire:model="filter.appeal_date.max">
-                    <x-slot name="script">
-                        $el.onchange = function () {
-                        @this.set('filter.appeal_date.max', $el.value);
-                        }
-                    </x-slot>
-                </x-pikaday-input>
+        @if ($this->filterEnabled('appeal_date'))
+            <div class="flex flex-col">
+                <x-label for="filter.appeal_date">{{ __('Appeal date') }}</x-label>
+                <div class="flex items-center space-x-1">
+                    <x-pikaday-input mode="gray" name="filter.appeal_date.min" format="Y-MM-DD"
+                        wire:model="filter.appeal_date.min">
+                        <x-slot name="script">
+                            $el.onchange = function () {
+                            @this.set('filter.appeal_date.min', $el.value);
+                            }
+                        </x-slot>
+                    </x-pikaday-input>
+                    <span>-</span>
+                    <x-pikaday-input mode="gray" name="filter.appeal_date.max" format="Y-MM-DD"
+                        wire:model="filter.appeal_date.max">
+                        <x-slot name="script">
+                            $el.onchange = function () {
+                            @this.set('filter.appeal_date.max', $el.value);
+                            }
+                        </x-slot>
+                    </x-pikaday-input>
+                </div>
             </div>
-        </div>
+        @endif
         <div class="flex items-end space-x-2">
             <x-button mode="primary" wire:click="searchFilter">{{ __('Search') }}</x-button>
             <x-button mode="black" wire:click="resetFilter">{{ __('Reset') }}</x-button>
@@ -89,11 +99,11 @@
                             {{ $_status->name }}
                         </x-filter.item>
                     @endforeach
-                    {{--                 @can('manage-candidates') --}}
-                    <x-filter.item wire:click.prevent="setStatus('deleted')" :active="$status === 'deleted'">
-                        {{ __('Deleted') }}
-                    </x-filter.item>
-                    {{--                 @endcan --}}
+                    @if ($showDeletedTab)
+                        <x-filter.item wire:click.prevent="setStatus('deleted')" :active="$status === 'deleted'">
+                            {{ __('Deleted') }}
+                        </x-filter.item>
+                    @endif
                 </x-filter.nav>
             </div>
 
@@ -158,22 +168,24 @@
                                         class="px-2 py-2 text-sm font-medium text-gray-900 rounded-lg bg-slate-100">{{ $_candidate->structure->name }}</span>
                                 </x-table.td>
 
-                                <x-table.td>
-                                    <div class="flex flex-col space-y-1">
-                                        <div class="flex items-center space-x-1">
-                                            <span
-                                                class="text-sm font-medium text-gray-500">{{ __('Knowledge') }}:</span>
-                                            <span
-                                                class="text-sm font-medium px-2 py-1 rounded-lg bg-{{ $_candidate->knowledge_test_color }}-100 text-{{ $_candidate->knowledge_test_color }}-500">{{ $_candidate->knowledge_test }}</span>
+                                @if ($this->isMilitaryCandidateMode())
+                                    <x-table.td>
+                                        <div class="flex flex-col space-y-1">
+                                            <div class="flex items-center space-x-1">
+                                                <span
+                                                    class="text-sm font-medium text-gray-500">{{ __('Knowledge') }}:</span>
+                                                <span
+                                                    class="text-sm font-medium px-2 py-1 rounded-lg bg-{{ $_candidate->knowledge_test_color }}-100 text-{{ $_candidate->knowledge_test_color }}-500">{{ $_candidate->knowledge_test }}</span>
+                                            </div>
+                                            <div class="flex items-center space-x-1">
+                                                <span
+                                                    class="text-sm font-medium text-gray-500">{{ __('Physical fitness') }}:</span>
+                                                <span
+                                                    class="text-sm font-medium px-2 py-1 rounded-lg bg-{{ $_candidate->physical_fitness_exam_color }}-100 text-{{ $_candidate->physical_fitness_exam_color }}-500">{{ $_candidate->physical_fitness_exam }}</span>
+                                            </div>
                                         </div>
-                                        <div class="flex items-center space-x-1">
-                                            <span
-                                                class="text-sm font-medium text-gray-500">{{ __('Physical fitness') }}:</span>
-                                            <span
-                                                class="text-sm font-medium px-2 py-1 rounded-lg bg-{{ $_candidate->physical_fitness_exam_color }}-100 text-{{ $_candidate->physical_fitness_exam_color }}-500">{{ $_candidate->physical_fitness_exam }}</span>
-                                        </div>
-                                    </div>
-                                </x-table.td>
+                                    </x-table.td>
+                                @endif
 
                                 <x-table.td>
                                     <div class="flex flex-col text-sm font-medium">

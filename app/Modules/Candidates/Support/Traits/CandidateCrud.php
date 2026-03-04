@@ -4,6 +4,7 @@ namespace App\Modules\Candidates\Support\Traits;
 
 use App\Concerns\LoadsAppealStatuses;
 use App\Enums\AttitudeMilitaryEnum;
+use App\Modules\Candidates\Support\CandidateModeResolver;
 use App\Models\Structure;
 use App\Models\Candidate;
 use App\Livewire\Traits\DropdownConstructTrait;
@@ -28,9 +29,11 @@ trait CandidateCrud
 
     public ?Candidate $candidateModelData = null;
 
+    public string $candidateMode = CandidateModeResolver::MILITARY;
+
     public function rules()
     {
-        return [
+        $rules = [
             'candidate.name' => 'required|string|min:2',
             'candidate.surname' => 'required|string|min:2',
             'candidate.patronymic' => 'required|string|min:2',
@@ -39,10 +42,18 @@ trait CandidateCrud
             'candidate.gender' => 'required|int',
             'candidate.height' => 'required|int',
             'candidate.knowledge_test' => 'required|int',
-            'candidate.physical_fitness_exam' => 'required|int',
-            'candidate.attitude_to_military' => ['required', Rule::in(AttitudeMilitaryEnum::values())],
             'candidate.status_id' => 'required|int|exists:appeal_statuses,id',
         ];
+
+        if ($this->isMilitaryCandidateMode()) {
+            $rules['candidate.physical_fitness_exam'] = 'required|int';
+            $rules['candidate.attitude_to_military'] = ['required', Rule::in(AttitudeMilitaryEnum::values())];
+        } else {
+            $rules['candidate.physical_fitness_exam'] = 'nullable|int';
+            $rules['candidate.attitude_to_military'] = ['nullable', Rule::in(AttitudeMilitaryEnum::values())];
+        }
+
+        return $rules;
     }
 
     protected function validationAttributes()
@@ -64,6 +75,8 @@ trait CandidateCrud
 
     public function mount()
     {
+        $this->candidateMode = app(CandidateModeResolver::class)->resolve();
+
         if (! empty($this->candidateModel)) {
             $this->fillCandidate();
             $this->title = __('Edit candidate') . ' - ' . "<span class='text-teal-500'>{$this->candidateModelData->fullname}</span>";
@@ -75,6 +88,8 @@ trait CandidateCrud
               'status_id' => null
             ];
         }
+
+        $this->normalizeByMode();
     }
 
     #[Computed(persist: true)]
@@ -121,5 +136,29 @@ trait CandidateCrud
             : 'candidates::livewire.candidates.add-candidate';
 
         return view($view_name, compact('statuses'));
+    }
+
+    public function isMilitaryCandidateMode(): bool
+    {
+        return $this->candidateMode === CandidateModeResolver::MILITARY;
+    }
+
+    public function candidateModeLabel(): string
+    {
+        return app(CandidateModeResolver::class)->label($this->candidateMode);
+    }
+
+    protected function normalizeByMode(): void
+    {
+        if ($this->isMilitaryCandidateMode()) {
+            return;
+        }
+
+        // Keep civilian add/edit forms consistent; military-only fields are hidden.
+        $this->candidate['attitude_to_military'] = data_get($this->candidate, 'attitude_to_military');
+        $this->candidate['military_service'] = data_get($this->candidate, 'military_service');
+        $this->candidate['hhk_date'] = data_get($this->candidate, 'hhk_date');
+        $this->candidate['hhk_result'] = data_get($this->candidate, 'hhk_result');
+        $this->candidate['useless_info'] = data_get($this->candidate, 'useless_info');
     }
 }
