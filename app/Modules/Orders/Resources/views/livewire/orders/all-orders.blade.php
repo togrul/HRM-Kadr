@@ -63,7 +63,7 @@
                         <button wire:click="openSideMenu('add-order',{{ $selectedOrder }})"
                             class="flex items-center justify-center w-12 h-12 transition-all duration-300 rounded-xl hover:bg-blue-50"
                             type="button">
-                            @include('components.icons.add-file')
+                            <x-icons.add-file></x-icons.add-file>
                         </button>
                     @endcan
                     @can('export-orders')
@@ -198,10 +198,7 @@
                                         @if ($_order->order->blade != \App\Models\Order::BLADE_BUSINESS_TRIP)
                                             <button wire:click="printOrder('{{ $_order->order_no }}')"
                                                 class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg bg-teal-50 hover:bg-teal-100 hover:text-gray-700">
-                                                @include('components.icons.print-file', [
-                                                    'color' => 'text-teal-500',
-                                                    'hover' => 'text-teal-600',
-                                                ])
+                                                <x-icons.print-file color="text-teal-500" hover="text-teal-600"></x-icons.print-file>
                                             </button>
                                         @endif
                                     @endcan
@@ -212,17 +209,14 @@
                                         @can('edit-orders')
                                             <button wire:click="openSideMenu('edit-order','{{ $_order->order_no }}')"
                                                 class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase bg-gray-100 rounded-lg appearance-none hover:bg-gray-200 hover:text-gray-700">
-                                                @include('components.icons.document-icon')
+                                                <x-icons.document-icon></x-icons.document-icon>
                                             </button>
                                         @endcan
                                     @else
                                         @can('edit-orders')
                                             <button wire:click="restoreData('{{ $_order->order_no }}')"
                                                 class="flex items-center justify-center text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg w-9 h-9 bg-teal-50 hover:bg-teal-100 hover:text-gray-700">
-                                                @include('components.icons.recover', [
-                                                    'color' => 'text-teal-500',
-                                                    'hover' => 'text-teal-600',
-                                                ])
+                                                <x-icons.recover color="text-teal-500" hover="text-teal-600"></x-icons.recover>
                                             </button>
                                         @endcan
                                     @endif
@@ -233,7 +227,7 @@
                                         @can('delete-orders')
                                             <button wire:click="setDeleteOrder('{{ $_order->order_no }}')"
                                                 class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-100 hover:text-gray-700">
-                                                @include('components.icons.delete-icon')
+                                                <x-icons.delete-icon></x-icons.delete-icon>
                                             </button>
                                         @endcan
                                     @else
@@ -241,7 +235,7 @@
                                             <button wire:click="forceDeleteData('{{ $_order->order_no }}')"
                                                 wire:confirm="{{ __('Are you sure you want to remove this data?') }}"
                                                 class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700">
-                                                @include('components.icons.force-delete')
+                                                <x-icons.force-delete></x-icons.force-delete>
                                             </button>
                                         @endcan
                                     @endif

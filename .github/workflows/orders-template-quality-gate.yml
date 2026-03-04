@@ -60,6 +60,9 @@ jobs:
           DB_DATABASE: database/database.sqlite
         run: php artisan migrate --force
 
+      - name: Blaze-safe view lint
+        run: php artisan views:blaze-safe-lint --strict
+
       - name: Run Orders Template quality gate
         env:
           DB_CONNECTION: sqlite

@@ -1,11 +1,11 @@
 @props([
      'eventToOpenModal' => null,
      'livewireEventToOpenModal' => null,
-     'event-to-close-modal',
-     'modal-title',
-     'modal-description',
-     'modal-confirm-button-text',
-     'wire-click'
+     'eventToCloseModal' => null,
+     'modalTitle' => null,
+     'modalDescription' => null,
+     'modalConfirmButtonText' => null,
+     'wireClick' => null
 ])
 
 <div
@@ -67,7 +67,7 @@
             <div class="sm:flex sm:items-start">
               <div class="flex items-center justify-center flex-shrink-0 w-12 h-12 mx-auto bg-rose-50 rounded-full sm:mx-0 sm:h-10 sm:w-10">
                 <!-- Heroicon name: outline/exclamation -->
-                  @include('components.icons.info-icon')
+                  <x-icons.info-icon></x-icons.info-icon>
               </div>
               <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
                 <h3 class="text-lg font-normal leading-6 text-gray-900" id="modal-title">

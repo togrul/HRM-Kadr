@@ -33,7 +33,7 @@
                 </div>
                 <button wire:click.prevent = "setDeleteSettings({{ $settingValue->id }})"
                     class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-100 hover:text-gray-700">
-                    @include('components.icons.delete-icon')
+                    <x-icons.delete-icon></x-icons.delete-icon>
                 </button>
             </div>
         @endforeach

@@ -40,10 +40,7 @@
                       wire:target="openSideMenu"
                       type="button"
                       class="flex items-center justify-center w-8 h-8 transition-all duration-300 rounded-lg appearance-none bg-white/80 hover:bg-white/60">
-                      @include('components.icons.edit-icon', [
-                          'color' => 'text-zinc-500',
-                          'hover' => 'text-zinc-600',
-                      ])
+                      <x-icons.edit-icon color="text-zinc-500" hover="text-zinc-600"></x-icons.edit-icon>
                   </button>
               @endif
               @if ($canDeleteStaff)
@@ -52,10 +49,7 @@
                       wire:target="setDeleteStaff"
                       type="button"
                       class="flex items-center justify-center w-8 h-8 transition-all duration-300 rounded-lg appearance-none bg-white/80 hover:bg-white/60">
-                      @include('components.icons.delete-icon', [
-                          'color' => 'text-rose-400',
-                          'hover' => 'text-rose-300',
-                      ])
+                      <x-icons.delete-icon color="text-rose-400" hover="text-rose-300"></x-icons.delete-icon>
                   </button>
               @endif
           </div>

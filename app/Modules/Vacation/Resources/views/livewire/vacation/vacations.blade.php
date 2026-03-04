@@ -245,10 +245,7 @@
                                     @can('export-vacations')
                                         <button wire:click="printVacationDocument('{{ $_vacation->id }}')"
                                             class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg bg-teal-50 hover:bg-teal-50 hover:text-gray-700">
-                                            @include('components.icons.document-icon', [
-                                                'color' => 'text-teal-500',
-                                                'hover' => 'text-teal-600',
-                                            ])
+                                            <x-icons.document-icon color="text-teal-500" hover="text-teal-600"></x-icons.document-icon>
                                         </button>
                                     @endcan
                                 </x-table.td>

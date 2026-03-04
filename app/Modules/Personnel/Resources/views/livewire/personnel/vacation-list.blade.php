@@ -72,7 +72,7 @@
                                     <button wire:click="goToVacations('{{ $vacation->year }}')"
                                         class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-gray-50 hover:text-gray-700"
                                     >
-                                        @include('components.icons.document-icon')
+                                        <x-icons.document-icon></x-icons.document-icon>
                                     </button>
                                 </div>
                             </x-table.td>

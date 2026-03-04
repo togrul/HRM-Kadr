@@ -103,7 +103,7 @@
                         <button wire:click="openSideMenu('add-candidate')"
                             class="flex items-center justify-center w-12 h-12 transition-all duration-300 rounded-xl hover:bg-blue-50"
                             type="button">
-                            @include('components.icons.add-file')
+                            <x-icons.add-file></x-icons.add-file>
                         </button>
                     @endcan
                     @can('export', App\Models\Candidate::class)
@@ -193,17 +193,14 @@
                                             <a href="#"
                                                 wire:click="openSideMenu('edit-candidate',{{ $_candidate->id }})"
                                                 class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase bg-gray-100 rounded-lg hover:bg-gray-200 hover:text-gray-700">
-                                                @include('components.icons.profile-icon')
+                                                <x-icons.profile-icon></x-icons.profile-icon>
                                             </a>
                                         @endcan
                                     @else
                                         @role('Admin')
                                             <button wire:click="restoreData('{{ $_candidate->id }}')"
                                                 class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-teal-50 hover:text-gray-700">
-                                                @include('components.icons.recover', [
-                                                    'color' => 'text-teal-500',
-                                                    'hover' => 'text-teal-600',
-                                                ])
+                                                <x-icons.recover color="text-teal-500" hover="text-teal-600"></x-icons.recover>
                                             </button>
                                         @endrole
                                     @endif
@@ -214,7 +211,7 @@
                                         @can('delete', $_candidate)
                                             <button wire:click="setDeleteCandidate('{{ $_candidate->id }}')"
                                                 class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-100 hover:text-gray-700">
-                                                @include('components.icons.delete-icon')
+                                                <x-icons.delete-icon></x-icons.delete-icon>
                                             </button>
                                         @endcan
                                     @else
@@ -222,7 +219,7 @@
                                             <button wire:confirm="{{ __('Are you sure you want to remove this data?') }}"
                                                 wire:click="forceDeleteData('{{ $_candidate->id }}')"
                                                 class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700">
-                                                @include('components.icons.force-delete')
+                                                <x-icons.force-delete></x-icons.force-delete>
                                             </button>
                                         @endcan
                                     @endif

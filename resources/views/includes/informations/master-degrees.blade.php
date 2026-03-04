@@ -77,14 +77,14 @@
                                         wire:click="updateMasterDegree({{ $master->id }})"
                                         class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-gray-50 hover:text-gray-700"
                                     >
-                                        @include('components.icons.edit-icon')
+                                        <x-icons.edit-icon></x-icons.edit-icon>
                                     </button>
                                     <button
                                         onclick="confirm('Are you sure you want to remove this?') || event.stopImmediatePropagation()"
                                         wire:click="forceDeleteMasterDegree({{ $master->id }})"
                                         class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-50 hover:text-gray-700"
                                     >
-                                        @include('components.icons.force-delete')
+                                        <x-icons.force-delete></x-icons.force-delete>
                                     </button>
                                 </div>
                             </x-table.td>

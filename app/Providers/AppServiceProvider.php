@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
+use Livewire\Blaze\Blaze;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -49,6 +50,7 @@ class AppServiceProvider extends ServiceProvider
         $this->configureModels();
         $this->registerMacros();
         $this->registerBladeDirectives();
+        $this->configureBlazeOptimization();
     }
 
     /**
@@ -80,5 +82,26 @@ class AppServiceProvider extends ServiceProvider
     {
         Blade::if('module', fn (string $slug) => app(\App\Services\Modules\ModuleState::class)->enabled($slug));
         Blade::if('feature', fn (string $feature) => app(\App\Services\Features\FeatureState::class)->enabled($feature));
+    }
+
+    private function configureBlazeOptimization(): void
+    {
+        if (! class_exists(Blaze::class) || ! config('blaze.enabled', true)) {
+            return;
+        }
+
+        foreach ((array) config('blaze.optimize', []) as $entry) {
+            $path = (string) ($entry['path'] ?? '');
+            if ($path === '') {
+                continue;
+            }
+
+            Blaze::optimize()->in(
+                $path,
+                (bool) ($entry['compile'] ?? true),
+                (bool) ($entry['memo'] ?? false),
+                (bool) ($entry['fold'] ?? false),
+            );
+        }
     }
 }

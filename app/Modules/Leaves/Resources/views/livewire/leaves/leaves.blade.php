@@ -124,7 +124,7 @@
                            class="flex items-center justify-center w-12 h-12 transition-all duration-300 rounded-xl hover:bg-blue-50"
                            type="button"
                    >
-                           @include('components.icons.add-file')
+                           <x-icons.add-file></x-icons.add-file>
                     </button>
                 @endcan
                 @can('export', App\Models\Leave::class)
@@ -150,7 +150,9 @@
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
                 <div class="overflow-visible">
                     <x-table.tbl :headers="$this->getTableHeaders()" title="{{ __('Leaves') }}">
-                        @php($authUser = auth()->user())
+                        @php
+                            $authUser = auth()->user();
+                        @endphp
                         @forelse ($permits as $leave)
                             <tr wire:key="leave-row-{{ $leave->id }}">
                                 <x-table.td>
@@ -295,7 +297,7 @@
                                                 wire:target="openSideMenu"
                                                 class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase bg-gray-100 rounded-lg hover:bg-gray-200 hover:text-gray-700"
                                             >
-                                                @include('components.icons.document-icon')
+                                                <x-icons.document-icon></x-icons.document-icon>
                                             </button>
                                         @endcan
                                     @else
@@ -305,10 +307,7 @@
                                                     wire:target="restoreData('{{ $leave->id }}')"
                                                     class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-teal-50 hover:text-gray-700"
                                             >
-                                                @include('components.icons.recover', [
-                                                    'color' => 'text-teal-500',
-                                                    'hover' => 'text-teal-600',
-                                                ])
+                                                <x-icons.recover color="text-teal-500" hover="text-teal-600"></x-icons.recover>
                                             </button>
                                         @endcan
                                     @endif
@@ -323,7 +322,7 @@
                                                 wire:target="setDeleteLeave('{{ $leave->id }}')"
                                                 class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-100 hover:text-gray-700"
                                             >
-                                                @include('components.icons.delete-icon')
+                                                <x-icons.delete-icon></x-icons.delete-icon>
                                             </button>
                                         @endcan
                                     @else
@@ -335,7 +334,7 @@
                                                 wire:target="forceDeleteData('{{ $leave->id }}')"
                                                 class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700"
                                             >
-                                                @include('components.icons.force-delete')
+                                                <x-icons.force-delete></x-icons.force-delete>
                                             </button>
                                         @endcan
                                     @endif

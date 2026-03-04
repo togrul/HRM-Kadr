@@ -11,8 +11,9 @@
         applyPaginatorTheme();
 
         const currentComponentId = $wire.__instance?.id ?? $wire.$id ?? null;
-
-        window.__notificationPaginatorHooks ??= {};
+        if (!window.__notificationPaginatorHooks) {
+            window.__notificationPaginatorHooks = {};
+        }
 
         if (currentComponentId && !window.__notificationPaginatorHooks[currentComponentId]) {
             window.__notificationPaginatorHooks[currentComponentId] = true;

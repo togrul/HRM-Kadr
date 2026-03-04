@@ -51,7 +51,7 @@
                 <button wire:click="openSideMenu('add-staff')"
                     class="flex items-center justify-center p-2 space-x-2 transition-all duration-300 rounded-xl bg-slate-100 text-slate-500 hover:bg-slate-200"
                     type="button">
-                    @include('components.icons.add-icon')
+                    <x-icons.add-icon></x-icons.add-icon>
                 </button>
             @endcan
             @can('export-staff')

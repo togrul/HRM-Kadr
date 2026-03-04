@@ -122,7 +122,7 @@
                                         wire:click="forceDeleteMilitary({{ $key }})"
                                         class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700"
                                     >
-                                        @include('components.icons.force-delete')
+                                        <x-icons.force-delete></x-icons.force-delete>
                                     </button>
                                 </x-table.td>
                             </tr>
@@ -238,7 +238,7 @@
                                         wire:click="forceDeleteInjury({{ $key }})"
                                         class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700"
                                     >
-                                        @include('components.icons.force-delete')
+                                        <x-icons.force-delete></x-icons.force-delete>
                                     </button>
                                 </x-table.td>
                             </tr>
@@ -359,7 +359,7 @@
                                         wire:click="forceDeleteCaptivity({{ $key }})"
                                         class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700"
                                     >
-                                        @include('components.icons.force-delete')
+                                        <x-icons.force-delete></x-icons.force-delete>
                                     </button>
                                 </x-table.td>
                             </tr>

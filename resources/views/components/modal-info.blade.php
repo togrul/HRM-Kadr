@@ -1,7 +1,7 @@
 @props([
     'eventToOpenModal' => null,
     'livewireEventToOpenModal' => null,
-    'modal-title',
+    'modalTitle' => null,
     'bodyMessage' => ''
 ])
 

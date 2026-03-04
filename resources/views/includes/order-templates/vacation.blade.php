@@ -115,7 +115,9 @@
         @if($sectionKey === 'personnel_selected')
             <div class="grid grid-cols-1 gap-2 sm:grid-cols-1 md:grid-cols-1">
                 <div class="px-2 py-3 bg-slate-100 rounded-lg flex flex-col space-y-2">
-                    @php($vacationRows = $selectedPersonnel->rows[$i] ?? [])
+                    @php
+                        $vacationRows = $selectedPersonnel->rows[$i] ?? [];
+                    @endphp
                     @if(!empty($vacationRows))
                         @foreach($vacationRows as $keyPerson => $selectPerson)
                             <div class="w-full bg-slate-50 border border-slate-200 gap-3 px-3 py-1 rounded-lg flex items-center justify-between">

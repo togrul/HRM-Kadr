@@ -1,13 +1,12 @@
-<div
-    class="relative flex items-center"
-    x-data="{ isOpen: false }"
->
-    <button @click="
-        isOpen=!isOpen
-        if(isOpen){
-            $wire.getNotifications()
-        }
-    "
+<div class="relative flex items-center" x-data="{ isOpen: false }" x-on:keydown.escape.window="isOpen = false">
+    <button
+        type="button"
+        @click="
+            isOpen = !isOpen;
+            if (isOpen) {
+                $wire.getNotifications();
+            }
+        "
         class="relative inline-flex items-center justify-center w-10 h-10 text-sm font-medium text-blue-500 transition duration-200 ease-in bg-transparent rounded-md hover:bg-white/80 focus:outline-none"
     >
         <svg  fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 font-normal text-slate-500">
@@ -15,19 +14,19 @@
         </svg>
         <livewire:notification.notifications-counter :key="'notifications-counter-'.auth()->id()" />
     </button>
-    <div x-cloak
-         class="absolute top-full right-0 z-50 mt-2 text-left bg-white border shadow-2xl text-neutral-700 shadow-neutral-200 border-neutral-200 w-[32rem] max-w-[calc(100vw-2rem)] rounded-xl origin-top-right"
-         style="display:none;"
-         x-show="isOpen"
-         x-transition:enter="transition duration-200 transform ease-out"
-         x-transition:enter-start="scale-75"
-         x-transition:leave="transition duration-100 transform ease-in"
-         x-transition:leave-end="opacity-0 scale-90"
-         x-on:click.away="isOpen = false"
-         x-on:keydown.escape.window="isOpen = false">
-          
-        <ul class="overflow-y-auto text-xs font-normal divide-y divide-dashed max-h-96 rounded-tl-xl rounded-tr-xl"
-        >
+
+    <div
+        x-cloak
+        style="display:none;"
+        x-show="isOpen"
+        x-transition:enter="transition duration-200 transform ease-out"
+        x-transition:enter-start="scale-75"
+        x-transition:leave="transition duration-100 transform ease-in"
+        x-transition:leave-end="opacity-0 scale-90"
+        x-on:click.away="isOpen = false"
+        class="absolute right-0 z-50 mt-2 origin-top-right border bg-white text-left text-neutral-700 shadow-2xl shadow-neutral-200 border-neutral-200 top-full w-[32rem] max-w-[calc(100vw-2rem)] rounded-xl"
+    >
+        <ul class="overflow-y-auto text-xs font-normal divide-y divide-dashed max-h-96 rounded-tl-xl rounded-tr-xl">
             @forelse($notifications as $notification)
                 <x-notification.item :notification="$notification" />
             @empty
@@ -43,13 +42,16 @@
                         </li>
                     @endforeach
                 @else
-                    <div class="w-40 py-6 mx-auto">
-                        <img class="mx-auto mix-blend-luminosity" src="{{ asset('/assets/images/chat.png') }}" alt="">
-                        <div class="mt-6 text-sm font-medium text-center text-gray-400">{{ __('No new notifications') }}</div>
-                    </div>
+                    <li class="py-6">
+                        <div class="w-40 mx-auto">
+                            <img class="mx-auto mix-blend-luminosity" src="{{ asset('/assets/images/chat.png') }}" alt="">
+                            <div class="mt-6 text-sm font-medium text-center text-gray-400">{{ __('No new notifications') }}</div>
+                        </div>
+                    </li>
                 @endif
             @endforelse
         </ul>
+
         <div class="flex justify-between text-center border-t border-dashed border-neutral-300">
             <a wire:navigate href="{{ route('notifications') }}" class="px-5 py-3 text-sm font-medium transition duration-300 text-neutral-500 hover:text-green-400">
                 {{__('Show all notifications')}}
@@ -62,6 +64,6 @@
                 {{ __('Mark all as read') }}
             </button>
         </div>
-    </div >
+    </div>
 
 </div>

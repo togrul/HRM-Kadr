@@ -1,5 +1,11 @@
 # Livewire Blaze Migration TODO (Deferred Plan)
 
+## Status update (2026-03-04)
+- Full migration məqsədi bu mərhələdə dayandırıldı.
+- Proje **hybrid/stable** modeldə bağlandı.
+- Final əməliyyat qaydası və checklist:
+  - `docs/blaze-final-checklist.md`
+
 ## Objective
 Adopt Blaze gradually to improve render performance for presentational Blade components without breaking existing Livewire-heavy workflows.
 

@@ -1,10 +1,10 @@
 @props([
     'eventToOpenModal' => null,
     'livewireEventToOpenModal' => null,
-    'event-to-close-modal',
-    'modal-title',
-    'modal-confirm-button-text',
-    'wire-click',
+    'eventToCloseModal' => null,
+    'modalTitle' => null,
+    'modalConfirmButtonText' => null,
+    'wireClick' => null,
     'bodyMessage' => ''
 ])
 

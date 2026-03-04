@@ -64,6 +64,9 @@ jobs:
           DB_DATABASE: database/database.sqlite
         run: php artisan migrate --force
 
+      - name: Blaze-safe view lint
+        run: php artisan views:blaze-safe-lint --strict
+
       - name: PHP syntax lint
         run: git ls-files '*.php' | xargs -n 1 php -l
 

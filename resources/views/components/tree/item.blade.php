@@ -23,18 +23,8 @@
                         aria-controls="subs-{{ $model->id }}"
                         class="rounded text-zinc-400 transition-colors hover:text-zinc-600 focus:outline-none"
                     >
-                        @include('components.icons.chevron-right-icon', [
-                            'show'  => '!openSub',
-                            'size'  => 'w-4 h-4',
-                            'color' => 'text-zinc-400',
-                            'hover' => 'text-zinc-600'
-                        ])
-                        @include('components.icons.chevron-down-icon', [
-                            'show'  => 'openSub',
-                            'size'  => 'w-4 h-4',
-                            'color' => 'text-zinc-400',
-                            'hover' => 'text-zinc-600'
-                        ])
+                        <x-icons.chevron-right-icon show="!openSub" size="w-4 h-4" color="text-zinc-400" hover="text-zinc-600"></x-icons.chevron-right-icon>
+                        <x-icons.chevron-down-icon show="openSub" size="w-4 h-4" color="text-zinc-400" hover="text-zinc-600"></x-icons.chevron-down-icon>
                     </button>
                 @else
                     <span class="h-3 w-3"></span>

@@ -105,7 +105,7 @@
                                 onclick="confirm('Are you sure you want to remove this data?') || event.stopImmediatePropagation()"
                                 wire:click="forceDeleteKinship({{ $key }})"
                                 class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700">
-                                @include('components.icons.force-delete')
+                                <x-icons.force-delete></x-icons.force-delete>
                             </button>
                         </div>
                     </x-slot>

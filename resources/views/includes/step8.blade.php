@@ -10,8 +10,8 @@
                         class="w-full"
                         wire:model.live="miscForm.language.language_id"
                         :model="$this->languageOptions"
-                    :search-model="data_get($stepSearchModels, 'searchLanguage', 'searchLanguage')"
-                    :search-placeholder="data_get($stepSearchPlaceholders, 'searchLanguage', __('Search...'))"
+                        :search-model="data_get($stepSearchModels, 'searchLanguage', 'searchLanguage')"
+                        :search-placeholder="data_get($stepSearchPlaceholders, 'searchLanguage', __('Search...'))"
                     >
                     </x-ui.select-dropdown>
                     @error('miscForm.language.language_id')
@@ -63,7 +63,7 @@
                                             wire:click="forceDeleteLanguage({{ $key }})"
                                             class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700"
                                         >
-                                            @include('components.icons.force-delete')
+                                            <x-icons.force-delete></x-icons.force-delete>
                                         </button>
                                     </x-table.td>
                                 </tr>
@@ -139,7 +139,7 @@
                             wire:click="forceDeleteEvent({{ $key }})"
                             class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700"
                         >
-                            @include('components.icons.force-delete')
+                            <x-icons.force-delete></x-icons.force-delete>
                     </button>
                   </div>
                 @empty
@@ -265,7 +265,7 @@
                             wire:click="forceDeleteDegree({{ $key }})"
                             class="absolute flex items-center justify-center p-2 transition-all duration-300 bg-transparent rounded-lg right-1 top-1 hover:bg-rose-100"
                         >
-                            @include('components.icons.force-delete')
+                            <x-icons.force-delete></x-icons.force-delete>
                         </button>
                         <div class="flex items-center space-x-2 border-b border-dashed w-max border-slate-400">
                             <p class="font-medium text-teal-500">
@@ -377,7 +377,7 @@
                             wire:click="forceDeleteElection({{ $key }})"
                             class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700"
                     >
-                            @include('components.icons.force-delete')
+                            <x-icons.force-delete></x-icons.force-delete>
                     </button>
                   </div>
                     @empty
