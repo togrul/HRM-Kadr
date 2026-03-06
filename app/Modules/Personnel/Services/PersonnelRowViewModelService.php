@@ -2,6 +2,7 @@
 
 namespace App\Modules\Personnel\Services;
 
+use App\Models\AttendanceShiftAssignment;
 use App\Models\Personnel;
 use App\Models\Structure;
 use Carbon\Carbon;
@@ -29,9 +30,12 @@ class PersonnelRowViewModelService
      */
     public function decorateCollection(Collection $collection): Collection
     {
-        return $collection->map(function (Personnel $personnel, int $index) {
+        $activeShiftAssignments = $this->resolveActiveShiftAssignments($collection);
+
+        return $collection->map(function (Personnel $personnel, int $index) use ($activeShiftAssignments) {
             $vacation = $personnel->activeVacation;
             $businessTrip = $personnel->activeBusinessTrip;
+            $activeShiftAssignment = $activeShiftAssignments->get((string) $personnel->tabel_no);
 
             $personnel->setAttribute('structure_path', $this->resolveStructurePath($personnel->structure));
             $personnel->setAttribute('join_work_date_fmt', $this->formatDate($personnel->join_work_date));
@@ -47,9 +51,48 @@ class PersonnelRowViewModelService
             $personnel->setAttribute('active_business_trip_end', $this->formatDate($businessTrip?->end_date));
             $personnel->setAttribute('photo_url', $this->photoUrl($personnel->photo));
             $personnel->setAttribute('deleted_by_name', (string) optional($personnel->personDidDelete)->name);
+            $personnel->setAttribute('active_shift_name', (string) optional($activeShiftAssignment?->shift)->name);
+            $personnel->setAttribute(
+                'active_shift_window',
+                $activeShiftAssignment?->shift
+                    ? sprintf('%s - %s', $activeShiftAssignment->shift->start_time, $activeShiftAssignment->shift->end_time)
+                    : null
+            );
 
             return $personnel;
         });
+    }
+
+    /**
+     * @param  Collection<int, Personnel>  $collection
+     * @return Collection<string, AttendanceShiftAssignment>
+     */
+    protected function resolveActiveShiftAssignments(Collection $collection): Collection
+    {
+        $tabelNos = $collection
+            ->pluck('tabel_no')
+            ->filter()
+            ->unique()
+            ->values();
+
+        if ($tabelNos->isEmpty()) {
+            return collect();
+        }
+
+        return AttendanceShiftAssignment::query()
+            ->with('shift:id,name,start_time,end_time')
+            ->whereIn('tabel_no', $tabelNos->all())
+            ->where('is_active', true)
+            ->whereDate('effective_from', '<=', now()->toDateString())
+            ->where(function ($query): void {
+                $query->whereNull('effective_to')
+                    ->orWhereDate('effective_to', '>=', now()->toDateString());
+            })
+            ->orderByDesc('effective_from')
+            ->orderByDesc('id')
+            ->get()
+            ->unique('tabel_no')
+            ->keyBy('tabel_no');
     }
 
     protected function photoUrl(?string $path): string

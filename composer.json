@@ -67,6 +67,11 @@
             "@php artisan orders:templates:metrics --json --min-total=1",
             "@php artisan orders:templates:query-budget --json --allow-empty"
         ],
+        "ci:attendance-gate": [
+            "@ci:blaze-safe-lint",
+            "@php artisan attendance:query-budget --json --allow-empty",
+            "@php artisan test tests/Unit/Architecture/AttendanceLivewireReadBoundaryTest.php tests/Feature/Console/AttendanceQueryBudgetCommandTest.php"
+        ],
         "post-update-cmd": [
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
         ],

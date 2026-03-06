@@ -536,7 +536,16 @@ class PersonnelSeeder extends Seeder
           'show-leaves',
           'edit-leaves',
           'delete-leaves',
-          'export-leaves'
+          'export-leaves',
+          'show-attendance',
+          'manage-attendance',
+          'add-attendance-manual',
+          'edit-attendance-manual',
+          'approve-attendance-manual',
+          'approve-attendance-overtime',
+          'manage-attendance-month-close',
+          'edit-attendance-exceptions',
+          'export-attendance'
         ];
 
         $now = now();

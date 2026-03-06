@@ -97,7 +97,13 @@
                                                     <x-small-badge
                                                         mode="green">{{ $personnel->rank_label }}</x-small-badge>
                                                 @endif
+                                                @if ($personnel->active_shift_name)
+                                                    <x-small-badge mode="sky">{{ __('Shift') }}: {{ $personnel->active_shift_name }}</x-small-badge>
+                                                @endif
                                             </div>
+                                            @if ($personnel->active_shift_window)
+                                                <span class="text-xs text-zinc-500">{{ $personnel->active_shift_window }}</span>
+                                            @endif
 
                                         </div>
                                     </div>

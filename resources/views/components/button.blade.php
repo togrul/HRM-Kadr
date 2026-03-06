@@ -30,6 +30,8 @@
             => 'border-transparent bg-slate-100 text-slate-700 hover:bg-slate-200 active:bg-slate-200',
         'step-next'
             => 'border-transparent bg-emerald-700 text-white hover:bg-emerald-800 active:bg-emerald-800',
+        'reject' => 'bg-rose-600/10 text-rose-600 hover:bg-rose-200 active:bg-rose-100 border-transparent',
+        'approve' => 'bg-emerald-200 text-green-700 hover:bg-emerald-100 active:bg-emerald-100 border-transparent'
     };
 @endphp
 

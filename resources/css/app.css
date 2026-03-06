@@ -102,6 +102,11 @@
     animation: icon .3s cubic-bezier(1.000, 0.008, 0.565, 1.650) .1s 1 forwards;
   }
 
+  .stats-cell-header {
+    text-wrap: auto;
+    text-align: center;
+  }
+
   @keyframes icon {
     from {
         opacity: 0;

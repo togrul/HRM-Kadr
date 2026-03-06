@@ -72,5 +72,10 @@ return [
             'enabled' => true,
             'migrations' => app_path('Modules/UI/Database/Migrations'),
         ],
+        'attendance' => [
+            'provider' => \App\Modules\Attendance\Providers\AttendanceServiceProvider::class,
+            'enabled' => true,
+            'migrations' => app_path('Modules/Attendance/Database/Migrations'),
+        ],
     ],
 ];
