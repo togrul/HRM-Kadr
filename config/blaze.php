@@ -203,6 +203,14 @@ return [
             'memo' => false,
             'fold' => false,
         ],
+        // Stage 10.5: Attendance module rollout is kept OFF until all
+        // full-page Livewire views are verified as Blaze-safe.
+        [
+            'path' => app_path('Modules/Attendance/Resources/views'),
+            'compile' => false,
+            'memo' => false,
+            'fold' => false,
+        ],
         // Stage 10: Services/Admin/UI module rollout (compile-only)
         [
             'path' => app_path('Modules/Services/Resources/views'),

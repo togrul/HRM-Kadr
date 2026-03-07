@@ -2,6 +2,7 @@
 
 namespace App\Modules\Attendance\Livewire;
 
+use App\Services\StructurePathService;
 use App\Modules\Attendance\Application\Services\AttendanceAuthorizationService;
 use App\Modules\Attendance\Application\Services\AttendancePuantajReadService;
 use App\Modules\Attendance\Application\Services\AttendanceStructureScopeReadService;
@@ -57,6 +58,8 @@ class PuantajGrid extends Component
         $readService = app(AttendancePuantajReadService::class);
         /** @var AttendanceStructureScopeReadService $structureScopeRead */
         $structureScopeRead = app(AttendanceStructureScopeReadService::class);
+        /** @var StructurePathService $structurePathService */
+        $structurePathService = app(StructurePathService::class);
 
         $personnels = $readService->paginatePersonnels(trim($this->search), $this->perPage, $structureIds);
         $tabelNos = $personnels->getCollection()->pluck('tabel_no')->filter()->values()->all();
@@ -67,7 +70,8 @@ class PuantajGrid extends Component
         $rows = $personnels->getCollection()->map(function ($personnel) use (
             $days,
             $from,
-            $ledgerByTabelAndDate
+            $ledgerByTabelAndDate,
+            $structurePathService
         ): array {
             $rowCells = [];
             $totalWorkedMinutes = 0;
@@ -96,8 +100,9 @@ class PuantajGrid extends Component
 
             return [
                 'personnel' => $personnel,
+                'structure_path' => $structurePathService->resolve((int) $personnel->structure_id),
                 'cells' => $rowCells,
-                'total_hours' => round($totalWorkedMinutes / 60, 1),
+                'total_hours' => $this->formatHours($totalWorkedMinutes),
                 'total_days' => $totalPresentDays,
             ];
         })->values();
@@ -119,7 +124,7 @@ class PuantajGrid extends Component
         }
 
         if ($workedMinutes > 0) {
-            return (string) round($workedMinutes / 60, 1);
+            return $this->formatHours($workedMinutes);
         }
 
         if ($absenceCode !== '') {
@@ -138,7 +143,7 @@ class PuantajGrid extends Component
         $parts = [];
 
         if ($workedMinutes > 0) {
-            $parts[] = __('Worked: :hours h', ['hours' => round($workedMinutes / 60, 1)]);
+            $parts[] = __('Worked: :hours h', ['hours' => $this->formatHours($workedMinutes)]);
         }
 
         if ($status !== 'none') {
@@ -150,5 +155,10 @@ class PuantajGrid extends Component
         }
 
         return implode(' | ', $parts);
+    }
+
+    private function formatHours(int $workedMinutes): string
+    {
+        return (string) round($workedMinutes / 60);
     }
 }

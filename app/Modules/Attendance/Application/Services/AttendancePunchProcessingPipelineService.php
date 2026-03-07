@@ -162,6 +162,7 @@ class AttendancePunchProcessingPipelineService
         $exceptionService = app(AttendanceExceptionService::class);
         $monthLockService = app(AttendanceMonthLockService::class);
         $shiftWindowService = app(AttendanceShiftWindowService::class);
+        $overtimeRequestSyncService = app(AttendanceOvertimeRequestSyncService::class);
 
         $punchesByTabel = $allPunches->groupBy('tabel_no');
         $existingLedgerDatesByTabel = AttendanceDailyLedger::query()
@@ -223,6 +224,7 @@ class AttendancePunchProcessingPipelineService
             $exceptionService,
             $monthLockService,
             $shiftWindowService,
+            $overtimeRequestSyncService,
             $opts,
             $structureByTabel,
             &$ledgerUpserts,
@@ -297,12 +299,24 @@ class AttendancePunchProcessingPipelineService
                         approvedOvertimeMinutes: $overtimeApprovedMap[$key] ?? null
                     );
 
-                    AttendanceDailyLedger::query()->updateOrCreate(
-                        [
+                    $ledger = AttendanceDailyLedger::query()
+                        ->where('tabel_no', (string) $tabelNo)
+                        ->whereDate('date', $date->toDateString())
+                        ->first()
+                        ?? new AttendanceDailyLedger([
                             'tabel_no' => (string) $tabelNo,
-                            'date' => $date->toDateString(),
-                        ],
-                        $ledgerPayload
+                            'date' => $date->copy()->startOfDay(),
+                        ]);
+
+                    $ledger->fill($ledgerPayload);
+                    $ledger->save();
+
+                    $overtimeRequestSyncService->sync(
+                        tabelNo: (string) $tabelNo,
+                        date: $date,
+                        ledgerPayload: $ledgerPayload,
+                        manualEntry: $manualEntry,
+                        setting: $settings
                     );
 
                     $exceptionService->syncDayExceptions(

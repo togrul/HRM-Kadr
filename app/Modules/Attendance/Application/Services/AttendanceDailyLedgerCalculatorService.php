@@ -63,6 +63,7 @@ class AttendanceDailyLedgerCalculatorService
                     'approval_status' => $manualEntry->approval_status,
                     'late_minutes' => $lateMinutes,
                     'early_leave_minutes' => $earlyLeaveMinutes,
+                    'requestable_overtime_minutes' => $overtimeMinutes,
                 ],
             ];
         }
@@ -114,6 +115,12 @@ class AttendanceDailyLedgerCalculatorService
             setting: $setting,
             approvedOvertimeMinutes: $approvedOvertimeMinutes
         );
+        $requestableOvertimeMinutes = $policy->resolveRequestableOvertimeMinutes(
+            workedMinutes: $workedMinutes,
+            scheduledMinutes: $scheduledMinutes,
+            calendarDayType: $calendarDayType,
+            setting: $setting
+        );
 
         $status = $this->resolveStatus($calendarDayType, $workedMinutes);
 
@@ -135,6 +142,7 @@ class AttendanceDailyLedgerCalculatorService
                 'pair_count' => count($pairing['pairs'] ?? []),
                 'approved_overtime_minutes' => max(0, (int) ($approvedOvertimeMinutes ?? 0)),
                 'overtime_policy' => (string) ($setting?->overtime_policy ?? config('attendance.processing.policy_defaults.overtime_policy', 'by_approval')),
+                'requestable_overtime_minutes' => $requestableOvertimeMinutes,
             ],
         ];
     }
@@ -197,6 +205,7 @@ class AttendanceDailyLedgerCalculatorService
                 'calendar_day_type' => $calendarDayType,
                 'override_type' => $type,
                 'override_source' => (string) ($override['source'] ?? $type),
+                'requestable_overtime_minutes' => 0,
             ],
         ];
     }

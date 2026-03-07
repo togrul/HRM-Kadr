@@ -6,6 +6,30 @@
     </x-surface-card>
 
     <x-surface-card :title="__('Global policy')">
+        @if($currentDefaultShift)
+            <div class="mb-3 rounded-xl border border-blue-100 bg-blue-50 p-3">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <p class="text-sm font-semibold text-blue-900">{{ __('Current default shift') }}</p>
+                        <p class="text-xs text-blue-700">{{ __('This shift is used when personnel do not have an active assignment.') }}</p>
+                    </div>
+                    <div class="flex flex-col items-start gap-1">
+                        <x-small-badge mode="sky">{{ $currentDefaultShift->name }}</x-small-badge>
+                        <span class="text-xs text-blue-700">
+                            {{ $currentDefaultShift->start_time }} - {{ $currentDefaultShift->end_time }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        @else
+            <div class="mb-3 rounded-xl border border-amber-100 bg-amber-50 p-3 text-sm text-amber-700">
+                <div class="flex items-center gap-2">
+                    <x-small-badge mode="red">{{ __('No default shift configured') }}</x-small-badge>
+                    <span>{{ __('Configure a default shift here if manual calculations should work without a personnel-specific assignment.') }}</span>
+                </div>
+            </div>
+        @endif
+
         <div class="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
             <div>
                 <x-label for="attendance-settings-timezone">{{ __('Timezone') }}</x-label>
@@ -120,4 +144,3 @@
         @endif
     </x-surface-card>
 </div>
-

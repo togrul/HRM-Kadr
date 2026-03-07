@@ -53,9 +53,30 @@ class AttendanceRulePolicyService
         return $this->roundMinutes($computed, $setting);
     }
 
+    public function resolveRequestableOvertimeMinutes(
+        int $workedMinutes,
+        int $scheduledMinutes,
+        string $calendarDayType,
+        ?AttendanceSetting $setting
+    ): int {
+        $policy = (string) ($setting?->overtime_policy ?? config('attendance.processing.policy_defaults.overtime_policy', 'by_approval'));
+
+        $computed = match ($policy) {
+            'none' => 0,
+            'all_worked' => max(0, $workedMinutes),
+            'after_shift', 'by_approval' => $calendarDayType === 'workday'
+                ? max(0, $workedMinutes - $scheduledMinutes)
+                : max(0, $workedMinutes),
+            default => $calendarDayType === 'workday'
+                ? max(0, $workedMinutes - $scheduledMinutes)
+                : max(0, $workedMinutes),
+        };
+
+        return $this->roundMinutes($computed, $setting);
+    }
+
     public function applyGrace(int $deltaMinutes, int $graceMinutes): int
     {
         return max(0, $deltaMinutes - max(0, $graceMinutes));
     }
 }
-

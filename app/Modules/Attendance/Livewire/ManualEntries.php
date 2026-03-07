@@ -3,8 +3,11 @@
 namespace App\Modules\Attendance\Livewire;
 
 use App\Models\AttendanceManualEntry;
+use App\Models\AttendanceSetting;
 use App\Models\AttendanceShift;
+use App\Models\AttendanceShiftAssignment;
 use App\Models\Personnel;
+use App\Services\StructurePathService;
 use App\Modules\Attendance\Application\Services\AttendanceAuthorizationService;
 use App\Modules\Attendance\Application\Services\AttendanceManualEntryService;
 use App\Modules\Attendance\Application\Services\AttendanceManualMetricsResolverService;
@@ -284,6 +287,8 @@ class ManualEntries extends Component
             : [];
         /** @var AttendanceStructureScopeReadService $structureScopeRead */
         $structureScopeRead = app(AttendanceStructureScopeReadService::class);
+        /** @var StructurePathService $structurePathService */
+        $structurePathService = app(StructurePathService::class);
 
         $availableShifts = AttendanceShift::query()
             ->where('is_active', true)
@@ -310,13 +315,50 @@ class ManualEntries extends Component
                 ->orderBy('surname')
                 ->orderBy('name')
                 ->limit(12)
-                ->get();
+                ->get()
+                ->map(function (Personnel $personnel) use ($structurePathService) {
+                    $personnel->setAttribute('structure_path', $structurePathService->resolve((int) $personnel->structure_id));
+
+                    return $personnel;
+                });
         }
 
         $selectedShiftPreview = null;
         if ($this->form['shift_source_mode'] === 'explicit' && ! empty($this->form['explicit_shift_id'])) {
             $selectedShiftPreview = $availableShifts->firstWhere('id', (int) $this->form['explicit_shift_id']);
         }
+
+        $currentDefaultShift = AttendanceSetting::query()
+            ->with('defaultShift:id,name,start_time,end_time,break_minutes,is_active')
+            ->where('scope_type', 'global')
+            ->where('is_active', true)
+            ->latest('id')
+            ->first()
+            ?->defaultShift;
+
+        $selectedPersonnelActiveAssignment = null;
+        if (! empty($this->form['tabel_no'])) {
+            $assignmentDate = filled($this->form['date']) ? (string) $this->form['date'] : now()->toDateString();
+
+            $selectedPersonnelActiveAssignment = AttendanceShiftAssignment::query()
+                ->with('shift:id,name,start_time,end_time,break_minutes')
+                ->where('tabel_no', $this->form['tabel_no'])
+                ->where('is_active', true)
+                ->whereDate('effective_from', '<=', $assignmentDate)
+                ->where(function ($query) use ($assignmentDate): void {
+                    $query->whereNull('effective_to')
+                        ->orWhereDate('effective_to', '>=', $assignmentDate);
+                })
+                ->latest('effective_from')
+                ->latest('id')
+                ->first();
+        }
+
+        $baselineContext = app(AttendanceManualMetricsResolverService::class)->resolveBaselineContext(
+            ! empty($this->form['tabel_no']) ? (string) $this->form['tabel_no'] : null,
+            filled($this->form['date']) ? (string) $this->form['date'] : now()->toDateString(),
+            $this->form
+        );
 
         $selectedPersonnelRecord = null;
         if (! empty($this->form['tabel_no'])) {
@@ -332,12 +374,36 @@ class ManualEntries extends Component
                     'fullname' => (string) $selectedPersonnelRecord->fullname,
                 ];
             }
+
+            if ($selectedPersonnelRecord) {
+                $selectedPersonnelRecord->setAttribute(
+                    'structure_path',
+                    $structurePathService->resolve((int) $selectedPersonnelRecord->structure_id)
+                );
+            }
         }
 
+        $recentEntries = $this->recentEntries;
+        $recentEntries->setCollection(
+            $recentEntries->getCollection()->map(function (AttendanceManualEntry $entry) use ($structurePathService) {
+                if ($entry->personnel) {
+                    $entry->personnel->setAttribute(
+                        'structure_path',
+                        $structurePathService->resolve((int) $entry->personnel->structure_id)
+                    );
+                }
+
+                return $entry;
+            })
+        );
+
         return view('attendance::livewire.attendance.manual-entries', [
-            'recentEntries' => $this->recentEntries,
+            'recentEntries' => $recentEntries,
             'availableShifts' => $availableShifts,
             'selectedShiftPreview' => $selectedShiftPreview,
+            'currentDefaultShift' => $currentDefaultShift,
+            'selectedPersonnelActiveAssignment' => $selectedPersonnelActiveAssignment,
+            'baselineContext' => $baselineContext,
             'personnelResults' => $personnelResults,
             'selectedPersonnelRecord' => $selectedPersonnelRecord,
             'selectedStructureLabel' => $structureScopeRead->label($this->selectedStructureId),

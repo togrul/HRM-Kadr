@@ -10,6 +10,7 @@ return [
         'default_window_hours' => (int) env('ATTENDANCE_PROCESS_DEFAULT_WINDOW_HOURS', 48),
         'schedule_enabled' => (bool) env('ATTENDANCE_PROCESS_SCHEDULE_ENABLED', false),
         'schedule_every_minutes' => (int) env('ATTENDANCE_PROCESS_SCHEDULE_EVERY_MINUTES', 10),
+        'overtime_request_stale_days' => (int) env('ATTENDANCE_OVERTIME_REQUEST_STALE_DAYS', 3),
         'policy_defaults' => [
             'overtime_policy' => env('ATTENDANCE_POLICY_OVERTIME', 'by_approval'),
             'rounding_policy' => env('ATTENDANCE_POLICY_ROUNDING', 'none'),

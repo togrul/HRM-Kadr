@@ -1,30 +1,37 @@
 <div class="space-y-4">
     <x-surface-card :title="__('Exceptions inbox')" icon="icons.pending-icon">
-        <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
-            <div>
-                <x-label for="attendance-ex-status">{{ __('Status') }}</x-label>
-                <select id="attendance-ex-status" wire:model.live="status" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
-                    <option value="open">{{ __('open') }}</option>
-                    <option value="resolved">{{ __('resolved') }}</option>
-                    <option value="all">{{ __('all') }}</option>
-                </select>
+        <div class="space-y-3">
+            <div class="space-y-1">
+                <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400">{{ __('Queue filters') }}</p>
+                <p class="text-sm text-zinc-500">{{ __('Use exception type and date range to focus on unresolved attendance anomalies.') }}</p>
             </div>
-            <div>
-                <x-label for="attendance-ex-type">{{ __('Type') }}</x-label>
-                <select id="attendance-ex-type" wire:model.live="type" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
-                    <option value="all">{{ __('all') }}</option>
-                    <option value="missing_in">{{ __('missing_in') }}</option>
-                    <option value="missing_out">{{ __('missing_out') }}</option>
-                    <option value="unmatched_punch">{{ __('unmatched_punch') }}</option>
-                </select>
-            </div>
-            <div>
-                <x-label for="attendance-ex-from">{{ __('From') }}</x-label>
-                <input id="attendance-ex-from" wire:model.live="fromDate" type="date" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
-            </div>
-            <div>
-                <x-label for="attendance-ex-to">{{ __('To') }}</x-label>
-                <input id="attendance-ex-to" wire:model.live="toDate" type="date" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
+
+            <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+                <div>
+                    <x-label for="attendance-ex-status">{{ __('Status') }}</x-label>
+                    <select id="attendance-ex-status" wire:model.live="status" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                        <option value="open">{{ __('open') }}</option>
+                        <option value="resolved">{{ __('resolved') }}</option>
+                        <option value="all">{{ __('all') }}</option>
+                    </select>
+                </div>
+                <div>
+                    <x-label for="attendance-ex-type">{{ __('Type') }}</x-label>
+                    <select id="attendance-ex-type" wire:model.live="type" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                        <option value="all">{{ __('all') }}</option>
+                        <option value="missing_in">{{ __('missing_in') }}</option>
+                        <option value="missing_out">{{ __('missing_out') }}</option>
+                        <option value="unmatched_punch">{{ __('unmatched_punch') }}</option>
+                    </select>
+                </div>
+                <div>
+                    <x-label for="attendance-ex-from">{{ __('From') }}</x-label>
+                    <input id="attendance-ex-from" wire:model.live="fromDate" type="date" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
+                </div>
+                <div>
+                    <x-label for="attendance-ex-to">{{ __('To') }}</x-label>
+                    <input id="attendance-ex-to" wire:model.live="toDate" type="date" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
+                </div>
             </div>
         </div>
     </x-surface-card>
@@ -37,6 +44,7 @@
         </div>
     @endif
 
+    <div class="space-y-3">
     <div class="relative min-h-[220px] overflow-x-auto">
         <div class="inline-block min-w-full py-2 align-middle">
             <div class="overflow-visible">
@@ -48,7 +56,7 @@
                     __('Message'),
                     __('Status'),
                     __('Action')
-                ]">
+                ]" :title="__('Open items')">
                     @forelse($items as $item)
                         <tr>
                             <x-table.td>{{ optional($item->date)->format('Y-m-d') }}</x-table.td>
@@ -56,8 +64,10 @@
                             <x-table.td extraClasses="text-zinc-700">
                                 <div class="flex flex-col">
                                     <span>{{ $item->personnel?->surname }} {{ $item->personnel?->name }} {{ $item->personnel?->patronymic }}</span>
-                                    @if($item->personnel?->structure?->name)
-                                        <span class="text-xs text-zinc-500">{{ $item->personnel->structure->name }}</span>
+                                    @if($item->personnel?->structure_path)
+                                        <span class="max-w-[18rem] truncate text-xs text-zinc-500 md:max-w-[24rem]" title="{{ $item->personnel->structure_path }}">
+                                            {{ $item->personnel->structure_path }}
+                                        </span>
                                     @endif
                                 </div>
                             </x-table.td>
@@ -92,5 +102,6 @@
 
     <div>
         {{ $items->links() }}
+    </div>
     </div>
 </div>

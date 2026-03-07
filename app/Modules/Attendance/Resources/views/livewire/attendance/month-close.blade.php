@@ -1,11 +1,12 @@
 <div class="space-y-4">
     <x-surface-card :title="__('Month close / lock')" icon="icons.lock-icon">
-        <div class="flex flex-wrap items-center justify-between gap-3">
+        <div class="space-y-3">
             <div>
-                <p class="mt-1 text-sm text-zinc-500">{{ __('Lock/unlock ledger and summary records for selected month.') }}</p>
+                <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400">{{ __('Period control') }}</p>
+                <p class="mt-1 text-sm text-zinc-500">{{ __('Lock, unlock and export the selected month after attendance checks are complete.') }}</p>
             </div>
 
-            <div class="flex items-center gap-2">
+            <div class="flex flex-wrap items-center gap-2">
                 @if($canManage)
                     <x-button mode="primary" wire:click="snapshotNow">
                         {{ __('Snapshot now') }}

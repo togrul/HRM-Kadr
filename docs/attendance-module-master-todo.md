@@ -13,6 +13,7 @@ Bu sənəd Mesai Takibi / Attendance modulunun sıfırdan expert səviyyədə qu
 - [x] 7) Export profile UX polish
 - [x] 8) Permission matrix operator doc
 - [x] 9) Structure scope architecture boundary test
+- [x] 10) Blaze compile-only canary validated for Attendance (`memo=false`, A/B smoke green)
 
 ## Rule of execution
 

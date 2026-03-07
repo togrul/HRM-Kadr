@@ -13,6 +13,79 @@ class AttendanceManualMetricsResolverService
     /**
      * @param  array<string,mixed>  $payload
      * @return array{
+     *   shift:?AttendanceShift,
+     *   planned_minutes:int,
+     *   baseline_source:string,
+     *   baseline_label:?string
+     * }
+     */
+    public function resolveBaselineContext(?string $tabelNo, string $date, array $payload): array
+    {
+        $workDate = Carbon::parse($date)->startOfDay();
+        $shiftSourceMode = (string) ($payload['shift_source_mode'] ?? 'auto');
+        $explicitShiftId = is_numeric($payload['explicit_shift_id'] ?? null)
+            ? (int) $payload['explicit_shift_id']
+            : null;
+
+        $setting = AttendanceSetting::query()
+            ->where('scope_type', 'global')
+            ->where('is_active', true)
+            ->latest('id')
+            ->first();
+
+        $defaultShift = null;
+        if ($setting?->default_shift_id) {
+            $defaultShift = AttendanceShift::query()
+                ->where('is_active', true)
+                ->find($setting->default_shift_id);
+        }
+
+        $explicitShift = null;
+        if ($shiftSourceMode === 'explicit' && $explicitShiftId !== null) {
+            $explicitShift = AttendanceShift::query()
+                ->where('is_active', true)
+                ->find($explicitShiftId);
+        }
+
+        $assignments = collect();
+        if (filled($tabelNo)) {
+            $assignments = AttendanceShiftAssignment::query()
+                ->with('shift:id,name,start_time,end_time,break_minutes,is_night_shift,in_flex_before_minutes,in_flex_after_minutes,out_flex_before_minutes,out_flex_after_minutes')
+                ->where('tabel_no', $tabelNo)
+                ->where('is_active', true)
+                ->where('effective_from', '<=', $workDate->toDateString())
+                ->where(function ($query) use ($workDate): void {
+                    $query->whereNull('effective_to')
+                        ->orWhere('effective_to', '>=', $workDate->toDateString());
+                })
+                ->orderByDesc('effective_from')
+                ->get();
+        }
+
+        [$shift, $baselineSource] = $this->resolveBaselineShift(
+            assignmentsForTabel: $assignments,
+            date: $workDate,
+            defaultShift: $defaultShift,
+            explicitShift: $explicitShift
+        );
+
+        $plannedMinutes = 0;
+        if ($shift !== null) {
+            $window = app(AttendanceShiftWindowService::class)->resolve($workDate, $shift);
+            $plannedMinutes = max(0, $window['shift_start']->diffInMinutes($window['shift_end']) - (int) $shift->break_minutes);
+        }
+
+        return [
+            'shift' => $shift,
+            'planned_minutes' => $plannedMinutes,
+            'baseline_source' => $baselineSource,
+            'baseline_label' => $shift?->name,
+        ];
+    }
+
+    /**
+     * @param  array<string,mixed>  $payload
+     * @return array{
      *   check_in_at:?string,
      *   check_out_at:?string,
      *   worked_minutes:int,
@@ -30,10 +103,6 @@ class AttendanceManualMetricsResolverService
         $checkInAt = $this->normalizeTimeValue($payload['check_in_at'] ?? null);
         $checkOutAt = $this->normalizeTimeValue($payload['check_out_at'] ?? null);
         $manualOverride = (bool) ($payload['manual_metric_override'] ?? false);
-        $shiftSourceMode = (string) ($payload['shift_source_mode'] ?? 'auto');
-        $explicitShiftId = is_numeric($payload['explicit_shift_id'] ?? null)
-            ? (int) $payload['explicit_shift_id']
-            : null;
 
         if ($checkInAt === null || $checkOutAt === null) {
             return [
@@ -66,45 +135,17 @@ class AttendanceManualMetricsResolverService
         }
 
         $workDate = Carbon::parse($date)->startOfDay();
+        $context = $this->resolveBaselineContext($tabelNo, $date, $payload);
+        /** @var ?AttendanceShift $shift */
+        $shift = $context['shift'];
+        $baselineSource = (string) $context['baseline_source'];
+        $baselineLabel = $context['baseline_label'];
+        $plannedMinutes = (int) $context['planned_minutes'];
         $setting = AttendanceSetting::query()
             ->where('scope_type', 'global')
             ->where('is_active', true)
             ->latest('id')
             ->first();
-
-        $defaultShift = null;
-        if ($setting?->default_shift_id) {
-            $defaultShift = AttendanceShift::query()->find($setting->default_shift_id);
-        }
-
-        $explicitShift = null;
-        if ($shiftSourceMode === 'explicit' && $explicitShiftId !== null) {
-            $explicitShift = AttendanceShift::query()
-                ->where('is_active', true)
-                ->find($explicitShiftId);
-        }
-
-        $assignments = collect();
-        if (filled($tabelNo)) {
-            $assignments = AttendanceShiftAssignment::query()
-                ->with('shift:id,name,start_time,end_time,break_minutes,is_night_shift,in_flex_before_minutes,in_flex_after_minutes,out_flex_before_minutes,out_flex_after_minutes')
-                ->where('tabel_no', $tabelNo)
-                ->where('is_active', true)
-                ->where('effective_from', '<=', $workDate->toDateString())
-                ->where(function ($query) use ($workDate): void {
-                    $query->whereNull('effective_to')
-                        ->orWhere('effective_to', '>=', $workDate->toDateString());
-                })
-                ->orderByDesc('effective_from')
-                ->get();
-        }
-
-        [$shift, $baselineSource] = $this->resolveBaselineShift(
-            assignmentsForTabel: $assignments,
-            date: $workDate,
-            defaultShift: $defaultShift,
-            explicitShift: $explicitShift
-        );
 
         $checkIn = Carbon::parse($workDate->toDateString().' '.$checkInAt);
         $checkOut = Carbon::parse($workDate->toDateString().' '.$checkOutAt);
@@ -116,7 +157,7 @@ class AttendanceManualMetricsResolverService
             }
 
             $policy = app(AttendanceRulePolicyService::class);
-            $scheduledMinutes = max(0, $window['shift_start']->diffInMinutes($window['shift_end']) - (int) $shift->break_minutes);
+            $scheduledMinutes = $plannedMinutes;
             $workedMinutes = max(0, $checkIn->diffInMinutes($checkOut) - (int) $shift->break_minutes);
             $lateMinutes = $policy->applyGrace(
                 max(0, $window['shift_start']->diffInMinutes($checkIn, false)),
@@ -143,7 +184,7 @@ class AttendanceManualMetricsResolverService
                 'early_leave_minutes' => (int) $earlyLeaveMinutes,
                 'planned_minutes' => $scheduledMinutes,
                 'baseline_source' => $baselineSource,
-                'baseline_label' => $shift->name,
+                'baseline_label' => $baselineLabel,
                 'auto_calculated' => true,
             ];
         }

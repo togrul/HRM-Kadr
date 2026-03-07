@@ -15,6 +15,7 @@ Tarih: 2026-03-04
 
 ## What is ON now (principle)
 - Shared/component layer (button, badge, table shell, common UI atoms)
+- Attendance module Livewire view-ları (**compile-only canary**)
 - SidebarStructure module view-ları (canary) **except**
   - `app/Modules/SidebarStructure/Resources/views/livewire/structure/**` (targeted bypass, compile OFF)
 
@@ -33,6 +34,8 @@ Tarih: 2026-03-04
   - UI
 
 ## Known guardrails
+- Attendance üçün yalnız `compile=true`, `memo=false`, `fold=false` aktivdir.
+- Attendance memo rollout-u **qəsdən açılmır**. Əvvəlcə compile-only stabil saxlanılır, browser smoke pass tamamlanır, yalnız sonra seçilmiş çox təkrarlanan view-lərdə ayrıca A/B ilə memo düşünülür.
 - SidebarStructure üçün compile ON saxlanılır, amma `livewire/structure/**` path-i compile OFF-dur.
 - Bu guardrail root-tag incident-ləri təkrarlamamaq üçündür; əvvəl canary zamanı `structure.sidebar`, `structure.orders`, `structure.services` komponentlərində aralıqlı root-tag xətası müşahidə olunub.
 - Regression test:
@@ -45,6 +48,31 @@ Tarih: 2026-03-04
 - `php artisan view:clear`
 - `php artisan view:cache`
 - `php artisan views:blaze-safe-lint --strict`
+
+### Attendance canary A/B snapshot (2026-03-07)
+
+Smoke benchmark:
+
+- `BLAZE_ENABLED=false php artisan attendance:query-budget --json --allow-empty`
+- `BLAZE_ENABLED=true php artisan attendance:query-budget --json --allow-empty`
+
+Result:
+
+- Both modes passed all 3 probes (`failed_probes=0`, `over_budget_probes=0`).
+- Query counts were unchanged:
+  - `overview_build`: 10
+  - `daily_monitor_load`: 6
+  - `puantaj_grid_load`: 4
+- Blaze ON stayed within budget and showed no regression large enough to justify enabling memo globally.
+
+Decision:
+
+- Attendance remains **compile-only canary**
+- Attendance memo remains **OFF**
+- Any future memo rollout must be:
+  1. selected-view only
+  2. measured with the same A/B command pair
+  3. preceded by manual browser smoke
 
 ## New module / component rule
 1. Yeni Blade component `resources/views/components/**` altındadırsa:

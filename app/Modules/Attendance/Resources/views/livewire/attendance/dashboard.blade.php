@@ -1,17 +1,50 @@
-<div class="flex flex-col">
+<div class="flex flex-col space-y-4 px-6 py-4">
     <x-slot name="sidebar">
         <livewire:structure.sidebar wire:key="attendance-structure-sidebar" />
     </x-slot>
 
-    <div class="flex flex-col px-6 py-4 space-y-4">
     <x-surface-card :title="__('Attendance tracking')" icon="icons.clock-icon">
-        <div class="flex flex-col gap-3">
-            <div class="flex flex-col">
-                <span class="text-sm text-zinc-500">{{ __('This screen manages attendance, shifts and manual entries.') }}</span>
+        <div class="space-y-4">
+            <div class="flex flex-col gap-1 md:flex-row md:items-start md:justify-between">
+                <div class="space-y-1">
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400">{{ __('Workspace') }}</p>
+                    <span class="text-sm text-zinc-500">{{ __('This screen manages attendance, shifts and manual entries.') }}</span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2 self-start md:self-auto">
+                    <div class="flex flex-col">
+                        <x-label for="attendance-year">{{ __('Year') }}</x-label>
+                        <input
+                            id="attendance-year"
+                            type="number"
+                            min="2000"
+                            max="2100"
+                            wire:model.live="year"
+                            class="h-10 w-24 rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500"
+                        />
+                    </div>
+                    <div class="flex flex-col">
+                        <x-label for="attendance-month">{{ __('Month') }}</x-label>
+                        <select
+                            id="attendance-month"
+                            wire:model.live="month"
+                            class="h-10 w-24 rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500"
+                        >
+                            @for ($m = 1; $m <= 12; $m++)
+                                <option value="{{ $m }}">{{ str_pad((string) $m, 2, '0', STR_PAD_LEFT) }}</option>
+                            @endfor
+                        </select>
+                    </div>
+                </div>
             </div>
 
-            <div class="flex flex-wrap items-end justify-between gap-2">
-                <x-filter.nav class="flex-1 min-w-0">
+            <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-3">
+                <div class="mb-2 flex items-center justify-between gap-2">
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400">{{ __('Attendance sections') }}</p>
+                    <span class="text-xs text-zinc-500">{{ __('Switch views without leaving the attendance workspace.') }}</span>
+                </div>
+
+                <x-filter.nav class="min-w-0">
                     @if(in_array('overview', $availableTabs, true))
                         <x-filter.item wire:click.prevent="switchTab('overview')" :active="$activeTab === 'overview'">
                             {{ __('Summary') }}
@@ -58,32 +91,6 @@
                         </x-filter.item>
                     @endif
                 </x-filter.nav>
-
-                <div class="grid grid-cols-2 gap-2">
-                <div class="flex flex-col">
-                    <x-label for="attendance-year">{{ __('Year') }}</x-label>
-                    <input
-                        id="attendance-year"
-                        type="number"
-                        min="2000"
-                        max="2100"
-                        wire:model.live="year"
-                        class="h-10 w-24 rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500"
-                    />
-                </div>
-                <div class="flex flex-col">
-                    <x-label for="attendance-month">{{ __('Month') }}</x-label>
-                    <select
-                        id="attendance-month"
-                        wire:model.live="month"
-                        class="h-10 w-24 rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500"
-                    >
-                        @for ($m = 1; $m <= 12; $m++)
-                            <option value="{{ $m }}">{{ str_pad((string) $m, 2, '0', STR_PAD_LEFT) }}</option>
-                        @endfor
-                    </select>
-                </div>
-                </div>
             </div>
         </div>
     </x-surface-card>
@@ -192,5 +199,4 @@
     @if($activeTab === 'shifts' && in_array('shifts', $availableTabs, true))
         <livewire:attendance.shift-management />
     @endif
-    </div>
 </div>

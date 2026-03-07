@@ -26,7 +26,6 @@ class AttendancePuantajReadService
                         ->orWhere('patronymic', 'like', $wildcard);
                 });
             })
-            ->with('structure:id,name,parent_id')
             ->orderBy('surname')
             ->orderBy('name')
             ->paginate($perPage);

@@ -90,8 +90,8 @@
                         >
                             <span>{{ $personnel->fullname }}</span>
                             <span class="text-xs font-mono text-zinc-500">{{ $personnel->tabel_no }}</span>
-                            <span class="text-[11px] text-zinc-400">
-                                {{ $personnel->structure?->name }}
+                            <span class="max-w-[18rem] truncate text-[11px] text-zinc-400 md:max-w-[24rem]" title="{{ $personnel->structure_path }}">
+                                {{ $personnel->structure_path ?: '-' }}
                                 @if($personnel->position?->name)
                                     • {{ $personnel->position->name }}
                                 @endif
@@ -140,9 +140,17 @@
         @if($selectedPersonnel)
             <div class="mt-3 rounded-xl border border-zinc-200 bg-zinc-50 p-3">
                 <div class="flex flex-wrap items-center justify-between gap-3">
-                    <div>
+                    <div class="min-w-0">
                         <p class="text-sm font-semibold text-zinc-900">{{ $selectedPersonnel['fullname'] }}</p>
                         <p class="text-xs font-mono uppercase tracking-wide text-zinc-500">{{ $selectedPersonnel['tabel_no'] }}</p>
+                        @if($selectedPersonnelRecord?->structure_path)
+                            <p class="mt-1 max-w-[18rem] truncate text-xs text-zinc-500 md:max-w-[24rem]" title="{{ $selectedPersonnelRecord->structure_path }}">
+                                {{ $selectedPersonnelRecord->structure_path }}
+                                @if($selectedPersonnelRecord?->position?->name)
+                                    • {{ $selectedPersonnelRecord->position->name }}
+                                @endif
+                            </p>
+                        @endif
                     </div>
 
                     @if($selectedPersonnelActiveAssignment?->shift)
@@ -174,11 +182,11 @@
         </div>
     </x-surface-card>
 
-    <x-surface-card :title="__('Current shift catalog')">
+    <div class="space-y-3">
         <div class="relative overflow-x-auto">
             <div class="inline-block min-w-full py-2 align-middle">
                 <div class="overflow-visible">
-                    <x-table.tbl :headers="[__('Name'), __('Hours'), __('Break'), __('Flex window'), __('Status'), __('Actions')]">
+                    <x-table.tbl :headers="[__('Name'), __('Hours'), __('Break'), __('Flex window'), __('Status'), __('Actions')]" :title="__('Current shift catalog')">
                         @forelse($shifts as $shift)
                             <tr>
                                 <x-table.td extraClasses="font-medium">{{ $shift->name }}</x-table.td>
@@ -210,20 +218,22 @@
                 </div>
             </div>
         </div>
-    </x-surface-card>
+    </div>
 
-    <x-surface-card :title="__('Recent shift assignments')">
+    <div class="space-y-3">
         <div class="relative overflow-x-auto">
             <div class="inline-block min-w-full py-2 align-middle">
                 <div class="overflow-visible">
-                    <x-table.tbl :headers="[__('Personnel'), __('Tabel no'), __('Structure'), __('Shift'), __('Effective range'), __('Source'), __('Status'), __('Actions')]">
+                    <x-table.tbl :headers="[__('Personnel'), __('Tabel no'), __('Structure'), __('Shift'), __('Effective range'), __('Source'), __('Status'), __('Actions')]" :title="__('Recent shift assignments')">
                         @forelse($assignments as $assignment)
                             <tr>
                                 <x-table.td extraClasses="font-medium">{{ $assignment->personnel?->fullname ?? '-' }}</x-table.td>
                                 <x-table.td extraClasses="font-mono uppercase text-zinc-500">{{ $assignment->tabel_no }}</x-table.td>
                                 <x-table.td>
                                     <div class="flex flex-col">
-                                        <span>{{ $assignment->personnel?->structure?->name ?? '-' }}</span>
+                                        <span class="max-w-[18rem] truncate md:max-w-[24rem]" title="{{ $assignment->personnel?->structure_path ?? '' }}">
+                                            {{ $assignment->personnel?->structure_path ?? '-' }}
+                                        </span>
                                         @if($assignment->personnel?->position?->name)
                                             <span class="text-xs text-zinc-500">{{ $assignment->personnel->position->name }}</span>
                                         @endif
@@ -287,5 +297,5 @@
                 </div>
             </div>
         </div>
-    </x-surface-card>
+    </div>
 </div>

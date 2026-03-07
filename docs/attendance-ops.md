@@ -23,6 +23,8 @@ Release-dən əvvəl minimum manual checks:
 Local smoke/acceptance command set:
 
 - `php artisan attendance:query-budget --json --allow-empty`
+- `BLAZE_ENABLED=false php artisan attendance:query-budget --json --allow-empty`
+- `BLAZE_ENABLED=true php artisan attendance:query-budget --json --allow-empty`
 - `php artisan test tests/Unit/Modules/Attendance`
 - `php artisan test tests/Unit/Architecture/AttendanceLivewireReadBoundaryTest.php tests/Feature/Console/AttendanceQueryBudgetCommandTest.php`
 - `php artisan test tests/Unit/Architecture/AttendanceStructureScopeBoundaryTest.php`
@@ -73,6 +75,17 @@ Scenario docs:
 Perf regressions üçün primary gate:
 
 - `php artisan attendance:query-budget --json --allow-empty`
+
+Blaze canary üçün A/B smoke:
+
+- `BLAZE_ENABLED=false php artisan attendance:query-budget --json --allow-empty`
+- `BLAZE_ENABLED=true php artisan attendance:query-budget --json --allow-empty`
+
+Qayda:
+
+1. Attendance üçün memo rollout etmə.
+2. Əvvəlcə browser smoke pass et.
+3. Sonra yalnız seçilmiş təkrarlanan view-lər üçün ayrıca A/B ilə memo düşün.
 
 Probe flows:
 

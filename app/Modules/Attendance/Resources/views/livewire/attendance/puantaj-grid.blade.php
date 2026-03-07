@@ -44,8 +44,13 @@
                                     {{ $personnel->surname }} {{ $personnel->name }} {{ $personnel->patronymic }}
                                 </div>
                                 <div class="text-xs font-mono font-normal text-zinc-500">{{ $personnel->tabel_no }}</div>
-                                @if($personnel->structure?->name)
-                                    <div class="text-xs text-zinc-500">{{ $personnel->structure->name }}</div>
+                                @if($row['structure_path'])
+                                    <div
+                                        class="max-w-[18rem] truncate text-xs text-zinc-500 md:max-w-[22rem]"
+                                        title="{{ $row['structure_path'] }}"
+                                    >
+                                        {{ $row['structure_path'] }}
+                                    </div>
                                 @endif
                             </x-table.td>
 

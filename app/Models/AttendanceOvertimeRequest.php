@@ -20,6 +20,7 @@ class AttendanceOvertimeRequest extends Model
         'requested_minutes',
         'approved_minutes',
         'status',
+        'source',
         'reason',
         'requested_by',
         'approved_by',
@@ -43,4 +44,3 @@ class AttendanceOvertimeRequest extends Model
         return $this->belongsTo(User::class, 'approved_by');
     }
 }
-

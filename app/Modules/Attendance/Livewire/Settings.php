@@ -66,10 +66,11 @@ class Settings extends Component
         $shifts = AttendanceShift::query()
             ->where('is_active', true)
             ->orderBy('name')
-            ->get(['id', 'name']);
+            ->get(['id', 'name', 'start_time', 'end_time', 'break_minutes']);
 
         return view('attendance::livewire.attendance.settings', [
             'shifts' => $shifts,
+            'currentDefaultShift' => $shifts->firstWhere('id', (int) ($this->form['default_shift_id'] ?? 0)),
         ]);
     }
 
@@ -88,4 +89,3 @@ class Settings extends Component
         ];
     }
 }
-

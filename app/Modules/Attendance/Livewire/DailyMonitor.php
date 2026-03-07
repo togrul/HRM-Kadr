@@ -2,6 +2,7 @@
 
 namespace App\Modules\Attendance\Livewire;
 
+use App\Services\StructurePathService;
 use App\Modules\Attendance\Application\Services\AttendanceAuthorizationService;
 use App\Modules\Attendance\Application\Services\AttendanceDailyMonitorReadService;
 use App\Modules\Attendance\Application\Services\AttendanceStructureScopeReadService;
@@ -63,6 +64,8 @@ class DailyMonitor extends Component
         $readService = app(AttendanceDailyMonitorReadService::class);
         /** @var AttendanceStructureScopeReadService $structureScopeRead */
         $structureScopeRead = app(AttendanceStructureScopeReadService::class);
+        /** @var StructurePathService $structurePathService */
+        $structurePathService = app(StructurePathService::class);
 
         $rows = $readService->paginateRows(
             date: $this->date,
@@ -70,6 +73,14 @@ class DailyMonitor extends Component
             statusFilter: $this->statusFilter,
             perPage: $this->perPage,
             structureIds: $structureIds
+        );
+
+        $rows->setCollection(
+            $rows->getCollection()->map(function ($row) use ($structurePathService) {
+                $row->structure_path = $structurePathService->resolve((int) ($row->structure_id ?? 0));
+
+                return $row;
+            })
         );
 
         $totals = $readService->totals(

@@ -3,6 +3,7 @@
 namespace App\Modules\Attendance\Livewire;
 
 use App\Models\AttendanceException;
+use App\Services\StructurePathService;
 use App\Modules\Attendance\Application\Services\AttendanceAuditLogger;
 use App\Modules\Attendance\Application\Services\AttendanceAuthorizationService;
 use App\Modules\Attendance\Application\Services\AttendanceStructureScopeReadService;
@@ -153,9 +154,11 @@ class ExceptionsInbox extends Component
             : [];
         /** @var AttendanceStructureScopeReadService $structureScopeRead */
         $structureScopeRead = app(AttendanceStructureScopeReadService::class);
+        /** @var StructurePathService $structurePathService */
+        $structurePathService = app(StructurePathService::class);
 
         $items = AttendanceException::query()
-            ->with(['personnel:tabel_no,surname,name,patronymic,structure_id', 'personnel.structure:id,name,parent_id', 'resolvedBy:id,name'])
+            ->with(['personnel:tabel_no,surname,name,patronymic,structure_id', 'resolvedBy:id,name'])
             ->when($this->status !== 'all', fn ($query) => $query->where('status', $this->status))
             ->when($this->type !== 'all', fn ($query) => $query->where('type', $this->type))
             ->when($this->fromDate !== '', fn ($query) => $query->whereDate('date', '>=', $this->fromDate))
@@ -166,6 +169,19 @@ class ExceptionsInbox extends Component
             ->orderByDesc('date')
             ->orderByDesc('id')
             ->paginate($this->perPage);
+
+        $items->setCollection(
+            $items->getCollection()->map(function (AttendanceException $item) use ($structurePathService) {
+                if ($item->personnel) {
+                    $item->personnel->setAttribute(
+                        'structure_path',
+                        $structurePathService->resolve((int) $item->personnel->structure_id)
+                    );
+                }
+
+                return $item;
+            })
+        );
 
         return view('attendance::livewire.attendance.exceptions-inbox', [
             'items' => $items,

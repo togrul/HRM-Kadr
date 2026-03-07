@@ -44,7 +44,6 @@ class AttendanceDailyMonitorReadService
         return Personnel::query()
             ->withoutGlobalScope(SoftDeletingScope::class)
             ->from('personnels as p')
-            ->leftJoin('structures as s', 'p.structure_id', '=', 's.id')
             ->leftJoin('attendance_daily_ledgers as l', function ($join) use ($date): void {
                 $join->on('p.tabel_no', '=', 'l.tabel_no')
                     ->whereDate('l.date', $date);
@@ -82,7 +81,6 @@ class AttendanceDailyMonitorReadService
                 'p.name',
                 'p.patronymic',
                 'p.structure_id',
-                's.name as structure_name',
                 'l.id as ledger_id',
                 'l.worked_minutes',
                 'l.late_minutes',
