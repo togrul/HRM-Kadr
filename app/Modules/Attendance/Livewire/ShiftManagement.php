@@ -5,13 +5,12 @@ namespace App\Modules\Attendance\Livewire;
 use App\Models\AttendanceShift;
 use App\Models\AttendanceShiftAssignment;
 use App\Models\Personnel;
-use App\Models\Structure;
 use App\Modules\Attendance\Application\Services\AttendanceAuthorizationService;
 use App\Modules\Attendance\Application\Services\AttendanceShiftManagementService;
+use App\Modules\Attendance\Application\Services\AttendanceStructureScopeReadService;
 use App\Traits\NestedStructureTrait;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -289,6 +288,8 @@ class ShiftManagement extends Component
     public function render()
     {
         $today = now()->toDateString();
+        /** @var AttendanceStructureScopeReadService $structureScopeRead */
+        $structureScopeRead = app(AttendanceStructureScopeReadService::class);
 
         $structureIds = $this->selectedStructureId
             ? $this->getNestedStructure($this->selectedStructureId)
@@ -349,17 +350,7 @@ class ShiftManagement extends Component
                 ->get();
         }
 
-        $structureOptions = Structure::query()
-            ->select('id', DB::raw('name as label'))
-            ->accessible()
-            ->when(
-                mb_strlen(trim($this->structureSearch)) >= 1,
-                fn ($query) => $query->where('name', 'like', '%'.trim($this->structureSearch).'%')
-            )
-            ->orderBy('level')
-            ->orderBy('code')
-            ->limit(80)
-            ->get();
+        $structureOptions = $structureScopeRead->filterOptions($this->structureSearch);
 
         $selectedPersonnelActiveAssignment = null;
         if (! empty($this->assignmentForm['tabel_no'])) {
@@ -383,9 +374,7 @@ class ShiftManagement extends Component
             'assignments' => $assignments,
             'personnelResults' => $personnelResults,
             'structureOptions' => $structureOptions,
-            'selectedStructureLabel' => $this->selectedStructureId
-                ? Structure::query()->whereKey($this->selectedStructureId)->value('name')
-                : null,
+            'selectedStructureLabel' => $structureScopeRead->label($this->selectedStructureId),
             'selectedPersonnelActiveAssignment' => $selectedPersonnelActiveAssignment,
         ]);
     }

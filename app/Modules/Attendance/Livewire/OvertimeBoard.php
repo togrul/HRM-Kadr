@@ -3,9 +3,9 @@
 namespace App\Modules\Attendance\Livewire;
 
 use App\Models\AttendanceOvertimeRequest;
-use App\Models\Structure;
 use App\Modules\Attendance\Application\Services\AttendanceAuthorizationService;
 use App\Modules\Attendance\Application\Services\AttendanceOvertimeApprovalService;
+use App\Modules\Attendance\Application\Services\AttendanceStructureScopeReadService;
 use App\Traits\NestedStructureTrait;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -116,6 +116,8 @@ class OvertimeBoard extends Component
         $structureIds = $this->selectedStructureId
             ? $this->getNestedStructure($this->selectedStructureId)
             : [];
+        /** @var AttendanceStructureScopeReadService $structureScopeRead */
+        $structureScopeRead = app(AttendanceStructureScopeReadService::class);
 
         $items = AttendanceOvertimeRequest::query()
             ->with([
@@ -136,9 +138,7 @@ class OvertimeBoard extends Component
 
         return view('attendance::livewire.attendance.overtime-board', [
             'items' => $items,
-            'selectedStructureLabel' => $this->selectedStructureId
-                ? Structure::query()->whereKey($this->selectedStructureId)->value('name')
-                : null,
+            'selectedStructureLabel' => $structureScopeRead->label($this->selectedStructureId),
         ]);
     }
 }

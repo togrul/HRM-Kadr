@@ -16,7 +16,7 @@
         <div class="text-base font-medium text-slate-600 tracking-tight w-full">
             {{ $title }} 
         </div>
-
+          
         @if (filled($icon))
             <x-dynamic-component
                 :component="$icon"

@@ -5,10 +5,10 @@ namespace App\Modules\Attendance\Livewire;
 use App\Models\AttendanceManualEntry;
 use App\Models\AttendanceShift;
 use App\Models\Personnel;
-use App\Models\Structure;
 use App\Modules\Attendance\Application\Services\AttendanceAuthorizationService;
 use App\Modules\Attendance\Application\Services\AttendanceManualEntryService;
 use App\Modules\Attendance\Application\Services\AttendanceManualMetricsResolverService;
+use App\Modules\Attendance\Application\Services\AttendanceStructureScopeReadService;
 use App\Traits\NestedStructureTrait;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -282,6 +282,8 @@ class ManualEntries extends Component
         $structureIds = $this->selectedStructureId
             ? $this->getNestedStructure($this->selectedStructureId)
             : [];
+        /** @var AttendanceStructureScopeReadService $structureScopeRead */
+        $structureScopeRead = app(AttendanceStructureScopeReadService::class);
 
         $availableShifts = AttendanceShift::query()
             ->where('is_active', true)
@@ -338,9 +340,7 @@ class ManualEntries extends Component
             'selectedShiftPreview' => $selectedShiftPreview,
             'personnelResults' => $personnelResults,
             'selectedPersonnelRecord' => $selectedPersonnelRecord,
-            'selectedStructureLabel' => $this->selectedStructureId
-                ? Structure::query()->whereKey($this->selectedStructureId)->value('name')
-                : null,
+            'selectedStructureLabel' => $structureScopeRead->label($this->selectedStructureId),
         ]);
     }
 

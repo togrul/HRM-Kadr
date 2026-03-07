@@ -4,7 +4,7 @@ namespace App\Modules\Attendance\Livewire;
 
 use App\Modules\Attendance\Application\Services\AttendanceAuthorizationService;
 use App\Modules\Attendance\Application\Services\AttendanceDailyMonitorReadService;
-use App\Models\Structure;
+use App\Modules\Attendance\Application\Services\AttendanceStructureScopeReadService;
 use App\Traits\NestedStructureTrait;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -61,6 +61,8 @@ class DailyMonitor extends Component
 
         /** @var AttendanceDailyMonitorReadService $readService */
         $readService = app(AttendanceDailyMonitorReadService::class);
+        /** @var AttendanceStructureScopeReadService $structureScopeRead */
+        $structureScopeRead = app(AttendanceStructureScopeReadService::class);
 
         $rows = $readService->paginateRows(
             date: $this->date,
@@ -80,9 +82,7 @@ class DailyMonitor extends Component
         return view('attendance::livewire.attendance.daily-monitor', [
             'rows' => $rows,
             'totals' => $totals,
-            'selectedStructureLabel' => $this->selectedStructureId
-                ? Structure::query()->whereKey($this->selectedStructureId)->value('name')
-                : null,
+            'selectedStructureLabel' => $structureScopeRead->label($this->selectedStructureId),
         ]);
     }
 }

@@ -25,6 +25,16 @@ Local smoke/acceptance command set:
 - `php artisan attendance:query-budget --json --allow-empty`
 - `php artisan test tests/Unit/Modules/Attendance`
 - `php artisan test tests/Unit/Architecture/AttendanceLivewireReadBoundaryTest.php tests/Feature/Console/AttendanceQueryBudgetCommandTest.php`
+- `php artisan test tests/Unit/Architecture/AttendanceStructureScopeBoundaryTest.php`
+- `php artisan test tests/Feature/Attendance/AttendancePermissionMatrixTest.php`
+
+Scenario docs:
+
+- `docs/scenario/attendance-acceptance-checklist.md`
+- `docs/scenario/attendance-admin-guide.md`
+- `docs/scenario/attendance-operator-guide.md`
+- `docs/scenario/attendance-approval-guide.md`
+- `docs/scenario/attendance-permission-matrix.md`
 
 ## 3) Scheduler / Ops
 
@@ -103,5 +113,12 @@ Rebuild entry-points:
 Composer script:
 
 - `composer ci:attendance-gate`
+
+## Permission / role audit snapshot
+
+- HR Admin: bütün attendance tab və mutate axınları
+- HR Manager: manual/exceptions/overtime/month-close(export) əməliyyatları
+- HR Employee: yalnız read tablar
+- HR Auditor: read + month-close export görünüşü
 
 Bu script query budget + architecture/read-boundary testlərini bir yerdə yoxlayır.

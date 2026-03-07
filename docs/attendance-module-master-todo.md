@@ -8,6 +8,11 @@ Bu sənəd Mesai Takibi / Attendance modulunun sıfırdan expert səviyyədə qu
 - [ ] 2) CI quality gate-in əsas branch-də stabil təsdiqi
 - [x] 3) Scheduler/Ops wiring (process + snapshot + observability)
 - [x] 4) Performance tuning/Ops (query budget + cache + pre-aggregation runbook)
+- [x] 5) Permission matrix feature audit
+- [x] 6) Scenario docs closeout (acceptance/admin/operator/approval)
+- [x] 7) Export profile UX polish
+- [x] 8) Permission matrix operator doc
+- [x] 9) Structure scope architecture boundary test
 
 ## Rule of execution
 
@@ -89,3 +94,13 @@ Bu sənəd Mesai Takibi / Attendance modulunun sıfırdan expert səviyyədə qu
 - [x] Audit trail ilə kim nəyi niyə dəyişdi izlənə bilir.
 - [x] Manual flow acceptance test checklist bağlıdır (`tests/Feature/Attendance/AttendanceManualFlowAcceptanceTest.php`).
 - [x] Audit trail acceptance test checklist bağlıdır (`tests/Feature/Attendance/AttendanceManualFlowAcceptanceTest.php`).
+- [x] Permission matrix feature test bağlıdır (`tests/Feature/Attendance/AttendancePermissionMatrixTest.php`).
+- [x] Browser/manual acceptance checklist sənədləşdirildi (`docs/scenario/attendance-acceptance-checklist.md`).
+
+## Scenario docs
+
+- `docs/scenario/attendance-acceptance-checklist.md`
+- `docs/scenario/attendance-admin-guide.md`
+- `docs/scenario/attendance-operator-guide.md`
+- `docs/scenario/attendance-approval-guide.md`
+- `docs/scenario/attendance-permission-matrix.md`

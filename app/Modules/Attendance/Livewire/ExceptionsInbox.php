@@ -3,9 +3,9 @@
 namespace App\Modules\Attendance\Livewire;
 
 use App\Models\AttendanceException;
-use App\Models\Structure;
 use App\Modules\Attendance\Application\Services\AttendanceAuditLogger;
 use App\Modules\Attendance\Application\Services\AttendanceAuthorizationService;
+use App\Modules\Attendance\Application\Services\AttendanceStructureScopeReadService;
 use App\Traits\NestedStructureTrait;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -151,6 +151,8 @@ class ExceptionsInbox extends Component
         $structureIds = $this->selectedStructureId
             ? $this->getNestedStructure($this->selectedStructureId)
             : [];
+        /** @var AttendanceStructureScopeReadService $structureScopeRead */
+        $structureScopeRead = app(AttendanceStructureScopeReadService::class);
 
         $items = AttendanceException::query()
             ->with(['personnel:tabel_no,surname,name,patronymic,structure_id', 'personnel.structure:id,name,parent_id', 'resolvedBy:id,name'])
@@ -167,9 +169,7 @@ class ExceptionsInbox extends Component
 
         return view('attendance::livewire.attendance.exceptions-inbox', [
             'items' => $items,
-            'selectedStructureLabel' => $this->selectedStructureId
-                ? Structure::query()->whereKey($this->selectedStructureId)->value('name')
-                : null,
+            'selectedStructureLabel' => $structureScopeRead->label($this->selectedStructureId),
         ]);
     }
 }

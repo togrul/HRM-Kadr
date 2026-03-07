@@ -25,6 +25,11 @@ class MonthClose extends Component
 
     public bool $canExport = false;
 
+    /**
+     * @var array<string,mixed>
+     */
+    public array $csvProfile = [];
+
     public function mount(
         int $year,
         int $month,
@@ -42,6 +47,7 @@ class MonthClose extends Component
         $this->year = $year;
         $this->month = $month;
         $this->status = $lockService->periodStatus($year, $month);
+        $this->csvProfile = (array) config('attendance.exports.payroll.csv', []);
     }
 
     public function closePeriod(AttendanceMonthLockService $lockService): void
@@ -155,6 +161,8 @@ class MonthClose extends Component
 
     public function render()
     {
-        return view('attendance::livewire.attendance.month-close');
+        return view('attendance::livewire.attendance.month-close', [
+            'csvProfile' => $this->csvProfile,
+        ]);
     }
 }

@@ -62,4 +62,28 @@
             <div class="mt-2 text-2xl font-semibold text-zinc-800">{{ $status['worked_hours'] ?? 0 }}</div>
         </div>
     </div>
+
+    <x-surface-card :title="__('Export profile')" icon="icons.line-settings-icon">
+        <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+            <x-surface-card :title="__('Format')">
+                <div class="text-lg font-semibold text-zinc-800">XLSX / CSV</div>
+                <p class="mt-1 text-xs text-zinc-500">{{ __('Monthly payroll snapshot export contract.') }}</p>
+            </x-surface-card>
+            <x-surface-card :title="__('CSV delimiter')">
+                <div class="text-lg font-semibold text-zinc-800">{{ $csvProfile['delimiter'] ?? ';' }}</div>
+            </x-surface-card>
+            <x-surface-card :title="__('CSV encoding')">
+                <div class="text-lg font-semibold text-zinc-800">{{ $csvProfile['output_encoding'] ?? 'UTF-8' }}</div>
+            </x-surface-card>
+            <x-surface-card :title="__('UTF-8 BOM')">
+                <div class="text-lg font-semibold text-zinc-800">{{ ! empty($csvProfile['use_bom']) ? __('Enabled') : __('Disabled') }}</div>
+            </x-surface-card>
+            <x-surface-card :title="__('CSV enclosure')">
+                <div class="text-lg font-semibold text-zinc-800">{{ $csvProfile['enclosure'] ?? '"' }}</div>
+            </x-surface-card>
+        </div>
+        <p class="mt-3 text-xs text-zinc-500">
+            {{ __('Use this profile to validate payroll import compatibility before exporting month-end files for downstream finance systems.') }}
+        </p>
+    </x-surface-card>
 </div>

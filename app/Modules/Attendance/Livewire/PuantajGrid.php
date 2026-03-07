@@ -4,7 +4,7 @@ namespace App\Modules\Attendance\Livewire;
 
 use App\Modules\Attendance\Application\Services\AttendanceAuthorizationService;
 use App\Modules\Attendance\Application\Services\AttendancePuantajReadService;
-use App\Models\Structure;
+use App\Modules\Attendance\Application\Services\AttendanceStructureScopeReadService;
 use App\Traits\NestedStructureTrait;
 use Carbon\Carbon;
 use Livewire\Component;
@@ -55,6 +55,8 @@ class PuantajGrid extends Component
             : [];
         /** @var AttendancePuantajReadService $readService */
         $readService = app(AttendancePuantajReadService::class);
+        /** @var AttendanceStructureScopeReadService $structureScopeRead */
+        $structureScopeRead = app(AttendanceStructureScopeReadService::class);
 
         $personnels = $readService->paginatePersonnels(trim($this->search), $this->perPage, $structureIds);
         $tabelNos = $personnels->getCollection()->pluck('tabel_no')->filter()->values()->all();
@@ -106,9 +108,7 @@ class PuantajGrid extends Component
             'personnels' => $personnels,
             'calendarDayTypeByDate' => $calendarDayTypeByDate,
             'monthStart' => $from,
-            'selectedStructureLabel' => $this->selectedStructureId
-                ? Structure::query()->whereKey($this->selectedStructureId)->value('name')
-                : null,
+            'selectedStructureLabel' => $structureScopeRead->label($this->selectedStructureId),
         ]);
     }
 
