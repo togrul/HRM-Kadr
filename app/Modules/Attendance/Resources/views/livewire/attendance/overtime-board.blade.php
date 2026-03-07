@@ -25,6 +25,14 @@
         </div>
     </x-surface-card>
 
+    @if($selectedStructureLabel)
+        <div class="flex flex-wrap items-center gap-2 rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 text-xs text-blue-700">
+            <x-small-badge mode="sky">{{ __('Structure scope') }}</x-small-badge>
+            <span>{{ __('Showing personnel from the selected structure tree only.') }}</span>
+            <span class="font-medium">{{ $selectedStructureLabel }}</span>
+        </div>
+    @endif
+
     <div class="relative overflow-x-auto">
         <div class="inline-block min-w-full py-2 align-middle">
             <div class="overflow-visible">
@@ -49,7 +57,12 @@
                         <x-table.td>{{ optional($item->date)->format('Y-m-d') }}</x-table.td>
                         <x-table.td extraClasses="font-medium text-zinc-700">{{ $item->tabel_no }}</x-table.td>
                         <x-table.td extraClasses="text-zinc-700">
-                            {{ $item->personnel?->surname }} {{ $item->personnel?->name }} {{ $item->personnel?->patronymic }}
+                            <div class="flex flex-col">
+                                <span>{{ $item->personnel?->surname }} {{ $item->personnel?->name }} {{ $item->personnel?->patronymic }}</span>
+                                @if($item->personnel?->structure?->name)
+                                    <span class="text-xs text-zinc-500">{{ $item->personnel->structure->name }}</span>
+                                @endif
+                            </div>
                         </x-table.td>
                         <x-table.td extraClasses="text-right text-zinc-700">{{ (int) $item->requested_minutes }}</x-table.td>
                         <x-table.td extraClasses="text-right">

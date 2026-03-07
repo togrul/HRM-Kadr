@@ -37,6 +37,14 @@
         </div>
     </x-surface-card>
 
+    @if($selectedStructureLabel)
+        <div class="flex flex-wrap items-center gap-2 rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 text-xs text-blue-700">
+            <x-small-badge mode="sky">{{ __('Structure scope') }}</x-small-badge>
+            <span>{{ __('Showing personnel from the selected structure tree only.') }}</span>
+            <span class="font-medium">{{ $selectedStructureLabel }}</span>
+        </div>
+    @endif
+
     <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <x-surface-card :title="__('Present')"><div class="text-2xl font-semibold text-emerald-600">{{ $totals['present'] }}</div></x-surface-card>
         <x-surface-card :title="__('Late')"><div class="text-2xl font-semibold text-amber-600">{{ $totals['late'] }}</div></x-surface-card>
@@ -67,7 +75,14 @@
                         @endphp
                         <tr>
                             <x-table.td extraClasses="font-medium font-mono uppercase !text-zinc-500">{{ $row->tabel_no }}</x-table.td>
-                            <x-table.td extraClasses="text-zinc-700">{{ $row->surname }} {{ $row->name }} {{ $row->patronymic }}</x-table.td>
+                            <x-table.td extraClasses="text-zinc-700">
+                                <div class="flex flex-col">
+                                    <span>{{ $row->surname }} {{ $row->name }} {{ $row->patronymic }}</span>
+                                    @if($row->structure_name)
+                                        <span class="text-xs text-zinc-500">{{ $row->structure_name }}</span>
+                                    @endif
+                                </div>
+                            </x-table.td>
                             <x-table.td>
                                 <span class="inline-flex rounded-full px-2 py-1 uppercase text-xs font-medium {{ $badgeClass }}">{{ __($status) }}</span>
                             </x-table.td>

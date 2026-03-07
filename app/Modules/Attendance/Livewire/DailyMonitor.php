@@ -4,12 +4,15 @@ namespace App\Modules\Attendance\Livewire;
 
 use App\Modules\Attendance\Application\Services\AttendanceAuthorizationService;
 use App\Modules\Attendance\Application\Services\AttendanceDailyMonitorReadService;
+use App\Models\Structure;
+use App\Traits\NestedStructureTrait;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 class DailyMonitor extends Component
 {
     use WithPagination;
+    use NestedStructureTrait;
 
     public string $date = '';
 
@@ -18,6 +21,8 @@ class DailyMonitor extends Component
     public string $statusFilter = 'all';
 
     public int $perPage = 20;
+
+    public ?int $selectedStructureId = null;
 
     public function mount(AttendanceAuthorizationService $authorization): void
     {
@@ -43,8 +48,17 @@ class DailyMonitor extends Component
         $this->resetPage();
     }
 
+    public function updatedSelectedStructureId(): void
+    {
+        $this->resetPage();
+    }
+
     public function render()
     {
+        $structureIds = $this->selectedStructureId
+            ? $this->getNestedStructure($this->selectedStructureId)
+            : [];
+
         /** @var AttendanceDailyMonitorReadService $readService */
         $readService = app(AttendanceDailyMonitorReadService::class);
 
@@ -52,18 +66,23 @@ class DailyMonitor extends Component
             date: $this->date,
             search: trim($this->search),
             statusFilter: $this->statusFilter,
-            perPage: $this->perPage
+            perPage: $this->perPage,
+            structureIds: $structureIds
         );
 
         $totals = $readService->totals(
             date: $this->date,
             search: trim($this->search),
-            statusFilter: $this->statusFilter
+            statusFilter: $this->statusFilter,
+            structureIds: $structureIds
         );
 
         return view('attendance::livewire.attendance.daily-monitor', [
             'rows' => $rows,
             'totals' => $totals,
+            'selectedStructureLabel' => $this->selectedStructureId
+                ? Structure::query()->whereKey($this->selectedStructureId)->value('name')
+                : null,
         ]);
     }
 }

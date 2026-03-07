@@ -7,12 +7,46 @@
         </x-surface-card>
     @endunless
 
+    @if($selectedStructureLabel)
+        <div class="flex flex-wrap items-center gap-2 rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 text-xs text-blue-700">
+            <x-small-badge mode="sky">{{ __('Structure scope') }}</x-small-badge>
+            <span>{{ __('Showing personnel from the selected structure tree only.') }}</span>
+            <span class="font-medium">{{ $selectedStructureLabel }}</span>
+        </div>
+    @endif
+
     @if($canWrite)
         <x-surface-card :title="__('Manual entry form')">
             <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
                 <div>
-                    <x-label for="manual-form-tabel">{{ __('Tabel no') }}</x-label>
-                    <x-livewire-input id="manual-form-tabel" mode="gray" name="form.tabel_no" wire:model.live.debounce.300ms="form.tabel_no" />
+                    <x-ui.search-input-select
+                        :label="__('Personnel')"
+                        searchModel="personnelSearch"
+                        :selected="$selectedPersonnel"
+                        displayKey="fullname"
+                        idKey="tabel_no"
+                        onClear="clearPersonnel"
+                        clearField="tabel_no"
+                        :placeholder="__('Search personnel to create a manual entry')"
+                    >
+                        @forelse($personnelResults as $personnel)
+                            <button
+                                type="button"
+                                wire:click="selectPersonnel('{{ $personnel->tabel_no }}', '{{ addslashes($personnel->fullname) }}')"
+                                class="flex w-full flex-col rounded-md px-2 py-1 text-left text-slate-600 transition-all duration-300 hover:bg-white drop-shadow-sm"
+                            >
+                                <span>{{ $personnel->fullname }}</span>
+                                <span class="text-xs font-mono text-zinc-500">{{ $personnel->tabel_no }}</span>
+                                @if($personnel->structure?->name)
+                                    <span class="text-[11px] text-zinc-400">{{ $personnel->structure->name }}</span>
+                                @endif
+                            </button>
+                        @empty
+                            <span class="mx-auto text-sm font-medium text-slate-500">
+                                {{ __('Search personnel to create a manual entry') }}
+                            </span>
+                        @endforelse
+                    </x-ui.search-input-select>
                     @error('form.tabel_no') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
                 </div>
                 <div>
@@ -118,6 +152,20 @@
                 </div>
 
                 <div class="md:col-span-3">
+                    @if($selectedPersonnelRecord)
+                        <div class="mb-3 rounded-xl border border-zinc-200 bg-zinc-50 p-3">
+                            <div class="flex flex-wrap items-center justify-between gap-3">
+                                <div>
+                                    <p class="text-sm font-semibold text-zinc-900">{{ $selectedPersonnelRecord->fullname }}</p>
+                                    <p class="text-xs font-mono uppercase tracking-wide text-zinc-500">{{ $selectedPersonnelRecord->tabel_no }}</p>
+                                </div>
+                                @if($selectedPersonnelRecord->structure?->name)
+                                    <x-small-badge mode="blue">{{ $selectedPersonnelRecord->structure->name }}</x-small-badge>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
+
                     @if($form['shift_source_mode'] === 'explicit')
                         <div class="mb-3 rounded-xl border border-blue-100 bg-blue-50 p-3">
                             @if($selectedShiftPreview)
@@ -250,7 +298,7 @@
                 <div class="overflow-visible">
                     <x-table.tbl :headers="[
                         __('#'),
-                        __('Tabel no'),
+                        __('Personnel'),
                         __('Date'),
                         __('Check-in'),
                         __('Check-out'),
@@ -271,10 +319,20 @@
                                     default => 'bg-amber-100 text-amber-700',
                                 };
                             @endphp
-                            <tr>
-                                <x-table.td>{{ $entry->id }}</x-table.td>
-                                <x-table.td extraClasses="font-medium font-mono uppercase !text-zinc-500">{{ $entry->tabel_no }}</x-table.td>
-                                <x-table.td>{{ optional($entry->date)->format('Y-m-d') }}</x-table.td>
+                        <tr>
+                            <x-table.td>{{ $entry->id }}</x-table.td>
+                            <x-table.td extraClasses="text-zinc-700">
+                                <div class="flex flex-col">
+                                    <span class="font-medium text-zinc-900">
+                                        {{ $entry->personnel?->fullname ?? $entry->tabel_no }}
+                                    </span>
+                                    <span class="text-xs font-mono uppercase text-zinc-500">{{ $entry->tabel_no }}</span>
+                                    @if($entry->personnel?->structure?->name)
+                                        <span class="text-xs text-zinc-500">{{ $entry->personnel->structure->name }}</span>
+                                    @endif
+                                </div>
+                            </x-table.td>
+                            <x-table.td>{{ optional($entry->date)->format('Y-m-d') }}</x-table.td>
                                 <x-table.td>{{ $entry->check_in_at ?: '-' }}</x-table.td>
                                 <x-table.td>{{ $entry->check_out_at ?: '-' }}</x-table.td>
                                 <x-table.td>{{ $entry->worked_minutes }}</x-table.td>

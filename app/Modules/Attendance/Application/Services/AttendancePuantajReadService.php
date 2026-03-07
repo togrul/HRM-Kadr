@@ -11,11 +11,12 @@ use Illuminate\Support\Collection;
 
 class AttendancePuantajReadService
 {
-    public function paginatePersonnels(string $search, int $perPage): LengthAwarePaginator
+    public function paginatePersonnels(string $search, int $perPage, array $structureIds = []): LengthAwarePaginator
     {
         return Personnel::query()
             ->where('is_pending', 0)
             ->whereNull('leave_work_date')
+            ->when($structureIds !== [], fn ($query) => $query->whereIn('structure_id', $structureIds))
             ->when($search !== '', function ($query) use ($search): void {
                 $wildcard = '%'.$search.'%';
                 $query->where(function ($q) use ($wildcard): void {
@@ -25,6 +26,7 @@ class AttendancePuantajReadService
                         ->orWhere('patronymic', 'like', $wildcard);
                 });
             })
+            ->with('structure:id,name,parent_id')
             ->orderBy('surname')
             ->orderBy('name')
             ->paginate($perPage);

@@ -3,8 +3,10 @@
 namespace App\Modules\Attendance\Livewire;
 
 use App\Models\AttendanceOvertimeRequest;
+use App\Models\Structure;
 use App\Modules\Attendance\Application\Services\AttendanceAuthorizationService;
 use App\Modules\Attendance\Application\Services\AttendanceOvertimeApprovalService;
+use App\Traits\NestedStructureTrait;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
@@ -14,6 +16,7 @@ use Livewire\WithPagination;
 class OvertimeBoard extends Component
 {
     use WithPagination;
+    use NestedStructureTrait;
 
     public string $status = 'pending';
 
@@ -26,6 +29,8 @@ class OvertimeBoard extends Component
     public int $perPage = 20;
 
     public bool $canApprove = false;
+
+    public ?int $selectedStructureId = null;
 
     public function mount(int $year, int $month, AttendanceAuthorizationService $authorization): void
     {
@@ -51,6 +56,11 @@ class OvertimeBoard extends Component
     }
 
     public function updatedToDate(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedSelectedStructureId(): void
     {
         $this->resetPage();
     }
@@ -103,21 +113,32 @@ class OvertimeBoard extends Component
 
     public function render()
     {
+        $structureIds = $this->selectedStructureId
+            ? $this->getNestedStructure($this->selectedStructureId)
+            : [];
+
         $items = AttendanceOvertimeRequest::query()
             ->with([
-                'personnel:tabel_no,surname,name,patronymic',
+                'personnel:tabel_no,surname,name,patronymic,structure_id',
+                'personnel.structure:id,name,parent_id',
                 'requestedBy:id,name',
                 'approvedBy:id,name',
             ])
             ->when($this->status !== 'all', fn ($query) => $query->where('status', $this->status))
             ->when($this->fromDate !== '', fn ($query) => $query->whereDate('date', '>=', $this->fromDate))
             ->when($this->toDate !== '', fn ($query) => $query->whereDate('date', '<=', $this->toDate))
+            ->when($structureIds !== [], function ($query) use ($structureIds): void {
+                $query->whereHas('personnel', fn ($personnelQuery) => $personnelQuery->whereIn('structure_id', $structureIds));
+            })
             ->orderByDesc('date')
             ->orderByDesc('id')
             ->paginate($this->perPage);
 
         return view('attendance::livewire.attendance.overtime-board', [
             'items' => $items,
+            'selectedStructureLabel' => $this->selectedStructureId
+                ? Structure::query()->whereKey($this->selectedStructureId)->value('name')
+                : null,
         ]);
     }
 }

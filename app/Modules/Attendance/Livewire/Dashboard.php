@@ -4,6 +4,7 @@ namespace App\Modules\Attendance\Livewire;
 
 use App\Modules\Attendance\Application\Services\AttendanceAuthorizationService;
 use App\Modules\Attendance\Application\Services\AttendanceOverviewService;
+use Livewire\Attributes\On;
 use Carbon\Carbon;
 use Livewire\Component;
 
@@ -16,6 +17,8 @@ class Dashboard extends Component
     public int $month;
 
     public string $activeTab = 'overview';
+
+    public ?int $selectedStructureId = null;
 
     /**
      * @var array<int,string>
@@ -69,6 +72,22 @@ class Dashboard extends Component
         }
 
         $this->activeTab = $tab;
+    }
+
+    #[On('selectStructure')]
+    public function selectStructure(mixed $payload = null): void
+    {
+        if (is_array($payload)) {
+            $payload = $payload['id'] ?? (array_is_list($payload) ? ($payload[0] ?? null) : null);
+        }
+
+        $this->selectedStructureId = is_numeric($payload) ? (int) $payload : null;
+    }
+
+    #[On('filterSelected')]
+    public function clearSelectedStructure(): void
+    {
+        $this->selectedStructureId = null;
     }
 
     /**

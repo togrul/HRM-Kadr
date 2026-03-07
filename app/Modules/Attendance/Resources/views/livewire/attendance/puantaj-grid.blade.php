@@ -22,6 +22,14 @@
         </div>
     </x-surface-card>
 
+    @if($selectedStructureLabel)
+        <div class="flex flex-wrap items-center gap-2 rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 text-xs text-blue-700">
+            <x-small-badge mode="sky">{{ __('Structure scope') }}</x-small-badge>
+            <span>{{ __('Showing personnel from the selected structure tree only.') }}</span>
+            <span class="font-medium">{{ $selectedStructureLabel }}</span>
+        </div>
+    @endif
+
     <div class="relative min-h-[300px] overflow-x-auto">
         <div class="inline-block min-w-full py-2 align-middle">
             <div class="overflow-visible">
@@ -36,6 +44,9 @@
                                     {{ $personnel->surname }} {{ $personnel->name }} {{ $personnel->patronymic }}
                                 </div>
                                 <div class="text-xs font-mono font-normal text-zinc-500">{{ $personnel->tabel_no }}</div>
+                                @if($personnel->structure?->name)
+                                    <div class="text-xs text-zinc-500">{{ $personnel->structure->name }}</div>
+                                @endif
                             </x-table.td>
 
                             @foreach($days as $day)

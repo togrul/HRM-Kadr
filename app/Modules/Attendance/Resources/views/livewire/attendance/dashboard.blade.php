@@ -1,4 +1,9 @@
-<div class="flex flex-col px-6 py-4 space-y-4">
+<div class="flex flex-col">
+    <x-slot name="sidebar">
+        <livewire:structure.sidebar wire:key="attendance-structure-sidebar" />
+    </x-slot>
+
+    <div class="flex flex-col px-6 py-4 space-y-4">
     <x-surface-card :title="__('Attendance tracking')" icon="icons.clock-icon">
         <div class="flex flex-col gap-3">
             <div class="flex flex-col">
@@ -138,18 +143,19 @@
     @endif
 
     @if($activeTab === 'manual' && in_array('manual', $availableTabs, true))
-        <livewire:attendance.manual-entries :embedded="true" />
+        <livewire:attendance.manual-entries :embedded="true" :selectedStructureId="$selectedStructureId" :key="'attendance-manual-'.$year.'-'.$month.'-'.($selectedStructureId ?? 'all')" />
     @endif
 
     @if($activeTab === 'daily-monitor' && in_array('daily-monitor', $availableTabs, true))
-        <livewire:attendance.daily-monitor :key="'attendance-monitor-'.$year.'-'.$month" />
+        <livewire:attendance.daily-monitor :selectedStructureId="$selectedStructureId" :key="'attendance-monitor-'.$year.'-'.$month.'-'.($selectedStructureId ?? 'all')" />
     @endif
 
     @if($activeTab === 'puantaj' && in_array('puantaj', $availableTabs, true))
         <livewire:attendance.puantaj-grid
             :year="$year"
             :month="$month"
-            :key="'attendance-puantaj-'.$year.'-'.$month"
+            :selectedStructureId="$selectedStructureId"
+            :key="'attendance-puantaj-'.$year.'-'.$month.'-'.($selectedStructureId ?? 'all')"
         />
     @endif
 
@@ -157,7 +163,8 @@
         <livewire:attendance.exceptions-inbox
             :year="$year"
             :month="$month"
-            :key="'attendance-exceptions-'.$year.'-'.$month"
+            :selectedStructureId="$selectedStructureId"
+            :key="'attendance-exceptions-'.$year.'-'.$month.'-'.($selectedStructureId ?? 'all')"
         />
     @endif
 
@@ -165,7 +172,8 @@
         <livewire:attendance.overtime-board
             :year="$year"
             :month="$month"
-            :key="'attendance-overtime-'.$year.'-'.$month"
+            :selectedStructureId="$selectedStructureId"
+            :key="'attendance-overtime-'.$year.'-'.$month.'-'.($selectedStructureId ?? 'all')"
         />
     @endif
 
@@ -184,4 +192,5 @@
     @if($activeTab === 'shifts' && in_array('shifts', $availableTabs, true))
         <livewire:attendance.shift-management />
     @endif
+    </div>
 </div>

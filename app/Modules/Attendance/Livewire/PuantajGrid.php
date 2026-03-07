@@ -4,6 +4,8 @@ namespace App\Modules\Attendance\Livewire;
 
 use App\Modules\Attendance\Application\Services\AttendanceAuthorizationService;
 use App\Modules\Attendance\Application\Services\AttendancePuantajReadService;
+use App\Models\Structure;
+use App\Traits\NestedStructureTrait;
 use Carbon\Carbon;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -11,6 +13,7 @@ use Livewire\WithPagination;
 class PuantajGrid extends Component
 {
     use WithPagination;
+    use NestedStructureTrait;
 
     public int $year;
 
@@ -19,6 +22,8 @@ class PuantajGrid extends Component
     public string $search = '';
 
     public int $perPage = 20;
+
+    public ?int $selectedStructureId = null;
 
     public function mount(int $year, int $month, AttendanceAuthorizationService $authorization): void
     {
@@ -35,15 +40,23 @@ class PuantajGrid extends Component
         $this->resetPage();
     }
 
+    public function updatedSelectedStructureId(): void
+    {
+        $this->resetPage();
+    }
+
     public function render()
     {
         $from = Carbon::createFromDate($this->year, $this->month, 1)->startOfMonth();
         $to = $from->copy()->endOfMonth();
         $days = range(1, (int) $from->daysInMonth);
+        $structureIds = $this->selectedStructureId
+            ? $this->getNestedStructure($this->selectedStructureId)
+            : [];
         /** @var AttendancePuantajReadService $readService */
         $readService = app(AttendancePuantajReadService::class);
 
-        $personnels = $readService->paginatePersonnels(trim($this->search), $this->perPage);
+        $personnels = $readService->paginatePersonnels(trim($this->search), $this->perPage, $structureIds);
         $tabelNos = $personnels->getCollection()->pluck('tabel_no')->filter()->values()->all();
 
         $ledgerByTabelAndDate = $readService->loadLedgerMap($tabelNos, $from, $to);
@@ -93,6 +106,9 @@ class PuantajGrid extends Component
             'personnels' => $personnels,
             'calendarDayTypeByDate' => $calendarDayTypeByDate,
             'monthStart' => $from,
+            'selectedStructureLabel' => $this->selectedStructureId
+                ? Structure::query()->whereKey($this->selectedStructureId)->value('name')
+                : null,
         ]);
     }
 

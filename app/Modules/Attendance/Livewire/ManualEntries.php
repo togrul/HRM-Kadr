@@ -4,9 +4,12 @@ namespace App\Modules\Attendance\Livewire;
 
 use App\Models\AttendanceManualEntry;
 use App\Models\AttendanceShift;
+use App\Models\Personnel;
+use App\Models\Structure;
 use App\Modules\Attendance\Application\Services\AttendanceAuthorizationService;
 use App\Modules\Attendance\Application\Services\AttendanceManualEntryService;
 use App\Modules\Attendance\Application\Services\AttendanceManualMetricsResolverService;
+use App\Traits\NestedStructureTrait;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -16,6 +19,7 @@ use Livewire\WithPagination;
 class ManualEntries extends Component
 {
     use WithPagination;
+    use NestedStructureTrait;
 
     public bool $embedded = false;
 
@@ -32,6 +36,15 @@ class ManualEntries extends Component
     public bool $autoCalculatedPreview = false;
 
     public bool $manualMetricOverride = false;
+
+    public ?int $selectedStructureId = null;
+
+    public string $personnelSearch = '';
+
+    /**
+     * @var array<string,string>|null
+     */
+    public ?array $selectedPersonnel = null;
 
     /**
      * @var array<string,mixed>
@@ -97,6 +110,12 @@ class ManualEntries extends Component
         $this->resetPage();
     }
 
+    public function updatedSelectedStructureId(): void
+    {
+        $this->clearPersonnel();
+        $this->resetPage();
+    }
+
     public function updated(string $property, mixed $value): void
     {
         if ($property === 'manualMetricOverride') {
@@ -111,6 +130,25 @@ class ManualEntries extends Component
         if (in_array($property, ['form.tabel_no', 'form.date', 'form.check_in_at', 'form.check_out_at', 'form.shift_source_mode', 'form.explicit_shift_id'], true)) {
             $this->refreshCalculatedFields();
         }
+    }
+
+    public function selectPersonnel(string $tabelNo, string $fullname): void
+    {
+        $this->form['tabel_no'] = $tabelNo;
+        $this->selectedPersonnel = [
+            'tabel_no' => $tabelNo,
+            'fullname' => $fullname,
+        ];
+        $this->personnelSearch = '';
+        $this->refreshCalculatedFields();
+    }
+
+    public function clearPersonnel(): void
+    {
+        $this->form['tabel_no'] = '';
+        $this->selectedPersonnel = null;
+        $this->personnelSearch = '';
+        $this->refreshCalculatedFields();
     }
 
     public function updatedManualMetricOverride(bool $value): void
@@ -162,6 +200,8 @@ class ManualEntries extends Component
         $this->form['reason'] = '';
         $this->autoCalculatedPreview = false;
         $this->manualMetricOverride = false;
+        $this->selectedPersonnel = null;
+        $this->personnelSearch = '';
         $this->resetPreview();
     }
 
@@ -214,8 +254,14 @@ class ManualEntries extends Component
 
     public function getRecentEntriesProperty()
     {
+        $structureIds = $this->selectedStructureId
+            ? $this->getNestedStructure($this->selectedStructureId)
+            : [];
+
         return AttendanceManualEntry::query()
             ->with([
+                'personnel:tabel_no,surname,name,patronymic,structure_id',
+                'personnel.structure:id,name,parent_id',
                 'enteredBy:id,name',
                 'approvedBy:id,name',
             ])
@@ -223,6 +269,9 @@ class ManualEntries extends Component
                 $this->queueStatus !== 'all',
                 fn ($query) => $query->where('approval_status', $this->queueStatus)
             )
+            ->when($structureIds !== [], function ($query) use ($structureIds): void {
+                $query->whereHas('personnel', fn ($personnelQuery) => $personnelQuery->whereIn('structure_id', $structureIds));
+            })
             ->latest('date')
             ->latest('id')
             ->paginate($this->perPage);
@@ -230,20 +279,68 @@ class ManualEntries extends Component
 
     public function render()
     {
+        $structureIds = $this->selectedStructureId
+            ? $this->getNestedStructure($this->selectedStructureId)
+            : [];
+
         $availableShifts = AttendanceShift::query()
             ->where('is_active', true)
             ->orderBy('name')
             ->get(['id', 'name', 'start_time', 'end_time', 'break_minutes']);
+
+        $personnelResults = collect();
+        if (mb_strlen(trim($this->personnelSearch)) >= 2) {
+            $term = trim($this->personnelSearch);
+            $wildcard = '%'.$term.'%';
+
+            $personnelResults = Personnel::query()
+                ->select('tabel_no', 'surname', 'name', 'patronymic', 'structure_id')
+                ->where('is_pending', 0)
+                ->whereNull('leave_work_date')
+                ->when($structureIds !== [], fn ($query) => $query->whereIn('structure_id', $structureIds))
+                ->where(function ($query) use ($wildcard): void {
+                    $query->where('tabel_no', 'like', $wildcard)
+                        ->orWhere('surname', 'like', $wildcard)
+                        ->orWhere('name', 'like', $wildcard)
+                        ->orWhere('patronymic', 'like', $wildcard);
+                })
+                ->with('structure:id,name,parent_id')
+                ->orderBy('surname')
+                ->orderBy('name')
+                ->limit(12)
+                ->get();
+        }
 
         $selectedShiftPreview = null;
         if ($this->form['shift_source_mode'] === 'explicit' && ! empty($this->form['explicit_shift_id'])) {
             $selectedShiftPreview = $availableShifts->firstWhere('id', (int) $this->form['explicit_shift_id']);
         }
 
+        $selectedPersonnelRecord = null;
+        if (! empty($this->form['tabel_no'])) {
+            $selectedPersonnelRecord = Personnel::query()
+                ->select('tabel_no', 'surname', 'name', 'patronymic', 'structure_id')
+                ->with('structure:id,name,parent_id')
+                ->where('tabel_no', $this->form['tabel_no'])
+                ->first();
+
+            if ($selectedPersonnelRecord && ! $this->selectedPersonnel) {
+                $this->selectedPersonnel = [
+                    'tabel_no' => (string) $selectedPersonnelRecord->tabel_no,
+                    'fullname' => (string) $selectedPersonnelRecord->fullname,
+                ];
+            }
+        }
+
         return view('attendance::livewire.attendance.manual-entries', [
             'recentEntries' => $this->recentEntries,
             'availableShifts' => $availableShifts,
             'selectedShiftPreview' => $selectedShiftPreview,
+            'personnelResults' => $personnelResults,
+            'selectedPersonnelRecord' => $selectedPersonnelRecord,
+            'selectedStructureLabel' => $this->selectedStructureId
+                ? Structure::query()->whereKey($this->selectedStructureId)->value('name')
+                : null,
         ]);
     }
 

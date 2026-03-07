@@ -243,6 +243,14 @@
                                                 <x-small-badge mode="green">{{ __('Effective today') }}</x-small-badge>
                                             @endif
 
+                                            @if($assignment->starts_in_future)
+                                                <x-small-badge mode="sky">{{ __('Starts in future') }}</x-small-badge>
+                                            @endif
+
+                                            @if($assignment->is_expired)
+                                                <x-small-badge>{{ __('Expired') }}</x-small-badge>
+                                            @endif
+
                                             @if($assignment->has_overlap_warning)
                                                 <x-small-badge mode="red">{{ __('Overlap warning') }}</x-small-badge>
                                             @endif

@@ -418,6 +418,19 @@ class ShiftManagement extends Component
             );
 
             $assignment->setAttribute(
+                'starts_in_future',
+                $assignment->is_active
+                && $rangeStart !== null
+                && $rangeStart > $today
+            );
+
+            $assignment->setAttribute(
+                'is_expired',
+                $assignment->is_active
+                && $rangeEnd < $today
+            );
+
+            $assignment->setAttribute(
                 'has_overlap_warning',
                 $overlapPool->contains(function (AttendanceShiftAssignment $other) use ($assignment, $rangeStart, $rangeEnd) {
                     if ((int) $other->id === (int) $assignment->id || (string) $other->tabel_no !== (string) $assignment->tabel_no) {

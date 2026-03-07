@@ -13,9 +13,10 @@ class AttendanceDailyMonitorReadService
         string $date,
         string $search,
         string $statusFilter,
-        int $perPage
+        int $perPage,
+        array $structureIds = []
     ): LengthAwarePaginator {
-        return $this->baseQuery($date, $search, $statusFilter)->paginate($perPage);
+        return $this->baseQuery($date, $search, $statusFilter, $structureIds)->paginate($perPage);
     }
 
     /**
@@ -24,24 +25,26 @@ class AttendanceDailyMonitorReadService
     public function totals(
         string $date,
         string $search,
-        string $statusFilter
+        string $statusFilter,
+        array $structureIds = []
     ): array {
         return [
-            'present' => (clone $this->baseQuery($date, $search, $statusFilter))->where(function (Builder $query): void {
+            'present' => (clone $this->baseQuery($date, $search, $statusFilter, $structureIds))->where(function (Builder $query): void {
                 $query->where('l.worked_minutes', '>', 0)
                     ->orWhereIn('l.attendance_status', ['present', 'manual_present', 'holiday_worked', 'weekend_worked']);
             })->count(),
-            'late' => (clone $this->baseQuery($date, $search, $statusFilter))->where('l.late_minutes', '>', 0)->count(),
-            'absent' => (clone $this->baseQuery($date, $search, $statusFilter))->whereIn('l.attendance_status', ['absent', 'manual_absence'])->count(),
-            'missing' => (clone $this->baseQuery($date, $search, $statusFilter))->whereNull('l.id')->count(),
+            'late' => (clone $this->baseQuery($date, $search, $statusFilter, $structureIds))->where('l.late_minutes', '>', 0)->count(),
+            'absent' => (clone $this->baseQuery($date, $search, $statusFilter, $structureIds))->whereIn('l.attendance_status', ['absent', 'manual_absence'])->count(),
+            'missing' => (clone $this->baseQuery($date, $search, $statusFilter, $structureIds))->whereNull('l.id')->count(),
         ];
     }
 
-    private function baseQuery(string $date, string $search, string $statusFilter): Builder
+    private function baseQuery(string $date, string $search, string $statusFilter, array $structureIds = []): Builder
     {
         return Personnel::query()
             ->withoutGlobalScope(SoftDeletingScope::class)
             ->from('personnels as p')
+            ->leftJoin('structures as s', 'p.structure_id', '=', 's.id')
             ->leftJoin('attendance_daily_ledgers as l', function ($join) use ($date): void {
                 $join->on('p.tabel_no', '=', 'l.tabel_no')
                     ->whereDate('l.date', $date);
@@ -49,6 +52,7 @@ class AttendanceDailyMonitorReadService
             ->where('p.is_pending', 0)
             ->whereNull('p.leave_work_date')
             ->whereNull('p.deleted_at')
+            ->when($structureIds !== [], fn (Builder $query) => $query->whereIn('p.structure_id', $structureIds))
             ->when($search !== '', function (Builder $query) use ($search): void {
                 $wildcard = '%'.$search.'%';
                 $query->where(function (Builder $q) use ($wildcard): void {
@@ -77,6 +81,8 @@ class AttendanceDailyMonitorReadService
                 'p.surname',
                 'p.name',
                 'p.patronymic',
+                'p.structure_id',
+                's.name as structure_name',
                 'l.id as ledger_id',
                 'l.worked_minutes',
                 'l.late_minutes',
