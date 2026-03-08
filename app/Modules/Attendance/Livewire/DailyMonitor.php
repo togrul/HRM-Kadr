@@ -27,7 +27,7 @@ class DailyMonitor extends Component
 
     public function mount(AttendanceAuthorizationService $authorization): void
     {
-        if (! $authorization->can('attendance.view')) {
+        if (! $authorization->can('attendance.daily.view')) {
             abort(403);
         }
 

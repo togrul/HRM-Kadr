@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Role;
+use App\Support\Permissions\PermissionDescriptionCatalog;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -33,6 +34,7 @@ return new class extends Migration
         $rows = array_map(
             fn (string $name) => [
                 'name' => $name,
+                'description' => PermissionDescriptionCatalog::describe($name),
                 'guard_name' => 'web',
                 'created_at' => $now,
                 'updated_at' => $now,
@@ -40,7 +42,7 @@ return new class extends Migration
             $this->permissions
         );
 
-        Permission::query()->upsert($rows, ['name', 'guard_name'], ['updated_at']);
+        Permission::query()->upsert($rows, ['name', 'guard_name'], ['description', 'updated_at']);
 
         $adminRole = Role::query()
             ->where('name', 'Admin')

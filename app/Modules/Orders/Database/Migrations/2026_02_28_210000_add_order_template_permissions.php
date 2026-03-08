@@ -1,5 +1,6 @@
 <?php
 
+use App\Support\Permissions\PermissionDescriptionCatalog;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\PermissionRegistrar;
@@ -19,13 +20,14 @@ return new class extends Migration
         $rows = collect($this->permissions)
             ->map(fn (string $name) => [
                 'name' => $name,
+                'description' => PermissionDescriptionCatalog::describe($name),
                 'guard_name' => 'web',
                 'created_at' => $now,
                 'updated_at' => $now,
             ])
             ->all();
 
-        DB::table('permissions')->upsert($rows, ['name', 'guard_name'], ['updated_at']);
+        DB::table('permissions')->upsert($rows, ['name', 'guard_name'], ['description', 'updated_at']);
 
         app(PermissionRegistrar::class)->forgetCachedPermissions();
     }
@@ -40,4 +42,3 @@ return new class extends Migration
         app(PermissionRegistrar::class)->forgetCachedPermissions();
     }
 };
-

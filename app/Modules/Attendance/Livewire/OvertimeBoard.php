@@ -61,7 +61,7 @@ class OvertimeBoard extends Component
         $this->canCreate = $this->canApprove || $authorization->can('attendance.manual.write');
         $this->manualRequest['date'] = now()->toDateString();
 
-        if (! $authorization->can('attendance.view')) {
+        if (! $authorization->can('attendance.overtime.view')) {
             abort(403);
         }
     }

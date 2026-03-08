@@ -97,13 +97,49 @@ Görmür:
 
 ## Permission scopes
 
+Module və section-level access:
+
 - `attendance.view`
+- `attendance.daily.view`
+- `attendance.puantaj.view`
+- `attendance.manual.view`
+- `attendance.overtime.view`
+- `attendance.exceptions.view`
+- `attendance.month.view`
+- `attendance.settings.manage`
+- `attendance.shifts.manage`
+
+Mutation scopes:
+
 - `attendance.manual.write`
 - `attendance.manual.approve`
 - `attendance.overtime.approve`
 - `attendance.exceptions.resolve`
 - `attendance.month.manage`
 - `attendance.export`
+
+Spatie permission name qarşılıqları:
+
+- `attendance.view` -> `show-attendance`
+- `attendance.daily.view` -> `show-attendance-daily-monitor`
+- `attendance.puantaj.view` -> `show-attendance-puantaj`
+- `attendance.manual.view` -> `show-attendance-manual`
+- `attendance.overtime.view` -> `show-attendance-overtime`
+- `attendance.exceptions.view` -> `show-attendance-exceptions`
+- `attendance.month.view` -> `show-attendance-month-close`
+- `attendance.settings.manage` -> `manage-attendance-settings`
+- `attendance.shifts.manage` -> `manage-attendance-shifts`
+- `attendance.manual.write` -> `add-attendance-manual`, `edit-attendance-manual`
+- `attendance.manual.approve` -> `approve-attendance-manual`
+- `attendance.overtime.approve` -> `approve-attendance-overtime`
+- `attendance.exceptions.resolve` -> `edit-attendance-exceptions`
+- `attendance.month.manage` -> `manage-attendance-month-close`
+- `attendance.export` -> `export-attendance`
+
+Vacib qayda:
+
+- `manage-attendance-settings` və `manage-attendance-shifts` explicit admin permission-lərdir.
+- `manage-attendance` təkbaşına `Tənzimləmələr` və `Növbələr` tablarını açmır.
 
 Bu davranışın avtomatik yoxlanışı:
 

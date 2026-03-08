@@ -28,7 +28,7 @@ class PuantajGrid extends Component
 
     public function mount(int $year, int $month, AttendanceAuthorizationService $authorization): void
     {
-        if (! $authorization->can('attendance.view')) {
+        if (! $authorization->can('attendance.puantaj.view')) {
             abort(403);
         }
 

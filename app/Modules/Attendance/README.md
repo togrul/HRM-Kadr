@@ -43,11 +43,15 @@ Current state:
    - compliance (schedule adherence)
 7. Role-based access scopes are enabled:
    - attendance.view
+   - attendance.daily.view / attendance.puantaj.view
+   - attendance.manual.view / attendance.overtime.view / attendance.exceptions.view / attendance.month.view
+   - attendance.settings.manage / attendance.shifts.manage
    - attendance.manual.write / attendance.manual.approve
    - attendance.overtime.approve
    - attendance.exceptions.resolve
    - attendance.month.manage
    - attendance.export
+   - `manage-attendance-settings` and `manage-attendance-shifts` are explicit admin permissions
    - Role matrix seeded: HR Admin / HR Manager / HR Employee / HR Auditor
 8. Phase G performance hardening:
    - pre-aggregated daily structure summaries (`attendance_daily_structure_summaries`)

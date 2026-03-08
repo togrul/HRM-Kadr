@@ -97,33 +97,35 @@ class Dashboard extends Component
     {
         $tabs = ['overview'];
 
-        if ($authorization->can('attendance.view')) {
+        if ($authorization->can('attendance.daily.view')) {
             $tabs[] = 'daily-monitor';
+        }
+
+        if ($authorization->can('attendance.puantaj.view')) {
             $tabs[] = 'puantaj';
+        }
+
+        if ($authorization->can('attendance.exceptions.view')) {
             $tabs[] = 'exceptions';
+        }
+
+        if ($authorization->can('attendance.overtime.view')) {
             $tabs[] = 'overtime';
+        }
+
+        if ($authorization->can('attendance.month.view')) {
             $tabs[] = 'month-close';
+        }
+
+        if ($authorization->can('attendance.manual.view')) {
             $tabs[] = 'manual';
         }
 
-        if (! $authorization->can('attendance.exceptions.resolve')) {
-            $tabs = array_values(array_diff($tabs, ['exceptions']));
-        }
-
-        if (! $authorization->can('attendance.overtime.approve')) {
-            $tabs = array_values(array_diff($tabs, ['overtime']));
-        }
-
-        if (! $authorization->can('attendance.month.manage') && ! $authorization->can('attendance.export')) {
-            $tabs = array_values(array_diff($tabs, ['month-close']));
-        }
-
-        if (! $authorization->can('attendance.manual.write') && ! $authorization->can('attendance.manual.approve')) {
-            $tabs = array_values(array_diff($tabs, ['manual']));
-        }
-
-        if ($authorization->can('attendance.month.manage')) {
+        if ($authorization->can('attendance.settings.manage')) {
             $tabs[] = 'settings';
+        }
+
+        if ($authorization->can('attendance.shifts.manage')) {
             $tabs[] = 'shifts';
         }
 

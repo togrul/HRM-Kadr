@@ -18,6 +18,7 @@ use App\Models\ScientificDegreeAndName;
 use App\Models\SocialOrigin;
 use App\Models\User;
 use App\Models\WorkNorm;
+use App\Support\Permissions\PermissionDescriptionCatalog;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -538,7 +539,15 @@ class PersonnelSeeder extends Seeder
           'delete-leaves',
           'export-leaves',
           'show-attendance',
+          'show-attendance-daily-monitor',
+          'show-attendance-puantaj',
+          'show-attendance-manual',
+          'show-attendance-exceptions',
+          'show-attendance-overtime',
+          'show-attendance-month-close',
           'manage-attendance',
+          'manage-attendance-settings',
+          'manage-attendance-shifts',
           'add-attendance-manual',
           'edit-attendance-manual',
           'approve-attendance-manual',
@@ -552,6 +561,7 @@ class PersonnelSeeder extends Seeder
         $permissionRows = array_map(
             fn (string $name) => [
                 'name' => $name,
+                'description' => PermissionDescriptionCatalog::describe($name),
                 'guard_name' => 'web',
                 'created_at' => $now,
                 'updated_at' => $now,
@@ -559,7 +569,7 @@ class PersonnelSeeder extends Seeder
             $permissionNames
         );
 
-        Permission::upsert($permissionRows, ['name', 'guard_name'], ['updated_at']);
+        Permission::upsert($permissionRows, ['name', 'guard_name'], ['description', 'updated_at']);
 
         $role = Role::firstOrCreate(
             ['name' => 'Admin', 'guard_name' => 'web'],

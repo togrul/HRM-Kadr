@@ -94,8 +94,8 @@ class ShiftManagement extends Component
 
     public function mount(AttendanceAuthorizationService $authorization): void
     {
-        $authorization->authorize('attendance.view');
-        $this->canManage = $authorization->can('attendance.month.manage');
+        $authorization->authorize('attendance.shifts.manage');
+        $this->canManage = $authorization->can('attendance.shifts.manage');
         $this->assignmentForm['effective_from'] = now()->toDateString();
     }
 

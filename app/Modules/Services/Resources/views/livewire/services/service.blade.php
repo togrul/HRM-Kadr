@@ -46,11 +46,31 @@
                     @break
 
                     @case('roles')
-                        <div class="grid grid-cols-1 gap-3 sm:grid-cols-5">
-                            <div class="sm:col-span-2" wire:key="roles-section">
+                        <div class="space-y-4" x-data="{ activeRoleTab: 'roles' }">
+                            <div class="inline-flex items-center rounded-2xl border border-zinc-200 bg-zinc-50 p-1">
+                                <button
+                                    type="button"
+                                    class="rounded-xl px-4 py-2 text-sm font-medium transition-all"
+                                    :class="activeRoleTab === 'roles' ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-500 hover:text-zinc-700'"
+                                    @click="activeRoleTab = 'roles'"
+                                >
+                                    {{ __('Roles') }}
+                                </button>
+                                <button
+                                    type="button"
+                                    class="rounded-xl px-4 py-2 text-sm font-medium transition-all"
+                                    :class="activeRoleTab === 'permissions' ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-500 hover:text-zinc-700'"
+                                    @click="activeRoleTab = 'permissions'"
+                                >
+                                    {{ __('Permissions') }}
+                                </button>
+                            </div>
+
+                            <div x-show="activeRoleTab === 'roles'" x-cloak wire:key="roles-section">
                                 @livewire('services.roles.manage-roles', key('roles'))
                             </div>
-                            <div class="sm:col-span-3" wire:key="permission-section">
+
+                            <div x-show="activeRoleTab === 'permissions'" x-cloak wire:key="permission-section">
                                 @livewire('services.roles.permissions', key('permissions'))
                             </div>
                         </div>

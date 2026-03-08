@@ -43,8 +43,8 @@ class Settings extends Component
         AttendanceAuthorizationService $authorization,
         AttendanceSettingsService $settingsService
     ): void {
-        $authorization->authorize('attendance.view');
-        $this->canManage = $authorization->can('attendance.month.manage');
+        $authorization->authorize('attendance.settings.manage');
+        $this->canManage = $authorization->can('attendance.settings.manage');
 
         $this->loadForm($settingsService);
     }

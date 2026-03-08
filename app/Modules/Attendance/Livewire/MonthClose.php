@@ -37,7 +37,7 @@ class MonthClose extends Component
         AttendanceAuthorizationService $authorization
     ): void
     {
-        if (! $authorization->can('attendance.view')) {
+        if (! $authorization->can('attendance.month.view')) {
             abort(403);
         }
 

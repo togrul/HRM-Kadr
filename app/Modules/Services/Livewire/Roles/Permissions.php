@@ -18,9 +18,13 @@ class Permissions extends Component
 
     public $permission_name;
 
+    public string $permission_description = '';
+
     public string $search = '';
 
     public int $perPage = 25;
+
+    public bool $showPermissionModal = false;
 
     protected function rules(): array
     {
@@ -29,28 +33,52 @@ class Permissions extends Component
                 'required',
                 Rule::unique('permissions', 'name')->ignore($this->permission_id),
             ],
+            'permission_description' => ['required', 'string', 'min:12'],
         ];
     }
 
-    public function editPermission($id)
+    public function createPermission(): void
+    {
+        $this->resetInputFields();
+        $this->resetErrorBag();
+        $this->showPermissionModal = true;
+    }
+
+    public function editPermission($id): void
     {
         $permission = Permission::findOrFail($id);
         $this->permission_id = $id;
         $this->permission_name = $permission->name;
+        $this->permission_description = (string) ($permission->description ?? '');
+        $this->resetErrorBag();
+        $this->showPermissionModal = true;
     }
 
-    public function store()
+    public function closePermissionModal(): void
+    {
+        $this->showPermissionModal = false;
+        $this->resetInputFields();
+        $this->resetErrorBag();
+    }
+
+    public function store(): void
     {
         $this->validate();
-        $data = ['name' => $this->permission_name];
+        $data = [
+            'name' => $this->permission_name,
+            'description' => $this->permission_description,
+        ];
 
         if ($this->permission_id) {
-            Permission::findOrFail($this->permission_id)->update($data);
+            $permission = Permission::findOrFail($this->permission_id);
+            $permission->forceFill($data)->save();
         } else {
-            Permission::create($data);
+            $permission = new Permission;
+            $permission->forceFill($data + ['guard_name' => 'web'])->save();
         }
 
         $this->dispatch('permissionUpdated', __('Permission was added successfully!'));
+        $this->showPermissionModal = false;
         $this->resetInputFields();
         $this->resetErrorBag();
     }
@@ -60,10 +88,9 @@ class Permissions extends Component
         $this->dispatch('setDeletePermission', $permissionId);
     }
 
-    public function cancel()
+    public function cancel(): void
     {
-        $this->resetInputFields();
-        $this->resetErrorBag();
+        $this->closePermissionModal();
     }
 
     public function updatingSearch(): void
@@ -74,15 +101,20 @@ class Permissions extends Component
     private function resetInputFields()
     {
         $this->permission_name = '';
+        $this->permission_description = '';
         $this->permission_id = null;
     }
 
     public function render()
     {
         $permissions = Permission::query()
-            ->select('id', 'name')
+            ->select('id', 'name', 'description')
             ->when($this->search !== '', function ($query) {
-                $query->where('name', 'like', '%'.$this->search.'%');
+                $query->where(function ($innerQuery): void {
+                    $innerQuery
+                        ->where('name', 'like', '%'.$this->search.'%')
+                        ->orWhere('description', 'like', '%'.$this->search.'%');
+                });
             })
             ->orderBy('name')
             ->paginate($this->perPage);

@@ -100,10 +100,11 @@ class ManualEntries extends Component
     {
         $this->embedded = $embedded;
         $this->form['date'] = now()->toDateString();
+        $canView = $authorization->can('attendance.manual.view');
         $this->canWrite = $authorization->can('attendance.manual.write');
         $this->canApprove = $authorization->can('attendance.manual.approve');
 
-        if (! $this->canWrite && ! $this->canApprove) {
+        if (! $canView && ! $this->canWrite && ! $this->canApprove) {
             abort(403);
         }
     }

@@ -124,7 +124,7 @@ class SetPermission extends Component
     private function preloadPermissionData(): void
     {
         $permissions = Permission::query()
-            ->select('id', 'name')
+            ->select('id', 'name', 'description')
             ->orderBy('name')
             ->get();
 
@@ -209,6 +209,7 @@ class SetPermission extends Component
                 'id' => (int) $permission->id,
                 'name' => $permission->name,
                 'title' => $method,
+                'description' => (string) ($permission->description ?? ''),
             ];
 
             return $carry;
