@@ -2,6 +2,7 @@
 
 namespace App\Modules\Services\Livewire\Roles;
 
+use Illuminate\Support\Str;
 use Livewire\Attributes\On;
 use Livewire\WithPagination;
 use Livewire\Component;
@@ -63,18 +64,21 @@ class Permissions extends Component
 
     public function store(): void
     {
-        $this->validate();
-        $data = [
-            'name' => $this->permission_name,
-            'description' => $this->permission_description,
-        ];
+        $data = $this->validate();
 
         if ($this->permission_id) {
             $permission = Permission::findOrFail($this->permission_id);
-            $permission->forceFill($data)->save();
+            $permission->forceFill([
+                'name' => $data['permission_name'],
+                'description' => $data['permission_description'],
+            ])->save();
         } else {
             $permission = new Permission;
-            $permission->forceFill($data + ['guard_name' => 'web'])->save();
+            $permission->forceFill([
+                'name' => $data['permission_name'],
+                'description' => $data['permission_description'],
+                'guard_name' => 'web',
+            ])->save();
         }
 
         $this->dispatch('permissionUpdated', __('Permission was added successfully!'));
@@ -103,6 +107,95 @@ class Permissions extends Component
         $this->permission_name = '';
         $this->permission_description = '';
         $this->permission_id = null;
+    }
+
+    public function moduleBadge(string $permissionName): array
+    {
+        $normalized = Str::of($permissionName)->lower()->replace('_', '-')->toString();
+
+        return match (true) {
+            str_contains($normalized, 'attendance') => ['label' => __('Attendance'), 'mode' => 'sky'],
+            str_contains($normalized, 'order') || str_contains($normalized, 'template') || str_contains($normalized, 'component') => ['label' => __('Orders'), 'mode' => 'amber'],
+            str_contains($normalized, 'candidate') => ['label' => __('Candidates'), 'mode' => 'purple'],
+            str_contains($normalized, 'leave') || str_contains($normalized, 'vacation') || str_contains($normalized, 'business-trip') => ['label' => __('Time off'), 'mode' => 'green'],
+            str_contains($normalized, 'structure') || str_contains($normalized, 'staff') || str_contains($normalized, 'personnel') => ['label' => __('Workforce'), 'mode' => 'blue'],
+            str_contains($normalized, 'service') || str_contains($normalized, 'role') || str_contains($normalized, 'permission') || str_contains($normalized, 'menu') || str_contains($normalized, 'user') || str_contains($normalized, 'rank') => ['label' => __('Admin'), 'mode' => 'secondary'],
+            default => ['label' => __('General'), 'mode' => 'secondary'],
+        };
+    }
+
+    public function riskBadge(string $permissionName): array
+    {
+        $normalized = Str::of($permissionName)->lower()->replace('_', '-')->toString();
+
+        return match (true) {
+            str_contains($normalized, 'delete')
+                || str_contains($normalized, 'remove')
+                || str_contains($normalized, 'approve')
+                || str_contains($normalized, 'reject')
+                || str_contains($normalized, 'publish')
+                || str_contains($normalized, 'close')
+                || str_contains($normalized, 'manage')
+                || str_contains($normalized, 'settings')
+                    => ['label' => __('High risk'), 'mode' => 'red'],
+            str_contains($normalized, 'create')
+                || str_contains($normalized, 'add')
+                || str_contains($normalized, 'edit')
+                || str_contains($normalized, 'update')
+                || str_contains($normalized, 'assign')
+                || str_contains($normalized, 'export')
+                || str_contains($normalized, 'import')
+                    => ['label' => __('Medium risk'), 'mode' => 'amber'],
+            default => ['label' => __('Low risk'), 'mode' => 'green'],
+        };
+    }
+
+    public function adminBadge(string $permissionName): ?array
+    {
+        $normalized = Str::of($permissionName)->lower()->replace('_', '-')->toString();
+
+        if (
+            str_contains($normalized, 'admin')
+            || str_contains($normalized, 'settings')
+            || str_contains($normalized, 'role')
+            || str_contains($normalized, 'permission')
+            || str_contains($normalized, 'manage')
+        ) {
+            return ['label' => __('Admin only'), 'mode' => 'purple'];
+        }
+
+        return null;
+    }
+
+    public function highlightText(?string $value): string
+    {
+        $text = (string) $value;
+        $needle = trim($this->search);
+
+        if ($text === '') {
+            return '';
+        }
+
+        if ($needle === '') {
+            return e($text);
+        }
+
+        $pattern = '/(' . preg_quote($needle, '/') . ')/iu';
+        $parts = preg_split($pattern, $text, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+
+        if ($parts === false) {
+            return e($text);
+        }
+
+        return collect($parts)
+            ->map(function (string $part) use ($needle): string {
+                if (mb_strtolower($part) === mb_strtolower($needle)) {
+                    return '<mark class="rounded bg-amber-100 px-1 text-zinc-900">' . e($part) . '</mark>';
+                }
+
+                return e($part);
+            })
+            ->implode('');
     }
 
     public function render()

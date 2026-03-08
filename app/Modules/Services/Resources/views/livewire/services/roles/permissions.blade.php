@@ -25,10 +25,10 @@
         x-on:keydown.escape.window="openPermissionModal = false; $wire.closePermissionModal()"
         style="display: none;"
     >
-        <div class="flex min-h-screen items-center justify-center px-4 pb-8 pt-4">
+        <div class="flex min-h-screen items-center justify-center px-4 pb-6 pt-8 md:pt-10">
             <div class="absolute inset-0 bg-zinc-900/50" @click="openPermissionModal = false; $wire.closePermissionModal()"></div>
             <div class="relative z-10 w-full max-w-3xl rounded-3xl border border-zinc-200 bg-white shadow-2xl">
-                <div class="flex items-center justify-between border-b border-zinc-200 px-6 py-5">
+                <div class="flex items-center justify-between border-b border-zinc-200 px-6 py-3">
                     <div>
                         <h3 class="text-xl font-semibold text-zinc-800">
                             {{ $permission_id ? __('Edit permission') : __('Add permission') }}
@@ -39,7 +39,13 @@
                     </button>
                 </div>
 
-                <form wire:submit.prevent="store" class="space-y-5 px-6 py-6">
+                <form wire:submit.prevent="store" class="space-y-5 px-6 py-5">
+                    @if ($errors->any())
+                        <div class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                            {{ $errors->first() }}
+                        </div>
+                    @endif
+
                     <div class="grid grid-cols-1 gap-5">
                         <div>
                             <x-label for="permission_name" :value="__('Permission')" />
@@ -99,19 +105,30 @@
                     @foreach ($permissions as $permission)
                         <tr wire:key="permission-row-{{ $permission->id }}">
                             <x-table.td>
-                                <div class="flex flex-row items-center space-x-2">
-                                    <span @class([
-                                        'px-3 py-1 inline-flex text-xs leading-4 font-medium rounded-full flex-none uppercase',
-                                    ])>
-                                        {{ $permission->name }}
-                                    </span>
-                                </div>
+                                @php
+                                    $moduleBadge = $this->moduleBadge($permission->name);
+                                    $riskBadge = $this->riskBadge($permission->name);
+                                    $adminBadge = $this->adminBadge($permission->name);
+                                @endphp
 
+                                <div class="flex flex-col gap-2">
+                                    <span class="text-sm font-semibold text-zinc-800">
+                                        {!! $this->highlightText($permission->name) !!}
+                                    </span>
+
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <x-small-badge :mode="$moduleBadge['mode']">{{ $moduleBadge['label'] }}</x-small-badge>
+                                        <x-small-badge :mode="$riskBadge['mode']">{{ $riskBadge['label'] }}</x-small-badge>
+                                        @if ($adminBadge)
+                                            <x-small-badge :mode="$adminBadge['mode']">{{ $adminBadge['label'] }}</x-small-badge>
+                                        @endif
+                                    </div>
+                                </div>
                             </x-table.td>
 
                             <x-table.td>
                                 <p class="max-w-3xl text-sm leading-6 text-zinc-600">
-                                    {{ $permission->description }}
+                                    {!! $this->highlightText($permission->description) !!}
                                 </p>
                             </x-table.td>
 

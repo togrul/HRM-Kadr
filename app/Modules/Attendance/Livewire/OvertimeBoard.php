@@ -287,11 +287,57 @@ class OvertimeBoard extends Component
             })
         );
 
+        $activeFilters = [];
+
+        if ($this->status !== 'all') {
+            $activeFilters[] = [
+                'label' => __('Status'),
+                'value' => __($this->status),
+                'mode' => 'sky',
+            ];
+        }
+
+        if ($this->fromDate !== '' || $this->toDate !== '') {
+            $range = trim(($this->fromDate ?: '...').' - '.($this->toDate ?: '...'));
+            $activeFilters[] = [
+                'label' => __('Period'),
+                'value' => $range,
+                'mode' => 'secondary',
+            ];
+        }
+
+        $selectedStructureLabel = $structureScopeRead->label($this->selectedStructureId);
+        if ($selectedStructureLabel) {
+            $activeFilters[] = [
+                'label' => __('Structure'),
+                'value' => $selectedStructureLabel,
+                'mode' => 'purple',
+            ];
+        }
+
+        if ($this->selectedPersonnel) {
+            $activeFilters[] = [
+                'label' => __('Personnel'),
+                'value' => (string) ($this->selectedPersonnel['fullname'] ?? $this->selectedPersonnel['tabel_no'] ?? ''),
+                'mode' => 'green',
+            ];
+        }
+
+        $emptyStateTitle = __('No overtime requests found.');
+        $emptyStateDescription = __('No overtime requests match the current filters. Adjust the filters or create a manual request.');
+
+        if ($activeFilters === []) {
+            $emptyStateDescription = __('No overtime requests are waiting in the selected period yet. Approved, rejected or not-yet-generated requests will not appear here.');
+        }
+
         return view('attendance::livewire.attendance.overtime-board', [
             'items' => $items,
-            'selectedStructureLabel' => $structureScopeRead->label($this->selectedStructureId),
+            'selectedStructureLabel' => $selectedStructureLabel,
             'personnelResults' => $personnelResults,
             'staleAfterDays' => $staleAfterDays,
+            'activeFilters' => $activeFilters,
+            'emptyStateTitle' => $emptyStateTitle,
+            'emptyStateDescription' => $emptyStateDescription,
         ]);
     }
 }

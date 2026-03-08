@@ -101,6 +101,17 @@
         </div>
     @endif
 
+    @if(!empty($activeFilters))
+        <div class="flex flex-wrap items-center gap-2 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2">
+            <span class="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400">{{ __('Active filters') }}</span>
+            @foreach($activeFilters as $filter)
+                <x-small-badge :mode="$filter['mode']">
+                    {{ $filter['label'] }}: {{ $filter['value'] }}
+                </x-small-badge>
+            @endforeach
+        </div>
+    @endif
+
     <div class="space-y-3">
     <div class="relative overflow-x-auto">
         <div class="inline-block min-w-full py-2 align-middle">
@@ -181,7 +192,16 @@
                         </x-table.td>
                     </tr>
                 @empty
-                    <x-table.empty :rows="7" />
+                    <tr>
+                        <td colspan="7" class="px-4 py-10">
+                            <div class="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-zinc-200 bg-zinc-50 px-6 py-8 text-center">
+                                <x-small-badge mode="secondary">{{ $emptyStateTitle }}</x-small-badge>
+                                <p class="max-w-2xl text-sm leading-6 text-zinc-500">
+                                    {{ $emptyStateDescription }}
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
                 @endforelse
                 </x-table.tbl>
             </div>
