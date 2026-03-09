@@ -52,7 +52,7 @@
         <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
             <div class="flex flex-col xl:col-span-2">
                 <x-ui.select-dropdown
-                    :label="__('Structure')"
+                    :label="__('business_trips::common.filters.structure')"
                     placeholder="---"
                     mode="gray"
                     class="w-full"
@@ -64,7 +64,7 @@
             </div>
             <div class="flex flex-col xl:col-span-2">
                 <x-ui.select-dropdown
-                    :label="__('Order types')"
+                    :label="__('business_trips::common.filters.order_types')"
                     placeholder="---"
                     mode="gray"
                     class="w-full"
@@ -73,17 +73,17 @@
                 />
             </div>
             <div class="flex flex-col">
-                <x-label for="filter.fullname">{{ __('Fullname') }}</x-label>
+                <x-label for="filter.fullname">{{ __('business_trips::common.filters.fullname') }}</x-label>
                 <x-livewire-input mode="gray" name="filter.fullname"
                     wire:model.defer="filter.fullname"></x-livewire-input>
             </div>
             <div class="flex flex-col">
-                <x-label for="filter.order_no">{{ __('Order #') }}</x-label>
+                <x-label for="filter.order_no">{{ __('business_trips::common.filters.order_no') }}</x-label>
                 <x-livewire-input mode="gray" name="filter.order_no"
                     wire:model.defer="filter.order_no"></x-livewire-input>
             </div>
             <div class="flex flex-col lg:col-span-2">
-                <x-label for="filter.date_range">{{ __('Date range') }}</x-label>
+                <x-label for="filter.date_range">{{ __('business_trips::common.filters.date_range') }}</x-label>
                 <div class="flex items-center space-x-1">
                     <x-pikaday-input mode="gray" name="filter.date.min" format="Y-MM-DD"
                         wire:model.live="filter.date.min">
@@ -105,38 +105,38 @@
                 </div>
             </div>
             <div class="flex flex-col">
-                <x-label for="filter.location">{{ __('Location') }}</x-label>
+                <x-label for="filter.location">{{ __('business_trips::common.filters.location') }}</x-label>
                 <x-livewire-input mode="gray" name="filter.location"
                     wire:model.defer="filter.location"></x-livewire-input>
             </div>
             <div class="flex flex-col w-full space-y-1 lg:col-span-2">
-                <x-label for="filter.gender">{{ __('Status') }}</x-label>
+                <x-label for="filter.gender">{{ __('business_trips::common.filters.status') }}</x-label>
                 <div class="flex flex-row">
                     <label class="inline-flex items-center px-2 py-2 bg-gray-100 rounded shadow-sm">
                         <input type="radio" class="form-radio" name="filter.business_trip_status"
                             wire:model="filter.business_trip_status" value="all">
-                        <span class="ml-2 text-sm font-normal">{{ __('All') }}</span>
+                        <span class="ml-2 text-sm font-normal">{{ __('business_trips::common.filters.all') }}</span>
                     </label>
                     <label class="inline-flex items-center px-2 py-2 bg-gray-100 rounded shadow-sm">
                         <input type="radio" class="form-radio" name="filter.business_trip_status"
                             wire:model="filter.business_trip_status" value="at_work">
-                        <span class="ml-2 text-sm font-normal">{{ __('At work') }}</span>
+                        <span class="ml-2 text-sm font-normal">{{ __('business_trips::common.filters.at_work') }}</span>
                     </label>
                     <label class="inline-flex items-center px-2 py-2 bg-gray-100 rounded shadow-sm">
                         <input type="radio" class="form-radio" name="filter.business_trip_status"
                             wire:model="filter.business_trip_status" value="in_business_trip">
-                        <span class="ml-2 text-sm font-normal">{{ __('In business trip') }}</span>
+                        <span class="ml-2 text-sm font-normal">{{ __('business_trips::common.filters.in_business_trip') }}</span>
                     </label>
                     <label class="inline-flex items-center px-2 py-2 bg-gray-100 rounded shadow-sm">
                         <input type="radio" class="form-radio" name="filter.business_trip_status"
                             wire:model="filter.business_trip_status" value="deleted">
-                        <span class="ml-2 text-sm font-normal">{{ __('Deleted') }}</span>
+                        <span class="ml-2 text-sm font-normal">{{ __('business_trips::common.filters.deleted') }}</span>
                     </label>
                 </div>
             </div>
             <div class="flex items-end space-x-2">
-                <x-button mode="primary" wire:click="searchFilter">{{ __('Search') }}</x-button>
-                <x-button mode="black" wire:click="resetFilter">{{ __('Reset') }}</x-button>
+                <x-button mode="primary" wire:click="searchFilter">{{ __('business_trips::common.filters.search') }}</x-button>
+                <x-button mode="black" wire:click="resetFilter">{{ __('business_trips::common.filters.reset') }}</x-button>
             </div>
         </div>
 
@@ -144,7 +144,7 @@
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
                 <div class="overflow-visible">
 
-                    <x-table.tbl :headers="$this->getTableHeaders()" title="{{ __('Business trips') }}">
+                    <x-table.tbl :headers="$this->getTableHeaders()" title="{{ __('business_trips::common.table.title') }}">
                         @forelse ($this->businessTrips as $_bTrip)
                             <tr @class([
                                 'bg-teal-50' => $_bTrip->is_active_trip,
@@ -171,7 +171,7 @@
                                         @if ($_bTrip->is_active_trip)
                                             <span
                                                 class="flex items-center justify-center px-2 py-1 text-sm font-medium text-green-700 bg-green-200 rounded-lg">
-                                                {{ __('In business trip') }}
+                                                {{ __('business_trips::common.filters.in_business_trip') }}
                                             </span>
                                         @endif
                                     </div>
@@ -180,21 +180,21 @@
                                 <x-table.td>
                                     <div class="flex flex-col text-sm font-medium">
                                         <div class="flex items-center space-x-1">
-                                            <span class="text-gray-500">{{ __('Start date') }}:</span>
+                                            <span class="text-gray-500">{{ __('business_trips::common.table.start_date') }}:</span>
                                             <span class="text-sky-500">{{ $_bTrip->start_date_label }}</span>
                                         </div>
                                         <div class="flex items-center space-x-1">
-                                            <span class="text-gray-500">{{ __('End date') }}:</span>
+                                            <span class="text-gray-500">{{ __('business_trips::common.table.end_date') }}:</span>
                                             <span class="text-rose-500">{{ $_bTrip->end_date_label }}</span>
                                         </div>
                                         @if (\Illuminate\Support\Arr::get($search, 'business_trip_status', '') == 'deleted')
                                             <div class="flex flex-col text-sm font-medium">
                                                 <div class="flex items-center space-x-1">
-                                                    <span class="text-gray-500">{{ __('Deleted date') }}:</span>
+                                                    <span class="text-gray-500">{{ __('business_trips::common.table.deleted_date') }}:</span>
                                                     <span class="text-black">{{ $_bTrip->deleted_at_label ?? '' }}</span>
                                                 </div>
                                                 <div class="flex items-center space-x-1">
-                                                    <span class="text-gray-500">{{ __('Deleted by') }}:</span>
+                                                    <span class="text-gray-500">{{ __('business_trips::common.table.deleted_by') }}:</span>
                                                     <span
                                                         class="text-black">{{ $_bTrip->personDidDelete->name }}</span>
                                                 </div>
@@ -218,7 +218,7 @@
                                 <x-table.td>
                                     <div class="flex flex-col text-sm font-medium">
                                         <div class="flex items-center space-x-1">
-                                            <span class="text-gray-500">{{ __('Order #') }}:</span>
+                                            <span class="text-gray-500">{{ __('business_trips::common.table.order_no') }}:</span>
                                             <a href="{{ route('orders', ['search' => ['order_no' => $_bTrip->order_no]]) }}"
                                                 class="text-blue-600">{{ $_bTrip->order_no }}</a>
                                             @if ($_bTrip->is_multi_order_trip)
@@ -230,11 +230,11 @@
                                             @endif
                                         </div>
                                         <div class="flex items-center space-x-1">
-                                            <span class="text-gray-500">{{ __('Given by') }}:</span>
+                                            <span class="text-gray-500">{{ __('business_trips::common.table.given_by') }}:</span>
                                             <span class="text-black">{{ $_bTrip->order_given_by }}</span>
                                         </div>
                                         <div class="flex items-center space-x-1">
-                                            <span class="text-gray-500">{{ __('Given date') }}:</span>
+                                            <span class="text-gray-500">{{ __('business_trips::common.table.given_date') }}:</span>
                                             <span class="text-black">{{ $_bTrip->order_date_label }}</span>
                                         </div>
                                     </div>

@@ -1,45 +1,50 @@
 @props(['notification'])
 
 @php
+    use App\Support\Translations\ModuleTranslation;
+
     $data = $notification->data;
-    $type = $data['type'] ?? 'notification';
     $action = $data['action'] ?? '';
     $isRead = !empty($notification->read_at);
+    $resolveText = static fn ($value, $fallback = '') => is_string($value) && $value !== ''
+        ? ModuleTranslation::resolveStoredText($value)
+        : $fallback;
+
     switch ($action) {
         case 'create':
             $color = 'emerald';
-            $message = $data['message'] ?? __('has created new personnel');
-            $category = __($data['category'] ?? ('New ' . strtolower($type)));
+            $message = $resolveText($data['message'] ?? null, __('notifications::common.messages.created_new_personnel'));
+            $category = $resolveText($data['category'] ?? null, __('notifications::common.categories.new_record'));
             $addedBy = $data['added_by'] ?? null;
             break;
         case 'delete':
             $color = 'rose';
-            $message = $data['message'] ?? __('has deleted personnel');
-            $category = __($data['category'] ?? ($type . ' deleted'));
-            $addedBy = $data['added_by'] ?? null;                                                                                                      
+            $message = $resolveText($data['message'] ?? null, __('notifications::common.messages.deleted_personnel'));
+            $category = $resolveText($data['category'] ?? null, __('notifications::common.categories.deleted_record'));
+            $addedBy = $data['added_by'] ?? null;
             break;
         case 'birthday':
             $color = 'blue';
             $message = '';
-            $category = $type;
+            $category = $resolveText($data['category'] ?? null, __('notifications::common.categories.birthday'));
             $addedBy = null;
             break;
         case 'leave':
             $color = 'amber';
-            $message = $data['message'] ?? __('New leave request has created');
-            $category = __($data['category'] ?? $data['leave_type'] ?? 'Leave');
+            $message = $resolveText($data['message'] ?? null, __('notifications::common.messages.new_leave_request_created'));
+            $category = $resolveText($data['category'] ?? ($data['leave_type'] ?? null), __('notifications::common.categories.leave'));
             $addedBy = $data['added_by'] ?? null;
             break;
         case 'leaveStatusChanged':
             $color = 'indigo';
-            $message = $data['message'] ?? __('Leave request has been' . ' ' . strtolower($data['status'] ?? '') );
-            $category = __($data['category'] ?? $data['leave_type'] ?? 'Leave');
+            $message = $resolveText($data['message'] ?? null, __('notifications::common.messages.leave_request_status_changed'));
+            $category = $resolveText($data['category'] ?? ($data['leave_type'] ?? null), __('notifications::common.categories.leave'));
             $addedBy = $data['added_by'] ?? null;
             break;
         default:
             $color = 'gray';
-            $message = $data['message'] ?? __('has a notification');
-            $category = __($data['category'] ?? 'Notification');
+            $message = $resolveText($data['message'] ?? null, __('notifications::common.messages.has_notification'));
+            $category = $resolveText($data['category'] ?? null, __('notifications::common.categories.notification'));
             $addedBy = $data['added_by'] ?? null;
     }
 @endphp
@@ -56,7 +61,7 @@
                         @if ($action === 'birthday' && $addedBy)
                             <x-icons.cake-icon color="text-yellow-800"></x-icons.cake-icon>
                             <span class="flex items-center flex-none text-base text-black">
-                                <span class="text-sm text-neutral-500">{{ __('Age') }}:</span>
+                                <span class="text-sm text-neutral-500">{{ __('notifications::common.labels.age') }}:</span>
                                 {{ \Carbon\Carbon::parse($addedBy)->age }}
                             </span>
                         @elseif ($addedBy)
@@ -71,10 +76,10 @@
                             <span class="flex-wrap flex-none font-medium text-black">- {{ $data['name'] }}</span>
                         @endif
                     </span>
-                   
+
                     <span
                         class="bg-{{ $color }}-50 border border-{{ $color }}-200 text-xs rounded-lg uppercase text-{{ $color }}-500 font-semibold px-2 py-0.5 w-max flex-none ml-1">
-                        {{ __($category) }}
+                        {{ $category }}
                     </span>
                 </p>
                 @if (!$isRead)

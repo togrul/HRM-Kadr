@@ -43,12 +43,12 @@ trait TemplateCrud
     protected function validationAttributes()
     {
         return [
-            'template_data.id' => __('Id'),
-            'template_data.name' => __('Name'),
-            'template_data.content' => __('Content'),
-            'template_data.order_category_id' => __('Category'),
-            'template_data.order_model' => __('Model'),
-            'template_data.blade' => __('Page'),
+            'template_data.id' => __('orders::template_form.labels.id'),
+            'template_data.name' => __('orders::template_form.labels.name'),
+            'template_data.content' => __('orders::template_form.labels.content'),
+            'template_data.order_category_id' => __('orders::template_form.labels.category'),
+            'template_data.order_model' => __('orders::template_form.labels.model'),
+            'template_data.blade' => __('orders::template_form.labels.page'),
         ];
     }
 
@@ -56,9 +56,9 @@ trait TemplateCrud
     {
         if (! empty($this->templateModel)) {
             $this->fillTemplate();
-            $this->title = __('Edit template');
+            $this->title = __('orders::template_form.titles.edit_template');
         } else {
-            $this->title = __('Add template');
+            $this->title = __('orders::template_form.titles.add_template');
             $this->template_data['order_model'] = $this->allowedOrderModels()[0] ?? '';
             $this->template_data['blade'] = $this->allowedBladeValues()[0] ?? Order::BLADE_DEFAULT;
         }

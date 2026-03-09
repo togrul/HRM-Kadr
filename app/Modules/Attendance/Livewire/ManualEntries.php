@@ -183,13 +183,13 @@ class ManualEntries extends Component
                 enteredBy: (int) Auth::id(),
             );
         } catch (ValidationException $exception) {
-            $message = collect($exception->errors())->flatten()->first() ?: __('Validation failed.');
+            $message = collect($exception->errors())->flatten()->first() ?: __('attendance::manual_entries.messages.validation_failed');
             $this->dispatch('notify', type: 'error', message: $message);
 
             return;
         }
 
-        $this->dispatch('notify', type: 'success', message: __('Manual attendance entry saved.'));
+        $this->dispatch('notify', type: 'success', message: __('attendance::manual_entries.messages.saved'));
 
         $this->form['check_in_at'] = '';
         $this->form['check_out_at'] = '';
@@ -223,13 +223,13 @@ class ManualEntries extends Component
         try {
             $service->approve($entry, (int) Auth::id());
         } catch (ValidationException $exception) {
-            $message = collect($exception->errors())->flatten()->first() ?: __('Validation failed.');
+            $message = collect($exception->errors())->flatten()->first() ?: __('attendance::manual_entries.messages.validation_failed');
             $this->dispatch('notify', type: 'error', message: $message);
 
             return;
         }
 
-        $this->dispatch('notify', type: 'success', message: __('Manual entry approved.'));
+        $this->dispatch('notify', type: 'success', message: __('attendance::manual_entries.messages.approved'));
     }
 
     public function reject(int $entryId, AttendanceManualEntryService $service): void
@@ -246,14 +246,14 @@ class ManualEntries extends Component
         try {
             $service->reject($entry, (int) Auth::id(), (string) ($this->rejectNotes[$entryId] ?? ''));
         } catch (ValidationException $exception) {
-            $message = collect($exception->errors())->flatten()->first() ?: __('Validation failed.');
+            $message = collect($exception->errors())->flatten()->first() ?: __('attendance::manual_entries.messages.validation_failed');
             $this->dispatch('notify', type: 'error', message: $message);
 
             return;
         }
 
         unset($this->rejectNotes[$entryId]);
-        $this->dispatch('notify', type: 'success', message: __('Manual entry rejected.'));
+        $this->dispatch('notify', type: 'success', message: __('attendance::manual_entries.messages.rejected'));
     }
 
     public function getRecentEntriesProperty()

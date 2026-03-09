@@ -34,14 +34,14 @@
                 <button wire:click.prevent="showPage('vacancies')"
                     class="flex items-center justify-center px-4 py-2 space-x-2 text-white transition-all duration-300 rounded-lg shadow-sm bg-slate-900 hover:bg-slate-200 hover:text-slate-900"
                     type="button">
-                    <span>{{ __('Get all vacancies') }}</span>
+                    <span>{{ __('staff::common.actions.get_all_vacancies') }}</span>
                 </button>
             @endif
             @if ($selectedPage == 'vacancies')
                 <button wire:click.prevent="showPage('all')"
                     class="flex items-center justify-center px-4 py-2 space-x-2 text-white transition-all duration-300 shadow-sm rounded-xl bg-slate-900 hover:bg-slate-200 hover:text-slate-900"
                     type="button">
-                    <span>{{ __('All data') }}</span>
+                    <span>{{ __('staff::common.actions.all_data') }}</span>
                 </button>
             @endif
         </div>
@@ -102,11 +102,11 @@
         <div class="flex flex-col px-6 space-y-2">
             <div class="flex items-center space-x-4">
                 <div class="flex items-center space-x-2">
-                    <span class="font-medium text-gray-500">{{ __('Count') }}:</span>
+                    <span class="font-medium text-gray-500">{{ __('staff::common.fields.count') }}:</span>
                     <span>{{ $staffs->count() }}</span>
                 </div>
                 <div class="flex items-center space-x-2">
-                    <span class="font-medium text-gray-500">{{ __('Total') }}:</span>
+                    <span class="font-medium text-gray-500">{{ __('staff::common.fields.total') }}:</span>
                     <span>{{ $staffs->sum('vacant') }}</span>
                 </div>
             </div>
@@ -114,7 +114,7 @@
             <div class="relative min-h-[300px] -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
                 <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
                     <div class="overflow-visible">
-                        <x-table.tbl :headers="[__('#'), __('Structure'), __('Position'), __('Vacant')]">
+                        <x-table.tbl :headers="[__('personnel::common.labels.number'), __('staff::common.fields.structure'), __('staff::common.fields.position'), __('staff::common.fields.vacant')]">
                             @foreach ($staffs as $staff)
                                 <tr>
                                     <x-table.td>

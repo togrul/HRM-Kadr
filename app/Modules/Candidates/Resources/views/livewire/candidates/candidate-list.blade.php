@@ -22,13 +22,13 @@
     <div class="grid grid-cols-1 gap-2 px-6 py-4 sm:grid-cols-2 lg:grid-cols-4">
         @if ($this->filterEnabled('fullname'))
             <div class="flex flex-col">
-                <x-label for="filter.fullname">{{ __('Fullname') }}</x-label>
+                <x-label for="filter.fullname">{{ __('candidates::common.labels.fullname') }}</x-label>
                 <x-livewire-input mode="gray" name="filter.fullname" wire:model="filter.fullname"></x-livewire-input>
             </div>
         @endif
         @if ($this->filterEnabled('gender'))
             <div class="flex flex-col w-full space-y-1">
-                <x-label for="filter.gender">{{ __('Gender') }}</x-label>
+                <x-label for="filter.gender">{{ __('candidates::common.labels.gender') }}</x-label>
                 <div class="flex space-x-2">
                     @foreach (\App\Enums\GenderEnum::genderOptions() as $value => $label)
                         <label class="inline-flex items-center w-full px-2 py-2 bg-gray-100 rounded shadow-sm">
@@ -43,14 +43,14 @@
         <div class="flex items-center space-x-2">
             @if ($this->filterEnabled('results') && $this->isMilitaryCandidateMode())
                 <div class="flex flex-col">
-                    <x-label for="filter.results">{{ __('Test results') }}</x-label>
+                    <x-label for="filter.results">{{ __('candidates::common.labels.test_results') }}</x-label>
                     <x-livewire-input mode="gray" type="number" name="filter.results"
                         wire:model="filter.results"></x-livewire-input>
                 </div>
             @endif
             @if ($this->filterEnabled('age'))
                 <div class="flex flex-col">
-                    <x-label for="filter.age">{{ __('Age') }}</x-label>
+                    <x-label for="filter.age">{{ __('candidates::common.labels.age') }}</x-label>
                     <x-livewire-input mode="gray" type="number" name="filter.age"
                         wire:model="filter.age"></x-livewire-input>
                 </div>
@@ -59,7 +59,7 @@
 
         @if ($this->filterEnabled('appeal_date'))
             <div class="flex flex-col">
-                <x-label for="filter.appeal_date">{{ __('Appeal date') }}</x-label>
+                <x-label for="filter.appeal_date">{{ __('candidates::common.labels.appeal_date') }}</x-label>
                 <div class="flex items-center space-x-1">
                     <x-pikaday-input mode="gray" name="filter.appeal_date.min" format="Y-MM-DD"
                         wire:model="filter.appeal_date.min">
@@ -82,8 +82,8 @@
             </div>
         @endif
         <div class="flex items-end space-x-2">
-            <x-button mode="primary" wire:click="searchFilter">{{ __('Search') }}</x-button>
-            <x-button mode="black" wire:click="resetFilter">{{ __('Reset') }}</x-button>
+            <x-button mode="primary" wire:click="searchFilter">{{ __('candidates::common.labels.search') }}</x-button>
+            <x-button mode="black" wire:click="resetFilter">{{ __('candidates::common.labels.reset') }}</x-button>
         </div>
     </div>
 
@@ -92,7 +92,7 @@
             <div class="flex flex-col items-center justify-between px-2 py-2 bg-white sm:flex-row filter rounded-xl">
                 <x-filter.nav>
                     <x-filter.item wire:click.prevent="setStatus('all')" :active="$status === 'all'">
-                        {{ __('All') }}
+                        {{ __('candidates::common.labels.all') }}
                     </x-filter.item>
                     @foreach ($_appeal_statuses as $_status)
                         <x-filter.item wire:click.prevent="setStatus({{ $_status->id }})" :active="$status === $_status->id">
@@ -101,7 +101,7 @@
                     @endforeach
                     @if ($showDeletedTab)
                         <x-filter.item wire:click.prevent="setStatus('deleted')" :active="$status === 'deleted'">
-                            {{ __('Deleted') }}
+                            {{ __('candidates::common.labels.deleted') }}
                         </x-filter.item>
                     @endif
                 </x-filter.nav>
@@ -131,7 +131,7 @@
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
                 <div class="overflow-visible">
 
-                    <x-table.tbl :headers="$this->getTableHeaders()" title="{{ __('Candidates') }}">
+                    <x-table.tbl :headers="$this->getTableHeaders()" title="{{ __('candidates::common.titles.candidates') }}">
                         @forelse ($_candidates as $_candidate)
                             <tr wire:key="candidate-row-{{ $_candidate->id }}">
                                 <x-table.td>
@@ -148,12 +148,12 @@
                                         @if (!empty($_candidate->deleted_at))
                                             <div class="flex flex-col text-xs font-medium">
                                                 <div class="flex items-center space-x-1">
-                                                    <span class="text-gray-500">{{ __('Deleted date') }}:</span>
+                                                    <span class="text-gray-500">{{ __('candidates::common.labels.deleted_date') }}:</span>
                                                     <span
                                                         class="text-black">{{ \Carbon\Carbon::parse($_candidate->deleted_at)->format('d-m-Y H:i') }}</span>
                                                 </div>
                                                 <div class="flex items-center space-x-1">
-                                                    <span class="text-gray-500">{{ __('Deleted by') }}:</span>
+                                                    <span class="text-gray-500">{{ __('candidates::common.labels.deleted_by') }}:</span>
                                                     <span
                                                         class="text-black">{{ $_candidate->personDidDelete->name }}</span>
                                                 </div>
@@ -173,13 +173,13 @@
                                         <div class="flex flex-col space-y-1">
                                             <div class="flex items-center space-x-1">
                                                 <span
-                                                    class="text-sm font-medium text-gray-500">{{ __('Knowledge') }}:</span>
+                                                    class="text-sm font-medium text-gray-500">{{ __('candidates::common.labels.knowledge') }}:</span>
                                                 <span
                                                     class="text-sm font-medium px-2 py-1 rounded-lg bg-{{ $_candidate->knowledge_test_color }}-100 text-{{ $_candidate->knowledge_test_color }}-500">{{ $_candidate->knowledge_test }}</span>
                                             </div>
                                             <div class="flex items-center space-x-1">
                                                 <span
-                                                    class="text-sm font-medium text-gray-500">{{ __('Physical fitness') }}:</span>
+                                                    class="text-sm font-medium text-gray-500">{{ __('candidates::common.labels.physical_fitness') }}:</span>
                                                 <span
                                                     class="text-sm font-medium px-2 py-1 rounded-lg bg-{{ $_candidate->physical_fitness_exam_color }}-100 text-{{ $_candidate->physical_fitness_exam_color }}-500">{{ $_candidate->physical_fitness_exam }}</span>
                                             </div>
@@ -189,7 +189,7 @@
 
                                 <x-table.td>
                                     <div class="flex flex-col text-sm font-medium">
-                                        <x-table.cell-vertical title="Appeal date">
+                                        <x-table.cell-vertical title="{{ __('candidates::common.labels.appeal_date') }}">
                                             {{ \Carbon\Carbon::parse($_candidate->appeal_date)->format('d.m.Y') }}
                                         </x-table.cell-vertical>
                                     </div>
@@ -228,7 +228,7 @@
                                         @endcan
                                     @else
                                         @can('delete', $_candidate)
-                                            <button wire:confirm="{{ __('Are you sure you want to remove this data?') }}"
+                                            <button wire:confirm="{{ __('candidates::common.messages.remove_confirm') }}"
                                                 wire:click="forceDeleteData('{{ $_candidate->id }}')"
                                                 class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700">
                                                 <x-icons.force-delete></x-icons.force-delete>

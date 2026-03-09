@@ -1,12 +1,12 @@
 <div class="sidemenu-title">
     <h2 class="text-lg font-medium text-gray-600" id="slide-over-title">
-        {{ $title ?? ''}}
+        {{ $title ?? '' }}
     </h2>
 </div>
 
 <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
     <div class="">
-        <x-label for="template_data.id">{{ __('ID') }}</x-label>
+        <x-label for="template_data.id">{{ __('orders::template_form.labels.id') }}</x-label>
         <x-livewire-input mode="gray" type="number" name="template_data.id" wire:model="template_data.id"></x-livewire-input>
         @error('template_data.id')
         <x-validation> {{ $message }} </x-validation>
@@ -14,7 +14,7 @@
     </div>
     <div class="flex flex-col">
         <x-ui.select-dropdown
-            :label="__('Category')"
+            :label="__('orders::template_form.labels.category')"
             placeholder="---"
             mode="gray"
             class="w-full"
@@ -31,14 +31,14 @@
 
 <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
     <div class="">
-        <x-label for="template_data.name">{{ __('Name') }}</x-label>
+        <x-label for="template_data.name">{{ __('orders::template_form.labels.name') }}</x-label>
         <x-livewire-input mode="gray" name="template_data.name" wire:model="template_data.name"></x-livewire-input>
         @error('template_data.name')
         <x-validation> {{ $message }} </x-validation>
         @enderror
     </div>
     <div class="">
-        <x-label for="template_data.order_model">{{ __('Model') }}</x-label>
+        <x-label for="template_data.order_model">{{ __('orders::template_form.labels.model') }}</x-label>
         <select
             wire:model="template_data.order_model"
             @disabled(!empty($templateModel))
@@ -50,7 +50,7 @@
         </select>
         @if(!empty($templateModel))
             <p class="mt-1 text-xs text-slate-500">
-                {{ __('Model is locked in edit mode. Create a new template if model type must change.') }}
+                {{ __('orders::template_form.descriptions.model_locked_edit_mode') }}
             </p>
         @endif
         @error('template_data.order_model')
@@ -61,7 +61,7 @@
 
 <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
     <div class="">
-        <x-label for="template_data.blade">{{ __('Page') }}</x-label>
+        <x-label for="template_data.blade">{{ __('orders::template_form.labels.page') }}</x-label>
         <select
             wire:model="template_data.blade"
             class="w-full h-12 rounded-xl border border-slate-100 bg-gray-100 px-3 text-slate-800 focus:border-primary focus:ring-0"
@@ -75,7 +75,7 @@
         @enderror
     </div>
     <div class="flex flex-col space-y-4 ">
-        <x-label for="template_data.content">{{ __('File') }}</x-label>
+        <x-label for="template_data.content">{{ __('orders::template_form.labels.file') }}</x-label>
         <div class="bg-gray-100 rounded-lg shadow-sm p-1">
             <div class="flex flex-col py-1" x-data="{ isUploading: false, progress: 0 }"
                  x-on:livewire-upload-start="isUploading = true" x-on:livewire-upload-finish="isUploading = false"
@@ -110,7 +110,7 @@
                     <svg data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="w-8 h-8">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m.75 12 3 3m0 0 3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"></path>
                     </svg>
-                    <span class="text-base font-medium">{{ __('Download') }}</span>
+                    <span class="text-base font-medium">{{ __('orders::template_form.labels.download') }}</span>
                 </a>
             @endif
         @endif
@@ -119,13 +119,13 @@
             <div class="rounded-lg border border-slate-200 bg-slate-50 p-3 space-y-1 text-xs">
                 @if(!empty($currentTemplateChecksum))
                     <div class="flex items-center justify-between gap-2">
-                        <span class="text-slate-500">{{ __('Current file checksum (sha256)') }}</span>
+                        <span class="text-slate-500">{{ __('orders::template_form.labels.current_file_checksum') }}</span>
                         <span class="font-mono text-slate-700 break-all">{{ $currentTemplateChecksum }}</span>
                     </div>
                 @endif
                 @if(!empty($uploadedTemplateChecksum))
                     <div class="flex items-center justify-between gap-2">
-                        <span class="text-slate-500">{{ __('Uploaded file checksum (sha256)') }}</span>
+                        <span class="text-slate-500">{{ __('orders::template_form.labels.uploaded_file_checksum') }}</span>
                         <span class="font-mono text-slate-700 break-all">{{ $uploadedTemplateChecksum }}</span>
                     </div>
                 @endif
@@ -137,12 +137,12 @@
 @if(!empty($templateModel))
     <div class="rounded-lg border border-slate-200 bg-slate-50 p-3 space-y-3">
         <div class="space-y-1">
-            <h4 class="text-sm font-semibold text-slate-700">{{ __('Template flow') }}</h4>
+            <h4 class="text-sm font-semibold text-slate-700">{{ __('orders::template_form.labels.template_flow') }}</h4>
             <p class="text-xs text-slate-500">
-                {{ __('This modal manages template master data (ID, category, model, blade, DOCX file).') }}
+                {{ __('orders::template_form.descriptions.template_master_data') }}
             </p>
             <p class="text-xs text-slate-500">
-                {{ __('Set Type > UI config manages dynamic fields, mappings, section blocks, and template version lifecycle.') }}
+                {{ __('orders::template_form.descriptions.set_type_ui_config') }}
             </p>
         </div>
         <button
@@ -150,7 +150,7 @@
             class="h-9 px-4 rounded-lg bg-sky-100 hover:bg-sky-200 text-sm font-medium text-sky-800 transition-colors"
             wire:click.prevent="openSetTypeUiConfig"
         >
-            {{ __('Open Set Type / UI config') }}
+            {{ __('orders::template_form.actions.open_set_type_ui_config') }}
         </button>
 
         @if(!empty($activeVersionBindings))
@@ -158,11 +158,11 @@
                 <table class="w-full text-xs text-left">
                     <thead>
                     <tr class="bg-slate-50 text-slate-500 border-b border-slate-200">
-                        <th class="px-2 py-2 min-w-[140px]">{{ __('Type') }}</th>
-                        <th class="px-2 py-2 min-w-[100px]">{{ __('Active version') }}</th>
-                        <th class="px-2 py-2 min-w-[110px]">{{ __('Status') }}</th>
-                        <th class="px-2 py-2 min-w-[220px]">{{ __('Checksum') }}</th>
-                        <th class="px-2 py-2 min-w-[110px]">{{ __('Linked') }}</th>
+                        <th class="px-2 py-2 min-w-[140px]">{{ __('orders::template_form.labels.type') }}</th>
+                        <th class="px-2 py-2 min-w-[100px]">{{ __('orders::template_form.labels.active_version') }}</th>
+                        <th class="px-2 py-2 min-w-[110px]">{{ __('orders::template_form.labels.status') }}</th>
+                        <th class="px-2 py-2 min-w-[220px]">{{ __('orders::template_form.labels.checksum') }}</th>
+                        <th class="px-2 py-2 min-w-[110px]">{{ __('orders::template_form.labels.linked') }}</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -174,9 +174,9 @@
                             <td class="px-2 py-2 font-mono text-slate-600 text-[11px] break-all">{{ $binding['checksum'] ?: '-' }}</td>
                             <td class="px-2 py-2">
                                 @if(!empty($binding['linked']))
-                                    <span class="text-emerald-700">{{ __('Yes') }}</span>
+                                    <span class="text-emerald-700">{{ __('orders::template_form.labels.yes') }}</span>
                                 @else
-                                    <span class="text-rose-600">{{ __('No') }}</span>
+                                    <span class="text-rose-600">{{ __('orders::template_form.labels.no') }}</span>
                                 @endif
                             </td>
                         </tr>
@@ -189,5 +189,5 @@
 @endif
 
 <div class="flex justify-between items-end w-full">
-    <x-modal-button>{{ __('Save') }}</x-modal-button>
+    <x-modal-button>{{ __('orders::template_form.actions.save') }}</x-modal-button>
 </div>

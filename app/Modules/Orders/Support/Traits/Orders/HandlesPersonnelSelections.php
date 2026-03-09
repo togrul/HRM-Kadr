@@ -123,12 +123,12 @@ trait HandlesPersonnelSelections
         $daysRequested = $this->componentForms[$row]['days'] ?? 0;
 
         if ($vacation && ($remaining < 1 || $daysRequested > $remaining)) {
-            $this->dispatch('checkVacationAdd', __('There are not enough days left for this vacation.'));
+            $this->dispatch('checkVacationAdd', __('orders::order_form.messages.not_enough_vacation_days'));
         }
 
         $workDuration = $person->currentWork?->join_date?->diffInMonths(Carbon::now()) ?? 0;
         if ($workDuration < 6) {
-            $this->dispatch('addError', $person->fullname . ' 6 aydan az müddətdir işləyir.');
+            $this->dispatch('addError', __('orders::order_form.messages.less_than_six_months', ['person' => $person->fullname]));
         }
 
         return [
@@ -167,7 +167,8 @@ trait HandlesPersonnelSelections
         $suffixService = new WordSuffixService;
 
         $levels = array_column(StructureEnum::cases(), 'name', 'value');
-        $levelName = __(strtolower($levels[$structure->level]) ?? '');
+        $levelKey = strtolower((string) ($levels[$structure->level] ?? ''));
+        $levelName = __('orders::order_form.structure_levels.'.$levelKey);
 
         return is_numeric($structureName)
             ? sprintf('%s%s %s', $structureName, $suffixService->getNumberSuffix((int) $structureName), $levelName)

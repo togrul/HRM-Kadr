@@ -2,14 +2,14 @@
     <thead>
         <tr>
             <th>#</th>
-            <th>{{__('Person')}}</th>
-            <th>{{ __('Teacher') }}</th>
-            {{-- <th>{{ __('Remaining visit count') }}</th>
-            <th>{{__('Start date') }}</th>
-            <th>{{ __('End date') }}</th>
-            <th>{{__('Duration')}}</th>
-            <th>{{__('Card #')}}</th>
-            <th>{{__('Gender')}}</th> --}}
+            <th>{{ __('personnel::common.labels.person') }}</th>
+            <th>{{ __('personnel::common.labels.teacher') }}</th>
+            {{-- <th>{{ __('personnel::common.labels.remaining_visit_count') }}</th>
+            <th>{{ __('personnel::common.labels.start_date') }}</th>
+            <th>{{ __('personnel::common.labels.end_date') }}</th>
+            <th>{{ __('personnel::common.labels.duration') }}</th>
+            <th>{{ __('personnel::common.labels.card_number') }}</th>
+            <th>{{ __('personnel::common.labels.gender') }}</th> --}}
         </tr>
     </thead>
     <tbody>
@@ -27,7 +27,7 @@
                 @endif
                 <th>{{ \Carbon\Carbon::parse($r[ 'seance_end' ])->diffForHumans($r['seance_start'],$options) }}</th>
                 <th>{{ $r['assigned_card'] }}</th>
-                <th>{{ $r[ 'person' ]['gender'] ?? '' ? __('Man') : __('Woman') }}</th> --}}
+                <th>{{ $r[ 'person' ]['gender'] ?? '' ? __('personnel::common.labels.man') : __('personnel::common.labels.woman') }}</th> --}}
             </tr>
         @endforeach
     </tbody>

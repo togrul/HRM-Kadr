@@ -23,16 +23,16 @@
                     showCancelButton:true,
                     confirmButtonColor:'#3085d6',
                     cancelButtonColor:'#ff0000',
-                    confirmButtonText: "{{ __('Yes, Delete it!') }}",
-                    cancelButtonText: "{{ __('Cancel') }}"
+                    confirmButtonText: "{{ __('ui::common.swal.yes_delete_it') }}",
+                    cancelButtonText: "{{ __('ui::common.actions.cancel') }}"
                 }).then((result)=>{
                     if(result.isConfirmed){
                         Livewire.dispatch('goOn-Delete')
 
                         Livewire.on('deleted',(event)=>{
                             swal.fire({
-                                title: "{{ __('Deleted') }}",
-                                text: "{{ __('Your record has been deleted') }}",
+                                title: "{{ __('ui::common.swal.deleted') }}",
+                                text: "{{ __('ui::common.messages.record_deleted') }}",
                                 icon:'success',
                                 showConfirmButton: false,
                                 timer: 2000,

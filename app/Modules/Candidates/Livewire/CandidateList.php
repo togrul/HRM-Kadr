@@ -79,17 +79,17 @@ class CandidateList extends Component
     public function getTableHeaders(): array
     {
         $headers = [
-            __('#'),
-            __('Fullname'),
-            __('Structure'),
-            __('Dates'),
-            __('Status'),
-            'action',
-            'action',
+            __('personnel::common.labels.number'),
+            __('candidates::common.labels.fullname'),
+            __('candidates::common.labels.structure'),
+            __('candidates::common.labels.dates'),
+            __('candidates::common.labels.status'),
+            __('personnel::common.labels.action'),
+            __('personnel::common.labels.action'),
         ];
 
         if ($this->isMilitaryCandidateMode()) {
-            array_splice($headers, 3, 0, [__('Tests')]);
+            array_splice($headers, 3, 0, [__('candidates::common.labels.tests')]);
         }
 
         return $headers;
@@ -114,14 +114,14 @@ class CandidateList extends Component
         $candidate->update([
             'deleted_by' => null,
         ]);
-        $this->dispatch('candidateAdded', __('Candidate was updated successfully!'));
+        $this->dispatch('candidateAdded', __('candidates::common.messages.candidate_updated'));
     }
 
     public function forceDeleteData($id): void
     {
         $model = Candidate::withTrashed()->findOrFail($id);
         $model->forceDelete();
-        $this->dispatch('candidateWasDeleted', __('Candidate was deleted!'));
+        $this->dispatch('candidateWasDeleted', __('candidates::common.messages.candidate_deleted'));
     }
 
     protected function returnData($type = 'normal')

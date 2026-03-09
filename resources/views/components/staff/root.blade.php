@@ -20,15 +20,15 @@
             @if ($hasParent)
             <div class="flex gap-2 divide-x divide-zinc-300 items-center">
                 <div class="flex items-center gap-2">
-                  <span class="text-zinc-400 font-semibold text-xs uppercase tracking-tighter">{{ __('Total') }}:</span>
+                  <span class="text-zinc-400 font-semibold text-xs uppercase tracking-tighter">{{ __('staff::common.fields.total') }}:</span>
                   <span class="text-blue-500 font-semibold text-[13px] relative top-[-1px]">{{ $total_sum }}</span>
                 </div>
                 <div class="flex items-center gap-2 px-2">
-                  <span class="text-zinc-400 font-semibold text-xs uppercase tracking-tighter">{{ __('Filled') }}:</span>
+                  <span class="text-zinc-400 font-semibold text-xs uppercase tracking-tighter">{{ __('staff::common.fields.filled') }}:</span>
                   <span class="text-rose-500 font-semibold text-[13px] relative top-[-1px]">{{ $total_filled }}</span>
                 </div>
                 <div class="flex items-center gap-2 px-2">
-                  <span class="text-zinc-400 font-semibold text-xs uppercase tracking-tighter">{{ __('Vacant') }}:</span>
+                  <span class="text-zinc-400 font-semibold text-xs uppercase tracking-tighter">{{ __('staff::common.fields.vacant') }}:</span>
                   <span class="text-green-500 font-semibold text-[13px] relative top-[-1px]">{{ $total_vacant }}</span>
                 </div>
             </div>

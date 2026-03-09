@@ -18,13 +18,14 @@ trait HandlesSetTypeUiConfigSupport
     public function resolveUiAuditActionLabel(string $action): string
     {
         return match (trim($action)) {
-            'metadata_bootstrapped' => __('Metadata generated'),
-            'metadata_field_added' => __('Metadata field added'),
-            'metadata_field_removed' => __('Metadata field removed'),
-            'ui_config_saved' => __('UI config saved'),
-            'version_drafted' => __('Draft version created'),
-            'version_published' => __('Version published'),
-            'version_rolled_back' => __('Version rolled back'),
+            'metadata_bootstrapped' => __('orders::template_set_type.audit.actions.metadata_bootstrapped'),
+            'metadata_field_added' => __('orders::template_set_type.audit.actions.metadata_field_added'),
+            'metadata_field_removed' => __('orders::template_set_type.audit.actions.metadata_field_removed'),
+            'wizard_metadata_generated' => __('orders::template_onboarding_wizard.audit.actions.wizard_metadata_generated'),
+            'ui_config_saved' => __('orders::template_set_type.audit.actions.ui_config_saved'),
+            'version_drafted' => __('orders::template_set_type.audit.actions.version_drafted'),
+            'version_published' => __('orders::template_set_type.audit.actions.version_published'),
+            'version_rolled_back' => __('orders::template_set_type.audit.actions.version_rolled_back'),
             default => Str::headline(str_replace('_', ' ', trim($action))),
         };
     }
@@ -75,7 +76,7 @@ trait HandlesSetTypeUiConfigSupport
     {
         $user = auth()->user();
         if (! $user) {
-            $this->dispatch($messageEvent, __('You do not have permission to perform this action.'));
+            $this->dispatch($messageEvent, __('orders::template_set_type.messages.permission_denied'));
             return false;
         }
 
@@ -86,7 +87,7 @@ trait HandlesSetTypeUiConfigSupport
             }
         }
 
-        $this->dispatch($messageEvent, __('You do not have permission to perform this action.'));
+        $this->dispatch($messageEvent, __('orders::template_set_type.messages.permission_denied'));
 
         return false;
     }
@@ -270,11 +271,11 @@ trait HandlesSetTypeUiConfigSupport
     private function inputTypeOptions(): array
     {
         return [
-            'text-input' => __('Text input'),
-            'numeric-input' => __('Numeric input'),
-            'date-input' => __('Date input'),
-            'select' => __('Select'),
-            'radio-list' => __('Tree list'),
+            'text-input' => __('orders::template_set_type.input_types.text_input'),
+            'numeric-input' => __('orders::template_set_type.input_types.numeric_input'),
+            'date-input' => __('orders::template_set_type.input_types.date_input'),
+            'select' => __('orders::template_set_type.input_types.select'),
+            'radio-list' => __('orders::template_set_type.input_types.radio_list'),
         ];
     }
 

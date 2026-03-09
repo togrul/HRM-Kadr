@@ -57,7 +57,7 @@ class DeleteTemplate extends Component
 
         $this->templateId = null;
 
-        $this->dispatch('templateWasDeleted', __('Template was deleted!'));
+        $this->dispatch('templateWasDeleted', __('orders::templates_list.messages.template_deleted'));
     }
 
     public function render()

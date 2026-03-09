@@ -62,7 +62,7 @@ class MonthClose extends Component
         $this->dispatch(
             'notify',
             type: 'success',
-            message: __('Month closed. Summaries: :summaries, Locked ledgers: :ledgers', [
+            message: __('attendance::month_close.messages.closed', [
                 'summaries' => $stats['summary_upserts'],
                 'ledgers' => $stats['locked_ledgers'],
             ])
@@ -81,7 +81,7 @@ class MonthClose extends Component
         $this->dispatch(
             'notify',
             type: 'success',
-            message: __('Month unlocked. Summaries: :summaries, Ledgers: :ledgers', [
+            message: __('attendance::month_close.messages.unlocked', [
                 'summaries' => $stats['unlocked_summaries'],
                 'ledgers' => $stats['unlocked_ledgers'],
             ])
@@ -100,7 +100,7 @@ class MonthClose extends Component
         $this->dispatch(
             'notify',
             type: 'success',
-            message: __('Snapshot done. Summary rows upserted: :count', [
+            message: __('attendance::month_close.messages.snapshot_done', [
                 'count' => $stats['summary_upserts'],
             ])
         );
@@ -117,7 +117,7 @@ class MonthClose extends Component
         $this->dispatch(
             'notify',
             type: 'success',
-            message: __('Monthly snapshot queued.')
+            message: __('attendance::month_close.messages.snapshot_queued')
         );
     }
 

@@ -1,16 +1,16 @@
 <div class="flex flex-col space-y-4">
-    <x-form-card title="Awards">
+    <x-form-card title="{{ __('personnel::wizard.sections.awards') }}">
         <div class="grid grid-cols-6 gap-2">
             <div class="flex flex-col col-span-2">
                 <x-ui.select-dropdown
-                    label="{{ __('Awards') }}"
+                    label="{{ __('personnel::common.labels.awards') }}"
                     placeholder="---"
                     mode="gray"
                     class="w-full"
                     wire:model.live="awardsPunishmentsForm.award.award_id"
                     :model="$this->awardOptions"
                     :search-model="data_get($stepSearchModels, 'searchAward', 'searchAward')"
-                    :search-placeholder="data_get($stepSearchPlaceholders, 'searchAward', __('Search...'))"
+                    :search-placeholder="data_get($stepSearchPlaceholders, 'searchAward', __('personnel::common.placeholders.search'))"
                 >
                 </x-ui.select-dropdown>
                 @error('awardsPunishmentsForm.award.award_id')
@@ -18,7 +18,7 @@
                 @enderror
             </div>
             <div class="flex flex-col col-span-2">
-                <x-label for="awardsPunishmentsForm.award.reason">{{ __('Reason') }}</x-label>
+                <x-label for="awardsPunishmentsForm.award.reason">{{ __('personnel::common.labels.reason') }}</x-label>
                 <x-livewire-input
                     mode="gray"
                     name="awardsPunishmentsForm.award.reason"
@@ -29,7 +29,7 @@
                 @enderror
             </div>
             <div class="flex flex-col">
-                <x-label for="awardsPunishmentsForm.award.given_date">{{ __('Given date') }}</x-label>
+                <x-label for="awardsPunishmentsForm.award.given_date">{{ __('personnel::common.labels.given_date') }}</x-label>
                 <x-pikaday-input
                     mode="gray"
                     name="awardsPunishmentsForm.award.given_date"
@@ -47,7 +47,7 @@
                 @enderror
             </div>
             <div class="flex items-end space-x-3">
-                <x-label class="mb-1" for="awardsPunishmentsForm.award.is_old">{{ __('Is old?') }}</x-label>
+                <x-label class="mb-1" for="awardsPunishmentsForm.award.is_old">{{ __('personnel::common.labels.is_old') }}</x-label>
                 <x-checkbox
                     name="awardsPunishmentsForm.award.is_old"
                     model="awardsPunishmentsForm.award.is_old"
@@ -55,15 +55,15 @@
             </div>
 
             <div class="flex flex-col col-span-2">
-                <x-label for="awardsPunishmentsForm.award.order_given_by">{{ __('Order issued by') }}</x-label>
+                <x-label for="awardsPunishmentsForm.award.order_given_by">{{ __('personnel::common.labels.order_issued_by') }}</x-label>
                 <x-livewire-input mode="gray" name="awardsPunishmentsForm.award.order_given_by" wire:model="awardsPunishmentsForm.award.order_given_by"></x-livewire-input>
             </div>
             <div class="flex flex-col col-span-2">
-                <x-label for="awardsPunishmentsForm.award.order_no">{{ __('Order number') }}</x-label>
+                <x-label for="awardsPunishmentsForm.award.order_no">{{ __('personnel::common.labels.order_number') }}</x-label>
                 <x-livewire-input mode="gray" name="awardsPunishmentsForm.award.order_no" wire:model="awardsPunishmentsForm.award.order_no"></x-livewire-input>
             </div>
             <div class="flex flex-col col-span-2">
-                <x-label for="awardsPunishmentsForm.award.order_date">{{ __('Order date') }}</x-label>
+                <x-label for="awardsPunishmentsForm.award.order_date">{{ __('personnel::common.labels.order_date') }}</x-label>
                 <x-pikaday-input
                     mode="gray"
                     name="awardsPunishmentsForm.award.order_date"
@@ -80,13 +80,13 @@
         </div>
 
         <div class="flex justify-end w-full">
-            <x-button mode="black" wire:click="addAward">{{ __('Add') }}</x-button>
+            <x-button mode="black" wire:click="addAward">{{ __('personnel::common.actions.add') }}</x-button>
         </div>
 
         <div class="relative -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
                 <div class="overflow-visible">
-                    <x-table.tbl :headers="[__('Award'), __('Reason'), __('Date'), __('Info') ,'action', 'action']">
+                    <x-table.tbl :headers="[__('personnel::common.labels.award'), __('personnel::common.labels.reason'), __('personnel::common.labels.date'), __('personnel::common.labels.info'), __('personnel::common.labels.action'), __('personnel::common.labels.action')]">
                         @forelse ($awardsPunishmentsForm->awardList ?? [] as $key => $awdModel)
                             <tr>
                                 <x-table.td>
@@ -108,7 +108,7 @@
                                 <div class="flex items-start space-x-6">
                                     <div class="flex flex-col items-start space-y-1">
                                          <span class="text-sm font-medium text-gray-500 border-b border-dashed border-slate-400">
-                                                {{ __('Issued by') }}:
+                                                {{ __('personnel::common.labels.order_issued_by') }}:
                                          </span>
                                         <span class="text-sm font-medium text-gray-900">
                                                 {{ data_get($awdModel, 'order_given_by', '---') }}
@@ -116,7 +116,7 @@
                                     </div>
                                     <div class="flex flex-col items-start space-y-1">
                                         <span class="text-sm font-medium text-gray-500 border-b border-dashed border-slate-400">
-                                            {{ __('Number') }} #:
+                                            {{ __('personnel::common.labels.number') }} #:
                                         </span>
                                         <span class="text-sm font-medium text-blue-500">
                                             {{ data_get($awdModel, 'order_no', '---') }}
@@ -124,7 +124,7 @@
                                     </div>
                                     <div class="flex flex-col items-start space-y-1">
                                         <span class="text-sm font-medium text-gray-500 border-b border-dashed border-slate-400">
-                                            {{ __('Date') }}:
+                                            {{ __('personnel::common.labels.date') }}:
                                         </span>
                                         <span class="text-sm font-medium text-gray-700">
                                             @if(! empty($awdModel['order_date']))
@@ -144,7 +144,7 @@
                                 </x-table.td>
                                 <x-table.td :isButton="true">
                                     <button
-                                        onclick="confirm('Are you sure you want to remove this data?') || event.stopImmediatePropagation()"
+                                        onclick="confirm('{{ __('personnel::common.messages.remove_data_confirm') }}') || event.stopImmediatePropagation()"
                                         wire:click="forceDeleteAward({{ $key }})"
                                         class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700"
                                     >
@@ -156,7 +156,7 @@
                             <tr>
                                 <td colspan="5">
                                     <div class="flex items-center justify-center py-4">
-                                        <span class="font-medium">{{ __('No information added') }}</span>
+                                        <span class="font-medium">{{ __('personnel::common.labels.no_information_added') }}</span>
                                     </div>
                                 </td>
                             </tr>
@@ -167,18 +167,18 @@
         </div>
     </x-form-card>
 
-    <x-form-card title="Punishments">
+    <x-form-card title="{{ __('personnel::wizard.sections.punishments') }}">
         <div class="grid grid-cols-4 gap-2">
             <div class="flex flex-col col-span-2">
                 <x-ui.select-dropdown
-                    label="{{ __('Punishments') }}"
+                    label="{{ __('personnel::common.labels.punishments') }}"
                     placeholder="---"
                     mode="gray"
                     class="w-full"
                     wire:model.live="awardsPunishmentsForm.punishment.punishment_id"
                     :model="$this->punishmentOptions"
                     :search-model="data_get($stepSearchModels, 'searchPunishment', 'searchPunishment')"
-                    :search-placeholder="data_get($stepSearchPlaceholders, 'searchPunishment', __('Search...'))"
+                    :search-placeholder="data_get($stepSearchPlaceholders, 'searchPunishment', __('personnel::common.placeholders.search'))"
                 >
                 </x-ui.select-dropdown>
                 @error('awardsPunishmentsForm.punishment.punishment_id')
@@ -186,7 +186,7 @@
                 @enderror
             </div>
             <div class="flex flex-col col-span-2">
-                <x-label for="awardsPunishmentsForm.punishment.reason">{{ __('Reason') }}</x-label>
+                <x-label for="awardsPunishmentsForm.punishment.reason">{{ __('personnel::common.labels.reason') }}</x-label>
                 <x-livewire-input
                     mode="gray"
                     name="awardsPunishmentsForm.punishment.reason"
@@ -200,7 +200,7 @@
 
         <div class="grid grid-cols-7 gap-2">
             <div class="flex flex-col">
-                <x-label for="awardsPunishmentsForm.punishment.given_date">{{ __('Given date') }}</x-label>
+                <x-label for="awardsPunishmentsForm.punishment.given_date">{{ __('personnel::common.labels.given_date') }}</x-label>
                 <x-pikaday-input
                     mode="gray"
                     name="awardsPunishmentsForm.punishment.given_date"
@@ -218,7 +218,7 @@
                 @enderror
             </div>
             <div class="flex flex-col">
-                <x-label for="awardsPunishmentsForm.punishment.expired_date">{{ __('Expired date') }}</x-label>
+                <x-label for="awardsPunishmentsForm.punishment.expired_date">{{ __('personnel::common.labels.expired_date') }}</x-label>
                 <x-pikaday-input
                     mode="gray"
                     name="awardsPunishmentsForm.punishment.expired_date"
@@ -233,15 +233,15 @@
                 </x-pikaday-input>
             </div>
             <div class="flex flex-col col-span-2">
-                <x-label for="awardsPunishmentsForm.punishment.order_given_by">{{ __('Order issued by') }}</x-label>
+                <x-label for="awardsPunishmentsForm.punishment.order_given_by">{{ __('personnel::common.labels.order_issued_by') }}</x-label>
                 <x-livewire-input mode="gray" name="awardsPunishmentsForm.punishment.order_given_by" wire:model="awardsPunishmentsForm.punishment.order_given_by"></x-livewire-input>
             </div>
             <div class="flex flex-col col-span-2">
-                <x-label for="awardsPunishmentsForm.punishment.order_no">{{ __('Order number') }}</x-label>
+                <x-label for="awardsPunishmentsForm.punishment.order_no">{{ __('personnel::common.labels.order_number') }}</x-label>
                 <x-livewire-input mode="gray" name="awardsPunishmentsForm.punishment.order_no" wire:model="awardsPunishmentsForm.punishment.order_no"></x-livewire-input>
             </div>
              <div class="flex flex-col">
-                <x-label for="awardsPunishmentsForm.punishment.order_date">{{ __('Order date') }}</x-label>
+                <x-label for="awardsPunishmentsForm.punishment.order_date">{{ __('personnel::common.labels.order_date') }}</x-label>
                 <x-pikaday-input
                     mode="gray"
                     name="awardsPunishmentsForm.punishment.order_date"
@@ -258,13 +258,13 @@
         </div>
 
         <div class="flex justify-end">
-            <x-button mode="black" wire:click="addPunishment">{{ __('Add') }}</x-button>
+            <x-button mode="black" wire:click="addPunishment">{{ __('personnel::common.actions.add') }}</x-button>
         </div>
 
         <div class="relative -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
                 <div class="overflow-visible">
-                    <x-table.tbl :headers="[__('Punishment'), __('Reason'), __('Date'), __('Info') ,'action']">
+                    <x-table.tbl :headers="[__('personnel::common.labels.punishment'), __('personnel::common.labels.reason'), __('personnel::common.labels.date'), __('personnel::common.labels.info'), __('personnel::common.labels.action')]">
                         @forelse ($awardsPunishmentsForm->punishmentList ?? [] as $key => $pnshModel)
                             <tr>
                                 <x-table.td>
@@ -280,14 +280,14 @@
                                 <x-table.td>
                                     <div class="flex items-center space-x-6">
                                         <div class="flex flex-col items-start space-y-1">
-                                            <span class="text-sm font-medium text-gray-500 border-b border-dashed border-slate-400">{{ __('Given date') }}:</span>
+                                            <span class="text-sm font-medium text-gray-500 border-b border-dashed border-slate-400">{{ __('personnel::common.labels.given_date') }}:</span>
                                             <span class="text-sm font-medium text-gray-700">
                                                 {{ data_get($pnshModel, 'given_date') }}
                                             </span>
                                         </div>
 
                                         <div class="flex flex-col items-start space-y-1">
-                                            <span class="text-sm font-medium text-gray-500 border-b border-dashed border-slate-400">{{ __('Expired date') }}:</span>
+                                            <span class="text-sm font-medium text-gray-500 border-b border-dashed border-slate-400">{{ __('personnel::common.labels.expired_date') }}:</span>
                                             <span class="text-sm font-medium text-rose-500">
                                                 {{ data_get($pnshModel, 'expired_date') ?: '—' }}
                                             </span>
@@ -298,7 +298,7 @@
                                 <div class="flex items-center space-x-6">
                                     <div class="flex flex-col items-start space-y-1">
                                          <span class="text-sm font-medium text-gray-500 border-b border-dashed border-slate-400">
-                                                {{ __('Issued by') }}:
+                                                {{ __('personnel::common.labels.order_issued_by') }}:
                                          </span>
                                         <span class="text-sm font-medium text-gray-900">
                                                 {{ data_get($pnshModel, 'order_given_by', '---') }}
@@ -306,7 +306,7 @@
                                     </div>
                                     <div class="flex flex-col items-start space-y-1">
                                         <span class="text-sm font-medium text-gray-500 border-b border-dashed border-slate-400">
-                                            {{ __('Number') }} #:
+                                            {{ __('personnel::common.labels.number') }} #:
                                         </span>
                                         <span class="text-sm font-medium text-blue-500">
                                             {{ data_get($pnshModel, 'order_no', '---') }}
@@ -314,7 +314,7 @@
                                     </div>
                                     <div class="flex flex-col items-start space-y-1">
                                         <span class="text-sm font-medium text-gray-500 border-b border-dashed border-slate-400">
-                                            {{ __('Date') }}:
+                                            {{ __('personnel::common.labels.date') }}:
                                         </span>
                                         <span class="text-sm font-medium text-gray-700">
                                             @if(! empty($pnshModel['order_date']))
@@ -326,7 +326,7 @@
                             </x-table.td>
                                 <x-table.td :isButton="true">
                                     <button
-                                        onclick="confirm('Are you sure you want to remove this data?') || event.stopImmediatePropagation()"
+                                        onclick="confirm('{{ __('personnel::common.messages.remove_data_confirm') }}') || event.stopImmediatePropagation()"
                                         wire:click="forceDeletePunishment({{ $key }})"
                                         class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700"
                                     >
@@ -338,7 +338,7 @@
                             <tr>
                                 <td colspan="4">
                                     <div class="flex items-center justify-center py-4">
-                                        <span class="font-medium">{{ __('No information added') }}</span>
+                                        <span class="font-medium">{{ __('personnel::common.labels.no_information_added') }}</span>
                                     </div>
                                 </td>
                             </tr>
@@ -349,9 +349,9 @@
         </div>
     </x-form-card>
 
-    <x-form-card title="Discrediting information">
+    <x-form-card title="{{ __('personnel::wizard.sections.discrediting_information') }}">
         <div class="flex flex-col">
-            <x-label for="personalForm.personnelExtra.discrediting_information">{{ __('Description') }}</x-label>
+            <x-label for="personalForm.personnelExtra.discrediting_information">{{ __('personnel::common.labels.description') }}</x-label>
             <x-textarea
                 mode="gray"
                 name="personalForm.personnelExtra.discrediting_information"

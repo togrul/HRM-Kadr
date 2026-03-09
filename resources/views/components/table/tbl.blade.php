@@ -5,6 +5,10 @@
     'bordered' => false,
 ])
 
+@php
+    use Illuminate\Support\Str;
+@endphp
+
 <div class="overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-100/80 shadow-[0_1px_2px_rgba(16,24,40,0.04)]">
     <div class="px-4 py-2.5">
         @if (filled($title))
@@ -22,8 +26,15 @@
                     @foreach ($headers as $header)
                       @php
                         $isDay = is_numeric($header);
+                        $normalizedHeader = is_string($header) ? Str::of(strip_tags($header))->lower()->squish()->toString() : '';
+                        $isActionHeader = in_array($normalizedHeader, [
+                            'action',
+                            'actions',
+                            'əməliyyat',
+                            'əməliyyatlar',
+                        ], true);
                       @endphp
-                        @if ($header != 'action')
+                        @if (! $isActionHeader)
                             <th
                                 scope="col"
                                 @class([
@@ -36,12 +47,7 @@
                                 {{ $header }}
                             </th>
                         @else
-                            <th
-                                scope="col"
-                                class="relative px-4 py-2.5 bg-zinc-100/70 border-y border-zinc-200 first:rounded-l-xl first:border-l last:rounded-r-xl last:border-r"
-                            >
-                                <span class="sr-only">{{ __('Edit') }}</span>
-                            </th>
+                            <th scope="col" class="relative px-4 py-2.5 bg-zinc-100/70 border-y border-zinc-200 first:rounded-l-xl first:border-l last:rounded-r-xl last:border-r"></th>
                         @endif
                     @endforeach
                 </tr>

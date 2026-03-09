@@ -172,7 +172,7 @@ class ShiftManagement extends Component
             return;
         }
 
-        $this->dispatch('notify', type: 'success', message: __('Shift saved.'));
+        $this->dispatch('notify', type: 'success', message: __('attendance::shift_management.messages.shift_saved'));
         $this->resetShiftForm();
     }
 
@@ -198,7 +198,7 @@ class ShiftManagement extends Component
             $this->resetShiftForm();
         }
 
-        $this->dispatch('notify', type: 'success', message: __('Shift deactivated.'));
+        $this->dispatch('notify', type: 'success', message: __('attendance::shift_management.messages.shift_deactivated'));
     }
 
     public function editAssignment(int $assignmentId): void
@@ -262,7 +262,7 @@ class ShiftManagement extends Component
             return;
         }
 
-        $this->dispatch('notify', type: 'success', message: __('Shift assignment saved.'));
+        $this->dispatch('notify', type: 'success', message: __('attendance::shift_management.messages.assignment_saved'));
         $this->resetAssignmentForm();
     }
 
@@ -283,7 +283,7 @@ class ShiftManagement extends Component
             $this->resetAssignmentForm();
         }
 
-        $this->dispatch('notify', type: 'success', message: __('Shift assignment deactivated.'));
+        $this->dispatch('notify', type: 'success', message: __('attendance::shift_management.messages.assignment_deactivated'));
     }
 
     public function render()

@@ -1,22 +1,22 @@
 @php
     $headers = array_merge(
-        [__('Tabel no / Name')],
+        [__('attendance::puantaj.headers.personnel')],
         array_map(fn ($day) => (string) $day, $days),
-        [__('Total hours'), __('Total days')]
+        [__('attendance::puantaj.headers.total_hours'), __('attendance::puantaj.headers.total_days')]
     );
 @endphp
 
 <div class="space-y-4">
-    <x-surface-card :title="__('Timesheet grid')" icon="icons.calendar-icon">
+    <x-surface-card :title="__('attendance::puantaj.title')" icon="icons.calendar-icon">
         <div class="grid grid-cols-1 gap-2 md:grid-cols-3">
             <div class="md:col-span-2">
-                <x-label for="attendance-puantaj-search">{{ __('Search (name or tabel no)') }}</x-label>
+                <x-label for="attendance-puantaj-search">{{ __('attendance::puantaj.search.label') }}</x-label>
                 <x-livewire-input
                     id="attendance-puantaj-search"
                     mode="gray"
                     name="search"
                     wire:model.live.debounce.300ms="search"
-                    placeholder="{{ __('e.g. 12345 or Aliyev') }}"
+                    placeholder="{{ __('attendance::puantaj.search.placeholder') }}"
                 />
             </div>
         </div>
@@ -24,8 +24,8 @@
 
     @if($selectedStructureLabel)
         <div class="flex flex-wrap items-center gap-2 rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 text-xs text-blue-700">
-            <x-small-badge mode="sky">{{ __('Structure scope') }}</x-small-badge>
-            <span>{{ __('Showing personnel from the selected structure tree only.') }}</span>
+            <x-small-badge mode="sky">{{ __('attendance::puantaj.scope.badge') }}</x-small-badge>
+            <span>{{ __('attendance::puantaj.scope.description') }}</span>
             <span class="font-medium">{{ $selectedStructureLabel }}</span>
         </div>
     @endif
@@ -33,7 +33,7 @@
     <div class="relative min-h-[300px] overflow-x-auto">
         <div class="inline-block min-w-full py-2 align-middle">
             <div class="overflow-visible">
-                <x-table.tbl :headers="$headers" :title="__('Timesheet grid')" bordered>
+                <x-table.tbl :headers="$headers" :title="__('attendance::puantaj.title')" bordered>
                     @forelse($rows as $row)
                         @php
                             $personnel = $row['personnel'];

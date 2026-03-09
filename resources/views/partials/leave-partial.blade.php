@@ -8,14 +8,14 @@
     <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
         <div class="flex flex-col">
              <x-ui.search-input-select
-                label="Search personnel"
+                label="{{ __('leaves::common.labels.search_personnel') }}"
                 searchModel="personnelName"
                 :selected="$leave->tabel_no"
                 displayKey="fullname"
                 idKey="tabel_no"
                 onClear="removePersonnel"
                 clearField="tabel_no"
-                placeholder="Search..."
+                placeholder="{{ __('leaves::common.labels.search_placeholder') }}"
             >
                 @forelse($this->personnelList as $pl)
                     <p
@@ -26,7 +26,7 @@
                     </p>
                 @empty
                     <span class="mx-auto text-sm font-medium text-slate-500">
-                        {{ __('Please search personnel') }}
+                        {{ __('leaves::common.labels.search_personnel') }}
                     </span>
                 @endforelse
             </x-ui.search-input-select>
@@ -37,7 +37,7 @@
 
         <div class="flex flex-col">
              <x-ui.select-dropdown
-                label="{{ __('Leave type') }}"
+                label="{{ __('leaves::common.labels.leave_type') }}"
                 placeholder="---"
                 mode="gray"
                 class="w-full"
@@ -53,7 +53,7 @@
 
     <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
         <div class="flex flex-col">
-            <x-label for="leave.starts_at">{{ __('Start date') }}</x-label>
+            <x-label for="leave.starts_at">{{ __('leaves::common.labels.start_date') }}</x-label>
             <x-pikaday-input mode="gray" name="leave.starts_at" format="Y-MM-DD" wire:model.live="leave.starts_at">
                 <x-slot name="script">
                     $el.onchange = function () {
@@ -67,7 +67,7 @@
         </div>
 
         <div class="flex flex-col">
-            <x-label for="leave.ends_at">{{ __('End date') }}</x-label>
+            <x-label for="leave.ends_at">{{ __('leaves::common.labels.end_date') }}</x-label>
             <x-pikaday-input mode="gray" name="leave.ends_at" format="Y-MM-DD" wire:model.live="leave.ends_at">
                 <x-slot name="script">
                     $el.onchange = function () {
@@ -78,19 +78,19 @@
         </div>
 
         <div class="flex flex-col">
-            <x-label for="leave.total_days">{{ __('Total days') }}</x-label>
+            <x-label for="leave.total_days">{{ __('leaves::common.labels.total_days') }}</x-label>
             <x-livewire-input mode="gray"  name="leave.total_days" wire:model="leave.total_days" disabled readonly></x-livewire-input>
         </div>
     </div>
 
     <div class="grid grid-cols-1">
-        <x-textarea name="leave.reason" :placeholder="__('Reason')" mode="gray" wire:model="leave.reason"></x-textarea>
+        <x-textarea name="leave.reason" :placeholder="__('leaves::common.labels.reason')" mode="gray" wire:model="leave.reason"></x-textarea>
     </div>
 
     <div class="grid items-start items-end grid-cols-1 gap-2 sm:grid-cols-3">
         <div class="flex flex-col">
             <x-ui.select-dropdown
-                label="{{ __('Status') }}"
+                label="{{ __('leaves::common.labels.status') }}"
                 placeholder="---"
                 mode="gray"
                 class="w-full"
@@ -104,14 +104,14 @@
         </div>
 
         <x-ui.search-input-select
-            label="Assigned person"
+            label="{{ __('leaves::common.labels.assigned_person') }}"
             searchModel="assignedSearch"
             :selected="$leave->assigned_to"
             displayKey="fullname"
             idKey="id"
             onClear="removePersonnel"
             clearField="assigned_to"
-            placeholder="Search..."
+            placeholder="{{ __('leaves::common.labels.search_placeholder') }}"
         >
             @forelse($this->personnelList as $pl)
                 <p
@@ -122,7 +122,7 @@
                 </p>
             @empty
                 <span class="mx-auto text-sm font-mediu m text-slate-500">
-                    {{ __('Please search personnel') }}
+                    {{ __('leaves::common.labels.search_personnel') }}
                 </span>
             @endforelse
         </x-ui.search-input-select>
@@ -134,6 +134,6 @@
     </div>
 
     <div class="flex items-end justify-between w-full">
-        <x-modal-button>{{ __('Save') }}</x-modal-button>
+        <x-modal-button>{{ __('leaves::common.actions.save') }}</x-modal-button>
     </div>
 </div>

@@ -1,0 +1,56 @@
+<?php
+
+return [
+    'title' => 'Month close / lock',
+    'period_control' => [
+        'title' => 'Period control',
+        'description' => 'Lock, unlock and export the selected month after attendance checks are complete.',
+    ],
+    'actions' => [
+        'snapshot_now' => 'Snapshot now',
+        'snapshot_queue' => 'Snapshot queue',
+        'close_month' => 'Close month',
+        'unlock_month' => 'Unlock month',
+        'export_xlsx' => 'Export XLSX',
+        'export_csv' => 'Export CSV',
+    ],
+    'stats' => [
+        'status' => 'Status',
+        'locked' => 'locked',
+        'open' => 'open',
+        'total_ledgers' => 'Total ledgers',
+        'locked_ledgers' => 'Locked ledgers',
+        'summary_rows' => 'Summary rows',
+        'locked_summaries' => 'Locked summaries',
+        'worked_hours' => 'Worked hours',
+    ],
+    'export_profile' => [
+        'title' => 'Export profile',
+        'format' => 'Format',
+        'contract' => 'Monthly payroll snapshot export contract.',
+        'csv_delimiter' => 'CSV delimiter',
+        'csv_encoding' => 'CSV encoding',
+        'utf8_bom' => 'UTF-8 BOM',
+        'csv_enclosure' => 'CSV enclosure',
+        'enabled' => 'Enabled',
+        'disabled' => 'Disabled',
+        'description' => 'Use this profile to validate payroll import compatibility before exporting month-end files for downstream finance systems.',
+    ],
+    'messages' => [
+        'closed' => 'Month closed. Summaries: :summaries, Locked ledgers: :ledgers',
+        'unlocked' => 'Month unlocked. Summaries: :summaries, Ledgers: :ledgers',
+        'snapshot_done' => 'Snapshot done. Summary rows upserted: :count',
+        'snapshot_queued' => 'Monthly snapshot queued.',
+    ],
+    'payroll_headers' => [
+        'tabel_no' => 'Tabel no',
+        'fullname' => 'Fullname',
+        'scheduled_hours' => 'Scheduled (hours)',
+        'worked_hours' => 'Worked (hours)',
+        'overtime_hours' => 'Overtime (hours)',
+        'absent_hours' => 'Absent (hours)',
+        'workdays' => 'Workdays',
+        'present_days' => 'Present days',
+        'absent_days' => 'Absent days',
+    ],
+];

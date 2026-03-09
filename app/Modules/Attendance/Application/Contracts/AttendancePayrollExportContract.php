@@ -13,15 +13,15 @@ class AttendancePayrollExportContract
     {
         return [
             '#',
-            __('Tabel no'),
-            __('Fullname'),
-            __('Scheduled (hours)'),
-            __('Worked (hours)'),
-            __('Overtime (hours)'),
-            __('Absent (hours)'),
-            __('Workdays'),
-            __('Present days'),
-            __('Absent days'),
+            __('attendance::month_close.payroll_headers.tabel_no'),
+            __('attendance::month_close.payroll_headers.fullname'),
+            __('attendance::month_close.payroll_headers.scheduled_hours'),
+            __('attendance::month_close.payroll_headers.worked_hours'),
+            __('attendance::month_close.payroll_headers.overtime_hours'),
+            __('attendance::month_close.payroll_headers.absent_hours'),
+            __('attendance::month_close.payroll_headers.workdays'),
+            __('attendance::month_close.payroll_headers.present_days'),
+            __('attendance::month_close.payroll_headers.absent_days'),
         ];
     }
 

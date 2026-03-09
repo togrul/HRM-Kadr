@@ -8,7 +8,7 @@
     <div class="grid grid-cols-1 gap-2 mt-4 sm:grid-cols-2">
         <div class="flex flex-col">
             <x-ui.select-dropdown
-                :label="__('Template')"
+                :label="__('orders::order_form.fields.template')"
                 placeholder="---"
                 mode="gray"
                 class="w-full"
@@ -24,7 +24,7 @@
         </div>
 
         <div class="">
-            <x-label for="orderForm.order_no">{{ __('Order #') }}</x-label>
+            <x-label for="orderForm.order_no">{{ __('orders::order_form.fields.order_no') }}</x-label>
             <x-livewire-input mode="gray"  name="orderForm.order_no" wire:model="orderForm.order_no"></x-livewire-input>
             @error('orderForm.order_no')
             <x-validation> {{ $message }} </x-validation>
@@ -34,15 +34,15 @@
 
     <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
         <div class="">
-            <x-label for="orderForm.given_by">{{ __('Given by') }}</x-label>
+            <x-label for="orderForm.given_by">{{ __('orders::order_form.fields.given_by') }}</x-label>
             <x-livewire-input mode="gray" disabled="true" name="orderForm.given_by" wire:model="orderForm.given_by"></x-livewire-input>
         </div>
         <div class="">
-            <x-label for="orderForm.given_by_rank">{{ __('Rank') }}</x-label>
+            <x-label for="orderForm.given_by_rank">{{ __('orders::order_form.fields.rank') }}</x-label>
             <x-livewire-input mode="gray"  name="orderForm.given_by_rank" wire:model="orderForm.given_by_rank"></x-livewire-input>
         </div>
         <div class="">
-            <x-label for="orderForm.given_date">{{ __('Given date') }}</x-label>
+            <x-label for="orderForm.given_date">{{ __('orders::order_form.fields.given_date') }}</x-label>
             <x-pikaday-input mode="gray" name="orderForm.given_date" format="Y-MM-DD" wire:model.live="orderForm.given_date">
                 <x-slot name="script">
                     $el.onchange = function () {
@@ -59,7 +59,7 @@
     @if($selectedBlade === \App\Models\Order::BLADE_BUSINESS_TRIP)
         <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3">
             <div class="flex flex-col">
-                <x-label for="orderForm.description.start_date">{{ __('Start date') }}</x-label>
+                <x-label for="orderForm.description.start_date">{{ __('orders::order_form.fields.start_date') }}</x-label>
                 <x-pikaday-input mode="gray" name="orderForm.description.start_date" format="Y-MM-DD" wire:model.live="orderForm.description.start_date">
                     <x-slot name="script">
                         $el.onchange = function () {
@@ -72,7 +72,7 @@
                 @enderror
             </div>
             <div class="flex flex-col">
-                <x-label for="orderForm.description.end_date">{{ __('End date') }}</x-label>
+                <x-label for="orderForm.description.end_date">{{ __('orders::order_form.fields.end_date') }}</x-label>
                 <x-pikaday-input mode="gray" name="orderForm.description.end_date" format="Y-MM-DD" wire:model.live="orderForm.description.end_date">
                     <x-slot name="script">
                         $el.onchange = function () {
@@ -85,7 +85,7 @@
                 @enderror
             </div>
             <div class="">
-                <x-label for="orderForm.description.location">{{ __('Location') }}</x-label>
+                <x-label for="orderForm.description.location">{{ __('orders::order_form.fields.location') }}</x-label>
                 <x-livewire-input mode="gray"  name="orderForm.description.location" wire:model="orderForm.description.location"></x-livewire-input>
                 @error('orderForm.description.location')
                     <x-validation> {{ $message }} </x-validation>
@@ -93,7 +93,7 @@
             </div>
             @if($selectedTemplate == \App\Models\PersonnelBusinessTrip::FOREIGN_BUSINESS_TRIP)
                 <div class="flex flex-col sm:col-span-2 md:col-span-3">
-                    <x-label for="orderForm.description.description">{{ __('Title') }}</x-label>
+                    <x-label for="orderForm.description.description">{{ __('orders::order_form.fields.title') }}</x-label>
                     <x-textarea mode="gray" placeholder=""  name="orderForm.description.description" wire:model="orderForm.description.description"></x-textarea>
                     @error('orderForm.description.description')
                     <x-validation> {{ $message }} </x-validation>
@@ -123,7 +123,7 @@
                             ])->values()->all();
                         @endphp
             <x-ui.select-dropdown
-                :label="__('Select component')"
+                :label="__('orders::order_form.fields.select_component')"
                 placeholder="---"
                 mode="gray"
                 class="w-full"
@@ -143,7 +143,7 @@
         <div class="flex items-center justify-center">
             <button class="flex items-center justify-center px-6 py-2 space-x-2 text-sm font-medium bg-gray-100 rounded-lg shadow-sm text-slate-900" wire:click="addRow">
                 <x-icons.add-icon></x-icons.add-icon>
-                <span class="uppercase">{{ __('Add') }}</span>
+                <span class="uppercase">{{ __('orders::order_form.actions.add') }}</span>
             </button>
         </div>
         @endif
@@ -151,7 +151,7 @@
 
     <div class="grid grid-cols-1">
         <div class="flex flex-col space-y-1">
-            <x-label for="personnel.gender">{{ __('Status') }}</x-label>
+            <x-label for="personnel.gender">{{ __('orders::order_form.fields.status') }}</x-label>
             <div class="flex flex-row">
                 @foreach($this->statuses as $_status)
                     <label class="inline-flex items-center px-2 py-2 bg-gray-100 rounded shadow-sm">
@@ -167,18 +167,18 @@
     </div>
 
     <div class="flex items-end justify-between w-full">
-        <x-modal-button>{{ __('Save') }}</x-modal-button>
+        <x-modal-button>{{ __('orders::order_form.actions.save') }}</x-modal-button>
     </div>
 
     <div>
         <x-modal-info
             livewire-event-to-open-modal="checkVacancyWasSet"
-            :modal-title="__('Vacancy error')"
+            :modal-title="__('orders::order_form.messages.vacancy_error')"
         ></x-modal-info>
 
         <x-modal-info
             livewire-event-to-open-modal="checkVacationAdd"
-            :modal-title="__('Vacation error')"
+            :modal-title="__('orders::order_form.messages.vacation_error')"
         ></x-modal-info>
     </div>
 </div>

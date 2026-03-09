@@ -93,12 +93,12 @@ class ExceptionsInbox extends Component
             'status' => 'resolved',
             'resolved_by' => Auth::id(),
             'resolved_at' => now(),
-            'resolution_note' => $exception->resolution_note ?: __('Resolved from exceptions inbox.'),
+            'resolution_note' => $exception->resolution_note ?: __('attendance::exceptions.messages.resolution_note'),
         ]);
 
         app(AttendanceAuditLogger::class)->log(
             event: 'exception.resolved',
-            description: __('Attendance exception resolved from inbox.'),
+            description: __('attendance::exceptions.messages.resolved_description'),
             subject: $exception,
             properties: [
                 'tabel_no' => $exception->tabel_no,
@@ -109,7 +109,7 @@ class ExceptionsInbox extends Component
             ]
         );
 
-        $this->dispatch('notify', type: 'success', message: __('Exception resolved.'));
+        $this->dispatch('notify', type: 'success', message: __('attendance::exceptions.messages.resolved'));
     }
 
     public function reopen(int $exceptionId): void
@@ -133,7 +133,7 @@ class ExceptionsInbox extends Component
 
         app(AttendanceAuditLogger::class)->log(
             event: 'exception.reopened',
-            description: __('Attendance exception reopened from inbox.'),
+            description: __('attendance::exceptions.messages.reopened_description'),
             subject: $exception,
             properties: [
                 'tabel_no' => $exception->tabel_no,
@@ -144,7 +144,7 @@ class ExceptionsInbox extends Component
             ]
         );
 
-        $this->dispatch('notify', type: 'success', message: __('Exception reopened.'));
+        $this->dispatch('notify', type: 'success', message: __('attendance::exceptions.messages.reopened'));
     }
 
     public function render()

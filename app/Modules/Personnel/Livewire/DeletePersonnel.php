@@ -56,7 +56,7 @@ class DeletePersonnel extends Component
 
         $this->personnelId = null;
 
-        $this->dispatch('personnelWasDeleted', __('Personnel was deleted!'));
+        $this->dispatch('personnelWasDeleted', __('personnel::common.messages.personnel_deleted'));
     }
 
     public function render()

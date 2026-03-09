@@ -21,7 +21,7 @@ trait HandlesSetTypeUiConfigMutations
         }
 
         if (! $this->uiConfigOrderTypeId || ! $this->uiConfigVersionId) {
-            $this->dispatch('typesUpdated', __('Please open UI config for an order type first.'));
+            $this->dispatch('typesUpdated', __('orders::template_set_type.messages.open_ui_first'));
             return;
         }
 
@@ -58,7 +58,7 @@ trait HandlesSetTypeUiConfigMutations
 
         if ($validator->fails()) {
             $this->setErrorBag($validator->errors());
-            $this->dispatch('addError', __('Please fix validation errors in Add metadata field.'));
+            $this->dispatch('addError', __('orders::template_set_type.messages.fix_add_metadata_errors'));
             return;
         }
 
@@ -75,11 +75,11 @@ trait HandlesSetTypeUiConfigMutations
         }
 
         if (in_array($input, ['select', 'radio-list'], true) && $model === '') {
-            $this->addError('newFieldModel', __('Model is required for lookup input.'));
+            $this->addError('newFieldModel', __('orders::template_set_type.messages.model_required_lookup_input'));
         }
 
         if ($this->getErrorBag()->isNotEmpty()) {
-            $this->dispatch('typesUpdated', __('Please fix validation errors in Add metadata field.'));
+            $this->dispatch('typesUpdated', __('orders::template_set_type.messages.fix_add_metadata_errors'));
             return;
         }
 
@@ -97,7 +97,7 @@ trait HandlesSetTypeUiConfigMutations
             ->exists();
 
         if ($exists) {
-            $this->addError('newFieldKey', __('This field key already exists in metadata.'));
+            $this->addError('newFieldKey', __('orders::template_set_type.messages.field_key_exists'));
             return;
         }
 
@@ -143,7 +143,7 @@ trait HandlesSetTypeUiConfigMutations
 
         $this->resetNewFieldDraft();
         $this->openUiConfig((int) $this->uiConfigOrderTypeId);
-        $this->dispatch('typesUpdated', __('Metadata field added successfully.'));
+        $this->dispatch('typesUpdated', __('orders::template_set_type.messages.metadata_field_added'));
     }
 
     public function removeUiMetadataField(int $fieldId): void
@@ -168,7 +168,7 @@ trait HandlesSetTypeUiConfigMutations
         }
 
         $this->openUiConfig((int) $this->uiConfigOrderTypeId);
-        $this->dispatch('typesUpdated', __('Metadata field removed successfully.'));
+        $this->dispatch('typesUpdated', __('orders::template_set_type.messages.metadata_field_removed'));
     }
 
     public function addMappingRow(): void
@@ -258,7 +258,7 @@ trait HandlesSetTypeUiConfigMutations
             ])
             ->find((int) $this->uiConfigVersionId);
         if (! $templateVersion) {
-            $this->dispatch('typesUpdated', __('Active metadata template version not found.'));
+            $this->dispatch('typesUpdated', __('orders::template_set_type.messages.active_version_not_found'));
             return;
         }
 
@@ -279,7 +279,7 @@ trait HandlesSetTypeUiConfigMutations
 
             $model = trim((string) ($draft['model'] ?? ''));
             if (in_array($resolvedInput, ['select', 'radio-list'], true) && $model === '') {
-                $this->addError("uiConfigDraft.{$field->id}.model", __('Model is required for lookup input.'));
+                $this->addError("uiConfigDraft.{$field->id}.model", __('orders::template_set_type.messages.model_required_lookup_input'));
             }
         }
 
@@ -292,7 +292,7 @@ trait HandlesSetTypeUiConfigMutations
         $normalizedMappings = $this->buildNormalizedMappingsDraft($knownFieldKeys);
 
         if ($normalizedMappings->isEmpty()) {
-            $this->addError('mappingDraft', __('At least one mapping is required.'));
+            $this->addError('mappingDraft', __('orders::template_set_type.messages.at_least_one_mapping_required'));
         }
 
         $coverage = app(TemplatePlaceholderCoverageService::class)
@@ -302,14 +302,14 @@ trait HandlesSetTypeUiConfigMutations
         if (! empty($coverage['inspectable']) && ! empty($coverage['missing_placeholders'])) {
             $this->addError(
                 'mappingDraft',
-                __('Missing mappings for template placeholders: :placeholders', [
+                __('orders::template_set_type.messages.missing_mapping_placeholders', [
                     'placeholders' => implode(', ', $coverage['missing_placeholders']),
                 ])
             );
         }
 
         if ($this->getErrorBag()->isNotEmpty()) {
-            $this->dispatch('typesUpdated', __('Please fix validation errors before saving UI config.'));
+            $this->dispatch('typesUpdated', __('orders::template_set_type.messages.fix_ui_errors_before_save'));
             return;
         }
 
@@ -329,7 +329,7 @@ trait HandlesSetTypeUiConfigMutations
             $normalizedMappings
         );
         if (! $templateVersion) {
-            $this->dispatch('typesUpdated', __('Active metadata template version not found.'));
+            $this->dispatch('typesUpdated', __('orders::template_set_type.messages.active_version_not_found'));
             return;
         }
         $stateAfter = $this->captureUiConfigState($templateVersion);
@@ -347,7 +347,7 @@ trait HandlesSetTypeUiConfigMutations
         ], auth()->id());
 
         $this->openUiConfig((int) $this->uiConfigOrderTypeId, (int) $this->uiConfigVersionId);
-        $this->dispatch('typesUpdated', __('UI config was updated successfully.'));
+        $this->dispatch('typesUpdated', __('orders::template_set_type.messages.ui_config_updated'));
     }
 
     private function buildNormalizedMappingsDraft(array $knownFieldKeys = []): Collection
@@ -372,12 +372,12 @@ trait HandlesSetTypeUiConfigMutations
             }
 
             if ($placeholderRaw === '') {
-                $this->addError("mappingDraft.{$index}.placeholder", __('Placeholder is required.'));
+                $this->addError("mappingDraft.{$index}.placeholder", __('orders::template_set_type.messages.placeholder_required'));
                 continue;
             }
 
             if ($fieldKeyRaw === '') {
-                $this->addError("mappingDraft.{$index}.field_key", __('Field key is required.'));
+                $this->addError("mappingDraft.{$index}.field_key", __('orders::template_set_type.messages.field_key_required'));
                 continue;
             }
 
@@ -389,13 +389,13 @@ trait HandlesSetTypeUiConfigMutations
             $mappingConfig = $this->normalizeMappingConfigFromDraft($row['mapping_config_json'] ?? null, $index);
 
             if (! empty($knownFieldMap) && ! isset($knownFieldMap[$fieldKey])) {
-                $this->addError("mappingDraft.{$index}.field_key", __('Field key must exist in metadata fields.'));
+                $this->addError("mappingDraft.{$index}.field_key", __('orders::template_set_type.messages.field_key_must_exist'));
                 continue;
             }
 
             $dupKey = $placeholder.'|'.$scope;
             if (isset($seen[$dupKey])) {
-                $this->addError("mappingDraft.{$index}.placeholder", __('Duplicate placeholder/scope is not allowed.'));
+                $this->addError("mappingDraft.{$index}.placeholder", __('orders::template_set_type.messages.duplicate_placeholder_scope'));
                 continue;
             }
             $seen[$dupKey] = true;
@@ -421,7 +421,7 @@ trait HandlesSetTypeUiConfigMutations
 
         $decoded = json_decode($value, true);
         if (! is_array($decoded)) {
-            $this->addError("mappingDraft.{$index}.mapping_config_json", __('Mapping config must be valid JSON object.'));
+            $this->addError("mappingDraft.{$index}.mapping_config_json", __('orders::template_set_type.messages.mapping_config_must_be_json_object'));
             return null;
         }
 
@@ -729,29 +729,43 @@ trait HandlesSetTypeUiConfigMutations
         $highlights = collect();
 
         foreach (['fields', 'mappings', 'sections'] as $bucket) {
+            $bucketLabel = __('orders::template_set_type.audit.buckets.'.$bucket);
             $added = collect(data_get($diff, "{$bucket}.added", []))
                 ->pluck('key')
                 ->filter()
                 ->take(2)
-                ->map(fn ($key) => sprintf('%s + %s', Str::title($bucket), $key));
+                ->map(fn ($key) => __('orders::template_set_type.audit.highlight_added', [
+                    'bucket' => $bucketLabel,
+                    'key' => $key,
+                ]));
 
             $removed = collect(data_get($diff, "{$bucket}.removed", []))
                 ->pluck('key')
                 ->filter()
                 ->take(2)
-                ->map(fn ($key) => sprintf('%s - %s', Str::title($bucket), $key));
+                ->map(fn ($key) => __('orders::template_set_type.audit.highlight_removed', [
+                    'bucket' => $bucketLabel,
+                    'key' => $key,
+                ]));
 
             $updated = collect(data_get($diff, "{$bucket}.updated", []))
                 ->take(2)
-                ->map(function ($item) use ($bucket) {
+                ->map(function ($item) use ($bucketLabel) {
                     $key = (string) ($item['key'] ?? '');
                     $changedPaths = collect(is_array($item['changes'] ?? null) ? array_keys($item['changes']) : [])
                         ->take(2)
                         ->implode(', ');
 
                     return $changedPaths !== ''
-                        ? sprintf('%s ~ %s (%s)', Str::title($bucket), $key, $changedPaths)
-                        : sprintf('%s ~ %s', Str::title($bucket), $key);
+                        ? __('orders::template_set_type.audit.highlight_updated_with_changes', [
+                            'bucket' => $bucketLabel,
+                            'key' => $key,
+                            'changes' => $changedPaths,
+                        ])
+                        : __('orders::template_set_type.audit.highlight_updated', [
+                            'bucket' => $bucketLabel,
+                            'key' => $key,
+                        ]);
                 });
 
             $highlights = $highlights

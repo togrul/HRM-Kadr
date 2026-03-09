@@ -57,7 +57,7 @@ class EditPersonnel extends Component
         $personnel = $this->personnelModelDataInstance();
 
         $this->authorize('update', $personnel);
-        $this->title = __('Edit personnel');
+        $this->title = __('personnel::common.titles.edit_personnel');
         $this->step = 1;
         $this->resetStepTrackingFor($personnel->getKey());
         $this->loadStepData((int) $this->step);
@@ -71,7 +71,7 @@ class EditPersonnel extends Component
     public function confirmPersonnel(): void
     {
         app(PersonnelPendingApprovalService::class)->approve($this->personnelModelDataInstance());
-        $this->dispatch('addError', __('Personnel was updated successfully!'));
+        $this->dispatch('addError', __('personnel::common.messages.personnel_updated'));
     }
 
     public function store()
@@ -136,7 +136,7 @@ class EditPersonnel extends Component
             }
         });
 
-        $this->dispatchPersonnelStored(__('Personnel was updated successfully!'));
+        $this->dispatchPersonnelStored(__('personnel::common.messages.personnel_updated'));
         $this->dispatchModalCloseEvent();
     }
 

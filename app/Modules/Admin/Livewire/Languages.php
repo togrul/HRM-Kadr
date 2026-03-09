@@ -27,8 +27,8 @@ class Languages extends Component
     protected function validationAttributes(): array
     {
         return [
-            'form.id' => __('ID'),
-            'form.name' => __('Name'),
+            'form.id' => __('admin::languages.fields.id'),
+            'form.name' => __('admin::languages.fields.name'),
         ];
     }
 
@@ -70,6 +70,7 @@ class Languages extends Component
     public function render()
     {
         $languages = Language::all();
+
         return view('admin::livewire.admin.languages', compact('languages'));
     }
 }

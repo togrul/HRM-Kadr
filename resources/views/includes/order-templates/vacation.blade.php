@@ -51,7 +51,7 @@
             @else
                 <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3">
                     <div class="flex flex-col">
-                        <x-label for="componentForms.{{$i}}.start_date">{{ __('Start date') }}</x-label>
+                        <x-label for="componentForms.{{$i}}.start_date">{{ __('orders::order_form.fields.start_date') }}</x-label>
                         <x-pikaday-input mode="gray" name="componentForms.{{$i}}.start_date" format="Y-MM-DD" wire:model.live="componentForms.{{$i}}.start_date">
                             <x-slot name="script">
                                 $el.onchange = function () {
@@ -64,7 +64,7 @@
                         @enderror
                     </div>
                     <div class="flex flex-col">
-                        <x-label for="componentForms.{{$i}}.end_date">{{ __('End date') }}</x-label>
+                        <x-label for="componentForms.{{$i}}.end_date">{{ __('orders::order_form.fields.end_date') }}</x-label>
                         <x-pikaday-input mode="gray" name="componentForms.{{$i}}.end_date" format="Y-MM-DD" wire:model.live="componentForms.{{$i}}.end_date">
                             <x-slot name="script">
                                 $el.onchange = function () {
@@ -77,7 +77,7 @@
                         @enderror
                     </div>
                     <div class="flex flex-col">
-                        <x-label for="componentForms.{{$i}}.days">{{ __('Days') }}</x-label>
+                        <x-label for="componentForms.{{$i}}.days">{{ __('orders::order_form.fields.days') }}</x-label>
                         <x-livewire-input mode="gray" name="componentForms.{{$i}}.days" wire:model="componentForms.{{$i}}.days"></x-livewire-input>
                         @error("componentForms.{$i}.days")
                             <x-validation> {{ $message }} </x-validation>
@@ -91,7 +91,7 @@
         @if($sectionKey === 'personnel_search')
             <div class="grid grid-cols-1 gap-2 sm:grid-cols-1 md:grid-cols-1">
                 <div class="flex flex-col relative">
-                    <x-label for="personnel_name">{{ __('Search personnel') }}</x-label>
+                    <x-label for="personnel_name">{{ __('orders::order_form.fields.search_personnel') }}</x-label>
                     <x-livewire-input x-on:click.stop="showPersonnelList = {{ $i }}" mode="gray" name="personnel_name" wire:model.live="personnel_name"></x-livewire-input>
                     <div x-show="showPersonnelList == {{ $i }}"
                          x-on:click.away = "showPersonnelList = -1"
@@ -101,10 +101,10 @@
                                class="cursor-pointer flex flex-col transition-all duration-300 hover:bg-white px-2 py-1 rounded-md text-slate-600 drop-shadow-sm"
                             >
                                 <span>{{ $pl->fullname }}</span>
-                                <span class="text-sm text-rose-400 font-medium">@if($pl->inActiveVacation) ({{ __('in vacation') }}) @endif</span>
+                                <span class="text-sm text-rose-400 font-medium">@if($pl->inActiveVacation) ({{ __('orders::order_form.messages.in_vacation') }}) @endif</span>
                             </p>
                         @empty
-                            <span class="text-sm font-medium text-slate-500 mx-auto">{{ __('Please search personnel') }}</span>
+                            <span class="text-sm font-medium text-slate-500 mx-auto">{{ __('orders::order_form.messages.please_search_personnel') }}</span>
                         @endforelse
                     </div>
                 </div>
@@ -133,12 +133,12 @@
                                         'text-sm',
                                         'text-rose-500' => $selectPerson['work_duration'] < 6,
                                         'text-slate-900' => $selectPerson['work_duration'] >= 6
-                                    ])>{{ __('Seniority') }}: {{ $duration }}</span>
+                                    ])>{{ __('orders::order_form.fields.seniority') }}: {{ $duration }}</span>
                                 </p>
                                 <div class="flex flex-col w-full">
                                     <div class="flex items-center justify-between">
                                         <div class="flex items-center space-x-2">
-                                            <x-label>{{ __('Reserved month') }}: </x-label>
+                                            <x-label>{{ __('orders::order_form.fields.reserved_month') }}: </x-label>
                                             <span class="text-sm text-sky-500">{{ $selectPerson['reserved_date_month'] }}</span>
                                         </div>
                                         <div class="flex items-center space-x-2">
@@ -150,7 +150,7 @@
                                                     default => 'teal',
                                                 };
                                             @endphp
-                                            <span class="text-sm text-gray-600 flex-shrink-0">{{ __('Vacation days') }}: </span>
+                                            <span class="text-sm text-gray-600 flex-shrink-0">{{ __('orders::order_form.fields.vacation_days') }}: </span>
                                             <div class="rounded-lg h-3 bg-slate-200 relative w-28 overflow-hidden flex justify-center items-center">
                                                 <div class="absolute left-0 h-full bg-{{ $color }}-500 shadow-sm" style="width: {{ $percentage }}%"></div>
                                             </div>

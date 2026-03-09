@@ -64,7 +64,7 @@ class Files extends Component
         } else {
             $this->personnelFiles->files()->delete();
         }
-        $this->dispatch('fileAdded', __('File has added successfully!'));
+        $this->dispatch('fileAdded', __('personnel::files.messages.saved'));
         $this->dispatchModalCloseEvent();
     }
 
@@ -77,7 +77,9 @@ class Files extends Component
 
        $this->authorize('update', $this->personnelFiles);
 
-        $this->title = __('Files') . "( {$this->personnelFiles->fullname} )";
+        $this->title = __('personnel::files.titles.files_for', [
+            'name' => $this->personnelFiles->fullname,
+        ]);
 
         $this->file_list = $this->personnelFiles->files->toArray();
     }

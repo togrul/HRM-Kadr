@@ -43,7 +43,7 @@
             <div class="flex flex-col items-center justify-between px-2 py-2 bg-white sm:flex-row filter rounded-xl">
                 <x-filter.nav>
                     <x-filter.item wire:click.prevent="setStatus('all')" :active="$status === 'all'">
-                        {{ __('All') }}
+                        {{ __('orders::order_list.filters.all') }}
                     </x-filter.item>
                     @foreach ($this->statuses as $_status)
                         <x-filter.item wire:click.prevent="setStatus({{ $_status->id }})" :active="$_status->id === intval($status)">
@@ -52,7 +52,7 @@
                     @endforeach
                     @role('Admin')
                         <x-filter.item wire:click.prevent="setStatus('deleted')" :active="$status === 'deleted'">
-                            {{ __('Deleted') }}
+                            {{ __('orders::order_list.filters.deleted') }}
                         </x-filter.item>
                     @endrole
                 </x-filter.nav>
@@ -79,12 +79,12 @@
 
         <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
             <div class="flex flex-col">
-                <x-label for="search.order_no">{{ __('Search') }}</x-label>
+                <x-label for="search.order_no">{{ __('orders::order_list.filters.search') }}</x-label>
                 <x-livewire-input mode="gray" name="search.order_no"
                     wire:model.live="search.order_no"></x-livewire-input>
             </div>
             <div class="flex flex-col lg:col-span-2">
-                <x-label for="search.given_date">{{ __('Given date') }}</x-label>
+                <x-label for="search.given_date">{{ __('orders::order_list.filters.given_date') }}</x-label>
                 <div class="flex items-center space-x-1">
                     <x-pikaday-input mode="gray" name="search.given_date.min" format="Y-MM-DD"
                         wire:model.live="search.given_date.min">
@@ -106,14 +106,14 @@
                 </div>
             </div>
             <div class="flex items-end">
-                <x-button mode="black" wire:click="resetFilter">{{ __('Reset') }}</x-button>
+                <x-button mode="black" wire:click="resetFilter">{{ __('orders::order_list.filters.reset') }}</x-button>
             </div>
         </div>
 
         <div class="relative min-h-[300px] -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
                 <div class="overflow-visible">
-                    <x-table.tbl :headers="$this->getTableHeaders()" title="{{ __('Orders') }}">
+                    <x-table.tbl :headers="$this->getTableHeaders()" title="{{ __('orders::order_list.table.title') }}">
                         @forelse ($orders as $_order)
                             <tr wire:key="order-row-{{ $_order->id }}" @class([
                                 '' => $_order->status_id != 30,
@@ -163,12 +163,12 @@
                                             @if ($status == 'deleted')
                                                 <div class="flex flex-col text-xs font-medium">
                                                     <div class="flex items-center space-x-1">
-                                                        <span class="text-gray-500">{{ __('Deleted date') }}:</span>
+                                                        <span class="text-gray-500">{{ __('orders::order_list.table.deleted_date') }}:</span>
                                                         <span
                                                             class="text-black">{{ \Carbon\Carbon::parse($_order->deleted_at)->format('d.m.Y H:i') }}</span>
                                                     </div>
                                                     <div class="flex items-center space-x-1">
-                                                        <span class="text-gray-500">{{ __('Deleted by') }}:</span>
+                                                        <span class="text-gray-500">{{ __('orders::order_list.table.deleted_by') }}:</span>
                                                         <span
                                                             class="text-black">{{ $_order->personDidDelete->name }}</span>
                                                     </div>
@@ -233,7 +233,7 @@
                                     @else
                                         @can('delete-orders')
                                             <button wire:click="forceDeleteData('{{ $_order->order_no }}')"
-                                                wire:confirm="{{ __('Are you sure you want to remove this data?') }}"
+                                                wire:confirm="{{ __('orders::order_list.messages.force_delete_confirm') }}"
                                                 class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700">
                                                 <x-icons.force-delete></x-icons.force-delete>
                                             </button>

@@ -131,7 +131,7 @@ class OnboardingWizard extends Component
         }
 
         if (! $this->templateId) {
-            $this->dispatch('addError', __('Please select a template first.'));
+            $this->dispatch('addError', __('orders::template_onboarding_wizard.messages.select_template_first'));
 
             return;
         }
@@ -146,7 +146,7 @@ class OnboardingWizard extends Component
         }
 
         if (! $this->orderTypeId) {
-            $this->dispatch('addError', __('Please select an order type first.'));
+            $this->dispatch('addError', __('orders::template_onboarding_wizard.messages.select_order_type_first'));
             return;
         }
 
@@ -163,10 +163,10 @@ class OnboardingWizard extends Component
         }
 
         $this->versionId = (int) $created->id;
-        $this->versionResult = __('Draft version created: v:version', ['version' => (int) $created->version_no]);
+        $this->versionResult = __('orders::template_onboarding_wizard.messages.draft_version_created_with_number', ['version' => (int) $created->version_no]);
         $this->resetPreviewState();
         $this->refreshVersionState();
-        $this->dispatch('typesUpdated', __('Draft version created successfully.'));
+        $this->dispatch('typesUpdated', __('orders::template_onboarding_wizard.messages.draft_version_created_success'));
     }
 
     public function uploadDocxForSelectedVersion(): void
@@ -176,7 +176,7 @@ class OnboardingWizard extends Component
         }
 
         if (! $this->orderTypeId || ! $this->versionId) {
-            $this->dispatch('addError', __('Please create/select a version first.'));
+            $this->dispatch('addError', __('orders::template_onboarding_wizard.messages.create_or_select_version_first'));
             return;
         }
 
@@ -198,19 +198,20 @@ class OnboardingWizard extends Component
 
         $this->docxFile = null;
         $this->uploadedChecksum = (string) ($result['checksum'] ?? '');
-        $this->uploadResult = __('DOCX uploaded and linked to selected version.');
+        $this->uploadResult = __('orders::template_onboarding_wizard.messages.docx_uploaded_and_linked');
         $this->resetPreviewState();
         $this->refreshVersionState();
-        $this->dispatch('typesUpdated', __('DOCX uploaded successfully.'));
+        $this->dispatch('typesUpdated', __('orders::template_onboarding_wizard.messages.docx_uploaded_success'));
     }
 
-    public function generateMetadataAndMappings(): void {
+    public function generateMetadataAndMappings(): void
+    {
         if (! $this->ensureWizardPermission('metadata')) {
             return;
         }
 
         if (! $this->orderTypeId || ! $this->versionId) {
-            $this->dispatch('addError', __('Please select an order type/version first.'));
+            $this->dispatch('addError', __('orders::template_onboarding_wizard.messages.select_order_type_version_first'));
             return;
         }
 
@@ -232,7 +233,7 @@ class OnboardingWizard extends Component
         $updatedFields = (int) ($result['updated_fields'] ?? 0);
         $updatedMappings = (int) ($result['updated_mappings'] ?? 0);
 
-        $this->metadataResult = __('Metadata synced. Fields +: :fields, ~: :updated_fields, -: :deleted_fields | Mappings +: :mappings, ~: :updated_mappings, -: :deleted_mappings', [
+        $this->metadataResult = __('orders::template_onboarding_wizard.messages.metadata_synced_summary', [
             'fields' => $createdFields,
             'updated_fields' => $updatedFields,
             'deleted_fields' => $deletedFields,
@@ -242,7 +243,7 @@ class OnboardingWizard extends Component
         ]);
         $this->resetPreviewState();
         $this->refreshVersionState();
-        $this->dispatch('typesUpdated', __('Metadata + mappings generated successfully.'));
+        $this->dispatch('typesUpdated', __('orders::template_onboarding_wizard.messages.metadata_mappings_generated_success'));
     }
 
     public function runCoverageScan(): void
@@ -252,7 +253,7 @@ class OnboardingWizard extends Component
         }
 
         if (! $this->versionId) {
-            $this->dispatch('addError', __('Please select a version first.'));
+            $this->dispatch('addError', __('orders::template_onboarding_wizard.messages.select_version_first'));
             return;
         }
 
@@ -271,7 +272,7 @@ class OnboardingWizard extends Component
         }
 
         if (! $this->versionId || ! $this->orderTypeId) {
-            $this->dispatch('addError', __('Please select a version first.'));
+            $this->dispatch('addError', __('orders::template_onboarding_wizard.messages.select_version_first'));
             return;
         }
 
@@ -293,9 +294,9 @@ class OnboardingWizard extends Component
         $this->coverage = is_array($result['coverage'] ?? null) ? $result['coverage'] : [];
 
         $this->versionId = (int) ($published?->id ?? $this->versionId);
-        $this->publishResult = __('Version published successfully.');
+        $this->publishResult = __('orders::template_onboarding_wizard.messages.version_published_success');
         $this->refreshVersionState();
-        $this->dispatch('typesUpdated', __('Version published successfully.'));
+        $this->dispatch('typesUpdated', __('orders::template_onboarding_wizard.messages.version_published_success'));
     }
 
     public function runPreviewRender(): void
@@ -305,7 +306,7 @@ class OnboardingWizard extends Component
         }
 
         if (! $this->orderTypeId || ! $this->versionId) {
-            $this->dispatch('addError', __('Please select an order type/version first.'));
+            $this->dispatch('addError', __('orders::template_onboarding_wizard.messages.select_order_type_version_first'));
             return;
         }
 
@@ -328,14 +329,14 @@ class OnboardingWizard extends Component
         $this->previewSucceeded = true;
         $this->previewOutputPath = (string) ($result['output_path'] ?? '');
         $this->previewOutputName = (string) ($result['output_name'] ?? '');
-        $this->previewResult = __('Preview rendered successfully.');
-        $this->dispatch('typesUpdated', __('Preview render completed.'));
+        $this->previewResult = __('orders::template_onboarding_wizard.messages.preview_rendered_success');
+        $this->dispatch('typesUpdated', __('orders::template_onboarding_wizard.messages.preview_render_completed'));
     }
 
     public function downloadPreview()
     {
         if (! $this->previewOutputPath || ! is_file($this->previewOutputPath)) {
-            $this->dispatch('addError', __('Preview file is not available. Run preview render first.'));
+            $this->dispatch('addError', __('orders::template_onboarding_wizard.messages.preview_file_not_available'));
             return null;
         }
 
@@ -352,7 +353,7 @@ class OnboardingWizard extends Component
         }
 
         if (! $this->templateId) {
-            $this->dispatch('addError', __('Please select a template first.'));
+            $this->dispatch('addError', __('orders::template_onboarding_wizard.messages.select_template_first'));
 
             return;
         }
@@ -364,12 +365,12 @@ class OnboardingWizard extends Component
             return;
         }
 
-        $this->setEnsureResult = __('Created: :created, Existing: :existing', [
+        $this->setEnsureResult = __('orders::template_onboarding_wizard.messages.sets_ensured_result', [
             'created' => (int) ($result['created'] ?? 0),
             'existing' => (int) ($result['existing'] ?? 0),
         ]);
 
-        $this->dispatch('typesUpdated', __('Template sets ensured successfully. :result', [
+        $this->dispatch('typesUpdated', __('orders::template_onboarding_wizard.messages.sets_ensured_success', [
             'result' => $this->setEnsureResult,
         ]));
 
@@ -407,7 +408,7 @@ class OnboardingWizard extends Component
     {
         $user = auth()->user();
         if (! $user) {
-            $this->dispatch('addError', __('You do not have permission to perform this action.'));
+            $this->dispatch('addError', __('orders::template_onboarding_wizard.messages.permission_denied'));
             return false;
         }
 
@@ -418,7 +419,7 @@ class OnboardingWizard extends Component
             }
         }
 
-        $this->dispatch('addError', __('You do not have permission to perform this action.'));
+        $this->dispatch('addError', __('orders::template_onboarding_wizard.messages.permission_denied'));
 
         return false;
     }

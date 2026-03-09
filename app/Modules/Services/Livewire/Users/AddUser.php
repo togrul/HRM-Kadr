@@ -37,11 +37,11 @@ class AddUser extends Component
     protected function validationAttributes()
     {
         return [
-            'user.name' => __('Name'),
-            'user.email' => __('Email'),
-            'user.password' => __('Password'),
-            'user.confirm-password' => __('Confirm password'),
-            'roleId' => __('Role'),
+            'user.name' => __('services::common.labels.name'),
+            'user.email' => __('services::common.labels.email'),
+            'user.password' => __('services::common.labels.password'),
+            'user.confirm-password' => __('services::common.labels.confirm_password'),
+            'roleId' => __('services::common.labels.role'),
         ];
     }
 
@@ -59,13 +59,13 @@ class AddUser extends Component
             }
         }
 
-        $this->dispatch('userAdded', __('User was added successfully!'));
+        $this->dispatch('userAdded', __('services::users.messages.created'));
     }
 
     public function mount()
     {
         // $this->authorize('manage-settings',$this->user);
-        $this->title = __('Add user');
+        $this->title = __('services::users.titles.add');
         $this->roleId = null;
     }
 

@@ -45,7 +45,7 @@ class AllTemplates extends Component
         $template->update([
             'deleted_by' => null,
         ]);
-        $this->dispatch('templateAdded', __('Template was updated successfully!'));
+        $this->dispatch('templateAdded', __('orders::templates_list.messages.template_updated'));
     }
 
     public function forceDeleteData($id)
@@ -55,7 +55,7 @@ class AllTemplates extends Component
             return;
         }
         $model->forceDelete();
-        $this->dispatch('templateWasDeleted', __('Template was deleted!'));
+        $this->dispatch('templateWasDeleted', __('orders::templates_list.messages.template_deleted'));
     }
 
     public function fillFilter()

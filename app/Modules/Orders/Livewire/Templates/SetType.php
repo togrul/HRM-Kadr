@@ -79,7 +79,7 @@ class SetType extends Component
     protected function validationAttributes()
     {
         return [
-            'types.name' => __('Name'),
+            'types.name' => __('orders::template_set_type.labels.name'),
         ];
     }
 
@@ -95,7 +95,7 @@ class SetType extends Component
 
         $this->clearField();
 
-        $this->dispatch('typesUpdated', __('Type was added successfully!'));
+        $this->dispatch('typesUpdated', __('orders::template_set_type.messages.type_added'));
     }
 
     public function removeType($_typeId)
@@ -108,7 +108,7 @@ class SetType extends Component
             ->removeType($this->templateModel, (int) $_typeId);
 
         if (! $removed) {
-            $this->dispatch('addError', __('Type not found.'));
+            $this->dispatch('addError', __('orders::template_set_type.messages.type_not_found'));
 
             return;
         }
@@ -117,7 +117,7 @@ class SetType extends Component
             $this->clearField();
         }
 
-        $this->dispatch('typesUpdated', __('Type was updated successfully!'));
+        $this->dispatch('typesUpdated', __('orders::template_set_type.messages.type_deleted'));
     }
 
     public function editType($_typeId)
@@ -128,7 +128,7 @@ class SetType extends Component
 
         $this->selectedModel = $this->resolveOwnedType((int) $_typeId);
         if (! $this->selectedModel) {
-            $this->dispatch('addError', __('Type not found.'));
+            $this->dispatch('addError', __('orders::template_set_type.messages.type_not_found'));
 
             return;
         }
@@ -147,13 +147,13 @@ class SetType extends Component
             ->updateType($this->templateModel, (int) $this->selectedType, $this->types);
 
         if (! $updated) {
-            $this->dispatch('addError', __('Type not found.'));
+            $this->dispatch('addError', __('orders::template_set_type.messages.type_not_found'));
 
             return;
         }
 
         $this->clearField();
-        $this->dispatch('typesUpdated', __('Type was added successfully!'));
+        $this->dispatch('typesUpdated', __('orders::template_set_type.messages.type_updated'));
     }
 
     public function cancelUpdate()
@@ -170,7 +170,7 @@ class SetType extends Component
 
     public function mount()
     {
-        $this->title = __('Set Type');
+        $this->title = __('orders::template_set_type.title');
         $this->templateModel = app(SetTypeReadUseCase::class)->loadTemplateOrFail((int) $this->templateModel);
         $this->uiInputTypes = $this->inputTypeOptions();
         $this->resetNewFieldDraft();

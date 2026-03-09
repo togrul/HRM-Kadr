@@ -9,7 +9,7 @@
 
                     <div class="flex items-end space-x-2">
                         <div>
-                            <x-label for="role_name" :value="__('Role')" />
+                            <x-label for="role_name" :value="__('services::common.labels.role')" />
 
                             <x-livewire-input id="role_name" name="role_name" mode="gray"
                                 class="block mt-1 w-full sm:text-sm outline-none font-medium h-10 dark:bg-gray-700 {{ $errors->any() ? 'border-red-600' : '' }}"
@@ -20,7 +20,7 @@
                         </div>
                         <x-button mode="primary" class="space-x-2">
                             <x-icons.key-icon color="text-white" hover="text-gray-50"></x-icons.key-icon>
-                            <span> {{ __('Add role') }}</span>
+                            <span> {{ __('services::roles.actions.add_role') }}</span>
                         </x-button>
                     </div>
                 </div>
@@ -33,7 +33,7 @@
         <div class="inline-block min-w-full py-2 align-middle">
             <div class="overflow-visible">
 
-                <x-table.tbl :headers="[__('Name'), 'action', 'action', 'action']">
+                <x-table.tbl :headers="[__('services::common.labels.name'), __('services::common.labels.action'), __('services::common.labels.action'), __('services::common.labels.action')]">
                     @foreach ($roles as $role)
                         <tr wire:key={{ $role->id }}>
                             <x-table.td>

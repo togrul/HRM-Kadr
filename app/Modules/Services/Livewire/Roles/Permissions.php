@@ -81,7 +81,7 @@ class Permissions extends Component
             ])->save();
         }
 
-        $this->dispatch('permissionUpdated', __('Permission was added successfully!'));
+        $this->dispatch('permissionUpdated', __('services::roles.messages.permission_saved'));
         $this->showPermissionModal = false;
         $this->resetInputFields();
         $this->resetErrorBag();
@@ -114,13 +114,13 @@ class Permissions extends Component
         $normalized = Str::of($permissionName)->lower()->replace('_', '-')->toString();
 
         return match (true) {
-            str_contains($normalized, 'attendance') => ['label' => __('Attendance'), 'mode' => 'sky'],
-            str_contains($normalized, 'order') || str_contains($normalized, 'template') || str_contains($normalized, 'component') => ['label' => __('Orders'), 'mode' => 'amber'],
-            str_contains($normalized, 'candidate') => ['label' => __('Candidates'), 'mode' => 'purple'],
-            str_contains($normalized, 'leave') || str_contains($normalized, 'vacation') || str_contains($normalized, 'business-trip') => ['label' => __('Time off'), 'mode' => 'green'],
-            str_contains($normalized, 'structure') || str_contains($normalized, 'staff') || str_contains($normalized, 'personnel') => ['label' => __('Workforce'), 'mode' => 'blue'],
-            str_contains($normalized, 'service') || str_contains($normalized, 'role') || str_contains($normalized, 'permission') || str_contains($normalized, 'menu') || str_contains($normalized, 'user') || str_contains($normalized, 'rank') => ['label' => __('Admin'), 'mode' => 'secondary'],
-            default => ['label' => __('General'), 'mode' => 'secondary'],
+            str_contains($normalized, 'attendance') => ['label' => __('services::roles.badges.modules.attendance'), 'mode' => 'sky'],
+            str_contains($normalized, 'order') || str_contains($normalized, 'template') || str_contains($normalized, 'component') => ['label' => __('services::roles.badges.modules.orders'), 'mode' => 'amber'],
+            str_contains($normalized, 'candidate') => ['label' => __('services::roles.badges.modules.candidates'), 'mode' => 'purple'],
+            str_contains($normalized, 'leave') || str_contains($normalized, 'vacation') || str_contains($normalized, 'business-trip') => ['label' => __('services::roles.badges.modules.time_off'), 'mode' => 'green'],
+            str_contains($normalized, 'structure') || str_contains($normalized, 'staff') || str_contains($normalized, 'personnel') => ['label' => __('services::roles.badges.modules.workforce'), 'mode' => 'blue'],
+            str_contains($normalized, 'service') || str_contains($normalized, 'role') || str_contains($normalized, 'permission') || str_contains($normalized, 'menu') || str_contains($normalized, 'user') || str_contains($normalized, 'rank') => ['label' => __('services::roles.badges.modules.admin'), 'mode' => 'secondary'],
+            default => ['label' => __('services::roles.badges.modules.general'), 'mode' => 'secondary'],
         };
     }
 
@@ -137,7 +137,7 @@ class Permissions extends Component
                 || str_contains($normalized, 'close')
                 || str_contains($normalized, 'manage')
                 || str_contains($normalized, 'settings')
-                    => ['label' => __('High risk'), 'mode' => 'red'],
+                    => ['label' => __('services::roles.badges.risks.high'), 'mode' => 'red'],
             str_contains($normalized, 'create')
                 || str_contains($normalized, 'add')
                 || str_contains($normalized, 'edit')
@@ -145,8 +145,8 @@ class Permissions extends Component
                 || str_contains($normalized, 'assign')
                 || str_contains($normalized, 'export')
                 || str_contains($normalized, 'import')
-                    => ['label' => __('Medium risk'), 'mode' => 'amber'],
-            default => ['label' => __('Low risk'), 'mode' => 'green'],
+                    => ['label' => __('services::roles.badges.risks.medium'), 'mode' => 'amber'],
+            default => ['label' => __('services::roles.badges.risks.low'), 'mode' => 'green'],
         };
     }
 
@@ -161,7 +161,7 @@ class Permissions extends Component
             || str_contains($normalized, 'permission')
             || str_contains($normalized, 'manage')
         ) {
-            return ['label' => __('Admin only'), 'mode' => 'purple'];
+            return ['label' => __('services::roles.badges.admin_only'), 'mode' => 'purple'];
         }
 
         return null;

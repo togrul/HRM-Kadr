@@ -21,7 +21,7 @@
         <div class="flex items-center justify-center space-x-2 action-section">
             <x-button class="space-x-2" mode="primary" wire:click.prevent="openCrud()">
                 <x-icons.add-icon color="text-white" hover="text-gray-50"></x-icons.add-icon>
-                <span>{{ __('Add weapon') }}</span>
+                <span>{{ __('admin::references.buttons.add_weapon') }}</span>
             </x-button>
         </div>
     </div>
@@ -33,32 +33,32 @@
             </button>
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 mt-4 w-full">
                 <div class="flex flex-col">
-                    <x-label for="form.name">{{ __('Name') }}</x-label>
+                    <x-label for="form.name">{{ __('admin::references.fields.name') }}</x-label>
                     <x-livewire-input mode="default" name="form.name" wire:model="form.name"></x-livewire-input>
                     @error('form.name')
                     <x-validation> {{ $message }} </x-validation>
                     @enderror
                 </div>
                 <div class="flex flex-col">
-                    <x-label for="form.serial_number">{{ __('Serial number') }}</x-label>
+                    <x-label for="form.serial_number">{{ __('admin::references.fields.serial_number') }}</x-label>
                     <x-livewire-input mode="default" name="form.serial_number" wire:model="form.serial_number"></x-livewire-input>
                 </div>
                 <div class="flex flex-col">
-                    <x-label for="form.capacity">{{ __('Capacity') }}</x-label>
+                    <x-label for="form.capacity">{{ __('admin::references.fields.capacity') }}</x-label>
                     <x-livewire-input mode="default" type="number" name="form.capacity" wire:model="form.capacity"></x-livewire-input>
                     @error('form.capacity')
                     <x-validation> {{ $message }} </x-validation>
                     @enderror
                 </div>
                 <div class="flex flex-col">
-                    <x-label for="form.production_year">{{ __('Production year') }}</x-label>
+                    <x-label for="form.production_year">{{ __('admin::references.fields.production_year') }}</x-label>
                     <x-livewire-input mode="default" type="number" name="form.production_year" wire:model="form.production_year"></x-livewire-input>
                     @error('form.production_year')
                     <x-validation> {{ $message }} </x-validation>
                     @enderror
                 </div>
                 <div class="flex items-end">
-                    <x-modal-button mode="black">{{ __('Save') }}</x-modal-button>
+                    <x-modal-button mode="black">{{ __('admin::references.actions.save') }}</x-modal-button>
                 </div>
             </div>
         </div>
@@ -68,7 +68,7 @@
         <div class="relative min-h-[300px] -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
                 <div class="overflow-visible">
-                    <x-table.tbl :headers="[__('ID'),__('Name'),__('Serial number'),__('Capacity'),__('Production year'),'action']">
+                    <x-table.tbl :headers="[__('admin::references.fields.id'),__('admin::references.fields.name'),__('admin::references.fields.serial_number'),__('admin::references.fields.capacity'),__('admin::references.fields.production_year'),__('admin::references.table.action')]">
                         @forelse ($weapons as $weapon)
                             <tr>
                                 <x-table.td>

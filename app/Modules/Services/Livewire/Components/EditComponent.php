@@ -34,6 +34,6 @@ class EditComponent extends Component
 
         $this->componentModelData->update($this->modifyArray($this->component));
 
-        $this->dispatch('componentAdded', __('Component was updated successfully!'));
+        $this->dispatch('componentAdded', __('services::components.messages.updated'));
     }
 }

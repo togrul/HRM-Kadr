@@ -171,7 +171,7 @@
               mode="gray"
               :name="$searchModel"
               wire:model.live.debounce.300ms="{{ $searchModel }}"
-              placeholder="{{ $searchPlaceholder ?? __('Search...') }}"
+              placeholder="{{ $searchPlaceholder ?? __('ui::common.placeholders.search') }}"
               x-on:click.stop="$event.stopPropagation()"
               x-on:focus.stop="setOpen(true)"
               x-on:input.stop="setOpen(true)"

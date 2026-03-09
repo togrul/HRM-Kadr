@@ -1,8 +1,8 @@
 <x-modal-delete
   livewire-event-to-open-modal="deleteSettingsWasSet"
   event-to-close-modal="settingsWasDeleted"
-  :modal-title="__('Delete setting')"
-  :modal-description="__('Are you sure you want to delete this setting? This action cannot be undone.')"
-  :modal-confirm-button-text="__('Delete')"
+  :modal-title="__('services::settings.titles.delete')"
+  :modal-description="__('services::settings.messages.delete_description')"
+  :modal-confirm-button-text="__('services::common.actions.delete')"
   wire-click="deleteSetting"
 />

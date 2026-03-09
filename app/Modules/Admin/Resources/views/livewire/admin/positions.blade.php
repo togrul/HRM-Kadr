@@ -21,7 +21,7 @@
         <div class="flex items-center justify-center space-x-2 action-section">
             <x-button class="space-x-2" mode="primary" wire:click.prevent="openCrud()">
                 <x-icons.add-icon color="text-white" hover="text-gray-50"></x-icons.add-icon>
-                <span>{{ __('Add position') }}</span>
+                <span>{{ __('admin::references.buttons.add_position') }}</span>
             </x-button>
         </div>
     </div>
@@ -33,7 +33,7 @@
             </button>
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 mt-4 w-full">
                 <div class="flex flex-col">
-                    <x-label for="form.id">{{ __('ID') }}</x-label>
+                    <x-label for="form.id">{{ __('admin::references.fields.id') }}</x-label>
                     <x-livewire-input mode="default" type="number" name="form.id" wire:model="form.id"></x-livewire-input>
                     @error('form.id')
                         <x-validation> {{ $message }} </x-validation>
@@ -41,7 +41,7 @@
                 </div>
                 <div class="flex flex-col">
                     <x-ui.select-dropdown
-                        :label="__('Rank category')"
+                        :label="__('admin::references.fields.rank_category')"
                         placeholder="---"
                         mode="default"
                         class="w-full"
@@ -55,14 +55,14 @@
                     @enderror
                 </div>
                 <div class="flex flex-col">
-                    <x-label for="form.name">{{ __('Name') }}</x-label>
+                    <x-label for="form.name">{{ __('admin::references.fields.name') }}</x-label>
                     <x-livewire-input mode="default" name="form.name" wire:model="form.name"></x-livewire-input>
                     @error('form.name')
                         <x-validation> {{ $message }} </x-validation>
                     @enderror
                 </div>
                 <div class="flex items-end">
-                    <x-modal-button mode="black">{{ __('Save') }}</x-modal-button>
+                    <x-modal-button mode="black">{{ __('admin::references.actions.save') }}</x-modal-button>
                 </div>
             </div>
         </div>
@@ -72,7 +72,7 @@
         <div class="relative min-h-[300px] -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
                 <div class="overflow-visible">
-                    <x-table.tbl :headers="[__('ID'),__('Category'),__('Name'),'action']">
+                    <x-table.tbl :headers="[__('admin::references.fields.id'),__('admin::references.fields.category'),__('admin::references.fields.name'),__('admin::references.table.action')]">
                         @forelse ($positions as $position)
                             <tr>
                                 <x-table.td>

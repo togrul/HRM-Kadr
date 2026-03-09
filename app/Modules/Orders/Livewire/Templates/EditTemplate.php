@@ -84,7 +84,7 @@ class EditTemplate extends Component
                 $this->modifyArray($this->template_data)
             );
         } catch (RuntimeException $exception) {
-            $this->dispatch('addError', __($exception->getMessage()));
+            $this->dispatch('addError', $exception->getMessage());
 
             return;
         }
@@ -93,7 +93,7 @@ class EditTemplate extends Component
         $this->templateModel = (int) $updated->id;
         $this->activeVersionBindings = $this->buildActiveVersionBindings();
 
-        $this->dispatch('templateAdded', __('Template was added successfully!'));
+        $this->dispatch('templateAdded', __('orders::templates_list.messages.template_updated'));
     }
 
     private function resolveUploadedChecksum(mixed $file): ?string

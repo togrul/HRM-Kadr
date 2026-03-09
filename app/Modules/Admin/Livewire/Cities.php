@@ -38,9 +38,9 @@ class Cities extends Component
     protected function validationAttributes(): array
     {
         return [
-            'form.name' => __('Name'),
-            'form.country_id' => __('Country'),
-            'form.parent_id' => __('Parent'),
+            'form.name' => __('admin::references.fields.name'),
+            'form.country_id' => __('admin::references.fields.country'),
+            'form.parent_id' => __('admin::references.fields.parent'),
         ];
     }
 

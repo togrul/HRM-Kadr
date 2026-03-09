@@ -4,6 +4,7 @@ namespace App\Services\Orders;
 
 use App\Models\OrderTemplateVersion;
 use App\Modules\Orders\Domain\Contracts\OrderTemplateRegistry;
+use App\Support\Translations\ModuleTranslation;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Cache;
 
@@ -103,7 +104,7 @@ class OrderTemplateFormSchemaService
 
             $resolvedDefinition = array_filter([
                 'field' => $resolvedField,
-                'title' => __($resolvedTitle),
+                'title' => $this->resolveStoredTitle($resolvedTitle),
                 'model' => $uiConfig['model'] ?? null,
                 'selectedName' => $uiConfig['selectedName'] ?? null,
                 'searchField' => $uiConfig['searchField'] ?? null,
@@ -247,7 +248,7 @@ class OrderTemplateFormSchemaService
             if (! array_key_exists($groupKey, $groups)) {
                 $groups[$groupKey] = [
                     'key' => $groupKey,
-                    'title' => is_string($groupTitle) && trim($groupTitle) !== '' ? __($groupTitle) : null,
+                    'title' => is_string($groupTitle) && trim($groupTitle) !== '' ? $this->resolveStoredTitle($groupTitle) : null,
                     'order' => $groupOrder,
                     'grid_cols' => $gridCols,
                     'fields' => [],
@@ -340,7 +341,7 @@ class OrderTemplateFormSchemaService
 
             $merged = array_merge($existing, [
                 'title' => isset($block['title']) && is_string($block['title']) && trim($block['title']) !== ''
-                    ? __((string) $block['title'])
+                    ? $this->resolveStoredTitle((string) $block['title'])
                     : ($existing['title'] ?? null),
                 'enabled' => array_key_exists('enabled', $block) ? (bool) $block['enabled'] : (bool) ($existing['enabled'] ?? true),
                 'order' => array_key_exists('order', $block) ? (int) $block['order'] : (int) ($existing['order'] ?? 100),
@@ -369,5 +370,10 @@ class OrderTemplateFormSchemaService
         return [
             ['key' => 'row_fields', 'title' => null, 'enabled' => true, 'order' => 10],
         ];
+    }
+
+    private function resolveStoredTitle(string $value): string
+    {
+        return ModuleTranslation::resolveStoredText($value);
     }
 }

@@ -1,8 +1,8 @@
 <x-modal-delete
     livewire-event-to-open-modal="deleteTemplateWasSet"
     event-to-close-modal="templateWasDeleted"
-    :modal-title="__('Delete template')"
-    :modal-description="__('Are you sure you want to delete this template?')"
-    :modal-confirm-button-text="__('Delete')"
+    :modal-title="__('orders::template_form.titles.delete_template')"
+    :modal-description="__('orders::template_form.messages.delete_template_confirm')"
+    :modal-confirm-button-text="__('orders::template_form.actions.delete')"
     wire-click="deleteTemplate"
 />

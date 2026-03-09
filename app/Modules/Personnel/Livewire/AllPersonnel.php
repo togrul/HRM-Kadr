@@ -116,7 +116,7 @@ class AllPersonnel extends Component
         $personnel->update([
             'deleted_by' => null,
         ]);
-        $this->dispatch('personnelAdded', __('Personnel was updated successfully!'));
+        $this->dispatch('personnelAdded', __('personnel::common.messages.personnel_updated'));
     }
 
     public function forceDeleteData($id)
@@ -130,7 +130,7 @@ class AllPersonnel extends Component
         $this->authorize('forceDelete', $model);
 
         $model->forceDelete();
-        $this->dispatch('personnelWasDeleted', __('Personnel was deleted!'));
+        $this->dispatch('personnelWasDeleted', __('personnel::common.messages.personnel_deleted'));
     }
 
     #[On('selectStructure')]
@@ -168,23 +168,23 @@ class AllPersonnel extends Component
     public function getStatusFilters(): array
     {
         return [
-            ['key' => 'current', 'label' => __('Active')],
-            ['key' => 'leaves', 'label' => __('Resigned')],
-            ['key' => 'all', 'label' => __('All')],
-            ['key' => 'deleted', 'label' => __('Deleted'), 'permission' => 'access-admin'],
-            ['key' => 'pending', 'label' => __('Pending')],
+            ['key' => 'current', 'label' => __('personnel::common.labels.active')],
+            ['key' => 'leaves', 'label' => __('personnel::common.labels.resigned')],
+            ['key' => 'all', 'label' => __('personnel::common.labels.all')],
+            ['key' => 'deleted', 'label' => __('personnel::common.labels.deleted'), 'permission' => 'access-admin'],
+            ['key' => 'pending', 'label' => __('personnel::common.labels.pending')],
         ];
     }
 
     public function getTableHeaders(): array
     {
         return [
-            __('#'),
-            __('Tabel'),
-            __('Fullname'),
-            __('Structure'),
-            __('Date'),
-            'action',
+            __('personnel::common.labels.number'),
+            __('personnel::common.labels.tabel'),
+            __('personnel::common.labels.fullname'),
+            __('personnel::common.labels.structure'),
+            __('personnel::common.labels.date'),
+            __('services::common.labels.action'),
         ];
     }
 

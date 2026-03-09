@@ -69,13 +69,13 @@ class Vacations extends Component
     public function getTableHeaders(): array
     {
         return [
-            __('#'),
-            __('Fullname'),
-            __('Structure'),
-            __('Dates'),
-            __('Locations'),
-            __('Order'),
-            'action',
+            __('personnel::common.labels.number'),
+            __('vacation::common.labels.fullname'),
+            __('vacation::common.labels.structure'),
+            __('vacation::common.labels.dates'),
+            __('vacation::common.labels.locations'),
+            __('vacation::common.labels.order'),
+            __('personnel::common.labels.action'),
         ];
     }
 

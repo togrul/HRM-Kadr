@@ -21,7 +21,7 @@ class OrderPrintPayloadFactory
         $orderLog->loadMissing(['order', 'components', 'attributes.component']);
 
         if (! $orderLog->order) {
-            throw new RuntimeException('Order relation is missing for print payload.');
+            throw new RuntimeException(__('orders::template_runtime.messages.order_relation_missing_for_print_payload'));
         }
 
         $orderTypeId = (int) ($orderLog->order_type_id ?? 0);
@@ -33,12 +33,12 @@ class OrderPrintPayloadFactory
         if ($snapshotVersion) {
             $templatePath = $this->resolveStrictSnapshotTemplatePath($snapshotTemplatePath, $snapshotVersion);
             if ($snapshotMode !== 'metadata' || ! $this->hasRowMappings($snapshotVersion)) {
-                throw new RuntimeException('Metadata template mappings are required for this order type.');
+                throw new RuntimeException(__('orders::template_runtime.messages.metadata_mappings_required_for_order_type'));
             }
             $payload = $this->metadataBuilder->build($orderLog, $snapshotVersion);
 
             if (($payload['mode'] ?? 'metadata') !== 'metadata') {
-                throw new RuntimeException('Metadata print payload could not be generated.');
+                throw new RuntimeException(__('orders::template_runtime.messages.metadata_print_payload_not_generated'));
             }
 
             return $this->toPayloadDto(
@@ -52,7 +52,7 @@ class OrderPrintPayloadFactory
 
         $templateVersion = $orderTypeId > 0 ? $this->templateRegistry->activeVersionForOrderType($orderTypeId) : null;
         if (! $templateVersion || ! $this->hasRowMappings($templateVersion)) {
-            throw new RuntimeException('Metadata template mappings are required for this order type.');
+            throw new RuntimeException(__('orders::template_runtime.messages.metadata_mappings_required_for_order_type'));
         }
         $templatePath = $this->resolveTemplatePath(
             templateVersion: $templateVersion,
@@ -60,13 +60,13 @@ class OrderPrintPayloadFactory
         );
 
         if (trim($templatePath) === '') {
-            throw new RuntimeException('Order template was not found.');
+            throw new RuntimeException(__('orders::template_runtime.messages.order_template_not_found'));
         }
 
         $payload = $this->metadataBuilder->build($orderLog, $templateVersion);
 
         if (($payload['mode'] ?? 'metadata') !== 'metadata') {
-            throw new RuntimeException('Metadata print payload could not be generated.');
+            throw new RuntimeException(__('orders::template_runtime.messages.metadata_print_payload_not_generated'));
         }
 
         return $this->toPayloadDto(
@@ -104,7 +104,7 @@ class OrderPrintPayloadFactory
             return $versionPath;
         }
 
-        throw new RuntimeException('Metadata template file is missing in snapshot/version.');
+        throw new RuntimeException(__('orders::template_runtime.messages.metadata_template_file_missing_in_snapshot'));
     }
 
     private function hasRowMappings(\App\Models\OrderTemplateVersion $version): bool

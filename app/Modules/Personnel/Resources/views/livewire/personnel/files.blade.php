@@ -6,7 +6,7 @@
     </div>
 
     <div class="flex flex-col px-2 py-3 space-y-2 border rounded-lg bg-neutral-50">
-        <h1 class="text-xl font-medium text-gray-900">{{ __('New file') }}</h1>
+        <h1 class="text-xl font-medium text-gray-900">{{ __('personnel::files.titles.new_file') }}</h1>
         <div class="grid grid-cols-2 gap-2">
             <div class="flex flex-col space-y-4 ">
                 <x-ui.file-upload model="files.file" :data="$files['file'] ?? []" />
@@ -14,13 +14,13 @@
             </div>
 
             <div class="flex flex-col">
-                <x-label for="files.filename">{{ __('File name') }}</x-label>
+                <x-label for="files.filename">{{ __('personnel::files.labels.file_name') }}</x-label>
                 <x-livewire-input mode="gray"  name="files.filename" wire:model.live="files.filename"></x-livewire-input>
                 @error('files.filename') <x-validation> {{ $message }} </x-validation> @enderror
             </div>
 
         </div>
-        <x-button mode="black" class="w-max" wire:click="addFile">{{ __('Add') }}</x-button>
+        <x-button mode="black" class="w-max" wire:click="addFile">{{ __('personnel::common.actions.add') }}</x-button>
     </div>
 
     <div class="flex flex-col space-y-2">
@@ -40,7 +40,7 @@
                     <a target="_blank" class="font-medium text-blue-600 underline" href="{{ $route }}">{{ $file['filename'] }}</a>
                 </div>
                 <button
-                    onclick="confirm('Are you sure you want to remove this data?') || event.stopImmediatePropagation()"
+                    onclick="confirm('{{ __('personnel::common.messages.remove_data_confirm') }}') || event.stopImmediatePropagation()"
                     wire:click="deleteFile({{ $key }})"
                     class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700"
                 >
@@ -54,6 +54,6 @@
 
 
     <div class="flex items-end justify-between w-full">
-        <x-modal-button>{{ __('Save') }}</x-modal-button>
+        <x-modal-button>{{ __('personnel::common.actions.save') }}</x-modal-button>
     </div>
 </div>

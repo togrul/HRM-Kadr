@@ -40,9 +40,9 @@ class Awards extends Component
     protected function validationAttributes(): array
     {
         return [
-            'form.id' => __('ID'),
-            'form.name' => __('Name'),
-            'form.award_type_id' => __('Type'),
+            'form.id' => __('admin::references.fields.id'),
+            'form.name' => __('admin::references.fields.name'),
+            'form.award_type_id' => __('admin::references.fields.type'),
         ];
     }
 

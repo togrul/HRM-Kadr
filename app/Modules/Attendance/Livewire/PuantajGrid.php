@@ -141,17 +141,28 @@ class PuantajGrid extends Component
     private function buildCellTitle(int $workedMinutes, string $status, string $absenceCode): string
     {
         $parts = [];
+        $statusLabels = [
+            'present' => __('attendance::puantaj.statuses.present'),
+            'manual_present' => __('attendance::puantaj.statuses.manual_present'),
+            'holiday_worked' => __('attendance::puantaj.statuses.holiday_worked'),
+            'weekend_worked' => __('attendance::puantaj.statuses.weekend_worked'),
+            'absent' => __('attendance::puantaj.statuses.absent'),
+            'manual_absence' => __('attendance::puantaj.statuses.manual_absence'),
+            'weekend' => __('attendance::puantaj.statuses.weekend'),
+            'holiday' => __('attendance::puantaj.statuses.holiday'),
+            'none' => __('attendance::puantaj.statuses.none'),
+        ];
 
         if ($workedMinutes > 0) {
-            $parts[] = __('Worked: :hours h', ['hours' => $this->formatHours($workedMinutes)]);
+            $parts[] = __('attendance::puantaj.tooltips.worked', ['hours' => $this->formatHours($workedMinutes)]);
         }
 
         if ($status !== 'none') {
-            $parts[] = __('Status: :status', ['status' => __($status)]);
+            $parts[] = __('attendance::puantaj.tooltips.status', ['status' => $statusLabels[$status] ?? $status]);
         }
 
         if ($absenceCode !== '') {
-            $parts[] = __('Absence: :code', ['code' => strtoupper($absenceCode)]);
+            $parts[] = __('attendance::puantaj.tooltips.absence', ['code' => strtoupper($absenceCode)]);
         }
 
         return implode(' | ', $parts);

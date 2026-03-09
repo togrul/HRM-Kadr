@@ -35,12 +35,12 @@ class Structures extends Component
     protected function validationAttributes(): array
     {
         return [
-            'form.name' => __('Name'),
-            'form.shortname' => __('Shortname'),
-            'form.coefficient' => __('Coefficient'),
-            'form.code' => __('Code'),
-            'form.level' => __('Level'),
-            'form.parent_id' => __('Parent'),
+            'form.name' => __('admin::references.fields.name'),
+            'form.shortname' => __('admin::references.fields.shortname'),
+            'form.coefficient' => __('admin::references.fields.coefficient'),
+            'form.code' => __('admin::references.fields.code'),
+            'form.level' => __('admin::references.fields.level'),
+            'form.parent_id' => __('admin::references.fields.parent'),
         ];
     }
 

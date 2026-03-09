@@ -10,14 +10,14 @@ class PersonnelStepNavigationService
     public function steps(): array
     {
         return [
-            1 => __('Personal Information'),
-            2 => __('Cards'),
-            3 => __('Education'),
-            4 => __('Labor activities'),
-            5 => __('Military'),
-            6 => __('Awards and punishments'),
-            7 => __('Kinships'),
-            8 => __('Other'),
+            1 => __('personnel::common.steps.personal_information'),
+            2 => __('personnel::common.steps.cards'),
+            3 => __('personnel::common.steps.education'),
+            4 => __('personnel::common.steps.labor_activities'),
+            5 => __('personnel::common.steps.military'),
+            6 => __('personnel::common.steps.awards_and_punishments'),
+            7 => __('personnel::common.steps.kinships'),
+            8 => __('personnel::common.steps.other'),
         ];
     }
 

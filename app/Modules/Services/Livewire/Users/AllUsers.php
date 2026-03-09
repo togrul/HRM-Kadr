@@ -54,7 +54,7 @@ class AllUsers extends Component
     {
         $model = User::withTrashed()->find($id);
         $model->forceDelete();
-        $this->dispatch('userWasDeleted', __('User was deleted!'));
+        $this->dispatch('userWasDeleted', __('services::users.messages.deleted'));
     }
 
     #[On('restoreData')]
@@ -66,7 +66,7 @@ class AllUsers extends Component
             'deleted_by' => null,
             'is_active' => true,
         ]);
-        $this->dispatch('userAdded', __('User was updated successfully!'));
+        $this->dispatch('userAdded', __('services::users.messages.updated'));
     }
 
     public function mount()

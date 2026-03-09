@@ -4,7 +4,7 @@ return [
     'global' => [
         [
             'id' => 1,
-            'name' => 'Staff table',
+            'name' => 'ui::menu.items.staff_table',
             'icon' => 'network-icon',
             'color' => 'zinc',
             'order' => 1,
@@ -15,7 +15,7 @@ return [
         ],
         [
             'id' => 2,
-            'name' => 'Orders',
+            'name' => 'ui::menu.items.orders',
             'icon' => 'line-order-icon',
             'color' => 'zinc',
             'order' => 2,
@@ -26,7 +26,7 @@ return [
         ],
         [
             'id' => 3,
-            'name' => 'Personal affairs',
+            'name' => 'ui::menu.items.personal_affairs',
             'icon' => 'personal-affair-icon',
             'color' => 'zinc',
             'order' => 3,
@@ -37,7 +37,7 @@ return [
         ],
         [
             'id' => 4,
-            'name' => 'Reports',
+            'name' => 'ui::menu.items.reports',
             'icon' => 'report-chart-icon',
             'color' => 'zinc',
             'order' => 9,
@@ -48,7 +48,7 @@ return [
         ],
         [
             'id' => 5,
-            'name' => 'Queries',
+            'name' => 'ui::menu.items.queries',
             'icon' => 'admin-icon',
             'color' => 'zinc',
             'order' => 21,
@@ -59,7 +59,7 @@ return [
         ],
         [
             'id' => 7,
-            'name' => 'Candidates',
+            'name' => 'ui::menu.items.candidates',
             'icon' => 'candidate-icon',
             'color' => 'zinc',
             'order' => 4,
@@ -70,7 +70,7 @@ return [
         ],
         [
             'id' => 8,
-            'name' => 'Vacations',
+            'name' => 'ui::menu.items.vacations',
             'icon' => 'vacation-icon',
             'color' => 'zinc',
             'order' => 5,
@@ -81,7 +81,7 @@ return [
         ],
         [
             'id' => 9,
-            'name' => 'Business trips',
+            'name' => 'ui::menu.items.business_trips',
             'icon' => 'holiday-icon',
             'color' => 'zinc',
             'order' => 6,
@@ -92,7 +92,7 @@ return [
         ],
         [
             'id' => 10,
-            'name' => 'Time off',
+            'name' => 'ui::menu.items.time_off',
             'icon' => 'calendar-icon',
             'color' => 'zinc',
             'order' => 8,

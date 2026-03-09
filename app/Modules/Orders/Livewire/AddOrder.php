@@ -85,12 +85,12 @@ class AddOrder extends Component
                 (new OrderConfirmedService($order_log, $extraData))->handle($confirmedPayload);
             });
         } catch (RuntimeException $exception) {
-            $this->dispatch('addError', __($exception->getMessage()));
+            $this->dispatch('addError', $exception->getMessage());
 
             return null;
         }
 
-        $this->dispatch('orderAdded', __('Order was added successfully!'));
+        $this->dispatch('orderAdded', __('orders::order_form.messages.order_added'));
 
         return null;
     }

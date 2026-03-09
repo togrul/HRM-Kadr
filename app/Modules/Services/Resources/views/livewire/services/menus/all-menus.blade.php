@@ -3,7 +3,7 @@
         {{-- @can('manage-settings') --}}
         <x-button mode="primary" wire:click.prevent="openSideMenu('add-menu')" class="space-x-2">
             <x-icons.folder-plus-icon color="text-white" hover="text-gray-50"></x-icons.folder-plus-icon>
-            <span>{{ __('Add menu') }}</span>
+            <span>{{ __('services::menus.actions.add_menu') }}</span>
         </x-button>
         {{-- @endcan --}}
     </div>
@@ -12,7 +12,7 @@
         <div class="relative min-h-[300px] -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
                 <div class="overflow-visible">
-                    <x-table.tbl :headers="[__('Name'), __('Color'), __('Order'), __('URL'), __('Active?'), 'action', 'action']">
+                    <x-table.tbl :headers="[__('services::common.labels.name'), __('services::common.labels.color'), __('services::common.labels.order'), __('services::common.labels.url'), __('services::common.labels.active_question'), __('services::common.labels.action'), __('services::common.labels.action')]">
                         @forelse ($_menus as $menu)
                             <tr>
                                 <x-table.td>
@@ -83,9 +83,6 @@
                         @empty
                             <tr>
                                 <td colspan="9">
-                                    {{-- <x-empty :title="__('No users found.')" wire:click="$dispatch('openSideMenu','add-user')">
-                                  {{ __('Add user') }}
-                              </x-empty> --}}
                                 </td>
                             </tr>
                         @endforelse

@@ -6,7 +6,7 @@
     {{-- filter --}}
        <div class="grid grid-cols-1 gap-2 px-6 py-4 sm:grid-cols-2 lg:grid-cols-4">
        <x-ui.select-dropdown
-                label="{{ __('Leave type') }}"
+                label="{{ __('leaves::common.labels.leave_type') }}"
                 placeholder="---"
                 mode="gray"
                 class="w-full"
@@ -14,7 +14,7 @@
                 :model="$this->leaveTypes"
         />
         <div class="flex flex-col">
-            <x-label for="filter.fullname">{{ __('Fullname') }}</x-label>
+            <x-label for="filter.fullname">{{ __('leaves::common.labels.fullname') }}</x-label>
             <x-livewire-input
                     mode="gray"
                     name="filter.fullname"
@@ -22,7 +22,7 @@
             ></x-livewire-input>
         </div>
         <div class="flex flex-col w-full space-y-1">
-            <x-label for="filter.gender">{{ __('Gender') }}</x-label>
+            <x-label for="filter.gender">{{ __('leaves::common.labels.gender') }}</x-label>
             <div class="flex space-x-2">
                 @foreach (\App\Enums\GenderEnum::genderOptions() as $value => $label)
                     <label class="inline-flex items-center w-full px-2 py-2 bg-gray-100 rounded shadow-sm">
@@ -34,13 +34,13 @@
             </div>
         </div>
        <div class="flex flex-col">
-            <x-label for="filter.reason">{{ __('Reason') }}</x-label>
+            <x-label for="filter.reason">{{ __('leaves::common.labels.reason') }}</x-label>
             <x-livewire-input mode="gray" type="text" name="filter.reason"
                     wire:model="filter.reason"></x-livewire-input>
       </div>
 
         <div class="flex flex-col">
-            <x-label for="filter.appeal_date">{{ __('Dates') }}</x-label>
+            <x-label for="filter.appeal_date">{{ __('leaves::common.labels.dates') }}</x-label>
             <div class="flex items-center space-x-1">
                 <x-pikaday-input mode="gray" name="filter.starts_at" format="Y-MM-DD"
                     wire:model="filter.starts_at">
@@ -67,13 +67,13 @@
                     wire:click="searchFilter"
                     wire:loading.attr="disabled"
                     wire:target="searchFilter"
-            >{{ __('Search') }}</x-button>
+            >{{ __('leaves::common.labels.search') }}</x-button>
             <x-button
                     mode="black"
                     wire:click="resetFilter"
                     wire:loading.attr="disabled"
                     wire:target="resetFilter"
-            >{{ __('Reset') }}</x-button>
+            >{{ __('leaves::common.labels.reset') }}</x-button>
         </div>
     </div>
     {{-- end filter --}}
@@ -87,11 +87,11 @@
                       <div class="flex items-center justify-between text-slate-800">
                         <div class="flex items-baseline space-x-1">
                             <span class="text-lg font-bold font-title">{{ $row['total_days'] }}</span>
-                            <span class="text-[12px] font-medium font-mono text-gray-500 uppercase">{{ __('day') }}</span>
+                            <span class="text-[12px] font-medium font-mono text-gray-500 uppercase">{{ __('leaves::common.labels.day') }}</span>
                         </div>
                         <div class="flex items-baseline space-x-1 text-emerald-700">
                             <span class="text-lg font-bold font-title">{{ $row['count'] }}</span>
-                            <span class="text-[12px] font-medium font-mono text-emerald-600 uppercase">{{ __('request') }}</span>
+                            <span class="text-[12px] font-medium font-mono text-emerald-600 uppercase">{{ __('leaves::common.labels.request') }}</span>
                         </div>
                     </div>
                     </x-surface-card>
@@ -103,7 +103,7 @@
              <div class="px-2 py-2 bg-white filter rounded-xl">
                 <x-filter.nav>
                     <x-filter.item wire:click.prevent="setStatus('all')" :active="$status === 'all'">
-                        {{ __('All') }}
+                        {{ __('leaves::common.labels.all') }}
                     </x-filter.item>
                     @foreach ($_appeal_statuses as $_status)
                         <x-filter.item wire:click.prevent="setStatus({{ $_status->id }})" :active="$status === $_status->id">
@@ -112,7 +112,7 @@
                     @endforeach
                     @can('delete', App\Models\Leave::class)
                         <x-filter.item wire:click.prevent="setStatus('deleted')" :active="$status === 'deleted'">
-                            {{ __('Deleted') }}
+                            {{ __('leaves::common.labels.deleted') }}
                         </x-filter.item>
                     @endcan
                 </x-filter.nav>
@@ -149,7 +149,7 @@
     <div class="relative min-h-[300px] overflow-x-auto">
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
                 <div class="overflow-visible">
-                    <x-table.tbl :headers="$this->getTableHeaders()" title="{{ __('Leaves') }}">
+                    <x-table.tbl :headers="$this->getTableHeaders()" title="{{ __('leaves::common.titles.leaves') }}">
                         @php
                             $authUser = auth()->user();
                         @endphp
@@ -182,12 +182,12 @@
                                 <x-table.td>
                                     <div class="flex flex-col space-y-1">
                                       <span class="flex-wrap text-sm font-medium whitespace-normal">{{ $leave->periodLabel }}</span>
-                                      <span class="text-sm font-medium text-neutral-700/80">({{ $leave->total_days }} {{ __('day') }})</span>
+                                      <span class="text-sm font-medium text-neutral-700/80">({{ $leave->total_days }} {{ __('leaves::common.labels.day') }})</span>
                                     </div>
                                       @if ($leave->deleted_at)
                                           <hr class="my-1" >
                                            <div class="flex items-center mt-2 space-x-1 text-xs font-medium">
-                                                <span class="text-rose-500">{{ __('Deleted date') }}:</span>
+                                                <span class="text-rose-500">{{ __('leaves::common.labels.deleted_date') }}:</span>
                                                 <span class="text-black">{{ \Carbon\Carbon::parse($leave->deleted_at)->format('d-m-Y H:i') }}</span>
                                             </div>
                                         @endif
@@ -328,7 +328,7 @@
                                     @else
                                         @can('forceDelete', $leave)
                                             <button
-                                                wire:confirm="{{ __('Are you sure you want to remove this data?') }}"
+                                                wire:confirm="{{ __('leaves::common.messages.remove_confirm') }}"
                                                 wire:click="forceDeleteData('{{ $leave->id }}')"
                                                 wire:loading.attr="disabled"
                                                 wire:target="forceDeleteData('{{ $leave->id }}')"

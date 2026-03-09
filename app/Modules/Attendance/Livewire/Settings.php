@@ -58,7 +58,7 @@ class Settings extends Component
         $this->validate();
         $settingsService->updateGlobal($this->form, (int) Auth::id());
 
-        $this->dispatch('notify', type: 'success', message: __('Attendance settings saved.'));
+        $this->dispatch('notify', type: 'success', message: __('attendance::settings.messages.saved'));
     }
 
     public function render()

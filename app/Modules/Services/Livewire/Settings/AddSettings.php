@@ -20,8 +20,8 @@ class AddSettings extends Component
     protected function validationAttributes()
     {
         return [
-            'settings.name' => __('Name'),
-            'settings.value' => __('Value'),
+            'settings.name' => __('services::common.labels.name'),
+            'settings.value' => __('services::common.labels.value'),
         ];
     }
 
@@ -31,7 +31,7 @@ class AddSettings extends Component
 
         Setting::create($this->settings);
 
-        $this->dispatch('settingsUpdated', __('Setting was added successfully!'));
+        $this->dispatch('settingsUpdated', __('services::settings.messages.saved'));
 
         $this->settings = [];
     }

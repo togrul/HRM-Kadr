@@ -144,11 +144,13 @@ class OrderTemplateVersionLifecycleService
         );
 
         if (empty($coverage['inspectable'])) {
-            throw new RuntimeException('Template coverage is unavailable. Upload DOCX and run coverage first.');
+            throw new RuntimeException(__('orders::template_lifecycle.messages.template_coverage_unavailable'));
         }
 
         if (! empty($coverage['missing_placeholders'])) {
-            throw new RuntimeException('Cannot publish. Missing mappings: '.implode(', ', $coverage['missing_placeholders']));
+            throw new RuntimeException(__('orders::template_lifecycle.messages.cannot_publish_missing_mappings', [
+                'placeholders' => implode(', ', $coverage['missing_placeholders']),
+            ]));
         }
 
         $orderTypeId = (int) $version->templateSet->order_type_id;
@@ -162,7 +164,7 @@ class OrderTemplateVersionLifecycleService
                 ->get(['id']);
 
             if ($lockedVersions->doesntContain(fn (OrderTemplateVersion $item) => (int) $item->id === (int) $version->id)) {
-                throw new RuntimeException('Selected template version does not exist.');
+                throw new RuntimeException(__('orders::template_lifecycle.messages.selected_template_version_missing'));
             }
 
             OrderTemplateVersion::query()
@@ -354,7 +356,9 @@ class OrderTemplateVersionLifecycleService
             ->count();
 
         if ($activeCount !== 1) {
-            throw new RuntimeException("Single active version invariant failed for template_set={$templateSetId}");
+            throw new RuntimeException(__('orders::template_lifecycle.messages.single_active_version_invariant_failed', [
+                'template_set_id' => $templateSetId,
+            ]));
         }
     }
 }

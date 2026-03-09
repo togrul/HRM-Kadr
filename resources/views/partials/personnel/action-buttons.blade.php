@@ -19,7 +19,7 @@
         <button wire:click="resetSelectedFilter" wire:loading.attr="disabled" wire:target="resetSelectedFilter"
             class="appearance-none text-rose-500 text-sm font-medium flex items-center space-x-2 justify-end">
             <x-icons.remove-icon />
-            <span>{{ __('Reset filter') }}</span>
+            <span>{{ __('personnel::common.actions.reset_filter') }}</span>
         </button>
     @endif
 </div>

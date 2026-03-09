@@ -18,7 +18,7 @@
         mode="gray"
         :load-on-open="$resolvedLoadOnOpen"
         :search-model="$searchModel"
-        :search-placeholder="__('Search...')"
+        :search-placeholder="__('ui::common.placeholders.search')"
         class="w-full"
         :model="$options"
         {{ $attributes }}

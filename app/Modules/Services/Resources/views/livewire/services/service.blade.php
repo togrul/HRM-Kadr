@@ -31,7 +31,7 @@
                                 fill="currentColor" opacity="0.3" />
                         </g>
                     </svg>
-                    <h1 class="text-lg text-slate-600">{{ __('You can customize settings') }}</h1>
+                    <h1 class="text-lg text-slate-600">{{ __('services::common.messages.customize_settings') }}</h1>
                 </div>
             </div>
         @else
@@ -54,7 +54,7 @@
                                     :class="activeRoleTab === 'roles' ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-500 hover:text-zinc-700'"
                                     @click="activeRoleTab = 'roles'"
                                 >
-                                    {{ __('Roles') }}
+                                    {{ __('services::common.labels.roles') }}
                                 </button>
                                 <button
                                     type="button"
@@ -62,7 +62,7 @@
                                     :class="activeRoleTab === 'permissions' ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-500 hover:text-zinc-700'"
                                     @click="activeRoleTab = 'permissions'"
                                 >
-                                    {{ __('Permissions') }}
+                                    {{ __('services::common.labels.permissions') }}
                                 </button>
                             </div>
 

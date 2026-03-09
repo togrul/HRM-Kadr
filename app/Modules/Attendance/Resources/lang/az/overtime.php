@@ -1,0 +1,78 @@
+<?php
+
+return [
+    'title' => 'Əlavə iş təsdiq lövhəsi',
+    'filters' => [
+        'title' => 'Təsdiq filtrləri',
+        'description' => 'Əlavə iş sorğularını nəzərdən keçirin, dövrə görə daraldın və eyni lövhədən təsdiq və ya rədd edin.',
+        'status' => 'Status',
+        'from' => 'Başlanğıc',
+        'to' => 'Son',
+        'active' => 'Aktiv filtrlər',
+        'period' => 'Dövr',
+        'structure' => 'Struktur',
+        'personnel' => 'Əməkdaş',
+    ],
+    'badges' => [
+        'title' => 'Sorğu nişanları',
+        'manual' => 'Manual',
+        'auto_generated' => 'Avtomatik yaradılıb',
+        'manual_request' => 'Manual sorğu',
+        'from_manual_entry' => 'Manual girişdən',
+        'from_ledger' => 'Ledgerdən',
+        'stale_pending' => 'Köhnəlmiş gözləmə',
+    ],
+    'create' => [
+        'title' => 'Əlavə iş sorğusu yarat',
+        'personnel' => 'Əməkdaş',
+        'placeholder' => 'Əlavə iş sorğusu yaratmaq üçün əməkdaş seçin',
+        'date' => 'Tarix',
+        'requested_minutes' => 'Tələb olunan dəqiqələr',
+        'reason' => 'Səbəb',
+        'action' => 'Sorğu yarat',
+    ],
+    'scope' => [
+        'badge' => 'Struktur scope',
+        'description' => 'Yalnız seçilmiş struktur ağacındakı əməkdaşlar göstərilir.',
+    ],
+    'table' => [
+        'title' => 'Gözləyən təsdiqlər',
+        'date' => 'Tarix',
+        'tabel_no' => 'Tabel nömrəsi',
+        'personnel' => 'Əməkdaş',
+        'requested_minutes' => 'Tələb olunan (dəq)',
+        'approved_minutes' => 'Təsdiqlənən (dəq)',
+        'status' => 'Status',
+        'action' => 'Əməliyyat',
+        'request_age' => 'Sorğunun yaşı',
+        'pending_approval_hint' => 'Təsdiq cədvəldə göstərilən tələb olunan dəqiqələrə əsasən aparılır.',
+    ],
+    'statuses' => [
+        'pending' => 'gözləyir',
+        'approved' => 'təsdiqləndi',
+        'rejected' => 'rədd edildi',
+        'all' => 'hamısı',
+    ],
+    'actions' => [
+        'approve' => 'Təsdiq et',
+        'reject' => 'Rədd et',
+    ],
+    'empty' => [
+        'title' => 'Əlavə iş sorğusu tapılmadı.',
+        'description_filtered' => 'Cari filtrlərə uyğun əlavə iş sorğusu yoxdur. Filtrləri dəyişin və ya manual sorğu yaradın.',
+        'description_default' => 'Seçilmiş dövrdə hələ əlavə iş sorğusu yoxdur. Təsdiqlənmiş, rədd edilmiş və ya hələ yaradılmamış sorğular burada görünməyəcək.',
+    ],
+    'messages' => [
+        'validation_failed' => 'Validasiya uğursuz oldu.',
+        'approved' => 'Əlavə iş sorğusu təsdiqləndi.',
+        'rejected' => 'Əlavə iş sorğusu rədd edildi.',
+        'created' => 'Manual əlavə iş sorğusu yaradıldı.',
+    ],
+    'errors' => [
+        'requested_minutes_positive' => 'Tələb olunan dəqiqələr sıfırdan böyük olmalıdır.',
+        'month_locked' => 'Seçilmiş ay kilidlənib. Əlavə iş sorğusu yaratmaq bloklanıb.',
+        'personnel_not_found' => 'Seçilmiş əməkdaş tapılmadı.',
+        'approved_exists' => 'Bu gün üçün artıq təsdiqlənmiş əlavə iş sorğusu mövcuddur.',
+        'pending_exists' => 'Bu gün üçün artıq gözləyən əlavə iş sorğusu mövcuddur.',
+    ],
+];

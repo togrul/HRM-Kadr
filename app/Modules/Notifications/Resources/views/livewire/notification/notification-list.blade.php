@@ -31,10 +31,10 @@
     "
 >
     <div class="flex justify-between items-center px-8 py-4">
-        <span class="font-medium text-slate-600">{{__('Count')}}: {{$notifications->total()}}</span>
+        <span class="font-medium text-slate-600">{{ __('notifications::common.labels.count') }}: {{$notifications->total()}}</span>
         <button wire:click.prevent="clearNotifications" class="appearance-none font-medium space-x-2 flex items-center justify-center">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bookmark-x w-6 h-6 text-rose-500"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z"/><path d="m14.5 7.5-5 5"/><path d="m9.5 7.5 5 5"/></svg>
-            <span class="text-rose-500">{{ __('Clear all notifications') }}</span>
+            <span class="text-rose-500">{{ __('notifications::common.labels.clear_all_notifications') }}</span>
         </button>
     </div>
 
@@ -43,7 +43,7 @@
             <x-notification.list-item :$notification />
         @empty
             <div class="px-8 py-10 text-center text-sm text-slate-400">
-                {{ __('No notifications found') }}
+                {{ __('notifications::common.labels.no_notifications_found') }}
             </div>
         @endforelse
         <div>

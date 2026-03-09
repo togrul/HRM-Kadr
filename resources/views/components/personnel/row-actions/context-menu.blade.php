@@ -53,7 +53,7 @@
         type="button"
         x-on:click.stop="toggle()"
         class="inline-flex items-center justify-center w-8 h-8 text-zinc-500 rounded-md bg-zinc-100/80 hover:bg-zinc-200 hover:text-zinc-700 transition-colors"
-        title="{{ __('More actions') }}"
+        title="{{ __('personnel::common.labels.more_actions') }}"
     >
         <x-icons.settings-icon />
     </button>

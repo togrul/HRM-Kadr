@@ -60,7 +60,7 @@
                 <button
                     type="button"
                     class="inline-flex items-center justify-center rounded-xl px-2 py-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-neutral-400"
-                    aria-label="Bağla"
+                    aria-label="{{ __('ui::common.actions.close') }}"
                     @click="openDeleteModal = false"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -82,7 +82,7 @@
                     {{ $modalConfirmButtonText }}
                 </button>
                 <button @click="openDeleteModal = false" type="button" class="rounded-xl px-4 py-2 text-sm font-medium border border-neutral-200 dark:border-neutral-800 text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-300 flex items-center gap-2">
-                    {{ __('Cancel') }}
+                    {{ __('ui::common.actions.cancel') }}
                 </button>
             </div>
 

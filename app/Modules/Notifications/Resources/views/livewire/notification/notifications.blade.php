@@ -61,7 +61,7 @@
                     <li class="py-6">
                         <div class="w-40 mx-auto">
                             <img class="mx-auto mix-blend-luminosity" src="{{ asset('/assets/images/chat.png') }}" alt="">
-                            <div class="mt-6 text-sm font-medium text-center text-gray-400">{{ __('No new notifications') }}</div>
+                            <div class="mt-6 text-sm font-medium text-center text-gray-400">{{ __('notifications::common.labels.no_new_notifications') }}</div>
                         </div>
                     </li>
                 @endif
@@ -70,14 +70,14 @@
 
         <div class="flex justify-between text-center border-t border-dashed border-neutral-300">
             <a wire:navigate href="{{ route('notifications') }}" class="px-5 py-3 text-sm font-medium transition duration-300 text-neutral-500 hover:text-green-400">
-                {{__('Show all notifications')}}
+                {{ __('notifications::common.labels.show_all_notifications') }}
             </a>
             <button
                 wire:click="markAllAsRead"
                 @click="isOpen = false"
                 class="px-5 py-3 text-sm font-medium transition duration-150 ease-in appearance-none text-neutral-500 hover:text-blue-500"
             >
-                {{ __('Mark all as read') }}
+                {{ __('notifications::common.labels.mark_all_as_read') }}
             </button>
         </div>
     </div>

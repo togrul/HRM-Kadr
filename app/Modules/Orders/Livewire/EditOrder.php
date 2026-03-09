@@ -221,12 +221,12 @@ class EditOrder extends Component
                 $this->manageComponentsAndAttributes(data: $data, orderPayload: $payload);
             });
         } catch (RuntimeException $exception) {
-            $this->dispatch('addError', __($exception->getMessage()));
+            $this->dispatch('addError', $exception->getMessage());
 
             return null;
         }
 
-        $this->dispatch('orderAdded', __('Order was updated successfully!'));
+        $this->dispatch('orderAdded', __('orders::order_form.messages.order_updated'));
 
         return null;
     }

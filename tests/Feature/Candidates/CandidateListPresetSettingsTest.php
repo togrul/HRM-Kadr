@@ -83,11 +83,11 @@ class CandidateListPresetSettingsTest extends TestCase
 
         Livewire::test(\App\Modules\Candidates\Livewire\CandidateList::class)
             ->assertSet('status', 20)
-            ->assertSee(__('Fullname'))
-            ->assertSee(__('Gender'))
-            ->assertDontSee(__('Test results'))
-            ->assertDontSee(__('Age'))
-            ->assertDontSee(__('Appeal date'));
+            ->assertSee(__('candidates::common.labels.fullname'))
+            ->assertSee(__('candidates::common.labels.gender'))
+            ->assertDontSee(__('candidates::common.labels.test_results'))
+            ->assertDontSee(__('candidates::common.labels.age'))
+            ->assertDontSee(__('candidates::common.labels.appeal_date'));
     }
 
     private function authorizedUser(): User
@@ -100,4 +100,3 @@ class CandidateListPresetSettingsTest extends TestCase
         return $user;
     }
 }
-

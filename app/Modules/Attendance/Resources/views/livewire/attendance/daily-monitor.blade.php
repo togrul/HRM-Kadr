@@ -1,16 +1,31 @@
+@php
+    $dailyMonitorStatusLabels = [
+        'all' => __('attendance::daily_monitor.statuses.all'),
+        'present' => __('attendance::daily_monitor.statuses.present'),
+        'late' => __('attendance::daily_monitor.statuses.late'),
+        'absent' => __('attendance::daily_monitor.statuses.absent'),
+        'missing' => __('attendance::daily_monitor.statuses.missing'),
+        'manual_present' => __('attendance::daily_monitor.statuses.manual_present'),
+        'holiday_worked' => __('attendance::daily_monitor.statuses.holiday_worked'),
+        'weekend_worked' => __('attendance::daily_monitor.statuses.weekend_worked'),
+        'manual_absence' => __('attendance::daily_monitor.statuses.manual_absence'),
+        'unknown' => __('attendance::daily_monitor.statuses.unknown'),
+    ];
+@endphp
+
 <div class="space-y-4">
-    <x-surface-card :title="__('Daily monitor')" icon="icons.pending-icon">
+    <x-surface-card :title="__('attendance::daily_monitor.title')" icon="icons.pending-icon">
         <div class="space-y-3">
             <div class="flex flex-col gap-1 md:flex-row md:items-start md:justify-between">
                 <div class="space-y-1">
-                    <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400">{{ __('Filters') }}</p>
-                    <p class="text-sm text-zinc-500">{{ __('Review today attendance status, late arrivals and missing records for the selected scope.') }}</p>
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400">{{ __('attendance::daily_monitor.filters.title') }}</p>
+                    <p class="text-sm text-zinc-500">{{ __('attendance::daily_monitor.filters.description') }}</p>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
                 <div>
-                    <x-label for="attendance-monitor-date">{{ __('Date') }}</x-label>
+                    <x-label for="attendance-monitor-date">{{ __('attendance::daily_monitor.filters.date') }}</x-label>
                     <input
                         id="attendance-monitor-date"
                         wire:model.live="date"
@@ -19,27 +34,27 @@
                     />
                 </div>
                 <div>
-                    <x-label for="attendance-monitor-status">{{ __('Status') }}</x-label>
+                    <x-label for="attendance-monitor-status">{{ __('attendance::daily_monitor.filters.status') }}</x-label>
                     <select
                         id="attendance-monitor-status"
                         wire:model.live="statusFilter"
                         class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500"
                     >
-                        <option value="all">{{ __('all') }}</option>
-                        <option value="present">{{ __('present') }}</option>
-                        <option value="late">{{ __('late') }}</option>
-                        <option value="absent">{{ __('absent') }}</option>
-                        <option value="missing">{{ __('missing ledger') }}</option>
+                        <option value="all">{{ __('attendance::daily_monitor.statuses.all') }}</option>
+                        <option value="present">{{ __('attendance::daily_monitor.statuses.present') }}</option>
+                        <option value="late">{{ __('attendance::daily_monitor.statuses.late') }}</option>
+                        <option value="absent">{{ __('attendance::daily_monitor.statuses.absent') }}</option>
+                        <option value="missing">{{ __('attendance::daily_monitor.statuses.missing') }}</option>
                     </select>
                 </div>
                 <div>
-                    <x-label for="attendance-monitor-search">{{ __('Search') }}</x-label>
+                    <x-label for="attendance-monitor-search">{{ __('attendance::daily_monitor.filters.search') }}</x-label>
                     <x-livewire-input
                         id="attendance-monitor-search"
                         mode="gray"
                         name="search"
                         wire:model.live.debounce.300ms="search"
-                        placeholder="{{ __('Name or tabel no') }}"
+                        placeholder="{{ __('attendance::daily_monitor.filters.search_placeholder') }}"
                     />
                 </div>
             </div>
@@ -48,22 +63,22 @@
 
     @if($selectedStructureLabel)
         <div class="flex flex-wrap items-center gap-2 rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 text-xs text-blue-700">
-            <x-small-badge mode="sky">{{ __('Structure scope') }}</x-small-badge>
-            <span>{{ __('Showing personnel from the selected structure tree only.') }}</span>
+            <x-small-badge mode="sky">{{ __('attendance::daily_monitor.scope.badge') }}</x-small-badge>
+            <span>{{ __('attendance::daily_monitor.scope.description') }}</span>
             <span class="font-medium">{{ $selectedStructureLabel }}</span>
         </div>
     @endif
 
     <div class="space-y-2">
         <div class="flex items-center justify-between gap-2">
-            <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400">{{ __('Daily status breakdown') }}</p>
-            <span class="text-xs text-zinc-500">{{ __('Live counters for selected date and structure scope.') }}</span>
+            <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400">{{ __('attendance::daily_monitor.breakdown.title') }}</p>
+            <span class="text-xs text-zinc-500">{{ __('attendance::daily_monitor.breakdown.description') }}</span>
         </div>
         <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <x-surface-card :title="__('Present')"><div class="text-2xl font-semibold text-emerald-600">{{ $totals['present'] }}</div></x-surface-card>
-        <x-surface-card :title="__('Late')"><div class="text-2xl font-semibold text-amber-600">{{ $totals['late'] }}</div></x-surface-card>
-        <x-surface-card :title="__('Absent')"><div class="text-2xl font-semibold text-rose-600">{{ $totals['absent'] }}</div></x-surface-card>
-        <x-surface-card :title="__('Missing ledger')"><div class="text-2xl font-semibold text-blue-600">{{ $totals['missing'] }}</div></x-surface-card>
+        <x-surface-card :title="__('attendance::daily_monitor.cards.present')"><div class="text-2xl font-semibold text-emerald-600">{{ $totals['present'] }}</div></x-surface-card>
+        <x-surface-card :title="__('attendance::daily_monitor.cards.late')"><div class="text-2xl font-semibold text-amber-600">{{ $totals['late'] }}</div></x-surface-card>
+        <x-surface-card :title="__('attendance::daily_monitor.cards.absent')"><div class="text-2xl font-semibold text-rose-600">{{ $totals['absent'] }}</div></x-surface-card>
+        <x-surface-card :title="__('attendance::daily_monitor.cards.missing')"><div class="text-2xl font-semibold text-blue-600">{{ $totals['missing'] }}</div></x-surface-card>
         </div>
     </div>
 
@@ -72,13 +87,13 @@
         <div class="inline-block min-w-full py-2 align-middle">
             <div class="overflow-visible">
                 <x-table.tbl :headers="[
-                    __('Tabel no'),
-                    __('Full name'),
-                    __('Status'),
-                    __('Worked (hours)'),
-                    __('Late (min)'),
-                    __('Early (min)')
-                ]" :title="__('Personnel status list')">
+                    __('attendance::daily_monitor.table.tabel_no'),
+                    __('attendance::daily_monitor.table.full_name'),
+                    __('attendance::daily_monitor.table.status'),
+                    __('attendance::daily_monitor.table.worked_hours'),
+                    __('attendance::daily_monitor.table.late_minutes'),
+                    __('attendance::daily_monitor.table.early_minutes')
+                ]" :title="__('attendance::daily_monitor.table.title')">
                     @forelse($rows as $row)
                         @php
                             $status = $row->attendance_status ?? ($row->ledger_id ? 'unknown' : 'missing');
@@ -102,7 +117,7 @@
                                 </div>
                             </x-table.td>
                             <x-table.td>
-                                <span class="inline-flex rounded-full px-2 py-1 uppercase text-xs font-medium {{ $badgeClass }}">{{ __($status) }}</span>
+                                <span class="inline-flex rounded-full px-2 py-1 uppercase text-xs font-medium {{ $badgeClass }}">{{ $dailyMonitorStatusLabels[$status] ?? $status }}</span>
                             </x-table.td>
                             <x-table.td extraClasses="text-center text-zinc-700">{{ (int) round(((int) $row->worked_minutes) / 60) }}</x-table.td>
                             <x-table.td extraClasses="text-center !text-rose-500">{{ (int) $row->late_minutes }}</x-table.td>

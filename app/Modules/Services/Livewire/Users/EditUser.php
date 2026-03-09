@@ -40,7 +40,7 @@ class EditUser extends Component
             } else {
                 $rules['user.old_password'] = ['required', function ($attribute, $value, $fail) {
                     if (! Hash::check($this->user['old_password'], $this->userModel->password)) {
-                        $fail(__('Old Password didn\'t match'));
+                        $fail(__('services::users.messages.old_password_mismatch'));
                     }
                 }, ];
             }
@@ -52,18 +52,18 @@ class EditUser extends Component
     protected function validationAttributes()
     {
         return [
-            'user.name' => __('Name'),
-            'user.email' => __('Email'),
-            'user.password' => __('Password'),
-            'user.confirm-password' => __('Confirm password'),
-            'roleId' => __('Role'),
+            'user.name' => __('services::common.labels.name'),
+            'user.email' => __('services::common.labels.email'),
+            'user.password' => __('services::common.labels.password'),
+            'user.confirm-password' => __('services::common.labels.confirm_password'),
+            'roleId' => __('services::common.labels.role'),
         ];
     }
 
     public function mount()
     {
         // $this->authorize('manage-settings',$this->user);
-        $this->title = __('Edit user');
+        $this->title = __('services::users.titles.edit');
         $userId = is_array($this->userModel)
             ? ($this->userModel['id'] ?? null)
             : $this->userModel;
@@ -91,7 +91,7 @@ class EditUser extends Component
             $this->userModel->roles()->sync($this->roleId);
         }
 
-        $this->dispatch('userAdded', __('User was updated successfully!'));
+        $this->dispatch('userAdded', __('services::users.messages.updated'));
     }
 
     public function render()

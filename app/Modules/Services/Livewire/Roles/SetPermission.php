@@ -3,6 +3,8 @@
 namespace App\Modules\Services\Livewire\Roles;
 
 use App\Models\Structure;
+use App\Support\Permissions\PermissionTranslationKey;
+use App\Support\Translations\ModuleTranslation;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -54,7 +56,9 @@ class SetPermission extends Component
     private function loadRoleData(): void
     {
         $this->role = Role::findOrFail($this->roleModel);
-        $this->title = __('Set permission').' - '."<span class='text-blue-500'>{$this->role->name}</span>";
+        $this->title = __('services::roles.titles.set_permission', [
+            'role' => "<span class='text-blue-500'>{$this->role->name}</span>",
+        ]);
     }
 
     public function store()
@@ -64,7 +68,7 @@ class SetPermission extends Component
         });
 
         $this->clearCacheAndSelections();
-        $this->dispatch('permissionSet', __('Permission was added to role successfully!'));
+        $this->dispatch('permissionSet', __('services::roles.messages.permission_assigned'));
     }
 
     private function updateRoleData(): void
@@ -195,20 +199,26 @@ class SetPermission extends Component
     private function groupPermissionsByModule(EloquentCollection $permissions): array
     {
         return $permissions->reduce(function (array $carry, Permission $permission) {
-            [$method, $module] = array_pad(explode('-', (string) $permission->name, 2), 2, null);
+            $groupKey = PermissionTranslationKey::groupKeyFromPermission((string) $permission->name);
+            $methodKey = PermissionTranslationKey::methodKeyFromPermission((string) $permission->name);
 
-            if (blank($method) || blank($module)) {
+            if ($groupKey === null || $methodKey === null) {
                 return $carry;
             }
 
-            if (! isset($carry[$module])) {
-                $carry[$module] = [];
+            if (! isset($carry[$groupKey])) {
+                $carry[$groupKey] = [
+                    'translation_key' => 'services::permissions.groups.'.$groupKey,
+                    'fallback_label' => ModuleTranslation::humanize($groupKey),
+                    'permissions' => [],
+                ];
             }
 
-            $carry[$module][$method] = [
+            $carry[$groupKey]['permissions'][$methodKey] = [
                 'id' => (int) $permission->id,
                 'name' => $permission->name,
-                'title' => $method,
+                'translation_key' => 'services::permissions.methods.'.$methodKey,
+                'fallback_label' => ModuleTranslation::humanize($methodKey),
                 'description' => (string) ($permission->description ?? ''),
             ];
 

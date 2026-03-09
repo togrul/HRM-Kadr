@@ -55,7 +55,7 @@ class DeleteComponent extends Component
 
         $this->componentId = null;
 
-        $this->dispatch('componentWasDeleted', __('Component was deleted!'));
+        $this->dispatch('componentWasDeleted', __('services::components.messages.deleted'));
     }
 
     public function render()

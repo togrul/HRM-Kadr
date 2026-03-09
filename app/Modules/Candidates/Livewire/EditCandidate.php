@@ -48,6 +48,6 @@ class EditCandidate extends Component
 
         $this->candidateModelData->update($this->modifyArray($this->candidate, $this->candidateModelData->dateList()));
 
-        $this->dispatch('candidateAdded', __('Candidate was updated successfully!'));
+        $this->dispatch('candidateAdded', __('candidates::common.messages.candidate_updated'));
     }
 }

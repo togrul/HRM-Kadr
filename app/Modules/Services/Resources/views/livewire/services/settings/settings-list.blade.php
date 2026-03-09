@@ -7,7 +7,7 @@
                     stroke="currentColor" class="w-6 h-6">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                 </svg>
-                <span>{{ __('Add settings') }}</span>
+                <span>{{ __('services::settings.actions.add_settings') }}</span>
             </x-button>
             {{-- @endcan --}}
         </div>
@@ -16,17 +16,17 @@
 
     <div class="mb-6 p-4 bg-white rounded-xl border border-gray-200">
         <div class="flex flex-col gap-3">
-            <div class="text-sm font-semibold text-gray-700">{{ __('Candidate status whitelist presets') }}</div>
+            <div class="text-sm font-semibold text-gray-700">{{ __('services::settings.labels.candidate_status_whitelist_presets') }}</div>
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div class="flex flex-col space-y-2">
-                    <span class="text-sm font-medium text-gray-500">{{ __('Military mode status ids') }}</span>
+                    <span class="text-sm font-medium text-gray-500">{{ __('services::settings.labels.military_mode_status_ids') }}</span>
                     <div class="grid grid-cols-1 gap-2 md:grid-cols-2">
                         <div class="flex flex-col space-y-1">
-                            <span class="text-xs text-gray-500">{{ __('Default status') }}</span>
+                            <span class="text-xs text-gray-500">{{ __('services::settings.labels.default_status') }}</span>
                             <select wire:model.live="candidatePresetSettings.military.default_status"
                                 class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500">
-                                <option value="all">{{ __('All') }}</option>
-                                <option value="deleted">{{ __('Deleted') }}</option>
+                                <option value="all">{{ __('services::common.actions.all') }}</option>
+                                <option value="deleted">{{ __('services::common.labels.deleted') }}</option>
                                 @foreach($candidateStatuses as $statusOption)
                                     <option value="{{ $statusOption['id'] }}">#{{ $statusOption['id'] }} - {{ $statusOption['name'] }}</option>
                                 @endforeach
@@ -36,15 +36,15 @@
                             <label class="inline-flex items-center gap-2 rounded-md bg-white px-3 py-2 text-sm border border-gray-200">
                                 <input type="checkbox" wire:model.live="candidatePresetSettings.military.show_deleted_tab"
                                     class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                                <span class="text-gray-700">{{ __('Show deleted tab') }}</span>
+                                <span class="text-gray-700">{{ __('services::settings.labels.show_deleted_tab') }}</span>
                             </label>
                         </div>
                     </div>
                     <div class="flex items-center gap-2">
                         <x-button mode="slate" class="!py-1 !px-3 !text-xs"
-                            wire:click="selectAllCandidateStatuses('military')">{{ __('All') }}</x-button>
+                            wire:click="selectAllCandidateStatuses('military')">{{ __('services::common.actions.all') }}</x-button>
                         <x-button mode="slate" class="!py-1 !px-3 !text-xs"
-                            wire:click="clearAllCandidateStatuses('military')">{{ __('Clear') }}</x-button>
+                            wire:click="clearAllCandidateStatuses('military')">{{ __('services::common.actions.clear') }}</x-button>
                     </div>
                     <div class="max-h-48 overflow-auto rounded-lg border border-gray-200 bg-gray-50 p-2 space-y-2">
                         @forelse($candidateStatuses as $statusOption)
@@ -58,12 +58,12 @@
                                 </div>
                             </label>
                         @empty
-                            <div class="text-xs text-gray-500 px-2 py-1">{{ __('No statuses found for current locale.') }}
+                            <div class="text-xs text-gray-500 px-2 py-1">{{ __('services::settings.messages.no_statuses_found') }}
                             </div>
                         @endforelse
                     </div>
                     <div class="flex flex-col space-y-2">
-                        <span class="text-xs text-gray-500">{{ __('Enabled filters') }}</span>
+                        <span class="text-xs text-gray-500">{{ __('services::settings.labels.enabled_filters') }}</span>
                         <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
                             @foreach($this->candidateFilterOptionsForMode('military') as $filterOption)
                                 <label class="inline-flex items-center gap-2 rounded-md bg-white px-3 py-2 text-sm border border-gray-200">
@@ -77,14 +77,14 @@
                     </div>
                 </div>
                 <div class="flex flex-col space-y-2">
-                    <span class="text-sm font-medium text-gray-500">{{ __('Civilian mode status ids') }}</span>
+                    <span class="text-sm font-medium text-gray-500">{{ __('services::settings.labels.civilian_mode_status_ids') }}</span>
                     <div class="grid grid-cols-1 gap-2 md:grid-cols-2">
                         <div class="flex flex-col space-y-1">
-                            <span class="text-xs text-gray-500">{{ __('Default status') }}</span>
+                            <span class="text-xs text-gray-500">{{ __('services::settings.labels.default_status') }}</span>
                             <select wire:model.live="candidatePresetSettings.civilian.default_status"
                                 class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500">
-                                <option value="all">{{ __('All') }}</option>
-                                <option value="deleted">{{ __('Deleted') }}</option>
+                                <option value="all">{{ __('services::common.actions.all') }}</option>
+                                <option value="deleted">{{ __('services::common.labels.deleted') }}</option>
                                 @foreach($candidateStatuses as $statusOption)
                                     <option value="{{ $statusOption['id'] }}">#{{ $statusOption['id'] }} - {{ $statusOption['name'] }}</option>
                                 @endforeach
@@ -94,15 +94,15 @@
                             <label class="inline-flex items-center gap-2 rounded-md bg-white px-3 py-2 text-sm border border-gray-200">
                                 <input type="checkbox" wire:model.live="candidatePresetSettings.civilian.show_deleted_tab"
                                     class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                                <span class="text-gray-700">{{ __('Show deleted tab') }}</span>
+                                <span class="text-gray-700">{{ __('services::settings.labels.show_deleted_tab') }}</span>
                             </label>
                         </div>
                     </div>
                     <div class="flex items-center gap-2">
                         <x-button mode="slate" class="!py-1 !px-3 !text-xs"
-                            wire:click="selectAllCandidateStatuses('civilian')">{{ __('All') }}</x-button>
+                            wire:click="selectAllCandidateStatuses('civilian')">{{ __('services::common.actions.all') }}</x-button>
                         <x-button mode="slate" class="!py-1 !px-3 !text-xs"
-                            wire:click="clearAllCandidateStatuses('civilian')">{{ __('Clear') }}</x-button>
+                            wire:click="clearAllCandidateStatuses('civilian')">{{ __('services::common.actions.clear') }}</x-button>
                     </div>
                     <div class="max-h-48 overflow-auto rounded-lg border border-gray-200 bg-gray-50 p-2 space-y-2">
                         @forelse($candidateStatuses as $statusOption)
@@ -116,12 +116,12 @@
                                 </div>
                             </label>
                         @empty
-                            <div class="text-xs text-gray-500 px-2 py-1">{{ __('No statuses found for current locale.') }}
+                            <div class="text-xs text-gray-500 px-2 py-1">{{ __('services::settings.messages.no_statuses_found') }}
                             </div>
                         @endforelse
                     </div>
                     <div class="flex flex-col space-y-2">
-                        <span class="text-xs text-gray-500">{{ __('Enabled filters') }}</span>
+                        <span class="text-xs text-gray-500">{{ __('services::settings.labels.enabled_filters') }}</span>
                         <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
                             @foreach($this->candidateFilterOptionsForMode('civilian') as $filterOption)
                                 <label class="inline-flex items-center gap-2 rounded-md bg-white px-3 py-2 text-sm border border-gray-200">
@@ -136,11 +136,11 @@
                 </div>
             </div>
             <div class="text-xs text-gray-500">
-                {{ __('Pick statuses directly by name. Empty selection means all statuses are visible.') }}
+                {{ __('services::settings.messages.pick_statuses_help') }}
             </div>
             <div>
                 <x-button mode="primary" wire:click="saveCandidateStatusWhitelist">
-                    {{ __('Save presets') }}
+                    {{ __('services::settings.actions.save_presets') }}
                 </x-button>
             </div>
         </div>
@@ -150,7 +150,7 @@
         @foreach ($settings as $key => $settingValue)
             <div class="flex space-x-2 justify-between items-end w-full">
                 <div class="flex flex-col space-y-2 w-full">
-                    <span class="text-sm font-medium text-gray-500">{{ __($settingValue->name) }}</span>
+                    <span class="text-sm font-medium text-gray-500">{{ $this->resolveSettingLabel((string) $settingValue->name) }}</span>
                     @if ($settingValue->type == 'string')
                         <x-livewire-input mode="gray" name="setting.{{ $key }}.value"
                             wire:model.live="setting.{{ $key }}.value"></x-livewire-input>

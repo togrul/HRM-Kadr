@@ -11,14 +11,14 @@
 
     <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
       <div class="">
-        <x-label for="user.name">{{ __('Name') }}</x-label>
+        <x-label for="user.name">{{ __('services::common.labels.name') }}</x-label>
         <x-livewire-input mode="gray" name="user.name" wire:model="user.name"></x-livewire-input>
         @error('user.name')
             <x-validation> {{ $message }} </x-validation>
         @enderror
       </div>
       <div class="">
-        <x-label for="user.email">{{ __('Email') }}</x-label>
+        <x-label for="user.email">{{ __('services::common.labels.email') }}</x-label>
         <x-livewire-input mode="gray" name="user.email" wire:model.defer="user.email"></x-livewire-input>
         @error('user.email')
           <x-validation> {{ $message }} </x-validation>
@@ -26,7 +26,7 @@
       </div>
        <div>
             <x-ui.select-dropdown
-                :label="__('Role')"
+                :label="__('services::common.labels.role')"
                 placeholder="---"
                 mode="gray"
                 class="w-full"
@@ -43,14 +43,14 @@
  
     <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
         <div class="">
-          <x-label for="user.password">{{ __('Password') }}</x-label>
+          <x-label for="user.password">{{ __('services::common.labels.password') }}</x-label>
           <x-livewire-input mode="gray" type="password" name="user.password" wire:model="user.password" autocomplete="new-password"></x-livewire-input>
           @error('user.password')
               <x-validation> {{ $message }} </x-validation>
           @enderror
         </div>
         <div class="">
-          <x-label for="user.confirm-password">{{ __('Confirm Password') }}</x-label>
+          <x-label for="user.confirm-password">{{ __('services::common.labels.confirm_password') }}</x-label>
           <x-livewire-input mode="gray" type="password" name="user.confirm-password" wire:model="user.confirm-password"></x-livewire-input>
           @error('user.confirm-password')
               <x-validation> {{ $message }} </x-validation>
@@ -58,6 +58,6 @@
         </div>
     </div>
  
-      <x-modal-button>{{ __('Save user') }}</x-modal-button>
+      <x-modal-button>{{ __('services::users.actions.save_user') }}</x-modal-button>
 </div>
 </div>

@@ -4,6 +4,7 @@ namespace App\Modules\Services\Livewire\Settings;
 
 use App\Models\AppealStatus;
 use App\Models\Setting;
+use App\Support\Translations\ModuleTranslation;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -60,7 +61,7 @@ class SettingsList extends Component
             'value' => $value,
         ]);
 
-        $this->dispatch('settingsUpdated', __('Setting was added successfully!'));
+        $this->dispatch('settingsUpdated', __('services::settings.messages.saved'));
     }
 
     public function setDeleteSettings($settingsId)
@@ -113,7 +114,7 @@ class SettingsList extends Component
         }
 
         $this->loadCandidateStatusWhitelist();
-        $this->dispatch('settingsUpdated', __('Setting was added successfully!'));
+        $this->dispatch('settingsUpdated', __('services::settings.messages.saved'));
     }
 
     public function selectAllCandidateStatuses(string $mode): void
@@ -292,11 +293,11 @@ class SettingsList extends Component
     public function candidateFilterOptionsForMode(string $mode): array
     {
         $options = [
-            ['key' => 'fullname', 'label' => __('Fullname')],
-            ['key' => 'gender', 'label' => __('Gender')],
-            ['key' => 'results', 'label' => __('Test results')],
-            ['key' => 'age', 'label' => __('Age')],
-            ['key' => 'appeal_date', 'label' => __('Appeal date')],
+            ['key' => 'fullname', 'label' => __('services::common.labels.fullname')],
+            ['key' => 'gender', 'label' => __('services::common.labels.gender')],
+            ['key' => 'results', 'label' => __('services::common.labels.test_results')],
+            ['key' => 'age', 'label' => __('services::common.labels.age')],
+            ['key' => 'appeal_date', 'label' => __('services::common.labels.appeal_date')],
         ];
 
         if ($mode === 'civilian') {
@@ -304,5 +305,10 @@ class SettingsList extends Component
         }
 
         return $options;
+    }
+
+    public function resolveSettingLabel(string $value): string
+    {
+        return ModuleTranslation::resolveStoredText($value);
     }
 }

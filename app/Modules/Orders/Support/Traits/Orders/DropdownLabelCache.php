@@ -127,7 +127,7 @@ trait DropdownLabelCache
                 continue;
             }
 
-            $level_name = __(strtolower((collect(StructureEnum::cases())->pluck('name', 'value')[$parent['level']])));
+            $level_name = __('orders::order_form.structure_levels.'.strtolower((string) (collect(StructureEnum::cases())->pluck('name', 'value')[$parent['level']] ?? '')));
 
             $data = $isCoded
                 ? $this->codedStructureLabelWithNormalizedSuffix($parent, $level_name, $suffixService)
@@ -166,7 +166,7 @@ trait DropdownLabelCache
             return (string) ($node['name'] ?? '---');
         }
 
-        $levelName = __(strtolower((string) (collect(StructureEnum::cases())->pluck('name', 'value')[$node['level']] ?? '')));
+        $levelName = __('orders::order_form.structure_levels.'.strtolower((string) (collect(StructureEnum::cases())->pluck('name', 'value')[$node['level']] ?? '')));
         $suffixService = new WordSuffixService;
         $levelBase = mb_strtolower((string) $levelName);
         $levelWithSuffix = $this->normalizeStructureSuffixLabel(

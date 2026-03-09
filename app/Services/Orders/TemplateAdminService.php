@@ -24,11 +24,11 @@ class TemplateAdminService implements OrderTemplateAdmin
     {
         $id = (int) Arr::get($payload, 'id');
         if ($id <= 0) {
-            throw new RuntimeException(__('Template id is required.'));
+            throw new RuntimeException(__('orders::template_form.messages.template_id_required'));
         }
 
         if ($this->templates->existsById($id)) {
-            throw new RuntimeException(__('Template id already exists.'));
+            throw new RuntimeException(__('orders::template_form.messages.template_id_exists'));
         }
 
         $attributes = Arr::except($payload, ['id']);
@@ -45,7 +45,7 @@ class TemplateAdminService implements OrderTemplateAdmin
     {
         $targetId = (int) Arr::get($payload, 'id', (int) $template->id);
         if ($targetId <= 0) {
-            throw new RuntimeException(__('Template id is required.'));
+            throw new RuntimeException(__('orders::template_form.messages.template_id_required'));
         }
 
         $attributes = Arr::except($payload, ['id']);
@@ -63,14 +63,14 @@ class TemplateAdminService implements OrderTemplateAdmin
     private function guardTemplateIdChange(Order $template, int $targetId): void
     {
         if ($this->templates->existsById($targetId)) {
-            throw new RuntimeException(__('Template id already exists.'));
+            throw new RuntimeException(__('orders::template_form.messages.template_id_exists'));
         }
 
         $hasDependencies = $this->templates->hasDependencies($template);
 
         if ($hasDependencies) {
             throw new RuntimeException(
-                __('Template id cannot be changed because dependent records exist.')
+                __('orders::template_form.messages.template_id_change_blocked')
             );
         }
     }

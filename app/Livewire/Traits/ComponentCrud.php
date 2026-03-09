@@ -36,11 +36,11 @@ trait ComponentCrud
     protected function validationAttributes()
     {
         return [
-            'component.name' => __('Name'),
-            'component.content' => __('Content'),
-            'component.order_type_id' => __('Category'),
-            'component.title' => __('Title'),
-            'component.dynamic_fields' => __('Dynamic fields'),
+            'component.name' => __('services::common.labels.name'),
+            'component.content' => __('services::common.labels.content'),
+            'component.order_type_id' => __('services::common.labels.category'),
+            'component.title' => __('services::common.labels.title'),
+            'component.dynamic_fields' => __('services::common.labels.dynamic_fields'),
         ];
     }
 
@@ -59,9 +59,9 @@ trait ComponentCrud
     {
         if (! empty($this->componentModel)) {
             $this->fillComponent();
-            $this->title = __('Edit component');
+            $this->title = __('services::components.titles.edit');
         } else {
-            $this->title = __('Add component');
+            $this->title = __('services::components.titles.add');
             $this->component['order_type_id'] = null;
             $this->component['rank_id'] = null;
         }

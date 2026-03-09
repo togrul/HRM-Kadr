@@ -3,13 +3,13 @@
 >
     <div class="flex items-center justify-between py-2 space-x-2 action-section">
         <div class="">
-            <x-label for="search">{{ __('Name') }}</x-label>
+            <x-label for="search">{{ __('services::common.labels.name') }}</x-label>
             <x-livewire-input mode="gray" name="search" wire:model.live="search"></x-livewire-input>
         </div>
         {{-- @can('manage-components') --}}
         <x-button mode="primary" wire:click="openSideMenu('add-component')" class="space-x-2">
             <x-icons.add-icon color="text-white" hover="text-gray-50"></x-icons.add-icon>
-            <span>{{ __('Add component') }}</span>
+            <span>{{ __('services::components.actions.add_component') }}</span>
         </x-button>
         {{-- @endcan --}}
     </div>

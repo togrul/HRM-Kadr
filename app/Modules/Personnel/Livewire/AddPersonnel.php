@@ -70,14 +70,14 @@ class AddPersonnel extends Component
                 $personnel->update($assembled['personnel_extra']);
             }
         });
-        $this->dispatchPersonnelStored(__('Personnel was added successfully!'));
+        $this->dispatchPersonnelStored(__('personnel::common.messages.personnel_created'));
         $this->dispatchModalCloseEvent();
     }
 
     public function mount()
     {
         $this->authorize('create', Personnel::class);
-        $this->title = __('New personnel');
+        $this->title = __('personnel::common.titles.new_personnel');
         $this->step = 1;
 
         if (isset($this->personalForm)) {

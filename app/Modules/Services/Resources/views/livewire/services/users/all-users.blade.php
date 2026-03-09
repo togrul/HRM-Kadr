@@ -22,13 +22,13 @@
     <div class="flex flex-col items-center justify-between sm:flex-row filter bg-white py-2 px-2 rounded-xl">
         <x-filter.nav>
             <x-filter.item wire:click.prevent="setStatus(1)" :active="$status === 1">
-                {{ __('Active') }}
+                {{ __('services::common.labels.active') }}
             </x-filter.item>
             <x-filter.item wire:click.prevent="setStatus(0)" :active="$status === 0">
-                {{ __('De-active') }}
+                {{ __('services::common.labels.inactive') }}
             </x-filter.item>
             <x-filter.item wire:click.prevent="setStatus(2)" :active="$status === 2">
-                {{ __('Deleted') }}
+                {{ __('services::common.labels.deleted') }}
             </x-filter.item>
         </x-filter.nav>
 
@@ -36,12 +36,12 @@
         <div class="flex items-center justify-center space-x-2 action-section">
             <x-button class="space-x-2" mode="gray" wire:click.prevent="resetFilter">
                 <x-icons.refresh-icon color="text-gray-400" hover="text-gray-200"></x-icons.refresh-icon>
-                <span>{{ __('Reset filter') }}</span>
+                <span>{{ __('services::common.actions.reset_filter') }}</span>
             </x-button>
             {{-- @can('manage-settings') --}}
             <x-button class="space-x-2" mode="primary" wire:click.prevent="openSideMenu('add-user')">
                 <x-icons.add-user color="text-white" hover="text-gray-50"></x-icons.add-user>
-                <span>{{ __('Add User') }}</span>
+                <span>{{ __('services::users.actions.add_user') }}</span>
             </x-button>
             {{-- @endcan --}}
         </div>
@@ -49,7 +49,7 @@
 
     <div class="grid grid-cols-1 gap-4 my-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         <div>
-            <x-label for="q">{{ __('User name or email') }}</x-label>
+            <x-label for="q">{{ __('services::users.fields.user_name_or_email') }}</x-label>
             <x-livewire-input id="q" name="q" mode="gray" wire:model.live="q"
                 autocomplete="off"></x-livewire-input>
         </div>
@@ -59,7 +59,7 @@
         <div class="relative min-h-[300px] -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
                 <div class="overflow-visible">
-                    <x-table.tbl :headers="[__('User'), __('Role'), __('Email'), __('Active?'), 'action', 'action']">
+                    <x-table.tbl :headers="[__('services::common.labels.user'), __('services::common.labels.role'), __('services::common.labels.email'), __('services::common.labels.active_question'), __('services::common.labels.action'), __('services::common.labels.action')]">
                         @forelse ($_users as $user)
                             <tr wire:key="user-row-{{ $user->id }}">
                                 <x-table.td>
@@ -94,11 +94,11 @@
                                     @if ($status == 2)
                                         <div class="flex flex-col text-xs font-medium">
                                             <div class="flex items-center space-x-1">
-                                                <span class="text-gray-500">{{ __('Deleted date') }}:</span>
+                                                <span class="text-gray-500">{{ __('services::common.labels.deleted_date') }}:</span>
                                                 <span class="text-black">{{ $user->deleted_at_label }}</span>
                                             </div>
                                             <div class="flex items-center space-x-1">
-                                                <span class="text-gray-500">{{ __('Deleted by') }}:</span>
+                                                <span class="text-gray-500">{{ __('services::common.labels.deleted_by') }}:</span>
                                                 <span class="text-black">{{ $user->deleted_by_name }}</span>
                                             </div>
                                         </div>
@@ -123,7 +123,7 @@
                                         </button>
                                         {{-- @role('admin') --}}
                                         <button
-                                            onclick="confirm('Are you sure you want to remove this user?') || event.stopImmediatePropagation()"
+                                            onclick="confirm('{{ __('services::users.messages.force_delete_confirm') }}') || event.stopImmediatePropagation()"
                                             wire:click.prevent="forceDeleteData({{ $user->id }})"
                                             class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-50 hover:text-gray-700">
                                             <x-icons.force-delete color="text-rose-400"
@@ -144,9 +144,6 @@
                         @empty
                             <tr>
                                 <td colspan="9">
-                                    {{-- <x-empty :title="__('No users found.')" wire:click="$dispatch('openSideMenu','add-user')">
-                              {{ __('Add user') }}
-                          </x-empty> --}}
                                 </td>
                             </tr>
                         @endforelse

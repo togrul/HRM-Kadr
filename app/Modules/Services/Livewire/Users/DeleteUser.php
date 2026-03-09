@@ -56,7 +56,7 @@ class DeleteUser extends Component
 
         $this->userId = null;
 
-        $this->dispatch('userWasDeleted', __('User was deleted!'));
+        $this->dispatch('userWasDeleted', __('services::users.messages.deleted'));
     }
 
     public function render()

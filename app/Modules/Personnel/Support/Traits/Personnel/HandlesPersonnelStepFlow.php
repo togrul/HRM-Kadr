@@ -228,7 +228,7 @@ trait HandlesPersonnelStepFlow
         $defaults = [];
 
         foreach ($this->stepSearchKeysForStep($step) as $searchKey) {
-            $defaults[$searchKey] = __('Search...');
+            $defaults[$searchKey] = __('personnel::common.placeholders.search');
         }
 
         return $defaults;

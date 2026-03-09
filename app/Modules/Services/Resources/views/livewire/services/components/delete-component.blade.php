@@ -1,9 +1,8 @@
 <x-modal-delete
     livewire-event-to-open-modal="deleteComponentWasSet"
     event-to-close-modal="componentWasDeleted"
-    :modal-title="__('Delete component')"
-    :modal-description="__('Are you sure you want to delete this component?')"
-    :modal-confirm-button-text="__('Delete')"
+    :modal-title="__('services::components.titles.delete')"
+    :modal-description="__('services::components.messages.delete_description')"
+    :modal-confirm-button-text="__('services::common.actions.delete')"
     wire-click="deleteComponent"
 />
-

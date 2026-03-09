@@ -10,7 +10,7 @@
             </div>
         </div>
         <div class="flex flex-col space-y-4 py-10 px-8 justify-center">
-           <h1 class="text-black font-bold text-2xl text-center">{{ __('Human Resources Management system') }}</h1>
+           <h1 class="text-black font-bold text-2xl text-center">{{ __('ui::auth.titles.app_name') }}</h1>
             <div class="">
                 <!-- Session Status -->
           <x-auth-session-status class="mb-4" :status="session('status')" />
@@ -21,37 +21,37 @@
 
         <!-- Name -->
         <div>
-            <x-amazing-input id="name" :label="__('Name')" type="text" :value="old('name')" />
+            <x-amazing-input id="name" :label="__('ui::auth.fields.name')" type="text" :value="old('name')" />
             <x-input-error :messages="$errors->get('name')" class="mt-2" />
         </div>
 
         <!-- Email Address -->
         <div class="mt-4">
-            <x-amazing-input id="email" :label="__('Email')" type="email" :value="old('email')" />
+            <x-amazing-input id="email" :label="__('ui::auth.fields.email')" type="email" :value="old('email')" />
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
         <!-- Password -->
         <div class="mt-4">
-               <x-amazing-input id="password" :label="__('Password')" type="password" autocomplete="current-password" />
+               <x-amazing-input id="password" :label="__('ui::auth.fields.password')" type="password" autocomplete="current-password" />
 
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
 
         <!-- Confirm Password -->
         <div class="mt-4">
-            <x-amazing-input id="password_confirmation" :label="__('Password confirmation')" type="password" autocomplete="new-password" />
+            <x-amazing-input id="password_confirmation" :label="__('ui::auth.fields.password_confirmation')" type="password" autocomplete="new-password" />
            
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
         </div>
 
         <div class="flex items-center justify-end mt-4">
             <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" href="{{ route('login') }}">
-                {{ __('Already registered?') }}
+                {{ __('ui::auth.links.already_registered') }}
             </a>
 
             <x-primary-button class="ml-4">
-                {{ __('Register') }}
+                {{ __('ui::auth.actions.register') }}
             </x-primary-button>
         </div>
     </form>

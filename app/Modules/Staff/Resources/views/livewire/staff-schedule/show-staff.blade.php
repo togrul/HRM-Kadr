@@ -8,7 +8,7 @@
     <div class="relative min-h-[300px] -my-2 overflow-x-auto">
         <div class="inline-block min-w-full py-2 align-middle">
         <div class="overflow-visible w-full">
-            <x-table.tbl :headers="[__('#'),__('Tabel'),__('Fullname'),__('Gender')]">
+            <x-table.tbl :headers="[__('personnel::common.labels.number'),__('staff::common.fields.tabel'),__('staff::common.fields.fullname'),__('staff::common.fields.gender')]">
                 @foreach ($staffs as $staff)
                     <tr>
                         <x-table.td>
@@ -40,7 +40,7 @@
 
                        <x-table.td>
                             <span class="text-sm font-medium text-gray-500 rounded-xl px-3 py-1 shadow-sm bg-gray-100">
-                                {{ $staff->gender ? __('Man') : __('Woman') }}
+                                {{ $staff->gender ? __('staff::common.fields.man') : __('staff::common.fields.woman') }}
                            </span>
                         </x-table.td>
                     </tr>

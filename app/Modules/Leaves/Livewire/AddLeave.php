@@ -26,7 +26,7 @@ class AddLeave extends Component
     public function mount(): void
     {
         $this->authorize('create', Leave::class);
-        $this->title = __('Add leave');
+        $this->title = __('leaves::common.titles.add_leave');
         $this->leave->resetForm();
     }
 
@@ -44,7 +44,7 @@ class AddLeave extends Component
 
         DB::transaction(fn () => Leave::create($payload));
 
-        $this->dispatch('leaveAdded', __('Leave was added successfully!'));
+        $this->dispatch('leaveAdded', __('leaves::common.messages.leave_added'));
 
         $this->leave->resetForm();
         $this->reset('personnelName', 'assignedSearch');

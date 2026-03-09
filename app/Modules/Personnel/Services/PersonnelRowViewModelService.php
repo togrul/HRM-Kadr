@@ -41,7 +41,7 @@ class PersonnelRowViewModelService
             $personnel->setAttribute('join_work_date_fmt', $this->formatDate($personnel->join_work_date));
             $personnel->setAttribute('leave_work_date_fmt', $this->formatDate($personnel->leave_work_date));
             $personnel->setAttribute('deleted_at_fmt', $this->formatDateTime($personnel->deleted_at));
-            $personnel->setAttribute('gender_label', (int) $personnel->gender === 1 ? __('Man') : __('Woman'));
+            $personnel->setAttribute('gender_label', (int) $personnel->gender === 1 ? __('personnel::common.labels.man') : __('personnel::common.labels.woman'));
             $personnel->setAttribute('rank_label', (string) optional($personnel->latestRank?->rank)->name);
             $personnel->setAttribute('active_vacation', $vacation);
             $personnel->setAttribute('active_business_trip', $businessTrip);

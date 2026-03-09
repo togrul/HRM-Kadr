@@ -37,10 +37,10 @@ class LeaveForm extends Form
     public function validationAttributes(): array
     {
         return [
-            'tabel_no.tabel_no' => __('Personnel'),
-            'leave_type_id'     => __('Leave type'),
-            'starts_at'         => __('Start date'),
-            'status_id'         => __('Status'),
+            'tabel_no.tabel_no' => __('leaves::common.labels.personnel'),
+            'leave_type_id'     => __('leaves::common.labels.leave_type'),
+            'starts_at'         => __('leaves::common.labels.start_date'),
+            'status_id'         => __('leaves::common.labels.status'),
         ];
     }
 

@@ -28,7 +28,7 @@ trait MasterDegreeTrait {
             $masterDegreeData,
         );
 
-        $this->dispatch('contractAdded', __('Master degree was added successfully!'));
+        $this->dispatch('contractAdded', __('personnel::information.messages.master_degree_created'));
         $this->dispatchModalCloseEvent();
         $this->reset('masterDegrees', 'selectedDegree');
     }
@@ -48,7 +48,7 @@ trait MasterDegreeTrait {
     public function forceDeleteMasterDegree(PersonnelMasterDegree $masterDegree): void
     {
         $masterDegree->delete();
-        $this->dispatch('contractAdded', __('Master degree was deleted successfully!'));
+        $this->dispatch('contractAdded', __('personnel::information.messages.master_degree_deleted'));
         $this->dispatchModalCloseEvent();
     }
 }

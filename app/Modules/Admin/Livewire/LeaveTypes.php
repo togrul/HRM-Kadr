@@ -31,8 +31,8 @@ class LeaveTypes extends Component
     protected function validationAttributes(): array
     {
         return [
-            'form.name' => __('Name'),
-            'form.max_days' => __('Max days'),
+            'form.name' => __('admin::leave_types.fields.name'),
+            'form.max_days' => __('admin::leave_types.fields.max_days'),
         ];
     }
 

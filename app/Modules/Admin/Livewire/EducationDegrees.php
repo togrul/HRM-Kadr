@@ -27,8 +27,8 @@ class EducationDegrees extends Component
     protected function validationAttributes(): array
     {
         return [
-            'form.id' => __('ID'),
-            'form.title_az' => __('Name'),
+            'form.id' => __('admin::references.fields.id'),
+            'form.title_az' => __('admin::references.fields.name'),
         ];
     }
 

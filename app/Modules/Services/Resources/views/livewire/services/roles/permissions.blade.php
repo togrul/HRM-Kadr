@@ -7,13 +7,13 @@
                 name="permission_search"
                 type="text"
                 wire:model.live.debounce.300ms="search"
-                :placeholder="__('Search permission')"
+                :placeholder="__('services::roles.actions.search_permission')"
             />
         </div>
         <div class="shrink-0">
             <x-button mode="primary" class="space-x-2" wire:click="createPermission" type="button">
                 <x-icons.permission-icon color="text-white" hover="text-gray-50"></x-icons.permission-icon>
-                <span>{{ __('Add permission') }}</span>
+                <span>{{ __('services::roles.actions.add_permission') }}</span>
             </x-button>
         </div>
     </div>
@@ -31,7 +31,7 @@
                 <div class="flex items-center justify-between border-b border-zinc-200 px-6 py-3">
                     <div>
                         <h3 class="text-xl font-semibold text-zinc-800">
-                            {{ $permission_id ? __('Edit permission') : __('Add permission') }}
+                            {{ $permission_id ? __('services::roles.titles.edit_permission') : __('services::roles.titles.add_permission') }}
                         </h3>
                     </div>
                     <button type="button" class="rounded-xl p-2 text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-700" @click="openPermissionModal = false; $wire.closePermissionModal()">
@@ -48,7 +48,7 @@
 
                     <div class="grid grid-cols-1 gap-5">
                         <div>
-                            <x-label for="permission_name" :value="__('Permission')" />
+                            <x-label for="permission_name" :value="__('services::common.labels.permission')" />
                             <x-livewire-input
                                 mode="gray"
                                 name="permission_name"
@@ -65,7 +65,7 @@
                         </div>
 
                         <div>
-                            <x-label for="permission_description" :value="__('Permission description')" />
+                            <x-label for="permission_description" :value="__('services::roles.fields.permission_description')" />
                             <textarea
                                 id="permission_description"
                                 name="permission_description"
@@ -85,11 +85,11 @@
                             class="rounded-2xl border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-50"
                             @click="openPermissionModal = false; $wire.closePermissionModal()"
                         >
-                            {{ __('Cancel') }}
+                            {{ __('services::common.actions.cancel') }}
                         </button>
                         <x-button mode="primary" class="space-x-2" type="submit">
                             <x-icons.permission-icon color="text-white" hover="text-gray-50"></x-icons.permission-icon>
-                            <span>{{ __('Save') }}</span>
+                            <span>{{ __('services::common.actions.save') }}</span>
                         </x-button>
                     </div>
                 </form>
@@ -101,7 +101,7 @@
         <div class="inline-block min-w-full py-2 align-middle">
             <div class="overflow-visible">
 
-                <x-table.tbl :headers="[__('Name'), __('Description'), 'action', 'action']">
+                <x-table.tbl :headers="[__('services::common.labels.name'), __('services::common.labels.description'), __('services::common.labels.action'), __('services::common.labels.action')]">
                     @foreach ($permissions as $permission)
                         <tr wire:key="permission-row-{{ $permission->id }}">
                             <x-table.td>

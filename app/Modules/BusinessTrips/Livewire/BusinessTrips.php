@@ -69,7 +69,14 @@ class BusinessTrips extends Component
 
     public function getTableHeaders(): array
     {
-        return [__('#'), __('Fullname'), __('Dates'), __('Locations'), __('Order'), 'action'];
+        return [
+            __('business_trips::common.table.row_no'),
+            __('business_trips::common.table.fullname'),
+            __('business_trips::common.table.dates'),
+            __('business_trips::common.table.locations'),
+            __('business_trips::common.table.order'),
+            'action',
+        ];
     }
 
     public function printBusinessTripDocument(PersonnelBusinessTrip $model, $multi = false)

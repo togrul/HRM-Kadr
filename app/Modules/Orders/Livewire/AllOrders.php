@@ -64,15 +64,15 @@ class AllOrders extends Component
     public function getTableHeaders(): array
     {
         return [
-            __('#'),
-            __('Order #'),
-            __('Type'),
-            __('Given date'),
-            __('Given by'),
-            __('Status'),
-            'action',
-            'action',
-            'action',
+            __('orders::order_list.table.row_no'),
+            __('orders::order_list.table.order_no'),
+            __('orders::order_list.table.type'),
+            __('orders::order_list.table.given_date'),
+            __('orders::order_list.table.given_by'),
+            __('orders::order_list.table.status'),
+            __('orders::order_list.table.action'),
+            __('orders::order_list.table.action'),
+            __('orders::order_list.table.action'),
         ];
     }
 
@@ -95,7 +95,7 @@ class AllOrders extends Component
         $orderLog->update([
             'deleted_by' => null,
         ]);
-        $this->dispatch('orderAdded', __('Order was updated successfully!'));
+        $this->dispatch('orderAdded', __('orders::order_form.messages.order_updated'));
     }
 
     #[Renderless]
@@ -111,7 +111,7 @@ class AllOrders extends Component
 
         $model->handleDeletion();
 
-        $this->dispatch('orderWasDeleted', __('Order was deleted!'));
+        $this->dispatch('orderWasDeleted', __('orders::order_form.messages.order_deleted'));
     }
 
     public function printOrder(string $order_no)

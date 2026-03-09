@@ -54,7 +54,7 @@ class ManageRoles extends Component
             Role::create($payload);
         }
 
-        $this->dispatch('roleUpdated', __('Role was updated successfully!'));
+        $this->dispatch('roleUpdated', __('services::roles.messages.role_saved'));
         $this->cancel();
     }
 

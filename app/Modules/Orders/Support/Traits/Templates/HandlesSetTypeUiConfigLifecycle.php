@@ -72,7 +72,7 @@ trait HandlesSetTypeUiConfigLifecycle
 
         $activeVersion = $this->ensureUiMetadataInitialized($orderType);
         if (! $activeVersion) {
-            $this->dispatch('typesUpdated', __('Active metadata template version not found.'));
+            $this->dispatch('typesUpdated', __('orders::template_set_type.messages.active_version_not_found'));
             return;
         }
 
@@ -185,7 +185,7 @@ trait HandlesSetTypeUiConfigLifecycle
             ->map(fn ($audit) => [
                 'id' => (int) $audit->id,
                 'action' => (string) $audit->action,
-                'actor' => (string) ($audit->changedBy?->name ?? __('System')),
+                'actor' => (string) ($audit->changedBy?->name ?? __('orders::template_set_type.labels.system')),
                 'created_at' => $audit->created_at?->format('Y-m-d H:i'),
                 'payload' => is_array($audit->payload) ? $audit->payload : [],
             ])
@@ -210,12 +210,12 @@ trait HandlesSetTypeUiConfigLifecycle
         );
 
         if (! $created) {
-            $this->dispatch('typesUpdated', __('Could not create draft version.'));
+            $this->dispatch('typesUpdated', __('orders::template_set_type.messages.could_not_create_draft'));
             return;
         }
 
         $this->openUiConfig((int) $this->uiConfigOrderTypeId, (int) $created->id);
-        $this->dispatch('typesUpdated', __('Draft version created successfully.'));
+        $this->dispatch('typesUpdated', __('orders::template_set_type.messages.draft_created'));
     }
 
     public function publishUiConfigVersion(int $versionId): void
@@ -235,7 +235,7 @@ trait HandlesSetTypeUiConfigLifecycle
             ->find($versionId);
 
         if (! $version) {
-            $this->dispatch('typesUpdated', __('Selected version not found.'));
+            $this->dispatch('typesUpdated', __('orders::template_set_type.messages.selected_version_not_found'));
             return;
         }
 
@@ -252,12 +252,12 @@ trait HandlesSetTypeUiConfigLifecycle
             ->analyzeForVersion($version, $mappings);
 
         if (empty($coverage['inspectable'])) {
-            $this->dispatch('typesUpdated', __('Template coverage is unavailable. Upload DOCX and run coverage first.'));
+            $this->dispatch('typesUpdated', __('orders::template_set_type.messages.coverage_unavailable_upload_docx'));
             return;
         }
 
         if (! empty($coverage['missing_placeholders'])) {
-            $this->dispatch('typesUpdated', __('Cannot publish. Missing mappings: :placeholders', [
+            $this->dispatch('typesUpdated', __('orders::template_set_type.messages.cannot_publish_missing_mappings', [
                 'placeholders' => implode(', ', $coverage['missing_placeholders']),
             ]));
             return;
@@ -272,12 +272,12 @@ trait HandlesSetTypeUiConfigLifecycle
         }
 
         if (! $published) {
-            $this->dispatch('typesUpdated', __('Could not publish this version.'));
+            $this->dispatch('typesUpdated', __('orders::template_set_type.messages.could_not_publish_version'));
             return;
         }
 
         $this->openUiConfig((int) $this->uiConfigOrderTypeId, (int) $published->id);
-        $this->dispatch('typesUpdated', __('Template version published.'));
+        $this->dispatch('typesUpdated', __('orders::template_set_type.messages.version_published'));
     }
 
     public function rollbackUiConfigVersion(int $versionId): void
@@ -299,12 +299,12 @@ trait HandlesSetTypeUiConfigLifecycle
         }
 
         if (! $rolledBack) {
-            $this->dispatch('typesUpdated', __('Could not rollback to this version.'));
+            $this->dispatch('typesUpdated', __('orders::template_set_type.messages.could_not_rollback'));
             return;
         }
 
         $this->openUiConfig((int) $this->uiConfigOrderTypeId, (int) $rolledBack->id);
-        $this->dispatch('typesUpdated', __('Rollback completed.'));
+        $this->dispatch('typesUpdated', __('orders::template_set_type.messages.rollback_completed'));
     }
 
     public function deleteUiDraftVersion(int $versionId): void
@@ -320,12 +320,12 @@ trait HandlesSetTypeUiConfigLifecycle
         $deleted = app(SetTypeUiConfigLifecycleUseCase::class)
             ->deleteVersion($versionId, auth()->id());
         if (! $deleted) {
-            $this->dispatch('typesUpdated', __('Only non-active draft/published versions can be deleted. At least one version must remain.'));
+            $this->dispatch('typesUpdated', __('orders::template_set_type.messages.delete_version_guard'));
             return;
         }
 
         $this->openUiConfig((int) $this->uiConfigOrderTypeId);
-        $this->dispatch('typesUpdated', __('Template version deleted.'));
+        $this->dispatch('typesUpdated', __('orders::template_set_type.messages.version_deleted'));
     }
 
     public function bootstrapUiConfigMetadata(): void
@@ -335,7 +335,7 @@ trait HandlesSetTypeUiConfigLifecycle
         }
 
         if (! $this->uiConfigOrderTypeId) {
-            $this->dispatch('typesUpdated', __('Please open UI config for an order type first.'));
+            $this->dispatch('typesUpdated', __('orders::template_set_type.messages.open_ui_first'));
             return;
         }
 
@@ -343,7 +343,7 @@ trait HandlesSetTypeUiConfigLifecycle
             ->orderTypeForMetadataBootstrap((int) $this->uiConfigOrderTypeId);
 
         if (! $orderType) {
-            $this->dispatch('typesUpdated', __('Order type not found.'));
+            $this->dispatch('typesUpdated', __('orders::template_set_type.messages.order_type_not_found'));
             return;
         }
 
@@ -352,7 +352,7 @@ trait HandlesSetTypeUiConfigLifecycle
 
         $activeVersion = $this->ensureUiMetadataInitialized($orderType, true);
         if (! $activeVersion) {
-            $this->dispatch('typesUpdated', __('Active metadata template version not found.'));
+            $this->dispatch('typesUpdated', __('orders::template_set_type.messages.active_version_not_found'));
             return;
         }
 
@@ -360,16 +360,16 @@ trait HandlesSetTypeUiConfigLifecycle
         $this->openUiConfig((int) $this->uiConfigOrderTypeId);
 
         if ($currentCount === 0) {
-            $this->dispatch('typesUpdated', __('No placeholders detected from template version. Upload DOCX or add metadata fields manually.'));
+            $this->dispatch('typesUpdated', __('orders::template_set_type.messages.no_placeholders_detected'));
             return;
         }
 
         if ($currentCount === $previousCount) {
-            $this->dispatch('typesUpdated', __('Metadata is already generated and up to date.'));
+            $this->dispatch('typesUpdated', __('orders::template_set_type.messages.metadata_up_to_date'));
             return;
         }
 
-        $this->dispatch('typesUpdated', __('Metadata generated successfully.'));
+        $this->dispatch('typesUpdated', __('orders::template_set_type.messages.metadata_generated'));
     }
 
     public function closeUiConfig(): void

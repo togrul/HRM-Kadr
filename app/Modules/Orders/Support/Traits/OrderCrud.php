@@ -274,7 +274,7 @@ trait OrderCrud
     private function fillCrudData(): array|\Livewire\Features\SupportEvents\Event
     {
         if (! $this->ensureTemplateSchemaReadyForSave()) {
-            return $this->dispatch('addError', __('Active metadata template version with mappings is required for this order type.'));
+            return $this->dispatch('addError', __('orders::order_form.messages.active_metadata_required'));
         }
 
         $data = $this->crudPipelineService->validateAndPrepare(
@@ -319,12 +319,12 @@ trait OrderCrud
     {
         if (! empty($this->orderModel)) {
             $this->authorize('edit-orders');
-            $this->title = __('Edit order');
+            $this->title = __('orders::order_form.titles.edit');
             $this->fillOrder();
             $this->refreshTemplateFormSchema();
         } else {
             $this->authorize('add-orders');
-            $this->title = __('Add order');
+            $this->title = __('orders::order_form.titles.add');
             $this->orderForm->fillDefaults($this->selectedOrder, cache('settings'));
             $this->resetComponentState();
             $this->selectedPersonnel->resetState();

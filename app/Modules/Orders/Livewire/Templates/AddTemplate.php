@@ -22,11 +22,11 @@ class AddTemplate extends Component
         try {
             app(OrderTemplateAdmin::class)->create($this->modifyArray($this->template_data));
         } catch (RuntimeException $exception) {
-            $this->dispatch('addError', __($exception->getMessage()));
+            $this->dispatch('addError', $exception->getMessage());
 
             return;
         }
 
-        $this->dispatch('templateAdded', __('Template was added successfully!'));
+        $this->dispatch('templateAdded', __('orders::templates_list.messages.template_added'));
     }
 }

@@ -28,7 +28,7 @@ class EditLeave extends Component
     public function mount(?int $leaveModel = null): void
     {
         $this->authorize('viewAny', Leave::class);
-        $this->title = __('Edit leave');
+        $this->title = __('leaves::common.titles.edit_leave');
         $this->leave->resetForm();
 
         if (! $leaveModel) {
@@ -75,7 +75,7 @@ class EditLeave extends Component
 
         $this->reset('personnelName', 'assignedSearch');
 
-        $this->dispatch('leaveAdded', __('Leave was updated successfully!'));
+        $this->dispatch('leaveAdded', __('leaves::common.messages.leave_updated'));
     }
 
     public function render()

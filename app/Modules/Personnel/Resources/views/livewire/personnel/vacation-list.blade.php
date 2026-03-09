@@ -11,7 +11,7 @@
     <div class="flex space-x-2 items-center">
         <div class="flex flex-col w-1/3">
             <x-ui.select-dropdown
-                :label="__('Reserved month')"
+                :label="__('personnel::common.labels.reserved_month')"
                 placeholder="---"
                 mode="gray"
                 class="w-full"
@@ -22,12 +22,12 @@
         <button wire:click="setMonth"
                 class="appearance-none bg-slate-900 text-slate-100 px-4 py-2 mt-1 rounded-md shadow-sm text-sm font-medium flex items-center space-x-2 justify-end transition-all duration-300 hover:bg-slate-700 hover:text-slate-100 hover:shadow-none"
         >
-            <span> {{ __('Save') }}</span>
+            <span> {{ __('personnel::common.actions.save') }}</span>
         </button>
         <button wire:click="resetVacation"
                 class="appearance-none bg-rose-500 text-rose-50 px-4 py-2 mt-1 rounded-md shadow-sm text-sm font-medium flex items-center space-x-2 justify-end transition-all duration-300 hover:bg-rose-100 hover:text-rose-500 hover:shadow-none"
         >
-            <span> {{ __('Cancel') }}</span>
+            <span> {{ __('personnel::common.actions.cancel') }}</span>
         </button>
     </div>
     @endif
@@ -35,7 +35,7 @@
     <div class="relative -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
         <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
             <div class="overflow-visible">
-                <x-table.tbl :headers="[__('Year'),__('Reserved month'),__('Total days'),__('Remaining days'), __('Used') ,'action']">
+                <x-table.tbl :headers="[__('personnel::common.labels.year'), __('personnel::common.labels.reserved_month'), __('personnel::common.labels.total_days'), __('personnel::common.labels.remaining_days'), __('personnel::common.labels.used'), __('services::common.labels.action')]">
                     @forelse ($personnelModelData->yearlyVacation as $vacation)
                         @php
                             $currentYear = $vacation->year == \Carbon\Carbon::now()->year;
@@ -81,7 +81,7 @@
                         <tr>
                             <td colspan="6">
                                 <div class="flex justify-center items-center py-4">
-                                    <span class="font-medium">{{ __('No information added') }}</span>
+                                    <span class="font-medium">{{ __('personnel::vacations.messages.empty') }}</span>
                                 </div>
                             </td>
                         </tr>

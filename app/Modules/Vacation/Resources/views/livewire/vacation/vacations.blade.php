@@ -22,7 +22,7 @@
     <div class="flex flex-col px-6 py-4 space-y-4">
         <div class="flex items-center justify-between">
             <div class="flex flex-row items-center justify-start px-2 py-2 space-x-2 rounded-xl">
-                <x-label>{{ __('Year') }} </x-label>
+                <x-label>{{ __('vacation::common.labels.year') }} </x-label>
                 <select name="selectedYear" id="selectedYear" wire:model.live="selectedYear" @disabled(!empty($filter['date']['min'] ?? null) || !empty($filter['date']['max'] ?? null))
                     class="block w-full text-base text-white rounded-md bg-neutral-800 border-slate-600 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm">
                     @foreach ($years as $year)
@@ -47,7 +47,7 @@
         <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
             <div class="flex flex-col xl:col-span-2">
                 <x-ui.select-dropdown
-                    :label="__('Structure')"
+                    :label="__('vacation::common.labels.structure')"
                     placeholder="---"
                     mode="gray"
                     class="w-full"
@@ -58,17 +58,17 @@
                 </x-ui.select-dropdown>
             </div>
             <div class="flex flex-col">
-                <x-label for="filter.fullname">{{ __('Fullname') }}</x-label>
+                <x-label for="filter.fullname">{{ __('vacation::common.labels.fullname') }}</x-label>
                 <x-livewire-input mode="gray" name="filter.fullname"
                     wire:model.defer="filter.fullname"></x-livewire-input>
             </div>
             <div class="flex flex-col">
-                <x-label for="filter.order_no">{{ __('Order #') }}</x-label>
+                <x-label for="filter.order_no">{{ __('vacation::common.labels.order_hash') }}</x-label>
                 <x-livewire-input mode="gray" name="filter.order_no"
                     wire:model.defer="filter.order_no"></x-livewire-input>
             </div>
             <div class="flex flex-col lg:col-span-2">
-                <x-label for="filter.date_range">{{ __('Date range') }}</x-label>
+                <x-label for="filter.date_range">{{ __('vacation::common.labels.date_range') }}</x-label>
                 <div class="flex items-center space-x-1">
                     <x-pikaday-input mode="gray" name="filter.date.min" format="Y-MM-DD"
                         wire:model.defer="filter.date.min">
@@ -98,38 +98,38 @@
                 </div>
             </div>
             <div class="flex flex-col">
-                <x-label for="filter.vacation_places">{{ __('Location') }}</x-label>
+                <x-label for="filter.vacation_places">{{ __('vacation::common.labels.location') }}</x-label>
                 <x-livewire-input mode="gray" name="filter.vacation_places"
                     wire:model.defer="filter.vacation_places"></x-livewire-input>
             </div>
             <div class="flex flex-col">
-                <x-label for="filter.duration">{{ __('Duration') }}</x-label>
+                <x-label for="filter.duration">{{ __('vacation::common.labels.duration') }}</x-label>
                 <x-livewire-input type="number" mode="gray" name="filter.duration"
                     wire:model.defer="filter.duration"></x-livewire-input>
             </div>
             <div class="flex flex-col w-full space-y-1 lg:col-span-2">
-                <x-label for="filter.gender">{{ __('Status') }}</x-label>
+                <x-label for="filter.gender">{{ __('vacation::common.labels.status') }}</x-label>
                 <div class="flex flex-row">
                     <label class="inline-flex items-center px-2 py-2 bg-gray-100 rounded shadow-sm">
                         <input type="radio" class="form-radio" name="filter.vacation_status"
                             wire:model="filter.vacation_status" value="all">
-                        <span class="ml-2 text-sm font-normal">{{ __('All') }}</span>
+                        <span class="ml-2 text-sm font-normal">{{ __('vacation::common.labels.all') }}</span>
                     </label>
                     <label class="inline-flex items-center px-2 py-2 bg-gray-100 rounded shadow-sm">
                         <input type="radio" class="form-radio" name="filter.vacation_status"
                             wire:model="filter.vacation_status" value="at_work">
-                        <span class="ml-2 text-sm font-normal">{{ __('At work') }}</span>
+                        <span class="ml-2 text-sm font-normal">{{ __('vacation::common.labels.at_work') }}</span>
                     </label>
                     <label class="inline-flex items-center px-2 py-2 bg-gray-100 rounded shadow-sm">
                         <input type="radio" class="form-radio" name="filter.vacation_status"
                             wire:model="filter.vacation_status" value="in_vacation">
-                        <span class="ml-2 text-sm font-normal">{{ __('In vacation') }}</span>
+                        <span class="ml-2 text-sm font-normal">{{ __('vacation::common.labels.in_vacation') }}</span>
                     </label>
                 </div>
             </div>
             <div class="flex items-end space-x-2">
-                <x-button mode="primary" wire:click="searchFilter()">{{ __('Search') }}</x-button>
-                <x-button mode="black" wire:click="resetFilter">{{ __('Reset') }}</x-button>
+                <x-button mode="primary" wire:click="searchFilter()">{{ __('vacation::common.labels.search') }}</x-button>
+                <x-button mode="black" wire:click="resetFilter">{{ __('vacation::common.labels.reset') }}</x-button>
             </div>
         </div>
 
@@ -137,7 +137,7 @@
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
                 <div class="overflow-visible">
 
-                    <x-table.tbl :headers="$this->getTableHeaders()" title="{{ __('Vacations') }}">
+                    <x-table.tbl :headers="$this->getTableHeaders()" title="{{ __('vacation::common.titles.vacations') }}">
                         @forelse ($this->vacations as $_vacation)
                             <tr @class([
                                 'bg-teal-50' => $_vacation->is_active_vacation,
@@ -160,7 +160,7 @@
                                         @if ($_vacation->is_active_vacation)
                                             <span
                                                 class="flex items-center justify-center px-2 py-1 text-sm font-medium text-green-700 bg-green-200 rounded-lg">
-                                                {{ __('In vacation') }}
+                                                {{ __('vacation::common.labels.in_vacation') }}
                                             </span>
                                         @endif
                                     </div>
@@ -182,28 +182,28 @@
                                 <x-table.td>
                                     <div class="flex flex-col text-sm font-medium">
                                         <div class="flex items-center space-x-1">
-                                            <span class="text-gray-500">{{ __('Duration') }}:</span>
+                                            <span class="text-gray-500">{{ __('vacation::common.labels.duration') }}:</span>
                                             <span class="text-teal-500">{{ $_vacation->duration }}
-                                                {{ __('day') }}</span>
+                                                {{ __('vacation::common.labels.day') }}</span>
                                         </div>
                                         <div class="flex items-center space-x-1">
-                                            <span class="text-gray-500">{{ __('Start date') }}:</span>
+                                            <span class="text-gray-500">{{ __('vacation::common.labels.start_date') }}:</span>
                                             <span
                                                 class="text-sky-500">{{ \Carbon\Carbon::parse($_vacation->start_date)->format('d.m.Y') }}</span>
                                         </div>
                                         <div class="flex items-center space-x-1">
-                                            <span class="text-gray-500">{{ __('End date') }}:</span>
+                                            <span class="text-gray-500">{{ __('vacation::common.labels.end_date') }}:</span>
                                             <span
                                                 class="text-rose-500">{{ \Carbon\Carbon::parse($_vacation->end_date)->format('d.m.Y') }}</span>
                                         </div>
                                         <div class="flex items-center space-x-1">
-                                            <span class="text-gray-500">{{ __('Return work date') }}:</span>
+                                            <span class="text-gray-500">{{ __('vacation::common.labels.return_work_date') }}:</span>
                                             <span
                                                 class="text-green-500">{{ \Carbon\Carbon::parse($_vacation->return_work_date)->format('d.m.Y') }}</span>
                                         </div>
                                         <div class="flex items-center space-x-2">
                                             <span
-                                                class="flex-shrink-0 text-sm text-gray-500">{{ __('Vacation days') }}:
+                                                class="flex-shrink-0 text-sm text-gray-500">{{ __('vacation::common.labels.vacation_days') }}:
                                             </span>
                                             <div
                                                 class="relative flex items-center justify-center w-20 h-2 overflow-hidden rounded-lg bg-slate-200">
@@ -225,16 +225,16 @@
                                 <x-table.td>
                                     <div class="flex flex-col text-sm font-medium">
                                         <div class="flex items-center space-x-1">
-                                            <span class="text-gray-500">{{ __('Order #') }}:</span>
+                                            <span class="text-gray-500">{{ __('vacation::common.labels.order_hash') }}:</span>
                                             <a href="{{ route('orders', ['search' => ['order_no' => $_vacation->order_no]]) }}"
                                                 class="text-blue-600">{{ $_vacation->order_no }}</a>
                                         </div>
                                         <div class="flex items-center space-x-1">
-                                            <span class="text-gray-500">{{ __('Given by') }}:</span>
+                                            <span class="text-gray-500">{{ __('vacation::common.labels.given_by') }}:</span>
                                             <span class="text-black">{{ $_vacation->order_given_by }}</span>
                                         </div>
                                         <div class="flex items-center space-x-1">
-                                            <span class="text-gray-500">{{ __('Given date') }}:</span>
+                                            <span class="text-gray-500">{{ __('vacation::common.labels.given_date') }}:</span>
                                             <span
                                                 class="text-black">{{ \Carbon\Carbon::parse($_vacation->order_date)->format('d.m.Y') }}</span>
                                         </div>

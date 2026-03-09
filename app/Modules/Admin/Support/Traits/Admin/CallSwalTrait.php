@@ -7,8 +7,8 @@ trait CallSwalTrait
     public function callSuccessSwal()
     {
         $this->dispatch('swal', [
-            'title' => __('Saved!'),
-            'text' => __('Data was updated successfully!'),
+            'title' => __('admin::common.alerts.success.title'),
+            'text' => __('admin::common.alerts.success.text'),
             'icon' => 'success',
             'timer' => 2000,
             'timerProgressBar' => true,
@@ -18,8 +18,8 @@ trait CallSwalTrait
     public function callWarningSwal()
     {
         $this->dispatch('swal', [
-            'title' => __('Warning!'),
-            'text' => __('Data already exist!'),
+            'title' => __('admin::common.alerts.warning.title'),
+            'text' => __('admin::common.alerts.warning.text'),
             'icon' => 'error',
             'timer' => 2000,
             'timerProgressBar' => true,
@@ -29,8 +29,8 @@ trait CallSwalTrait
     public function callDeletePromptSwal()
     {
         $this->dispatch('delete-prompt', [
-            'title' => __('Are you sure?'),
-            'text' => __('This action cannot be undone!'),
+            'title' => __('admin::common.alerts.delete_prompt.title'),
+            'text' => __('admin::common.alerts.delete_prompt.text'),
             'icon' => 'warning',
         ]);
     }

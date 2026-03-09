@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'fields' => [
+        'select_personnel' => 'Select personnel',
+        'select_rank' => 'Select rank',
+        'day' => 'Day',
+        'month' => 'Month',
+        'year' => 'Year',
+        'name' => 'Name',
+        'surname' => 'Surname',
+        'select_main_structure' => 'Select main structure',
+        'select_structure' => 'Select structure',
+        'select_position' => 'Select position',
+        'start_date' => 'Start date',
+        'end_date' => 'End date',
+        'location' => 'Location',
+        'trip_start_day' => 'Trip start day',
+        'trip_start_month' => 'Trip start month',
+        'trip_start_year' => 'Trip start year',
+        'select_transportation' => 'Select transportation',
+        'meeting_hour' => 'Meeting hour',
+        'return_month' => 'Return month',
+        'return_day' => 'Return day',
+        'weapon' => 'Weapon',
+        'car' => 'Car',
+    ],
+];

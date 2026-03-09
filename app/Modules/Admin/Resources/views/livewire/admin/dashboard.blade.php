@@ -1,5 +1,5 @@
 <div class="flex flex-col space-y-4">
-    <h1 class="text-2xl text-gray-500">{{ __('Settings') }}</h1>
+    <h1 class="text-2xl text-gray-500">{{ __('admin::references.dashboard.title') }}</h1>
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
         @foreach(config('admin.menu_items') as $menuItem)
             @php
@@ -16,4 +16,3 @@
         @endforeach
     </div>
 </div>
-

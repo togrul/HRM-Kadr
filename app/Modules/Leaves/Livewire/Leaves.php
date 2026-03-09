@@ -116,7 +116,7 @@ class Leaves extends Component
         $model = Leave::withTrashed()->find($id);
         $this->authorize('delete', $model);
         $model->forceDelete();
-        $this->dispatch('leaveWasDeleted', __('Leave was deleted!'));
+        $this->dispatch('leaveWasDeleted', __('leaves::common.messages.leave_deleted'));
     }
 
     public function restoreData($id)
@@ -124,21 +124,21 @@ class Leaves extends Component
         $model = Leave::withTrashed()->find($id);
         $this->authorize('restore', $model);
         $model->restore();
-        $this->dispatch('leaveAdded', __('Leave was updated successfully!'));
+        $this->dispatch('leaveAdded', __('leaves::common.messages.leave_updated'));
     }
 
     public function getTableHeaders(): array
     {
         return [
             '#',
-            __('Fullname'),
-            __('Type'),
-            __('Dates'),
-            __('Reason'),
-            __('Status'),
-            __('File'),
-            'action',
-            'action',
+            __('leaves::common.labels.fullname'),
+            __('leaves::common.labels.type'),
+            __('leaves::common.labels.dates'),
+            __('leaves::common.labels.reason'),
+            __('leaves::common.labels.status'),
+            __('leaves::common.labels.file'),
+            __('personnel::common.labels.action'),
+            __('personnel::common.labels.action'),
             // 'action'
         ];
     }

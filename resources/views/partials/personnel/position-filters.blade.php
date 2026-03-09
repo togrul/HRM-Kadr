@@ -19,7 +19,7 @@
             wire:loading.attr="disabled"
             wire:target="resetFilter"
             class="appearance-none w-max text-sm font-medium bg-slate-100 text-rose-500 rounded-2xl px-3 py-1 transition-all duration-300 hover:bg-slate-200">
-            {{ __('Reset') }}
+            {{ __('personnel::common.actions.reset') }}
         </button>
     @endif
 </div>

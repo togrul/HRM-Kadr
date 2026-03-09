@@ -122,12 +122,12 @@ class OvertimeBoard extends Component
             $minutes = $minutes !== null ? (int) $minutes : null;
             $service->approve($request, (int) Auth::id(), $minutes);
         } catch (ValidationException $exception) {
-            $this->dispatch('notify', type: 'error', message: collect($exception->errors())->flatten()->first() ?: __('Validation failed.'));
+            $this->dispatch('notify', type: 'error', message: collect($exception->errors())->flatten()->first() ?: __('attendance::overtime.messages.validation_failed'));
 
             return;
         }
 
-        $this->dispatch('notify', type: 'success', message: __('Overtime request approved.'));
+        $this->dispatch('notify', type: 'success', message: __('attendance::overtime.messages.approved'));
     }
 
     public function reject(int $requestId, AttendanceOvertimeApprovalService $service): void
@@ -144,12 +144,12 @@ class OvertimeBoard extends Component
         try {
             $service->reject($request, (int) Auth::id());
         } catch (ValidationException $exception) {
-            $this->dispatch('notify', type: 'error', message: collect($exception->errors())->flatten()->first() ?: __('Validation failed.'));
+            $this->dispatch('notify', type: 'error', message: collect($exception->errors())->flatten()->first() ?: __('attendance::overtime.messages.validation_failed'));
 
             return;
         }
 
-        $this->dispatch('notify', type: 'success', message: __('Overtime request rejected.'));
+        $this->dispatch('notify', type: 'success', message: __('attendance::overtime.messages.rejected'));
     }
 
     public function createManualRequest(AttendanceOvertimeRequestService $service): void
@@ -161,12 +161,12 @@ class OvertimeBoard extends Component
         try {
             $service->create($this->manualRequest, (int) Auth::id());
         } catch (ValidationException $exception) {
-            $this->dispatch('notify', type: 'error', message: collect($exception->errors())->flatten()->first() ?: __('Validation failed.'));
+            $this->dispatch('notify', type: 'error', message: collect($exception->errors())->flatten()->first() ?: __('attendance::overtime.messages.validation_failed'));
 
             return;
         }
 
-        $this->dispatch('notify', type: 'success', message: __('Manual overtime request created.'));
+        $this->dispatch('notify', type: 'success', message: __('attendance::overtime.messages.created'));
         $this->manualRequest = [
             'tabel_no' => '',
             'date' => now()->toDateString(),
@@ -259,9 +259,9 @@ class OvertimeBoard extends Component
                 $item->setAttribute(
                     'source_label',
                     match ((string) $item->source) {
-                        'manual' => __('Manual request'),
-                        'auto_manual_entry' => __('From manual entry'),
-                        default => __('From ledger'),
+                        'manual' => __('attendance::overtime.badges.manual_request'),
+                        'auto_manual_entry' => __('attendance::overtime.badges.from_manual_entry'),
+                        default => __('attendance::overtime.badges.from_ledger'),
                     }
                 );
                 $item->setAttribute(
@@ -275,8 +275,8 @@ class OvertimeBoard extends Component
                 $item->setAttribute(
                     'origin_label',
                     (string) $item->source === 'manual'
-                        ? __('Manual')
-                        : __('Auto-generated')
+                        ? __('attendance::overtime.badges.manual')
+                        : __('attendance::overtime.badges.auto_generated')
                 );
                 $item->setAttribute(
                     'origin_badge_mode',
@@ -291,8 +291,8 @@ class OvertimeBoard extends Component
 
         if ($this->status !== 'all') {
             $activeFilters[] = [
-                'label' => __('Status'),
-                'value' => __($this->status),
+                'label' => __('attendance::overtime.filters.status'),
+                'value' => __('attendance::overtime.statuses.'.$this->status),
                 'mode' => 'sky',
             ];
         }
@@ -300,7 +300,7 @@ class OvertimeBoard extends Component
         if ($this->fromDate !== '' || $this->toDate !== '') {
             $range = trim(($this->fromDate ?: '...').' - '.($this->toDate ?: '...'));
             $activeFilters[] = [
-                'label' => __('Period'),
+                'label' => __('attendance::overtime.filters.period'),
                 'value' => $range,
                 'mode' => 'secondary',
             ];
@@ -309,7 +309,7 @@ class OvertimeBoard extends Component
         $selectedStructureLabel = $structureScopeRead->label($this->selectedStructureId);
         if ($selectedStructureLabel) {
             $activeFilters[] = [
-                'label' => __('Structure'),
+                'label' => __('attendance::overtime.filters.structure'),
                 'value' => $selectedStructureLabel,
                 'mode' => 'purple',
             ];
@@ -317,17 +317,17 @@ class OvertimeBoard extends Component
 
         if ($this->selectedPersonnel) {
             $activeFilters[] = [
-                'label' => __('Personnel'),
+                'label' => __('attendance::overtime.filters.personnel'),
                 'value' => (string) ($this->selectedPersonnel['fullname'] ?? $this->selectedPersonnel['tabel_no'] ?? ''),
                 'mode' => 'green',
             ];
         }
 
-        $emptyStateTitle = __('No overtime requests found.');
-        $emptyStateDescription = __('No overtime requests match the current filters. Adjust the filters or create a manual request.');
+        $emptyStateTitle = __('attendance::overtime.empty.title');
+        $emptyStateDescription = __('attendance::overtime.empty.description_filtered');
 
         if ($activeFilters === []) {
-            $emptyStateDescription = __('No overtime requests are waiting in the selected period yet. Approved, rejected or not-yet-generated requests will not appear here.');
+            $emptyStateDescription = __('attendance::overtime.empty.description_default');
         }
 
         return view('attendance::livewire.attendance.overtime-board', [

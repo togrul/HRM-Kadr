@@ -30,10 +30,10 @@ class Weapons extends Component
     protected function validationAttributes(): array
     {
         return [
-            'form.name' => __('Name'),
-            'form.serial_number' => __('Serial number'),
-            'form.capacity' => __('Capacity'),
-            'form.production_year' => __('Production year'),
+            'form.name' => __('admin::references.fields.name'),
+            'form.serial_number' => __('admin::references.fields.serial_number'),
+            'form.capacity' => __('admin::references.fields.capacity'),
+            'form.production_year' => __('admin::references.fields.production_year'),
         ];
     }
 

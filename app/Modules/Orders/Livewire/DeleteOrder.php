@@ -58,7 +58,7 @@ class DeleteOrder extends Component
 
         $this->orderLogId = null;
 
-        $this->dispatch('orderWasDeleted', __('Order was deleted!'));
+        $this->dispatch('orderWasDeleted', __('orders::order_form.messages.order_deleted'));
     }
 
     public function render()

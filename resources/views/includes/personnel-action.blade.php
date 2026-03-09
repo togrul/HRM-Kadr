@@ -8,8 +8,8 @@
             <svg class="w-6 h-6 text-rose-500" xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6v6l4 2"/><path d="M16 21.16a10 10 0 1 1 5-13.516"/><path d="M20 11.5v6"/><path d="M20 21.5h.01"/></svg>
         </span>
         <div class="flex items-center justify-between w-full">
-            <p class="text-sm font-medium text-gray-900">{{ __('personnel.confirm-message') }}</p>
-            <button wire:click="confirmPersonnel" class="px-4 py-2 text-sm font-semibold text-white transition-all duration-200 bg-gray-900 rounded-lg shadow-sm appearance-none hover:bg-gray-700">{{ __('Confirm') }}</button>
+            <p class="text-sm font-medium text-gray-900">{{ __('personnel::common.messages.confirm_message') }}</p>
+            <button wire:click="confirmPersonnel" class="px-4 py-2 text-sm font-semibold text-white transition-all duration-200 bg-gray-900 rounded-lg shadow-sm appearance-none hover:bg-gray-700">{{ __('personnel::common.actions.confirm') }}</button>
         </div>
     </div>
     @endif
@@ -64,18 +64,18 @@
         @if(! auth()->user()->can('update-personnels') && isset($personnelModel))
             <div class="flex items-center space-x-2">
                 <x-icons.lock-icon color="text-rose-500" hover="text-rose-600" size="w-7 h-7"></x-icons.lock-icon>
-                <span class="text-sm text-slate-500">{{ __('You have no permission to edit.') }}</span>
+                <span class="text-sm text-slate-500">{{ __('personnel::common.messages.no_permission_to_edit') }}</span>
             </div>
         @else
-            <x-modal-button>{{ __('Save') }}</x-modal-button>
+            <x-modal-button>{{ __('personnel::common.actions.save') }}</x-modal-button>
         @endif
 
         <div class="flex items-center space-x-2">
         @if($step > 1)
-            <x-button mode="step-prev" wire:click.prevent="previousStep">{{ __('Previous') }}</x-button>
+            <x-button mode="step-prev" wire:click.prevent="previousStep">{{ __('personnel::common.actions.previous') }}</x-button>
         @endif
             @if(array_key_last($stepItems) != $step)
-                <x-button mode="step-next" wire:click.prevent="nextStep">{{ __('Next') }}</x-button>
+                <x-button mode="step-next" wire:click.prevent="nextStep">{{ __('personnel::common.actions.next') }}</x-button>
             @endif
         </div>
     </div>

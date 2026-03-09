@@ -22,10 +22,10 @@
     <div class="flex flex-col items-center justify-between sm:flex-row filter bg-white py-2 px-2 rounded-xl">
         <x-filter.nav>
             <x-filter.item  wire:click.prevent="setStatus(1)" :active="$status === 1">
-                {{ __('Active') }}
+                {{ __('services::common.labels.active') }}
             </x-filter.item>
             <x-filter.item  wire:click.prevent="setStatus(0)" :active="$status === 0">
-                {{ __('De-active') }}
+                {{ __('services::common.labels.inactive') }}
             </x-filter.item>
         </x-filter.nav>
 
@@ -34,7 +34,7 @@
             {{-- @can('manage-settings') --}}
             <x-button class="space-x-2" mode="primary" wire:click.prevent="openSideMenu('add-rank')">
                 <x-icons.add-icon color="text-white" hover="text-gray-50"></x-icons.add-icon>
-               <span>{{ __('Add rank') }}</span>
+               <span>{{ __('services::ranks.actions.add_rank') }}</span>
             </x-button>
             {{-- @endcan --}}
         </div>
@@ -44,7 +44,7 @@
         <div class="relative min-h-[300px] -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
                 <div class="overflow-visible">
-                    <x-table.tbl :headers="[__('ID'),__('Category'),__('Name'),__('Duration'),__('Active?'),'action','action']">
+                    <x-table.tbl :headers="[__('services::common.labels.id'), __('services::common.labels.category'), __('services::common.labels.name'), __('services::common.labels.duration'), __('services::common.labels.active_question'), __('services::common.labels.action'), __('services::common.labels.action')]">
                         @forelse ($_ranks as $rank)
                             <tr wire:key="rank-row-{{ $rank->id }}">
                                 <x-table.td>
@@ -134,9 +134,6 @@
                         @empty
                             <tr>
                                 <td colspan="5">
-                                    {{-- <x-empty :title="__('No users found.')" wire:click="$dispatch('openSideMenu','add-user')">
-                                        {{ __('Add user') }}
-                                    </x-empty> --}}
                                 </td>
                             </tr>
                         @endforelse

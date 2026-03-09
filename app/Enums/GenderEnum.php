@@ -10,7 +10,9 @@ enum GenderEnum: int
     {
         $options = [];
         foreach (self::cases() as $case) {
-            $options[$case->value] = $case === self::GENDER_MALE ? __('Man') : __('Woman');
+            $options[$case->value] = $case === self::GENDER_MALE
+                ? __('staff::common.fields.man')
+                : __('staff::common.fields.woman');
         }
         return $options;
     }

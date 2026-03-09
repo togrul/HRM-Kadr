@@ -22,7 +22,7 @@
         <div class="flex items-center justify-center space-x-2 action-section">
             <x-button class="space-x-2" mode="primary" wire:click.prevent="openCrud()">
                 <x-icons.add-icon color="text-white" hover="text-gray-50"></x-icons.add-icon>
-                <span>{{ __('Add type') }}</span>
+                <span>{{ __('admin::leave_types.actions.add') }}</span>
             </x-button>
         </div>
     </div>
@@ -34,14 +34,14 @@
             </button>
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 mt-4 w-full">
                 <div class="flex flex-col">
-                    <x-label for="form.name">{{ __('Name') }}</x-label>
+                    <x-label for="form.name">{{ __('admin::leave_types.fields.name') }}</x-label>
                     <x-livewire-input mode="default" name="form.name" wire:model="form.name"></x-livewire-input>
                     @error('form.name')
                         <x-validation> {{ $message }} </x-validation>
                     @enderror
                 </div>
                 <div class="flex flex-col">
-                    <x-label for="form.max_days">{{ __('Max days') }}</x-label>
+                    <x-label for="form.max_days">{{ __('admin::leave_types.fields.max_days') }}</x-label>
                     <x-livewire-input mode="default" type="number" name="form.max_days"
                         wire:model="form.max_days"></x-livewire-input>
                     @error('form.max_days')
@@ -50,10 +50,10 @@
                 </div>
                 <div class="flex items-end">
                     <x-checkbox name="form.requires_document"
-                        model="form.requires_document">{{ __('Requires document?') }}</x-checkbox>
+                        model="form.requires_document">{{ __('admin::leave_types.fields.requires_document') }}</x-checkbox>
                 </div>
                 <div class="flex items-end">
-                    <x-modal-button mode="black">{{ __('Save') }}</x-modal-button>
+                    <x-modal-button mode="black">{{ __('admin::leave_types.actions.save') }}</x-modal-button>
                 </div>
             </div>
         </div>
@@ -63,7 +63,7 @@
         <div class="relative min-h-[300px] -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
                 <div class="overflow-visible">
-                    <x-table.tbl :headers="[__('ID'), __('Name'), __('Max days'), __('Requires document?'), 'action']">
+                    <x-table.tbl :headers="[__('admin::leave_types.fields.id'), __('admin::leave_types.fields.name'), __('admin::leave_types.fields.max_days'), __('admin::leave_types.fields.requires_document'), __('admin::leave_types.table.actions')]">
                         @forelse ($leave_types as $type)
                             <tr wire:key="leave-type-row-{{ $type->id }}">
                                 <x-table.td>

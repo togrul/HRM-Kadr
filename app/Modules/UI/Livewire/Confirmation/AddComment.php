@@ -58,11 +58,11 @@ class AddComment extends Component
 
         if ($action === OrderStatusEnum::APPROVED->name) {
             $successEvent = 'leaveApproved';
-            $successMsg   =  __('Leave was approved successfully!');
+            $successMsg   =  __('leaves::common.messages.leave_approved');
         }
         else {
             $successEvent = 'leaveRejected';
-            $successMsg   =  __('Leave was rejected successfully!');
+            $successMsg   =  __('leaves::common.messages.leave_rejected');
         }
 
         $this->reset('comment');

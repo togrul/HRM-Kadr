@@ -22,13 +22,13 @@ class AttendanceOvertimeRequestService
 
         if ($tabelNo === '' || $requestedMinutes <= 0) {
             throw ValidationException::withMessages([
-                'manualRequest.requested_minutes' => __('Requested minutes must be greater than zero.'),
+                'manualRequest.requested_minutes' => __('attendance::overtime.errors.requested_minutes_positive'),
             ]);
         }
 
         if (app(AttendanceMonthLockService::class)->isPeriodLocked($date)) {
             throw ValidationException::withMessages([
-                'manualRequest.date' => __('Selected month is locked. Overtime request creation is blocked.'),
+                'manualRequest.date' => __('attendance::overtime.errors.month_locked'),
             ]);
         }
 
@@ -38,7 +38,7 @@ class AttendanceOvertimeRequestService
 
         if (! $personnelExists) {
             throw ValidationException::withMessages([
-                'manualRequest.tabel_no' => __('Selected personnel was not found.'),
+                'manualRequest.tabel_no' => __('attendance::overtime.errors.personnel_not_found'),
             ]);
         }
 
@@ -50,7 +50,7 @@ class AttendanceOvertimeRequestService
 
         if ($approvedExists) {
             throw ValidationException::withMessages([
-                'manualRequest.date' => __('An approved overtime request already exists for this day.'),
+                'manualRequest.date' => __('attendance::overtime.errors.approved_exists'),
             ]);
         }
 
@@ -62,7 +62,7 @@ class AttendanceOvertimeRequestService
 
         if ($pendingExists) {
             throw ValidationException::withMessages([
-                'manualRequest.date' => __('A pending overtime request already exists for this day.'),
+                'manualRequest.date' => __('attendance::overtime.errors.pending_exists'),
             ]);
         }
 

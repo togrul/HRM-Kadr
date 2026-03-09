@@ -21,6 +21,8 @@
 ])
 
 @php
+    use App\Support\Translations\ModuleTranslation;
+
     $resolvedInputTypes = $inputTypes ?? [
         '$structure_main' => 'select',
         '$position' => 'select',
@@ -55,8 +57,8 @@
         $selectedId = \App\Support\StructureSelect::resolveSelected($component, $list_string, $key, $field, $defaultId);
         $fallbackValue = data_get($component->{$list_string}[$key] ?? [], $field);
         $fieldLabel = $defaultLabel ?? (is_array($fallbackValue)
-                ? ($fallbackValue['name'] ?? __('Structure'))
-                : (! empty($fallbackValue) ? $fallbackValue : __('Structure')));
+                ? ($fallbackValue['name'] ?? __('ui::common.labels.structure'))
+                : (! empty($fallbackValue) ? $fallbackValue : __('ui::common.labels.structure')));
 
         return [$selectedId, $fieldLabel];
     };
@@ -151,7 +153,7 @@
                     @endphp
                     @foreach($model?->where('parent_id', $mainStructureId) ?? [] as $model_item)
                         @php
-                            $_level_name = __($structureLevels[$model_item->level] ?? '');
+                            $_level_name = ModuleTranslation::resolveStoredText((string) ($structureLevels[$model_item->level] ?? ''));
                             $_select_value = ($field == 'structure_id' && $isCoded)
                                                     ? $model_item->code."{$suffixService->getNumberSuffix($model_item->code)} {$_level_name}"
                                                     : $model_item->name;         
@@ -166,7 +168,7 @@
                             :suffix-service="$suffixService"
                             :structure-levels="$structureLevels"
                         >
-                            {{ __($_select_value) }}
+                            {{ ModuleTranslation::resolveStoredText((string) $_select_value) }}
                         </x-radio-tree.item>
                     @endforeach
                 </x-radio-tree.list>

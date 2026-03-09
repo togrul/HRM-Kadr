@@ -1,9 +1,13 @@
 @props([
-    'title' => 'Şərh əlavə et',
-    'confirm' => 'Təsdiq et',
-    'cancel' => 'İmtina',
+    'title' => 'ui::common.actions.edit',
+    'confirm' => 'ui::common.actions.edit',
+    'cancel' => 'ui::common.actions.cancel',
     'confirmAction' => 'confirmComment', // default olaraq confirmComment
 ])
+
+@php
+    use App\Support\Translations\ModuleTranslation;
+@endphp
 
 <div
   x-data="{
@@ -71,10 +75,10 @@
           <div class="px-5 py-4 border-b border-neutral-200/70 dark:border-neutral-800/60">
             <div class="flex items-start justify-between gap-4">
               <h2 id="comment-modal-title" class="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
-                {{ __($title) }}
+                {{ ModuleTranslation::resolveStoredText($title) }}
               </h2>
               <button type="button" class="inline-flex items-center justify-center rounded-xl px-2 py-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-neutral-400"
-                      @click="closeModal()" aria-label="Bağla">
+                      @click="closeModal()" aria-label="{{ __('ui::common.actions.close') }}">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
@@ -89,19 +93,19 @@
           <div class="px-5 py-4 border-t border-neutral-200/70 dark:border-neutral-800/60 flex items-center justify-end gap-3">
             <button type="button" class="rounded-xl px-4 py-2 text-sm font-medium border border-neutral-200 dark:border-neutral-800 text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-300"
                     @click="closeModal()" :disabled="busy">
-              {{ __($cancel) }}
+              {{ ModuleTranslation::resolveStoredText($cancel) }}
             </button>
 
             <button type="button" class="rounded-xl px-4 py-2 text-sm font-semibold bg-indigo-600 text-white hover:bg-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 disabled:opacity-60"
                     @click="submit()"
                     :disabled="busy || !String(comment ?? '').trim().length">
-                    <span x-show="!busy">{{ __($confirm) }}</span>
+                    <span x-show="!busy">{{ ModuleTranslation::resolveStoredText($confirm) }}</span>
                     <span x-show="busy" class="inline-flex items-center gap-2">
                         <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
                         <path class="opacity-75" d="M4 12a8 8 0 018-8v3a5 5 0 00-5 5H4z" fill="currentColor"></path>
                     </svg>
-                {{ __('Loading') }}...
+                {{ __('ui::common.actions.loading') }}...
               </span>
             </button>
           </div>

@@ -49,7 +49,7 @@ class PermissionDescriptionCatalog
             'get-notification' => 'Sistem bildirişlərini almaq, bildiriş panelində görmək və istifadəçi bildiriş axınında iştirak etmək icazəsi verir.',
             'confirmation-general' => 'Ümumi təsdiq axınlarında qərar vermək, təsdiq və ya rədd əməliyyatları aparmaq icazəsi verir.',
             'manage-staff' => 'Ştat cədvəli üzrə tam idarəetmə, planlama və struktur səviyyəli dəyişikliklər aparmaq icazəsi verir.',
-            'add-leaves' => 'Yeni məzuniyyət və ya digər qeyri-iştirak qeydi yaratmaq icazəsi verir.',
+            'add-leaves' => 'Yeni icazə və ya digər qeyri-iştirak qeydi yaratmaq icazəsi verir.',
             'show-leaves' => 'İcazələr modulunu görmək və mövcud qeydləri izləmək icazəsi verir.',
             'edit-leaves' => 'İcazə qeydlərini redaktə etmək və status/məzmun dəyişiklikləri aparmaq icazəsi verir.',
             'delete-leaves' => 'İcazə qeydlərini silmək və ya ləğv etmək icazəsi verir.',

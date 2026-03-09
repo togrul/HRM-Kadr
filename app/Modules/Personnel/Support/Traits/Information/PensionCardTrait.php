@@ -25,7 +25,7 @@ trait PensionCardTrait {
 
         $this->personnelModelData->pensionCards()->create($pensionCardData);
 
-        $this->dispatch('contractAdded', __('Pension card was added successfully!'));
+        $this->dispatch('contractAdded', __('personnel::information.messages.pension_card_created'));
         $this->dispatchModalCloseEvent();
         $this->reset('pensionCards');
     }
@@ -33,7 +33,7 @@ trait PensionCardTrait {
     public function forceDeletePensionCard(PersonnelPensionCard $pensionCard): void
     {
         $pensionCard->delete();
-        $this->dispatch('contractAdded', __('Pension card was deleted successfully!'));
+        $this->dispatch('contractAdded', __('personnel::information.messages.pension_card_deleted'));
         $this->dispatchModalCloseEvent();
     }
 }

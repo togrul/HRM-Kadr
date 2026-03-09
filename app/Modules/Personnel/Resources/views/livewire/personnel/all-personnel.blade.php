@@ -23,7 +23,7 @@
 
             <div class="relative min-h-[300px] overflow-x-auto">
                 <div class="inline-block min-w-full align-middle sm:px-1">
-                    <x-table.tbl :headers="$this->getTableHeaders()" title="{{ __('Personnels') }}">
+                    <x-table.tbl :headers="$this->getTableHeaders()" title="{{ __('personnel::common.titles.personnels') }}">
                         @forelse ($personnels as $personnel)
                             @php
                                 $rowNumber = $rowStart + $loop->iteration;
@@ -38,12 +38,12 @@
                                     <div class="absolute top-0 left-0 flex flex-col justify-between h-full">
                                         @if ($personnel->active_vacation)
                                             <x-progress :startDate="$personnel->active_vacation_start" :endDate="$personnel->active_vacation_end" color="emerald">
-                                                {{ __('In vacation') }}
+                                                {{ __('personnel::common.states.in_vacation') }}
                                             </x-progress>
                                         @endif
                                         @if ($personnel->active_business_trip)
                                             <x-progress :startDate="$personnel->active_business_trip_start" :endDate="$personnel->active_business_trip_end" color="rose">
-                                                {{ __('In business trip') }}
+                                                {{ __('personnel::common.states.in_business_trip') }}
                                             </x-progress>
                                         @endif
                                     </div>
@@ -64,18 +64,18 @@
                                                 class="flex items-center px-2 py-0 space-x-2 text-xs font-medium text-amber-500 border border-amber-200 rounded-lg shadow-sm bg-amber-50">
                                                 <x-icons.pending-icon size="w-5 h-5"
                                                     color="text-amber-600"></x-icons.pending-icon>
-                                                <span class="uppercase tracking-tight">{{ __('Waiting for approval') }}</span>
+                                                <span class="uppercase tracking-tight">{{ __('personnel::common.states.waiting_for_approval') }}</span>
                                             </div>
                                         @endif
 
                                         @if ($status == 'deleted')
                                             <div class="flex flex-col text-xs font-medium">
                                                 <div class="flex items-center space-x-1">
-                                                    <span class="text-gray-500">{{ __('Deleted date') }}:</span>
+                                                    <span class="text-gray-500">{{ __('personnel::common.labels.deleted_date') }}:</span>
                                                     <span class="text-black">{{ $personnel->deleted_at_fmt }}</span>
                                                 </div>
                                                 <div class="flex items-center space-x-1">
-                                                    <span class="text-gray-500">{{ __('Deleted by') }}:</span>
+                                                    <span class="text-gray-500">{{ __('personnel::common.labels.deleted_by') }}:</span>
                                                     <span class="text-black">{{ $personnel->deleted_by_name }}</span>
                                                 </div>
                                             </div>
@@ -98,7 +98,7 @@
                                                         mode="green">{{ $personnel->rank_label }}</x-small-badge>
                                                 @endif
                                                 @if ($personnel->active_shift_name)
-                                                    <x-small-badge mode="sky">{{ __('Shift') }}: {{ $personnel->active_shift_name }}</x-small-badge>
+                                                    <x-small-badge mode="sky">{{ __('personnel::common.labels.shift') }}: {{ $personnel->active_shift_name }}</x-small-badge>
                                                 @endif
                                             </div>
                                             @if ($personnel->active_shift_window)
@@ -120,11 +120,11 @@
                                 </x-table.td>
 
                                 <x-table.td>
-                                    <x-table.cell-vertical title="Join date">
+                                    <x-table.cell-vertical :title="__('personnel::common.labels.join_date')">
                                         {{ $personnel->join_work_date_fmt }}
                                     </x-table.cell-vertical>
                                     @if (!empty($personnel->leave_work_date))
-                                        <x-table.cell-vertical title="Leave date" text-color="text-rose-500">
+                                        <x-table.cell-vertical :title="__('personnel::common.labels.leave_date')" text-color="text-rose-500">
                                             {{ $personnel->leave_work_date_fmt }}
                                         </x-table.cell-vertical>
                                     @endif

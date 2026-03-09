@@ -1,14 +1,14 @@
 <div class="flex flex-col space-y-2 w-full">
     <div class="grid grid-cols-3 gap-3">
         <div class="flex flex-col">
-            <x-label for="pensionCards.card_no">{{ __('Card number') }}</x-label>
+            <x-label for="pensionCards.card_no">{{ __('personnel::information.fields.card_number') }}</x-label>
             <x-livewire-input mode="default" name="pensionCards.card_no" wire:model="pensionCards.card_no"></x-livewire-input>
             @error('pensionCards.card_no')
                 <x-validation> {{ $message }} </x-validation>
             @enderror
         </div>
         <div class="flex flex-col">
-            <x-label for="pensionCards.given_date">{{ __('Given date') }}</x-label>
+            <x-label for="pensionCards.given_date">{{ __('personnel::information.fields.given_date') }}</x-label>
             <x-pikaday-input mode="default" name="pensionCards.given_date" format="Y-MM-DD" wire:model.live="pensionCards.given_date">
                 <x-slot name="script">
                     $el.onchange = function () {
@@ -21,7 +21,7 @@
             @enderror
         </div>
         <div class="flex flex-col">
-            <x-label for="pensionCards.expiry_date">{{ __('Expiry date') }}</x-label>
+            <x-label for="pensionCards.expiry_date">{{ __('personnel::information.fields.expiry_date') }}</x-label>
             <x-pikaday-input mode="default" name="pensionCards.expiry_date" format="Y-MM-DD" wire:model.live="pensionCards.expiry_date">
                 <x-slot name="script">
                     $el.onchange = function () {
@@ -35,12 +35,12 @@
         </div>
     </div>
     <div class="flex justify-end space-x-2">
-        <x-button mode="black" wire:click="addPensionCard">{{ __('Save') }}</x-button>
+        <x-button mode="black" wire:click="addPensionCard">{{ __('personnel::common.actions.save') }}</x-button>
     </div>
     <div class="relative -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
         <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
             <div class="overflow-visible">
-                <x-table.tbl :headers="[__('Card number'),__('Given date'),__('Expiry date'),'action']">
+                <x-table.tbl :headers="[__('personnel::information.fields.card_number'),__('personnel::information.fields.given_date'),__('personnel::information.fields.expiry_date'),__('personnel::common.labels.action')]">
                     @forelse ($personnelModelData->pensionCards as $pension)
                         @php
                             $activeCard = (\Carbon\Carbon::parse($pension->given_date) <= \Carbon\Carbon::now())
@@ -85,7 +85,7 @@
                         <tr>
                             <td colspan="4">
                                 <div class="flex justify-center items-center py-4">
-                                    <span class="font-medium">{{ __('No information added') }}</span>
+                                    <span class="font-medium">{{ __('personnel::common.labels.no_information_added') }}</span>
                                 </div>
                             </td>
                         </tr>
@@ -96,4 +96,3 @@
     </div>
 
 </div>
-

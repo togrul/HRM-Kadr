@@ -20,12 +20,12 @@ class OrderTemplateSnapshotService
         $resolvedOrderTypeId = is_numeric($orderTypeId) ? (int) $orderTypeId : 0;
 
         if ($resolvedOrderTypeId <= 0) {
-            throw new RuntimeException('Order type is required for template snapshot capture.');
+            throw new RuntimeException(__('orders::template_runtime.messages.order_type_required_for_snapshot'));
         }
 
         $version = $this->templateRegistry->activeVersionForOrderType($resolvedOrderTypeId);
         if (! $version) {
-            throw new RuntimeException('Active metadata template version not found for this order type.');
+            throw new RuntimeException(__('orders::template_runtime.messages.active_metadata_version_not_found_for_order_type'));
         }
 
         $version->loadMissing([
@@ -39,12 +39,12 @@ class OrderTemplateSnapshotService
         );
 
         if (! $hasRowMappings) {
-            throw new RuntimeException('Metadata template mappings are required for this order type.');
+            throw new RuntimeException(__('orders::template_runtime.messages.metadata_mappings_required_for_order_type'));
         }
 
         $templatePath = trim((string) $version->template_path);
         if ($templatePath === '') {
-            throw new RuntimeException('Active metadata template file is missing for this order type.');
+            throw new RuntimeException(__('orders::template_runtime.messages.active_metadata_template_file_missing_for_order_type'));
         }
 
         return [

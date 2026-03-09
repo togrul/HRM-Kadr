@@ -1,16 +1,16 @@
 <table>
     <thead>
     <tr>
-        <th>{{ __('Fullname') }}</th>
-        <th>{{ __('Position') }}</th>
-        <th>{{ __('Structure') }}</th>
-        <th>{{ __('Leave type') }}</th>
-        <th>{{ __('Start date') }}</th>
-        <th>{{ __('End date') }}</th>
-        <th>{{ __('Total days') }}</th>
-        <th>{{ __('Status') }}</th>
-        <th>{{ __('Reason') }}</th>
-        <th>{{ __('Created date') }}</th>
+        <th>{{ __('leaves::common.labels.fullname') }}</th>
+        <th>{{ __('leaves::common.labels.position') }}</th>
+        <th>{{ __('leaves::common.labels.structure') }}</th>
+        <th>{{ __('leaves::common.labels.leave_type') }}</th>
+        <th>{{ __('leaves::common.labels.start_date') }}</th>
+        <th>{{ __('leaves::common.labels.end_date') }}</th>
+        <th>{{ __('leaves::common.labels.total_days') }}</th>
+        <th>{{ __('leaves::common.labels.status') }}</th>
+        <th>{{ __('leaves::common.labels.reason') }}</th>
+        <th>{{ __('leaves::common.labels.created_date') }}</th>
     </tr>
     </thead>
     <tbody>

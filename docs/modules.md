@@ -5,9 +5,18 @@ Livewire components, routes, views, and service provider. Shared patterns:
 
 - Namespace: `App\Modules\<Name>\Livewire`
 - Views namespace: `<name>::` (passed to `loadViewsFrom`)
+- Translation namespace: canonical slug format, used as `module::file.key`
 - Routes: `app/Modules/<Name>/Routes/web.php` (loaded in provider)
 - Livewire discovery: `config/livewire.php` lists module namespaces
 - Alias registration: module providers register deterministic aliases via explicit `componentMap()` + `registerAliases($map, '<prefix>')`.
+
+## Translation Rule
+
+- Canonical translation key format: `module::file.key`
+- View namespace and translation namespace may differ
+- Example:
+  - BusinessTrips view alias: `business-trips::livewire.business-trips.business-trips`
+  - BusinessTrips translation alias: `business_trips::common.table.title`
 
 ## Enabled Modules
 - Personnel (`personnel::`) – CRUD, files, information, vacation list
@@ -15,7 +24,7 @@ Livewire components, routes, views, and service provider. Shared patterns:
 - Staff (`staff::`) – staff schedule
 - Candidates (`candidates::`) – candidate CRUD/list
 - Leaves (`leaves::`) – leave CRUD/list
-- BusinessTrips (`business-trips::`) – business trip list
+- BusinessTrips (`business-trips::` views, `business_trips::` translations) – business trip list
 - Vacation (`vacation::`) – vacation list
 - Admin (`admin::`) – admin settings/masters
 - Services (`services::`) – settings, menus, users, ranks, components, roles
@@ -37,6 +46,7 @@ Livewire components, routes, views, and service provider. Shared patterns:
 2) Add provider to `config/modules.php`; add namespace to `config/livewire.php` discovery.
 3) Place Livewire classes under `app/Modules/<Name>/Livewire`; views under `app/Modules/<Name>/Resources/views`.
 4) Update traits/render paths to use `<module>::` view prefixes.
+5) Add translation catalogs under `app/Modules/<Name>/Resources/lang/<locale>` and use canonical keys in the form `module::file.key`.
 
 ### Quick recipe (providers + aliases + observers)
 - In the provider `boot()`, call:

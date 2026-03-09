@@ -9,7 +9,7 @@
         <div class="sm:col-span-2 flex items-end space-x-2">
             <div class="w-full">
                 <div class="flex items-center space-x-2">
-                    <x-label for="types.name">{{ __('Name') }}</x-label>
+                    <x-label for="types.name">{{ __('orders::template_set_type.labels.name') }}</x-label>
                     @error('types.name')
                         <x-validation>(* {{ $message }} )</x-validation>
                     @enderror
@@ -20,7 +20,7 @@
                     wire:click="addType"
             >
                 <x-icons.add-icon color="text-white" hover="text-gray-50"></x-icons.add-icon>
-                <span>{{ __('Add') }}</span>
+                <span>{{ __('orders::template_set_type.actions.add') }}</span>
             </button>
         </div>
     </div>
@@ -56,7 +56,7 @@
                             wire:click.prevent="openUiConfig({{ $_type->id }})"
                     >
                         <x-icons.layout-icon color="text-sky-500" hover="text-sky-600"></x-icons.layout-icon>
-                        <span>{{ __('UI config') }}</span>
+                        <span>{{ __('orders::template_set_type.labels.ui_config') }}</span>
                     </button>
                     <button class="w-8 h-8 px-1 py-1 rounded-lg hover:bg-emerald-50 hover:shadow-sm font-medium text-sm flex justify-center items-center"
                             wire:click="editType({{ $_type->id }})"
@@ -65,7 +65,7 @@
                     </button>
                     <button class="w-8 h-8 px-1 py-1 rounded-lg hover:bg-rose-50 hover:shadow-sm font-medium text-sm flex justify-center items-center"
                             wire:click="removeType({{ $_type->id }})"
-                            wire:confirm="{{ __('Are you sure you want to delete?') }}"
+                            wire:confirm="{{ __('orders::template_set_type.confirmations.delete') }}"
                     >
                         <x-icons.backspace-icon color="text-rose-500" hover="text-rose-600"></x-icons.backspace-icon>
                     </button>
@@ -73,7 +73,7 @@
             </div>
         @empty
             <div class="flex justify-start items-center px-4 py-3 font-medium bg-gray-100 rounded-lg text-gray-500 text-base">
-                <span>{{ __('No data exists.') }}</span>
+                <span>{{ __('orders::template_set_type.labels.no_data_exists') }}</span>
             </div>
         @endforelse
     </div>
@@ -88,10 +88,10 @@
             $hasTemplatePath = filled($uiPlaceholderCoverage['template_path'] ?? null);
 
             $publishChecks = [
-                ['label' => __('Version selected'), 'ok' => $hasSelectedVersion, 'fail' => __('Select a version from versions table.')],
-                ['label' => __('Template file attached'), 'ok' => $hasTemplatePath, 'fail' => __('Upload/attach DOCX template to this version.')],
-                ['label' => __('Coverage scan available'), 'ok' => $coverageInspectable, 'fail' => __('Coverage is unavailable for this version.')],
-                ['label' => __('No missing mappings'), 'ok' => $coverageInspectable && $missingCount === 0, 'fail' => __('Resolve missing placeholders before publish.')],
+                ['label' => __('orders::template_set_type.readiness.version_selected'), 'ok' => $hasSelectedVersion, 'fail' => __('orders::template_set_type.readiness.fail.version_selected')],
+                ['label' => __('orders::template_set_type.readiness.template_file_attached'), 'ok' => $hasTemplatePath, 'fail' => __('orders::template_set_type.readiness.fail.template_file_attached')],
+                ['label' => __('orders::template_set_type.readiness.coverage_scan_available'), 'ok' => $coverageInspectable, 'fail' => __('orders::template_set_type.readiness.fail.coverage_scan_available')],
+                ['label' => __('orders::template_set_type.readiness.no_missing_mappings'), 'ok' => $coverageInspectable && $missingCount === 0, 'fail' => __('orders::template_set_type.readiness.fail.no_missing_mappings')],
             ];
 
             $publishBlockedMessages = collect($publishChecks)
@@ -107,7 +107,7 @@
             <div class="flex items-center justify-between">
                 <div class="flex flex-col">
                     <h3 class="text-sm font-semibold text-slate-700">
-                        {{ __('UI config editor') }}
+                        {{ __('orders::template_set_type.labels.ui_config_editor') }}
                     </h3>
                     <p class="text-xs text-slate-500">
                         {{ $activeType?->name ?? '' }}
@@ -118,18 +118,18 @@
                             class="h-8 px-3 rounded-lg bg-sky-100 hover:bg-sky-200 text-xs font-medium text-sky-800 transition-colors"
                             wire:click.prevent="createUiDraftVersion"
                     >
-                        {{ __('Create draft') }}
+                        {{ __('orders::template_set_type.actions.create_draft') }}
                     </button>
                     <button type="button"
                             class="h-8 px-3 rounded-lg bg-amber-100 hover:bg-amber-200 text-xs font-medium text-amber-800 transition-colors"
                             wire:click.prevent="bootstrapUiConfigMetadata"
                     >
-                        {{ __('Generate metadata') }}
+                        {{ __('orders::template_set_type.actions.generate_metadata') }}
                     </button>
                     <button class="h-8 px-3 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-medium text-slate-700 transition-colors"
                             wire:click="closeUiConfig"
                     >
-                        {{ __('Close') }}
+                        {{ __('orders::template_set_type.actions.close') }}
                     </button>
                 </div>
             </div>
@@ -142,16 +142,16 @@
 
             @if(!empty($uiConfigVersions))
                 <div class="space-y-2">
-                    <h4 class="text-sm font-semibold text-slate-700">{{ __('Template versions') }}</h4>
+                    <h4 class="text-sm font-semibold text-slate-700">{{ __('orders::template_set_type.labels.template_versions') }}</h4>
                     <div class="overflow-x-auto rounded-lg border border-slate-200">
                         <table class="w-full text-xs text-left">
                             <thead>
                                 <tr class="text-slate-500 bg-slate-50 border-b border-slate-200">
-                                    <th class="py-2 px-2 min-w-[80px]">{{ __('Version') }}</th>
-                                    <th class="py-2 px-2 min-w-[100px]">{{ __('Status') }}</th>
-                                    <th class="py-2 px-2 min-w-[90px]">{{ __('Active') }}</th>
-                                    <th class="py-2 px-2 min-w-[150px]">{{ __('Published at') }}</th>
-                                    <th class="py-2 px-2 min-w-[220px]">{{ __('Actions') }}</th>
+                                    <th class="py-2 px-2 min-w-[80px]">{{ __('orders::template_set_type.labels.version') }}</th>
+                                    <th class="py-2 px-2 min-w-[100px]">{{ __('orders::template_set_type.labels.status') }}</th>
+                                    <th class="py-2 px-2 min-w-[90px]">{{ __('orders::template_set_type.labels.active') }}</th>
+                                    <th class="py-2 px-2 min-w-[150px]">{{ __('orders::template_set_type.labels.published_at') }}</th>
+                                    <th class="py-2 px-2 min-w-[220px]">{{ __('orders::template_set_type.labels.actions') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -164,9 +164,9 @@
                                         <td class="py-2 px-2">{{ (string) ($version['status'] ?? '-') }}</td>
                                         <td class="py-2 px-2">
                                             @if(!empty($version['is_active']))
-                                                <span class="text-emerald-700">{{ __('Yes') }}</span>
+                                                <span class="text-emerald-700">{{ __('orders::template_set_type.labels.yes') }}</span>
                                             @else
-                                                <span class="text-slate-500">{{ __('No') }}</span>
+                                                <span class="text-slate-500">{{ __('orders::template_set_type.labels.no') }}</span>
                                             @endif
                                         </td>
                                         <td class="py-2 px-2">{{ (string) ($version['published_at'] ?? '-') }}</td>
@@ -176,7 +176,7 @@
                                                         class="h-7 px-2 rounded-md bg-slate-100 hover:bg-slate-200 text-[11px] font-medium text-slate-700 transition-colors"
                                                         wire:click="openUiConfig({{ (int) $uiConfigOrderTypeId }}, {{ (int) ($version['id'] ?? 0) }})"
                                                 >
-                                                    {{ __('Edit') }}
+                                                    {{ __('orders::template_set_type.actions.edit') }}
                                                 </button>
 
                                                 @if(empty($version['is_active']))
@@ -189,7 +189,7 @@
                                                             class="h-7 px-2 rounded-md bg-emerald-100 hover:bg-emerald-200 text-[11px] font-medium text-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                                             wire:click="publishUiConfigVersion({{ (int) ($version['id'] ?? 0) }})"
                                                     >
-                                                        {{ __('Publish') }}
+                                                        {{ __('orders::template_set_type.actions.publish') }}
                                                     </button>
                                                 @endif
 
@@ -198,7 +198,7 @@
                                                             class="h-7 px-2 rounded-md bg-violet-100 hover:bg-violet-200 text-[11px] font-medium text-violet-700 transition-colors"
                                                             wire:click="rollbackUiConfigVersion({{ (int) ($version['id'] ?? 0) }})"
                                                     >
-                                                        {{ __('Rollback') }}
+                                                        {{ __('orders::template_set_type.actions.rollback') }}
                                                     </button>
                                                 @endif
 
@@ -206,9 +206,9 @@
                                                     <button type="button"
                                                             class="h-7 px-2 rounded-md bg-rose-100 hover:bg-rose-200 text-[11px] font-medium text-rose-700 transition-colors"
                                                             wire:click="deleteUiDraftVersion({{ (int) ($version['id'] ?? 0) }})"
-                                                            wire:confirm="{{ __('Are you sure you want to delete this version?') }}"
+                                                            wire:confirm="{{ __('orders::template_set_type.confirmations.delete_version') }}"
                                                     >
-                                                        {{ __('Delete') }}
+                                                        {{ __('orders::template_set_type.actions.delete') }}
                                                     </button>
                                                 @endif
                                             </div>
@@ -224,63 +224,63 @@
             @if(!empty($uiPlaceholderCoverage))
                 <div class="rounded-lg border border-slate-200 bg-slate-50 p-3 space-y-2">
                     <div class="flex flex-col">
-                        <h4 class="text-sm font-semibold text-slate-700">{{ __('Placeholder coverage') }}</h4>
-                        <p class="text-xs text-slate-500">{{ __('Checks placeholders used in template DOCX against mappings in this version.') }}</p>
+                        <h4 class="text-sm font-semibold text-slate-700">{{ __('orders::template_set_type.labels.placeholder_coverage') }}</h4>
+                        <p class="text-xs text-slate-500">{{ __('orders::template_set_type.descriptions.coverage') }}</p>
                     </div>
 
                     @if(!empty($uiPlaceholderCoverage['inspectable']))
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-2 text-xs">
                             <div class="rounded-md border border-slate-200 bg-white px-2 py-1.5">
-                                <span class="text-slate-500">{{ __('Template placeholders') }}</span>
+                                <span class="text-slate-500">{{ __('orders::template_set_type.labels.template_placeholders') }}</span>
                                 <div class="font-semibold text-slate-800">{{ count($uiPlaceholderCoverage['template_placeholders'] ?? []) }}</div>
                             </div>
                             <div class="rounded-md border border-slate-200 bg-white px-2 py-1.5">
-                                <span class="text-slate-500">{{ __('Mapped placeholders') }}</span>
+                                <span class="text-slate-500">{{ __('orders::template_set_type.labels.mapped_placeholders') }}</span>
                                 <div class="font-semibold text-slate-800">{{ count($uiPlaceholderCoverage['mapped_placeholders'] ?? []) }}</div>
                             </div>
                             <div class="rounded-md border border-rose-200 bg-rose-50 px-2 py-1.5">
-                                <span class="text-rose-600">{{ __('Missing mappings') }}</span>
+                                <span class="text-rose-600">{{ __('orders::template_set_type.labels.missing_mappings') }}</span>
                                 <div class="font-semibold text-rose-700">{{ count($uiPlaceholderCoverage['missing_placeholders'] ?? []) }}</div>
                             </div>
                             <div class="rounded-md border border-amber-200 bg-amber-50 px-2 py-1.5">
-                                <span class="text-amber-700">{{ __('Orphan mappings') }}</span>
+                                <span class="text-amber-700">{{ __('orders::template_set_type.labels.orphan_mappings') }}</span>
                                 <div class="font-semibold text-amber-800">{{ count($uiPlaceholderCoverage['orphan_mappings'] ?? []) }}</div>
                             </div>
                         </div>
 
                         @if(!empty($uiPlaceholderCoverage['missing_placeholders']))
                             <div class="rounded-md border border-rose-200 bg-rose-50 px-2 py-1.5 text-xs text-rose-700">
-                                <span class="font-semibold">{{ __('Missing placeholders') }}:</span>
+                                <span class="font-semibold">{{ __('orders::template_set_type.labels.missing_placeholders') }}:</span>
                                 {{ implode(', ', $uiPlaceholderCoverage['missing_placeholders']) }}
                             </div>
                         @endif
 
                         @if(!empty($uiPlaceholderCoverage['orphan_mappings']))
                             <div class="rounded-md border border-amber-200 bg-amber-50 px-2 py-1.5 text-xs text-amber-800">
-                                <span class="font-semibold">{{ __('Orphan mappings') }}:</span>
+                                <span class="font-semibold">{{ __('orders::template_set_type.labels.orphan_mappings') }}:</span>
                                 {{ implode(', ', $uiPlaceholderCoverage['orphan_mappings']) }}
                             </div>
                         @endif
 
                         <div class="rounded-md border border-slate-200 bg-white px-2 py-1.5 text-xs text-slate-600">
-                            {{ __('Coverage checks DOCX scalar placeholders. Row mappings are not counted as orphan.') }}
+                            {{ __('orders::template_set_type.descriptions.coverage_docx_scalar_hint') }}
                         </div>
 
                         @if($orphanCount > 0)
                             <div class="rounded-md border border-slate-200 bg-white px-2 py-1.5 text-xs text-slate-600">
-                                {{ __('Orphan mappings do not block publish, but cleanup is recommended.') }}
+                                {{ __('orders::template_set_type.descriptions.orphan_publish_hint') }}
                             </div>
                         @endif
                     @else
                         <div class="rounded-md border border-amber-200 bg-amber-50 px-2 py-1.5 text-xs text-amber-800">
-                            {{ __('Template placeholder scan is unavailable for this version.') }}
+                            {{ __('orders::template_set_type.readiness.fail.coverage_scan_available') }}
                         </div>
                     @endif
                 </div>
             @endif
 
             <div class="rounded-lg border border-slate-200 bg-slate-50 p-3 space-y-2">
-                <div class="text-xs font-semibold text-slate-700">{{ __('Add metadata field') }}</div>
+                <div class="text-xs font-semibold text-slate-700">{{ __('orders::template_set_type.labels.add_metadata_field') }}</div>
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-2">
                     <div class="md:col-span-2">
                         <input type="text"
@@ -290,13 +290,13 @@
                     </div>
                     <div class="md:col-span-2">
                         <input type="text"
-                               placeholder="{{ __('Label') }}"
+                               placeholder="{{ __('orders::template_set_type.labels.label') }}"
                                class="w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 focus:border-primary focus:ring-0"
                                wire:model.defer="newFieldLabel"/>
                     </div>
                     <div class="md:col-span-2">
                         <input type="text"
-                               placeholder="{{ __('Alias field') }}"
+                               placeholder="{{ __('orders::template_set_type.labels.alias_field') }}"
                                class="w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 focus:border-primary focus:ring-0"
                                wire:model.defer="newFieldAlias"/>
                     </div>
@@ -337,7 +337,7 @@
                             <input type="checkbox"
                                    class="rounded border-slate-300 text-primary focus:ring-primary/20"
                                    wire:model.defer="newFieldRequired"/>
-                            <span>{{ __('Required') }}</span>
+                            <span>{{ __('orders::template_set_type.labels.required') }}</span>
                         </label>
                     </div>
                     <div class="md:col-span-4 flex items-center justify-end">
@@ -345,7 +345,7 @@
                                 class="h-8 px-3 rounded-lg bg-emerald-100 hover:bg-emerald-200 text-xs font-medium text-emerald-800 transition-colors"
                                 wire:click="addUiMetadataField"
                         >
-                            {{ __('Add field') }}
+                            {{ __('orders::template_set_type.labels.add_field') }}
                         </button>
                     </div>
                 </div>
@@ -356,21 +356,21 @@
                     <table class="w-full text-xs text-left">
                         <thead>
                             <tr class="text-slate-500 border-b border-slate-200">
-                                <th class="py-2 pr-2 min-w-[170px]">{{ __('Field') }}</th>
-                                <th class="py-2 px-2 min-w-[140px]">{{ __('Field key') }}</th>
-                                <th class="py-2 px-2 min-w-[150px]">{{ __('Input') }}</th>
-                                <th class="py-2 px-2 min-w-[140px]">{{ __('Model') }}</th>
-                                <th class="py-2 px-2 min-w-[140px]">{{ __('Selected name') }}</th>
-                                <th class="py-2 px-2 min-w-[160px]">{{ __('Search field') }}</th>
-                                <th class="py-2 px-2 min-w-[90px]">{{ __('Required') }}</th>
-                                <th class="py-2 px-2 min-w-[170px]">{{ __('Rules') }}</th>
-                                <th class="py-2 px-2 min-w-[120px]">{{ __('Group') }}</th>
-                                <th class="py-2 px-2 min-w-[120px]">{{ __('Group title') }}</th>
-                                <th class="py-2 px-2 min-w-[90px]">{{ __('Group order') }}</th>
-                                <th class="py-2 px-2 min-w-[90px]">{{ __('Field order') }}</th>
-                                <th class="py-2 px-2 min-w-[180px]">{{ __('Grid cols') }}</th>
-                                <th class="py-2 pl-2 min-w-[180px]">{{ __('Col span') }}</th>
-                                <th class="py-2 pl-2 min-w-[80px]">{{ __('Action') }}</th>
+                                <th class="py-2 pr-2 min-w-[170px]">{{ __('orders::template_set_type.labels.field') }}</th>
+                                <th class="py-2 px-2 min-w-[140px]">{{ __('orders::template_set_type.labels.field_key') }}</th>
+                                <th class="py-2 px-2 min-w-[150px]">{{ __('orders::template_set_type.labels.input') }}</th>
+                                <th class="py-2 px-2 min-w-[140px]">{{ __('orders::template_set_type.labels.model') }}</th>
+                                <th class="py-2 px-2 min-w-[140px]">{{ __('orders::template_set_type.labels.selected_name') }}</th>
+                                <th class="py-2 px-2 min-w-[160px]">{{ __('orders::template_set_type.labels.search_field') }}</th>
+                                <th class="py-2 px-2 min-w-[90px]">{{ __('orders::template_set_type.labels.required') }}</th>
+                                <th class="py-2 px-2 min-w-[170px]">{{ __('orders::template_set_type.labels.rules') }}</th>
+                                <th class="py-2 px-2 min-w-[120px]">{{ __('orders::template_set_type.labels.group') }}</th>
+                                <th class="py-2 px-2 min-w-[120px]">{{ __('orders::template_set_type.labels.group_title') }}</th>
+                                <th class="py-2 px-2 min-w-[90px]">{{ __('orders::template_set_type.labels.group_order') }}</th>
+                                <th class="py-2 px-2 min-w-[90px]">{{ __('orders::template_set_type.labels.field_order') }}</th>
+                                <th class="py-2 px-2 min-w-[180px]">{{ __('orders::template_set_type.labels.grid_cols') }}</th>
+                                <th class="py-2 pl-2 min-w-[180px]">{{ __('orders::template_set_type.labels.col_span') }}</th>
+                                <th class="py-2 pl-2 min-w-[80px]">{{ __('orders::template_set_type.labels.action') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -430,7 +430,7 @@
                                                 class="rounded border-slate-300 text-primary focus:ring-primary/20"
                                                 wire:model.defer="uiConfigDraft.{{ $field['id'] }}.required"
                                             />
-                                            <span class="text-xs">{{ __('Yes') }}</span>
+                                            <span class="text-xs">{{ __('orders::template_set_type.labels.yes') }}</span>
                                         </label>
                                     </td>
                                     <td class="py-2 px-2">
@@ -490,7 +490,7 @@
                                             type="button"
                                             class="w-8 h-8 rounded-md bg-rose-50 hover:bg-rose-100 text-rose-600 transition-colors"
                                             wire:click="removeUiMetadataField({{ $field['id'] }})"
-                                            wire:confirm="{{ __('Are you sure you want to delete?') }}"
+                                            wire:confirm="{{ __('orders::template_set_type.confirmations.delete') }}"
                                         >
                                             ✕
                                         </button>
@@ -502,15 +502,15 @@
                 </div>
             @else
                 <div class="rounded-lg border border-amber-200 bg-amber-50 text-amber-700 px-3 py-2 text-sm flex items-center justify-between gap-3">
-                    <span>{{ __('This template version has no metadata fields yet. Use Generate metadata to build fields from template placeholders.') }}</span>
+                    <span>{{ __('orders::template_set_type.empty.metadata_fields') }}</span>
                 </div>
             @endif
 
             <div class="space-y-2">
                 <div class="flex flex-col">
-                    <h4 class="text-sm font-semibold text-slate-700">{{ __('Section blocks') }}</h4>
-                    <p class="text-xs text-slate-500">{{ __('Control visibility and order for template sections.') }}</p>
-                    <p class="text-[11px] text-slate-400">{{ __('row_fields is the main dynamic-fields container for each component row. Sort controls display order (10, 20, 30...).') }}</p>
+                    <h4 class="text-sm font-semibold text-slate-700">{{ __('orders::template_set_type.labels.section_blocks') }}</h4>
+                    <p class="text-xs text-slate-500">{{ __('orders::template_set_type.descriptions.section_blocks') }}</p>
+                    <p class="text-[11px] text-slate-400">{{ __('orders::template_set_type.descriptions.section_blocks_hint') }}</p>
                 </div>
 
                 @if(!empty($sectionBlocksDraft))
@@ -518,10 +518,10 @@
                         <table class="w-full text-xs text-left">
                             <thead>
                                 <tr class="text-slate-500 bg-slate-50 border-b border-slate-200">
-                                    <th class="py-2 px-2 min-w-[140px]">{{ __('Key') }}</th>
-                                    <th class="py-2 px-2 min-w-[180px]">{{ __('Title') }}</th>
-                                    <th class="py-2 px-2 min-w-[110px]">{{ __('Enabled') }}</th>
-                                    <th class="py-2 px-2 min-w-[110px]">{{ __('Sort') }}</th>
+                                    <th class="py-2 px-2 min-w-[140px]">{{ __('orders::template_set_type.labels.key') }}</th>
+                                    <th class="py-2 px-2 min-w-[180px]">{{ __('orders::template_set_type.labels.title') }}</th>
+                                    <th class="py-2 px-2 min-w-[110px]">{{ __('orders::template_set_type.labels.enabled') }}</th>
+                                    <th class="py-2 px-2 min-w-[110px]">{{ __('orders::template_set_type.labels.sort') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -549,7 +549,7 @@
                                                     class="rounded border-slate-300 text-primary focus:ring-primary/20"
                                                     wire:model.live="sectionBlocksDraft.{{ $blockIndex }}.enabled"
                                                 />
-                                                <span>{{ __('Visible') }}</span>
+                                                <span>{{ __('orders::template_set_type.labels.visible') }}</span>
                                             </label>
                                         </td>
                                         <td class="py-2 px-2">
@@ -567,7 +567,7 @@
                     </div>
                 @else
                     <div class="rounded-lg border border-slate-200 bg-slate-50 text-slate-600 px-3 py-2 text-sm">
-                        {{ __('No section blocks configured.') }}
+                        {{ __('orders::template_set_type.empty.section_blocks') }}
                     </div>
                 @endif
             </div>
@@ -575,14 +575,14 @@
             <div class="space-y-2">
                 <div class="flex items-center justify-between">
                     <div class="flex flex-col">
-                        <h4 class="text-sm font-semibold text-slate-700">{{ __('Mapping editor') }}</h4>
-                        <p class="text-xs text-slate-500">{{ __('Map placeholders to field keys. Scope row = per component row, scalar = global value.') }}</p>
+                        <h4 class="text-sm font-semibold text-slate-700">{{ __('orders::template_set_type.labels.mapping_editor') }}</h4>
+                        <p class="text-xs text-slate-500">{{ __('orders::template_set_type.descriptions.mapping_editor') }}</p>
                     </div>
                     <button type="button"
                             class="h-8 px-3 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-medium text-slate-700 transition-colors"
                             wire:click="addMappingRow"
                     >
-                        {{ __('Add mapping') }}
+                        {{ __('orders::template_set_type.actions.add_mapping') }}
                     </button>
                 </div>
 
@@ -591,11 +591,11 @@
                         <table class="w-full text-xs text-left">
                             <thead>
                                 <tr class="text-slate-500 bg-slate-50 border-b border-slate-200">
-                                    <th class="py-2 px-2 min-w-[150px]">{{ __('Placeholder') }}</th>
-                                    <th class="py-2 px-2 min-w-[150px]">{{ __('Field key') }}</th>
-                                    <th class="py-2 px-2 min-w-[120px]">{{ __('Scope') }}</th>
-                                    <th class="py-2 px-2 min-w-[90px]">{{ __('Sort') }}</th>
-                                    <th class="py-2 px-2 min-w-[260px]">{{ __('Mapping config (JSON)') }}</th>
+                                    <th class="py-2 px-2 min-w-[150px]">{{ __('orders::template_set_type.labels.placeholder') }}</th>
+                                    <th class="py-2 px-2 min-w-[150px]">{{ __('orders::template_set_type.labels.field_key') }}</th>
+                                    <th class="py-2 px-2 min-w-[120px]">{{ __('orders::template_set_type.labels.scope') }}</th>
+                                    <th class="py-2 px-2 min-w-[90px]">{{ __('orders::template_set_type.labels.sort') }}</th>
+                                    <th class="py-2 px-2 min-w-[260px]">{{ __('orders::template_set_type.labels.mapping_config_json') }}</th>
                                     <th class="py-2 px-2 min-w-[70px]"></th>
                                 </tr>
                             </thead>
@@ -623,8 +623,8 @@
                                                 class="w-full rounded-md border border-slate-200 bg-slate-50 px-2 py-1 focus:border-primary focus:ring-0"
                                                 wire:model.defer="mappingDraft.{{ $mappingIndex }}.scope"
                                             >
-                                                <option value="row">{{ __('row') }}</option>
-                                                <option value="scalar">{{ __('scalar') }}</option>
+                                                <option value="row">{{ __('orders::template_set_type.scope_values.row') }}</option>
+                                                <option value="scalar">{{ __('orders::template_set_type.scope_values.scalar') }}</option>
                                             </select>
                                         </td>
                                         <td class="py-2 px-2">
@@ -658,7 +658,7 @@
                     </div>
                 @else
                     <div class="rounded-lg border border-slate-200 bg-slate-50 text-slate-600 px-3 py-2 text-sm">
-                        {{ __('No mappings configured.') }}
+                        {{ __('orders::template_set_type.empty.mappings') }}
                     </div>
                 @endif
             </div>
@@ -752,7 +752,7 @@
 
             @if(!empty($uiConfigAuditTrail))
                 <div class="space-y-2">
-                    <h4 class="text-sm font-semibold text-slate-700">{{ __('Recent changes') }}</h4>
+                    <h4 class="text-sm font-semibold text-slate-700">{{ __('orders::template_set_type.labels.recent_changes') }}</h4>
                     <div class="rounded-lg border border-slate-200 bg-slate-50 divide-y divide-slate-200 max-h-56 overflow-y-auto">
                         @foreach($uiConfigAuditTrail as $audit)
                             @php
@@ -767,27 +767,27 @@
                                 <div class="flex flex-col gap-1.5">
                                     <span class="font-medium text-slate-700">{{ $this->resolveUiAuditActionLabel((string) ($audit['action'] ?? '')) }}</span>
                                     @if(!empty($payload['field_key']))
-                                        <span class="text-slate-500">{{ __('Field') }}: {{ $payload['field_key'] }}</span>
+                                        <span class="text-slate-500">{{ __('orders::template_set_type.labels.field') }}: {{ $payload['field_key'] }}</span>
                                     @endif
                                     @if(($fieldSummary['added'] ?? 0) + ($fieldSummary['removed'] ?? 0) + ($fieldSummary['updated'] ?? 0) > 0)
                                         <div class="flex flex-wrap items-center gap-1">
-                                            <span class="rounded-full px-2 py-0.5 bg-sky-100 text-sky-700">{{ __('F') }} +{{ (int) ($fieldSummary['added'] ?? 0) }}</span>
-                                            <span class="rounded-full px-2 py-0.5 bg-rose-100 text-rose-700">{{ __('F') }} -{{ (int) ($fieldSummary['removed'] ?? 0) }}</span>
-                                            <span class="rounded-full px-2 py-0.5 bg-amber-100 text-amber-700">{{ __('F') }} ~{{ (int) ($fieldSummary['updated'] ?? 0) }}</span>
+                                            <span class="rounded-full px-2 py-0.5 bg-sky-100 text-sky-700">{{ __('orders::template_set_type.audit.metrics.field_short') }} +{{ (int) ($fieldSummary['added'] ?? 0) }}</span>
+                                            <span class="rounded-full px-2 py-0.5 bg-rose-100 text-rose-700">{{ __('orders::template_set_type.audit.metrics.field_short') }} -{{ (int) ($fieldSummary['removed'] ?? 0) }}</span>
+                                            <span class="rounded-full px-2 py-0.5 bg-amber-100 text-amber-700">{{ __('orders::template_set_type.audit.metrics.field_short') }} ~{{ (int) ($fieldSummary['updated'] ?? 0) }}</span>
                                         </div>
                                     @endif
                                     @if(($mappingSummary['added'] ?? 0) + ($mappingSummary['removed'] ?? 0) + ($mappingSummary['updated'] ?? 0) > 0)
                                         <div class="flex flex-wrap items-center gap-1">
-                                            <span class="rounded-full px-2 py-0.5 bg-emerald-100 text-emerald-700">{{ __('M') }} +{{ (int) ($mappingSummary['added'] ?? 0) }}</span>
-                                            <span class="rounded-full px-2 py-0.5 bg-rose-100 text-rose-700">{{ __('M') }} -{{ (int) ($mappingSummary['removed'] ?? 0) }}</span>
-                                            <span class="rounded-full px-2 py-0.5 bg-amber-100 text-amber-700">{{ __('M') }} ~{{ (int) ($mappingSummary['updated'] ?? 0) }}</span>
+                                            <span class="rounded-full px-2 py-0.5 bg-emerald-100 text-emerald-700">{{ __('orders::template_set_type.audit.metrics.mapping_short') }} +{{ (int) ($mappingSummary['added'] ?? 0) }}</span>
+                                            <span class="rounded-full px-2 py-0.5 bg-rose-100 text-rose-700">{{ __('orders::template_set_type.audit.metrics.mapping_short') }} -{{ (int) ($mappingSummary['removed'] ?? 0) }}</span>
+                                            <span class="rounded-full px-2 py-0.5 bg-amber-100 text-amber-700">{{ __('orders::template_set_type.audit.metrics.mapping_short') }} ~{{ (int) ($mappingSummary['updated'] ?? 0) }}</span>
                                         </div>
                                     @endif
                                     @if(($sectionSummary['added'] ?? 0) + ($sectionSummary['removed'] ?? 0) + ($sectionSummary['updated'] ?? 0) > 0)
                                         <div class="flex flex-wrap items-center gap-1">
-                                            <span class="rounded-full px-2 py-0.5 bg-violet-100 text-violet-700">{{ __('S') }} +{{ (int) ($sectionSummary['added'] ?? 0) }}</span>
-                                            <span class="rounded-full px-2 py-0.5 bg-rose-100 text-rose-700">{{ __('S') }} -{{ (int) ($sectionSummary['removed'] ?? 0) }}</span>
-                                            <span class="rounded-full px-2 py-0.5 bg-amber-100 text-amber-700">{{ __('S') }} ~{{ (int) ($sectionSummary['updated'] ?? 0) }}</span>
+                                            <span class="rounded-full px-2 py-0.5 bg-violet-100 text-violet-700">{{ __('orders::template_set_type.audit.metrics.section_short') }} +{{ (int) ($sectionSummary['added'] ?? 0) }}</span>
+                                            <span class="rounded-full px-2 py-0.5 bg-rose-100 text-rose-700">{{ __('orders::template_set_type.audit.metrics.section_short') }} -{{ (int) ($sectionSummary['removed'] ?? 0) }}</span>
+                                            <span class="rounded-full px-2 py-0.5 bg-amber-100 text-amber-700">{{ __('orders::template_set_type.audit.metrics.section_short') }} ~{{ (int) ($sectionSummary['updated'] ?? 0) }}</span>
                                         </div>
                                     @endif
                                     @if(!empty($highlights))
@@ -799,12 +799,12 @@
                                     @endif
                                     @if(isset($payload['fields_count']) || isset($payload['mappings_count']) || isset($payload['section_blocks_count']))
                                         <span class="text-slate-500 text-[11px]">
-                                            {{ __('Snapshot') }}: {{ __('Fields') }} {{ (int) ($payload['fields_count'] ?? 0) }}, {{ __('Mappings') }} {{ (int) ($payload['mappings_count'] ?? 0) }}, {{ __('Sections') }} {{ (int) ($payload['section_blocks_count'] ?? 0) }}
+                                            {{ __('orders::template_set_type.labels.snapshot') }}: {{ __('orders::template_set_type.labels.fields') }} {{ (int) ($payload['fields_count'] ?? 0) }}, {{ __('orders::template_set_type.labels.mappings') }} {{ (int) ($payload['mappings_count'] ?? 0) }}, {{ __('orders::template_set_type.labels.sections') }} {{ (int) ($payload['section_blocks_count'] ?? 0) }}
                                         </span>
                                     @endif
                                 </div>
                                 <div class="text-right text-[11px] text-slate-500 shrink-0">
-                                    <div>{{ $audit['actor'] ?? __('System') }}</div>
+                                    <div>{{ $audit['actor'] ?? __('orders::template_set_type.labels.system') }}</div>
                                     <div>{{ $audit['created_at'] ?? '' }}</div>
                                 </div>
                             </div>
@@ -817,13 +817,13 @@
                 <button class="h-9 px-4 rounded-lg bg-slate-100 hover:bg-slate-200 text-sm font-medium text-slate-700 transition-colors"
                         wire:click="closeUiConfig"
                 >
-                    {{ __('Cancel') }}
+                    {{ __('orders::template_set_type.actions.cancel') }}
                 </button>
                 <button class="h-9 px-4 rounded-lg bg-black hover:bg-black/80 text-sm font-semibold text-white transition-colors disabled:opacity-50"
                         wire:click="saveUiConfig"
                         wire:loading.attr="disabled"
                 >
-                    {{ __('Save UI config') }}
+                    {{ __('orders::template_set_type.actions.save_ui_config') }}
                 </button>
             </div>
         </div>

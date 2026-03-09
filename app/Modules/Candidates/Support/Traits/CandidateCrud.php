@@ -59,17 +59,17 @@ trait CandidateCrud
     protected function validationAttributes()
     {
         return [
-            'candidate.name' => __('Name'),
-            'candidate.surname' => __('Surname'),
-            'candidate.patronymic' => __('Patronymic'),
-            'candidate.structure_id' => __('Structure'),
-            'candidate.birthdate' => __('Birthdate'),
-            'candidate.gender' => __('Gender'),
-            'candidate.height' => __('Height'),
-            'candidate.knowledge_test' => __('Knowledge test'),
-            'candidate.physical_fitness_exam' => __('Physical fitness'),
-            'candidate.attitude_to_military' => __('Attitude to military'),
-            'candidate.status_id' => __('Status'),
+            'candidate.name' => __('candidates::common.labels.name'),
+            'candidate.surname' => __('candidates::common.labels.surname'),
+            'candidate.patronymic' => __('candidates::common.labels.patronymic'),
+            'candidate.structure_id' => __('candidates::common.labels.structure'),
+            'candidate.birthdate' => __('candidates::common.labels.birthdate'),
+            'candidate.gender' => __('candidates::common.labels.gender'),
+            'candidate.height' => __('candidates::common.labels.height'),
+            'candidate.knowledge_test' => __('candidates::common.labels.knowledge_test'),
+            'candidate.physical_fitness_exam' => __('candidates::common.labels.physical_fitness'),
+            'candidate.attitude_to_military' => __('candidates::common.labels.attitude_to_military'),
+            'candidate.status_id' => __('candidates::common.labels.status'),
         ];
     }
 
@@ -79,10 +79,10 @@ trait CandidateCrud
 
         if (! empty($this->candidateModel)) {
             $this->fillCandidate();
-            $this->title = __('Edit candidate') . ' - ' . "<span class='text-teal-500'>{$this->candidateModelData->fullname}</span>";
+            $this->title = __('candidates::common.titles.edit_candidate') . ' - ' . "<span class='text-teal-500'>{$this->candidateModelData->fullname}</span>";
         } else {
             $this->authorize('create', Candidate::class);
-            $this->title = __('Add candidate');
+            $this->title = __('candidates::common.titles.add_candidate');
             $this->candidate = [
               'structure_id' => null,
               'status_id' => null

@@ -5,39 +5,39 @@
     <thead>
         <tr>
             <th>#</th>
-            <th>{{ __('Fullname') }}</th>
-            <th>{{ __('Structure') }}</th>
-            <th>{{ __('Height') }}</th>
+            <th>{{ __('candidates::common.labels.fullname') }}</th>
+            <th>{{ __('candidates::common.labels.structure') }}</th>
+            <th>{{ __('candidates::common.labels.height') }}</th>
             @if ($isMilitaryMode)
-                <th>{{ __('Military service') }}</th>
+                <th>{{ __('candidates::common.labels.military_service') }}</th>
             @endif
-            <th>{{ __('Phone') }}</th>
-            <th>{{ __('Knowledge test') }}</th>
+            <th>{{ __('candidates::common.labels.phone') }}</th>
+            <th>{{ __('candidates::common.labels.knowledge_test') }}</th>
             @if ($isMilitaryMode)
-                <th>{{ __('Physical fitness exam') }}</th>
+                <th>{{ __('candidates::common.labels.physical_fitness_exam') }}</th>
             @endif
-            <th>{{ __('Research result') }}</th>
-            <th>{{ __('Research date') }}</th>
-            <th>{{ __('Discrediting information') }}</th>
-            <th>{{ __('Examination date') }}</th>
-            <th>{{ __('Appeal date') }}</th>
-            <th>{{ __('Application date') }}</th>
-            <th>{{ __('Requisition date') }}</th>
-            <th>{{ __('Initial documents') }}</th>
-            <th>{{ __('Documents completeness') }}</th>
+            <th>{{ __('candidates::common.labels.research_result') }}</th>
+            <th>{{ __('candidates::common.labels.research_date') }}</th>
+            <th>{{ __('candidates::common.labels.discrediting_information') }}</th>
+            <th>{{ __('candidates::common.labels.examination_date') }}</th>
+            <th>{{ __('candidates::common.labels.appeal_date') }}</th>
+            <th>{{ __('candidates::common.labels.application_date') }}</th>
+            <th>{{ __('candidates::common.labels.requisition_date') }}</th>
+            <th>{{ __('candidates::common.labels.initial_documents') }}</th>
+            <th>{{ __('candidates::common.labels.documents_completeness') }}</th>
             @if ($isMilitaryMode)
-                <th>{{ __('Attitude to military') }}</th>
+                <th>{{ __('candidates::common.labels.attitude_to_military') }}</th>
             @endif
-            <th>{{ __('Characteristics') }}</th>
+            <th>{{ __('candidates::common.labels.characteristics') }}</th>
             @if ($isMilitaryMode)
-                <th>{{ __('HHK date') }}</th>
-                <th>{{ __('HHK result') }}</th>
-                <th>{{ __('Useless info') }}</th>
+                <th>{{ __('candidates::common.labels.hhk_date') }}</th>
+                <th>{{ __('candidates::common.labels.hhk_result') }}</th>
+                <th>{{ __('candidates::common.labels.useless_info') }}</th>
             @endif
-            <th>{{ __('Note') }}</th>
-            <th>{{ __('Presented by') }}</th>
-            <th>{{ __('Created date') }}</th>
-            <th>{{ __('Status') }}</th>
+            <th>{{ __('candidates::common.labels.note') }}</th>
+            <th>{{ __('candidates::common.labels.presented_by') }}</th>
+            <th>{{ __('candidates::common.labels.created_date') }}</th>
+            <th>{{ __('candidates::common.labels.status') }}</th>
         </tr>
     </thead>
     <tbody>

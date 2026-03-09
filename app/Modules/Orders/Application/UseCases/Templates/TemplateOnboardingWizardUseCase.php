@@ -67,7 +67,7 @@ class TemplateOnboardingWizardUseCase
             ->get(['id', 'name']);
 
         if ($types->isEmpty()) {
-            throw new RuntimeException(__('No order types found for selected template.'));
+            throw new RuntimeException(__('orders::template_lifecycle.messages.no_order_types_for_selected_template'));
         }
 
         $created = 0;
@@ -86,7 +86,7 @@ class TemplateOnboardingWizardUseCase
             OrderTemplateSet::query()->create([
                 'order_type_id' => (int) $type->id,
                 'name' => (string) $type->name,
-                'description' => __('Auto-created from onboarding wizard'),
+                'description' => __('orders::template_lifecycle.defaults.auto_created_from_onboarding_wizard'),
             ]);
             $created++;
         }
@@ -102,7 +102,7 @@ class TemplateOnboardingWizardUseCase
     {
         $context = $this->resolveTypeContext($orderTypeId);
         if (! $context) {
-            throw new RuntimeException(__('Order type not found.'));
+            throw new RuntimeException(__('orders::template_lifecycle.messages.order_type_not_found'));
         }
 
         $set = $context->templateSet;
@@ -110,7 +110,7 @@ class TemplateOnboardingWizardUseCase
             $set = OrderTemplateSet::query()->create([
                 'order_type_id' => (int) $context->id,
                 'name' => (string) $context->name,
-                'description' => __('Auto-created from onboarding wizard'),
+                'description' => __('orders::template_lifecycle.defaults.auto_created_from_onboarding_wizard'),
             ]);
         }
 
@@ -165,7 +165,7 @@ class TemplateOnboardingWizardUseCase
             ->find($versionId);
 
         if (! $version || ! $version->templateSet || (int) $version->templateSet->order_type_id !== $orderTypeId) {
-            throw new RuntimeException(__('Selected version is invalid for this order type.'));
+            throw new RuntimeException(__('orders::template_lifecycle.messages.selected_version_invalid_for_order_type'));
         }
 
         $templateName = (string) ($version->template_name ?: $version->templateSet->name ?: 'template');
@@ -212,7 +212,7 @@ class TemplateOnboardingWizardUseCase
             ->find($versionId);
 
         if (! $version || ! $version->templateSet || (int) $version->templateSet->order_type_id !== $orderTypeId) {
-            throw new RuntimeException(__('Selected version is invalid.'));
+            throw new RuntimeException(__('orders::template_lifecycle.messages.selected_version_invalid'));
         }
 
         $result = $this->metadataSyncService->sync(
@@ -252,7 +252,7 @@ class TemplateOnboardingWizardUseCase
             ->find($versionId);
 
         if (! $version) {
-            throw new RuntimeException(__('Version not found.'));
+            throw new RuntimeException(__('orders::template_lifecycle.messages.version_not_found'));
         }
 
         $mappings = $version->mappings
@@ -280,7 +280,7 @@ class TemplateOnboardingWizardUseCase
         ?int $actorId
     ): array {
         if (! $previewSucceeded || ! $previewOutputPath || ! is_file($previewOutputPath)) {
-            throw new RuntimeException(__('Run preview render before publishing.'));
+            throw new RuntimeException(__('orders::template_lifecycle.messages.run_preview_before_publishing'));
         }
 
         /** @var OrderTemplateVersion|null $version */
@@ -289,7 +289,7 @@ class TemplateOnboardingWizardUseCase
             ->find($versionId);
 
         if (! $version || ! $version->templateSet || (int) $version->templateSet->order_type_id !== $orderTypeId) {
-            throw new RuntimeException(__('Selected version is invalid for this order type.'));
+            throw new RuntimeException(__('orders::template_lifecycle.messages.selected_version_invalid_for_order_type'));
         }
 
         if ($coverage === []) {
@@ -297,16 +297,16 @@ class TemplateOnboardingWizardUseCase
         }
 
         if (empty($coverage['inspectable'])) {
-            throw new RuntimeException(__('Template coverage is not inspectable. Upload DOCX first.'));
+            throw new RuntimeException(__('orders::template_lifecycle.messages.template_coverage_not_inspectable'));
         }
 
         if (! empty($coverage['missing_placeholders'])) {
-            throw new RuntimeException(__('Cannot publish while missing mappings exist.'));
+            throw new RuntimeException(__('orders::template_lifecycle.messages.cannot_publish_missing_mappings_exist'));
         }
 
         $published = $this->lifecycleService->publishVersion($versionId, $actorId);
         if (! $published) {
-            throw new RuntimeException(__('Could not publish selected version.'));
+            throw new RuntimeException(__('orders::template_lifecycle.messages.could_not_publish_selected_version'));
         }
 
         return [
@@ -330,7 +330,7 @@ class TemplateOnboardingWizardUseCase
             ->find($versionId);
 
         if (! $version || ! $version->templateSet || (int) $version->templateSet->order_type_id !== $orderTypeId) {
-            throw new RuntimeException(__('Selected version is invalid.'));
+            throw new RuntimeException(__('orders::template_lifecycle.messages.selected_version_invalid'));
         }
 
         $coverage = $this->coverageService->analyzeForVersion(
@@ -346,11 +346,11 @@ class TemplateOnboardingWizardUseCase
         );
 
         if (empty($coverage['inspectable'])) {
-            throw new RuntimeException(__('Template coverage is unavailable. Upload DOCX and run coverage first.'));
+            throw new RuntimeException(__('orders::template_lifecycle.messages.template_coverage_unavailable'));
         }
 
         if (! empty($coverage['missing_placeholders'])) {
-            throw new RuntimeException(__('Cannot run preview. Missing mappings: :placeholders', [
+            throw new RuntimeException(__('orders::template_lifecycle.messages.cannot_run_preview_missing_mappings', [
                 'placeholders' => implode(', ', $coverage['missing_placeholders']),
             ]));
         }

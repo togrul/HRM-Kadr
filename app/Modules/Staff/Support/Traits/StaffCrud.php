@@ -51,11 +51,11 @@ trait StaffCrud
     protected function validationAttributes(): array
     {
         return [
-            'staff.*.structure_id' => __('Structure'),
-            'staff.*.position_id' => __('Position'),
-            'staff.*.total' => __('Total'),
-            'staff.*.filled' => __('Filled'),
-            'staff.*.vacant' => __('Vacant'),
+            'staff.*.structure_id' => __('staff::common.fields.structure'),
+            'staff.*.position_id' => __('staff::common.fields.position'),
+            'staff.*.total' => __('staff::common.fields.total'),
+            'staff.*.filled' => __('staff::common.fields.filled'),
+            'staff.*.vacant' => __('staff::common.fields.vacant'),
         ];
     }
 

@@ -26,7 +26,7 @@ class AddStaff extends Component
         }
 
         if (! empty($this->checkStructure())) {
-            $this->dispatch('staffScheduleError', __('This structure has already been added!'));
+            $this->dispatch('staffScheduleError', __('staff::common.messages.structure_exists'));
 
             return;
         }
@@ -44,13 +44,13 @@ class AddStaff extends Component
             StaffSchedule::create($data);
         }
 
-        $this->dispatch('staffAdded', __('Staff was added successfully!'));
+        $this->dispatch('staffAdded', __('staff::common.messages.staff_added'));
     }
 
     public function mount()
     {
         $this->authorize('create', StaffSchedule::class);
-        $this->title = __('New staff');
+        $this->title = __('staff::common.titles.new_staff');
         $this->structureId = null;
     }
 }

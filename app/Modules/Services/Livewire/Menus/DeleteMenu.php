@@ -56,7 +56,7 @@ class DeleteMenu extends Component
 
         $this->menuId = null;
 
-        $this->dispatch('menuWasDeleted', __('Menu was deleted!'));
+        $this->dispatch('menuWasDeleted', __('services::menus.messages.deleted'));
     }
 
     public function render()

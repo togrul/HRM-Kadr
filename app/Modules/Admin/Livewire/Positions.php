@@ -33,9 +33,9 @@ class Positions extends Component
     protected function validationAttributes(): array
     {
         return [
-            'form.id' => __('ID'),
-            'form.name' => __('Name'),
-            'form.rank_category_id' => __('Rank category'),
+            'form.id' => __('admin::references.fields.id'),
+            'form.name' => __('admin::references.fields.name'),
+            'form.rank_category_id' => __('admin::references.fields.rank_category'),
         ];
     }
 

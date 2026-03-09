@@ -58,6 +58,10 @@
         "ci:blaze-safe-lint": [
             "@php artisan views:blaze-safe-lint --strict"
         ],
+        "ci:translations": [
+            "@php artisan translations:lint",
+            "@php artisan test tests/Unit/Architecture/TranslationCatalogLintTest.php tests/Unit/Architecture/ModuleTranslationNamespaceTest.php tests/Unit/Services/ServicesPermissionTranslationMapTest.php"
+        ],
         "ci:ui-icon-smoke": [
             "@php artisan test tests/Unit/Architecture/CriticalActionIconsSmokeTest.php"
         ],

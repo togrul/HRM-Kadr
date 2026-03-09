@@ -86,7 +86,7 @@
               {{ $modalConfirmButtonText }}
             </button>
             <button @click="openDeleteModal = false" type="button" class="inline-flex justify-center w-full px-4 py-2 mt-3 text-base font-normal text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-               {{ __('Cancel') }}
+               {{ __('ui::common.actions.cancel') }}
             </button>
           </div>
 

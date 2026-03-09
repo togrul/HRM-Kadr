@@ -1,7 +1,7 @@
 <div class="flex h-full min-h-0 flex-col overflow-hidden rounded-[18px] border border-zinc-200 bg-white">
     <div class="flex items-center justify-between border-b border-zinc-200 px-3 py-3">
         <h3 class="text-base font-medium tracking-tight text-zinc-600">
-            {{ __('Structure') }}
+            {{ __('structure::common.titles.structure') }}
         </h3>
 
         <button
@@ -26,7 +26,7 @@
     <div class="mt-auto border-t border-zinc-200 bg-zinc-50 px-3 py-3">
         <a wire:navigate href="{{ route('admin.structures') }}" class="inline-flex items-center gap-2 text-sm font-medium text-zinc-500 transition-colors hover:text-zinc-700">
             <x-icons.settings-icon size="w-4 h-4" color="text-zinc-500" hover="text-zinc-700" />
-            <span>{{ __('Manage hierarchy') }}</span>
+            <span>{{ __('structure::common.actions.manage_hierarchy') }}</span>
         </a>
     </div>
 </div>

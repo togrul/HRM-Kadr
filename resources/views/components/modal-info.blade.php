@@ -89,7 +89,7 @@
             </div>
             <div class="px-4 py-3 bg-gray-50 sm:px-6 sm:flex sm:flex-row-reverse rounded-lg">
                 <button @click="openDeleteModal = false" type="button" class="inline-flex justify-center w-full px-4 py-2 mt-3 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-xl shadow-sm hover:bg-gray-50  sm:mt-0 sm:ml-3 sm:w-auto">
-                    {{ __('Cancel') }}
+                    {{ __('ui::common.actions.cancel') }}
                 </button>
             </div>
 

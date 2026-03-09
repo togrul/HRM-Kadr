@@ -1,48 +1,64 @@
+@php
+    $baselineSourceLabels = [
+        'none' => __('attendance::manual_entries.sources.none'),
+        'manual_override' => __('attendance::manual_entries.sources.manual_override'),
+        'explicit_shift' => __('attendance::manual_entries.sources.explicit_shift'),
+        'assignment_shift' => __('attendance::manual_entries.sources.assignment_shift'),
+        'default_shift' => __('attendance::manual_entries.sources.default_shift'),
+    ];
+    $queueStatusLabels = [
+        'pending' => __('attendance::manual_entries.statuses.pending'),
+        'approved' => __('attendance::manual_entries.statuses.approved'),
+        'rejected' => __('attendance::manual_entries.statuses.rejected'),
+        'all' => __('attendance::manual_entries.statuses.all'),
+    ];
+@endphp
+
 <div class="space-y-4">
     @unless($embedded)
-        <x-surface-card :title="__('Manual Attendance Entry')" icon="icons.pending-icon">
+        <x-surface-card :title="__('attendance::manual_entries.titles.page')" icon="icons.pending-icon">
             <p class="text-sm text-zinc-500">
-                {{ __('Daily manual attendance input screen for organizations without a device system.') }}
+                {{ __('attendance::manual_entries.descriptions.page') }}
             </p>
         </x-surface-card>
     @endunless
 
     @if($selectedStructureLabel)
         <div class="flex flex-wrap items-center gap-2 rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 text-xs text-blue-700">
-            <x-small-badge mode="sky">{{ __('Structure scope') }}</x-small-badge>
-            <span>{{ __('Showing personnel from the selected structure tree only.') }}</span>
+            <x-small-badge mode="sky">{{ __('attendance::manual_entries.labels.structure_scope') }}</x-small-badge>
+            <span>{{ __('attendance::manual_entries.descriptions.scope') }}</span>
             <span class="font-medium">{{ $selectedStructureLabel }}</span>
         </div>
     @endif
 
     @if($canWrite)
-        <x-surface-card :title="__('Manual entry form')">
+        <x-surface-card :title="__('attendance::manual_entries.titles.form')">
             <div class="mb-4 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-3">
                 <div class="grid gap-3 lg:grid-cols-[1.9fr_0.8fr]">
                     <div class="space-y-1">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400">{{ __('Input flow') }}</p>
-                        <p class="text-sm text-zinc-500">{{ __('Pick personnel, set day and times, then let the system calculate metrics from shift rules or enter them manually.') }}</p>
+                        <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400">{{ __('attendance::manual_entries.labels.input_flow') }}</p>
+                        <p class="text-sm text-zinc-500">{{ __('attendance::manual_entries.descriptions.input_flow') }}</p>
                     </div>
 
                     <div class="rounded-xl border border-zinc-200 bg-white px-3 py-3 shadow-sm">
                         <div class="flex h-full flex-col justify-between gap-3">
                             <div class="space-y-0.5">
-                                <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400">{{ __('Metric input mode') }}</p>
+                                <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400">{{ __('attendance::manual_entries.labels.metric_input_mode') }}</p>
                                 <p class="text-xs leading-5 text-zinc-500">
-                                    {{ __('Controls whether attendance metrics are auto-calculated from shift rules or entered manually.') }}
+                                    {{ __('attendance::manual_entries.descriptions.metric_mode') }}
                                 </p>
                             </div>
 
                             <div class="flex items-center justify-between gap-3 rounded-lg bg-zinc-50 px-3 py-2">
                                 <div class="min-w-0">
-                                    <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('Current mode') }}</p>
+                                    <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('attendance::manual_entries.labels.current_mode') }}</p>
                                     <p class="text-sm font-medium text-zinc-700">
-                                        {{ $manualMetricOverride ? __('Manual override') : __('Automatic calculation') }}
+                                        {{ $manualMetricOverride ? __('attendance::manual_entries.modes.manual_override') : __('attendance::manual_entries.modes.automatic_calculation') }}
                                     </p>
                                 </div>
 
                                 <x-small-badge :mode="$manualMetricOverride ? 'amber' : 'green'">
-                                    {{ $manualMetricOverride ? __('Manual override') : __('Automatic calculation') }}
+                                    {{ $manualMetricOverride ? __('attendance::manual_entries.modes.manual_override') : __('attendance::manual_entries.modes.automatic_calculation') }}
                                 </x-small-badge>
                             </div>
                         </div>
@@ -53,14 +69,14 @@
             <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
                 <div>
                     <x-ui.search-input-select
-                        :label="__('Personnel')"
+                        :label="__('attendance::manual_entries.labels.personnel')"
                         searchModel="personnelSearch"
                         :selected="$selectedPersonnel"
                         displayKey="fullname"
                         idKey="tabel_no"
                         onClear="clearPersonnel"
                         clearField="tabel_no"
-                        :placeholder="__('Search personnel to create a manual entry')"
+                        :placeholder="__('attendance::manual_entries.placeholders.search_personnel')"
                     >
                         @forelse($personnelResults as $personnel)
                             <button
@@ -78,14 +94,14 @@
                             </button>
                         @empty
                             <span class="mx-auto text-sm font-medium text-slate-500">
-                                {{ __('Search personnel to create a manual entry') }}
+                                {{ __('attendance::manual_entries.placeholders.search_personnel') }}
                             </span>
                         @endforelse
                     </x-ui.search-input-select>
                     @error('form.tabel_no') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
                 </div>
                 <div>
-                    <x-label for="manual-form-date">{{ __('Date') }}</x-label>
+                    <x-label for="manual-form-date">{{ __('attendance::manual_entries.labels.date') }}</x-label>
                     <input
                         id="manual-form-date"
                         wire:model.live="form.date"
@@ -95,7 +111,7 @@
                     @error('form.date') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
                 </div>
                 <div>
-                    <x-label for="manual-form-check-in">{{ __('Check-in time') }}</x-label>
+                    <x-label for="manual-form-check-in">{{ __('attendance::manual_entries.labels.check_in_time') }}</x-label>
                     <input
                         id="manual-form-check-in"
                         wire:model.live="form.check_in_at"
@@ -105,7 +121,7 @@
                     @error('form.check_in_at') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
                 </div>
                 <div>
-                    <x-label for="manual-form-check-out">{{ __('Check-out time') }}</x-label>
+                    <x-label for="manual-form-check-out">{{ __('attendance::manual_entries.labels.check_out_time') }}</x-label>
                     <input
                         id="manual-form-check-out"
                         wire:model.live="form.check_out_at"
@@ -115,26 +131,26 @@
                     @error('form.check_out_at') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
                 </div>
                 <div>
-                    <x-label for="manual-form-shift-source">{{ __('Shift source') }}</x-label>
+                    <x-label for="manual-form-shift-source">{{ __('attendance::manual_entries.labels.shift_source') }}</x-label>
                     <select
                         id="manual-form-shift-source"
                         wire:model.live="form.shift_source_mode"
                         class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500"
                     >
-                        <option value="auto">{{ __('Auto (assignment/default shift)') }}</option>
-                        <option value="explicit">{{ __('Selected shift') }}</option>
+                        <option value="auto">{{ __('attendance::manual_entries.options.shift_source_auto') }}</option>
+                        <option value="explicit">{{ __('attendance::manual_entries.options.shift_source_explicit') }}</option>
                     </select>
                     @error('form.shift_source_mode') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
                 </div>
                 <div>
-                    <x-label for="manual-form-explicit-shift">{{ __('Calculation shift') }}</x-label>
+                    <x-label for="manual-form-explicit-shift">{{ __('attendance::manual_entries.labels.calculation_shift') }}</x-label>
                     <select
                         id="manual-form-explicit-shift"
                         wire:model.live="form.explicit_shift_id"
                         @disabled($form['shift_source_mode'] !== 'explicit')
                         class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                        <option value="">{{ __('Select shift') }}</option>
+                        <option value="">{{ __('attendance::manual_entries.options.select_shift') }}</option>
                         @foreach($availableShifts as $shift)
                             <option value="{{ $shift->id }}">{{ $shift->name }}</option>
                         @endforeach
@@ -146,8 +162,8 @@
                         <div class="rounded-xl border border-zinc-200 bg-zinc-50 p-3">
                             <div class="mb-3 flex items-center justify-between gap-2">
                                 <div>
-                                    <p class="text-sm font-semibold text-zinc-800">{{ __('Selected personnel') }}</p>
-                                    <p class="text-xs text-zinc-500">{{ __('The manual entry and calculation scope is bound to this personnel record.') }}</p>
+                                    <p class="text-sm font-semibold text-zinc-800">{{ __('attendance::manual_entries.labels.selected_personnel') }}</p>
+                                    <p class="text-xs text-zinc-500">{{ __('attendance::manual_entries.descriptions.selected_personnel') }}</p>
                                 </div>
                             </div>
 
@@ -167,7 +183,7 @@
                                 </div>
                             @else
                                 <div class="rounded-xl border border-dashed border-zinc-200 bg-white px-3 py-4 text-sm text-zinc-500">
-                                    {{ __('Search and select personnel to continue with manual attendance input.') }}
+                                    {{ __('attendance::manual_entries.descriptions.search_and_select_personnel') }}
                                 </div>
                             @endif
                         </div>
@@ -175,8 +191,8 @@
                         <div class="rounded-xl border border-zinc-200 bg-zinc-50 p-3">
                             <div class="mb-3 flex items-center justify-between gap-2">
                                 <div>
-                                    <p class="text-sm font-semibold text-zinc-800">{{ __('Metric mode') }}</p>
-                                    <p class="text-xs text-zinc-500">{{ __('Switch between auto-calculated values and fully manual metric entry.') }}</p>
+                                    <p class="text-sm font-semibold text-zinc-800">{{ __('attendance::manual_entries.labels.metric_mode') }}</p>
+                                    <p class="text-xs text-zinc-500">{{ __('attendance::manual_entries.descriptions.metric_switch') }}</p>
                                 </div>
                             </div>
 
@@ -187,20 +203,20 @@
                                     wire:model.live="manualMetricOverride"
                                     class="h-4 w-4 rounded border-zinc-300 text-blue-600 focus:ring-blue-500"
                                 />
-                                <span>{{ __('Manual override') }}</span>
+                                <span>{{ __('attendance::manual_entries.modes.manual_override') }}</span>
                             </label>
 
                             <p class="mt-3 text-xs text-zinc-500">
-                                {{ __('If check-in and check-out are entered, worked/late/early values are calculated automatically using the assigned shift or global default shift.') }}
+                                {{ __('attendance::manual_entries.descriptions.metric_auto_fill') }}
                             </p>
                             @if(!$manualMetricOverride)
                                 <p class="mt-1 text-xs text-zinc-500">
-                                    {{ __('To enter these metrics manually, enable manual override.') }}
+                                    {{ __('attendance::manual_entries.descriptions.enable_manual_override') }}
                                 </p>
                             @endif
                             @if($autoCalculatedPreview)
                                 <p class="mt-1 text-xs font-medium text-emerald-600">
-                                    {{ __('Worked, overtime, late and early leave values were auto-filled from the entered times.') }}
+                                    {{ __('attendance::manual_entries.descriptions.auto_filled') }}
                                 </p>
                             @endif
                         </div>
@@ -213,8 +229,8 @@
                             <div class="rounded-xl border border-zinc-200 bg-zinc-50 p-3">
                                 <div class="mb-3 flex items-center justify-between gap-2">
                                     <div>
-                                        <p class="text-sm font-semibold text-zinc-800">{{ __('Shift baseline') }}</p>
-                                        <p class="text-xs text-zinc-500">{{ __('Review which shift baseline is used before saving the manual entry.') }}</p>
+                                        <p class="text-sm font-semibold text-zinc-800">{{ __('attendance::manual_entries.labels.shift_baseline') }}</p>
+                                        <p class="text-xs text-zinc-500">{{ __('attendance::manual_entries.descriptions.shift_baseline') }}</p>
                                     </div>
                                 </div>
 
@@ -222,13 +238,13 @@
                                     <div class="rounded-xl border border-zinc-200 bg-white p-3">
                                         <div class="flex flex-wrap items-center justify-between gap-3">
                                             <div>
-                                                <p class="text-sm font-semibold text-zinc-900">{{ __('Auto calculation baseline') }}</p>
-                                                <p class="text-xs text-zinc-500">{{ __('The system first checks personnel assignment, then falls back to the global default shift.') }}</p>
+                                                <p class="text-sm font-semibold text-zinc-900">{{ __('attendance::manual_entries.labels.auto_calculation_baseline') }}</p>
+                                                <p class="text-xs text-zinc-500">{{ __('attendance::manual_entries.descriptions.auto_baseline') }}</p>
                                             </div>
 
                                             @if($baselineContext['baseline_label'])
                                                 <div class="flex flex-col items-start gap-1">
-                                                    <x-small-badge mode="blue">{{ __('Detected source') }}: {{ __($baselineContext['baseline_source']) }}</x-small-badge>
+                                                    <x-small-badge mode="blue">{{ __('attendance::manual_entries.labels.detected_source') }}: {{ $baselineSourceLabels[$baselineContext['baseline_source']] ?? $baselineContext['baseline_source'] }}</x-small-badge>
                                                     <x-small-badge mode="sky">{{ $baselineContext['baseline_label'] }}</x-small-badge>
                                                 </div>
                                             @endif
@@ -237,9 +253,9 @@
                                         <div class="mt-3 grid gap-3 md:grid-cols-2">
                                             <div class="rounded-xl border border-zinc-200 bg-zinc-50 p-3">
                                                 <div class="flex items-center justify-between gap-2">
-                                                    <p class="text-sm font-semibold text-zinc-800">{{ __('Assigned shift') }}</p>
+                                                    <p class="text-sm font-semibold text-zinc-800">{{ __('attendance::manual_entries.labels.assigned_shift') }}</p>
                                                     @if($selectedPersonnelActiveAssignment?->shift)
-                                                        <x-small-badge mode="green">{{ __('Active assignment') }}</x-small-badge>
+                                                        <x-small-badge mode="green">{{ __('attendance::manual_entries.labels.active_assignment') }}</x-small-badge>
                                                     @endif
                                                 </div>
 
@@ -248,20 +264,20 @@
                                                         <x-small-badge mode="sky">{{ $selectedPersonnelActiveAssignment->shift->name }}</x-small-badge>
                                                         <span>
                                                             {{ $selectedPersonnelActiveAssignment->shift->start_time }} - {{ $selectedPersonnelActiveAssignment->shift->end_time }}
-                                                            • {{ __('Break') }}: {{ $selectedPersonnelActiveAssignment->shift->break_minutes }} {{ __('min') }}
+                                                            • {{ __('attendance::manual_entries.labels.break') }}: {{ $selectedPersonnelActiveAssignment->shift->break_minutes }} {{ __('attendance::manual_entries.labels.min') }}
                                                         </span>
-                                                        <span>{{ __('This personnel-specific shift will be used for automatic late/early/overtime calculation.') }}</span>
+                                                        <span>{{ __('attendance::manual_entries.descriptions.assignment_shift') }}</span>
                                                     </div>
                                                 @else
-                                                    <p class="mt-2 text-xs text-zinc-500">{{ __('No active shift assignment') }}</p>
+                                                    <p class="mt-2 text-xs text-zinc-500">{{ __('attendance::manual_entries.descriptions.no_active_assignment') }}</p>
                                                 @endif
                                             </div>
 
                                             <div class="rounded-xl border border-zinc-200 bg-zinc-50 p-3">
                                                 <div class="flex items-center justify-between gap-2">
-                                                    <p class="text-sm font-semibold text-zinc-800">{{ __('Default shift fallback') }}</p>
+                                                    <p class="text-sm font-semibold text-zinc-800">{{ __('attendance::manual_entries.labels.default_shift_fallback') }}</p>
                                                     @if($currentDefaultShift)
-                                                        <x-small-badge mode="blue">{{ __('Configured') }}</x-small-badge>
+                                                        <x-small-badge mode="blue">{{ __('attendance::manual_entries.labels.configured') }}</x-small-badge>
                                                     @endif
                                                 </div>
 
@@ -270,20 +286,20 @@
                                                         <x-small-badge mode="sky">{{ $currentDefaultShift->name }}</x-small-badge>
                                                         <span>
                                                             {{ $currentDefaultShift->start_time }} - {{ $currentDefaultShift->end_time }}
-                                                            • {{ __('Break') }}: {{ $currentDefaultShift->break_minutes }} {{ __('min') }}
+                                                            • {{ __('attendance::manual_entries.labels.break') }}: {{ $currentDefaultShift->break_minutes }} {{ __('attendance::manual_entries.labels.min') }}
                                                         </span>
-                                                        <span>{{ __('This shift is used when personnel do not have an active assignment.') }}</span>
+                                                        <span>{{ __('attendance::manual_entries.descriptions.default_shift_usage') }}</span>
                                                     </div>
                                                 @else
-                                                    <p class="mt-2 text-xs text-zinc-500">{{ __('No default shift configured') }}</p>
+                                                    <p class="mt-2 text-xs text-zinc-500">{{ __('attendance::manual_entries.descriptions.no_default_shift') }}</p>
                                                 @endif
                                             </div>
                                         </div>
 
                                         @if(! $baselineContext['baseline_label'])
                                             <div class="mt-3 flex items-start gap-2 rounded-xl border border-amber-100 bg-amber-50 px-3 py-2 text-sm text-amber-700">
-                                                <x-small-badge mode="red">{{ __('No baseline shift available') }}</x-small-badge>
-                                                <span>{{ __('To calculate planned/late/early/overtime values, either assign a shift to the personnel, choose Selected shift, or configure a default shift in Settings.') }}</span>
+                                                <x-small-badge mode="red">{{ __('attendance::manual_entries.labels.shift_required') }}</x-small-badge>
+                                                <span>{{ __('attendance::manual_entries.descriptions.no_baseline') }}</span>
                                             </div>
                                         @endif
                                     </div>
@@ -292,21 +308,21 @@
                                         @if($selectedShiftPreview)
                                             <div class="flex flex-wrap items-center justify-between gap-3">
                                                 <div>
-                                                    <p class="text-sm font-semibold text-blue-900">{{ __('Selected shift for calculation') }}</p>
-                                                    <p class="text-xs text-blue-700">{{ __('This selected shift is used instead of assignment/default shift.') }}</p>
+                                                    <p class="text-sm font-semibold text-blue-900">{{ __('attendance::manual_entries.labels.selected_shift_for_calculation') }}</p>
+                                                    <p class="text-xs text-blue-700">{{ __('attendance::manual_entries.descriptions.selected_shift') }}</p>
                                                 </div>
                                                 <div class="flex flex-col items-start gap-1">
                                                     <x-small-badge mode="sky">{{ $selectedShiftPreview->name }}</x-small-badge>
                                                     <span class="text-xs text-blue-700">
                                                         {{ $selectedShiftPreview->start_time }} - {{ $selectedShiftPreview->end_time }}
-                                                        • {{ __('Break') }}: {{ $selectedShiftPreview->break_minutes }} {{ __('min') }}
+                                                        • {{ __('attendance::manual_entries.labels.break') }}: {{ $selectedShiftPreview->break_minutes }} {{ __('attendance::manual_entries.labels.min') }}
                                                     </span>
                                                 </div>
                                             </div>
                                         @else
                                             <div class="flex items-center gap-2 text-sm text-amber-700">
-                                                <x-small-badge>{{ __('Shift required') }}</x-small-badge>
-                                                <span>{{ __('Select a shift to calculate planned/late/early/overtime values.') }}</span>
+                                                <x-small-badge>{{ __('attendance::manual_entries.labels.shift_required') }}</x-small-badge>
+                                                <span>{{ __('attendance::manual_entries.descriptions.select_shift') }}</span>
                                             </div>
                                         @endif
                                     </div>
@@ -318,34 +334,34 @@
                             <div class="rounded-xl border border-zinc-200 bg-zinc-50 p-3">
                                 <div class="mb-3 flex items-center justify-between gap-2">
                                     <div>
-                                        <p class="text-sm font-semibold text-zinc-800">{{ __('Calculated metrics') }}</p>
-                                        <p class="text-xs text-zinc-500">{{ __('Use automatic calculation or manually override attendance metrics before approval.') }}</p>
+                                        <p class="text-sm font-semibold text-zinc-800">{{ __('attendance::manual_entries.labels.calculated_metrics') }}</p>
+                                        <p class="text-xs text-zinc-500">{{ __('attendance::manual_entries.descriptions.calculated_metrics') }}</p>
                                     </div>
                                 </div>
 
                                 <div class="grid grid-cols-1 gap-3">
                                     <div>
-                                        <x-label for="manual-form-worked">{{ __('Worked minutes') }}</x-label>
+                                        <x-label for="manual-form-worked">{{ __('attendance::manual_entries.labels.worked_minutes') }}</x-label>
                                         <x-livewire-input id="manual-form-worked" mode="gray" type="number" min="0" name="form.worked_minutes" wire:model.defer="form.worked_minutes" :readonly="!$manualMetricOverride" />
                                         @error('form.worked_minutes') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
                                     </div>
                                     <div>
-                                        <x-label for="manual-form-overtime">{{ __('Overtime minutes') }}</x-label>
+                                        <x-label for="manual-form-overtime">{{ __('attendance::manual_entries.labels.overtime_minutes') }}</x-label>
                                         <x-livewire-input id="manual-form-overtime" mode="gray" type="number" min="0" name="form.overtime_minutes" wire:model.defer="form.overtime_minutes" :readonly="!$manualMetricOverride" />
                                         @error('form.overtime_minutes') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
                                     </div>
                                     <div>
-                                        <x-label for="manual-form-late">{{ __('Late minutes') }}</x-label>
+                                        <x-label for="manual-form-late">{{ __('attendance::manual_entries.labels.late_minutes') }}</x-label>
                                         <x-livewire-input id="manual-form-late" mode="gray" type="number" min="0" name="form.late_minutes" wire:model.defer="form.late_minutes" :readonly="!$manualMetricOverride" />
                                         @error('form.late_minutes') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
                                     </div>
                                     <div>
-                                        <x-label for="manual-form-early-leave">{{ __('Early leave minutes') }}</x-label>
+                                        <x-label for="manual-form-early-leave">{{ __('attendance::manual_entries.labels.early_leave_minutes') }}</x-label>
                                         <x-livewire-input id="manual-form-early-leave" mode="gray" type="number" min="0" name="form.early_leave_minutes" wire:model.defer="form.early_leave_minutes" :readonly="!$manualMetricOverride" />
                                         @error('form.early_leave_minutes') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
                                     </div>
                                     <div>
-                                        <x-label for="manual-form-absence">{{ __('Absence code') }}</x-label>
+                                        <x-label for="manual-form-absence">{{ __('attendance::manual_entries.labels.absence_code') }}</x-label>
                                         <x-livewire-input id="manual-form-absence" mode="gray" name="form.absence_code" wire:model.defer="form.absence_code" />
                                     </div>
                                 </div>
@@ -355,17 +371,17 @@
                 </div>
 
                 <div class="md:col-span-2">
-                    <x-label for="manual-form-status">{{ __('Approval') }}</x-label>
+                    <x-label for="manual-form-status">{{ __('attendance::manual_entries.labels.approval') }}</x-label>
                     <div id="manual-form-status" class="rounded-xl border border-amber-200 bg-amber-50/70 px-3 py-3">
                         <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                             <div class="space-y-0.5">
-                                <p class="text-sm font-medium text-zinc-800">{{ __('Manual entry always starts as') }}</p>
-                                <p class="text-xs text-zinc-500">{{ __('Saved entries go to approval queue before being posted to attendance ledgers.') }}</p>
+                                <p class="text-sm font-medium text-zinc-800">{{ __('attendance::manual_entries.labels.approval_queue') }}</p>
+                                <p class="text-xs text-zinc-500">{{ __('attendance::manual_entries.descriptions.approval_state') }}</p>
                             </div>
 
                             <span class="inline-flex w-fit items-center gap-2 rounded-full bg-white px-3 py-1 text-xs font-semibold uppercase tracking-wide text-amber-700 shadow-sm">
                                 <span class="h-2 w-2 rounded-full bg-amber-500"></span>
-                                {{ __('pending') }}
+                                {{ __('attendance::manual_entries.statuses.pending') }}
                             </span>
                         </div>
                     </div>
@@ -374,48 +390,48 @@
                     <div class="md:col-span-3">
                         <div class="rounded-xl border border-zinc-200 bg-zinc-50 p-3">
                             <div class="flex flex-wrap items-center justify-between gap-2">
-                                <p class="text-sm font-semibold text-zinc-800">{{ __('Live calculation summary') }}</p>
+                                <p class="text-sm font-semibold text-zinc-800">{{ __('attendance::manual_entries.labels.live_calculation_summary') }}</p>
                                 <p class="text-xs text-zinc-500">
                                     @if($preview['baseline_source'] === 'explicit_shift')
-                                        {{ __('Calculated with selected shift: :shift', ['shift' => $preview['baseline_label']]) }}
+                                        {{ __('attendance::manual_entries.summaries.calculated_with_selected_shift', ['shift' => $preview['baseline_label']]) }}
                                     @elseif($preview['baseline_source'] === 'assignment_shift')
-                                        {{ __('Calculated with assigned shift: :shift', ['shift' => $preview['baseline_label']]) }}
+                                        {{ __('attendance::manual_entries.summaries.calculated_with_assigned_shift', ['shift' => $preview['baseline_label']]) }}
                                     @elseif($preview['baseline_source'] === 'default_shift')
-                                        {{ __('Calculated with default shift: :shift', ['shift' => $preview['baseline_label']]) }}
+                                        {{ __('attendance::manual_entries.summaries.calculated_with_default_shift', ['shift' => $preview['baseline_label']]) }}
                                     @elseif($preview['baseline_source'] === 'manual_override')
-                                        {{ __('Manual override is active.') }}
+                                        {{ __('attendance::manual_entries.descriptions.manual_override_active') }}
                                     @else
-                                        {{ __('No shift baseline found. Worked minutes are calculated from entered times, but late/early/overtime remain 0 until a shift is assigned or a default shift is configured.') }}
+                                        {{ __('attendance::manual_entries.descriptions.no_shift_baseline') }}
                                     @endif
                                 </p>
                             </div>
 
                             <div class="mt-2 flex flex-wrap gap-2 text-[11px] text-zinc-500">
-                                <span class="rounded-full bg-white px-2 py-1 shadow-sm">{{ __('Source') }}: {{ __($preview['baseline_source']) }}</span>
+                                <span class="rounded-full bg-white px-2 py-1 shadow-sm">{{ __('attendance::manual_entries.labels.source') }}: {{ $baselineSourceLabels[$preview['baseline_source']] ?? $preview['baseline_source'] }}</span>
                                 @if($preview['baseline_label'])
-                                    <span class="rounded-full bg-white px-2 py-1 shadow-sm">{{ __('Shift') }}: {{ $preview['baseline_label'] }}</span>
+                                    <span class="rounded-full bg-white px-2 py-1 shadow-sm">{{ __('attendance::manual_entries.labels.shift') }}: {{ $preview['baseline_label'] }}</span>
                                 @endif
                             </div>
 
                             <div class="mt-3 grid grid-cols-2 gap-3 md:grid-cols-5">
                                 <div class="rounded-lg bg-white px-3 py-2 shadow-sm">
-                                    <p class="text-[11px] uppercase tracking-wide text-zinc-500">{{ __('Planned') }}</p>
+                                    <p class="text-[11px] uppercase tracking-wide text-zinc-500">{{ __('attendance::manual_entries.labels.planned') }}</p>
                                     <p class="mt-1 text-lg font-semibold text-zinc-900">{{ $preview['planned_minutes'] }}</p>
                                 </div>
                                 <div class="rounded-lg bg-white px-3 py-2 shadow-sm">
-                                    <p class="text-[11px] uppercase tracking-wide text-zinc-500">{{ __('Worked') }}</p>
+                                    <p class="text-[11px] uppercase tracking-wide text-zinc-500">{{ __('attendance::manual_entries.labels.worked') }}</p>
                                     <p class="mt-1 text-lg font-semibold text-zinc-900">{{ $preview['worked_minutes'] }}</p>
                                 </div>
                                 <div class="rounded-lg bg-white px-3 py-2 shadow-sm">
-                                    <p class="text-[11px] uppercase tracking-wide text-zinc-500">{{ __('Late minutes') }}</p>
+                                    <p class="text-[11px] uppercase tracking-wide text-zinc-500">{{ __('attendance::manual_entries.labels.late_minutes') }}</p>
                                     <p class="mt-1 text-lg font-semibold text-amber-600">{{ $preview['late_minutes'] }}</p>
                                 </div>
                                 <div class="rounded-lg bg-white px-3 py-2 shadow-sm">
-                                    <p class="text-[11px] uppercase tracking-wide text-zinc-500">{{ __('Early leave minutes') }}</p>
+                                    <p class="text-[11px] uppercase tracking-wide text-zinc-500">{{ __('attendance::manual_entries.labels.early_leave_minutes') }}</p>
                                     <p class="mt-1 text-lg font-semibold text-rose-600">{{ $preview['early_leave_minutes'] }}</p>
                                 </div>
                                 <div class="rounded-lg bg-white px-3 py-2 shadow-sm">
-                                    <p class="text-[11px] uppercase tracking-wide text-zinc-500">{{ __('Overtime minutes') }}</p>
+                                    <p class="text-[11px] uppercase tracking-wide text-zinc-500">{{ __('attendance::manual_entries.labels.overtime_minutes') }}</p>
                                     <p class="mt-1 text-lg font-semibold text-emerald-600">{{ $preview['overtime_minutes'] }}</p>
                                 </div>
                             </div>
@@ -424,7 +440,7 @@
                 @endif
 
                 <div class="md:col-span-3">
-                    <x-label for="manual-form-reason">{{ __('Reason') }}</x-label>
+                    <x-label for="manual-form-reason">{{ __('attendance::manual_entries.labels.reason') }}</x-label>
                     <textarea
                         id="manual-form-reason"
                         wire:model.defer="form.reason"
@@ -436,32 +452,32 @@
 
             <div class="mt-4 flex items-center justify-between gap-3 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-3">
                 <div class="space-y-1">
-                    <p class="text-sm font-semibold text-zinc-800">{{ __('Submit manual entry') }}</p>
-                    <p class="text-xs text-zinc-500">{{ __('Saved entries go to approval queue before being posted to attendance ledgers.') }}</p>
+                    <p class="text-sm font-semibold text-zinc-800">{{ __('attendance::manual_entries.labels.submit_manual_entry') }}</p>
+                    <p class="text-xs text-zinc-500">{{ __('attendance::manual_entries.descriptions.approval_state') }}</p>
                 </div>
-                <x-button mode="primary" wire:click="save">{{ __('Save') }}</x-button>
+                <x-button mode="primary" wire:click="save">{{ __('attendance::manual_entries.actions.save') }}</x-button>
             </div>
         </x-surface-card>
     @endif
 
-    <x-surface-card :title="__('Manual override queue')">
+    <x-surface-card :title="__('attendance::manual_entries.titles.queue')">
         <div class="mb-3 space-y-3">
             <div class="space-y-1">
-                <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400">{{ __('Approval queue') }}</p>
-                <p class="text-sm text-zinc-500">{{ __('Review submitted manual attendance entries, approve them or return them with a reject note.') }}</p>
+                <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400">{{ __('attendance::manual_entries.labels.approval_queue') }}</p>
+                <p class="text-sm text-zinc-500">{{ __('attendance::manual_entries.descriptions.queue') }}</p>
             </div>
 
             <div class="w-full sm:w-48">
-                <x-label for="manual-queue-status">{{ __('Status filter') }}</x-label>
+                <x-label for="manual-queue-status">{{ __('attendance::manual_entries.labels.status_filter') }}</x-label>
                 <select
                     id="manual-queue-status"
                     wire:model.live="queueStatus"
                     class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500"
                 >
-                    <option value="pending">{{ __('pending') }}</option>
-                    <option value="approved">{{ __('approved') }}</option>
-                    <option value="rejected">{{ __('rejected') }}</option>
-                    <option value="all">{{ __('all') }}</option>
+                    <option value="pending">{{ __('attendance::manual_entries.statuses.pending') }}</option>
+                    <option value="approved">{{ __('attendance::manual_entries.statuses.approved') }}</option>
+                    <option value="rejected">{{ __('attendance::manual_entries.statuses.rejected') }}</option>
+                    <option value="all">{{ __('attendance::manual_entries.statuses.all') }}</option>
                 </select>
             </div>
         </div>
@@ -470,19 +486,19 @@
             <div class="inline-block min-w-full py-2 align-middle">
                 <div class="overflow-visible">
                     <x-table.tbl :headers="[
-                        __('#'),
-                        __('Personnel'),
-                        __('Date'),
-                        __('Check-in'),
-                        __('Check-out'),
-                        __('Worked'),
-                        __('Overtime'),
-                        __('Late (min)'),
-                        __('Early (min)'),
-                        __('Status'),
-                        __('Entered by'),
-                        __('Approved by'),
-                        __('Actions')
+                        __('personnel::common.labels.number'),
+                        __('attendance::manual_entries.labels.personnel'),
+                        __('attendance::manual_entries.labels.date'),
+                        __('attendance::manual_entries.labels.check_in'),
+                        __('attendance::manual_entries.labels.check_out'),
+                        __('attendance::manual_entries.labels.worked'),
+                        __('attendance::manual_entries.labels.overtime'),
+                        __('attendance::manual_entries.labels.late_minutes'),
+                        __('attendance::manual_entries.labels.early_leave_minutes'),
+                        __('attendance::manual_entries.labels.status'),
+                        __('attendance::manual_entries.labels.entered_by'),
+                        __('attendance::manual_entries.labels.approved_by'),
+                        __('attendance::manual_entries.labels.actions')
                     ]">
                         @forelse($recentEntries as $entry)
                             @php
@@ -516,7 +532,7 @@
                                 <x-table.td>{{ $entry->early_leave_minutes }}</x-table.td>
                                 <x-table.td>
                                     <span class="inline-flex rounded-full px-2 py-1 text-xs uppercase font-medium {{ $statusClass }}">
-                                        {{ __($entry->approval_status) }}
+                                        {{ $queueStatusLabels[$entry->approval_status] ?? $entry->approval_status }}
                                     </span>
                                 </x-table.td>
                                 <x-table.td extraClasses="text-zinc-600">{{ $entry->enteredBy?->name ?? '-' }}</x-table.td>
@@ -527,14 +543,14 @@
                                             <input
                                                 wire:model.defer="rejectNotes.{{ $entry->id }}"
                                                 type="text"
-                                                placeholder="{{ __('Reject note') }}"
+                                                placeholder="{{ __('attendance::manual_entries.placeholders.reject_note') }}"
                                                 class="h-8 w-36 rounded-md border border-zinc-200 bg-zinc-100 px-2 text-xs"
                                             />
                                             <x-button mode="approve" class="!h-8 !px-3 !text-xs uppercase" wire:click="approve({{ $entry->id }})">
-                                                {{ __('Approve') }}
+                                                {{ __('attendance::manual_entries.actions.approve') }}
                                             </x-button>
                                             <x-button mode="reject" class="!h-8 !px-3 !text-xs uppercase" wire:click="reject({{ $entry->id }})">
-                                                {{ __('Reject') }}
+                                                {{ __('attendance::manual_entries.actions.reject') }}
                                             </x-button>
                                         </div>
                                     @else

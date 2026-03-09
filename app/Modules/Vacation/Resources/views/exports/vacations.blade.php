@@ -2,17 +2,17 @@
     <thead>
     <tr>
         <th>#</th>
-        <th>{{__('Structure')}}</th>
-        <th>{{ __('Position') }}</th>
-        <th>{{ __('Fullname') }}</th>
-        <th>{{ __('Location') }}</th>
-        <th>{{ __('Start date') }}</th>
-        <th>{{ __('End date') }}</th>
-        <th>{{ __('Return work date') }}</th>
-        <th>{{ __('Duration') }}</th>
-        <th>{{ __('Order #') }}</th>
-        <th>{{ __('Given by') }}</th>
-        <th>{{ __('Given date') }}</th>
+        <th>{{ __('vacation::common.labels.structure') }}</th>
+        <th>{{ __('personnel::common.labels.position') }}</th>
+        <th>{{ __('vacation::common.labels.fullname') }}</th>
+        <th>{{ __('vacation::common.labels.location') }}</th>
+        <th>{{ __('vacation::common.labels.start_date') }}</th>
+        <th>{{ __('vacation::common.labels.end_date') }}</th>
+        <th>{{ __('vacation::common.labels.return_work_date') }}</th>
+        <th>{{ __('vacation::common.labels.duration') }}</th>
+        <th>{{ __('vacation::common.labels.order_hash') }}</th>
+        <th>{{ __('vacation::common.labels.given_by') }}</th>
+        <th>{{ __('vacation::common.labels.given_date') }}</th>
     </tr>
     </thead>
     <tbody>

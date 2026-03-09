@@ -27,7 +27,7 @@ trait DisposalTrait {
             $disposalData
         );
 
-        $this->dispatch('contractAdded', __('Disposal was added successfully!'));
+        $this->dispatch('contractAdded', __('personnel::information.messages.disposal_created'));
         $this->dispatchModalCloseEvent();
         $this->reset('disposals');
     }
@@ -48,7 +48,7 @@ trait DisposalTrait {
     public function forceDeleteDisposal(PersonnelDisposal $disposalModel): void
     {
         $disposalModel->delete();
-        $this->dispatch('contractAdded', __('Disposal was deleted successfully!'));
+        $this->dispatch('contractAdded', __('personnel::information.messages.disposal_deleted'));
         $this->dispatchModalCloseEvent();
     }
 }

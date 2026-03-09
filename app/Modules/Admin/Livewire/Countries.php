@@ -35,8 +35,8 @@ class Countries extends Component
     protected function validationAttributes(): array
     {
         return [
-            'form.code' => __('Code'),
-            'form.country_translations.title' => __('Name'),
+            'form.code' => __('admin::references.fields.code'),
+            'form.country_translations.title' => __('admin::references.fields.name'),
         ];
     }
 

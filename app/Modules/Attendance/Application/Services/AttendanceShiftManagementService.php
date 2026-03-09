@@ -84,7 +84,7 @@ class AttendanceShiftManagementService
 
         if ($usedAsDefault) {
             throw ValidationException::withMessages([
-                'shift' => __('This shift is selected as the default shift. Remove it from settings first.'),
+                'shift' => __('attendance::shift_management.messages.default_shift_selected'),
             ]);
         }
 
@@ -95,7 +95,7 @@ class AttendanceShiftManagementService
 
         if ($activeAssignments) {
             throw ValidationException::withMessages([
-                'shift' => __('This shift has active personnel assignments. Deactivate assignments first.'),
+                'shift' => __('attendance::shift_management.messages.active_assignments_exist'),
             ]);
         }
 
@@ -230,7 +230,7 @@ class AttendanceShiftManagementService
 
         if ($query->exists()) {
             throw ValidationException::withMessages([
-                'assignment.tabel_no' => __('There is already an active shift assignment overlapping this date range.'),
+                'assignment.tabel_no' => __('attendance::shift_management.messages.assignment_overlap'),
             ]);
         }
     }

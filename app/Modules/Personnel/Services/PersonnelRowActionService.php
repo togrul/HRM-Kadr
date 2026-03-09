@@ -17,7 +17,7 @@ class PersonnelRowActionService
             if (auth()->user()?->can('edit-personnels')) {
                 $actions[] = PersonnelRowActionDescriptor::action(
                     id: 'edit',
-                    label: __('Edit'),
+                    label: __('personnel::common.actions.edit'),
                     icon: 'icons.profile-icon',
                     actionPayload: [
                         'type' => 'open',
@@ -29,7 +29,7 @@ class PersonnelRowActionService
 
                 $actions[] = PersonnelRowActionDescriptor::action(
                     id: 'files',
-                    label: __('Files'),
+                    label: __('personnel::common.actions.files'),
                     icon: 'icons.files-icon',
                     actionPayload: [
                         'type' => 'open',
@@ -42,7 +42,7 @@ class PersonnelRowActionService
 
                 $actions[] = PersonnelRowActionDescriptor::link(
                     id: 'print',
-                    label: __('Print'),
+                    label: __('personnel::common.actions.print'),
                     icon: 'icons.print-outline-icon',
                     href: route('print.personnel', $personnel->id),
                     inMenu: true,
@@ -50,7 +50,7 @@ class PersonnelRowActionService
 
                 $actions[] = PersonnelRowActionDescriptor::link(
                     id: 'cv',
-                    label: __('CV'),
+                    label: __('personnel::common.actions.cv'),
                     icon: 'icons.cv-outline',
                     href: route('print.cv', $personnel->id),
                     inMenu: true,
@@ -58,7 +58,7 @@ class PersonnelRowActionService
 
                 $actions[] = PersonnelRowActionDescriptor::action(
                     id: 'information',
-                    label: __('Information'),
+                    label: __('personnel::common.actions.information'),
                     icon: 'icons.profile-outline-icon',
                     actionPayload: [
                         'type' => 'open',
@@ -71,7 +71,7 @@ class PersonnelRowActionService
 
                 $actions[] = PersonnelRowActionDescriptor::action(
                     id: 'vacations',
-                    label: __('Vacations'),
+                    label: __('personnel::common.actions.vacations'),
                     icon: 'icons.vacation-outline-icon',
                     actionPayload: [
                         'type' => 'open',
@@ -85,14 +85,14 @@ class PersonnelRowActionService
                 if (auth()->user()?->can('delete-personnels')) {
                     $actions[] = PersonnelRowActionDescriptor::action(
                         id: 'delete',
-                        label: __('Delete'),
+                        label: __('personnel::common.actions.delete'),
                         icon: 'icons.delete-icon',
                         actionPayload: [
                             'type' => 'delete',
                             'value' => $personnel->tabel_no,
                         ],
                         permission: 'delete-personnels',
-                        confirmMessage: __('Are you sure you want to delete this data?'),
+                        confirmMessage: __('personnel::common.messages.delete_data_confirm'),
                         wireTarget: 'setDeletePersonnel'
                     );
                 }
@@ -102,7 +102,7 @@ class PersonnelRowActionService
         if ($status === 'deleted' && auth()->user()?->can('edit-personnels')) {
             $actions[] = PersonnelRowActionDescriptor::action(
                 id: 'restore',
-                label: __('Restore'),
+                label: __('personnel::common.actions.restore'),
                 icon: 'icons.recover',
                 actionPayload: [
                     'type' => 'restore',
@@ -117,13 +117,13 @@ class PersonnelRowActionService
             if (auth()->user()?->can('delete-personnels')) {
                 $actions[] = PersonnelRowActionDescriptor::action(
                     id: 'force-delete',
-                    label: __('Force delete'),
+                    label: __('personnel::common.actions.force_delete'),
                     icon: 'icons.force-delete',
                     actionPayload: [
                         'type' => 'force-delete',
                         'value' => $personnel->tabel_no,
                     ],
-                    confirmMessage: __('Are you sure you want to remove this data?'),
+                    confirmMessage: __('personnel::common.messages.remove_data_confirm'),
                     wireTarget: 'forceDeleteData',
                 );
             }
@@ -132,4 +132,3 @@ class PersonnelRowActionService
         return array_values(array_filter($actions, fn (PersonnelRowActionDescriptor $action): bool => $action->visibleByPermission()));
     }
 }
-

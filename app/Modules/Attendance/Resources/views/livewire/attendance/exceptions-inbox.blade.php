@@ -1,35 +1,35 @@
 <div class="space-y-4">
-    <x-surface-card :title="__('Exceptions inbox')" icon="icons.pending-icon">
+    <x-surface-card :title="__('attendance::exceptions.title')" icon="icons.pending-icon">
         <div class="space-y-3">
             <div class="space-y-1">
-                <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400">{{ __('Queue filters') }}</p>
-                <p class="text-sm text-zinc-500">{{ __('Use exception type and date range to focus on unresolved attendance anomalies.') }}</p>
+                <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400">{{ __('attendance::exceptions.filters.title') }}</p>
+                <p class="text-sm text-zinc-500">{{ __('attendance::exceptions.filters.description') }}</p>
             </div>
 
             <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
                 <div>
-                    <x-label for="attendance-ex-status">{{ __('Status') }}</x-label>
+                    <x-label for="attendance-ex-status">{{ __('attendance::exceptions.filters.status') }}</x-label>
                     <select id="attendance-ex-status" wire:model.live="status" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
-                        <option value="open">{{ __('open') }}</option>
-                        <option value="resolved">{{ __('resolved') }}</option>
-                        <option value="all">{{ __('all') }}</option>
+                        <option value="open">{{ __('attendance::exceptions.statuses.open') }}</option>
+                        <option value="resolved">{{ __('attendance::exceptions.statuses.resolved') }}</option>
+                        <option value="all">{{ __('attendance::exceptions.statuses.all') }}</option>
                     </select>
                 </div>
                 <div>
-                    <x-label for="attendance-ex-type">{{ __('Type') }}</x-label>
+                    <x-label for="attendance-ex-type">{{ __('attendance::exceptions.filters.type') }}</x-label>
                     <select id="attendance-ex-type" wire:model.live="type" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
-                        <option value="all">{{ __('all') }}</option>
-                        <option value="missing_in">{{ __('missing_in') }}</option>
-                        <option value="missing_out">{{ __('missing_out') }}</option>
-                        <option value="unmatched_punch">{{ __('unmatched_punch') }}</option>
+                        <option value="all">{{ __('attendance::exceptions.types.all') }}</option>
+                        <option value="missing_in">{{ __('attendance::exceptions.types.missing_in') }}</option>
+                        <option value="missing_out">{{ __('attendance::exceptions.types.missing_out') }}</option>
+                        <option value="unmatched_punch">{{ __('attendance::exceptions.types.unmatched_punch') }}</option>
                     </select>
                 </div>
                 <div>
-                    <x-label for="attendance-ex-from">{{ __('From') }}</x-label>
+                    <x-label for="attendance-ex-from">{{ __('attendance::exceptions.filters.from') }}</x-label>
                     <input id="attendance-ex-from" wire:model.live="fromDate" type="date" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
                 </div>
                 <div>
-                    <x-label for="attendance-ex-to">{{ __('To') }}</x-label>
+                    <x-label for="attendance-ex-to">{{ __('attendance::exceptions.filters.to') }}</x-label>
                     <input id="attendance-ex-to" wire:model.live="toDate" type="date" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
                 </div>
             </div>
@@ -38,8 +38,8 @@
 
     @if($selectedStructureLabel)
         <div class="flex flex-wrap items-center gap-2 rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 text-xs text-blue-700">
-            <x-small-badge mode="sky">{{ __('Structure scope') }}</x-small-badge>
-            <span>{{ __('Showing personnel from the selected structure tree only.') }}</span>
+            <x-small-badge mode="sky">{{ __('attendance::exceptions.scope.badge') }}</x-small-badge>
+            <span>{{ __('attendance::exceptions.scope.description') }}</span>
             <span class="font-medium">{{ $selectedStructureLabel }}</span>
         </div>
     @endif
@@ -49,14 +49,14 @@
         <div class="inline-block min-w-full py-2 align-middle">
             <div class="overflow-visible">
                 <x-table.tbl :headers="[
-                    __('Date'),
-                    __('Tabel no'),
-                    __('Personnel'),
-                    __('Type'),
-                    __('Message'),
-                    __('Status'),
-                    __('Action')
-                ]" :title="__('Open items')">
+                    __('attendance::exceptions.table.date'),
+                    __('attendance::exceptions.table.tabel_no'),
+                    __('attendance::exceptions.table.personnel'),
+                    __('attendance::exceptions.table.type'),
+                    __('attendance::exceptions.table.message'),
+                    __('attendance::exceptions.table.status'),
+                    __('attendance::exceptions.table.action')
+                ]" :title="__('attendance::exceptions.table.title')">
                     @forelse($items as $item)
                         <tr>
                             <x-table.td>{{ optional($item->date)->format('Y-m-d') }}</x-table.td>
@@ -71,11 +71,11 @@
                                     @endif
                                 </div>
                             </x-table.td>
-                            <x-table.td extraClasses="text-zinc-600">{{ __($item->type) }}</x-table.td>
+                            <x-table.td extraClasses="text-zinc-600">{{ __('attendance::exceptions.types.'.$item->type) }}</x-table.td>
                             <x-table.td extraClasses="text-zinc-600 whitespace-normal">{{ $item->message }}</x-table.td>
                             <x-table.td>
                                 <span class="inline-flex rounded-full px-2 py-1 text-xs font-medium {{ $item->status === 'open' ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700' }}">
-                                    {{ __($item->status) }}
+                                    {{ __('attendance::exceptions.statuses.'.$item->status) }}
                                 </span>
                             </x-table.td>
                             <x-table.td :isButton="true">
@@ -83,11 +83,11 @@
                                     <span class="text-xs text-zinc-500">-</span>
                                 @elseif($item->status === 'open')
                                     <x-button mode="success" class="!h-8 !px-3 !text-xs" wire:click="markResolved({{ $item->id }})">
-                                        {{ __('Resolve') }}
+                                        {{ __('attendance::exceptions.actions.resolve') }}
                                     </x-button>
                                 @else
                                     <x-button mode="black" class="!h-8 !px-3 !text-xs" wire:click="reopen({{ $item->id }})">
-                                        {{ __('Reopen') }}
+                                        {{ __('attendance::exceptions.actions.reopen') }}
                                     </x-button>
                                 @endif
                             </x-table.td>

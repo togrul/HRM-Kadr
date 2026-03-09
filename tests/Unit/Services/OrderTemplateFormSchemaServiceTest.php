@@ -123,6 +123,7 @@ class OrderTemplateFormSchemaServiceTest extends TestCase
         $this->assertSame('metadata', $result['source']);
         $this->assertSame(['$fullname', '$day'], $result['row_field_keys']);
         $this->assertSame('personnel_id', $result['field_catalog']['$fullname']['field']);
+        $this->assertSame('Select personnel', $result['field_catalog']['$fullname']['title']);
         $this->assertSame('_personnels', $result['field_catalog']['$fullname']['model']);
         $this->assertSame('select', $result['field_catalog']['$fullname']['input']);
         $this->assertSame('nullable|int', $result['field_catalog']['$fullname']['rules']);
@@ -130,15 +131,80 @@ class OrderTemplateFormSchemaServiceTest extends TestCase
         $this->assertSame(['default' => 1, 'sm' => 2], $result['field_catalog']['$fullname']['grid_cols']);
         $this->assertSame(['default' => 1, 'sm' => 2], $result['field_catalog']['$fullname']['col_span']);
         $this->assertSame('day', $result['field_catalog']['$day']['field']);
+        $this->assertSame('Day', $result['field_catalog']['$day']['title']);
         $this->assertSame('numeric-input', $result['field_catalog']['$day']['input']);
         $this->assertSame('nullable|numeric', $result['field_catalog']['$day']['rules']);
         $this->assertSame('timing', $result['field_catalog']['$day']['group']);
         $this->assertContains('personnel_id', $result['dropdown_fields']);
         $this->assertCount(2, $result['row_groups']);
         $this->assertSame('personnel', $result['row_groups'][0]['key']);
+        $this->assertSame('Personnel', $result['row_groups'][0]['title']);
         $this->assertSame(['$fullname'], $result['row_groups'][0]['fields']);
         $this->assertSame('timing', $result['row_groups'][1]['key']);
+        $this->assertSame('Timing', $result['row_groups'][1]['title']);
         $this->assertSame(['$day'], $result['row_groups'][1]['fields']);
+    }
+
+    public function test_it_translates_only_canonical_namespaced_stored_titles(): void
+    {
+        app()->setLocale('az');
+
+        $orderType = $this->seedOrderType('TranslatedTitles');
+        $set = OrderTemplateSet::query()->create([
+            'order_type_id' => $orderType->id,
+            'name' => 'Set',
+        ]);
+
+        $version = OrderTemplateVersion::query()->create([
+            'order_template_set_id' => $set->id,
+            'version_no' => 1,
+            'template_path' => 'templates/order-translated.docx',
+            'status' => 'published',
+            'is_active' => true,
+            'published_at' => now(),
+            'meta' => [
+                'form' => [
+                    'section_blocks' => [
+                        [
+                            'key' => 'row_fields',
+                            'title' => 'orders::template_set_type.labels.section_blocks',
+                            'enabled' => true,
+                            'order' => 10,
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+        OrderTemplateField::query()->create([
+            'order_template_version_id' => $version->id,
+            'field_key' => '$fullname',
+            'label' => 'orders::template_metadata_defaults.fields.select_personnel',
+            'field_type' => 'select',
+            'sort_order' => 10,
+            'ui_config' => [
+                'field' => 'personnel_id',
+                'model' => '_personnels',
+                'group' => 'personnel',
+                'group_title' => 'orders::template_set_type.labels.group_title',
+                'group_order' => 1,
+                'field_order' => 10,
+            ],
+        ]);
+
+        OrderTemplateMapping::query()->create([
+            'order_template_version_id' => $version->id,
+            'placeholder' => '${fullname}',
+            'field_key' => '$fullname',
+            'scope' => 'row',
+            'sort_order' => 10,
+        ]);
+
+        $result = app(OrderTemplateFormSchemaService::class)->resolveForOrderType((int) $orderType->id);
+
+        $this->assertSame('Əməkdaş seçin', $result['field_catalog']['$fullname']['title']);
+        $this->assertSame('Qrup başlığı', $result['row_groups'][0]['title']);
+        $this->assertSame('Bölmə blokları', $result['section_blocks'][0]['title']);
     }
 
     private function seedOrderType(string $suffix): OrderType
@@ -154,6 +220,7 @@ class OrderTemplateFormSchemaServiceTest extends TestCase
         $orderId = match ($suffix) {
             'NoMetadata' => 9701,
             'NoMappings' => 9702,
+            'TranslatedTitles' => 9704,
             default => 9703,
         };
         app(\App\Services\Orders\TemplateAdminService::class)->create([

@@ -66,7 +66,7 @@ class OrderTemplateRenderer
             $templateProcessor->saveAs($outputPath);
 
             if (! is_file($outputPath) || filesize($outputPath) === 0) {
-                throw new RuntimeException('DOCX file was not generated or is empty.');
+                throw new RuntimeException(__('orders::template_runtime.messages.docx_not_generated_or_empty'));
             }
 
             Log::info('orders.template.render.success', [
@@ -262,6 +262,8 @@ class OrderTemplateRenderer
             }
         }
 
-        throw new RuntimeException("Order template file not found: {$storedPath}");
+        throw new RuntimeException(__('orders::template_runtime.messages.order_template_file_not_found', [
+            'stored_path' => $storedPath,
+        ]));
     }
 }
