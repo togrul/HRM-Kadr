@@ -58,8 +58,13 @@ Current state:
    - overview cache strategy: `attendance:{org}:{year}:{month}:{structure}`
    - query budget command: `attendance:query-budget`
    - architecture guard test for read-heavy Livewire components
-9. Remaining roadmap is tracked in `docs/attendance-module-master-todo.md`.
-10. Ops runbook is tracked in `docs/attendance-ops.md`.
+9. Weekend auto-seed is enabled for the first day of each month:
+   - command: `attendance:calendars:seed-weekends`
+   - weekend rows do not override existing manual holiday/workday rules
+10. Query-budget defaults are tightened to current real runtime profile:
+   - overview: `15`
+   - daily monitor: `10`
+   - puantaj: `8`
 
 CSV export settings are configurable from `config/attendance.php`:
 
@@ -81,3 +86,26 @@ Observability schedule settings:
 Local quality gate:
 
 - `composer ci:attendance-gate`
+
+## Documentation
+
+Main functional guide:
+
+- `[Attendance User Guide](/Users/togruljalalli/Desktop/projects/HRM/docs/scenario/attendance-user-guide.md)`
+
+Supporting guides:
+
+- `[Attendance Operator Guide](/Users/togruljalalli/Desktop/projects/HRM/docs/scenario/attendance-operator-guide.md)`
+- `[Attendance Permission Matrix](/Users/togruljalalli/Desktop/projects/HRM/docs/scenario/attendance-permission-matrix.md)`
+- `[Attendance Core Data Dictionary](/Users/togruljalalli/Desktop/projects/HRM/docs/attendance-core-data-dictionary.md)`
+- `[Attendance Gap Closure Plan](/Users/togruljalalli/Desktop/projects/HRM/docs/attendance-gap-closure-plan.md)`
+
+Recommended documentation section order for future in-app docs:
+
+1. Attendance Overview / User Guide
+2. Operator Quick Guide
+3. Admin Guide
+4. Approval Guide
+5. Permission Matrix
+6. Data Dictionary
+7. Ops / Commands

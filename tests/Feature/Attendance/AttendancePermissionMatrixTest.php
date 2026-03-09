@@ -23,6 +23,7 @@ class AttendancePermissionMatrixTest extends TestCase
             'manage-attendance',
             'manage-attendance-settings',
             'manage-attendance-shifts',
+            'manage-attendance-calendars',
             'add-attendance-manual',
             'edit-attendance-manual',
             'approve-attendance-manual',
@@ -56,7 +57,7 @@ class AttendancePermissionMatrixTest extends TestCase
         $this->actingAs($user);
 
         Livewire::test(Dashboard::class)
-            ->assertSet('availableTabs', ['overview', 'daily-monitor', 'puantaj', 'exceptions', 'overtime', 'month-close', 'manual', 'settings', 'shifts'])
+            ->assertSet('availableTabs', ['overview', 'daily-monitor', 'puantaj', 'exceptions', 'overtime', 'month-close', 'manual', 'settings', 'shifts', 'calendar-regimes'])
             ->assertSee(__('attendance::dashboard.tabs.overview'))
             ->assertSee(__('attendance::dashboard.tabs.daily_monitor'))
             ->assertSee(__('attendance::dashboard.tabs.puantaj'))
@@ -65,7 +66,8 @@ class AttendancePermissionMatrixTest extends TestCase
             ->assertSee(__('attendance::dashboard.tabs.month_close'))
             ->assertSee(__('attendance::dashboard.tabs.manual'))
             ->assertSee(__('attendance::dashboard.tabs.settings'))
-            ->assertSee(__('attendance::dashboard.tabs.shifts'));
+            ->assertSee(__('attendance::dashboard.tabs.shifts'))
+            ->assertSee(__('attendance::dashboard.tabs.calendar_regimes'));
     }
 
     public function test_hr_manager_sees_operational_tabs_but_not_admin_shift_settings_tabs(): void
@@ -81,7 +83,8 @@ class AttendancePermissionMatrixTest extends TestCase
             ->assertSee(__('attendance::dashboard.tabs.overtime'))
             ->assertSee(__('attendance::dashboard.tabs.month_close'))
             ->assertDontSee(__('attendance::dashboard.tabs.settings'))
-            ->assertDontSee(__('attendance::dashboard.tabs.shifts'));
+            ->assertDontSee(__('attendance::dashboard.tabs.shifts'))
+            ->assertDontSee(__('attendance::dashboard.tabs.calendar_regimes'));
     }
 
     public function test_hr_employee_sees_module_tabs_but_not_admin_sections(): void
@@ -100,7 +103,8 @@ class AttendancePermissionMatrixTest extends TestCase
             ->assertSee(__('attendance::dashboard.tabs.overtime'))
             ->assertDontSee(__('attendance::dashboard.tabs.month_close'))
             ->assertDontSee(__('attendance::dashboard.tabs.settings'))
-            ->assertDontSee(__('attendance::dashboard.tabs.shifts'));
+            ->assertDontSee(__('attendance::dashboard.tabs.shifts'))
+            ->assertDontSee(__('attendance::dashboard.tabs.calendar_regimes'));
     }
 
     public function test_hr_auditor_can_open_module_tabs_but_not_admin_sections(): void
@@ -116,7 +120,8 @@ class AttendancePermissionMatrixTest extends TestCase
             ->assertSee(__('attendance::dashboard.tabs.exceptions'))
             ->assertSee(__('attendance::dashboard.tabs.overtime'))
             ->assertDontSee(__('attendance::dashboard.tabs.settings'))
-            ->assertDontSee(__('attendance::dashboard.tabs.shifts'));
+            ->assertDontSee(__('attendance::dashboard.tabs.shifts'))
+            ->assertDontSee(__('attendance::dashboard.tabs.calendar_regimes'));
     }
 
     public function test_settings_and_shifts_tabs_require_explicit_section_permissions(): void
@@ -141,7 +146,8 @@ class AttendancePermissionMatrixTest extends TestCase
         Livewire::test(Dashboard::class)
             ->assertSet('availableTabs', ['overview', 'daily-monitor', 'puantaj', 'exceptions', 'overtime', 'month-close', 'manual'])
             ->assertDontSee(__('attendance::dashboard.tabs.settings'))
-            ->assertDontSee(__('attendance::dashboard.tabs.shifts'));
+            ->assertDontSee(__('attendance::dashboard.tabs.shifts'))
+            ->assertDontSee(__('attendance::dashboard.tabs.calendar_regimes'));
     }
 
     private function userForRole(string $roleName): User

@@ -6,6 +6,7 @@ use App\Services\StructurePathService;
 use App\Modules\Attendance\Application\Services\AttendanceAuthorizationService;
 use App\Modules\Attendance\Application\Services\AttendancePuantajReadService;
 use App\Modules\Attendance\Application\Services\AttendanceStructureScopeReadService;
+use App\Support\Translations\ModuleTranslation;
 use App\Traits\NestedStructureTrait;
 use Carbon\Carbon;
 use Livewire\Component;
@@ -61,11 +62,12 @@ class PuantajGrid extends Component
         /** @var StructurePathService $structurePathService */
         $structurePathService = app(StructurePathService::class);
 
-        $personnels = $readService->paginatePersonnels(trim($this->search), $this->perPage, $structureIds);
+        $personnels = $readService->paginatePersonnels(trim($this->search), $this->perPage, $structureIds, $from, $to);
         $tabelNos = $personnels->getCollection()->pluck('tabel_no')->filter()->values()->all();
 
         $ledgerByTabelAndDate = $readService->loadLedgerMap($tabelNos, $from, $to);
         $calendarDayTypeByDate = $readService->globalCalendarDayTypeByDate($from, $to);
+        $calendarOverrides = $readService->calendarOverrides($from, $to, $structureIds);
 
         $rows = $personnels->getCollection()->map(function ($personnel) use (
             $days,
@@ -81,19 +83,10 @@ class PuantajGrid extends Component
                 $date = $from->copy()->day($day)->toDateString();
                 $ledger = $ledgerByTabelAndDate[$personnel->tabel_no][$date] ?? null;
 
-                $workedMinutes = (int) ($ledger['worked_minutes'] ?? 0);
-                $status = (string) ($ledger['attendance_status'] ?? 'none');
-                $absenceCode = (string) ($ledger['absence_code'] ?? '');
+                $rowCells[$day] = $this->buildCellData($ledger);
 
-                $rowCells[$day] = [
-                    'value' => $this->formatCellValue($workedMinutes, $status, $absenceCode),
-                    'status' => $status,
-                    'worked_minutes' => $workedMinutes,
-                    'title' => $this->buildCellTitle($workedMinutes, $status, $absenceCode),
-                ];
-
-                $totalWorkedMinutes += $workedMinutes;
-                if ($workedMinutes > 0 || in_array($status, ['present', 'manual_present', 'holiday_worked', 'weekend_worked'], true)) {
+                $totalWorkedMinutes += (int) $rowCells[$day]['worked_minutes'];
+                if ((int) $rowCells[$day]['worked_minutes'] > 0 || in_array($rowCells[$day]['status'], ['present', 'manual_present', 'holiday_worked', 'weekend_worked'], true)) {
                     $totalPresentDays++;
                 }
             }
@@ -109,36 +102,178 @@ class PuantajGrid extends Component
 
         return view('attendance::livewire.attendance.puantaj-grid', [
             'days' => $days,
+            'headers' => $this->buildHeaders($days, $from, $calendarOverrides),
             'rows' => $rows,
             'personnels' => $personnels,
             'calendarDayTypeByDate' => $calendarDayTypeByDate,
+            'calendarOverrides' => $this->buildCalendarLegend($calendarOverrides),
+            'statusLegend' => $this->buildStatusLegend(),
+            'leaveLegend' => $this->buildLeaveLegend($rows->all()),
             'monthStart' => $from,
             'selectedStructureLabel' => $structureScopeRead->label($this->selectedStructureId),
         ]);
     }
 
-    private function formatCellValue(int $workedMinutes, string $status, string $absenceCode): string
+    /**
+     * @param  array<int,int>  $days
+     * @param  array<int,array<string,mixed>>  $calendarOverrides
+     * @return array<int,string|array<string,mixed>>
+     */
+    private function buildHeaders(array $days, Carbon $from, array $calendarOverrides): array
     {
+        $headers = [__('attendance::puantaj.headers.personnel')];
+
+        foreach ($days as $day) {
+            $date = $from->copy()->day($day);
+            $dateKey = $date->toDateString();
+            $dayType = $this->resolveHeaderDayType($date, $calendarOverrides);
+
+            $header = [
+                'label' => (string) $day,
+                'day' => $day,
+                'is_day' => true,
+                'day_type' => $dayType,
+                'title' => __('attendance::puantaj.statuses.'.$dayType),
+            ];
+
+            if ($dayType === 'weekend') {
+                $header['icon'] = 'icons.calendar-icon';
+                $header['th_classes'] = '!bg-zinc-200/70 text-zinc-600';
+                $header['content_classes'] = 'text-zinc-600';
+            } elseif ($dayType === 'holiday') {
+                $header['icon'] = 'icons.holiday-icon';
+                $header['th_classes'] = '!bg-fuchsia-100/80 text-fuchsia-700';
+                $header['content_classes'] = 'text-fuchsia-700';
+            } elseif ($dayType === 'workday' && $this->hasExplicitWorkdayOverride($dateKey, $calendarOverrides)) {
+                $header['icon'] = 'icons.calendar-icon';
+                $header['th_classes'] = '!bg-emerald-100/80 text-emerald-700';
+                $header['content_classes'] = 'text-emerald-700';
+                $header['title'] = __('attendance::puantaj.headers.workday_override');
+            }
+
+            $headers[] = $header;
+        }
+
+        $headers[] = __('attendance::puantaj.headers.total_hours');
+        $headers[] = __('attendance::puantaj.headers.total_days');
+
+        return $headers;
+    }
+
+    /**
+     * @param  array<string,mixed>|null  $ledger
+     * @return array<string,mixed>
+     */
+    private function buildCellData(?array $ledger): array
+    {
+        $workedMinutes = (int) ($ledger['worked_minutes'] ?? 0);
+        $status = (string) ($ledger['attendance_status'] ?? 'none');
+        $absenceCode = strtoupper((string) ($ledger['absence_code'] ?? ''));
+        $leaveTypeName = trim((string) ($ledger['leave_type_name'] ?? ''));
+        $leaveTypeId = is_numeric($ledger['leave_type_id'] ?? null) ? (int) $ledger['leave_type_id'] : null;
+        $calendarDayType = (string) ($ledger['calendar_day_type'] ?? '');
+
         if ($status === 'none') {
-            return '';
+            return [
+                'display' => '',
+                'status' => 'none',
+                'worked_minutes' => 0,
+                'title' => '',
+                'cell_classes' => 'text-zinc-400 bg-white',
+                'icon' => null,
+                'icon_color' => 'text-zinc-400',
+            ];
         }
 
         if ($workedMinutes > 0) {
-            return $this->formatHours($workedMinutes);
+            return [
+                'display' => $this->formatHours($workedMinutes),
+                'status' => $status,
+                'worked_minutes' => $workedMinutes,
+                'title' => $this->buildCellTitle($workedMinutes, $status, $absenceCode, $leaveTypeName, $calendarDayType),
+                'cell_classes' => $this->resolveWorkedMinuteClasses($workedMinutes, $status),
+                'icon' => null,
+                'icon_color' => 'text-zinc-500',
+            ];
         }
 
-        if ($absenceCode !== '') {
-            return strtoupper($absenceCode);
+        if ($status === 'leave') {
+            $legendCode = $this->resolveLeaveLegendCode($leaveTypeName, $absenceCode);
+            $tone = $this->resolveLeaveTone($leaveTypeId, $leaveTypeName, $absenceCode);
+
+            return [
+                'display' => '',
+                'status' => $status,
+                'worked_minutes' => 0,
+                'title' => '',
+                'cell_classes' => $this->resolveLeaveToneClasses($tone),
+                'icon' => 'icons.document-icon',
+                'icon_color' => $this->resolveLeaveToneIconColor($tone),
+                'legend_key' => 'leave:'.($leaveTypeId ?? $leaveTypeName ?? $absenceCode),
+                'legend_label' => $leaveTypeName !== '' ? $leaveTypeName : ($absenceCode !== '' ? $absenceCode : __('attendance::puantaj.legend.unknown_leave')),
+                'legend_code' => $legendCode,
+                'legend_mode' => $this->resolveLeaveToneBadgeMode($tone),
+                'legend_icon' => 'icons.document-icon',
+                'legend_icon_color' => $this->resolveLeaveToneIconColor($tone),
+            ];
         }
 
-        return match ($status) {
-            'absent', 'manual_absence' => '0',
-            'weekend', 'holiday' => '-',
-            default => '',
-        };
+        if ($status === 'vacation') {
+            return [
+                'display' => __('attendance::puantaj.short_labels.vacation'),
+                'status' => $status,
+                'worked_minutes' => 0,
+                'title' => $this->buildCellTitle($workedMinutes, $status, $absenceCode, $leaveTypeName, $calendarDayType),
+                'cell_classes' => 'text-violet-700 bg-violet-50/80',
+                'icon' => 'icons.vacation-icon',
+                'icon_color' => 'text-violet-600',
+            ];
+        }
+
+        if ($status === 'business_trip') {
+            return [
+                'display' => __('attendance::puantaj.short_labels.business_trip'),
+                'status' => $status,
+                'worked_minutes' => 0,
+                'title' => $this->buildCellTitle($workedMinutes, $status, $absenceCode, $leaveTypeName, $calendarDayType),
+                'cell_classes' => 'text-sky-700 bg-sky-50/80',
+                'icon' => 'icons.briefcase-icon',
+                'icon_color' => 'text-sky-600',
+            ];
+        }
+
+        if (in_array($status, ['holiday', 'weekend'], true)) {
+            return [
+                'display' => $status === 'holiday' ? '' : '-',
+                'status' => $status,
+                'worked_minutes' => 0,
+                'title' => $this->buildCellTitle($workedMinutes, $status, $absenceCode, $leaveTypeName, $calendarDayType),
+                'cell_classes' => $status === 'holiday'
+                    ? 'text-fuchsia-700 bg-fuchsia-50/80'
+                    : 'text-zinc-400 bg-zinc-50/80',
+                'icon' => $status === 'holiday' ? 'icons.calendar-icon' : null,
+                'icon_color' => $status === 'holiday' ? 'text-fuchsia-600' : 'text-zinc-400',
+            ];
+        }
+
+        return [
+            'display' => $absenceCode !== '' ? $absenceCode : '0',
+            'status' => $status,
+            'worked_minutes' => 0,
+            'title' => $this->buildCellTitle($workedMinutes, $status, $absenceCode, $leaveTypeName, $calendarDayType),
+            'cell_classes' => 'text-rose-600 bg-rose-50/70',
+            'icon' => null,
+            'icon_color' => 'text-rose-500',
+        ];
     }
 
-    private function buildCellTitle(int $workedMinutes, string $status, string $absenceCode): string
+    private function buildCellTitle(
+        int $workedMinutes,
+        string $status,
+        string $absenceCode,
+        string $leaveTypeName = '',
+        string $calendarDayType = ''
+    ): string
     {
         $parts = [];
         $statusLabels = [
@@ -161,11 +296,228 @@ class PuantajGrid extends Component
             $parts[] = __('attendance::puantaj.tooltips.status', ['status' => $statusLabels[$status] ?? $status]);
         }
 
+        if ($leaveTypeName !== '') {
+            $parts[] = __('attendance::puantaj.tooltips.leave_type', ['type' => $leaveTypeName]);
+        }
+
         if ($absenceCode !== '') {
             $parts[] = __('attendance::puantaj.tooltips.absence', ['code' => strtoupper($absenceCode)]);
         }
 
+        if ($calendarDayType !== '') {
+            $parts[] = __('attendance::puantaj.tooltips.calendar', [
+                'type' => __('attendance::puantaj.statuses.'.$calendarDayType),
+            ]);
+        }
+
         return implode(' | ', $parts);
+    }
+
+    private function resolveWorkedMinuteClasses(int $workedMinutes, string $status): string
+    {
+        if (in_array($status, ['holiday_worked', 'weekend_worked'], true)) {
+            return 'text-emerald-700 bg-emerald-50/70';
+        }
+
+        $fullDayMinutes = 9 * 60;
+
+        return match (true) {
+            $workedMinutes > $fullDayMinutes => 'text-emerald-600 bg-emerald-50',
+            $workedMinutes === $fullDayMinutes => 'text-zinc-900 bg-white',
+            $workedMinutes > 0 => 'text-amber-500 bg-amber-50',
+            default => 'text-zinc-900 bg-white',
+        };
+    }
+
+    /**
+     * @param  array<int,array<string,mixed>>  $rows
+     * @return array<int,array<string,mixed>>
+     */
+    private function buildLeaveLegend(array $rows): array
+    {
+        return collect($rows)
+            ->flatMap(fn (array $row) => array_values($row['cells'] ?? []))
+            ->filter(fn (array $cell) => isset($cell['legend_key'], $cell['legend_label'], $cell['legend_mode']))
+            ->unique('legend_key')
+            ->map(fn (array $cell) => [
+                'label' => (string) $cell['legend_label'],
+                'code' => (string) ($cell['legend_code'] ?? ''),
+                'mode' => (string) $cell['legend_mode'],
+                'icon' => (string) ($cell['legend_icon'] ?? 'icons.info-circle-icon'),
+                'icon_color' => (string) ($cell['legend_icon_color'] ?? 'text-blue-600'),
+            ])
+            ->sortBy(fn (array $item) => mb_strtolower($item['label']))
+            ->values()
+            ->all();
+    }
+
+    private function resolveLeaveLegendCode(string $leaveTypeName, string $absenceCode): string
+    {
+        if ($absenceCode !== '') {
+            return strtoupper($absenceCode);
+        }
+
+        $trimmed = trim($leaveTypeName);
+        if ($trimmed === '') {
+            return '';
+        }
+
+        return mb_strtoupper(mb_substr($trimmed, 0, 3));
+    }
+
+    private function resolveLeaveTone(?int $leaveTypeId, string $leaveTypeName, string $absenceCode): string
+    {
+        $palette = ['blue', 'purple', 'red', 'sky', 'green', 'secondary'];
+        $seed = $leaveTypeId !== null
+            ? (string) $leaveTypeId
+            : ($absenceCode !== '' ? $absenceCode : $leaveTypeName);
+
+        return $palette[abs(crc32($seed)) % count($palette)];
+    }
+
+    private function resolveLeaveToneClasses(string $tone): string
+    {
+        return match ($tone) {
+            'blue' => 'bg-blue-50/80',
+            'purple' => 'bg-violet-50/80',
+            'red' => 'bg-rose-50/80',
+            'sky' => 'bg-sky-50/80',
+            'green' => 'bg-emerald-50/80',
+            default => 'bg-zinc-50/80',
+        };
+    }
+
+    private function resolveLeaveToneIconColor(string $tone): string
+    {
+        return match ($tone) {
+            'blue' => 'text-blue-600',
+            'purple' => 'text-violet-600',
+            'red' => 'text-rose-600',
+            'sky' => 'text-sky-600',
+            'green' => 'text-emerald-600',
+            default => 'text-zinc-600',
+        };
+    }
+
+    private function resolveLeaveToneBadgeMode(string $tone): string
+    {
+        return match ($tone) {
+            'blue' => 'blue',
+            'purple' => 'purple',
+            'red' => 'red',
+            'sky' => 'sky',
+            'green' => 'green',
+            default => 'secondary',
+        };
+    }
+
+    /**
+     * @param  array<int,array<string,mixed>>  $calendarOverrides
+     */
+    private function resolveHeaderDayType(Carbon $date, array $calendarOverrides): string
+    {
+        $dateKey = $date->toDateString();
+        $structureOverride = collect($calendarOverrides)
+            ->first(fn (array $item) => (string) ($item['date'] ?? '') === $dateKey && (string) ($item['scope_type'] ?? '') === 'structure');
+
+        if (is_array($structureOverride) && isset($structureOverride['day_type'])) {
+            return (string) $structureOverride['day_type'];
+        }
+
+        $globalOverride = collect($calendarOverrides)
+            ->first(fn (array $item) => (string) ($item['date'] ?? '') === $dateKey && (string) ($item['scope_type'] ?? '') === 'global');
+
+        if (is_array($globalOverride) && isset($globalOverride['day_type'])) {
+            return (string) $globalOverride['day_type'];
+        }
+
+        return $date->isWeekend() ? 'weekend' : 'workday';
+    }
+
+    /**
+     * @param  array<int,array<string,mixed>>  $calendarOverrides
+     */
+    private function hasExplicitWorkdayOverride(string $dateKey, array $calendarOverrides): bool
+    {
+        return collect($calendarOverrides)
+            ->contains(fn (array $item) => (string) ($item['date'] ?? '') === $dateKey && (string) ($item['day_type'] ?? '') === 'workday');
+    }
+
+    /**
+     * @return array<int,array<string,mixed>>
+     */
+    private function buildStatusLegend(): array
+    {
+        return [
+            [
+                'label' => __('attendance::puantaj.legend.items.full_day'),
+                'mode' => 'green',
+                'icon' => null,
+                'description' => __('attendance::puantaj.legend.descriptions.full_day'),
+            ],
+            [
+                'label' => __('attendance::puantaj.legend.items.partial_day'),
+                'mode' => 'secondary',
+                'icon' => null,
+                'description' => __('attendance::puantaj.legend.descriptions.partial_day'),
+            ],
+            [
+                'label' => __('attendance::puantaj.legend.items.absence'),
+                'mode' => 'red',
+                'icon' => null,
+                'description' => __('attendance::puantaj.legend.descriptions.absence'),
+            ],
+            [
+                'label' => __('attendance::puantaj.legend.items.weekend'),
+                'mode' => 'secondary',
+                'icon' => 'icons.calendar-icon',
+                'description' => __('attendance::puantaj.legend.descriptions.weekend'),
+            ],
+            [
+                'label' => __('attendance::puantaj.legend.items.holiday'),
+                'mode' => 'purple',
+                'icon' => 'icons.holiday-icon',
+                'description' => __('attendance::puantaj.legend.descriptions.holiday'),
+            ],
+        ];
+    }
+
+    /**
+     * @param  array<int,array<string,mixed>>  $calendarOverrides
+     * @return array<int,array<string,mixed>>
+     */
+    private function buildCalendarLegend(array $calendarOverrides): array
+    {
+        return collect($calendarOverrides)
+            ->reject(fn (array $item) => (string) ($item['day_type'] ?? '') === 'weekend')
+            ->map(function (array $item): array {
+                $mode = match ($item['day_type']) {
+                    'workday' => 'green',
+                    'holiday' => 'red',
+                    default => 'secondary',
+                };
+
+                $resolvedName = trim(ModuleTranslation::resolveStoredText((string) ($item['name'] ?? '')));
+                $label = trim(implode(' - ', array_filter([
+                    Carbon::parse((string) $item['date'])->format('d.m'),
+                    $resolvedName !== '' ? $resolvedName : __('attendance::puantaj.statuses.'.$item['day_type']),
+                ])));
+
+                return [
+                    'label' => $label,
+                    'mode' => $mode,
+                    'icon' => $item['day_type'] === 'holiday' ? 'icons.holiday-icon' : 'icons.calendar-icon',
+                    'description' => __('attendance::puantaj.legend.calendar_description', [
+                        'type' => __('attendance::puantaj.statuses.'.$item['day_type']),
+                        'scope' => $item['scope_label'],
+                        'paid' => $item['is_paid']
+                            ? __('attendance::puantaj.calendar.paid')
+                            : __('attendance::puantaj.calendar.unpaid'),
+                    ]),
+                ];
+            })
+            ->values()
+            ->all();
     }
 
     private function formatHours(int $workedMinutes): string

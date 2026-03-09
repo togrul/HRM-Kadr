@@ -23,6 +23,12 @@ return [
         'schedule_at' => env('ATTENDANCE_SNAPSHOT_SCHEDULE_AT', '01:30'),
         'schedule_lock' => (bool) env('ATTENDANCE_SNAPSHOT_SCHEDULE_LOCK', false),
     ],
+    'calendar' => [
+        'weekend_auto_seed' => [
+            'schedule_enabled' => (bool) env('ATTENDANCE_WEEKEND_AUTO_SEED_SCHEDULE_ENABLED', true),
+            'schedule_at' => env('ATTENDANCE_WEEKEND_AUTO_SEED_SCHEDULE_AT', '00:05'),
+        ],
+    ],
     'exports' => [
         'payroll' => [
             'csv' => [
@@ -37,9 +43,9 @@ return [
     'performance' => [
         'overview_cache_minutes' => (int) env('ATTENDANCE_OVERVIEW_CACHE_MINUTES', 10),
         'query_budget' => [
-            'overview_build' => (int) env('ATTENDANCE_QUERY_BUDGET_OVERVIEW', 20),
-            'daily_monitor_load' => (int) env('ATTENDANCE_QUERY_BUDGET_DAILY_MONITOR', 25),
-            'puantaj_grid_load' => (int) env('ATTENDANCE_QUERY_BUDGET_PUANTAJ', 30),
+            'overview_build' => (int) env('ATTENDANCE_QUERY_BUDGET_OVERVIEW', 15),
+            'daily_monitor_load' => (int) env('ATTENDANCE_QUERY_BUDGET_DAILY_MONITOR', 10),
+            'puantaj_grid_load' => (int) env('ATTENDANCE_QUERY_BUDGET_PUANTAJ', 8),
         ],
     ],
     'observability' => [

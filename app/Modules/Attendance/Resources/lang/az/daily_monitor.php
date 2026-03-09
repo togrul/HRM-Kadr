@@ -22,7 +22,7 @@ return [
         'present' => 'İşdə',
         'late' => 'Gecikib',
         'absent' => 'Yoxdur',
-        'missing' => 'Ledger çatışmır',
+        'missing' => 'Gündəlik qeyd çatışmır',
     ],
     'table' => [
         'title' => 'Əməkdaş status siyahısı',
@@ -38,7 +38,7 @@ return [
         'present' => 'işdə',
         'late' => 'gecikib',
         'absent' => 'yoxdur',
-        'missing' => 'ledger çatışmır',
+        'missing' => 'gündəlik qeyd çatışmır',
         'manual_present' => 'manual işdə',
         'holiday_worked' => 'bayramda işləyib',
         'weekend_worked' => 'həftəsonu işləyib',

@@ -50,6 +50,14 @@ class Kernel extends ConsoleKernel
                 ->withoutOverlapping();
         }
 
+        if ((bool) config('attendance.calendar.weekend_auto_seed.schedule_enabled', true)) {
+            $at = (string) config('attendance.calendar.weekend_auto_seed.schedule_at', '00:05');
+
+            $schedule->command('attendance:calendars:seed-weekends')
+                ->monthlyOn(1, $at)
+                ->withoutOverlapping();
+        }
+
         if ((bool) config('attendance.observability.reports.enabled', false)) {
             $dailyAt = (string) config('attendance.observability.reports.daily_at', '08:30');
             $weeklyDay = (int) config('attendance.observability.reports.weekly_day', 1);

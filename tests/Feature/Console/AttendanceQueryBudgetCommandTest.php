@@ -76,6 +76,48 @@ class AttendanceQueryBudgetCommandTest extends TestCase
         $this->assertSame('puantaj_grid_load', data_get($payload, 'results.2.flow'));
     }
 
+    public function test_it_stays_within_tightened_default_query_budgets_for_larger_dataset(): void
+    {
+        foreach (range(1, 25) as $index) {
+            $personnel = $this->makePersonnel([
+                'surname' => 'Doe'.$index,
+                'name' => 'John'.$index,
+            ]);
+
+            AttendanceDailyLedger::query()->create([
+                'tabel_no' => $personnel->tabel_no,
+                'date' => '2026-03-05',
+                'scheduled_minutes' => 540,
+                'worked_minutes' => 510,
+                'break_minutes' => 30,
+                'overtime_minutes' => 0,
+                'late_minutes' => 15,
+                'early_leave_minutes' => 0,
+                'attendance_status' => 'present',
+                'absence_code' => null,
+                'source_summary' => 'system',
+                'is_locked' => false,
+                'meta' => null,
+            ]);
+        }
+
+        $exitCode = Artisan::call('attendance:query-budget', [
+            '--year' => 2026,
+            '--month' => 3,
+            '--date' => '2026-03-05',
+            '--json' => true,
+        ]);
+
+        $payload = json_decode(Artisan::output(), true);
+
+        $this->assertSame(0, $exitCode);
+        $this->assertSame(0, data_get($payload, 'summary.failed_probes'));
+        $this->assertSame(0, data_get($payload, 'summary.over_budget_probes'));
+        $this->assertLessThanOrEqual(config('attendance.performance.query_budget.overview_build'), (int) data_get($payload, 'results.0.queries'));
+        $this->assertLessThanOrEqual(config('attendance.performance.query_budget.daily_monitor_load'), (int) data_get($payload, 'results.1.queries'));
+        $this->assertLessThanOrEqual(config('attendance.performance.query_budget.puantaj_grid_load'), (int) data_get($payload, 'results.2.queries'));
+    }
+
     private function makePersonnel(array $overrides = []): Personnel
     {
         $user = User::query()->first() ?? User::factory()->create();

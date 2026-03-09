@@ -11,6 +11,7 @@ class LeaveType extends Model
 
     protected $fillable = [
         'name',
+        'attendance_code',
         'max_days',
         'requires_document'
     ];

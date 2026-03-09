@@ -22,7 +22,8 @@ class AttendancePunchProcessingPipelineService
      *   include_processed?:bool,
      *   mark_processed?:bool,
      *   structure_id?:int|null,
-     *   tabel_nos?:array<int,string>|null
+     *   tabel_nos?:array<int,string>|null,
+     *   force_dates?:array<int,string>|null
      * }  $options
      * @return array<string,int>
      */
@@ -38,6 +39,7 @@ class AttendancePunchProcessingPipelineService
             'mark_processed' => true,
             'structure_id' => null,
             'tabel_nos' => null,
+            'force_dates' => null,
         ], $options);
 
         $scopeTabelNos = $this->resolveScopeTabelNos(
@@ -165,12 +167,21 @@ class AttendancePunchProcessingPipelineService
         $overtimeRequestSyncService = app(AttendanceOvertimeRequestSyncService::class);
 
         $punchesByTabel = $allPunches->groupBy('tabel_no');
-        $existingLedgerDatesByTabel = AttendanceDailyLedger::query()
-            ->whereBetween('date', [$from->toDateString(), $to->toDateString()])
+        $existingLedgers = AttendanceDailyLedger::query()
+            ->whereDate('date', '>=', $from->toDateString())
+            ->whereDate('date', '<=', $to->toDateString())
             ->whereIn('tabel_no', $baseTabelNos)
-            ->get(['tabel_no', 'date'])
+            ->get();
+
+        $existingLedgerDatesByTabel = $existingLedgers
             ->groupBy('tabel_no')
             ->map(fn (Collection $rows) => $rows->pluck('date')->map(fn ($d) => Carbon::parse($d)->toDateString())->all())
+            ->all();
+
+        $existingLedgerMap = $existingLedgers
+            ->mapWithKeys(fn (AttendanceDailyLedger $ledger) => [
+                $ledger->tabel_no.'|'.$ledger->date->toDateString() => $ledger,
+            ])
             ->all();
 
         $dateKeysByTabel = [];
@@ -190,12 +201,17 @@ class AttendancePunchProcessingPipelineService
 
             $fromOverrides = $context['override_keys_by_tabel'][$tabelNo] ?? [];
             $fromLedger = $existingLedgerDatesByTabel[$tabelNo] ?? [];
+            $forcedDates = collect($opts['force_dates'] ?? [])
+                ->filter(fn ($value) => is_string($value) && trim($value) !== '')
+                ->map(fn (string $value) => Carbon::parse($value)->toDateString())
+                ->all();
 
             $dateKeysByTabel[$tabelNo] = collect()
                 ->merge($fromPunches)
                 ->merge($fromManual)
                 ->merge($fromOverrides)
                 ->merge($fromLedger)
+                ->merge($forcedDates)
                 ->filter()
                 ->unique()
                 ->sort()
@@ -227,6 +243,7 @@ class AttendancePunchProcessingPipelineService
             $overtimeRequestSyncService,
             $opts,
             $structureByTabel,
+            &$existingLedgerMap,
             &$ledgerUpserts,
             &$processedPunchIds,
             &$usedPunchIds,
@@ -299,17 +316,14 @@ class AttendancePunchProcessingPipelineService
                         approvedOvertimeMinutes: $overtimeApprovedMap[$key] ?? null
                     );
 
-                    $ledger = AttendanceDailyLedger::query()
-                        ->where('tabel_no', (string) $tabelNo)
-                        ->whereDate('date', $date->toDateString())
-                        ->first()
-                        ?? new AttendanceDailyLedger([
-                            'tabel_no' => (string) $tabelNo,
-                            'date' => $date->copy()->startOfDay(),
-                        ]);
+                    $ledger = $existingLedgerMap[$key] ?? new AttendanceDailyLedger([
+                        'tabel_no' => (string) $tabelNo,
+                        'date' => $date->copy()->startOfDay(),
+                    ]);
 
                     $ledger->fill($ledgerPayload);
                     $ledger->save();
+                    $existingLedgerMap[$key] = $ledger;
 
                     $overtimeRequestSyncService->sync(
                         tabelNo: (string) $tabelNo,

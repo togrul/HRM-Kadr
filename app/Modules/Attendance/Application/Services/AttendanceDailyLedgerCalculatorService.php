@@ -19,7 +19,7 @@ class AttendanceDailyLedgerCalculatorService
      *   consumed_punch_ids?:array<int,int>,
      *   pairs:array<int,array{in:string,out:string,duration_minutes:int}>
      * }  $pairing
-     * @param  array{type:string,priority?:int,source?:string}|null  $override
+     * @param  array<string,mixed>|null  $override
      * @return array<string,mixed>
      */
     public function calculate(
@@ -161,7 +161,7 @@ class AttendanceDailyLedgerCalculatorService
     }
 
     /**
-     * @param  array{type:string,priority?:int,source?:string}  $override
+     * @param  array<string,mixed>  $override
      * @return array<string,mixed>
      */
     private function buildOverridePayload(
@@ -184,7 +184,7 @@ class AttendanceDailyLedgerCalculatorService
             : 0;
 
         $absenceCode = match ($type) {
-            'leave' => 'leave',
+            'leave' => strtoupper((string) ($override['absence_code'] ?? 'LEAVE')),
             'vacation' => 'vacation',
             default => null,
         };
@@ -205,6 +205,8 @@ class AttendanceDailyLedgerCalculatorService
                 'calendar_day_type' => $calendarDayType,
                 'override_type' => $type,
                 'override_source' => (string) ($override['source'] ?? $type),
+                'leave_type_id' => $override['leave_type_id'] ?? null,
+                'leave_type_name' => $override['leave_type_name'] ?? null,
                 'requestable_overtime_minutes' => 0,
             ],
         ];

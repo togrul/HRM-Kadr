@@ -24,6 +24,7 @@ class LeaveTypes extends Component
     {
         return [
             'form.name' => 'required|string|min:2',
+            'form.attendance_code' => 'nullable|string|min:2|max:32',
             'form.max_days' => 'required|integer|min:0',
         ];
     }
@@ -32,6 +33,7 @@ class LeaveTypes extends Component
     {
         return [
             'form.name' => __('admin::leave_types.fields.name'),
+            'form.attendance_code' => __('admin::leave_types.fields.attendance_code'),
             'form.max_days' => __('admin::leave_types.fields.max_days'),
         ];
     }
@@ -69,7 +71,7 @@ class LeaveTypes extends Component
 
         $this->form['requires_document'] = $this->form['requires_document'] ?? false;
         $this->model
-            ? $this->model->update(Arr::only($this->form, ['name', 'max_days', 'requires_document']))
+            ? $this->model->update(Arr::only($this->form, ['name', 'attendance_code', 'max_days', 'requires_document']))
             : LeaveType::create($this->form);
 
         $this->callSuccessSwal();

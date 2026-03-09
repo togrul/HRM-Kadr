@@ -9,6 +9,7 @@ use App\Models\PersonnelBusinessTrip;
 use App\Models\PersonnelVacation;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Schema;
 
 class AttendanceDayContextResolverService
 {
@@ -18,7 +19,7 @@ class AttendanceDayContextResolverService
      * @return array{
      *   calendars_global:array<string,string>,
      *   calendars_structure:array<string,string>,
-     *   overrides:array<string,array{type:string,priority:int,source:string}>,
+     *   overrides:array<string,array<string,mixed>>,
      *   override_keys_by_tabel:array<string,array<int,string>>
      * }
      */
@@ -28,7 +29,8 @@ class AttendanceDayContextResolverService
         $structureIds = collect($structureByTabel)->filter()->unique()->values();
 
         $calendars = AttendanceCalendar::query()
-            ->whereBetween('date', [$from->toDateString(), $to->toDateString()])
+            ->whereDate('date', '>=', $from->toDateString())
+            ->whereDate('date', '<=', $to->toDateString())
             ->where(function ($query) use ($structureIds): void {
                 $query->where('scope_type', 'global');
 
@@ -103,7 +105,7 @@ class AttendanceDayContextResolverService
 
     /**
      * @param  array<string,array{type:string,priority:int,source:string}>  $overrideMap
-     * @return array{type:string,priority:int,source:string}|null
+     * @return array<string,mixed>|null
      */
     public function resolveOverride(Carbon $date, string $tabelNo, array $overrideMap): ?array
     {
@@ -113,7 +115,7 @@ class AttendanceDayContextResolverService
     }
 
     /**
-     * @param  array<string,array{type:string,priority:int,source:string}>  $overrides
+     * @param  array<string,array<string,mixed>>  $overrides
      * @param  array<string,array<int,string>>  $keysByTabel
      */
     private function collectLeaveOverrides(
@@ -123,15 +125,26 @@ class AttendanceDayContextResolverService
         array &$overrides,
         array &$keysByTabel
     ): void {
+        $leaveTypeColumns = ['id', 'name'];
+        if ($this->leaveTypesHaveAttendanceCode()) {
+            $leaveTypeColumns[] = 'attendance_code';
+        }
+
         $rows = Leave::query()
+            ->with([
+                'leaveType' => fn ($query) => $query->select($leaveTypeColumns),
+            ])
             ->whereIn('tabel_no', $tabelNos)
             ->whereDate('starts_at', '<=', $to->toDateString())
             ->whereDate('ends_at', '>=', $from->toDateString())
             ->where(function ($query): void {
                 $query->where('status_id', OrderStatusEnum::APPROVED->value)
-                    ->orWhereNotNull('approved_at');
+                    ->orWhere(function ($fallback): void {
+                        $fallback->whereNull('status_id')
+                            ->whereNotNull('approved_at');
+                    });
             })
-            ->get(['tabel_no', 'starts_at', 'ends_at']);
+            ->get(['tabel_no', 'leave_type_id', 'starts_at', 'ends_at']);
 
         foreach ($rows as $row) {
             $start = Carbon::parse($row->starts_at)->startOfDay();
@@ -144,6 +157,11 @@ class AttendanceDayContextResolverService
                 start: $start,
                 end: $end,
                 type: 'leave',
+                extra: [
+                    'absence_code' => $this->resolveLeaveAttendanceCode($this->resolveLeaveTypeAttendanceCode($row->leaveType)),
+                    'leave_type_id' => $row->leave_type_id ? (int) $row->leave_type_id : null,
+                    'leave_type_name' => $row->leaveType?->name,
+                ],
                 priority: 300,
                 source: 'leave',
                 overrides: $overrides,
@@ -153,7 +171,7 @@ class AttendanceDayContextResolverService
     }
 
     /**
-     * @param  array<string,array{type:string,priority:int,source:string}>  $overrides
+     * @param  array<string,array<string,mixed>>  $overrides
      * @param  array<string,array<int,string>>  $keysByTabel
      */
     private function collectVacationOverrides(
@@ -180,6 +198,7 @@ class AttendanceDayContextResolverService
                 start: $start,
                 end: $end,
                 type: 'vacation',
+                extra: [],
                 priority: 200,
                 source: 'vacation',
                 overrides: $overrides,
@@ -189,7 +208,7 @@ class AttendanceDayContextResolverService
     }
 
     /**
-     * @param  array<string,array{type:string,priority:int,source:string}>  $overrides
+     * @param  array<string,array<string,mixed>>  $overrides
      * @param  array<string,array<int,string>>  $keysByTabel
      */
     private function collectBusinessTripOverrides(
@@ -216,6 +235,7 @@ class AttendanceDayContextResolverService
                 start: $start,
                 end: $end,
                 type: 'business_trip',
+                extra: [],
                 priority: 100,
                 source: 'business_trip',
                 overrides: $overrides,
@@ -225,7 +245,7 @@ class AttendanceDayContextResolverService
     }
 
     /**
-     * @param  array<string,array{type:string,priority:int,source:string}>  $overrides
+     * @param  array<string,array<string,mixed>>  $overrides
      * @param  array<string,array<int,string>>  $keysByTabel
      */
     private function walkDateRange(
@@ -235,6 +255,7 @@ class AttendanceDayContextResolverService
         Carbon $start,
         Carbon $end,
         string $type,
+        array $extra,
         int $priority,
         string $source,
         array &$overrides,
@@ -249,11 +270,11 @@ class AttendanceDayContextResolverService
             $current = $overrides[$key] ?? null;
 
             if ($current === null || $priority > ((int) ($current['priority'] ?? 0))) {
-                $overrides[$key] = [
+                $overrides[$key] = array_merge([
                     'type' => $type,
                     'priority' => $priority,
                     'source' => $source,
-                ];
+                ], $extra);
             }
 
             $keysByTabel[$tabelNo] ??= [];
@@ -261,5 +282,31 @@ class AttendanceDayContextResolverService
             $cursor->addDay();
         }
     }
-}
 
+    private function resolveLeaveAttendanceCode(?string $attendanceCode): string
+    {
+        $code = strtoupper(trim((string) $attendanceCode));
+
+        return $code !== '' ? $code : 'LEAVE';
+    }
+
+    private function resolveLeaveTypeAttendanceCode(mixed $leaveType): ?string
+    {
+        if (! $this->leaveTypesHaveAttendanceCode() || ! is_object($leaveType)) {
+            return null;
+        }
+
+        return data_get($leaveType, 'attendance_code');
+    }
+
+    private function leaveTypesHaveAttendanceCode(): bool
+    {
+        static $hasAttendanceCode;
+
+        if ($hasAttendanceCode === null) {
+            $hasAttendanceCode = Schema::hasColumn('leave_types', 'attendance_code');
+        }
+
+        return (bool) $hasAttendanceCode;
+    }
+}

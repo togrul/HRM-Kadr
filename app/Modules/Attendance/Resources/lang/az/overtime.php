@@ -19,7 +19,7 @@ return [
         'auto_generated' => 'Avtomatik yaradılıb',
         'manual_request' => 'Manual sorğu',
         'from_manual_entry' => 'Manual girişdən',
-        'from_ledger' => 'Ledgerdən',
+        'from_ledger' => 'Gündəlik qeyddən',
         'stale_pending' => 'Köhnəlmiş gözləmə',
     ],
     'create' => [

@@ -106,6 +106,11 @@ class AttendanceAuthorizationService
             'manage-attendance-settings',
             'access-admin',
         ],
+        'attendance.calendars.manage' => [
+            'manage-attendance-calendars',
+            'manage-attendance-settings',
+            'access-admin',
+        ],
         'attendance.export' => [
             'export-attendance',
             'manage-attendance',

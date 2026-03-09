@@ -32,11 +32,18 @@
             <button class="appearance-none absolute top-2 right-2" wire:click="closeCrud()">
                 <x-icons.close-icon></x-icons.close-icon>
             </button>
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 mt-4 w-full">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-2 mt-4 w-full">
                 <div class="flex flex-col">
                     <x-label for="form.name">{{ __('admin::leave_types.fields.name') }}</x-label>
                     <x-livewire-input mode="default" name="form.name" wire:model="form.name"></x-livewire-input>
                     @error('form.name')
+                        <x-validation> {{ $message }} </x-validation>
+                    @enderror
+                </div>
+                <div class="flex flex-col">
+                    <x-label for="form.attendance_code">{{ __('admin::leave_types.fields.attendance_code') }}</x-label>
+                    <x-livewire-input mode="default" name="form.attendance_code" wire:model="form.attendance_code"></x-livewire-input>
+                    @error('form.attendance_code')
                         <x-validation> {{ $message }} </x-validation>
                     @enderror
                 </div>
@@ -63,7 +70,7 @@
         <div class="relative min-h-[300px] -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
                 <div class="overflow-visible">
-                    <x-table.tbl :headers="[__('admin::leave_types.fields.id'), __('admin::leave_types.fields.name'), __('admin::leave_types.fields.max_days'), __('admin::leave_types.fields.requires_document'), __('admin::leave_types.table.actions')]">
+                    <x-table.tbl :headers="[__('admin::leave_types.fields.id'), __('admin::leave_types.fields.name'), __('admin::leave_types.fields.attendance_code'), __('admin::leave_types.fields.max_days'), __('admin::leave_types.fields.requires_document'), __('admin::leave_types.table.actions')]">
                         @forelse ($leave_types as $type)
                             <tr wire:key="leave-type-row-{{ $type->id }}">
                                 <x-table.td>
@@ -74,6 +81,11 @@
                                 <x-table.td style="white-space: normal !important;">
                                     <p class="text-sm font-medium">
                                         {{ $type->name }}
+                                    </p>
+                                </x-table.td>
+                                <x-table.td style="white-space: normal !important;">
+                                    <p class="text-sm font-medium">
+                                        {{ $type->attendance_code ?: '-' }}
                                     </p>
                                 </x-table.td>
                                 <x-table.td style="white-space: normal !important;">
@@ -104,7 +116,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5"></td>
+                                <td colspan="6"></td>
                             </tr>
                         @endforelse
                     </x-table.tbl>

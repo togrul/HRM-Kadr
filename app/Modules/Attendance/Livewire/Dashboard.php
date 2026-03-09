@@ -10,7 +10,7 @@ use Livewire\Component;
 
 class Dashboard extends Component
 {
-    private const ALLOWED_TABS = ['overview', 'daily-monitor', 'puantaj', 'exceptions', 'overtime', 'month-close', 'manual', 'settings', 'shifts'];
+    private const ALLOWED_TABS = ['overview', 'daily-monitor', 'puantaj', 'exceptions', 'overtime', 'month-close', 'manual', 'settings', 'shifts', 'calendar-regimes'];
 
     public int $year;
 
@@ -127,6 +127,10 @@ class Dashboard extends Component
 
         if ($authorization->can('attendance.shifts.manage')) {
             $tabs[] = 'shifts';
+        }
+
+        if ($authorization->can('attendance.calendars.manage')) {
+            $tabs[] = 'calendar-regimes';
         }
 
         return array_values(array_intersect(self::ALLOWED_TABS, $tabs));

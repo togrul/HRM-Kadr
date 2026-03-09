@@ -36,6 +36,9 @@ class AddComment extends Component
             if ($toStatus === OrderStatusEnum::APPROVED) {
                 $leave->approved_at = $now;
                 $leave->approved_by = $userId;
+            } else {
+                $leave->approved_at = null;
+                $leave->approved_by = null;
             }
 
             $leave->save();

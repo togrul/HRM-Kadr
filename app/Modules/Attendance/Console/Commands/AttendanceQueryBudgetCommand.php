@@ -93,7 +93,7 @@ class AttendanceQueryBudgetCommand extends Command
             $from = Carbon::createFromDate($year, $month, 1)->startOfMonth();
             $to = $from->copy()->endOfMonth();
 
-            $page = $puantajReadService->paginatePersonnels('', $perPage);
+            $page = $puantajReadService->paginatePersonnels('', $perPage, [], $from, $to);
             $tabelNos = $page->getCollection()->pluck('tabel_no')->filter()->values()->all();
             $puantajReadService->loadLedgerMap($tabelNos, $from, $to);
             $puantajReadService->globalCalendarDayTypeByDate($from, $to);

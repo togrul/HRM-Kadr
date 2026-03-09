@@ -24,6 +24,7 @@ return [
         'manual' => 'Manual entries',
         'settings' => 'Settings',
         'shifts' => 'Shifts',
+        'calendar_regimes' => 'Work regime calendar',
     ],
     'cards' => [
         'attendance_statistics' => 'Attendance statistics',

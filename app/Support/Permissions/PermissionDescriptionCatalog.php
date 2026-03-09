@@ -64,6 +64,7 @@ class PermissionDescriptionCatalog
             'manage-attendance' => 'Davamiyyət modulu üzrə ümumi idarəetmə, əməliyyat və nəzarət funksiyalarını icra etmək icazəsi verir.',
             'manage-attendance-settings' => 'Attendance tənzimləmələrini, default shift, grace qaydaları və hesablama siyasətlərini dəyişmək icazəsi verir.',
             'manage-attendance-shifts' => 'Növbələri yaratmaq, redaktə etmək, deaktiv etmək və kadrlar üzrə növbə təyinatlarını idarə etmək icazəsi verir.',
+            'manage-attendance-calendars' => 'Attendance iş rejimi təqvimini idarə etmək, ümumi və struktur səviyyəli iş günü/bayram override-larını dəyişmək icazəsi verir.',
             'add-attendance-manual' => 'Manual attendance qeydi yaratmaq və yeni girişləri sistemə daxil etmək icazəsi verir.',
             'edit-attendance-manual' => 'Manual attendance qeydlərini redaktə etmək və hesab parametrlərini yeniləmək icazəsi verir.',
             'approve-attendance-manual' => 'Manual attendance qeydlərini təsdiqləmək və ya rədd etmək icazəsi verir.',

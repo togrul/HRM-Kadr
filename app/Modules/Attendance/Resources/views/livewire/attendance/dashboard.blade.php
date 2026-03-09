@@ -90,6 +90,11 @@
                             {{ __('attendance::dashboard.tabs.shifts') }}
                         </x-filter.item>
                     @endif
+                    @if(in_array('calendar-regimes', $availableTabs, true))
+                        <x-filter.item wire:click.prevent="switchTab('calendar-regimes')" :active="$activeTab === 'calendar-regimes'">
+                            {{ __('attendance::dashboard.tabs.calendar_regimes') }}
+                        </x-filter.item>
+                    @endif
                 </x-filter.nav>
             </div>
         </div>
@@ -199,4 +204,10 @@
     @if($activeTab === 'shifts' && in_array('shifts', $availableTabs, true))
         <livewire:attendance.shift-management />
     @endif
+
+    @if($activeTab === 'calendar-regimes' && in_array('calendar-regimes', $availableTabs, true))
+        <livewire:attendance.calendar-regimes />
+    @endif
+
+    <x-datepicker :auto="false"></x-datepicker>
 </div>

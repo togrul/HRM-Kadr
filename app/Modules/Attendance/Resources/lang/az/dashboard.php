@@ -24,6 +24,7 @@ return [
         'manual' => 'Manual girişlər',
         'settings' => 'Tənzimləmələr',
         'shifts' => 'Növbələr',
+        'calendar_regimes' => 'İş rejimi təqvimi',
     ],
     'cards' => [
         'attendance_statistics' => 'Davamiyyət statistikası',

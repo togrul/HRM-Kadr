@@ -196,12 +196,17 @@ class AttendanceDailyLedgerCalculatorServiceTest extends TestCase
             override: [
                 'type' => 'leave',
                 'source' => 'leave',
+                'absence_code' => 'SICK',
+                'leave_type_id' => 7,
+                'leave_type_name' => 'Xəstəlik',
             ]
         );
 
         $this->assertSame('leave', $result['attendance_status']);
-        $this->assertSame('leave', $result['absence_code']);
+        $this->assertSame('SICK', $result['absence_code']);
         $this->assertSame(0, $result['worked_minutes']);
         $this->assertSame('policy_override', $result['source_summary']);
+        $this->assertSame(7, $result['meta']['leave_type_id']);
+        $this->assertSame('Xəstəlik', $result['meta']['leave_type_name']);
     }
 }

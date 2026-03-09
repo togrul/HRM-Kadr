@@ -6,6 +6,7 @@ use App\Modules\Attendance\Console\Commands\AttendanceProcessPunchesCommand;
 use App\Modules\Attendance\Console\Commands\AttendanceMonthlySnapshotCommand;
 use App\Modules\Attendance\Console\Commands\AttendanceQueryBudgetCommand;
 use App\Modules\Attendance\Console\Commands\AttendanceRecalculateLedgersCommand;
+use App\Modules\Attendance\Console\Commands\AttendanceSeedWeekendCalendarsCommand;
 use App\Providers\Concerns\RegistersLivewireAliases;
 use App\Services\Modules\ModuleState;
 use Illuminate\Support\ServiceProvider;
@@ -22,6 +23,7 @@ class AttendanceServiceProvider extends ServiceProvider
                 AttendanceMonthlySnapshotCommand::class,
                 AttendanceRecalculateLedgersCommand::class,
                 AttendanceQueryBudgetCommand::class,
+                AttendanceSeedWeekendCalendarsCommand::class,
             ]);
         }
     }
@@ -55,6 +57,7 @@ class AttendanceServiceProvider extends ServiceProvider
             'month-close' => \App\Modules\Attendance\Livewire\MonthClose::class,
             'settings' => \App\Modules\Attendance\Livewire\Settings::class,
             'shift-management' => \App\Modules\Attendance\Livewire\ShiftManagement::class,
+            'calendar-regimes' => \App\Modules\Attendance\Livewire\CalendarRegimes::class,
         ];
     }
 }

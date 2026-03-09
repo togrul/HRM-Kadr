@@ -5,17 +5,33 @@ namespace App\Modules\Attendance\Application\Services;
 use App\Models\AttendanceCalendar;
 use App\Models\AttendanceDailyLedger;
 use App\Models\Personnel;
+use App\Models\Structure;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 
 class AttendancePuantajReadService
 {
-    public function paginatePersonnels(string $search, int $perPage, array $structureIds = []): LengthAwarePaginator
+    public function paginatePersonnels(
+        string $search,
+        int $perPage,
+        array $structureIds = [],
+        ?Carbon $from = null,
+        ?Carbon $to = null
+    ): LengthAwarePaginator
     {
+        $fromDate = $from?->toDateString();
+        $toDate = $to?->toDateString();
+
         return Personnel::query()
             ->where('is_pending', 0)
-            ->whereNull('leave_work_date')
+            ->when($toDate !== null, fn ($query) => $query->whereDate('join_work_date', '<=', $toDate))
+            ->when($fromDate !== null, function ($query) use ($fromDate): void {
+                $query->where(function ($inner) use ($fromDate): void {
+                    $inner->whereNull('leave_work_date')
+                        ->orWhereDate('leave_work_date', '>=', $fromDate);
+                });
+            }, fn ($query) => $query->whereNull('leave_work_date'))
             ->when($structureIds !== [], fn ($query) => $query->whereIn('structure_id', $structureIds))
             ->when($search !== '', function ($query) use ($search): void {
                 $wildcard = '%'.$search.'%';
@@ -44,7 +60,7 @@ class AttendancePuantajReadService
         $ledgers = AttendanceDailyLedger::query()
             ->whereIn('tabel_no', $tabelNos)
             ->whereBetween('date', [$from->toDateString(), $to->toDateString()])
-            ->get(['tabel_no', 'date', 'worked_minutes', 'attendance_status', 'absence_code']);
+            ->get(['tabel_no', 'date', 'worked_minutes', 'attendance_status', 'absence_code', 'meta']);
 
         return $ledgers
             ->groupBy('tabel_no')
@@ -54,6 +70,9 @@ class AttendancePuantajReadService
                         'worked_minutes' => (int) $ledger->worked_minutes,
                         'attendance_status' => (string) $ledger->attendance_status,
                         'absence_code' => (string) ($ledger->absence_code ?? ''),
+                        'leave_type_id' => data_get($ledger->meta, 'leave_type_id'),
+                        'leave_type_name' => (string) data_get($ledger->meta, 'leave_type_name', ''),
+                        'calendar_day_type' => (string) data_get($ledger->meta, 'calendar_day_type', ''),
                     ],
                 ])->all();
             })
@@ -67,11 +86,56 @@ class AttendancePuantajReadService
     {
         return AttendanceCalendar::query()
             ->where('scope_type', 'global')
-            ->whereBetween('date', [$from->toDateString(), $to->toDateString()])
+            ->whereDate('date', '>=', $from->toDateString())
+            ->whereDate('date', '<=', $to->toDateString())
             ->get(['date', 'day_type'])
             ->mapWithKeys(fn (AttendanceCalendar $calendar) => [
                 $calendar->date->toDateString() => (string) $calendar->day_type,
             ])
+            ->all();
+    }
+
+    /**
+     * @param  array<int,int>  $structureIds
+     * @return array<int,array<string,mixed>>
+     */
+    public function calendarOverrides(Carbon $from, Carbon $to, array $structureIds = []): array
+    {
+        $structureNames = $structureIds === []
+            ? []
+            : Structure::query()
+                ->whereIn('id', $structureIds)
+                ->pluck('name', 'id')
+                ->all();
+
+        return AttendanceCalendar::query()
+            ->whereDate('date', '>=', $from->toDateString())
+            ->whereDate('date', '<=', $to->toDateString())
+            ->where(function ($query) use ($structureIds): void {
+                $query->where('scope_type', 'global');
+
+                if ($structureIds !== []) {
+                    $query->orWhere(function ($q) use ($structureIds): void {
+                        $q->where('scope_type', 'structure')
+                            ->whereIn('scope_id', $structureIds);
+                    });
+                }
+            })
+            ->orderBy('date')
+            ->orderBy('scope_type')
+            ->get(['date', 'day_type', 'name', 'is_paid', 'scope_type', 'scope_id'])
+            ->map(function (AttendanceCalendar $calendar) use ($structureNames): array {
+                return [
+                    'date' => $calendar->date?->toDateString(),
+                    'day_type' => (string) $calendar->day_type,
+                    'name' => (string) ($calendar->name ?? ''),
+                    'is_paid' => (bool) $calendar->is_paid,
+                    'scope_type' => (string) $calendar->scope_type,
+                    'scope_label' => $calendar->scope_type === 'structure'
+                        ? ($structureNames[(int) $calendar->scope_id] ?? ('#'.$calendar->scope_id))
+                        : __('attendance::puantaj.calendar.global_scope'),
+                ];
+            })
             ->all();
     }
 }
