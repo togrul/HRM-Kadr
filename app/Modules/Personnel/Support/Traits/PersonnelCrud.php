@@ -10,6 +10,7 @@ use App\Livewire\Traits\DropdownConstructTrait;
 use App\Livewire\Traits\Helpers\FillComplexArrayTrait;
 use App\Models\City;
 use App\Models\CountryTranslation;
+use App\Models\Structure;
 use App\Modules\Personnel\Support\Traits\DispatchesPersonnelUiEvents;
 use App\Modules\Personnel\Support\Traits\Personnel\HandlesPersonnelStepFlow;
 use App\Modules\Personnel\Support\Traits\Personnel\HandlesPersonnelStepValidation;
@@ -133,6 +134,48 @@ trait PersonnelCrud
         } else {
             $this->laborActivityForm->laborActivity['position_id'] = null;
             $this->laborActivityForm->laborActivity['structure_id'] = null;
+        }
+    }
+
+    public function selectLaborStructure(int $structureId): void
+    {
+        if (! property_exists($this, 'laborActivityForm') || ! $this->laborActivityForm) {
+            return;
+        }
+
+        $structure = Structure::query()
+            ->accessible()
+            ->find($structureId, ['id', 'name']);
+
+        if (! $structure) {
+            return;
+        }
+
+        $this->laborActivityForm->laborActivity['structure_id'] = (int) $structure->id;
+        $this->laborActivityForm->laborActivity['structure_label'] = (string) $structure->name;
+        $this->laborActivityForm->laborActivity['position_id'] = null;
+        $this->laborActivityForm->laborActivity['position_label'] = null;
+        $this->searchLaborPosition = '';
+    }
+
+    public function setStructure($payload, $list = null, $field = null, $key = null, $isCoded = null): void
+    {
+        if (is_array($payload)) {
+            $list = $payload['list'] ?? $list;
+            $field = $payload['field'] ?? $field;
+            $key = $payload['row'] ?? $key;
+            $isCoded = $payload['coded'] ?? $isCoded;
+            $payload = $payload['id'] ?? null;
+        }
+
+        $structureId = is_numeric($payload) ? (int) $payload : null;
+
+        if (! $structureId || $field !== 'structure_id') {
+            return;
+        }
+
+        if ($list === 'laborActivityForm') {
+            $this->selectLaborStructure($structureId);
         }
     }
 

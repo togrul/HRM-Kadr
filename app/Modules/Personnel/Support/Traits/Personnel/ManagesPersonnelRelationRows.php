@@ -344,7 +344,7 @@ trait ManagesPersonnelRelationRows
         $form->removePunishmentEntry($key);
     }
 
-    public function addKinship(): void
+    public function saveKinship(): void
     {
         $form = $this->kinshipFormInstance();
 
@@ -354,12 +354,17 @@ trait ManagesPersonnelRelationRows
 
         $this->validate($this->getKinshipRules());
 
-        $form->addKinshipEntry(
+        $form->saveKinshipEntry(
             $this->kinshipLabel(data_get($form->kinship, 'kinship_id'))
         );
     }
 
-    public function forceDeleteKinship(int $key): void
+    public function addKinship(): void
+    {
+        $this->saveKinship();
+    }
+
+    public function editKinship(string $rowKey): void
     {
         $form = $this->kinshipFormInstance();
 
@@ -367,7 +372,31 @@ trait ManagesPersonnelRelationRows
             return;
         }
 
-        $form->removeKinshipEntry($key);
+        $form->beginKinshipEdit($rowKey);
+        $this->resetValidation();
+    }
+
+    public function cancelKinshipEdit(): void
+    {
+        $form = $this->kinshipFormInstance();
+
+        if (! $form) {
+            return;
+        }
+
+        $form->cancelKinshipEdit();
+        $this->resetValidation();
+    }
+
+    public function forceDeleteKinship(string $rowKey): void
+    {
+        $form = $this->kinshipFormInstance();
+
+        if (! $form) {
+            return;
+        }
+
+        $form->removeKinshipEntry($rowKey);
     }
 
     public function addLanguage(): void

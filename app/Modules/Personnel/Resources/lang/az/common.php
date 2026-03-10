@@ -3,6 +3,7 @@
 return [
     'actions' => [
         'add' => 'Əlavə et',
+        'update' => 'Yenilə',
         'save' => 'Yadda saxla',
         'delete' => 'Sil',
         'cancel' => 'Ləğv et',
@@ -190,6 +191,10 @@ return [
         'punishments' => 'Cəzalar',
         'kinship' => 'Qohumluq',
         'kinships' => 'Qohumluqlar',
+        'new_kinship' => 'Yeni qohum əlavə et',
+        'new_kinship_hint' => 'Qohum məlumatlarını doldurub siyahıya əlavə edin.',
+        'editing_kinship' => 'Qohum məlumatı redaktə olunur',
+        'editing_kinship_hint' => 'Aşağıdakı seçilmiş kartın məlumatları formda açılıb.',
         'birth_certificate_number' => 'Doğum haqqında şəhadətnamə nömrəsi',
         'marriage_certificate_number' => 'Nikah şəhadətnaməsi nömrəsi',
         'language' => 'Dil',

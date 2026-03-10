@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Forms\Personnel;
 
+use App\Models\Structure;
 use App\Models\Personnel;
 use Illuminate\Support\Arr;
 use Livewire\Form;
@@ -67,6 +68,7 @@ class LaborActivityForm extends Form
             'laborActivities',
             'latestDisposal',
             'currentWork',
+            'structure' => fn ($query) => $query->withRecursive('parent', false),
             'ranks.rank',
             'ranks.rankReason',
         ]);
@@ -84,6 +86,7 @@ class LaborActivityForm extends Form
                 $payload['is_special_service'] = (bool) ($payload['is_special_service'] ?? false);
                 $payload['is_current'] = (bool) ($payload['is_current'] ?? false);
                 $payload['time'] = '12:00';
+                $payload['company_name_display'] = $payload['company_name'] ?? null;
 
                 $start = $activity->join_date ? \Carbon\Carbon::parse($activity->join_date) : \Carbon\Carbon::now();
                 $payload['position_label'] = $personnel->disposalTaggedLabel(
@@ -91,6 +94,10 @@ class LaborActivityForm extends Form
                     $start,
                     $payload['is_current'] && empty($activity->leave_date)
                 );
+
+                if ($payload['is_current'] && empty($activity->leave_date) && $personnel->structure) {
+                    $payload['company_name_display'] = $personnel->structure->fullStructurePath(rootAsShortname: true);
+                }
 
                 return $payload;
             })
@@ -129,15 +136,16 @@ class LaborActivityForm extends Form
         if (! empty($entry['use_lookup'])) {
             $positionName = trim((string) ($entry['position_label'] ?? ''));
             $structureName = trim((string) ($entry['structure_label'] ?? ''));
+            $entry['company_name_display'] = $structureName !== '' ? $structureName : ($entry['company_name'] ?? null);
 
             if ($structureName !== '') {
-                $companyName = trim((string) ($entry['company_name'] ?? ''));
-                $entry['company_name'] = $companyName === '' ? $structureName : "{$companyName} - {$structureName}";
+                $entry['company_name'] = $structureName;
             }
 
             $entry['position'] = trim($positionName);
             $entry['position_label'] = $entry['position'];
         } else {
+            $entry['company_name_display'] = $entry['company_name'] ?? null;
             $entry['position_label'] = $entry['position'] ?? null;
             $entry['position_id'] = null;
             $entry['structure_id'] = null;
@@ -189,6 +197,7 @@ class LaborActivityForm extends Form
     {
         return [
             'company_name' => null,
+            'company_name_display' => null,
             'position' => null,
             'position_label' => null,
             'structure_label' => null,
@@ -231,4 +240,5 @@ class LaborActivityForm extends Form
     {
         return $this->rankList ?? [];
     }
+
 }

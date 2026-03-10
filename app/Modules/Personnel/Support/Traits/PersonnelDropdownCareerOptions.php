@@ -16,6 +16,7 @@ use App\Models\ScientificDegreeAndName;
 use App\Models\SocialOrigin;
 use App\Models\Structure;
 use App\Models\WorkNorm;
+use App\Services\StructureService;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 
@@ -485,6 +486,29 @@ trait PersonnelDropdownCareerOptions
             selectedId: $selectedId,
             limit: 40
         );
+    }
+
+    #[Computed]
+    public function laborStructureTreeRoots()
+    {
+        $accessibleIds = array_map(
+            'intval',
+            resolve(StructureService::class)->getAccessibleStructures()
+        );
+
+        if ($accessibleIds === []) {
+            return collect();
+        }
+
+        return Structure::query()
+            ->whereIn('id', $accessibleIds)
+            ->where(function ($query) use ($accessibleIds) {
+                $query->whereNull('parent_id')
+                    ->orWhereNotIn('parent_id', $accessibleIds);
+            })
+            ->withRecursive('subs')
+            ->orderBy('code')
+            ->get(['id', 'name', 'parent_id', 'code', 'level']);
     }
 
     protected function positionOptionsFor(string $searchKey, int|string|null $selectedId): array

@@ -21,17 +21,50 @@
                     </label>
                 </div>
                 @if($laborActivityForm->laborActivity['use_lookup'] ?? false)
-                    <x-ui.select-dropdown
-                        label=""
-                        placeholder="---"
-                        mode="gray"
-                        class="w-full"
-                        wire:model.live="laborActivityForm.laborActivity.structure_id"
-                        :model="$this->laborStructureOptions"
-                    :search-model="data_get($stepSearchModels, 'searchLaborStructure', 'searchLaborStructure')"
-                    :search-placeholder="data_get($stepSearchPlaceholders, 'searchLaborStructure', __('personnel::common.placeholders.search'))"
-                    >
-                    </x-ui.select-dropdown>
+                    @php
+                        $laborStructureSelectedResolver = fn ($component, $list, $row, $field, $preset = null)
+                            => (int) (data_get($component->laborActivityForm->laborActivity, 'structure_id') ?? 0) ?: null;
+                    @endphp
+                    <div class="flex flex-col space-y-1"
+                         x-data="{ showStructures: false, openNodes: $store.laborStructureTree ?? ($store.laborStructureTree = {}) }">
+                        <div class="relative w-full">
+                            <button
+                                type="button"
+                                @click="showStructures = !showStructures"
+                                class="relative flex items-center justify-between w-full px-4 py-2 text-left rounded-lg shadow-sm bg-neutral-100 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                            >
+                                <span class="block truncate text-neutral-900">
+                                    {{ $this->optionLabelFor($this->laborStructureOptions, data_get($laborActivityForm->laborActivity, 'structure_id')) ?: '---' }}
+                                </span>
+                                <svg class="w-5 h-5 text-neutral-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    <path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                                </svg>
+                            </button>
+
+                            <div
+                                x-show="showStructures"
+                                @click.outside="showStructures = false"
+                                x-transition.opacity.duration.100ms
+                                class="absolute z-[150] w-full px-3 py-3 mt-1 space-y-2 overflow-auto bg-white rounded-md shadow-xl max-h-80"
+                            >
+                                <x-radio-tree.list>
+                                    @foreach($this->laborStructureTreeRoots as $structureRoot)
+                                        <x-radio-tree.item
+                                            :model="$structureRoot"
+                                            list-data="laborActivityForm"
+                                            field="structure_id"
+                                            :key="0"
+                                            :is-coded="false"
+                                            :selected-id="data_get($laborActivityForm->laborActivity, 'structure_id')"
+                                            :selected-resolver="$laborStructureSelectedResolver"
+                                        >
+                                            {{ $structureRoot->name }}
+                                        </x-radio-tree.item>
+                                    @endforeach
+                                </x-radio-tree.list>
+                            </div>
+                        </div>
+                    </div>
                     @error('laborActivityForm.laborActivity.structure_id')
                     <x-validation> {{ $message }} </x-validation>
                     @enderror
@@ -160,7 +193,7 @@
             </button>
             <div class="flex items-center space-x-2 border-b border-dashed w-max border-slate-400">
                 <p class="font-medium text-gray-700">
-                    {{ $laModel['company_name'] }}
+                    {{ data_get($laModel, 'company_name_display') ?? data_get($laModel, 'company_name') }}
                 </p>
                 @if($laModel['is_current'] ??= false)
                 <span class="flex items-center justify-center w-4 h-4 bg-green-500 border-4 border-green-200 rounded-full">

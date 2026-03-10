@@ -3,6 +3,7 @@
 return [
     'actions' => [
         'add' => 'Add',
+        'update' => 'Update',
         'save' => 'Save',
         'delete' => 'Delete',
         'cancel' => 'Cancel',
@@ -190,6 +191,10 @@ return [
         'punishments' => 'Punishments',
         'kinship' => 'Kinship',
         'kinships' => 'Kinships',
+        'new_kinship' => 'Add new kinship',
+        'new_kinship_hint' => 'Fill the kinship details and add them to the list.',
+        'editing_kinship' => 'Editing kinship',
+        'editing_kinship_hint' => 'The selected card below is currently loaded into the form.',
         'birth_certificate_number' => 'Birth certificate number',
         'marriage_certificate_number' => 'Marriage certificate number',
         'language' => 'Language',

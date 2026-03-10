@@ -1,5 +1,20 @@
 <div class="flex flex-col space-y-4">
     <x-form-card title="{{ __('personnel::common.steps.kinships') }}">
+        <div class="flex items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+                <x-small-badge mode="{{ $kinshipForm->isEditingKinship() ? 'blue' : 'green' }}">
+                    {{ $kinshipForm->isEditingKinship()
+                        ? __('personnel::common.labels.editing_kinship')
+                        : __('personnel::common.labels.new_kinship') }}
+                </x-small-badge>
+                <p class="text-sm text-neutral-500">
+                    {{ $kinshipForm->isEditingKinship()
+                        ? __('personnel::common.labels.editing_kinship_hint')
+                        : __('personnel::common.labels.new_kinship_hint') }}
+                </p>
+            </div>
+        </div>
+
         <div class="grid grid-cols-4 gap-2">
             <div class="flex flex-col">
                 <x-ui.select-dropdown label="{{ __('personnel::common.labels.kinship') }}" placeholder="---" mode="gray" class="w-full"
@@ -83,30 +98,62 @@
             </div>
         </div>
 
-        <div class="flex justify-end">
-            <x-button mode="black" wire:click="addKinship">{{ __('personnel::common.actions.add') }}</x-button>
+        <div class="flex justify-end gap-2">
+            @if($kinshipForm->isEditingKinship())
+                <x-button mode="danger" wire:click="cancelKinshipEdit">{{ __('personnel::common.actions.cancel') }}</x-button>
+            @endif
+
+            <x-button mode="black" wire:click="saveKinship">
+                {{ $kinshipForm->isEditingKinship()
+                    ? __('personnel::common.actions.update')
+                    : __('personnel::common.actions.add') }}
+            </x-button>
         </div>
 
         <div class="grid gap-2">
             @forelse ($kinshipForm->kinshipList ?? [] as $key => $knshModel)
-                <x-surface-card wire:key="kinships-{{ $key }}">
+                @php
+                    $rowKey = data_get($knshModel, 'row_key') ?? ('kinships-'.$key);
+                    $isEditing = $kinshipForm->editingKinshipKey === $rowKey;
+                @endphp
+
+                <x-surface-card
+                    wire:key="kinships-{{ $rowKey }}"
+                    @class([
+                        'transition-all duration-300 hover:border-zinc-300 hover:bg-zinc-100/80' => ! $isEditing,
+                        '!border-sky-300 !bg-sky-50/70 shadow-[0_18px_40px_-28px_rgba(14,165,233,0.45)] ring-1 ring-sky-200' => $isEditing,
+                    ])
+                >
                     <x-slot name="title">
                         <div class="flex items-center justify-between w-full">
-                            <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-3">
                                 <span
-                                    class="px-2 py-1 text-sm font-medium uppercase rounded-md text-neutral-600 bg-neutral-200/80">
+                                    class="inline-flex items-center rounded-full bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500 shadow-sm">
                                     {{ data_get($knshModel, 'kinship_name') ?? '---' }}
                                 </span>
-                                <span class="text-base border-b border-dotted text-emerald-600 border-emerald-500">
+                                <span class="text-base font-semibold text-emerald-600 border-b border-dotted border-emerald-400/80">
                                     {{ data_get($knshModel, 'fullname') ?? '---' }}
                                 </span>
+
+                                @if($isEditing)
+                                    <span class="inline-flex items-center rounded-full bg-sky-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-sky-700">
+                                        {{ __('personnel::common.actions.edit') }}
+                                    </span>
+                                @endif
                             </div>
-                            <button
-                                onclick="confirm('{{ __('personnel::common.messages.remove_data_confirm') }}') || event.stopImmediatePropagation()"
-                                wire:click="forceDeleteKinship({{ $key }})"
-                                class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700">
-                                <x-icons.force-delete></x-icons.force-delete>
-                            </button>
+                            <div class="flex items-center gap-2">
+                                <button
+                                    wire:click="editKinship('{{ $rowKey }}')"
+                                    class="flex h-10 w-10 items-center justify-center rounded-full border border-white/80 bg-white text-slate-300 shadow-[0_12px_28px_-18px_rgba(15,23,42,0.22)] transition hover:text-sky-500">
+                                    <x-icons.edit-icon color="{{ $isEditing ? 'text-sky-500' : 'text-slate-300' }}" hover="{{ $isEditing ? 'text-sky-600' : 'text-sky-500' }}"></x-icons.edit-icon>
+                                </button>
+                                <button
+                                    onclick="confirm('{{ __('personnel::common.messages.remove_data_confirm') }}') || event.stopImmediatePropagation()"
+                                    wire:click="forceDeleteKinship('{{ $rowKey }}')"
+                                    class="flex h-10 w-10 items-center justify-center rounded-full border border-white/80 bg-white text-rose-300 shadow-[0_12px_28px_-18px_rgba(15,23,42,0.22)] transition hover:text-rose-500">
+                                    <x-icons.force-delete color="text-rose-300" hover="text-rose-500"></x-icons.force-delete>
+                                </button>
+                            </div>
                         </div>
                     </x-slot>
                     <div class="flex flex-col w-full space-y-3">

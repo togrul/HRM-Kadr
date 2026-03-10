@@ -5,6 +5,7 @@ namespace Tests\Unit\Services;
 use App\Enums\KnowledgeStatusEnum;
 use App\Models\Country;
 use App\Models\EducationDegree;
+use App\Models\Kinship;
 use App\Models\Language;
 use App\Models\Personnel;
 use App\Models\Position;
@@ -84,6 +85,77 @@ class PersonnelRelationsServiceTest extends TestCase
         $this->assertDatabaseMissing('personnel_cards', [
             'tabel_no' => $personnel->tabel_no,
             'card_number' => 'OLD',
+        ]);
+    }
+
+    public function test_it_preserves_multiple_kinships_with_same_kinship_id_during_update(): void
+    {
+        $personnel = $this->makePersonnel();
+
+        Kinship::create([
+            'id' => 21,
+            'name_az' => 'Qardaş',
+            'name_en' => 'Brother',
+            'name_ru' => 'Брат',
+            'is_active' => true,
+        ]);
+
+        $first = $personnel->kinships()->create([
+            'kinship_id' => 21,
+            'fullname' => 'Birinci qardaş',
+            'birthdate' => '1990-01-01',
+            'registered_address' => 'A küçəsi',
+            'residental_address' => 'A küçəsi',
+        ]);
+
+        $second = $personnel->kinships()->create([
+            'kinship_id' => 21,
+            'fullname' => 'İkinci qardaş',
+            'birthdate' => '1992-01-01',
+            'registered_address' => 'B küçəsi',
+            'residental_address' => 'B küçəsi',
+        ]);
+
+        app(PersonnelRelationsService::class)->update($personnel->fresh('kinships'), [
+            'kinships' => [
+                [
+                    'id' => $first->id,
+                    'kinship_id' => 21,
+                    'fullname' => 'Birinci qardaş yenilənib',
+                    'birthdate' => '1990-01-01',
+                    'registered_address' => 'A küçəsi',
+                    'residental_address' => 'A küçəsi',
+                ],
+                [
+                    'id' => $second->id,
+                    'kinship_id' => 21,
+                    'fullname' => 'İkinci qardaş yenilənib',
+                    'birthdate' => '1992-01-01',
+                    'registered_address' => 'B küçəsi',
+                    'residental_address' => 'B küçəsi',
+                ],
+                [
+                    'kinship_id' => 21,
+                    'fullname' => 'Üçüncü qardaş',
+                    'birthdate' => '1995-01-01',
+                    'registered_address' => 'C küçəsi',
+                    'residental_address' => 'C küçəsi',
+                ],
+            ],
+        ]);
+
+        $this->assertDatabaseCount('personnel_kinships', 3);
+        $this->assertDatabaseHas('personnel_kinships', [
+            'id' => $first->id,
+            'fullname' => 'Birinci qardaş yenilənib',
+        ]);
+        $this->assertDatabaseHas('personnel_kinships', [
+            'id' => $second->id,
+            'fullname' => 'İkinci qardaş yenilənib',
+        ]);
+        $this->assertDatabaseHas('personnel_kinships', [
+            'tabel_no' => $personnel->tabel_no,
+            'fullname' => 'Üçüncü qardaş',
         ]);
     }
 

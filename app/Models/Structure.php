@@ -80,6 +80,16 @@ class Structure extends Model
         return implode(' / ', $this->getAllParentName());
     }
 
+    public function fullStructurePath(bool $includeRoot = true, bool $rootAsShortname = false): string
+    {
+        return implode(' / ', $this->fullStructureSegments($includeRoot, $rootAsShortname));
+    }
+
+    public function fullStructureName(bool $includeRoot = false): string
+    {
+        return implode(' / ', $this->fullStructureSegments($includeRoot));
+    }
+
     public function getAllNestedIds(): array
     {
         return $this->subs->reduce(fn($ids, $child) => array_merge($ids, $child->getAllNestedIds()), [$this->id]);
@@ -110,5 +120,33 @@ class Structure extends Model
         }
 
         return array_reverse($parentNames);
+    }
+
+    protected function fullStructureSegments(bool $includeRoot = true, bool $rootAsShortname = false): array
+    {
+        $segments = [];
+        $cursor = $this;
+
+        while ($cursor) {
+            if (! $cursor->relationLoaded('parent') && ! is_null($cursor->parent_id)) {
+                $cursor->loadMissing('parent');
+            }
+
+            $isRoot = is_null($cursor->parent_id);
+
+            if (! $isRoot || $includeRoot) {
+                $segments[] = ($isRoot && $rootAsShortname)
+                    ? (string) ($cursor->shortname ?: $cursor->name)
+                    : (string) $cursor->name;
+            }
+
+            if (! $cursor->relationLoaded('parent')) {
+                break;
+            }
+
+            $cursor = $cursor->parent;
+        }
+
+        return array_reverse(array_filter($segments));
     }
 }

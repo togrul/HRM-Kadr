@@ -21,6 +21,7 @@ use App\Models\PersonnelRank;
 use App\Models\PersonnelScientificDegreeAndName;
 use App\Models\PersonnelTakenCaptive;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 
 class PersonnelRelationsService
 {
@@ -95,7 +96,7 @@ class PersonnelRelationsService
             $this->handleAssociations($personnel, relation: 'punishments', list: $payloads['punishments'] ?? [], uniqueKeys: ['punishment_id', 'given_date'], model: PersonnelPunishment::class, tabelCheck: true);
         }
         if (array_key_exists('kinships', $payloads)) {
-            $this->handleAssociations($personnel, relation: 'kinships', list: $payloads['kinships'] ?? [], uniqueKeys: 'kinship_id', model: PersonnelKinship::class);
+            $this->handleAssociations($personnel, relation: 'kinships', list: $payloads['kinships'] ?? [], uniqueKeys: [], model: PersonnelKinship::class);
         }
         if (array_key_exists('languages', $payloads)) {
             $this->handleAssociations($personnel, relation: 'foreignLanguages', list: $payloads['languages'] ?? [], uniqueKeys: 'language_id');
@@ -203,13 +204,33 @@ class PersonnelRelationsService
             }
 
             $payload = $this->modifyArray($item, $modelInstance && method_exists($modelInstance, 'dateList') ? $modelInstance->dateList() : []);
-            $queryKeys = array_intersect_key($payload, array_flip($uniqueKeys));
+            $persisted = null;
 
-            if ($tabelCheck) {
-                $queryKeys['tabel_no'] = $personnel->tabel_no;
+            if (! empty($payload['id'])) {
+                $persisted = $personnel->{$relation}()
+                    ->whereKey((int) $payload['id'])
+                    ->first();
+
+                if ($persisted) {
+                    $persisted->fill(Arr::except($payload, ['id']));
+                    $persisted->save();
+                }
             }
 
-            $persisted = $personnel->{$relation}()->updateOrCreate($queryKeys, $payload);
+            if (! $persisted) {
+                $queryKeys = array_intersect_key($payload, array_flip($uniqueKeys));
+
+                if ($tabelCheck) {
+                    $queryKeys['tabel_no'] = $personnel->tabel_no;
+                }
+
+                if (! empty($queryKeys)) {
+                    $persisted = $personnel->{$relation}()->updateOrCreate($queryKeys, Arr::except($payload, ['id']));
+                } else {
+                    $persisted = $personnel->{$relation}()->create(Arr::except($payload, ['id']));
+                }
+            }
+
             $updatedModelsId[] = $persisted->id;
         }
 
