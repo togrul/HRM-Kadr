@@ -2,7 +2,7 @@
     <x-surface-card :title="__('attendance::month_close.title')" icon="icons.lock-icon">
         <div class="space-y-3">
             <div>
-                <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400">{{ __('attendance::month_close.period_control.title') }}</p>
+                <p class="text-[11px] font-semibold uppercase  text-zinc-400">{{ __('attendance::month_close.period_control.title') }}</p>
                 <p class="mt-1 text-sm text-zinc-500">{{ __('attendance::month_close.period_control.description') }}</p>
             </div>
 

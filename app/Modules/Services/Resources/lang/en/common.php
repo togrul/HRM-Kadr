@@ -48,6 +48,7 @@ return [
         'age' => 'Age',
         'appeal_date' => 'Appeal date',
         'general' => 'General',
+        'candidate_preferences' => 'Candidates',
         'menus' => 'Menus',
         'roles' => 'Roles',
         'users' => 'Users',

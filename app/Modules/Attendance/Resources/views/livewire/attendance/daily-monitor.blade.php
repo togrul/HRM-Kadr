@@ -18,7 +18,7 @@
         <div class="space-y-3">
             <div class="flex flex-col gap-1 md:flex-row md:items-start md:justify-between">
                 <div class="space-y-1">
-                    <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400">{{ __('attendance::daily_monitor.filters.title') }}</p>
+                    <p class="text-[11px] font-semibold uppercase  text-zinc-400">{{ __('attendance::daily_monitor.filters.title') }}</p>
                     <p class="text-sm text-zinc-500">{{ __('attendance::daily_monitor.filters.description') }}</p>
                 </div>
             </div>
@@ -71,7 +71,7 @@
 
     <div class="space-y-2">
         <div class="flex items-center justify-between gap-2">
-            <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400">{{ __('attendance::daily_monitor.breakdown.title') }}</p>
+            <p class="text-[11px] font-semibold uppercase  text-zinc-400">{{ __('attendance::daily_monitor.breakdown.title') }}</p>
             <span class="text-xs text-zinc-500">{{ __('attendance::daily_monitor.breakdown.description') }}</span>
         </div>
         <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">

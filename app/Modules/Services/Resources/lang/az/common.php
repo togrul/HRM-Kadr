@@ -48,6 +48,7 @@ return [
         'age' => 'Yaş',
         'appeal_date' => 'Müraciət tarixi',
         'general' => 'Ümumi',
+        'candidate_preferences' => 'Namizədlər',
         'menus' => 'Menyular',
         'roles' => 'Rollar',
         'users' => 'İstifadəçilər',

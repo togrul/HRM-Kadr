@@ -2,7 +2,7 @@
     <x-surface-card :title="__('attendance::overtime.title')" icon="icons.clock-icon">
         <div class="space-y-3">
             <div class="space-y-1">
-                <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400">{{ __('attendance::overtime.filters.title') }}</p>
+                <p class="text-[11px] font-semibold uppercase  text-zinc-400">{{ __('attendance::overtime.filters.title') }}</p>
                 <p class="text-sm text-zinc-500">{{ __('attendance::overtime.filters.description') }}</p>
             </div>
 
@@ -103,7 +103,7 @@
 
     @if(!empty($activeFilters))
         <div class="flex flex-wrap items-center gap-2 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2">
-            <span class="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400">{{ __('attendance::overtime.filters.active') }}</span>
+            <span class="text-xs font-semibold uppercase  text-zinc-400">{{ __('attendance::overtime.filters.active') }}</span>
             @foreach($activeFilters as $filter)
                 <x-small-badge :mode="$filter['mode']">
                     {{ $filter['label'] }}: {{ $filter['value'] }}

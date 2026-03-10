@@ -2,7 +2,7 @@
     <x-surface-card :title="__('attendance::exceptions.title')" icon="icons.pending-icon">
         <div class="space-y-3">
             <div class="space-y-1">
-                <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400">{{ __('attendance::exceptions.filters.title') }}</p>
+                <p class="text-[11px] font-semibold uppercase  text-zinc-400">{{ __('attendance::exceptions.filters.title') }}</p>
                 <p class="text-sm text-zinc-500">{{ __('attendance::exceptions.filters.description') }}</p>
             </div>
 

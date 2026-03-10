@@ -16,6 +16,8 @@ class SettingsList extends Component
 
     private const CANDIDATE_FILTER_KEYS = ['fullname', 'gender', 'results', 'age', 'appeal_date'];
 
+    public string $section = 'general';
+
     public $setting = [];
     public array $candidateStatusWhitelist = [
         'military' => [],
@@ -37,8 +39,10 @@ class SettingsList extends Component
     ];
     public array $candidateStatuses = [];
 
-    public function mount(): void
+    public function mount(string $section = 'general'): void
     {
+        $this->section = in_array($section, ['general', 'candidate'], true) ? $section : 'general';
+
         $this->candidateStatuses = AppealStatus::query()
             ->where('locale', app()->getLocale())
             ->orderBy('id')
@@ -141,9 +145,13 @@ class SettingsList extends Component
 
     public function render()
     {
-        $settings = Setting::query()
-            ->whereNotIn('name', $this->candidateManagedSettingKeys())
-            ->get();
+        $settings = collect();
+
+        if ($this->section === 'general') {
+            $settings = Setting::query()
+                ->whereNotIn('name', $this->candidateManagedSettingKeys())
+                ->get();
+        }
 
         $this->setting = $settings->toArray();
 
@@ -305,6 +313,20 @@ class SettingsList extends Component
         }
 
         return $options;
+    }
+
+    public function candidateModes(): array
+    {
+        return [
+            'military' => [
+                'title' => __('services::settings.labels.military_mode_status_ids'),
+                'accent' => 'emerald',
+            ],
+            'civilian' => [
+                'title' => __('services::settings.labels.civilian_mode_status_ids'),
+                'accent' => 'sky',
+            ],
+        ];
     }
 
     public function resolveSettingLabel(string $value): string

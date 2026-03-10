@@ -36,14 +36,14 @@
             <div class="mb-4 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-3">
                 <div class="grid gap-3 lg:grid-cols-[1.9fr_0.8fr]">
                     <div class="space-y-1">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400">{{ __('attendance::manual_entries.labels.input_flow') }}</p>
+                        <p class="text-[11px] font-semibold uppercase  text-zinc-400">{{ __('attendance::manual_entries.labels.input_flow') }}</p>
                         <p class="text-sm text-zinc-500">{{ __('attendance::manual_entries.descriptions.input_flow') }}</p>
                     </div>
 
                     <div class="rounded-xl border border-zinc-200 bg-white px-3 py-3 shadow-sm">
                         <div class="flex h-full flex-col justify-between gap-3">
                             <div class="space-y-0.5">
-                                <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400">{{ __('attendance::manual_entries.labels.metric_input_mode') }}</p>
+                                <p class="text-[11px] font-semibold uppercase  text-zinc-400">{{ __('attendance::manual_entries.labels.metric_input_mode') }}</p>
                                 <p class="text-xs leading-5 text-zinc-500">
                                     {{ __('attendance::manual_entries.descriptions.metric_mode') }}
                                 </p>
@@ -463,7 +463,7 @@
     <x-surface-card :title="__('attendance::manual_entries.titles.queue')">
         <div class="mb-3 space-y-3">
             <div class="space-y-1">
-                <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400">{{ __('attendance::manual_entries.labels.approval_queue') }}</p>
+                <p class="text-[11px] font-semibold uppercase  text-zinc-400">{{ __('attendance::manual_entries.labels.approval_queue') }}</p>
                 <p class="text-sm text-zinc-500">{{ __('attendance::manual_entries.descriptions.queue') }}</p>
             </div>
 

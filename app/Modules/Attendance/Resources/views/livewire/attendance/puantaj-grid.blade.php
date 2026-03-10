@@ -82,7 +82,7 @@
     <x-surface-card :title="__('attendance::puantaj.legend.title')" icon="icons.info-circle-icon">
         <div class="space-y-4">
             <div class="rounded-xl border border-zinc-200 bg-zinc-50/70 p-3 space-y-2">
-                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400">{{ __('attendance::puantaj.legend.sections.colors') }}</p>
+                <p class="text-xs font-semibold uppercase  text-zinc-400">{{ __('attendance::puantaj.legend.sections.colors') }}</p>
                 <div class="flex flex-wrap gap-2">
                     @foreach($statusLegend as $item)
                         <x-small-badge :mode="$item['mode']" :icon="$item['icon']">{{ $item['label'] }}</x-small-badge>
@@ -97,7 +97,7 @@
 
             @if($leaveLegend !== [])
                 <div class="rounded-xl border border-zinc-200 bg-zinc-50/70 p-3 space-y-2">
-                    <p class="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400">{{ __('attendance::puantaj.legend.sections.leave_types') }}</p>
+                    <p class="text-xs font-semibold uppercase  text-zinc-400">{{ __('attendance::puantaj.legend.sections.leave_types') }}</p>
                     <div class="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
                         @foreach($leaveLegend as $item)
                             <div class="flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-700">
@@ -118,7 +118,7 @@
 
             @if($calendarOverrides !== [])
                 <div class="rounded-xl border border-zinc-200 bg-zinc-50/70 p-3 space-y-2">
-                    <p class="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400">{{ __('attendance::puantaj.legend.sections.calendar') }}</p>
+                    <p class="text-xs font-semibold uppercase  text-zinc-400">{{ __('attendance::puantaj.legend.sections.calendar') }}</p>
                     <div class="flex flex-wrap gap-2">
                         @foreach($calendarOverrides as $item)
                             <x-small-badge :mode="$item['mode']" :icon="$item['icon']">{{ $item['label'] }}</x-small-badge>

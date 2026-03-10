@@ -7,7 +7,7 @@
         <div class="space-y-4">
             <div class="flex flex-col gap-1 md:flex-row md:items-start md:justify-between">
                 <div class="space-y-1">
-                    <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400">{{ __('attendance::dashboard.workspace.title') }}</p>
+                    <p class="text-[11px] font-semibold uppercase  text-zinc-400">{{ __('attendance::dashboard.workspace.title') }}</p>
                     <span class="text-sm text-zinc-500">{{ __('attendance::dashboard.workspace.description') }}</span>
                 </div>
 
@@ -40,7 +40,7 @@
 
             <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-3">
                 <div class="mb-2 flex items-center justify-between gap-2">
-                    <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400">{{ __('attendance::dashboard.sections.title') }}</p>
+                    <p class="text-[11px] font-semibold uppercase  text-zinc-400">{{ __('attendance::dashboard.sections.title') }}</p>
                     <span class="text-xs text-zinc-500">{{ __('attendance::dashboard.sections.description') }}</span>
                 </div>
 

@@ -38,7 +38,11 @@
             <section class="" wire:target="selectService" wire:loading.remove>
                 @switch($selectedService)
                     @case('general')
-                        @livewire('services.settings.settings-list', key('settings'))
+                        @livewire('services.settings.settings-list', ['section' => 'general'], key('settings-general'))
+                    @break
+
+                    @case('candidate')
+                        @livewire('services.settings.settings-list', ['section' => 'candidate'], key('settings-candidate'))
                     @break
 
                     @case('menus')
