@@ -1,7 +1,9 @@
-@props(['model', 'data'])
+@props(['model', 'data', 'accept' => null])
 
 @php
-    [$modelName, $modelKey] = explode('.', $model);
+    $modelParts = explode('.', $model, 2);
+    $modelName = $modelParts[0] ?? $model;
+    $modelKey = $modelParts[1] ?? null;
 @endphp
 
 <div class="p-1 rounded-lg shadow-sm bg-neutral-100">
@@ -19,7 +21,7 @@
                         </path>
                     </svg>
                 </span>
-                <input type='file' class="hidden" wire:model="{{ $model }}" />
+                <input type='file' class="hidden" wire:model="{{ $model }}" @if($accept) accept="{{ $accept }}" @endif />
             </label>
 
         </div>
