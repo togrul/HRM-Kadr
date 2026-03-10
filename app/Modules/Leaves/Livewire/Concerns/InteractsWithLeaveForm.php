@@ -98,6 +98,55 @@ trait InteractsWithLeaveForm
         );
     }
 
+    #[Computed]
+    public function selectedLeaveTypeMeta(): ?array
+    {
+        $leaveTypeId = $this->leave->leave_type_id;
+
+        if (! $leaveTypeId) {
+            return null;
+        }
+
+        /** @var LeaveType|null $leaveType */
+        $leaveType = LeaveType::query()
+            ->select('id', 'name', 'max_days', 'requires_document')
+            ->find((int) $leaveTypeId);
+
+        if (! $leaveType) {
+            return null;
+        }
+
+        return [
+            'id' => (int) $leaveType->id,
+            'name' => (string) $leaveType->name,
+            'max_days' => max(0, (int) $leaveType->max_days),
+            'requires_document' => (bool) $leaveType->requires_document,
+        ];
+    }
+
+    #[Computed]
+    public function leaveDurationNotice(): ?array
+    {
+        $meta = $this->selectedLeaveTypeMeta;
+        $totalDays = (int) ($this->leave->total_days ?? 0);
+
+        if (! $meta || $totalDays <= 0) {
+            return null;
+        }
+
+        $maxDays = (int) data_get($meta, 'max_days', 0);
+
+        if ($maxDays <= 0 || $totalDays <= $maxDays) {
+            return null;
+        }
+
+        return [
+            'type_name' => (string) data_get($meta, 'name', ''),
+            'max_days' => $maxDays,
+            'selected_days' => $totalDays,
+        ];
+    }
+
     #[Computed(cache: true)]
     public function statuses(): array
     {
@@ -122,7 +171,7 @@ trait InteractsWithLeaveForm
             $start = Carbon::parse($this->leave->starts_at);
             $end = Carbon::parse($this->leave->ends_at);
 
-            $this->leave->total_days = $start->diffInDays($end);
+            $this->leave->total_days = $start->diffInDays($end) + 1;
 
             return;
         }

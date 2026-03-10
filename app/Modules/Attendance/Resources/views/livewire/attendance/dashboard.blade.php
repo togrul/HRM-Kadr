@@ -206,7 +206,11 @@
     @endif
 
     @if($activeTab === 'calendar-regimes' && in_array('calendar-regimes', $availableTabs, true))
-        <livewire:attendance.calendar-regimes />
+        <livewire:attendance.calendar-regimes
+            :year="$year"
+            :month="$month"
+            :key="'attendance-calendar-regimes-'.$year.'-'.$month"
+        />
     @endif
 
     <x-datepicker :auto="false"></x-datepicker>

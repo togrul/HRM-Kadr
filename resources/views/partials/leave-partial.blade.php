@@ -48,6 +48,24 @@
             @error('leave.leave_type_id')
                 <x-validation> {{ $message }} </x-validation>
             @enderror
+
+            @if($this->selectedLeaveTypeMeta)
+                <div class="mt-2 flex flex-wrap items-center gap-2">
+                    <x-small-badge mode="{{ data_get($this->selectedLeaveTypeMeta, 'max_days', 0) > 0 ? 'blue' : 'secondary' }}">
+                        @if(data_get($this->selectedLeaveTypeMeta, 'max_days', 0) > 0)
+                            {{ __('leaves::common.labels.max_days_short', ['days' => data_get($this->selectedLeaveTypeMeta, 'max_days')]) }}
+                        @else
+                            {{ __('leaves::common.labels.no_max_days') }}
+                        @endif
+                    </x-small-badge>
+
+                    <x-small-badge mode="{{ data_get($this->selectedLeaveTypeMeta, 'requires_document') ? 'red' : 'green' }}">
+                        {{ data_get($this->selectedLeaveTypeMeta, 'requires_document')
+                            ? __('leaves::common.labels.document_required')
+                            : __('leaves::common.labels.document_optional') }}
+                    </x-small-badge>
+                </div>
+            @endif
         </div>
     </div>
 
@@ -87,6 +105,28 @@
         <x-textarea name="leave.reason" :placeholder="__('leaves::common.labels.reason')" mode="gray" wire:model="leave.reason"></x-textarea>
     </div>
 
+    @if($this->leaveDurationNotice)
+        <div class="rounded-3xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 shadow-sm">
+            <div class="flex items-start gap-3">
+                <div class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-rose-100 text-rose-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-11.25a.75.75 0 10-1.5 0v4.5a.75.75 0 001.5 0v-4.5zM10 14a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div class="space-y-1">
+                    <p class="font-semibold">{{ __('leaves::common.messages.max_days_notice_title') }}</p>
+                    <p>
+                        {{ __('leaves::common.messages.max_days_notice_body', [
+                            'type' => data_get($this->leaveDurationNotice, 'type_name'),
+                            'selected' => data_get($this->leaveDurationNotice, 'selected_days'),
+                            'max' => data_get($this->leaveDurationNotice, 'max_days'),
+                        ]) }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    @endif
+
     <div class="grid items-start items-end grid-cols-1 gap-2 sm:grid-cols-3">
         <div class="flex flex-col">
             <x-ui.select-dropdown
@@ -103,34 +143,42 @@
             @enderror
         </div>
 
-        <x-ui.search-input-select
-            label="{{ __('leaves::common.labels.assigned_person') }}"
-            searchModel="assignedSearch"
-            :selected="$leave->assigned_to"
-            displayKey="fullname"
-            idKey="id"
-            onClear="removePersonnel"
-            clearField="assigned_to"
-            placeholder="{{ __('leaves::common.labels.search_placeholder') }}"
-        >
-            @forelse($this->personnelList as $pl)
-                <p
-                    wire:click="selectPersonnel('{{ $pl->tabel_no }}', '{{ $pl->fullname }}','assigned_to', {{ $pl->id }})"
-                    class="flex flex-col px-2 py-1 transition-all duration-300 rounded-md cursor-pointer hover:bg-white text-slate-600 drop-shadow-sm"
-                >
-                    <span>{{ $pl->fullname }}</span>
-                </p>
-            @empty
-                <span class="mx-auto text-sm font-mediu m text-slate-500">
-                    {{ __('leaves::common.labels.search_personnel') }}
-                </span>
-            @endforelse
-        </x-ui.search-input-select>
+        <div class="flex flex-col">
+            <x-ui.search-input-select
+                label="{{ __('leaves::common.labels.assigned_person') }}"
+                searchModel="assignedSearch"
+                :selected="$leave->assigned_to"
+                displayKey="fullname"
+                idKey="id"
+                onClear="removePersonnel"
+                clearField="assigned_to"
+                placeholder="{{ __('leaves::common.labels.search_placeholder') }}"
+            >
+                @forelse($this->personnelList as $pl)
+                    <p
+                        wire:click="selectPersonnel('{{ $pl->tabel_no }}', '{{ $pl->fullname }}','assigned_to', {{ $pl->id }})"
+                        class="flex flex-col px-2 py-1 transition-all duration-300 rounded-md cursor-pointer hover:bg-white text-slate-600 drop-shadow-sm"
+                    >
+                        <span>{{ $pl->fullname }}</span>
+                    </p>
+                @empty
+                    <span class="mx-auto text-sm font-mediu m text-slate-500">
+                        {{ __('leaves::common.labels.search_personnel') }}
+                    </span>
+                @endforelse
+            </x-ui.search-input-select>
+        </div>
 
-         <x-ui.file-upload
-            model="leave.document_path"
-            :data="$leave->document_path"
-        />
+        <div class="flex flex-col">
+            <x-ui.file-upload
+                model="leave.document_path"
+                :data="$leave->document_path"
+            />
+
+            @error('leave.document_path')
+                <x-validation>{{ $message }}</x-validation>
+            @enderror
+        </div>
     </div>
 
     <div class="flex items-end justify-between w-full">

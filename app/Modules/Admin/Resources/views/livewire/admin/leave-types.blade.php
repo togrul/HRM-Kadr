@@ -85,7 +85,7 @@
                                 </x-table.td>
                                 <x-table.td style="white-space: normal !important;">
                                     <p class="text-sm font-medium">
-                                        {{ $type->attendance_code ?: '-' }}
+                                        {{ $supportsAttendanceCode ? ($type->attendance_code ?: '-') : '-' }}
                                     </p>
                                 </x-table.td>
                                 <x-table.td style="white-space: normal !important;">

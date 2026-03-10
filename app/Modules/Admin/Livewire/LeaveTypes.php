@@ -11,6 +11,7 @@ use Livewire\WithPagination as LivewireWithPagination;
 use App\Modules\Admin\Support\Traits\Admin\CallSwalTrait as AdminCallSwalTrait;
 use App\Modules\Admin\Support\Traits\Admin\AdminCrudTrait as AdminAdminCrudTrait;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests as AccessAuthorizesRequests;
+use Illuminate\Support\Facades\Schema;
 
 #[On(['leaveTypeUpdated', 'deleted'])]
 class LeaveTypes extends Component
@@ -19,6 +20,8 @@ class LeaveTypes extends Component
     use AccessAuthorizesRequests;
     use AdminCallSwalTrait;
     use LivewireWithPagination;
+
+    public bool $supportsAttendanceCode = false;
 
     public function rules(): array
     {
@@ -51,6 +54,10 @@ class LeaveTypes extends Component
             $this->form = [];
         }
 
+        if (! $this->supportsAttendanceCode) {
+            $this->form['attendance_code'] = null;
+        }
+
         $this->isAdded = true;
     }
 
@@ -70,9 +77,15 @@ class LeaveTypes extends Component
         $this->validate();
 
         $this->form['requires_document'] = $this->form['requires_document'] ?? false;
+        $payload = Arr::only($this->form, ['name', 'max_days', 'requires_document']);
+
+        if ($this->supportsAttendanceCode) {
+            $payload['attendance_code'] = $this->form['attendance_code'] ?? null;
+        }
+
         $this->model
-            ? $this->model->update(Arr::only($this->form, ['name', 'attendance_code', 'max_days', 'requires_document']))
-            : LeaveType::create($this->form);
+            ? $this->model->update($payload)
+            : LeaveType::create($payload);
 
         $this->callSuccessSwal();
 
@@ -82,6 +95,7 @@ class LeaveTypes extends Component
 
     public function mount()
     {
+        $this->supportsAttendanceCode = Schema::hasColumn('leave_types', 'attendance_code');
         $this->isAdded = false;
     }
 
@@ -100,6 +114,9 @@ class LeaveTypes extends Component
         $paginated->setCollection(
             $paginated->getCollection()->values()->map(function (LeaveType $leaveType) {
                 $leaveType->requires_document_label = (bool) $leaveType->requires_document;
+                $leaveType->setAttribute('attendance_code', $this->supportsAttendanceCode
+                    ? ($leaveType->getAttributes()['attendance_code'] ?? null)
+                    : null);
 
                 return $leaveType;
             })

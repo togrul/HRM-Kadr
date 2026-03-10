@@ -3,9 +3,11 @@
 namespace App\Livewire\Forms;
 
 use App\Models\Leave;
+use App\Models\LeaveType;
 use App\Models\Personnel;
 use Livewire\Form;
 use Illuminate\Validation\Rule;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class LeaveForm extends Form
 {
@@ -24,6 +26,8 @@ class LeaveForm extends Form
 
     public function rules(): array
     {
+        $requiresDocument = $this->selectedLeaveTypeRequiresDocument();
+
         return [
             'tabel_no.tabel_no' => ['required', 'string', 'exists:personnels,tabel_no'],
             'leave_type_id'     => ['required', 'integer', Rule::exists('leave_types', 'id')],
@@ -31,6 +35,20 @@ class LeaveForm extends Form
             'starts_at'         => ['required', 'date'],
             'ends_at'           => ['nullable', 'date', 'after_or_equal:starts_at'],
             'assigned_to.id'    => ['nullable', 'integer', Rule::exists('personnels', 'id')],
+            'document_path'     => [
+                Rule::requiredIf($requiresDocument),
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    if ($value === null || $value === '') {
+                        return;
+                    }
+
+                    if (is_string($value) || $value instanceof TemporaryUploadedFile) {
+                        return;
+                    }
+
+                    $fail(__('validation.file', ['attribute' => __('leaves::common.labels.file')]));
+                },
+            ],
         ];
     }
 
@@ -41,6 +59,7 @@ class LeaveForm extends Form
             'leave_type_id'     => __('leaves::common.labels.leave_type'),
             'starts_at'         => __('leaves::common.labels.start_date'),
             'status_id'         => __('leaves::common.labels.status'),
+            'document_path'     => __('leaves::common.labels.file'),
         ];
     }
 
@@ -123,5 +142,16 @@ class LeaveForm extends Form
             'assigned_to'   => null,
             'document_path' => null,
         ];
+    }
+
+    private function selectedLeaveTypeRequiresDocument(): bool
+    {
+        if (! $this->leave_type_id) {
+            return false;
+        }
+
+        return (bool) LeaveType::query()
+            ->whereKey((int) $this->leave_type_id)
+            ->value('requires_document');
     }
 }

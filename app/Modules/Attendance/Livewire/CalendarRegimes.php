@@ -15,6 +15,10 @@ class CalendarRegimes extends Component
 {
     use WithPagination;
 
+    public int $year;
+
+    public int $month;
+
     public bool $canManage = false;
 
     public ?int $editingId = null;
@@ -56,10 +60,12 @@ class CalendarRegimes extends Component
         ];
     }
 
-    public function mount(AttendanceAuthorizationService $authorization): void
+    public function mount(AttendanceAuthorizationService $authorization, ?int $year = null, ?int $month = null): void
     {
         $authorization->authorize('attendance.calendars.manage');
         $this->canManage = $authorization->can('attendance.calendars.manage');
+        $this->year = $year ?: (int) now()->year;
+        $this->month = $month ?: (int) now()->month;
         $this->resetForm();
     }
 
@@ -128,6 +134,8 @@ class CalendarRegimes extends Component
             ->all();
 
         $calendars = AttendanceCalendar::query()
+            ->whereYear('date', $this->year)
+            ->whereMonth('date', $this->month)
             ->orderByDesc('date')
             ->orderBy('scope_type')
             ->paginate($this->perPage);
@@ -143,7 +151,7 @@ class CalendarRegimes extends Component
     {
         $this->editingId = null;
         $this->form = [
-            'date' => now()->toDateString(),
+            'date' => now()->setDate($this->year, $this->month, 1)->toDateString(),
             'day_type' => 'workday',
             'name' => '',
             'is_paid' => true,
