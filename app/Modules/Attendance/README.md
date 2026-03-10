@@ -95,7 +95,10 @@ Main functional guide:
 
 Supporting guides:
 
-- `[Attendance Operator Guide](/Users/togruljalalli/Desktop/projects/HRM/docs/scenario/attendance-operator-guide.md)`
+- `[Attendance Operator Guide](/Users/togruljalalli/Desktop/projects/HRM/docs/scenario/attendance-operator-guide.md)` - gündəlik operator işi üçün qısa axın
+- `[Attendance Admin Guide](/Users/togruljalalli/Desktop/projects/HRM/docs/scenario/attendance-admin-guide.md)` - settings, shifts, calendar və month close owner sənədi
+- `[Attendance Approval Guide](/Users/togruljalalli/Desktop/projects/HRM/docs/scenario/attendance-approval-guide.md)` - manual, overtime və exception qərarları üçün guide
+- `[Attendance Ops / Commands Guide](/Users/togruljalalli/Desktop/projects/HRM/docs/scenario/attendance-ops-commands-guide.md)` - command, scheduler və incident runbook
 - `[Attendance Permission Matrix](/Users/togruljalalli/Desktop/projects/HRM/docs/scenario/attendance-permission-matrix.md)`
 - `[Attendance Core Data Dictionary](/Users/togruljalalli/Desktop/projects/HRM/docs/attendance-core-data-dictionary.md)`
 - `[Attendance Gap Closure Plan](/Users/togruljalalli/Desktop/projects/HRM/docs/attendance-gap-closure-plan.md)`
@@ -106,6 +109,6 @@ Recommended documentation section order for future in-app docs:
 2. Operator Quick Guide
 3. Admin Guide
 4. Approval Guide
-5. Permission Matrix
-6. Data Dictionary
-7. Ops / Commands
+5. Ops / Commands Guide
+6. Permission Matrix
+7. Data Dictionary

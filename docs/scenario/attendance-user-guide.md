@@ -554,21 +554,17 @@ Yoxlanacaq yerlər:
 
 ## 10. Texniki idarəetmə və əməliyyat komandası üçün
 
-Əsas command-lər:
+Ops tərəfi üçün ayrıca tam sənəd mövcuddur:
+
+- `[Attendance Ops / Commands Guide](/Users/togruljalalli/Desktop/projects/HRM/docs/scenario/attendance-ops-commands-guide.md)`
+
+Qısa xatırlatma olaraq əsas command-lər:
 
 - `attendance:punches:process`
 - `attendance:recalculate`
 - `attendance:monthly-snapshot`
 - `attendance:query-budget`
 - `attendance:calendars:seed-weekends`
-
-### Nə zaman istifadə olunur
-
-- ingest sonrası process
-- tarixi düzəlişdən sonra recalculate
-- ay sonunda snapshot
-- performans ölçümü üçün query-budget
-- ay əvvəlində weekend seed
 
 ## 11. Documentation bölməsi üçün tövsiyə olunan quruluş
 
@@ -582,9 +578,9 @@ Sonradan ayrıca documentation bölməsi açılacaqsa, Attendance üçün giriş
    - settings, shifts, calendar
 4. `Approval Guide`
    - overtime, month close, leave impact
-5. `Permission Matrix`
-6. `Data Dictionary`
-7. `Ops / Commands`
+5. `Ops / Commands Guide`
+6. `Permission Matrix`
+7. `Data Dictionary`
 
 Yəni bu sənəd documentation bölməsində Attendance üçün əsas “landing doc” olmalıdır.
 
@@ -592,6 +588,9 @@ Yəni bu sənəd documentation bölməsində Attendance üçün əsas “landing
 
 - `[Attendance README](/Users/togruljalalli/Desktop/projects/HRM/app/Modules/Attendance/README.md)`
 - `[Attendance Operator Guide](/Users/togruljalalli/Desktop/projects/HRM/docs/scenario/attendance-operator-guide.md)`
+- `[Attendance Admin Guide](/Users/togruljalalli/Desktop/projects/HRM/docs/scenario/attendance-admin-guide.md)`
+- `[Attendance Approval Guide](/Users/togruljalalli/Desktop/projects/HRM/docs/scenario/attendance-approval-guide.md)`
+- `[Attendance Ops / Commands Guide](/Users/togruljalalli/Desktop/projects/HRM/docs/scenario/attendance-ops-commands-guide.md)`
 - `[Attendance Permission Matrix](/Users/togruljalalli/Desktop/projects/HRM/docs/scenario/attendance-permission-matrix.md)`
 - `[Attendance Core Data Dictionary](/Users/togruljalalli/Desktop/projects/HRM/docs/attendance-core-data-dictionary.md)`
 - `[Attendance Gap Closure Plan](/Users/togruljalalli/Desktop/projects/HRM/docs/attendance-gap-closure-plan.md)`
