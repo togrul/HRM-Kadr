@@ -31,6 +31,8 @@ Livewire components, routes, views, and service provider. Shared patterns:
 - Notifications (`notification::`) – bell dropdown and list
 - SidebarStructure (`structure::`) – structure sidebar/orders/services Livewire snippets used across screens
 - UI (`ui::`) – shared confirmation/filter/notification blade partials
+- TrainingNeeds (`training-needs::` views, `training_needs::` translations) – competency catalogs, programs, role requirement matrix foundation
+- PerformanceEvaluation (`performance-evaluation::` views, `performance_evaluation::` translations) – cycles, evaluation templates, scoring, weak-area training-need integration foundation
 
 ## Provider pattern
 - Load module routes/views in `boot()`

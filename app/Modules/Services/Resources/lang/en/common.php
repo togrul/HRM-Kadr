@@ -55,6 +55,7 @@ return [
         'ranks' => 'Ranks',
         'order_templates' => 'Order templates',
         'components' => 'Components',
+        'performance' => 'Performance',
     ],
     'navigation' => [
         'roles_and_permissions' => 'Roles and permissions',

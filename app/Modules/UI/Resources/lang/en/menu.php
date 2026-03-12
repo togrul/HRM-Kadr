@@ -12,5 +12,7 @@ return [
         'business_trips' => 'Business trips',
         'time_off' => 'Time off',
         'attendance' => 'Attendance',
+        'training' => 'Training',
+        'performance' => 'Performance',
     ],
 ];

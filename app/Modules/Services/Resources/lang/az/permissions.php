@@ -9,6 +9,7 @@ return [
         'admin' => 'Admin',
         'attendance' => 'Davamiyyət',
         'attendance_daily_monitor' => 'Davamiyyət - günlük monitor',
+        'attendance_calendar' => 'Davamiyyət - iş rejimi təqvimi',
         'attendance_exceptions' => 'Davamiyyət - istisnalar',
         'attendance_manual' => 'Davamiyyət - manual giriş',
         'attendance_month_close' => 'Davamiyyət - ayın bağlanması',
@@ -26,8 +27,10 @@ return [
         'order_template_versions' => 'Əmr şablonları - versiyalar',
         'orders' => 'Əmrlər',
         'personnels' => 'Şəxsi heyət',
+        'performance_evaluation' => 'Performans qiymətləndirməsi',
         'settings' => 'Tənzimləmələr',
         'staff' => 'Ştat cədvəli',
+        'training_needs' => 'Təlim ehtiyacı',
         'vacations' => 'Məzuniyyətlər',
     ],
     'methods' => [

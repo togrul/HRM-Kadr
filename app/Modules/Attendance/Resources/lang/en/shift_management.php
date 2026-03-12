@@ -45,6 +45,12 @@ return [
         'in' => 'In',
         'out' => 'Out',
     ],
+    'sources' => [
+        'manual_ui' => 'Entered manually',
+        'manual' => 'Manual',
+        'system' => 'System',
+        'import' => 'Import',
+    ],
     'statuses' => [
         'active' => 'active',
         'inactive' => 'inactive',

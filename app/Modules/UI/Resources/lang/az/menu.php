@@ -12,5 +12,7 @@ return [
         'business_trips' => 'Ezamiyyətlər',
         'time_off' => 'İcazələr',
         'attendance' => 'Davamiyyət',
+        'training' => 'Təlim',
+        'performance' => 'Performans',
     ],
 ];

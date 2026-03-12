@@ -7,6 +7,7 @@
 @php
     $extraClasses = match ($mode) {
         'default' => 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50 active:bg-gray-100',
+        'secondary' => 'border-zinc-200 bg-zinc-100 text-zinc-700 hover:bg-zinc-200 active:bg-zinc-200',
         'gray' => 'border-zinc-800 bg-zinc-900 text-zinc-100 hover:bg-zinc-800 active:bg-zinc-900',
         'primary' => 'border-blue-600 bg-blue-600 text-blue-50 hover:bg-blue-700 active:bg-blue-700',
         'success' => 'border-green-600 bg-green-600 text-white hover:bg-green-700 active:bg-green-700',

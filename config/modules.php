@@ -77,5 +77,15 @@ return [
             'enabled' => true,
             'migrations' => app_path('Modules/Attendance/Database/Migrations'),
         ],
+        'training-needs' => [
+            'provider' => \App\Modules\TrainingNeeds\Providers\TrainingNeedsServiceProvider::class,
+            'enabled' => true,
+            'migrations' => app_path('Modules/TrainingNeeds/Database/Migrations'),
+        ],
+        'performance-evaluation' => [
+            'provider' => \App\Modules\PerformanceEvaluation\Providers\PerformanceEvaluationServiceProvider::class,
+            'enabled' => true,
+            'migrations' => app_path('Modules/PerformanceEvaluation/Database/Migrations'),
+        ],
     ],
 ];

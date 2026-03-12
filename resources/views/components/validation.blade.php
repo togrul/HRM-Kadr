@@ -1,3 +1,3 @@
-<p class="py-0.5 px-2.5 tracking-tighter text-xs rounded-bl-md rounded-br-md font-semibold bg-rose-500 text-rose-50 transition-all duration-300">
+<p class="rounded-lg bg-rose-500 px-3 py-2 text-xs font-semibold leading-5 text-rose-50 break-words transition-all duration-300">
      {{ $slot }}
 </p>

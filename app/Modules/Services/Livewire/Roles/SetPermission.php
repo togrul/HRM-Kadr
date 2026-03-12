@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\PermissionRegistrar;
 use App\Models\Role;
 
 class SetPermission extends Component
@@ -88,6 +89,7 @@ class SetPermission extends Component
     {
         Cache::forget('structures');
         Cache::forget("structure-accessible-".auth()->user()->id);
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
         $this->initializeProperties();
     }
 

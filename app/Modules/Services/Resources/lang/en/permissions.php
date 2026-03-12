@@ -9,6 +9,7 @@ return [
         'admin' => 'Admin',
         'attendance' => 'Attendance',
         'attendance_daily_monitor' => 'Attendance - daily monitor',
+        'attendance_calendar' => 'Attendance - work regime calendar',
         'attendance_exceptions' => 'Attendance - exceptions',
         'attendance_manual' => 'Attendance - manual entry',
         'attendance_month_close' => 'Attendance - month close',
@@ -26,8 +27,10 @@ return [
         'order_template_versions' => 'Order templates - versions',
         'orders' => 'Orders',
         'personnels' => 'Personnel',
+        'performance_evaluation' => 'Performance evaluation',
         'settings' => 'Settings',
         'staff' => 'Staff table',
+        'training_needs' => 'Training needs',
         'vacations' => 'Vacations',
     ],
     'methods' => [

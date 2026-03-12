@@ -8,6 +8,8 @@
   'loadOnOpen' => null,
   'searchModel' => null,
   'searchPlaceholder' => null,
+  'direction' => 'auto',
+  'instance' => null,
 ])
 
 @php
@@ -16,25 +18,28 @@
   $wireModel = collect($wireModelKeys)
       ->map(fn ($key) => $attributes->get($key))
       ->first(fn ($value) => filled($value));
-  $identitySource = (string) ($wireModel
+  $identitySource = (string) ($instance
+      ?? $wireModel
       ?? $attributes->get('name')
       ?? $attributes->get('id')
       ?? $searchModel
       ?? $label
       ?? 'select-dropdown');
-  $uid = 'ui-select-'.Str::slug($identitySource, '_');
+  $uid = 'ui-select-'.substr(md5($identitySource.'|'.$searchModel.'|'.$label), 0, 12);
   $labelId = $uid.'-label';
   $bg = $mode === 'gray' ? 'bg-neutral-100' : 'bg-white';
 @endphp
 
 <div
-  wire:key="select-{{ $uid }}"
   x-data="{
     uid: @js($uid),
     currentValue: @if($wireModel) @entangle($wireModel).live @else null @endif,
     cachedOptions: @js($model),
     placeholder: @js($placeholder),
     isOpen: false,
+    openUp: false,
+    panelMaxHeight: 224,
+    preferredDirection: @js($direction),
     isDisabled: @js((bool) $disabled),
     loadOnOpen: @js($loadOnOpen),
     selectedCache: { id: null, label: '' },
@@ -70,10 +75,6 @@
     },
 
     init(){
-      if (!window.__uiSelectOpenState) {
-        window.__uiSelectOpenState = {};
-      }
-      this.isOpen = !!window.__uiSelectOpenState[this.uid];
       this.cachedOptions = this.normalizeOptions(this.cachedOptions);
       const currentId = this.toId(this.currentValue);
       if (this.initialSelectedLabel && currentId !== null) {
@@ -88,12 +89,39 @@
         if (found) {
           this.selectedCache = { id: this.toId(found.id), label: found.label };
         }
+        if (this.isOpen) {
+          this.$nextTick(() => requestAnimationFrame(() => this.repositionPanel()));
+        }
       });
     },
 
     setOpen(next){
       this.isOpen = !!next;
-      window.__uiSelectOpenState[this.uid] = this.isOpen;
+    },
+
+    repositionPanel(){
+      const button = this.$refs.button;
+      const panel = this.$refs.panel;
+      if (!button || !panel) return;
+
+      const buttonRect = button.getBoundingClientRect();
+      const viewportHeight = window.visualViewport?.height || window.innerHeight;
+      const gap = 8;
+      const viewportPadding = 12;
+      const naturalHeight = Math.min(panel.scrollHeight || 224, 320);
+      const availableBelow = Math.max(140, viewportHeight - buttonRect.bottom - gap - viewportPadding);
+      const availableAbove = Math.max(140, buttonRect.top - gap - viewportPadding);
+
+      if (this.preferredDirection === 'up') {
+        this.openUp = true;
+      } else if (this.preferredDirection === 'down') {
+        this.openUp = false;
+      } else {
+        this.openUp = naturalHeight > availableBelow && availableAbove > availableBelow;
+      }
+      this.panelMaxHeight = this.openUp
+        ? Math.min(320, availableAbove)
+        : Math.min(320, availableBelow);
     },
 
     selectedLabel(){
@@ -126,7 +154,16 @@
 
     toggle(){
       if (this.isDisabled) return;
-      this.setOpen(!this.isOpen);
+      if (this.isOpen) {
+        this.setOpen(false);
+        return;
+      }
+
+      this.setOpen(true);
+      window.dispatchEvent(new CustomEvent('ui-select-opened', { detail: { uid: this.uid } }));
+      this.$nextTick(() => {
+        requestAnimationFrame(() => this.repositionPanel());
+      });
       if (this.isOpen && this.loadOnOpen && $wire && typeof $wire.loadOptionGroup === 'function') {
         $wire.loadOptionGroup(this.loadOnOpen);
       }
@@ -134,6 +171,8 @@
   }"
   x-on:click.window="if (!$el.contains($event.target)) setOpen(false)"
   x-on:keydown.escape.window="setOpen(false)"
+  x-on:ui-select-opened.window="if ($event.detail?.uid !== uid) setOpen(false)"
+  x-on:resize.window.debounce.100ms="if (isOpen) repositionPanel()"
   {{ $attributes->except(['wire:model','wire:model.live','wire:model.defer','wire:model.lazy','wire:model.blur'])->class('relative w-full') }}
   x-bind:class="isOpen ? 'z-[140]' : 'z-10'"
 >
@@ -144,6 +183,7 @@
   <div class="relative mt-1">
     <button
       type="button" id="{{ $uid }}-button"
+      x-ref="button"
       class="relative w-full py-2 pl-3 pr-10 text-left rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm {{ $bg }} {{ $disabled ? 'opacity-60 cursor-not-allowed' : '' }}"
       :aria-expanded="isOpen" aria-labelledby="{{ $labelId }}"
       :disabled="isDisabled"
@@ -160,8 +200,11 @@
     </button>
 
     <ul
+      x-ref="panel"
       x-show="isOpen && !isDisabled" x-transition.opacity.duration.100ms x-cloak
-      class="absolute z-[150] w-full px-3 py-2 mt-1 space-y-2 overflow-auto text-base bg-white rounded-md shadow-xl max-h-56 focus:outline-none sm:text-sm"
+      :class="openUp ? 'bottom-full mb-2 origin-bottom' : 'top-full mt-1 origin-top'"
+      :style="{ maxHeight: `${panelMaxHeight}px` }"
+      class="absolute z-[150] w-full px-3 py-2 space-y-2 overflow-auto text-base bg-white rounded-md shadow-xl focus:outline-none sm:text-sm"
     >
       {{-- slot: search input --}}
       @if ($searchModel)

@@ -72,6 +72,13 @@ class PermissionDescriptionCatalog
             'manage-attendance-month-close' => 'Attendance dövrlərini bağlamaq, açmaq və locked month nəzarətini idarə etmək icazəsi verir.',
             'edit-attendance-exceptions' => 'Attendance istisnalarını redaktə etmək, resolve etmək və correction axınını idarə etmək icazəsi verir.',
             'export-attendance' => 'Attendance, puantaj və əlaqəli hesabatları export etmək icazəsi verir.',
+            'show-training-needs' => 'Təlim ehtiyacı modulunu görmək, kompetensiya kataloqu, ehtiyaclar, planlar və nəticələrə baxmaq icazəsi verir.',
+            'manage-training-needs' => 'Təlim ehtiyacı modulu daxilində kataloq, profil, ehtiyac, plan, sessiya və təlim nəticələrini idarə etmək icazəsi verir.',
+            'review-training-needs' => 'Təlim planı təkliflərini HR səviyyəsində düzəltmək, təsdiqləmək və review axınını idarə etmək icazəsi verir.',
+            'export-training-needs' => 'Təlim ehtiyacı modulu üzrə delivery, feedback və analitika hesabatlarını export etmək icazəsi verir.',
+            'show-performance-evaluation' => 'Performans qiymətləndirməsi modulunu görmək, dövr, şablon, forma və test nəticələrinə baxmaq icazəsi verir.',
+            'manage-performance-evaluation' => 'Performans qiymətləndirmə modulu daxilində dövrlər, şablonlar, formalar, ballar və test sessiyalarını idarə etmək icazəsi verir.',
+            'review-performance-evaluation' => 'Açıq cavabların review edilməsi, weak-area təsdiqi və qiymətləndirmə nəticələrinin audit səviyyəsində nəzərdən keçirilməsi icazəsi verir.',
         ];
     }
 

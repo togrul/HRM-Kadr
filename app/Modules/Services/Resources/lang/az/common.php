@@ -55,6 +55,7 @@ return [
         'ranks' => 'Rütbələr',
         'order_templates' => 'Əmr şablonları',
         'components' => 'Komponentlər',
+        'performance' => 'Performans',
     ],
     'navigation' => [
         'roles_and_permissions' => 'Rollar və icazələr',

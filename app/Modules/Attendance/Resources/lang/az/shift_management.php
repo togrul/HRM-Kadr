@@ -45,6 +45,12 @@ return [
         'in' => 'Giriş',
         'out' => 'Çıxış',
     ],
+    'sources' => [
+        'manual_ui' => 'Əl ilə daxil edilib',
+        'manual' => 'Əl ilə',
+        'system' => 'Sistem',
+        'import' => 'İmport',
+    ],
     'statuses' => [
         'active' => 'aktiv',
         'inactive' => 'qeyri-aktiv',

@@ -58,6 +58,8 @@
         'Business trips' => 'ui::menu.items.business_trips',
         'Time off' => 'ui::menu.items.time_off',
         'Attendance' => 'ui::menu.items.attendance',
+        'Training' => 'ui::menu.items.training',
+        'Performance' => 'ui::menu.items.performance',
     ];
 
     $moduleAliases = [

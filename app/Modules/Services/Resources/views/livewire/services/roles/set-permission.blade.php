@@ -61,8 +61,9 @@
                             :aria-expanded="open"
                         >
                             <div class="min-w-0">
+                                @php($groupLabel = __($permissionData['translation_key']))
                                 <h2 class="text-xs font-semibold uppercase tracking-tight font-mono text-zinc-800">
-                                    {{ __($permissionData['translation_key']) }}
+                                    {{ $groupLabel !== $permissionData['translation_key'] ? $groupLabel : $permissionData['fallback_label'] }}
                                 </h2>
                                 <p class="mt-1 text-xs text-zinc-400">{{ __('services::permissions.sections.group') }}</p>
                             </div>
@@ -109,8 +110,9 @@
 
                                         <div class="min-w-0">
                                             <div class="flex items-center gap-2">
+                                                @php($permissionLabel = __($permission['translation_key']))
                                                 <span class="text-[12px] font-medium uppercase leading-5 text-zinc-800">
-                                                    {{ __($permission['translation_key']) }}
+                                                    {{ $permissionLabel !== $permission['translation_key'] ? $permissionLabel : $permission['fallback_label'] }}
                                                 </span>
                                             </div>
 

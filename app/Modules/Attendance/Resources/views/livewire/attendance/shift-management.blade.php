@@ -267,7 +267,27 @@
                                         </div>
                                     </div>
                                 </x-table.td>
-                                <x-table.td>{{ $assignment->assignment_source ?: 'manual_ui' }}</x-table.td>
+                                <x-table.td>
+                                    @php
+                                        $assignmentSource = (string) ($assignment->assignment_source ?: 'manual_ui');
+                                        $assignmentSourceMode = match ($assignmentSource) {
+                                            'manual_ui', 'manual' => 'sky',
+                                            'system' => 'green',
+                                            'import' => 'amber',
+                                            default => 'secondary',
+                                        };
+                                        $assignmentSourceLabel = __('attendance::shift_management.sources.'.$assignmentSource);
+                                        if ($assignmentSourceLabel === 'attendance::shift_management.sources.'.$assignmentSource) {
+                                            $assignmentSourceLabel = str($assignmentSource)
+                                                ->replace('_', ' ')
+                                                ->headline()
+                                                ->toString();
+                                        }
+                                    @endphp
+                                    <x-small-badge :mode="$assignmentSourceMode">
+                                        {{ $assignmentSourceLabel }}
+                                    </x-small-badge>
+                                </x-table.td>
                                 <x-table.td>
                                     <div class="flex flex-wrap items-center gap-1">
                                         <span class="inline-flex rounded-full px-2 py-1 text-xs font-medium {{ $assignment->is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-zinc-100 text-zinc-600' }}">

@@ -1,0 +1,495 @@
+<?php
+
+namespace Tests\Feature\PerformanceEvaluation;
+
+use App\Models\PerformanceForm;
+use App\Models\PerformanceFormScore;
+use App\Models\PerformanceFormTemplate;
+use App\Models\PerformanceFormTemplateItem;
+use App\Models\PerformanceFormTemplateSection;
+use App\Models\PerformanceCycle;
+use App\Models\PerformanceTrainingNeedLink;
+use App\Models\Personnel;
+use App\Models\Position;
+use App\Models\RoleCompetencyRequirement;
+use App\Models\TrainingCompetency;
+use App\Models\TrainingCompetencyGroup;
+use App\Models\TrainingLevel;
+use App\Models\TrainingNeedItem;
+use App\Models\TrainingProgram;
+use App\Models\TrainingProgramCompetency;
+use App\Modules\PerformanceEvaluation\Livewire\Dashboard;
+use App\Modules\PerformanceEvaluation\Livewire\Lists as PerformanceEvaluationLists;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
+use Livewire\Livewire;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
+use Tests\TestCase;
+
+class PerformanceEvaluationDashboardTest extends TestCase
+{
+    use RefreshDatabase;
+
+    public function test_authenticated_user_can_open_performance_evaluation_route(): void
+    {
+        $user = \App\Models\User::factory()->create();
+        $this->grantPerformancePermissions($user);
+
+        $this->actingAs($user)
+            ->get(route('performance-evaluation'))
+            ->assertOk()
+            ->assertSee(__('performance_evaluation::dashboard.title'));
+    }
+
+    public function test_performance_evaluation_route_requires_view_permission(): void
+    {
+        $user = \App\Models\User::factory()->create();
+        Permission::findOrCreate('show-performance-evaluation', 'web');
+
+        $this->actingAs($user)
+            ->get(route('performance-evaluation'))
+            ->assertForbidden();
+    }
+
+    public function test_dashboard_can_create_foundation_records_and_link_weak_score_to_training_need(): void
+    {
+        $user = \App\Models\User::factory()->create(['name' => 'HR Specialist']);
+        $manager = \App\Models\User::factory()->create(['name' => 'Team Manager']);
+        $hrReviewer = \App\Models\User::factory()->create(['name' => 'Reviewer User']);
+        $this->grantPerformancePermissions($user);
+
+        $beginner = TrainingLevel::query()->where('score', 2)->firstOrFail();
+        $targetLevel = TrainingLevel::query()->where('score', 4)->firstOrFail();
+
+        Role::findOrCreate('admin', 'web');
+        Permission::findOrCreate('get-notification', 'web');
+
+        Position::query()->create([
+            'id' => 301,
+            'name' => 'Senior Lecturer',
+        ]);
+
+        $personnel = $this->createPersonnel($user->id, 301);
+        $competency = $this->createCompetency();
+        $program = $this->createTrainingProgram($competency->id, $targetLevel->id);
+
+        RoleCompetencyRequirement::query()->create([
+            'position_id' => 301,
+            'training_competency_id' => $competency->id,
+            'required_level_id' => $targetLevel->id,
+            'priority' => 'high',
+            'is_mandatory' => true,
+        ]);
+
+        $this->actingAs($user);
+
+        Livewire::test(Dashboard::class)
+            ->set('cycleForm.name', '2026 Academic Performance')
+            ->set('cycleForm.cycle_type', 'academic')
+            ->set('cycleForm.period_start', '2026-09-01')
+            ->set('cycleForm.period_end', '2027-06-30')
+            ->set('cycleForm.status', 'active')
+            ->call('storeCycle')
+            ->assertHasNoErrors()
+            ->set('templateForm.name', 'Academic Staff Core Template')
+            ->set('templateForm.code', 'PE-AC-01')
+            ->call('storeTemplate')
+            ->assertHasNoErrors()
+            ->set('sectionForm.performance_form_template_id', PerformanceFormTemplate::query()->where('code', 'PE-AC-01')->value('id'))
+            ->set('sectionForm.name', 'Pedagogical Performance')
+            ->set('sectionForm.weight_percent', 60)
+            ->call('storeSection')
+            ->assertHasNoErrors()
+            ->set('itemForm.performance_form_template_section_id', PerformanceFormTemplateSection::query()->where('name', 'Pedagogical Performance')->value('id'))
+            ->set('itemForm.training_competency_id', $competency->id)
+            ->set('itemForm.name', 'Teaching Methodology')
+            ->set('itemForm.weight_percent', 30)
+            ->set('itemForm.low_score_threshold', 60)
+            ->call('storeItem')
+            ->assertHasNoErrors()
+            ->set('evaluationForm.performance_cycle_id', \App\Models\PerformanceCycle::query()->where('name', '2026 Academic Performance')->value('id'))
+            ->set('evaluationForm.performance_form_template_id', PerformanceFormTemplate::query()->where('code', 'PE-AC-01')->value('id'))
+            ->set('evaluationForm.personnel_id', $personnel->id)
+            ->set('evaluationForm.manager_id', $manager->id)
+            ->set('evaluationForm.hr_reviewer_id', $hrReviewer->id)
+            ->call('storeEvaluationForm')
+            ->assertHasNoErrors()
+            ->set('scoreForm.performance_form_id', PerformanceForm::query()->where('personnel_id', $personnel->id)->value('id'))
+            ->set('scoreForm.performance_form_template_item_id', PerformanceFormTemplateItem::query()->where('name', 'Teaching Methodology')->value('id'))
+            ->set('scoreForm.evaluator_type', 'manager')
+            ->set('scoreForm.score', 45)
+            ->set('scoreForm.comment', 'Methodology consistency is below expected standard.')
+            ->call('storeScore')
+            ->assertHasNoErrors();
+
+        $formId = PerformanceForm::query()->where('personnel_id', $personnel->id)->value('id');
+        $scoreId = \App\Models\PerformanceFormScore::query()->where('performance_form_id', $formId)->value('id');
+
+        $this->assertDatabaseHas('performance_cycles', [
+            'name' => '2026 Academic Performance',
+            'cycle_type' => 'academic',
+            'status' => 'active',
+        ]);
+
+        $this->assertDatabaseHas('performance_form_templates', [
+            'name' => 'Academic Staff Core Template',
+            'code' => 'PE-AC-01',
+        ]);
+
+        $this->assertDatabaseHas('performance_forms', [
+            'id' => $formId,
+            'manager_id' => $manager->id,
+            'hr_reviewer_id' => $hrReviewer->id,
+            'manager_status' => 'submitted',
+            'final_category' => 'weak',
+        ]);
+
+        $this->assertDatabaseHas('performance_form_scores', [
+            'id' => $scoreId,
+            'evaluator_type' => 'manager',
+        ]);
+
+        $this->assertDatabaseHas('training_need_items', [
+            'personnel_id' => $personnel->id,
+            'training_competency_id' => $competency->id,
+            'recommended_program_id' => $program->id,
+            'target_level_id' => $targetLevel->id,
+            'source' => 'performance_gap',
+            'priority' => 'high',
+        ]);
+
+        $this->assertDatabaseHas('performance_training_need_links', [
+            'performance_form_id' => $formId,
+            'performance_form_score_id' => $scoreId,
+            'training_competency_id' => $competency->id,
+        ]);
+
+        Livewire::test(Dashboard::class)
+            ->set('scoreForm.performance_form_id', $formId)
+            ->set('scoreForm.performance_form_template_item_id', PerformanceFormTemplateItem::query()->where('name', 'Teaching Methodology')->value('id'))
+            ->set('scoreForm.evaluator_type', 'manager')
+            ->set('scoreForm.score', 82)
+            ->set('scoreForm.comment', 'Recovered after coaching.')
+            ->call('storeScore')
+            ->assertHasNoErrors();
+
+        $this->assertDatabaseMissing('performance_training_need_links', [
+            'performance_form_score_id' => $scoreId,
+        ]);
+
+        $this->assertSame(0, TrainingNeedItem::query()->where('source', 'performance_gap')->count());
+        $this->assertSame(0, PerformanceTrainingNeedLink::query()->count());
+    }
+
+    public function test_existing_medium_performance_need_is_upgraded_when_final_result_becomes_weak(): void
+    {
+        $user = \App\Models\User::factory()->create(['name' => 'HR Specialist']);
+        $manager = \App\Models\User::factory()->create(['name' => 'Team Manager']);
+        $hrReviewer = \App\Models\User::factory()->create(['name' => 'Reviewer User']);
+        $this->grantPerformancePermissions($user);
+
+        $beginner = TrainingLevel::query()->where('score', 2)->firstOrFail();
+        $targetLevel = TrainingLevel::query()->where('score', 4)->firstOrFail();
+
+        Role::findOrCreate('admin', 'web');
+        Permission::findOrCreate('get-notification', 'web');
+
+        Position::query()->create([
+            'id' => 302,
+            'name' => 'Senior Lecturer',
+        ]);
+
+        $personnel = $this->createPersonnel($user->id, 302, 'PE-002');
+        $competency = $this->createCompetency();
+        $program = $this->createTrainingProgram($competency->id, $targetLevel->id);
+
+        RoleCompetencyRequirement::query()->create([
+            'position_id' => 302,
+            'training_competency_id' => $competency->id,
+            'required_level_id' => $targetLevel->id,
+            'priority' => 'high',
+            'is_mandatory' => true,
+        ]);
+
+        $this->actingAs($user);
+
+        Livewire::test(Dashboard::class)
+            ->set('cycleForm.name', '2026 Annual Performance')
+            ->set('cycleForm.cycle_type', 'annual')
+            ->set('cycleForm.period_start', '2026-01-01')
+            ->set('cycleForm.period_end', '2026-12-31')
+            ->set('cycleForm.status', 'active')
+            ->call('storeCycle')
+            ->assertHasNoErrors()
+            ->set('templateForm.name', 'Annual Staff Template')
+            ->set('templateForm.code', 'PE-AN-01')
+            ->call('storeTemplate')
+            ->assertHasNoErrors()
+            ->set('sectionForm.performance_form_template_id', PerformanceFormTemplate::query()->where('code', 'PE-AN-01')->value('id'))
+            ->set('sectionForm.name', 'Core Criteria')
+            ->set('sectionForm.weight_percent', 100)
+            ->call('storeSection')
+            ->assertHasNoErrors();
+
+        $sectionId = PerformanceFormTemplateSection::query()->where('name', 'Core Criteria')->value('id');
+
+        Livewire::test(Dashboard::class)
+            ->set('itemForm.performance_form_template_section_id', $sectionId)
+            ->set('itemForm.training_competency_id', $competency->id)
+            ->set('itemForm.name', 'Criterion A')
+            ->set('itemForm.weight_percent', 50)
+            ->set('itemForm.low_score_threshold', 70)
+            ->call('storeItem')
+            ->assertHasNoErrors()
+            ->set('itemForm.performance_form_template_section_id', $sectionId)
+            ->set('itemForm.training_competency_id', $competency->id)
+            ->set('itemForm.name', 'Criterion B')
+            ->set('itemForm.weight_percent', 50)
+            ->set('itemForm.low_score_threshold', 60)
+            ->call('storeItem')
+            ->assertHasNoErrors()
+            ->set('evaluationForm.performance_cycle_id', \App\Models\PerformanceCycle::query()->where('name', '2026 Annual Performance')->value('id'))
+            ->set('evaluationForm.performance_form_template_id', PerformanceFormTemplate::query()->where('code', 'PE-AN-01')->value('id'))
+            ->set('evaluationForm.personnel_id', $personnel->id)
+            ->set('evaluationForm.manager_id', $manager->id)
+            ->set('evaluationForm.hr_reviewer_id', $hrReviewer->id)
+            ->call('storeEvaluationForm')
+            ->assertHasNoErrors();
+
+        $formId = PerformanceForm::query()->where('personnel_id', $personnel->id)->value('id');
+        $itemAId = PerformanceFormTemplateItem::query()->where('name', 'Criterion A')->value('id');
+        $itemBId = PerformanceFormTemplateItem::query()->where('name', 'Criterion B')->value('id');
+
+        Livewire::test(Dashboard::class)
+            ->set('scoreForm.performance_form_id', $formId)
+            ->set('scoreForm.performance_form_template_item_id', $itemAId)
+            ->set('scoreForm.evaluator_type', 'manager')
+            ->set('scoreForm.score', 65)
+            ->call('storeScore')
+            ->assertHasNoErrors();
+
+        $this->assertDatabaseHas('training_need_items', [
+            'personnel_id' => $personnel->id,
+            'training_competency_id' => $competency->id,
+            'priority' => 'medium',
+        ]);
+
+        Livewire::test(Dashboard::class)
+            ->set('scoreForm.performance_form_id', $formId)
+            ->set('scoreForm.performance_form_template_item_id', $itemBId)
+            ->set('scoreForm.evaluator_type', 'hr')
+            ->set('scoreForm.score', 30)
+            ->call('storeScore')
+            ->assertHasNoErrors();
+
+        $this->assertDatabaseHas('performance_forms', [
+            'id' => $formId,
+            'final_category' => 'weak',
+        ]);
+
+        $this->assertDatabaseHas('training_need_items', [
+            'personnel_id' => $personnel->id,
+            'training_competency_id' => $competency->id,
+            'recommended_program_id' => $program->id,
+            'target_level_id' => $targetLevel->id,
+            'priority' => 'high',
+        ]);
+    }
+
+    public function test_weak_links_list_renders_presented_reason_in_active_locale(): void
+    {
+        app()->setLocale('az');
+
+        $user = \App\Models\User::factory()->create(['name' => 'HR Specialist']);
+        $this->grantPerformancePermissions($user);
+        Role::findOrCreate('admin', 'web');
+        Permission::findOrCreate('get-notification', 'web');
+
+        Position::query()->create([
+            'id' => 303,
+            'name' => 'Senior Lecturer',
+        ]);
+
+        $personnel = $this->createPersonnel($user->id, 303, 'PE-003');
+        $competency = $this->createCompetency();
+        $program = $this->createTrainingProgram($competency->id, TrainingLevel::query()->where('score', 4)->value('id'));
+
+        $need = TrainingNeedItem::query()->create([
+            'personnel_id' => $personnel->id,
+            'training_competency_id' => $competency->id,
+            'position_id' => 303,
+            'recommended_program_id' => $program->id,
+            'target_level_id' => TrainingLevel::query()->where('score', 4)->value('id'),
+            'priority' => 'high',
+            'source' => 'performance_gap',
+            'status' => 'approved',
+            'target_completion_date' => '2026-05-01',
+            'reason' => 'Low performance score detected on form #1, item #2: 45.00',
+        ]);
+
+        $cycle = PerformanceCycle::query()->create([
+            'name' => '2026 Annual Performance',
+            'cycle_type' => 'annual',
+            'period_start' => '2026-01-01',
+            'period_end' => '2026-12-31',
+            'status' => 'active',
+        ]);
+
+        $template = PerformanceFormTemplate::query()->create([
+            'name' => 'Annual Staff Template',
+            'code' => 'PE-AN-01',
+            'is_active' => true,
+        ]);
+
+        $section = PerformanceFormTemplateSection::query()->create([
+            'performance_form_template_id' => $template->id,
+            'name' => 'Core Criteria',
+            'weight_percent' => 100,
+        ]);
+
+        $item = PerformanceFormTemplateItem::query()->create([
+            'performance_form_template_section_id' => $section->id,
+            'training_competency_id' => $competency->id,
+            'name' => 'Criterion A',
+            'weight_percent' => 100,
+            'low_score_threshold' => 70,
+        ]);
+
+        $form = PerformanceForm::query()->create([
+            'performance_cycle_id' => $cycle->id,
+            'performance_form_template_id' => $template->id,
+            'personnel_id' => $personnel->id,
+            'final_score' => 45,
+            'final_category' => 'weak',
+            'result_status' => 'completed',
+        ]);
+
+        $score = PerformanceFormScore::query()->create([
+            'performance_form_id' => $form->id,
+            'performance_form_template_item_id' => $item->id,
+            'evaluator_type' => 'manager',
+            'score' => 45,
+        ]);
+
+        $link = PerformanceTrainingNeedLink::query()->create([
+            'performance_form_id' => $form->id,
+            'performance_form_score_id' => $score->id,
+            'training_need_item_id' => $need->id,
+            'training_competency_id' => $competency->id,
+            'source' => 'low_score',
+        ]);
+
+        $this->actingAs($user);
+
+        Livewire::test(PerformanceEvaluationLists::class)
+            ->set('entity', 'weak_links')
+            ->set('selectedRowId', $link->id)
+            ->assertSee(__('performance_evaluation::dashboard.messages.performance_gap_reason', [
+                'form' => 1,
+                'item' => 2,
+                'score' => '45.00',
+            ]));
+    }
+
+    private function createCompetency(): TrainingCompetency
+    {
+        $group = TrainingCompetencyGroup::query()->create([
+            'name' => 'Pedagogy',
+            'slug' => 'pedagogy',
+            'is_active' => true,
+        ]);
+
+        return TrainingCompetency::query()->create([
+            'training_competency_group_id' => $group->id,
+            'name' => 'Teaching Excellence',
+            'slug' => 'teaching-excellence',
+            'is_active' => true,
+        ]);
+    }
+
+    private function createTrainingProgram(int $competencyId, int $targetLevelId): TrainingProgram
+    {
+        $program = TrainingProgram::query()->create([
+            'title' => 'Advanced Teaching Lab',
+            'slug' => 'advanced-teaching-lab',
+            'code' => 'TRN-401',
+            'delivery_type' => 'internal',
+            'is_active' => true,
+        ]);
+
+        TrainingProgramCompetency::query()->create([
+            'training_program_id' => $program->id,
+            'training_competency_id' => $competencyId,
+            'target_level_id' => $targetLevelId,
+        ]);
+
+        return $program;
+    }
+
+    private function createPersonnel(int $userId, int $positionId, string $tabelNo = 'PE-001'): Personnel
+    {
+        DB::table('countries')->insert([
+            'id' => 1,
+            'code' => 'AZ',
+        ]);
+
+        DB::table('education_degrees')->insert([
+            'id' => 1,
+            'title_az' => 'Bakalavr',
+            'title_en' => 'Bachelor',
+            'title_ru' => 'Bachelor',
+        ]);
+
+        DB::table('structures')->insert([
+            'id' => 1,
+            'name' => 'DMX',
+            'shortname' => 'DMX',
+        ]);
+
+        DB::table('work_norms')->insert([
+            'id' => 1,
+            'name_az' => 'Tam iş günü',
+            'name_en' => 'Full time',
+            'name_ru' => 'Full time',
+        ]);
+
+        return Personnel::query()->create([
+            'tabel_no' => $tabelNo,
+            'surname' => 'Huseynov',
+            'name' => 'Ramin',
+            'patronymic' => 'Elchin',
+            'birthdate' => '1991-03-15',
+            'gender' => 1,
+            'phone' => '0121111111',
+            'mobile' => '0501111111',
+            'email' => 'ramin@example.test',
+            'nationality_id' => 1,
+            'pin' => 'XYZ1234',
+            'residental_address' => 'Baku',
+            'education_degree_id' => 1,
+            'structure_id' => 1,
+            'position_id' => $positionId,
+            'work_norm_id' => 1,
+            'join_work_date' => '2024-01-01',
+            'added_by' => $userId,
+        ]);
+    }
+
+    private function grantPerformancePermissions(\App\Models\User $user): void
+    {
+        foreach ([
+            'show-performance-evaluation',
+            'manage-performance-evaluation',
+            'review-performance-evaluation',
+        ] as $permission) {
+            Permission::findOrCreate($permission, 'web');
+        }
+
+        $user->givePermissionTo([
+            'show-performance-evaluation',
+            'manage-performance-evaluation',
+            'review-performance-evaluation',
+        ]);
+    }
+}
