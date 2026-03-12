@@ -2,10 +2,12 @@
 
 namespace App\Modules\Attendance\Livewire;
 
+use App\Livewire\Concerns\ConfirmsDestructiveActions;
 use App\Models\AttendanceCalendar;
 use App\Models\Structure;
 use App\Modules\Attendance\Application\Services\AttendanceAuthorizationService;
 use App\Modules\Attendance\Application\Services\AttendanceCalendarManagementService;
+use App\Support\Translations\ModuleTranslation;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
@@ -13,6 +15,7 @@ use Livewire\WithPagination;
 
 class CalendarRegimes extends Component
 {
+    use ConfirmsDestructiveActions;
     use WithPagination;
 
     public int $year;
@@ -22,6 +25,8 @@ class CalendarRegimes extends Component
     public bool $canManage = false;
 
     public ?int $editingId = null;
+
+    public ?string $editingStoredName = null;
 
     public int $perPage = 20;
 
@@ -81,7 +86,16 @@ class CalendarRegimes extends Component
             ? AttendanceCalendar::query()->findOrFail($this->editingId)
             : null;
 
-        $service->upsert($this->form, (int) Auth::id(), $calendar);
+        $payload = $this->form;
+
+        if (
+            filled($this->editingStoredName)
+            && (string) data_get($payload, 'name', '') === ModuleTranslation::resolveStoredText($this->editingStoredName)
+        ) {
+            $payload['name'] = $this->editingStoredName;
+        }
+
+        $service->upsert($payload, (int) Auth::id(), $calendar);
 
         $this->dispatch('notify', type: 'success', message: __('attendance::calendar_regimes.messages.saved'));
         $this->resetForm();
@@ -93,14 +107,33 @@ class CalendarRegimes extends Component
         $calendar = AttendanceCalendar::query()->findOrFail($id);
 
         $this->editingId = (int) $calendar->id;
+        $this->editingStoredName = filled($calendar->name) ? (string) $calendar->name : null;
         $this->form = [
             'date' => $calendar->date?->toDateString() ?? now()->toDateString(),
             'day_type' => (string) $calendar->day_type,
-            'name' => (string) ($calendar->name ?? ''),
+            'name' => $calendar->name ? ModuleTranslation::resolveStoredText((string) $calendar->name) : '',
             'is_paid' => (bool) $calendar->is_paid,
             'scope_type' => (string) $calendar->scope_type,
             'scope_id' => $calendar->scope_id ? (int) $calendar->scope_id : null,
         ];
+    }
+
+    public function confirmRemove(int $id): void
+    {
+        $calendar = AttendanceCalendar::query()->findOrFail($id);
+
+        $details = array_filter([
+            $calendar->date?->format('Y-m-d'),
+            __('attendance::calendar_regimes.options.'.$calendar->day_type),
+            $calendar->name ? ModuleTranslation::resolveStoredText((string) $calendar->name) : null,
+        ]);
+
+        $this->confirmDeletion(
+            action: 'remove',
+            parameters: [$id],
+            message: __('attendance::calendar_regimes.confirmations.delete'),
+            description: implode(' • ', $details),
+        );
     }
 
     public function remove(int $id, AttendanceCalendarManagementService $service): void
@@ -150,6 +183,7 @@ class CalendarRegimes extends Component
     private function resetForm(): void
     {
         $this->editingId = null;
+        $this->editingStoredName = null;
         $this->form = [
             'date' => now()->setDate($this->year, $this->month, 1)->toDateString(),
             'day_type' => 'workday',

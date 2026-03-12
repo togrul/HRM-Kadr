@@ -73,6 +73,45 @@
         })
         .filter(Boolean);
     },
+    syncSelectedCache(currentId = this.toId(this.currentValue)){
+      const found = this.cachedOptions.find(o => this.toId(o.id) === currentId);
+      if (found) {
+        this.selectedCache = { id: this.toId(found.id), label: found.label };
+        return;
+      }
+      if (currentId === null) {
+        this.selectedCache = { id: null, label: '' };
+      }
+    },
+    syncOptionsFromDom(){
+      const optionNodes = Array.from(this.$root.querySelectorAll('[data-option-id]'));
+      const domOptions = optionNodes.map((node) => ({
+        id: node.dataset.optionId,
+        label: node.dataset.optionLabel ?? '',
+      }));
+      this.cachedOptions = this.normalizeOptions(domOptions);
+      this.syncSelectedCache();
+    },
+    observeOptions(){
+      const target = this.$refs.panel ?? this.$root;
+      if (!target || typeof MutationObserver === 'undefined') return;
+
+      const observer = new MutationObserver(() => {
+        this.$nextTick(() => {
+          this.syncOptionsFromDom();
+          if (this.isOpen) {
+            requestAnimationFrame(() => this.repositionPanel());
+          }
+        });
+      });
+
+      observer.observe(target, {
+        childList: true,
+        subtree: true,
+      });
+
+      this.$root._uiSelectObserver = observer;
+    },
 
     init(){
       this.cachedOptions = this.normalizeOptions(this.cachedOptions);
@@ -83,12 +122,12 @@
           this.selectedCache = { id: currentId, label: this.initialSelectedLabel };
         }
       }
+      this.$nextTick(() => {
+        this.syncOptionsFromDom();
+        this.observeOptions();
+      });
       this.$watch('currentValue', (next) => {
-        const nextId = this.toId(next);
-        const found = this.cachedOptions.find(o => this.toId(o.id) === nextId);
-        if (found) {
-          this.selectedCache = { id: this.toId(found.id), label: found.label };
-        }
+        this.syncSelectedCache(this.toId(next));
         if (this.isOpen) {
           this.$nextTick(() => requestAnimationFrame(() => this.repositionPanel()));
         }

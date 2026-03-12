@@ -1,514 +1,654 @@
 # Performance Evaluation User Guide
 
-Bu sənəd `Performance Evaluation` modulunu addım-addım izah edir. Məqsəd odur ki, modulu ilk dəfə açan HR əməkdaşı və ya rəhbər ekrandakı hər formun nə iş gördüyünü, daxil edilən məlumatın hara düşdüyünü və sonradan nəyə təsir etdiyini aydın başa düşsün.
+Bu sənəd `Performance Evaluation` modulunu ilk dəfə görən istifadəçi üçün addım-addım izah edir. Məqsəd odur ki, HR əməkdaşı, rəhbər və reviewer:
 
-## 1. Modul nə üçündür
+- hər tabın nə üçün açıldığını bilsin
+- hər formda hansı field-in niyə lazım olduğunu başa düşsün
+- `Save` edəndən sonra hansı record-un yarandığını və hansı statusun dəyişdiyini bilsin
+- performans score-un `Training Needs` moduluna necə təsir etdiyini anlasın
+- form əsaslı qiymətləndirmə ilə test əsaslı skill measurement arasındakı fərqi görə bilsin
 
-Bu modul iki xətt üzrə işləyir:
+Route: `/performance-evaluation`
+
+## 1. Modulun qısa məntiqi
+
+Bu modul iki ayrı, amma əlaqəli axını idarə edir:
 
 1. forma əsaslı performans qiymətləndirməsi
-2. test və bacarıq ölçümü
+2. test və skill measurement
 
-Sistemin verdiyi nəticə yalnız “bal” deyil. Buradan yaranan zəif sahələr avtomatik olaraq `Training Needs` moduluna düşə bilər.
+Qısa data axını belədir:
 
-## 2. Route və əsas tab-lar
+`Cycle -> Template -> Section -> Item -> Evaluation Form -> Score -> Final Result -> Weak Link -> Training Need`
 
-- Route: `/performance-evaluation`
-- Tab-lar:
-  - `Xülasə`
-  - `Dövrlər`
-  - `Şablonlar`
-  - `Qiymətləndirmələr`
-  - `Testlər`
+Test xətti isə belədir:
 
-İdeal iş sırası:
+`Test Bank -> Question -> Test Session -> Attempt -> Review -> Finalize -> Skill Gap -> Training Need`
 
-1. dövr yarat
-2. şablon yarat
-3. şablon bölmələrini yarat
-4. meyarları yarat
-5. formanı əməkdaşa təyin et
-6. qiymətləndirən ballarını daxil et
-7. zəif nəticələri Training Needs-ə ötür
-8. lazım olsa test bankı və test sessiyası qur
-9. açıq cavabları review et
+Bu modulun ən vacib tərəfi budur:
 
-## 3. Xülasə tabı
+- zəif nəticə sadəcə “bal” kimi qalmır
+- aşağı score və ya zəif test nəticəsi `Training Needs` modulunda avtomatik need yarada bilər
 
-Bu tab əməliyyat aparmaq üçün deyil, ümumi mənzərə üçündür.
+## 2. Yeni istifadəçi üçün tövsiyə olunan iş sırası
 
-Gördüyün sayğaclar:
+Sıfırdan işləyirsənsə, bu ardıcıllıqla get:
 
-- `Dövr`: neçə aktiv və ya arxiv qiymətləndirmə dövrü var
-- `Şablon`: neçə forma şablonu var
-- `Bölmə`: neçə şablon bölməsi var
-- `Meyar`: neçə qiymətləndirmə kriteriyası var
-- `Forma`: neçə real qiymətləndirmə forması təyin olunub
-- `Bal`: neçə evaluator score daxil edilib
-- `İnkişaf linki`: zəif score-dan neçə training need yaranıb
-- `Test bankı / sessiya / cəhd`: test ölçmə qatının ümumi vəziyyəti
+1. `Dövrlər` tabında cycle yarat
+2. `Şablonlar` tabında template yarat
+3. template üçün section yarat
+4. section üçün item yarat
+5. hər item-i düzgün competency ilə bağla
+6. `Qiymətləndirmələr` tabında formu əməkdaşa təyin et
+7. evaluator score-larını daxil et
+8. weak result-ların Training Needs-ə düşdüyünü yoxla
+9. test istifadə olunursa, ayrıca bank, question və session qur
+10. open answer-ları review et və attempt-i finalize et
 
-## 4. Dövrlər tabı
+Əgər item competency-yə bağlanmasa, score yazılsa belə Training Needs inteqrasiyası işləməyəcək.
 
-`Dövr` qiymətləndirmənin işlədiyi zaman pəncərəsidir.
+## 3. Tab-lar nə üçündür
 
-### 4.1. Yeni dövr formu
+- `Xülasə`
+  - ümumi vəziyyətə baxış
+- `Dövrlər`
+  - qiymətləndirmənin zaman pəncərəsi
+- `Şablonlar`
+  - form skeleton-u: template, section, item
+- `Qiymətləndirmələr`
+  - real əməkdaşlara form təyinatı və score capture
+- `Testlər`
+  - skill measurement və open answer review
+- `Tam siyahılar`
+  - paginated, filter-li, detail panel-li tam workspace
+
+## 4. Xülasə tabı
+
+Bu tab əməliyyat aparmaq üçün deyil. Bu tab idarəetmə baxışıdır.
+
+Burada görünən sayğaclar:
+
+- `Cycles`
+- `Templates`
+- `Sections`
+- `Items`
+- `Forms`
+- `Scores`
+- `Need links`
+
+Bu sayğaclar nəyi göstərir:
+
+- baza düzgün qurulubmu
+- real form assignment var ya yox
+- artıq evaluator score yığılıbmı
+- zəif nəticələr Training Needs-ə ötürülüb ya yox
+
+Dashboard kartları limitli gəlir. Tam nəzarət üçün `Tam siyahılar` və export hissəsindən istifadə et.
+
+## 5. Dövrlər tabı
+
+Cycle performans işinin zaman konteyneridir.
+
+### 5.1. Cycle formu
 
 Field-lər:
 
-- `Dövr adı`
-  - nümunə: `2026 illik qiymətləndirmə`
-  - bu ad sonradan form listələrində və report-larda görünür
-- `Dövr növü`
-  - `İllik`, `Tədris ili`, `Rüblük`
-  - bu sadəcə period növünü semantik olaraq göstərir
+- `Cycle name`
+  - nümunə: `2026 Annual Performance`
+- `Cycle type`
+  - `annual`, `academic`, `quarterly`
+- `Start date`
+- `End date`
 - `Status`
-  - `Qaralama`: hələ işlənir
-  - `Aktiv`: istifadə üçün açıqdır
-  - `Bağlı`: artıq yeni əməliyyat üçün istifadə edilmir
-- `Başlanğıc tarixi`
-- `Bitiş tarixi`
-  - bu tarix aralığı dövrün hansı müddəti əhatə etdiyini göstərir
-- `Açıqlama`
-  - HR qeydləri və dövrün məqsədi
-- `Formanı avtomatik yarat`
-  - aktivdirsə, gələcəkdə sistemin bu dövr üçün avtomatik forma yaratması nəzərdə tutulur
+  - `draft`, `active`, `closed`
+- `Auto-generate forms`
+  - gələcəkdə avtomatik form generate olunması üçün işarədir
+- `Description`
 
-### 4.2. Yadda saxlandıqda nə olur
+Save olunanda nə olur:
 
-Məlumat `performance_cycles` cədvəlinə düşür.
+- `performance_cycles` cədvəlinə create və ya update olunur
 
-Bu dövr daha sonra:
+Bu formdan sonra hara təsir edir:
 
-- `Form təyinatı` hissəsində seçilir
-- `Test sessiyası` hissəsində seçilir
-- `Son formalar` və digər listlərdə görünür
+- evaluation assignment formunda seçilir
+- test session formunda seçilir
+- recent cycles kartında görünür
+- export və list-lərdə period konteksti olur
 
-## 5. Şablonlar tabı
+Praktik tövsiyə:
 
-Bu tab qiymətləndirmə skeleton-unu qurur. Burada üç qat var:
+- eyni dövr üçün aydın adlandırma seç
+- aktiv cycle olmadan assignment-a keçmə
 
-1. `Şablon`
-2. `Şablon bölməsi`
-3. `Meyar`
+### 5.2. Recent cycles kartı
 
-### 5.1. Şablon nədir
+Bu kart:
 
-Şablon bütün formanın əsas konteyneridir.
+- dövrün periodunu
+- statusunu
+- auto generation açıqdır ya yox
+- edit və delete action-larını
 
-Məsələn:
+göstərir.
 
-- `Akademik heyət əsas şablonu`
-- `İnzibati heyət şablonu`
+## 6. Şablonlar tabı
 
-### 5.2. Yeni şablon formu
+Bu tab form skeleton-unu qurur. Burada üç qat var:
 
-Field-lər:
+1. template
+2. section
+3. item
 
-- `Şablon adı`
-  - insanın görəcəyi əsas addır
-- `Şablon kodu`
-  - qısa identifikator
-  - nümunə: `PE-AC-01`
-  - eyni adda çox şablon olsa belə seçimi asanlaşdırır
-- `Açıqlama`
-  - şablonun kim üçün və nə məqsədlə yaradıldığını izah edir
-- `Aktivdir`
-  - aktiv olmayan şablon saxlanır, amma yeni istifadə üçün üstün seçim olmur
-
-### 5.3. Şablon yaradıldıqdan sonra harada görünür
-
-Şablon saxlanandan sonra bunlarda görünür:
-
-- `Xülasə` tabındakı `Son şablonlar`
-- `Şablonlar` tabındakı `Son şablonlar`
-- `Şablon bölməsi` formundakı `Şablon` select-i
-- `Form təyinatı` hissəsindəki `Şablon` select-i
-- `Son formalar` listəsində təyin olunmuş formanın altında
-
-`Açıqlama` da artıq `Son şablonlar` kartında görünür.
-
-### 5.4. Şablon bölməsi nədir
-
-Bölmə, şablon daxilində böyük məna blokudur.
-
-Nümunələr:
-
-- `Pedaqoji fəaliyyət`
-- `Yaradıcılıq və inkişaf`
-- `İntizam`
-
-### 5.5. Şablon bölməsi formundakı field-lər
-
-- `Şablon`
-  - bu bölmənin hansı şablona aid olduğunu seçir
-- `Bölmə adı`
-  - formda görünəcək başlıqdır
-- `Nəticəyə təsir (%)`
-  - bu bölmənin yekun nəticədə neçə faiz pay daşıdığını göstərir
-  - məsələn `60` yazılırsa, yekun nəticənin 60%-i bu bölmədən gəlir
-- `Sıra`
-  - UI-da və hesablamada bölmələrin hansı ardıcıllıqla görünəcəyini təyin edir
-  - kiçik rəqəm əvvəl gəlir
-  - bu sahə yalnız görünüş sırası üçündür, bala birbaşa təsir etmir
-
-### 5.6. Bölmə yaradıldıqda nə olur
-
-Məlumat `performance_form_template_sections` cədvəlinə düşür.
-
-Bu bölmə sonra:
-
-- `Meyar` formundakı `Bölmə` select-ində görünür
-- həmin şablona aid meyarların konteyneri olur
-- çəkisinə görə yekun score hesabında rol oynayır
-
-### 5.7. Meyar nədir
-
-Meyar ölçülən konkret kriteriyadır.
-
-Nümunə:
-
-- `Tədris metodikası`
-- `Etik qaydalara riayət`
-- `Komanda işi`
-
-### 5.8. Meyar formundakı field-lər
-
-- `Bölmə`
-  - meyarın hansı bölməyə aid olduğunu göstərir
-- `Kompetensiya`
-  - bu meyarı Training Needs dünyası ilə bağlayır
-  - zəif score yarananda training need məhz bu kompetensiya üzərindən yaranır
-  - bu sahə boş qalsa training need inteqrasiyası işləməyəcək; buna görə meyarı kompetensiyasız saxlamaq düzgün deyil
-- `Meyar adı`
-  - evaluator formda bunu görəcək
-- `Nəticəyə təsir (%)`
-  - həmin bölmə daxilində meyarın nə qədər pay daşıdığını göstərir
-  - bu dəyər yekun bal hesablamasında istifadə olunur
-- `Aşağı bal həddi`
-  - score bu həddin altına düşərsə sistem bunu zəif nəticə sayır
-  - zəif nəticə `Training Needs` moduluna need yarada bilər
-- `Şərh tələb edir`
-  - aktivdirsə evaluator bu meyara bal verəndə izah yazmalıdır
-
-### 5.9. Meyar yaradıldıqda nə olur
-
-Məlumat `performance_form_template_items` cədvəlinə düşür.
-
-Bu item sonra:
-
-- `Evaluator balı` hissəsində seçilir
-- təyin olunmuş formaya score girişi üçün istifadə olunur
-- zəif nəticədə `performance_training_need_links` və `training_need_items` yarada bilir
-- `Son meyarlar` listində adı, bağlı olduğu section/template, kompetensiyası, `Nəticəyə təsir` və `Aşağı hədd` ilə görünür
-
-## 6. Qiymətləndirmələr tabı
-
-Bu tabda iki əsas hissə var:
-
-1. `Form təyinatı`
-2. `Evaluator balı`
-
-### 6.1. Form təyinatı nədir
-
-Bu, seçilmiş dövr və şablonu konkret əməkdaşa bağlayır.
-
-### 6.2. Form təyinatı field-ləri
-
-- `Dövr`
-  - form hansı dövr daxilində işləyəcək
-- `Şablon`
-  - hansı skeleton istifadə olunacaq
-- `Əməkdaş`
-  - kim qiymətləndirilir
-- `Rəhbər`
-  - manager evaluator
-- `İR reviewer`
-  - HR tərəfdən yoxlayan şəxs
-
-### 6.3. Yadda saxlandıqda nə olur
-
-Məlumat `performance_forms` cədvəlinə düşür.
-
-Bu form:
-
-- `Son formalar` listəsində görünür
-- `Evaluator balı` formundakı `Qiymətləndirmə forması` select-ində görünür
-- sonradan self/manager/hr score-larını daşıyır
-
-### 6.4. Evaluator balı formu
+### 6.1. Template formu
 
 Field-lər:
 
-- `Qiymətləndirmə forması`
-- `Meyar`
-- `Qiymətləndirən`
-  - `Özünüqiymətləndirmə`, `Rəhbər`, `İR`
-- `Bal`
-- `Şərh`
+- `Template name`
+- `Template code`
+- `Description`
+- `Is active`
 
-### 6.5. Score daxil ediləndə nə olur
+Save olunanda nə olur:
 
-Məlumat `performance_form_scores` cədvəlinə düşür.
+- `performance_form_templates` cədvəlinə yazılır
 
-Sistem sonra:
+Bu formdan sonra hara təsir edir:
 
-- həmin formanın uyğun statusunu `submitted` edə bilər
-- meyarın aşağı həddi ilə score-u müqayisə edir
-- score həddən aşağıdırsa `Training Needs` moduluna need yaradır
-- əvvəllər yaranmış auto need varsa və score düzələrsə həmin linki təmizləyir
-- meyar kompetensiyaya bağlıdırsa bu score `performance_training_need_links` və `training_need_items` yarada bilər
+- section formunda select olur
+- evaluation assignment formunda select olur
+- recent template kartlarında görünür
 
-Əgər meyar kompetensiyaya bağlanmayıbsa:
+Praktik qayda:
 
-- bal yadda saxlanır
+- code sahəsini boş qoymaq olar
+- amma çox template olduqda seçim üçün code çox faydalıdır
+
+### 6.2. Section formu
+
+Section template daxilində böyük məna blokudur.
+
+Field-lər:
+
+- `Template`
+- `Section name`
+- `Impact on result (%)`
+- `Sort order`
+
+Save olunanda nə olur:
+
+- `performance_form_template_sections` cədvəlinə yazılır
+
+Bu formdan sonra hara təsir edir:
+
+- item formunda section select olur
+- final scoring strukturunda section çəkisi kimi istifadə olunur
+- recent section kartında görünür
+
+### 6.3. Item formu
+
+Item ölçülən konkret kriteriyadır.
+
+Field-lər:
+
+- `Section`
+- `Competency`
+- `Criterion name`
+- `Description`
+- `Impact on result (%)`
+- `Low score threshold`
+- `Requires comment`
+- `Sort order`
+
+Field-lərin praktik mənası:
+
+- `Competency`
+  - Training Needs inteqrasiyasının əsas körpüsüdür
+- `Low score threshold`
+  - zəif nəticənin trigger həddidir
+- `Requires comment`
+  - evaluator-dan əlavə əsaslandırma gözlənilir
+- `Impact on result (%)`
+  - yekun hesabda rol oynayır
+
+Save olunanda nə olur:
+
+- `performance_form_template_items` cədvəlinə yazılır
+
+Bu formdan sonra hara təsir edir:
+
+- score capture formunda item seçilir
+- final score hesabına daxil olur
+- threshold altına düşərsə training need yarada bilir
+- recent item kartında görünür
+
+Ən vacib qayda:
+
+- item competency-yə bağlanmalıdır
+- əks halda zəif score görünəcək, amma auto training need yaranmayacaq
+
+### 6.4. Şablonlar tabında iş sırası
+
+Doğru sıra budur:
+
+1. template yarat
+2. həmin template üçün section yarat
+3. hər section üçün item yarat
+4. hər item üçün threshold və competency-ni yoxla
+
+Bu sıra pozularsa evaluation assignment zamanı natamam skeleton yaranır.
+
+## 7. Qiymətləndirmələr tabı
+
+Bu tab real əməliyyat qatıdır. Burada iki əsas iş görülür:
+
+1. form assignment
+2. evaluator score capture
+
+### 7.1. Evaluation assignment formu
+
+Field-lər:
+
+- `Cycle`
+- `Template`
+- `Employee`
+- `Manager`
+- `HR reviewer`
+
+Save olunanda nə olur:
+
+- `performance_forms` cədvəlinə create və ya update olunur
+- eyni cycle + template + employee varsa `updateOrCreate` məntiqi işləyir
+
+Bu formdan sonra hara təsir edir:
+
+- evaluator score formunda selectable olur
+- recent forms kartında görünür
+- evaluator workspace üçün iş yaradır
+
+Praktik qayda:
+
+- employee seçmədən əvvəl template-in tam hazır olduğuna əmin ol
+- manager və HR reviewer sahələri sonrakı iş sahəsi üçün vacibdir
+
+### 7.2. Evaluator score formu
+
+Field-lər:
+
+- `Evaluation form`
+- `Criterion`
+- `Evaluator`
+  - `self`, `manager`, `hr`
+- `Score`
+- `Comment`
+
+Save olunanda nə olur:
+
+- `performance_form_scores` cədvəlinə update-or-create yazılır
+- formun uyğun evaluator statusu `submitted` olur
+- formun final nəticəsi yenilənir
+- weak-area sync servisi işləyir
+- lazım gələrsə `training_need_items` və `performance_training_need_links` yaranır
+- əvvəl yaranmış auto link artıq zəif deyilsə silinə bilər
+
+Bu formdan sonra hara təsir edir:
+
+- recent forms
+- weak links kartı
+- Training Needs modulu
+- export report-lar
+
+### 7.3. Score save olunanda konkret nə baş verir
+
+Əgər score normal həddədirsə:
+
+- score yazılır
 - evaluator statusu yenilənir
-- amma avtomatik təlim ehtiyacı yaranmır
+- formun nəticəsi refresh olunur
 
-### 6.6. Son formalar kartı necə oxunur
+Əgər score `Low score threshold` dəyərindən aşağıdırsa:
 
-Hər kartda 4 status badge-i ola bilər:
+1. sistem bunu zəif nəticə kimi qəbul edir
+2. item competency-yə bağlıdırsa həmin competency ilə əlaqəli training need yarada bilər
+3. `performance_training_need_links` cədvəlində link yaranır
+4. `Training Needs` modulunda source=`performance_gap` olan need görünür
 
-- `Özünüqiymətləndirmə`
-- `Rəhbər`
-- `İR`
-- `Yekun`
+Əgər sonradan score düzəlirsə:
 
-İlk 3 badge evaluator axınının vəziyyətidir:
+- auto-created link təmizlənə bilər
+- artıq zəif olmayan nəticə need ilə bağlı qalmaz
 
-- `Qaralama`: həmin evaluator hələ bal daxil etməyib
-- `Təqdim edilib`: həmin evaluator balı artıq saxlayıb
+Əgər item competency-yə bağlı deyilsə:
 
-`Yekun` badge-i isə ümumi nəticə kateqoriyasıdır:
+- score yenə də yazılır
+- amma training need inteqrasiyası işləmir
+- sistem bunu ayrıca xəbərdarlıq mesajı ilə bildirir
 
-- `Yüksək`
-- `Orta`
-- `Zəif`
+### 7.4. Recent forms kartı
 
-Bu badge evaluator statusu deyil; form üzrə hesablanmış final nəticədir.
+Bu kartda dörd status xətti var:
 
-## 6.7. Mənim qiymətləndirmələrim
+- `self_status`
+- `manager_status`
+- `hr_status`
+- `final_category`
 
-Bu ayrıca evaluator iş sahəsidir. Rəhbər və ya İR reviewer özünə düşən işləri burada idarə edir.
+İlk üçü evaluator mərhələsini göstərir:
 
-Buradakı əsas hissələr:
+- `draft`
+- `submitted`
 
-- `Axtarış`
-- `Rol filtri`
-- `Status filtri`
-- `Qiymətləndirmə forması`
-- `Meyar`
-- `Bal`
-- `Şərh`
+Sonuncu isə nəticə kateqoriyasıdır:
 
-İş prinsipi:
+- `high`
+- `medium`
+- `weak`
 
-1. soldakı kartlardan formanı tapırsan
-2. `Bal formunu aç` düyməsi ilə formanı sağdakı form-a doldurursan
-3. meyar seçirsən
-4. bal və şərh yazırsan
-5. `Balı yadda saxla` ilə submit edirsən
+Bu dörd badge eyni şey deyil.
 
-Açıq cavab review hissəsi də eyni məntiqlə işləyir:
+### 7.5. Weak links kartı
 
-1. solda gözləyən cavabı tapırsan
-2. `Yoxlama formasını aç` edirsən
-3. sağda review balı və rəy yazırsan
-4. `Cavabı yoxla` ilə yekunlaşdırırsan
+Bu kart zəif nəticədən yaranan training need bağlantılarını göstərir.
 
-Bu workspace tam report ekranı deyil.
+Burada istifadəçi görə bilər:
 
-- təyin olunmuş formalar: maksimum `24`
-- gözləyən açıq cavablar: maksimum `24`
+- hansı form
+- hansı item
+- hansı competency
+- hansı əməkdaş
+- hansı zəif nəticə
 
-Yəni bu hissə gündəlik iş qutusu kimidir. Tam siyahı və arxiv üçün export/print hissəsi istifadə olunur.
+Bu kart Training Needs inteqrasiyasının canlı sübutudur.
 
-Əlavə olaraq `Tam siyahılar` tab-ı artıq ayrıca list/detail workspace-dir:
+### 7.6. Evaluator workspace
 
-- formalar
-- şablonlar
-- meyarlar
-- test cəhdləri
-- zəif sahə linkləri
+Bu ayrıca istifadəçi iş sahəsidir. Rəhbər və HR reviewer özünə düşən işləri burada idarə edir.
 
-burada search, filter, pagination və detail panel ilə görünür. Dashboard kartları qısa xülasə üçündür, tam siyahı üçün bu tab istifadə olunur.
+Buradakı iş axını:
 
-### 6.6. `Son formalar` kartındakı badge-lər nə deməkdir
+1. soldakı assigned forms siyahısından formanı tap
+2. `Open score form` ilə sağdakı score formunu doldur
+3. item seç
+4. score və comment yaz
+5. save et
 
-Bu kartda adətən 4 badge görünür:
+Open-answer review hissəsi də eyni məntiqlə işləyir:
 
-- 1-ci badge: `self_status`
-  - əməkdaş özünüqiymətləndirmə hissəsini doldurubsa `Təqdim edilib`
-  - doldurmayıbsa `Qaralama`
-- 2-ci badge: `manager_status`
-  - rəhbər hissəsi doldurulubsa `Təqdim edilib`
-  - doldurulmayıbsa `Qaralama`
-- 3-cü badge: `hr_status`
-  - HR reviewer hissəsi doldurulubsa `Təqdim edilib`
-  - doldurulmayıbsa `Qaralama`
-- 4-cü badge: `final_category`
-  - yekun nəticə kateqoriyasıdır
-  - `Yüksək`, `Orta`, `Zəif` kimi görünür
+1. pending review cavabını tap
+2. `Open review form` et
+3. bal və rəy yaz
+4. review et
 
-Yəni ekranda `2 qaralama + 1 təqdim edilib + 1 yüksək` görürsünüzsə, bu o deməkdir:
+## 8. Testlər tabı
 
-- `Özünüqiymətləndirmə`, `Rəhbər`, `İR` badge-lərindən ikisi hələ `Qaralama` vəziyyətindədir
-- həmin evaluator-lar hələ öz score-larını tamamlamayıb
-- evaluator-lardan biri artıq score göndərib və statusu `Təqdim edilib` olub
-- sistemin hazırkı yekun kateqoriyası `Yüksək` çıxıb
+Bu tab skill measurement üçündür.
 
-Bu badge-lər ayrı-ayrı mənalar daşıyır; 4 badge eyni status deyil.
-
-### 6.7. Aşağı score veriləndə konkret nə baş verir
-
-Əgər score meyarın `Aşağı bal həddi` dəyərindən aşağıdırsa:
-
-1. həmin meyar zəif nəticə kimi qəbul olunur
-2. meyara bağlı `Kompetensiya` varsa, sistem onu Training Needs ilə əlaqələndirir
-3. `training_need_items` cədvəlində avtomatik ehtiyac yarana bilər
-4. `performance_training_need_links` cədvəlində bu zəif nəticə ilə yaranmış need arasında link yazılır
-5. həmin ehtiyac sonradan:
-   - plan board-da görünə bilər
-   - smart suggestion-a düşə bilər
-   - illik təlim planına daxil edilə bilər
-
-Əgər sonradan score düzəlirsə və artıq həddin üstündədirsə, sistem auto-created link-i təmizləyir.
-
-## 7. Testlər tabı
-
-Bu hissə skill measurement üçündür.
-
-### 7.1. Test bankı
+### 8.1. Test bank formu
 
 Field-lər:
 
-- `Test bankı adı`
-- `Test bankı kodu`
-- `Keçid balı (%)`
-- `Müddət (dəqiqə)`
-- `Açıqlama`
-- `Aktivdir`
+- `Test bank name`
+- `Test bank code`
+- `Pass score (%)`
+- `Duration (minutes)`
+- `Description`
+- `Max attempts`
+- `Is active`
 
-Yadda saxlananda:
+Save olunanda nə olur:
 
-- `performance_test_banks`
+- `performance_test_banks` cədvəlinə yazılır
 
-### 7.2. Sual bankı
+Bu formdan sonra hara təsir edir:
 
-Field-lər:
+- question formunda select olur
+- test session formunda select olur
+- recent bank kartlarında görünür
 
-- `Test bankı`
-- `Kompetensiya`
-- `Sual növü`
-  - `Çoxseçimli`
-  - `Açıq cavab`
-  - `Praktiki case study`
-  - `Situasiya əsaslı`
-- `Sual mətni`
-- `Maksimum bal`
-- `Sıra`
-- `Variantlar`
-
-`Variantlar` yalnız çoxseçimli sual üçün praktik olaraq vacibdir.
-
-### 7.3. Test sessiyası
+### 8.2. Test question formu
 
 Field-lər:
 
-- `Dövr`
-- `Test bankı`
-- `Əməkdaş`
+- `Test bank`
+- `Competency`
+- `Question type`
+  - `multiple_choice`
+  - `open_answer`
+  - `case_study`
+  - `behavioral`
+- `Question prompt`
+- `Description`
+- `Maximum score`
+- `Sort order`
+- `Is active`
+- `Options`
+
+Xüsusi qeyd:
+
+- `Options` əsasən multiple-choice suallar üçün vacibdir
+- multiple-choice seçilərsə variantlar boş qala bilməz
+
+Save olunanda nə olur:
+
+- `performance_test_questions` cədvəlinə yazılır
+- option-lar ayrıca sync olunur
+
+Bu formdan sonra hara təsir edir:
+
+- attempt answer formunda question select olur
+- competency link-i varsa zəif nəticə Training Needs-ə gedə bilər
+
+### 8.3. Test session formu
+
+Field-lər:
+
+- `Cycle`
+- `Test bank`
+- `Employee`
 - `Reviewer`
-- `Plan tarixi`
-- `Son tarix`
-- `Keçid balı`
-- `Müddət`
-- `Maksimum cəhd`
+- `Scheduled at`
+- `Available until`
+- `Pass score`
+- `Duration`
+- `Max attempts`
 - `Status`
+  - `assigned`, `in_progress`, `completed`, `closed`
 
-Yadda saxlananda:
+Save olunanda nə olur:
 
-- `performance_test_sessions`
+- `performance_test_sessions` cədvəlinə yazılır
 
-### 7.4. Cavab toplama
+Bu formdan sonra hara təsir edir:
 
-Field-lər:
+- attempt answer formu
+- recent attempts
+- review queue
 
-- `Test sessiyası`
-- `Sual`
-- `Cəhd nömrəsi`
-- `Variant`
-- `Cavab mətni`
-
-Burada cavablar `performance_test_attempt_answers` cədvəlinə yazılır.
-
-### 7.5. Cəhdi yekunlaşdır
-
-Bu hissə seçilmiş cəhdi bağlayır. Yekunlaşdırmadan sonra sistem:
-
-- auto-score olunan sualları hesablayır
-- ümumi faiz çıxarır
-- pass/fail nəticəsi yaradır
-- zəif competency nəticələri varsa need yarada bilir
-
-### 7.6. Açıq cavab yoxlaması
-
-Burada reviewer açıq cavablara əl ilə bal verir.
+### 8.4. Attempt answer formu
 
 Field-lər:
 
-- `Cavab`
-- `Yoxlama balı`
-- `Rəy`
+- `Test session`
+- `Question`
+- `Attempt number`
+- `Option`
+- `Answer text`
 
-Review bitəndən sonra session nəticəsi tamamlanır.
+Məntiq:
 
-## 8. Training Needs ilə inteqrasiya
+- auto-scored suallarda option seçilməlidir
+- open-answer tipində text cavabı boş qala bilməz
+- seçilən sual seçilən bank-a aid olmalıdır
 
-Bu modul iki yoldan training need yarada bilir:
+Save olunanda nə olur:
 
-1. `Evaluator balı` aşağı həddin altına düşəndə
-2. test nəticəsi competency threshold-dan aşağı olanda
+- `performance_test_attempts` lazım gələrsə yaradılır
+- `performance_test_attempt_answers` update-or-create ilə yazılır
+- cavab open-answer-dırsa review status `pending` olur
+- auto-score olursa `auto_ready` olur
 
-Bu zaman need aşağıdakı məntiqlə yaranır:
+### 8.5. Finalize attempt action-ı
 
-- kompetensiya item və ya sualdan götürülür
-- item və ya sual kompetensiyaya bağlanmayıbsa training need yaranmır
-- personel form və ya session-dan götürülür
-- mənbə:
-  - `performance_gap`
-  - `skill_gap`
+Bu action seçilmiş cəhdi bağlayır.
 
-## 9. Tipik iş ssenarisi
+Finalize olunanda nə olur:
 
-### Ssenari 1: İllik qiymətləndirmə
+- auto-score olunan suallar hesablanır
+- cəhdin yekun faizi çıxır
+- pass/fail məntiqi işləyir
+- zəif skill nəticəsi varsa Training Needs inteqrasiyası işləyə bilər
 
-1. HR `Dövr` yaradır
-2. HR `Şablon` yaradır
-3. HR `Bölmə` və `Meyar` qurur
-4. HR formu əməkdaşa təyin edir
-5. Rəhbər bal verir
-6. Zəif meyar varsa system training need yaradır
-7. HR həmin need-i `Training Needs` modulunda planlaşdırır
+Bu addım edilmədən test nəticəsi tam bağlanmış hesab olunmur.
 
-### Ssenari 2: Testlə skill gap aşkar edilir
+### 8.6. Open answer review formu
 
-1. HR test bankı yaradır
-2. sualları və kompetensiya bağlarını yazır
-3. test sessiyası açır
-4. əməkdaş cavab verir
-5. reviewer açıq cavabları yoxlayır
-6. sistem yekun nəticə çıxarır
-7. zəif competency varsa training need yaradır
+Field-lər:
 
-## 10. Praktik qeydlər
+- `Answer`
+- `Review score`
+- `Feedback`
 
-- Şablon yaratdıqdan sonra onu dərhal:
-  - `Şablon bölməsi`
-  - `Form təyinatı`
-  hissələrində seçə bilərsən.
-- `Açıqlama` boş saxlanıla bilər, amma şablon çoxaldıqda qarışıqlığın qarşısını alır.
-- `Nəticəyə təsir (%)` və `Sıra` təsadüfi sahələr deyil:
-  - `Nəticəyə təsir (%)` hesablamaya təsir edir
-  - `Sıra` görünüş və axına təsir edir
-- `Aşağı bal həddi` Training Needs ilə inteqrasiyanın trigger sahəsidir.
+Save olunanda nə olur:
+
+- reviewer əl ilə bal verir
+- cavabın review hissəsi bağlanır
+- test nəticəsi daha düzgün yekunlaşır
+
+Bu hissə yalnız review permission olan istifadəçi üçündür.
+
+## 9. Training Needs ilə inteqrasiya
+
+Bu modul iki fərqli source ilə training need yarada bilər:
+
+1. `performance_gap`
+   - form əsaslı aşağı score
+2. `skill_gap`
+   - test və measurement nəticəsi zəifdir
+
+Need yaranması üçün lazım olan şərtlər:
+
+- item və ya question competency-yə bağlı olmalıdır
+- employee müəyyən olmalıdır
+- nəticə threshold-dan aşağı düşməlidir
+
+Need yaranandan sonra nə olur:
+
+- Training Needs modulunda need queue-ya düşür
+- planlama və session axınına qoşula bilir
+
+## 10. Tam siyahılar tabı
+
+Bu tab dashboard kartlarının geniş versiyasıdır.
+
+Burada:
+
+- search
+- filter
+- pagination
+- detail panel
+
+ilə aşağıdakı varlıqlar görünür:
+
+- forms
+- templates
+- items
+- weak links
+- test attempts
+
+Dashboard kartı kifayət etmirsə, həmişə bu hissəyə keç.
+
+## 11. Export və report hissəsi
+
+Moduldan bu report-lar çıxarıla bilir:
+
+- forms report
+- summary report
+- weak links report
+- weak pivot report
+- audit report
+- print summary
+
+Bu report-lar gündəlik edit işi üçün deyil; audit, rəhbərlik və arxiv üçündür.
+
+## 12. Save edəndə təsir xəritəsi
+
+Qısa xatırlatma:
+
+- `Cycle`
+  - period konteynerini yaradır
+- `Template`
+  - form skeleton-u yaradır
+- `Section`
+  - nəticə strukturunu qurur
+- `Item`
+  - real ölçmə kriteriyasını və weak trigger-i yaradır
+- `Evaluation form`
+  - əməkdaş assignment-i yaradır
+- `Score`
+  - evaluator statusunu, nəticəni və weak link-i yeniləyir
+- `Test bank`
+  - measurement bazasını yaradır
+- `Question`
+  - competency bağlı test materialı yaradır
+- `Test session`
+  - real employee test assignment-i yaradır
+- `Attempt answer`
+  - cavab bazasını qurur
+- `Finalize`
+  - cəhdi bağlayır və nəticəni formalaşdırır
+- `Review`
+  - open-answer hissəsini yekunlaşdırır
+
+## 13. Tipik iş ssenariləri
+
+### Ssenari A: İllik performans qiymətləndirməsi
+
+1. cycle yarat
+2. template yarat
+3. section və item-ları tamamla
+4. hər item-in competency və threshold-unu yoxla
+5. evaluation formu əməkdaşa təyin et
+6. manager score daxil et
+7. HR review score daxil et
+8. weak link yaranıbsa Training Needs-ə keç və oradakı need-i planlaşdır
+
+### Ssenari B: Skill measurement ilə gap aşkar etmək
+
+1. test bank yarat
+2. sualları competency-lərlə bağla
+3. test session yarat
+4. cavabları daxil et
+5. open-answer varsa review et
+6. attempt-i finalize et
+7. weak skill nəticəsi varsa Training Needs-də yaranan need-i yoxla
+
+### Ssenari C: Manager günlük işi
+
+1. evaluator workspace-ə gir
+2. assigned formu seç
+3. score formunu aç
+4. item üzrə bal ver
+5. lazım olduqda comment yaz
+6. submit et
+
+## 14. Ən çox edilən səhvlər
+
+- cycle yaratmadan form təyinatına keçmək
+- template hazır olmadan employee assignment etmək
+- item-ı competency-siz saxlamaq
+- threshold-u boş və ya mənasız vermək
+- test question-u yanlış bank ilə qarışdırmaq
+- attempt finalize etmədən nəticə gözləmək
+- weak link yarananda Training Needs tərəfini yoxlamamaq
+
+## 15. Son qayda
+
+Bu modulu belə yadda saxla:
+
+- `Cycle` vaxtı müəyyən edir
+- `Template` formu qurur
+- `Item` nəyi ölçdüyünü deyir
+- `Score` nəticəni yaradır
+- `Weak result` inkişaf ehtiyacına çevrilə bilər
+
+Yəni bu modul sadəcə qiymətləndirmə ekranı deyil. Bu modul performans nəticəsini inkişaf qərarına çevirən idarəetmə qatıdır.

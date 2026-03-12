@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Computed;
 use Livewire\Component;
 
 class ShiftManagement extends Component
@@ -123,8 +124,8 @@ class ShiftManagement extends Component
         $this->editingShiftId = $shift->id;
         $this->shiftForm = [
             'name' => (string) $shift->name,
-            'start_time' => (string) $shift->start_time,
-            'end_time' => (string) $shift->end_time,
+            'start_time' => substr((string) $shift->start_time, 0, 5),
+            'end_time' => substr((string) $shift->end_time, 0, 5),
             'break_minutes' => (int) $shift->break_minutes,
             'is_night_shift' => (bool) $shift->is_night_shift,
             'in_flex_before_minutes' => (int) $shift->in_flex_before_minutes,
@@ -286,27 +287,29 @@ class ShiftManagement extends Component
         $this->dispatch('notify', type: 'success', message: __('attendance::shift_management.messages.assignment_deactivated'));
     }
 
-    public function render()
+    #[Computed]
+    public function shifts(): Collection
     {
-        $today = now()->toDateString();
-        /** @var AttendanceStructureScopeReadService $structureScopeRead */
-        $structureScopeRead = app(AttendanceStructureScopeReadService::class);
-        /** @var StructurePathService $structurePathService */
-        $structurePathService = app(StructurePathService::class);
-
-        $structureIds = $this->selectedStructureId
-            ? $this->getNestedStructure($this->selectedStructureId)
-            : [];
-
-        $shifts = AttendanceShift::query()
+        return AttendanceShift::query()
             ->orderByDesc('is_active')
             ->orderBy('name')
             ->get();
+    }
 
-        $assignmentShifts = AttendanceShift::query()
+    #[Computed]
+    public function assignmentShifts(): Collection
+    {
+        return AttendanceShift::query()
             ->where('is_active', true)
             ->orderBy('name')
             ->get(['id', 'name']);
+    }
+
+    #[Computed]
+    public function assignments(): Collection
+    {
+        $today = now()->toDateString();
+        $structurePathService = app(StructurePathService::class);
 
         $assignments = AttendanceShiftAssignment::query()
             ->with([
@@ -314,7 +317,9 @@ class ShiftManagement extends Component
                 'personnel:tabel_no,surname,name,patronymic,structure_id,position_id',
                 'personnel.position:id,name',
             ])
-            ->when($structureIds !== [], function ($query) use ($structureIds) {
+            ->when($this->currentStructureIds() !== [], function ($query) {
+                $structureIds = $this->currentStructureIds();
+
                 $query->whereHas('personnel', function ($personnelQuery) use ($structureIds): void {
                     $personnelQuery->whereIn('structure_id', $structureIds);
                 });
@@ -333,81 +338,122 @@ class ShiftManagement extends Component
                 );
             }
 
-            return $assignment;
-        });
+                return $assignment;
+            });
 
-        $personnelResults = collect();
-        if (mb_strlen(trim($this->personnelSearch)) >= 2) {
-            $term = trim($this->personnelSearch);
-            $wildcard = '%'.$term.'%';
+        return $assignments;
+    }
 
-            $personnelResults = Personnel::query()
-                ->select('tabel_no', 'surname', 'name', 'patronymic', 'structure_id', 'position_id')
-                ->whereNull('leave_work_date')
-                ->when($structureIds !== [], function ($query) use ($structureIds) {
-                    $query->whereIn('structure_id', $structureIds);
-                })
-                ->where(function ($query) use ($wildcard): void {
-                    $query->where('tabel_no', 'like', $wildcard)
-                        ->orWhere('surname', 'like', $wildcard)
-                        ->orWhere('name', 'like', $wildcard)
-                        ->orWhere('patronymic', 'like', $wildcard);
-                })
-                ->with([
-                    'position:id,name',
-                ])
-                ->orderBy('surname')
-                ->limit(12)
-                ->get()
-                ->map(function (Personnel $personnel) use ($structurePathService) {
-                    $personnel->setAttribute('structure_path', $structurePathService->resolve((int) $personnel->structure_id));
-
-                    return $personnel;
-                });
+    #[Computed]
+    public function personnelResults(): Collection
+    {
+        if (mb_strlen(trim($this->personnelSearch)) < 2) {
+            return collect();
         }
 
-        $structureOptions = $structureScopeRead->filterOptions($this->structureSearch);
+        $term = trim($this->personnelSearch);
+        $wildcard = '%'.$term.'%';
+        $structurePathService = app(StructurePathService::class);
 
-        $selectedPersonnelActiveAssignment = null;
-        $selectedPersonnelRecord = null;
-        if (! empty($this->assignmentForm['tabel_no'])) {
-            $selectedPersonnelActiveAssignment = AttendanceShiftAssignment::query()
-                ->with('shift:id,name,start_time,end_time')
-                ->where('tabel_no', $this->assignmentForm['tabel_no'])
-                ->where('is_active', true)
-                ->whereDate('effective_from', '<=', now()->toDateString())
-                ->where(function ($query): void {
-                    $query->whereNull('effective_to')
-                        ->orWhereDate('effective_to', '>=', now()->toDateString());
-                })
-                ->latest('effective_from')
-                ->latest('id')
-                ->first();
+        return Personnel::query()
+            ->select('tabel_no', 'surname', 'name', 'patronymic', 'structure_id', 'position_id')
+            ->whereNull('leave_work_date')
+            ->when($this->currentStructureIds() !== [], function ($query) {
+                $query->whereIn('structure_id', $this->currentStructureIds());
+            })
+            ->where(function ($query) use ($wildcard): void {
+                $query->where('tabel_no', 'like', $wildcard)
+                    ->orWhere('surname', 'like', $wildcard)
+                    ->orWhere('name', 'like', $wildcard)
+                    ->orWhere('patronymic', 'like', $wildcard);
+            })
+            ->with([
+                'position:id,name',
+            ])
+            ->orderBy('surname')
+            ->limit(12)
+            ->get()
+            ->map(function (Personnel $personnel) use ($structurePathService) {
+                $personnel->setAttribute('structure_path', $structurePathService->resolve((int) $personnel->structure_id));
 
-            $selectedPersonnelRecord = Personnel::query()
-                ->select('tabel_no', 'surname', 'name', 'patronymic', 'structure_id', 'position_id')
-                ->with('position:id,name')
-                ->where('tabel_no', $this->assignmentForm['tabel_no'])
-                ->first();
+                return $personnel;
+            });
+    }
 
-            if ($selectedPersonnelRecord) {
-                $selectedPersonnelRecord->setAttribute(
-                    'structure_path',
-                    $structurePathService->resolve((int) $selectedPersonnelRecord->structure_id)
-                );
-            }
+    #[Computed]
+    public function structureOptions(): Collection
+    {
+        /** @var AttendanceStructureScopeReadService $structureScopeRead */
+        $structureScopeRead = app(AttendanceStructureScopeReadService::class);
+
+        return $structureScopeRead->filterOptions($this->structureSearch);
+    }
+
+    #[Computed]
+    public function selectedStructureLabel(): ?string
+    {
+        /** @var AttendanceStructureScopeReadService $structureScopeRead */
+        $structureScopeRead = app(AttendanceStructureScopeReadService::class);
+
+        return $structureScopeRead->label($this->selectedStructureId);
+    }
+
+    #[Computed]
+    public function selectedPersonnelActiveAssignment(): ?AttendanceShiftAssignment
+    {
+        if (empty($this->assignmentForm['tabel_no'])) {
+            return null;
         }
 
-        return view('attendance::livewire.attendance.shift-management', [
-            'shifts' => $shifts,
-            'assignmentShifts' => $assignmentShifts,
-            'assignments' => $assignments,
-            'personnelResults' => $personnelResults,
-            'structureOptions' => $structureOptions,
-            'selectedStructureLabel' => $structureScopeRead->label($this->selectedStructureId),
-            'selectedPersonnelActiveAssignment' => $selectedPersonnelActiveAssignment,
-            'selectedPersonnelRecord' => $selectedPersonnelRecord,
-        ]);
+        return AttendanceShiftAssignment::query()
+            ->with('shift:id,name,start_time,end_time')
+            ->where('tabel_no', $this->assignmentForm['tabel_no'])
+            ->where('is_active', true)
+            ->whereDate('effective_from', '<=', now()->toDateString())
+            ->where(function ($query): void {
+                $query->whereNull('effective_to')
+                    ->orWhereDate('effective_to', '>=', now()->toDateString());
+            })
+            ->latest('effective_from')
+            ->latest('id')
+            ->first();
+    }
+
+    #[Computed]
+    public function selectedPersonnelRecord(): ?Personnel
+    {
+        if (empty($this->assignmentForm['tabel_no'])) {
+            return null;
+        }
+
+        $structurePathService = app(StructurePathService::class);
+
+        $selectedPersonnelRecord = Personnel::query()
+            ->select('tabel_no', 'surname', 'name', 'patronymic', 'structure_id', 'position_id')
+            ->with('position:id,name')
+            ->where('tabel_no', $this->assignmentForm['tabel_no'])
+            ->first();
+
+        if ($selectedPersonnelRecord) {
+            $selectedPersonnelRecord->setAttribute(
+                'structure_path',
+                $structurePathService->resolve((int) $selectedPersonnelRecord->structure_id)
+            );
+        }
+
+        return $selectedPersonnelRecord;
+    }
+
+    protected function currentStructureIds(): array
+    {
+        return $this->selectedStructureId
+            ? $this->getNestedStructure($this->selectedStructureId)
+            : [];
+    }
+
+    public function render()
+    {
+        return view('attendance::livewire.attendance.shift-management');
     }
 
     /**

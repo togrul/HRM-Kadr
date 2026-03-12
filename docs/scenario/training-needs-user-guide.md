@@ -1,137 +1,223 @@
 # Training Needs User Guide
 
-Bu sənəd `Training Needs` modulunu sıfırdan izah edir. Məqsəd odur ki, sistemi ilk dəfə açan HR əməkdaşı hər tabın nə iş gördüyünü, formda doldurulan məlumatın hara düşdüyünü və sonradan nəyə təsir etdiyini rahat anlaya bilsin.
+Bu sənəd `Training Needs` modulunu sistemi ilk dəfə açan istifadəçi üçün izah edir. Məqsəd yalnız ekran adlarını göstərmək deyil. Məqsəd odur ki, HR əməkdaşı bu sənədi oxuyaraq:
 
-## 1. Modulun ümumi məntiqi
+- modulun ümumi məntiqini başa düşsün
+- hər tab və kartın nə iş gördüyünü bilsin
+- hər formdakı field-in niyə lazım olduğunu anlasın
+- `Save` edəndən sonra nə baş verdiyini görsün
+- hansı işi hansı ardıcıllıqla etməli olduğunu bilsin
+- ehtiyacdan sessiyaya, sessiyadan nəticəyə qədər prosesi təkbaşına idarə edə bilsin
 
-Bu modul təkcə “təlim ehtiyacı siyahısı” deyil. Bütöv axın belədir:
+Route: `/training-needs`
 
-1. kompetensiya və proqram kataloqu qurulur
-2. vəzifə üçün tələb olunan kompetensiyalar yazılır
-3. əməkdaşın mövcud səviyyəsi daxil edilir
-4. ehtiyaclar yaranır
-5. sistem ağıllı təkliflər verir
-6. illik plan hazırlanır
-7. HR plan item-ları review və təsdiq edir
-8. approved item-lardan session proposal çıxır
-9. sessiya yaradılır və keçirilir
-10. iştirakçı, delivery və feedback bağlanır
-11. nəticə report və analitikaya düşür
+## 1. Modulun qısa məntiqi
 
-## 2. Route və tab-lar
+Bu modul “təlim ehtiyacları siyahısı”ndan daha böyükdür. Burada dörd qat bir yerdə yaşayır:
 
-- Route: `/training-needs`
-- Tab-lar:
-  - `Xülasə`
-  - `Kataloqlar`
-  - `Rol tələbləri`
-  - `Profil və plan`
-  - `İllik planlama`
-  - `Təlim təqvimi`
-  - `Nəticələr`
-  - `Analitika`
+1. baza quruluşu
+   - kompetensiya qrupları
+   - səviyyələr
+   - kompetensiyalar
+   - proqramlar
+   - proqram-kompetensiya xəritəsi
+2. ehtiyacın yaranması
+   - rol tələbi
+   - əməkdaş profili
+   - manual need
+   - performans və testdən gələn auto need
+3. planlama və icra
+   - annual plan
+   - plan item
+   - session proposal
+   - training session
+   - participant attendance
+4. bağlanış və ölçmə
+   - delivery record
+   - certificate / document
+   - feedback form və response
+   - analytics və export
 
-## 3. Xülasə tabı
+Qısa data axını belədir:
 
-Bu tab əməliyyat aparmaq üçün deyil. Burada ümumi saylar görünür:
+`Kompetensiya kataloqu -> Rol tələbi -> Əməkdaş profili -> Need -> Plan -> Plan item -> Session proposal -> Session -> Participant -> Delivery -> Feedback -> Analytics`
 
-- qrup sayı
-- kompetensiya sayı
-- proqram sayı
-- rol tələbi sayı
-- profil sayı
-- need sayı
-- plan sayı
-- plan item sayı
-- session sayı
-- delivery sayı
-- feedback sayı
+## 2. Yeni istifadəçi üçün tövsiyə olunan iş sırası
 
-Bu hissə HR üçün “sistem nə vəziyyətdədir” sualının qısa cavabıdır.
+Modulu sıfırdan qurursansa, bu sıranı pozma:
 
-Dashboard blokları tam report siyahısı deyil.
+1. `Kataloqlar` tabında baza lüğətlərini yarat
+2. `Rol tələbləri` tabında vəzifə tələblərini yaz
+3. `Profil və plan` tabında əməkdaş profillərini daxil et
+4. Eyni tabda need-ləri yarat və ya auto gələnləri yoxla
+5. `İllik planlama` tabında plan yarat
+6. Plan item-ları review et və təsdiqlə
+7. `Təlim təqvimi` tabında proposal-ları sessiyaya çevir
+8. İştirakçıları və davamiyyəti idarə et
+9. Sessiyanı tamamla
+10. `Nəticələr` tabında feedback və certificate hissəsini bağla
+11. `Analitika` və `Tam siyahılar` hissəsində nəticəni yoxla
 
-- çoxu limitli gəlir
-- tipik limitlər `5`, `6`, `8`, user inbox-larda isə `24`-dür
-- bu bloklarda hələ pagination yoxdur
-- ekranın sonsuz uzanmaması üçün limit saxlanır
-- tam siyahı üçün export və print summary hissəsi istifadə olunur
+Əgər bu ardıcıllıq pozularsa, sonrakı select-lərdə seçim çıxmır, suggestion keyfiyyəti düşür və analytics boş görünür.
 
-Yeni `Tam siyahılar` tab-ında isə need, plan item, session və delivery siyahıları ayrıca search, status filter, pagination və detail panel ilə görünür.
+## 3. Tab-lar nə üçündür
 
-## 4. Kataloqlar tabı
+- `Xülasə`
+  - ümumi vəziyyətə baxış üçündür
+- `Kataloqlar`
+  - modulun lüğət və referans bazası burada qurulur
+- `Rol tələbləri`
+  - hər vəzifə üçün lazım olan kompetensiya və səviyyə burada yazılır
+- `Profil və plan`
+  - əməkdaşın cari səviyyəsi və fərdi need burada formalaşır
+- `İllik planlama`
+  - need-lər plan item-a çevrilir və HR review edilir
+- `Təlim təqvimi`
+  - approved item real training session olur
+- `Nəticələr`
+  - sessiya tamamlanır, delivery və feedback bağlanır
+- `Analitika`
+  - rəhbərlik və HR üçün xülasə göstəriciləridir
+- `Tam siyahılar`
+  - paginated, filter-li, detail panel-li list workspace-dir
 
-Burada modulun təməli qurulur.
+## 4. Xülasə tabı
 
-### 4.1. Kompetensiya qrupları
+Bu tab əməliyyat aparmaq üçün deyil. Bu tab “sistem hazırda hansı vəziyyətdədir?” sualına cavab verir.
+
+Burada görünən sayğaclar:
+
+- `Groups`
+- `Levels`
+- `Competencies`
+- `Programs`
+- `Program maps`
+- `Requirements`
+- `Profiles`
+- `Needs`
+- `Plans`
+- `Plan items`
+- `Sessions`
+- `Delivered trainings`
+- `Feedback forms`
+
+Əhəmiyyətli qeyd:
+
+- dashboard kartları limitlidir
+- burada tam siyahı göstərilmir
+- tam izləmə üçün `Tam siyahılar`, export və print istifadə olunur
+
+## 5. Kataloqlar tabı
+
+Bu tab modulun təməlidir. Buradakı səhvlər bütün sonrakı mərhələləri korlayır.
+
+### 5.1. Kompetensiya qrupları formu
 
 Field-lər:
 
 - `Qrup adı`
+  - kompetensiyanı hansı ailədə topladığını göstərir
+  - nümunə: Liderlik, Texniki bacarıqlar, Tədris bacarıqları
 - `Açıqlama`
+  - qrupun nəyi əhatə etdiyini izah edir
 - `Sıra`
+  - listələrdə görünüş ardıcıllığı üçündür
 - `Aktivdir`
+  - deaktiv qrup arxiv kimi qalır, yeni iş üçün istifadə edilməyə bilər
 
-Yadda saxlananda:
+Save olunanda nə olur:
 
-- `training_competency_groups`
+- `training_competency_groups` cədvəlinə yeni yazı düşür
+- qrup sonradan `Kompetensiyalar` formunda seçilən lookup olur
 
-Nümunə qruplar:
+Bu formdan sonra hara təsir edir:
 
-- Liderlik
-- Texniki bacarıqlar
-- Yumşaq bacarıqlar
-- Tədris bacarıqları
+- competency create form
+- listələr və analytics qruplaşdırmaları
 
-### 4.2. Kompetensiya səviyyələri
+### 5.2. Kompetensiya səviyyələri formu
 
 Field-lər:
 
 - `Səviyyə adı`
+  - nümunə: Başlanğıc, Orta, Güclü, Ekspert
 - `Bal`
+  - sistemin müqayisə üçün istifadə etdiyi ədədi dəyərdir
 - `Açıqlama`
+  - səviyyənin izahı
 - `Sıra`
+  - görünüş sırası
 - `Standartdır`
+  - default səviyyə kimi istifadə oluna bilər
 
-Yadda saxlananda:
+Save olunanda nə olur:
 
-- `training_levels`
+- `training_levels` cədvəlinə yazılır
+- `Bal` dəyəri gələcək gap hesablarında və suggestion scoring-də istifadə olunur
 
-`Bal` sonradan gap hesabı və suggestion score üçün istifadə olunur.
+Bu formdan sonra hara təsir edir:
 
-### 4.3. Kompetensiyalar
+- profil formu
+- role requirement formu
+- need formu
+- program map
+- analytics
+
+### 5.3. Kompetensiyalar formu
 
 Field-lər:
 
 - `Qrup`
+  - kompetensiyanın aid olduğu ailə
 - `Kompetensiya adı`
+  - sistemin əsas competency identifikatoru
 - `Açıqlama`
+  - istifadəçi yönlü izah
 - `Məcburidir`
+  - bəzi ssenarilərdə prioriteti yüksəldə bilər
 - `Aktivdir`
 
-Yadda saxlananda:
+Save olunanda nə olur:
 
-- `training_competencies`
+- `training_competencies` cədvəlinə yazılır
+- bütün sonrakı modullar üçün seçilə bilən competency yaranır
 
-### 4.4. Təlim proqramları
+Bu formdan sonra hara təsir edir:
+
+- program map
+- role requirement
+- employee profile
+- training need
+- performance item link-ləri
+- performance test question-ları
+
+### 5.4. Təlim proqramları formu
 
 Field-lər:
 
 - `Proqram adı`
 - `Proqram kodu`
 - `Keçirilmə növü`
-  - `Daxili`
-  - `Xarici`
-  - `Hibrid`
+  - `internal`, `external`, `hybrid`
 - `Saat`
 - `Açıqlama`
 - `Aktivdir`
 
-Yadda saxlananda:
+Save olunanda nə olur:
 
-- `training_programs`
+- `training_programs` cədvəlinə yazılır
+- proqram ehtiyac və session form-larında seçilə bilir
 
-### 4.5. Təlim proqramı -> kompetensiya xəritəsi
+Bu formdan sonra hara təsir edir:
+
+- need queue
+- plan suggestion
+- session form
+- delivery və report hissəsi
+
+### 5.5. Təlim proqramı -> kompetensiya xəritəsi formu
+
+Bu form kataloq tabının ən kritik hissələrindən biridir.
 
 Field-lər:
 
@@ -139,19 +225,27 @@ Field-lər:
 - `Kompetensiya`
 - `Hədəf səviyyə`
 
-Yadda saxlananda:
+Save olunanda nə olur:
 
-- `training_program_competency_map`
+- `training_program_competency_map` cədvəlinə yazılır
 
-Bu xəritə sonradan belə işləyir:
+Bu formdan sonra hara təsir edir:
 
-- hansı proqram hansı boşluğu bağlayır
-- smart recommendation hansı proqramı seçsin
-- session proposal hansı proqram üzrə qurulsun
+- sistem hansı proqramı hansı gap üçün tövsiyə etsin
+- suggestion score hansı proqramı önə çəksin
+- need üçün `recommended program` daha düzgün seçilsin
+- plan və session proposal keyfiyyəti yüksəlsin
 
-## 5. Rol tələbləri tabı
+Əgər mapping zəifdirsə:
 
-Bu tab “hansı vəzifə üçün hansı kompetensiya lazımdır?” sualının cavabıdır.
+- recommendation keyfiyyəti düşür
+- eyni need üçün yanlış proqram təklif oluna bilər
+
+## 6. Rol tələbləri tabı
+
+Bu tab “bu vəzifədə ideal olaraq hansı competency və hansı səviyyə olmalıdır?” sualına cavab verir.
+
+### 6.1. Role competency requirement formu
 
 Field-lər:
 
@@ -159,29 +253,31 @@ Field-lər:
 - `Kompetensiya`
 - `Tələb olunan səviyyə`
 - `Prioritet`
+  - `low`, `medium`, `high`
 - `Məcburidir`
 
-Yadda saxlananda:
+Save olunanda nə olur:
 
-- `role_competency_requirements`
+- `role_competency_requirements` cədvəlinə yazılır
 
-Bu məlumat:
+Bu formdan sonra hara təsir edir:
 
-- gap score
-- suggestion score
+- employee profile ilə müqayisə
+- gap hesabı
+- need suggestion
 - coverage analytics
 - top gap positions
 
-üçün əsas bazadır.
+Bu tab tamamlanmadan profil və need işləməyə başlasa belə, sistemin “niyə bu əməkdaşın ehtiyacı var?” sualına sübut bazası zəifləyir.
 
-## 6. Profil və plan tabı
+## 7. Profil və plan tabı
 
-Bu tab iki hissədən ibarətdir:
+Bu tab iki əsas işi görür:
 
-1. `Əməkdaş kompetensiya profili`
-2. `Təlim ehtiyacı sırası`
+1. əməkdaşın cari competency profilini yazır
+2. training need yaradır və idarə edir
 
-### 6.1. Əməkdaş kompetensiya profili
+### 7.1. Employee competency profile formu
 
 Field-lər:
 
@@ -189,26 +285,27 @@ Field-lər:
 - `Kompetensiya`
 - `Mövcud səviyyə`
 - `Mənbə`
+  - `manual`, `manager_review`, `hr_review`, `exam`
 - `Son qiymətləndirmə tarixi`
 
-`Mənbə` nə ola bilər:
+Save olunanda nə olur:
 
-- `manual`
-- `manager_review`
-- `hr_review`
-- `exam`
+- `employee_competency_profiles` cədvəlinə yazılır
 
-Yadda saxlananda:
+Bu formdan sonra hara təsir edir:
 
-- `employee_competency_profiles`
+- sistem əməkdaşın mövcud durumunu bilir
+- role requirement ilə fərq hesablanır
+- smart suggestion və coverage hesabları daha dəqiq olur
 
-Bu məlumat sonradan:
+Praktik tövsiyə:
 
-- tələb olunan səviyyə ilə müqayisə olunur
-- gap ölçülür
-- smart suggestion score üçün istifadə olunur
+- hər competency üçün ən az bir profil girişi olmalıdır
+- tarix sahəsi boş qalmamalıdır; köhnə qiymətləndirmə ilə yeni qərar vermək risklidir
 
-### 6.2. Təlim ehtiyacı sırası
+### 7.2. Training need queue formu
+
+Bu form real inkişaf ehtiyacını yaradır.
 
 Field-lər:
 
@@ -218,343 +315,480 @@ Field-lər:
 - `Hədəf səviyyə`
 - `Prioritet`
 - `Mənbə`
+  - `manual`
+  - `manager_request`
+  - `employee_request`
+  - `manager_review`
+  - `hr_review`
+  - `performance_gap`
+  - `skill_gap`
+  - `exam`
 - `Status`
+  - `draft`, `review`, `approved`, `planned`, `completed`
 - `Səbəb`
 - `Plan qeydi`
 - `Hədəf tamamlanma tarixi`
 
-Yadda saxlananda:
+Save olunanda nə olur:
 
-- `training_need_items`
+- `training_need_items` cədvəlinə yazılır
+- bu write həm need queue-da, həm də sonrakı plan suggestion-larda görünür
 
-Need mənbələri:
+Bu formdan sonra hara təsir edir:
 
-- `manual`
-- `manager_request`
-- `employee_request`
-- `manager_review`
-- `hr_review`
-- `performance_gap`
-- `skill_gap`
-- `exam`
+- annual planning board
+- suggestion board
+- session participant auto-fill
+- analytics
 
-Need statusları:
+Field-lərin praktik mənası:
 
-- `draft`
-- `review`
-- `approved`
-- `planned`
-- `completed`
+- `Recommended program`
+  - gələcək plan və session üçün operativ seçimi sürətləndirir
+- `Source`
+  - ehtiyacın haradan gəldiyini göstərir; audit və source mix analytics üçün vacibdir
+- `Status`
+  - işin mərhələsini göstərir
+- `Reason`
+  - niyə yaradıldığını sübut edir
+- `Plan note`
+  - HR-in planlama qeydi və ya next step qeydidir
+- `Target completion date`
+  - overdue və near due məntiqinə təsir edə bilər
 
-## 7. İllik planlama tabı
+### 7.3. Bu tabda hansı işlər sırayla edilməlidir
 
-Bu tab modulun ən vacib idarəetmə qatıdır. Burada:
+Ən sağlam ardıcıllıq:
 
-1. illik plan yaradılır
-2. sistem suggestion çıxarır
-3. plan item-lar yaranır
-4. HR review edir
+1. əməkdaşı seç
+2. profil yaz
+3. eyni competency üçün requirement ilə fərqi yoxla
+4. ehtiyac yaranırsa need yarat
+5. source və reason hissəsini boş buraxma
 
-### 7.1. İllik plan formu
+Əgər Performance modulundan auto need gəlirsə:
+
+- onu yenidən sıfırdan yaratma
+- mövcud need-in source və reason hissəsinə bax
+- yalnız planlama qərarı ver
+
+## 8. İllik planlama tabı
+
+Bu tab need-ləri icra oluna bilən plan obyektlərinə çevirir.
+
+### 8.1. Annual training plan formu
 
 Field-lər:
 
 - `Plan adı`
 - `Plan ili`
 - `Plan rübü`
-  - `Bütün il` və ya konkret rüb
+  - boş və ya `full year`
 - `Status`
+  - `draft`, `review`, `approved`, `published`
 - `Təsdiqlənmiş ehtiyaclardan plan sətirlərini avtomatik yarat`
 - `Qeyd`
 
-Yadda saxlananda:
+Save olunanda nə olur:
 
-## 8. Təlim təqvimi
+- `training_annual_plans` cədvəlinə yazılır
+- `auto_generate` aktivdirsə `TrainingNeedPlanningService` approved need-lərdən `training_plan_items` yaradır
+- plan statusu item-ların vəziyyətinə görə sync olunur
 
-Bu tab approved plan item-ları real sessiyaya çevirir.
+Bu formdan sonra hara təsir edir:
 
-Buradakı əsas hissələr:
+- recent plans
+- suggested plan board
+- HR review panel
+- session proposal board
 
-- `Sessiya təklifləri`
-- `Təlim təqvimi`
-- `İştirakçı və davamiyyət`
+### 8.2. Plan status necə işləyir
 
-### 8.1. Sessiya təklifləri
+- `draft`
+  - plan yaradılıb, amma hələ review və approval mərhələsinə keçməyib
+- `review`
+  - item-lar yaranıb və HR baxışı tələb olunur
+- `approved`
+  - review hissəsi tamamlanıb
+- `published`
+  - təşkilat daxilində tətbiq üçün yekun mərhələ
 
-Approved plan item üçün sistem session proposal yaradır.
+### 8.3. Suggested plan board
 
-Burada HR:
+Bu board HR üçün qərar dəstək qatıdır. Sistem ehtiyacları score-layıb ön sıralayır.
 
-- görünən təklifləri seçə bilər
-- `Seçilən təkliflərdən sessiya yarat` ilə toplu session yarada bilər
-- `Formaya yerləşdir` ilə session form-u avtomatik doldura bilər
-- tək-tək `Sessiya yarat` edə bilər
+Sistem nələrə baxır:
 
-### 8.2. İştirakçı və davamiyyət
-
-Sessiya seçildikdən sonra:
-
-- iştirakçı axtarışı
-- davamiyyət filtri
-- iştirakçı mənbə filtri
-- görünənləri seç
-- seçimi təmizlə
-- toplu davamiyyət statusu tətbiqi
-
-mümkündür.
-
-Bu hissə sessiya icrası üçün əsas əməliyyat panelidir.
-
-## 9. Nəticələr
-
-Bu tab delivery və sənəd bağlama hissəsidir.
-
-Burada:
-
-- sessiyanı tamamlayırsan
-- certificate / document faylı yükləyirsən
-- `Bax / Yüklə / Əvəz et / Sil` ilə sənədi idarə edirsən
-- rəy forması və cavabları toplayırsan
-
-Certificate viewer burada ayrıca document panel kimi işləyir:
-
-- böyük preview sahəsi
-- sənəd tipi və status badge-ləri
-- metadata bloku
-- action rail (`Bax`, `Yüklə`)
-- sessiya konteksti
-
-## 10. Analitika və hesabat
-
-Burada aşağıdakılar var:
-
-- `Əhatə və uyğunluq`
-- `Hesabat xülasəsi`
-- `İcra xülasəsi export`
-- `Pivot hesabat`
-- `Audit hesabatı`
-- `Çap görünüşü`
-
-`Əhatə və uyğunluq` hissəsi plan, need və requirement coverage göstəricilərini göstərir.
-
-- `training_annual_plans`
-
-### 7.2. Plan status necə dəyişir
-
-- plan yaradılarkən adətən `draft` olur
-- auto-generate nəticəsində item yaranarsa plan `review` olur
-- plan item qalmayıbsa yenidən `draft` ola bilər
-- bütün plan item-lar `approved` olanda plan avtomatik `approved` olur
-- `published` ayrıca son mərhələ statusudur
-
-### 7.3. Sistem tövsiyəli planlar
-
-Bu board HR üçün “sistem nələri önə çəkir?” sualını cavablayır.
-
-Score nələrə əsaslanır:
-
-- ehtiyacın mənbəyi
-- prioriteti
-- requirement-in `mandatory` olması
+- prioritet
+- məcburi requirement
 - role criticality
-- eyni kompetensiya boşluğunun neçə dəfə təkrarlandığı
-- eyni vəzifədə neçə gap olduğu
+- eyni gap-in təkrarlanması
 - proqramın hazır olması
 - due date yaxınlığı
+- evidence-based source-lar
 
-Sistem hər təklif üçün səbəb də göstərir:
+HR burada nə etməlidir:
 
-- `mandatory`
-- `role critical`
-- `repeat gap`
-- `program ready`
-- `overdue`
+- təklifləri oxumaq
+- hansı need-lərin plan item olmağa layiq olduğunu anlamaq
+- approved need-lərin faktiki plan item-a çevrilməsini izləmək
 
-### 7.4. Plan item review
+### 8.4. HR review panel
 
-Plan item seçiləndə HR:
+Bu hissə auto-generated və ya mövcud plan item üzərində son qərar üçündür.
 
-- participant sayını dəyişə bilər
-- büdcəni dəyişə bilər
-- prioriteti dəyişə bilər
-- review note yaza bilər
-- `hr_adjusted` edə bilər
-- `approved` edə bilər
+Field-lər:
 
-Bu hissə auto-generated təklifin HR tərəfindən düzəldilmiş final versiyasıdır.
+- `Participant count`
+- `Estimated budget`
+- `Priority`
+- `Review note`
 
-## 8. Təlim təqvimi tabı
+Action-lar:
 
-Bu tab approved plan item-ları real sessiyaya çevirir.
+- `Mark HR adjusted`
+- `Approve`
 
-### 8.1. Session proposal board
+Save olunanda nə olur:
 
-Approved item-lardan sistem proposal çıxarır.
+- `training_plan_items` üzərində participant count, budget, priority, review note yenilənir
+- `review_status` `hr_adjusted` və ya `approved` olur
+- `reviewed_by` və `reviewed_at` yazılır
+- plan statusu yenidən sync olunur
 
-Proposal nəyi göstərir:
+Bu hissənin mənası:
 
-- hansı plan item-dan gəlib
-- hansı proqram üzrə sessiya tövsiyə olunur
-- neçə participant var
-- hansı tarix daha uyğun görünür
-- təxmini büdcə
+- sistem təklif verir
+- HR isə onu əməliyyata yararlı plana çevirir
 
-### 8.2. Proposal-dan nə etmək olar
+### 8.5. Bu tabda doğru iş sırası
 
-- `Formaya yerləşdir`
-  - session form avtomatik doldurulur
-- `Sessiya yarat`
-  - bir kliklə real `training_sessions` yaranır
+1. plan yarat
+2. auto-generated item-ları yoxla
+3. participant count və budget düzəlt
+4. review note yaz
+5. `HR adjusted` və ya `Approve` et
+6. yalnız bundan sonra calendar tab-a keç
 
-### 8.3. Sessiya formu
+## 9. Təlim təqvimi tabı
+
+Bu tab approved item-ları real session-a çevirir.
+
+### 9.1. Session proposal board
+
+Proposal board approved plan item-lardan yaranır. Burada sistem belə suallara cavab verir:
+
+- hansı item sessiyaya çevrilməlidir
+- hansı proqram daha uyğundur
+- neçə iştirakçı gözlənilir
+- təxmini büdcə və tarix nədir
+
+Action-lar:
+
+- `Select visible proposals`
+- `Clear proposals`
+- `Apply to form`
+- `Create session`
+- `Create sessions from selected`
+
+Bu action-ların mənası:
+
+- `Apply to form`
+  - session formu doldurulur, amma hələ save olmur
+- `Create session`
+  - birbaşa `training_sessions` yaranır
+- `Create sessions from selected`
+  - toplu şəkildə bir neçə proposal real sessiyaya çevrilir
+
+### 9.2. Training session formu
 
 Field-lər:
 
 - `Plan`
-- `Proqram`
-- `Başlıq`
-- `Başlanğıc`
-- `Bitiş`
-- `Məkan`
+- `Program`
+- `Session title`
+- `Start date`
+- `End date`
+- `Location`
 - `Trainer`
 - `Capacity`
 - `Planned budget`
-- `Auto fill participants`
+- `Auto-fill participants from approved needs`
 - `Status`
-- `Qeyd`
+  - `draft`, `scheduled`, `in_progress`, `completed`, `cancelled`
+- `Notes`
 
-Yadda saxlananda:
+Save olunanda nə olur:
 
-- `training_sessions`
+- `training_sessions` cədvəlinə yazılır
+- form proposal-dan gəlibsə `training_plan_item_id` də yazılır
+- `auto_fill_participants` aktivdirsə uyğun need-lərdən iştirakçılar auto əlavə olunur
+- plan varsa, onun statusu yenidən sync olunur
 
-### 8.4. Participant auto-fill
+Bu formdan sonra hara təsir edir:
 
-Əgər `Auto fill participants` aktivdirsə:
+- session participants
+- upcoming sessions
+- delivery snapshot
+- results tab
 
-- approved/planned need-lərdən uyğun əməkdaşlar sessiyaya əlavə olunur
+Praktik qayda:
 
-### 8.5. Participant detail
+- proposal-dan gələn sessiyanı create etməzdən əvvəl tarix, trainer və budget-i yoxla
+- `Status` heç vaxt səbəbsiz `completed` qoyulmasın; əvvəl session reallıqda keçirilməlidir
 
-Sessiya seçildikdə:
-
-- participant list çıxır
-- search/filter işləyir
-- quick attendance toggle var
-- bulk status update var
-- selected participant-ləri silmək olur
-
-Participant status nümunələri:
-
-- `confirmed`
-- `attended`
-- `absent`
-- `cancelled`
-
-## 9. Nəticələr tabı
-
-Bu tab artıq keçirilmiş sessiyanı bağlamaq üçündür.
-
-### 9.1. Feedback form
+### 9.3. Session participant formu
 
 Field-lər:
 
-- `Sessiya`
-- `Başlıq`
+- `Session`
+- `Employee`
+- `Training need`
+- `Attendance status`
+
+Save olunanda nə olur:
+
+- `training_session_participants` cədvəlinə update-or-create yazılır
+- eyni session + personnel üçün dublikat yaradılmır
+- status `attended` olarsa `attended_at` avtomatik dolur
+
+### 9.4. Session detail və participant management
+
+Sessiya seçildikdən sonra bu əməliyyatlar var:
+
+- participant search
+- attendance filter
+- participant source filter
+- visible participant-ləri seçmək
+- bulk attendance status tətbiq etmək
+- selected participant-ləri silmək
+- tək participant üçün quick status dəyişmək
+
+Bu əməliyyatların təsiri:
+
+- attendance vəziyyəti delivery nəticəsinə təsir edir
+- `complete session` zamanı attended olanlar üçün delivery yaradılır
+
+### 9.5. Complete session action-ı
+
+Bu action calendar tabının ən kritik addımıdır.
+
+`Complete session` basılanda nə olur:
+
+- sessiya tamamlanmış kimi işlənir
+- `TrainingDeliveryService` attended participant-lər üçün `training_delivery_records` yaradır
+- statistik məlumat yenilənir
+
+Yəni certificate və nəticə tabına keçməzdən əvvəl session tamamlanmalıdır.
+
+## 10. Nəticələr tabı
+
+Bu tab “sessiya keçirildi, indi necə bağlayıram?” sualına cavab verir.
+
+### 10.1. Feedback form setup
+
+Field-lər:
+
+- `Session`
+- `Feedback form title`
 - `Status`
+  - `draft`, `open`, `closed`
 - `Default question type`
-  - `rating`
-  - `text`
-  - `multiple_choice`
-- `Suallar`
+  - `rating`, `text`, `multiple_choice`
+- `Feedback questions`
 
-Yadda saxlananda:
+Save olunanda nə olur:
 
-- `training_feedback_forms`
+- `training_feedback_forms` cədvəlinə yazılır
+- daxil edilən suallar sətir-sətir ayrılıb strukturlaşır
 
-### 9.2. Feedback response
+### 10.2. Feedback response formu
 
 Field-lər:
 
 - `Feedback form`
-- `Əməkdaş`
+- `Employee`
 - `Overall score`
-- `Şərhlər`
-- `Cavablar`
+- `Comments`
+- `Answers`
 
-Yadda saxlananda:
+Save olunanda nə olur:
 
-- `training_feedback_responses`
+- `training_feedback_responses` cədvəlinə update-or-create yazılır
+- eyni form + employee üçün cavab yenilənə bilər
 
-### 9.3. Delivered trainings
+Bu formdan sonra hara təsir edir:
 
-Sessiya tamamlandıqda:
+- feedback session summary
+- average feedback analytics
+- export report-lar
 
-- `training_delivery_records` yaranır
-- bağlı training need `completed` ola bilir
+### 10.3. Delivered trainings kartı
 
-### 9.4. Certificate / document
+Bu kart completed delivery record-ları göstərir.
 
-Delivery record üçün:
+Burada istifadəçi:
 
-- certificate upload etmək olar
-- preview etmək olar
-- download etmək olar
-- replace etmək olar
-- delete etmək olar
+- delivery record seçə bilər
+- certificate-i preview edə bilər
+- document-i download edə bilər
+- certificate-i replace və ya delete edə bilər
 
-## 10. Analitika tabı
+### 10.4. Delivery documents formu
 
-Bu tab rəhbərlik və HR monitorinqi üçündür.
+Field-lər:
 
-Burada görünən əsas göstəricilər:
+- `Delivery record`
+- `Certificate / document`
 
-- `Əhatə nisbəti`
-- `Uyğunluq nisbəti`
-- `Rol tələbi əhatəsi`
-- `Ümumi ehtiyac`
-- `Təsdiqlənmiş ehtiyac`
-- `Planlanan ehtiyac`
-- `Mənbə qarışığı`
-- `Prioritet qarışığı`
-- `Ən çox boşluq olan vəzifələr`
+Save olunanda nə olur:
 
-Bu rəqəmlər qərar üçün istifadə olunur:
+- fayl `public` diskə yazılır
+- `training_delivery_records.certificate_path` və `certificate_name` yenilənir
+- əvvəlki fayl varsa replace olunur
 
-- hansı sahədə boşluq çoxdur
-- hansı mənbədən ehtiyac daha çox gəlir
-- hansı vəzifələr risklidir
+Delete olunanda nə olur:
 
-## 11. Report və export
+- storage-dan fayl silinir
+- record üzərində certificate sahələri `null` olur
 
-Modul artıq bunları export edir:
+### 10.5. Export reports kartı
 
-- delivery report
+Buradan bunlar çıxarılır:
+
+- delivered trainings report
+- delivery summary report
+- delivery pivot report
 - feedback report
+- audit report
+- print summary
 
-Delivery report artıq certificate sütununu da daşıyır.
+Bu hissə əməliyyat aparmır; reporting üçündür.
 
-## 12. Tipik iş axını
+## 11. Analitika tabı
 
-### Ssenari 1: HR sıfırdan plan qurur
+Bu tab rəhbərlik və HR planlaması üçün nəzərdə tutulub.
 
-1. qrup, səviyyə, kompetensiya, proqram yaradır
-2. requirement matrix-i yazır
-3. employee profile daxil edir
-4. need yaradır və ya system-generated need qəbul edir
-5. illik plan yaradır
-6. system suggestion-ları yoxlayır
-7. plan item-ları `hr_adjusted` və ya `approved` edir
-8. proposal-ları sessiyaya çevirir
-9. sessiyanı keçirir
-10. feedback və certificate bağlayır
+Əsas bloklar:
 
-### Ssenari 2: Need Performance modulundan gəlir
+- `Coverage ratio`
+- `Program fit ratio`
+- `Requirement coverage`
+- `Total / approved / planned needs`
+- `Source mix`
+- `Priority mix`
+- `Top gap positions`
 
-1. zəif score və ya test nəticəsi yaranır
-2. need bu modulda avtomatik görünür
-3. HR proqram və target level-i yoxlayır
-4. illik planlama tabında suggestion board-a keçir
-5. plan item approved olur
-6. session proposal yaranır
-7. sessiya keçirilir
-8. nəticə `completed` və report qatına düşür
+Bu tabın məqsədi:
+
+- harada daha çox boşluq var
+- hansı source daha çox need yaradır
+- plan və requirement coverage nə səviyyədədir
+
+## 12. Tam siyahılar tabı
+
+Bu tab dashboard kartlarından fərqli olaraq tam əməliyyat nəzarəti üçündür.
+
+Burada:
+
+- search
+- filter
+- pagination
+- detail panel
+
+ilə full list-lər görünür.
+
+Bu tabı nə vaxt istifadə etməlisən:
+
+- dashboard kartı limitə görə yetmirsə
+- konkret record tapmaq lazımdırsa
+- detail panel ilə bir record-u dərin oxumaq istəyirsənsə
+
+## 13. Save edəndə təsir xəritəsi
+
+Qısa xatırlatma:
+
+- `Group / Level / Competency / Program`
+  - baza lüğətini böyüdür
+- `Program map`
+  - recommendation keyfiyyətini artırır
+- `Requirement`
+  - gap ölçməsini legitim edir
+- `Profile`
+  - əməkdaşın cari vəziyyətini formalaşdırır
+- `Need`
+  - planlama üçün əsas queue yaradır
+- `Plan`
+  - need-ləri plan item-a çevirir
+- `Plan item review`
+  - HR qərarını rəsmi hala salır
+- `Session`
+  - icra mərhələsini açır
+- `Participant`
+  - attendance və delivery bazasını yaradır
+- `Complete session`
+  - delivery record yaradır
+- `Feedback / response`
+  - nəticə ölçümünü bağlayır
+- `Certificate`
+  - sübut sənədini bağlayır
+
+## 14. Tam iş ssenarisi
+
+### Ssenari A: Sıfırdan modul qurmaq
+
+1. competency group-ları yarat
+2. levels yarat
+3. competencies yarat
+4. programs yarat
+5. program mapping yaz
+6. role requirements doldur
+7. employee profile daxil et
+8. need yarat
+9. annual plan yarat
+10. plan item-ları review et
+11. approved item-ları session-a çevir
+12. participant-ləri idarə et
+13. session-ı complete et
+14. certificate və feedback ilə bağla
+
+### Ssenari B: Performance-dan gələn auto need ilə işləmək
+
+1. `Profil və plan` tabında source=`performance_gap` və ya `skill_gap` olan need-i tap
+2. reason hissəsini oxu
+3. recommended program və target level yoxla
+4. annual plan-a daxil et
+5. review-dan keçir
+6. session yarat
+7. completion və delivery-ni bağla
+
+### Ssenari C: Real sessiyanı bağlamaq
+
+1. calendar tabında participant attendance-i yenilə
+2. `attended` olanları yoxla
+3. `Complete session` et
+4. results tabında delivery record-u aç
+5. certificate yüklə
+6. lazım olsa feedback form yarat
+7. feedback response-ları daxil et
+
+## 15. Ən çox edilən səhvlər
+
+- program mapping yazmadan need-lərlə işləmək
+- requirement matrix boş ikən analytics gözləmək
+- profile yazmadan need yaratmaq
+- plan item review etmədən session yaratmaq
+- session complete etmədən certificate yükləmək
+- source və reason hissəsini boş buraxmaq
+
+## 16. Son qayda
+
+Əgər “mən indi hansı mərhələdəyəm?” sualında çaşırsansa, bunu xatırla:
+
+- `Kataloq` bazanı qurur
+- `Need` problemi yazır
+- `Plan` qərarı verir
+- `Session` icraya çevirir
+- `Result` sübut və ölçünü bağlayır
+
+Bu məntiq saxlanarsa, modul təkcə data saxlamaq üçün yox, real HR inkişaf prosesini idarə etmək üçün işləyir.

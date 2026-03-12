@@ -2,6 +2,7 @@
 
 namespace App\Modules\PerformanceEvaluation\Livewire;
 
+use App\Livewire\Concerns\ConfirmsDestructiveActions;
 use App\Livewire\Traits\DropdownConstructTrait;
 use App\Models\PerformanceCycle;
 use App\Models\PerformanceForm;
@@ -31,10 +32,12 @@ use App\Modules\PerformanceEvaluation\Livewire\Concerns\InteractsWithPerformance
 use App\Modules\PerformanceEvaluation\Application\Services\PerformanceSkillMeasurementService;
 use App\Modules\PerformanceEvaluation\Application\Services\PerformanceWeakAreaTrainingNeedService;
 use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class Dashboard extends Component
 {
+    use ConfirmsDestructiveActions;
     use DropdownConstructTrait;
     use HandlesPerformanceFoundationMutations;
     use HandlesPerformanceEvaluationFlowMutations;
@@ -138,6 +141,88 @@ class Dashboard extends Component
         }
 
         $this->activeTab = $tab;
+    }
+
+    public function confirmDeleteCycle(int $id): void
+    {
+        $cycle = PerformanceCycle::query()->findOrFail($id);
+
+        $this->confirmDeletion(
+            action: 'deleteCycle',
+            parameters: [$id],
+            message: __('performance_evaluation::dashboard.confirmations.delete_cycle'),
+            description: (string) $cycle->name,
+            confirmLabel: __('performance_evaluation::dashboard.actions.delete'),
+        );
+    }
+
+    public function confirmDeleteTemplate(int $id): void
+    {
+        $template = PerformanceFormTemplate::query()->findOrFail($id);
+
+        $this->confirmDeletion(
+            action: 'deleteTemplate',
+            parameters: [$id],
+            message: __('performance_evaluation::dashboard.confirmations.delete_template'),
+            description: (string) $template->name,
+            confirmLabel: __('performance_evaluation::dashboard.actions.delete'),
+        );
+    }
+
+    public function confirmDeleteSection(int $id): void
+    {
+        $section = PerformanceFormTemplateSection::query()->findOrFail($id);
+
+        $this->confirmDeletion(
+            action: 'deleteSection',
+            parameters: [$id],
+            message: __('performance_evaluation::dashboard.confirmations.delete_section'),
+            description: (string) $section->name,
+            confirmLabel: __('performance_evaluation::dashboard.actions.delete'),
+        );
+    }
+
+    public function confirmDeleteItem(int $id): void
+    {
+        $item = PerformanceFormTemplateItem::query()->findOrFail($id);
+
+        $this->confirmDeletion(
+            action: 'deleteItem',
+            parameters: [$id],
+            message: __('performance_evaluation::dashboard.confirmations.delete_item'),
+            description: (string) $item->name,
+            confirmLabel: __('performance_evaluation::dashboard.actions.delete'),
+        );
+    }
+
+    public function confirmDeleteEvaluationForm(int $id): void
+    {
+        $form = PerformanceForm::query()->with(['personnel', 'cycle:id,name'])->findOrFail($id);
+
+        $details = array_filter([
+            $form->personnel?->fullname,
+            $form->cycle?->name,
+        ]);
+
+        $this->confirmDeletion(
+            action: 'deleteEvaluationForm',
+            parameters: [$id],
+            message: __('performance_evaluation::dashboard.confirmations.delete_form'),
+            description: implode(' • ', $details),
+            confirmLabel: __('performance_evaluation::dashboard.actions.delete'),
+        );
+    }
+
+    #[On('performance-evaluation:edit-form')]
+    public function handleEditEvaluationForm(int $formId): void
+    {
+        $this->editEvaluationForm($formId);
+    }
+
+    #[On('performance-evaluation:confirm-delete-form')]
+    public function handleConfirmDeleteEvaluationForm(int $formId): void
+    {
+        $this->confirmDeleteEvaluationForm($formId);
     }
 
 

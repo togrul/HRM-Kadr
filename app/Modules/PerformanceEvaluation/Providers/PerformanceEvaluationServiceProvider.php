@@ -3,6 +3,7 @@
 namespace App\Modules\PerformanceEvaluation\Providers;
 
 use App\Modules\PerformanceEvaluation\Console\Commands\PerformanceEvaluationQueryBudgetCommand;
+use App\Modules\PerformanceEvaluation\Console\Commands\PerformanceEvaluationRenderBenchmarkCommand;
 use App\Providers\Concerns\RegistersLivewireAliases;
 use App\Services\Modules\ModuleState;
 use Illuminate\Support\ServiceProvider;
@@ -24,6 +25,7 @@ class PerformanceEvaluationServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 PerformanceEvaluationQueryBudgetCommand::class,
+                PerformanceEvaluationRenderBenchmarkCommand::class,
             ]);
         }
     }
@@ -38,6 +40,10 @@ class PerformanceEvaluationServiceProvider extends ServiceProvider
         return [
             'dashboard' => \App\Modules\PerformanceEvaluation\Livewire\Dashboard::class,
             'evaluator-workspace' => \App\Modules\PerformanceEvaluation\Livewire\EvaluatorWorkspace::class,
+            'evaluator-score-capture' => \App\Modules\PerformanceEvaluation\Livewire\EvaluatorScoreCapture::class,
+            'overview' => \App\Modules\PerformanceEvaluation\Livewire\Overview::class,
+            'evaluations-summary' => \App\Modules\PerformanceEvaluation\Livewire\EvaluationsSummary::class,
+            'tests-summary' => \App\Modules\PerformanceEvaluation\Livewire\TestsSummary::class,
             'lists' => \App\Modules\PerformanceEvaluation\Livewire\Lists::class,
         ];
     }

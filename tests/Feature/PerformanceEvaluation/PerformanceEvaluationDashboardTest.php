@@ -19,7 +19,12 @@ use App\Models\TrainingNeedItem;
 use App\Models\TrainingProgram;
 use App\Models\TrainingProgramCompetency;
 use App\Modules\PerformanceEvaluation\Livewire\Dashboard;
+use App\Modules\PerformanceEvaluation\Livewire\EvaluationsSummary as PerformanceEvaluationEvaluationsSummary;
+use App\Modules\PerformanceEvaluation\Livewire\EvaluatorScoreCapture;
+use App\Modules\PerformanceEvaluation\Livewire\EvaluatorWorkspace;
 use App\Modules\PerformanceEvaluation\Livewire\Lists as PerformanceEvaluationLists;
+use App\Modules\PerformanceEvaluation\Livewire\Overview as PerformanceEvaluationOverview;
+use App\Modules\PerformanceEvaluation\Livewire\TestsSummary as PerformanceEvaluationTestsSummary;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
@@ -40,6 +45,186 @@ class PerformanceEvaluationDashboardTest extends TestCase
             ->get(route('performance-evaluation'))
             ->assertOk()
             ->assertSee(__('performance_evaluation::dashboard.title'));
+    }
+
+    public function test_overview_component_renders_performance_summary_cards(): void
+    {
+        $user = \App\Models\User::factory()->create();
+        $this->grantPerformancePermissions($user);
+
+        $this->actingAs($user);
+
+        Livewire::test(PerformanceEvaluationOverview::class)
+            ->assertSee(__('performance_evaluation::dashboard.cards.foundation_scope'))
+            ->assertSee(__('performance_evaluation::dashboard.cards.recent_cycles'))
+            ->assertSee(__('performance_evaluation::dashboard.cards.reports'));
+    }
+
+    public function test_evaluations_summary_component_renders_recent_forms_and_relays_actions(): void
+    {
+        $user = \App\Models\User::factory()->create();
+        $this->grantPerformancePermissions($user);
+        $manager = \App\Models\User::factory()->create(['name' => 'Team Manager']);
+        $hrReviewer = \App\Models\User::factory()->create(['name' => 'HR Reviewer']);
+        Role::findOrCreate('admin', 'web');
+        Permission::findOrCreate('get-notification', 'web');
+
+        Position::query()->create([
+            'id' => 501,
+            'name' => 'Specialist',
+        ]);
+
+        $personnel = $this->createPersonnel($user->id, 501, 'PE-501');
+        $cycle = PerformanceCycle::query()->create([
+            'name' => '2026 Cycle',
+            'cycle_type' => 'annual',
+            'period_start' => '2026-01-01',
+            'period_end' => '2026-12-31',
+            'status' => 'active',
+        ]);
+        $template = PerformanceFormTemplate::query()->create([
+            'name' => 'Core Template',
+            'code' => 'CORE-501',
+            'is_active' => true,
+        ]);
+        $form = PerformanceForm::query()->create([
+            'performance_cycle_id' => $cycle->id,
+            'performance_form_template_id' => $template->id,
+            'personnel_id' => $personnel->id,
+            'manager_id' => $manager->id,
+            'hr_reviewer_id' => $hrReviewer->id,
+            'self_status' => 'submitted',
+            'manager_status' => 'draft',
+            'hr_status' => 'draft',
+            'final_score' => 72.5,
+            'final_category' => 'medium',
+        ]);
+
+        $this->actingAs($user);
+
+        Livewire::test(PerformanceEvaluationEvaluationsSummary::class)
+            ->assertSee(__('performance_evaluation::dashboard.cards.recent_forms'))
+            ->assertSee($personnel->fullname)
+            ->call('relayEditEvaluationForm', $form->id)
+            ->assertDispatched('performance-evaluation:edit-form', formId: $form->id)
+            ->call('relayDeleteEvaluationForm', $form->id)
+            ->assertDispatched('performance-evaluation:confirm-delete-form', formId: $form->id);
+
+        Livewire::test(Dashboard::class)
+            ->dispatch('performance-evaluation:edit-form', formId: $form->id)
+            ->assertSet('editingEvaluationFormId', $form->id)
+            ->dispatch('performance-evaluation:confirm-delete-form', formId: $form->id)
+            ->assertSet('showDeleteConfirmation', true)
+            ->assertSet('deleteConfirmation.action', 'deleteEvaluationForm');
+    }
+
+    public function test_tests_summary_component_renders_testing_cards(): void
+    {
+        $user = \App\Models\User::factory()->create();
+        $this->grantPerformancePermissions($user);
+
+        $this->actingAs($user);
+
+        Livewire::test(PerformanceEvaluationTestsSummary::class)
+            ->assertSee(__('performance_evaluation::dashboard.cards.recent_test_banks'))
+            ->assertSee(__('performance_evaluation::dashboard.cards.recent_test_attempts'))
+            ->assertSee(__('performance_evaluation::dashboard.cards.pending_review_answers'));
+    }
+
+    public function test_evaluator_score_capture_prefills_first_item_and_existing_score_when_opening_score_form(): void
+    {
+        $manager = \App\Models\User::factory()->create(['name' => 'Manager Reviewer']);
+        $hrReviewer = \App\Models\User::factory()->create(['name' => 'HR Reviewer']);
+        $this->grantPerformancePermissions($manager);
+        Role::findOrCreate('admin', 'web');
+        Permission::findOrCreate('get-notification', 'web');
+
+        Position::query()->create([
+            'id' => 511,
+            'name' => 'Methodist',
+        ]);
+
+        $personnel = $this->createPersonnel($manager->id, 511, 'PE-511');
+        $cycle = PerformanceCycle::query()->create([
+            'name' => '2026 Reviewer Cycle',
+            'cycle_type' => 'annual',
+            'period_start' => '2026-01-01',
+            'period_end' => '2026-12-31',
+            'status' => 'active',
+        ]);
+        $template = PerformanceFormTemplate::query()->create([
+            'name' => 'Reviewer Template',
+            'code' => 'REV-511',
+            'is_active' => true,
+        ]);
+        $section = PerformanceFormTemplateSection::query()->create([
+            'performance_form_template_id' => $template->id,
+            'name' => 'Core Section',
+            'weight_percent' => 100,
+            'sort_order' => 1,
+        ]);
+        $firstItem = PerformanceFormTemplateItem::query()->create([
+            'performance_form_template_section_id' => $section->id,
+            'name' => 'Communication',
+            'weight_percent' => 50,
+            'low_score_threshold' => 60,
+            'requires_comment' => true,
+            'sort_order' => 1,
+        ]);
+        $secondItem = PerformanceFormTemplateItem::query()->create([
+            'performance_form_template_section_id' => $section->id,
+            'name' => 'Delivery',
+            'weight_percent' => 50,
+            'low_score_threshold' => 60,
+            'requires_comment' => true,
+            'sort_order' => 2,
+        ]);
+        $form = PerformanceForm::query()->create([
+            'performance_cycle_id' => $cycle->id,
+            'performance_form_template_id' => $template->id,
+            'personnel_id' => $personnel->id,
+            'manager_id' => $manager->id,
+            'hr_reviewer_id' => $hrReviewer->id,
+            'self_status' => 'draft',
+            'manager_status' => 'draft',
+            'hr_status' => 'draft',
+        ]);
+
+        PerformanceFormScore::query()->create([
+            'performance_form_id' => $form->id,
+            'performance_form_template_item_id' => $firstItem->id,
+            'evaluator_type' => 'manager',
+            'score' => 88,
+            'comment' => 'Existing manager note.',
+        ]);
+
+        PerformanceFormScore::query()->create([
+            'performance_form_id' => $form->id,
+            'performance_form_template_item_id' => $secondItem->id,
+            'evaluator_type' => 'manager',
+            'score' => 61,
+            'comment' => 'Second item note.',
+        ]);
+
+        $this->actingAs($manager);
+
+        Livewire::test(EvaluatorScoreCapture::class, [
+            'formCatalog' => [[
+                'id' => $form->id,
+                'label' => $personnel->fullname.' / '.$template->name,
+                'template_id' => $template->id,
+                'evaluator_type' => 'manager',
+            ]],
+        ])
+            ->call('startScoreForm', $form->id)
+            ->assertSet('scoreForm.performance_form_id', $form->id)
+            ->assertSet('scoreForm.evaluator_type', 'manager')
+            ->assertSet('scoreForm.performance_form_template_item_id', $firstItem->id)
+            ->assertSet('scoreForm.score', '88.00')
+            ->assertSet('scoreForm.comment', 'Existing manager note.')
+            ->set('scoreForm.performance_form_template_item_id', $secondItem->id)
+            ->assertSet('scoreForm.score', '61.00')
+            ->assertSet('scoreForm.comment', 'Second item note.');
     }
 
     public function test_performance_evaluation_route_requires_view_permission(): void
@@ -390,6 +575,34 @@ class PerformanceEvaluationDashboardTest extends TestCase
                 'item' => 2,
                 'score' => '45.00',
             ]));
+    }
+
+    public function test_cycle_delete_is_confirmed_via_modal_before_execution(): void
+    {
+        $user = \App\Models\User::factory()->create(['name' => 'HR Specialist']);
+        $this->grantPerformancePermissions($user);
+
+        $cycle = PerformanceCycle::query()->create([
+            'name' => '2026 Annual Performance',
+            'cycle_type' => 'annual',
+            'period_start' => '2026-01-01',
+            'period_end' => '2026-12-31',
+            'status' => 'draft',
+        ]);
+
+        $this->actingAs($user);
+
+        Livewire::test(Dashboard::class)
+            ->call('confirmDeleteCycle', $cycle->id)
+            ->assertSet('showDeleteConfirmation', true)
+            ->assertSee(__('performance_evaluation::dashboard.confirmations.delete_cycle'))
+            ->assertSee('2026 Annual Performance')
+            ->call('runConfirmedDeletion')
+            ->assertSet('showDeleteConfirmation', false);
+
+        $this->assertDatabaseMissing('performance_cycles', [
+            'id' => $cycle->id,
+        ]);
     }
 
     private function createCompetency(): TrainingCompetency

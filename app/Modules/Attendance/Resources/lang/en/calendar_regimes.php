@@ -39,4 +39,7 @@ return [
         'deleted' => 'Calendar rule deleted.',
         'duplicate_scope_date' => 'A calendar rule already exists for this date and scope.',
     ],
+    'confirmations' => [
+        'delete' => 'Delete this calendar rule?',
+    ],
 ];

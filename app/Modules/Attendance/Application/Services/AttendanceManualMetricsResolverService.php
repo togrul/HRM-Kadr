@@ -10,6 +10,10 @@ use Illuminate\Support\Collection;
 
 class AttendanceManualMetricsResolverService
 {
+    protected static bool $globalSettingLoaded = false;
+
+    protected static ?AttendanceSetting $globalSetting = null;
+
     /**
      * @param  array<string,mixed>  $payload
      * @return array{
@@ -27,18 +31,8 @@ class AttendanceManualMetricsResolverService
             ? (int) $payload['explicit_shift_id']
             : null;
 
-        $setting = AttendanceSetting::query()
-            ->where('scope_type', 'global')
-            ->where('is_active', true)
-            ->latest('id')
-            ->first();
-
-        $defaultShift = null;
-        if ($setting?->default_shift_id) {
-            $defaultShift = AttendanceShift::query()
-                ->where('is_active', true)
-                ->find($setting->default_shift_id);
-        }
+        $setting = $this->globalActiveSetting();
+        $defaultShift = $setting?->defaultShift;
 
         $explicitShift = null;
         if ($shiftSourceMode === 'explicit' && $explicitShiftId !== null) {
@@ -141,11 +135,7 @@ class AttendanceManualMetricsResolverService
         $baselineSource = (string) $context['baseline_source'];
         $baselineLabel = $context['baseline_label'];
         $plannedMinutes = (int) $context['planned_minutes'];
-        $setting = AttendanceSetting::query()
-            ->where('scope_type', 'global')
-            ->where('is_active', true)
-            ->latest('id')
-            ->first();
+        $setting = $this->globalActiveSetting();
 
         $checkIn = Carbon::parse($workDate->toDateString().' '.$checkInAt);
         $checkOut = Carbon::parse($workDate->toDateString().' '.$checkOutAt);
@@ -212,6 +202,27 @@ class AttendanceManualMetricsResolverService
         $value = trim((string) $value);
 
         return $value !== '' ? $value : null;
+    }
+
+    public function globalDefaultShift(): ?AttendanceShift
+    {
+        return $this->globalActiveSetting()?->defaultShift;
+    }
+
+    private function globalActiveSetting(): ?AttendanceSetting
+    {
+        if (self::$globalSettingLoaded) {
+            return self::$globalSetting;
+        }
+
+        self::$globalSettingLoaded = true;
+
+        return self::$globalSetting = AttendanceSetting::query()
+            ->with('defaultShift:id,name,start_time,end_time,break_minutes,is_night_shift,in_flex_before_minutes,in_flex_after_minutes,out_flex_before_minutes,out_flex_after_minutes,is_active')
+            ->where('scope_type', 'global')
+            ->where('is_active', true)
+            ->latest('id')
+            ->first();
     }
 
     /**

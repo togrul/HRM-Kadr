@@ -11,6 +11,7 @@ trait ResetsTrainingCalendarForms
         $this->selectedSessionId = null;
         $this->selectedPlanItemId = null;
         $this->selectedSessionProposalPlanItemId = null;
+        $this->editingSessionId = null;
         $this->bulkParticipantIds = [];
         $this->bulkProposalPlanItemIds = [];
         $this->bulkAttendanceStatus = 'confirmed';

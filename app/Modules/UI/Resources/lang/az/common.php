@@ -4,8 +4,14 @@ return [
     'actions' => [
         'cancel' => 'Ləğv et',
         'close' => 'Bağla',
+        'delete' => 'Sil',
         'edit' => 'Düzəliş et',
         'loading' => 'Yüklənir',
+    ],
+    'destructive' => [
+        'title' => 'Əməliyyatı təsdiqlə',
+        'description' => 'Bu dəyişiklik dərhal tətbiq olunur və geri qaytarılmır.',
+        'impact' => 'Geri qaytarılmır',
     ],
     'labels' => [
         'structure' => 'Struktur',

@@ -6,6 +6,34 @@ return [
             'overview_build' => env('TRAINING_NEEDS_QUERY_BUDGET_OVERVIEW', 20),
             'planning_build' => env('TRAINING_NEEDS_QUERY_BUDGET_PLANNING', 24),
             'calendar_build' => env('TRAINING_NEEDS_QUERY_BUDGET_CALENDAR', 26),
+            'analytics_build' => env('TRAINING_NEEDS_QUERY_BUDGET_ANALYTICS', 12),
+            'results_summary_build' => env('TRAINING_NEEDS_QUERY_BUDGET_RESULTS_SUMMARY', 14),
+        ],
+        'render_budget' => [
+            'planning_render' => [
+                'response_bytes' => env('TRAINING_NEEDS_RENDER_BUDGET_PLANNING_RESPONSE', 300000),
+                'render_ms' => env('TRAINING_NEEDS_RENDER_BUDGET_PLANNING_MS', 400),
+            ],
+            'calendar_render' => [
+                'response_bytes' => env('TRAINING_NEEDS_RENDER_BUDGET_CALENDAR_RESPONSE', 300000),
+                'render_ms' => env('TRAINING_NEEDS_RENDER_BUDGET_CALENDAR_MS', 400),
+            ],
+            'analytics_render' => [
+                'response_bytes' => env('TRAINING_NEEDS_RENDER_BUDGET_ANALYTICS_RESPONSE', 120000),
+                'render_ms' => env('TRAINING_NEEDS_RENDER_BUDGET_ANALYTICS_MS', 200),
+            ],
+            'results_summary_render' => [
+                'response_bytes' => env('TRAINING_NEEDS_RENDER_BUDGET_RESULTS_SUMMARY_RESPONSE', 120000),
+                'render_ms' => env('TRAINING_NEEDS_RENDER_BUDGET_RESULTS_SUMMARY_MS', 200),
+            ],
+            'session_detail_workspace_render' => [
+                'response_bytes' => env('TRAINING_NEEDS_RENDER_BUDGET_SESSION_DETAIL_RESPONSE', 300000),
+                'render_ms' => env('TRAINING_NEEDS_RENDER_BUDGET_SESSION_DETAIL_MS', 300),
+            ],
+            'calendar_session_detail_update' => [
+                'response_bytes' => env('TRAINING_NEEDS_RENDER_BUDGET_CALENDAR_SELECT_RESPONSE', 200000),
+                'render_ms' => env('TRAINING_NEEDS_RENDER_BUDGET_CALENDAR_SELECT_MS', 250),
+            ],
         ],
     ],
     'suggestion' => [

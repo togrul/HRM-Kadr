@@ -13,7 +13,7 @@
         applyPaginatorTheme(false);
         if (typeof Livewire !== 'undefined') {
             Livewire.hook('commit', ({ component, succeed }) => {
-                if (component.id !== $wire.__instance.id) return;
+                if (component.id !== @js($this->getId())) return;
                 succeed(() => queueMicrotask(() => applyPaginatorTheme(true)));
             });
         }
@@ -87,26 +87,28 @@
         </div>
     </div>
 
+    <div class="px-6">
+        <div class="flex flex-col items-center justify-between px-2 py-2 bg-white sm:flex-row filter rounded-xl">
+            <x-filter.nav>
+                <x-filter.item wire:click.prevent="setStatus('all')" :active="$status === 'all'">
+                    {{ __('candidates::common.labels.all') }}
+                </x-filter.item>
+                @foreach ($this->appealStatusTabs as $_status)
+                    <x-filter.item wire:click.prevent="setStatus({{ $_status->id }})" :active="$status === $_status->id">
+                        {{ $_status->name }}
+                    </x-filter.item>
+                @endforeach
+                @if ($this->canShowDeletedTab)
+                    <x-filter.item wire:click.prevent="setStatus('deleted')" :active="$status === 'deleted'">
+                        {{ __('candidates::common.labels.deleted') }}
+                    </x-filter.item>
+                @endif
+            </x-filter.nav>
+        </div>
+    </div>
+
     <div class="flex flex-col px-6 py-4 space-y-4">
         <div class="flex items-center justify-between">
-            <div class="flex flex-col items-center justify-between px-2 py-2 bg-white sm:flex-row filter rounded-xl">
-                <x-filter.nav>
-                    <x-filter.item wire:click.prevent="setStatus('all')" :active="$status === 'all'">
-                        {{ __('candidates::common.labels.all') }}
-                    </x-filter.item>
-                    @foreach ($_appeal_statuses as $_status)
-                        <x-filter.item wire:click.prevent="setStatus({{ $_status->id }})" :active="$status === $_status->id">
-                            {{ $_status->name }}
-                        </x-filter.item>
-                    @endforeach
-                    @if ($showDeletedTab)
-                        <x-filter.item wire:click.prevent="setStatus('deleted')" :active="$status === 'deleted'">
-                            {{ __('candidates::common.labels.deleted') }}
-                        </x-filter.item>
-                    @endif
-                </x-filter.nav>
-            </div>
-
             <div class="flex flex-col">
                 <div class="flex space-x-4">
                     @can('create', App\Models\Candidate::class)
@@ -132,7 +134,7 @@
                 <div class="overflow-visible">
 
                     <x-table.tbl :headers="$this->getTableHeaders()" title="{{ __('candidates::common.titles.candidates') }}">
-                        @forelse ($_candidates as $_candidate)
+                        @forelse ($this->candidateRows as $_candidate)
                             <tr wire:key="candidate-row-{{ $_candidate->id }}">
                                 <x-table.td>
                                     <span class="text-sm font-medium text-gray-700">
@@ -247,7 +249,7 @@
         </div>
 
         <div class="mt-2">
-            {{ $_candidates->links() }}
+            {{ $this->candidateRows->links() }}
         </div>
     </div>
 

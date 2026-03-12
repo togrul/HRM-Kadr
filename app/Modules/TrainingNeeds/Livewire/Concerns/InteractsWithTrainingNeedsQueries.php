@@ -222,22 +222,24 @@ trait InteractsWithTrainingNeedsQueries
 
     public function getStatsProperty(): array
     {
-        return $this->memo['stats'] ??= (array) DB::selectOne(
-            'select
-                (select count(*) from training_competency_groups) as `groups`,
-                (select count(*) from training_levels) as `levels`,
-                (select count(*) from training_competencies) as `competencies`,
-                (select count(*) from training_programs) as `programs`,
-                (select count(*) from training_program_competency_map) as `program_maps`,
-                (select count(*) from role_competency_requirements) as `requirements`,
-                (select count(*) from employee_competency_profiles) as `profiles`,
-                (select count(*) from training_need_items) as `needs`,
-                (select count(*) from training_annual_plans) as `plans`,
-                (select count(*) from training_plan_items) as `plan_items`,
-                (select count(*) from training_sessions) as `sessions`,
-                (select count(*) from training_delivery_records) as `deliveries`,
-                (select count(*) from training_feedback_forms) as `feedback_forms`'
-        );
+        return $this->rememberRuntime('trainingNeeds.stats', function (): array {
+            return (array) DB::selectOne(
+                'select
+                    (select count(*) from training_competency_groups) as `groups`,
+                    (select count(*) from training_levels) as `levels`,
+                    (select count(*) from training_competencies) as `competencies`,
+                    (select count(*) from training_programs) as `programs`,
+                    (select count(*) from training_program_competency_map) as `program_maps`,
+                    (select count(*) from role_competency_requirements) as `requirements`,
+                    (select count(*) from employee_competency_profiles) as `profiles`,
+                    (select count(*) from training_need_items) as `needs`,
+                    (select count(*) from training_annual_plans) as `plans`,
+                    (select count(*) from training_plan_items) as `plan_items`,
+                    (select count(*) from training_sessions) as `sessions`,
+                    (select count(*) from training_delivery_records) as `deliveries`,
+                    (select count(*) from training_feedback_forms) as `feedback_forms`'
+            );
+        });
     }
 
     public function getRecentCompetenciesProperty()
@@ -300,7 +302,7 @@ trait InteractsWithTrainingNeedsQueries
 
     public function getRecentPlansProperty()
     {
-        return $this->memo['recentPlans'] ??= app(TrainingNeedAnalyticsService::class)->recentPlans();
+        return $this->rememberRuntime('trainingNeeds.recentPlans', fn () => app(TrainingNeedAnalyticsService::class)->recentPlans());
     }
 
     public function getRecentPlanItemsProperty()
@@ -325,25 +327,29 @@ trait InteractsWithTrainingNeedsQueries
             return null;
         }
 
-        return $this->memo['selectedPlanItem:'.$this->selectedPlanItemId] ??= TrainingPlanItem::query()
-            ->with([
-                'plan:id,title,plan_year,plan_quarter,status',
-                'competency:id,name',
-                'program:id,title',
-                'position:id,name',
-                'targetLevel:id,name',
-                'reviewer:id,name,email',
-            ])
-            ->find($this->selectedPlanItemId);
+        return $this->rememberRuntime('trainingNeeds.selectedPlanItem.'.$this->selectedPlanItemId, function () {
+            return TrainingPlanItem::query()
+                ->with([
+                    'plan:id,title,plan_year,plan_quarter,status',
+                    'competency:id,name',
+                    'program:id,title',
+                    'position:id,name',
+                    'targetLevel:id,name',
+                    'reviewer:id,name,email',
+                ])
+                ->find($this->selectedPlanItemId);
+        });
     }
 
     public function getSuggestedPlanGroupsProperty()
     {
-        return $this->memo['suggestedPlanGroups'] ??= app(TrainingNeedSuggestionService::class)->suggestions(
-            planYear: (int) data_get($this->planForm, 'plan_year', (int) now()->format('Y')),
-            planQuarter: data_get($this->planForm, 'plan_quarter') ? (int) data_get($this->planForm, 'plan_quarter') : null,
-            limit: 6,
-        );
+        return $this->rememberRuntime('trainingNeeds.suggestedPlanGroups', function () {
+            return app(TrainingNeedSuggestionService::class)->suggestions(
+                planYear: (int) data_get($this->planForm, 'plan_year', (int) now()->format('Y')),
+                planQuarter: data_get($this->planForm, 'plan_quarter') ? (int) data_get($this->planForm, 'plan_quarter') : null,
+                limit: 6,
+            );
+        });
     }
 
     public function getRecentSessionsProperty()
@@ -353,7 +359,7 @@ trait InteractsWithTrainingNeedsQueries
 
     public function getSessionProposalsProperty()
     {
-        return $this->memo['sessionProposals'] ??= app(TrainingSessionProposalService::class)->proposals(limit: 6);
+        return $this->rememberRuntime('trainingNeeds.sessionProposals', fn () => app(TrainingSessionProposalService::class)->proposals(limit: 6));
     }
 
     public function getSelectedSessionProperty(): ?TrainingSession
@@ -366,18 +372,20 @@ trait InteractsWithTrainingNeedsQueries
 
         $this->selectedSessionId = $sessionId;
 
-        return $this->memo['selectedSession:'.$sessionId] ??= TrainingSession::query()
-            ->with([
-                'plan:id,title,plan_year,plan_quarter,status',
-                'program:id,title,duration_hours',
-                'participants.personnel:id,tabel_no,surname,name,patronymic',
-                'participants.trainingNeed:id,reason,priority,status',
-                'deliveryRecords:id,training_session_id,personnel_id,certificate_path,certificate_name,completed_at',
-                'deliveryRecords.personnel:id,tabel_no,surname,name,patronymic',
-                'feedbackForms:id,training_session_id,title,status',
-                'feedbackForms.responses:id,training_feedback_form_id,overall_score',
-            ])
-            ->find($sessionId);
+        return $this->rememberRuntime('trainingNeeds.selectedSession.'.$sessionId, function () use ($sessionId) {
+            return TrainingSession::query()
+                ->with([
+                    'plan:id,title,plan_year,plan_quarter,status',
+                    'program:id,title,duration_hours',
+                    'participants.personnel:id,tabel_no,surname,name,patronymic',
+                    'participants.trainingNeed:id,reason,priority,status',
+                    'deliveryRecords:id,training_session_id,personnel_id,certificate_path,certificate_name,completed_at',
+                    'deliveryRecords.personnel:id,tabel_no,surname,name,patronymic',
+                    'feedbackForms:id,training_session_id,title,status',
+                    'feedbackForms.responses:id,training_feedback_form_id,overall_score',
+                ])
+                ->find($sessionId);
+        });
     }
 
     public function getFilteredSelectedParticipantsProperty()
@@ -447,31 +455,31 @@ trait InteractsWithTrainingNeedsQueries
 
     public function getFeedbackSessionSummariesProperty()
     {
-        return $this->memo['feedbackSessionSummaries'] ??= app(TrainingNeedReportingService::class)->feedbackSessionSummaries();
+        return $this->rememberRuntime('trainingNeeds.feedbackSessionSummaries', fn () => app(TrainingNeedReportingService::class)->feedbackSessionSummaries());
     }
 
     public function getAnalyticsSummaryProperty(): array
     {
-        return $this->memo['analyticsSummary'] ??= app(TrainingNeedAnalyticsService::class)->summary();
+        return $this->rememberRuntime('trainingNeeds.analyticsSummary', fn (): array => app(TrainingNeedAnalyticsService::class)->summary());
     }
 
     public function getAnalyticsSourceMixProperty(): array
     {
-        return $this->memo['analyticsSourceMix'] ??= app(TrainingNeedAnalyticsService::class)->sourceMix();
+        return $this->rememberRuntime('trainingNeeds.analyticsSourceMix', fn (): array => app(TrainingNeedAnalyticsService::class)->sourceMix());
     }
 
     public function getAnalyticsPriorityMixProperty(): array
     {
-        return $this->memo['analyticsPriorityMix'] ??= app(TrainingNeedAnalyticsService::class)->priorityMix();
+        return $this->rememberRuntime('trainingNeeds.analyticsPriorityMix', fn (): array => app(TrainingNeedAnalyticsService::class)->priorityMix());
     }
 
     public function getTopGapPositionsProperty(): array
     {
-        return $this->memo['topGapPositions'] ??= app(TrainingNeedAnalyticsService::class)->topGapPositions();
+        return $this->rememberRuntime('trainingNeeds.topGapPositions', fn (): array => app(TrainingNeedAnalyticsService::class)->topGapPositions());
     }
 
     public function getDeliverySummaryProperty(): array
     {
-        return $this->memo['deliverySummary'] ??= app(TrainingNeedAnalyticsService::class)->deliverySummary();
+        return $this->rememberRuntime('trainingNeeds.deliverySummary', fn (): array => app(TrainingNeedAnalyticsService::class)->deliverySummary());
     }
 }

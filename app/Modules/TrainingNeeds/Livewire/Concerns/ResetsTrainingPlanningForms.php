@@ -10,5 +10,6 @@ trait ResetsTrainingPlanningForms
         $this->needForm = $this->needDefaults();
         $this->planForm = $this->planDefaults();
         $this->planItemReviewForm = $this->planItemReviewDefaults();
+        $this->editingPlanId = null;
     }
 }

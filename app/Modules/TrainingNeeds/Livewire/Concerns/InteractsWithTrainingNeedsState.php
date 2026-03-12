@@ -40,7 +40,7 @@ trait InteractsWithTrainingNeedsState
 
     protected function refreshRuntimeCaches(): void
     {
-        $this->memo = [];
+        $this->resetRuntimeMemo();
         $this->resetDropdownRuntimeCache();
     }
 }

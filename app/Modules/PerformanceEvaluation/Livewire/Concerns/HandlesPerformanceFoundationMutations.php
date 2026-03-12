@@ -192,6 +192,8 @@ trait HandlesPerformanceFoundationMutations
         if ($this->editingCycleId === $id) {
             $this->cancelCycleEdit();
         }
+
+        $this->dispatch('performanceEvaluationSaved', __('performance_evaluation::dashboard.messages.cycle_deleted'));
     }
 
     public function editTemplate(int $id): void
@@ -216,6 +218,8 @@ trait HandlesPerformanceFoundationMutations
         if ($this->editingTemplateId === $id) {
             $this->cancelTemplateEdit();
         }
+
+        $this->dispatch('performanceEvaluationSaved', __('performance_evaluation::dashboard.messages.template_deleted'));
     }
 
     public function editSection(int $id): void
@@ -240,6 +244,8 @@ trait HandlesPerformanceFoundationMutations
         if ($this->editingSectionId === $id) {
             $this->cancelSectionEdit();
         }
+
+        $this->dispatch('performanceEvaluationSaved', __('performance_evaluation::dashboard.messages.section_deleted'));
     }
 
     public function editItem(int $id): void
@@ -268,6 +274,8 @@ trait HandlesPerformanceFoundationMutations
         if ($this->editingItemId === $id) {
             $this->cancelItemEdit();
         }
+
+        $this->dispatch('performanceEvaluationSaved', __('performance_evaluation::dashboard.messages.item_deleted'));
     }
 
     public function cancelCycleEdit(): void

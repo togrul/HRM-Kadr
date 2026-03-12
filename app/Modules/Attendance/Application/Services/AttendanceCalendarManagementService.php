@@ -38,12 +38,25 @@ class AttendanceCalendarManagementService
             'scope_id',
         ]) : [];
 
-        $calendar->date = $date;
-        $calendar->day_type = (string) ($payload['day_type'] ?? 'workday');
-        $calendar->name = filled($payload['name'] ?? null) ? trim((string) $payload['name']) : null;
-        $calendar->is_paid = (bool) ($payload['is_paid'] ?? true);
-        $calendar->scope_type = $scopeType;
-        $calendar->scope_id = $scopeId;
+        $after = [
+            'date' => $date,
+            'day_type' => (string) ($payload['day_type'] ?? 'workday'),
+            'name' => filled($payload['name'] ?? null) ? trim((string) $payload['name']) : null,
+            'is_paid' => (bool) ($payload['is_paid'] ?? true),
+            'scope_type' => $scopeType,
+            'scope_id' => $scopeId,
+        ];
+
+        if ($calendar->exists && $this->normalizeComparableState($before) === $this->normalizeComparableState($after)) {
+            return $calendar->refresh();
+        }
+
+        $calendar->date = $after['date'];
+        $calendar->day_type = $after['day_type'];
+        $calendar->name = $after['name'];
+        $calendar->is_paid = $after['is_paid'];
+        $calendar->scope_type = $after['scope_type'];
+        $calendar->scope_id = $after['scope_id'];
         $calendar->updated_by = $userId;
 
         if (! $calendar->exists) {
@@ -58,14 +71,7 @@ class AttendanceCalendarManagementService
             subject: $calendar,
             properties: [
                 'before' => $before,
-                'after' => $calendar->only([
-                    'date',
-                    'day_type',
-                    'name',
-                    'is_paid',
-                    'scope_type',
-                    'scope_id',
-                ]),
+                'after' => $after,
             ],
             causerId: $userId
         );
@@ -130,5 +136,23 @@ class AttendanceCalendarManagementService
                 'form.date' => __('attendance::calendar_regimes.messages.duplicate_scope_date'),
             ]);
         }
+    }
+
+    /**
+     * @param  array<string, mixed>  $state
+     * @return array<string, mixed>
+     */
+    private function normalizeComparableState(array $state): array
+    {
+        return [
+            'date' => filled($state['date'] ?? null)
+                ? Carbon::parse((string) $state['date'])->toDateString()
+                : null,
+            'day_type' => (string) ($state['day_type'] ?? 'workday'),
+            'name' => filled($state['name'] ?? null) ? trim((string) $state['name']) : null,
+            'is_paid' => (bool) ($state['is_paid'] ?? true),
+            'scope_type' => (string) ($state['scope_type'] ?? 'global'),
+            'scope_id' => is_numeric($state['scope_id'] ?? null) ? (int) $state['scope_id'] : null,
+        ];
     }
 }

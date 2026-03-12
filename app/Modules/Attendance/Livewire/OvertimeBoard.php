@@ -11,8 +11,11 @@ use App\Modules\Attendance\Application\Services\AttendanceOvertimeRequestService
 use App\Modules\Attendance\Application\Services\AttendanceStructureScopeReadService;
 use App\Traits\NestedStructureTrait;
 use Carbon\Carbon;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -178,49 +181,53 @@ class OvertimeBoard extends Component
         $this->resetPage();
     }
 
-    public function render()
+    #[Computed]
+    public function personnelResults(): Collection
     {
-        $structureIds = $this->selectedStructureId
-            ? $this->getNestedStructure($this->selectedStructureId)
-            : [];
-        /** @var AttendanceStructureScopeReadService $structureScopeRead */
-        $structureScopeRead = app(AttendanceStructureScopeReadService::class);
+        if (! $this->canCreate || mb_strlen(trim($this->personnelSearch)) < 2) {
+            return collect();
+        }
+
+        /** @var StructurePathService $structurePathService */
+        $structurePathService = app(StructurePathService::class);
+
+        return Personnel::query()
+            ->where('is_pending', 0)
+            ->whereNull('leave_work_date')
+            ->when(
+                $this->currentStructureIds() !== [],
+                fn ($query) => $query->whereIn('structure_id', $this->currentStructureIds())
+            )
+            ->where(function ($query): void {
+                $term = trim($this->personnelSearch);
+                $query->where('name', 'like', '%'.$term.'%')
+                    ->orWhere('surname', 'like', '%'.$term.'%')
+                    ->orWhere('patronymic', 'like', '%'.$term.'%')
+                    ->orWhere('tabel_no', 'like', '%'.$term.'%');
+            })
+            ->orderBy('surname')
+            ->limit(15)
+            ->get()
+            ->map(function (Personnel $personnel) use ($structurePathService) {
+                $personnel->setAttribute(
+                    'structure_path',
+                    $structurePathService->resolve((int) $personnel->structure_id)
+                );
+                $personnel->setAttribute(
+                    'fullname',
+                    trim($personnel->surname.' '.$personnel->name.' '.$personnel->patronymic)
+                );
+
+                return $personnel;
+            });
+    }
+
+    #[Computed]
+    public function items(): LengthAwarePaginator
+    {
         /** @var StructurePathService $structurePathService */
         $structurePathService = app(StructurePathService::class);
         $staleAfterDays = max(1, (int) config('attendance.processing.overtime_request_stale_days', 3));
-
-        $personnelResults = collect();
-        if ($this->canCreate && mb_strlen(trim($this->personnelSearch)) >= 2) {
-            $personnelResults = Personnel::query()
-                ->where('is_pending', 0)
-                ->whereNull('leave_work_date')
-                ->when(
-                    $structureIds !== [],
-                    fn ($query) => $query->whereIn('structure_id', $structureIds)
-                )
-                ->where(function ($query): void {
-                    $term = trim($this->personnelSearch);
-                    $query->where('name', 'like', '%'.$term.'%')
-                        ->orWhere('surname', 'like', '%'.$term.'%')
-                        ->orWhere('patronymic', 'like', '%'.$term.'%')
-                        ->orWhere('tabel_no', 'like', '%'.$term.'%');
-                })
-                ->orderBy('surname')
-                ->limit(15)
-                ->get()
-                ->map(function (Personnel $personnel) use ($structurePathService) {
-                    $personnel->setAttribute(
-                        'structure_path',
-                        $structurePathService->resolve((int) $personnel->structure_id)
-                    );
-                    $personnel->setAttribute(
-                        'fullname',
-                        trim($personnel->surname.' '.$personnel->name.' '.$personnel->patronymic)
-                    );
-
-                    return $personnel;
-                });
-        }
 
         $items = AttendanceOvertimeRequest::query()
             ->with([
@@ -231,7 +238,9 @@ class OvertimeBoard extends Component
             ->when($this->status !== 'all', fn ($query) => $query->where('status', $this->status))
             ->when($this->fromDate !== '', fn ($query) => $query->whereDate('date', '>=', $this->fromDate))
             ->when($this->toDate !== '', fn ($query) => $query->whereDate('date', '<=', $this->toDate))
-            ->when($structureIds !== [], function ($query) use ($structureIds): void {
+            ->when($this->currentStructureIds() !== [], function ($query): void {
+                $structureIds = $this->currentStructureIds();
+
                 $query->whereHas('personnel', fn ($personnelQuery) => $personnelQuery->whereIn('structure_id', $structureIds));
             })
             ->orderByDesc('date')
@@ -287,6 +296,21 @@ class OvertimeBoard extends Component
             })
         );
 
+        return $items;
+    }
+
+    #[Computed]
+    public function selectedStructureLabel(): ?string
+    {
+        /** @var AttendanceStructureScopeReadService $structureScopeRead */
+        $structureScopeRead = app(AttendanceStructureScopeReadService::class);
+
+        return $structureScopeRead->label($this->selectedStructureId);
+    }
+
+    #[Computed]
+    public function activeFilters(): array
+    {
         $activeFilters = [];
 
         if ($this->status !== 'all') {
@@ -306,38 +330,47 @@ class OvertimeBoard extends Component
             ];
         }
 
-        $selectedStructureLabel = $structureScopeRead->label($this->selectedStructureId);
-        if ($selectedStructureLabel) {
+        if ($this->selectedStructureLabel) {
             $activeFilters[] = [
                 'label' => __('attendance::overtime.filters.structure'),
-                'value' => $selectedStructureLabel,
+                'value' => $this->selectedStructureLabel,
                 'mode' => 'purple',
             ];
         }
 
-        if ($this->selectedPersonnel) {
-            $activeFilters[] = [
-                'label' => __('attendance::overtime.filters.personnel'),
-                'value' => (string) ($this->selectedPersonnel['fullname'] ?? $this->selectedPersonnel['tabel_no'] ?? ''),
-                'mode' => 'green',
-            ];
-        }
+        return $activeFilters;
+    }
 
-        $emptyStateTitle = __('attendance::overtime.empty.title');
+    #[Computed]
+    public function emptyStateTitle(): string
+    {
+        return __('attendance::overtime.empty.title');
+    }
+
+    #[Computed]
+    public function emptyStateDescription(): string
+    {
         $emptyStateDescription = __('attendance::overtime.empty.description_filtered');
 
-        if ($activeFilters === []) {
+        if ($this->activeFilters === []) {
             $emptyStateDescription = __('attendance::overtime.empty.description_default');
         }
 
-        return view('attendance::livewire.attendance.overtime-board', [
-            'items' => $items,
-            'selectedStructureLabel' => $selectedStructureLabel,
-            'personnelResults' => $personnelResults,
-            'staleAfterDays' => $staleAfterDays,
-            'activeFilters' => $activeFilters,
-            'emptyStateTitle' => $emptyStateTitle,
-            'emptyStateDescription' => $emptyStateDescription,
-        ]);
+        return $emptyStateDescription;
+    }
+
+    public function render()
+    {
+        return view('attendance::livewire.attendance.overtime-board');
+    }
+
+    /**
+     * @return array<int,int>
+     */
+    private function currentStructureIds(): array
+    {
+        return $this->selectedStructureId
+            ? $this->getNestedStructure($this->selectedStructureId)
+            : [];
     }
 }

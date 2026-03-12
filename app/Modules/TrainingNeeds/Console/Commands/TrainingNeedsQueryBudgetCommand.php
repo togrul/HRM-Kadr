@@ -3,6 +3,7 @@
 namespace App\Modules\TrainingNeeds\Console\Commands;
 
 use App\Models\TrainingCompetency;
+use App\Models\TrainingFeedbackForm;
 use App\Models\TrainingNeedItem;
 use App\Models\TrainingProgram;
 use App\Modules\TrainingNeeds\Application\Services\TrainingNeedAnalyticsService;
@@ -23,6 +24,8 @@ class TrainingNeedsQueryBudgetCommand extends Command
         {--overview-budget= : Max query count for overview flow}
         {--planning-budget= : Max query count for planning flow}
         {--calendar-budget= : Max query count for calendar/results flow}
+        {--analytics-budget= : Max query count for analytics island}
+        {--results-summary-budget= : Max query count for results summary island}
         {--json : Print report as JSON}';
 
     protected $description = 'Run query-budget checks for Training Needs dashboard flows';
@@ -46,6 +49,8 @@ class TrainingNeedsQueryBudgetCommand extends Command
             'overview_build' => max(1, (int) ($this->option('overview-budget') ?: config('training_needs.performance.query_budget.overview_build', 20))),
             'planning_build' => max(1, (int) ($this->option('planning-budget') ?: config('training_needs.performance.query_budget.planning_build', 24))),
             'calendar_build' => max(1, (int) ($this->option('calendar-budget') ?: config('training_needs.performance.query_budget.calendar_build', 26))),
+            'analytics_build' => max(1, (int) ($this->option('analytics-budget') ?: config('training_needs.performance.query_budget.analytics_build', 12))),
+            'results_summary_build' => max(1, (int) ($this->option('results-summary-budget') ?: config('training_needs.performance.query_budget.results_summary_build', 14))),
         ];
 
         $hasData = DB::table('training_competencies')->exists()
@@ -101,6 +106,20 @@ class TrainingNeedsQueryBudgetCommand extends Command
             $analyticsService->deliverySummary();
             $reportingService->deliveryRows();
             $reportingService->feedbackRows();
+        });
+        $results[] = $this->probe('analytics_build', $budgets['analytics_build'], function () use ($analyticsService): void {
+            $analyticsService->summary();
+            $analyticsService->sourceMix();
+            $analyticsService->priorityMix();
+            $analyticsService->topGapPositions();
+        });
+        $results[] = $this->probe('results_summary_build', $budgets['results_summary_build'], function () use ($analyticsService, $reportingService): void {
+            TrainingFeedbackForm::query()->with(['session:id,title', 'responses'])->latest('id')->limit(6)->get();
+            $reportingService->feedbackSessionSummaries();
+            $analyticsService->deliverySummary();
+            $reportingService->deliveryRows();
+            $reportingService->feedbackRows();
+            $reportingService->auditRows();
         });
 
         $summary = [

@@ -9,11 +9,21 @@ use Illuminate\Support\Facades\DB;
 
 class AttendanceMonthLockService
 {
+    /**
+     * @var array<string,bool>
+     */
+    protected static array $periodLockMemo = [];
+
     public function isPeriodLocked(Carbon|string $date): bool
     {
         $dt = $date instanceof Carbon ? $date : Carbon::parse($date);
+        $key = $this->periodKey((int) $dt->year, (int) $dt->month);
 
-        return AttendanceMonthlySummary::query()
+        if (array_key_exists($key, self::$periodLockMemo)) {
+            return self::$periodLockMemo[$key];
+        }
+
+        return self::$periodLockMemo[$key] = AttendanceMonthlySummary::query()
             ->where('year', (int) $dt->year)
             ->where('month', (int) $dt->month)
             ->where('is_locked', true)
@@ -26,6 +36,7 @@ class AttendanceMonthLockService
     public function closeMonth(int $year, int $month): array
     {
         $stats = $this->snapshotMonth($year, $month, true);
+        $this->forgetPeriodLock($year, $month);
 
         app(AttendanceAuditLogger::class)->log(
             event: 'month_lock.closed',
@@ -102,6 +113,10 @@ class AttendanceMonthLockService
             'daily_structure_summary_upserts' => (int) ($summaryRefreshStats['upserts'] ?? 0),
         ];
 
+        if ($lock) {
+            $this->forgetPeriodLock($year, $month);
+        }
+
         app(AttendanceCacheService::class)->forgetOverviewMonth($year, $month);
 
         app(AttendanceAuditLogger::class)->log(
@@ -142,6 +157,8 @@ class AttendanceMonthLockService
             'unlocked_summaries' => $unlockedSummaries,
             'unlocked_ledgers' => $unlockedLedgers,
         ];
+
+        $this->forgetPeriodLock($year, $month);
 
         app(AttendanceCacheService::class)->forgetOverviewMonth($year, $month);
 
@@ -208,5 +225,15 @@ class AttendanceMonthLockService
         $to = $from->copy()->endOfMonth();
 
         return [$from, $to];
+    }
+
+    private function forgetPeriodLock(int $year, int $month): void
+    {
+        unset(self::$periodLockMemo[$this->periodKey($year, $month)]);
+    }
+
+    private function periodKey(int $year, int $month): string
+    {
+        return sprintf('%04d-%02d', $year, $month);
     }
 }

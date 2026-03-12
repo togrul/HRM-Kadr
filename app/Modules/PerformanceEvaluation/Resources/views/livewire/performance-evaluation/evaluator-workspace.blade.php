@@ -60,14 +60,22 @@
                         <x-ui.list-card tone="{{ $form->final_category === 'weak' ? 'red' : ($form->final_category === 'high' ? 'green' : 'default') }}">
                             <div class="space-y-4">
                                 <div class="space-y-1">
-                                    <p class="text-lg font-semibold leading-8 text-zinc-900 break-words">{{ $form->personnel?->fullname ?? '-' }}</p>
-                                    <p class="text-sm text-zinc-500 break-words">{{ $form->cycle?->name }} • {{ $form->template?->name ?: $form->template?->code }}</p>
-                                    <p class="text-sm text-zinc-500">{{ __('performance_evaluation::dashboard.fields.manager') }}: {{ $form->manager?->name ?? '-' }}</p>
-                                    <p class="text-sm text-zinc-500">{{ __('performance_evaluation::dashboard.fields.hr_reviewer') }}: {{ $form->hrReviewer?->name ?? '-' }}</p>
+                                    <p class="text-lg font-semibold leading-8 text-zinc-900 break-words">{{ $form->personnel_fullname ?: '-' }}</p>
+                                    <p class="text-sm text-zinc-500 break-words">{{ $form->cycle_name ?: '-' }} • {{ $form->template_name ?: $form->template_code ?: '-' }}</p>
+                                    <p class="text-sm text-zinc-500">{{ __('performance_evaluation::dashboard.fields.manager') }}: {{ $form->manager_name ?? '-' }}</p>
+                                    <p class="text-sm text-zinc-500">{{ __('performance_evaluation::dashboard.fields.hr_reviewer') }}: {{ $form->hr_reviewer_name ?? '-' }}</p>
                                 </div>
 
                                 <div class="flex flex-wrap gap-2">
                                     <x-small-badge mode="secondary">{{ __('performance_evaluation::dashboard.labels.current_role', ['role' => $form->manager_id === auth()->id() ? __('performance_evaluation::dashboard.evaluators.manager') : __('performance_evaluation::dashboard.evaluators.hr')]) }}</x-small-badge>
+                                    @php($progress = data_get($this->assignedFormProgress, $form->id))
+                                    @if ($progress)
+                                        <x-small-badge :mode="$progress['remaining'] > 0 ? 'amber' : 'green'">
+                                            {{ $progress['remaining'] > 0
+                                                ? __('performance_evaluation::dashboard.labels.criteria_remaining', ['count' => $progress['remaining']])
+                                                : __('performance_evaluation::dashboard.labels.all_criteria_scored') }}
+                                        </x-small-badge>
+                                    @endif
                                     @if ($form->final_category)
                                         <x-small-badge :mode="$form->final_category === 'weak' ? 'red' : ($form->final_category === 'high' ? 'green' : 'amber')">
                                             {{ __('performance_evaluation::dashboard.labels.final_category') }}: {{ __('performance_evaluation::dashboard.categories.'.$form->final_category) }}
@@ -76,7 +84,7 @@
                                 </div>
 
                                 <div class="border-t border-zinc-200/80 pt-3">
-                                    <x-ui.action-pill wire:click="startScoreForm({{ $form->id }})" icon="icons.edit-icon">{{ __('performance_evaluation::dashboard.actions.open_score_form') }}</x-ui.action-pill>
+                                    <x-ui.action-pill wire:click="openScoreCapture({{ $form->id }})" icon="icons.edit-icon">{{ __('performance_evaluation::dashboard.actions.open_score_form') }}</x-ui.action-pill>
                                 </div>
                             </div>
                         </x-ui.list-card>
@@ -87,39 +95,7 @@
             </x-surface-card>
         </div>
 
-        <div>
-            <x-surface-card :title="__('performance_evaluation::dashboard.cards.score_capture')" icon="icons.profile-icon" bodyClass="overflow-visible" contentClass="overflow-visible p-4">
-                <div class="grid gap-3 content-start">
-                    <div class="rounded-3xl border border-zinc-200 bg-gradient-to-br from-white to-sky-50 px-4 py-3">
-                        <p class="text-xs leading-6 text-zinc-500">{{ __('performance_evaluation::dashboard.labels.assigned_score_form_hint') }}</p>
-                    </div>
-
-                    <x-ui.select-dropdown :label="__('performance_evaluation::dashboard.fields.evaluation_form')" placeholder="---" mode="gray" class="w-full" instance="perf-evaluator-form"
-                        wire:model.live="scoreForm.performance_form_id"
-                        :model="$this->assignedForms->map(fn ($form) => ['id' => $form->id, 'label' => ($form->personnel?->fullname ?? '-') . ' / ' . ($form->template?->name ?: $form->template?->code ?: '-')])->values()->all()"></x-ui.select-dropdown>
-                    @error('scoreForm.performance_form_id') <x-validation>{{ $message }}</x-validation> @enderror
-
-                    <x-ui.select-dropdown :label="__('performance_evaluation::dashboard.fields.item')" placeholder="---" mode="gray" class="w-full" instance="perf-evaluator-item"
-                        wire:model.live="scoreForm.performance_form_template_item_id"
-                        :model="$this->formItemOptions()"></x-ui.select-dropdown>
-                    @error('scoreForm.performance_form_template_item_id') <x-validation>{{ $message }}</x-validation> @enderror
-
-                    <div>
-                        <x-label for="evaluator-score">{{ __('performance_evaluation::dashboard.fields.score') }}</x-label>
-                        <x-livewire-input mode="gray" id="evaluator-score" type="number" step="0.01" wire:model.defer="scoreForm.score" />
-                        @error('scoreForm.score') <x-validation>{{ $message }}</x-validation> @enderror
-                    </div>
-
-                    <div>
-                        <x-label for="evaluator-comment">{{ __('performance_evaluation::dashboard.fields.comment') }}</x-label>
-                        <textarea id="evaluator-comment" wire:model.defer="scoreForm.comment" class="min-h-24 w-full rounded-lg border-none bg-neutral-100 px-3 py-2 text-sm shadow-sm focus:ring-blue-500"></textarea>
-                        @error('scoreForm.comment') <x-validation>{{ $message }}</x-validation> @enderror
-                    </div>
-
-                    <x-button mode="black" wire:click="saveAssignedScore">{{ __('performance_evaluation::dashboard.actions.save_score') }}</x-button>
-                </div>
-            </x-surface-card>
-        </div>
+        <livewire:performance-evaluation.evaluator-score-capture :form-catalog="$this->scoreCaptureFormCatalog" />
 
         <div class="space-y-4">
             <x-surface-card :title="__('performance_evaluation::dashboard.cards.assigned_reviews')" icon="icons.comment-icon" bodyClass="overflow-visible" contentClass="overflow-visible p-4">
@@ -149,9 +125,9 @@
                     @forelse ($this->pendingAnswers as $answer)
                         <x-ui.list-card tone="amber">
                             <div class="space-y-2">
-                                <p class="text-sm font-semibold text-zinc-900 break-words">{{ $answer->attempt?->session?->personnel?->fullname ?? '-' }}</p>
-                                <p class="text-xs text-zinc-500 break-words">{{ $answer->attempt?->session?->bank?->name ?? '-' }}</p>
-                                <p class="text-xs text-zinc-500 break-words">{{ \Illuminate\Support\Str::limit((string) $answer->question?->prompt, 120) }}</p>
+                                <p class="text-sm font-semibold text-zinc-900 break-words">{{ $answer->personnel_fullname ?: '-' }}</p>
+                                <p class="text-xs text-zinc-500 break-words">{{ $answer->bank_name ?? '-' }}</p>
+                                <p class="text-xs text-zinc-500 break-words">{{ \Illuminate\Support\Str::limit((string) $answer->question_prompt, 120) }}</p>
                                 <x-ui.action-pill wire:click="startReviewAnswer({{ $answer->id }})" icon="icons.edit-icon">{{ __('performance_evaluation::dashboard.actions.open_review_form') }}</x-ui.action-pill>
                             </div>
                         </x-ui.list-card>
@@ -169,7 +145,7 @@
 
                     <x-ui.select-dropdown :label="__('performance_evaluation::dashboard.fields.answer')" placeholder="---" mode="gray" class="w-full" instance="perf-evaluator-answer"
                         wire:model.live="reviewForm.performance_test_attempt_answer_id"
-                        :model="$this->pendingAnswers->map(fn ($answer) => ['id' => $answer->id, 'label' => '#' . $answer->attempt?->id . ' / ' . \Illuminate\Support\Str::limit((string) $answer->question?->prompt, 50)])->values()->all()"></x-ui.select-dropdown>
+                        :model="$this->pendingAnswers->map(fn ($answer) => ['id' => $answer->id, 'label' => '#' . $answer->attempt_id . ' / ' . \Illuminate\Support\Str::limit((string) $answer->question_prompt, 50)])->values()->all()"></x-ui.select-dropdown>
                     @error('reviewForm.performance_test_attempt_answer_id') <x-validation>{{ $message }}</x-validation> @enderror
 
                     <div>

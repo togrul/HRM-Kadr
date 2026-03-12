@@ -39,4 +39,7 @@ return [
         'deleted' => 'Təqvim qaydası silindi.',
         'duplicate_scope_date' => 'Bu tarix və əhatə üçün artıq təqvim qaydası mövcuddur.',
     ],
+    'confirmations' => [
+        'delete' => 'Bu təqvim qaydası silinsin?',
+    ],
 ];

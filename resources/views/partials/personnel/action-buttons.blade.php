@@ -12,10 +12,10 @@
             </x-action-button>
         @endcan
 
-        <x-filter-button :filters="$filters" wire:click="openFilter" wire:loading.attr="disabled" wire:target="openFilter" />
+        <x-filter-button :filters="$this->filters" wire:click="openFilter" wire:loading.attr="disabled" wire:target="openFilter" />
     </div>
 
-    @if (count($filters) > 0)
+    @if (count($this->filters) > 0)
         <button wire:click="resetSelectedFilter" wire:loading.attr="disabled" wire:target="resetSelectedFilter"
             class="appearance-none text-rose-500 text-sm font-medium flex items-center space-x-2 justify-end">
             <x-icons.remove-icon />

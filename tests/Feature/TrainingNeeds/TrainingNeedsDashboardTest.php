@@ -4,15 +4,23 @@ namespace Tests\Feature\TrainingNeeds;
 
 use App\Models\Personnel;
 use App\Models\Position;
+use App\Models\TrainingAnnualPlan;
 use App\Models\TrainingCompetency;
 use App\Models\TrainingCompetencyGroup;
+use App\Models\TrainingDeliveryRecord;
+use App\Models\TrainingFeedbackForm;
 use App\Models\TrainingLevel;
 use App\Models\TrainingNeedItem;
 use App\Models\TrainingProgram;
+use App\Models\TrainingSession;
 use App\Modules\TrainingNeeds\Livewire\Dashboard;
+use App\Modules\TrainingNeeds\Livewire\Analytics as TrainingNeedsAnalytics;
 use App\Modules\TrainingNeeds\Livewire\Lists as TrainingNeedsLists;
+use App\Modules\TrainingNeeds\Livewire\Overview as TrainingNeedsOverview;
+use App\Modules\TrainingNeeds\Livewire\ResultsSummary as TrainingNeedsResultsSummary;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -31,6 +39,45 @@ class TrainingNeedsDashboardTest extends TestCase
             ->get(route('training-needs'))
             ->assertOk()
             ->assertSee(__('training_needs::dashboard.title'));
+    }
+
+    public function test_overview_component_renders_training_summary_cards(): void
+    {
+        $user = \App\Models\User::factory()->create();
+        $this->grantTrainingNeedsPermissions($user);
+
+        $this->actingAs($user);
+
+        Livewire::test(TrainingNeedsOverview::class)
+            ->assertSee(__('training_needs::dashboard.cards.foundation_scope'))
+            ->assertSee(__('training_needs::dashboard.cards.recent_competencies'))
+            ->assertSee(__('training_needs::dashboard.cards.coverage_snapshot'));
+    }
+
+    public function test_analytics_component_renders_reporting_cards(): void
+    {
+        $user = \App\Models\User::factory()->create();
+        $this->grantTrainingNeedsPermissions($user);
+
+        $this->actingAs($user);
+
+        Livewire::test(TrainingNeedsAnalytics::class)
+            ->assertSee(__('training_needs::dashboard.cards.coverage_ratio'))
+            ->assertSee(__('training_needs::dashboard.cards.reporting_summary'))
+            ->assertSee(__('training_needs::dashboard.cards.top_gap_positions'));
+    }
+
+    public function test_results_summary_component_renders_feedback_and_export_cards(): void
+    {
+        $user = \App\Models\User::factory()->create();
+        $this->grantTrainingNeedsPermissions($user);
+
+        $this->actingAs($user);
+
+        Livewire::test(TrainingNeedsResultsSummary::class)
+            ->assertSee(__('training_needs::dashboard.cards.recent_feedback_forms'))
+            ->assertSee(__('training_needs::dashboard.cards.feedback_session_summary'))
+            ->assertSee(__('training_needs::dashboard.cards.export_reports'));
     }
 
     public function test_training_needs_route_requires_view_permission(): void
@@ -221,6 +268,222 @@ class TrainingNeedsDashboardTest extends TestCase
                 'item' => 2,
                 'score' => '45.00',
             ]));
+    }
+
+    public function test_delivery_certificate_delete_is_confirmed_via_modal_before_execution(): void
+    {
+        Storage::fake('public');
+
+        $user = \App\Models\User::factory()->create();
+        $this->grantTrainingNeedsPermissions($user);
+        Role::findOrCreate('admin', 'web');
+        Permission::findOrCreate('get-notification', 'web');
+
+        Position::query()->create([
+            'id' => 103,
+            'name' => 'Coordinator',
+        ]);
+
+        $personnel = $this->createPersonnel($user->id, 103);
+        $program = TrainingProgram::query()->create([
+            'title' => 'Onboarding Lab',
+            'slug' => 'onboarding-lab',
+            'delivery_type' => 'internal',
+            'duration_hours' => 4,
+            'is_active' => true,
+        ]);
+
+        $session = TrainingSession::query()->create([
+            'title' => 'March Session',
+            'training_program_id' => $program->id,
+            'scheduled_start_at' => '2026-03-15 09:00:00',
+            'scheduled_end_at' => '2026-03-15 13:00:00',
+            'status' => 'planned',
+        ]);
+
+        Storage::disk('public')->put('training-certificates/test-certificate.pdf', 'certificate');
+
+        $record = TrainingDeliveryRecord::query()->create([
+            'training_session_id' => $session->id,
+            'training_program_id' => $program->id,
+            'personnel_id' => $personnel->id,
+            'result_status' => 'completed',
+            'completed_at' => '2026-03-15 14:00:00',
+            'certificate_path' => 'training-certificates/test-certificate.pdf',
+            'certificate_name' => 'test-certificate.pdf',
+        ]);
+
+        $this->actingAs($user);
+
+        Livewire::test(Dashboard::class)
+            ->call('confirmDeleteDeliveryCertificate', $record->id)
+            ->assertSet('showDeleteConfirmation', true)
+            ->assertSee(__('training_needs::dashboard.confirmations.delete_certificate'))
+            ->assertSee('test-certificate.pdf')
+            ->call('runConfirmedDeletion')
+            ->assertSet('showDeleteConfirmation', false);
+
+        $this->assertDatabaseHas('training_delivery_records', [
+            'id' => $record->id,
+            'certificate_path' => null,
+            'certificate_name' => null,
+        ]);
+    }
+
+    public function test_dashboard_can_edit_plan_session_and_feedback_form(): void
+    {
+        $user = \App\Models\User::factory()->create();
+        $this->grantTrainingNeedsPermissions($user);
+
+        $program = TrainingProgram::query()->create([
+            'title' => 'Communication Lab',
+            'slug' => 'communication-lab',
+            'delivery_type' => 'internal',
+            'duration_hours' => 6,
+            'is_active' => true,
+        ]);
+
+        $plan = TrainingAnnualPlan::query()->create([
+            'title' => '2026 Plan',
+            'plan_year' => 2026,
+            'status' => 'draft',
+            'auto_generated' => true,
+        ]);
+
+        $session = TrainingSession::query()->create([
+            'training_annual_plan_id' => $plan->id,
+            'training_program_id' => $program->id,
+            'title' => 'Initial Session',
+            'scheduled_start_at' => '2026-04-10 09:00:00',
+            'scheduled_end_at' => '2026-04-10 12:00:00',
+            'status' => 'scheduled',
+            'auto_fill_participants' => false,
+        ]);
+
+        $feedbackForm = TrainingFeedbackForm::query()->create([
+            'training_session_id' => $session->id,
+            'title' => 'Initial Feedback',
+            'status' => 'draft',
+            'questions' => [
+                ['type' => 'rating', 'text' => 'How useful was it?'],
+            ],
+        ]);
+
+        $this->actingAs($user);
+
+        Livewire::test(Dashboard::class)
+            ->call('editPlan', $plan->id)
+            ->assertSet('editingPlanId', $plan->id)
+            ->set('planForm.title', '2026 Revised Plan')
+            ->set('planForm.notes', 'Updated by HR')
+            ->set('planForm.auto_generate', false)
+            ->call('storePlan')
+            ->assertHasNoErrors()
+            ->assertSet('editingPlanId', null)
+            ->call('editSession', $session->id)
+            ->assertSet('editingSessionId', $session->id)
+            ->set('sessionForm.title', 'Updated Session')
+            ->set('sessionForm.location', 'Room 301')
+            ->set('sessionForm.auto_fill_participants', false)
+            ->call('storeSession')
+            ->assertHasNoErrors()
+            ->assertSet('editingSessionId', null)
+            ->call('editFeedbackForm', $feedbackForm->id)
+            ->assertSet('editingFeedbackFormId', $feedbackForm->id)
+            ->set('feedbackForm.title', 'Updated Feedback')
+            ->set('feedbackForm.questions_text', "Question 1\nQuestion 2")
+            ->call('storeFeedbackForm')
+            ->assertHasNoErrors()
+            ->assertSet('editingFeedbackFormId', null);
+
+        $this->assertDatabaseHas('training_annual_plans', [
+            'id' => $plan->id,
+            'title' => '2026 Revised Plan',
+            'notes' => 'Updated by HR',
+        ]);
+
+        $this->assertDatabaseHas('training_sessions', [
+            'id' => $session->id,
+            'title' => 'Updated Session',
+            'location' => 'Room 301',
+        ]);
+
+        $this->assertDatabaseHas('training_feedback_forms', [
+            'id' => $feedbackForm->id,
+            'title' => 'Updated Feedback',
+            'status' => 'draft',
+        ]);
+
+        $this->assertSame(
+            ['Question 1', 'Question 2'],
+            collect(TrainingFeedbackForm::query()->findOrFail($feedbackForm->id)->questions)->pluck('text')->all()
+        );
+    }
+
+    public function test_plan_session_and_feedback_form_deletions_are_confirmed_via_modal(): void
+    {
+        $user = \App\Models\User::factory()->create();
+        $this->grantTrainingNeedsPermissions($user);
+
+        $program = TrainingProgram::query()->create([
+            'title' => 'Leadership Sprint',
+            'slug' => 'leadership-sprint',
+            'delivery_type' => 'internal',
+            'duration_hours' => 8,
+            'is_active' => true,
+        ]);
+
+        $plan = TrainingAnnualPlan::query()->create([
+            'title' => 'Delete Me Plan',
+            'plan_year' => 2026,
+            'status' => 'review',
+        ]);
+
+        $session = TrainingSession::query()->create([
+            'training_annual_plan_id' => $plan->id,
+            'training_program_id' => $program->id,
+            'title' => 'Delete Me Session',
+            'scheduled_start_at' => '2026-05-01 10:00:00',
+            'scheduled_end_at' => '2026-05-01 12:00:00',
+            'status' => 'scheduled',
+            'auto_fill_participants' => false,
+        ]);
+
+        $feedbackForm = TrainingFeedbackForm::query()->create([
+            'training_session_id' => $session->id,
+            'title' => 'Delete Me Feedback',
+            'status' => 'open',
+            'questions' => [
+                ['type' => 'rating', 'text' => 'Question'],
+            ],
+        ]);
+
+        $this->actingAs($user);
+
+        Livewire::test(Dashboard::class)
+            ->call('confirmDeleteFeedbackForm', $feedbackForm->id)
+            ->assertSet('showDeleteConfirmation', true)
+            ->assertSee(__('training_needs::dashboard.confirmations.delete_feedback_form'))
+            ->call('runConfirmedDeletion')
+            ->assertSet('showDeleteConfirmation', false)
+            ->call('confirmDeleteSession', $session->id)
+            ->assertSee(__('training_needs::dashboard.confirmations.delete_session'))
+            ->call('runConfirmedDeletion')
+            ->call('confirmDeletePlan', $plan->id)
+            ->assertSee(__('training_needs::dashboard.confirmations.delete_plan'))
+            ->call('runConfirmedDeletion');
+
+        $this->assertDatabaseMissing('training_feedback_forms', [
+            'id' => $feedbackForm->id,
+        ]);
+
+        $this->assertDatabaseMissing('training_sessions', [
+            'id' => $session->id,
+        ]);
+
+        $this->assertDatabaseMissing('training_annual_plans', [
+            'id' => $plan->id,
+        ]);
     }
 
     private function createPersonnel(int $userId, int $positionId): Personnel

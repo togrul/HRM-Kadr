@@ -14,6 +14,32 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 trait HandlesTrainingResultsMutations
 {
+    public function editFeedbackForm(int $id): void
+    {
+        $this->authorizeTrainingNeedsManage();
+
+        $form = TrainingFeedbackForm::query()->findOrFail($id);
+
+        $this->editingFeedbackFormId = $form->id;
+        $this->feedbackForm = [
+            'training_session_id' => $form->training_session_id,
+            'title' => (string) $form->title,
+            'status' => (string) $form->status,
+            'default_question_type' => (string) data_get($form->questions, '0.type', 'rating'),
+            'questions_text' => collect($form->questions ?? [])
+                ->map(fn (array $question): string => trim((string) data_get($question, 'text', data_get($question, 'prompt', ''))))
+                ->filter()
+                ->implode(PHP_EOL),
+        ];
+    }
+
+    public function cancelFeedbackFormEdit(): void
+    {
+        $this->editingFeedbackFormId = null;
+        $this->feedbackForm = $this->feedbackFormDefaults();
+        $this->resetValidation();
+    }
+
     public function storeFeedbackForm(): void
     {
         $this->authorizeTrainingNeedsManage();
@@ -41,17 +67,41 @@ trait HandlesTrainingResultsMutations
             ])
             ->all();
 
-        TrainingFeedbackForm::query()->create([
+        $form = $this->editingFeedbackFormId
+            ? TrainingFeedbackForm::query()->findOrFail($this->editingFeedbackFormId)
+            : new TrainingFeedbackForm();
+
+        $form->fill([
             'training_session_id' => (int) data_get($validated, 'feedbackForm.training_session_id'),
             'title' => trim((string) data_get($validated, 'feedbackForm.title')),
             'status' => (string) data_get($validated, 'feedbackForm.status'),
             'questions' => $questions,
         ]);
+        $form->save();
 
-        $this->reset('feedbackForm', 'searchSession');
-        $this->feedbackForm = $this->feedbackFormDefaults();
+        $this->cancelFeedbackFormEdit();
+        $this->reset('searchSession');
         $this->refreshRuntimeCaches();
         $this->dispatch('trainingNeedsSaved', __('training_needs::dashboard.messages.feedback_form_saved'));
+    }
+
+    public function deleteFeedbackForm(int $feedbackFormId): void
+    {
+        $this->authorizeTrainingNeedsManage();
+
+        $form = TrainingFeedbackForm::query()->findOrFail($feedbackFormId);
+        $form->delete();
+
+        if ($this->editingFeedbackFormId === $feedbackFormId) {
+            $this->cancelFeedbackFormEdit();
+        }
+
+        if ((int) data_get($this->feedbackResponseForm, 'training_feedback_form_id') === $feedbackFormId) {
+            $this->feedbackResponseForm = $this->feedbackResponseDefaults();
+        }
+
+        $this->refreshRuntimeCaches();
+        $this->dispatch('trainingNeedsSaved', __('training_needs::dashboard.messages.feedback_form_deleted'));
     }
 
     public function submitFeedbackResponse(): void

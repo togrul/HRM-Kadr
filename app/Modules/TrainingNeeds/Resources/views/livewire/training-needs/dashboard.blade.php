@@ -67,111 +67,7 @@
     </x-surface-card>
 
     @if ($activeTab === 'overview')
-        <div class="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
-            <x-surface-card :title="__('training_needs::dashboard.cards.foundation_scope')" icon="icons.profile-outline-icon">
-                <div class="grid gap-3 md:grid-cols-2">
-                    <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-                        <p class="text-sm font-semibold text-zinc-800">{{ __('training_needs::dashboard.cards.catalog_scope_title') }}</p>
-                        <p class="mt-1 text-sm text-zinc-500">{{ __('training_needs::dashboard.cards.catalog_scope_description') }}</p>
-                    </div>
-                    <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-                        <p class="text-sm font-semibold text-zinc-800">{{ __('training_needs::dashboard.cards.matrix_scope_title') }}</p>
-                        <p class="mt-1 text-sm text-zinc-500">{{ __('training_needs::dashboard.cards.matrix_scope_description') }}</p>
-                    </div>
-                    <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-                        <p class="text-sm font-semibold text-zinc-800">{{ __('training_needs::dashboard.cards.profile_scope_title') }}</p>
-                        <p class="mt-1 text-sm text-zinc-500">{{ __('training_needs::dashboard.cards.profile_scope_description') }}</p>
-                    </div>
-                    <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-                        <p class="text-sm font-semibold text-zinc-800">{{ __('training_needs::dashboard.cards.integration_scope_title') }}</p>
-                        <p class="mt-1 text-sm text-zinc-500">{{ __('training_needs::dashboard.cards.integration_scope_description') }}</p>
-                    </div>
-                </div>
-            </x-surface-card>
-
-            <x-surface-card :title="__('training_needs::dashboard.cards.next_sprints')" icon="icons.pending-icon">
-                <div class="space-y-3">
-                    <div class="rounded-xl border border-sky-200 bg-sky-50 px-4 py-3">
-                        <p class="text-sm font-semibold text-sky-900">{{ __('training_needs::dashboard.cards.sprint_two_title') }}</p>
-                        <p class="mt-1 text-sm text-sky-700">{{ __('training_needs::dashboard.cards.sprint_two_description') }}</p>
-                    </div>
-                    <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
-                        <p class="text-sm font-semibold text-emerald-900">{{ __('training_needs::dashboard.cards.sprint_three_title') }}</p>
-                        <p class="mt-1 text-sm text-emerald-700">{{ __('training_needs::dashboard.cards.sprint_three_description') }}</p>
-                    </div>
-                    <div class="rounded-xl border border-violet-200 bg-violet-50 px-4 py-3">
-                        <p class="text-sm font-semibold text-violet-900">{{ __('training_needs::dashboard.cards.sprint_five_title') }}</p>
-                        <p class="mt-1 text-sm text-violet-700">{{ __('training_needs::dashboard.cards.sprint_five_description') }}</p>
-                    </div>
-                </div>
-            </x-surface-card>
-        </div>
-
-        <div class="grid gap-4 xl:grid-cols-3">
-            <x-surface-card :title="__('training_needs::dashboard.cards.recent_competencies')" icon="icons.folder-plus-icon">
-                <div class="space-y-3">
-                    @forelse ($this->recentCompetencies as $competency)
-                        <x-ui.list-card>
-                            <div class="flex items-center justify-between gap-2">
-                                <span class="text-sm font-semibold text-zinc-900">{{ $competency->name }}</span>
-                                @if ($competency->is_mandatory)
-                                    <x-small-badge mode="red">{{ __('training_needs::dashboard.labels.mandatory') }}</x-small-badge>
-                                @endif
-                            </div>
-                            <p class="mt-1 text-xs text-zinc-500">{{ $competency->group?->name ?? __('training_needs::dashboard.labels.no_group') }}</p>
-                        </x-ui.list-card>
-                    @empty
-                        <x-ui.empty-state icon="icons.profile-icon" :message="__('training_needs::dashboard.empty.recent_competencies')" />
-                    @endforelse
-                </div>
-            </x-surface-card>
-
-            <x-surface-card :title="__('training_needs::dashboard.cards.recent_programs')" icon="icons.clock-icon">
-                <div class="space-y-3">
-                    @forelse ($this->recentPrograms as $program)
-                        <x-ui.list-card>
-                            <div class="flex items-center justify-between gap-2">
-                                <span class="text-sm font-semibold text-zinc-900">{{ $program->title }}</span>
-                                <x-small-badge mode="green">{{ __('training_needs::dashboard.delivery_types.'.$program->delivery_type) }}</x-small-badge>
-                            </div>
-                            <p class="mt-1 text-xs text-zinc-500">
-                                {{ __('training_needs::dashboard.labels.program_meta', [
-                                    'code' => $program->code ?: __('training_needs::dashboard.labels.no_code'),
-                                    'hours' => $program->duration_hours ?: 0,
-                                ]) }}
-                            </p>
-                        </x-ui.list-card>
-                    @empty
-                        <x-ui.empty-state icon="icons.training-icon" :message="__('training_needs::dashboard.empty.recent_programs')" />
-                    @endforelse
-                </div>
-            </x-surface-card>
-
-            <x-surface-card :title="__('training_needs::dashboard.cards.coverage_snapshot')" icon="icons.profile-icon">
-                <div class="grid gap-3">
-                    <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-                        <p class="text-[11px] font-semibold uppercase text-zinc-400">{{ __('training_needs::dashboard.stats.program_maps') }}</p>
-                        <p class="mt-1 text-2xl font-semibold text-zinc-900">{{ $this->stats['program_maps'] }}</p>
-                    </div>
-                    <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-                        <p class="text-[11px] font-semibold uppercase text-zinc-400">{{ __('training_needs::dashboard.stats.profiles') }}</p>
-                        <p class="mt-1 text-2xl font-semibold text-zinc-900">{{ $this->stats['profiles'] }}</p>
-                    </div>
-                    <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-                        <p class="text-[11px] font-semibold uppercase text-zinc-400">{{ __('training_needs::dashboard.stats.needs') }}</p>
-                        <p class="mt-1 text-2xl font-semibold text-zinc-900">{{ $this->stats['needs'] }}</p>
-                    </div>
-                    <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-                        <p class="text-[11px] font-semibold uppercase text-zinc-400">{{ __('training_needs::dashboard.stats.plans') }}</p>
-                        <p class="mt-1 text-2xl font-semibold text-zinc-900">{{ $this->stats['plans'] }}</p>
-                    </div>
-                    <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-                        <p class="text-[11px] font-semibold uppercase text-zinc-400">{{ __('training_needs::dashboard.stats.plan_items') }}</p>
-                        <p class="mt-1 text-2xl font-semibold text-zinc-900">{{ $this->stats['plan_items'] }}</p>
-                    </div>
-                </div>
-            </x-surface-card>
-        </div>
+        <livewire:training-needs.overview lazy />
     @endif
 
     @if ($activeTab === 'catalogs')
@@ -687,6 +583,11 @@
     @if ($activeTab === 'planning')
         <div class="grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
             <x-surface-card :title="__('training_needs::dashboard.cards.annual_planning_board')" icon="icons.training-icon" bodyClass="overflow-visible" contentClass="overflow-visible p-4">
+                @if ($editingPlanId)
+                    <div class="mb-4 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-800">
+                        {{ __('training_needs::dashboard.labels.editing_plan_hint') }}
+                    </div>
+                @endif
                 <div class="grid gap-3 md:grid-cols-2">
                     <div class="md:col-span-2">
                         <x-label for="plan-title">{{ __('training_needs::dashboard.fields.plan_title') }}</x-label>
@@ -729,7 +630,14 @@
                         @error('planForm.notes') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div class="md:col-span-2">
-                        <x-button mode="black" wire:click="storePlan">{{ __('training_needs::dashboard.actions.save_plan') }}</x-button>
+                        <div class="flex flex-wrap gap-2">
+                            <x-button mode="black" wire:click="storePlan">
+                                {{ $editingPlanId ? __('training_needs::dashboard.actions.update_plan') : __('training_needs::dashboard.actions.save_plan') }}
+                            </x-button>
+                            @if ($editingPlanId)
+                                <x-button mode="secondary" wire:click="cancelPlanEdit">{{ __('training_needs::dashboard.actions.cancel_edit') }}</x-button>
+                            @endif
+                        </div>
                         <p class="mt-3 text-xs text-zinc-500">{{ __('training_needs::dashboard.labels.plan_status_hint') }}</p>
                     </div>
                 </div>
@@ -747,6 +655,10 @@
                                 <x-small-badge mode="sky">{{ __('training_needs::dashboard.plan_statuses.'.$plan->status) }}</x-small-badge>
                             </div>
                             <p class="mt-2 text-xs text-zinc-500">{{ __('training_needs::dashboard.labels.plan_summary', ['count' => $plan->items_count, 'participants' => $plan->planned_participants, 'budget' => number_format((float) $plan->estimated_budget, 2)]) }}</p>
+                            <div class="mt-3 flex flex-wrap gap-2">
+                                <x-ui.action-pill mode="secondary" wire:click="editPlan({{ $plan->id }})" icon="icons.edit-icon">{{ __('training_needs::dashboard.actions.edit') }}</x-ui.action-pill>
+                                <x-ui.action-pill mode="delete" wire:click="confirmDeletePlan({{ $plan->id }})" icon="icons.delete-icon">{{ __('training_needs::dashboard.actions.delete') }}</x-ui.action-pill>
+                            </div>
                         </x-ui.list-card>
                     @empty
                         <x-ui.empty-state icon="icons.training-icon" :message="__('training_needs::dashboard.empty.recent_plans')" />
@@ -940,7 +852,11 @@
 
         <div class="grid gap-4 xl:grid-cols-2">
             <x-surface-card :title="__('training_needs::dashboard.cards.training_calendar')" icon="icons.training-icon" bodyClass="overflow-visible" contentClass="overflow-visible p-4">
-                @if ($selectedSessionProposalPlanItemId)
+                @if ($editingSessionId)
+                    <div class="mb-4 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-800">
+                        {{ __('training_needs::dashboard.labels.editing_session_hint') }}
+                    </div>
+                @elseif ($selectedSessionProposalPlanItemId)
                     <div class="mb-4 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-800">
                         {{ __('training_needs::dashboard.labels.session_proposal_applied_hint') }}
                     </div>
@@ -1026,7 +942,14 @@
                         @error('sessionForm.notes') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div class="md:col-span-2">
-                        <x-button mode="black" wire:click="storeSession">{{ __('training_needs::dashboard.actions.save_session') }}</x-button>
+                        <div class="flex flex-wrap gap-2">
+                            <x-button mode="black" wire:click="storeSession">
+                                {{ $editingSessionId ? __('training_needs::dashboard.actions.update_session') : __('training_needs::dashboard.actions.save_session') }}
+                            </x-button>
+                            @if ($editingSessionId)
+                                <x-button mode="secondary" wire:click="cancelSessionEdit">{{ __('training_needs::dashboard.actions.cancel_edit') }}</x-button>
+                            @endif
+                        </div>
                     </div>
                 </div>
             </x-surface-card>
@@ -1094,8 +1017,8 @@
             <x-surface-card :title="__('training_needs::dashboard.cards.upcoming_sessions')" icon="icons.clock-icon">
                 <div class="space-y-3">
                     @forelse ($this->recentSessions as $session)
-                        <button type="button" wire:click="selectSessionDetail({{ $session->id }})" class="w-full text-left">
-                            <x-ui.list-card :active="$this->selectedSession?->id === $session->id" tone="{{ ($this->selectedSession?->id === $session->id) ? 'sky' : 'neutral' }}">
+                        <x-ui.list-card :active="$selectedSessionId === $session->id" tone="{{ $selectedSessionId === $session->id ? 'sky' : 'neutral' }}">
+                            <button type="button" wire:click="selectSessionDetail({{ $session->id }})" class="w-full text-left">
                             <div class="flex items-center justify-between gap-2">
                                 <div>
                                     <p class="text-sm font-semibold text-zinc-900">{{ $session->title }}</p>
@@ -1104,8 +1027,12 @@
                                 <x-small-badge mode="sky">{{ __('training_needs::dashboard.session_statuses.'.$session->status) }}</x-small-badge>
                             </div>
                             <p class="mt-2 text-xs text-zinc-500">{{ __('training_needs::dashboard.labels.session_meta', ['location' => $session->location ?: '—', 'trainer' => $session->trainer_name ?: '—', 'participants' => $session->participants->count()]) }}</p>
-                            </x-ui.list-card>
-                        </button>
+                            </button>
+                            <div class="mt-3 flex flex-wrap gap-2 border-t border-zinc-200/80 pt-3">
+                                <x-ui.action-pill mode="secondary" wire:click="editSession({{ $session->id }})" icon="icons.edit-icon">{{ __('training_needs::dashboard.actions.edit') }}</x-ui.action-pill>
+                                <x-ui.action-pill mode="delete" wire:click="confirmDeleteSession({{ $session->id }})" icon="icons.delete-icon">{{ __('training_needs::dashboard.actions.delete') }}</x-ui.action-pill>
+                            </div>
+                        </x-ui.list-card>
                     @empty
                         <x-ui.empty-state icon="icons.calendar-icon" :message="__('training_needs::dashboard.empty.sessions')" />
                     @endforelse
@@ -1134,131 +1061,22 @@
             </x-surface-card>
         </div>
 
-        @if ($this->selectedSession)
-            <x-surface-card :title="__('training_needs::dashboard.cards.session_detail')" icon="icons.profile-outline-icon">
-                <div class="grid gap-4 xl:grid-cols-[0.9fr_1.1fr]">
-                    <div class="space-y-4">
-                        <div class="grid gap-3 sm:grid-cols-2">
-                            <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-                                <p class="text-[11px] font-semibold uppercase text-zinc-400">{{ __('training_needs::dashboard.fields.session') }}</p>
-                                <p class="mt-1 text-sm font-semibold text-zinc-900">{{ $this->selectedSession->title }}</p>
-                            </div>
-                            <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-                                <p class="text-[11px] font-semibold uppercase text-zinc-400">{{ __('training_needs::dashboard.fields.program') }}</p>
-                                <p class="mt-1 text-sm font-semibold text-zinc-900">{{ $this->selectedSession->program?->title ?? '---' }}</p>
-                            </div>
-                            <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-                                <p class="text-[11px] font-semibold uppercase text-zinc-400">{{ __('training_needs::dashboard.fields.scheduled_start_at') }}</p>
-                                <p class="mt-1 text-sm font-semibold text-zinc-900">{{ optional($this->selectedSession->scheduled_start_at)->format('d.m.Y H:i') ?: '---' }}</p>
-                            </div>
-                            <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-                                <p class="text-[11px] font-semibold uppercase text-zinc-400">{{ __('training_needs::dashboard.fields.location') }}</p>
-                                <p class="mt-1 text-sm font-semibold text-zinc-900">{{ $this->selectedSession->location ?: '---' }}</p>
-                            </div>
-                            <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-                                <p class="text-[11px] font-semibold uppercase text-zinc-400">{{ __('training_needs::dashboard.labels.participant_count', ['count' => 0]) }}</p>
-                                <p class="mt-1 text-2xl font-semibold text-zinc-900">{{ $this->selectedSession->participants->count() }}</p>
-                            </div>
-                            <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-                                <p class="text-[11px] font-semibold uppercase text-zinc-400">{{ __('training_needs::dashboard.labels.attended_participants') }}</p>
-                                <p class="mt-1 text-2xl font-semibold text-zinc-900">{{ $this->selectedSession->participants->where('attendance_status', 'attended')->count() }}</p>
-                            </div>
-                        </div>
-
-                        <div class="rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
-                            <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
-                                <div class="space-y-1">
-                                    <p class="text-sm font-semibold text-zinc-800">{{ __('training_needs::dashboard.fields.participant_search') }}</p>
-                                    <p class="text-xs text-zinc-500">{{ __('training_needs::dashboard.empty.filtered_session_participants') }}</p>
-                                </div>
-                                <div class="flex flex-wrap gap-2">
-                                    <x-ui.action-pill mode="secondary" wire:click="selectVisibleParticipants" icon="icons.profile-icon">{{ __('training_needs::dashboard.actions.select_visible_participants') }}</x-ui.action-pill>
-                                    <x-ui.action-pill mode="secondary" wire:click="clearSelectedParticipants">{{ __('training_needs::dashboard.actions.clear_selected_participants') }}</x-ui.action-pill>
-                                </div>
-                            </div>
-                            <div class="flex flex-wrap items-end gap-3">
-                                <div class="min-w-56 flex-1">
-                                    <x-label for="selected-participant-search">{{ __('training_needs::dashboard.fields.participant_search') }}</x-label>
-                                    <x-livewire-input mode="gray" id="selected-participant-search" wire:model.live.debounce.300ms="searchSelectedParticipant" />
-                                </div>
-                                <div class="min-w-48 flex-1">
-                                    <x-label for="selected-attendance-filter">{{ __('training_needs::dashboard.fields.participant_attendance_filter') }}</x-label>
-                                    <select id="selected-attendance-filter" wire:model.live="selectedParticipantAttendanceFilter" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
-                                        <option value="all">---</option>
-                                        <option value="planned">{{ __('training_needs::dashboard.attendance_statuses.planned') }}</option>
-                                        <option value="confirmed">{{ __('training_needs::dashboard.attendance_statuses.confirmed') }}</option>
-                                        <option value="attended">{{ __('training_needs::dashboard.attendance_statuses.attended') }}</option>
-                                        <option value="absent">{{ __('training_needs::dashboard.attendance_statuses.absent') }}</option>
-                                        <option value="cancelled">{{ __('training_needs::dashboard.attendance_statuses.cancelled') }}</option>
-                                    </select>
-                                </div>
-                                <div class="min-w-48 flex-1">
-                                    <x-label for="selected-source-filter">{{ __('training_needs::dashboard.fields.participant_source_filter') }}</x-label>
-                                    <select id="selected-source-filter" wire:model.live="selectedParticipantSourceFilter" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
-                                        <option value="all">---</option>
-                                        <option value="manual">{{ __('training_needs::dashboard.sources.manual') }}</option>
-                                        <option value="performance_gap">{{ __('training_needs::dashboard.sources.performance_gap') }}</option>
-                                        <option value="skill_gap">{{ __('training_needs::dashboard.sources.skill_gap') }}</option>
-                                        <option value="manager_request">{{ __('training_needs::dashboard.sources.manager_request') }}</option>
-                                        <option value="employee_request">{{ __('training_needs::dashboard.sources.employee_request') }}</option>
-                                    </select>
-                                </div>
-                                <div class="min-w-56 flex-1">
-                                    <x-label for="bulk-attendance-status">{{ __('training_needs::dashboard.fields.bulk_attendance_status') }}</x-label>
-                                    <select id="bulk-attendance-status" wire:model.defer="bulkAttendanceStatus" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
-                                        <option value="planned">{{ __('training_needs::dashboard.attendance_statuses.planned') }}</option>
-                                        <option value="confirmed">{{ __('training_needs::dashboard.attendance_statuses.confirmed') }}</option>
-                                        <option value="attended">{{ __('training_needs::dashboard.attendance_statuses.attended') }}</option>
-                                        <option value="absent">{{ __('training_needs::dashboard.attendance_statuses.absent') }}</option>
-                                        <option value="cancelled">{{ __('training_needs::dashboard.attendance_statuses.cancelled') }}</option>
-                                    </select>
-                                </div>
-                                <x-ui.action-pill wire:click="applyBulkParticipantStatus">{{ __('training_needs::dashboard.actions.apply_bulk_status') }}</x-ui.action-pill>
-                                <x-ui.action-pill mode="delete" wire:click="removeSelectedParticipants" wire:confirm="{{ __('training_needs::dashboard.confirmations.remove_selected_participants') }}" icon="icons.delete-icon">{{ __('training_needs::dashboard.actions.remove_selected_participants') }}</x-ui.action-pill>
-                            </div>
-                            <div class="mt-3 flex flex-wrap gap-2">
-                                <x-ui.action-pill mode="secondary" wire:click="applyBulkParticipantStatusShortcut('confirmed')">{{ __('training_needs::dashboard.attendance_statuses.confirmed') }}</x-ui.action-pill>
-                                <x-ui.action-pill mode="secondary" wire:click="applyBulkParticipantStatusShortcut('attended')">{{ __('training_needs::dashboard.attendance_statuses.attended') }}</x-ui.action-pill>
-                                <x-ui.action-pill mode="secondary" wire:click="applyBulkParticipantStatusShortcut('absent')">{{ __('training_needs::dashboard.attendance_statuses.absent') }}</x-ui.action-pill>
-                                <x-ui.action-pill mode="secondary" wire:click="applyBulkParticipantStatusShortcut('cancelled')">{{ __('training_needs::dashboard.attendance_statuses.cancelled') }}</x-ui.action-pill>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="space-y-3">
-                        @forelse ($this->filteredSelectedParticipants as $participant)
-                            <x-ui.list-card>
-                                <div class="flex flex-wrap items-start justify-between gap-3">
-                                    <div class="flex items-start gap-3">
-                                        <input type="checkbox" wire:model.live="bulkParticipantIds" value="{{ $participant->id }}" class="mt-1 rounded border-zinc-300 text-blue-600 focus:ring-blue-500">
-                                        <div>
-                                            <p class="text-sm font-semibold text-zinc-900">{{ $participant->personnel?->fullname ?? '---' }}</p>
-                                            <p class="mt-1 text-xs text-zinc-500">{{ $participant->personnel?->tabel_no ? '#'.$participant->personnel->tabel_no : '---' }} @if($participant->trainingNeed?->reason) • {{ $participant->trainingNeed->presentedReason() }} @endif</p>
-                                        </div>
-                                    </div>
-                                    <x-small-badge mode="{{ $participant->attendance_status === 'attended' ? 'green' : ($participant->attendance_status === 'absent' ? 'red' : 'sky') }}">
-                                        {{ __('training_needs::dashboard.attendance_statuses.'.$participant->attendance_status) }}
-                                    </x-small-badge>
-                                </div>
-                                <div class="mt-3 flex flex-wrap gap-2">
-                                    <button type="button" wire:click="quickSetParticipantStatus({{ $participant->id }}, 'confirmed')" class="rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 transition hover:border-blue-300 hover:text-blue-700">{{ __('training_needs::dashboard.attendance_statuses.confirmed') }}</button>
-                                    <button type="button" wire:click="quickSetParticipantStatus({{ $participant->id }}, 'attended')" class="rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 transition hover:border-green-300 hover:text-green-700">{{ __('training_needs::dashboard.attendance_statuses.attended') }}</button>
-                                    <button type="button" wire:click="quickSetParticipantStatus({{ $participant->id }}, 'absent')" class="rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 transition hover:border-rose-300 hover:text-rose-700">{{ __('training_needs::dashboard.attendance_statuses.absent') }}</button>
-                                    <button type="button" wire:click="quickSetParticipantStatus({{ $participant->id }}, 'cancelled')" class="rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 transition hover:border-zinc-400 hover:text-zinc-900">{{ __('training_needs::dashboard.attendance_statuses.cancelled') }}</button>
-                                </div>
-                            </x-ui.list-card>
-                        @empty
-                            <x-ui.empty-state icon="icons.users-icon" :message="__('training_needs::dashboard.empty.filtered_session_participants')" />
-                        @endforelse
-                    </div>
-                </div>
-            </x-surface-card>
+        @if ($selectedSessionId)
+            <livewire:training-needs.session-detail-workspace
+                :session-id="$selectedSessionId"
+                :key="'training-session-detail-'.$selectedSessionId.'-'.$sessionDetailWorkspaceVersion"
+            />
         @endif
     @endif
 
     @if ($activeTab === 'results')
         <div class="grid gap-4 xl:grid-cols-2">
             <x-surface-card :title="__('training_needs::dashboard.cards.feedback_forms')" icon="icons.folder-plus-icon" bodyClass="overflow-visible" contentClass="overflow-visible p-4">
+                @if ($editingFeedbackFormId)
+                    <div class="mb-4 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-800">
+                        {{ __('training_needs::dashboard.labels.editing_feedback_form_hint') }}
+                    </div>
+                @endif
                 <div class="grid gap-3 md:grid-cols-2">
                     <div class="md:col-span-2">
                         <x-ui.select-dropdown
@@ -1302,7 +1120,14 @@
                         @error('feedbackForm.questions_text') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div class="md:col-span-2">
-                        <x-button mode="black" wire:click="storeFeedbackForm">{{ __('training_needs::dashboard.actions.save_feedback_form') }}</x-button>
+                        <div class="flex flex-wrap gap-2">
+                            <x-button mode="black" wire:click="storeFeedbackForm">
+                                {{ $editingFeedbackFormId ? __('training_needs::dashboard.actions.update_feedback_form') : __('training_needs::dashboard.actions.save_feedback_form') }}
+                            </x-button>
+                            @if ($editingFeedbackFormId)
+                                <x-button mode="secondary" wire:click="cancelFeedbackFormEdit">{{ __('training_needs::dashboard.actions.cancel_edit') }}</x-button>
+                            @endif
+                        </div>
                     </div>
                 </div>
             </x-surface-card>
@@ -1372,7 +1197,7 @@
                                     @if ($record->certificate_path)
                                         <x-ui.action-pill mode="secondary" wire:click="previewDeliveryCertificate({{ $record->id }})">{{ __('training_needs::dashboard.actions.preview_certificate') }}</x-ui.action-pill>
                                         <x-ui.action-pill mode="secondary" wire:click="downloadDeliveryCertificate({{ $record->id }})">{{ __('training_needs::dashboard.actions.download_certificate') }}</x-ui.action-pill>
-                                        <x-ui.action-pill mode="delete" wire:click="deleteDeliveryCertificate({{ $record->id }})" icon="icons.delete-icon">{{ __('training_needs::dashboard.actions.delete_certificate') }}</x-ui.action-pill>
+                                        <x-ui.action-pill mode="delete" wire:click="confirmDeleteDeliveryCertificate({{ $record->id }})" icon="icons.delete-icon">{{ __('training_needs::dashboard.actions.delete_certificate') }}</x-ui.action-pill>
                                     @endif
                                     <x-small-badge mode="green">{{ __('training_needs::dashboard.delivery_result_statuses.'.$record->result_status) }}</x-small-badge>
                                 </div>
@@ -1386,58 +1211,7 @@
             </x-surface-card>
 
             <div class="space-y-4">
-                <x-surface-card :title="__('training_needs::dashboard.cards.recent_feedback_forms')" icon="icons.profile-icon">
-                    <div class="space-y-3">
-                        @forelse ($this->recentFeedbackForms as $form)
-                            <x-ui.list-card>
-                                <div class="flex items-center justify-between gap-2">
-                                    <div>
-                                        <p class="text-sm font-semibold text-zinc-900">{{ $form->title }}</p>
-                                        <p class="text-xs text-zinc-500">{{ $form->session?->title ?? '—' }}</p>
-                                    </div>
-                                    <x-small-badge mode="sky">{{ __('training_needs::dashboard.feedback_statuses.'.$form->status) }}</x-small-badge>
-                                </div>
-                                <p class="mt-2 text-xs text-zinc-500">{{ __('training_needs::dashboard.labels.feedback_form_meta', ['count' => $form->responses->count(), 'questions' => count($form->questions ?? [])]) }}</p>
-                            </x-ui.list-card>
-                        @empty
-                            <x-ui.empty-state icon="icons.comment-icon" :message="__('training_needs::dashboard.empty.feedback_forms')" />
-                        @endforelse
-                    </div>
-                </x-surface-card>
-
-                <x-surface-card :title="__('training_needs::dashboard.cards.feedback_session_summary')" icon="icons.pending-icon">
-                    <div class="space-y-3">
-                        @forelse ($this->feedbackSessionSummaries as $summary)
-                            <x-ui.list-card>
-                                <div class="flex items-center justify-between gap-2">
-                                    <div>
-                                        <p class="text-sm font-semibold text-zinc-900">{{ $summary->title }}</p>
-                                        <p class="text-xs text-zinc-500">{{ $summary->scheduled_start_at ? \Illuminate\Support\Carbon::parse($summary->scheduled_start_at)->format('d.m.Y H:i') : '---' }}</p>
-                                    </div>
-                                    <x-small-badge mode="sky">{{ __('training_needs::dashboard.session_statuses.'.$summary->status) }}</x-small-badge>
-                                </div>
-                                <p class="mt-2 text-xs text-zinc-500">{{ __('training_needs::dashboard.labels.feedback_session_meta', ['forms' => $summary->feedback_forms_count, 'responses' => $summary->feedback_responses_count, 'score' => $summary->average_feedback_score]) }}</p>
-                            </x-ui.list-card>
-                        @empty
-                            <x-ui.empty-state icon="icons.pending-icon" :message="__('training_needs::dashboard.empty.feedback_forms')" />
-                        @endforelse
-                    </div>
-                </x-surface-card>
-
-                <x-surface-card :title="__('training_needs::dashboard.cards.export_reports')" icon="icons.pending-icon">
-                    <div class="grid gap-3">
-                        <x-button mode="black" wire:click="exportDeliveryReport">{{ __('training_needs::dashboard.actions.export_delivery_report') }}</x-button>
-                        <x-button mode="success" wire:click="exportFeedbackReport">{{ __('training_needs::dashboard.actions.export_feedback_report') }}</x-button>
-                        <x-button mode="default" wire:click="exportDeliverySummaryReport">{{ __('training_needs::dashboard.actions.export_delivery_summary_report') }}</x-button>
-                        <x-button mode="default" wire:click="exportDeliveryPivotReport">{{ __('training_needs::dashboard.actions.export_delivery_pivot_report') }}</x-button>
-                        <x-button mode="default" wire:click="exportAuditReport">{{ __('training_needs::dashboard.actions.export_audit_report') }}</x-button>
-                        <a href="{{ route('training-needs.print-summary') }}" target="_blank" class="inline-flex min-w-max items-center justify-center rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-xs font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-100">
-                            {{ __('training_needs::dashboard.actions.open_print_summary') }}
-                        </a>
-                        <p class="text-xs text-zinc-500">{{ __('training_needs::dashboard.labels.export_report_hint') }}</p>
-                        <p class="text-xs text-zinc-500">{{ __('training_needs::dashboard.labels.print_report_hint') }}</p>
-                    </div>
-                </x-surface-card>
+                <livewire:training-needs.results-summary lazy />
 
                 <x-surface-card :title="__('training_needs::dashboard.cards.delivery_documents')" icon="icons.profile-outline-icon" bodyClass="overflow-visible" contentClass="overflow-visible p-4">
                     <div class="grid gap-3">
@@ -1474,7 +1248,7 @@
                                 <div class="flex flex-wrap gap-2">
                                     <x-ui.action-pill mode="secondary" wire:click="previewDeliveryCertificate({{ $selectedDeliveryRecord->id }})">{{ __('training_needs::dashboard.actions.preview_certificate') }}</x-ui.action-pill>
                                     <x-ui.action-pill mode="secondary" wire:click="downloadDeliveryCertificate({{ $selectedDeliveryRecord->id }})">{{ __('training_needs::dashboard.actions.download_certificate') }}</x-ui.action-pill>
-                                    <x-ui.action-pill mode="delete" wire:click="deleteDeliveryCertificate({{ $selectedDeliveryRecord->id }})" wire:confirm="{{ __('training_needs::dashboard.confirmations.delete_certificate') }}" icon="icons.delete-icon">{{ __('training_needs::dashboard.actions.delete_certificate') }}</x-ui.action-pill>
+                                    <x-ui.action-pill mode="delete" wire:click="confirmDeleteDeliveryCertificate({{ $selectedDeliveryRecord->id }})" icon="icons.delete-icon">{{ __('training_needs::dashboard.actions.delete_certificate') }}</x-ui.action-pill>
                                 </div>
                             @endif
                         @endif
@@ -1487,85 +1261,12 @@
     @endif
 
     @if ($activeTab === 'analytics')
-        <div class="grid gap-4 xl:grid-cols-3">
-            <x-surface-card :title="__('training_needs::dashboard.cards.coverage_ratio')" icon="icons.profile-icon">
-                <div class="grid gap-3">
-                    <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-                        <p class="text-[11px] font-semibold uppercase text-zinc-400">{{ __('training_needs::dashboard.labels.coverage_ratio') }}</p>
-                        <p class="mt-1 text-2xl font-semibold text-zinc-900">{{ $this->analyticsSummary['coverage_ratio'] }}%</p>
-                    </div>
-                    <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-                        <p class="text-[11px] font-semibold uppercase text-zinc-400">{{ __('training_needs::dashboard.labels.mapping_ratio') }}</p>
-                        <p class="mt-1 text-2xl font-semibold text-zinc-900">{{ $this->analyticsSummary['mapping_ratio'] }}%</p>
-                    </div>
-                    <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-                        <p class="text-[11px] font-semibold uppercase text-zinc-400">{{ __('training_needs::dashboard.labels.requirement_coverage_ratio') }}</p>
-                        <p class="mt-1 text-2xl font-semibold text-zinc-900">{{ $this->analyticsSummary['requirement_coverage_ratio'] }}%</p>
-                    </div>
-                </div>
-            </x-surface-card>
-
-            <x-surface-card :title="__('training_needs::dashboard.cards.reporting_summary')" icon="icons.pending-icon">
-                <div class="space-y-3">
-                    <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-                        <p class="text-[11px] font-semibold uppercase text-zinc-400">{{ __('training_needs::dashboard.labels.total_needs') }}</p>
-                        <p class="mt-1 text-2xl font-semibold text-zinc-900">{{ $this->analyticsSummary['total_needs'] }}</p>
-                    </div>
-                    <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-                        <p class="text-[11px] font-semibold uppercase text-zinc-400">{{ __('training_needs::dashboard.labels.approved_needs') }}</p>
-                        <p class="mt-1 text-2xl font-semibold text-zinc-900">{{ $this->analyticsSummary['approved_needs'] }}</p>
-                    </div>
-                    <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-                        <p class="text-[11px] font-semibold uppercase text-zinc-400">{{ __('training_needs::dashboard.labels.planned_needs') }}</p>
-                        <p class="mt-1 text-2xl font-semibold text-zinc-900">{{ $this->analyticsSummary['planned_needs'] }}</p>
-                    </div>
-                </div>
-            </x-surface-card>
-
-            <x-surface-card :title="__('training_needs::dashboard.cards.source_mix')" icon="icons.folder-plus-icon">
-                <div class="space-y-3">
-                    @forelse ($this->analyticsSourceMix as $source => $count)
-                        <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 flex items-center justify-between gap-3">
-                            <span class="text-sm font-semibold text-zinc-900">{{ __('training_needs::dashboard.sources.'.$source) }}</span>
-                            <x-small-badge mode="blue">{{ $count }}</x-small-badge>
-                        </div>
-                    @empty
-                        <p class="text-sm text-zinc-500">{{ __('training_needs::dashboard.empty.analytics') }}</p>
-                    @endforelse
-                </div>
-            </x-surface-card>
-        </div>
-
-        <div class="grid gap-4 xl:grid-cols-2">
-            <x-surface-card :title="__('training_needs::dashboard.cards.priority_mix')" icon="icons.profile-outline-icon">
-                <div class="space-y-3">
-                    @forelse ($this->analyticsPriorityMix as $priority => $count)
-                        <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 flex items-center justify-between gap-3">
-                            <span class="text-sm font-semibold text-zinc-900">{{ __('training_needs::dashboard.priorities.'.$priority) }}</span>
-                            <x-small-badge :mode="$priority === 'high' ? 'red' : ($priority === 'medium' ? 'green' : 'secondary')">{{ $count }}</x-small-badge>
-                        </div>
-                    @empty
-                        <p class="text-sm text-zinc-500">{{ __('training_needs::dashboard.empty.analytics') }}</p>
-                    @endforelse
-                </div>
-            </x-surface-card>
-
-            <x-surface-card :title="__('training_needs::dashboard.cards.top_gap_positions')" icon="icons.training-icon">
-                <div class="space-y-3">
-                    @forelse ($this->topGapPositions as $position => $count)
-                        <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 flex items-center justify-between gap-3">
-                            <span class="text-sm font-semibold text-zinc-900">{{ $position }}</span>
-                            <x-small-badge mode="red">{{ $count }}</x-small-badge>
-                        </div>
-                    @empty
-                        <p class="text-sm text-zinc-500">{{ __('training_needs::dashboard.empty.analytics') }}</p>
-                    @endforelse
-                </div>
-            </x-surface-card>
-        </div>
+        <livewire:training-needs.analytics lazy />
     @endif
 
     @if ($activeTab === 'lists')
         <livewire:training-needs.lists lazy />
     @endif
+
+    <x-ui.delete-confirmation-modal />
 </div>

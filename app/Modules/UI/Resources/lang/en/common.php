@@ -4,8 +4,14 @@ return [
     'actions' => [
         'cancel' => 'Cancel',
         'close' => 'Close',
+        'delete' => 'Delete',
         'edit' => 'Edit',
         'loading' => 'Loading',
+    ],
+    'destructive' => [
+        'title' => 'Confirm action',
+        'description' => 'This change is applied immediately and cannot be undone.',
+        'impact' => 'Cannot be undone',
     ],
     'labels' => [
         'structure' => 'Structure',

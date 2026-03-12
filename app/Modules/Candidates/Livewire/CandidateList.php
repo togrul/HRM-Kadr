@@ -14,6 +14,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -158,6 +159,24 @@ class CandidateList extends Component
         return $paginated;
     }
 
+    #[Computed]
+    public function candidateRows(): LengthAwarePaginator
+    {
+        return $this->returnData();
+    }
+
+    #[Computed]
+    public function appealStatusTabs(): Collection
+    {
+        return $this->visibleAppealStatuses();
+    }
+
+    #[Computed]
+    public function canShowDeletedTab(): bool
+    {
+        return $this->showDeletedTab();
+    }
+
     public function mount(StructureService $structureService): void
     {
         $this->authorize('viewAny', Candidate::class);
@@ -170,12 +189,7 @@ class CandidateList extends Component
 
     public function render()
     {
-        $_appeal_statuses = $this->visibleAppealStatuses();
-        $showDeletedTab = $this->showDeletedTab();
-
-        $_candidates = $this->returnData();
-
-        return view('candidates::livewire.candidates.candidate-list', compact('_appeal_statuses', '_candidates', 'showDeletedTab'));
+        return view('candidates::livewire.candidates.candidate-list');
     }
 
     public function isMilitaryCandidateMode(): bool

@@ -11,7 +11,7 @@
 
         applyPaginatorTheme(false);
 
-        const currentComponentId = $wire.__instance?.id ?? $wire.$id ?? null;
+        const currentComponentId = @js($this->getId());
         window.__ordersPaginatorHooks ??= {};
 
         if (currentComponentId && !window.__ordersPaginatorHooks[currentComponentId]) {
@@ -114,7 +114,7 @@
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
                 <div class="overflow-visible">
                     <x-table.tbl :headers="$this->getTableHeaders()" title="{{ __('orders::order_list.table.title') }}">
-                        @forelse ($orders as $_order)
+                        @forelse ($this->orders as $_order)
                             <tr wire:key="order-row-{{ $_order->id }}" @class([
                                 '' => $_order->status_id != 30,
                                 'bg-rose-50' => $_order->status_id == 30,
@@ -249,7 +249,7 @@
             </div>
         </div>
         <div class="mt-2">
-            {{ $orders->links() }}
+            {{ $this->orders->links() }}
         </div>
     </div>
 

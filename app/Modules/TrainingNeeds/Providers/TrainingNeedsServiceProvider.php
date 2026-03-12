@@ -3,6 +3,7 @@
 namespace App\Modules\TrainingNeeds\Providers;
 
 use App\Modules\TrainingNeeds\Console\Commands\TrainingNeedsQueryBudgetCommand;
+use App\Modules\TrainingNeeds\Console\Commands\TrainingNeedsRenderBenchmarkCommand;
 use App\Providers\Concerns\RegistersLivewireAliases;
 use App\Services\Modules\ModuleState;
 use Illuminate\Support\ServiceProvider;
@@ -24,6 +25,7 @@ class TrainingNeedsServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 TrainingNeedsQueryBudgetCommand::class,
+                TrainingNeedsRenderBenchmarkCommand::class,
             ]);
         }
     }
@@ -37,7 +39,11 @@ class TrainingNeedsServiceProvider extends ServiceProvider
     {
         return [
             'dashboard' => \App\Modules\TrainingNeeds\Livewire\Dashboard::class,
+            'overview' => \App\Modules\TrainingNeeds\Livewire\Overview::class,
+            'analytics' => \App\Modules\TrainingNeeds\Livewire\Analytics::class,
             'lists' => \App\Modules\TrainingNeeds\Livewire\Lists::class,
+            'results-summary' => \App\Modules\TrainingNeeds\Livewire\ResultsSummary::class,
+            'session-detail-workspace' => \App\Modules\TrainingNeeds\Livewire\SessionDetailWorkspace::class,
             'certificate-viewer' => \App\Modules\TrainingNeeds\Livewire\CertificateViewer::class,
         ];
     }

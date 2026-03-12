@@ -1,4 +1,5 @@
 <div class="space-y-4">
+    @island(name: 'attendance-overtime-queue')
     <x-surface-card :title="__('attendance::overtime.title')" icon="icons.clock-icon">
         <div class="space-y-3">
             <div class="space-y-1">
@@ -36,7 +37,9 @@
             </div>
         </div>
     </x-surface-card>
+    @endisland
 
+    @island(name: 'attendance-overtime-workbench')
     @if($canCreate)
         <x-surface-card :title="__('attendance::overtime.create.title')">
             <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
@@ -51,7 +54,7 @@
                         clearField="tabel_no"
                         :placeholder="__('attendance::overtime.create.placeholder')"
                     >
-                        @forelse($personnelResults as $personnel)
+                        @forelse($this->personnelResults as $personnel)
                             <button
                                 type="button"
                                 wire:click="selectPersonnel('{{ $personnel->tabel_no }}', '{{ addslashes($personnel->fullname) }}')"
@@ -92,19 +95,21 @@
             </div>
         </x-surface-card>
     @endif
+    @endisland
 
-    @if($selectedStructureLabel)
+    @island(name: 'attendance-overtime-queue')
+    @if($this->selectedStructureLabel)
         <div class="flex flex-wrap items-center gap-2 rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 text-xs text-blue-700">
             <x-small-badge mode="sky">{{ __('attendance::overtime.scope.badge') }}</x-small-badge>
             <span>{{ __('attendance::overtime.scope.description') }}</span>
-            <span class="font-medium">{{ $selectedStructureLabel }}</span>
+            <span class="font-medium">{{ $this->selectedStructureLabel }}</span>
         </div>
     @endif
 
-    @if(!empty($activeFilters))
+    @if(!empty($this->activeFilters))
         <div class="flex flex-wrap items-center gap-2 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2">
             <span class="text-xs font-semibold uppercase  text-zinc-400">{{ __('attendance::overtime.filters.active') }}</span>
-            @foreach($activeFilters as $filter)
+            @foreach($this->activeFilters as $filter)
                 <x-small-badge :mode="$filter['mode']">
                     {{ $filter['label'] }}: {{ $filter['value'] }}
                 </x-small-badge>
@@ -125,7 +130,7 @@
                     __('attendance::overtime.table.status'),
                     __('attendance::overtime.table.action')
                 ]" :title="__('attendance::overtime.table.title')">
-                @forelse($items as $item)
+                @forelse($this->items as $item)
                     @php
                         $badgeClass = match($item->status) {
                             'approved' => 'bg-emerald-100 text-emerald-700',
@@ -195,9 +200,9 @@
                     <tr>
                         <td colspan="7" class="px-4 py-10">
                             <div class="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-zinc-200 bg-zinc-50 px-6 py-8 text-center">
-                                <x-small-badge mode="secondary">{{ $emptyStateTitle }}</x-small-badge>
+                                <x-small-badge mode="secondary">{{ $this->emptyStateTitle }}</x-small-badge>
                                 <p class="max-w-2xl text-sm leading-6 text-zinc-500">
-                                    {{ $emptyStateDescription }}
+                                    {{ $this->emptyStateDescription }}
                                 </p>
                             </div>
                         </td>
@@ -209,7 +214,8 @@
     </div>
 
     <div class="mt-3">
-        {{ $items->links() }}
+        {{ $this->items->links() }}
     </div>
     </div>
+    @endisland
 </div>

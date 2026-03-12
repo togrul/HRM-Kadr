@@ -12,6 +12,7 @@ use App\Services\Orders\OrderPrintPayloadFactory;
 use App\Services\Orders\OrderTemplateRenderer;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Isolate;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
@@ -190,6 +191,12 @@ class AllOrders extends Component
         return $paginated;
     }
 
+    #[Computed]
+    public function orders(): LengthAwarePaginator
+    {
+        return $this->returnData();
+    }
+
     #[Isolate]
     public function getStatusesProperty()
     {
@@ -216,8 +223,6 @@ class AllOrders extends Component
 
     public function render()
     {
-        $orders = $this->returnData();
-
-        return view('orders::livewire.orders.all-orders', compact('orders'));
+        return view('orders::livewire.orders.all-orders');
     }
 }

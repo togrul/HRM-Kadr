@@ -20,6 +20,7 @@ class CandidateListPresetSettingsTest extends TestCase
         parent::setUp();
 
         Cache::forget('settings');
+        Cache::forget('appeal-statuses:'.app()->getLocale());
         config()->set('candidates.mode', 'military');
     }
 
@@ -41,23 +42,30 @@ class CandidateListPresetSettingsTest extends TestCase
 
         $this->actingAs($user);
 
-        Livewire::test(\App\Modules\Candidates\Livewire\CandidateList::class)
-            ->assertSee('Status A')
-            ->assertSee('Status B')
-            ->assertSee('Status C')
-            ->assertDontSee('Hidden Status')
+        $component = Livewire::test(\App\Modules\Candidates\Livewire\CandidateList::class);
+
+        $this->assertSame(
+            ['Status A', 'Status B', 'Status C'],
+            $component->instance()->appealStatusTabs->pluck('name')->all()
+        );
+
+        $component
             ->call('setStatus', 20)
-            ->assertSet('status', 20)
-            ->assertSee('Status A')
-            ->assertSee('Status B')
-            ->assertSee('Status C')
-            ->assertDontSee('Hidden Status')
+            ->assertSet('status', 20);
+
+        $this->assertSame(
+            ['Status A', 'Status B', 'Status C'],
+            $component->instance()->appealStatusTabs->pluck('name')->all()
+        );
+
+        $component
             ->call('setStatus', 'all')
-            ->assertSet('status', 'all')
-            ->assertSee('Status A')
-            ->assertSee('Status B')
-            ->assertSee('Status C')
-            ->assertDontSee('Hidden Status');
+            ->assertSet('status', 'all');
+
+        $this->assertSame(
+            ['Status A', 'Status B', 'Status C'],
+            $component->instance()->appealStatusTabs->pluck('name')->all()
+        );
     }
 
     public function test_default_status_and_enabled_filters_can_be_overridden_from_settings(): void

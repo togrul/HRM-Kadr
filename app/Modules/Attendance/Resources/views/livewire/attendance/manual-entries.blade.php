@@ -6,12 +6,6 @@
         'assignment_shift' => __('attendance::manual_entries.sources.assignment_shift'),
         'default_shift' => __('attendance::manual_entries.sources.default_shift'),
     ];
-    $queueStatusLabels = [
-        'pending' => __('attendance::manual_entries.statuses.pending'),
-        'approved' => __('attendance::manual_entries.statuses.approved'),
-        'rejected' => __('attendance::manual_entries.statuses.rejected'),
-        'all' => __('attendance::manual_entries.statuses.all'),
-    ];
 @endphp
 
 <div class="space-y-4">
@@ -23,14 +17,17 @@
         </x-surface-card>
     @endunless
 
-    @if($selectedStructureLabel)
+    @island(name: 'attendance-manual-workbench')
+    @if($this->selectedStructureLabel)
         <div class="flex flex-wrap items-center gap-2 rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 text-xs text-blue-700">
             <x-small-badge mode="sky">{{ __('attendance::manual_entries.labels.structure_scope') }}</x-small-badge>
             <span>{{ __('attendance::manual_entries.descriptions.scope') }}</span>
-            <span class="font-medium">{{ $selectedStructureLabel }}</span>
+            <span class="font-medium">{{ $this->selectedStructureLabel }}</span>
         </div>
     @endif
+    @endisland
 
+    @island(name: 'attendance-manual-workbench')
     @if($canWrite)
         <x-surface-card :title="__('attendance::manual_entries.titles.form')">
             <div class="mb-4 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-3">
@@ -78,7 +75,7 @@
                         clearField="tabel_no"
                         :placeholder="__('attendance::manual_entries.placeholders.search_personnel')"
                     >
-                        @forelse($personnelResults as $personnel)
+                        @forelse($this->personnelResults as $personnel)
                             <button
                                 type="button"
                                 wire:click="selectPersonnel('{{ $personnel->tabel_no }}', '{{ addslashes($personnel->fullname) }}')"
@@ -151,7 +148,7 @@
                         class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                         <option value="">{{ __('attendance::manual_entries.options.select_shift') }}</option>
-                        @foreach($availableShifts as $shift)
+                        @foreach($this->availableShifts as $shift)
                             <option value="{{ $shift->id }}">{{ $shift->name }}</option>
                         @endforeach
                     </select>
@@ -167,15 +164,15 @@
                                 </div>
                             </div>
 
-                            @if($selectedPersonnelRecord)
+                            @if($this->selectedPersonnelRecord)
                                 <div class="rounded-xl border border-zinc-200 bg-white p-3">
                                     <div class="flex flex-wrap items-center justify-between gap-3">
                                         <div class="min-w-0">
-                                            <p class="text-sm font-semibold text-zinc-900">{{ $selectedPersonnelRecord->fullname }}</p>
-                                            <p class="text-xs font-mono uppercase tracking-wide text-zinc-500">{{ $selectedPersonnelRecord->tabel_no }}</p>
-                                            @if($selectedPersonnelRecord->structure_path)
-                                                <p class="mt-1 max-w-[18rem] truncate text-xs text-zinc-500 md:max-w-[24rem]" title="{{ $selectedPersonnelRecord->structure_path }}">
-                                                    {{ $selectedPersonnelRecord->structure_path }}
+                                            <p class="text-sm font-semibold text-zinc-900">{{ $this->selectedPersonnelRecord->fullname }}</p>
+                                            <p class="text-xs font-mono uppercase tracking-wide text-zinc-500">{{ $this->selectedPersonnelRecord->tabel_no }}</p>
+                                            @if($this->selectedPersonnelRecord->structure_path)
+                                                <p class="mt-1 max-w-[18rem] truncate text-xs text-zinc-500 md:max-w-[24rem]" title="{{ $this->selectedPersonnelRecord->structure_path }}">
+                                                    {{ $this->selectedPersonnelRecord->structure_path }}
                                                 </p>
                                             @endif
                                         </div>
@@ -242,10 +239,10 @@
                                                 <p class="text-xs text-zinc-500">{{ __('attendance::manual_entries.descriptions.auto_baseline') }}</p>
                                             </div>
 
-                                            @if($baselineContext['baseline_label'])
+                                            @if($this->baselineContext['baseline_label'])
                                                 <div class="flex flex-col items-start gap-1">
-                                                    <x-small-badge mode="blue">{{ __('attendance::manual_entries.labels.detected_source') }}: {{ $baselineSourceLabels[$baselineContext['baseline_source']] ?? $baselineContext['baseline_source'] }}</x-small-badge>
-                                                    <x-small-badge mode="sky">{{ $baselineContext['baseline_label'] }}</x-small-badge>
+                                                    <x-small-badge mode="blue">{{ __('attendance::manual_entries.labels.detected_source') }}: {{ $baselineSourceLabels[$this->baselineContext['baseline_source']] ?? $this->baselineContext['baseline_source'] }}</x-small-badge>
+                                                    <x-small-badge mode="sky">{{ $this->baselineContext['baseline_label'] }}</x-small-badge>
                                                 </div>
                                             @endif
                                         </div>
@@ -254,17 +251,17 @@
                                             <div class="rounded-xl border border-zinc-200 bg-zinc-50 p-3">
                                                 <div class="flex items-center justify-between gap-2">
                                                     <p class="text-sm font-semibold text-zinc-800">{{ __('attendance::manual_entries.labels.assigned_shift') }}</p>
-                                                    @if($selectedPersonnelActiveAssignment?->shift)
+                                                    @if($this->selectedPersonnelActiveAssignment?->shift)
                                                         <x-small-badge mode="green">{{ __('attendance::manual_entries.labels.active_assignment') }}</x-small-badge>
                                                     @endif
                                                 </div>
 
-                                                @if($selectedPersonnelActiveAssignment?->shift)
+                                                @if($this->selectedPersonnelActiveAssignment?->shift)
                                                     <div class="mt-2 flex flex-col gap-1 text-xs text-zinc-500">
-                                                        <x-small-badge mode="sky">{{ $selectedPersonnelActiveAssignment->shift->name }}</x-small-badge>
+                                                        <x-small-badge mode="sky">{{ $this->selectedPersonnelActiveAssignment->shift->name }}</x-small-badge>
                                                         <span>
-                                                            {{ $selectedPersonnelActiveAssignment->shift->start_time }} - {{ $selectedPersonnelActiveAssignment->shift->end_time }}
-                                                            • {{ __('attendance::manual_entries.labels.break') }}: {{ $selectedPersonnelActiveAssignment->shift->break_minutes }} {{ __('attendance::manual_entries.labels.min') }}
+                                                            {{ $this->selectedPersonnelActiveAssignment->shift->start_time }} - {{ $this->selectedPersonnelActiveAssignment->shift->end_time }}
+                                                            • {{ __('attendance::manual_entries.labels.break') }}: {{ $this->selectedPersonnelActiveAssignment->shift->break_minutes }} {{ __('attendance::manual_entries.labels.min') }}
                                                         </span>
                                                         <span>{{ __('attendance::manual_entries.descriptions.assignment_shift') }}</span>
                                                     </div>
@@ -276,17 +273,17 @@
                                             <div class="rounded-xl border border-zinc-200 bg-zinc-50 p-3">
                                                 <div class="flex items-center justify-between gap-2">
                                                     <p class="text-sm font-semibold text-zinc-800">{{ __('attendance::manual_entries.labels.default_shift_fallback') }}</p>
-                                                    @if($currentDefaultShift)
+                                                    @if($this->currentDefaultShift)
                                                         <x-small-badge mode="blue">{{ __('attendance::manual_entries.labels.configured') }}</x-small-badge>
                                                     @endif
                                                 </div>
 
-                                                @if($currentDefaultShift)
+                                                @if($this->currentDefaultShift)
                                                     <div class="mt-2 flex flex-col gap-1 text-xs text-zinc-500">
-                                                        <x-small-badge mode="sky">{{ $currentDefaultShift->name }}</x-small-badge>
+                                                        <x-small-badge mode="sky">{{ $this->currentDefaultShift->name }}</x-small-badge>
                                                         <span>
-                                                            {{ $currentDefaultShift->start_time }} - {{ $currentDefaultShift->end_time }}
-                                                            • {{ __('attendance::manual_entries.labels.break') }}: {{ $currentDefaultShift->break_minutes }} {{ __('attendance::manual_entries.labels.min') }}
+                                                            {{ $this->currentDefaultShift->start_time }} - {{ $this->currentDefaultShift->end_time }}
+                                                            • {{ __('attendance::manual_entries.labels.break') }}: {{ $this->currentDefaultShift->break_minutes }} {{ __('attendance::manual_entries.labels.min') }}
                                                         </span>
                                                         <span>{{ __('attendance::manual_entries.descriptions.default_shift_usage') }}</span>
                                                     </div>
@@ -296,7 +293,7 @@
                                             </div>
                                         </div>
 
-                                        @if(! $baselineContext['baseline_label'])
+                                        @if(! $this->baselineContext['baseline_label'])
                                             <div class="mt-3 flex items-start gap-2 rounded-xl border border-amber-100 bg-amber-50 px-3 py-2 text-sm text-amber-700">
                                                 <x-small-badge mode="red">{{ __('attendance::manual_entries.labels.shift_required') }}</x-small-badge>
                                                 <span>{{ __('attendance::manual_entries.descriptions.no_baseline') }}</span>
@@ -305,17 +302,17 @@
                                     </div>
                                 @else
                                     <div class="rounded-xl border border-blue-100 bg-blue-50 p-3">
-                                        @if($selectedShiftPreview)
+                                        @if($this->selectedShiftPreview)
                                             <div class="flex flex-wrap items-center justify-between gap-3">
                                                 <div>
                                                     <p class="text-sm font-semibold text-blue-900">{{ __('attendance::manual_entries.labels.selected_shift_for_calculation') }}</p>
                                                     <p class="text-xs text-blue-700">{{ __('attendance::manual_entries.descriptions.selected_shift') }}</p>
                                                 </div>
                                                 <div class="flex flex-col items-start gap-1">
-                                                    <x-small-badge mode="sky">{{ $selectedShiftPreview->name }}</x-small-badge>
+                                                    <x-small-badge mode="sky">{{ $this->selectedShiftPreview->name }}</x-small-badge>
                                                     <span class="text-xs text-blue-700">
-                                                        {{ $selectedShiftPreview->start_time }} - {{ $selectedShiftPreview->end_time }}
-                                                        • {{ __('attendance::manual_entries.labels.break') }}: {{ $selectedShiftPreview->break_minutes }} {{ __('attendance::manual_entries.labels.min') }}
+                                                        {{ $this->selectedShiftPreview->start_time }} - {{ $this->selectedShiftPreview->end_time }}
+                                                        • {{ __('attendance::manual_entries.labels.break') }}: {{ $this->selectedShiftPreview->break_minutes }} {{ __('attendance::manual_entries.labels.min') }}
                                                     </span>
                                                 </div>
                                             </div>
@@ -459,7 +456,9 @@
             </div>
         </x-surface-card>
     @endif
+    @endisland
 
+    @island(name: 'attendance-manual-queue')
     <x-surface-card :title="__('attendance::manual_entries.titles.queue')">
         <div class="mb-3 space-y-3">
             <div class="space-y-1">
@@ -500,7 +499,7 @@
                         __('attendance::manual_entries.labels.approved_by'),
                         __('attendance::manual_entries.labels.actions')
                     ]">
-                        @forelse($recentEntries as $entry)
+                        @forelse($this->recentEntries as $entry)
                             @php
                                 $statusClass = match($entry->approval_status) {
                                     'approved' => 'bg-emerald-100 text-emerald-700',
@@ -532,7 +531,7 @@
                                 <x-table.td>{{ $entry->early_leave_minutes }}</x-table.td>
                                 <x-table.td>
                                     <span class="inline-flex rounded-full px-2 py-1 text-xs uppercase font-medium {{ $statusClass }}">
-                                        {{ $queueStatusLabels[$entry->approval_status] ?? $entry->approval_status }}
+                                        {{ $this->approvalStatusLabel((string) $entry->approval_status) }}
                                     </span>
                                 </x-table.td>
                                 <x-table.td extraClasses="text-zinc-600">{{ $entry->enteredBy?->name ?? '-' }}</x-table.td>
@@ -567,7 +566,8 @@
         </div>
 
         <div class="mt-3">
-            {{ $recentEntries->links() }}
+            {{ $this->recentEntries->links() }}
         </div>
     </x-surface-card>
+    @endisland
 </div>

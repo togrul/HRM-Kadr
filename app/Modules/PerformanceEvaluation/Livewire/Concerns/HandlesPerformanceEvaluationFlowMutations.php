@@ -4,7 +4,9 @@ namespace App\Modules\PerformanceEvaluation\Livewire\Concerns;
 
 use App\Models\PerformanceForm;
 use App\Models\PerformanceFormScore;
+use App\Models\User;
 use App\Modules\PerformanceEvaluation\Application\Services\PerformanceWeakAreaTrainingNeedService;
+use Illuminate\Validation\ValidationException;
 
 trait HandlesPerformanceEvaluationFlowMutations
 {
@@ -15,8 +17,8 @@ trait HandlesPerformanceEvaluationFlowMutations
             'evaluationForm.performance_cycle_id' => 'required|exists:performance_cycles,id',
             'evaluationForm.performance_form_template_id' => 'required|exists:performance_form_templates,id',
             'evaluationForm.personnel_id' => 'required|exists:personnels,id',
-            'evaluationForm.manager_id' => 'nullable|exists:users,id',
-            'evaluationForm.hr_reviewer_id' => 'nullable|exists:users,id',
+            'evaluationForm.manager_id' => 'nullable|integer',
+            'evaluationForm.hr_reviewer_id' => 'nullable|integer',
         ], attributes: [
             'evaluationForm.performance_cycle_id' => __('performance_evaluation::dashboard.fields.cycle'),
             'evaluationForm.performance_form_template_id' => __('performance_evaluation::dashboard.fields.template'),
@@ -24,6 +26,8 @@ trait HandlesPerformanceEvaluationFlowMutations
             'evaluationForm.manager_id' => __('performance_evaluation::dashboard.fields.manager'),
             'evaluationForm.hr_reviewer_id' => __('performance_evaluation::dashboard.fields.hr_reviewer'),
         ]);
+
+        $this->guardEvaluatorUsersExist($validated);
 
         $payload = [
             'performance_cycle_id' => (int) data_get($validated, 'evaluationForm.performance_cycle_id'),
@@ -54,6 +58,58 @@ trait HandlesPerformanceEvaluationFlowMutations
         $this->editingEvaluationFormId = null;
         $this->resetValidation();
         $this->dispatch('performanceEvaluationSaved', __('performance_evaluation::dashboard.messages.evaluation_saved'));
+    }
+
+    /**
+     * @param  array<string, mixed>  $validated
+     *
+     * @throws ValidationException
+     */
+    protected function guardEvaluatorUsersExist(array $validated): void
+    {
+        $evaluatorMap = [
+            'evaluationForm.manager_id' => data_get($validated, 'evaluationForm.manager_id'),
+            'evaluationForm.hr_reviewer_id' => data_get($validated, 'evaluationForm.hr_reviewer_id'),
+        ];
+
+        $ids = collect($evaluatorMap)
+            ->filter(fn ($value) => filled($value))
+            ->map(fn ($value) => (int) $value)
+            ->unique()
+            ->values();
+
+        if ($ids->isEmpty()) {
+            return;
+        }
+
+        $existingIds = User::query()
+            ->whereIn('id', $ids->all())
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+
+        $missingIds = $ids->diff($existingIds)->all();
+        if ($missingIds === []) {
+            return;
+        }
+
+        $messages = [];
+
+        foreach ($evaluatorMap as $field => $value) {
+            if (filled($value) && in_array((int) $value, $missingIds, true)) {
+                $messages[$field] = __('validation.exists', [
+                    'attribute' => __(
+                        $field === 'evaluationForm.manager_id'
+                            ? 'performance_evaluation::dashboard.fields.manager'
+                            : 'performance_evaluation::dashboard.fields.hr_reviewer'
+                    ),
+                ]);
+            }
+        }
+
+        if ($messages !== []) {
+            throw ValidationException::withMessages($messages);
+        }
     }
 
     public function storeScore(): void
@@ -128,6 +184,8 @@ trait HandlesPerformanceEvaluationFlowMutations
         if ($this->editingEvaluationFormId === $id) {
             $this->cancelEvaluationEdit();
         }
+
+        $this->dispatch('performanceEvaluationSaved', __('performance_evaluation::dashboard.messages.evaluation_deleted'));
     }
 
     public function cancelEvaluationEdit(): void

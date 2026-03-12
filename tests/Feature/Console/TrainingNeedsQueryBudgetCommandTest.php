@@ -155,8 +155,12 @@ class TrainingNeedsQueryBudgetCommandTest extends TestCase
         $this->assertSame(0, $exitCode);
         $this->assertSame(0, data_get($payload, 'summary.failed_probes'));
         $this->assertSame(0, data_get($payload, 'summary.over_budget_probes'));
-        $this->assertLessThanOrEqual(config('training_needs.performance.query_budget.overview_build'), (int) data_get($payload, 'results.0.queries'));
-        $this->assertLessThanOrEqual(config('training_needs.performance.query_budget.planning_build'), (int) data_get($payload, 'results.1.queries'));
-        $this->assertLessThanOrEqual(config('training_needs.performance.query_budget.calendar_build'), (int) data_get($payload, 'results.2.queries'));
+        $results = collect(data_get($payload, 'results', []))->keyBy('flow');
+
+        $this->assertLessThanOrEqual(config('training_needs.performance.query_budget.overview_build'), (int) data_get($results, 'overview_build.queries'));
+        $this->assertLessThanOrEqual(config('training_needs.performance.query_budget.planning_build'), (int) data_get($results, 'planning_build.queries'));
+        $this->assertLessThanOrEqual(config('training_needs.performance.query_budget.calendar_build'), (int) data_get($results, 'calendar_build.queries'));
+        $this->assertLessThanOrEqual(config('training_needs.performance.query_budget.analytics_build'), (int) data_get($results, 'analytics_build.queries'));
+        $this->assertLessThanOrEqual(config('training_needs.performance.query_budget.results_summary_build'), (int) data_get($results, 'results_summary_build.queries'));
     }
 }

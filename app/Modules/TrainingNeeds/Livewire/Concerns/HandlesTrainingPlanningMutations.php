@@ -3,6 +3,7 @@
 namespace App\Modules\TrainingNeeds\Livewire\Concerns;
 
 use App\Models\TrainingAnnualPlan;
+use App\Models\TrainingFeedbackForm;
 use App\Models\TrainingPlanItem;
 use App\Models\TrainingProgram;
 use App\Models\TrainingSession;
@@ -11,6 +12,30 @@ use App\Modules\TrainingNeeds\Application\Services\TrainingSessionParticipantSer
 
 trait HandlesTrainingPlanningMutations
 {
+    public function editPlan(int $id): void
+    {
+        $this->authorizeTrainingNeedsManage();
+
+        $plan = TrainingAnnualPlan::query()->findOrFail($id);
+
+        $this->editingPlanId = $plan->id;
+        $this->planForm = [
+            'title' => (string) $plan->title,
+            'plan_year' => (int) $plan->plan_year,
+            'plan_quarter' => $plan->plan_quarter,
+            'status' => (string) $plan->status,
+            'notes' => (string) ($plan->notes ?? ''),
+            'auto_generate' => false,
+        ];
+    }
+
+    public function cancelPlanEdit(): void
+    {
+        $this->editingPlanId = null;
+        $this->planForm = $this->planDefaults();
+        $this->resetValidation();
+    }
+
     public function selectVisibleSessionProposals(): void
     {
         $this->bulkProposalPlanItemIds = collect($this->sessionProposals)
@@ -90,25 +115,66 @@ trait HandlesTrainingPlanningMutations
             'planForm.status' => __('training_needs::dashboard.fields.status'),
         ]);
 
-        $plan = TrainingAnnualPlan::query()->create([
+        $payload = [
             'title' => trim((string) data_get($validated, 'planForm.title')),
             'plan_year' => (int) data_get($validated, 'planForm.plan_year'),
             'plan_quarter' => data_get($validated, 'planForm.plan_quarter'),
             'status' => (string) data_get($validated, 'planForm.status'),
             'notes' => data_get($validated, 'planForm.notes'),
-            'auto_generated' => (bool) (data_get($validated, 'planForm.auto_generate') ?? true),
-        ]);
+        ];
+        $shouldGenerate = (bool) (data_get($validated, 'planForm.auto_generate') ?? true);
 
-        if ((bool) (data_get($validated, 'planForm.auto_generate') ?? true)) {
-            app(TrainingNeedPlanningService::class)->generatePlanItems($plan);
+        if ($this->editingPlanId) {
+            $plan = TrainingAnnualPlan::query()->findOrFail($this->editingPlanId);
+            $plan->update([
+                ...$payload,
+                'auto_generated' => $shouldGenerate ? true : (bool) $plan->auto_generated,
+            ]);
         } else {
-            app(TrainingNeedPlanningService::class)->syncPlanStatus($plan);
+            $plan = TrainingAnnualPlan::query()->create([
+                ...$payload,
+                'auto_generated' => $shouldGenerate,
+            ]);
         }
 
-        $this->reset('planForm');
-        $this->planForm = $this->planDefaults();
+        if ($shouldGenerate) {
+            app(TrainingNeedPlanningService::class)->generatePlanItems($plan->fresh());
+        } else {
+            app(TrainingNeedPlanningService::class)->syncPlanStatus($plan->fresh());
+        }
+
+        $this->cancelPlanEdit();
         $this->refreshRuntimeCaches();
         $this->dispatch('trainingNeedsSaved', __('training_needs::dashboard.messages.plan_saved'));
+    }
+
+    public function deletePlan(int $planId): void
+    {
+        $this->authorizeTrainingNeedsManage();
+
+        $plan = TrainingAnnualPlan::query()->findOrFail($planId);
+        $selectedPlanItemBelongsToPlan = $this->selectedPlanItemId
+            ? TrainingPlanItem::query()
+                ->where('id', $this->selectedPlanItemId)
+                ->where('training_annual_plan_id', $planId)
+                ->exists()
+            : false;
+        $plan->delete();
+
+        if ($this->editingPlanId === $planId) {
+            $this->cancelPlanEdit();
+        }
+
+        if ($selectedPlanItemBelongsToPlan) {
+            $this->cancelPlanItemReview();
+        }
+
+        if ((int) data_get($this->sessionForm, 'training_annual_plan_id') === $planId) {
+            $this->sessionForm['training_annual_plan_id'] = null;
+        }
+
+        $this->refreshRuntimeCaches();
+        $this->dispatch('trainingNeedsSaved', __('training_needs::dashboard.messages.plan_deleted'));
     }
 
     public function savePlanItemReview(string $status): void
@@ -185,8 +251,7 @@ trait HandlesTrainingPlanningMutations
             $program = TrainingProgram::query()->find(data_get($validated, 'sessionForm.training_program_id'));
         }
 
-        $session = TrainingSession::query()->create([
-            'training_plan_item_id' => $this->selectedSessionProposalPlanItemId,
+        $payload = [
             'training_annual_plan_id' => data_get($validated, 'sessionForm.training_annual_plan_id'),
             'training_program_id' => data_get($validated, 'sessionForm.training_program_id'),
             'title' => trim((string) (data_get($validated, 'sessionForm.title') ?: ($program?->title ?: __('training_needs::dashboard.labels.default_session_title')))),
@@ -199,23 +264,123 @@ trait HandlesTrainingPlanningMutations
             'auto_fill_participants' => (bool) (data_get($validated, 'sessionForm.auto_fill_participants') ?? true),
             'status' => (string) data_get($validated, 'sessionForm.status'),
             'notes' => data_get($validated, 'sessionForm.notes'),
+        ];
+        $existingSession = $this->editingSessionId
+            ? TrainingSession::query()->findOrFail($this->editingSessionId)
+            : null;
+        $session = $existingSession ?? new TrainingSession();
+
+        $session->fill([
+            ...$payload,
+            'training_plan_item_id' => $this->selectedSessionProposalPlanItemId ?: $existingSession?->training_plan_item_id,
         ]);
+        $session->save();
 
         $filledParticipants = 0;
         if ($session->auto_fill_participants) {
             $filledParticipants = app(TrainingSessionParticipantService::class)->autoFillFromNeeds($session->load('plan'));
         }
 
-        if ($session->training_annual_plan_id) {
-            app(TrainingNeedPlanningService::class)->syncPlanStatus($session->plan()->first());
+        $planIdsToSync = collect([
+            $session->training_annual_plan_id,
+            $existingSession?->training_annual_plan_id,
+        ])->filter()->unique()->values();
+
+        foreach ($planIdsToSync as $planId) {
+            $plan = TrainingAnnualPlan::query()->find($planId);
+            if ($plan) {
+                app(TrainingNeedPlanningService::class)->syncPlanStatus($plan);
+            }
         }
 
-        $this->reset('sessionForm', 'searchSessionPlan', 'searchTrainingProgram');
-        $this->sessionForm = $this->sessionDefaults();
-        $this->selectedSessionProposalPlanItemId = null;
+        $this->cancelSessionEdit();
+        $this->reset('searchSessionPlan', 'searchTrainingProgram');
+        $this->selectedSessionId = $session->id;
+        $this->sessionDetailWorkspaceVersion++;
         $this->refreshRuntimeCaches();
         $this->dispatch('trainingNeedsSaved', __('training_needs::dashboard.messages.session_saved', [
             'count' => $filledParticipants,
         ]));
+    }
+
+    public function editSession(int $id): void
+    {
+        $this->authorizeTrainingNeedsManage();
+
+        $session = TrainingSession::query()->findOrFail($id);
+
+        $this->editingSessionId = $session->id;
+        $this->selectedSessionId = $session->id;
+        $this->selectedSessionProposalPlanItemId = $session->training_plan_item_id;
+        $this->sessionForm = [
+            'training_annual_plan_id' => $session->training_annual_plan_id,
+            'training_program_id' => $session->training_program_id,
+            'title' => (string) $session->title,
+            'scheduled_start_at' => optional($session->scheduled_start_at)->format('Y-m-d\TH:i'),
+            'scheduled_end_at' => optional($session->scheduled_end_at)->format('Y-m-d\TH:i'),
+            'location' => (string) ($session->location ?? ''),
+            'trainer_name' => (string) ($session->trainer_name ?? ''),
+            'capacity' => $session->capacity,
+            'planned_budget' => $session->planned_budget,
+            'auto_fill_participants' => (bool) $session->auto_fill_participants,
+            'status' => (string) $session->status,
+            'notes' => (string) ($session->notes ?? ''),
+        ];
+    }
+
+    public function cancelSessionEdit(): void
+    {
+        $this->editingSessionId = null;
+        $this->selectedSessionProposalPlanItemId = null;
+        $this->sessionForm = $this->sessionDefaults();
+        $this->resetValidation();
+    }
+
+    public function deleteSession(int $sessionId): void
+    {
+        $this->authorizeTrainingNeedsManage();
+
+        $session = TrainingSession::query()->findOrFail($sessionId);
+        $planId = $session->training_annual_plan_id;
+        $selectedFeedbackFormBelongsToSession = (int) data_get($this->feedbackResponseForm, 'training_feedback_form_id') > 0
+            ? TrainingFeedbackForm::query()
+                ->where('id', (int) data_get($this->feedbackResponseForm, 'training_feedback_form_id'))
+                ->where('training_session_id', $sessionId)
+                ->exists()
+            : false;
+        $session->delete();
+
+        if ($this->editingSessionId === $sessionId) {
+            $this->cancelSessionEdit();
+        }
+
+        if ($this->selectedSessionId === $sessionId) {
+            $this->selectedSessionId = null;
+            $this->bulkParticipantIds = [];
+            $this->sessionDetailWorkspaceVersion++;
+        }
+
+        if ((int) data_get($this->participantForm, 'training_session_id') === $sessionId) {
+            $this->participantForm['training_session_id'] = null;
+            $this->participantForm['training_need_item_id'] = null;
+        }
+
+        if ((int) data_get($this->feedbackForm, 'training_session_id') === $sessionId) {
+            $this->feedbackForm['training_session_id'] = null;
+        }
+
+        if ($selectedFeedbackFormBelongsToSession) {
+            $this->feedbackResponseForm = $this->feedbackResponseDefaults();
+        }
+
+        if ($planId) {
+            $plan = TrainingAnnualPlan::query()->find($planId);
+            if ($plan) {
+                app(TrainingNeedPlanningService::class)->syncPlanStatus($plan);
+            }
+        }
+
+        $this->refreshRuntimeCaches();
+        $this->dispatch('trainingNeedsSaved', __('training_needs::dashboard.messages.session_deleted'));
     }
 }

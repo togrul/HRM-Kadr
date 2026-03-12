@@ -9,5 +9,6 @@ trait ResetsTrainingResultForms
         $this->feedbackForm = $this->feedbackFormDefaults();
         $this->feedbackResponseForm = $this->feedbackResponseDefaults();
         $this->deliveryDocumentForm = $this->deliveryDocumentDefaults();
+        $this->editingFeedbackFormId = null;
     }
 }

@@ -43,4 +43,36 @@ class AttendanceCalendarRegimesMonthFilterTest extends TestCase
             ->assertSee('2026-03-10')
             ->assertDontSee('2026-04-05');
     }
+
+    public function test_calendar_regimes_resolves_auto_label_and_requires_delete_confirmation(): void
+    {
+        app()->setLocale('az');
+
+        $user = User::factory()->create();
+        $user->givePermissionTo(Permission::findOrCreate('manage-attendance-calendars', 'web'));
+
+        $this->actingAs($user);
+
+        $calendar = AttendanceCalendar::query()->create([
+            'date' => '2026-03-15',
+            'day_type' => 'weekend',
+            'name' => 'attendance::calendar_regimes.auto_labels.weekend',
+            'is_paid' => true,
+            'scope_type' => 'global',
+            'scope_id' => null,
+        ]);
+
+        Livewire::test(CalendarRegimes::class, ['year' => 2026, 'month' => 3])
+            ->assertSee(__('attendance::calendar_regimes.auto_labels.weekend'))
+            ->assertDontSee('attendance::calendar_regimes.auto_labels.weekend')
+            ->call('confirmRemove', $calendar->id)
+            ->assertSet('showDeleteConfirmation', true)
+            ->assertSee(__('attendance::calendar_regimes.confirmations.delete'))
+            ->call('runConfirmedDeletion')
+            ->assertSet('showDeleteConfirmation', false);
+
+        $this->assertDatabaseMissing('attendance_calendars', [
+            'id' => $calendar->id,
+        ]);
+    }
 }
