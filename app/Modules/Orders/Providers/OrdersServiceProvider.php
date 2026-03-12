@@ -12,6 +12,8 @@ use App\Modules\Orders\Domain\Contracts\OrderTypeStatusLookupReadRepository;
 use App\Modules\Orders\Domain\Contracts\PersonnelLookupReadRepository;
 use App\Modules\Orders\Domain\Contracts\RankPositionLookupReadRepository;
 use App\Modules\Orders\Domain\Contracts\StructureLookupReadRepository;
+use App\Modules\Orders\Console\Commands\OrdersListQueryBudgetCommand;
+use App\Modules\Orders\Console\Commands\OrdersListRenderBenchmarkCommand;
 use App\Modules\Orders\Infrastructure\Persistence\Eloquent\EloquentOrderTypeStatusLookupReadRepository;
 use App\Modules\Orders\Infrastructure\Persistence\Eloquent\EloquentOrderTemplateReadRepository;
 use App\Modules\Orders\Infrastructure\Persistence\Eloquent\EloquentOrderTemplateRepository;
@@ -33,6 +35,13 @@ class OrdersServiceProvider extends ServiceProvider
 
     public function register(): void
     {
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                OrdersListQueryBudgetCommand::class,
+                OrdersListRenderBenchmarkCommand::class,
+            ]);
+        }
+
         $this->app->bind(OrderTemplateRepository::class, EloquentOrderTemplateRepository::class);
         $this->app->bind(OrderTemplateReadRepository::class, EloquentOrderTemplateReadRepository::class);
         $this->app->bind(OrderTemplateAdmin::class, TemplateAdminService::class);

@@ -2,6 +2,8 @@
 
 namespace App\Modules\Candidates\Providers;
 
+use App\Modules\Candidates\Console\Commands\CandidateListQueryBudgetCommand;
+use App\Modules\Candidates\Console\Commands\CandidateListRenderBenchmarkCommand;
 use App\Providers\Concerns\RegistersLivewireAliases;
 use App\Services\Modules\ModuleState;
 use Illuminate\Support\ServiceProvider;
@@ -12,7 +14,12 @@ class CandidatesServiceProvider extends ServiceProvider
 
     public function register(): void
     {
-        //
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                CandidateListQueryBudgetCommand::class,
+                CandidateListRenderBenchmarkCommand::class,
+            ]);
+        }
     }
 
     public function boot(): void

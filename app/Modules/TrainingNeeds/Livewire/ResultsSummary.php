@@ -3,7 +3,7 @@
 namespace App\Modules\TrainingNeeds\Livewire;
 
 use App\Livewire\Concerns\WithRuntimeMemo;
-use App\Modules\TrainingNeeds\Livewire\Concerns\HandlesTrainingResultsMutations;
+use App\Modules\TrainingNeeds\Livewire\Concerns\HandlesTrainingDeliveryMutations;
 use App\Modules\TrainingNeeds\Livewire\Concerns\InteractsWithTrainingNeedsAccess;
 use App\Modules\TrainingNeeds\Livewire\Concerns\InteractsWithTrainingNeedsQueries;
 use Livewire\Attributes\Isolate;
@@ -12,7 +12,7 @@ use Livewire\Component;
 #[Isolate]
 class ResultsSummary extends Component
 {
-    use HandlesTrainingResultsMutations;
+    use HandlesTrainingDeliveryMutations;
     use InteractsWithTrainingNeedsAccess;
     use InteractsWithTrainingNeedsQueries;
     use WithRuntimeMemo;

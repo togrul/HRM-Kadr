@@ -51,6 +51,25 @@ return [
     ],
 
     'observability' => [
+        'list_render_budget' => [
+            'orders_render' => [
+                'response_bytes' => (int) env('ORDERS_LIST_RENDER_BUDGET_RENDER_RESPONSE', 180000),
+                'render_ms' => (int) env('ORDERS_LIST_RENDER_BUDGET_RENDER_MS', 180),
+            ],
+            'orders_filter_update' => [
+                'response_bytes' => (int) env('ORDERS_LIST_RENDER_BUDGET_FILTER_RESPONSE', 180000),
+                'render_ms' => (int) env('ORDERS_LIST_RENDER_BUDGET_FILTER_MS', 180),
+            ],
+            'orders_add_modal_open' => [
+                'response_bytes' => (int) env('ORDERS_LIST_RENDER_BUDGET_MODAL_RESPONSE', 145000),
+                'render_ms' => (int) env('ORDERS_LIST_RENDER_BUDGET_MODAL_MS', 120),
+            ],
+        ],
+        'list_query_budget' => [
+            'orders_render' => (int) env('ORDERS_LIST_QUERY_BUDGET_RENDER', 14),
+            'orders_filter_update' => (int) env('ORDERS_LIST_QUERY_BUDGET_FILTER_UPDATE', 28),
+            'orders_add_modal_open' => (int) env('ORDERS_LIST_QUERY_BUDGET_MODAL_OPEN', 14),
+        ],
         'query_budget' => [
             'add_form_schema' => (int) env('ORDERS_QUERY_BUDGET_ADD_FORM_SCHEMA', 15),
             'edit_order_load' => (int) env('ORDERS_QUERY_BUDGET_EDIT_ORDER_LOAD', 15),

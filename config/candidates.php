@@ -63,4 +63,25 @@ return [
             'enabled_filters' => ['fullname', 'gender', 'age', 'appeal_date'],
         ],
     ],
+    'performance' => [
+        'render_budget' => [
+            'candidate_list_render' => [
+                'response_bytes' => (int) env('CANDIDATES_RENDER_BUDGET_RENDER_RESPONSE', 200000),
+                'render_ms' => (int) env('CANDIDATES_RENDER_BUDGET_RENDER_MS', 200),
+            ],
+            'candidate_filter_update' => [
+                'response_bytes' => (int) env('CANDIDATES_RENDER_BUDGET_FILTER_RESPONSE', 220000),
+                'render_ms' => (int) env('CANDIDATES_RENDER_BUDGET_FILTER_MS', 220),
+            ],
+            'candidate_add_modal_open' => [
+                'response_bytes' => (int) env('CANDIDATES_RENDER_BUDGET_MODAL_RESPONSE', 240000),
+                'render_ms' => (int) env('CANDIDATES_RENDER_BUDGET_MODAL_MS', 150),
+            ],
+        ],
+        'query_budget' => [
+            'candidate_list_render' => (int) env('CANDIDATES_QUERY_BUDGET_RENDER', 16),
+            'candidate_filter_update' => (int) env('CANDIDATES_QUERY_BUDGET_FILTER_UPDATE', 30),
+            'candidate_add_modal_open' => (int) env('CANDIDATES_QUERY_BUDGET_MODAL_OPEN', 16),
+        ],
+    ],
 ];

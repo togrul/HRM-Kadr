@@ -47,6 +47,28 @@ return [
             'daily_monitor_load' => (int) env('ATTENDANCE_QUERY_BUDGET_DAILY_MONITOR', 10),
             'puantaj_grid_load' => (int) env('ATTENDANCE_QUERY_BUDGET_PUANTAJ', 8),
         ],
+        'render_budget' => [
+            'manual_entries_render' => [
+                'response_bytes' => (int) env('ATTENDANCE_RENDER_BUDGET_MANUAL_RESPONSE', 220000),
+                'render_ms' => (int) env('ATTENDANCE_RENDER_BUDGET_MANUAL_MS', 220),
+            ],
+            'overtime_board_render' => [
+                'response_bytes' => (int) env('ATTENDANCE_RENDER_BUDGET_OVERTIME_RESPONSE', 220000),
+                'render_ms' => (int) env('ATTENDANCE_RENDER_BUDGET_OVERTIME_MS', 220),
+            ],
+            'shift_management_render' => [
+                'response_bytes' => (int) env('ATTENDANCE_RENDER_BUDGET_SHIFTS_RESPONSE', 220000),
+                'render_ms' => (int) env('ATTENDANCE_RENDER_BUDGET_SHIFTS_MS', 220),
+            ],
+            'calendar_regimes_render' => [
+                'response_bytes' => (int) env('ATTENDANCE_RENDER_BUDGET_CALENDAR_RESPONSE', 180000),
+                'render_ms' => (int) env('ATTENDANCE_RENDER_BUDGET_CALENDAR_MS', 180),
+            ],
+            'month_close_render' => [
+                'response_bytes' => (int) env('ATTENDANCE_RENDER_BUDGET_MONTH_CLOSE_RESPONSE', 160000),
+                'render_ms' => (int) env('ATTENDANCE_RENDER_BUDGET_MONTH_CLOSE_MS', 180),
+            ],
+        ],
     ],
     'observability' => [
         'reports' => [

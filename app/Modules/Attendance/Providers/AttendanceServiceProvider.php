@@ -6,6 +6,7 @@ use App\Modules\Attendance\Console\Commands\AttendanceProcessPunchesCommand;
 use App\Modules\Attendance\Console\Commands\AttendanceMonthlySnapshotCommand;
 use App\Modules\Attendance\Console\Commands\AttendanceQueryBudgetCommand;
 use App\Modules\Attendance\Console\Commands\AttendanceRecalculateLedgersCommand;
+use App\Modules\Attendance\Console\Commands\AttendanceRenderBenchmarkCommand;
 use App\Modules\Attendance\Console\Commands\AttendanceSeedWeekendCalendarsCommand;
 use App\Providers\Concerns\RegistersLivewireAliases;
 use App\Services\Modules\ModuleState;
@@ -23,6 +24,7 @@ class AttendanceServiceProvider extends ServiceProvider
                 AttendanceMonthlySnapshotCommand::class,
                 AttendanceRecalculateLedgersCommand::class,
                 AttendanceQueryBudgetCommand::class,
+                AttendanceRenderBenchmarkCommand::class,
                 AttendanceSeedWeekendCalendarsCommand::class,
             ]);
         }
