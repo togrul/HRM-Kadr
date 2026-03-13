@@ -127,6 +127,75 @@
                     </div>
                 </x-surface-card>
             </div>
+
+            <div class="grid gap-4 xl:grid-cols-3">
+                <x-surface-card :title="__('performance_evaluation::dashboard.cards.question_analysis')" icon="icons.training-icon">
+                    <div class="space-y-3">
+                        <div class="flex flex-wrap gap-2">
+                            <x-button mode="secondary" wire:click="exportPerformanceQuestionAnalysisReport">{{ __('performance_evaluation::dashboard.actions.export_question_analysis_report') }}</x-button>
+                        </div>
+                        @forelse ($this->questionAnalysisRows as $row)
+                            <x-ui.list-card>
+                                <div class="space-y-2">
+                                    <p class="text-sm font-semibold text-zinc-900">{{ \Illuminate\Support\Str::limit((string) $row->question_prompt, 90) }}</p>
+                                    <p class="text-xs text-zinc-500">{{ $row->bank_name ?: '—' }} • {{ __('performance_evaluation::dashboard.question_types.'.$row->question_type) }}</p>
+                                    <div class="flex flex-wrap gap-2">
+                                        <x-small-badge mode="sky">{{ __('performance_evaluation::dashboard.fields.answers_count') }}: {{ $row->answers_count }}</x-small-badge>
+                                        <x-small-badge mode="emerald">{{ __('performance_evaluation::dashboard.fields.correct_rate') }}: {{ number_format((float) $row->correct_rate, 2) }}%</x-small-badge>
+                                        <x-small-badge mode="amber">{{ __('performance_evaluation::dashboard.fields.pending_reviews_count') }}: {{ $row->pending_reviews_count }}</x-small-badge>
+                                    </div>
+                                </div>
+                            </x-ui.list-card>
+                        @empty
+                            <x-ui.empty-state icon="icons.training-icon" :message="__('performance_evaluation::dashboard.empty.test_answers')" />
+                        @endforelse
+                    </div>
+                </x-surface-card>
+
+                <x-surface-card :title="__('performance_evaluation::dashboard.cards.reviewer_turnaround')" icon="icons.profile-outline-icon">
+                    <div class="space-y-3">
+                        <div class="flex flex-wrap gap-2">
+                            <x-button mode="secondary" wire:click="exportPerformanceReviewerTurnaroundReport">{{ __('performance_evaluation::dashboard.actions.export_reviewer_turnaround_report') }}</x-button>
+                        </div>
+                        @forelse ($this->reviewerTurnaroundRows as $row)
+                            <x-ui.list-card>
+                                <div class="space-y-2">
+                                    <p class="text-sm font-semibold text-zinc-900">{{ $row->reviewer_name ?: '—' }}</p>
+                                    <div class="flex flex-wrap gap-2">
+                                        <x-small-badge mode="sky">{{ __('performance_evaluation::dashboard.fields.reviewed_answers_count') }}: {{ $row->reviewed_answers_count }}</x-small-badge>
+                                        <x-small-badge mode="amber">{{ __('performance_evaluation::dashboard.fields.average_review_minutes') }}: {{ number_format((float) ($row->average_review_minutes ?? 0), 2) }}</x-small-badge>
+                                    </div>
+                                </div>
+                            </x-ui.list-card>
+                        @empty
+                            <x-ui.empty-state icon="icons.profile-outline-icon" :message="__('performance_evaluation::dashboard.empty.pending_review_answers')" />
+                        @endforelse
+                    </div>
+                </x-surface-card>
+
+                <x-surface-card :title="__('performance_evaluation::dashboard.cards.personnel_test_outcomes')" icon="icons.profile-icon">
+                    <div class="space-y-3">
+                        <div class="flex flex-wrap gap-2">
+                            <x-button mode="secondary" wire:click="exportPerformancePersonnelOutcomeReport">{{ __('performance_evaluation::dashboard.actions.export_personnel_outcomes_report') }}</x-button>
+                        </div>
+                        @forelse ($this->personnelOutcomeRows as $row)
+                            <x-ui.list-card>
+                                <div class="space-y-2">
+                                    <p class="text-sm font-semibold text-zinc-900">{{ $row->personnel_fullname ?: '—' }}</p>
+                                    <p class="text-xs text-zinc-500">#{{ $row->personnel_tabel_no ?: '—' }}</p>
+                                    <div class="flex flex-wrap gap-2">
+                                        <x-small-badge mode="sky">{{ __('performance_evaluation::dashboard.fields.attempts_count') }}: {{ $row->attempts_count }}</x-small-badge>
+                                        <x-small-badge mode="emerald">{{ __('performance_evaluation::dashboard.fields.pass_rate') }}: {{ number_format((float) $row->pass_rate, 2) }}%</x-small-badge>
+                                        <x-small-badge mode="secondary">{{ __('performance_evaluation::dashboard.fields.average_percentage') }}: {{ number_format((float) $row->average_percentage, 2) }}%</x-small-badge>
+                                    </div>
+                                </div>
+                            </x-ui.list-card>
+                        @empty
+                            <x-ui.empty-state icon="icons.profile-icon" :message="__('performance_evaluation::dashboard.empty.test_attempts')" />
+                        @endforelse
+                    </div>
+                </x-surface-card>
+            </div>
         </div>
     </x-surface-card>
 </div>

@@ -34,11 +34,13 @@ use App\Modules\PerformanceEvaluation\Application\Services\PerformanceWeakAreaTr
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\On;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
 class Dashboard extends Component
 {
     use ConfirmsDestructiveActions;
     use DropdownConstructTrait;
+    use WithFileUploads;
     use HandlesPerformanceFoundationMutations;
     use HandlesPerformanceEvaluationFlowMutations;
     use HandlesPerformanceTestingMutations;
@@ -49,6 +51,8 @@ class Dashboard extends Component
     use InteractsWithPerformanceEvaluationState;
 
     public string $activeTab = 'overview';
+
+    public string $testsSubTab = 'banks';
 
     public array $cycleForm = [];
 
@@ -73,6 +77,10 @@ class Dashboard extends Component
     public array $attemptSubmitForm = [];
 
     public array $reviewForm = [];
+
+    public array $testQuestionImportForm = [];
+
+    public $testQuestionImportFile = null;
 
     public ?int $editingCycleId = null;
 
@@ -127,6 +135,11 @@ class Dashboard extends Component
      */
     public array $tabs = ['overview', 'cycles', 'templates', 'evaluations', 'tests', 'reports', 'lists'];
 
+    /**
+     * @var array<int, string>
+     */
+    public array $testsSubTabs = ['banks', 'questions', 'import', 'sessions', 'review'];
+
     public function mount(): void
     {
         $this->authorizePerformanceEvaluationView();
@@ -135,6 +148,11 @@ class Dashboard extends Component
         $requestedTab = (string) request()->query('tab', 'overview');
         if (in_array($requestedTab, $this->tabs, true)) {
             $this->activeTab = $requestedTab;
+        }
+
+        $requestedTestsSubTab = (string) request()->query('tests_view', 'banks');
+        if (in_array($requestedTestsSubTab, $this->testsSubTabs, true)) {
+            $this->testsSubTab = $requestedTestsSubTab;
         }
     }
 
@@ -145,6 +163,15 @@ class Dashboard extends Component
         }
 
         $this->activeTab = $tab;
+    }
+
+    public function switchTestsSubTab(string $tab): void
+    {
+        if (! in_array($tab, $this->testsSubTabs, true)) {
+            return;
+        }
+
+        $this->testsSubTab = $tab;
     }
 
     public function confirmDeleteCycle(int $id): void

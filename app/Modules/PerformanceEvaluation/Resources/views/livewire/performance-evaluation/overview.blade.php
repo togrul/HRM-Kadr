@@ -113,7 +113,7 @@
         <x-surface-card :title="__('performance_evaluation::dashboard.cards.evaluator_workspace')" icon="icons.performance-icon">
             <div class="space-y-4">
                 <p class="text-sm leading-6 text-zinc-500">{{ __('performance_evaluation::dashboard.labels.evaluator_workspace_hint') }}</p>
-                <a href="{{ route('performance-evaluation.evaluator') }}" class="inline-flex items-center justify-center rounded-full border border-sky-200 bg-sky-50 px-4 py-2 text-sm font-semibold text-sky-700 transition hover:border-sky-300 hover:bg-sky-100">
+                <a href="{{ route('performance-evaluation.evaluator', ['return' => url()->current()]) }}" class="inline-flex items-center justify-center rounded-full border border-sky-200 bg-sky-50 px-4 py-2 text-sm font-semibold text-sky-700 transition hover:border-sky-300 hover:bg-sky-100">
                     {{ __('performance_evaluation::dashboard.actions.open_evaluator_workspace') }}
                 </a>
             </div>

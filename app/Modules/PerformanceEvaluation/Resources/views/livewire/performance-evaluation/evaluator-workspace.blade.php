@@ -1,4 +1,11 @@
 <div class="flex flex-col space-y-4 px-6 py-4">
+    <div class="flex items-center justify-between gap-3">
+        <a href="{{ $this->backUrl }}" class="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-700 shadow-sm transition hover:bg-zinc-50">
+            <span aria-hidden="true">←</span>
+            <span>{{ __('performance_evaluation::dashboard.actions.back_to_performance_dashboard') }}</span>
+        </a>
+    </div>
+
     <x-surface-card :title="__('performance_evaluation::dashboard.cards.evaluator_workspace')" icon="icons.performance-icon">
         <div class="space-y-4">
             <div class="grid gap-3 md:grid-cols-3">

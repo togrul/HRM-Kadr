@@ -300,6 +300,7 @@ return [
         'employee_request' => 'Əməkdaş tələbi',
         'performance_gap' => 'Performans boşluğu',
         'skill_gap' => 'Bacarıq boşluğu',
+        'skill_measurement' => 'Bacarıq ölçümü',
     ],
     'participant_sources' => [
         'all' => 'Hamısı',

@@ -18,10 +18,11 @@
 
         // Color modes (requested palette)
         'blue' => 'bg-blue-100 text-blue-700 [a]:hover:bg-blue-200',
-        'green' => 'bg-emerald-100 text-emerald-700 [a]:hover:bg-emerald-200',
+        'green', 'emerald' => 'bg-emerald-100 text-emerald-700 [a]:hover:bg-emerald-200',
         'sky' => 'bg-sky-100 text-sky-700 [a]:hover:bg-sky-200',
         'purple' => 'bg-violet-100 text-violet-700 [a]:hover:bg-violet-200',
         'red' => 'bg-rose-100 text-rose-700 [a]:hover:bg-rose-200',
+        'amber' => 'bg-amber-100 text-amber-700 [a]:hover:bg-amber-200',
 
         default => 'bg-gray-100 text-gray-900 [a]:hover:bg-gray-100/80',
     };

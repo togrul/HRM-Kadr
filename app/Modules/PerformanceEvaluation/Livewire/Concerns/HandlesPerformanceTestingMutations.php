@@ -7,10 +7,52 @@ use App\Models\PerformanceTestAttemptAnswer;
 use App\Models\PerformanceTestBank;
 use App\Models\PerformanceTestQuestion;
 use App\Models\PerformanceTestSession;
+use App\Modules\PerformanceEvaluation\Application\Services\PerformanceTestQuestionImportService;
 use App\Modules\PerformanceEvaluation\Application\Services\PerformanceSkillMeasurementService;
+use App\Modules\PerformanceEvaluation\Exports\PerformanceTestQuestionImportTemplateExport;
+use App\Modules\PerformanceEvaluation\Imports\PerformanceTestQuestionSheetImport;
+use Maatwebsite\Excel\Facades\Excel;
 
 trait HandlesPerformanceTestingMutations
 {
+    public function downloadTestQuestionImportTemplate()
+    {
+        $this->authorizePerformanceEvaluationManage();
+
+        return Excel::download(
+            new PerformanceTestQuestionImportTemplateExport(),
+            'performance-test-question-import-template.xlsx'
+        );
+    }
+
+    public function importTestQuestions(): void
+    {
+        $this->authorizePerformanceEvaluationManage();
+
+        $validated = $this->validate([
+            'testQuestionImportForm.performance_test_bank_id' => 'nullable|exists:performance_test_banks,id',
+            'testQuestionImportFile' => 'required|file|mimes:xlsx,xls,csv,txt|max:10240',
+        ], attributes: [
+            'testQuestionImportForm.performance_test_bank_id' => __('performance_evaluation::dashboard.fields.test_bank'),
+            'testQuestionImportFile' => __('performance_evaluation::dashboard.fields.import_file'),
+        ]);
+
+        $rows = Excel::toArray(new PerformanceTestQuestionSheetImport(), $this->testQuestionImportFile)[0] ?? [];
+
+        $result = app(PerformanceTestQuestionImportService::class)->import(
+            $rows,
+            data_get($validated, 'testQuestionImportForm.performance_test_bank_id')
+                ? (int) data_get($validated, 'testQuestionImportForm.performance_test_bank_id')
+                : null
+        );
+
+        $this->reset('testQuestionImportFile');
+        $this->testQuestionImportForm = $this->testQuestionImportDefaults();
+        $this->resetValidation();
+        $this->refreshTestsSummary();
+        $this->dispatch('performanceEvaluationSaved', __('performance_evaluation::dashboard.messages.test_question_imported', $result));
+    }
+
     public function storeTestBank(): void
     {
         $this->authorizePerformanceEvaluationManage();

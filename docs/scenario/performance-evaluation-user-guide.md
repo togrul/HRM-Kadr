@@ -893,52 +893,57 @@ Save sonrası:
 
 ## 12. Test məlumatları bu gün harada toplanır
 
-Bu sual çox vacibdir, çünki bugünkü UX burada tam ideal deyil.
+Bu sual çox vacibdir, çünki test xətti artıq yalnız qısa summary kartları ilə məhdud deyil.
 
 ### 12.1. Test banklar
 
-Hazırda bunlar əsasən:
+Banklar iki yerdə görünür:
 
-- `Testlər` tabındakı `Son test bankları` kartında
+- `Testlər` tabında `Son test bankları` kartında
+- `Tam siyahılar` tabında `test_banks` entity siyahısında
 
-görünür.
-
-Tam, ayrı, paginated bank management siyahısı hazırda ayrıca yoxdur.
+Yəni həm qısa vitrin, həm də ayrıca paginated arxiv var.
 
 ### 12.2. Sual bankı
 
-Hazırda ayrıca `question list management` səhifəsi yoxdur.
+Sual datası da ayrıca görünür:
 
-Sual daha çox:
+- `Testlər` tabında sual yaratma workbench-ində
+- `Tam siyahılar` tabında `test_questions` entity siyahısında
 
-- question setup formu
-- həmin bankla bağlı əməliyyat axını
+Detail panel açıldıqda:
 
-üzərindən idarə olunur.
+- sual tipi
+- bank
+- competency
+- max score
+- option-lar
 
-Bu, az data üçün işləyir. Data çoxaldıqda zəifdir.
+görünür.
 
 ### 12.3. Test təyinatları
 
 Yəni `test sessions`.
 
-Hazırda bunlar:
+Bunlar üç səviyyədə izlənir:
 
-- session setup formu
-- cəhd və summary konteksti
+- `Testlər` tabında session setup formu
+- `Tam siyahılar` tabında `test_sessions` arxivi
+- `Test workspace` daxilində işçiyə görünən təyinat kartları
 
-üzərindən görünür.
-
-Ayrı session arxiv/list səhifəsi yoxdur.
+Yəni session artıq ayrıca arxiv kimi də izlənir.
 
 ### 12.4. Cavablar və cəhdlər
 
-Hazırda bunlar iki yerdə görünür:
+Bunlar indi bir neçə yerdə görünür:
 
-- `TestsSummary` daxilində `Son test cəhdləri`
-- `Tam siyahılar` tabında `Recent test attempts`
+- `TestsSummary` daxilində son cəhdlər
+- `Tam siyahılar` tabında `attempts`
+- `Tam siyahılar` tabında `test_answers`
+- `Test workspace` daxilində `Attempt history`
+- printable `test transcript`
 
-Yəni tam paginated görünən yeganə test xətti siyahısı faktiki olaraq `attempts` siyahısıdır.
+Bu o deməkdir ki, həm operativ baxış, həm də tam audit izi mövcuddur.
 
 ### 12.5. Pending review cavablar
 
@@ -946,14 +951,15 @@ Bunlar:
 
 - `TestsSummary`
 - `Evaluator workspace`
+- `test_answers` arxiv siyahısı
 
 üzərində görünür.
 
 ### 12.6. Professional nəticə
 
-Əgər test banklarının, sualların və session-ların sayı çoxalacaqsa, hazırkı struktur limitlidir.
+Test authoring, session assignment, attempt history, answer audit və report qatları artıq ayrıca görünən səviyyəyə çıxıb.
 
-Professional baxımdan gələcəkdə ayrıca lazımdır:
+Bugünkü strukturda artıq bunlar hazırdır:
 
 - `Test banks list`
 - `Question bank list`
@@ -961,12 +967,15 @@ Professional baxımdan gələcəkdə ayrıca lazımdır:
 - `Attempts and answers list`
 - `Test reporting dashboard`
 
+Bu boşluq bağlanıb.
+
 ## 13. Bu test axını peşəkar baxımdan nə qədər düzgündür
 
 Qısa cavab:
 
-- `test yaratmaq` hissəsi bu dashboard-da ola bilər
-- amma `manual answer capture` ilə eyni admin səhifədə olması ideal son vəziyyət deyil
+- bugünkü arxitektura peşəkar xəttə çox yaxındır
+- çünki artıq `authoring`, `assignment`, `test taking`, `review`, `reporting` ayrılıb
+- admin daxilində qalan `manual answer capture` isə artıq əsas user journey deyil, ops/demo workbench rolundadır
 
 ### 13.1. Nə doğrudur
 
@@ -988,47 +997,43 @@ Peşəkar sistemlərdə adətən ayrıca olur:
 
 Bugünkü sistemdə:
 
-- authoring var
-- assignment var
-- manual attempt capture var
-- review var
+- `Authoring` var
+- `Assignment` var
+- `Test workspace` var
+- `Review` var
+- `Reporting` var
 
-hamısı eyni dashboard-da toplanıb.
+Yəni əsas xətt artıq ayrılıb.
 
-Bu niyə problem yarada bilər:
+Admin daxilində qalan `attempt answer capture` hələ mövcuddur, amma bu daha çox:
 
-- admin ekranı yüklənir
-- əməliyyat rolu ilə nəticə rolu qarışır
-- həqiqi “imtahan vermə” təcrübəsi ayrı olmur
-- audit və user journey qarışa bilər
+- daxili simulyasiya
+- data bərpası
+- admin dəstək müdaxiləsi
+
+üçündür.
 
 ### 13.3. Bugünkü yanaşma tam səhvdirmi
 
 Yox.
 
-Əgər məqsəd:
+Hazırda ən doğru bölgü belədir:
 
-- HR üçün idarəetmə workbench
-- test mexanizmini daxildə simulyasiya etmək
-- cavabları manual daxil etmək
-
-dirsə, bu məntiqlidir.
-
-Amma professional son model kimi ən yaxşı yanaşma adətən belə olur:
-
-- `Admin dashboard`: bank, sual, session, reporting
+- `Admin dashboard`: bank, sual, import, session, report
 - `Candidate/Test taker screen`: real test həlli
 - `Reviewer workspace`: manual review
-- `Reports screen`: analitika
+- `Reports screen`: analitika və audit
+
+Bu bölgü artıq mövcuddur.
 
 ### 13.4. Tövsiyə
 
-Bu modul gələcəkdə böyüyəcəksə, test xəttini 4 yerə bölmək daha doğrudur:
+Hazırkı memarlıqda əsas növbəti tövsiyələr bunlardır:
 
-1. `Test authoring`
-2. `Test assignments`
-3. `Test taking`
-4. `Review and reports`
+1. explicit `user -> personnel` link-lərini admin səviyyəsində görünən və idarə olunan etmək
+2. test report-lara daha çox analitika əlavə etmək
+3. import şablonunu istifadəçi üçün daha çox nümunə dataset ilə zənginləşdirmək
+4. əgər siyasət tələb edirsə, `attempt answer capture` admin workbench-ini yalnız səlahiyyətli rollara açıq saxlamaq
 
 ## 14. Hazırda hansı hesabatlar var
 
@@ -1076,9 +1081,9 @@ Zəif sahələri competency, priority və status üzrə pivot edir.
 
 Brauzerdən PDF kimi saxlanıla bilən çap görünüşüdür.
 
-## 15. Hansı test report-ları hazırda çatmır
+## 15. Test report-larında bu gün nə var, nə hələ genişlənə bilər
 
-Sənin dediyin ehtiyac tam doğrudur. Bu report-lar ayrıca lazımdır:
+Bu gün hazır olan test report-ları:
 
 1. `Test sessions report`
    - hansı bank kimə verilib
@@ -1091,25 +1096,24 @@ Sənin dediyin ehtiyac tam doğrudur. Bu report-lar ayrıca lazımdır:
    - neçə faiz toplayıb
 3. `Answer detail report`
    - hansı testdə hansı sual cavablanıb
-   - hansı cavab doğru olub
-   - hansı cavab yanlış olub
-   - open-answer review score nə olub
-4. `Question analysis report`
-   - ən çox yanlış cavablanan suallar
-   - competency üzrə zəiflik
+   - open-answer review status-u
+   - final score
+4. `Printable transcript`
+   - attempt summary
+   - sual-sual breakdown
+   - reviewer feedback timeline
 5. `Personnel test history`
-   - işçinin bütün test keçmişi
-   - hansı banklarda, hansı nəticə ilə iştirak edib
+   - `Test workspace` daxilində cəhd tarixçəsi
 
-Hazırda bunlar tam hazır deyil.
+Hələ genişlənə biləcək professional əlavələr:
 
-Yəni bugünkü modul:
+- competency üzrə trend qrafiki
+- ən çox səhv cavablanan suallar
+- reviewer turnaround time
+- department / structure üzrə test performansı
+- keçid həddi ilə real nəticə fərqi
 
-- test qurur
-- nəticə çıxarır
-- weak link yaradır
-
-amma tam imtahan analitika qatı hələ son mərhələdə deyil.
+Yəni əsas report qatı hazırdır, amma analitika dərinliyi gələcəkdə daha da zənginləşdirilə bilər.
 
 ## 16. Tam siyahılar tabı
 
@@ -1415,6 +1419,56 @@ Aktiv olmayan bank:
 
 - yeni session assignment üçün istifadə edilməməlidir
 
+### 19.4.A. Sualları import ilə əlavə etmək necə işləyir
+
+Əgər sual sayı çoxdursa, onları bir-bir yazmaq əvəzinə import etmək daha doğrudur.
+
+Bu modulda professional yol belədir:
+
+1. `Testlər` tabında `Sual importu` blokuna keç
+2. əvvəl `Excel şablonunu yüklə`
+3. şablondakı sütun adlarını pozmadan doldur
+4. istəyirsənsə import-u mövcud banka bağla, istəmirsənsə sistem `bank_code` və `bank_name` ilə bankı özü yaratsın
+5. faylı yüklə
+6. `Suaları import et` düyməsini bas
+
+Şablonda əsas sütunlar bunlardır:
+
+- `bank_code`
+- `bank_name`
+- `question_type`
+- `prompt`
+- `description`
+- `competency_name`
+- `max_score`
+- `sort_order`
+- `option_1` ... `option_4`
+
+Variantlı sualda `option_*` sütunları istifadə olunur.
+
+Open-answer, case-study və behavioral suallarda isə əsasən:
+
+- sual mətni
+- competency
+- max score
+
+kifayət edir.
+
+Import nə edir:
+
+- lazım olsa bank yaradır
+- competency-ni ada görə tapır
+- eyni bankda eyni prompt varsa onu update edir
+- variantlı sual üçün option-ları yenidən sinxronlaşdırır
+
+Import zamanı ən böyük risk:
+
+- competency adının sistemdə olmaması
+- sual tipinin yanlış yazılması
+- option-ların natamam verilməsi
+
+Ona görə importdan əvvəl template preview kartındakı sütun quruluşunu yoxlamaq vacibdir.
+
 ### 19.5. Sual tipləri ayrı-ayrı necə işləyir
 
 #### `Multiple choice`
@@ -1581,11 +1635,29 @@ Məna:
 
 Burada sistem belə davranır:
 
-1. istifadəçinin özünə uyğun personnel record-u tapılır
+1. istifadəçinin özünə uyğun personnel record-u explicit `user -> personnel` link ilə tapılır
 2. ona təyin olunan session-lar yüklənir
 3. prioritet olaraq hələ həll edilə bilən session seçilir
 4. aktiv cəhd varsa həmin cəhd davam edir
 5. yoxdursa işçi `Testə başla` ilə yeni cəhd açır
+
+#### `User -> personnel` link niyə vacibdir
+
+Test workspace testləri `user` üzərindən açır, amma session-lar `personnel` üzərinə təyin olunur.
+
+Bu səbəbdən sistem bu iki varlığı düzgün bağlamalıdır.
+
+Bugünkü professional yanaşma budur:
+
+- əvvəl explicit link yoxlanılır
+- uyğun link varsa testlər birbaşa həmin personnel üçün açılır
+- fallback resolve yalnız ilkin bağ yaratmaq üçündür
+
+Bu nəyi həll edir:
+
+- yanlış şəxsə test görünməsi riski azalır
+- email və ad fərqlərinə görə testin itməsinin qarşısı alınır
+- workspace daha stabil və daha sürətli işləyir
 
 ### 19.10. Test workspace içində görünən hissələr
 
@@ -1615,6 +1687,37 @@ Buradan görünür:
 - təhvil vaxtı
 
 Bu blok audit üçün çox vacibdir.
+
+#### `Attempt analytics`
+
+Tamamlanmış cəhdlərdə sistem artıq analitik görünüş də verir.
+
+Burada:
+
+- sual-sual nəticə
+- doğru / yanlış işarəsi
+- final score
+- reviewer feedback
+- review timeline
+
+görünür.
+
+Bu blok xüsusilə open-answer və mixed testlər üçün çox faydalıdır.
+
+#### `Printable transcript`
+
+Bu, cəhdin çap və audit görünüşüdür.
+
+Transcript daxilində:
+
+- attempt summary
+- sual breakdown
+- seçilmiş variant və ya yazılmış cavab
+- correct answer
+- reviewer feedback
+- timeline
+
+yer alır.
 
 #### `Test runner`
 

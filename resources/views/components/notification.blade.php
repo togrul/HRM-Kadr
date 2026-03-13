@@ -77,7 +77,9 @@
                 'typesUpdated', 'vacancyUpdated',
                 'rankAdded', 'rankWasDeleted',
                 'contractAdded', 'leaveApproved', 'leaveRejected', 'leaveWasDeleted',
-                'leaveAdded'
+                'leaveAdded',
+                'performanceEvaluationSaved',
+                'trainingNeedsSaved'
             ]
             const errorEvents = ['staffScheduleError', 'addError']
 

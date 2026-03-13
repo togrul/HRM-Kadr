@@ -18,6 +18,7 @@ use App\Models\TrainingLevel;
 use App\Models\TrainingNeedItem;
 use App\Models\TrainingProgram;
 use App\Models\TrainingProgramCompetency;
+use App\Models\UserPersonnelLink;
 use App\Modules\PerformanceEvaluation\Livewire\Dashboard;
 use App\Modules\PerformanceEvaluation\Livewire\EvaluationsSummary as PerformanceEvaluationEvaluationsSummary;
 use App\Modules\PerformanceEvaluation\Livewire\EvaluatorScoreCapture;
@@ -27,6 +28,7 @@ use App\Modules\PerformanceEvaluation\Livewire\Overview as PerformanceEvaluation
 use App\Modules\PerformanceEvaluation\Livewire\Reports as PerformanceEvaluationReports;
 use App\Modules\PerformanceEvaluation\Livewire\TestWorkspace as PerformanceEvaluationTestWorkspace;
 use App\Modules\PerformanceEvaluation\Livewire\TestsSummary as PerformanceEvaluationTestsSummary;
+use App\Modules\PerformanceEvaluation\Livewire\UserPersonnelLinks as PerformanceEvaluationUserPersonnelLinks;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
@@ -1302,6 +1304,117 @@ class PerformanceEvaluationDashboardTest extends TestCase
 
         $this->assertDatabaseMissing('performance_cycles', [
             'id' => $cycle->id,
+        ]);
+    }
+
+    public function test_personnel_can_open_printable_test_transcript(): void
+    {
+        $user = \App\Models\User::factory()->create([
+            'name' => 'Togrul Calalli',
+            'email' => 'togrul@example.com',
+        ]);
+        $this->grantPerformancePermissions($user);
+        Role::findOrCreate('admin', 'web');
+        Permission::findOrCreate('get-notification', 'web');
+
+        Position::query()->create([
+            'id' => 1999,
+            'name' => 'Reviewer',
+        ]);
+
+        $personnel = $this->createPersonnel($user->id, 1999, 'PE-1999');
+        $personnel->update(['email' => 'togrul@example.com']);
+
+        $bank = \App\Models\PerformanceTestBank::query()->create([
+            'name' => 'Transcript Bank',
+            'code' => 'TR-1999',
+            'pass_score' => 60,
+            'duration_minutes' => 30,
+            'max_attempts' => 1,
+            'is_active' => true,
+        ]);
+
+        $question = \App\Models\PerformanceTestQuestion::query()->create([
+            'performance_test_bank_id' => $bank->id,
+            'question_type' => 'open_answer',
+            'prompt' => 'Transcript question',
+            'max_score' => 100,
+            'sort_order' => 1,
+            'is_active' => true,
+        ]);
+
+        $session = \App\Models\PerformanceTestSession::query()->create([
+            'performance_test_bank_id' => $bank->id,
+            'personnel_id' => $personnel->id,
+            'assigned_by' => $user->id,
+            'status' => 'completed',
+        ]);
+
+        $attempt = \App\Models\PerformanceTestAttempt::query()->create([
+            'performance_test_session_id' => $session->id,
+            'attempt_no' => 1,
+            'started_at' => now()->subMinutes(30),
+            'submitted_at' => now(),
+            'status' => 'completed',
+            'score' => 80,
+            'percentage' => 80,
+            'passed' => true,
+        ]);
+
+        \App\Models\PerformanceTestAttemptAnswer::query()->create([
+            'performance_test_attempt_id' => $attempt->id,
+            'performance_test_question_id' => $question->id,
+            'answer_text' => 'Transcript answer',
+            'review_status' => 'reviewed',
+            'review_score' => 80,
+            'final_score' => 80,
+            'reviewed_by' => $user->id,
+            'reviewed_at' => now(),
+            'feedback' => 'Reviewed well',
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('performance-evaluation.test-transcript', $attempt))
+            ->assertOk()
+            ->assertSee('Transcript question')
+            ->assertSee('Transcript answer')
+            ->assertSee(__('performance_evaluation::dashboard.labels.test_transcript_title'));
+    }
+
+    public function test_manager_can_open_user_personnel_links_and_save_manual_link(): void
+    {
+        $user = \App\Models\User::factory()->create();
+        $this->grantPerformancePermissions($user);
+        Role::findOrCreate('admin', 'web');
+        Permission::findOrCreate('get-notification', 'web');
+
+        $linkedUser = \App\Models\User::factory()->create([
+            'name' => 'Linked User',
+            'email' => 'linked@example.com',
+        ]);
+
+        Position::query()->create([
+            'id' => 504,
+            'name' => 'Operator',
+        ]);
+
+        $personnel = $this->createPersonnel($user->id, 504, 'PE-504');
+
+        $this->actingAs($user)
+            ->get(route('performance-evaluation.user-personnel-links'))
+            ->assertOk()
+            ->assertSeeLivewire(PerformanceEvaluationUserPersonnelLinks::class);
+
+        Livewire::test(PerformanceEvaluationUserPersonnelLinks::class)
+            ->set('linkForm.user_id', $linkedUser->id)
+            ->set('linkForm.personnel_id', $personnel->id)
+            ->call('saveLink')
+            ->assertHasNoErrors();
+
+        $this->assertDatabaseHas('user_personnel_links', [
+            'user_id' => $linkedUser->id,
+            'personnel_id' => $personnel->id,
+            'resolution_source' => 'manual',
         ]);
     }
 

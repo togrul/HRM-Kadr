@@ -256,10 +256,24 @@
                                     <x-small-badge mode="sky">{{ __('performance_evaluation::dashboard.fields.status') }}: {{ __('performance_evaluation::dashboard.test_statuses.'.$this->selectedRow->status) }}</x-small-badge>
                                     <x-small-badge mode="amber">{{ __('performance_evaluation::dashboard.fields.score') }}: {{ $this->selectedRow->score ?? '—' }}</x-small-badge>
                                 @elseif ($entity === 'test_answers')
-                                    <x-small-badge mode="secondary">{{ __('performance_evaluation::dashboard.fields.personnel') }}: {{ $this->selectedRow->attempt?->session?->personnel?->fullname ?? '—' }}</x-small-badge>
-                                    <x-small-badge mode="secondary">{{ __('performance_evaluation::dashboard.fields.test_bank') }}: {{ $this->selectedRow->attempt?->session?->bank?->name ?? '—' }}</x-small-badge>
-                                    <x-small-badge mode="sky">{{ __('performance_evaluation::dashboard.fields.review_status') }}: {{ $this->selectedRow->review_status ? __('performance_evaluation::dashboard.review_statuses.'.$this->selectedRow->review_status) : '—' }}</x-small-badge>
-                                    <x-small-badge mode="amber">{{ __('performance_evaluation::dashboard.fields.final_score') }}: {{ $this->selectedRow->final_score ?? $this->selectedRow->review_score ?? $this->selectedRow->auto_score ?? '—' }}</x-small-badge>
+                                    <div class="grid w-full gap-2 sm:grid-cols-2">
+                                        <div class="rounded-2xl border border-zinc-200 bg-zinc-50 px-3 py-2">
+                                            <p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-400">{{ __('performance_evaluation::dashboard.fields.personnel') }}</p>
+                                            <p class="mt-1 text-sm font-medium text-zinc-800">{{ $this->selectedRow->attempt?->session?->personnel?->fullname ?? '—' }}</p>
+                                        </div>
+                                        <div class="rounded-2xl border border-zinc-200 bg-zinc-50 px-3 py-2">
+                                            <p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-400">{{ __('performance_evaluation::dashboard.fields.test_bank') }}</p>
+                                            <p class="mt-1 text-sm font-medium text-zinc-800">{{ $this->selectedRow->attempt?->session?->bank?->name ?? '—' }}</p>
+                                        </div>
+                                        <div class="rounded-2xl border border-sky-200 bg-sky-50 px-3 py-2">
+                                            <p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-sky-600">{{ __('performance_evaluation::dashboard.fields.review_status') }}</p>
+                                            <p class="mt-1 text-sm font-medium text-sky-900">{{ $this->selectedRow->review_status ? __('performance_evaluation::dashboard.review_statuses.'.$this->selectedRow->review_status) : '—' }}</p>
+                                        </div>
+                                        <div class="rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2">
+                                            <p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-amber-600">{{ __('performance_evaluation::dashboard.fields.final_score') }}</p>
+                                            <p class="mt-1 text-sm font-medium text-amber-900">{{ $this->selectedRow->final_score ?? $this->selectedRow->review_score ?? $this->selectedRow->auto_score ?? '—' }}</p>
+                                        </div>
+                                    </div>
                                 @else
                                     <x-small-badge mode="secondary">{{ __('performance_evaluation::dashboard.fields.personnel') }}: {{ $this->selectedRow->form?->personnel?->fullname ?? '—' }}</x-small-badge>
                                     <x-small-badge mode="secondary">{{ __('performance_evaluation::dashboard.fields.priority') }}: {{ __('training_needs::dashboard.priorities.'.($this->selectedRow->trainingNeed?->priority ?? 'medium')) }}</x-small-badge>

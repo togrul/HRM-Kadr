@@ -41,6 +41,7 @@ class PerformanceEvaluationServiceProvider extends ServiceProvider
             'dashboard' => \App\Modules\PerformanceEvaluation\Livewire\Dashboard::class,
             'evaluator-workspace' => \App\Modules\PerformanceEvaluation\Livewire\EvaluatorWorkspace::class,
             'test-workspace' => \App\Modules\PerformanceEvaluation\Livewire\TestWorkspace::class,
+            'user-personnel-links' => \App\Modules\PerformanceEvaluation\Livewire\UserPersonnelLinks::class,
             'evaluator-score-capture' => \App\Modules\PerformanceEvaluation\Livewire\EvaluatorScoreCapture::class,
             'overview' => \App\Modules\PerformanceEvaluation\Livewire\Overview::class,
             'evaluations-summary' => \App\Modules\PerformanceEvaluation\Livewire\EvaluationsSummary::class,

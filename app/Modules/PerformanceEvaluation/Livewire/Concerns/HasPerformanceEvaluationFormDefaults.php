@@ -143,4 +143,11 @@ trait HasPerformanceEvaluationFormDefaults
             'feedback' => '',
         ];
     }
+
+    protected function testQuestionImportDefaults(): array
+    {
+        return [
+            'performance_test_bank_id' => null,
+        ];
+    }
 }

@@ -86,7 +86,9 @@ class EvaluatorWorkspace extends Component
         $answerId = (int) data_get($validated, 'reviewForm.performance_test_attempt_answer_id');
         abort_if(! $this->pendingAnswers->contains('id', $answerId), 403);
 
-        $answer = PerformanceTestAttemptAnswer::query()->findOrFail($answerId);
+        /** @var \App\Models\PerformanceTestAttemptAnswer|null $answer */
+        $answer = $this->pendingAnswers->firstWhere('id', $answerId);
+        abort_if($answer === null, 403);
 
         app(PerformanceSkillMeasurementService::class)->reviewAnswer(
             $answer,
@@ -100,6 +102,7 @@ class EvaluatorWorkspace extends Component
             'score' => null,
             'feedback' => '',
         ];
+        $this->resetRuntimeMemo();
         $this->resetValidation();
         $this->dispatch('performanceEvaluationSaved', __('performance_evaluation::dashboard.messages.answer_reviewed'));
     }
@@ -113,5 +116,16 @@ class EvaluatorWorkspace extends Component
     public function render()
     {
         return view('performance-evaluation::livewire.performance-evaluation.evaluator-workspace');
+    }
+
+    public function getBackUrlProperty(): string
+    {
+        $returnUrl = request()->query('return');
+
+        if (is_string($returnUrl) && str_starts_with($returnUrl, url('/'))) {
+            return $returnUrl;
+        }
+
+        return route('performance-evaluation');
     }
 }

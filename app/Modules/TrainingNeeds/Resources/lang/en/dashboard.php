@@ -303,6 +303,7 @@ return [
         'employee_request' => 'Employee request',
         'performance_gap' => 'Performance gap',
         'skill_gap' => 'Skill gap',
+        'skill_measurement' => 'Skill measurement',
     ],
     'participant_sources' => [
         'all' => 'All sources',

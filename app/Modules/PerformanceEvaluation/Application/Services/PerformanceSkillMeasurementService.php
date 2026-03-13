@@ -73,31 +73,28 @@ class PerformanceSkillMeasurementService
                 $this->scoreAnswer($answer);
             }
 
-            $attempt->refresh()->loadMissing([
-                'session.bank:id,pass_score',
-                'session.personnel:id,position_id',
-                'answers.question:id,training_competency_id,max_score,question_type',
-            ]);
+            $attemptAggregate = $this->hydrateAttemptAggregate((int) $attempt->id);
 
-            $pendingManual = $attempt->answers->contains(fn (PerformanceTestAttemptAnswer $answer) => $answer->review_status === 'pending');
-            $totals = $this->computeAttemptTotals($attempt->answers);
+            $pendingManual = $attemptAggregate->answers->contains(fn (PerformanceTestAttemptAnswer $answer) => $answer->review_status === 'pending');
+            $totals = $this->computeAttemptTotals($attemptAggregate->answers);
+            $attemptPassScore = $this->attemptPassScore($attemptAggregate);
 
-            $attempt->update([
-                'submitted_at' => $attempt->submitted_at ?? now(),
+            $attemptAggregate->update([
+                'submitted_at' => $attemptAggregate->submitted_at ?? now(),
                 'auto_scored_at' => now(),
                 'score' => $totals['score'],
                 'percentage' => $totals['percentage'],
-                'passed' => $pendingManual ? null : ($totals['percentage'] >= $this->attemptPassScore($attempt)),
+                'passed' => $pendingManual ? null : ($totals['percentage'] >= $attemptPassScore),
                 'status' => $pendingManual ? 'review_pending' : 'completed',
                 'reviewed_at' => $pendingManual ? null : now(),
             ]);
 
             if (! $pendingManual) {
-                $this->syncAttemptOutcomes($attempt->fresh());
+                $this->syncAttemptOutcomesUsingAggregate($attemptAggregate);
             }
         });
 
-        return $attempt->fresh(['session.bank', 'answers.question', 'trainingNeedLinks']);
+        return $this->hydrateAttemptAggregate((int) $attempt->id);
     }
 
     public function reviewAnswer(PerformanceTestAttemptAnswer $answer, float $score, ?string $feedback, ?int $reviewerId): PerformanceTestAttemptAnswer
@@ -115,32 +112,32 @@ class PerformanceSkillMeasurementService
             $attempt = $this->hydrateAttemptAggregate((int) $answer->performance_test_attempt_id);
             $pendingManual = $attempt->answers->contains(fn (PerformanceTestAttemptAnswer $item) => $item->review_status === 'pending');
             $totals = $this->computeAttemptTotals($attempt->answers);
+            $attemptPassScore = $this->attemptPassScore($attempt);
 
             $attempt->update([
                 'score' => $totals['score'],
                 'percentage' => $totals['percentage'],
-                'passed' => $pendingManual ? null : ($totals['percentage'] >= $this->attemptPassScore($attempt)),
+                'passed' => $pendingManual ? null : ($totals['percentage'] >= $attemptPassScore),
                 'status' => $pendingManual ? 'review_pending' : 'completed',
                 'reviewed_at' => $pendingManual ? null : now(),
                 'reviewed_by' => $pendingManual ? null : $reviewerId,
             ]);
 
             if (! $pendingManual) {
-                $this->syncAttemptOutcomes($attempt);
+                $this->syncAttemptOutcomesUsingAggregate($attempt);
             }
         });
 
-        return $answer->fresh();
+        return $answer;
     }
 
     public function syncAttemptOutcomes(PerformanceTestAttempt $attempt): void
     {
-        $attempt->loadMissing([
-            'session.personnel:id,position_id',
-            'answers.question:id,training_competency_id,max_score',
-            'trainingNeedLinks.trainingNeed',
-        ]);
+        $this->syncAttemptOutcomesUsingAggregate($this->hydrateAttemptAggregate((int) $attempt->id));
+    }
 
+    private function syncAttemptOutcomesUsingAggregate(PerformanceTestAttempt $attempt): void
+    {
         $competencyScores = $attempt->answers
             ->filter(fn (PerformanceTestAttemptAnswer $answer) => filled($answer->question?->training_competency_id) && $answer->final_score !== null)
             ->groupBy(fn (PerformanceTestAttemptAnswer $answer) => (int) $answer->question->training_competency_id)

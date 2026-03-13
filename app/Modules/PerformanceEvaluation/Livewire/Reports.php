@@ -50,6 +50,21 @@ class Reports extends Component
         return app(PerformanceEvaluationReportingService::class)->testAnswerRows(limit: 8);
     }
 
+    public function getQuestionAnalysisRowsProperty()
+    {
+        return app(PerformanceEvaluationReportingService::class)->testQuestionAnalysisRows(limit: 8);
+    }
+
+    public function getReviewerTurnaroundRowsProperty()
+    {
+        return app(PerformanceEvaluationReportingService::class)->reviewerTurnaroundRows(limit: 8);
+    }
+
+    public function getPersonnelOutcomeRowsProperty()
+    {
+        return app(PerformanceEvaluationReportingService::class)->personnelOutcomeRows(limit: 8);
+    }
+
     public function exportPerformanceFormsReport()
     {
         $this->authorizePerformanceEvaluationExport();
@@ -238,6 +253,69 @@ class Reports extends Component
                 'test_answers'
             ),
             'performance-test-answers-report.xlsx'
+        );
+    }
+
+    public function exportPerformanceQuestionAnalysisReport()
+    {
+        $this->authorizePerformanceEvaluationExport();
+
+        return Excel::download(
+            new PerformanceEvaluationReportExport(
+                app(PerformanceEvaluationReportingService::class)->testQuestionAnalysisRows(),
+                [
+                    '#',
+                    __('performance_evaluation::dashboard.fields.test_bank'),
+                    __('performance_evaluation::dashboard.fields.prompt'),
+                    __('performance_evaluation::dashboard.fields.question_type'),
+                    __('performance_evaluation::dashboard.fields.answers_count'),
+                    __('performance_evaluation::dashboard.fields.correct_answers_count'),
+                    __('performance_evaluation::dashboard.fields.correct_rate'),
+                    __('performance_evaluation::dashboard.fields.average_final_score'),
+                    __('performance_evaluation::dashboard.fields.pending_reviews_count'),
+                ],
+                'test_question_analysis'
+            ),
+            'performance-test-question-analysis-report.xlsx'
+        );
+    }
+
+    public function exportPerformanceReviewerTurnaroundReport()
+    {
+        $this->authorizePerformanceEvaluationExport();
+
+        return Excel::download(
+            new PerformanceEvaluationReportExport(
+                app(PerformanceEvaluationReportingService::class)->reviewerTurnaroundRows(),
+                [
+                    __('performance_evaluation::dashboard.fields.reviewer'),
+                    __('performance_evaluation::dashboard.fields.reviewed_answers_count'),
+                    __('performance_evaluation::dashboard.fields.average_review_minutes'),
+                ],
+                'reviewer_turnaround'
+            ),
+            'performance-reviewer-turnaround-report.xlsx'
+        );
+    }
+
+    public function exportPerformancePersonnelOutcomeReport()
+    {
+        $this->authorizePerformanceEvaluationExport();
+
+        return Excel::download(
+            new PerformanceEvaluationReportExport(
+                app(PerformanceEvaluationReportingService::class)->personnelOutcomeRows(),
+                [
+                    __('performance_evaluation::dashboard.fields.personnel'),
+                    __('performance_evaluation::dashboard.fields.tabel_no'),
+                    __('performance_evaluation::dashboard.fields.attempts_count'),
+                    __('performance_evaluation::dashboard.fields.passed_attempts_count'),
+                    __('performance_evaluation::dashboard.fields.pass_rate'),
+                    __('performance_evaluation::dashboard.fields.average_percentage'),
+                ],
+                'personnel_outcomes'
+            ),
+            'performance-personnel-outcomes-report.xlsx'
         );
     }
 

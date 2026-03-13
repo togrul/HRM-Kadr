@@ -12,5 +12,6 @@ trait ResetsPerformanceTestingForms
         $this->attemptAnswerForm = $this->attemptAnswerDefaults();
         $this->attemptSubmitForm = $this->attemptSubmitDefaults();
         $this->reviewForm = $this->reviewDefaults();
+        $this->testQuestionImportForm = $this->testQuestionImportDefaults();
     }
 }

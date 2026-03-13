@@ -198,4 +198,118 @@ class PerformanceEvaluationReportingService
 
         return $query->get();
     }
+
+    public function testQuestionAnalysisRows(?int $limit = null)
+    {
+        $query = PerformanceTestAttemptAnswer::query()
+            ->join('performance_test_questions', 'performance_test_questions.id', '=', 'performance_test_attempt_answers.performance_test_question_id')
+            ->join('performance_test_attempts', 'performance_test_attempts.id', '=', 'performance_test_attempt_answers.performance_test_attempt_id')
+            ->join('performance_test_sessions', 'performance_test_sessions.id', '=', 'performance_test_attempts.performance_test_session_id')
+            ->join('performance_test_banks', 'performance_test_banks.id', '=', 'performance_test_sessions.performance_test_bank_id')
+            ->selectRaw('
+                performance_test_questions.id,
+                performance_test_banks.name as bank_name,
+                performance_test_questions.prompt as question_prompt,
+                performance_test_questions.question_type,
+                COUNT(*) as answers_count,
+                SUM(CASE WHEN performance_test_attempt_answers.is_correct = 1 THEN 1 ELSE 0 END) as correct_answers_count,
+                SUM(CASE WHEN performance_test_attempt_answers.review_status = "pending" THEN 1 ELSE 0 END) as pending_reviews_count,
+                ROUND(COALESCE(AVG(performance_test_attempt_answers.final_score), 0), 2) as average_final_score
+            ')
+            ->groupBy([
+                'performance_test_questions.id',
+                'performance_test_banks.name',
+                'performance_test_questions.prompt',
+                'performance_test_questions.question_type',
+            ])
+            ->orderByDesc('answers_count');
+
+        if ($limit !== null) {
+            $query->limit($limit);
+        }
+
+        return $query->get()->map(function ($row) {
+            $answersCount = max(1, (int) $row->answers_count);
+            $row->correct_rate = round(((int) $row->correct_answers_count / $answersCount) * 100, 2);
+
+            return $row;
+        });
+    }
+
+    public function reviewerTurnaroundRows(?int $limit = null)
+    {
+        $rows = PerformanceTestAttemptAnswer::query()
+            ->join('performance_test_attempts', 'performance_test_attempts.id', '=', 'performance_test_attempt_answers.performance_test_attempt_id')
+            ->leftJoin('users as reviewers', 'reviewers.id', '=', 'performance_test_attempt_answers.reviewed_by')
+            ->whereNotNull('performance_test_attempt_answers.reviewed_at')
+            ->get([
+                'reviewers.id as reviewer_id',
+                'reviewers.name as reviewer_name',
+                'reviewers.email as reviewer_email',
+                'performance_test_attempts.submitted_at',
+                'performance_test_attempt_answers.reviewed_at',
+            ])
+            ->groupBy('reviewer_id')
+            ->map(function ($group) {
+                $minutes = $group
+                    ->filter(fn ($row) => $row->submitted_at && $row->reviewed_at)
+                    ->map(function ($row) {
+                        return round(
+                            \Illuminate\Support\Carbon::parse($row->submitted_at)
+                                ->diffInMinutes(\Illuminate\Support\Carbon::parse($row->reviewed_at)),
+                            2
+                        );
+                    });
+
+                return (object) [
+                    'reviewer_id' => $group->first()->reviewer_id,
+                    'reviewer_name' => $group->first()->reviewer_name ?: $group->first()->reviewer_email,
+                    'reviewed_answers_count' => $group->count(),
+                    'average_review_minutes' => $minutes->isEmpty() ? 0.0 : round($minutes->avg(), 2),
+                ];
+            })
+            ->sortByDesc('reviewed_answers_count')
+            ->values();
+
+        if ($limit !== null) {
+            return $rows->take($limit)->values();
+        }
+
+        return $rows;
+    }
+
+    public function personnelOutcomeRows(?int $limit = null)
+    {
+        $query = PerformanceTestAttempt::query()
+            ->join('performance_test_sessions', 'performance_test_sessions.id', '=', 'performance_test_attempts.performance_test_session_id')
+            ->join('personnels', 'personnels.id', '=', 'performance_test_sessions.personnel_id')
+            ->selectRaw('
+                personnels.id as personnel_id,
+                CONCAT_WS(" ", personnels.surname, personnels.name, personnels.patronymic) as personnel_fullname,
+                personnels.tabel_no as personnel_tabel_no,
+                COUNT(*) as attempts_count,
+                SUM(CASE WHEN performance_test_attempts.passed = 1 THEN 1 ELSE 0 END) as passed_attempts_count,
+                ROUND(COALESCE(AVG(performance_test_attempts.percentage), 0), 2) as average_percentage
+            ')
+            ->whereIn('performance_test_attempts.status', ['completed', 'review_pending'])
+            ->groupBy([
+                'personnels.id',
+                'personnels.surname',
+                'personnels.name',
+                'personnels.patronymic',
+                'personnels.tabel_no',
+            ])
+            ->orderByDesc('average_percentage');
+
+        if ($limit !== null) {
+            $query->limit($limit);
+        }
+
+        return $query->get()->map(function ($row) {
+            $attemptsCount = max(1, (int) $row->attempts_count);
+            $row->pass_rate = round(((int) $row->passed_attempts_count / $attemptsCount) * 100, 2);
+
+            return $row;
+        });
+    }
 }
