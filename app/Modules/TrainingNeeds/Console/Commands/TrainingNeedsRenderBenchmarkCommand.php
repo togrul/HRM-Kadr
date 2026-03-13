@@ -9,6 +9,7 @@ use App\Models\TrainingProgram;
 use App\Models\User;
 use App\Modules\TrainingNeeds\Livewire\Analytics;
 use App\Modules\TrainingNeeds\Livewire\Dashboard;
+use App\Modules\TrainingNeeds\Livewire\Reports;
 use App\Modules\TrainingNeeds\Livewire\ResultsSummary;
 use App\Modules\TrainingNeeds\Livewire\SessionDetailWorkspace;
 use App\Support\Livewire\LivewireComponentProfiler;
@@ -29,6 +30,8 @@ class TrainingNeedsRenderBenchmarkCommand extends Command
         {--analytics-render-budget= : Max render time in ms for analytics render}
         {--results-summary-response-budget= : Max response size for results summary render}
         {--results-summary-render-budget= : Max render time in ms for results summary render}
+        {--reports-response-budget= : Max response size for reports render}
+        {--reports-render-budget= : Max render time in ms for reports render}
         {--session-detail-response-budget= : Max response size for session detail workspace render}
         {--session-detail-render-budget= : Max render time in ms for session detail workspace render}
         {--calendar-select-response-budget= : Max response size for selecting a session in calendar}
@@ -86,6 +89,7 @@ class TrainingNeedsRenderBenchmarkCommand extends Command
             'calendar_render' => $this->budgetPair('calendar_render', 'calendar'),
             'analytics_render' => $this->budgetPair('analytics_render', 'analytics'),
             'results_summary_render' => $this->budgetPair('results_summary_render', 'results_summary'),
+            'reports_render' => $this->budgetPair('reports_render', 'reports'),
             'session_detail_workspace_render' => $this->budgetPair('session_detail_workspace_render', 'session_detail'),
             'calendar_session_detail_update' => $this->budgetPair('calendar_session_detail_update', 'calendar_select'),
         ];
@@ -96,6 +100,7 @@ class TrainingNeedsRenderBenchmarkCommand extends Command
             $results[] = $this->probe('calendar_render', $budgets['calendar_render'], fn () => $profiler->measureRender($user, Dashboard::class, queryParams: ['tab' => 'calendar']));
             $results[] = $this->probe('analytics_render', $budgets['analytics_render'], fn () => $profiler->measureRender($user, Analytics::class));
             $results[] = $this->probe('results_summary_render', $budgets['results_summary_render'], fn () => $profiler->measureRender($user, ResultsSummary::class));
+            $results[] = $this->probe('reports_render', $budgets['reports_render'], fn () => $profiler->measureRender($user, Reports::class));
             $results[] = $sessionId > 0
                 ? $this->probe('session_detail_workspace_render', $budgets['session_detail_workspace_render'], fn () => $profiler->measureRender($user, SessionDetailWorkspace::class, ['sessionId' => $sessionId]))
                 : $this->skipped('session_detail_workspace_render', 'training_session_missing');

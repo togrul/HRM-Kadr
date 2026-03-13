@@ -129,6 +129,7 @@ trait HasTrainingNeedsFormDefaults
             'trainer_name' => '',
             'capacity' => 20,
             'planned_budget' => null,
+            'actual_budget' => null,
             'auto_fill_participants' => true,
             'status' => 'scheduled',
             'notes' => '',

@@ -81,6 +81,7 @@ class TrainingNeedsRenderBenchmarkCommandTest extends TestCase
         $this->assertSame('ok', data_get($results, 'calendar_render.status'));
         $this->assertSame('ok', data_get($results, 'analytics_render.status'));
         $this->assertSame('ok', data_get($results, 'results_summary_render.status'));
+        $this->assertSame('ok', data_get($results, 'reports_render.status'));
         $this->assertSame('ok', data_get($results, 'session_detail_workspace_render.status'));
         $this->assertSame('ok', data_get($results, 'calendar_session_detail_update.status'));
         $this->assertGreaterThan(0, (int) data_get($results, 'planning_render.response_bytes'));

@@ -25,6 +25,7 @@ class TrainingSession extends Model
         'trainer_name',
         'capacity',
         'planned_budget',
+        'actual_budget',
         'auto_fill_participants',
         'status',
         'completed_at',
@@ -37,6 +38,7 @@ class TrainingSession extends Model
         'completed_at' => 'datetime',
         'capacity' => 'integer',
         'planned_budget' => 'decimal:2',
+        'actual_budget' => 'decimal:2',
         'auto_fill_participants' => 'boolean',
     ];
 

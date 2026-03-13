@@ -100,6 +100,8 @@ class Dashboard extends Component
 
     public int $resultsSummaryVersion = 0;
 
+    public int $reportsVersion = 0;
+
     public string $bulkAttendanceStatus = 'confirmed';
 
     public string $selectedParticipantAttendanceFilter = 'all';
@@ -135,7 +137,7 @@ class Dashboard extends Component
     /**
      * @var array<int, string>
      */
-    public array $tabs = ['overview', 'catalogs', 'matrix', 'profiles', 'planning', 'calendar', 'results', 'analytics', 'lists'];
+    public array $tabs = ['overview', 'catalogs', 'matrix', 'profiles', 'planning', 'calendar', 'results', 'analytics', 'reports', 'lists'];
 
     public function mount(): void
     {
@@ -305,6 +307,15 @@ class Dashboard extends Component
     {
         $this->refreshRuntimeCaches();
         $this->sessionDetailWorkspaceVersion++;
+        $this->reportsVersion++;
+    }
+
+    #[On('trainingNeedsSaved')]
+    public function handleTrainingNeedsSaved(): void
+    {
+        $this->refreshRuntimeCaches();
+        $this->resultsSummaryVersion++;
+        $this->reportsVersion++;
     }
 
     public function refreshResultsSummary(): void

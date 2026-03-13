@@ -218,7 +218,7 @@
                                 </p>
                             </div>
 
-                            <div class="grid gap-3 sm:grid-cols-2">
+                            <div class="{{ $entity === 'test_answers' ? 'w-full' : '' }} grid gap-3 sm:grid-cols-2">
                                 @if ($entity === 'forms')
                                     <x-small-badge mode="secondary">{{ __('performance_evaluation::dashboard.fields.cycle') }}: {{ $this->selectedRow->cycle?->name ?? '—' }}</x-small-badge>
                                     <x-small-badge mode="secondary">{{ __('performance_evaluation::dashboard.fields.template') }}: {{ $this->selectedRow->template?->name ?: $this->selectedRow->template?->code ?: '—' }}</x-small-badge>
@@ -256,22 +256,30 @@
                                     <x-small-badge mode="sky">{{ __('performance_evaluation::dashboard.fields.status') }}: {{ __('performance_evaluation::dashboard.test_statuses.'.$this->selectedRow->status) }}</x-small-badge>
                                     <x-small-badge mode="amber">{{ __('performance_evaluation::dashboard.fields.score') }}: {{ $this->selectedRow->score ?? '—' }}</x-small-badge>
                                 @elseif ($entity === 'test_answers')
-                                    <div class="grid w-full gap-2 sm:grid-cols-2">
-                                        <div class="rounded-2xl border border-zinc-200 bg-zinc-50 px-3 py-2">
-                                            <p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-400">{{ __('performance_evaluation::dashboard.fields.personnel') }}</p>
-                                            <p class="mt-1 text-sm font-medium text-zinc-800">{{ $this->selectedRow->attempt?->session?->personnel?->fullname ?? '—' }}</p>
+                                    <div class="w-full space-y-3 sm:col-span-2">
+                                        <div class="grid w-full grid-cols-2 gap-3">
+                                            <div class="min-w-0 rounded-3xl border border-zinc-200 bg-zinc-50 px-4 py-4">
+                                                <p class="text-[9px] font-semibold uppercase tracking-[0.12em] text-zinc-400">{{ __('performance_evaluation::dashboard.fields.personnel') }}</p>
+                                                <p class="mt-2 text-base font-semibold tracking-tight leading-snug text-zinc-950" title="{{ $this->selectedRow->attempt?->session?->personnel?->fullname ?? '—' }}">
+                                                    {{ $this->selectedRow->attempt?->session?->personnel?->fullname ?? '—' }}
+                                                </p>
+                                            </div>
+                                            <div class="min-w-0 rounded-3xl border border-zinc-200 bg-zinc-50 px-4 py-4">
+                                                <p class="text-[9px] font-semibold uppercase tracking-[0.12em] text-zinc-400">{{ __('performance_evaluation::dashboard.fields.test_bank') }}</p>
+                                                <p class="mt-2 text-base font-semibold tracking-tight leading-snug text-zinc-950" title="{{ $this->selectedRow->attempt?->session?->bank?->name ?? '—' }}">
+                                                    {{ $this->selectedRow->attempt?->session?->bank?->name ?? '—' }}
+                                                </p>
+                                            </div>
                                         </div>
-                                        <div class="rounded-2xl border border-zinc-200 bg-zinc-50 px-3 py-2">
-                                            <p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-400">{{ __('performance_evaluation::dashboard.fields.test_bank') }}</p>
-                                            <p class="mt-1 text-sm font-medium text-zinc-800">{{ $this->selectedRow->attempt?->session?->bank?->name ?? '—' }}</p>
-                                        </div>
-                                        <div class="rounded-2xl border border-sky-200 bg-sky-50 px-3 py-2">
-                                            <p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-sky-600">{{ __('performance_evaluation::dashboard.fields.review_status') }}</p>
-                                            <p class="mt-1 text-sm font-medium text-sky-900">{{ $this->selectedRow->review_status ? __('performance_evaluation::dashboard.review_statuses.'.$this->selectedRow->review_status) : '—' }}</p>
-                                        </div>
-                                        <div class="rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2">
-                                            <p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-amber-600">{{ __('performance_evaluation::dashboard.fields.final_score') }}</p>
-                                            <p class="mt-1 text-sm font-medium text-amber-900">{{ $this->selectedRow->final_score ?? $this->selectedRow->review_score ?? $this->selectedRow->auto_score ?? '—' }}</p>
+                                        <div class="grid w-full grid-cols-2 gap-3">
+                                            <div class="rounded-3xl border border-sky-200 bg-sky-50 px-4 py-4">
+                                                <p class="text-[9px] font-semibold uppercase tracking-[0.12em] text-sky-700">{{ __('performance_evaluation::dashboard.fields.review_status') }}</p>
+                                                <p class="mt-2 text-base font-semibold tracking-tight leading-snug text-sky-950">{{ $this->selectedRow->review_status ? __('performance_evaluation::dashboard.review_statuses.'.$this->selectedRow->review_status) : '—' }}</p>
+                                            </div>
+                                            <div class="rounded-3xl border border-amber-200 bg-amber-50 px-4 py-4">
+                                                <p class="text-[9px] font-semibold uppercase tracking-[0.12em] text-amber-700">{{ __('performance_evaluation::dashboard.fields.final_score') }}</p>
+                                                <p class="mt-2 text-[2rem] font-semibold tracking-tight leading-none text-amber-950">{{ $this->selectedRow->final_score ?? $this->selectedRow->review_score ?? $this->selectedRow->auto_score ?? '—' }}</p>
+                                            </div>
                                         </div>
                                     </div>
                                 @else
@@ -339,22 +347,24 @@
                                     <p>{{ __('performance_evaluation::dashboard.fields.available_until') }}: {{ $this->selectedRow->available_until?->format('d.m.Y') ?? '—' }}</p>
                                 </div>
                             @elseif ($entity === 'test_answers')
-                                <div class="rounded-2xl border border-zinc-200 bg-white p-4 text-sm leading-7 text-zinc-600 space-y-3">
-                                    <div>
-                                        <p class="font-semibold text-zinc-900">{{ __('performance_evaluation::dashboard.fields.prompt') }}</p>
-                                        <p class="mt-1">{{ $this->selectedRow->question?->prompt ?? '—' }}</p>
+                                <div class="w-full space-y-3 text-sm text-zinc-700">
+                                    <div class="rounded-3xl border border-zinc-200 bg-white px-5 py-4">
+                                        <p class="text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-400">{{ __('performance_evaluation::dashboard.fields.prompt') }}</p>
+                                        <p class="mt-2 text-base font-medium leading-7 text-zinc-900">{{ $this->selectedRow->question?->prompt ?? '—' }}</p>
                                     </div>
-                                    <div>
-                                        <p class="font-semibold text-zinc-900">{{ __('performance_evaluation::dashboard.fields.option') }}</p>
-                                        <p class="mt-1">{{ $this->selectedRow->selectedOption?->label ?? '—' }}</p>
+                                    <div class="grid w-full grid-cols-2 gap-3">
+                                        <div class="rounded-3xl border border-zinc-200 bg-zinc-50 px-5 py-4">
+                                            <p class="text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-400">{{ __('performance_evaluation::dashboard.fields.option') }}</p>
+                                            <p class="mt-2 text-sm leading-6 text-zinc-900">{{ $this->selectedRow->selectedOption?->label ?? '—' }}</p>
+                                        </div>
+                                        <div class="rounded-3xl border border-zinc-200 bg-zinc-50 px-5 py-4">
+                                            <p class="text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-400">{{ __('performance_evaluation::dashboard.fields.answer_text') }}</p>
+                                            <p class="mt-2 text-sm leading-6 text-zinc-900">{{ $this->selectedRow->answer_text ?: '—' }}</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p class="font-semibold text-zinc-900">{{ __('performance_evaluation::dashboard.fields.answer_text') }}</p>
-                                        <p class="mt-1">{{ $this->selectedRow->answer_text ?: '—' }}</p>
-                                    </div>
-                                    <div>
-                                        <p class="font-semibold text-zinc-900">{{ __('performance_evaluation::dashboard.fields.feedback') }}</p>
-                                        <p class="mt-1">{{ $this->selectedRow->feedback ?: '—' }}</p>
+                                    <div class="rounded-3xl border border-zinc-200 bg-zinc-50 px-5 py-4">
+                                        <p class="text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-400">{{ __('performance_evaluation::dashboard.fields.feedback') }}</p>
+                                        <p class="mt-2 text-sm leading-6 text-zinc-900">{{ $this->selectedRow->feedback ?: '—' }}</p>
                                     </div>
                                 </div>
                             @endif

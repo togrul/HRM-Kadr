@@ -618,7 +618,7 @@
                             <div class="mt-4 space-y-3">
                                 @foreach ([
                                     __('performance_evaluation::dashboard.question_types.multiple_choice') => 'Variantlardan biri və ya bir neçəsi düzgün cavabdır; score option üzrə verilir.',
-                                    __('performance_evaluation::dashboard.question_types.open_answer') => 'Sərbəst cavab toplanır, yekun bal reviewer tərəfindən sonradan yazılır.',
+                                    __('performance_evaluation::dashboard.question_types.open_answer') => 'Sərbəst cavab toplanır, yekun bal yoxlayan tərəfindən sonradan yazılır.',
                                     __('performance_evaluation::dashboard.question_types.case_study') => 'Ssenariyə cavab kimi işləyir; əsasən açıq cavab kimi review mərhələsində qiymətləndirilir.',
                                     __('performance_evaluation::dashboard.question_types.behavioral') => 'Davranış və yanaşma tipli cavablar üçündür; manual review ilə yaxşı işləyir.',
                                 ] as $title => $copy)
@@ -635,7 +635,7 @@
 
             @if ($testsSubTab === 'import')
                 <x-surface-card :title="__('performance_evaluation::dashboard.cards.test_question_import')" icon="icons.training-icon" bodyClass="overflow-visible" contentClass="overflow-visible p-4">
-                    <div class="grid gap-4 lg:grid-cols-2">
+                    <div class="grid gap-4 md:grid-cols-2">
                         <div class="space-y-4 rounded-[28px] border border-zinc-200 bg-gradient-to-b from-zinc-50 to-white p-5">
                             <div class="space-y-2">
                                 <p class="text-sm font-semibold text-zinc-900">{{ __('performance_evaluation::dashboard.labels.import_workflow_title') }}</p>
@@ -783,7 +783,7 @@
                         </div>
                     </x-surface-card>
 
-                    <div class="space-y-4">
+                    <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
                         <div class="rounded-[28px] border border-zinc-200 bg-zinc-50 px-4 py-4">
                             <div class="space-y-1">
                                 <p class="text-sm font-semibold text-zinc-900">{{ __('performance_evaluation::dashboard.cards.test_taking_workspace') }}</p>
@@ -801,14 +801,14 @@
 
                         <div class="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
                             <p class="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-400">{{ __('performance_evaluation::dashboard.tests_subtabs.sessions') }}</p>
-                            <div class="mt-4 grid gap-3">
+                            <div class="mt-4 grid gap-3 sm:grid-cols-2">
                                 <div class="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3">
                                     <p class="text-sm font-semibold text-zinc-900">{{ __('performance_evaluation::dashboard.fields.available_until') }}</p>
                                     <p class="mt-1 text-xs leading-6 text-zinc-500">Son tarix bitəndən sonra test workspace yeni cəhd başlatmağa imkan verməz.</p>
                                 </div>
                                 <div class="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3">
                                     <p class="text-sm font-semibold text-zinc-900">{{ __('performance_evaluation::dashboard.fields.reviewer') }}</p>
-                                    <p class="mt-1 text-xs leading-6 text-zinc-500">Açıq cavab, case və davranış tipli suallar bu reviewer tərəfindən sonradan yoxlanır.</p>
+                                    <p class="mt-1 text-xs leading-6 text-zinc-500">Açıq cavab, case və davranış tipli suallar bu yoxlayan tərəfindən sonradan yoxlanır.</p>
                                 </div>
                             </div>
                         </div>
@@ -817,14 +817,14 @@
             @endif
 
             @if ($testsSubTab === 'review')
-                <div class="grid gap-4 lg:grid-cols-[320px_minmax(0,1fr)]">
+                <div class="grid gap-4 xl:grid-cols-[300px_minmax(0,1fr)]">
                     <div class="space-y-4">
                         <div class="rounded-[28px] border border-zinc-200 bg-zinc-50 px-4 py-4">
                             <div class="space-y-1">
                                 <p class="text-sm font-semibold text-zinc-900">{{ __('performance_evaluation::dashboard.cards.test_taking_workspace') }}</p>
                                 <p class="text-xs leading-6 text-zinc-500">{{ __('performance_evaluation::dashboard.labels.test_taking_workspace_hint') }}</p>
                             </div>
-                            <div class="mt-4 grid gap-2">
+                            <div class="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-1">
                                 <a href="{{ route('performance-evaluation.user-personnel-links', ['return' => url()->current()]) }}" class="inline-flex min-h-11 items-center justify-center rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-center text-sm font-medium leading-tight text-zinc-700 shadow-sm">
                                     {{ __('performance_evaluation::dashboard.actions.open_user_personnel_links') }}
                                 </a>
@@ -846,31 +846,10 @@
                             </div>
                         </x-surface-card>
 
-                        <x-surface-card :title="__('performance_evaluation::dashboard.cards.open_answer_review')" icon="icons.profile-outline-icon" bodyClass="overflow-visible" contentClass="overflow-visible p-4">
-                            <div class="grid gap-3">
-                                <div>
-                                    <x-ui.select-dropdown :label="__('performance_evaluation::dashboard.fields.answer')" placeholder="---" mode="gray" class="w-full" instance="perf-review-answer"
-                                        direction="up"
-                                        wire:model.live="reviewForm.performance_test_attempt_answer_id" :model="$this->reviewAnswerOptions()" search-model="searchReviewAnswer"></x-ui.select-dropdown>
-                                    @error('reviewForm.performance_test_attempt_answer_id') <x-validation>{{ $message }}</x-validation> @enderror
-                                </div>
-                                <div>
-                                    <x-label for="review-score">{{ __('performance_evaluation::dashboard.fields.review_score') }}</x-label>
-                                    <x-livewire-input mode="gray" id="review-score" type="number" step="0.01" wire:model.defer="reviewForm.score" />
-                                    @error('reviewForm.score') <x-validation>{{ $message }}</x-validation> @enderror
-                                </div>
-                                <div>
-                                    <x-label for="review-feedback">{{ __('performance_evaluation::dashboard.fields.feedback') }}</x-label>
-                                    <textarea id="review-feedback" wire:model.defer="reviewForm.feedback" class="min-h-24 w-full rounded-lg border-none bg-neutral-100 px-3 py-2 text-sm shadow-sm focus:ring-blue-500"></textarea>
-                                    @error('reviewForm.feedback') <x-validation>{{ $message }}</x-validation> @enderror
-                                </div>
-                                <x-button mode="black" wire:click="reviewAttemptAnswer">{{ __('performance_evaluation::dashboard.actions.review_answer') }}</x-button>
-                            </div>
-                        </x-surface-card>
                     </div>
 
                     <div class="space-y-4">
-                        <div class="grid gap-4 xl:grid-cols-2">
+                        <div class="grid gap-4 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
                             <x-surface-card :title="__('performance_evaluation::dashboard.cards.attempt_capture')" icon="icons.pending-icon" bodyClass="overflow-visible" contentClass="overflow-visible p-4">
                                 <div class="grid gap-3">
                                     <x-ui.select-dropdown :label="__('performance_evaluation::dashboard.fields.test_session')" placeholder="---" mode="gray" class="w-full" instance="perf-attempt-session"
@@ -904,7 +883,7 @@
                                     <textarea id="attempt-answer-text" wire:model.defer="attemptAnswerForm.answer_text" class="min-h-24 w-full rounded-lg border-none bg-neutral-100 px-3 py-2 text-sm shadow-sm focus:ring-blue-500"></textarea>
                                     @error('attemptAnswerForm.answer_text') <x-validation>{{ $message }}</x-validation> @enderror
                                 </div>
-                                <div class="flex flex-wrap gap-3">
+                                <div class="flex flex-wrap justify-end gap-3">
                                     <x-button mode="black" wire:click="storeAttemptAnswer">{{ __('performance_evaluation::dashboard.actions.save_attempt_answer') }}</x-button>
                                 </div>
                             </x-surface-card>
@@ -929,7 +908,9 @@
                                             @error('reviewForm.feedback') <x-validation>{{ $message }}</x-validation> @enderror
                                         </div>
                                     </div>
-                                    <x-button mode="black" wire:click="reviewAttemptAnswer">{{ __('performance_evaluation::dashboard.actions.review_answer') }}</x-button>
+                                    <div class="flex justify-end">
+                                        <x-button mode="black" wire:click="reviewAttemptAnswer">{{ __('performance_evaluation::dashboard.actions.review_answer') }}</x-button>
+                                    </div>
                                 </div>
                             </x-surface-card>
                         </div>

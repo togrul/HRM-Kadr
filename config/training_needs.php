@@ -8,6 +8,7 @@ return [
             'calendar_build' => env('TRAINING_NEEDS_QUERY_BUDGET_CALENDAR', 26),
             'analytics_build' => env('TRAINING_NEEDS_QUERY_BUDGET_ANALYTICS', 12),
             'results_summary_build' => env('TRAINING_NEEDS_QUERY_BUDGET_RESULTS_SUMMARY', 14),
+            'reports_build' => env('TRAINING_NEEDS_QUERY_BUDGET_REPORTS', 18),
         ],
         'render_budget' => [
             'planning_render' => [
@@ -25,6 +26,10 @@ return [
             'results_summary_render' => [
                 'response_bytes' => env('TRAINING_NEEDS_RENDER_BUDGET_RESULTS_SUMMARY_RESPONSE', 120000),
                 'render_ms' => env('TRAINING_NEEDS_RENDER_BUDGET_RESULTS_SUMMARY_MS', 200),
+            ],
+            'reports_render' => [
+                'response_bytes' => env('TRAINING_NEEDS_RENDER_BUDGET_REPORTS_RESPONSE', 220000),
+                'render_ms' => env('TRAINING_NEEDS_RENDER_BUDGET_REPORTS_MS', 260),
             ],
             'session_detail_workspace_render' => [
                 'response_bytes' => env('TRAINING_NEEDS_RENDER_BUDGET_SESSION_DETAIL_RESPONSE', 300000),

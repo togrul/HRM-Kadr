@@ -162,5 +162,6 @@ class TrainingNeedsQueryBudgetCommandTest extends TestCase
         $this->assertLessThanOrEqual(config('training_needs.performance.query_budget.calendar_build'), (int) data_get($results, 'calendar_build.queries'));
         $this->assertLessThanOrEqual(config('training_needs.performance.query_budget.analytics_build'), (int) data_get($results, 'analytics_build.queries'));
         $this->assertLessThanOrEqual(config('training_needs.performance.query_budget.results_summary_build'), (int) data_get($results, 'results_summary_build.queries'));
+        $this->assertLessThanOrEqual(config('training_needs.performance.query_budget.reports_build'), (int) data_get($results, 'reports_build.queries'));
     }
 }

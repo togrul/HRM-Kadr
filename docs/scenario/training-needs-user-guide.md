@@ -513,6 +513,7 @@ Field-lər:
 - `Trainer`
 - `Capacity`
 - `Planned budget`
+- `Actual budget`
 - `Auto-fill participants from approved needs`
 - `Status`
   - `draft`, `scheduled`, `in_progress`, `completed`, `cancelled`
@@ -535,6 +536,8 @@ Bu formdan sonra hara təsir edir:
 Praktik qayda:
 
 - proposal-dan gələn sessiyanı create etməzdən əvvəl tarix, trainer və budget-i yoxla
+- `Planned budget` planlanan xərci, `Actual budget` isə sessiya həqiqətən bitəndən sonra faktiki xərci göstərir
+- sessiya hələ keçirilməyibsə `Actual budget` sahəsini boş saxlamaq daha düzgündür
 - `Status` heç vaxt səbəbsiz `completed` qoyulmasın; əvvəl session reallıqda keçirilməlidir
 
 ### 9.3. Session participant formu
@@ -685,7 +688,183 @@ Bu tabın məqsədi:
 - hansı source daha çox need yaradır
 - plan və requirement coverage nə səviyyədədir
 
-## 12. Tam siyahılar tabı
+## 12. Rəhbər hesabatları tabı
+
+Bu tab rəhbərlik, HR rəhbəri və L&D məsulu üçün qurulub. Məqsəd sadəcə say göstərmək deyil; plan, icra, nəticə və büdcəni bir ekranda bağlamaqdır.
+
+Bu tabda aşağıdakı suallara cavab verilir:
+
+- bu il neçə təlim keçirilib?
+- hansı rübdə delivery daha güclü olub?
+- ümumi təlim saatı nə qədərdir?
+- daxili / xarici / hibrid balansı necədir?
+- nəticə və rəy səviyyəsi nə yerdədir?
+- planlanan büdcə ilə faktiki xərc arasında fərq nə qədərdir?
+- yaranan təlim ehtiyacının hansı hissəsi planlanıb, hansı hissəsi sessiyaya çevrilib, hansı hissəsi tamamlanıb?
+
+### 12.1. Filtr sətri
+
+Field-lər:
+
+- `Hesabat ili`
+- `Hesabat rübü`
+
+Məntiq:
+
+- `Hesabat ili` bütün aşağıdakı KPI və cədvəllərin əsas filtridir
+- `Hesabat rübü` seçilərsə executive summary və employee-based report-lar həmin rübə daralır
+- rüb boş qalarsa sistem ilin tam nəticəsini göstərir
+
+### 12.2. Executive KPI kartları
+
+Bu üst kartlar ilk baxış üçün hazırlanıb.
+
+Kartlar:
+
+- `Keçirilən təlim sayı`
+- `Ümumi təlim saatı`
+- `Davamiyyət faizi`
+- `Orta rəy balı`
+
+Bu göstəricilər necə hesablanır:
+
+- keçirilən təlim sayı: completed sessiyaların sayı
+- ümumi təlim saatı: attended iştirakçıların topladığı saatların cəmi
+- davamiyyət faizi: attended participant / total participant nisbəti
+- orta rəy balı: feedback response-lardan gələn orta nəticə
+
+### 12.3. İllik icra kəsiyi
+
+Bu cədvəl il üzrə ümumi icra görünüşüdür.
+
+Sütunlar:
+
+- `Hesabat ili`
+- `Keçirilən təlim sayı`
+- `İştirakçı sayı`
+- `Ümumi təlim saatı`
+- `Fərq`
+
+`Fərq` burada `planned budget total - actual budget total` kimi oxunur.
+
+### 12.4. Rüblük icra kəsiyi
+
+Bu blok seçilən ili Q1, Q2, Q3, Q4 üzrə bölür.
+
+Hər rüb kartında:
+
+- sessiya sayı
+- iştirakçı sayı
+- attended hours
+- planned budget
+- actual budget
+- average feedback score
+
+göstərilir.
+
+### 12.5. Daxili / xarici / hibrid bölgü
+
+Bu hissə delivery type bölgüsünü göstərir.
+
+Hər type üçün:
+
+- neçə sessiya keçirildiyi
+- neçə participant iştirak etdiyi
+- neçə attended saat toplandığı
+- orta rəy balının neçə olduğu
+
+göstərilir.
+
+### 12.6. Təlim nəticələri dashboard-u
+
+Bu hissə “təlim keçirildi, bəs nəticə necə oldu?” sualına cavab verir.
+
+Hər nəticə sətrində:
+
+- sessiya adı
+- delivery type
+- participant sayı
+- attendance rate
+- average feedback score
+
+görünür.
+
+### 12.7. Büdcə analitikası
+
+Bu blok üç əsas rəqəmi göstərir:
+
+- `Plan büdcəsi`
+- `Faktiki büdcə`
+- `Fərq`
+
+Burada vacib qayda:
+
+- `Planned budget` plan mərhələsində daxil edilir
+- `Actual budget` sessiya real keçirilib yekunlaşdıqdan sonra daxil edilir
+
+### 12.8. Təlim ehtiyacı vs icra
+
+Bu, ehtiyacla delivery arasında comparison ekranıdır.
+
+Burada:
+
+- `Total needs`
+- `Approved needs`
+- `Planned needs`
+- `Session-linked needs`
+- `Completed needs`
+- `Open needs`
+- `Planning coverage ratio`
+- `Delivery coverage ratio`
+
+göstərilir.
+
+### 12.9. Kompetensiya üzrə əhatə
+
+Burada hər kompetensiya üzrə:
+
+- ümumi need sayı
+- planned need sayı
+- delivered record sayı
+
+görünür.
+
+### 12.10. Proqram üzrə əhatə
+
+Burada hər proqram üçün:
+
+- delivery type
+- sessions count
+- recommended needs
+- delivered records
+
+göstərilir.
+
+### 12.11. Əməkdaş üzrə təlim saatları
+
+Bu cədvəl employee-based hesabatdır.
+
+Sütunlar:
+
+- `Əməkdaş`
+- `Tabel nömrəsi`
+- `Keçirilən təlim sayı`
+- `Ümumi təlim saatı`
+- `Daxili / xarici / hibrid`
+- `Orta rəy balı`
+
+### 12.12. Bu tab hansı formaların nəticəsi ilə dolur?
+
+Bu tab özü əməliyyat aparmır, amma aşağıdakı formaların nəticəsini oxuyur:
+
+- session formu
+- participant attendance
+- complete session
+- feedback response
+- planned budget
+- actual budget
+
+## 13. Tam siyahılar tabı
 
 Bu tab dashboard kartlarından fərqli olaraq tam əməliyyat nəzarəti üçündür.
 
@@ -704,7 +883,7 @@ Bu tabı nə vaxt istifadə etməlisən:
 - konkret record tapmaq lazımdırsa
 - detail panel ilə bir record-u dərin oxumaq istəyirsənsə
 
-## 13. Save edəndə təsir xəritəsi
+## 14. Save edəndə təsir xəritəsi
 
 Qısa xatırlatma:
 
@@ -733,7 +912,7 @@ Qısa xatırlatma:
 - `Certificate`
   - sübut sənədini bağlayır
 
-## 14. Tam iş ssenarisi
+## 15. Tam iş ssenarisi
 
 ### Ssenari A: Sıfırdan modul qurmaq
 
@@ -772,7 +951,18 @@ Qısa xatırlatma:
 6. lazım olsa feedback form yarat
 7. feedback response-ları daxil et
 
-## 15. Ən çox edilən səhvlər
+### Ssenari D: Rəhbər üçün hesabat hazırlamaq
+
+1. `Rəhbər hesabatları` tabını aç
+2. əvvəl `Hesabat ili` seç
+3. lazım olsa `Hesabat rübü` seç
+4. executive KPI kartlarından ilk snapshot götür
+5. `İllik icra kəsiyi` və `Rüblük icra kəsiyi` ilə trendi yoxla
+6. `Büdcə analitikası` ilə planned vs actual fərqini oxu
+7. `Təlim ehtiyacı vs icra` blokunda coverage ratio-ları yoxla
+8. `Əməkdaş üzrə təlim saatları` cədvəlindən employee-based dəlil götür
+
+## 16. Ən çox edilən səhvlər
 
 - program mapping yazmadan need-lərlə işləmək
 - requirement matrix boş ikən analytics gözləmək
@@ -780,8 +970,10 @@ Qısa xatırlatma:
 - plan item review etmədən session yaratmaq
 - session complete etmədən certificate yükləmək
 - source və reason hissəsini boş buraxmaq
+- `Actual budget` sahəsini sessiya bitmədən faktiki xərc kimi doldurmaq
+- report tabında boşluq görüb səbəbi report-un özündə axtarmaq; çox vaxt problem session, attendance və ya feedback datalarındadır
 
-## 16. Son qayda
+## 17. Son qayda
 
 Əgər “mən indi hansı mərhələdəyəm?” sualında çaşırsansa, bunu xatırla:
 

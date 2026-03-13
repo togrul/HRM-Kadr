@@ -58,6 +58,9 @@
                     <x-filter.item wire:click.prevent="switchTab('analytics')" :active="$activeTab === 'analytics'">
                         {{ __('training_needs::dashboard.tabs.analytics') }}
                     </x-filter.item>
+                    <x-filter.item wire:click.prevent="switchTab('reports')" :active="$activeTab === 'reports'">
+                        {{ __('training_needs::dashboard.tabs.reports') }}
+                    </x-filter.item>
                     <x-filter.item wire:click.prevent="switchTab('lists')" :active="$activeTab === 'lists'">
                         {{ __('training_needs::dashboard.tabs.lists') }}
                     </x-filter.item>
@@ -921,6 +924,11 @@
                         <x-livewire-input mode="gray" id="session-budget" type="number" step="0.01" wire:model.defer="sessionForm.planned_budget" />
                         @error('sessionForm.planned_budget') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
+                    <div>
+                        <x-label for="session-actual-budget">{{ __('training_needs::dashboard.fields.actual_budget') }}</x-label>
+                        <x-livewire-input mode="gray" id="session-actual-budget" type="number" step="0.01" wire:model.defer="sessionForm.actual_budget" />
+                        @error('sessionForm.actual_budget') <x-validation>{{ $message }}</x-validation> @enderror
+                    </div>
                     <label class="inline-flex items-center gap-2 rounded-lg bg-zinc-50 px-3 py-2 text-sm text-zinc-700">
                         <input type="checkbox" wire:model.defer="sessionForm.auto_fill_participants" class="rounded border-zinc-300 text-blue-600 focus:ring-blue-500">
                         {{ __('training_needs::dashboard.fields.auto_fill_participants') }}
@@ -1262,6 +1270,10 @@
 
     @if ($activeTab === 'analytics')
         <livewire:training-needs.analytics lazy />
+    @endif
+
+    @if ($activeTab === 'reports')
+        <livewire:training-needs.reports :key="'training-needs-reports-'.$reportsVersion" lazy />
     @endif
 
     @if ($activeTab === 'lists')

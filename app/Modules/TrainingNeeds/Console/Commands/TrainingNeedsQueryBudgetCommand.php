@@ -6,7 +6,9 @@ use App\Models\TrainingCompetency;
 use App\Models\TrainingFeedbackForm;
 use App\Models\TrainingNeedItem;
 use App\Models\TrainingProgram;
+use App\Modules\TrainingNeeds\Application\Services\TrainingExecutiveReportingService;
 use App\Modules\TrainingNeeds\Application\Services\TrainingNeedAnalyticsService;
+use App\Modules\TrainingNeeds\Application\Services\TrainingNeedCoverageService;
 use App\Modules\TrainingNeeds\Application\Services\TrainingNeedReportingService;
 use App\Modules\TrainingNeeds\Application\Services\TrainingNeedSuggestionService;
 use App\Modules\TrainingNeeds\Application\Services\TrainingSessionProposalService;
@@ -26,12 +28,15 @@ class TrainingNeedsQueryBudgetCommand extends Command
         {--calendar-budget= : Max query count for calendar/results flow}
         {--analytics-budget= : Max query count for analytics island}
         {--results-summary-budget= : Max query count for results summary island}
+        {--reports-budget= : Max query count for reports island}
         {--json : Print report as JSON}';
 
     protected $description = 'Run query-budget checks for Training Needs dashboard flows';
 
     public function handle(
         TrainingNeedAnalyticsService $analyticsService,
+        TrainingExecutiveReportingService $executiveReportingService,
+        TrainingNeedCoverageService $coverageService,
         TrainingNeedReportingService $reportingService,
         TrainingNeedSuggestionService $suggestionService,
         TrainingSessionProposalService $proposalService,
@@ -51,6 +56,7 @@ class TrainingNeedsQueryBudgetCommand extends Command
             'calendar_build' => max(1, (int) ($this->option('calendar-budget') ?: config('training_needs.performance.query_budget.calendar_build', 26))),
             'analytics_build' => max(1, (int) ($this->option('analytics-budget') ?: config('training_needs.performance.query_budget.analytics_build', 12))),
             'results_summary_build' => max(1, (int) ($this->option('results-summary-budget') ?: config('training_needs.performance.query_budget.results_summary_build', 14))),
+            'reports_build' => max(1, (int) ($this->option('reports-budget') ?: config('training_needs.performance.query_budget.reports_build', 18))),
         ];
 
         $hasData = DB::table('training_competencies')->exists()
@@ -120,6 +126,18 @@ class TrainingNeedsQueryBudgetCommand extends Command
             $reportingService->deliveryRows();
             $reportingService->feedbackRows();
             $reportingService->auditRows();
+        });
+        $results[] = $this->probe('reports_build', $budgets['reports_build'], function () use ($executiveReportingService, $coverageService, $year, $quarter): void {
+            $executiveReportingService->availableYears();
+            $executiveReportingService->executiveSummary($year, $quarter);
+            $executiveReportingService->annualRows();
+            $executiveReportingService->quarterlyRows($year);
+            $executiveReportingService->employeeHoursRows($year, $quarter);
+            $executiveReportingService->deliveryTypeRows($year, $quarter);
+            $executiveReportingService->outcomeRows($year, $quarter);
+            $coverageService->summary($year, $quarter);
+            $coverageService->competencyRows($year, $quarter);
+            $coverageService->programRows($year, $quarter);
         });
 
         $summary = [

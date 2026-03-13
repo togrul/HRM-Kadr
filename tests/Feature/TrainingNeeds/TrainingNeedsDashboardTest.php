@@ -17,6 +17,7 @@ use App\Modules\TrainingNeeds\Livewire\Dashboard;
 use App\Modules\TrainingNeeds\Livewire\Analytics as TrainingNeedsAnalytics;
 use App\Modules\TrainingNeeds\Livewire\Lists as TrainingNeedsLists;
 use App\Modules\TrainingNeeds\Livewire\Overview as TrainingNeedsOverview;
+use App\Modules\TrainingNeeds\Livewire\Reports as TrainingNeedsReports;
 use App\Modules\TrainingNeeds\Livewire\ResultsSummary as TrainingNeedsResultsSummary;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -78,6 +79,32 @@ class TrainingNeedsDashboardTest extends TestCase
             ->assertSee(__('training_needs::dashboard.cards.recent_feedback_forms'))
             ->assertSee(__('training_needs::dashboard.cards.feedback_session_summary'))
             ->assertSee(__('training_needs::dashboard.cards.export_reports'));
+    }
+
+    public function test_reports_component_renders_executive_and_coverage_cards(): void
+    {
+        $user = \App\Models\User::factory()->create();
+        $this->grantTrainingNeedsPermissions($user);
+
+        $this->actingAs($user);
+
+        Livewire::test(TrainingNeedsReports::class)
+            ->assertSee(__('training_needs::dashboard.cards.executive_reports'))
+            ->assertSee(__('training_needs::dashboard.cards.need_vs_delivery'))
+            ->assertSee(__('training_needs::dashboard.cards.employee_hours'));
+    }
+
+    public function test_reports_component_falls_back_to_default_year_when_year_is_cleared(): void
+    {
+        $user = \App\Models\User::factory()->create();
+        $this->grantTrainingNeedsPermissions($user);
+
+        $this->actingAs($user);
+
+        Livewire::test(TrainingNeedsReports::class)
+            ->set('reportYear', null)
+            ->assertSet('reportYear', now()->year)
+            ->assertSee(__('training_needs::dashboard.cards.executive_reports'));
     }
 
     public function test_dashboard_refreshes_results_summary_after_feedback_and_delivery_mutations(): void
