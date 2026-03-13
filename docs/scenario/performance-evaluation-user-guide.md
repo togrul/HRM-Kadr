@@ -1,654 +1,1836 @@
 # Performance Evaluation User Guide
 
-Bu sənəd `Performance Evaluation` modulunu ilk dəfə görən istifadəçi üçün addım-addım izah edir. Məqsəd odur ki, HR əməkdaşı, rəhbər və reviewer:
+Bu sənəd `Performance Evaluation` modulunu ilk dəfə açan istifadəçi üçün tam əməliyyat bələdçisidir. Məqsəd budur ki, istifadəçi:
 
-- hər tabın nə üçün açıldığını bilsin
-- hər formda hansı field-in niyə lazım olduğunu başa düşsün
-- `Save` edəndən sonra hansı record-un yarandığını və hansı statusun dəyişdiyini bilsin
-- performans score-un `Training Needs` moduluna necə təsir etdiyini anlasın
-- form əsaslı qiymətləndirmə ilə test əsaslı skill measurement arasındakı fərqi görə bilsin
+- modulun ümumi məntiqini başa düşsün
+- hansı tabın nə iş gördüyünü bilsin
+- hər formda hər field-in nə demək olduğunu anlasın
+- `Save` edəndə sistemdə nə yarandığını bilsin
+- hansı addımı hansı addımdan sonra etməli olduğunu qarışdırmasın
+- forma əsaslı qiymətləndirmə ilə test əsaslı ölçmənin fərqini düzgün qursun
+- nəticələrin `Training Needs` moduluna necə təsir etdiyini görə bilsin
 
 Route: `/performance-evaluation`
 
-## 1. Modulun qısa məntiqi
+## 1. Modul nə üçündür
 
-Bu modul iki ayrı, amma əlaqəli axını idarə edir:
+Bu modul iki ayrı, amma bir-birinə bağlı qiymətləndirmə xəttini idarə edir:
 
-1. forma əsaslı performans qiymətləndirməsi
-2. test və skill measurement
+1. `Forma əsaslı performans qiymətləndirməsi`
+2. `Test əsaslı bilik və bacarıq ölçümü`
 
-Qısa data axını belədir:
+Birinci xətt işçi haqqında strukturlaşdırılmış qiymətləndirmə aparır.
+
+İkinci xətt işçiyə test təyin edir, cavab toplayır, açıq cavabları review edir və nəticəyə görə zəif sahələri çıxarır.
+
+Bu modulun əsas dəyəri odur ki, zəif nəticə sadəcə ekranda görünən bal kimi qalmır. Zəif nəticə:
+
+- `weak category`
+- `weak competency link`
+- `training need`
+
+yarada bilir.
+
+## 2. Modulun böyük məntiqi
+
+### 2.1. Forma əsaslı xətt
 
 `Cycle -> Template -> Section -> Item -> Evaluation Form -> Score -> Final Result -> Weak Link -> Training Need`
 
-Test xətti isə belədir:
+### 2.2. Test əsaslı xətt
 
-`Test Bank -> Question -> Test Session -> Attempt -> Review -> Finalize -> Skill Gap -> Training Need`
+`Test Bank -> Question -> Test Session -> Attempt -> Answer -> Review -> Finalize -> Skill Gap -> Training Need`
 
-Bu modulun ən vacib tərəfi budur:
+Bu o deməkdir ki:
 
-- zəif nəticə sadəcə “bal” kimi qalmır
-- aşağı score və ya zəif test nəticəsi `Training Needs` modulunda avtomatik need yarada bilər
+- `Cycle` zaman çərçivəsini yaradır
+- `Template` qiymətləndirmə skeleton-unu yaradır
+- `Item` nəyi ölçdüyünü deyir
+- `Evaluation Form` həmin skeleton-u konkret əməkdaşa bağlayır
+- `Score` nəticəni yaradır
+- `Test Bank / Question / Session` test xəttini qurur
+- `Attempt / Answer / Review` test nəticəsini formalaşdırır
+- zəif nəticə `Training Needs` moduluna ötürülə bilər
 
-## 2. Yeni istifadəçi üçün tövsiyə olunan iş sırası
+## 3. Modulu hansı rollar istifadə edir
 
-Sıfırdan işləyirsənsə, bu ardıcıllıqla get:
+### 3.1. HR və ya admin
+
+Bu rol adətən:
+
+- cycle yaradır
+- template yaradır
+- section və item yaradır
+- evaluation form təyin edir
+- test bank yaradır
+- sual yaradır
+- test session yaradır
+- export və audit hesabatlarına baxır
+
+### 3.2. Manager və reviewer
+
+Bu rol adətən:
+
+- evaluator workspace-də form score doldurur
+- test open-answer cavablarını review edir
+
+### 3.3. Əməliyyat qaydası
+
+HR və admin baza qurur.
+
+Manager və reviewer real qiymətləndirməni aparır.
+
+Bu ayrım vacibdir. Əgər skeleton hazır olmadan assignment edilsə, aşağıdakı problemlər yaranır:
+
+- form natamam olur
+- item seçimi qarışır
+- scoring məntiqi zəifləyir
+- training link-ləri düzgün yaranmır
+
+## 4. Ekrandakı tablar nə üçündür
+
+Dashboard bu tablardan ibarətdir:
+
+- `Xülasə`
+- `Dövrlər`
+- `Şablonlar`
+- `Qiymətləndirmələr`
+- `Testlər`
+- `Hesabatlar`
+- `Tam siyahılar`
+
+### 4.1. Xülasə
+
+İdarəetmə baxışı üçündür. Burada əməliyyat deyil, ümumi vəziyyət görünür.
+
+### 4.2. Dövrlər
+
+Period və status idarəsi üçündür.
+
+### 4.3. Şablonlar
+
+Template, section və item qurmaq üçündür.
+
+### 4.4. Qiymətləndirmələr
+
+Form assignment və manual score capture üçündür.
+
+### 4.5. Testlər
+
+Test bank, sual, session, cavab toplama, finalize və review üçündür.
+
+### 4.6. Tam siyahılar
+
+Filter, search, detail panel və paginated tam baxış üçündür.
+
+### 4.7. Hesabatlar
+
+Bu tab:
+
+- performans form report-ları
+- weak link report-ları
+- audit çıxışları
+- test sessiya report-ları
+- test cəhd report-ları
+- test cavab audit report-ları
+
+üçün mərkəzi nöqtədir.
+
+## 5. İstifadəçi üçün doğru iş sırası
+
+Sıfırdan qurursansa, bu ardıcıllığı pozma:
 
 1. `Dövrlər` tabında cycle yarat
 2. `Şablonlar` tabında template yarat
-3. template üçün section yarat
-4. section üçün item yarat
-5. hər item-i düzgün competency ilə bağla
-6. `Qiymətləndirmələr` tabında formu əməkdaşa təyin et
-7. evaluator score-larını daxil et
-8. weak result-ların Training Needs-ə düşdüyünü yoxla
-9. test istifadə olunursa, ayrıca bank, question və session qur
-10. open answer-ları review et və attempt-i finalize et
+3. template daxilində section yarat
+4. section daxilində item yarat
+5. hər item-i competency ilə bağla
+6. `Qiymətləndirmələr` tabında form təyin et
+7. evaluator workspace-də bal toplamağa başla
+8. zəif nəticələri və weak link-ləri yoxla
+9. əgər test xətti də istifadə olunacaqsa, `Testlər` tabında bank yarat
+10. bank üçün sual yarat
+11. işçiyə test session təyin et
+12. cavabları topla
+13. open-answer varsa review et
+14. attempt-i finalize et
+15. training impact-i və hesabatları yoxla
 
-Əgər item competency-yə bağlanmasa, score yazılsa belə Training Needs inteqrasiyası işləməyəcək.
+Ən çox səhv bu iki səbəbdən yaranır:
 
-## 3. Tab-lar nə üçündür
+- item competency-yə bağlanmır
+- test session bank və sual məntiqi tam qurulmadan cavab toplama mərhələsinə keçilir
 
-- `Xülasə`
-  - ümumi vəziyyətə baxış
-- `Dövrlər`
-  - qiymətləndirmənin zaman pəncərəsi
-- `Şablonlar`
-  - form skeleton-u: template, section, item
-- `Qiymətləndirmələr`
-  - real əməkdaşlara form təyinatı və score capture
-- `Testlər`
-  - skill measurement və open answer review
-- `Tam siyahılar`
-  - paginated, filter-li, detail panel-li tam workspace
+## 6. Xülasə tabı
 
-## 4. Xülasə tabı
+Bu tab əməliyyat aparmaq üçün deyil. Bu tab idarəetmə vitrini kimidir.
 
-Bu tab əməliyyat aparmaq üçün deyil. Bu tab idarəetmə baxışıdır.
-
-Burada görünən sayğaclar:
+Burada görünən əsas göstəricilər:
 
 - `Cycles`
 - `Templates`
-- `Sections`
-- `Items`
 - `Forms`
-- `Scores`
-- `Need links`
+- `Links`
 
-Bu sayğaclar nəyi göstərir:
+Bu sayğaclar nəyi izah edir:
 
-- baza düzgün qurulubmu
-- real form assignment var ya yox
-- artıq evaluator score yığılıbmı
-- zəif nəticələr Training Needs-ə ötürülüb ya yox
+- baza qurulubmu
+- real assignment var ya yox
+- zəif nəticədən training link yaranıb ya yox
 
-Dashboard kartları limitli gəlir. Tam nəzarət üçün `Tam siyahılar` və export hissəsindən istifadə et.
+Bu tabdakı kartlar limitlidir. Yəni burada hər şeyin tam siyahısı yoxdur. Çox data olduqda tam nəzarət üçün:
 
-## 5. Dövrlər tabı
+- `Tam siyahılar`
+- export report-lar
+- print summary
 
-Cycle performans işinin zaman konteyneridir.
+istifadə olunur.
 
-### 5.1. Cycle formu
+## 7. Dövrlər tabı
 
-Field-lər:
+Cycle performans prosesinin zaman konteyneridir.
 
-- `Cycle name`
-  - nümunə: `2026 Annual Performance`
-- `Cycle type`
-  - `annual`, `academic`, `quarterly`
-- `Start date`
-- `End date`
-- `Status`
-  - `draft`, `active`, `closed`
-- `Auto-generate forms`
-  - gələcəkdə avtomatik form generate olunması üçün işarədir
-- `Description`
+### 7.1. Cycle formundakı field-lər
 
-Save olunanda nə olur:
+#### `Cycle name`
 
-- `performance_cycles` cədvəlinə create və ya update olunur
+Cycle adı.
 
-Bu formdan sonra hara təsir edir:
+Nümunə:
 
-- evaluation assignment formunda seçilir
-- test session formunda seçilir
-- recent cycles kartında görünür
-- export və list-lərdə period konteksti olur
+- `2026 Annual Performance`
+- `Q1 2026 Review`
 
-Praktik tövsiyə:
+Bu field:
 
-- eyni dövr üçün aydın adlandırma seç
-- aktiv cycle olmadan assignment-a keçmə
+- listdə görünür
+- form assignment zamanı seçilir
+- report-larda period etiketi kimi çıxır
 
-### 5.2. Recent cycles kartı
+#### `Cycle type`
 
-Bu kart:
+Hazır seçimlər:
 
-- dövrün periodunu
-- statusunu
-- auto generation açıqdır ya yox
-- edit və delete action-larını
+- `annual`
+- `academic`
+- `quarterly`
 
-göstərir.
+Bu təsnifat əsasən idarəetmə və reporting konteksti üçündür.
 
-## 6. Şablonlar tabı
+#### `Start date`
 
-Bu tab form skeleton-unu qurur. Burada üç qat var:
+Cycle-ın başlanğıc tarixidir.
 
-1. template
-2. section
-3. item
+#### `End date`
 
-### 6.1. Template formu
+Cycle-ın bitiş tarixidir.
 
-Field-lər:
+Bu iki tarix birlikdə period pəncərəsini yaradır.
 
-- `Template name`
-- `Template code`
-- `Description`
-- `Is active`
+#### `Status`
 
-Save olunanda nə olur:
+Hazır seçimlər:
 
-- `performance_form_templates` cədvəlinə yazılır
+- `draft`
+- `active`
+- `closed`
 
-Bu formdan sonra hara təsir edir:
+Praktik məna:
 
-- section formunda select olur
-- evaluation assignment formunda select olur
-- recent template kartlarında görünür
+- `draft`: hələ qurulur
+- `active`: istifadə olunur
+- `closed`: artıq bitib, yeni assignment üçün uyğun deyil
 
-Praktik qayda:
+#### `Auto-generate forms`
 
-- code sahəsini boş qoymaq olar
-- amma çox template olduqda seçim üçün code çox faydalıdır
+Bu flag gələcək və ya avtomatlaşdırılmış form generation məntiqinə hazır olmaq üçündür.
 
-### 6.2. Section formu
+Bugünkü istifadəçi üçün qayda:
+
+- iş axınında problem yaratmır
+- amma aktiv cycle-larda açıq qalması məntiqlidir
+
+#### `Description`
+
+Cycle-a izah, daxili qeyd və ya business context əlavə etmək üçündür.
+
+### 7.2. Cycle save ediləndə nə olur
+
+`performance_cycles` cədvəlində record yaranır və ya update olunur.
+
+Bu save-dən sonra dəyişən yerlər:
+
+- cycle dropdown-ları
+- recent cycles kartı
+- evaluation assignment
+- test session assignment
+- export və summary grouping
+
+### 7.3. HR üçün praktik qayda
+
+Əgər yeni il və ya yeni quarter başlayırsa:
+
+1. əvvəlcə cycle aç
+2. status-u `active` et
+3. sonra form və test assignment-a keç
+
+## 8. Şablonlar tabı
+
+Bu tab qiymətləndirmənin skeleton-unu qurur.
+
+Burada 3 qat var:
+
+1. `Template`
+2. `Section`
+3. `Item`
+
+### 8.1. Template formu
+
+#### `Template name`
+
+Şablonun göstərilən adı.
+
+Nümunə:
+
+- `Leadership Review Template`
+- `Officer Annual Evaluation`
+
+#### `Template code`
+
+Qısa daxili kod.
+
+Nümunə:
+
+- `LDR-2026`
+- `OFC-ANNUAL`
+
+Bu sahə çox template olduqda seçimi asanlaşdırır.
+
+#### `Description`
+
+Template-in nə üçün hazırlandığını izah edir.
+
+#### `Is active`
+
+Template istifadəyə açıqdır ya yox.
+
+### 8.2. Template save ediləndə nə olur
+
+`performance_form_templates` cədvəlinə record yazılır.
+
+Sonra harada istifadə olunur:
+
+- section formunda
+- evaluation assignment formunda
+- recent templates kartında
+- lists tabında
+
+### 8.3. Section formu
 
 Section template daxilində böyük məna blokudur.
 
-Field-lər:
+Misal:
 
-- `Template`
-- `Section name`
-- `Impact on result (%)`
-- `Sort order`
-
-Save olunanda nə olur:
-
-- `performance_form_template_sections` cədvəlinə yazılır
-
-Bu formdan sonra hara təsir edir:
-
-- item formunda section select olur
-- final scoring strukturunda section çəkisi kimi istifadə olunur
-- recent section kartında görünür
-
-### 6.3. Item formu
-
-Item ölçülən konkret kriteriyadır.
+- `Peşəkar davranış`
+- `İdarəetmə bacarıqları`
+- `Nəticəyönümlülük`
 
 Field-lər:
 
-- `Section`
-- `Competency`
-- `Criterion name`
-- `Description`
-- `Impact on result (%)`
-- `Low score threshold`
-- `Requires comment`
-- `Sort order`
+#### `Template`
 
-Field-lərin praktik mənası:
+Bu section hansı template-ə aiddir.
 
-- `Competency`
-  - Training Needs inteqrasiyasının əsas körpüsüdür
-- `Low score threshold`
-  - zəif nəticənin trigger həddidir
-- `Requires comment`
-  - evaluator-dan əlavə əsaslandırma gözlənilir
-- `Impact on result (%)`
-  - yekun hesabda rol oynayır
+#### `Section name`
 
-Save olunanda nə olur:
+Section-un adı.
 
-- `performance_form_template_items` cədvəlinə yazılır
+#### `Impact on result (%)`
 
-Bu formdan sonra hara təsir edir:
+Section-un yekun hesabdakı çəkisi.
 
-- score capture formunda item seçilir
-- final score hesabına daxil olur
-- threshold altına düşərsə training need yarada bilir
-- recent item kartında görünür
+Bu rəqəm nə qədər yüksəkdirsə, həmin blok yekuna daha çox təsir edir.
 
-Ən vacib qayda:
+#### `Sort order`
 
-- item competency-yə bağlanmalıdır
-- əks halda zəif score görünəcək, amma auto training need yaranmayacaq
+Section hansı sırada görünəcək.
 
-### 6.4. Şablonlar tabında iş sırası
+### 8.4. Section save ediləndə nə olur
+
+`performance_form_template_sections` cədvəlinə record yazılır.
+
+Sonra harada istifadə olunur:
+
+- item formunda section seçimi kimi
+- template strukturunda
+- scoring zamanı item-lərin məna qruplaşması kimi
+
+### 8.5. Item formu
+
+Item qiymətləndirilən konkret kriteriyadır.
+
+Misal:
+
+- `Etik qaydalara riayət`
+- `Tapşırıqları vaxtında icra edir`
+- `Komanda ilə koordinasiya`
+
+Field-lər:
+
+#### `Section`
+
+Item hansı section-a aiddir.
+
+#### `Competency`
+
+Ən vacib field-lərdən biridir.
+
+Bu field boş olarsa:
+
+- item qiymətləndirilə bilər
+- amma zəif nəticə competency əsaslı training link yaratmaz
+
+#### `Criterion name`
+
+Item-in qısa adı.
+
+#### `Description`
+
+Ətraflı izah.
+
+#### `Impact on result (%)`
+
+Həmin item-in yekun nəticədə çəkisi.
+
+#### `Low score threshold`
+
+Bu item üzrə hansı baldan aşağı nəticə zəif sayılacaq.
+
+Misal:
+
+- threshold `60`-dırsa, `45` score zəif trigger hesab edilir
+
+#### `Requires comment`
+
+Bu field aktivdirsə, evaluator-dan comment gözlənilir.
+
+#### `Sort order`
+
+Section daxilində item-lərin görünmə sırasıdır.
+
+### 8.6. Item save ediləndə nə olur
+
+`performance_form_template_items` cədvəlinə record yazılır.
+
+Sonra harada istifadə olunur:
+
+- score capture formunda
+- evaluator workspace-də
+- weak score detection məntiqində
+- Training Needs inteqrasiyasında
+
+### 8.7. Şablonlar tabında düzgün iş qaydası
 
 Doğru sıra budur:
 
 1. template yarat
 2. həmin template üçün section yarat
-3. hər section üçün item yarat
-4. hər item üçün threshold və competency-ni yoxla
+3. həmin section üçün item yarat
+4. item competency və threshold dəyərlərini yoxla
+5. yalnız bundan sonra evaluation assignment et
 
-Bu sıra pozularsa evaluation assignment zamanı natamam skeleton yaranır.
+## 9. Qiymətləndirmələr tabı
 
-## 7. Qiymətləndirmələr tabı
+Bu tab real əməliyyat qatıdır.
 
-Bu tab real əməliyyat qatıdır. Burada iki əsas iş görülür:
+Burada iki əsas iş görülür:
 
-1. form assignment
-2. evaluator score capture
+1. form təyinatı
+2. manual score capture
 
-### 7.1. Evaluation assignment formu
+Sağdakı `Son formalar` kartı isə bu iki işin nəticəsini izləmək üçündür.
 
-Field-lər:
+### 9.1. Form təyinatı bloku
 
-- `Cycle`
-- `Template`
-- `Employee`
-- `Manager`
-- `HR reviewer`
-
-Save olunanda nə olur:
-
-- `performance_forms` cədvəlinə create və ya update olunur
-- eyni cycle + template + employee varsa `updateOrCreate` məntiqi işləyir
-
-Bu formdan sonra hara təsir edir:
-
-- evaluator score formunda selectable olur
-- recent forms kartında görünür
-- evaluator workspace üçün iş yaradır
-
-Praktik qayda:
-
-- employee seçmədən əvvəl template-in tam hazır olduğuna əmin ol
-- manager və HR reviewer sahələri sonrakı iş sahəsi üçün vacibdir
-
-### 7.2. Evaluator score formu
+Bu blok yeni `performance_form` yaradır.
 
 Field-lər:
 
-- `Evaluation form`
-- `Criterion`
-- `Evaluator`
-  - `self`, `manager`, `hr`
-- `Score`
-- `Comment`
+#### `Cycle`
 
-Save olunanda nə olur:
+Form hansı qiymətləndirmə dövrünə aiddir.
 
-- `performance_form_scores` cədvəlinə update-or-create yazılır
-- formun uyğun evaluator statusu `submitted` olur
-- formun final nəticəsi yenilənir
-- weak-area sync servisi işləyir
-- lazım gələrsə `training_need_items` və `performance_training_need_links` yaranır
-- əvvəl yaranmış auto link artıq zəif deyilsə silinə bilər
+#### `Template`
 
-Bu formdan sonra hara təsir edir:
+Form hansı skeleton-dan qurulacaq.
 
-- recent forms
-- weak links kartı
-- Training Needs modulu
-- export report-lar
+#### `Employee`
 
-### 7.3. Score save olunanda konkret nə baş verir
+Qiymətləndirilən əməkdaş.
 
-Əgər score normal həddədirsə:
+#### `Manager`
 
-- score yazılır
-- evaluator statusu yenilənir
-- formun nəticəsi refresh olunur
+Manager evaluator. Bu istifadəçi manager score-larını dolduracaq.
 
-Əgər score `Low score threshold` dəyərindən aşağıdırsa:
+#### `HR reviewer`
 
-1. sistem bunu zəif nəticə kimi qəbul edir
-2. item competency-yə bağlıdırsa həmin competency ilə əlaqəli training need yarada bilər
-3. `performance_training_need_links` cədvəlində link yaranır
-4. `Training Needs` modulunda source=`performance_gap` olan need görünür
+HR evaluator. Bu istifadəçi HR baxışı və əlavə review üçün istifadə olunur.
 
-Əgər sonradan score düzəlirsə:
+### 9.2. Form təyinatı save ediləndə nə olur
 
-- auto-created link təmizlənə bilər
-- artıq zəif olmayan nəticə need ilə bağlı qalmaz
+`performance_forms` cədvəlində record yaranır və ya edit rejimində update olunur.
 
-Əgər item competency-yə bağlı deyilsə:
+Bunun təsiri:
 
-- score yenə də yazılır
-- amma training need inteqrasiyası işləmir
-- sistem bunu ayrıca xəbərdarlıq mesajı ilə bildirir
+- `Son formalar` kartında görünür
+- evaluator workspace-də assignment kimi görünür
+- score capture dropdown-ında seçilə bilir
+- sonradan form reports-a düşür
 
-### 7.4. Recent forms kartı
+### 9.3. Score capture bloku
 
-Bu kartda dörd status xətti var:
+Bu blok admin/workbench səviyyəsində manual score yazmaq üçündür.
 
-- `self_status`
-- `manager_status`
-- `hr_status`
-- `final_category`
+Bu, evaluator workspace-in alternativi deyil. Daha çox əməliyyat və düzəliş qatıdır.
 
-İlk üçü evaluator mərhələsini göstərir:
+Field-lər:
 
-- `draft`
+#### `Evaluation form`
+
+Bal yazılacaq form.
+
+#### `Item`
+
+Bal yazılacaq konkret kriteriya.
+
+#### `Evaluator type`
+
+Hazır seçimlər:
+
+- `self`
+- `manager`
+- `hr`
+
+Bu field score-un hansı baxışa aid olduğunu təyin edir.
+
+#### `Score`
+
+Verilən bal.
+
+#### `Comment`
+
+Əlavə izah və əsaslandırma.
+
+### 9.4. Score save ediləndə nə olur
+
+`performance_form_scores` cədvəlində record yaranır və ya update olunur.
+
+Sonra nə baş verir:
+
+- həmin item üzrə score yadda qalır
+- final nəticə hesablanması üçün baza yaranır
+- zəif threshold aşağı düşərsə weak link səbəbi yarana bilər
+- evaluator summary və `Son formalar` kartı yenilənir
+
+### 9.5. Sağdakı `Son formalar` kartı nəyi göstərir
+
+Bu kart son yaradılmış və ya son işlənən formaları göstərir.
+
+Kartda görünən əsas məlumat:
+
+- işçi adı
+- cycle
+- template
+- manager və HR reviewer
+- self/manager/hr status-ları
+- yekun kateqoriya
+- yekun score
+
+Bu kart:
+
+- tam arxiv deyil
+- qısa summary vitrini-dir
+
+Tam və filtrli baxış üçün `Tam siyahılar` tabına keçmək lazımdır.
+
+## 10. Evaluator workspace
+
+Route:
+
+- `/performance-evaluation/evaluator`
+
+Bu ayrıca iş sahəsidir və manager/reviewer üçün daha təmiz istifadə ssenarisidir.
+
+### 10.1. Sol panel: `Mənə təyin olunan formalar`
+
+Bu panel evaluator-a aid formaları göstərir.
+
+Filter-lər:
+
+#### `Search`
+
+İşçi adı, cycle, template üzrə axtarış üçündür.
+
+#### `Role filter`
+
+Hazır seçimlər:
+
+- `all`
+- `manager`
+- `hr`
+
+#### `Status filter`
+
+Hazır seçimlər:
+
+- `all`
+- `pending`
 - `submitted`
 
-Sonuncu isə nəticə kateqoriyasıdır:
+Bu paneldə kartların üzərində qalan meyar sayı da görünür.
 
-- `high`
-- `medium`
-- `weak`
+### 10.2. Orta panel: `Bal formu`
 
-Bu dörd badge eyni şey deyil.
+Bu panel seçilmiş form üzrə meyar-me yar score daxil etmək üçündür.
 
-### 7.5. Weak links kartı
+Əsas field-lər:
 
-Bu kart zəif nəticədən yaranan training need bağlantılarını göstərir.
+#### `Qiymətləndirmə forması`
 
-Burada istifadəçi görə bilər:
+Seçilmiş form.
 
-- hansı form
-- hansı item
-- hansı competency
-- hansı əməkdaş
-- hansı zəif nəticə
+#### `Meyar`
 
-Bu kart Training Needs inteqrasiyasının canlı sübutudur.
+Seçilmiş item.
 
-### 7.6. Evaluator workspace
+#### `Bal`
 
-Bu ayrıca istifadəçi iş sahəsidir. Rəhbər və HR reviewer özünə düşən işləri burada idarə edir.
+Verilən score.
 
-Buradakı iş axını:
+#### `Şərh`
 
-1. soldakı assigned forms siyahısından formanı tap
-2. `Open score form` ilə sağdakı score formunu doldur
-3. item seç
-4. score və comment yaz
-5. save et
+İzah.
 
-Open-answer review hissəsi də eyni məntiqlə işləyir:
+`Balı yadda saxla` edəndə:
 
-1. pending review cavabını tap
-2. `Open review form` et
-3. bal və rəy yaz
-4. review et
+- form score yenilənir
+- həmin form üzrə progress badge yenilənir
+- dashboard-dakı `Son formalar` summary-si də yenilənir
 
-## 8. Testlər tabı
+### 10.3. Sağ panel: `Assigned reviews`
 
-Bu tab skill measurement üçündür.
+Bu panel reviewer-ə düşən open-answer cavablarını göstərir.
 
-### 8.1. Test bank formu
+Bu hissə test review xəttinə aiddir.
 
-Field-lər:
+## 11. Testlər tabı
 
-- `Test bank name`
-- `Test bank code`
-- `Pass score (%)`
-- `Duration (minutes)`
-- `Description`
-- `Max attempts`
-- `Is active`
+Bu tab test xəttini idarə edir.
 
-Save olunanda nə olur:
+Burada 6 əsas blok var:
 
-- `performance_test_banks` cədvəlinə yazılır
+1. `Test bank setup`
+2. `Test question setup`
+3. `Test session setup`
+4. `Attempt capture`
+5. `Attempt finalize`
+6. `Open answer review`
 
-Bu formdan sonra hara təsir edir:
+Sağda isə `TestsSummary` child kartı var.
 
-- question formunda select olur
-- test session formunda select olur
-- recent bank kartlarında görünür
+### 11.1. Test bank setup
 
-### 8.2. Test question formu
+Bu blok test bank yaradır.
 
 Field-lər:
 
-- `Test bank`
-- `Competency`
-- `Question type`
-  - `multiple_choice`
-  - `open_answer`
-  - `case_study`
-  - `behavioral`
-- `Question prompt`
-- `Description`
-- `Maximum score`
-- `Sort order`
-- `Is active`
-- `Options`
+#### `Test bank name`
 
-Xüsusi qeyd:
+Bankın adı.
 
-- `Options` əsasən multiple-choice suallar üçün vacibdir
-- multiple-choice seçilərsə variantlar boş qala bilməz
+#### `Test bank code`
 
-Save olunanda nə olur:
+Qısa identifikator.
 
-- `performance_test_questions` cədvəlinə yazılır
-- option-lar ayrıca sync olunur
+#### `Pass score`
 
-Bu formdan sonra hara təsir edir:
+Keçid balı.
 
-- attempt answer formunda question select olur
-- competency link-i varsa zəif nəticə Training Needs-ə gedə bilər
+#### `Duration minutes`
 
-### 8.3. Test session formu
+İmtahan müddəti.
 
-Field-lər:
+#### `Max attempts`
 
-- `Cycle`
-- `Test bank`
-- `Employee`
-- `Reviewer`
-- `Scheduled at`
-- `Available until`
-- `Pass score`
-- `Duration`
-- `Max attempts`
-- `Status`
-  - `assigned`, `in_progress`, `completed`, `closed`
+İcazə verilən maksimum cəhd sayı.
 
-Save olunanda nə olur:
+#### `Description`
 
-- `performance_test_sessions` cədvəlinə yazılır
+Bankın izahı.
 
-Bu formdan sonra hara təsir edir:
+#### `Is active`
 
-- attempt answer formu
-- recent attempts
-- review queue
+Bank istifadəyə açıqdır ya yox.
 
-### 8.4. Attempt answer formu
+### 11.2. Test bank save ediləndə nə olur
+
+`performance_test_banks` cədvəlində record yaranır.
+
+Sonra:
+
+- sual formunda selectable olur
+- session formunda selectable olur
+- `Son test bankları` kartında görünür
+
+### 11.3. Test question setup
+
+Bu blok bank daxilində sual yaradır.
 
 Field-lər:
 
-- `Test session`
-- `Question`
-- `Attempt number`
-- `Option`
-- `Answer text`
+#### `Test bank`
 
-Məntiq:
+Sual hansı banka aiddir.
 
-- auto-scored suallarda option seçilməlidir
-- open-answer tipində text cavabı boş qala bilməz
-- seçilən sual seçilən bank-a aid olmalıdır
+#### `Competency`
 
-Save olunanda nə olur:
+Sual hansı competency-ni ölçür.
 
-- `performance_test_attempts` lazım gələrsə yaradılır
-- `performance_test_attempt_answers` update-or-create ilə yazılır
-- cavab open-answer-dırsa review status `pending` olur
-- auto-score olursa `auto_ready` olur
+Bu sahə sonradan skill gap və training link üçün vacibdir.
 
-### 8.5. Finalize attempt action-ı
+#### `Question type`
 
-Bu action seçilmiş cəhdi bağlayır.
+Hazır seçimlər:
 
-Finalize olunanda nə olur:
+- `multiple_choice`
+- `open_answer`
+- `case_study`
+- `behavioral`
 
-- auto-score olunan suallar hesablanır
-- cəhdin yekun faizi çıxır
-- pass/fail məntiqi işləyir
-- zəif skill nəticəsi varsa Training Needs inteqrasiyası işləyə bilər
+#### `Prompt`
 
-Bu addım edilmədən test nəticəsi tam bağlanmış hesab olunmur.
+Sual məzmunu.
 
-### 8.6. Open answer review formu
+#### `Description`
+
+Əlavə izah.
+
+#### `Max score`
+
+Maksimal bal.
+
+#### `Sort order`
+
+Sual sırası.
+
+#### `Options text`
+
+Variantlı suallar üçün seçimlər.
+
+Format bu məntiqə uyğundur:
+
+- hər variant ayrıca sətirdə
+- düzgün cavab ayrıca formatla işarələnir
+
+#### `Is active`
+
+Sual istifadəyə açıqdır ya yox.
+
+### 11.4. Test question save ediləndə nə olur
+
+`performance_test_questions` və sual tipindən asılı olaraq option record-ları yaranır.
+
+Sonra:
+
+- session bankı ilə əlaqəli istifadə olunur
+- attempt capture mərhələsində selectable olur
+- competency bağlantısı skill measurement üçün baza yaradır
+
+### 11.5. Test session setup
+
+Bu blok testin konkret işçiyə verilməsini qurur.
 
 Field-lər:
 
-- `Answer`
-- `Review score`
-- `Feedback`
+#### `Cycle`
 
-Save olunanda nə olur:
+Session hansı cycle-a aiddir.
 
-- reviewer əl ilə bal verir
-- cavabın review hissəsi bağlanır
-- test nəticəsi daha düzgün yekunlaşır
+#### `Test bank`
 
-Bu hissə yalnız review permission olan istifadəçi üçündür.
+Hansı bank işçiyə veriləcək.
 
-## 9. Training Needs ilə inteqrasiya
+#### `Personnel`
 
-Bu modul iki fərqli source ilə training need yarada bilər:
+İmtahan verən əməkdaş.
 
-1. `performance_gap`
-   - form əsaslı aşağı score
-2. `skill_gap`
-   - test və measurement nəticəsi zəifdir
+#### `Reviewer`
 
-Need yaranması üçün lazım olan şərtlər:
+Open-answer və manual review cavablarını yoxlayan şəxs.
 
-- item və ya question competency-yə bağlı olmalıdır
-- employee müəyyən olmalıdır
-- nəticə threshold-dan aşağı düşməlidir
+#### `Scheduled at`
 
-Need yaranandan sonra nə olur:
+Planlanan tarix.
 
-- Training Needs modulunda need queue-ya düşür
-- planlama və session axınına qoşula bilir
+#### `Available until`
 
-## 10. Tam siyahılar tabı
+Son istifadə tarixi.
 
-Bu tab dashboard kartlarının geniş versiyasıdır.
+#### `Pass score`
 
-Burada:
+Bank default dəyərini override edə bilər.
 
-- search
-- filter
-- pagination
-- detail panel
+#### `Duration minutes`
 
-ilə aşağıdakı varlıqlar görünür:
+Bank default dəyərini override edə bilər.
 
-- forms
-- templates
-- items
-- weak links
-- test attempts
+#### `Max attempts`
 
-Dashboard kartı kifayət etmirsə, həmişə bu hissəyə keç.
+Bank default dəyərini override edə bilər.
 
-## 11. Export və report hissəsi
+#### `Status`
 
-Moduldan bu report-lar çıxarıla bilir:
+Hazır seçimlər:
+
+- `assigned`
+- `in_progress`
+- `completed`
+- `closed`
+
+### 11.6. Test session save ediləndə nə olur
+
+`performance_test_sessions` cədvəlində record yaranır.
+
+Sonra:
+
+- attempt capture-da seçilə bilir
+- tests summary-də nəticələrə bağlanır
+- reviewer queue üçün kontekst yaradır
+
+### 11.7. Attempt capture
+
+Bu blok test cavablarını yazmaq üçündür.
+
+Bu, bugünkü moduldə admin/workbench və ya manual əməliyyat qatı kimidir.
+
+Field-lər:
+
+#### `Test session`
+
+Cavab hansı təyinata aiddir.
+
+#### `Question`
+
+Hansı sual cavablanır.
+
+#### `Attempt no`
+
+Neçənci cəhddir.
+
+#### `Option`
+
+Auto-scored sual üçün seçilən variant.
+
+#### `Answer text`
+
+Open-answer, case-study və behavioral suallar üçün mətn cavabı.
+
+### 11.8. Attempt answer save ediləndə nə olur
+
+Əvvəlcə uyğun `performance_test_attempt` record-u tapılır və ya yaradılır.
+
+Sonra `performance_test_attempt_answers` record-u yaranır və ya update olunur.
+
+Sual auto-scored-dursa:
+
+- düzgün variantla müqayisə edilə bilər
+- ilkin score sistemi doldura bilər
+
+Sual manual review tələb edirsə:
+
+- cavab `pending review` növbəsinə düşür
+
+### 11.9. Attempt finalize
+
+Bu blok cəhdi yekunlaşdırır.
+
+Field:
+
+#### `Attempt`
+
+Yekunlaşdırılacaq cəhd.
+
+`Finalize` sonrası:
+
+- attempt status-u dəyişir
+- score və percentage hesablanır
+- open-answer pending qalırsa review pending status-u saxlanır
+- zəif nəticə varsa competency əsaslı training link yarana bilər
+
+### 11.10. Open answer review
+
+Bu blok open-answer cavablarına manual score vermək üçündür.
+
+Field-lər:
+
+#### `Answer`
+
+Review ediləcək cavab.
+
+#### `Review score`
+
+Reviewer-in verdiyi bal.
+
+#### `Feedback`
+
+Reviewer rəyi.
+
+Save sonrası:
+
+- answer review status-u yenilənir
+- attempt-in ümumi nəticəsi yenidən hesablanır
+- tests summary kartı yenilənir
+
+## 12. Test məlumatları bu gün harada toplanır
+
+Bu sual çox vacibdir, çünki bugünkü UX burada tam ideal deyil.
+
+### 12.1. Test banklar
+
+Hazırda bunlar əsasən:
+
+- `Testlər` tabındakı `Son test bankları` kartında
+
+görünür.
+
+Tam, ayrı, paginated bank management siyahısı hazırda ayrıca yoxdur.
+
+### 12.2. Sual bankı
+
+Hazırda ayrıca `question list management` səhifəsi yoxdur.
+
+Sual daha çox:
+
+- question setup formu
+- həmin bankla bağlı əməliyyat axını
+
+üzərindən idarə olunur.
+
+Bu, az data üçün işləyir. Data çoxaldıqda zəifdir.
+
+### 12.3. Test təyinatları
+
+Yəni `test sessions`.
+
+Hazırda bunlar:
+
+- session setup formu
+- cəhd və summary konteksti
+
+üzərindən görünür.
+
+Ayrı session arxiv/list səhifəsi yoxdur.
+
+### 12.4. Cavablar və cəhdlər
+
+Hazırda bunlar iki yerdə görünür:
+
+- `TestsSummary` daxilində `Son test cəhdləri`
+- `Tam siyahılar` tabında `Recent test attempts`
+
+Yəni tam paginated görünən yeganə test xətti siyahısı faktiki olaraq `attempts` siyahısıdır.
+
+### 12.5. Pending review cavablar
+
+Bunlar:
+
+- `TestsSummary`
+- `Evaluator workspace`
+
+üzərində görünür.
+
+### 12.6. Professional nəticə
+
+Əgər test banklarının, sualların və session-ların sayı çoxalacaqsa, hazırkı struktur limitlidir.
+
+Professional baxımdan gələcəkdə ayrıca lazımdır:
+
+- `Test banks list`
+- `Question bank list`
+- `Test sessions list`
+- `Attempts and answers list`
+- `Test reporting dashboard`
+
+## 13. Bu test axını peşəkar baxımdan nə qədər düzgündür
+
+Qısa cavab:
+
+- `test yaratmaq` hissəsi bu dashboard-da ola bilər
+- amma `manual answer capture` ilə eyni admin səhifədə olması ideal son vəziyyət deyil
+
+### 13.1. Nə doğrudur
+
+Peşəkar sistemlərdə adətən ayrıca olur:
+
+1. `Authoring`
+   - bank yaratmaq
+   - sual yaratmaq
+   - scoring rule yaratmaq
+2. `Delivery`
+   - testi konkret istifadəçiyə vermək
+   - işçinin testi ayrıca test ekranında etməsi
+3. `Review`
+   - open-answer review
+4. `Reporting`
+   - nəticə və analitika
+
+### 13.2. Bugünkü sistem nə edir
+
+Bugünkü sistemdə:
+
+- authoring var
+- assignment var
+- manual attempt capture var
+- review var
+
+hamısı eyni dashboard-da toplanıb.
+
+Bu niyə problem yarada bilər:
+
+- admin ekranı yüklənir
+- əməliyyat rolu ilə nəticə rolu qarışır
+- həqiqi “imtahan vermə” təcrübəsi ayrı olmur
+- audit və user journey qarışa bilər
+
+### 13.3. Bugünkü yanaşma tam səhvdirmi
+
+Yox.
+
+Əgər məqsəd:
+
+- HR üçün idarəetmə workbench
+- test mexanizmini daxildə simulyasiya etmək
+- cavabları manual daxil etmək
+
+dirsə, bu məntiqlidir.
+
+Amma professional son model kimi ən yaxşı yanaşma adətən belə olur:
+
+- `Admin dashboard`: bank, sual, session, reporting
+- `Candidate/Test taker screen`: real test həlli
+- `Reviewer workspace`: manual review
+- `Reports screen`: analitika
+
+### 13.4. Tövsiyə
+
+Bu modul gələcəkdə böyüyəcəksə, test xəttini 4 yerə bölmək daha doğrudur:
+
+1. `Test authoring`
+2. `Test assignments`
+3. `Test taking`
+4. `Review and reports`
+
+## 14. Hazırda hansı hesabatlar var
+
+Bugünkü moduldə mövcud report-lar bunlardır:
+
+### 14.1. `Forms report`
+
+Hər form üzrə:
+
+- personnel
+- tabel no
+- cycle
+- template
+- manager
+- HR reviewer
+- final score
+- final category
+- self status
+- manager status
+- HR status
+
+### 14.2. `Summary report`
+
+Cycle + template qruplaşdırması ilə:
+
+- forms count
+- average score
+- high count
+- medium count
+- weak count
+
+### 14.3. `Weak links report`
+
+Competency üzrə zəif link-ləri göstərir.
+
+### 14.4. `Weak pivot report`
+
+Zəif sahələri competency, priority və status üzrə pivot edir.
+
+### 14.5. `Audit report`
+
+Əsas əməliyyat izlərini çıxarır.
+
+### 14.6. `Print summary`
+
+Brauzerdən PDF kimi saxlanıla bilən çap görünüşüdür.
+
+## 15. Hansı test report-ları hazırda çatmır
+
+Sənin dediyin ehtiyac tam doğrudur. Bu report-lar ayrıca lazımdır:
+
+1. `Test sessions report`
+   - hansı bank kimə verilib
+   - reviewer kimdir
+   - scheduled / available until
+   - status
+2. `Attempt results report`
+   - hansı cəhd neçə bal alıb
+   - passed / failed
+   - neçə faiz toplayıb
+3. `Answer detail report`
+   - hansı testdə hansı sual cavablanıb
+   - hansı cavab doğru olub
+   - hansı cavab yanlış olub
+   - open-answer review score nə olub
+4. `Question analysis report`
+   - ən çox yanlış cavablanan suallar
+   - competency üzrə zəiflik
+5. `Personnel test history`
+   - işçinin bütün test keçmişi
+   - hansı banklarda, hansı nəticə ilə iştirak edib
+
+Hazırda bunlar tam hazır deyil.
+
+Yəni bugünkü modul:
+
+- test qurur
+- nəticə çıxarır
+- weak link yaradır
+
+amma tam imtahan analitika qatı hələ son mərhələdə deyil.
+
+## 16. Tam siyahılar tabı
+
+Bu tab uzunmüddətli nəzarət üçündür.
+
+Hazır entity-lər:
+
+- `forms`
+- `templates`
+- `items`
+- `test_banks`
+- `test_questions`
+- `test_sessions`
+- `attempts`
+- `test_answers`
+- `weak_links`
+
+Bu o deməkdir ki, hazırda tam paginated baxış bunlar üçündür:
+
+- performans formaları
+- template-lər
+- item-lər
+- test bankları
+- test sualları
+- test sessiyaları
+- test cəhdləri
+- test cavabları
+- zəif sahə link-ləri
+
+Bu boşluq artıq bağlanıb. Test authoring və delivery datası da ayrıca arxiv şəklində görünür.
+
+## 17. Hesabatlar tabı
+
+Bu tab report mərkəzidir.
+
+Burada iki böyük qrup var:
+
+1. performans və weak link report-ları
+2. test delivery və answer audit report-ları
+
+Hazır report-lar:
 
 - forms report
 - summary report
 - weak links report
 - weak pivot report
 - audit report
+- test sessions report
+- test attempts report
+- test answers report
 - print summary
 
-Bu report-lar gündəlik edit işi üçün deyil; audit, rəhbərlik və arxiv üçündür.
+## 18. Save edəndə nə nəyə təsir edir
 
-## 12. Save edəndə təsir xəritəsi
+Bu bölmə ən vacib bölmələrdən biridir.
 
-Qısa xatırlatma:
+### 18.1. Cycle save
 
-- `Cycle`
-  - period konteynerini yaradır
-- `Template`
-  - form skeleton-u yaradır
-- `Section`
-  - nəticə strukturunu qurur
-- `Item`
-  - real ölçmə kriteriyasını və weak trigger-i yaradır
-- `Evaluation form`
-  - əməkdaş assignment-i yaradır
-- `Score`
-  - evaluator statusunu, nəticəni və weak link-i yeniləyir
-- `Test bank`
-  - measurement bazasını yaradır
-- `Question`
-  - competency bağlı test materialı yaradır
-- `Test session`
-  - real employee test assignment-i yaradır
-- `Attempt answer`
-  - cavab bazasını qurur
-- `Finalize`
-  - cəhdi bağlayır və nəticəni formalaşdırır
-- `Review`
-  - open-answer hissəsini yekunlaşdırır
+Yenilənən yerlər:
 
-## 13. Tipik iş ssenariləri
+- cycle select-lər
+- recent cycles
+- assignment və session context
 
-### Ssenari A: İllik performans qiymətləndirməsi
+### 18.2. Template save
 
-1. cycle yarat
-2. template yarat
-3. section və item-ları tamamla
-4. hər item-in competency və threshold-unu yoxla
-5. evaluation formu əməkdaşa təyin et
-6. manager score daxil et
-7. HR review score daxil et
-8. weak link yaranıbsa Training Needs-ə keç və oradakı need-i planlaşdır
+Yenilənən yerlər:
 
-### Ssenari B: Skill measurement ilə gap aşkar etmək
+- template select-lər
+- recent templates
+- section və evaluation dependency
 
-1. test bank yarat
-2. sualları competency-lərlə bağla
-3. test session yarat
-4. cavabları daxil et
-5. open-answer varsa review et
-6. attempt-i finalize et
-7. weak skill nəticəsi varsa Training Needs-də yaranan need-i yoxla
+### 18.3. Section save
 
-### Ssenari C: Manager günlük işi
+Yenilənən yerlər:
 
-1. evaluator workspace-ə gir
-2. assigned formu seç
-3. score formunu aç
-4. item üzrə bal ver
-5. lazım olduqda comment yaz
-6. submit et
+- section select
+- recent sections
+- item setup dependency
 
-## 14. Ən çox edilən səhvlər
+### 18.4. Item save
 
-- cycle yaratmadan form təyinatına keçmək
-- template hazır olmadan employee assignment etmək
-- item-ı competency-siz saxlamaq
-- threshold-u boş və ya mənasız vermək
-- test question-u yanlış bank ilə qarışdırmaq
+Yenilənən yerlər:
+
+- item select
+- recent items
+- score capture
+- future training link logic
+
+### 18.5. Evaluation form save
+
+Yenilənən yerlər:
+
+- `Son formalar`
+- evaluator workspace assigned forms
+- score capture form options
+
+### 18.6. Score save
+
+Yenilənən yerlər:
+
+- form progress
+- final nəticə
+- weak link logic
+- `Son formalar`
+- evaluator workspace progress badge
+
+### 18.7. Test bank save
+
+Yenilənən yerlər:
+
+- bank options
+- `Son test bankları`
+- question və session dependency
+
+### 18.8. Test question save
+
+Yenilənən yerlər:
+
+- question options
+- bank scoring logic
+- attempt capture dependency
+
+### 18.9. Test session save
+
+Yenilənən yerlər:
+
+- session options
+- attempt capture dependency
+- reviewer queue konteksti
+
+### 18.10. Attempt answer save
+
+Yenilənən yerlər:
+
+- attempt record
+- tests summary
+- pending review queue
+
+### 18.11. Attempt finalize
+
+Yenilənən yerlər:
+
+- attempt nəticəsi
+- percentage
+- passed/failed
+- weak link / training integration
+- tests summary
+
+### 18.12. Review answer save
+
+Yenilənən yerlər:
+
+- cavab review status-u
+- attempt totals
+- reviewer queue
+- tests summary
+
+## 19. Test xəttinin tam əməliyyat bələdçisi
+
+Bu bölmə yalnız `Testlər` xətti üçündür.
+
+Əgər istifadəçi uşağa izah edirmiş kimi sadə dildə başa düşmək istəyirsə, bu məntiqi belə yadda saxla:
+
+- `Test bank` bir imtahan qovluğudur
+- `Question` həmin qovluqdakı suallardır
+- `Test session` həmin imtahanın konkret əməkdaşa verilməsidir
+- `Attempt` işçinin imtahanı neçə dəfə həll etdiyini göstərən cəhddir
+- `Answer` hər sual üzrə verilən cavabdır
+- `Review` açıq cavabların insan tərəfindən yoxlanmasıdır
+- `Finalize` həmin cəhdin bağlanmasıdır
+- `Report` sonradan nə baş verdiyini izləmək üçündür
+
+### 19.1. Test xəttində kim nə edir
+
+#### `HR / Admin`
+
+Bu rol:
+
+- test bank yaradır
+- sual yaradır
+- test session təyin edir
+- report və audit nəzarəti aparır
+
+#### `İşçi`
+
+Bu rol:
+
+- özünə təyin olunan testi `Test workspace`-də açır
+- cavab yazır
+- qaralamanı saxlayır və ya auto-save ilə davam edir
+- vaxt bitmədən attempt-i yekunlaşdırır
+
+#### `Reviewer`
+
+Bu rol:
+
+- açıq cavabları yoxlayır
+- review score verir
+- feedback yazır
+
+### 19.2. Düzgün iş sırası
+
+Test xəttində professional ardıcıllıq belə olmalıdır:
+
+1. əvvəl `Test bank` yarat
+2. sonra həmin banka sualları əlavə et
+3. variantlı sualların option-larını düzgün qur
+4. açıq suallarda max score və məqsədi düzgün təyin et
+5. yalnız bundan sonra `Test session` ilə əməkdaşa test təyin et
+6. işçi testi `Test workspace`-də həll etsin
+7. open-answer varsa reviewer onu yoxlasın
+8. cəhd yekunlaşsın
+9. nəticəni `Tam siyahılar` və `Hesabatlar` tabında audit et
+
+Ən böyük səhv budur:
+
+- bankı yarımçıq saxlayıb session təyin etmək
+- sual option-ları düzgün deyilkən testi istifadəyə vermək
+- open-answer review gözləyən attempt üçün yekun nəticəni hazır hesab etmək
+
+### 19.3. Test bank nədir
+
+`Test bank` eyni mövzu və ya eyni bacarıq qrupu üzrə imtahan skeletidir.
+
+Misal:
+
+- `İllik imtahan`
+- `Excel bacarıqları`
+- `İş etikası testi`
+
+Bir bank:
+
+- adını daşıyır
+- keçid balını daşıyır
+- default vaxt limitini daşıyır
+- maksimum cəhd sayını daşıyır
+- onun içindəki bütün sualların konteyneri olur
+
+### 19.4. Test bank field-ləri nə deməkdir
+
+#### `Name`
+
+Testin ekranda görünən əsas adıdır.
+
+Bu ad:
+
+- session kartında görünür
+- test workspace-də görünür
+- report-larda görünür
+
+#### `Code`
+
+Daxili identifikasiya üçündür.
+
+Bu field:
+
+- qısa kodlama
+- arxiv və audit
+- eyni adda bankları fərqləndirmək
+
+üçün faydalıdır.
+
+#### `Description`
+
+Bu bankın hansı məqsəd üçün yaradıldığını yazmaq üçündür.
+
+Nümunə:
+
+- yeni işə qəbul üçün ilkin bilik yoxlaması
+- daxili etik davranış testi
+- proqram bilik ölçümü
+
+#### `Pass score`
+
+Keçid həddidir.
+
+Bu faizdir. Məsələn `60` o deməkdir ki, yekun faiz `60%` və ya daha çox olmalıdır.
+
+#### `Duration minutes`
+
+İşçiyə verilən vaxt limitidir.
+
+Bu dəyər:
+
+- test başlayanda sayğac üçün əsas olur
+- vaxt bitəndə auto-submit davranışını müəyyən edir
+
+#### `Max attempts`
+
+Eyni test üzrə neçə dəfə cəhd etmək olar.
+
+Misal:
+
+- `1` → yalnız bir dəfə həll edilə bilər
+- `2` → birinci cəhd uğursuz olsa və siyasət icazə verirsə ikinci cəhd açılar
+
+#### `Is active`
+
+Bank hazırda istifadəyə açıqdır ya yox.
+
+Aktiv olmayan bank:
+
+- yeni session assignment üçün istifadə edilməməlidir
+
+### 19.5. Sual tipləri ayrı-ayrı necə işləyir
+
+#### `Multiple choice`
+
+Bu, variantlı sualdır.
+
+İstifadəçi variantlardan birini seçir.
+
+Bu tip sualda:
+
+- option-lar olmalıdır
+- hər option-un düzgünlüyü qeyd olunmalıdır
+- hər option-un `score_value` dəyəri ola bilər
+
+Bu o deməkdir ki, variantlı sual yalnız `doğru / yanlış` məntiqi ilə yox, qismən bal ilə də işləyə bilər.
+
+Misal:
+
+- düzgün variant `100`
+- natamam doğru variant `50`
+- tam yanlış variant `0`
+
+Bu tip suallar auto-scored olur.
+
+#### `Open answer`
+
+Bu, mətn şəklində cavab verilən sualdır.
+
+İşçi sərbəst cavab yazır.
+
+Bu tip sualda sistem:
+
+- mətni saxlayır
+- auto-final score vermir
+- reviewer qərarını gözləyir
+
+Yəni nəticə yalnız insan review-dən sonra tamamlanır.
+
+#### `Case study`
+
+Bu, ssenariyə əsaslanan açıq cavabdır.
+
+Texniki olaraq open-answer ailəsinə yaxındır, amma business baxımdan istifadəçiyə real vəziyyət verib qərar, analiz və həll tələb edir.
+
+Bu tip də manual review tələb edir.
+
+#### `Behavioral`
+
+Davranış və situasiya əsaslı açıq cavabdır.
+
+İşçinin:
+
+- necə düşünməsi
+- necə reaksiya verməsi
+- hansı davranışı seçməsi
+
+yoxlanılır.
+
+Bu tip də manual review tələb edir.
+
+### 19.6. Variantlı sual option-ları necə qurulmalıdır
+
+Variantlı sualda option-lar düzgün qurulmasa bütün test xətti zədələnir.
+
+Diqqət ediləcək qaydalar:
+
+- label aydın olmalıdır
+- doğru variant işarələnməlidir
+- score_value siyasətə uyğun verilməlidir
+- eyni sualda bir neçə option-un yüksək bal verməsi yalnız qəsdən edilirsə istifadə olunmalıdır
+
+Professional tövsiyə:
+
+- sual yazan şəxs ilə review edən şəxs mümkün qədər ayrı olsun
+- variantlı suallarda qeyri-müəyyən label-lardan qaç
+
+### 19.7. Test session nədir
+
+`Test session` bankın konkret işçiyə verilməsidir.
+
+Bank özü ümumi şablondur.
+
+Session isə həmin bankın:
+
+- hansı əməkdaşa
+- hansı reviewer-lə
+- hansı periodda
+- hansı limitlə
+
+verildiyini göstərir.
+
+### 19.8. Test session field-ləri nə deməkdir
+
+#### `Cycle`
+
+Bu session hansı performans dövrünə bağlıdır.
+
+Boş qala bilər, amma period context üçün doldurulması məsləhətdir.
+
+#### `Test bank`
+
+Hansı bankın istifadə ediləcəyini göstərir.
+
+Bu seçimdən sonra suallar da dolayı yolla həmin bankdan gəlir.
+
+#### `Personnel`
+
+Testi həll edəcək şəxsdir.
+
+Ən vacib field-lərdən biridir. Yanlış personnel seçilərsə:
+
+- yanlış şəxsin workspace-ində test görünər
+- report səhv şəxsin üzərinə düşər
+
+#### `Reviewer`
+
+Açıq cavabları kim yoxlayacaq.
+
+Əgər testdə open-answer, case-study və ya behavioral sual varsa, reviewer field-i xüsusilə vacibdir.
+
+#### `Scheduled at`
+
+Planlaşdırılmış tarixdir.
+
+Bu field idarəetmə və planlama baxışı üçündür.
+
+#### `Available until`
+
+Bu session-un son istifadə tarixidir.
+
+İstifadəçi bu tarixdən sonra testi açmamalıdır.
+
+#### `Pass score`
+
+Session səviyyəsində ayrıca keçid həddi verilirsə, bankdakı default dəyəri override edir.
+
+#### `Duration minutes`
+
+Session səviyyəsində ayrıca vaxt limiti verilirsə, bankdakı default dəyəri override edir.
+
+#### `Max attempts`
+
+Session səviyyəsində ayrıca cəhd sayı verilirsə, bankdakı default dəyəri override edir.
+
+#### `Status`
+
+Adətən bu statuslar istifadə olunur:
+
+- `assigned`
+- `in_progress`
+- `completed`
+- `closed`
+
+Məna:
+
+- `assigned` → verilib, amma aktiv cəhd başlamayıb
+- `in_progress` → cəhd başlayıb
+- `completed` → session üzrə aktiv iş bitib
+- `closed` → artıq istifadə üçün bağlıdır
+
+### 19.9. Test workspace necə işləyir
+
+`Test workspace` işçi üçün ayrılmış həll ekranıdır.
+
+Burada sistem belə davranır:
+
+1. istifadəçinin özünə uyğun personnel record-u tapılır
+2. ona təyin olunan session-lar yüklənir
+3. prioritet olaraq hələ həll edilə bilən session seçilir
+4. aktiv cəhd varsa həmin cəhd davam edir
+5. yoxdursa işçi `Testə başla` ilə yeni cəhd açır
+
+### 19.10. Test workspace içində görünən hissələr
+
+#### `Assigned test sessions`
+
+Soldakı sessiya kartlarıdır.
+
+Buradan:
+
+- hansı testin verildiyini
+- statusunu
+- son tarixi
+- max attempts və pass score məlumatını
+
+görmək olur.
+
+#### `Attempt history`
+
+Bu blok əvvəlki cəhdləri göstərir.
+
+Buradan görünür:
+
+- attempt nömrəsi
+- status
+- bal
+- faiz
+- təhvil vaxtı
+
+Bu blok audit üçün çox vacibdir.
+
+#### `Test runner`
+
+Əsas həll panelidir.
+
+Burada:
+
+- cari test adı
+- status
+- cavab sayı
+- timer
+- sual naviqasiyası
+- aktiv sual
+- cavab sahəsi
+- save/finalize aksiyaları
+
+yer alır.
+
+### 19.11. Timer necə işləyir
+
+Timer yalnız aktiv cəhd üçün işləyir.
+
+Qaydalar:
+
+- cəhd başlamayıbsa sayğac işləmir
+- cəhd başlayanda countdown başlayır
+- cəhd tamamlananda timer dayanır
+- vaxt bitəndə sistem cəhdi auto-submit edir
+
+İstifadəçi baxımından düzgün davranış belə olmalıdır:
+
+- tamamlanmış cəhd üçün hələ də geri sayım getməməlidir
+- vaxt bitibsə cavablar itirilməməlidir
+- auto-submit baş veribsə bunu mesajla anlatmaq lazımdır
+
+### 19.12. Auto-save necə işləyir
+
+Auto-save istifadəçinin yazdığı cavabların itirilməməsi üçündür.
+
+Bu sistemdə:
+
+- cavab dəyişəndə draft dirty state yaranır
+- heartbeat zamanı auto-save işləyir
+- son auto-save vaxtı istifadəçiyə göstərilir
+
+Bu, xüsusilə açıq suallarda vacibdir.
+
+#### Auto-save nəyi saxlayır
+
+- selected option
+- answer text
+- flag state
+
+#### Auto-save nəyi etmir
+
+- cəhdi yekunlaşdırmır
+- review yaratmır
+- nəticəni final hesab etmir
+
+### 19.13. Sual işarələmə nədir
+
+`Flag question` istifadəçi üçün şəxsi marker-dir.
+
+Bu, sualın səhv olduğunu demir.
+
+Sadəcə istifadəçinin:
+
+- sonra qayıtmaq istədiyi
+- əmin olmadığı
+- yenidən baxmaq istədiyi
+
+sualı qeyd etməsidir.
+
+İşarələnmiş suallar:
+
+- navigation-da fərqli tonla görünür
+- active cəhd meta-sında saxlanılır
+- cəhd davam edəndə itməməlidir
+
+### 19.14. Attempt nə vaxt yaranır
+
+Attempt bu hallarda yaranır:
+
+- istifadəçi testə başlayır
+- və ya ilk cavabı verəndə sistem writable attempt açır
+
+Attempt yaradıldıqdan sonra:
+
+- `started_at` yazılır
+- session `assigned` idisə `in_progress` olur
+- answer rows həmin attempt-ə yazılır
+
+### 19.15. Yekunlaşdırma zamanı nə baş verir
+
+`Cəhdi yekunlaşdır` basıldıqda sistem:
+
+1. tələb olunan cavabları yoxlayır
+2. çatışmayan sual varsa error verir
+3. bütün cavabları draft-dan DB-yə yazır
+4. boş qalan suallar üçün də answer row materialize edir
+5. duration hesablayır
+6. auto-scored sualları hesablayır
+7. open-answer varsa `review_pending` vəziyyəti yaradır
+8. yoxdursa `completed` statusuna keçir
+9. faiz və keçid nəticəsini hesablayır
+10. weak-area / training link məntiqini işlədir
+
+### 19.16. `Time is up -> auto submit` necə işləyir
+
+Vaxt bitəndə sistem:
+
+- aktiv cəhdin expired olduğunu görür
+- draft cavabları son dəfə yazır
+- auto-submit edir
+- session-u bağlayır
+- istifadəçiyə bunun avtomatik baş verdiyini göstərir
+
+Bu davranış professional baxımdan vacibdir, çünki:
+
+- istifadəçi cavabını itirmir
+- timer sonsuza qədər işləyib yanlış state yaratmır
+- report-larda cəhd yarımçıq qalmır
+
+### 19.17. Nə vaxt yeni test açılmalıdır
+
+Əgər bir session tamamlanıbsa və başqa actionable session varsa, workspace növbəti uyğun testi açmalıdır.
+
+Bu o deməkdir:
+
+- köhnə test runner-da ilişib qalmamaq
+- istifadəçini əl ilə hər dəfə geri dönməyə məcbur etməmək
+
+Əgər başqa uyğun session yoxdursa, son tamamlanmış cəhd read-only görünüşdə qalmalıdır.
+
+### 19.18. Reviewer xətti necə işləyir
+
+Open-answer, case-study və behavioral suallar dərhal final nəticə vermir.
+
+Bu suallar:
+
+- answer kimi saxlanılır
+- `pending review` olur
+- reviewer queue-yə düşür
+
+Reviewer sonra:
+
+- cavabı oxuyur
+- review score verir
+- feedback yazır
+
+və həmin attempt-in yekun nəticəsi yenilənir.
+
+### 19.19. Test report-ları nə üçündür
+
+`Hesabatlar` tabında test xətti üçün ayrıca report-lar var:
+
+- `Test sessions report`
+- `Test attempts report`
+- `Test answers report`
+
+Bu report-lar ilə cavab tapılır:
+
+- hansı test kimə verilib
+- kim neçə dəfə cəhd edib
+- neçə bal toplayıb
+- hansı cavab open-review gözləyib
+- hansı sualda nə cavab yazılıb
+
+### 19.20. Test xəttində professional qaydalar
+
+- bank authoring ilə test həll ekranını qarışdırma
+- open-answer olan testdə reviewer xəttini əvvəlcədən planla
+- assignment etməzdən əvvəl bankı tam yoxla
+- score_value siyasətini əvvəlcədən sabitləşdir
+- report audit olmadan test nəticəsini son qərar kimi istifadə etmə
+
+## 20. Ən çox edilən səhvlər
+
+- cycle yaratmadan assignment-a keçmək
+- template hazır olmadan form təyin etmək
+- item-i competency-siz saxlamaq
+- threshold-u mənasız vermək
+- wrong bank ilə wrong question seçmək
 - attempt finalize etmədən nəticə gözləmək
-- weak link yarananda Training Needs tərəfini yoxlamamaq
+- open-answer review etmədən tam nəticə gözləmək
+- test bank, question və session çoxaldıqca `Tam siyahılar` və `Hesabatlar` tabından istifadə etməmək
 
-## 15. Son qayda
+## 21. Yeni istifadəçi üçün ən qısa düzgün yol
 
-Bu modulu belə yadda saxla:
+Əgər modulu ilk dəfə açırsansa:
 
-- `Cycle` vaxtı müəyyən edir
-- `Template` formu qurur
-- `Item` nəyi ölçdüyünü deyir
-- `Score` nəticəni yaradır
-- `Weak result` inkişaf ehtiyacına çevrilə bilər
+1. əvvəlcə `Dövrlər` tabını oxu və bir cycle yarat
+2. sonra `Şablonlar` tabında template, section, item qur
+3. item competency əlaqələrini yoxla
+4. `Qiymətləndirmələr` tabında form təyin et
+5. evaluator workspace-də bal topla
+6. zəif nəticələri və training impact-i yoxla
+7. əgər test xətti istifadə olunacaqsa, bank -> sual -> session -> cavab -> review -> finalize ardıcıllığı ilə get
+8. sonda `Tam siyahılar` və `Hesabatlar` tabı ilə nəzarət et
 
-Yəni bu modul sadəcə qiymətləndirmə ekranı deyil. Bu modul performans nəticəsini inkişaf qərarına çevirən idarəetmə qatıdır.
+## 22. Son nəticə
+
+Bu modulun məntiqi belə yadda saxlanmalıdır:
+
+- `Dövrlər` vaxtı idarə edir
+- `Şablonlar` nəyi ölçəcəyini qurur
+- `Qiymətləndirmələr` form əsaslı nəticəni yaradır
+- `Testlər` bilik və bacarıq nəticəsini yaradır
+- `Weak links` nəticəni inkişaf ehtiyacına çevirir
+- `Reports` isə bütün bu əməliyyatı ölçülə bilən idarəetmə məlumatına çevirir
+
+Bugünkü sistem işə yarayan və production-ready bir əməliyyat platformasıdır.
+
+Amma test xətti böyüyəcəksə, gələcək professional hədəf belə olmalıdır:
+
+- authoring ayrı
+- delivery ayrı
+- review ayrı
+- reporting ayrıca analitika səviyyəsində

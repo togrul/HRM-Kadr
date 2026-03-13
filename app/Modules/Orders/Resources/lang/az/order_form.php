@@ -64,6 +64,7 @@ return [
         'in_vacation' => 'məzuniyyətdə',
         'candidate_already_imported' => ':candidate artıq personal kimi mövcuddur. Tabel nömrəsi: :tabel_no.',
         'personnel_duplicate_tabel_no' => 'Bu tabel nömrəsi artıq mövcuddur: :tabel_no.',
+        'personnel_identity_conflict' => ':candidate üçün artıq aktiv personal mövcuddur. Tabel nömrəsi: :tabel_no.',
     ],
     'transportation' => [
         'placeholder' => 'Nəqliyyat seçin',

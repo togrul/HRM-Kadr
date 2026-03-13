@@ -118,10 +118,14 @@ class Dashboard extends Component
 
     public string $searchReviewAnswer = '';
 
+    public int $evaluationsSummaryVersion = 0;
+
+    public int $testsSummaryVersion = 0;
+
     /**
      * @var array<int, string>
      */
-    public array $tabs = ['overview', 'cycles', 'templates', 'evaluations', 'tests', 'lists'];
+    public array $tabs = ['overview', 'cycles', 'templates', 'evaluations', 'tests', 'reports', 'lists'];
 
     public function mount(): void
     {
@@ -225,6 +229,15 @@ class Dashboard extends Component
         $this->confirmDeleteEvaluationForm($formId);
     }
 
+    public function refreshEvaluationsSummary(): void
+    {
+        $this->evaluationsSummaryVersion++;
+    }
+
+    public function refreshTestsSummary(): void
+    {
+        $this->testsSummaryVersion++;
+    }
 
     public function render()
     {

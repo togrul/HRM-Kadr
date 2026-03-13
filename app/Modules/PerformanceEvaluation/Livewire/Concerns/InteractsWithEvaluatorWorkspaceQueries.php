@@ -9,6 +9,10 @@ use App\Models\PerformanceTestAttemptAnswer;
 
 trait InteractsWithEvaluatorWorkspaceQueries
 {
+    private const ASSIGNED_FORMS_LIMIT = 18;
+
+    private const PENDING_ANSWERS_LIMIT = 18;
+
     public function getAssignedFormsProperty()
     {
         return $this->rememberRuntime(
@@ -101,7 +105,7 @@ trait InteractsWithEvaluatorWorkspaceQueries
                         }
                     })
                     ->latest('id')
-                    ->limit(24)
+                    ->limit(self::ASSIGNED_FORMS_LIMIT)
                     ->get()
                     ->each(function (PerformanceForm $form): void {
                         $form->setAttribute('personnel_fullname', $this->buildFullname(
@@ -173,7 +177,7 @@ trait InteractsWithEvaluatorWorkspaceQueries
                         $query->where('performance_test_questions.question_type', $this->pendingQuestionTypeFilter);
                     })
                     ->latest('performance_test_attempt_answers.id')
-                    ->limit(24)
+                    ->limit(self::PENDING_ANSWERS_LIMIT)
                     ->get()
                     ->each(function (PerformanceTestAttemptAnswer $answer): void {
                         $answer->setAttribute('personnel_fullname', $this->buildFullname(

@@ -39,6 +39,7 @@ trait HandlesTrainingCalendarMutations
         $this->participantForm = $this->participantDefaults();
         $this->refreshRuntimeCaches();
         $this->dispatch('trainingNeedsSaved', __('training_needs::dashboard.messages.participant_saved'));
+        $this->dispatch('training-needs:calendar-mutated');
     }
 
     public function quickSetParticipantStatus(int $participantId, string $status): void
@@ -54,6 +55,7 @@ trait HandlesTrainingCalendarMutations
 
         $this->refreshRuntimeCaches();
         $this->dispatch('trainingNeedsSaved', __('training_needs::dashboard.messages.participant_status_updated'));
+        $this->dispatch('training-needs:calendar-mutated');
     }
 
     public function selectVisibleParticipants(): void
@@ -109,6 +111,7 @@ trait HandlesTrainingCalendarMutations
         $this->dispatch('trainingNeedsSaved', __('training_needs::dashboard.messages.bulk_participants_updated', [
             'count' => $count,
         ]));
+        $this->dispatch('training-needs:calendar-mutated');
     }
 
     public function removeSelectedParticipants(): void
@@ -134,6 +137,7 @@ trait HandlesTrainingCalendarMutations
         $this->dispatch('trainingNeedsSaved', __('training_needs::dashboard.messages.bulk_participants_removed', [
             'count' => $count,
         ]));
+        $this->dispatch('training-needs:calendar-mutated');
     }
 
     public function completeSession(TrainingDeliveryService $service): void
@@ -153,5 +157,6 @@ trait HandlesTrainingCalendarMutations
             'attended' => $stats['attended_count'],
             'records' => $stats['record_count'],
         ]));
+        $this->dispatch('training-needs:calendar-mutated');
     }
 }

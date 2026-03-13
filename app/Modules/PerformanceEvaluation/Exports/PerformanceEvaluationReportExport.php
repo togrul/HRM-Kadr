@@ -73,6 +73,56 @@ class PerformanceEvaluationReportExport implements FromCollection, WithHeadings,
             ];
         }
 
+        if ($this->type === 'test_sessions') {
+            return [
+                $row->id,
+                $row->cycle_name,
+                $row->bank_name,
+                $row->personnel_fullname,
+                $row->personnel_tabel_no,
+                $row->reviewer_name,
+                $row->status,
+                optional($row->scheduled_at)?->format('d.m.Y H:i'),
+                optional($row->available_until)?->format('d.m.Y H:i'),
+                (int) $row->attempts_count,
+            ];
+        }
+
+        if ($this->type === 'test_attempts') {
+            return [
+                $row->id,
+                $row->attempt_no,
+                $row->bank_name,
+                $row->personnel_fullname,
+                $row->personnel_tabel_no,
+                $row->status,
+                $row->score,
+                $row->percentage,
+                is_null($row->passed) ? '—' : ($row->passed ? 'yes' : 'no'),
+                optional($row->submitted_at)?->format('d.m.Y H:i'),
+            ];
+        }
+
+        if ($this->type === 'test_answers') {
+            return [
+                $row->id,
+                $row->attempt_id,
+                $row->bank_name,
+                $row->personnel_fullname,
+                $row->personnel_tabel_no,
+                $row->question_type,
+                $row->question_prompt,
+                $row->selected_option_label,
+                $row->answer_text,
+                is_null($row->is_correct) ? '—' : ($row->is_correct ? 'yes' : 'no'),
+                $row->auto_score,
+                $row->review_score,
+                $row->final_score,
+                $row->review_status,
+                $row->feedback,
+            ];
+        }
+
         return [
             $row->personnel?->fullname,
             $row->personnel?->tabel_no,

@@ -64,6 +64,7 @@ return [
         'in_vacation' => 'in vacation',
         'candidate_already_imported' => ':candidate already exists as personnel. Badge number: :tabel_no.',
         'personnel_duplicate_tabel_no' => 'This badge number already exists: :tabel_no.',
+        'personnel_identity_conflict' => 'An active personnel record already exists for :candidate. Badge number: :tabel_no.',
     ],
     'transportation' => [
         'placeholder' => 'Select transportation',

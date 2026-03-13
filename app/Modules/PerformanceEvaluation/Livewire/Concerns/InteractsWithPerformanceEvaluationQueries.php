@@ -90,6 +90,7 @@ trait InteractsWithPerformanceEvaluationQueries
     public function personnelOptions(string $searchProperty = 'searchPersonnel', string $selectedProperty = 'personnel_id'): array
     {
         $base = Personnel::query()
+            ->active()
             ->select([
                 'id',
                 DB::raw("CONCAT(surname, ' ', name, ' ', patronymic, ' (#', tabel_no, ')') as label"),

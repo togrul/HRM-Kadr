@@ -43,6 +43,7 @@ trait HandlesPerformanceTestingMutations
         $this->reset('bankForm');
         $this->bankForm = $this->bankDefaults();
         $this->resetValidation();
+        $this->refreshTestsSummary();
         $this->dispatch('performanceEvaluationSaved', __('performance_evaluation::dashboard.messages.test_bank_saved'));
     }
 
@@ -92,6 +93,7 @@ trait HandlesPerformanceTestingMutations
         $this->reset('questionForm', 'searchTestBank', 'searchTestCompetency');
         $this->questionForm = $this->questionDefaults();
         $this->resetValidation();
+        $this->refreshTestsSummary();
         $this->dispatch('performanceEvaluationSaved', __('performance_evaluation::dashboard.messages.test_question_saved'));
     }
 
@@ -133,6 +135,7 @@ trait HandlesPerformanceTestingMutations
         $this->reset('sessionForm', 'searchCycle', 'searchTestBank', 'searchTestPersonnel', 'searchTestReviewer');
         $this->sessionForm = $this->sessionDefaults();
         $this->resetValidation();
+        $this->refreshTestsSummary();
         $this->dispatch('performanceEvaluationSaved', __('performance_evaluation::dashboard.messages.test_session_saved'));
     }
 
@@ -202,6 +205,7 @@ trait HandlesPerformanceTestingMutations
         $this->reset('attemptAnswerForm', 'searchTestSession', 'searchTestQuestion');
         $this->attemptAnswerForm = $this->attemptAnswerDefaults();
         $this->resetValidation();
+        $this->refreshTestsSummary();
         $this->dispatch('performanceEvaluationSaved', __('performance_evaluation::dashboard.messages.attempt_answer_saved'));
     }
 
@@ -220,6 +224,7 @@ trait HandlesPerformanceTestingMutations
         $this->reset('attemptSubmitForm', 'searchTestAttempt');
         $this->attemptSubmitForm = $this->attemptSubmitDefaults();
         $this->resetValidation();
+        $this->refreshTestsSummary();
         $this->dispatch('performanceEvaluationSaved', __('performance_evaluation::dashboard.messages.attempt_submitted'));
     }
 
@@ -227,7 +232,7 @@ trait HandlesPerformanceTestingMutations
     {
         $this->authorizePerformanceEvaluationReview();
         $validated = $this->validate([
-            'reviewForm.performance_test_attempt_answer_id' => 'required|exists:performance_test_attempt_answers,id',
+            'reviewForm.performance_test_attempt_answer_id' => 'required|integer',
             'reviewForm.score' => 'required|numeric|min:0|max:1000',
             'reviewForm.feedback' => 'nullable|string|max:2000',
         ], attributes: [
@@ -247,6 +252,7 @@ trait HandlesPerformanceTestingMutations
         $this->reset('reviewForm', 'searchReviewAnswer');
         $this->reviewForm = $this->reviewDefaults();
         $this->resetValidation();
+        $this->refreshTestsSummary();
         $this->dispatch('performanceEvaluationSaved', __('performance_evaluation::dashboard.messages.answer_reviewed'));
     }
 }

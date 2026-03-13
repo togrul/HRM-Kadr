@@ -497,7 +497,7 @@ trait HandlesPerformanceEvaluationMutations
     {
         $this->authorizePerformanceEvaluationReview();
         $validated = $this->validate([
-            'reviewForm.performance_test_attempt_answer_id' => 'required|exists:performance_test_attempt_answers,id',
+            'reviewForm.performance_test_attempt_answer_id' => 'required|integer',
             'reviewForm.score' => 'required|numeric|min:0|max:1000',
             'reviewForm.feedback' => 'nullable|string|max:2000',
         ], attributes: [

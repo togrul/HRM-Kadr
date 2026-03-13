@@ -49,6 +49,9 @@
                     <x-filter.item wire:click.prevent="switchTab('tests')" :active="$activeTab === 'tests'">
                         {{ __('performance_evaluation::dashboard.tabs.tests') }}
                     </x-filter.item>
+                    <x-filter.item wire:click.prevent="switchTab('reports')" :active="$activeTab === 'reports'">
+                        {{ __('performance_evaluation::dashboard.tabs.reports') }}
+                    </x-filter.item>
                     <x-filter.item wire:click.prevent="switchTab('lists')" :active="$activeTab === 'lists'">
                         {{ __('performance_evaluation::dashboard.tabs.lists') }}
                     </x-filter.item>
@@ -438,7 +441,7 @@
                 </x-surface-card>
             </div>
 
-            <livewire:performance-evaluation.evaluations-summary lazy />
+            <livewire:performance-evaluation.evaluations-summary :key="'performance-evaluation-evaluations-summary-'.$evaluationsSummaryVersion" lazy />
         </div>
     @endif
 
@@ -577,6 +580,18 @@
             </x-surface-card>
         </div>
 
+        <div class="rounded-3xl border border-zinc-200 bg-zinc-50 px-4 py-4">
+            <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <div class="space-y-1">
+                    <p class="text-sm font-semibold text-zinc-900">{{ __('performance_evaluation::dashboard.cards.test_taking_workspace') }}</p>
+                    <p class="text-xs leading-6 text-zinc-500">{{ __('performance_evaluation::dashboard.labels.test_taking_workspace_hint') }}</p>
+                </div>
+                <a href="{{ route('performance-evaluation.test-workspace') }}" target="_blank" class="inline-flex h-11 items-center justify-center rounded-2xl bg-zinc-900 px-4 text-sm font-medium text-white">
+                    {{ __('performance_evaluation::dashboard.actions.open_test_workspace') }}
+                </a>
+            </div>
+        </div>
+
         <div class="grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
             <div class="space-y-4">
                 <x-surface-card :title="__('performance_evaluation::dashboard.cards.attempt_capture')" icon="icons.pending-icon" bodyClass="overflow-visible" contentClass="overflow-visible p-4">
@@ -659,8 +674,12 @@
                 </x-surface-card>
             </div>
 
-            <livewire:performance-evaluation.tests-summary lazy />
+            <livewire:performance-evaluation.tests-summary :key="'performance-evaluation-tests-summary-'.$testsSummaryVersion" lazy />
         </div>
+    @endif
+
+    @if ($activeTab === 'reports')
+        <livewire:performance-evaluation.reports lazy />
     @endif
 
     @if ($activeTab === 'lists')

@@ -1,8 +1,6 @@
 <div class="flex flex-col space-y-4 px-6 py-4">
     <x-surface-card :title="__('performance_evaluation::dashboard.cards.evaluator_workspace')" icon="icons.performance-icon">
         <div class="space-y-4">
-            <p class="text-sm text-zinc-500">{{ __('performance_evaluation::dashboard.labels.evaluator_workspace_hint') }}</p>
-
             <div class="grid gap-3 md:grid-cols-3">
                 <div class="rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3">
                     <p class="text-[11px] font-semibold uppercase text-sky-700">{{ __('performance_evaluation::dashboard.labels.evaluator_summary_total') }}</p>
@@ -139,10 +137,6 @@
 
             <x-surface-card :title="__('performance_evaluation::dashboard.cards.open_answer_review')" icon="icons.comment-icon" bodyClass="overflow-visible" contentClass="overflow-visible p-4">
                 <div class="grid gap-3 content-start">
-                    <div class="rounded-3xl border border-zinc-200 bg-gradient-to-br from-white to-amber-50 px-4 py-3">
-                        <p class="text-xs leading-6 text-zinc-500">{{ __('performance_evaluation::dashboard.labels.review_queue_hint') }}</p>
-                    </div>
-
                     <x-ui.select-dropdown :label="__('performance_evaluation::dashboard.fields.answer')" placeholder="---" mode="gray" class="w-full" instance="perf-evaluator-answer"
                         wire:model.live="reviewForm.performance_test_attempt_answer_id"
                         :model="$this->pendingAnswers->map(fn ($answer) => ['id' => $answer->id, 'label' => '#' . $answer->attempt_id . ' / ' . \Illuminate\Support\Str::limit((string) $answer->question_prompt, 50)])->values()->all()"></x-ui.select-dropdown>

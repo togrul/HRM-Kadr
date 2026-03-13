@@ -1211,7 +1211,7 @@
             </x-surface-card>
 
             <div class="space-y-4">
-                <livewire:training-needs.results-summary lazy />
+                <livewire:training-needs.results-summary :key="'training-needs-results-summary-'.$resultsSummaryVersion" lazy />
 
                 <x-surface-card :title="__('training_needs::dashboard.cards.delivery_documents')" icon="icons.profile-outline-icon" bodyClass="overflow-visible" contentClass="overflow-visible p-4">
                     <div class="grid gap-3">

@@ -57,6 +57,7 @@ trait HandlesPerformanceEvaluationFlowMutations
         $this->evaluationForm = $this->evaluationDefaults();
         $this->editingEvaluationFormId = null;
         $this->resetValidation();
+        $this->refreshEvaluationsSummary();
         $this->dispatch('performanceEvaluationSaved', __('performance_evaluation::dashboard.messages.evaluation_saved'));
     }
 
@@ -154,6 +155,7 @@ trait HandlesPerformanceEvaluationFlowMutations
         $this->reset('scoreForm', 'searchPerformanceForm', 'searchTemplateItem');
         $this->scoreForm = $this->scoreDefaults();
         $this->resetValidation();
+        $this->refreshEvaluationsSummary();
         $this->dispatch('performanceEvaluationSaved', __('performance_evaluation::dashboard.messages.score_saved'));
 
         if ($link === null && (float) data_get($validated, 'scoreForm.score') < (float) ($score->item?->low_score_threshold ?? 60) && empty($score->item?->training_competency_id)) {
@@ -185,6 +187,7 @@ trait HandlesPerformanceEvaluationFlowMutations
             $this->cancelEvaluationEdit();
         }
 
+        $this->refreshEvaluationsSummary();
         $this->dispatch('performanceEvaluationSaved', __('performance_evaluation::dashboard.messages.evaluation_deleted'));
     }
 

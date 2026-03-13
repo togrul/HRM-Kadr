@@ -42,6 +42,7 @@ trait HandlesTrainingDeliveryMutations
         $this->reset('deliveryDocumentForm', 'searchDeliveryRecord');
         $this->deliveryDocumentForm = $this->deliveryDocumentDefaults();
         $this->refreshRuntimeCaches();
+        $this->refreshResultsSummary();
         $this->dispatch('trainingNeedsSaved', __('training_needs::dashboard.messages.certificate_saved'));
     }
 
@@ -90,6 +91,7 @@ trait HandlesTrainingDeliveryMutations
         }
 
         $this->refreshRuntimeCaches();
+        $this->refreshResultsSummary();
         $this->dispatch('trainingNeedsSaved', __('training_needs::dashboard.messages.certificate_deleted'));
     }
 

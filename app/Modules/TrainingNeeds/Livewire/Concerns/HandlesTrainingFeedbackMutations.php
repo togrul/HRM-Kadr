@@ -75,6 +75,7 @@ trait HandlesTrainingFeedbackMutations
         $this->cancelFeedbackFormEdit();
         $this->reset('searchSession');
         $this->refreshRuntimeCaches();
+        $this->refreshResultsSummary();
         $this->dispatch('trainingNeedsSaved', __('training_needs::dashboard.messages.feedback_form_saved'));
     }
 
@@ -94,6 +95,7 @@ trait HandlesTrainingFeedbackMutations
         }
 
         $this->refreshRuntimeCaches();
+        $this->refreshResultsSummary();
         $this->dispatch('trainingNeedsSaved', __('training_needs::dashboard.messages.feedback_form_deleted'));
     }
 
@@ -139,6 +141,7 @@ trait HandlesTrainingFeedbackMutations
         $this->reset('feedbackResponseForm', 'searchFeedbackForm', 'searchPersonnel');
         $this->feedbackResponseForm = $this->feedbackResponseDefaults();
         $this->refreshRuntimeCaches();
+        $this->refreshResultsSummary();
         $this->dispatch('trainingNeedsSaved', __('training_needs::dashboard.messages.feedback_response_saved'));
     }
 }

@@ -98,6 +98,8 @@ class Dashboard extends Component
 
     public int $sessionDetailWorkspaceVersion = 0;
 
+    public int $resultsSummaryVersion = 0;
+
     public string $bulkAttendanceStatus = 'confirmed';
 
     public string $selectedParticipantAttendanceFilter = 'all';
@@ -303,6 +305,11 @@ class Dashboard extends Component
     {
         $this->refreshRuntimeCaches();
         $this->sessionDetailWorkspaceVersion++;
+    }
+
+    public function refreshResultsSummary(): void
+    {
+        $this->resultsSummaryVersion++;
     }
 
     public function render()

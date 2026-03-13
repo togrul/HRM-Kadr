@@ -17,6 +17,8 @@ use Illuminate\Support\Facades\DB;
 
 class PerformanceSkillMeasurementService
 {
+    private ?Collection $trainingLevels = null;
+
     /**
      * @return array<int, array{label:string,is_correct:bool,score_value:float,sort_order:int}>
      */
@@ -100,8 +102,6 @@ class PerformanceSkillMeasurementService
 
     public function reviewAnswer(PerformanceTestAttemptAnswer $answer, float $score, ?string $feedback, ?int $reviewerId): PerformanceTestAttemptAnswer
     {
-        $answer->loadMissing(['attempt.answers.question', 'attempt.session.bank', 'attempt.session.personnel']);
-
         DB::transaction(function () use ($answer, $score, $feedback, $reviewerId): void {
             $answer->update([
                 'review_score' => $score,
@@ -112,7 +112,7 @@ class PerformanceSkillMeasurementService
                 'feedback' => $feedback,
             ]);
 
-            $attempt = $answer->attempt->fresh(['session.bank', 'session.personnel', 'answers.question']);
+            $attempt = $this->hydrateAttemptAggregate((int) $answer->performance_test_attempt_id);
             $pendingManual = $attempt->answers->contains(fn (PerformanceTestAttemptAnswer $item) => $item->review_status === 'pending');
             $totals = $this->computeAttemptTotals($attempt->answers);
 
@@ -126,11 +126,11 @@ class PerformanceSkillMeasurementService
             ]);
 
             if (! $pendingManual) {
-                $this->syncAttemptOutcomes($attempt->fresh());
+                $this->syncAttemptOutcomes($attempt);
             }
         });
 
-        return $answer->fresh(['attempt']);
+        return $answer->fresh();
     }
 
     public function syncAttemptOutcomes(PerformanceTestAttempt $attempt): void
@@ -285,7 +285,7 @@ class PerformanceSkillMeasurementService
 
     private function levelIdFromPercentage(float $percentage): ?int
     {
-        $levels = TrainingLevel::query()->orderBy('score')->get(['id', 'score']);
+        $levels = $this->trainingLevels ??= TrainingLevel::query()->orderBy('score')->get(['id', 'score']);
         if ($levels->isEmpty()) {
             return null;
         }
@@ -308,5 +308,20 @@ class PerformanceSkillMeasurementService
         if ($trainingNeed !== null && $trainingNeed->source === 'skill_gap') {
             $trainingNeed->delete();
         }
+    }
+
+    private function hydrateAttemptAggregate(int $attemptId): PerformanceTestAttempt
+    {
+        return PerformanceTestAttempt::query()
+            ->with([
+                'session:id,personnel_id,performance_test_bank_id,pass_score',
+                'session.bank:id,pass_score',
+                'session.personnel:id,position_id',
+                'answers:id,performance_test_attempt_id,performance_test_question_id,selected_option_id,answer_text,is_correct,auto_score,review_score,final_score,review_status,reviewed_by,reviewed_at,feedback',
+                'answers.question:id,training_competency_id,max_score,question_type',
+                'trainingNeedLinks:id,performance_test_attempt_id,training_competency_id,training_need_item_id,source',
+                'trainingNeedLinks.trainingNeed:id,source',
+            ])
+            ->findOrFail($attemptId);
     }
 }

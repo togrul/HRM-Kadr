@@ -74,7 +74,7 @@ class EvaluatorWorkspace extends Component
     public function saveAnswerReview(): void
     {
         $validated = $this->validate([
-            'reviewForm.performance_test_attempt_answer_id' => 'required|exists:performance_test_attempt_answers,id',
+            'reviewForm.performance_test_attempt_answer_id' => 'required|integer',
             'reviewForm.score' => 'required|numeric|min:0|max:1000',
             'reviewForm.feedback' => 'nullable|string|max:2000',
         ], attributes: [
@@ -83,10 +83,10 @@ class EvaluatorWorkspace extends Component
             'reviewForm.feedback' => __('performance_evaluation::dashboard.fields.feedback'),
         ]);
 
-        $answer = PerformanceTestAttemptAnswer::query()
-            ->where('id', (int) data_get($validated, 'reviewForm.performance_test_attempt_answer_id'))
-            ->whereHas('attempt.session', fn ($query) => $query->where('reviewer_id', auth()->id()))
-            ->firstOrFail();
+        $answerId = (int) data_get($validated, 'reviewForm.performance_test_attempt_answer_id');
+        abort_if(! $this->pendingAnswers->contains('id', $answerId), 403);
+
+        $answer = PerformanceTestAttemptAnswer::query()->findOrFail($answerId);
 
         app(PerformanceSkillMeasurementService::class)->reviewAnswer(
             $answer,

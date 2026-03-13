@@ -80,6 +80,66 @@ class TrainingNeedsDashboardTest extends TestCase
             ->assertSee(__('training_needs::dashboard.cards.export_reports'));
     }
 
+    public function test_dashboard_refreshes_results_summary_after_feedback_and_delivery_mutations(): void
+    {
+        Storage::fake('public');
+
+        $user = \App\Models\User::factory()->create();
+        $this->grantTrainingNeedsPermissions($user);
+        Role::findOrCreate('admin', 'web');
+        Permission::findOrCreate('get-notification', 'web');
+
+        Position::query()->create([
+            'id' => 104,
+            'name' => 'Coordinator',
+        ]);
+
+        $personnel = $this->createPersonnel($user->id, 104);
+        $program = TrainingProgram::query()->create([
+            'title' => 'Coordination Lab',
+            'slug' => 'coordination-lab',
+            'delivery_type' => 'internal',
+            'duration_hours' => 4,
+            'is_active' => true,
+        ]);
+
+        $session = TrainingSession::query()->create([
+            'training_program_id' => $program->id,
+            'title' => 'April Session',
+            'scheduled_start_at' => '2026-04-01 09:00:00',
+            'scheduled_end_at' => '2026-04-01 13:00:00',
+            'status' => 'planned',
+        ]);
+
+        $record = TrainingDeliveryRecord::query()->create([
+            'training_session_id' => $session->id,
+            'training_program_id' => $program->id,
+            'personnel_id' => $personnel->id,
+            'result_status' => 'completed',
+            'completed_at' => '2026-04-01 14:00:00',
+            'certificate_path' => 'training-certificates/test-certificate.pdf',
+            'certificate_name' => 'test-certificate.pdf',
+        ]);
+
+        Storage::disk('public')->put('training-certificates/test-certificate.pdf', 'certificate');
+
+        $this->actingAs($user);
+
+        Livewire::test(Dashboard::class)
+            ->assertSet('resultsSummaryVersion', 0)
+            ->set('feedbackForm.training_session_id', $session->id)
+            ->set('feedbackForm.title', 'Session Feedback')
+            ->set('feedbackForm.status', 'open')
+            ->set('feedbackForm.default_question_type', 'rating')
+            ->set('feedbackForm.questions_text', 'How useful was it?')
+            ->call('storeFeedbackForm')
+            ->assertHasNoErrors()
+            ->assertSet('resultsSummaryVersion', 1)
+            ->call('deleteDeliveryCertificate', $record->id)
+            ->assertHasNoErrors()
+            ->assertSet('resultsSummaryVersion', 2);
+    }
+
     public function test_training_needs_route_requires_view_permission(): void
     {
         $user = \App\Models\User::factory()->create();

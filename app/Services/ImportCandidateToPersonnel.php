@@ -42,6 +42,21 @@ class ImportCandidateToPersonnel
                 ? "NMZD{$candidate->id}"
                 : $this->tabelNoGenerator->generateForJoinDate($joinDate);
 
+            $existingActivePersonnel = Personnel::query()
+                ->active()
+                ->where('surname', $candidate->surname)
+                ->where('name', $candidate->name)
+                ->where('patronymic', $candidate->patronymic)
+                ->whereDate('birthdate', Carbon::parse($candidate->birthdate)->format('Y-m-d'))
+                ->first();
+
+            if ($existingActivePersonnel) {
+                throw new RuntimeException(__('orders::order_form.messages.personnel_identity_conflict', [
+                    'candidate' => $candidate->fullname,
+                    'tabel_no' => $existingActivePersonnel->tabel_no,
+                ]));
+            }
+
             if (Personnel::withTrashed()->where('tabel_no', $tabelNo)->exists()) {
                 throw new RuntimeException(__('orders::order_form.messages.candidate_already_imported', [
                     'candidate' => $candidate->fullname,
