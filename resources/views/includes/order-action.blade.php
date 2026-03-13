@@ -14,7 +14,8 @@
                 class="w-full"
                 wire:model.live="orderForm.order_type_id"
                 :model="$this->templateOptions"
-                    search-model="search.template"
+                search-model="search.template"
+                load-on-open="templates"
                 :disabled="$orderModel"
             >
             </x-ui.select-dropdown>
@@ -129,6 +130,7 @@
                 class="w-full"
                 wire:model.live="componentForms.{{ $i }}.component_id"
                 :model="$componentOptions"
+                load-on-open="components"
             />
                         @error("componentForms.{$i}.component_id")
                             <x-validation> {{ $message }} </x-validation>

@@ -19,6 +19,11 @@ class AddOrder extends Component
     use AuthorizesRequests;
     use OrderCrud;
 
+    public function placeholder()
+    {
+        return view('orders::livewire.orders.placeholders.add-order');
+    }
+
     public function store()
     {
         $this->authorize('create', Order::class);

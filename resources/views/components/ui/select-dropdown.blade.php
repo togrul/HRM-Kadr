@@ -34,6 +34,8 @@
   x-data="{
     uid: @js($uid),
     currentValue: @if($wireModel) @entangle($wireModel).live @else null @endif,
+    lastValue: @if($wireModel) @js(null) @else null @endif,
+    localSearch: '',
     cachedOptions: @js($model),
     placeholder: @js($placeholder),
     isOpen: false,
@@ -42,6 +44,8 @@
     preferredDirection: @js($direction),
     isDisabled: @js((bool) $disabled),
     loadOnOpen: @js($loadOnOpen),
+    pendingReopen: false,
+    pendingSelectionClose: false,
     selectedCache: { id: null, label: '' },
     initialSelectedLabel: @js($selectedLabel),
     toId(v){ return (v===null||v===undefined||v==='') ? null : String(v).trim(); },
@@ -72,6 +76,24 @@
           };
         })
         .filter(Boolean);
+    },
+    normalizeSearchValue(value){
+      return String(value ?? '')
+        .toLocaleLowerCase('az')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/ə/g, 'e')
+        .replace(/ı/g, 'i')
+        .replace(/ö/g, 'o')
+        .replace(/ü/g, 'u')
+        .replace(/ş/g, 's')
+        .replace(/ç/g, 'c')
+        .replace(/ğ/g, 'g');
+    },
+    matchesSearch(label){
+      const query = this.normalizeSearchValue(this.localSearch).trim();
+      if (query === '') return true;
+      return this.normalizeSearchValue(label).includes(query);
     },
     syncSelectedCache(currentId = this.toId(this.currentValue)){
       const found = this.cachedOptions.find(o => this.toId(o.id) === currentId);
@@ -115,6 +137,7 @@
 
     init(){
       this.cachedOptions = this.normalizeOptions(this.cachedOptions);
+      this.lastValue = this.toId(this.currentValue);
       const currentId = this.toId(this.currentValue);
       if (this.initialSelectedLabel && currentId !== null) {
         const found = this.cachedOptions.find(o => this.toId(o.id) === currentId);
@@ -127,7 +150,13 @@
         this.observeOptions();
       });
       this.$watch('currentValue', (next) => {
-        this.syncSelectedCache(this.toId(next));
+        const normalizedNext = this.toId(next);
+        this.syncSelectedCache(normalizedNext);
+        if (this.pendingSelectionClose || normalizedNext !== this.lastValue) {
+          this.pendingSelectionClose = false;
+          this.isOpen = false;
+        }
+        this.lastValue = normalizedNext;
         if (this.isOpen) {
           this.$nextTick(() => requestAnimationFrame(() => this.repositionPanel()));
         }
@@ -180,6 +209,8 @@
     select(id, label = null){
       const wireValue = this.toWireValue(id);
       const val = this.toId(wireValue);
+      this.pendingReopen = false;
+      this.pendingSelectionClose = true;
       if (label !== null && label !== undefined) {
         this.selectedCache = { id: val, label: String(label) };
       } else {
@@ -188,7 +219,10 @@
       }
       this.currentValue = wireValue;
       this.initialSelectedLabel = null;
-      this.setOpen(false);
+      this.isOpen = false;
+      queueMicrotask(() => { this.isOpen = false; });
+      requestAnimationFrame(() => { this.isOpen = false; });
+      setTimeout(() => { this.isOpen = false; }, 0);
     },
 
     toggle(){
@@ -204,6 +238,7 @@
         requestAnimationFrame(() => this.repositionPanel());
       });
       if (this.isOpen && this.loadOnOpen && $wire && typeof $wire.loadOptionGroup === 'function') {
+        this.pendingReopen = true;
         $wire.loadOptionGroup(this.loadOnOpen);
       }
     },
@@ -211,9 +246,15 @@
   x-on:click.window="if (!$el.contains($event.target)) setOpen(false)"
   x-on:keydown.escape.window="setOpen(false)"
   x-on:ui-select-opened.window="if ($event.detail?.uid !== uid) setOpen(false)"
+  x-on:ui-select-option-group-loaded.window="
+    if ($event.detail?.group !== loadOnOpen || !pendingReopen) return;
+    pendingReopen = false;
+    setOpen(true);
+    $nextTick(() => requestAnimationFrame(() => repositionPanel()));
+  "
   x-on:resize.window.debounce.100ms="if (isOpen) repositionPanel()"
-  {{ $attributes->except(['wire:model','wire:model.live','wire:model.defer','wire:model.lazy','wire:model.blur'])->class('relative w-full') }}
-  x-bind:class="isOpen ? 'z-[140]' : 'z-10'"
+  {{ $attributes->except(['wire:model','wire:model.live','wire:model.defer','wire:model.lazy','wire:model.blur'])->class('relative isolate w-full') }}
+  x-bind:class="isOpen ? 'z-[520]' : 'z-10'"
 >
   @if($label)
     <x-label id="{{ $labelId }}" for="{{ $uid }}">{{ $label }}</x-label>
@@ -243,7 +284,7 @@
       x-show="isOpen && !isDisabled" x-transition.opacity.duration.100ms x-cloak
       :class="openUp ? 'bottom-full mb-2 origin-bottom' : 'top-full mt-1 origin-top'"
       :style="{ maxHeight: `${panelMaxHeight}px` }"
-      class="absolute z-[150] w-full px-3 py-2 space-y-2 overflow-auto text-base bg-white rounded-md shadow-xl focus:outline-none sm:text-sm"
+      class="absolute z-[330] w-full px-3 py-2 space-y-2 overflow-auto text-base bg-white rounded-md shadow-xl focus:outline-none sm:text-sm"
     >
       {{-- slot: search input --}}
       @if ($searchModel)
@@ -253,6 +294,7 @@
               mode="gray"
               :name="$searchModel"
               wire:model.live.debounce.300ms="{{ $searchModel }}"
+              x-model.live.debounce.150ms="localSearch"
               placeholder="{{ $searchPlaceholder ?? __('ui::common.placeholders.search') }}"
               x-on:click.stop="$event.stopPropagation()"
               x-on:focus.stop="setOpen(true)"
@@ -273,6 +315,7 @@
 
       {{-- null/placeholder option --}}
       <li class="relative py-2 pl-3 rounded-lg cursor-pointer select-none group pr-9 hover:bg-blue-400 bg-neutral-50"
+          x-show="matchesSearch(placeholder)"
           x-on:click.prevent.stop="select(null, placeholder)">
         <div class="flex items-center">
           <span class="block ml-3 truncate"> {{ $placeholder }} </span>
@@ -291,6 +334,7 @@
           class="relative py-2 pl-3 rounded-lg cursor-pointer select-none group pr-9 hover:bg-blue-400 bg-neutral-50"
           data-option-id="{{ data_get($opt,'id') }}"
           data-option-label="{{ data_get($opt,'label', data_get($opt,'name', data_get($opt,'title', data_get($opt,'text')))) }}"
+          x-show="matchesSearch($el.dataset.optionLabel)"
           x-on:click.prevent.stop="select($el.dataset.optionId, $el.dataset.optionLabel)"
         >
           <div class="flex items-center">

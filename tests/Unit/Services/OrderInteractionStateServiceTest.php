@@ -25,7 +25,7 @@ class OrderInteractionStateServiceTest extends TestCase
         $this->assertSame('structure_id', $selection['field']);
         $this->assertSame(0, $selection['key']);
         $this->assertSame(18, $selection['id']);
-        $this->assertSame('Child', $selection['label']);
+        $this->assertSame('Composed', $selection['label']);
     }
 
     public function test_it_resolves_dynamic_fields_using_fallback(): void

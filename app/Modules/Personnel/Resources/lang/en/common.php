@@ -226,7 +226,10 @@ return [
         'has_disability' => 'has disability?',
     ],
     'messages' => [
+        'confirm_title' => 'Pending record',
         'confirm_message' => 'This personnel record is waiting for confirmation.',
+        'confirm_description' => 'After confirmation, the record will fully join the active personnel registry and behave like a normal personnel entry in related flows.',
+        'confirm_hint' => 'Confirm only after the record has been reviewed.',
         'no_permission_to_edit' => 'You have no permission to edit.',
         'personnel_created' => 'Personnel was added successfully!',
         'personnel_updated' => 'Personnel was updated successfully!',

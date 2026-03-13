@@ -232,7 +232,13 @@ class LaborActivityForm extends Form
     public function laborActivitiesForPersistence(): array
     {
         return collect($this->laborActivityList ?? [])
-            ->map(fn ($activity) => Arr::except($activity, ['time', 'position_label', 'structure_label']))
+            ->map(fn ($activity) => Arr::except($activity, [
+                'time',
+                'position_label',
+                'structure_label',
+                'company_name_display',
+                'use_lookup',
+            ]))
             ->all();
     }
 

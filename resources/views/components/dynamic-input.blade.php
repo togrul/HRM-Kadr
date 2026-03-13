@@ -64,6 +64,13 @@
     };
 
     $resolvedSearchModel = blank($searchField) ? null : $searchField;
+    $resolvedLoadOnOpen = match ($field) {
+        'personnel_id' => 'personnels',
+        'position_id' => 'positions',
+        'structure_main_id' => 'main_structures',
+        'rank_id' => 'ranks',
+        default => null,
+    };
 @endphp
 
 @if($input == 'text-input')
@@ -118,6 +125,7 @@
             :disabled="$disabled"
             :search-model="$resolvedSearchModel"
             :selected-label="$selectedLabel"
+            :load-on-open="$resolvedLoadOnOpen"
         />
         @error("{$list_string}.{$key}.{$field}")
             <x-validation> {{ $message }} </x-validation>

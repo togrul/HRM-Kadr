@@ -33,4 +33,25 @@ class DeleteConfirmationModalTest extends TestCase
             ->assertSet('deletedId', 77)
             ->assertSet('showDeleteConfirmation', false);
     }
+
+    public function test_it_resets_dialog_state_when_closed_without_confirmation(): void
+    {
+        Livewire::test(DeleteConfirmationHarness::class)
+            ->call('requestDelete', 15)
+            ->call('closeDeleteConfirmation')
+            ->assertSet('deletedId', null)
+            ->assertSet('showDeleteConfirmation', false)
+            ->assertSet('deleteConfirmation.action', null)
+            ->assertSet('deleteConfirmation.message', null)
+            ->assertSet('deleteConfirmation.parameters', []);
+    }
+
+    public function test_it_noops_when_confirmation_runs_without_registered_action(): void
+    {
+        Livewire::test(DeleteConfirmationHarness::class)
+            ->call('runConfirmedDeletion')
+            ->assertSet('deletedId', null)
+            ->assertSet('showDeleteConfirmation', false)
+            ->assertSet('deleteConfirmation.action', null);
+    }
 }

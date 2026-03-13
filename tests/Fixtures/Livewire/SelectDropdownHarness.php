@@ -13,6 +13,8 @@ class SelectDropdownHarness extends Component
 
     public int|string|null $selected = 1;
 
+    public ?string $selectedLabel = null;
+
     public string $search = '';
 
     public function swapOptions(): void
@@ -25,6 +27,16 @@ class SelectDropdownHarness extends Component
         $this->selected = 'archived';
     }
 
+    public function detachSelectedOption(): void
+    {
+        $this->options = [
+            ['id' => 2, 'label' => 'Second'],
+        ];
+
+        $this->selected = 'archived';
+        $this->selectedLabel = 'Archived from cache';
+    }
+
     public function render()
     {
         return <<<'BLADE'
@@ -33,8 +45,11 @@ class SelectDropdownHarness extends Component
                 label="State"
                 instance="test-select-dropdown"
                 search-model="search"
+                search-placeholder="Search states"
+                load-on-open="status-group"
                 wire:model.live="selected"
                 :model="$options"
+                :selected-label="$selectedLabel"
             />
         </div>
         BLADE;

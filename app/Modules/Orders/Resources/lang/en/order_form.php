@@ -62,6 +62,8 @@ return [
         'please_search_personnel' => 'Please search personnel',
         'in_business_trip' => 'in business trip',
         'in_vacation' => 'in vacation',
+        'candidate_already_imported' => ':candidate already exists as personnel. Badge number: :tabel_no.',
+        'personnel_duplicate_tabel_no' => 'This badge number already exists: :tabel_no.',
     ],
     'transportation' => [
         'placeholder' => 'Select transportation',

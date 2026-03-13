@@ -31,8 +31,8 @@ class OrderRenderStateServiceTest extends TestCase
         $lookupService->shouldReceive('components')->once()->with(11)->andReturn($components);
         $lookupService->shouldReceive('templates')->once()->with(5, 'tpl')->andReturn($templates);
         $lookupService->shouldReceive('personnels')->once()->with(true, [101], 'pers', 15)->andReturn($personnels);
-        $lookupService->shouldReceive('ranks')->once()->andReturn($ranks);
-        $lookupService->shouldReceive('mainStructures')->once()->andReturn($mainStructures);
+        $lookupService->shouldReceive('ranks')->once()->with('rank')->andReturn($ranks);
+        $lookupService->shouldReceive('mainStructures')->once()->with('main')->andReturn($mainStructures);
         $lookupService->shouldReceive('structures')->once()->with('str')->andReturn($structures);
         $lookupService->shouldReceive('positions')->once()->with('pos')->andReturn($positions);
 
@@ -41,15 +41,33 @@ class OrderRenderStateServiceTest extends TestCase
 
         $remembered = null;
         $lookups = $service->resolveLookupCollections(
-            needsPersonnelLookup: true,
             isCandidateOrder: true,
             selectedOrder: 5,
             selectedTemplate: 11,
             searchTemplate: 'tpl',
             searchPersonnel: 'pers',
+            searchRank: 'rank',
+            searchMainStructure: 'main',
             searchStructure: 'str',
             searchPosition: 'pos',
             personnelIdList: [101],
+            componentIdList: [10],
+            selectedDropdownValues: [
+                'rank_id' => [40],
+                'structure_main_id' => [50],
+                'structure_id' => [60],
+                'position_id' => [70],
+            ],
+            loadedOptionGroups: [
+                'templates' => true,
+                'components' => true,
+                'personnels' => true,
+                'ranks' => true,
+                'main_structures' => true,
+                'structures' => true,
+                'positions' => true,
+            ],
+            visibleFields: ['component_id', 'personnel_id', 'rank_id', 'structure_main_id', 'structure_id', 'position_id'],
             rememberComponentDefinitions: function (Collection $collection) use (&$remembered): void {
                 $remembered = $collection;
             }
@@ -70,38 +88,101 @@ class OrderRenderStateServiceTest extends TestCase
         $components = collect([(object) ['id' => 10, 'dynamic_fields' => 'rank_id']]);
         $templates = collect([(object) ['id' => 20, 'name' => 'Template']]);
         $personnels = collect([(object) ['id' => 31, 'name' => 'B']]);
-        $ranks = collect();
-        $mainStructures = collect();
-        $structures = collect();
-        $positions = collect();
-
         $lookupService = Mockery::mock(OrderLookupService::class);
         $lookupService->shouldReceive('components')->once()->with(11)->andReturn($components);
         $lookupService->shouldReceive('templates')->once()->with(5, '')->andReturn($templates);
         $lookupService->shouldReceive('personnels')->once()->with(false, [], '', 15)->andReturn($personnels);
-        $lookupService->shouldReceive('ranks')->once()->andReturn($ranks);
-        $lookupService->shouldReceive('mainStructures')->once()->andReturn($mainStructures);
-        $lookupService->shouldReceive('structures')->once()->with('')->andReturn($structures);
-        $lookupService->shouldReceive('positions')->once()->with('')->andReturn($positions);
 
         $payloadBuilder = Mockery::mock(OrderRenderPayloadBuilder::class);
         $service = new OrderRenderStateService($lookupService, $payloadBuilder);
 
         $lookups = $service->resolveLookupCollections(
-            needsPersonnelLookup: true,
             isCandidateOrder: false,
             selectedOrder: 5,
             selectedTemplate: 11,
             searchTemplate: '',
             searchPersonnel: '',
+            searchRank: '',
+            searchMainStructure: '',
             searchStructure: '',
             searchPosition: '',
             personnelIdList: [],
+            componentIdList: [10],
+            selectedDropdownValues: [],
+            loadedOptionGroups: [
+                'templates' => true,
+                'personnels' => true,
+            ],
+            visibleFields: ['component_id', 'personnel_id'],
             rememberComponentDefinitions: function () {
             }
         );
 
         $this->assertSame($personnels, $lookups['personnels']);
+    }
+
+    public function test_it_resolves_main_structures_when_structure_search_is_used(): void
+    {
+        $mainStructures = collect([(object) ['id' => 50, 'name' => 'Main']]);
+
+        $lookupService = Mockery::mock(OrderLookupService::class);
+        $lookupService->shouldReceive('mainStructures')->once()->with('dep')->andReturn($mainStructures);
+
+        $payloadBuilder = Mockery::mock(OrderRenderPayloadBuilder::class);
+        $service = new OrderRenderStateService($lookupService, $payloadBuilder);
+
+        $lookups = $service->resolveLookupCollections(
+            isCandidateOrder: false,
+            selectedOrder: null,
+            selectedTemplate: null,
+            searchTemplate: '',
+            searchPersonnel: '',
+            searchRank: '',
+            searchMainStructure: 'dep',
+            searchStructure: 'dep',
+            searchPosition: '',
+            personnelIdList: [],
+            componentIdList: [],
+            selectedDropdownValues: [],
+            loadedOptionGroups: [],
+            visibleFields: ['structure_main_id'],
+            rememberComponentDefinitions: function () {
+            }
+        );
+
+        $this->assertSame($mainStructures, $lookups['main_structures']);
+    }
+
+    public function test_it_resolves_ranks_when_rank_search_is_used(): void
+    {
+        $ranks = collect([(object) ['id' => 40, 'name' => 'General']]);
+
+        $lookupService = Mockery::mock(OrderLookupService::class);
+        $lookupService->shouldReceive('ranks')->once()->with('gen')->andReturn($ranks);
+
+        $payloadBuilder = Mockery::mock(OrderRenderPayloadBuilder::class);
+        $service = new OrderRenderStateService($lookupService, $payloadBuilder);
+
+        $lookups = $service->resolveLookupCollections(
+            isCandidateOrder: false,
+            selectedOrder: null,
+            selectedTemplate: null,
+            searchTemplate: '',
+            searchPersonnel: '',
+            searchRank: 'gen',
+            searchMainStructure: '',
+            searchStructure: '',
+            searchPosition: '',
+            personnelIdList: [],
+            componentIdList: [],
+            selectedDropdownValues: [],
+            loadedOptionGroups: [],
+            visibleFields: ['rank_id'],
+            rememberComponentDefinitions: function () {
+            }
+        );
+
+        $this->assertSame($ranks, $lookups['ranks']);
     }
 
     public function test_it_delegates_render_payload_building(): void

@@ -54,6 +54,39 @@ class LaborActivityFormTest extends TestCase
         );
     }
 
+    public function test_labor_activities_for_persistence_excludes_display_only_fields(): void
+    {
+        $component = new class extends Component
+        {
+            public function render()
+            {
+                return '';
+            }
+        };
+
+        $form = new LaborActivityForm($component, 'laborActivityForm');
+        $form->laborActivityList = [[
+            'company_name' => 'DMX',
+            'company_name_display' => 'DMX / Full path',
+            'position' => 'Programçı',
+            'position_label' => 'Programçı',
+            'structure_label' => 'DMX / Full path',
+            'use_lookup' => true,
+            'join_date' => '2026-02-25',
+            'time' => '12:00',
+            'is_current' => true,
+        ]];
+
+        $payload = $form->laborActivitiesForPersistence();
+
+        $this->assertSame('DMX', $payload[0]['company_name']);
+        $this->assertArrayNotHasKey('company_name_display', $payload[0]);
+        $this->assertArrayNotHasKey('position_label', $payload[0]);
+        $this->assertArrayNotHasKey('structure_label', $payload[0]);
+        $this->assertArrayNotHasKey('use_lookup', $payload[0]);
+        $this->assertArrayNotHasKey('time', $payload[0]);
+    }
+
     private function makePersonnelWithStructurePath(): Personnel
     {
         $user = User::factory()->create();

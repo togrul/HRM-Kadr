@@ -266,6 +266,7 @@ class OrderTemplateMetadataSyncService
                 'title' => __('orders::template_metadata_defaults.fields.select_rank'),
                 'model' => '_ranks',
                 'selectedName' => 'rank',
+                'searchField' => 'search.rank',
             ],
             '$day' => ['field' => 'day', 'title' => __('orders::template_metadata_defaults.fields.day')],
             '$month' => ['field' => 'month', 'title' => __('orders::template_metadata_defaults.fields.month')],
@@ -277,6 +278,7 @@ class OrderTemplateMetadataSyncService
                 'title' => __('orders::template_metadata_defaults.fields.select_main_structure'),
                 'model' => '_main_structures',
                 'selectedName' => 'mainStructure',
+                'searchField' => 'search.mainStructure',
             ],
             '$structure' => [
                 'field' => 'structure_id',

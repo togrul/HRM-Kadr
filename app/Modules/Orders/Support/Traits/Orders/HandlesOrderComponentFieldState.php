@@ -157,6 +157,10 @@ trait HandlesOrderComponentFieldState
             $this->coded_list[$row] = (int) $value === 1;
             $this->componentForms[$row]['structure_id'] = null;
             unset($this->componentForms[$row]['structure'], $this->componentForms[$row]['structure_name']);
+
+            if (method_exists($this, 'markOptionGroupLoaded')) {
+                $this->markOptionGroupLoaded('structures');
+            }
         }
 
         if (in_array($field, ['start_date', 'end_date'], true) && $row !== null) {

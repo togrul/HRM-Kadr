@@ -7,8 +7,6 @@ use App\Livewire\Traits\SideModalAction;
 use App\Models\Personnel;
 use App\Modules\Personnel\Services\PersonnelLookupService;
 use App\Modules\Personnel\Services\PersonnelQueryService;
-use App\Modules\Personnel\Services\PersonnelRowViewModelService;
-use App\Modules\Personnel\Services\PersonnelRowActionService;
 use App\Services\StructureService;
 use App\Traits\NestedStructureTrait;
 use Carbon\Carbon;
@@ -49,11 +47,17 @@ class AllPersonnel extends Component
 
     protected array $allowedStatuses = ['current', 'leaves', 'all', 'deleted', 'pending'];
 
+    #[On('personnelTableRowAction')]
+    public function forwardTableRowAction(string $type, mixed $payload = null): void
+    {
+        $this->handleRowAction($type, $payload);
+    }
+
     public function exportExcel()
     {
         $this->authorize('export', Personnel::class);
 
-        $report['data'] = $this->returnData(type: 'excel');
+        $report['data'] = $this->personnelExportRows();
         $report['filter'] = $this->filters;
         $name = Carbon::now()->format('d.m.Y H:i');
 
@@ -242,17 +246,6 @@ class AllPersonnel extends Component
         $this->selectedPosition = is_numeric($this->selectedPosition) ? (int) $this->selectedPosition : null;
     }
 
-    #[Computed]
-    public function personnels()
-    {
-        return $this->returnData();
-    }
-
-    public function rowActions(Personnel $personnel): array
-    {
-        return app(PersonnelRowActionService::class)->build($personnel, $this->status);
-    }
-
     protected function getSafeFilterPayload(): array
     {
         $filters = is_array($this->filters) ? $this->filters : [];
@@ -319,28 +312,9 @@ class AllPersonnel extends Component
         };
     }
 
-    protected function returnData($type = 'normal')
+    protected function selectedStructureIds(): array
     {
-        $query = $this->personnelQuery(withStructureTree: $type === 'normal');
-        $rowViewModelService = app(PersonnelRowViewModelService::class);
-
-        if ($type === 'normal') {
-            return $rowViewModelService->decoratePaginator($query->paginate(10)->withQueryString());
-        }
-
-        return $query->cursor();
-    }
-
-    protected function personnelQuery(bool $withStructureTree = true): Builder
-    {
-        return app(PersonnelQueryService::class)->build(
-            status: $this->status,
-            filters: $this->filters,
-            selectedStructureIds: $this->selectedStructureIds(),
-            accessibleStructureIds: $this->accessibleStructureIds(),
-            selectedPosition: $this->selectedPosition,
-            withStructureTree: $withStructureTree
-        );
+        return $this->normalizeStructureState($this->structure);
     }
 
     protected function accessibleStructureIds(): array
@@ -352,9 +326,27 @@ class AllPersonnel extends Component
         return $this->accessibleStructureCache = resolve(StructureService::class)->getAccessibleStructures();
     }
 
-    protected function selectedStructureIds(): array
+    protected function personnelQuery(bool $withStructureTree = true): Builder
     {
-        return $this->normalizeStructureState($this->structure);
+        return app(PersonnelQueryService::class)->build(
+            status: $this->status,
+            filters: $this->filters,
+            selectedStructureIds: $this->selectedStructureIds(),
+            accessibleStructureIds: $this->accessibleStructureIds(),
+            selectedPosition: $this->selectedPosition,
+            withStructureTree: $withStructureTree,
+        );
+    }
+
+    protected function personnelExportRows(): iterable
+    {
+        return $this->personnelQuery(withStructureTree: false)
+            ->cursor()
+            ->map(fn (Personnel $personnel): array => [
+                'name' => $personnel->name,
+                'surname' => $personnel->surname,
+                'patronymic' => $personnel->patronymic,
+            ]);
     }
 
     protected function normalizeStructureState(mixed $value): array

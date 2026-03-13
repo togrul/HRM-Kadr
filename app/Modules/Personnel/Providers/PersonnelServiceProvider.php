@@ -50,6 +50,7 @@ class PersonnelServiceProvider extends ServiceProvider
     {
         return [
             'all-personnel' => \App\Modules\Personnel\Livewire\AllPersonnel::class,
+            'table-panel' => \App\Modules\Personnel\Livewire\TablePanel::class,
             'add-personnel' => \App\Modules\Personnel\Livewire\AddPersonnel::class,
             'edit-personnel' => \App\Modules\Personnel\Livewire\EditPersonnel::class,
             'delete-personnel' => \App\Modules\Personnel\Livewire\DeletePersonnel::class,

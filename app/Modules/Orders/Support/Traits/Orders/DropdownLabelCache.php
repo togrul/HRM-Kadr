@@ -99,7 +99,9 @@ trait DropdownLabelCache
             return '---';
         }
 
-        return $this->codedStructureLabelSimple($lineage);
+        $isCoded = $row !== null ? (bool) ($this->coded_list[$row] ?? false) : false;
+
+        return $this->buildStructureSelectedValue($lineage, $isCoded);
     }
 
     protected function resolveStructureLabel(int $id, bool $isCoded): string
@@ -114,49 +116,120 @@ trait DropdownLabelCache
             return $this->codedStructureLabelSimple($lineage);
         }
 
-        return $this->buildStructureValue($lineage, $isCoded);
+        return $this->buildStructureValue($lineage, false);
     }
 
     protected function buildStructureValue(array $lineage, $isCoded): string
     {
-        $value = '';
         $suffixService = new WordSuffixService;
+        $nodes = $this->structureLabelNodes($lineage);
 
-        foreach ($lineage as $parent) {
-            if (empty($parent['parent_id'])) {
-                continue;
-            }
-
-            $level_name = __('orders::order_form.structure_levels.'.strtolower((string) (collect(StructureEnum::cases())->pluck('name', 'value')[$parent['level']] ?? '')));
-
-            $data = $isCoded
-                ? $this->codedStructureLabelWithNormalizedSuffix($parent, $level_name, $suffixService)
-                : $suffixService->getStructureSuffix($parent['name']) . ' ';
-
-            $value .= $data;
+        if ($nodes === []) {
+            return '---';
         }
 
-        return $value;
+        if ($isCoded) {
+            if (count($nodes) === 1) {
+                return $this->codedStructureLabelSimple($nodes);
+            }
+
+            $parentSegments = collect(array_slice($nodes, 0, -1))
+                ->map(fn (array $node) => $this->codedStructureLabelWithNormalizedSuffix($node, $this->structureLevelName($node), $suffixService))
+                ->filter()
+                ->implode(' ');
+
+            $lastNode = end($nodes);
+            $lastLabel = $this->codedStructureFinalLabel($lastNode, $suffixService);
+
+            return trim($parentSegments.' '.$lastLabel);
+        }
+
+        if (count($nodes) === 1) {
+            return trim((string) ($nodes[0]['name'] ?? '---'));
+        }
+
+        $parentSegments = collect(array_slice($nodes, 0, -1))
+            ->map(function (array $node) use ($suffixService) {
+                $name = (string) ($node['name'] ?? '');
+
+                return trim($this->normalizeStructureSuffixLabel(
+                    $name,
+                    $suffixService->getStructureSuffix($name),
+                    $suffixService
+                ));
+            })
+            ->filter()
+            ->implode(' ');
+
+        $lastNode = end($nodes);
+        $lastLabel = trim($suffixService->getMultiSuffix((string) ($lastNode['name'] ?? ''), false));
+
+        if ($parentSegments === '') {
+            return $lastLabel !== '' ? $lastLabel : '---';
+        }
+
+        return trim($parentSegments.' '.$lastLabel);
+    }
+
+    protected function buildStructureSelectedValue(array $lineage, bool $isCoded): string
+    {
+        $suffixService = new WordSuffixService;
+        $nodes = $this->structureLabelNodes($lineage);
+
+        if ($nodes === []) {
+            return '---';
+        }
+
+        if ($isCoded) {
+            if (count($nodes) === 1) {
+                $node = $nodes[0];
+
+                return $this->codedStructureLabelWithNormalizedSuffix($node, $this->structureLevelName($node), $suffixService);
+            }
+
+            return collect($nodes)
+                ->map(function (array $node, int $index) use ($nodes, $suffixService) {
+                    $levelName = $this->structureLevelName($node);
+
+                    if ($index === array_key_last($nodes)) {
+                        return $this->codedStructureSelectedFinalLabel($node, $levelName, $suffixService);
+                    }
+
+                    return $this->codedStructureLabelWithNormalizedSuffix($node, $levelName, $suffixService);
+                })
+                ->filter()
+                ->implode(' ');
+        }
+
+        return collect($nodes)
+            ->map(function (array $node) use ($suffixService) {
+                $name = (string) ($node['name'] ?? '');
+
+                return trim($this->normalizeStructureSuffixLabel(
+                    $name,
+                    $suffixService->getStructureSuffix($name),
+                    $suffixService
+                ));
+            })
+            ->filter()
+            ->implode(' ');
     }
 
     protected function codedStructureLabelWithNormalizedSuffix(array $parent, string $levelName, WordSuffixService $suffixService): string
     {
-        $levelWithSuffix = (int) ($parent['level'] ?? 0) > 1
-            ? $suffixService->getMultiSuffix($levelName)
-            : $suffixService->getStructureSuffix($levelName);
+        $levelWithSuffix = $suffixService->getStructureSuffix($levelName);
 
         $levelWithSuffix = $this->normalizeStructureSuffixLabel($levelName, $levelWithSuffix, $suffixService);
 
-        return (string) ($parent['code'] ?? '')
+        return trim((string) ($parent['code'] ?? '')
             . $suffixService->getNumberSuffix((int) ($parent['code'] ?? 0))
             . ' '
-            . $levelWithSuffix
-            . ' ';
+            . $levelWithSuffix);
     }
 
     protected function codedStructureLabelSimple(array $lineage): string
     {
-        $node = collect($lineage)->last();
+        $node = collect($this->structureLabelNodes($lineage))->last();
         if (! is_array($node)) {
             return '---';
         }
@@ -166,16 +239,49 @@ trait DropdownLabelCache
             return (string) ($node['name'] ?? '---');
         }
 
-        $levelName = __('orders::order_form.structure_levels.'.strtolower((string) (collect(StructureEnum::cases())->pluck('name', 'value')[$node['level']] ?? '')));
-        $suffixService = new WordSuffixService;
-        $levelBase = mb_strtolower((string) $levelName);
-        $levelWithSuffix = $this->normalizeStructureSuffixLabel(
-            $levelBase,
-            $suffixService->getStructureSuffix($levelBase),
+        return trim($code.$this->numberSuffix($code).' '.$this->structureLevelName($node));
+    }
+
+    protected function codedStructureFinalLabel(array $node, WordSuffixService $suffixService): string
+    {
+        $code = (int) ($node['code'] ?? 0);
+        $levelName = $this->structureLevelName($node);
+        $finalLevel = $suffixService->getMultiSuffix($levelName, false);
+
+        return trim($code.$suffixService->getNumberSuffix($code).' '.$finalLevel);
+    }
+
+    protected function codedStructureSelectedFinalLabel(array $node, string $levelName, WordSuffixService $suffixService): string
+    {
+        $code = (int) ($node['code'] ?? 0);
+        $finalLevel = $this->normalizeStructureSuffixLabel(
+            $levelName,
+            $suffixService->getMultiSuffix($levelName),
             $suffixService
         );
 
-        return trim($code.$suffixService->getNumberSuffix($code).' '.$levelWithSuffix);
+        return trim($code.$suffixService->getNumberSuffix($code).' '.$finalLevel);
+    }
+
+    protected function structureLevelName(array $node): string
+    {
+        return __('orders::order_form.structure_levels.'.strtolower((string) (collect(StructureEnum::cases())->pluck('name', 'value')[$node['level']] ?? '')));
+    }
+
+    protected function structureLabelNodes(array $lineage): array
+    {
+        $nodes = array_values(array_filter($lineage, fn ($node) => is_array($node)));
+
+        if (count($nodes) > 1 && empty($nodes[0]['parent_id'])) {
+            array_shift($nodes);
+        }
+
+        return $nodes;
+    }
+
+    protected function numberSuffix(int $code): string
+    {
+        return (new WordSuffixService)->getNumberSuffix($code);
     }
 
     protected function normalizeStructureSuffixLabel(

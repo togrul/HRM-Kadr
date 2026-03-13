@@ -226,7 +226,10 @@ return [
         'has_disability' => 'əlillik var?',
     ],
     'messages' => [
+        'confirm_title' => 'Gözləyən qeyd',
         'confirm_message' => 'Bu əməkdaş qeydi təsdiq gözləyir.',
+        'confirm_description' => 'Təsdiqdən sonra qeyd aktiv əməkdaş siyahısına tam qoşulacaq və əlaqəli əməliyyatlarda normal istifadə olunacaq.',
+        'confirm_hint' => 'Təsdiq yalnız məlumatı yoxladıqdan sonra edilməlidir.',
         'no_permission_to_edit' => 'Redaktə etmək üçün icazəniz yoxdur.',
         'personnel_created' => 'Əməkdaş uğurla əlavə olundu!',
         'personnel_updated' => 'Əməkdaş uğurla yeniləndi!',

@@ -10,9 +10,13 @@ use Illuminate\Support\Collection;
 
 class EloquentRankPositionLookupReadRepository implements RankPositionLookupReadRepository
 {
-    public function activeRanks(): Collection
+    public function activeRanks(?string $search = null): Collection
     {
+        $normalized = trim((string) $search);
+        $localeColumn = 'name_'.app()->getLocale();
+
         return Rank::query()
+            ->when($normalized !== '', fn (Builder $query) => $query->where($localeColumn, 'LIKE', "%{$normalized}%"))
             ->where('is_active', true)
             ->orderBy('id')
             ->get();
@@ -28,4 +32,3 @@ class EloquentRankPositionLookupReadRepository implements RankPositionLookupRead
             ->get(['id', 'name']);
     }
 }
-

@@ -12,6 +12,11 @@ class AddCandidate extends Component
     use CandidateCrud;
     use AuthorizesRequests;
 
+    public function placeholder()
+    {
+        return view('candidates::livewire.candidates.placeholders.add-candidate');
+    }
+
     public function store(): void
     {
         $this->validate();

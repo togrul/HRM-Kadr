@@ -31,6 +31,8 @@ class OrdersListRenderBenchmarkCommandTest extends TestCase
         $this->assertSame('ok', data_get($results, 'orders_render.status'));
         $this->assertSame('ok', data_get($results, 'orders_filter_update.status'));
         $this->assertSame('ok', data_get($results, 'orders_add_modal_open.status'));
+        $this->assertSame('ok', data_get($results, 'orders_add_modal_panel_render.status'));
         $this->assertGreaterThan(0, (int) data_get($results, 'orders_render.response_bytes'));
+        $this->assertGreaterThan(0, (int) data_get($results, 'orders_add_modal_panel_render.response_bytes'));
     }
 }

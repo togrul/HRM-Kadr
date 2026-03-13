@@ -3,13 +3,42 @@
       {{ $title ?? ''}}
     </h2>
     @if(auth()->user()->can('confirmation-general') && isset($personnelModel) && $personnelModelData->is_pending)
-    <div class="flex items-center justify-start px-4 py-2 space-x-3 bg-white border border-gray-200 rounded-md shadow-lg">
-        <span class="flex-none">
-            <svg class="w-6 h-6 text-rose-500" xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6v6l4 2"/><path d="M16 21.16a10 10 0 1 1 5-13.516"/><path d="M20 11.5v6"/><path d="M20 21.5h.01"/></svg>
-        </span>
-        <div class="flex items-center justify-between w-full">
-            <p class="text-sm font-medium text-gray-900">{{ __('personnel::common.messages.confirm_message') }}</p>
-            <button wire:click="confirmPersonnel" class="px-4 py-2 text-sm font-semibold text-white transition-all duration-200 bg-gray-900 rounded-lg shadow-sm appearance-none hover:bg-gray-700">{{ __('personnel::common.actions.confirm') }}</button>
+    <div class="overflow-hidden rounded-[22px] border border-amber-200 bg-gradient-to-r from-amber-50 via-white to-rose-50/60 shadow-[0_16px_36px_rgba(15,23,42,0.08)]">
+        <div class="flex flex-col gap-4 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
+            <div class="flex min-w-0 items-start gap-4">
+                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-amber-200 bg-white text-amber-600 shadow-sm">
+                    <x-icons.pending-icon size="w-6 h-6" color="text-amber-500" />
+                </div>
+                <div class="min-w-0 space-y-2">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <x-small-badge mode="amber">{{ __('personnel::common.states.waiting_for_approval') }}</x-small-badge>
+                        <span class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                            {{ __('personnel::common.messages.confirm_title') }}
+                        </span>
+                    </div>
+                    <div class="space-y-1">
+                        <p class="text-sm font-semibold text-slate-800">{{ __('personnel::common.messages.confirm_message') }}</p>
+                        <p class="text-sm leading-6 text-slate-500">{{ __('personnel::common.messages.confirm_description') }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="flex shrink-0 items-center gap-3">
+                <p class="hidden max-w-48 text-right text-xs leading-5 text-slate-400 lg:block">
+                    {{ __('personnel::common.messages.confirm_hint') }}
+                </p>
+                <button
+                    wire:click="confirmPersonnel"
+                    wire:loading.attr="disabled"
+                    wire:target="confirmPersonnel"
+                    class="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                    <svg wire:loading wire:target="confirmPersonnel" class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
+                        <path class="opacity-75" d="M4 12a8 8 0 0 1 8-8v3a5 5 0 0 0-5 5H4z" fill="currentColor"></path>
+                    </svg>
+                    <span>{{ __('personnel::common.actions.confirm') }}</span>
+                </button>
+            </div>
         </div>
     </div>
     @endif

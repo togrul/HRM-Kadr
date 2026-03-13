@@ -6,8 +6,7 @@ use Illuminate\Support\Collection;
 
 interface RankPositionLookupReadRepository
 {
-    public function activeRanks(): Collection;
+    public function activeRanks(?string $search = null): Collection;
 
     public function positions(?string $search = null): Collection;
 }
-

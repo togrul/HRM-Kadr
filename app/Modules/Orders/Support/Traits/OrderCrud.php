@@ -118,6 +118,8 @@ trait OrderCrud
 
     public string $templateSchemaSource = 'metadata_required';
 
+    public array $loadedOptionGroups = [];
+
     public function bootOrderCrud(
         OrderLookupService $orderLookupService,
         OrderTypeStatusLookupReadRepository $orderTypeStatusLookup,
@@ -157,7 +159,7 @@ trait OrderCrud
             key: $key,
             isCoded: $isCoded,
             structureLineageResolver: fn (int $structureId) => $this->structureLineage($structureId),
-            structureLabelBuilder: fn (array $lineage, bool $coded) => $this->buildStructureValue($lineage, $coded)
+            structureLabelBuilder: fn (array $lineage, bool $coded) => $this->buildStructureSelectedValue($lineage, $coded)
         );
 
         if ($selection === null) {
@@ -223,9 +225,41 @@ trait OrderCrud
         $this->templateSelected((int) $value);
     }
 
+    public function loadOptionGroup(string $group): void
+    {
+        $normalized = trim($group);
+
+        if ($normalized === '') {
+            return;
+        }
+
+        $this->loadedOptionGroups[$normalized] = true;
+        $this->dispatch('ui-select-option-group-loaded', group: $normalized);
+    }
+
+    protected function markOptionGroupLoaded(string $group): void
+    {
+        $normalized = trim($group);
+
+        if ($normalized === '') {
+            return;
+        }
+
+        $this->loadedOptionGroups[$normalized] = true;
+    }
+
     #[Computed]
     public function templateOptions(): array
     {
+        $shouldLoadTemplates = ($this->loadedOptionGroups['templates'] ?? false)
+            || filled($this->search->template)
+            || filled($this->orderForm->order_type_id)
+            || filled($this->selectedTemplate);
+
+        if (! $shouldLoadTemplates) {
+            return [];
+        }
+
         $collection = $this->orderLookupService
             ->templates($this->selectedOrder ?? null, $this->search->template)
             ->map(fn ($template) => [
@@ -405,28 +439,89 @@ trait OrderCrud
             collect($this->componentForms)->pluck('personnel_id')->toArray(),
             static fn ($value) => $value !== null
         );
+        $componentIdList = array_filter(
+            collect($this->componentForms)->pluck('component_id')->toArray(),
+            static fn ($value) => $value !== null
+        );
+        $selectedDropdownValues = collect(['rank_id', 'structure_main_id', 'structure_id', 'position_id'])
+            ->mapWithKeys(fn (string $field) => [
+                $field => collect($this->componentForms)
+                    ->pluck($field)
+                    ->filter(static fn ($value) => $value !== null && $value !== '')
+                    ->map(static fn ($value) => (int) $value)
+                    ->filter(static fn (int $value) => $value > 0)
+                    ->unique()
+                    ->values()
+                    ->all(),
+            ])
+            ->all();
 
         $isCandidateOrder = $this->isCandidateOrder();
         $selectedOrder = $this->selectedOrder ?? null;
         $selectedTemplate = $this->selectedTemplate;
         $searchTemplate = $this->search->template ?? '';
         $searchPersonnel = $this->search->personnel ?? '';
+        $searchRank = $this->search->rank ?? '';
+        $searchMainStructure = $this->search->mainStructure ?? '';
         $searchStructure = $this->search->structure ?? '';
         $searchPosition = $this->search->position ?? '';
-        $needsPersonnelLookup = $this->selectedBlade === Order::BLADE_DEFAULT;
+        $visibleFields = $this->visibleLookupFields();
 
         return $this->renderStateService->resolveLookupCollections(
-            needsPersonnelLookup: $needsPersonnelLookup,
             isCandidateOrder: $isCandidateOrder,
             selectedOrder: $selectedOrder,
             selectedTemplate: $selectedTemplate,
             searchTemplate: $searchTemplate,
             searchPersonnel: $searchPersonnel,
+            searchRank: $searchRank,
+            searchMainStructure: $searchMainStructure,
             searchStructure: $searchStructure,
             searchPosition: $searchPosition,
             personnelIdList: $personnelIdList,
+            componentIdList: $componentIdList,
+            selectedDropdownValues: $selectedDropdownValues,
+            loadedOptionGroups: $this->loadedOptionGroups,
+            visibleFields: $visibleFields,
             rememberComponentDefinitions: fn ($componentForms) => $this->rememberComponentDefinitions($componentForms)
         );
+    }
+
+    protected function visibleLookupFields(): array
+    {
+        $fields = collect($this->selectedComponents ?? [])
+            ->flatten()
+            ->map(function ($token) {
+                $normalizedToken = (string) $token;
+                $resolvedField = data_get($this->dynamicFieldCatalog, $normalizedToken.'.field');
+
+                if (is_string($resolvedField) && trim($resolvedField) !== '') {
+                    return trim($resolvedField);
+                }
+
+                return match (ltrim($normalizedToken, '$')) {
+                    'rank' => 'rank_id',
+                    'fullname' => 'personnel_id',
+                    'structure_main' => 'structure_main_id',
+                    'structure' => 'structure_id',
+                    'position' => 'position_id',
+                    default => ltrim($normalizedToken, '$'),
+                };
+            })
+            ->filter()
+            ->values();
+
+        if ($this->selectedBlade === Order::BLADE_DEFAULT) {
+            $fields->push('personnel_id');
+        }
+
+        if (($this->showComponent ?? false) && ($this->selectedTemplate || $this->orderForm->order_type_id)) {
+            $fields->push('component_id');
+        }
+
+        return $fields
+            ->unique()
+            ->values()
+            ->all();
     }
 
     /**

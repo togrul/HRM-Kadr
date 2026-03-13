@@ -1,5 +1,5 @@
 @if ($filterDetailMounted)
-    <livewire:ui.filter.detail :filter="$filters" :key="'personnel-filter-detail'" />
+    <livewire:ui.filter.detail :filter="$filters" :key="'personnel-filter-detail'" lazy />
 @endif
 
 <x-side-modal size="x-large">

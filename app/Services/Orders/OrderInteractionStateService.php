@@ -35,10 +35,6 @@ class OrderInteractionStateService
         $lineage = $structureLineageResolver($resolvedId);
         $label = $structureLabelBuilder($lineage, (bool) $isCoded);
 
-        if ($field === 'structure_id' && ! $isCoded) {
-            $label = (string) (collect($lineage)->last()['name'] ?? $label);
-        }
-
         return [
             'list' => $list,
             'field' => $field,

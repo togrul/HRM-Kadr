@@ -62,6 +62,8 @@ return [
         'please_search_personnel' => 'Zəhmət olmasa əməkdaş axtarın',
         'in_business_trip' => 'ezamiyyətdə',
         'in_vacation' => 'məzuniyyətdə',
+        'candidate_already_imported' => ':candidate artıq personal kimi mövcuddur. Tabel nömrəsi: :tabel_no.',
+        'personnel_duplicate_tabel_no' => 'Bu tabel nömrəsi artıq mövcuddur: :tabel_no.',
     ],
     'transportation' => [
         'placeholder' => 'Nəqliyyat seçin',

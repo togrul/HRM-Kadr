@@ -256,7 +256,7 @@
     <x-side-modal>
         @can('create', App\Models\Candidate::class)
             @if ($showSideMenu == 'add-candidate')
-                <livewire:candidates.add-candidate wire:key="candidate-add-modal" />
+                <livewire:candidates.add-candidate wire:key="candidate-add-modal" lazy />
             @endif
         @endcan
 

@@ -4,6 +4,7 @@ namespace App\Modules\Personnel\Console\Commands;
 
 use App\Models\User;
 use App\Modules\Personnel\Livewire\AllPersonnel;
+use App\Modules\Personnel\Livewire\TablePanel;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
@@ -13,7 +14,9 @@ class PersonnelListQueryBudgetCommand extends Command
 {
     protected $signature = 'personnel:list-query-budget
         {--render-budget= : Max query count for personnel list render}
+        {--table-render-budget= : Max query count for personnel table render}
         {--status-budget= : Max query count for personnel status update}
+        {--table-status-budget= : Max query count for personnel table status render}
         {--filter-budget= : Max query count for personnel filter-detail open}
         {--json : Print report as JSON}';
 
@@ -34,7 +37,9 @@ class PersonnelListQueryBudgetCommand extends Command
 
         $budgets = [
             'all_personnel_render' => max(1, (int) ($this->option('render-budget') ?: config('personnel.performance.query_budget.all_personnel_render', 18))),
+            'personnel_table_render' => max(1, (int) ($this->option('table-render-budget') ?: config('personnel.performance.query_budget.personnel_table_render', 18))),
             'all_personnel_status_update' => max(1, (int) ($this->option('status-budget') ?: config('personnel.performance.query_budget.all_personnel_status_update', 24))),
+            'personnel_table_status_render' => max(1, (int) ($this->option('table-status-budget') ?: config('personnel.performance.query_budget.personnel_table_status_render', 24))),
             'all_personnel_filter_open' => max(1, (int) ($this->option('filter-budget') ?: config('personnel.performance.query_budget.all_personnel_filter_open', 8))),
         ];
 
@@ -43,16 +48,23 @@ class PersonnelListQueryBudgetCommand extends Command
             Livewire::actingAs($user);
             Livewire::test(AllPersonnel::class);
         });
+        $results[] = $this->probe('personnel_table_render', $budgets['personnel_table_render'], function () use ($user): void {
+            Livewire::actingAs($user);
+            Livewire::test(TablePanel::class);
+        });
         $results[] = $this->probe('all_personnel_status_update', $budgets['all_personnel_status_update'], function () use ($user): void {
             Livewire::actingAs($user);
             Livewire::test(AllPersonnel::class)
                 ->call('setStatus', 'all');
         });
+        $results[] = $this->probe('personnel_table_status_render', $budgets['personnel_table_status_render'], function () use ($user): void {
+            Livewire::actingAs($user);
+            Livewire::test(TablePanel::class, ['status' => 'all']);
+        });
         $results[] = $this->probe('all_personnel_filter_open', $budgets['all_personnel_filter_open'], function () use ($user): void {
             Livewire::actingAs($user);
             Livewire::test(AllPersonnel::class)
-                ->call('openFilter')
-                ->call('handleFilterDetailReady');
+                ->call('openFilter');
         });
 
         $summary = [

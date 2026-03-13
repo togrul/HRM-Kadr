@@ -71,15 +71,27 @@ class OrderLookupService
         );
     }
 
-    public function ranks(): Collection
+    public function ranks(?string $search = null): Collection
     {
+        $normalized = trim((string) $search);
+
+        if ($normalized !== '') {
+            return $this->rankPositionLookup->activeRanks($normalized);
+        }
+
         $cacheKey = OrderLookupCache::key('ranks', 'all');
 
         return Cache::remember($cacheKey, 600, fn () => $this->rankPositionLookup->activeRanks());
     }
 
-    public function mainStructures(): Collection
+    public function mainStructures(?string $search = null): Collection
     {
+        $normalized = trim((string) $search);
+
+        if ($normalized !== '') {
+            return $this->structureLookup->mainStructures($normalized);
+        }
+
         $cacheKey = OrderLookupCache::key('main_structures', 'all');
 
         return Cache::remember($cacheKey, 600, function () {
