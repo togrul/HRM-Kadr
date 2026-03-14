@@ -26,6 +26,7 @@ class PersonnelListQueryBudgetCommandTest extends TestCase
         $this->assertSame(0, $exitCode);
         $this->assertSame(0, data_get($payload, 'summary.failed_probes'));
         $this->assertSame('ok', data_get($results, 'all_personnel_render.status'));
+        $this->assertSame('ok', data_get($results, 'all_personnel_initial_page.status'));
         $this->assertSame('ok', data_get($results, 'personnel_table_render.status'));
         $this->assertSame('ok', data_get($results, 'all_personnel_status_update.status'));
         $this->assertSame('ok', data_get($results, 'personnel_table_status_render.status'));

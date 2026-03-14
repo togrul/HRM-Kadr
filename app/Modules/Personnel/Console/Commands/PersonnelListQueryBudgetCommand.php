@@ -14,6 +14,7 @@ class PersonnelListQueryBudgetCommand extends Command
 {
     protected $signature = 'personnel:list-query-budget
         {--render-budget= : Max query count for personnel list render}
+        {--initial-page-budget= : Max query count for full initial personnel page bootstrap}
         {--table-render-budget= : Max query count for personnel table render}
         {--status-budget= : Max query count for personnel status update}
         {--table-status-budget= : Max query count for personnel table status render}
@@ -37,6 +38,7 @@ class PersonnelListQueryBudgetCommand extends Command
 
         $budgets = [
             'all_personnel_render' => max(1, (int) ($this->option('render-budget') ?: config('personnel.performance.query_budget.all_personnel_render', 18))),
+            'all_personnel_initial_page' => max(1, (int) ($this->option('initial-page-budget') ?: config('personnel.performance.query_budget.all_personnel_initial_page', 32))),
             'personnel_table_render' => max(1, (int) ($this->option('table-render-budget') ?: config('personnel.performance.query_budget.personnel_table_render', 18))),
             'all_personnel_status_update' => max(1, (int) ($this->option('status-budget') ?: config('personnel.performance.query_budget.all_personnel_status_update', 24))),
             'personnel_table_status_render' => max(1, (int) ($this->option('table-status-budget') ?: config('personnel.performance.query_budget.personnel_table_status_render', 24))),
@@ -47,6 +49,11 @@ class PersonnelListQueryBudgetCommand extends Command
         $results[] = $this->probe('all_personnel_render', $budgets['all_personnel_render'], function () use ($user): void {
             Livewire::actingAs($user);
             Livewire::test(AllPersonnel::class);
+        });
+        $results[] = $this->probe('all_personnel_initial_page', $budgets['all_personnel_initial_page'], function () use ($user): void {
+            Livewire::actingAs($user);
+            Livewire::test(AllPersonnel::class);
+            Livewire::test(TablePanel::class, ['status' => 'current']);
         });
         $results[] = $this->probe('personnel_table_render', $budgets['personnel_table_render'], function () use ($user): void {
             Livewire::actingAs($user);

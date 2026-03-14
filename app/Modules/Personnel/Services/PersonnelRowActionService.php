@@ -7,14 +7,16 @@ use App\Models\Personnel;
 class PersonnelRowActionService
 {
     /**
+     * @param  array{can_edit: bool, can_delete: bool}|null  $capabilities
      * @return PersonnelRowActionDescriptor[]
      */
-    public function build(Personnel $personnel, string $status): array
+    public function build(Personnel $personnel, string $status, ?array $capabilities = null): array
     {
+        $capabilities ??= $this->resolveCapabilities();
         $actions = [];
 
         if ($status !== 'deleted') {
-            if (auth()->user()?->can('edit-personnels')) {
+            if ($capabilities['can_edit']) {
                 $actions[] = PersonnelRowActionDescriptor::action(
                     id: 'edit',
                     label: __('personnel::common.actions.edit'),
@@ -24,7 +26,6 @@ class PersonnelRowActionService
                         'menu' => 'edit-personnel',
                         'value' => $personnel->id,
                     ],
-                    permission: 'edit-personnels',
                 );
 
                 $actions[] = PersonnelRowActionDescriptor::action(
@@ -37,7 +38,6 @@ class PersonnelRowActionService
                         'value' => $personnel->tabel_no,
                     ],
                     inMenu: true,
-                    permission: 'edit-personnels',
                 );
 
                 $actions[] = PersonnelRowActionDescriptor::link(
@@ -66,7 +66,6 @@ class PersonnelRowActionService
                         'value' => $personnel->tabel_no,
                     ],
                     inMenu: true,
-                    permission: 'edit-personnels',
                 );
 
                 $actions[] = PersonnelRowActionDescriptor::action(
@@ -79,10 +78,9 @@ class PersonnelRowActionService
                         'value' => $personnel->tabel_no,
                     ],
                     inMenu: true,
-                    permission: 'edit-personnels',
                 );
 
-                if (auth()->user()?->can('delete-personnels')) {
+                if ($capabilities['can_delete']) {
                     $actions[] = PersonnelRowActionDescriptor::action(
                         id: 'delete',
                         label: __('personnel::common.actions.delete'),
@@ -91,7 +89,6 @@ class PersonnelRowActionService
                             'type' => 'delete',
                             'value' => $personnel->tabel_no,
                         ],
-                        permission: 'delete-personnels',
                         confirmMessage: __('personnel::common.messages.delete_data_confirm'),
                         wireTarget: 'setDeletePersonnel'
                     );
@@ -99,7 +96,7 @@ class PersonnelRowActionService
             }
         }
 
-        if ($status === 'deleted' && auth()->user()?->can('edit-personnels')) {
+        if ($status === 'deleted' && $capabilities['can_edit']) {
             $actions[] = PersonnelRowActionDescriptor::action(
                 id: 'restore',
                 label: __('personnel::common.actions.restore'),
@@ -114,7 +111,7 @@ class PersonnelRowActionService
                 ],
             );
 
-            if (auth()->user()?->can('delete-personnels')) {
+            if ($capabilities['can_delete']) {
                 $actions[] = PersonnelRowActionDescriptor::action(
                     id: 'force-delete',
                     label: __('personnel::common.actions.force_delete'),
@@ -129,6 +126,19 @@ class PersonnelRowActionService
             }
         }
 
-        return array_values(array_filter($actions, fn (PersonnelRowActionDescriptor $action): bool => $action->visibleByPermission()));
+        return array_values($actions);
+    }
+
+    /**
+     * @return array{can_edit: bool, can_delete: bool}
+     */
+    protected function resolveCapabilities(): array
+    {
+        $user = auth()->user();
+
+        return [
+            'can_edit' => $user?->can('edit-personnels') ?? false,
+            'can_delete' => $user?->can('delete-personnels') ?? false,
+        ];
     }
 }

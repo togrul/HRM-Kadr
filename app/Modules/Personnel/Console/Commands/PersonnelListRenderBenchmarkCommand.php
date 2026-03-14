@@ -14,6 +14,8 @@ class PersonnelListRenderBenchmarkCommand extends Command
     protected $signature = 'personnel:list-render-benchmark
         {--render-response-budget= : Max response size for personnel list render}
         {--render-ms-budget= : Max render time in ms for personnel list render}
+        {--initial-page-response-budget= : Max response size for full initial personnel page bootstrap}
+        {--initial-page-ms-budget= : Max render time in ms for full initial personnel page bootstrap}
         {--table-render-response-budget= : Max response size for personnel table render}
         {--table-render-ms-budget= : Max render time in ms for personnel table render}
         {--status-response-budget= : Max response size for personnel status update}
@@ -44,6 +46,10 @@ class PersonnelListRenderBenchmarkCommand extends Command
                 'response_bytes' => max(1, (int) ($this->option('render-response-budget') ?: config('personnel.performance.render_budget.all_personnel_render.response_bytes', 220000))),
                 'render_ms' => max(1, (float) ($this->option('render-ms-budget') ?: config('personnel.performance.render_budget.all_personnel_render.render_ms', 220))),
             ],
+            'all_personnel_initial_page' => [
+                'response_bytes' => max(1, (int) ($this->option('initial-page-response-budget') ?: config('personnel.performance.render_budget.all_personnel_initial_page.response_bytes', 420000))),
+                'render_ms' => max(1, (float) ($this->option('initial-page-ms-budget') ?: config('personnel.performance.render_budget.all_personnel_initial_page.render_ms', 800))),
+            ],
             'personnel_table_render' => [
                 'response_bytes' => max(1, (int) ($this->option('table-render-response-budget') ?: config('personnel.performance.render_budget.personnel_table_render.response_bytes', 180000))),
                 'render_ms' => max(1, (float) ($this->option('table-render-ms-budget') ?: config('personnel.performance.render_budget.personnel_table_render.render_ms', 220))),
@@ -64,6 +70,10 @@ class PersonnelListRenderBenchmarkCommand extends Command
 
         $results = [];
         $results[] = $this->probe('all_personnel_render', $budgets['all_personnel_render'], fn () => $profiler->measureRender($user, AllPersonnel::class));
+        $results[] = $this->probe('all_personnel_initial_page', $budgets['all_personnel_initial_page'], fn () => $this->mergeMetrics(
+            $profiler->measureRender($user, AllPersonnel::class),
+            $profiler->measureRender($user, TablePanel::class, ['status' => 'current'])
+        ));
         $results[] = $this->probe('personnel_table_render', $budgets['personnel_table_render'], fn () => $profiler->measureRender($user, TablePanel::class));
         $results[] = $this->probe('all_personnel_status_update', $budgets['all_personnel_status_update'], fn () => $profiler->measureInteraction($user, AllPersonnel::class, fn ($component) => $component->call('setStatus', 'all')));
         $results[] = $this->probe('personnel_table_status_render', $budgets['personnel_table_status_render'], fn () => $profiler->measureRender($user, TablePanel::class, ['status' => 'all']));
@@ -153,5 +163,26 @@ class PersonnelListRenderBenchmarkCommand extends Command
         }
 
         return ($summary['failed_probes'] === 0 && $summary['over_budget_probes'] === 0) ? self::SUCCESS : self::FAILURE;
+    }
+
+    /**
+     * @param  array<string, float|int|string|null>  ...$metrics
+     * @return array<string, float|int|string|null>
+     */
+    private function mergeMetrics(array ...$metrics): array
+    {
+        $sum = static fn (string $key): float|int => array_reduce(
+            $metrics,
+            fn ($carry, $item) => $carry + (float) data_get($item, $key, 0),
+            0
+        );
+
+        return [
+            'render_ms' => round((float) $sum('render_ms'), 2),
+            'response_bytes' => (int) $sum('response_bytes'),
+            'html_bytes' => (int) $sum('html_bytes'),
+            'snapshot_bytes' => (int) $sum('snapshot_bytes'),
+            'effects_bytes' => (int) $sum('effects_bytes'),
+        ];
     }
 }

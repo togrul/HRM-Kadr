@@ -30,6 +30,8 @@ class PersonnelRowViewModelService
      */
     public function decorateCollection(Collection $collection): Collection
     {
+        $this->ensureStructureTreeLoaded($collection);
+
         $activeShiftAssignments = $this->resolveActiveShiftAssignments($collection);
 
         return $collection->map(function (Personnel $personnel, int $index) use ($activeShiftAssignments) {
@@ -61,6 +63,25 @@ class PersonnelRowViewModelService
 
             return $personnel;
         });
+    }
+
+    /**
+     * The row decorator depends on structure -> parent chains to build labels.
+     * Load them here so callers do not need to remember that contract.
+     *
+     * @param  Collection<int, Personnel>  $collection
+     */
+    protected function ensureStructureTreeLoaded(Collection $collection): void
+    {
+        if ($collection->isEmpty()) {
+            return;
+        }
+
+        $collection->loadMissing([
+            'structure' => fn ($query) => $query
+                ->select('id', 'parent_id', 'name')
+                ->withRecursive('parent', false),
+        ]);
     }
 
     /**
@@ -137,24 +158,19 @@ class PersonnelRowViewModelService
         $segments = [];
         $cursor = $structure;
 
-
         while ($cursor) {
-          $segments[] = (string) $cursor->name;
-  
-          if (! $cursor->relationLoaded('parent')) {
-              break;
-          }
-  
-          $parent = $cursor->parent;
-  
-          // parent yoksa veya parent kurumsal root ise stop (kurum adını alma)
-          if (! $parent || is_null($parent->parent_id)) {
-              break;
-          }
-  
-          $cursor = $parent;
-      }
+            $segments[] = (string) $cursor->name;
 
-      return $this->structurePathCache[$cacheKey] = implode(' ', array_reverse($segments));
+            $parent = $cursor->parent;
+
+            // Stop at the organizational root and do not include its label.
+            if (! $parent || is_null($parent->parent_id)) {
+                break;
+            }
+
+            $cursor = $parent;
+        }
+
+        return $this->structurePathCache[$cacheKey] = implode(' ', array_reverse($segments));
     }
 }

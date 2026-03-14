@@ -3,6 +3,7 @@
 namespace App\Modules\Personnel\Livewire;
 
 use App\Models\Personnel;
+use App\Modules\Personnel\Services\PersonnelListStateNormalizer;
 use App\Modules\Personnel\Services\PersonnelQueryService;
 use App\Modules\Personnel\Services\PersonnelRowActionService;
 use App\Modules\Personnel\Services\PersonnelRowViewModelService;
@@ -30,13 +31,17 @@ class TablePanel extends Component
 
     protected ?array $accessibleStructureCache = null;
 
+    protected ?array $rowActionCapabilities = null;
+
     public function mount(string $status = 'current', array $filters = [], array $structure = [], ?int $selectedPosition = null): void
     {
         $this->authorize('viewAny', Personnel::class);
-        $this->status = $status;
-        $this->filters = $this->normalizeFilterPayload($filters);
-        $this->structure = $this->normalizeStructureState($structure);
-        $this->selectedPosition = $selectedPosition;
+        $normalizer = app(PersonnelListStateNormalizer::class);
+
+        $this->status = $normalizer->normalizeStatus($status, ['current', 'leaves', 'all', 'deleted', 'pending']);
+        $this->filters = $normalizer->normalizeFilters($filters);
+        $this->structure = $normalizer->normalizeStructure($structure);
+        $this->selectedPosition = $normalizer->normalizePosition($selectedPosition);
     }
 
     public function placeholder()
@@ -51,7 +56,11 @@ class TablePanel extends Component
 
     public function rowActions(Personnel $personnel): array
     {
-        return app(PersonnelRowActionService::class)->build($personnel, $this->status);
+        return app(PersonnelRowActionService::class)->build(
+            personnel: $personnel,
+            status: $this->status,
+            capabilities: $this->rowActionCapabilities()
+        );
     }
 
     public function getTableHeaders(): array
@@ -96,28 +105,29 @@ class TablePanel extends Component
 
     protected function normalizeStructureState(mixed $value): array
     {
-        if (is_array($value)) {
-            return array_values(array_filter(array_map('intval', $value)));
-        }
-
-        if (is_numeric($value)) {
-            return [(int) $value];
-        }
-
-        if (is_string($value)) {
-            $value = trim($value);
-
-            return $value === ''
-                ? []
-                : array_values(array_filter(array_map('intval', explode(',', $value))));
-        }
-
-        return [];
+        return app(PersonnelListStateNormalizer::class)->normalizeStructure($value);
     }
 
     protected function normalizeFilterPayload(array $filters): array
     {
-        return array_filter($filters, fn ($value, $key) => $value !== null && $value !== '' && $value !== [] && $key !== '__identity', ARRAY_FILTER_USE_BOTH);
+        return app(PersonnelListStateNormalizer::class)->normalizeFilters($filters);
+    }
+
+    /**
+     * @return array{can_edit: bool, can_delete: bool}
+     */
+    protected function rowActionCapabilities(): array
+    {
+        if ($this->rowActionCapabilities !== null) {
+            return $this->rowActionCapabilities;
+        }
+
+        $user = auth()->user();
+
+        return $this->rowActionCapabilities = [
+            'can_edit' => $user?->can('edit-personnels') ?? false,
+            'can_delete' => $user?->can('delete-personnels') ?? false,
+        ];
     }
 
     public function render()

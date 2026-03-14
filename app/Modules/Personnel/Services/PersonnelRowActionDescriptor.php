@@ -84,13 +84,4 @@ final class PersonnelRowActionDescriptor
         );
     }
 
-    public function visibleByPermission(): bool
-    {
-        if ($this->permission === null) {
-            return true;
-        }
-
-        return auth()->user()?->can($this->permission) ?? false;
-    }
 }
-

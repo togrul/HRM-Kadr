@@ -5,6 +5,7 @@ namespace App\Modules\Personnel\Livewire;
 use App\Modules\Personnel\Exports\PersonnelExport;
 use App\Livewire\Traits\SideModalAction;
 use App\Models\Personnel;
+use App\Modules\Personnel\Services\PersonnelListStateNormalizer;
 use App\Modules\Personnel\Services\PersonnelLookupService;
 use App\Modules\Personnel\Services\PersonnelQueryService;
 use App\Services\StructureService;
@@ -240,22 +241,24 @@ class AllPersonnel extends Component
 
     public function fillFilter()
     {
-        $this->status = in_array($this->status, $this->allowedStatuses, true) ? $this->status : 'current';
-        $this->filters ??= [];
-        $this->structure = $this->normalizeStructureState($this->structure);
-        $this->selectedPosition = is_numeric($this->selectedPosition) ? (int) $this->selectedPosition : null;
+        $normalizer = app(PersonnelListStateNormalizer::class);
+
+        $this->status = $normalizer->normalizeStatus($this->status, $this->allowedStatuses);
+        $this->filters = $normalizer->normalizeFilters(is_array($this->filters) ? $this->filters : []);
+        $this->structure = $normalizer->normalizeStructure($this->structure);
+        $this->selectedPosition = $normalizer->normalizePosition($this->selectedPosition);
     }
 
     protected function getSafeFilterPayload(): array
     {
-        $filters = is_array($this->filters) ? $this->filters : [];
-
-        return array_filter($filters, fn ($value, $key) => $value !== null && $value !== '' && $value !== [] && $key !== '__identity', ARRAY_FILTER_USE_BOTH);
+        return app(PersonnelListStateNormalizer::class)->normalizeFilters(
+            is_array($this->filters) ? $this->filters : []
+        );
     }
 
     protected function normalizeAndPersistFilters(array $filter): array
     {
-        return array_filter($filter, fn ($value, $key) => $value !== null && $value !== '' && $value !== [] && $key !== '__identity', ARRAY_FILTER_USE_BOTH);
+        return app(PersonnelListStateNormalizer::class)->normalizeFilters($filter);
     }
 
     #[Computed(persist: true)]
@@ -314,7 +317,7 @@ class AllPersonnel extends Component
 
     protected function selectedStructureIds(): array
     {
-        return $this->normalizeStructureState($this->structure);
+        return app(PersonnelListStateNormalizer::class)->normalizeStructure($this->structure);
     }
 
     protected function accessibleStructureIds(): array
@@ -340,7 +343,13 @@ class AllPersonnel extends Component
 
     protected function personnelExportRows(): iterable
     {
-        return $this->personnelQuery(withStructureTree: false)
+        return app(PersonnelQueryService::class)->buildExport(
+            status: $this->status,
+            filters: $this->filters,
+            selectedStructureIds: $this->selectedStructureIds(),
+            accessibleStructureIds: $this->accessibleStructureIds(),
+            selectedPosition: $this->selectedPosition,
+        )
             ->cursor()
             ->map(fn (Personnel $personnel): array => [
                 'name' => $personnel->name,
@@ -351,24 +360,7 @@ class AllPersonnel extends Component
 
     protected function normalizeStructureState(mixed $value): array
     {
-        if (is_array($value)) {
-            return array_values(array_filter(array_map('intval', $value)));
-        }
-
-        if (is_numeric($value)) {
-            return [ (int) $value ];
-        }
-
-        if (is_string($value)) {
-            $value = trim($value);
-            if ($value === '') {
-                return [];
-            }
-
-            return array_values(array_filter(array_map('intval', explode(',', $value))));
-        }
-
-        return [];
+        return app(PersonnelListStateNormalizer::class)->normalizeStructure($value);
     }
 
     public function render()
