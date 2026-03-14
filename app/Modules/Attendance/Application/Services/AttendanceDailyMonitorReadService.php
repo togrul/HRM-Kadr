@@ -49,8 +49,12 @@ class AttendanceDailyMonitorReadService
                     ->whereDate('l.date', $date);
             })
             ->where('p.is_pending', 0)
-            ->whereNull('p.leave_work_date')
             ->whereNull('p.deleted_at')
+            ->whereDate('p.join_work_date', '<=', $date)
+            ->where(function (Builder $query) use ($date): void {
+                $query->whereNull('p.leave_work_date')
+                    ->orWhereDate('p.leave_work_date', '>=', $date);
+            })
             ->when($structureIds !== [], fn (Builder $query) => $query->whereIn('p.structure_id', $structureIds))
             ->when($search !== '', function (Builder $query) use ($search): void {
                 $wildcard = '%'.$search.'%';

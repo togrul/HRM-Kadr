@@ -41,6 +41,8 @@ return [
         'unlocked' => 'Month unlocked. Summaries: :summaries, Ledgers: :ledgers',
         'snapshot_done' => 'Snapshot done. Summary rows upserted: :count',
         'snapshot_queued' => 'Monthly snapshot queued.',
+        'export_requires_snapshot' => 'Export requires a fresh monthly snapshot for this period.',
+        'export_requires_fresh_snapshot' => 'Export blocked. Ledger changes were detected after the last snapshot; generate a new snapshot first.',
     ],
     'payroll_headers' => [
         'tabel_no' => 'Tabel no',

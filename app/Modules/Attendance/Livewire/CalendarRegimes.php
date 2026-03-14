@@ -8,6 +8,7 @@ use App\Models\Structure;
 use App\Modules\Attendance\Application\Services\AttendanceAuthorizationService;
 use App\Modules\Attendance\Application\Services\AttendanceCalendarManagementService;
 use App\Support\Translations\ModuleTranslation;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
@@ -29,6 +30,11 @@ class CalendarRegimes extends Component
     public ?string $editingStoredName = null;
 
     public int $perPage = 20;
+
+    /**
+     * @var array<int,array{id:int,name:string}>
+     */
+    public array $structures = [];
 
     /**
      * @var array<string,mixed>
@@ -71,6 +77,7 @@ class CalendarRegimes extends Component
         $this->canManage = $authorization->can('attendance.calendars.manage');
         $this->year = $year ?: (int) now()->year;
         $this->month = $month ?: (int) now()->month;
+        $this->structures = $this->resolveStructures();
         $this->resetForm();
     }
 
@@ -134,6 +141,12 @@ class CalendarRegimes extends Component
             message: __('attendance::calendar_regimes.confirmations.delete'),
             description: implode(' • ', $details),
         );
+
+        $this->dispatch(
+            'notify',
+            type: 'error',
+            message: __('attendance::calendar_regimes.messages.delete_confirmation_required')
+        );
     }
 
     public function remove(int $id, AttendanceCalendarManagementService $service): void
@@ -158,10 +171,7 @@ class CalendarRegimes extends Component
 
     public function render()
     {
-        $structures = Structure::query()
-            ->orderBy('name')
-            ->get(['id', 'name']);
-
+        $structures = collect($this->structures);
         $structureNames = $structures
             ->pluck('name', 'id')
             ->all();
@@ -192,5 +202,24 @@ class CalendarRegimes extends Component
             'scope_type' => 'global',
             'scope_id' => null,
         ];
+    }
+
+    /**
+     * @return array<int,array{id:int,name:string}>
+     */
+    private function resolveStructures(): array
+    {
+        return Cache::remember(
+            'attendance-calendar-regimes-structures',
+            now()->addMinutes(10),
+            fn () => Structure::query()
+                ->orderBy('name')
+                ->get(['id', 'name'])
+                ->map(fn (Structure $structure) => [
+                    'id' => (int) $structure->id,
+                    'name' => (string) $structure->name,
+                ])
+                ->all()
+        );
     }
 }

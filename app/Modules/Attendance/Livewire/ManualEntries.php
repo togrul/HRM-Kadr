@@ -100,6 +100,24 @@ class ManualEntries extends Component
         ];
     }
 
+    protected function validationAttributes(): array
+    {
+        return [
+            'form.tabel_no' => __('attendance::manual_entries.labels.personnel'),
+            'form.date' => __('attendance::manual_entries.labels.date'),
+            'form.check_in_at' => __('attendance::manual_entries.labels.check_in_time'),
+            'form.check_out_at' => __('attendance::manual_entries.labels.check_out_time'),
+            'form.shift_source_mode' => __('attendance::manual_entries.labels.shift_source'),
+            'form.explicit_shift_id' => __('attendance::manual_entries.labels.calculation_shift'),
+            'form.worked_minutes' => __('attendance::manual_entries.labels.worked_minutes'),
+            'form.overtime_minutes' => __('attendance::manual_entries.labels.overtime_minutes'),
+            'form.late_minutes' => __('attendance::manual_entries.labels.late_minutes'),
+            'form.early_leave_minutes' => __('attendance::manual_entries.labels.early_leave_minutes'),
+            'form.absence_code' => __('attendance::manual_entries.labels.absence_code'),
+            'form.reason' => __('attendance::manual_entries.labels.reason'),
+        ];
+    }
+
     public function mount(AttendanceAuthorizationService $authorization, bool $embedded = false): void
     {
         $this->embedded = $embedded;
@@ -319,21 +337,23 @@ class ManualEntries extends Component
     #[Computed]
     public function availableShifts(): Collection
     {
-        return AttendanceShift::query()
-            ->where('is_active', true)
-            ->orderBy('name')
-            ->get([
-                'id',
-                'name',
-                'start_time',
-                'end_time',
-                'break_minutes',
-                'is_night_shift',
-                'in_flex_before_minutes',
-                'in_flex_after_minutes',
-                'out_flex_before_minutes',
-                'out_flex_after_minutes',
-            ]);
+        return $this->rememberRuntime('attendanceManualEntries.availableShifts', function () {
+            return AttendanceShift::query()
+                ->where('is_active', true)
+                ->orderBy('name')
+                ->get([
+                    'id',
+                    'name',
+                    'start_time',
+                    'end_time',
+                    'break_minutes',
+                    'is_night_shift',
+                    'in_flex_before_minutes',
+                    'in_flex_after_minutes',
+                    'out_flex_before_minutes',
+                    'out_flex_after_minutes',
+                ]);
+        });
     }
 
     #[Computed]
@@ -345,32 +365,38 @@ class ManualEntries extends Component
 
         $term = trim($this->personnelSearch);
         $wildcard = '%'.$term.'%';
+        $structureIds = $this->currentStructureIds();
         /** @var StructurePathService $structurePathService */
         $structurePathService = app(StructurePathService::class);
 
-        return Personnel::query()
-            ->select('tabel_no', 'surname', 'name', 'patronymic', 'structure_id')
-            ->where('is_pending', 0)
-            ->whereNull('leave_work_date')
-            ->when($this->currentStructureIds() !== [], function ($query): void {
-                $query->whereIn('structure_id', $this->currentStructureIds());
-            })
-            ->where(function ($query) use ($wildcard): void {
-                $query->where('tabel_no', 'like', $wildcard)
-                    ->orWhere('surname', 'like', $wildcard)
-                    ->orWhere('name', 'like', $wildcard)
-                    ->orWhere('patronymic', 'like', $wildcard);
-            })
-            ->with('structure:id,name,parent_id')
-            ->orderBy('surname')
-            ->orderBy('name')
-            ->limit(12)
-            ->get()
-            ->map(function (Personnel $personnel) use ($structurePathService) {
-                $personnel->setAttribute('structure_path', $structurePathService->resolve((int) $personnel->structure_id));
+        return $this->rememberRuntime('attendanceManualEntries.personnelResults.'.md5(json_encode([
+            'term' => $term,
+            'structure_ids' => $structureIds,
+        ]) ?: ''), function () use ($wildcard, $structureIds, $structurePathService) {
+            return Personnel::query()
+                ->select('tabel_no', 'surname', 'name', 'patronymic', 'structure_id')
+                ->where('is_pending', 0)
+                ->whereNull('leave_work_date')
+                ->when($structureIds !== [], function ($query) use ($structureIds): void {
+                    $query->whereIn('structure_id', $structureIds);
+                })
+                ->where(function ($query) use ($wildcard): void {
+                    $query->where('tabel_no', 'like', $wildcard)
+                        ->orWhere('surname', 'like', $wildcard)
+                        ->orWhere('name', 'like', $wildcard)
+                        ->orWhere('patronymic', 'like', $wildcard);
+                })
+                ->with('structure:id,name,parent_id')
+                ->orderBy('surname')
+                ->orderBy('name')
+                ->limit(12)
+                ->get()
+                ->map(function (Personnel $personnel) use ($structurePathService) {
+                    $personnel->setAttribute('structure_path', $structurePathService->resolve((int) $personnel->structure_id));
 
-                return $personnel;
-            });
+                    return $personnel;
+                });
+        });
     }
 
     #[Computed]
@@ -400,28 +426,45 @@ class ManualEntries extends Component
 
         $assignmentDate = filled($this->form['date']) ? (string) $this->form['date'] : now()->toDateString();
 
-        return AttendanceShiftAssignment::query()
-            ->with('shift:id,name,start_time,end_time,break_minutes,is_night_shift,in_flex_before_minutes,in_flex_after_minutes,out_flex_before_minutes,out_flex_after_minutes')
-            ->where('tabel_no', $this->form['tabel_no'])
-            ->where('is_active', true)
-            ->whereDate('effective_from', '<=', $assignmentDate)
-            ->where(function ($query) use ($assignmentDate): void {
-                $query->whereNull('effective_to')
-                    ->orWhereDate('effective_to', '>=', $assignmentDate);
-            })
-            ->latest('effective_from')
-            ->latest('id')
-            ->first();
+        return $this->rememberRuntime('attendanceManualEntries.activeAssignment.'.md5(json_encode([
+            'tabel_no' => $this->form['tabel_no'],
+            'date' => $assignmentDate,
+        ]) ?: ''), function () use ($assignmentDate) {
+            return AttendanceShiftAssignment::query()
+                ->with('shift:id,name,start_time,end_time,break_minutes,is_night_shift,in_flex_before_minutes,in_flex_after_minutes,out_flex_before_minutes,out_flex_after_minutes')
+                ->where('tabel_no', $this->form['tabel_no'])
+                ->where('is_active', true)
+                ->whereDate('effective_from', '<=', $assignmentDate)
+                ->where(function ($query) use ($assignmentDate): void {
+                    $query->whereNull('effective_to')
+                        ->orWhereDate('effective_to', '>=', $assignmentDate);
+                })
+                ->latest('effective_from')
+                ->latest('id')
+                ->first();
+        });
     }
 
     #[Computed]
     public function baselineContext(): array
     {
-        return app(AttendanceManualMetricsResolverService::class)->resolveBaselineContext(
-            ! empty($this->form['tabel_no']) ? (string) $this->form['tabel_no'] : null,
-            filled($this->form['date']) ? (string) $this->form['date'] : now()->toDateString(),
-            $this->form
-        );
+        $tabelNo = ! empty($this->form['tabel_no']) ? (string) $this->form['tabel_no'] : null;
+        $date = filled($this->form['date']) ? (string) $this->form['date'] : now()->toDateString();
+
+        return $this->rememberRuntime('attendanceManualEntries.baselineContext.'.md5(json_encode([
+            'tabel_no' => $tabelNo,
+            'date' => $date,
+            'shift_source_mode' => $this->form['shift_source_mode'] ?? null,
+            'explicit_shift_id' => $this->form['explicit_shift_id'] ?? null,
+            'check_in_at' => $this->form['check_in_at'] ?? null,
+            'check_out_at' => $this->form['check_out_at'] ?? null,
+        ]) ?: ''), function () use ($tabelNo, $date) {
+            return app(AttendanceManualMetricsResolverService::class)->resolveBaselineContext(
+                $tabelNo,
+                $date,
+                $this->form
+            );
+        });
     }
 
     #[Computed]
@@ -434,11 +477,13 @@ class ManualEntries extends Component
         /** @var StructurePathService $structurePathService */
         $structurePathService = app(StructurePathService::class);
 
-        $selectedPersonnelRecord = Personnel::query()
-            ->select('tabel_no', 'surname', 'name', 'patronymic', 'structure_id')
-            ->with('structure:id,name,parent_id')
-            ->where('tabel_no', $this->form['tabel_no'])
-            ->first();
+        $selectedPersonnelRecord = $this->rememberRuntime('attendanceManualEntries.selectedPersonnelRecord.'.$this->form['tabel_no'], function () {
+            return Personnel::query()
+                ->select('tabel_no', 'surname', 'name', 'patronymic', 'structure_id')
+                ->with('structure:id,name,parent_id')
+                ->where('tabel_no', $this->form['tabel_no'])
+                ->first();
+        });
 
         if ($selectedPersonnelRecord) {
             $selectedPersonnelRecord->setAttribute(
@@ -456,7 +501,9 @@ class ManualEntries extends Component
         /** @var AttendanceStructureScopeReadService $structureScopeRead */
         $structureScopeRead = app(AttendanceStructureScopeReadService::class);
 
-        return $structureScopeRead->label($this->selectedStructureId);
+        return $this->rememberRuntime('attendanceManualEntries.selectedStructureLabel.'.($this->selectedStructureId ?? 'all'), function () use ($structureScopeRead) {
+            return $structureScopeRead->label($this->selectedStructureId);
+        });
     }
 
     public function render()
@@ -476,9 +523,11 @@ class ManualEntries extends Component
      */
     private function currentStructureIds(): array
     {
-        return $this->selectedStructureId
-            ? $this->getNestedStructure($this->selectedStructureId)
-            : [];
+        return $this->rememberRuntime('attendanceManualEntries.currentStructureIds.'.($this->selectedStructureId ?? 'all'), function () {
+            return $this->selectedStructureId
+                ? $this->getNestedStructure($this->selectedStructureId)
+                : [];
+        });
     }
 
     private function refreshCalculatedFields(): void

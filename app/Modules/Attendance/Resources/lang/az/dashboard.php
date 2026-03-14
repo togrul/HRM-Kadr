@@ -20,11 +20,13 @@ return [
     'tabs' => [
         'overview' => 'Xülasə',
         'daily_monitor' => 'Günlük monitor',
+        'manager_summary' => 'Rəhbər xülasəsi',
         'puantaj' => 'Puantaj cədvəli',
         'exceptions' => 'İstisnalar qutusu',
         'overtime' => 'Əlavə iş lövhəsi',
         'month_close' => 'Ay bağlanışı',
         'manual' => 'Manual girişlər',
+        'history' => 'Tarixçə',
         'settings' => 'Tənzimləmələr',
         'shifts' => 'Növbələr',
         'calendar_regimes' => 'İş rejimi təqvimi',

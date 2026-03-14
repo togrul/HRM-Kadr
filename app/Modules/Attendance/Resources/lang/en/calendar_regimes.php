@@ -37,6 +37,7 @@ return [
     'messages' => [
         'saved' => 'Calendar rule saved.',
         'deleted' => 'Calendar rule deleted.',
+        'delete_confirmation_required' => 'Confirmation is required before deleting this calendar rule.',
         'duplicate_scope_date' => 'A calendar rule already exists for this date and scope.',
     ],
     'confirmations' => [

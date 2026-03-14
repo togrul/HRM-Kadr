@@ -64,6 +64,14 @@
         </div>
     </div>
 
+    @if($canExport && !($exportStatus['ready'] ?? false))
+        <div class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            {{ ($exportStatus['has_snapshot'] ?? false)
+                ? __('attendance::month_close.messages.export_requires_fresh_snapshot')
+                : __('attendance::month_close.messages.export_requires_snapshot') }}
+        </div>
+    @endif
+
     <x-surface-card :title="__('attendance::month_close.export_profile.title')" icon="icons.line-settings-icon">
         <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
             <x-surface-card :title="__('attendance::month_close.export_profile.format')">

@@ -4,13 +4,14 @@ namespace App\Modules\Attendance\Livewire;
 
 use App\Modules\Attendance\Application\Services\AttendanceAuthorizationService;
 use App\Modules\Attendance\Application\Services\AttendanceOverviewService;
+use App\Modules\Attendance\Application\Services\AttendanceStructureScopeReadService;
 use Livewire\Attributes\On;
 use Carbon\Carbon;
 use Livewire\Component;
 
 class Dashboard extends Component
 {
-    private const ALLOWED_TABS = ['overview', 'daily-monitor', 'puantaj', 'exceptions', 'overtime', 'month-close', 'manual', 'settings', 'shifts', 'calendar-regimes'];
+    private const ALLOWED_TABS = ['overview', 'manager-summary', 'daily-monitor', 'puantaj', 'exceptions', 'overtime', 'month-close', 'manual', 'history', 'settings', 'shifts', 'calendar-regimes'];
 
     public int $year;
 
@@ -19,6 +20,10 @@ class Dashboard extends Component
     public string $activeTab = 'overview';
 
     public ?int $selectedStructureId = null;
+
+    public string $historyType = 'all';
+
+    public ?int $historySubjectId = null;
 
     /**
      * @var array<int,string>
@@ -29,16 +34,28 @@ class Dashboard extends Component
 
     public function mount(
         AttendanceOverviewService $overviewService,
-        AttendanceAuthorizationService $authorization
+        AttendanceAuthorizationService $authorization,
+        AttendanceStructureScopeReadService $structureScopeRead
     ): void
     {
         $authorization->authorize('attendance.view');
 
         $now = Carbon::now();
 
-        $this->year = (int) $now->year;
-        $this->month = (int) $now->month;
+        $this->year = is_numeric(request()->query('year'))
+            ? (int) request()->query('year')
+            : (int) $now->year;
+        $this->month = is_numeric(request()->query('month'))
+            ? max(1, min(12, (int) request()->query('month')))
+            : (int) $now->month;
         $this->availableTabs = $this->resolveAvailableTabs($authorization);
+        $this->selectedStructureId = is_numeric(request()->query('structure_id'))
+            ? (int) request()->query('structure_id')
+            : null;
+        $this->historyType = $this->resolveRequestedHistoryType((string) request()->query('history_type', 'all'));
+        $this->historySubjectId = is_numeric(request()->query('history_subject_id'))
+            ? (int) request()->query('history_subject_id')
+            : null;
 
         $requestedTab = (string) request()->query('tab', 'overview');
         if (in_array($requestedTab, $this->availableTabs, true)) {
@@ -47,7 +64,13 @@ class Dashboard extends Component
             $this->activeTab = $this->availableTabs[0] ?? 'overview';
         }
 
-        $this->overview = $overviewService->build($this->year, $this->month);
+        $this->overview = $overviewService->build(
+            $this->year,
+            $this->month,
+            $this->selectedStructureId,
+            true,
+            $structureScopeRead->resolveIds($this->selectedStructureId)
+        );
     }
 
     public function updatedYear(AttendanceOverviewService $overviewService): void
@@ -62,7 +85,13 @@ class Dashboard extends Component
 
     private function refreshOverview(AttendanceOverviewService $overviewService): void
     {
-        $this->overview = $overviewService->build($this->year, $this->month);
+        $this->overview = $overviewService->build(
+            $this->year,
+            $this->month,
+            $this->selectedStructureId,
+            true,
+            app(AttendanceStructureScopeReadService::class)->resolveIds($this->selectedStructureId)
+        );
     }
 
     public function switchTab(string $tab): void
@@ -82,12 +111,14 @@ class Dashboard extends Component
         }
 
         $this->selectedStructureId = is_numeric($payload) ? (int) $payload : null;
+        $this->refreshOverview(app(AttendanceOverviewService::class));
     }
 
     #[On('filterSelected')]
     public function clearSelectedStructure(): void
     {
         $this->selectedStructureId = null;
+        $this->refreshOverview(app(AttendanceOverviewService::class));
     }
 
     /**
@@ -99,6 +130,10 @@ class Dashboard extends Component
 
         if ($authorization->can('attendance.daily.view')) {
             $tabs[] = 'daily-monitor';
+        }
+
+        if ($authorization->can('attendance.manager.summary.view')) {
+            $tabs[] = 'manager-summary';
         }
 
         if ($authorization->can('attendance.puantaj.view')) {
@@ -121,6 +156,10 @@ class Dashboard extends Component
             $tabs[] = 'manual';
         }
 
+        if ($authorization->can('attendance.history.view')) {
+            $tabs[] = 'history';
+        }
+
         if ($authorization->can('attendance.settings.manage')) {
             $tabs[] = 'settings';
         }
@@ -139,5 +178,12 @@ class Dashboard extends Component
     public function render()
     {
         return view('attendance::livewire.attendance.dashboard');
+    }
+
+    private function resolveRequestedHistoryType(string $type): string
+    {
+        return in_array($type, ['all', 'calendar', 'shift', 'assignment', 'settings', 'manual', 'overtime', 'exceptions', 'month'], true)
+            ? $type
+            : 'all';
     }
 }

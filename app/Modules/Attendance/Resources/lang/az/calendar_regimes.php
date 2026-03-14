@@ -37,6 +37,7 @@ return [
     'messages' => [
         'saved' => 'Təqvim qaydası yadda saxlanıldı.',
         'deleted' => 'Təqvim qaydası silindi.',
+        'delete_confirmation_required' => 'Silinmə əməliyyatı üçün təsdiq tələb olunur.',
         'duplicate_scope_date' => 'Bu tarix və əhatə üçün artıq təqvim qaydası mövcuddur.',
     ],
     'confirmations' => [

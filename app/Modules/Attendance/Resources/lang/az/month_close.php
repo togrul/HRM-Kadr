@@ -41,6 +41,8 @@ return [
         'unlocked' => 'Ay açıldı. Xülasələr: :summaries, Gündəlik qeydlər: :ledgers',
         'snapshot_done' => 'Snapshot tamamlandı. Upsert olunan xülasə sətirləri: :count',
         'snapshot_queued' => 'Aylıq snapshot növbəyə əlavə edildi.',
+        'export_requires_snapshot' => 'Eksport üçün əvvəlcə bu ay üzrə snapshot yaradılmalıdır.',
+        'export_requires_fresh_snapshot' => 'Eksport bloklandı. Son snapshot-dan sonra ledger dəyişiklikləri var; yenidən snapshot alın.',
     ],
     'payroll_headers' => [
         'tabel_no' => 'Tabel nömrəsi',

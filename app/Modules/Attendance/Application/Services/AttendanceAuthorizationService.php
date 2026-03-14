@@ -27,6 +27,10 @@ class AttendanceAuthorizationService
             'manage-staff',
             'access-admin',
         ],
+        'attendance.manager.summary.view' => [
+            'show-attendance-manager-summary',
+            'access-admin',
+        ],
         'attendance.puantaj.view' => [
             'show-attendance-puantaj',
             'show-attendance',
@@ -95,6 +99,10 @@ class AttendanceAuthorizationService
         'attendance.month.manage' => [
             'manage-attendance-month-close',
             'manage-attendance',
+            'access-admin',
+        ],
+        'attendance.history.view' => [
+            'show-attendance-history',
             'access-admin',
         ],
         'attendance.settings.manage' => [

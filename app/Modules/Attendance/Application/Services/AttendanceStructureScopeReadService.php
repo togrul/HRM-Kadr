@@ -9,6 +9,51 @@ use Illuminate\Support\Facades\DB;
 
 class AttendanceStructureScopeReadService
 {
+    /**
+     * @return array<int,int>
+     */
+    public function resolveIds(?int $structureId): array
+    {
+        if (! $structureId) {
+            return [];
+        }
+
+        return Cache::remember(
+            "attendance-structure-scope-ids:{$structureId}",
+            now()->addMinutes(10),
+            function () use ($structureId): array {
+                $rows = Structure::query()->get(['id', 'parent_id']);
+                $childrenByParent = [];
+
+                foreach ($rows as $row) {
+                    $parentId = $row->parent_id !== null ? (int) $row->parent_id : 0;
+                    $childrenByParent[$parentId] ??= [];
+                    $childrenByParent[$parentId][] = (int) $row->id;
+                }
+
+                $resolved = [];
+                $stack = [$structureId];
+
+                while ($stack !== []) {
+                    $currentId = (int) array_pop($stack);
+                    if (isset($resolved[$currentId])) {
+                        continue;
+                    }
+
+                    $resolved[$currentId] = $currentId;
+
+                    foreach ($childrenByParent[$currentId] ?? [] as $childId) {
+                        if (! isset($resolved[$childId])) {
+                            $stack[] = $childId;
+                        }
+                    }
+                }
+
+                return array_values($resolved);
+            }
+        );
+    }
+
     public function label(?int $structureId): ?string
     {
         if (! $structureId) {

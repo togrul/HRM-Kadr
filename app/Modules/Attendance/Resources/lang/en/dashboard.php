@@ -20,11 +20,13 @@ return [
     'tabs' => [
         'overview' => 'Summary',
         'daily_monitor' => 'Daily monitor',
+        'manager_summary' => 'Manager summary',
         'puantaj' => 'Timesheet grid',
         'exceptions' => 'Exceptions inbox',
         'overtime' => 'Overtime board',
         'month_close' => 'Month close',
         'manual' => 'Manual entries',
+        'history' => 'History',
         'settings' => 'Settings',
         'shifts' => 'Shifts',
         'calendar_regimes' => 'Work regime calendar',

@@ -10,6 +10,8 @@ use App\Models\AttendanceManualEntry;
 use App\Models\AttendanceOvertimeRequest;
 use App\Models\AttendanceRawPunch;
 use Carbon\Carbon;
+use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Facades\DB;
 
 class AttendanceOverviewService
 {
@@ -19,26 +21,34 @@ class AttendanceOverviewService
      *
      * @return array<string,int>
      */
-    public function build(int $year, int $month, ?int $structureId = null, bool $useCache = true): array
+    public function build(
+        int $year,
+        int $month,
+        ?int $structureId = null,
+        bool $useCache = true,
+        ?array $structureIds = null
+    ): array
     {
         $cache = app(AttendanceCacheService::class);
 
+        $normalizedStructureIds = $this->normalizeStructureIds($structureId, $structureIds);
+
         if (! $useCache) {
-            return $this->buildUncached($year, $month, $structureId);
+            return $this->buildUncached($year, $month, $structureId, $normalizedStructureIds);
         }
 
         return $cache->rememberOverview(
             year: $year,
             month: $month,
             structureId: $structureId,
-            resolver: fn () => $this->buildUncached($year, $month, $structureId)
+            resolver: fn () => $this->buildUncached($year, $month, $structureId, $normalizedStructureIds)
         );
     }
 
     /**
      * @return array<string,mixed>
      */
-    private function buildUncached(int $year, int $month, ?int $structureId = null): array
+    private function buildUncached(int $year, int $month, ?int $structureId = null, array $structureIds = []): array
     {
         $start = Carbon::createFromDate($year, $month, 1)->startOfMonth();
         $end = $start->copy()->endOfMonth();
@@ -47,12 +57,8 @@ class AttendanceOverviewService
 
         [$workdays, $weekendDays] = $this->resolveDayCounts($start, $end, $structureId);
 
-        $summaryAgg = AttendanceDailyStructureSummary::query()
-            ->whereBetween('date', [$start->toDateString(), $end->toDateString()])
-            ->when(
-                $structureId !== null,
-                fn ($query) => $query->where('structure_id', $structureId)
-            )
+        $summaryQuery = $this->summaryQuery($start, $end, $structureIds);
+        $summaryAgg = (clone $summaryQuery)
             ->selectRaw('COALESCE(SUM(scheduled_minutes_sum),0) as scheduled_sum')
             ->selectRaw('COALESCE(SUM(overtime_minutes_sum),0) as overtime_sum')
             ->selectRaw('COALESCE(SUM(worked_minutes_sum),0) as worked_sum')
@@ -61,128 +67,63 @@ class AttendanceOverviewService
             ->selectRaw('COALESCE(SUM(compliant_days),0) as compliant_days')
             ->first();
 
-        $summaryRows = AttendanceDailyStructureSummary::query()
-            ->whereBetween('date', [$start->toDateString(), $end->toDateString()])
-            ->when(
-                $structureId !== null,
-                fn ($query) => $query->where('structure_id', $structureId)
-            )
-            ->count();
+        $summaryRows = (clone $summaryQuery)->count();
 
         $useSummary = $summaryRows > 0;
 
-        $ledgerAgg = AttendanceDailyLedger::query()
-            ->whereBetween('date', [$start->toDateString(), $end->toDateString()])
-            ->selectRaw('COALESCE(SUM(scheduled_minutes),0) as scheduled_sum')
-            ->selectRaw('COALESCE(SUM(overtime_minutes),0) as overtime_sum')
-            ->selectRaw('COALESCE(SUM(worked_minutes),0) as worked_sum')
-            ->when(
-                $structureId !== null,
-                fn ($query) => $query->whereIn(
-                    'tabel_no',
-                    fn ($q) => $q->from('personnels')
-                        ->select('tabel_no')
-                        ->where('structure_id', $structureId)
-                )
-            )
-            ->first();
+        $ledgerAgg = null;
+        $ledgerCounts = null;
 
-        $ledgerCounts = AttendanceDailyLedger::query()
-            ->whereBetween('date', [$start->toDateString(), $end->toDateString()])
-            ->selectRaw('COUNT(*) as ledger_rows')
-            ->selectRaw('COALESCE(SUM(CASE WHEN scheduled_minutes > 0 THEN 1 ELSE 0 END),0) as scheduled_days')
-            ->selectRaw('COALESCE(SUM(CASE WHEN attendance_status IN ("absent","manual_absence") THEN 1 ELSE 0 END),0) as absence_days')
-            ->selectRaw('COALESCE(SUM(CASE WHEN scheduled_minutes > 0 AND attendance_status NOT IN ("absent","manual_absence") AND late_minutes = 0 AND early_leave_minutes = 0 THEN 1 ELSE 0 END),0) as compliant_days')
-            ->when(
-                $structureId !== null,
-                fn ($query) => $query->whereIn(
-                    'tabel_no',
-                    fn ($q) => $q->from('personnels')
-                        ->select('tabel_no')
-                        ->where('structure_id', $structureId)
-                )
-            )
-            ->first();
+        if (! $useSummary) {
+            $ledgerQuery = $this->ledgerQuery($start, $end, $structureIds);
 
-        $summaryPreviousOvertimeMinutes = (int) AttendanceDailyStructureSummary::query()
-            ->whereBetween('date', [$previousStart->toDateString(), $previousEnd->toDateString()])
-            ->when(
-                $structureId !== null,
-                fn ($query) => $query->where('structure_id', $structureId)
-            )
-            ->sum('overtime_minutes_sum');
+            $ledgerAgg = (clone $ledgerQuery)
+                ->selectRaw('COALESCE(SUM(scheduled_minutes),0) as scheduled_sum')
+                ->selectRaw('COALESCE(SUM(overtime_minutes),0) as overtime_sum')
+                ->selectRaw('COALESCE(SUM(worked_minutes),0) as worked_sum')
+                ->first();
 
-        $ledgerPreviousOvertimeMinutes = (int) AttendanceDailyLedger::query()
-            ->whereBetween('date', [$previousStart->toDateString(), $previousEnd->toDateString()])
-            ->when(
-                $structureId !== null,
-                fn ($query) => $query->whereIn(
-                    'tabel_no',
-                    fn ($q) => $q->from('personnels')
-                        ->select('tabel_no')
-                        ->where('structure_id', $structureId)
-                )
-            )
-            ->sum('overtime_minutes');
+            $ledgerCounts = (clone $ledgerQuery)
+                ->selectRaw('COUNT(*) as ledger_rows')
+                ->selectRaw('COALESCE(SUM(CASE WHEN scheduled_minutes > 0 THEN 1 ELSE 0 END),0) as scheduled_days')
+                ->selectRaw('COALESCE(SUM(CASE WHEN attendance_status IN ("absent","manual_absence") THEN 1 ELSE 0 END),0) as absence_days')
+                ->selectRaw('COALESCE(SUM(CASE WHEN scheduled_minutes > 0 AND attendance_status NOT IN ("absent","manual_absence") AND late_minutes = 0 AND early_leave_minutes = 0 THEN 1 ELSE 0 END),0) as compliant_days')
+                ->first();
+        }
 
-        $previousOvertimeMinutes = $summaryPreviousOvertimeMinutes > 0
-            ? $summaryPreviousOvertimeMinutes
-            : $ledgerPreviousOvertimeMinutes;
+        $previousSummaryQuery = $this->summaryQuery($previousStart, $previousEnd, $structureIds);
+        $previousSummaryRows = (clone $previousSummaryQuery)->count();
+
+        if ($previousSummaryRows > 0) {
+            $previousOvertimeMinutes = (int) (clone $previousSummaryQuery)->sum('overtime_minutes_sum');
+        } else {
+            $previousOvertimeMinutes = (int) (clone $this->ledgerQuery($previousStart, $previousEnd, $structureIds))->sum('overtime_minutes');
+        }
+
+        $scopedTabelNos = $this->scopedTabelNosSubquery($structureIds);
 
         $manualPending = AttendanceManualEntry::query()
             ->whereBetween('date', [$start->toDateString(), $end->toDateString()])
             ->where('approval_status', 'pending')
-            ->when(
-                $structureId !== null,
-                fn ($query) => $query->whereIn(
-                    'tabel_no',
-                    fn ($q) => $q->from('personnels')
-                        ->select('tabel_no')
-                        ->where('structure_id', $structureId)
-                )
-            )
+            ->when($scopedTabelNos !== null, fn ($query) => $query->whereIn('tabel_no', $scopedTabelNos))
             ->count();
 
         $rawPending = AttendanceRawPunch::query()
             ->whereBetween('punched_at', [$start->toDateTimeString(), $end->toDateTimeString()])
             ->where('is_processed', false)
-            ->when(
-                $structureId !== null,
-                fn ($query) => $query->whereIn(
-                    'tabel_no',
-                    fn ($q) => $q->from('personnels')
-                        ->select('tabel_no')
-                        ->where('structure_id', $structureId)
-                )
-            )
+            ->when($scopedTabelNos !== null, fn ($query) => $query->whereIn('tabel_no', $scopedTabelNos))
             ->count();
 
         $openExceptions = AttendanceException::query()
             ->whereBetween('date', [$start->toDateString(), $end->toDateString()])
             ->where('status', 'open')
-            ->when(
-                $structureId !== null,
-                fn ($query) => $query->whereIn(
-                    'tabel_no',
-                    fn ($q) => $q->from('personnels')
-                        ->select('tabel_no')
-                        ->where('structure_id', $structureId)
-                )
-            )
+            ->when($scopedTabelNos !== null, fn ($query) => $query->whereIn('tabel_no', $scopedTabelNos))
             ->count();
 
         $pendingOvertime = AttendanceOvertimeRequest::query()
             ->whereBetween('date', [$start->toDateString(), $end->toDateString()])
             ->where('status', 'pending')
-            ->when(
-                $structureId !== null,
-                fn ($query) => $query->whereIn(
-                    'tabel_no',
-                    fn ($q) => $q->from('personnels')
-                        ->select('tabel_no')
-                        ->where('structure_id', $structureId)
-                )
-            )
+            ->when($scopedTabelNos !== null, fn ($query) => $query->whereIn('tabel_no', $scopedTabelNos))
             ->count();
 
         $scheduledMinutes = (int) ($useSummary ? ($summaryAgg?->scheduled_sum ?? 0) : ($ledgerAgg?->scheduled_sum ?? 0));
@@ -244,6 +185,45 @@ class AttendanceOverviewService
     }
 
     /**
+     * @param  array<int,int>  $structureIds
+     */
+    private function summaryQuery(Carbon $start, Carbon $end, array $structureIds = []): \Illuminate\Database\Eloquent\Builder
+    {
+        return AttendanceDailyStructureSummary::query()
+            ->whereBetween('date', [$start->toDateString(), $end->toDateString()])
+            ->when(
+                $structureIds !== [],
+                fn ($query) => $query->whereIn('structure_id', $structureIds)
+            );
+    }
+
+    /**
+     * @param  array<int,int>  $structureIds
+     */
+    private function ledgerQuery(Carbon $start, Carbon $end, array $structureIds = []): \Illuminate\Database\Eloquent\Builder
+    {
+        $scopedTabelNos = $this->scopedTabelNosSubquery($structureIds);
+
+        return AttendanceDailyLedger::query()
+            ->whereBetween('date', [$start->toDateString(), $end->toDateString()])
+            ->when($scopedTabelNos !== null, fn ($query) => $query->whereIn('tabel_no', $scopedTabelNos));
+    }
+
+    /**
+     * @param  array<int,int>  $structureIds
+     */
+    private function scopedTabelNosSubquery(array $structureIds = []): ?Builder
+    {
+        if ($structureIds === []) {
+            return null;
+        }
+
+        return DB::table('personnels')
+            ->select('tabel_no')
+            ->whereIn('structure_id', $structureIds);
+    }
+
+    /**
      * @return array{0:int,1:int}
      */
     private function resolveDayCounts(Carbon $start, Carbon $end, ?int $structureId = null): array
@@ -298,5 +278,21 @@ class AttendanceOverviewService
         }
 
         return [$workdays, $nonWorkdays];
+    }
+
+    /**
+     * @param  array<int,int>|null  $structureIds
+     * @return array<int,int>
+     */
+    private function normalizeStructureIds(?int $structureId, ?array $structureIds): array
+    {
+        $normalized = collect($structureIds ?? ($structureId !== null ? [$structureId] : []))
+            ->filter(fn ($id) => is_numeric($id))
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values()
+            ->all();
+
+        return $normalized;
     }
 }

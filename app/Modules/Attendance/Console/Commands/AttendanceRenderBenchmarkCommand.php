@@ -102,6 +102,8 @@ class AttendanceRenderBenchmarkCommand extends Command
     private function probe(string $flow, array $budget, callable $callback): array
     {
         try {
+            // Warm the Livewire component/view path so the reported metric reflects steady-state render cost.
+            $callback();
             $metrics = $callback();
             $renderMs = (float) data_get($metrics, 'render_ms', 0);
             $responseBytes = (int) data_get($metrics, 'response_bytes', 0);

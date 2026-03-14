@@ -56,12 +56,14 @@ Bu ekran tab əsaslı vahid workspace-dir.
 Mövcud əsas tablar:
 
 - Xülasə
+- Rəhbər xülasəsi
 - Günlük monitor
 - Puantaj cədvəli
 - İstisnalar qutusu
 - Əlavə iş lövhəsi
 - Ay bağlanışı
 - Manual girişlər
+- Tarixçə
 - Tənzimləmələr
 - Növbələr
 - İş rejimi təqvimi
@@ -84,6 +86,7 @@ Hər istifadəçi bütün tabları görmür. Görünən tablar permission matris
 
 Ən çox istifadə etdiyi tablar:
 
+- Rəhbər xülasəsi
 - Günlük monitor
 - Puantaj cədvəli
 - Əlavə iş lövhəsi
@@ -94,6 +97,7 @@ Hər istifadəçi bütün tabları görmür. Görünən tablar permission matris
 
 Ən çox istifadə etdiyi tablar:
 
+- Tarixçə
 - Tənzimləmələr
 - Növbələr
 - İş rejimi təqvimi
@@ -138,7 +142,39 @@ Burada görünən əsas göstəricilər:
 - yoxluq nisbəti yüksəlibsə puantaj və manual növbə birlikdə yoxlanmalıdır
 - open exceptions yüksəkdirsə əvvəlcə həmin queue təmizlənməlidir
 
-## 5.2 Günlük monitor
+## 5.2 Rəhbər xülasəsi
+
+Bu tab rəhbər üçün komanda üzrə aylıq qərar panelidir.
+
+Əsas məqsədi:
+
+- problemli əməkdaşları tez ayırmaq
+- gecikmə, yoxluq və istisna siqnallarını toplu görmək
+- puantaj detalına keçməzdən əvvəl rəhbər səviyyəsində qısa qərar mənzərəsi qurmaq
+
+Bu tab aşağıdakıları əməkdaş səviyyəsində toplu göstərir:
+
+- plan günləri
+- iştirak günləri
+- yoxluq günləri
+- gecikmə dəqiqələri və gün sayı
+- erkən çıxış dəqiqələri və gün sayı
+- əlavə iş saatı
+- açıq istisna sayı
+
+### Nə vaxt istifadə olunur
+
+- rəhbər ay ortasında komandasının intizam vəziyyətini yoxlayanda
+- ay sonu bağlanışdan əvvəl riskli əməkdaşları seçəndə
+- HR ilə birlikdə problemli hallar üçün prioritet siyahı quranda
+
+### Haraya keçirir
+
+- daha detallı matrisa üçün `Puantaj`
+- gün səviyyəli nəzarət üçün `Günlük monitor`
+- correction və qərar axını üçün `İstisnalar` və `Manual girişlər`
+
+## 5.3 Günlük monitor
 
 Bu tab konkret bir gün üçün operativ nəzarət ekranıdır.
 
@@ -179,7 +215,7 @@ Bu tab konkret bir gün üçün operativ nəzarət ekranıdır.
 4. Təsdiq olunduqdan sonra ledger yenilənir
 5. Daily monitor düzgün nəticə göstərir
 
-## 5.3 Puantaj cədvəli
+## 5.4 Puantaj cədvəli
 
 Bu tab ay üzrə tam günlük matrisa görünüşüdür.
 
@@ -255,7 +291,7 @@ Avtomatik seed olunan həftəsonları burada ayrıca tarix-tarix göstərilmir.
 3. Puantajda həmin sütun holiday kimi işarələnir
 4. Daily monitor və overview da buna uyğun dəyişir
 
-## 5.4 İstisnalar qutusu
+## 5.5 İstisnalar qutusu
 
 Bu tab attendance anomaly inbox-dur.
 
@@ -283,7 +319,7 @@ Burada görünən əsas halllar:
 
 Exception həll olunmadan problem tam bağlanmış sayılmamalıdır. Manual entry ilə birlikdə düşünülməlidir.
 
-## 5.5 Əlavə iş lövhəsi
+## 5.6 Əlavə iş lövhəsi
 
 Bu tab overtime request workflow ekranıdır.
 
@@ -309,7 +345,7 @@ Overtime policy-dən asılı olaraq sistem request yarada və ya mövcud request
 4. təsdiq edən şəxs approve edir
 5. ledger və month summary buna uyğun yenilənir
 
-## 5.6 Ay bağlanışı
+## 5.7 Ay bağlanışı
 
 Bu tab ayın yekun bağlanması üçündür.
 
@@ -330,7 +366,7 @@ Bu tab ayın yekun bağlanması üçündür.
 
 Ay bağlanışı bordro və hesabatın stabil qalması üçündür.
 
-## 5.7 Manual girişlər
+## 5.8 Manual girişlər
 
 Bu tab cihaz məlumatı olmayan və ya düzəliş tələb olunan hallarda istifadə edilir.
 
@@ -357,7 +393,34 @@ Manual override yalnız əsaslandırılmış hallarda istifadə olunmalıdır.
 6. save et
 7. approval queue-dan approve olunduqdan sonra ledger-a düşür
 
-## 5.8 Tənzimləmələr
+## 5.9 Tarixçə
+
+Bu tab attendance üzrə audit və dəyişiklik tarixçəsi üçündür.
+
+Burada əsasən aşağıdakı dəyişikliklər görünür:
+
+- iş rejimi təqvimi dəyişiklikləri
+- növbə yaradılması və yenilənməsi
+- növbə təyinatları
+- attendance policy dəyişiklikləri
+- manual, overtime, exception və month close audit hadisələri
+
+### Admin niyə istifadə edir
+
+- hansı qaydanın nə vaxt dəyişdiyini görmək
+- problem yarandıqda dəyişikliyin mənbəyini tapmaq
+- kim tərəfindən hansı parametrlərin dəyişdirildiyini izləmək
+
+### Görünən əsas hissələr
+
+- hadisə vaxtı
+- bölmə və event kodu
+- obyekt
+- icra edən şəxs
+- dəyişən sahələr
+- əvvəlki / yeni vəziyyət
+
+## 5.10 Tənzimləmələr
 
 Bu tab attendance qaydalarının əsas policy ekranıdır.
 
@@ -381,7 +444,7 @@ Yəni burada edilən dəyişiklik:
 
 kimi hesablamalara təsir edir.
 
-## 5.9 Növbələr
+## 5.11 Növbələr
 
 Bu tab iki hissədən ibarətdir:
 
@@ -408,7 +471,7 @@ Burada həmin növbə konkret əməkdaşa tarix aralığı üzrə bağlanır.
 2. müəyyən struktur və ya əməkdaş qrupu üçün assignment verilir
 3. pipeline həmin tarixdən etibarən bu shift ilə hesablayır
 
-## 5.10 İş rejimi təqvimi
+## 5.12 İş rejimi təqvimi
 
 Bu tab workday/weekend/holiday qaydalarının idarəetmə ekranıdır.
 

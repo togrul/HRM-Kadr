@@ -7,12 +7,14 @@ Bu sənəd Attendance modulunda rolların hansı tab və əməliyyatlara çıxı
 Görür:
 
 - Xülasə
+- Rəhbər xülasəsi
 - Günlük monitor
 - Puantaj cədvəli
 - İstisnalar inbox-u
 - Əlavə iş paneli
 - Ayın bağlanması
 - Manual girişlər
+- Tarixçə
 - Tənzimləmələr
 - Növbələr
 
@@ -30,6 +32,7 @@ Görür:
 Görür:
 
 - Xülasə
+- Rəhbər xülasəsi
 - Günlük monitor
 - Puantaj cədvəli
 - İstisnalar inbox-u
@@ -78,6 +81,7 @@ Görür:
 - Günlük monitor
 - Puantaj cədvəli
 - Ayın bağlanması
+- Tarixçə
 
 Görmür:
 
@@ -101,11 +105,13 @@ Module və section-level access:
 
 - `attendance.view`
 - `attendance.daily.view`
+- `attendance.manager.summary.view`
 - `attendance.puantaj.view`
 - `attendance.manual.view`
 - `attendance.overtime.view`
 - `attendance.exceptions.view`
 - `attendance.month.view`
+- `attendance.history.view`
 - `attendance.settings.manage`
 - `attendance.shifts.manage`
 
@@ -122,11 +128,13 @@ Spatie permission name qarşılıqları:
 
 - `attendance.view` -> `show-attendance`
 - `attendance.daily.view` -> `show-attendance-daily-monitor`
+- `attendance.manager.summary.view` -> `show-attendance-manager-summary`
 - `attendance.puantaj.view` -> `show-attendance-puantaj`
 - `attendance.manual.view` -> `show-attendance-manual`
 - `attendance.overtime.view` -> `show-attendance-overtime`
 - `attendance.exceptions.view` -> `show-attendance-exceptions`
 - `attendance.month.view` -> `show-attendance-month-close`
+- `attendance.history.view` -> `show-attendance-history`
 - `attendance.settings.manage` -> `manage-attendance-settings`
 - `attendance.shifts.manage` -> `manage-attendance-shifts`
 - `attendance.manual.write` -> `add-attendance-manual`, `edit-attendance-manual`

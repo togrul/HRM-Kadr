@@ -2,6 +2,7 @@
 
 namespace App\Modules\Attendance\Livewire;
 
+use App\Livewire\Concerns\WithRuntimeMemo;
 use App\Models\AttendanceShift;
 use App\Models\AttendanceShiftAssignment;
 use App\Models\Personnel;
@@ -20,6 +21,7 @@ use Livewire\Component;
 
 class ShiftManagement extends Component
 {
+    use WithRuntimeMemo;
     use NestedStructureTrait;
 
     public bool $canManage = false;
@@ -93,6 +95,24 @@ class ShiftManagement extends Component
         ];
     }
 
+    protected function validationAttributes(): array
+    {
+        return [
+            'shiftForm.name' => __('attendance::shift_management.fields.shift_name'),
+            'shiftForm.start_time' => __('attendance::shift_management.fields.start_time'),
+            'shiftForm.end_time' => __('attendance::shift_management.fields.end_time'),
+            'shiftForm.break_minutes' => __('attendance::shift_management.fields.break_minutes'),
+            'shiftForm.in_flex_before_minutes' => __('attendance::shift_management.fields.check_in_flex_before'),
+            'shiftForm.in_flex_after_minutes' => __('attendance::shift_management.fields.check_in_flex_after'),
+            'shiftForm.out_flex_before_minutes' => __('attendance::shift_management.fields.check_out_flex_before'),
+            'shiftForm.out_flex_after_minutes' => __('attendance::shift_management.fields.check_out_flex_after'),
+            'assignmentForm.tabel_no' => __('attendance::shift_management.fields.search_personnel'),
+            'assignmentForm.shift_id' => __('attendance::shift_management.fields.shift'),
+            'assignmentForm.effective_from' => __('attendance::shift_management.fields.effective_from'),
+            'assignmentForm.effective_to' => __('attendance::shift_management.fields.effective_to'),
+        ];
+    }
+
     public function mount(AttendanceAuthorizationService $authorization): void
     {
         $authorization->authorize('attendance.shifts.manage');
@@ -152,6 +172,7 @@ class ShiftManagement extends Component
             'is_active' => true,
         ];
         $this->resetValidation();
+        $this->resetRuntimeMemo();
     }
 
     public function saveShift(AttendanceShiftManagementService $service): void
@@ -200,6 +221,7 @@ class ShiftManagement extends Component
         }
 
         $this->dispatch('notify', type: 'success', message: __('attendance::shift_management.messages.shift_deactivated'));
+        $this->resetRuntimeMemo();
     }
 
     public function editAssignment(int $assignmentId): void
@@ -237,10 +259,12 @@ class ShiftManagement extends Component
         $this->selectedPersonnel = null;
         $this->personnelSearch = '';
         $this->resetValidation();
+        $this->resetRuntimeMemo();
     }
 
     public function updatedSelectedStructureId(): void
     {
+        $this->resetRuntimeMemo();
         $this->clearPersonnel();
     }
 
@@ -285,24 +309,29 @@ class ShiftManagement extends Component
         }
 
         $this->dispatch('notify', type: 'success', message: __('attendance::shift_management.messages.assignment_deactivated'));
+        $this->resetRuntimeMemo();
     }
 
     #[Computed]
     public function shifts(): Collection
     {
-        return AttendanceShift::query()
-            ->orderByDesc('is_active')
-            ->orderBy('name')
-            ->get();
+        return $this->rememberRuntime('attendanceShiftManagement.shifts', function () {
+            return AttendanceShift::query()
+                ->orderByDesc('is_active')
+                ->orderBy('name')
+                ->get();
+        });
     }
 
     #[Computed]
     public function assignmentShifts(): Collection
     {
-        return AttendanceShift::query()
-            ->where('is_active', true)
-            ->orderBy('name')
-            ->get(['id', 'name']);
+        return $this->rememberRuntime('attendanceShiftManagement.assignmentShifts', function () {
+            return AttendanceShift::query()
+                ->where('is_active', true)
+                ->orderBy('name')
+                ->get(['id', 'name']);
+        });
     }
 
     #[Computed]
@@ -310,38 +339,41 @@ class ShiftManagement extends Component
     {
         $today = now()->toDateString();
         $structurePathService = app(StructurePathService::class);
+        $structureIds = $this->currentStructureIds();
 
-        $assignments = AttendanceShiftAssignment::query()
-            ->with([
-                'shift:id,name,start_time,end_time',
-                'personnel:tabel_no,surname,name,patronymic,structure_id,position_id',
-                'personnel.position:id,name',
-            ])
-            ->when($this->currentStructureIds() !== [], function ($query) {
-                $structureIds = $this->currentStructureIds();
+        return $this->rememberRuntime('attendanceShiftManagement.assignments.'.md5(json_encode([
+            'structure_ids' => $structureIds,
+            'today' => $today,
+        ]) ?: ''), function () use ($structureIds, $today, $structurePathService) {
+            $assignments = AttendanceShiftAssignment::query()
+                ->with([
+                    'shift:id,name,start_time,end_time',
+                    'personnel:tabel_no,surname,name,patronymic,structure_id,position_id',
+                    'personnel.position:id,name',
+                ])
+                ->when($structureIds !== [], function ($query) use ($structureIds) {
+                    $query->whereHas('personnel', function ($personnelQuery) use ($structureIds): void {
+                        $personnelQuery->whereIn('structure_id', $structureIds);
+                    });
+                })
+                ->latest('effective_from')
+                ->latest('id')
+                ->limit(20)
+                ->get();
 
-                $query->whereHas('personnel', function ($personnelQuery) use ($structureIds): void {
-                    $personnelQuery->whereIn('structure_id', $structureIds);
-                });
-            })
-            ->latest('effective_from')
-            ->latest('id')
-            ->limit(20)
-            ->get();
+            $assignments = $this->decorateAssignments($assignments, $today);
 
-        $assignments = $this->decorateAssignments($assignments, $today);
-        $assignments = $assignments->map(function (AttendanceShiftAssignment $assignment) use ($structurePathService) {
-            if ($assignment->personnel) {
-                $assignment->personnel->setAttribute(
-                    'structure_path',
-                    $structurePathService->resolve((int) $assignment->personnel->structure_id)
-                );
-            }
+            return $assignments->map(function (AttendanceShiftAssignment $assignment) use ($structurePathService) {
+                if ($assignment->personnel) {
+                    $assignment->personnel->setAttribute(
+                        'structure_path',
+                        $structurePathService->resolve((int) $assignment->personnel->structure_id)
+                    );
+                }
 
                 return $assignment;
             });
-
-        return $assignments;
+        });
     }
 
     #[Computed]
@@ -354,30 +386,36 @@ class ShiftManagement extends Component
         $term = trim($this->personnelSearch);
         $wildcard = '%'.$term.'%';
         $structurePathService = app(StructurePathService::class);
+        $structureIds = $this->currentStructureIds();
 
-        return Personnel::query()
-            ->select('tabel_no', 'surname', 'name', 'patronymic', 'structure_id', 'position_id')
-            ->whereNull('leave_work_date')
-            ->when($this->currentStructureIds() !== [], function ($query) {
-                $query->whereIn('structure_id', $this->currentStructureIds());
-            })
-            ->where(function ($query) use ($wildcard): void {
-                $query->where('tabel_no', 'like', $wildcard)
-                    ->orWhere('surname', 'like', $wildcard)
-                    ->orWhere('name', 'like', $wildcard)
-                    ->orWhere('patronymic', 'like', $wildcard);
-            })
-            ->with([
-                'position:id,name',
-            ])
-            ->orderBy('surname')
-            ->limit(12)
-            ->get()
-            ->map(function (Personnel $personnel) use ($structurePathService) {
-                $personnel->setAttribute('structure_path', $structurePathService->resolve((int) $personnel->structure_id));
+        return $this->rememberRuntime('attendanceShiftManagement.personnelResults.'.md5(json_encode([
+            'term' => $term,
+            'structure_ids' => $structureIds,
+        ]) ?: ''), function () use ($wildcard, $structureIds, $structurePathService) {
+            return Personnel::query()
+                ->select('tabel_no', 'surname', 'name', 'patronymic', 'structure_id', 'position_id')
+                ->whereNull('leave_work_date')
+                ->when($structureIds !== [], function ($query) use ($structureIds) {
+                    $query->whereIn('structure_id', $structureIds);
+                })
+                ->where(function ($query) use ($wildcard): void {
+                    $query->where('tabel_no', 'like', $wildcard)
+                        ->orWhere('surname', 'like', $wildcard)
+                        ->orWhere('name', 'like', $wildcard)
+                        ->orWhere('patronymic', 'like', $wildcard);
+                })
+                ->with([
+                    'position:id,name',
+                ])
+                ->orderBy('surname')
+                ->limit(12)
+                ->get()
+                ->map(function (Personnel $personnel) use ($structurePathService) {
+                    $personnel->setAttribute('structure_path', $structurePathService->resolve((int) $personnel->structure_id));
 
-                return $personnel;
-            });
+                    return $personnel;
+                });
+        });
     }
 
     #[Computed]
@@ -395,7 +433,9 @@ class ShiftManagement extends Component
         /** @var AttendanceStructureScopeReadService $structureScopeRead */
         $structureScopeRead = app(AttendanceStructureScopeReadService::class);
 
-        return $structureScopeRead->label($this->selectedStructureId);
+        return $this->rememberRuntime('attendanceShiftManagement.selectedStructureLabel.'.($this->selectedStructureId ?? 'all'), function () use ($structureScopeRead) {
+            return $structureScopeRead->label($this->selectedStructureId);
+        });
     }
 
     #[Computed]
@@ -405,18 +445,25 @@ class ShiftManagement extends Component
             return null;
         }
 
-        return AttendanceShiftAssignment::query()
-            ->with('shift:id,name,start_time,end_time')
-            ->where('tabel_no', $this->assignmentForm['tabel_no'])
-            ->where('is_active', true)
-            ->whereDate('effective_from', '<=', now()->toDateString())
-            ->where(function ($query): void {
-                $query->whereNull('effective_to')
-                    ->orWhereDate('effective_to', '>=', now()->toDateString());
-            })
-            ->latest('effective_from')
-            ->latest('id')
-            ->first();
+        $today = now()->toDateString();
+
+        return $this->rememberRuntime('attendanceShiftManagement.activeAssignment.'.md5(json_encode([
+            'tabel_no' => $this->assignmentForm['tabel_no'],
+            'today' => $today,
+        ]) ?: ''), function () use ($today) {
+            return AttendanceShiftAssignment::query()
+                ->with('shift:id,name,start_time,end_time')
+                ->where('tabel_no', $this->assignmentForm['tabel_no'])
+                ->where('is_active', true)
+                ->whereDate('effective_from', '<=', $today)
+                ->where(function ($query) use ($today): void {
+                    $query->whereNull('effective_to')
+                        ->orWhereDate('effective_to', '>=', $today);
+                })
+                ->latest('effective_from')
+                ->latest('id')
+                ->first();
+        });
     }
 
     #[Computed]
@@ -428,11 +475,13 @@ class ShiftManagement extends Component
 
         $structurePathService = app(StructurePathService::class);
 
-        $selectedPersonnelRecord = Personnel::query()
-            ->select('tabel_no', 'surname', 'name', 'patronymic', 'structure_id', 'position_id')
-            ->with('position:id,name')
-            ->where('tabel_no', $this->assignmentForm['tabel_no'])
-            ->first();
+        $selectedPersonnelRecord = $this->rememberRuntime('attendanceShiftManagement.selectedPersonnelRecord.'.$this->assignmentForm['tabel_no'], function () {
+            return Personnel::query()
+                ->select('tabel_no', 'surname', 'name', 'patronymic', 'structure_id', 'position_id')
+                ->with('position:id,name')
+                ->where('tabel_no', $this->assignmentForm['tabel_no'])
+                ->first();
+        });
 
         if ($selectedPersonnelRecord) {
             $selectedPersonnelRecord->setAttribute(
@@ -446,9 +495,11 @@ class ShiftManagement extends Component
 
     protected function currentStructureIds(): array
     {
-        return $this->selectedStructureId
-            ? $this->getNestedStructure($this->selectedStructureId)
-            : [];
+        return $this->rememberRuntime('attendanceShiftManagement.currentStructureIds.'.($this->selectedStructureId ?? 'all'), function () {
+            return $this->selectedStructureId
+                ? $this->getNestedStructure($this->selectedStructureId)
+                : [];
+        });
     }
 
     public function render()

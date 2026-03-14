@@ -30,6 +30,11 @@ class MonthClose extends Component
      */
     public array $csvProfile = [];
 
+    /**
+     * @var array<string,mixed>
+     */
+    public array $exportStatus = [];
+
     public function mount(
         int $year,
         int $month,
@@ -46,7 +51,7 @@ class MonthClose extends Component
 
         $this->year = $year;
         $this->month = $month;
-        $this->status = $lockService->periodStatus($year, $month);
+        $this->refreshState($lockService);
         $this->csvProfile = (array) config('attendance.exports.payroll.csv', []);
     }
 
@@ -57,7 +62,7 @@ class MonthClose extends Component
         }
 
         $stats = $lockService->closeMonth($this->year, $this->month);
-        $this->status = $lockService->periodStatus($this->year, $this->month);
+        $this->refreshState($lockService);
 
         $this->dispatch(
             'notify',
@@ -76,7 +81,7 @@ class MonthClose extends Component
         }
 
         $stats = $lockService->unlockMonth($this->year, $this->month);
-        $this->status = $lockService->periodStatus($this->year, $this->month);
+        $this->refreshState($lockService);
 
         $this->dispatch(
             'notify',
@@ -95,7 +100,7 @@ class MonthClose extends Component
         }
 
         $stats = $lockService->snapshotMonth($this->year, $this->month, false);
-        $this->status = $lockService->periodStatus($this->year, $this->month);
+        $this->refreshState($lockService);
 
         $this->dispatch(
             'notify',
@@ -129,6 +134,10 @@ class MonthClose extends Component
             abort(403);
         }
 
+        if (! $this->ensureExportReady()) {
+            return null;
+        }
+
         $rows = $service->rows($this->year, $this->month);
 
         $filename = sprintf('attendance-payroll-%04d-%02d.xlsx', $this->year, $this->month);
@@ -145,6 +154,10 @@ class MonthClose extends Component
     ) {
         if (! $this->canExport) {
             abort(403);
+        }
+
+        if (! $this->ensureExportReady()) {
+            return null;
         }
 
         $rows = $service->rows($this->year, $this->month);
@@ -164,5 +177,29 @@ class MonthClose extends Component
         return view('attendance::livewire.attendance.month-close', [
             'csvProfile' => $this->csvProfile,
         ]);
+    }
+
+    private function refreshState(AttendanceMonthLockService $lockService): void
+    {
+        $this->status = $lockService->periodStatus($this->year, $this->month);
+        $this->exportStatus = $lockService->exportStatus($this->year, $this->month);
+    }
+
+    private function ensureExportReady(): bool
+    {
+        $lockService = app(AttendanceMonthLockService::class);
+        $this->refreshState($lockService);
+
+        if ($this->exportStatus['ready'] ?? false) {
+            return true;
+        }
+
+        $message = ($this->exportStatus['has_snapshot'] ?? false)
+            ? __('attendance::month_close.messages.export_requires_fresh_snapshot')
+            : __('attendance::month_close.messages.export_requires_snapshot');
+
+        $this->dispatch('notify', type: 'error', message: $message);
+
+        return false;
     }
 }

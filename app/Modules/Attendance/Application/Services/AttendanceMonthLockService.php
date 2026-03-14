@@ -5,6 +5,7 @@ namespace App\Modules\Attendance\Application\Services;
 use App\Models\AttendanceDailyLedger;
 use App\Models\AttendanceMonthlySummary;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class AttendanceMonthLockService
@@ -73,31 +74,48 @@ class AttendanceMonthLockService
             ->groupBy('tabel_no')
             ->get();
 
-        $summaryUpserts = 0;
+        $summaryPayload = $this->buildMonthlySummaryPayload($grouped, $year, $month, $lock);
+        $summaryUpserts = count($summaryPayload);
+        $deletedStaleSummaries = 0;
         $lockedLedgers = 0;
 
-        DB::transaction(function () use ($grouped, $year, $month, $from, $to, $lock, &$summaryUpserts, &$lockedLedgers): void {
-            foreach ($grouped as $row) {
-                AttendanceMonthlySummary::query()->updateOrCreate(
+        DB::transaction(function () use (
+            $summaryPayload,
+            $year,
+            $month,
+            $from,
+            $to,
+            $lock,
+            &$deletedStaleSummaries,
+            &$lockedLedgers
+        ): void {
+            $periodSummaries = AttendanceMonthlySummary::query()
+                ->where('year', $year)
+                ->where('month', $month);
+
+            if ($summaryPayload === []) {
+                $deletedStaleSummaries = $periodSummaries->delete();
+            } else {
+                $deletedStaleSummaries = (clone $periodSummaries)
+                    ->whereNotIn('tabel_no', collect($summaryPayload)->pluck('tabel_no')->all())
+                    ->delete();
+
+                AttendanceMonthlySummary::query()->upsert(
+                    $summaryPayload,
+                    ['tabel_no', 'year', 'month'],
                     [
-                        'tabel_no' => (string) $row->tabel_no,
-                        'year' => $year,
-                        'month' => $month,
-                    ],
-                    [
-                        'total_scheduled_minutes' => (int) $row->total_scheduled_minutes,
-                        'total_worked_minutes' => (int) $row->total_worked_minutes,
-                        'total_overtime_minutes' => (int) $row->total_overtime_minutes,
-                        'total_absence_minutes' => (int) $row->total_absence_minutes,
-                        'total_workdays' => (int) $row->total_workdays,
-                        'total_present_days' => (int) $row->total_present_days,
-                        'total_absence_days' => (int) $row->total_absence_days,
-                        'is_locked' => $lock,
-                        'calculated_at' => now(),
+                        'total_scheduled_minutes',
+                        'total_worked_minutes',
+                        'total_overtime_minutes',
+                        'total_absence_minutes',
+                        'total_workdays',
+                        'total_present_days',
+                        'total_absence_days',
+                        'is_locked',
+                        'calculated_at',
+                        'updated_at',
                     ]
                 );
-
-                $summaryUpserts++;
             }
 
             if ($lock) {
@@ -109,6 +127,7 @@ class AttendanceMonthLockService
 
         $stats = [
             'summary_upserts' => $summaryUpserts,
+            'deleted_stale_summaries' => $deletedStaleSummaries,
             'locked_ledgers' => $lockedLedgers,
             'daily_structure_summary_upserts' => (int) ($summaryRefreshStats['upserts'] ?? 0),
         ];
@@ -182,29 +201,26 @@ class AttendanceMonthLockService
     {
         [$from, $to] = $this->periodBounds($year, $month);
 
-        $totalLedgers = AttendanceDailyLedger::query()
+        $ledgerAggregate = AttendanceDailyLedger::query()
             ->whereBetween('date', [$from->toDateString(), $to->toDateString()])
-            ->count();
+            ->selectRaw('COUNT(*) as total_ledgers')
+            ->selectRaw('COALESCE(SUM(CASE WHEN is_locked = 1 THEN 1 ELSE 0 END), 0) as locked_ledgers')
+            ->selectRaw('COALESCE(SUM(worked_minutes), 0) as worked_minutes')
+            ->first();
 
-        $lockedLedgers = AttendanceDailyLedger::query()
-            ->whereBetween('date', [$from->toDateString(), $to->toDateString()])
-            ->where('is_locked', true)
-            ->count();
-
-        $summaryRows = AttendanceMonthlySummary::query()
+        $summaryAggregate = AttendanceMonthlySummary::query()
             ->where('year', $year)
             ->where('month', $month)
-            ->count();
+            ->selectRaw('COUNT(*) as summary_rows')
+            ->selectRaw('COALESCE(SUM(CASE WHEN is_locked = 1 THEN 1 ELSE 0 END), 0) as locked_summary_rows')
+            ->selectRaw('MAX(calculated_at) as latest_snapshot_at')
+            ->first();
 
-        $lockedSummaryRows = AttendanceMonthlySummary::query()
-            ->where('year', $year)
-            ->where('month', $month)
-            ->where('is_locked', true)
-            ->count();
-
-        $workedMinutes = AttendanceDailyLedger::query()
-            ->whereBetween('date', [$from->toDateString(), $to->toDateString()])
-            ->sum('worked_minutes');
+        $totalLedgers = (int) ($ledgerAggregate?->total_ledgers ?? 0);
+        $lockedLedgers = (int) ($ledgerAggregate?->locked_ledgers ?? 0);
+        $summaryRows = (int) ($summaryAggregate?->summary_rows ?? 0);
+        $lockedSummaryRows = (int) ($summaryAggregate?->locked_summary_rows ?? 0);
+        $workedMinutes = (int) ($ledgerAggregate?->worked_minutes ?? 0);
 
         return [
             'is_locked' => $lockedSummaryRows > 0 || ($totalLedgers > 0 && $lockedLedgers === $totalLedgers),
@@ -212,7 +228,50 @@ class AttendanceMonthLockService
             'locked_ledgers' => $lockedLedgers,
             'summary_rows' => $summaryRows,
             'locked_summary_rows' => $lockedSummaryRows,
-            'worked_hours' => round(((int) $workedMinutes) / 60, 1),
+            'worked_hours' => round($workedMinutes / 60, 1),
+            'latest_snapshot_at' => $summaryAggregate?->latest_snapshot_at,
+        ];
+    }
+
+    /**
+     * @return array<string,mixed>
+     */
+    public function exportStatus(int $year, int $month): array
+    {
+        [$from, $to] = $this->periodBounds($year, $month);
+
+        $summaryAggregate = AttendanceMonthlySummary::query()
+            ->where('year', $year)
+            ->where('month', $month)
+            ->selectRaw('COUNT(*) as summary_rows')
+            ->selectRaw('COALESCE(SUM(CASE WHEN is_locked = 1 THEN 1 ELSE 0 END), 0) as locked_summary_rows')
+            ->selectRaw('MAX(calculated_at) as latest_snapshot_at')
+            ->first();
+
+        $latestLedgerUpdate = AttendanceDailyLedger::query()
+            ->whereBetween('date', [$from->toDateString(), $to->toDateString()])
+            ->max('updated_at');
+
+        $summaryRows = (int) ($summaryAggregate?->summary_rows ?? 0);
+        $lockedSummaryRows = (int) ($summaryAggregate?->locked_summary_rows ?? 0);
+        $latestSnapshotAt = $summaryAggregate?->latest_snapshot_at
+            ? Carbon::parse((string) $summaryAggregate->latest_snapshot_at)
+            : null;
+        $latestLedgerUpdatedAt = $latestLedgerUpdate ? Carbon::parse((string) $latestLedgerUpdate) : null;
+
+        $hasSnapshot = $summaryRows > 0 && $latestSnapshotAt !== null;
+        $isStale = $hasSnapshot
+            && $latestLedgerUpdatedAt !== null
+            && $latestLedgerUpdatedAt->greaterThan($latestSnapshotAt);
+
+        return [
+            'ready' => $hasSnapshot && ! $isStale,
+            'has_snapshot' => $hasSnapshot,
+            'is_stale' => $isStale,
+            'is_locked' => $lockedSummaryRows > 0,
+            'summary_rows' => $summaryRows,
+            'latest_snapshot_at' => $latestSnapshotAt?->toDateTimeString(),
+            'latest_ledger_updated_at' => $latestLedgerUpdatedAt?->toDateTimeString(),
         ];
     }
 
@@ -235,5 +294,33 @@ class AttendanceMonthLockService
     private function periodKey(int $year, int $month): string
     {
         return sprintf('%04d-%02d', $year, $month);
+    }
+
+    /**
+     * @param  Collection<int,object>  $rows
+     * @return array<int,array<string,mixed>>
+     */
+    private function buildMonthlySummaryPayload(Collection $rows, int $year, int $month, bool $lock): array
+    {
+        $timestamp = now();
+
+        return $rows->map(function (object $row) use ($year, $month, $lock, $timestamp): array {
+            return [
+                'tabel_no' => (string) $row->tabel_no,
+                'year' => $year,
+                'month' => $month,
+                'total_scheduled_minutes' => (int) $row->total_scheduled_minutes,
+                'total_worked_minutes' => (int) $row->total_worked_minutes,
+                'total_overtime_minutes' => (int) $row->total_overtime_minutes,
+                'total_absence_minutes' => (int) $row->total_absence_minutes,
+                'total_workdays' => (int) $row->total_workdays,
+                'total_present_days' => (int) $row->total_present_days,
+                'total_absence_days' => (int) $row->total_absence_days,
+                'is_locked' => $lock,
+                'calculated_at' => $timestamp,
+                'created_at' => $timestamp,
+                'updated_at' => $timestamp,
+            ];
+        })->all();
     }
 }

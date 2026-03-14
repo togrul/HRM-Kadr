@@ -14,10 +14,12 @@ Current state:
 3. Unified attendance page:
    - dashboard route: `/attendance`
    - daily monitor tab: `/attendance?tab=daily-monitor`
+   - manager summary tab: `/attendance?tab=manager-summary`
    - puantaj tab: `/attendance?tab=puantaj`
    - exceptions tab: `/attendance?tab=exceptions`
    - overtime board tab: `/attendance?tab=overtime`
    - manual entries tab: `/attendance?tab=manual`
+   - history tab: `/attendance?tab=history`
    - legacy `/attendance/manual-entries` route redirects to manual tab
 4. Phase B started:
    - token-protected punch ingest endpoint: `POST /api/attendance/punches/ingest`
@@ -44,6 +46,7 @@ Current state:
 7. Role-based access scopes are enabled:
    - attendance.view
    - attendance.daily.view / attendance.puantaj.view
+   - attendance.manager.summary.view / attendance.history.view
    - attendance.manual.view / attendance.overtime.view / attendance.exceptions.view / attendance.month.view
    - attendance.settings.manage / attendance.shifts.manage
    - attendance.manual.write / attendance.manual.approve

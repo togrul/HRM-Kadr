@@ -29,6 +29,12 @@
         stackCount() {
             return Math.max(0, this.toasts.length - 1)
         },
+        normalizeVariant(variant) {
+            const normalized = String(variant ?? '').toLowerCase()
+            if (normalized === 'error' || normalized === 'danger') return 'danger'
+            if (normalized === 'warning' || normalized === 'warn') return 'warning'
+            return 'success'
+        },
         push(rawMessage, variant = 'success') {
             const message = this.normalizeMessage(rawMessage)
             if (!message) return
@@ -98,6 +104,12 @@
                 window.addEventListener(event, fn)
                 listeners.push([event, fn])
             })
+            const notifyFn = (e) => {
+                const detail = Array.isArray(e?.detail) ? (e.detail[0] ?? {}) : (e?.detail ?? {})
+                this.push(detail, this.normalizeVariant(detail?.type))
+            }
+            window.addEventListener('notify', notifyFn)
+            listeners.push(['notify', notifyFn])
             window.__hrmToastListeners = listeners
         }
     }"

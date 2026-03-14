@@ -52,54 +52,75 @@
                     <span class="text-xs text-zinc-500">{{ __('attendance::dashboard.sections.description') }}</span>
                 </div>
 
+                @php
+                    $tabRoute = function (string $tab) use ($year, $month, $selectedStructureId) {
+                        return route('attendance', array_filter([
+                            'tab' => $tab,
+                            'year' => $year,
+                            'month' => $month,
+                            'structure_id' => $selectedStructureId,
+                        ], fn ($value) => $value !== null && $value !== ''));
+                    };
+                @endphp
+
                 <x-filter.nav class="min-w-0">
                     @if(in_array('overview', $availableTabs, true))
-                        <x-filter.item wire:click.prevent="switchTab('overview')" :active="$activeTab === 'overview'">
+                        <x-filter.item wire:navigate href="{{ $tabRoute('overview') }}" :active="$activeTab === 'overview'">
                             {{ __('attendance::dashboard.tabs.overview') }}
                         </x-filter.item>
                     @endif
+                    @if(in_array('manager-summary', $availableTabs, true))
+                        <x-filter.item wire:navigate href="{{ $tabRoute('manager-summary') }}" :active="$activeTab === 'manager-summary'">
+                            {{ __('attendance::dashboard.tabs.manager_summary') }}
+                        </x-filter.item>
+                    @endif
                     @if(in_array('daily-monitor', $availableTabs, true))
-                        <x-filter.item wire:click.prevent="switchTab('daily-monitor')" :active="$activeTab === 'daily-monitor'">
+                        <x-filter.item wire:navigate href="{{ $tabRoute('daily-monitor') }}" :active="$activeTab === 'daily-monitor'">
                             {{ __('attendance::dashboard.tabs.daily_monitor') }}
                         </x-filter.item>
                     @endif
                     @if(in_array('puantaj', $availableTabs, true))
-                        <x-filter.item wire:click.prevent="switchTab('puantaj')" :active="$activeTab === 'puantaj'">
+                        <x-filter.item wire:navigate href="{{ $tabRoute('puantaj') }}" :active="$activeTab === 'puantaj'">
                             {{ __('attendance::dashboard.tabs.puantaj') }}
                         </x-filter.item>
                     @endif
                     @if(in_array('exceptions', $availableTabs, true))
-                        <x-filter.item wire:click.prevent="switchTab('exceptions')" :active="$activeTab === 'exceptions'">
+                        <x-filter.item wire:navigate href="{{ $tabRoute('exceptions') }}" :active="$activeTab === 'exceptions'">
                             {{ __('attendance::dashboard.tabs.exceptions') }}
                         </x-filter.item>
                     @endif
                     @if(in_array('overtime', $availableTabs, true))
-                        <x-filter.item wire:click.prevent="switchTab('overtime')" :active="$activeTab === 'overtime'">
+                        <x-filter.item wire:navigate href="{{ $tabRoute('overtime') }}" :active="$activeTab === 'overtime'">
                             {{ __('attendance::dashboard.tabs.overtime') }}
                         </x-filter.item>
                     @endif
                     @if(in_array('month-close', $availableTabs, true))
-                        <x-filter.item wire:click.prevent="switchTab('month-close')" :active="$activeTab === 'month-close'">
+                        <x-filter.item wire:navigate href="{{ $tabRoute('month-close') }}" :active="$activeTab === 'month-close'">
                             {{ __('attendance::dashboard.tabs.month_close') }}
                         </x-filter.item>
                     @endif
                     @if(in_array('manual', $availableTabs, true))
-                        <x-filter.item wire:click.prevent="switchTab('manual')" :active="$activeTab === 'manual'">
+                        <x-filter.item wire:navigate href="{{ $tabRoute('manual') }}" :active="$activeTab === 'manual'">
                             {{ __('attendance::dashboard.tabs.manual') }}
                         </x-filter.item>
                     @endif
+                    @if(in_array('history', $availableTabs, true))
+                        <x-filter.item wire:navigate href="{{ $tabRoute('history') }}" :active="$activeTab === 'history'">
+                            {{ __('attendance::dashboard.tabs.history') }}
+                        </x-filter.item>
+                    @endif
                     @if(in_array('settings', $availableTabs, true))
-                        <x-filter.item wire:click.prevent="switchTab('settings')" :active="$activeTab === 'settings'">
+                        <x-filter.item wire:navigate href="{{ $tabRoute('settings') }}" :active="$activeTab === 'settings'">
                             {{ __('attendance::dashboard.tabs.settings') }}
                         </x-filter.item>
                     @endif
                     @if(in_array('shifts', $availableTabs, true))
-                        <x-filter.item wire:click.prevent="switchTab('shifts')" :active="$activeTab === 'shifts'">
+                        <x-filter.item wire:navigate href="{{ $tabRoute('shifts') }}" :active="$activeTab === 'shifts'">
                             {{ __('attendance::dashboard.tabs.shifts') }}
                         </x-filter.item>
                     @endif
                     @if(in_array('calendar-regimes', $availableTabs, true))
-                        <x-filter.item wire:click.prevent="switchTab('calendar-regimes')" :active="$activeTab === 'calendar-regimes'">
+                        <x-filter.item wire:navigate href="{{ $tabRoute('calendar-regimes') }}" :active="$activeTab === 'calendar-regimes'">
                             {{ __('attendance::dashboard.tabs.calendar_regimes') }}
                         </x-filter.item>
                     @endif
@@ -170,6 +191,15 @@
         <livewire:attendance.daily-monitor :selectedStructureId="$selectedStructureId" :key="'attendance-monitor-'.$year.'-'.$month.'-'.($selectedStructureId ?? 'all')" />
     @endif
 
+    @if($activeTab === 'manager-summary' && in_array('manager-summary', $availableTabs, true))
+        <livewire:attendance.manager-summary
+            :year="$year"
+            :month="$month"
+            :selectedStructureId="$selectedStructureId"
+            :key="'attendance-manager-summary-'.$year.'-'.$month.'-'.($selectedStructureId ?? 'all')"
+        />
+    @endif
+
     @if($activeTab === 'puantaj' && in_array('puantaj', $availableTabs, true))
         <livewire:attendance.puantaj-grid
             :year="$year"
@@ -207,6 +237,16 @@
 
     @if($activeTab === 'settings' && in_array('settings', $availableTabs, true))
         <livewire:attendance.settings />
+    @endif
+
+    @if($activeTab === 'history' && in_array('history', $availableTabs, true))
+        <livewire:attendance.history-log
+            :year="$year"
+            :month="$month"
+            :initialType="$historyType"
+            :initialSubjectId="$historySubjectId"
+            :key="'attendance-history-'.$year.'-'.$month.'-'.$historyType.'-'.($historySubjectId ?? 'all')"
+        />
     @endif
 
     @if($activeTab === 'shifts' && in_array('shifts', $availableTabs, true))

@@ -37,4 +37,18 @@ class AttendanceManualEntriesIslandTest extends TestCase
             ->assertSeeHtml('FRAGMENT:type=island|name=attendance-manual-workbench')
             ->assertSeeHtml('FRAGMENT:type=island|name=attendance-manual-queue');
     }
+
+    public function test_manual_entries_validation_uses_localized_attribute_names(): void
+    {
+        app()->setLocale('az');
+
+        $component = app(ManualEntries::class);
+        $method = new \ReflectionMethod($component, 'validationAttributes');
+        $method->setAccessible(true);
+
+        $attributes = $method->invoke($component);
+
+        $this->assertSame(__('attendance::manual_entries.labels.personnel'), $attributes['form.tabel_no'] ?? null);
+        $this->assertSame(__('attendance::manual_entries.labels.date'), $attributes['form.date'] ?? null);
+    }
 }

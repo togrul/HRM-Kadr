@@ -66,6 +66,7 @@ class AttendanceCalendarRegimesMonthFilterTest extends TestCase
             ->assertSee(__('attendance::calendar_regimes.auto_labels.weekend'))
             ->assertDontSee('attendance::calendar_regimes.auto_labels.weekend')
             ->call('confirmRemove', $calendar->id)
+            ->assertDispatched('notify', type: 'error', message: __('attendance::calendar_regimes.messages.delete_confirmation_required'))
             ->assertSet('showDeleteConfirmation', true)
             ->assertSee(__('attendance::calendar_regimes.confirmations.delete'))
             ->call('runConfirmedDeletion')

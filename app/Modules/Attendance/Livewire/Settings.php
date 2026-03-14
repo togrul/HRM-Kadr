@@ -39,6 +39,19 @@ class Settings extends Component
         ];
     }
 
+    protected function validationAttributes(): array
+    {
+        return [
+            'form.timezone' => __('attendance::settings.fields.timezone'),
+            'form.default_shift_id' => __('attendance::settings.fields.default_shift'),
+            'form.late_grace_minutes' => __('attendance::settings.fields.late_grace'),
+            'form.early_leave_grace_minutes' => __('attendance::settings.fields.early_grace'),
+            'form.rounding_policy' => __('attendance::settings.fields.rounding_policy'),
+            'form.rounding_step_minutes' => __('attendance::settings.fields.rounding_step'),
+            'form.overtime_policy' => __('attendance::settings.fields.overtime_policy'),
+        ];
+    }
+
     public function mount(
         AttendanceAuthorizationService $authorization,
         AttendanceSettingsService $settingsService

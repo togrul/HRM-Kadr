@@ -84,6 +84,12 @@
                                     </x-table.td>
                                     <x-table.td :isButton="true">
                                         <div class="inline-flex items-center gap-2">
+                                            <a
+                                                href="{{ route('attendance', ['tab' => 'history', 'history_type' => 'shift', 'history_subject_id' => $shift->id]) }}"
+                                                class="inline-flex h-8 items-center justify-center rounded-lg bg-sky-50 px-3 text-xs font-medium text-sky-700 transition hover:bg-sky-100"
+                                            >
+                                                {{ __('attendance::history.actions.open_filtered_history') }}
+                                            </a>
                                             <x-button mode="slate" class="!h-8 !px-3 !text-xs" wire:click="editShift({{ $shift->id }})">{{ __('attendance::shift_management.actions.edit') }}</x-button>
                                             @if($shift->is_active)
                                                 <x-button mode="reject" class="!h-8 !px-3 !text-xs" wire:click="deactivateShift({{ $shift->id }})">{{ __('attendance::shift_management.actions.deactivate') }}</x-button>
@@ -308,6 +314,12 @@
                                     </x-table.td>
                                     <x-table.td :isButton="true">
                                         <div class="inline-flex items-center gap-2">
+                                            <a
+                                                href="{{ route('attendance', ['tab' => 'history', 'history_type' => 'assignment', 'history_subject_id' => $assignment->id]) }}"
+                                                class="inline-flex h-8 items-center justify-center rounded-lg bg-sky-50 px-3 text-xs font-medium text-sky-700 transition hover:bg-sky-100"
+                                            >
+                                                {{ __('attendance::history.actions.open_filtered_history') }}
+                                            </a>
                                             <x-button mode="slate" class="!h-8 !px-3 !text-xs" wire:click="editAssignment({{ $assignment->id }})">{{ __('attendance::shift_management.actions.edit') }}</x-button>
                                             @if($assignment->is_active)
                                                 <x-button mode="reject" class="!h-8 !px-3 !text-xs" wire:click="deactivateAssignment({{ $assignment->id }})">{{ __('attendance::shift_management.actions.deactivate') }}</x-button>

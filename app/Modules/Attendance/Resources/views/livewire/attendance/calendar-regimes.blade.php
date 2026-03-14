@@ -98,6 +98,13 @@
                     <x-table.td>{{ $calendar->is_paid ? __('attendance::calendar_regimes.options.yes') : __('attendance::calendar_regimes.options.no') }}</x-table.td>
                     <x-table.td :isButton="true" width="100">
                         <div class="flex items-center space-x-2">
+                            <a
+                                href="{{ route('attendance', ['tab' => 'history', 'history_type' => 'calendar', 'history_subject_id' => $calendar->id]) }}"
+                                class="appearance-none flex items-center justify-center w-8 h-8 text-xs font-medium uppercase rounded-lg text-gray-500 hover:bg-blue-50 hover:text-blue-700"
+                                title="{{ __('attendance::history.actions.open_filtered_history') }}"
+                            >
+                                <x-icons.info-circle-icon color="text-sky-500" hover="text-sky-600"></x-icons.info-circle-icon>
+                            </a>
                             <button wire:click.prevent="edit({{ $calendar->id }})" class="appearance-none flex items-center justify-center w-8 h-8 text-xs font-medium uppercase rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-700">
                                 <x-icons.edit-icon color="text-slate-400" hover="text-slate-500"></x-icons.edit-icon>
                             </button>

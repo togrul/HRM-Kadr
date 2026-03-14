@@ -29,7 +29,8 @@ Attendance admin əsasən bu 5 sahəyə cavabdehdir:
 2. `Növbələr`
 3. `İş rejimi təqvimi`
 4. `Ay bağlanışı`
-5. performans və risk nəzarəti
+5. `Tarixçə`
+6. performans və risk nəzarəti
 
 Bu ekranlarda edilən dəyişikliklər yalnız UI-ni yox, birbaşa aşağıdakı nəticələri dəyişə bilər:
 
@@ -86,6 +87,14 @@ Bu ekran aşağıdakı nəticələri dəyişir:
 - ay bağlanmışkən geriyə dönük dəyişiklik edilirsə
 - shift assignment-lar yoxlanmadan default shift dəyişirsə
 - recalc planı olmadan ayın ortasında policy dəyişirsə
+
+### Dəyişiklikdən sonra haraya baxmaq lazımdır
+
+Policy dəyişikliyindən dərhal sonra:
+
+1. `Tarixçə` tab-ında audit qeydi yarandığını təsdiqlə
+2. `Puantaj` və `Daily Monitor` nəticəsini yoxla
+3. təsir gözlənilən tarix aralığı üçün recalc ehtiyacını qiymətləndir
 
 ### Təhlükəsiz dəyişiklik ssenarisi
 

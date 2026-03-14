@@ -3,6 +3,8 @@
 namespace App\Modules\Attendance\Console\Commands;
 
 use App\Modules\Attendance\Application\Services\AttendanceDailyMonitorReadService;
+use App\Modules\Attendance\Application\Services\AttendanceHistoryReadService;
+use App\Modules\Attendance\Application\Services\AttendanceMonthLockService;
 use App\Modules\Attendance\Application\Services\AttendanceOverviewService;
 use App\Modules\Attendance\Application\Services\AttendancePuantajReadService;
 use Carbon\Carbon;
@@ -22,14 +24,18 @@ class AttendanceQueryBudgetCommand extends Command
         {--overview-budget= : Max query count for overview flow}
         {--daily-budget= : Max query count for daily monitor flow}
         {--puantaj-budget= : Max query count for puantaj flow}
+        {--history-budget= : Max query count for history log flow}
+        {--month-close-budget= : Max query count for month close flow}
         {--json : Print report as JSON}';
 
-    protected $description = 'Run query-budget checks for Attendance overview/daily monitor/puantaj flows';
+    protected $description = 'Run query-budget checks for Attendance overview/daily monitor/puantaj/history/month close flows';
 
     public function handle(
         AttendanceOverviewService $overviewService,
         AttendanceDailyMonitorReadService $dailyMonitorReadService,
-        AttendancePuantajReadService $puantajReadService
+        AttendancePuantajReadService $puantajReadService,
+        AttendanceHistoryReadService $historyReadService,
+        AttendanceMonthLockService $monthLockService
     ): int {
         if (! $this->hasRequiredTables()) {
             $this->error('Attendance core tables are missing. Run migrations first.');
@@ -49,11 +55,15 @@ class AttendanceQueryBudgetCommand extends Command
             'overview_build' => (int) config('attendance.performance.query_budget.overview_build', 20),
             'daily_monitor_load' => (int) config('attendance.performance.query_budget.daily_monitor_load', 25),
             'puantaj_grid_load' => (int) config('attendance.performance.query_budget.puantaj_grid_load', 30),
+            'history_log_load' => (int) config('attendance.performance.query_budget.history_log_load', 12),
+            'month_close_status_load' => (int) config('attendance.performance.query_budget.month_close_status_load', 10),
         ];
         $budgets = [
             'overview_build' => max(1, (int) ($this->option('overview-budget') ?: $configuredBudgets['overview_build'])),
             'daily_monitor_load' => max(1, (int) ($this->option('daily-budget') ?: $configuredBudgets['daily_monitor_load'])),
             'puantaj_grid_load' => max(1, (int) ($this->option('puantaj-budget') ?: $configuredBudgets['puantaj_grid_load'])),
+            'history_log_load' => max(1, (int) ($this->option('history-budget') ?: $configuredBudgets['history_log_load'])),
+            'month_close_status_load' => max(1, (int) ($this->option('month-close-budget') ?: $configuredBudgets['month_close_status_load'])),
         ];
 
         $hasData = DB::table('attendance_daily_ledgers')->exists()
@@ -97,6 +107,17 @@ class AttendanceQueryBudgetCommand extends Command
             $tabelNos = $page->getCollection()->pluck('tabel_no')->filter()->values()->all();
             $puantajReadService->loadLedgerMap($tabelNos, $from, $to);
             $puantajReadService->globalCalendarDayTypeByDate($from, $to);
+        });
+        $results[] = $this->probe('history_log_load', $budgets['history_log_load'], function () use ($historyReadService, $year, $month, $perPage): void {
+            $from = Carbon::createFromDate($year, $month, 1)->startOfMonth()->toDateString();
+            $to = Carbon::createFromDate($year, $month, 1)->endOfMonth()->toDateString();
+
+            $historyReadService->paginateRows('all', '', $from, $to, $perPage);
+            $historyReadService->totals('all', '', $from, $to);
+        });
+        $results[] = $this->probe('month_close_status_load', $budgets['month_close_status_load'], function () use ($monthLockService, $year, $month): void {
+            $monthLockService->periodStatus($year, $month);
+            $monthLockService->exportStatus($year, $month);
         });
 
         $summary = [
@@ -148,6 +169,8 @@ class AttendanceQueryBudgetCommand extends Command
             'attendance_manual_entries',
             'attendance_raw_punches',
             'attendance_daily_structure_summaries',
+            'attendance_monthly_summaries',
+            'activity_log',
         ] as $table) {
             if (! Schema::hasTable($table)) {
                 return false;
