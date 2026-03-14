@@ -1,4 +1,4 @@
-# Attendance Approval Guide
+# Davamiyyət təsdiq bələdçisi
 
 Bu sənəd HR Manager, approver və qərar verən istifadəçilər üçün Attendance modulunda təsdiq və rədd axınlarını izah edir.
 
@@ -11,13 +11,13 @@ Bu guide-ın məqsədi:
 
 Ümumi modul məntiqi üçün:
 
-- `[Attendance User Guide](/Users/togruljalalli/Desktop/projects/HRM/docs/scenario/attendance-user-guide.md)`
+- `Davamiyyət istifadəçi bələdçisi`
 
 Settings və calendar sahibi üçün:
 
-- `[Attendance Admin Guide](/Users/togruljalalli/Desktop/projects/HRM/docs/scenario/attendance-admin-guide.md)`
+- `Davamiyyət admin bələdçisi`
 
-## 1. Approval rolu nə iş görür
+## 1. Təsdiq rolu nə iş görür
 
 Approver Attendance daxilində “məlumat yaradan” yox, “məlumatın nəticəyə düşməsinə qərar verən” roldur.
 

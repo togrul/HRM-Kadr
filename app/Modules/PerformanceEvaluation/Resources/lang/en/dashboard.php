@@ -237,6 +237,7 @@ return [
         'open_user_personnel_links' => 'Open user links',
         'save_user_personnel_link' => 'Save link',
         'back_to_performance_dashboard' => 'Back to performance dashboard',
+        'open_user_guide' => 'User guide',
     ],
     'messages' => [
         'cycle_saved' => 'Performance cycle saved.',

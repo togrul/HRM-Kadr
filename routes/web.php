@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\TrainingPerformanceGuideController;
+use App\Http\Controllers\AttendanceGuideController;
 use App\Http\Controllers\ProfileController;
 use App\Livewire\Services\Service;
 use Illuminate\Support\Facades\Route;
@@ -21,6 +23,11 @@ Route::middleware('auth')->group(function () {
         Route::patch('/', 'update')->name('profile.update');
         Route::delete('/', 'destroy')->name('profile.destroy');
     });
+
+    Route::get('/docs/training-performance', TrainingPerformanceGuideController::class)
+        ->name('training-performance.user-guide');
+    Route::get('/docs/attendance', AttendanceGuideController::class)
+        ->name('attendance.user-guide');
 });
 
 require __DIR__ . '/auth.php';

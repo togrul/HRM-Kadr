@@ -14,6 +14,9 @@ return [
         'title' => 'Attendance sections',
         'description' => 'Switch views without leaving the attendance workspace.',
     ],
+    'actions' => [
+        'open_user_guide' => 'User guide',
+    ],
     'tabs' => [
         'overview' => 'Summary',
         'daily_monitor' => 'Daily monitor',

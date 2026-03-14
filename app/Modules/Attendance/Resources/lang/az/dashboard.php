@@ -14,6 +14,9 @@ return [
         'title' => 'Davamiyyət bölmələri',
         'description' => 'Davamiyyət iş sahəsini tərk etmədən görünüşlər arasında keçid edin.',
     ],
+    'actions' => [
+        'open_user_guide' => 'İstifadəçi bələdçisi',
+    ],
     'tabs' => [
         'overview' => 'Xülasə',
         'daily_monitor' => 'Günlük monitor',

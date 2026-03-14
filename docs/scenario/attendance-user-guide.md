@@ -1,6 +1,6 @@
-# Attendance İstifadəçi Bələdçisi
+# Davamiyyət istifadəçi bələdçisi
 
-Bu sənəd Attendance modulunun son vəziyyətinə uyğun əsas istifadəçi və əməliyyat bələdçisidir.
+Bu sənəd Davamiyyət modulunun son vəziyyətinə uyğun əsas istifadəçi və əməliyyat bələdçisidir.
 
 Sənədin məqsədi:
 
@@ -12,7 +12,7 @@ Sənədin məqsədi:
 
 ## 1. Modulun məqsədi
 
-Attendance modulu əməkdaşın işə giriş-çıxış məlumatını, iş rejimini, icazə/məzuniyyət/ezamiyyət override-larını, manual düzəlişləri, əlavə iş prosesini və aylıq yekunları vahid iş sahəsində idarə edir.
+Davamiyyət modulu əməkdaşın işə giriş-çıxış məlumatını, iş rejimini, icazə/məzuniyyət/ezamiyyət override-larını, manual düzəlişləri, əlavə iş prosesini və aylıq yekunları vahid iş sahəsində idarə edir.
 
 Modulun əsas nəticəsi:
 
@@ -20,11 +20,11 @@ Modulun əsas nəticəsi:
 - həmin ledger puantaj, daily monitor, overtime, exception və month close ekranlarına qidalanır
 - ay bağlandıqda payroll/export üçün aylıq yekun çıxarılır
 
-Qısa desək, Attendance modulunda əsas “source of truth” `attendance_daily_ledgers` cədvəlidir. Ekranların böyük hissəsi bu hesablanmış nəticəni oxuyur.
+Qısa desək, Davamiyyət modulunda əsas istinad mənbəyi `attendance_daily_ledgers` cədvəlidir. Ekranların böyük hissəsi bu hesablanmış nəticəni oxuyur.
 
 ## 2. İş məntiqi necə qurulub
 
-Attendance məlumatı bu ardıcıllıqla işləyir:
+Davamiyyət məlumatı bu ardıcıllıqla işləyir:
 
 1. Məlumat daxil olur
    - cihaz/API punch
@@ -45,7 +45,7 @@ Bu səbəbdən istifadəçi tərəfdə görünən hər fərq adətən bu 4 mənb
 - calendar
 - override (leave/vacation/business trip/manual)
 
-## 3. Attendance iş sahəsinə giriş
+## 3. Davamiyyət iş sahəsinə giriş
 
 Əsas giriş nöqtəsi:
 
@@ -111,12 +111,12 @@ Burada görünən əsas göstəricilər:
 - planlaşdırılmış dəqiqələr
 - işlənmiş dəqiqələr
 - əlavə iş dəqiqələri
-- coverage
-- absence rate
-- compliance
+- əhatə göstəricisi
+- yoxluq nisbəti
+- intizam göstəricisi
 - open exceptions
-- pending manual entries
-- pending overtime
+- gözləyən manual girişlər
+- gözləyən əlavə iş qeydləri
 
 ### Nə üçün istifadə olunur
 
@@ -134,8 +134,8 @@ Burada görünən əsas göstəricilər:
 
 ### Nəyə diqqət etmək lazımdır
 
-- coverage aşağıdırsa punch, leave və ya shift tərəfi yoxlanmalıdır
-- absence rate yüksəlibsə puantaj və manual queue birlikdə yoxlanmalıdır
+- əhatə göstəricisi aşağıdırsa punch, leave və ya shift tərəfi yoxlanmalıdır
+- yoxluq nisbəti yüksəlibsə puantaj və manual növbə birlikdə yoxlanmalıdır
 - open exceptions yüksəkdirsə əvvəlcə həmin queue təmizlənməlidir
 
 ## 5.2 Günlük monitor
@@ -244,7 +244,7 @@ Avtomatik seed olunan həftəsonları burada ayrıca tarix-tarix göstərilmir.
 ### Tipik ssenari 1: Xəstəlik icazəsi
 
 1. Leave modulu üzərindən xəstəlik icazəsi approve olunur
-2. Attendance həmin tarix aralığını avtomatik recalc edir
+2. Davamiyyət həmin tarix aralığını avtomatik yenidən hesablayır
 3. Puantajda həmin günlər leave hüceyrəsinə çevrilir
 4. Leave type legend-də xəstəlik icazəsi görünür
 
@@ -289,7 +289,7 @@ Bu tab overtime request workflow ekranıdır.
 
 Burada:
 
-- pending overtime request-lər görünür
+- gözləyən əlavə iş müraciətləri görünür
 - approve / reject edilir
 - approved minutes düzəldilə bilir
 - mənbə görünür:
@@ -305,7 +305,7 @@ Overtime policy-dən asılı olaraq sistem request yarada və ya mövcud request
 
 1. əməkdaş faktiki 11 saat işləyib
 2. sistem bunu overtime candidate kimi görür
-3. overtime board-da pending request yaranır
+3. əlavə iş lövhəsində gözləyən müraciət yaranır
 4. təsdiq edən şəxs approve edir
 5. ledger və month summary buna uyğun yenilənir
 
@@ -451,7 +451,7 @@ Amma istifadəçi görünüşündə həftəsonu real manual override kimi tarix-
 
 ## 6. Leave, Vacation, Business Trip attendance-ə necə düşür
 
-Attendance override priority belədir:
+Davamiyyət override prioriteti belədir:
 
 1. leave
 2. vacation
@@ -499,7 +499,7 @@ Bu precedence attendance nəticəsində sürprizləri izah etmək üçün əsas 
 
 1. exceptions inbox-u izlə
 2. manual entry lazım olan halları doldur
-3. overtime pending request-ləri yığılmağa qoyma
+3. gözləyən əlavə iş müraciətlərini yığılmağa qoyma
 
 ### Həftəlik
 
@@ -511,7 +511,7 @@ Bu precedence attendance nəticəsində sürprizləri izah etmək üçün əsas 
 
 1. open exception qalmadığını yoxla
 2. manual queue təmiz olsun
-3. pending overtime qərarlaşdırılsın
+3. gözləyən əlavə iş müraciətləri qərarlaşdırılsın
 4. month close et
 5. export çıxart
 
@@ -556,7 +556,7 @@ Yoxlanacaq yerlər:
 
 Ops tərəfi üçün ayrıca tam sənəd mövcuddur:
 
-- `[Attendance Ops / Commands Guide](/Users/togruljalalli/Desktop/projects/HRM/docs/scenario/attendance-ops-commands-guide.md)`
+- `Davamiyyət əməliyyat / komandalar bələdçisi`
 
 Qısa xatırlatma olaraq əsas command-lər:
 
@@ -568,29 +568,29 @@ Qısa xatırlatma olaraq əsas command-lər:
 
 ## 11. Documentation bölməsi üçün tövsiyə olunan quruluş
 
-Sonradan ayrıca documentation bölməsi açılacaqsa, Attendance üçün giriş ağacı belə olmalıdır:
+Sonradan ayrıca sənədləşmə bölməsi açılacaqsa, Davamiyyət üçün giriş ağacı belə olmalıdır:
 
-1. `Attendance Overview`
+1. `Davamiyyətə ümumi baxış`
    - bu sənəd
-2. `Operator Quick Guide`
+2. `Operator üçün qısa bələdçi`
    - gündəlik operator işi
-3. `Admin Guide`
+3. `Admin bələdçisi`
    - settings, shifts, calendar
-4. `Approval Guide`
+4. `Təsdiq bələdçisi`
    - overtime, month close, leave impact
-5. `Ops / Commands Guide`
+5. `Əməliyyat / komandalar bələdçisi`
 6. `Permission Matrix`
 7. `Data Dictionary`
 
-Yəni bu sənəd documentation bölməsində Attendance üçün əsas “landing doc” olmalıdır.
+Yəni bu sənəd sənədləşmə bölməsində Davamiyyət üçün əsas giriş sənədi olmalıdır.
 
 ## 12. Bu sənədlə birlikdə baxılmalı digər sənədlər
 
 - `[Attendance README](/Users/togruljalalli/Desktop/projects/HRM/app/Modules/Attendance/README.md)`
-- `[Attendance Operator Guide](/Users/togruljalalli/Desktop/projects/HRM/docs/scenario/attendance-operator-guide.md)`
-- `[Attendance Admin Guide](/Users/togruljalalli/Desktop/projects/HRM/docs/scenario/attendance-admin-guide.md)`
-- `[Attendance Approval Guide](/Users/togruljalalli/Desktop/projects/HRM/docs/scenario/attendance-approval-guide.md)`
-- `[Attendance Ops / Commands Guide](/Users/togruljalalli/Desktop/projects/HRM/docs/scenario/attendance-ops-commands-guide.md)`
+- `Davamiyyət operatoru üçün qısa bələdçi`
+- `Davamiyyət admin bələdçisi`
+- `Davamiyyət təsdiq bələdçisi`
+- `Davamiyyət əməliyyat / komandalar bələdçisi`
 - `[Attendance Permission Matrix](/Users/togruljalalli/Desktop/projects/HRM/docs/scenario/attendance-permission-matrix.md)`
 - `[Attendance Core Data Dictionary](/Users/togruljalalli/Desktop/projects/HRM/docs/attendance-core-data-dictionary.md)`
 - `[Attendance Gap Closure Plan](/Users/togruljalalli/Desktop/projects/HRM/docs/attendance-gap-closure-plan.md)`

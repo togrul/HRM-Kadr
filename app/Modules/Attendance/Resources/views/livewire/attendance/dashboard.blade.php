@@ -11,12 +11,19 @@
                     <span class="text-sm text-zinc-500">{{ __('attendance::dashboard.workspace.description') }}</span>
                 </div>
 
-                <div class="grid grid-cols-2 gap-2 self-start md:self-auto">
-                    <div class="flex flex-col">
-                        <x-label for="attendance-year">{{ __('attendance::dashboard.filters.year') }}</x-label>
-                        <input
-                            id="attendance-year"
-                            type="number"
+                <div class="flex flex-col items-start gap-3 md:items-end">
+                    <a
+                        href="{{ route('training-performance.user-guide', ['focus' => 'attendance']) }}#attendance-module"
+                        class="inline-flex items-center justify-center rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 shadow-sm transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"
+                    >
+                        {{ __('attendance::dashboard.actions.open_user_guide') }}
+                    </a>
+                    <div class="grid grid-cols-2 gap-2 self-start md:self-auto">
+                        <div class="flex flex-col">
+                            <x-label for="attendance-year">{{ __('attendance::dashboard.filters.year') }}</x-label>
+                            <input
+                                id="attendance-year"
+                                type="number"
                             min="2000"
                             max="2100"
                             wire:model.live="year"
@@ -34,6 +41,7 @@
                                 <option value="{{ $m }}">{{ str_pad((string) $m, 2, '0', STR_PAD_LEFT) }}</option>
                             @endfor
                         </select>
+                    </div>
                     </div>
                 </div>
             </div>

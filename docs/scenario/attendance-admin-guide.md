@@ -1,4 +1,4 @@
-# Attendance Admin Guide
+# Davamiyyət admin bələdçisi
 
 Bu sənəd Attendance modulunun admin, HR settings owner və sistem qaydalarını idarə edən istifadəçiləri üçün nəzərdə tutulub.
 
@@ -11,15 +11,15 @@ Bu guide-ın məqsədi:
 
 Gündəlik operator işi üçün:
 
-- `[Attendance Operator Guide](/Users/togruljalalli/Desktop/projects/HRM/docs/scenario/attendance-operator-guide.md)`
+- `Davamiyyət operatoru üçün qısa bələdçi`
 
-Approval qərarları üçün:
+Təsdiq qərarları üçün:
 
-- `[Attendance Approval Guide](/Users/togruljalalli/Desktop/projects/HRM/docs/scenario/attendance-approval-guide.md)`
+- `Davamiyyət təsdiq bələdçisi`
 
 Əsas ümumi bələdçi üçün:
 
-- `[Attendance User Guide](/Users/togruljalalli/Desktop/projects/HRM/docs/scenario/attendance-user-guide.md)`
+- `Davamiyyət istifadəçi bələdçisi`
 
 ## 1. Admin hansı sahəyə cavabdehdir
 

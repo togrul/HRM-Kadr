@@ -1,6 +1,6 @@
-# Training Needs User Guide
+# Təlim ehtiyacı istifadəçi bələdçisi
 
-Bu sənəd `Training Needs` modulunu sistemi ilk dəfə açan istifadəçi üçün izah edir. Məqsəd yalnız ekran adlarını göstərmək deyil. Məqsəd odur ki, HR əməkdaşı bu sənədi oxuyaraq:
+Bu sənəd `Təlim ehtiyacı` modulunu sistemi ilk dəfə açan istifadəçi üçün izah edir. Məqsəd yalnız ekran adlarını göstərmək deyil. Məqsəd odur ki, HR əməkdaşı bu sənədi oxuyaraq:
 
 - modulun ümumi məntiqini başa düşsün
 - hər tab və kartın nə iş gördüyünü bilsin
@@ -265,7 +265,7 @@ Bu formdan sonra hara təsir edir:
 - employee profile ilə müqayisə
 - gap hesabı
 - need suggestion
-- coverage analytics
+- əhatə analitikası
 - top gap positions
 
 Bu tab tamamlanmadan profil və need işləməyə başlasa belə, sistemin “niyə bu əməkdaşın ehtiyacı var?” sualına sübut bazası zəifləyir.
@@ -296,7 +296,7 @@ Bu formdan sonra hara təsir edir:
 
 - sistem əməkdaşın mövcud durumunu bilir
 - role requirement ilə fərq hesablanır
-- smart suggestion və coverage hesabları daha dəqiq olur
+- ağıllı təklif və əhatə hesabları daha dəqiq olur
 
 Praktik tövsiyə:
 
@@ -547,7 +547,7 @@ Field-lər:
 - `Session`
 - `Employee`
 - `Training need`
-- `Attendance status`
+- `Davamiyyət statusu`
 
 Save olunanda nə olur:
 
@@ -676,7 +676,7 @@ Bu tab rəhbərlik və HR planlaması üçün nəzərdə tutulub.
 
 - `Coverage ratio`
 - `Program fit ratio`
-- `Requirement coverage`
+- `Tələb əhatəsi`
 - `Total / approved / planned needs`
 - `Source mix`
 - `Priority mix`
@@ -686,11 +686,11 @@ Bu tabın məqsədi:
 
 - harada daha çox boşluq var
 - hansı source daha çox need yaradır
-- plan və requirement coverage nə səviyyədədir
+- plan və tələb əhatəsi nə səviyyədədir
 
 ## 12. Rəhbər hesabatları tabı
 
-Bu tab rəhbərlik, HR rəhbəri və L&D məsulu üçün qurulub. Məqsəd sadəcə say göstərmək deyil; plan, icra, nəticə və büdcəni bir ekranda bağlamaqdır.
+Bu tab rəhbərlik, HR rəhbəri və təlim və inkişaf məsulu üçün qurulub. Məqsəd sadəcə say göstərmək deyil; plan, icra, nəticə və büdcəni bir ekranda bağlamaqdır.
 
 Bu tabda aşağıdakı suallara cavab verilir:
 
@@ -814,8 +814,8 @@ Burada:
 - `Session-linked needs`
 - `Completed needs`
 - `Open needs`
-- `Planning coverage ratio`
-- `Delivery coverage ratio`
+- `Plan əhatə nisbəti`
+- `İcra əhatə nisbəti`
 
 göstərilir.
 
@@ -959,7 +959,7 @@ Qısa xatırlatma:
 4. executive KPI kartlarından ilk snapshot götür
 5. `İllik icra kəsiyi` və `Rüblük icra kəsiyi` ilə trendi yoxla
 6. `Büdcə analitikası` ilə planned vs actual fərqini oxu
-7. `Təlim ehtiyacı vs icra` blokunda coverage ratio-ları yoxla
+7. `Təlim ehtiyacı vs icra` blokunda əhatə nisbətlərini yoxla
 8. `Əməkdaş üzrə təlim saatları` cədvəlindən employee-based dəlil götür
 
 ## 16. Ən çox edilən səhvlər

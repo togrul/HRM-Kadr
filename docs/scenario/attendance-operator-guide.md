@@ -1,10 +1,10 @@
-# Attendance Operator Guide
+# Davamiyyət operatoru üçün qısa bələdçi
 
 Bu sənəd gündəlik attendance operator işi üçün qısa bələdçidir.
 
 Tam modul izahı üçün əsas sənəd:
 
-- `[Attendance User Guide](/Users/togruljalalli/Desktop/projects/HRM/docs/scenario/attendance-user-guide.md)`
+- `Davamiyyət istifadəçi bələdçisi`
 
 ## Operatorun gündəlik istifadə etdiyi tablar
 

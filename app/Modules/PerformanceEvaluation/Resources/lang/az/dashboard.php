@@ -237,6 +237,7 @@ return [
         'open_user_personnel_links' => 'İstifadəçi bağlarını aç',
         'save_user_personnel_link' => 'Bağı yadda saxla',
         'back_to_performance_dashboard' => 'Performans panelinə qayıt',
+        'open_user_guide' => 'İstifadəçi bələdçisi',
     ],
     'messages' => [
         'cycle_saved' => 'Qiymətləndirmə dövrü yadda saxlanıldı.',

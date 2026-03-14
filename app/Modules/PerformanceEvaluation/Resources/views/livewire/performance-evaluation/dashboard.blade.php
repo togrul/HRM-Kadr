@@ -5,6 +5,14 @@
                 <div class="space-y-1">
                     <p class="text-[11px] font-semibold uppercase text-zinc-400">{{ __('performance_evaluation::dashboard.workspace.title') }}</p>
                     <p class="max-w-3xl text-sm text-zinc-500">{{ __('performance_evaluation::dashboard.workspace.description') }}</p>
+                    <div class="pt-2">
+                        <a
+                            href="{{ route('training-performance.user-guide', ['focus' => 'performance']) }}#performance-module"
+                            class="inline-flex items-center justify-center rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-800 transition hover:border-emerald-300 hover:bg-emerald-100"
+                        >
+                            {{ __('performance_evaluation::dashboard.actions.open_user_guide') }}
+                        </a>
+                    </div>
                 </div>
 
                 <div class="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">

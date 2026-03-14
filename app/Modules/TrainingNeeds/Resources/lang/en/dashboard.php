@@ -233,6 +233,7 @@ return [
         'export_feedback_report' => 'Export feedback report',
         'export_audit_report' => 'Export audit report',
         'open_print_summary' => 'Open print summary',
+        'open_user_guide' => 'User guide',
     ],
     'delivery_types' => [
         'internal' => 'Internal',

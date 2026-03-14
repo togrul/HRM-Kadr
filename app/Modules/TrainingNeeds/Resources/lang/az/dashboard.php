@@ -233,6 +233,7 @@ return [
         'export_feedback_report' => 'Rəy hesabatını eksport et',
         'export_audit_report' => 'Audit hesabatını eksport et',
         'open_print_summary' => 'Çap görünüşü',
+        'open_user_guide' => 'İstifadəçi bələdçisi',
     ],
     'delivery_types' => [
         'internal' => 'Daxili',
