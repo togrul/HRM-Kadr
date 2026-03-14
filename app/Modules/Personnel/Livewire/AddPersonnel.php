@@ -37,7 +37,7 @@ class AddPersonnel extends Component
 
     public function store()
     {
-        $this->step == 1 && $this->validate($this->validationRules()[$this->step]);
+        $this->validateCurrentStepForSave();
 
         $modelInstance = new Personnel;
 

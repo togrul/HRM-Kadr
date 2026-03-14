@@ -2,7 +2,7 @@
     <h2 class="text-xl font-semibold text-gray-500 font-title" id="slide-over-title">
       {{ $title ?? ''}}
     </h2>
-    @if(auth()->user()->can('confirmation-general') && isset($personnelModel) && $personnelModelData->is_pending)
+    @if(auth()->user()->can('confirmation-general') && isset($personnelModel) && ($personnelIsPending ?? false))
     <div class="overflow-hidden rounded-[22px] border border-amber-200 bg-gradient-to-r from-amber-50 via-white to-rose-50/60 shadow-[0_16px_36px_rgba(15,23,42,0.08)]">
         <div class="flex flex-col gap-4 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
             <div class="flex min-w-0 items-start gap-4">
@@ -82,8 +82,8 @@
         @php
             $activeStepComponent = $this->activeStepComponent;
             $stepPayload = $this->activeStepPayload();
-            $stepSearchModels = data_get($stepPayload, 'stepSearchModels', []);
-            $stepSearchPlaceholders = data_get($stepPayload, 'stepSearchPlaceholders', []);
+            $stepSearchModels = $this->activeStepSearchModels();
+            $stepSearchPlaceholders = $this->activeStepSearchPlaceholders();
         @endphp
 
         @include($activeStepComponent, $stepPayload)

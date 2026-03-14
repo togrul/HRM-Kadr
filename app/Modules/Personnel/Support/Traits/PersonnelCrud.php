@@ -179,13 +179,15 @@ trait PersonnelCrud
         }
     }
 
-    public function exceptArray($arrayKey)
+    public function exceptArray($arrayKey, ?int $step = null)
     {
-        $filtered = array_filter($this->validationRules()[$this->step], function ($key) use ($arrayKey) {
+        $step ??= (int) $this->step;
+
+        $filtered = array_filter($this->validationRules()[$step] ?? [], function ($key) use ($arrayKey) {
             return str_starts_with($key, $arrayKey);
         }, ARRAY_FILTER_USE_KEY);
 
-        return Arr::except($this->validationRules()[$this->step], array_keys($filtered));
+        return Arr::except($this->validationRules()[$step] ?? [], array_keys($filtered));
     }
 
     protected function validateCommon($exclude)
@@ -383,11 +385,7 @@ trait PersonnelCrud
     public function render()
     {
         $steps = ['steps' => $this->getSteps()];
-        $personnelContext = [
-            'personnelModelData' => method_exists($this, 'personnelModelDataInstance')
-                ? $this->personnelModelDataInstance()
-                : ($this->personnelModelData ?? null),
-        ];
+        $personnelContext = $this->personnelViewContext();
 
         $view_name = ! empty($this->personnelModel)
                     ? 'personnel::livewire.personnel.edit-personnel'
@@ -466,5 +464,24 @@ trait PersonnelCrud
         }
 
         return null;
+    }
+
+    protected function personnelViewContext(): array
+    {
+        if (! method_exists($this, 'personnelModelDataInstance')) {
+            return [
+                'personnelIsPending' => false,
+                'personnelPhotoUrl' => null,
+            ];
+        }
+
+        $personnel = $this->personnelModelDataInstance();
+
+        return [
+            'personnelIsPending' => (bool) ($personnel->is_pending ?? false),
+            'personnelPhotoUrl' => ! empty($personnel->photo)
+                ? \Illuminate\Support\Facades\Storage::url($personnel->photo)
+                : null,
+        ];
     }
 }

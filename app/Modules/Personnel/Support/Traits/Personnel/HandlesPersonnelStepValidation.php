@@ -4,7 +4,7 @@ namespace App\Modules\Personnel\Support\Traits\Personnel;
 
 trait HandlesPersonnelStepValidation
 {
-    private function getExceptedValidationsByStep(): array
+    private function getExceptedValidationsByStep(int $step): array
     {
         $exceptedValidations = [];
 
@@ -39,7 +39,7 @@ trait HandlesPersonnelStepValidation
             ],
         ];
 
-        foreach ($stepConditions[$this->step] ?? [] as $field => $payload) {
+        foreach ($stepConditions[$step] ?? [] as $field => $payload) {
             $hasValue = match ($field) {
                 'documentForm.document' => $this->payloadHasValues($payload),
                 default => ! empty($payload),
@@ -53,16 +53,17 @@ trait HandlesPersonnelStepValidation
         return $exceptedValidations;
     }
 
-    private function getValidationRulesForStep(): array
+    private function getValidationRulesForStep(?int $step = null): array
     {
-        $exceptedValidations = $this->getExceptedValidationsByStep();
+        $step ??= (int) $this->step;
+        $exceptedValidations = $this->getExceptedValidationsByStep($step);
 
         if (empty($exceptedValidations)) {
-            return $this->validationRules()[$this->step] ?? [];
+            return $this->validationRules()[$step] ?? [];
         }
 
         $specialConditions = array_map(
-            fn ($field) => $this->exceptArray($field),
+            fn ($field) => $this->exceptArray($field, $step),
             $exceptedValidations
         );
 
@@ -79,25 +80,7 @@ trait HandlesPersonnelStepValidation
             return;
         }
 
-        $currentStep = (int) $this->step;
-
-        if ($currentStep === 3 && property_exists($this, 'educationForm') && $this->educationForm) {
-            $this->recalculateEducationDurations();
-        }
-
-        if ($currentStep === 4 && property_exists($this, 'laborActivityForm') && $this->laborActivityForm) {
-            $this->calculateSeniority();
-        }
-
-        if (! $this->shouldValidateCurrentStep()) {
-            return;
-        }
-
-        $validator = $this->getValidationRulesForStep();
-
-        if (! empty($validator)) {
-            $this->validate($validator);
-        }
+        $this->validateStepIfNeeded((int) $this->step);
     }
 
     protected function shouldSkipNavigationValidation(): bool
@@ -108,6 +91,49 @@ trait HandlesPersonnelStepValidation
     protected function shouldValidateCurrentStep(): bool
     {
         return $this->shouldValidateStep((int) $this->step);
+    }
+
+    protected function validateCurrentStepForSave(): void
+    {
+        $stepOneRules = $this->validationRules()[1] ?? [];
+
+        if (! empty($stepOneRules)) {
+            $this->validate($stepOneRules);
+        }
+
+        $currentStep = (int) $this->step;
+
+        if ($currentStep !== 1) {
+            $this->validateStepIfNeeded($currentStep);
+        }
+    }
+
+    protected function validateStepIfNeeded(int $step): void
+    {
+        $this->prepareStepForValidation($step);
+
+        if (! $this->shouldValidateStep($step)) {
+            return;
+        }
+
+        $validator = $step === 1
+            ? ($this->validationRules()[1] ?? [])
+            : $this->getValidationRulesForStep($step);
+
+        if (! empty($validator)) {
+            $this->validate($validator);
+        }
+    }
+
+    protected function prepareStepForValidation(int $step): void
+    {
+        if ($step === 3 && property_exists($this, 'educationForm') && $this->educationForm) {
+            $this->recalculateEducationDurations();
+        }
+
+        if ($step === 4 && property_exists($this, 'laborActivityForm') && $this->laborActivityForm) {
+            $this->calculateSeniority();
+        }
     }
 
     protected function shouldValidateStep(int $step): bool

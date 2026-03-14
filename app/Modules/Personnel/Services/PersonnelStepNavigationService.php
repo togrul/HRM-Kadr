@@ -23,21 +23,31 @@ class PersonnelStepNavigationService
 
     public function previous(int $currentStep): int
     {
-        return max(1, $currentStep - 1);
+        return max(1, $this->normalize($currentStep) - 1);
     }
 
     public function next(int $currentStep): int
     {
-        return $currentStep + 1;
+        return min($this->maxStep(), $this->normalize($currentStep) + 1);
     }
 
     public function select(int $step): int
     {
-        return $step;
+        return $this->normalize($step);
     }
 
     public function handleStepChanged(int $step, callable $callback): void
     {
-        $callback($step);
+        $callback($this->normalize($step));
+    }
+
+    public function maxStep(): int
+    {
+        return max(array_keys($this->steps()));
+    }
+
+    public function normalize(int $step): int
+    {
+        return min($this->maxStep(), max(1, $step));
     }
 }

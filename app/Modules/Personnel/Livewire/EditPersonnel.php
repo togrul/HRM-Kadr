@@ -79,26 +79,7 @@ class EditPersonnel extends Component
         $personnel = $this->personnelModelDataInstance();
         $this->ensureCurrentStepDataLoaded();
         $this->authorize('update', $personnel);
-        $currentStep = (int) $this->step;
-
-        if ($currentStep === 1) {
-            $this->validate($this->validationRules()[1]);
-        } elseif ($currentStep === 2 && $this->shouldValidateStep(2)) {
-            $rules = $this->validationRules()[2] ?? [];
-            if ($rules) {
-                $this->validate($rules);
-            }
-        } elseif ($currentStep === 3 && $this->shouldValidateStep(3)) {
-            $rules = $this->validationRules()[3] ?? [];
-            if ($rules) {
-                $this->validate($rules);
-            }
-        } elseif ($currentStep === 4 && $this->shouldValidateStep(4)) {
-            $rules = $this->validationRules()[4] ?? [];
-            if ($rules) {
-                $this->validate($rules);
-            }
-        }
+        $this->validateCurrentStepForSave();
 
         if (! empty($this->avatar)) {
             $this->personalForm->personnel['photo'] = $this->avatar->store('personnel', 'public');
@@ -194,106 +175,110 @@ class EditPersonnel extends Component
 
     protected function loadDocumentFormData(): void
     {
-        if (isset($this->documentForm)) {
-            $this->ensureRelationsLoaded('documents', function () {
-                $this->personnelModelDataInstance()->loadMissing([
-                    'idDocuments.nationality',
-                    'idDocuments.bornCountry',
-                    'idDocuments.bornCity',
-                    'cards',
-                    'passports',
-                ]);
-            });
-
-            $this->documentForm->fillFromModel($this->personnelModelDataInstance());
-        }
+        $this->loadFormStepData(
+            formProperty: 'documentForm',
+            group: 'documents',
+            relations: [
+                'idDocuments.nationality',
+                'idDocuments.bornCountry',
+                'idDocuments.bornCity',
+                'cards',
+                'passports',
+            ],
+            loader: fn () => $this->documentForm->fillFromModel($this->personnelModelDataInstance())
+        );
     }
 
     protected function loadEducationFormData(): void
     {
-        if (isset($this->educationForm)) {
-            $this->ensureRelationsLoaded('education', function () {
-                $this->personnelModelDataInstance()->loadMissing([
-                    'education.educationalInstitution',
-                    'education.educationForm',
-                    'extraEducations.educationalInstitution',
-                    'extraEducations.educationForm',
-                    'extraEducations.educationType',
-                    'extraEducations.documentType',
-                ]);
-            });
-
-            $this->educationForm->fillFromModel($this->personnelModelDataInstance());
-            $this->recalculateEducationDurations();
-        }
+        $this->loadFormStepData(
+            formProperty: 'educationForm',
+            group: 'education',
+            relations: [
+                'education.educationalInstitution',
+                'education.educationForm',
+                'extraEducations.educationalInstitution',
+                'extraEducations.educationForm',
+                'extraEducations.educationType',
+                'extraEducations.documentType',
+            ],
+            loader: function (): void {
+                $this->educationForm->fillFromModel($this->personnelModelDataInstance());
+                $this->recalculateEducationDurations();
+            }
+        );
     }
 
     protected function loadLaborActivityFormData(): void
     {
-        if (isset($this->laborActivityForm)) {
-            $this->ensureRelationsLoaded('labor', function () {
-                $this->personnelModelDataInstance()->loadMissing([
-                    'laborActivities',
-                    'ranks',
-                ]);
-            });
-
-            $this->laborActivityForm->fillFromModel($this->personnelModelDataInstance());
-            $this->calculateSeniority();
-        }
+        $this->loadFormStepData(
+            formProperty: 'laborActivityForm',
+            group: 'labor',
+            relations: [
+                'laborActivities',
+                'latestDisposal',
+                'currentWork',
+                'structure' => fn ($query) => $query->withRecursive('parent', false),
+                'ranks',
+            ],
+            loader: function (): void {
+                $this->laborActivityForm->fillFromModel($this->personnelModelDataInstance());
+                $this->calculateSeniority();
+            }
+        );
     }
 
     protected function loadHistoryFormData(): void
     {
-        if (isset($this->historyForm)) {
-            $this->ensureRelationsLoaded('history', function () {
-                $this->personnelModelDataInstance()->loadMissing([
-                    'military',
-                    'participations',
-                ]);
-            });
-
-            $this->historyForm->fillFromModel($this->personnelModelDataInstance());
-        }
+        $this->loadFormStepData(
+            formProperty: 'historyForm',
+            group: 'history',
+            relations: [
+                'military.rank',
+                'injuries',
+                'captives',
+            ],
+            loader: fn () => $this->historyForm->fillFromModel($this->personnelModelDataInstance())
+        );
     }
 
     protected function loadAwardsFormData(): void
     {
-        if (isset($this->awardsPunishmentsForm)) {
-            $this->ensureRelationsLoaded('awards_punishments', function () {
-                $this->personnelModelDataInstance()->loadMissing([
-                    'awards',
-                    'punishments',
-                ]);
-            });
-
-            $this->awardsPunishmentsForm->fillFromModel($this->personnelModelDataInstance());
-        }
+        $this->loadFormStepData(
+            formProperty: 'awardsPunishmentsForm',
+            group: 'awards_punishments',
+            relations: [
+                'awards.award',
+                'punishments.punishment',
+            ],
+            loader: fn () => $this->awardsPunishmentsForm->fillFromModel($this->personnelModelDataInstance())
+        );
     }
 
     protected function loadKinshipFormData(): void
     {
-        if (isset($this->kinshipForm)) {
-            $this->ensureRelationsLoaded('kinships', function () {
-                $this->personnelModelDataInstance()->loadMissing('kinships');
-            });
-
-            $this->kinshipForm->fillFromModel($this->personnelModelDataInstance());
-        }
+        $this->loadFormStepData(
+            formProperty: 'kinshipForm',
+            group: 'kinships',
+            relations: ['kinships.kinship'],
+            loader: fn () => $this->kinshipForm->fillFromModel($this->personnelModelDataInstance())
+        );
     }
 
     protected function loadMiscFormData(): void
     {
-        if (isset($this->miscForm)) {
-            $this->ensureRelationsLoaded('misc', function () {
-                $this->personnelModelDataInstance()->loadMissing([
-                    'foreignLanguages',
-                    'degreeAndNames',
-                ]);
-            });
-
-            $this->miscForm->fillFromModel($this->personnelModelDataInstance());
-        }
+        $this->loadFormStepData(
+            formProperty: 'miscForm',
+            group: 'misc',
+            relations: [
+                'foreignLanguages.language',
+                'participations',
+                'degreeAndNames.degreeAndName',
+                'degreeAndNames.documentType',
+                'elections',
+            ],
+            loader: fn () => $this->miscForm->fillFromModel($this->personnelModelDataInstance())
+        );
     }
 
     protected function ensureRelationsLoaded(string $group, callable $loader): void
@@ -304,6 +289,19 @@ class EditPersonnel extends Component
 
         $loader();
         $this->relationGroupsLoaded[] = $group;
+    }
+
+    protected function loadFormStepData(string $formProperty, string $group, array $relations, callable $loader): void
+    {
+        if (! isset($this->{$formProperty})) {
+            return;
+        }
+
+        $this->ensureRelationsLoaded($group, function () use ($relations): void {
+            $this->personnelModelDataInstance()->loadMissing($relations);
+        });
+
+        $loader();
     }
 
     protected function resetStepTrackingFor(int $personnelId): void

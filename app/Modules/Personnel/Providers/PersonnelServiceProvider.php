@@ -4,6 +4,8 @@ namespace App\Modules\Personnel\Providers;
 
 use App\Modules\Personnel\Console\Commands\PersonnelListQueryBudgetCommand;
 use App\Modules\Personnel\Console\Commands\PersonnelListRenderBenchmarkCommand;
+use App\Modules\Personnel\Console\Commands\PersonnelCrudQueryBudgetCommand;
+use App\Modules\Personnel\Console\Commands\PersonnelCrudRenderBenchmarkCommand;
 use App\Providers\Concerns\RegistersLivewireAliases;
 use App\Services\Modules\ModuleState;
 use Illuminate\Support\Facades\Gate;
@@ -19,6 +21,8 @@ class PersonnelServiceProvider extends ServiceProvider
             $this->commands([
                 PersonnelListQueryBudgetCommand::class,
                 PersonnelListRenderBenchmarkCommand::class,
+                PersonnelCrudQueryBudgetCommand::class,
+                PersonnelCrudRenderBenchmarkCommand::class,
             ]);
         }
     }

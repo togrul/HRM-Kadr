@@ -27,6 +27,14 @@ return [
                 'response_bytes' => (int) env('PERSONNEL_RENDER_BUDGET_FILTER_RESPONSE', 190000),
                 'render_ms' => (int) env('PERSONNEL_RENDER_BUDGET_FILTER_MS', 180),
             ],
+            'personnel_crud_render' => [
+                'response_bytes' => (int) env('PERSONNEL_RENDER_BUDGET_CRUD_RENDER_RESPONSE', 320000),
+                'render_ms' => (int) env('PERSONNEL_RENDER_BUDGET_CRUD_RENDER_MS', 800),
+            ],
+            'personnel_crud_step_change' => [
+                'response_bytes' => (int) env('PERSONNEL_RENDER_BUDGET_CRUD_STEP_RESPONSE', 320000),
+                'render_ms' => (int) env('PERSONNEL_RENDER_BUDGET_CRUD_STEP_MS', 600),
+            ],
         ],
         'query_budget' => [
             'all_personnel_render' => (int) env('PERSONNEL_QUERY_BUDGET_RENDER', 18),
@@ -35,6 +43,8 @@ return [
             'all_personnel_status_update' => (int) env('PERSONNEL_QUERY_BUDGET_STATUS_UPDATE', 28),
             'personnel_table_status_render' => (int) env('PERSONNEL_QUERY_BUDGET_TABLE_STATUS_RENDER', 24),
             'all_personnel_filter_open' => (int) env('PERSONNEL_QUERY_BUDGET_FILTER_OPEN', 42),
+            'personnel_crud_render' => (int) env('PERSONNEL_QUERY_BUDGET_CRUD_RENDER', 48),
+            'personnel_crud_step_change' => (int) env('PERSONNEL_QUERY_BUDGET_CRUD_STEP_CHANGE', 18),
         ],
     ],
 ];

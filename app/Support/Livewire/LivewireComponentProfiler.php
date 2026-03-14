@@ -18,9 +18,13 @@ class LivewireComponentProfiler
      */
     public function measureRender(Authenticatable $user, string $component, array $params = [], array $queryParams = []): array
     {
+        $memoryBefore = memory_get_usage(true);
+        $peakBefore = memory_get_peak_usage(true);
         $startedAt = microtime(true);
         $test = $this->makeTestable($user, $component, $params, $queryParams);
         $elapsedMs = round((microtime(true) - $startedAt) * 1000, 2);
+        $memoryAfter = memory_get_usage(true);
+        $peakAfter = memory_get_peak_usage(true);
 
         $html = $test->html();
         $domHtml = $test->html(true);
@@ -31,6 +35,8 @@ class LivewireComponentProfiler
             'html_bytes' => strlen($domHtml),
             'snapshot_bytes' => strlen($this->extractWireAttribute($html, 'snapshot')),
             'effects_bytes' => strlen($this->extractWireAttribute($html, 'effects')),
+            'memory_bytes' => max(0, $memoryAfter - $memoryBefore),
+            'peak_memory_bytes' => max(0, $peakAfter - $peakBefore),
         ];
     }
 
@@ -48,6 +54,8 @@ class LivewireComponentProfiler
         array $queryParams = [],
         ?callable $boot = null,
     ): array {
+        $memoryBefore = memory_get_usage(true);
+        $peakBefore = memory_get_peak_usage(true);
         $test = $this->makeTestable($user, $component, $params, $queryParams);
 
         if ($boot) {
@@ -57,6 +65,8 @@ class LivewireComponentProfiler
         $startedAt = microtime(true);
         $interaction($test);
         $elapsedMs = round((microtime(true) - $startedAt) * 1000, 2);
+        $memoryAfter = memory_get_usage(true);
+        $peakAfter = memory_get_peak_usage(true);
 
         $state = $this->extractState($test);
         $responseContent = (string) $state->getResponse()->getContent();
@@ -70,6 +80,8 @@ class LivewireComponentProfiler
             'html_bytes' => strlen($effectHtml),
             'snapshot_bytes' => strlen((string) $snapshot),
             'effects_bytes' => strlen(json_encode($effects, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: ''),
+            'memory_bytes' => max(0, $memoryAfter - $memoryBefore),
+            'peak_memory_bytes' => max(0, $peakAfter - $peakBefore),
         ];
     }
 

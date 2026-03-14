@@ -443,9 +443,9 @@
                       <div class="flex flex-col items-center space-y-2">
                         @if ($avatar)
                         <img alt="avatar" class="object-cover w-full h-full" src="{{ $avatar->temporaryUrl() }}">
-                        @elseif(!empty($personnelModel) && $personnelModelData->photo)
+                        @elseif(!empty($personnelModel) && !empty($personnelPhotoUrl))
 {{--                        <img alt="avatar" class="object-cover w-full h-full" src="{{ asset('/storage/'.$personnelModelData->photo) }}">--}}
-                           <img alt="avatar" class="object-cover w-full h-full" src="{{ \Illuminate\Support\Facades\Storage::url($personnelModelData->photo) }}">
+                           <img alt="avatar" class="object-cover w-full h-full" src="{{ $personnelPhotoUrl }}">
                         @else
                         <img class="w-full h-full" src="{{ asset('assets/images/id-photo.jpeg') }}" alt="id photo">
                         @endif

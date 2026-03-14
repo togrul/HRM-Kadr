@@ -111,12 +111,19 @@ trait HandlesPersonnelStepFlow
     {
         $step = (int) $this->safePropertyValue('step', 1);
 
-        $payload = array_merge($this->baseStepPayload(), $this->stepFormPayload($step));
+        return array_merge($this->baseStepPayload(), $this->stepFormPayload($step));
+    }
 
-        $payload['stepSearchModels'] = $this->stepSearchModelMap($step);
-        $payload['stepSearchPlaceholders'] = $this->stepSearchPlaceholderDefaults($step);
+    #[Computed]
+    public function activeStepSearchModels(): array
+    {
+        return $this->stepSearchModelMap((int) $this->safePropertyValue('step', 1));
+    }
 
-        return $payload;
+    #[Computed]
+    public function activeStepSearchPlaceholders(): array
+    {
+        return $this->stepSearchPlaceholderDefaults((int) $this->safePropertyValue('step', 1));
     }
 
     protected function baseStepPayload(): array
@@ -134,9 +141,6 @@ trait HandlesPersonnelStepFlow
                 'personalForm' => $this->safePropertyValue('personalForm', null),
                 'avatar' => $this->safePropertyValue('avatar', null),
                 'personnelModel' => $this->safePropertyValue('personnelModel', null),
-                'personnelModelData' => method_exists($this, 'personnelModelDataInstance')
-                    ? $this->personnelModelDataInstance()
-                    : $this->safePropertyValue('personnelModelData', null),
             ],
             2 => [
                 'documentForm' => $this->safePropertyValue('documentForm', null),
