@@ -80,6 +80,21 @@ class EditPersonnel extends Component
         $this->ensureCurrentStepDataLoaded();
         $this->authorize('update', $personnel);
         $this->validateCurrentStepForSave();
+        $this->persistPersonnel();
+    }
+
+    protected function storeFromChildValidation(): void
+    {
+        $personnel = $this->personnelModelDataInstance();
+        $this->ensureCurrentStepDataLoaded();
+        $this->authorize('update', $personnel);
+        $this->validatePrimaryStepForPersist();
+        $this->persistPersonnel();
+    }
+
+    protected function persistPersonnel(): void
+    {
+        $personnel = $this->personnelModelDataInstance();
 
         if (! empty($this->avatar)) {
             $this->personalForm->personnel['photo'] = $this->avatar->store('personnel', 'public');

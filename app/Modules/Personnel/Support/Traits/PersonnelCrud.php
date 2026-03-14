@@ -21,6 +21,7 @@ use App\Services\EducationDurationService;
 use App\Traits\NormalizesDropdownPayloads;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
+use Livewire\Attributes\On;
 use Livewire\WithFileUploads;
 
 trait PersonnelCrud
@@ -115,6 +116,29 @@ trait PersonnelCrud
     protected ?CalculateSeniorityService $seniorityServiceInstance = null;
 
     protected ?EducationDurationService $educationDurationServiceInstance = null;
+
+    #[On('personnel-crud:navigate-approved')]
+    public function handleChildNavigationApproved(int $step, int $targetStep, array $payload = []): void
+    {
+        if ((int) $this->step !== $step || ! $this->activeStepUsesChildComponent()) {
+            return;
+        }
+
+        $this->syncChildStepPayload($step, $payload);
+        $this->step = $this->stepNavigationService()->select($targetStep);
+        $this->handleStepChanged();
+    }
+
+    #[On('personnel-crud:save-approved')]
+    public function handleChildSaveApproved(int $step, array $payload = []): void
+    {
+        if ((int) $this->step !== $step || ! $this->activeStepUsesChildComponent()) {
+            return;
+        }
+
+        $this->syncChildStepPayload($step, $payload);
+        $this->storeFromChildValidation();
+    }
 
     public function updatedAvatar(): void
     {
@@ -484,4 +508,149 @@ trait PersonnelCrud
                 : null,
         ];
     }
+
+    protected function syncChildStepPayload(int $step, array $payload): void
+    {
+        match ($step) {
+            2 => $this->syncDocumentStepPayload($payload),
+            3 => $this->syncEducationStepPayload($payload),
+            4 => $this->syncLaborStepPayload($payload),
+            5 => $this->syncHistoryStepPayload($payload),
+            6 => $this->syncAwardsStepPayload($payload),
+            7 => $this->syncKinshipStepPayload($payload),
+            8 => $this->syncMiscStepPayload($payload),
+            default => null,
+        };
+    }
+
+    protected function syncDocumentStepPayload(array $payload): void
+    {
+        if (! property_exists($this, 'documentForm') || ! $this->documentForm) {
+            return;
+        }
+
+        $this->documentForm->fillFromArrays(
+            $payload['document'] ?? [],
+            $payload['serviceCards'] ?? [],
+            $payload['serviceCardsList'] ?? [],
+            $payload['passports'] ?? [],
+            $payload['passportsList'] ?? []
+        );
+    }
+
+    protected function syncEducationStepPayload(array $payload): void
+    {
+        if (! property_exists($this, 'educationForm') || ! $this->educationForm) {
+            return;
+        }
+
+        $this->educationForm->education = array_replace($this->educationForm->education ?? [], $payload['education'] ?? []);
+        $this->educationForm->extraEducation = array_replace($this->educationForm->extraEducation ?? [], $payload['extraEducation'] ?? []);
+        $this->educationForm->extraEducationList = $payload['extraEducationList'] ?? [];
+        $this->educationForm->hasExtraEducation = (bool) ($payload['hasExtraEducation'] ?? false);
+        $this->recalculateEducationDurations();
+    }
+
+    protected function syncLaborStepPayload(array $payload): void
+    {
+        if (! property_exists($this, 'laborActivityForm') || ! $this->laborActivityForm) {
+            return;
+        }
+
+        $this->laborActivityForm->fillFromArrays(
+            $payload['laborActivity'] ?? [],
+            $payload['laborActivityList'] ?? [],
+            $payload['rank'] ?? [],
+            $payload['rankList'] ?? []
+        );
+        $this->isSpecialService = (bool) ($payload['isSpecialService'] ?? false);
+        $this->calculateSeniority();
+    }
+
+    protected function syncHistoryStepPayload(array $payload): void
+    {
+        if (! property_exists($this, 'historyForm') || ! $this->historyForm) {
+            return;
+        }
+
+        $this->historyForm->fillFromArrays(
+            $payload['military'] ?? [],
+            $payload['militaryList'] ?? [],
+            $payload['injury'] ?? [],
+            $payload['injuryList'] ?? [],
+            $payload['captivity'] ?? [],
+            $payload['captivityList'] ?? []
+        );
+
+        if (property_exists($this, 'personalForm') && $this->personalForm) {
+            $this->personalForm->personnelExtra = array_replace(
+                $this->personalForm->personnelExtra ?? [],
+                $payload['personnelExtra'] ?? []
+            );
+        }
+    }
+
+    protected function syncAwardsStepPayload(array $payload): void
+    {
+        if (! property_exists($this, 'awardsPunishmentsForm') || ! $this->awardsPunishmentsForm) {
+            return;
+        }
+
+        $this->awardsPunishmentsForm->fillFromArrays(
+            $payload['award'] ?? [],
+            $payload['awardList'] ?? [],
+            $payload['punishment'] ?? [],
+            $payload['punishmentList'] ?? []
+        );
+
+        if (property_exists($this, 'personalForm') && $this->personalForm) {
+            $this->personalForm->personnelExtra = array_replace(
+                $this->personalForm->personnelExtra ?? [],
+                $payload['personnelExtra'] ?? []
+            );
+        }
+    }
+
+    protected function syncKinshipStepPayload(array $payload): void
+    {
+        if (! property_exists($this, 'kinshipForm') || ! $this->kinshipForm) {
+            return;
+        }
+
+        $this->kinshipForm->fillFromArrays(
+            $payload['kinship'] ?? [],
+            $payload['kinshipList'] ?? [],
+            $payload['editingKinshipKey'] ?? null
+        );
+    }
+
+    protected function syncMiscStepPayload(array $payload): void
+    {
+        if (! property_exists($this, 'miscForm') || ! $this->miscForm) {
+            return;
+        }
+
+        $this->miscForm->fillFromArrays(
+            $payload['language'] ?? [],
+            $payload['languageList'] ?? [],
+            $payload['event'] ?? [],
+            $payload['eventList'] ?? [],
+            $payload['degree'] ?? [],
+            $payload['degreeList'] ?? [],
+            $payload['election'] ?? [],
+            $payload['electionList'] ?? [],
+            (bool) ($payload['hasElectedElectorals'] ?? false)
+        );
+    }
+
+    protected function validatePrimaryStepForPersist(): void
+    {
+        $stepOneRules = $this->validationRules()[1] ?? [];
+
+        if (! empty($stepOneRules)) {
+            $this->validate($stepOneRules);
+        }
+    }
+
+    abstract protected function storeFromChildValidation(): void;
 }

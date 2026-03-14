@@ -38,7 +38,17 @@ class AddPersonnel extends Component
     public function store()
     {
         $this->validateCurrentStepForSave();
+        $this->persistPersonnel();
+    }
 
+    protected function storeFromChildValidation(): void
+    {
+        $this->validatePrimaryStepForPersist();
+        $this->persistPersonnel();
+    }
+
+    protected function persistPersonnel(): void
+    {
         $modelInstance = new Personnel;
 
         if (! empty($this->avatar)) {
@@ -73,7 +83,6 @@ class AddPersonnel extends Component
         $this->dispatchPersonnelStored(__('personnel::common.messages.personnel_created'));
         $this->dispatchModalCloseEvent();
     }
-
     public function mount()
     {
         $this->authorize('create', Personnel::class);

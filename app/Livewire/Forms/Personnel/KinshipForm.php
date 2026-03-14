@@ -33,6 +33,18 @@ class KinshipForm extends Form
         $this->resetKinship();
     }
 
+    public function fillFromArrays(array $kinship, array $kinshipList, ?string $editingKinshipKey = null): void
+    {
+        $this->editingKinshipKey = $editingKinshipKey;
+        $this->kinship = ! empty($kinship)
+            ? array_replace($this->defaultKinship(), $kinship)
+            : $this->defaultKinship();
+
+        $this->kinshipList = collect($kinshipList)
+            ->map(fn ($entry) => array_replace($this->defaultKinship(), $entry ?? []))
+            ->all();
+    }
+
     public function fillFromModel(?Personnel $personnel): void
     {
         $this->resetForm();

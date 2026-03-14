@@ -107,6 +107,80 @@ trait HandlesPersonnelStepFlow
     }
 
     #[Computed]
+    public function activeStepUsesChildComponent(): bool
+    {
+        return $this->stepStateService()->stepUsesChildComponent((int) $this->safePropertyValue('step', 1));
+    }
+
+    #[Computed]
+    public function activeStepChildComponent(): ?string
+    {
+        return $this->stepStateService()->stepChildComponent((int) $this->safePropertyValue('step', 1));
+    }
+
+    #[Computed]
+    public function activeStepChildState(): array
+    {
+        $step = (int) $this->safePropertyValue('step', 1);
+
+        return match ($step) {
+            2 => [
+                'document' => $this->safePropertyValue('documentForm')?->document ?? [],
+                'serviceCards' => $this->safePropertyValue('documentForm')?->serviceCards ?? [],
+                'serviceCardsList' => $this->safePropertyValue('documentForm')?->serviceCardsList ?? [],
+                'passports' => $this->safePropertyValue('documentForm')?->passports ?? [],
+                'passportsList' => $this->safePropertyValue('documentForm')?->passportsList ?? [],
+            ],
+            3 => [
+                'education' => $this->safePropertyValue('educationForm')?->education ?? [],
+                'extraEducation' => $this->safePropertyValue('educationForm')?->extraEducation ?? [],
+                'extraEducationList' => $this->safePropertyValue('educationForm')?->extraEducationList ?? [],
+                'hasExtraEducation' => (bool) ($this->safePropertyValue('educationForm')?->hasExtraEducation ?? false),
+            ],
+            4 => [
+                'laborActivity' => $this->safePropertyValue('laborActivityForm')?->laborActivity ?? [],
+                'laborActivityList' => $this->safePropertyValue('laborActivityForm')?->laborActivityList ?? [],
+                'rank' => $this->safePropertyValue('laborActivityForm')?->rank ?? [],
+                'rankList' => $this->safePropertyValue('laborActivityForm')?->rankList ?? [],
+                'isSpecialService' => (bool) $this->safePropertyValue('isSpecialService', false),
+            ],
+            5 => [
+                'military' => $this->safePropertyValue('historyForm')?->military ?? [],
+                'militaryList' => $this->safePropertyValue('historyForm')?->militaryList ?? [],
+                'injury' => $this->safePropertyValue('historyForm')?->injury ?? [],
+                'injuryList' => $this->safePropertyValue('historyForm')?->injuryList ?? [],
+                'captivity' => $this->safePropertyValue('historyForm')?->captivity ?? [],
+                'captivityList' => $this->safePropertyValue('historyForm')?->captivityList ?? [],
+                'personnelExtra' => $this->safePropertyValue('personalForm')?->personnelExtra ?? [],
+            ],
+            6 => [
+                'award' => $this->safePropertyValue('awardsPunishmentsForm')?->award ?? [],
+                'awardList' => $this->safePropertyValue('awardsPunishmentsForm')?->awardList ?? [],
+                'punishment' => $this->safePropertyValue('awardsPunishmentsForm')?->punishment ?? [],
+                'punishmentList' => $this->safePropertyValue('awardsPunishmentsForm')?->punishmentList ?? [],
+                'personnelExtra' => $this->safePropertyValue('personalForm')?->personnelExtra ?? [],
+            ],
+            7 => [
+                'kinship' => $this->safePropertyValue('kinshipForm')?->kinship ?? [],
+                'kinshipList' => $this->safePropertyValue('kinshipForm')?->kinshipList ?? [],
+                'editingKinshipKey' => $this->safePropertyValue('kinshipForm')?->editingKinshipKey,
+            ],
+            8 => [
+                'language' => $this->safePropertyValue('miscForm')?->language ?? [],
+                'languageList' => $this->safePropertyValue('miscForm')?->languageList ?? [],
+                'event' => $this->safePropertyValue('miscForm')?->event ?? [],
+                'eventList' => $this->safePropertyValue('miscForm')?->eventList ?? [],
+                'degree' => $this->safePropertyValue('miscForm')?->degree ?? [],
+                'degreeList' => $this->safePropertyValue('miscForm')?->degreeList ?? [],
+                'election' => $this->safePropertyValue('miscForm')?->election ?? [],
+                'electionList' => $this->safePropertyValue('miscForm')?->electionList ?? [],
+                'hasElectedElectorals' => (bool) ($this->safePropertyValue('miscForm')?->hasElectedElectorals ?? false),
+            ],
+            default => [],
+        };
+    }
+
+    #[Computed]
     public function activeStepPayload(): array
     {
         $step = (int) $this->safePropertyValue('step', 1);

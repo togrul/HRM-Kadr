@@ -32,7 +32,7 @@ return [
     ],
     'steps' => [
         'personal_information' => 'Personal Information',
-        'cards' => 'Cards',
+        'cards' => 'Credentials',
         'education' => 'Education',
         'labor_activities' => 'Labor activities',
         'military' => 'Military',
@@ -215,6 +215,12 @@ return [
         'no_information_added' => 'No information added',
         'more_actions' => 'More actions',
         'result' => 'Result',
+        'completed' => 'Completed',
+        'in_progress' => 'Current step',
+        'not_completed' => 'Not completed',
+        'completed_short' => 'Ready',
+        'in_progress_short' => 'Current',
+        'not_completed_short' => 'Later',
     ],
     'states' => [
         'in_vacation' => 'In vacation',

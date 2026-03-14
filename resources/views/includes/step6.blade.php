@@ -351,12 +351,12 @@
 
     <x-form-card title="{{ __('personnel::wizard.sections.discrediting_information') }}">
         <div class="flex flex-col">
-            <x-label for="personalForm.personnelExtra.discrediting_information">{{ __('personnel::common.labels.description') }}</x-label>
+            <x-label for="personnelExtra.discrediting_information">{{ __('personnel::common.labels.description') }}</x-label>
             <x-textarea
                 mode="gray"
-                name="personalForm.personnelExtra.discrediting_information"
+                name="personnelExtra.discrediting_information"
                 placeholder=""
-                wire:model="personalForm.personnelExtra.discrediting_information"
+                wire:model.live.debounce.250ms="personnelExtra.discrediting_information"
             ></x-textarea>
         </div>
     </x-form-card>

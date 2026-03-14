@@ -11,13 +11,29 @@ class PersonnelStepState
     {
         return [
             1 => 'includes.step1',
-            2 => 'includes.step2',
-            3 => 'includes.step3',
-            4 => 'includes.step4',
-            5 => 'includes.step5',
-            6 => 'includes.step6',
-            7 => 'includes.step7',
-            8 => 'includes.step8',
+            2 => 'personnel.steps.document-step',
+            3 => 'personnel.steps.education-step',
+            4 => 'personnel.steps.labor-activity-step',
+            5 => 'personnel.steps.history-step',
+            6 => 'personnel.steps.awards-punishments-step',
+            7 => 'personnel.steps.kinship-step',
+            8 => 'personnel.steps.misc-step',
+        ];
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public function childComponentMap(): array
+    {
+        return [
+            2 => 'personnel.steps.document-step',
+            3 => 'personnel.steps.education-step',
+            4 => 'personnel.steps.labor-activity-step',
+            5 => 'personnel.steps.history-step',
+            6 => 'personnel.steps.awards-punishments-step',
+            7 => 'personnel.steps.kinship-step',
+            8 => 'personnel.steps.misc-step',
         ];
     }
 
@@ -90,5 +106,15 @@ class PersonnelStepState
     public function stepComponent(int $step): string
     {
         return $this->stepTemplate($step);
+    }
+
+    public function stepUsesChildComponent(int $step): bool
+    {
+        return isset($this->childComponentMap()[$step]);
+    }
+
+    public function stepChildComponent(int $step): ?string
+    {
+        return $this->childComponentMap()[$step] ?? null;
     }
 }

@@ -59,6 +59,52 @@ class MiscellaneousForm extends Form
         $this->election = $this->defaultElection();
     }
 
+    public function fillFromArrays(
+        array $language,
+        array $languageList,
+        array $event,
+        array $eventList,
+        array $degree,
+        array $degreeList,
+        array $election,
+        array $electionList,
+        bool $hasElectedElectorals = false
+    ): void {
+        $this->language = ! empty($language)
+            ? array_replace($this->defaultLanguage(), $language)
+            : $this->defaultLanguage();
+
+        $this->languageList = collect($languageList)
+            ->map(fn ($entry) => array_replace($this->defaultLanguage(), $entry ?? []))
+            ->all();
+
+        $this->event = ! empty($event)
+            ? array_replace($this->defaultEvent(), $event)
+            : $this->defaultEvent();
+
+        $this->eventList = collect($eventList)
+            ->map(fn ($entry) => array_replace($this->defaultEvent(), $entry ?? []))
+            ->all();
+
+        $this->degree = ! empty($degree)
+            ? array_replace($this->defaultDegree(), $degree)
+            : $this->defaultDegree();
+
+        $this->degreeList = collect($degreeList)
+            ->map(fn ($entry) => array_replace($this->defaultDegree(), $entry ?? []))
+            ->all();
+
+        $this->election = ! empty($election)
+            ? array_replace($this->defaultElection(), $election)
+            : $this->defaultElection();
+
+        $this->electionList = collect($electionList)
+            ->map(fn ($entry) => array_replace($this->defaultElection(), $entry ?? []))
+            ->all();
+
+        $this->hasElectedElectorals = $hasElectedElectorals;
+    }
+
     public function fillFromModel(?Personnel $personnel): void
     {
         $this->resetForm();

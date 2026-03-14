@@ -34,6 +34,29 @@ class AwardsPunishmentsForm extends Form
         $this->punishment = $this->defaultPunishment();
     }
 
+    public function fillFromArrays(
+        array $award,
+        array $awardList,
+        array $punishment,
+        array $punishmentList
+    ): void {
+        $this->award = ! empty($award)
+            ? array_replace($this->defaultAward(), $award)
+            : $this->defaultAward();
+
+        $this->awardList = collect($awardList)
+            ->map(fn ($entry) => array_replace($this->defaultAward(), $entry ?? []))
+            ->all();
+
+        $this->punishment = ! empty($punishment)
+            ? array_replace($this->defaultPunishment(), $punishment)
+            : $this->defaultPunishment();
+
+        $this->punishmentList = collect($punishmentList)
+            ->map(fn ($entry) => array_replace($this->defaultPunishment(), $entry ?? []))
+            ->all();
+    }
+
     public function fillFromModel(?Personnel $personnel): void
     {
         $this->resetForm();

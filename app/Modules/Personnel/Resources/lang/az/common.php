@@ -32,7 +32,7 @@ return [
     ],
     'steps' => [
         'personal_information' => 'Şəxsi məlumatlar',
-        'cards' => 'Kartlar',
+        'cards' => 'Vəsiqələr',
         'education' => 'Təhsil',
         'labor_activities' => 'Əmək fəaliyyəti',
         'military' => 'Hərbi',
@@ -215,6 +215,12 @@ return [
         'no_information_added' => 'Məlumat əlavə olunmayıb',
         'more_actions' => 'Daha çox əməliyyat',
         'result' => 'Nəticə',
+        'completed' => 'Tamamlanıb',
+        'in_progress' => 'Aktiv addım',
+        'not_completed' => 'Hələ doldurulmayıb',
+        'completed_short' => 'Hazır',
+        'in_progress_short' => 'Aktiv',
+        'not_completed_short' => 'Sonra',
     ],
     'states' => [
         'in_vacation' => 'Məzuniyyətdə',

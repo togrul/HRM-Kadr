@@ -266,14 +266,14 @@
 
     <x-form-card title="{{ __('personnel::wizard.sections.participation_in_war') }}">
         <div class="flex flex-col">
-            <x-label for="personalForm.personnelExtra.participation_in_war">{{ __('personnel::common.labels.description') }}</x-label>
+            <x-label for="personnelExtra.participation_in_war">{{ __('personnel::common.labels.description') }}</x-label>
             <x-textarea
                 mode="gray"
-                name="personalForm.personnelExtra.participation_in_war"
+                name="personnelExtra.participation_in_war"
                 placeholder=""
-                wire:model="personalForm.personnelExtra.participation_in_war"
+                wire:model.live.debounce.250ms="personnelExtra.participation_in_war"
             ></x-textarea>
-            @error('personalForm.personnelExtra.participation_in_war')
+            @error('personnelExtra.participation_in_war')
             <x-validation> {{ $message }} </x-validation>
             @enderror
         </div>

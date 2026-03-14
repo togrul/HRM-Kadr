@@ -211,7 +211,7 @@ trait PersonnelValidationTrait
             }
         }
 
-        if ($this->isAddedRank) {
+        if ($this->isAddedRank || $this->shouldValidateRankDraft()) {
             $rules = array_merge($rules, $this->rankRuleSet());
         }
 
@@ -396,6 +396,22 @@ trait PersonnelValidationTrait
         return filled($draft['company_name'] ?? null)
             || filled($draft['position'] ?? null)
             || filled($draft['join_date'] ?? null);
+    }
+
+    protected function shouldValidateRankDraft(): bool
+    {
+        if (! property_exists($this, 'laborActivityForm') || ! $this->laborActivityForm) {
+            return false;
+        }
+
+        $draft = $this->laborActivityForm->rank ?? [];
+
+        return filled($draft['rank_id'] ?? null)
+            || filled($draft['name'] ?? null)
+            || filled($draft['given_date'] ?? null)
+            || filled($draft['order_no'] ?? null)
+            || filled($draft['order_given_by'] ?? null)
+            || filled($draft['order_date'] ?? null);
     }
 
     protected function validationAttributes(): array

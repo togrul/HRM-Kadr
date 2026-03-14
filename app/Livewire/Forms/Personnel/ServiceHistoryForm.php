@@ -45,6 +45,39 @@ class ServiceHistoryForm extends Form
         $this->captivity = $this->defaultCaptivity();
     }
 
+    public function fillFromArrays(
+        array $military,
+        array $militaryList,
+        array $injury,
+        array $injuryList,
+        array $captivity,
+        array $captivityList
+    ): void {
+        $this->military = ! empty($military)
+            ? array_replace($this->defaultMilitary(), $military)
+            : $this->defaultMilitary();
+
+        $this->militaryList = collect($militaryList)
+            ->map(fn ($entry) => array_replace($this->defaultMilitary(), $entry ?? []))
+            ->all();
+
+        $this->injury = ! empty($injury)
+            ? array_replace($this->defaultInjury(), $injury)
+            : $this->defaultInjury();
+
+        $this->injuryList = collect($injuryList)
+            ->map(fn ($entry) => array_replace($this->defaultInjury(), $entry ?? []))
+            ->all();
+
+        $this->captivity = ! empty($captivity)
+            ? array_replace($this->defaultCaptivity(), $captivity)
+            : $this->defaultCaptivity();
+
+        $this->captivityList = collect($captivityList)
+            ->map(fn ($entry) => array_replace($this->defaultCaptivity(), $entry ?? []))
+            ->all();
+    }
+
     public function fillFromModel(?Personnel $personnel): void
     {
         $this->resetForm();
