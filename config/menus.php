@@ -42,7 +42,7 @@ return [
             'color' => 'zinc',
             'order' => 9,
             'is_active' => 1,
-            'url' => 'home',
+            'url' => 'reports',
             'permission_id' => 3,
             'types' => ['military', 'public', 'private'],
         ],

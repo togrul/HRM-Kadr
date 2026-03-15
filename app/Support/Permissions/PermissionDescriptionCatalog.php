@@ -81,6 +81,8 @@ class PermissionDescriptionCatalog
             'show-performance-evaluation' => 'Performans qiymətləndirməsi modulunu görmək, dövr, şablon, forma və test nəticələrinə baxmaq icazəsi verir.',
             'manage-performance-evaluation' => 'Performans qiymətləndirmə modulu daxilində dövrlər, şablonlar, formalar, ballar və test sessiyalarını idarə etmək icazəsi verir.',
             'review-performance-evaluation' => 'Açıq cavabların review edilməsi, weak-area təsdiqi və qiymətləndirmə nəticələrinin audit səviyyəsində nəzərdən keçirilməsi icazəsi verir.',
+            'show-reports' => 'Hesabatlar modulunu görmək, HR analitika ekranlarını, standart və müqayisəli hesabatları açmaq icazəsi verir.',
+            'export-reports' => 'Hesabatlar modulu daxilində Excel, CSV və PDF/çap nəticələrini çıxarmaq icazəsi verir.',
         ];
     }
 

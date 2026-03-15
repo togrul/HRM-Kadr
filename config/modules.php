@@ -87,5 +87,10 @@ return [
             'enabled' => true,
             'migrations' => app_path('Modules/PerformanceEvaluation/Database/Migrations'),
         ],
+        'reports' => [
+            'provider' => \App\Modules\Reports\Providers\ReportsServiceProvider::class,
+            'enabled' => true,
+            'migrations' => app_path('Modules/Reports/Database/Migrations'),
+        ],
     ],
 ];

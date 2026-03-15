@@ -33,6 +33,7 @@ Livewire components, routes, views, and service provider. Shared patterns:
 - UI (`ui::`) – shared confirmation/filter/notification blade partials
 - TrainingNeeds (`training-needs::` views, `training_needs::` translations) – competency catalogs, programs, role requirement matrix foundation
 - PerformanceEvaluation (`performance-evaluation::` views, `performance_evaluation::` translations) – cycles, evaluation templates, scoring, weak-area training-need integration foundation
+- Reports (`reports::`) – unified HR analytics, standard reports, dynamic reports, comparisons, exports
 
 ## Provider pattern
 - Load module routes/views in `boot()`

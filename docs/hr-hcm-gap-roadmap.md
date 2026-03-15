@@ -782,3 +782,5 @@ Cross-module əlaqələr:
 6. employee relations
 
 Bu ardıcıllıq həm biznes dəyərinə, həm istifadəçi görünürlüğünə, həm də hazırkı sistemin memarlığına ən uyğun yoldur.
+
+relative overflow-hidden rounded-[2rem] border border-zinc-200 bg-white shadow-[0_1px_2px_rgba(16,24,40,0.05)]
