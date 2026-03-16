@@ -24,4 +24,7 @@ return [
         'force_delete_confirm' => 'Bu məlumatı silmək istədiyinizə əminsiniz?',
         'delete_order_confirm' => 'Bu əmri silmək istədiyinizə əminsiniz?',
     ],
+    'actions' => [
+        'open_user_guide' => 'İstifadəçi bələdçisi',
+    ],
 ];

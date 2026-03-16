@@ -14,7 +14,7 @@ class TrainingPerformanceGuidePageTest extends TestCase
         $user = \App\Models\User::factory()->create();
 
         $this->actingAs($user)
-            ->get(route('training-performance.user-guide'))
+            ->get(route('docs.guide'))
             ->assertOk()
             ->assertSee('HR modullarının ortaq istifadə bələdçisi')
             ->assertSee('Təlim ehtiyacı istifadəçi bələdçisi')

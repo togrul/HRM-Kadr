@@ -1,13 +1,13 @@
 # Orders İstifadəçi Bələdçisi
 
-Bu sənəd `Orders` modulunun əsas istifadəçi bələdçisidir.
+Bu sənəd `Əmrlər` modulunun əsas istifadəçi bələdçisidir.
 
 Modulun məqsədi:
 
 - əmrlərin yaradılması və redaktəsi
-- order status izlənməsi
+- əmr statusunun izlənməsi
 - çap və sənəd generasiyası
-- order template lifecycle idarəsi
+- əmr şablon lifecycle idarəsi
 
 Əsas giriş:
 
@@ -15,14 +15,14 @@ Modulun məqsədi:
 
 ## 1. Modulun iki əsas hissəsi
 
-Orders praktik olaraq iki böyük hissədən ibarətdir:
+Əmrlər modulu praktik olaraq iki böyük hissədən ibarətdir:
 
-1. `Order registry`
-2. `Template engine`
+1. `Əmr reyestri`
+2. `Şablon mühərriki`
 
-Birinci hissə real order qeydiyyatı üçündür. İkinci hissə isə həmin order-lərin DOCX template və metadata idarəsidir.
+Birinci hissə real əmr qeydiyyatı üçündür. İkinci hissə isə həmin əmrlərin DOCX şablon və metadata idarəsidir.
 
-## 2. Order registry nə edir
+## 2. Əmr reyestri nə edir
 
 Əsas siyahı:
 
@@ -30,12 +30,12 @@ Birinci hissə real order qeydiyyatı üçündür. İkinci hissə isə həmin or
 
 Burada istifadəçi:
 
-- order-ləri statusa görə filter edir
+- əmrləri statusa görə filter edir
 - add / edit / delete edir
-- deleted record-ları görür və restore edir
+- silinmiş qeydləri görür və bərpa edir
 - çap edir
 
-## 3. Template engine nə edir
+## 3. Şablon mühərriki nə edir
 
 Əsas template səthi:
 
@@ -48,40 +48,40 @@ Burada istifadəçi:
 
 Bu hissədə:
 
-- template yaradılır
-- order type-lar bağlanır
-- DOCX upload edilir
+- şablon yaradılır
+- əmr tipləri bağlanır
+- DOCX yüklənir
 - metadata və mappings generasiya olunur
-- publish və preview edilir
+- publish və önizləmə edilir
 
 ## 4. Tipik istifadə ssenariləri
 
-### Yeni order yaratmaq
+### Yeni əmr yaratmaq
 
-1. order tipini seç
+1. əmr tipini seç
 2. forma məlumatlarını doldur
 3. status və iştirakçıları təyin et
-4. save et
+4. yadda saxla
 
-### Mövcud order-i çap etmək
+### Mövcud əmri çap etmək
 
-1. siyahıdan order-i tap
+1. siyahıdan əmri tap
 2. print seç
 3. DOCX render nəticəsini yüklə
 
-### Yeni template onboard etmək
+### Yeni şablon onboarding etmək
 
-1. template seç və ya yarat
-2. order type bağla
+1. şablon seç və ya yarat
+2. əmr tipini bağla
 3. draft version yarat
 4. DOCX yüklə
 5. metadata/mappings generasiya et
 6. coverage yoxla
-7. publish et
+7. dərc et
 
 ## 5. Nəyi harada yoxlamaq lazımdır
 
-`Order görünmür`:
+`Əmr görünmür`:
 
 - status filter
 - structure visibility
@@ -94,7 +94,7 @@ Bu hissədə:
 - print payload
 - renderer xətası
 
-`Template hazırdırmı`:
+`Şablon hazırdırmı`:
 
 - onboarding wizard nəticələri
 - set-type UI config

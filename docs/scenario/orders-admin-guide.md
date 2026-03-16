@@ -1,14 +1,14 @@
-# Orders Admin Guide
+# Əmrlər Admin Bələdçisi
 
-Bu sənəd `Orders` modulunda admin və template owner rolu üçün hazırlanıb.
+Bu sənəd `Əmrlər` modulunda admin və şablon sahibi rolu üçün hazırlanıb.
 
 ## 1. Admin nəyi idarə edir
 
-Orders admin əsasən bu sahələrə cavabdehdir:
+Əmrlər admini əsasən bu sahələrə cavabdehdir:
 
-- order type və status semantikası
-- template kataloqu
-- template set / version lifecycle
+- əmr tipi və status semantikası
+- şablon kataloqu
+- şablon set / versiya lifecycle
 - UI config və field mappings
 - print axınının stabilliyi
 
@@ -16,8 +16,8 @@ Orders admin əsasən bu sahələrə cavabdehdir:
 
 Admin üçün əsas lifecycle belədir:
 
-1. template yaradılır
-2. order type bağlanır
+1. şablon yaradılır
+2. əmr tipi bağlanır
 3. draft version açılır
 4. DOCX yüklənir
 5. metadata və mappings generasiya olunur
@@ -26,11 +26,11 @@ Admin üçün əsas lifecycle belədir:
 
 ## 3. Set Type ekranı
 
-`Set Type` ekranı template owner üçün ən vacib admin səthidir.
+`Set Type` ekranı şablon sahibi üçün ən vacib admin səthidir.
 
 Burada:
 
-- order type əlavə olunur
+- əmr tipi əlavə olunur
 - version-lar görünür
 - field metadata idarə olunur
 - mapping draft-ları saxlanılır
@@ -47,10 +47,10 @@ Belə dəyişikliklərdən sonra smoke check və query budget yoxlanmalıdır.
 
 ## 5. Tipik admin ssenariləri
 
-### Yeni order type üçün template açmaq
+### Yeni əmr tipi üçün şablon açmaq
 
-1. template yarat
-2. set type ilə order type bağla
+1. şablon yarat
+2. set type ilə əmr tipini bağla
 3. draft version aç
 4. DOCX və mappings hazırla
 

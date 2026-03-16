@@ -1,29 +1,29 @@
-# Orders Approval Guide
+# Əmrlər Təsdiq Bələdçisi
 
-Bu sənəd `Orders` modulunda qərar, status və nəzarət axınlarını izah edir.
+Bu sənəd `Əmrlər` modulunda qərar, status və nəzarət axınlarını izah edir.
 
 ## 1. Approval burada nə deməkdir
 
-Orders modulunda approval iki səviyyədə düşünülməlidir:
+Əmrlər modulunda təsdiq iki səviyyədə düşünülməlidir:
 
-1. real order status qərarı
-2. template readiness qərarı
+1. real əmr statusu qərarı
+2. şablon readiness qərarı
 
-## 2. Real order qərarları
+## 2. Real əmr qərarları
 
-Order status-u order-in hansı mərhələdə olduğunu göstərir. Bu səbəbdən status dəyişikliyi sadəcə UI filter yox, business qərardır.
+Əmr statusu əmrin hansı mərhələdə olduğunu göstərir. Bu səbəbdən status dəyişikliyi sadəcə UI filter yox, business qərardır.
 
 Yoxlanmalı sahələr:
 
-- order type
+- əmr tipi
 - given date
 - iştirakçılar
-- order status
+- əmr statusu
 - printable vəziyyət
 
-## 3. Template readiness qərarları
+## 3. Şablon readiness qərarları
 
-Template owner və ya approver aşağıdakıları yoxlamalıdır:
+Şablon sahibi və ya təsdiq verən aşağıdakıları yoxlamalıdır:
 
 - DOCX integrity
 - metadata completeness
@@ -32,14 +32,14 @@ Template owner və ya approver aşağıdakıları yoxlamalıdır:
 
 ## 4. Tipik ssenarilər
 
-### Order print üçün hazırdır
+### Əmr print üçün hazırdır
 
-1. order data tamdır
-2. template active-dir
+1. əmr məlumatı tamdır
+2. şablon aktivdir
 3. print payload düzgün qurulur
 4. renderer uğurludur
 
-### Template publish qərarı
+### Şablon publish qərarı
 
 1. draft version yoxlanılır
 2. coverage scan nəticəsi baxılır
@@ -48,8 +48,8 @@ Template owner və ya approver aşağıdakıları yoxlamalıdır:
 ## 5. Səhv qərarın nəticəsi
 
 - səhv print sənədi
-- yanlış order status görünüşü
-- template engine-də qırıq lifecycle
+- yanlış əmr statusu görünüşü
+- şablon mühərrikində qırıq lifecycle
 - istifadəçi tərəfdə form və mapping xətaları
 
 ## 6. Bu sənədlə birlikdə baxılmalı sənədlər

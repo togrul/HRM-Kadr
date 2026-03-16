@@ -1,6 +1,6 @@
-# Orders Ops / Commands Guide
+# Əmrlər Əməliyyat / Komandalar Bələdçisi
 
-Bu sənəd `Orders` modulu üçün texniki əməliyyat və command xəritəsidir.
+Bu sənəd `Əmrlər` modulu üçün texniki əməliyyat və komanda xəritəsidir.
 
 ## 1. Əsas command-lər
 
@@ -59,7 +59,7 @@ Məqsəd:
 - `orders:templates:query-budget`
 - `orders:templates:smoke`
 
-`Active version qarışıqlığı varsa`:
+`Aktiv versiya qarışıqlığı varsa`:
 
 - `orders:templates:reconcile-actives`
 
@@ -81,7 +81,7 @@ Məqsəd:
 1. query-budget nəticəsinə bax
 2. add/edit/print probe-larından hansının aşdığını müəyyən et
 
-`İki active version var`:
+`İki aktiv versiya var`:
 
 1. reconcile-actives işlə
 2. sonra set lifecycle audit et

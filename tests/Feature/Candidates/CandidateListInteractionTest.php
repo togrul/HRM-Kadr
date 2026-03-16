@@ -4,6 +4,8 @@ namespace Tests\Feature\Candidates;
 
 use App\Models\User;
 use App\Models\Candidate;
+use App\Models\AppealStatus;
+use App\Models\CandidateDocument;
 use App\Models\Structure;
 use App\Modules\Candidates\Livewire\CandidateList;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -85,20 +87,71 @@ class CandidateListInteractionTest extends TestCase
             ->assertForbidden();
     }
 
-    private function makeCandidate(): Candidate
+    public function test_candidate_list_can_filter_by_document_category(): void
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo(Permission::findOrCreate('show-candidates', 'web'));
+
+        $matching = $this->makeCandidate('Ali');
+        $other = $this->makeCandidate('Veli');
+
+        CandidateDocument::query()->create([
+            'candidate_id' => $matching->id,
+            'display_name' => 'Ali CV',
+            'original_name' => 'ali-cv.pdf',
+            'file_path' => 'candidates/test/ali-cv.pdf',
+            'disk' => 'local',
+            'mime_type' => 'application/pdf',
+            'extension' => 'pdf',
+            'size_bytes' => 1024,
+            'category' => 'cv',
+            'uploaded_by' => $user->id,
+        ]);
+
+        CandidateDocument::query()->create([
+            'candidate_id' => $other->id,
+            'display_name' => 'Veli Medical',
+            'original_name' => 'veli-medical.pdf',
+            'file_path' => 'candidates/test/veli-medical.pdf',
+            'disk' => 'local',
+            'mime_type' => 'application/pdf',
+            'extension' => 'pdf',
+            'size_bytes' => 1024,
+            'category' => 'medical',
+            'uploaded_by' => $user->id,
+        ]);
+
+        $this->actingAs($user);
+
+        Livewire::test(CandidateList::class)
+            ->set('filter.document_category', 'medical')
+            ->call('searchFilter')
+            ->assertSet('search.document_category', 'medical')
+            ->assertSee($other->fullname_max)
+            ->assertDontSee($matching->fullname_max)
+            ->call('toggleDocumentCategory', 'medical')
+            ->assertSet('search.document_category', null);
+    }
+
+    private function makeCandidate(string $name = 'Ali'): Candidate
     {
         $structure = Structure::query()->create([
-            'name' => 'Candidate Structure',
-            'shortname' => 'CS',
+            'name' => 'Candidate Structure '.$name,
+            'shortname' => 'CS'.strtoupper(substr($name, 0, 1)),
         ]);
 
         $creator = User::factory()->create();
+        $status = AppealStatus::query()->create([
+            'name' => 'Yeni '.$name,
+            'locale' => app()->getLocale(),
+        ]);
 
         return Candidate::query()->create([
             'surname' => 'Aliyev',
-            'name' => 'Ali',
+            'name' => $name,
             'patronymic' => 'Test',
             'structure_id' => $structure->id,
+            'status_id' => $status->id,
             'height' => 180,
             'creator_id' => $creator->id,
         ]);

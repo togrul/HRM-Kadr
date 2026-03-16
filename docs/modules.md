@@ -20,7 +20,7 @@ Livewire components, routes, views, and service provider. Shared patterns:
 
 ## Enabled Modules
 - Personnel (`personnel::`) – CRUD, files, information, vacation list
-- Orders (`orders::`) – order CRUD, templates
+- Orders (`orders::`) – order CRUD, templates, module guide: [Orders Module Guide](/Users/togruljalalli/Desktop/projects/HRM/docs/scenario/orders-module-guide.md)
 - Staff (`staff::`) – staff schedule
 - Candidates (`candidates::`) – candidate CRUD/list
 - Leaves (`leaves::`) – leave CRUD/list
@@ -31,8 +31,8 @@ Livewire components, routes, views, and service provider. Shared patterns:
 - Notifications (`notification::`) – bell dropdown and list
 - SidebarStructure (`structure::`) – structure sidebar/orders/services Livewire snippets used across screens
 - UI (`ui::`) – shared confirmation/filter/notification blade partials
-- TrainingNeeds (`training-needs::` views, `training_needs::` translations) – competency catalogs, programs, role requirement matrix foundation
-- PerformanceEvaluation (`performance-evaluation::` views, `performance_evaluation::` translations) – cycles, evaluation templates, scoring, weak-area training-need integration foundation
+- TrainingNeeds (`training-needs::` views, `training_needs::` translations) – competency catalogs, programs, role requirement matrix foundation, module guide: [Training Needs Module Guide](/Users/togruljalalli/Desktop/projects/HRM/docs/scenario/training-needs-module-guide.md)
+- PerformanceEvaluation (`performance-evaluation::` views, `performance_evaluation::` translations) – cycles, evaluation templates, scoring, weak-area training-need integration foundation, module guide: [Performance Evaluation Module Guide](/Users/togruljalalli/Desktop/projects/HRM/docs/scenario/performance-evaluation-module-guide.md)
 - Reports (`reports::`) – unified HR analytics, standard reports, dynamic reports, comparisons, exports
 
 ## Provider pattern

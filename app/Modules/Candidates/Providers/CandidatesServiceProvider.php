@@ -53,6 +53,7 @@ class CandidatesServiceProvider extends ServiceProvider
             'candidate-list' => \App\Modules\Candidates\Livewire\CandidateList::class,
             'add-candidate' => \App\Modules\Candidates\Livewire\AddCandidate::class,
             'edit-candidate' => \App\Modules\Candidates\Livewire\EditCandidate::class,
+            'candidate-files' => \App\Modules\Candidates\Livewire\CandidateFiles::class,
             'delete-candidate' => \App\Modules\Candidates\Livewire\DeleteCandidate::class,
         ];
     }

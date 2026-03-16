@@ -59,6 +59,13 @@
             </div>
             <div class="flex flex-col">
                 <div class="flex space-x-4">
+                    <a
+                        href="{{ route('docs.guide', ['focus' => 'orders']) }}#orders-module"
+                        class="flex items-center justify-center w-12 h-12 transition-all duration-300 rounded-xl hover:bg-zinc-50"
+                        title="{{ __('orders::order_list.actions.open_user_guide') }}"
+                    >
+                        <x-icons.book-icon size="w-5 h-5" color="text-zinc-600" hover="text-zinc-800" />
+                    </a>
                     @can('add-orders')
                         <button wire:click="openSideMenu('add-order',{{ $selectedOrder }})"
                             class="flex items-center justify-center w-12 h-12 transition-all duration-300 rounded-xl hover:bg-blue-50"

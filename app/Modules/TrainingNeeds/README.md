@@ -28,6 +28,7 @@
 - Translation namespace: `training_needs::`
 
 ## Related Guides
+- `/docs/scenario/training-needs-module-guide.md`
 - `/docs/scenario/training-performance-user-guide.md`
 - `/docs/scenario/training-needs-user-guide.md`
 - `/docs/scenario/training-performance-admin-ops-guide.md`
@@ -36,5 +37,6 @@
 - `training-needs-user-guide.md` artıq ilk dəfə modulu açan istifadəçi üçün end-to-end əməliyyat bələdçisidir.
 - Sənəd hər tabın məqsədini, hər əsas formun field-lərini, save sonrası təsiri və tövsiyə olunan iş sırasını izah edir.
 - Bu modul üçün onboarding oxu sırası:
-  1. `/docs/scenario/training-needs-user-guide.md`
-  2. `/docs/scenario/training-performance-admin-ops-guide.md`
+  1. `/docs/scenario/training-needs-module-guide.md`
+  2. `/docs/scenario/training-needs-user-guide.md`
+  3. `/docs/scenario/training-performance-admin-ops-guide.md`

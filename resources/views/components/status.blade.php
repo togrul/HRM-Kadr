@@ -33,11 +33,11 @@
 @endphp
 
 @if($design == 'default')
-<span class="text-xs border uppercase font-medium px-3 py-2 rounded-lg w-max {{ $color }}">
+<span class="text-xs tracking-tight border uppercase font-medium px-3 py-2 rounded-lg w-max {{ $color }}">
     {{ $label }}
 </span>
 @else
-<span class="inline-flex w-max items-center gap-1.5 rounded-full px-2.5 py-1 font-medium text-xs uppercase tracking-wide border {{ $color }}">
+<span class="inline-flex w-max items-center gap-1.5 rounded-full px-2.5 py-1 font-semibold text-xs uppercase tracking-tight border {{ $color }}">
         @if($iconComponent)
             <x-dynamic-component :component="$iconComponent" size="w-5 h-5" color="text-current" />
         @endif

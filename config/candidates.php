@@ -38,6 +38,13 @@ return [
         'civilian' => 'Civilian',
     ],
 
+    'documents' => [
+        'disk' => env('CANDIDATES_DOCUMENTS_DISK', 'local'),
+        'directory' => env('CANDIDATES_DOCUMENTS_DIRECTORY', 'candidates'),
+        'max_upload_kb' => (int) env('CANDIDATES_DOCUMENTS_MAX_UPLOAD_KB', 10240),
+        'categories' => ['cv', 'passport', 'diploma', 'medical', 'test_result', 'other'],
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Candidate List Presets by Mode
@@ -54,13 +61,13 @@ return [
             'default_status' => 'all',
             'show_deleted_tab' => true,
             'status_whitelist' => [],
-            'enabled_filters' => ['fullname', 'gender', 'results', 'age', 'appeal_date'],
+            'enabled_filters' => ['fullname', 'gender', 'results', 'age', 'appeal_date', 'document_category'],
         ],
         'civilian' => [
             'default_status' => 'all',
             'show_deleted_tab' => true,
             'status_whitelist' => [],
-            'enabled_filters' => ['fullname', 'gender', 'age', 'appeal_date'],
+            'enabled_filters' => ['fullname', 'gender', 'age', 'appeal_date', 'document_category'],
         ],
     ],
     'performance' => [

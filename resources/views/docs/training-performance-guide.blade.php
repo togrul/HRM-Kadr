@@ -42,6 +42,18 @@
                     ['id' => 'attendance-doc', 'label' => 'Tam bələdçi'],
                 ],
             ],
+            [
+                'label' => 'Əmrlər',
+                'tone' => 'amber',
+                'items' => [
+                    ['id' => 'orders-module', 'label' => 'Modulun məqsədi'],
+                    ['id' => 'orders-outline', 'label' => 'Bölmələr və sıra'],
+                    ['id' => 'orders-workflow', 'label' => 'Ekran xəritəsi'],
+                    ['id' => 'orders-scenarios', 'label' => 'Ssenarilər'],
+                    ['id' => 'orders-doc', 'label' => 'Tam bələdçi'],
+                    ['id' => 'orders-role-guides', 'label' => 'Rol üzrə bələdçilər'],
+                ],
+            ],
         ];
 
         $allSectionIds = collect($sidebarGroups)->flatMap(fn ($group) => array_column($group['items'], 'id'))->values()->all();
@@ -50,12 +62,14 @@
             ['href' => route('training-needs'), 'label' => 'Təlim paneli'],
             ['href' => route('performance-evaluation'), 'label' => 'Performans paneli'],
             ['href' => route('attendance'), 'label' => 'Davamiyyət paneli'],
+            ['href' => route('orders'), 'label' => 'Əmrlər paneli'],
         ];
 
         $initialSection = match ($focus) {
             'training' => 'training-module',
             'performance' => 'performance-module',
             'attendance' => 'attendance-module',
+            'orders' => 'orders-module',
             default => 'overview',
         };
     @endphp
@@ -96,6 +110,29 @@
 
             .docs-sidebar-group + .docs-sidebar-group {
                 margin-top: 2rem;
+            }
+
+            .docs-search-shell {
+                margin-bottom: 1rem;
+            }
+
+            .docs-search-input {
+                width: 100%;
+                border: 1px solid #e4e4e7;
+                border-radius: 0.95rem;
+                background: #fafafa;
+                padding: 0.8rem 0.95rem;
+                font-size: 0.92rem;
+                line-height: 1.4;
+                color: #09090b;
+                transition: border-color 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease;
+            }
+
+            .docs-search-input:focus {
+                outline: none;
+                border-color: #d4d4d8;
+                background: #fff;
+                box-shadow: 0 0 0 3px rgba(228, 228, 231, 0.55);
             }
 
             .docs-sidebar-label {
@@ -151,6 +188,12 @@
                 border-color: #f4f4f5;
                 background: #f4f4f5;
                 color: #09090b;
+            }
+
+            .docs-sidebar-link[data-tone="amber"][data-active="true"] {
+                border-color: #fde68a;
+                background: #fff7ed;
+                color: #92400e;
             }
 
             .docs-quick-link {
@@ -273,6 +316,46 @@
                 gap: 1rem;
             }
 
+            .docs-index-grid {
+                margin-top: 1.35rem;
+                display: grid;
+                gap: 1rem;
+            }
+
+            .docs-index-card {
+                border: 1px solid #e4e4e7;
+                border-radius: 1.1rem;
+                background: #fff;
+                padding: 1rem 1.05rem;
+            }
+
+            .docs-index-links {
+                margin-top: 0.85rem;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.55rem;
+            }
+
+            .docs-index-link {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                border: 1px solid #e4e4e7;
+                border-radius: 999px;
+                background: #fafafa;
+                padding: 0.5rem 0.8rem;
+                font-size: 0.82rem;
+                font-weight: 600;
+                color: #3f3f46;
+                transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+            }
+
+            .docs-index-link:hover {
+                border-color: #d4d4d8;
+                background: #fff;
+                color: #09090b;
+            }
+
             .docs-grid-2 {
                 grid-template-columns: repeat(1, minmax(0, 1fr));
             }
@@ -329,6 +412,11 @@
             .docs-tone-indigo {
                 border-color: #c7d2fe;
                 background: #f8faff;
+            }
+
+            .docs-tone-amber {
+                border-color: #fde68a;
+                background: #fffaf0;
             }
 
             .docs-section {
@@ -507,6 +595,10 @@
                     padding-right: 1.5rem;
                 }
 
+                .docs-index-grid {
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                }
+
                 .docs-grid-2 {
                     grid-template-columns: repeat(2, minmax(0, 1fr));
                 }
@@ -537,6 +629,8 @@
                     }
 
                     const sectionIds = JSON.parse(root.dataset.sectionIds || '[]');
+                    const focus = root.dataset.focus || 'overview';
+                    const initialSection = root.dataset.initialSection || sectionIds[0];
                     const links = Array.from(document.querySelectorAll('[data-docs-link]'));
 
                     if (sectionIds.length === 0 || links.length === 0) {
@@ -549,6 +643,44 @@
                             link.dataset.active = active ? 'true' : 'false';
                             link.setAttribute('aria-current', active ? 'true' : 'false');
                         });
+                    };
+
+                    const bindSearch = (container) => {
+                        if (!container) {
+                            return;
+                        }
+
+                        const input = container.querySelector('[data-docs-nav-search]');
+                        const groups = Array.from(container.querySelectorAll('[data-docs-nav-group]'));
+
+                        if (!(input instanceof HTMLInputElement) || groups.length === 0) {
+                            return;
+                        }
+
+                        const apply = () => {
+                            const query = input.value.trim().toLowerCase();
+
+                            groups.forEach((group) => {
+                                const items = Array.from(group.querySelectorAll('[data-docs-nav-item]'));
+                                let visibleCount = 0;
+
+                                items.forEach((item) => {
+                                    const text = (item.dataset.docsNavText || item.textContent || '').toLowerCase();
+                                    const visible = query === '' || text.includes(query);
+                                    item.hidden = !visible;
+                                    if (visible) {
+                                        visibleCount += 1;
+                                    }
+                                });
+
+                                group.hidden = visibleCount === 0;
+                            });
+                        };
+
+                        input.removeEventListener('input', input.__docsSearchHandler || (() => {}));
+                        input.__docsSearchHandler = apply;
+                        input.addEventListener('input', input.__docsSearchHandler);
+                        apply();
                     };
 
                     const currentFromScroll = () => {
@@ -608,14 +740,44 @@
                     window.__docsGuideHashHandler = syncActiveSection;
                     window.addEventListener('scroll', window.__docsGuideScrollHandler, { passive: true });
                     window.addEventListener('hashchange', window.__docsGuideHashHandler);
+                    bindSearch(document.querySelector('[data-docs-nav-container="desktop"]'));
+                    bindSearch(document.querySelector('[data-docs-nav-container="mobile"]'));
+
+                    const matchesFocus = (sectionId) => {
+                        if (!sectionId) return false;
+                        if (focus === 'overview') {
+                            return sectionId === 'overview' || sectionId === 'overview-workflow';
+                        }
+
+                        return sectionId.startsWith(`${focus}-`);
+                    };
 
                     if (window.location.hash) {
                         const hashed = window.location.hash.replace('#', '');
 
                         if (sectionIds.includes(hashed)) {
+                            if (!matchesFocus(hashed) && initialSection) {
+                                setActive(initialSection);
+
+                                const target = document.getElementById(initialSection);
+
+                                if (target) {
+                                    requestAnimationFrame(() => {
+                                        target.scrollIntoView({ behavior: 'auto', block: 'start' });
+                                        history.replaceState(null, '', `#${initialSection}`);
+                                    });
+                                }
+
+                                return;
+                            }
+
                             setActive(hashed);
                             return;
                         }
+                    }
+
+                    if (initialSection) {
+                        setActive(initialSection);
                     }
 
                     syncActiveSection();
@@ -630,10 +792,13 @@
     <x-slot name="sidebar">
         <div class="docs-sidebar-shell hidden lg:block">
             <aside class="docs-sidebar">
-                <div class="relative pr-5">
+                <div class="relative pr-5" data-docs-nav-container="desktop">
                     <div class="docs-sidebar-divider"></div>
+                    <div class="docs-search-shell">
+                        <input type="search" class="docs-search-input" placeholder="Bölmə axtar..." data-docs-nav-search>
+                    </div>
                     @foreach ($sidebarGroups as $group)
-                        <div class="docs-sidebar-group">
+                        <div class="docs-sidebar-group" data-docs-nav-group>
                             <p class="docs-sidebar-label">{{ $group['label'] }}</p>
                             <div class="space-y-0">
                                 @foreach ($group['items'] as $item)
@@ -641,6 +806,8 @@
                                         href="#{{ $item['id'] }}"
                                         class="docs-sidebar-link"
                                         data-docs-link="{{ $item['id'] }}"
+                                        data-docs-nav-item
+                                        data-docs-nav-text="{{ $group['label'] }} {{ $item['label'] }}"
                                         data-tone="{{ $group['tone'] }}"
                                         data-active="{{ $initialSection === $item['id'] ? 'true' : 'false' }}"
                                     >
@@ -664,7 +831,7 @@
         </div>
     </x-slot>
 
-    <div class="docs-shell" data-docs-root data-section-ids='@json($allSectionIds)'>
+    <div class="docs-shell" data-docs-root data-section-ids='@json($allSectionIds)' data-focus="{{ $focus }}" data-initial-section="{{ $initialSection }}">
         <details class="docs-mobile-nav mb-4 rounded-2xl border border-zinc-200 bg-white px-4 py-3 lg:hidden" data-docs-mobile-nav>
             <summary class="flex cursor-pointer items-center justify-between gap-3">
                 <div>
@@ -674,9 +841,12 @@
                 <span class="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-xs font-semibold text-zinc-500">Menyu</span>
             </summary>
 
-            <div class="mt-4 space-y-4 border-t border-zinc-200 pt-4">
+            <div class="mt-4 space-y-4 border-t border-zinc-200 pt-4" data-docs-nav-container="mobile">
+                <div class="docs-search-shell">
+                    <input type="search" class="docs-search-input" placeholder="Bölmə axtar..." data-docs-nav-search>
+                </div>
                 @foreach ($sidebarGroups as $group)
-                    <div>
+                    <div data-docs-nav-group>
                         <p class="docs-sidebar-label !mb-2 !px-0">{{ $group['label'] }}</p>
                         <div class="space-y-1">
                             @foreach ($group['items'] as $item)
@@ -684,6 +854,8 @@
                                     href="#{{ $item['id'] }}"
                                     class="docs-sidebar-link"
                                     data-docs-link="{{ $item['id'] }}"
+                                    data-docs-nav-item
+                                    data-docs-nav-text="{{ $group['label'] }} {{ $item['label'] }}"
                                     data-tone="{{ $group['tone'] }}"
                                     data-active="{{ $initialSection === $item['id'] ? 'true' : 'false' }}"
                                 >
@@ -711,6 +883,49 @@
                     </p>
                 </div>
 
+                <div class="docs-index-grid">
+                    <div class="docs-index-card">
+                        <p class="docs-card-title">Sürətli modul indeksi</p>
+                        <p class="docs-card-strong">Təlim ehtiyacı</p>
+                        <div class="docs-index-links">
+                            <a href="#training-module" class="docs-index-link">Modul</a>
+                            <a href="#training-outline" class="docs-index-link">Bölmələr</a>
+                            <a href="#training-workflow" class="docs-index-link">Axın</a>
+                            <a href="#training-doc" class="docs-index-link">Bələdçi</a>
+                        </div>
+                    </div>
+                    <div class="docs-index-card">
+                        <p class="docs-card-title">Sürətli modul indeksi</p>
+                        <p class="docs-card-strong">Performans qiymətləndirməsi</p>
+                        <div class="docs-index-links">
+                            <a href="#performance-module" class="docs-index-link">Modul</a>
+                            <a href="#performance-outline" class="docs-index-link">Bölmələr</a>
+                            <a href="#performance-workflow" class="docs-index-link">Axın</a>
+                            <a href="#performance-doc" class="docs-index-link">Bələdçi</a>
+                        </div>
+                    </div>
+                    <div class="docs-index-card">
+                        <p class="docs-card-title">Sürətli modul indeksi</p>
+                        <p class="docs-card-strong">Davamiyyət</p>
+                        <div class="docs-index-links">
+                            <a href="#attendance-module" class="docs-index-link">Modul</a>
+                            <a href="#attendance-outline" class="docs-index-link">Bölmələr</a>
+                            <a href="#attendance-workflow" class="docs-index-link">Axın</a>
+                            <a href="#attendance-doc" class="docs-index-link">Bələdçi</a>
+                        </div>
+                    </div>
+                    <div class="docs-index-card">
+                        <p class="docs-card-title">Sürətli modul indeksi</p>
+                        <p class="docs-card-strong">Əmrlər</p>
+                        <div class="docs-index-links">
+                            <a href="#orders-module" class="docs-index-link">Modul</a>
+                            <a href="#orders-outline" class="docs-index-link">Bölmələr</a>
+                            <a href="#orders-workflow" class="docs-index-link">Axın</a>
+                            <a href="#orders-doc" class="docs-index-link">Bələdçi</a>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="docs-grid docs-grid-2">
                     <div class="docs-card docs-card-muted">
                         <p class="docs-card-title">Təlim ehtiyacı</p>
@@ -726,6 +941,11 @@
                         <p class="docs-card-title">Davamiyyət</p>
                         <p class="docs-card-strong">Punch, növbə, təqvim və düzəliş nəticə xətti</p>
                         <p class="docs-card-body">Gündəlik ledger, puantaj, overtime, istisna və ay bağlanışı nəticəsini qurur.</p>
+                    </div>
+                    <div class="docs-card docs-card-muted">
+                        <p class="docs-card-title">Əmrlər</p>
+                        <p class="docs-card-strong">Əmr reyestri, şablon və çap axını</p>
+                        <p class="docs-card-body">Əmr məlumatı ilə DOCX şablon mühərrikini birləşdirib printable sənəd verir.</p>
                     </div>
                     <div class="docs-card docs-card-muted">
                         <p class="docs-card-title">Ortaq məntiq</p>
@@ -755,6 +975,11 @@
                         <p class="docs-card-title">Davamiyyət xətti</p>
                         <p class="docs-card-strong">Gündəlik nəzarət və ay yekunu</p>
                         <p class="docs-card-body">Punch, növbə və düzəlişləri ledger nəticəsinə çevirib puantaj və ay bağlanışına çıxarır.</p>
+                    </div>
+                    <div class="docs-card docs-tone-amber">
+                        <p class="docs-card-title">Əmrlər xətti</p>
+                        <p class="docs-card-strong">Reyestr, şablon və çap</p>
+                        <p class="docs-card-body">Order qeydiyyatını template, publish readiness və print nəticəsi ilə bağlayır.</p>
                     </div>
                 </div>
 
@@ -952,6 +1177,94 @@
 
                 <div id="attendance-doc" class="docs-content">
                     {!! $attendanceHtml !!}
+                </div>
+            </section>
+
+            <section id="orders-module" class="docs-section">
+                <div class="docs-module-head">
+                    <div>
+                        <p class="docs-header-kicker text-amber-700">Əmrlər modulu</p>
+                        <h2 class="docs-section-title">Əmrlər</h2>
+                        <p class="docs-lead !mt-3 !max-w-none">
+                            Bu modul əmrlərin qeydiyyatı, status izlənməsi, template uyğunluğu və printable DOCX sənəd alınması üçün işləyir.
+                        </p>
+                    </div>
+                    <a href="{{ route('orders') }}" class="docs-module-link">Modulu aç</a>
+                </div>
+
+                <div id="orders-outline" class="docs-grid docs-grid-2">
+                    <div class="docs-card docs-card-muted">
+                        <p class="docs-card-title">Bölmələr və sıra</p>
+                        <p class="docs-card-strong">Reyestr, şablon, publish, print</p>
+                        <p class="docs-card-body">Əvvəl əmr məlumatı qurulur, sonra tip-şablon uyğunluğu və printable nəticə yoxlanır.</p>
+                    </div>
+                    <div class="docs-card docs-card-muted">
+                        <p class="docs-card-title">İstifadəçi rolu</p>
+                        <p class="docs-card-strong">Operator, admin, şablon sahibi, əməliyyat</p>
+                        <p class="docs-card-body">Gündəlik qeydiyyat, şablon idarəsi və texniki smoke/check qatları ayrı rollarla işləyir.</p>
+                    </div>
+                </div>
+
+                <div id="orders-workflow" class="docs-grid docs-grid-3">
+                    <div class="docs-card">
+                        <p class="docs-card-title">Ekran xəritəsi 1</p>
+                        <p class="docs-card-strong">Əmr qeydiyyatı</p>
+                        <p class="docs-card-body">Tip seçimi, əmr məlumatı, iştirakçılar və status axını.</p>
+                    </div>
+                    <div class="docs-card">
+                        <p class="docs-card-title">Ekran xəritəsi 2</p>
+                        <p class="docs-card-strong">Şablon lifecycle</p>
+                        <p class="docs-card-body">Tip bağlama, onboarding, publish readiness və aktiv versiya xətti.</p>
+                    </div>
+                    <div class="docs-card">
+                        <p class="docs-card-title">Ekran xəritəsi 3</p>
+                        <p class="docs-card-strong">Print və incident yoxlaması</p>
+                        <p class="docs-card-body">Printable nəticə, smoke, query budget və render benchmark yoxlamaları.</p>
+                    </div>
+                </div>
+
+                <div id="orders-scenarios" class="docs-grid docs-grid-2">
+                    <div class="docs-card docs-card-muted">
+                        <p class="docs-card-title">Ssenari 1</p>
+                        <p class="docs-card-strong">Yeni əmr yarat və çap et</p>
+                        <p class="docs-card-body">Əmr məlumatı tamamlanır, şablon bağlılığı yoxlanır və printable sənəd alınır.</p>
+                    </div>
+                    <div class="docs-card docs-card-muted">
+                        <p class="docs-card-title">Ssenari 2</p>
+                        <p class="docs-card-strong">Yeni tip üçün şablon aç</p>
+                        <p class="docs-card-body">Onboarding wizard, publish readiness və smoke komandaları ilə yeni tip işə salınır.</p>
+                    </div>
+                </div>
+
+                <div id="orders-doc" class="docs-content">
+                    {!! $ordersModuleHtml !!}
+                </div>
+
+                <div id="orders-role-guides" class="docs-grid docs-grid-2">
+                    <div class="docs-card docs-card-muted">
+                        <p class="docs-card-title">İstifadəçi bələdçisi</p>
+                        <div class="docs-content mt-3">
+                            {!! $ordersUserHtml !!}
+                        </div>
+                    </div>
+                    <div class="docs-card docs-card-muted">
+                        <p class="docs-card-title">Admin bələdçisi</p>
+                        <div class="docs-content mt-3">
+                            {!! $ordersAdminHtml !!}
+                        </div>
+                    </div>
+                    <div class="docs-card docs-card-muted">
+                        <p class="docs-card-title">Təsdiq bələdçisi</p>
+                        <div class="docs-content mt-3">
+                            {!! $ordersApprovalHtml !!}
+                        </div>
+                    </div>
+                    <div class="docs-card docs-card-muted">
+                        <p class="docs-card-title">Əməliyyat / komandalar bələdçisi</p>
+                        <div class="docs-content mt-3">
+                            {!! $ordersOpsHtml !!}
+                        </div>
+                    </div>
                 </div>
             </section>
         </main>

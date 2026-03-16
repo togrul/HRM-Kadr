@@ -8,11 +8,14 @@ use App\Modules\Candidates\Support\CandidateModeResolver;
 use App\Livewire\Traits\SideModalAction;
 use App\Models\Setting;
 use App\Models\Candidate;
+use App\Models\CandidateDocument;
 use App\Services\StructureService;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
@@ -79,6 +82,12 @@ class CandidateList extends Component
         $this->applyFilter();
     }
 
+    public function toggleDocumentCategory(string $category): void
+    {
+        $this->filter['document_category'] = ($this->search['document_category'] ?? null) === $category ? null : $category;
+        $this->applyFilter();
+    }
+
     public function getTableHeaders(): array
     {
         $headers = [
@@ -87,6 +96,7 @@ class CandidateList extends Component
             __('candidates::common.labels.structure'),
             __('candidates::common.labels.dates'),
             __('candidates::common.labels.status'),
+            __('candidates::common.labels.files'),
             __('personnel::common.labels.action'),
             __('personnel::common.labels.action'),
         ];
@@ -129,16 +139,23 @@ class CandidateList extends Component
         $this->dispatch('candidateWasDeleted', __('candidates::common.messages.candidate_deleted'));
     }
 
-    protected function returnData($type = 'normal')
+    protected function filteredCandidateQuery(): Builder
     {
-        $result = Candidate::with(['structure', 'status', 'creator', 'personDidDelete'])
+        return Candidate::query()
             ->when(
                 ! empty($this->accessibleStructureIds),
                 fn ($query) => $query->whereIn('structure_id', $this->accessibleStructureIds)
             )
             ->when(is_numeric($this->status), fn ($q) => $q->where('status_id', $this->status))
             ->when($this->status === 'deleted', fn ($q) => $q->onlyTrashed())
-            ->filter($this->search ?? [])
+            ->filter($this->search ?? []);
+    }
+
+    protected function returnData($type = 'normal')
+    {
+        $result = $this->filteredCandidateQuery()
+            ->with(['structure', 'status', 'creator', 'personDidDelete'])
+            ->withCount('documents')
             ->orderByDesc('appeal_date');
 
         return $type == 'normal'
@@ -194,6 +211,49 @@ class CandidateList extends Component
     public function render()
     {
         return view('candidates::livewire.candidates.candidate-list');
+    }
+
+    #[Computed]
+    public function documentCategoryOptions(): array
+    {
+        return collect((array) config('candidates.documents.categories', ['other']))
+            ->map(fn (string $category) => [
+                'id' => $category,
+                'label' => __('candidates::files.categories.'.$category),
+            ])
+            ->values()
+            ->all();
+    }
+
+    #[Computed]
+    public function documentCategoryStats(): Collection
+    {
+        $candidateScope = $this->filteredCandidateQuery()->select('candidates.id');
+        $activeCategory = $this->search['document_category'] ?? null;
+        $stats = CandidateDocument::query()
+            ->select([
+                'category',
+                DB::raw('COUNT(*) as documents_count'),
+                DB::raw('COUNT(DISTINCT candidate_id) as candidates_count'),
+            ])
+            ->whereIn('candidate_id', $candidateScope)
+            ->groupBy('category')
+            ->orderByDesc('documents_count')
+            ->get()
+            ->keyBy('category');
+
+        return collect($this->documentCategoryOptions)
+            ->map(function (array $option) use ($stats, $activeCategory) {
+                $stat = $stats->get($option['id']);
+
+                return [
+                    'id' => $option['id'],
+                    'label' => $option['label'],
+                    'documents_count' => (int) ($stat->documents_count ?? 0),
+                    'candidates_count' => (int) ($stat->candidates_count ?? 0),
+                    'active' => $activeCategory === $option['id'],
+                ];
+            });
     }
 
     public function isMilitaryCandidateMode(): bool
@@ -264,8 +324,8 @@ class CandidateList extends Component
         }
 
         return $this->isMilitaryCandidateMode()
-            ? ['fullname', 'gender', 'results', 'age', 'appeal_date']
-            : ['fullname', 'gender', 'age', 'appeal_date'];
+            ? ['fullname', 'gender', 'results', 'age', 'appeal_date', 'document_category']
+            : ['fullname', 'gender', 'age', 'appeal_date', 'document_category'];
     }
 
     private function resolveVisibleStatusIds(Collection $statuses): array
@@ -352,7 +412,7 @@ class CandidateList extends Component
 
     private function normalizeEnabledFilters(mixed $value): array
     {
-        $allowed = ['fullname', 'gender', 'results', 'age', 'appeal_date'];
+        $allowed = ['fullname', 'gender', 'results', 'age', 'appeal_date', 'document_category'];
         $raw = [];
 
         if (is_array($value)) {

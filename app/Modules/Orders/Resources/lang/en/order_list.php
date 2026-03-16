@@ -24,4 +24,7 @@ return [
         'force_delete_confirm' => 'Are you sure you want to remove this data?',
         'delete_order_confirm' => 'Are you sure you want to delete this order?',
     ],
+    'actions' => [
+        'open_user_guide' => 'User guide',
+    ],
 ];

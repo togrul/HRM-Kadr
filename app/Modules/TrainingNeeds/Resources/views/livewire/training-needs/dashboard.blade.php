@@ -7,7 +7,7 @@
                     <p class="max-w-3xl text-sm text-zinc-500">{{ __('training_needs::dashboard.workspace.description') }}</p>
                     <div class="pt-2">
                         <a
-                            href="{{ route('training-performance.user-guide', ['focus' => 'training']) }}#training-module"
+                            href="{{ route('docs.guide', ['focus' => 'training']) }}#training-module"
                             class="inline-flex items-center justify-center rounded-2xl border border-sky-200 bg-sky-50 px-4 py-2.5 text-sm font-semibold text-sky-800 transition hover:border-sky-300 hover:bg-sky-100"
                         >
                             {{ __('training_needs::dashboard.actions.open_user_guide') }}

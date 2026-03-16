@@ -81,6 +81,18 @@
                 </div>
             </div>
         @endif
+        @if ($this->filterEnabled('document_category'))
+            <div class="flex flex-col">
+                <x-ui.select-dropdown
+                    :label="__('candidates::common.labels.document_category')"
+                    placeholder="---"
+                    mode="gray"
+                    class="w-full"
+                    wire:model.live="filter.document_category"
+                    :model="array_merge([['id' => 'all', 'label' => __('candidates::files.labels.all_categories')]], $this->documentCategoryOptions)"
+                />
+            </div>
+        @endif
         <div class="flex items-end space-x-2">
             <x-button mode="primary" wire:click="searchFilter">{{ __('candidates::common.labels.search') }}</x-button>
             <x-button mode="black" wire:click="resetFilter">{{ __('candidates::common.labels.reset') }}</x-button>
@@ -108,6 +120,36 @@
     </div>
 
     <div class="flex flex-col px-6 py-4 space-y-4">
+        @if ($this->documentCategoryStats->isNotEmpty())
+            <section class="grid grid-cols-1 gap-2 md:grid-cols-3 xl:grid-cols-6">
+                @foreach ($this->documentCategoryStats as $categoryStat)
+                    <button
+                        type="button"
+                        wire:click="toggleDocumentCategory('{{ $categoryStat['id'] }}')"
+                        class="{{ $categoryStat['active'] ? 'border-slate-800 bg-[linear-gradient(180deg,#111827_0%,#0f172a_100%)] text-white shadow-[0_18px_34px_-24px_rgba(15,23,42,0.58)] ring-1 ring-slate-700/30' : 'border-slate-200 bg-white text-slate-900 hover:border-slate-300 hover:bg-slate-50 hover:shadow-[0_16px_30px_-24px_rgba(15,23,42,0.25)]' }} flex rounded-[24px] border px-4 py-3 text-left transition"
+                    >
+                        <div class="flex w-full flex-col justify-between gap-1">
+                            <div class="space-y-2">
+                                <div class="{{ $categoryStat['active'] ? 'text-slate-300' : 'text-slate-400' }} text-[11px] font-semibold uppercase tracking-[0.2em]">
+                                    0{{ $loop->iteration }}
+                                </div>
+                                <div class="text-[1rem] font-semibold leading-6">{{ $categoryStat['label'] }}</div>
+                            </div>
+
+                            <div class="flex items-end justify-between gap-3">
+                                <div class="{{ $categoryStat['active'] ? 'text-slate-300' : 'text-slate-500' }} text-sm font-medium">
+                                    {{ $categoryStat['documents_count'] }} {{ __('candidates::common.labels.document') }}
+                                </div>
+                                <div class="{{ $categoryStat['active'] ? 'text-slate-300' : 'text-slate-500' }} text-xs font-medium text-right">
+                                    {{ trans_choice('candidates::common.labels.candidates_count', $categoryStat['candidates_count'], ['count' => $categoryStat['candidates_count']]) }}
+                                </div>
+                            </div>
+                        </div>
+                    </button>
+                @endforeach
+            </section>
+        @endif
+
         <div class="flex items-center justify-between">
             <div class="flex flex-col">
                 <div class="flex space-x-4">
@@ -198,7 +240,22 @@
                                 </x-table.td>
 
                                 <x-table.td>
-                                    <x-status design="modern" :status-id="$_candidate->status_id" :label="$_candidate->status->name"></x-status>
+                                    <x-status  design="modern" :status-id="$_candidate->status_id" :label="$_candidate->status->name"></x-status>
+                                </x-table.td>
+
+                                <x-table.td :isButton="true">
+                                    @can('update', $_candidate)
+                                        <button
+                                            wire:click="openSideMenu('candidate-files',{{ $_candidate->id }})"
+                                            class="relative flex items-center justify-center w-10 h-10 text-xs font-medium text-gray-500 uppercase bg-gray-100 rounded-lg hover:bg-gray-200 hover:text-gray-700"
+                                            title="{{ __('candidates::common.labels.files') }}"
+                                        >
+                                            <x-icons.document-icon></x-icons.document-icon>
+                                            <span class="absolute -right-1 -top-1 inline-flex min-w-5 items-center justify-center rounded-full bg-zinc-100 px-1.5 py-0.5 text-[10px] font-semibold text-zinc-600">
+                                                {{ (int) ($_candidate->documents_count ?? 0) }}
+                                            </span>
+                                        </button>
+                                    @endcan
                                 </x-table.td>
 
                                 <x-table.td :isButton="true">
@@ -262,6 +319,10 @@
 
         @if ($showSideMenu === 'edit-candidate')
             <livewire:candidates.edit-candidate :candidateModel="$modelName" :key="'candidate-edit-modal-' . ($modelName ?? 'none')" />
+        @endif
+
+        @if ($showSideMenu === 'candidate-files')
+            <livewire:candidates.candidate-files :candidateModel="$modelName" :key="'candidate-files-modal-' . ($modelName ?? 'none')" />
         @endif
     </x-side-modal>
 
