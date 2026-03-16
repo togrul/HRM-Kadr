@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
@@ -11,24 +12,63 @@ class TrainingPerformanceGuideController extends Controller
 {
     public function __invoke(Request $request): View
     {
-        $focus = $request->string('focus')->toString();
-
-        if (! in_array($focus, ['overview', 'training', 'performance', 'attendance', 'orders'], true)) {
-            $focus = 'overview';
-        }
+        $focus = $this->normalizeFocus($request->string('focus')->toString());
+        $initialModules = array_values(array_unique(array_filter(['overview', $focus !== 'overview' ? $focus : null])));
 
         return view('docs.training-performance-guide', [
             'focus' => $focus,
-            'overviewHtml' => $this->renderMarkdown('docs/scenario/training-performance-user-guide.md'),
-            'trainingHtml' => $this->renderMarkdown('docs/scenario/training-needs-user-guide.md'),
-            'performanceHtml' => $this->renderMarkdown('docs/scenario/performance-evaluation-user-guide.md'),
-            'attendanceHtml' => $this->renderMarkdown('docs/scenario/attendance-user-guide.md'),
-            'ordersModuleHtml' => $this->renderMarkdown('docs/scenario/orders-module-guide.md'),
-            'ordersUserHtml' => $this->renderMarkdown('docs/scenario/orders-user-guide.md'),
-            'ordersAdminHtml' => $this->renderMarkdown('docs/scenario/orders-admin-guide.md'),
-            'ordersApprovalHtml' => $this->renderMarkdown('docs/scenario/orders-approval-guide.md'),
-            'ordersOpsHtml' => $this->renderMarkdown('docs/scenario/orders-ops-commands-guide.md'),
+            'initialModules' => $initialModules,
+            'initialModulePayloads' => collect($initialModules)
+                ->mapWithKeys(fn (string $module) => [$module => $this->modulePayload($module)])
+                ->all(),
         ]);
+    }
+
+    public function section(Request $request, string $module): JsonResponse
+    {
+        $module = $this->normalizeFocus($module);
+
+        abort_if($module === 'overview', 404);
+
+        return response()->json([
+            'module' => $module,
+            'html' => view("docs.partials.guide-{$module}", $this->modulePayload($module))->render(),
+        ]);
+    }
+
+    private function normalizeFocus(?string $focus): string
+    {
+        if (! in_array($focus, ['overview', 'training', 'performance', 'attendance', 'orders'], true)) {
+            return 'overview';
+        }
+
+        return $focus;
+    }
+
+    private function modulePayload(string $module): array
+    {
+        return match ($module) {
+            'overview' => [
+                'overviewHtml' => $this->renderMarkdown('docs/scenario/training-performance-user-guide.md'),
+            ],
+            'training' => [
+                'trainingHtml' => $this->renderMarkdown('docs/scenario/training-needs-user-guide.md'),
+            ],
+            'performance' => [
+                'performanceHtml' => $this->renderMarkdown('docs/scenario/performance-evaluation-user-guide.md'),
+            ],
+            'attendance' => [
+                'attendanceHtml' => $this->renderMarkdown('docs/scenario/attendance-user-guide.md'),
+            ],
+            'orders' => [
+                'ordersModuleHtml' => $this->renderMarkdown('docs/scenario/orders-module-guide.md'),
+                'ordersUserHtml' => $this->renderMarkdown('docs/scenario/orders-user-guide.md'),
+                'ordersAdminHtml' => $this->renderMarkdown('docs/scenario/orders-admin-guide.md'),
+                'ordersApprovalHtml' => $this->renderMarkdown('docs/scenario/orders-approval-guide.md'),
+                'ordersOpsHtml' => $this->renderMarkdown('docs/scenario/orders-ops-commands-guide.md'),
+            ],
+            default => [],
+        };
     }
 
     private function renderMarkdown(string $relativePath): HtmlString

@@ -17,8 +17,20 @@ class TrainingPerformanceGuidePageTest extends TestCase
             ->get(route('docs.guide'))
             ->assertOk()
             ->assertSee('HR modullarının ortaq istifadə bələdçisi')
+            ->assertSee('Təlim ehtiyacı')
+            ->assertSee('Performans qiymətləndirməsi')
+            ->assertSee('Davamiyyət')
+            ->assertSee('Əmrlər');
+    }
+
+    public function test_focus_parameter_loads_requested_module_on_initial_render(): void
+    {
+        $user = \App\Models\User::factory()->create();
+
+        $this->actingAs($user)
+            ->get(route('docs.guide', ['focus' => 'training']))
+            ->assertOk()
             ->assertSee('Təlim ehtiyacı istifadəçi bələdçisi')
-            ->assertSee('Performans qiymətləndirmə istifadəçi bələdçisi')
-            ->assertSee('Davamiyyət istifadəçi bələdçisi');
+            ->assertDontSee('Performans qiymətləndirmə istifadəçi bələdçisi');
     }
 }

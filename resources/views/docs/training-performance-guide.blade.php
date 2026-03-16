@@ -57,6 +57,19 @@
         ];
 
         $allSectionIds = collect($sidebarGroups)->flatMap(fn ($group) => array_column($group['items'], 'id'))->values()->all();
+        $moduleSectionMap = collect($sidebarGroups)
+            ->flatMap(function (array $group) {
+                $module = match ($group['label']) {
+                    'Təlim ehtiyacı' => 'training',
+                    'Performans qiymətləndirməsi' => 'performance',
+                    'Davamiyyət' => 'attendance',
+                    'Əmrlər' => 'orders',
+                    default => 'overview',
+                };
+
+                return collect($group['items'])->mapWithKeys(fn (array $item) => [$item['id'] => $module]);
+            })
+            ->all();
 
         $quickLinks = [
             ['href' => route('training-needs'), 'label' => 'Təlim paneli'],
@@ -456,6 +469,28 @@
                 color: #09090b;
             }
 
+            .docs-lazy-placeholder {
+                margin-top: 3rem;
+                border: 1px dashed #d4d4d8;
+                border-radius: 1.4rem;
+                background: #fafafa;
+                padding: 1.25rem 1.3rem;
+            }
+
+            .docs-lazy-placeholder-title {
+                font-size: 1rem;
+                font-weight: 700;
+                letter-spacing: -0.025em;
+                color: #09090b;
+            }
+
+            .docs-lazy-placeholder-text {
+                margin-top: 0.55rem;
+                font-size: 0.93rem;
+                line-height: 1.75;
+                color: #52525b;
+            }
+
             .docs-content {
                 margin-top: 1.75rem;
                 color: #3f3f46;
@@ -631,6 +666,9 @@
                     const sectionIds = JSON.parse(root.dataset.sectionIds || '[]');
                     const focus = root.dataset.focus || 'overview';
                     const initialSection = root.dataset.initialSection || sectionIds[0];
+                    const moduleMap = JSON.parse(root.dataset.moduleMap || '{}');
+                    const loadedModules = new Set(JSON.parse(root.dataset.loadedModules || '[]'));
+                    const endpointTemplate = root.dataset.sectionEndpointTemplate || '';
                     const links = Array.from(document.querySelectorAll('[data-docs-link]'));
 
                     if (sectionIds.length === 0 || links.length === 0) {
@@ -683,6 +721,70 @@
                         apply();
                     };
 
+                    const closeMobileNav = () => {
+                        const mobileNav = document.querySelector('[data-docs-mobile-nav]');
+
+                        if (mobileNav instanceof HTMLDetailsElement) {
+                            mobileNav.open = false;
+                        }
+                    };
+
+                    const scrollToSection = (id, replaceHash = true) => {
+                        const target = document.getElementById(id);
+
+                        if (!target) {
+                            return;
+                        }
+
+                        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+                        if (replaceHash) {
+                            history.replaceState(null, '', `#${id}`);
+                        }
+                    };
+
+                    const loadSection = async (module) => {
+                        if (!module || module === 'overview' || loadedModules.has(module) || !endpointTemplate) {
+                            return;
+                        }
+
+                        const host = document.querySelector(`[data-docs-module-host="${module}"]`);
+
+                        if (!host || host.dataset.loading === 'true') {
+                            return;
+                        }
+
+                        host.dataset.loading = 'true';
+
+                        try {
+                            const response = await fetch(endpointTemplate.replace('__MODULE__', module), {
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'Accept': 'application/json',
+                                },
+                            });
+
+                            if (!response.ok) {
+                                throw new Error(`Failed to load section: ${module}`);
+                            }
+
+                            const payload = await response.json();
+                            host.innerHTML = payload.html;
+                            host.dataset.loaded = 'true';
+                            loadedModules.add(module);
+                        } finally {
+                            host.dataset.loading = 'false';
+                        }
+                    };
+
+                    const ensureSectionLoaded = async (sectionId) => {
+                        const module = moduleMap[sectionId] || 'overview';
+
+                        if (module !== 'overview' && !loadedModules.has(module)) {
+                            await loadSection(module);
+                        }
+                    };
+
                     const currentFromScroll = () => {
                         const threshold = 180;
                         let current = sectionIds[0];
@@ -723,14 +825,19 @@
                     };
 
                     links.forEach((link) => {
-                        link.addEventListener('click', () => {
-                            setActive(link.dataset.docsLink);
+                        link.addEventListener('click', async (event) => {
+                            event.preventDefault();
 
-                            const mobileNav = document.querySelector('[data-docs-mobile-nav]');
+                            const sectionId = link.dataset.docsLink;
 
-                            if (mobileNav instanceof HTMLDetailsElement) {
-                                mobileNav.open = false;
+                            if (!sectionId) {
+                                return;
                             }
+
+                            await ensureSectionLoaded(sectionId);
+                            setActive(sectionId);
+                            closeMobileNav();
+                            requestAnimationFrame(() => scrollToSection(sectionId));
                         });
                     });
 
@@ -742,6 +849,27 @@
                     window.addEventListener('hashchange', window.__docsGuideHashHandler);
                     bindSearch(document.querySelector('[data-docs-nav-container="desktop"]'));
                     bindSearch(document.querySelector('[data-docs-nav-container="mobile"]'));
+
+                    const lazyHosts = Array.from(document.querySelectorAll('[data-docs-module-host]'));
+                    const observer = new IntersectionObserver((entries) => {
+                        entries.forEach((entry) => {
+                            if (!entry.isIntersecting) {
+                                return;
+                            }
+
+                            const module = entry.target.getAttribute('data-docs-module-host');
+
+                            if (module) {
+                                loadSection(module);
+                            }
+                        });
+                    }, { rootMargin: '240px 0px' });
+
+                    lazyHosts.forEach((host) => {
+                        if (host.dataset.loaded !== 'true') {
+                            observer.observe(host);
+                        }
+                    });
 
                     const matchesFocus = (sectionId) => {
                         if (!sectionId) return false;
@@ -758,26 +886,27 @@
                         if (sectionIds.includes(hashed)) {
                             if (!matchesFocus(hashed) && initialSection) {
                                 setActive(initialSection);
-
-                                const target = document.getElementById(initialSection);
-
-                                if (target) {
+                                ensureSectionLoaded(initialSection).then(() => {
                                     requestAnimationFrame(() => {
-                                        target.scrollIntoView({ behavior: 'auto', block: 'start' });
-                                        history.replaceState(null, '', `#${initialSection}`);
+                                        scrollToSection(initialSection);
                                     });
-                                }
+                                });
 
                                 return;
                             }
 
-                            setActive(hashed);
+                            ensureSectionLoaded(hashed).then(() => {
+                                setActive(hashed);
+                                requestAnimationFrame(() => syncActiveSection());
+                            });
                             return;
                         }
                     }
 
                     if (initialSection) {
-                        setActive(initialSection);
+                        ensureSectionLoaded(initialSection).then(() => {
+                            setActive(initialSection);
+                        });
                     }
 
                     syncActiveSection();
@@ -831,7 +960,16 @@
         </div>
     </x-slot>
 
-    <div class="docs-shell" data-docs-root data-section-ids='@json($allSectionIds)' data-focus="{{ $focus }}" data-initial-section="{{ $initialSection }}">
+    <div
+        class="docs-shell"
+        data-docs-root
+        data-section-ids='@json($allSectionIds)'
+        data-module-map='@json($moduleSectionMap)'
+        data-loaded-modules='@json($initialModules)'
+        data-focus="{{ $focus }}"
+        data-initial-section="{{ $initialSection }}"
+        data-section-endpoint-template="{{ route('docs.section', ['module' => '__MODULE__']) }}"
+    >
         <details class="docs-mobile-nav mb-4 rounded-2xl border border-zinc-200 bg-white px-4 py-3 lg:hidden" data-docs-mobile-nav>
             <summary class="flex cursor-pointer items-center justify-between gap-3">
                 <div>
@@ -869,404 +1007,33 @@
         </details>
 
         <main class="docs-main">
-            <section id="overview">
-                <p class="docs-header-kicker text-zinc-500">Ümumi baxış</p>
-                <h1 class="docs-page-title">HR modullarının ortaq istifadə bələdçisi</h1>
-                <p class="docs-lead">
-                    Bu səhifə təlim ehtiyacı, performans qiymətləndirməsi və davamiyyət modullarını birlikdə başa düşmək, düzgün iş sırası qurmaq və hər işi hansı modulda etmək lazım olduğunu aydın görmək üçündür.
-                </p>
+            @include('docs.partials.guide-overview', $initialModulePayloads['overview'] ?? [])
 
-                <div class="docs-callout">
-                    <p class="docs-callout-title">Bu bələdçi nə verir</p>
-                    <p class="docs-callout-text">
-                        Modulların bir-birinə necə bağlandığını, hansı rolun hansı addımı atmalı olduğunu və gündəlik istifadə zamanı haradan başlamağın daha doğru olduğunu bir sənəddə göstərir.
-                    </p>
+            @foreach (['training', 'performance', 'attendance', 'orders'] as $module)
+                <div
+                    data-docs-module-host="{{ $module }}"
+                    data-loaded="{{ in_array($module, $initialModules, true) ? 'true' : 'false' }}"
+                >
+                    @if (in_array($module, $initialModules, true))
+                        @include("docs.partials.guide-{$module}", $initialModulePayloads[$module] ?? [])
+                    @else
+                        <section class="docs-lazy-placeholder" aria-live="polite">
+                            <p class="docs-lazy-placeholder-title">
+                                {{ match ($module) {
+                                    'training' => 'Təlim ehtiyacı',
+                                    'performance' => 'Performans qiymətləndirməsi',
+                                    'attendance' => 'Davamiyyət',
+                                    'orders' => 'Əmrlər',
+                                    default => 'Modul',
+                                } }}
+                            </p>
+                            <p class="docs-lazy-placeholder-text">
+                                Bu modul bölməsi yalnız siz ona keçəndə və ya səhifədə həmin hissəyə yaxınlaşanda yüklənəcək.
+                            </p>
+                        </section>
+                    @endif
                 </div>
-
-                <div class="docs-index-grid">
-                    <div class="docs-index-card">
-                        <p class="docs-card-title">Sürətli modul indeksi</p>
-                        <p class="docs-card-strong">Təlim ehtiyacı</p>
-                        <div class="docs-index-links">
-                            <a href="#training-module" class="docs-index-link">Modul</a>
-                            <a href="#training-outline" class="docs-index-link">Bölmələr</a>
-                            <a href="#training-workflow" class="docs-index-link">Axın</a>
-                            <a href="#training-doc" class="docs-index-link">Bələdçi</a>
-                        </div>
-                    </div>
-                    <div class="docs-index-card">
-                        <p class="docs-card-title">Sürətli modul indeksi</p>
-                        <p class="docs-card-strong">Performans qiymətləndirməsi</p>
-                        <div class="docs-index-links">
-                            <a href="#performance-module" class="docs-index-link">Modul</a>
-                            <a href="#performance-outline" class="docs-index-link">Bölmələr</a>
-                            <a href="#performance-workflow" class="docs-index-link">Axın</a>
-                            <a href="#performance-doc" class="docs-index-link">Bələdçi</a>
-                        </div>
-                    </div>
-                    <div class="docs-index-card">
-                        <p class="docs-card-title">Sürətli modul indeksi</p>
-                        <p class="docs-card-strong">Davamiyyət</p>
-                        <div class="docs-index-links">
-                            <a href="#attendance-module" class="docs-index-link">Modul</a>
-                            <a href="#attendance-outline" class="docs-index-link">Bölmələr</a>
-                            <a href="#attendance-workflow" class="docs-index-link">Axın</a>
-                            <a href="#attendance-doc" class="docs-index-link">Bələdçi</a>
-                        </div>
-                    </div>
-                    <div class="docs-index-card">
-                        <p class="docs-card-title">Sürətli modul indeksi</p>
-                        <p class="docs-card-strong">Əmrlər</p>
-                        <div class="docs-index-links">
-                            <a href="#orders-module" class="docs-index-link">Modul</a>
-                            <a href="#orders-outline" class="docs-index-link">Bölmələr</a>
-                            <a href="#orders-workflow" class="docs-index-link">Axın</a>
-                            <a href="#orders-doc" class="docs-index-link">Bələdçi</a>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="docs-grid docs-grid-2">
-                    <div class="docs-card docs-card-muted">
-                        <p class="docs-card-title">Təlim ehtiyacı</p>
-                        <p class="docs-card-strong">Ehtiyacdan nəticəyə və büdcəyə qədər olan inkişaf xətti</p>
-                        <p class="docs-card-body">Kataloq, ehtiyac, plan, sessiya, rəy və hesabat xəttini birləşdirir.</p>
-                    </div>
-                    <div class="docs-card docs-card-muted">
-                        <p class="docs-card-title">Performans qiymətləndirməsi</p>
-                        <p class="docs-card-strong">Qiymətləndirmə, test və zəif sahə analitikası</p>
-                        <p class="docs-card-body">Forma, test, review, transcript və zəif sahə axınını bağlayır.</p>
-                    </div>
-                    <div class="docs-card docs-card-muted">
-                        <p class="docs-card-title">Davamiyyət</p>
-                        <p class="docs-card-strong">Punch, növbə, təqvim və düzəliş nəticə xətti</p>
-                        <p class="docs-card-body">Gündəlik ledger, puantaj, overtime, istisna və ay bağlanışı nəticəsini qurur.</p>
-                    </div>
-                    <div class="docs-card docs-card-muted">
-                        <p class="docs-card-title">Əmrlər</p>
-                        <p class="docs-card-strong">Əmr reyestri, şablon və çap axını</p>
-                        <p class="docs-card-body">Əmr məlumatı ilə DOCX şablon mühərrikini birləşdirib printable sənəd verir.</p>
-                    </div>
-                    <div class="docs-card docs-card-muted">
-                        <p class="docs-card-title">Ortaq məntiq</p>
-                        <p class="docs-card-strong">Düzgün iş sırası və rol bölgüsü</p>
-                        <p class="docs-card-body">HR, rəhbər və əməliyyat istifadəçilərinin hansı addımı nə zaman etməli olduğunu göstərir.</p>
-                    </div>
-                </div>
-
-                <hr class="docs-divider">
-            </section>
-
-            <section id="overview-workflow" class="docs-section">
-                <p class="docs-header-kicker text-zinc-500">İş axını</p>
-                <h2 class="docs-section-title">Modulların birlikdə işləmə sxemi</h2>
-                <div class="docs-grid docs-grid-3">
-                    <div class="docs-card docs-tone-sky">
-                        <p class="docs-card-title">Təlim xətti</p>
-                        <p class="docs-card-strong">Kataloq, ehtiyac, plan və sessiya</p>
-                        <p class="docs-card-body">İnkişaf ehtiyacını konkret sessiyaya, nəticəyə və rəhbər hesabatına çevirir.</p>
-                    </div>
-                    <div class="docs-card docs-tone-emerald">
-                        <p class="docs-card-title">Performans xətti</p>
-                        <p class="docs-card-strong">Qiymətləndirmə, test və review</p>
-                        <p class="docs-card-body">Ölçmə nəticəsini zəif sahəyə və lazım olduqda təlim ehtiyacına daşıyır.</p>
-                    </div>
-                    <div class="docs-card docs-tone-indigo">
-                        <p class="docs-card-title">Davamiyyət xətti</p>
-                        <p class="docs-card-strong">Gündəlik nəzarət və ay yekunu</p>
-                        <p class="docs-card-body">Punch, növbə və düzəlişləri ledger nəticəsinə çevirib puantaj və ay bağlanışına çıxarır.</p>
-                    </div>
-                    <div class="docs-card docs-tone-amber">
-                        <p class="docs-card-title">Əmrlər xətti</p>
-                        <p class="docs-card-strong">Reyestr, şablon və çap</p>
-                        <p class="docs-card-body">Order qeydiyyatını template, publish readiness və print nəticəsi ilə bağlayır.</p>
-                    </div>
-                </div>
-
-                <div class="docs-content">
-                    {!! $overviewHtml !!}
-                </div>
-            </section>
-
-            <section id="training-module" class="docs-section">
-                <div class="docs-module-head">
-                    <div>
-                        <p class="docs-header-kicker text-sky-700">Təlim ehtiyacı modulu</p>
-                        <h2 class="docs-section-title">Təlim ehtiyacı</h2>
-                        <p class="docs-lead !mt-3 !max-w-none">
-                            Bu modul inkişaf ehtiyacını toplamaq, planlaşdırmaq, sessiyaya çevirmək və nəticəni saat, rəy, büdcə və rəhbər hesabatı ilə izləmək üçündür.
-                        </p>
-                    </div>
-                    <a href="{{ route('training-needs') }}" class="docs-module-link">Modulu aç</a>
-                </div>
-
-                <div id="training-outline" class="docs-grid docs-grid-2">
-                    <div class="docs-card docs-card-muted">
-                        <p class="docs-card-title">Bölmələr və sıra</p>
-                        <p class="docs-card-strong">Kataloq, ehtiyac, plan, sessiya, hesabat</p>
-                        <p class="docs-card-body">Əvvəl əsas bazalar qurulur, sonra ehtiyac və plan xətti, sonda sessiya və hesabatlar izlənir.</p>
-                    </div>
-                    <div class="docs-card docs-card-muted">
-                        <p class="docs-card-title">İstifadəçi rolu</p>
-                        <p class="docs-card-strong">HR, təlim koordinatoru və rəhbərlik</p>
-                        <p class="docs-card-body">Əməliyyat istifadəçisi plan və sessiya qurur, rəhbərlik isə nəticə və büdcə kəsiyini izləyir.</p>
-                    </div>
-                </div>
-
-                <div id="training-workflow" class="docs-grid docs-grid-3">
-                    <div class="docs-card">
-                        <p class="docs-card-title">Ekran xəritəsi 1</p>
-                        <p class="docs-card-strong">Kataloqlar və ehtiyaclar</p>
-                        <p class="docs-card-body">Kompetensiya, proqram və ehtiyac yaratma xətti.</p>
-                    </div>
-                    <div class="docs-card">
-                        <p class="docs-card-title">Ekran xəritəsi 2</p>
-                        <p class="docs-card-strong">Plan və sessiya</p>
-                        <p class="docs-card-body">İllik plan, plan sətri, sessiya və iştirakçı əlaqələri.</p>
-                    </div>
-                    <div class="docs-card">
-                        <p class="docs-card-title">Ekran xəritəsi 3</p>
-                        <p class="docs-card-strong">Nəticə və rəhbər hesabatı</p>
-                        <p class="docs-card-body">Rəy, nəticə, saat və büdcə analitikası oxunur.</p>
-                    </div>
-                </div>
-
-                <div id="training-scenarios" class="docs-grid docs-grid-2">
-                    <div class="docs-card docs-card-muted">
-                        <p class="docs-card-title">Ssenari 1</p>
-                        <p class="docs-card-strong">Əl ilə ehtiyac yarat və sessiyaya çevir</p>
-                        <p class="docs-card-body">HR axınında ehtiyacdan plan və sessiyaya keçən standart xətt.</p>
-                    </div>
-                    <div class="docs-card docs-card-muted">
-                        <p class="docs-card-title">Ssenari 2</p>
-                        <p class="docs-card-strong">Zəif nəticədən gələn təlim işi</p>
-                        <p class="docs-card-body">Performans nəticəsindən gələn ehtiyacı plan və sessiyaya çevirmək üçün istifadə olunur.</p>
-                    </div>
-                </div>
-
-                <div id="training-doc" class="docs-content">
-                    {!! $trainingHtml !!}
-                </div>
-            </section>
-
-            <section id="performance-module" class="docs-section">
-                <div class="docs-module-head">
-                    <div>
-                        <p class="docs-header-kicker text-emerald-700">Performans qiymətləndirməsi modulu</p>
-                        <h2 class="docs-section-title">Performans qiymətləndirməsi</h2>
-                        <p class="docs-lead !mt-3 !max-w-none">
-                            Bu modul forma, test, review, transcript və zəif sahə xəttini idarə etmək, nəticəni izləmək və lazım olduqda təlim ehtiyacına ötürmək üçündür.
-                        </p>
-                    </div>
-                    <a href="{{ route('performance-evaluation') }}" class="docs-module-link">Modulu aç</a>
-                </div>
-
-                <div id="performance-outline" class="docs-grid docs-grid-2">
-                    <div class="docs-card docs-card-muted">
-                        <p class="docs-card-title">Bölmələr və sıra</p>
-                        <p class="docs-card-strong">Dövr, şablon, təyinat, review, report</p>
-                        <p class="docs-card-body">Əvvəl skeleton qurulur, sonra təyinat və icra xətti, sonda nəticə və hesabat oxunur.</p>
-                    </div>
-                    <div class="docs-card docs-card-muted">
-                        <p class="docs-card-title">İstifadəçi rolu</p>
-                        <p class="docs-card-strong">HR, rəhbər, yoxlayan və əməkdaş</p>
-                        <p class="docs-card-body">Qiymətləndirmə və test xəttində hər rolun ayrıca iş sahəsi və məsuliyyəti var.</p>
-                    </div>
-                </div>
-
-                <div id="performance-workflow" class="docs-grid docs-grid-3">
-                    <div class="docs-card">
-                        <p class="docs-card-title">Ekran xəritəsi 1</p>
-                        <p class="docs-card-strong">Skeleton qur</p>
-                        <p class="docs-card-body">Dövr, şablon, bank və sual xətti yaradılır.</p>
-                    </div>
-                    <div class="docs-card">
-                        <p class="docs-card-title">Ekran xəritəsi 2</p>
-                        <p class="docs-card-strong">Təyinat və icra</p>
-                        <p class="docs-card-body">Form və test sessiyası verilir, cavab və review bağlanır.</p>
-                    </div>
-                    <div class="docs-card">
-                        <p class="docs-card-title">Ekran xəritəsi 3</p>
-                        <p class="docs-card-strong">Nəticə və ötürülmə</p>
-                        <p class="docs-card-body">Zəif nəticə təlim ehtiyacına çevrilə və hesabatlara düşə bilər.</p>
-                    </div>
-                </div>
-
-                <div id="performance-scenarios" class="docs-grid docs-grid-2">
-                    <div class="docs-card docs-card-muted">
-                        <p class="docs-card-title">Ssenari 1</p>
-                        <p class="docs-card-strong">Forma ilə qiymətləndirmə apar</p>
-                        <p class="docs-card-body">Dövr və form xəttindən yekun nəticəyə qədər olan yol.</p>
-                    </div>
-                    <div class="docs-card docs-card-muted">
-                        <p class="docs-card-title">Ssenari 2</p>
-                        <p class="docs-card-strong">Test həlli və review</p>
-                        <p class="docs-card-body">Sessiya, cəhd, açıq cavab review və transcript axını.</p>
-                    </div>
-                </div>
-
-                <div id="performance-doc" class="docs-content">
-                    {!! $performanceHtml !!}
-                </div>
-            </section>
-
-            <section id="attendance-module" class="docs-section">
-                <div class="docs-module-head">
-                    <div>
-                        <p class="docs-header-kicker text-indigo-700">Davamiyyət modulu</p>
-                        <h2 class="docs-section-title">Davamiyyət</h2>
-                        <p class="docs-lead !mt-3 !max-w-none">
-                            Bu modul punch, növbə, iş rejimi təqvimi, manual düzəliş, əlavə iş və ay bağlanışı nəticələrini vahid əməliyyat xəttində idarə etmək üçündür.
-                        </p>
-                    </div>
-                    <a href="{{ route('attendance') }}" class="docs-module-link">Modulu aç</a>
-                </div>
-
-                <div id="attendance-outline" class="docs-grid docs-grid-2">
-                    <div class="docs-card docs-card-muted">
-                        <p class="docs-card-title">Bölmələr və sıra</p>
-                        <p class="docs-card-strong">Monitor, puantaj, düzəliş, qayda, ay bağlanışı</p>
-                        <p class="docs-card-body">Gündəlik nəzarət və düzəlişlərdən başlayıb aylıq yekun nəticəyə çıxır.</p>
-                    </div>
-                    <div class="docs-card docs-card-muted">
-                        <p class="docs-card-title">İstifadəçi rolu</p>
-                        <p class="docs-card-strong">Operator, admin və təsdiq verən şəxs</p>
-                        <p class="docs-card-body">Əməliyyat, qayda idarəsi və qərar xətti ayrı istifadəçi səviyyələrinə bölünür.</p>
-                    </div>
-                </div>
-
-                <div id="attendance-workflow" class="docs-grid docs-grid-3">
-                    <div class="lg:col-span-3">
-                        <p class="docs-card-title">Ekran xəritəsi</p>
-                        <p class="mt-2 text-[1.05rem] font-semibold tracking-tight text-zinc-950">Davamiyyət iş axını</p>
-                    </div>
-                    <div class="docs-card">
-                        <p class="docs-card-title">Addım 1</p>
-                        <p class="docs-card-strong">Gündəlik nəzarət</p>
-                        <p class="docs-card-body">Günlük monitor, puantaj və istisna qutusu üzrə operativ izləmə aparılır.</p>
-                    </div>
-                    <div class="docs-card">
-                        <p class="docs-card-title">Addım 2</p>
-                        <p class="docs-card-strong">Düzəliş və qərar</p>
-                        <p class="docs-card-body">Manual giriş və əlavə iş qərarı ilə günlük nəticə sabitlənir.</p>
-                    </div>
-                    <div class="docs-card">
-                        <p class="docs-card-title">Addım 3</p>
-                        <p class="docs-card-strong">Qayda və yekun</p>
-                        <p class="docs-card-body">Növbə, təqvim və ay bağlanışı ledger nəticəsini tamamlayır.</p>
-                    </div>
-                </div>
-
-                <div id="attendance-scenarios" class="docs-grid docs-grid-3">
-                    <div class="docs-card docs-card-muted">
-                        <p class="docs-card-title">Operator</p>
-                        <p class="docs-card-strong">Gündəlik nəzarət və düzəliş</p>
-                        <p class="docs-card-body">Problemli günü aşkar et, düzəliş et və nəticəni puantajda yoxla.</p>
-                    </div>
-                    <div class="docs-card docs-card-muted">
-                        <p class="docs-card-title">Admin</p>
-                        <p class="docs-card-strong">Qayda və təqvim idarəsi</p>
-                        <p class="docs-card-body">Növbə, policy və təqvim dəyişikliklərinin təsirini idarə et.</p>
-                    </div>
-                    <div class="docs-card docs-card-muted">
-                        <p class="docs-card-title">Təsdiq verən şəxs</p>
-                        <p class="docs-card-strong">Qərar və bağlanış</p>
-                        <p class="docs-card-body">Manual giriş, əlavə iş və ay bağlanışı qərarını sabit saxla.</p>
-                    </div>
-                </div>
-
-                <div id="attendance-doc" class="docs-content">
-                    {!! $attendanceHtml !!}
-                </div>
-            </section>
-
-            <section id="orders-module" class="docs-section">
-                <div class="docs-module-head">
-                    <div>
-                        <p class="docs-header-kicker text-amber-700">Əmrlər modulu</p>
-                        <h2 class="docs-section-title">Əmrlər</h2>
-                        <p class="docs-lead !mt-3 !max-w-none">
-                            Bu modul əmrlərin qeydiyyatı, status izlənməsi, template uyğunluğu və printable DOCX sənəd alınması üçün işləyir.
-                        </p>
-                    </div>
-                    <a href="{{ route('orders') }}" class="docs-module-link">Modulu aç</a>
-                </div>
-
-                <div id="orders-outline" class="docs-grid docs-grid-2">
-                    <div class="docs-card docs-card-muted">
-                        <p class="docs-card-title">Bölmələr və sıra</p>
-                        <p class="docs-card-strong">Reyestr, şablon, publish, print</p>
-                        <p class="docs-card-body">Əvvəl əmr məlumatı qurulur, sonra tip-şablon uyğunluğu və printable nəticə yoxlanır.</p>
-                    </div>
-                    <div class="docs-card docs-card-muted">
-                        <p class="docs-card-title">İstifadəçi rolu</p>
-                        <p class="docs-card-strong">Operator, admin, şablon sahibi, əməliyyat</p>
-                        <p class="docs-card-body">Gündəlik qeydiyyat, şablon idarəsi və texniki smoke/check qatları ayrı rollarla işləyir.</p>
-                    </div>
-                </div>
-
-                <div id="orders-workflow" class="docs-grid docs-grid-3">
-                    <div class="docs-card">
-                        <p class="docs-card-title">Ekran xəritəsi 1</p>
-                        <p class="docs-card-strong">Əmr qeydiyyatı</p>
-                        <p class="docs-card-body">Tip seçimi, əmr məlumatı, iştirakçılar və status axını.</p>
-                    </div>
-                    <div class="docs-card">
-                        <p class="docs-card-title">Ekran xəritəsi 2</p>
-                        <p class="docs-card-strong">Şablon lifecycle</p>
-                        <p class="docs-card-body">Tip bağlama, onboarding, publish readiness və aktiv versiya xətti.</p>
-                    </div>
-                    <div class="docs-card">
-                        <p class="docs-card-title">Ekran xəritəsi 3</p>
-                        <p class="docs-card-strong">Print və incident yoxlaması</p>
-                        <p class="docs-card-body">Printable nəticə, smoke, query budget və render benchmark yoxlamaları.</p>
-                    </div>
-                </div>
-
-                <div id="orders-scenarios" class="docs-grid docs-grid-2">
-                    <div class="docs-card docs-card-muted">
-                        <p class="docs-card-title">Ssenari 1</p>
-                        <p class="docs-card-strong">Yeni əmr yarat və çap et</p>
-                        <p class="docs-card-body">Əmr məlumatı tamamlanır, şablon bağlılığı yoxlanır və printable sənəd alınır.</p>
-                    </div>
-                    <div class="docs-card docs-card-muted">
-                        <p class="docs-card-title">Ssenari 2</p>
-                        <p class="docs-card-strong">Yeni tip üçün şablon aç</p>
-                        <p class="docs-card-body">Onboarding wizard, publish readiness və smoke komandaları ilə yeni tip işə salınır.</p>
-                    </div>
-                </div>
-
-                <div id="orders-doc" class="docs-content">
-                    {!! $ordersModuleHtml !!}
-                </div>
-
-                <div id="orders-role-guides" class="docs-grid docs-grid-2">
-                    <div class="docs-card docs-card-muted">
-                        <p class="docs-card-title">İstifadəçi bələdçisi</p>
-                        <div class="docs-content mt-3">
-                            {!! $ordersUserHtml !!}
-                        </div>
-                    </div>
-                    <div class="docs-card docs-card-muted">
-                        <p class="docs-card-title">Admin bələdçisi</p>
-                        <div class="docs-content mt-3">
-                            {!! $ordersAdminHtml !!}
-                        </div>
-                    </div>
-                    <div class="docs-card docs-card-muted">
-                        <p class="docs-card-title">Təsdiq bələdçisi</p>
-                        <div class="docs-content mt-3">
-                            {!! $ordersApprovalHtml !!}
-                        </div>
-                    </div>
-                    <div class="docs-card docs-card-muted">
-                        <p class="docs-card-title">Əməliyyat / komandalar bələdçisi</p>
-                        <div class="docs-content mt-3">
-                            {!! $ordersOpsHtml !!}
-                        </div>
-                    </div>
-                </div>
-            </section>
+            @endforeach
         </main>
     </div>
 </x-app-layout>
