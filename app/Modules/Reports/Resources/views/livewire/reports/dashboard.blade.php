@@ -91,9 +91,9 @@
                                     'text-zinc-400/90' => $activeTab !== $tab,
                                 ])>{{ sprintf('%02d', array_search($tab, $tabOrder, true) + 1) }}</span>
                                 <p @class([
-                                    'text-lg tracking-[-0.025em] transition',
+                                    'text-sm uppercase tracking-tight transition',
                                     'text-zinc-950 font-semibold' => $activeTab === $tab,
-                                    'text-zinc-400/95 font-medium' => $activeTab !== $tab,
+                                    'text-zinc-400/95 font-semibold' => $activeTab !== $tab,
                                 ])>{{ __('reports::dashboard.tabs.'.$tab) }}</p>
                             </div>
                         </a>

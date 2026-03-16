@@ -2,6 +2,8 @@
 
 namespace App\Modules\Leaves\Providers;
 
+use App\Modules\Leaves\Console\Commands\LeavesQueryBudgetCommand;
+use App\Modules\Leaves\Console\Commands\LeavesRenderBenchmarkCommand;
 use App\Providers\Concerns\RegistersLivewireAliases;
 use App\Services\Modules\ModuleState;
 use App\Models\Leave;
@@ -15,7 +17,12 @@ class LeavesServiceProvider extends ServiceProvider
 
     public function register(): void
     {
-        //
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                LeavesQueryBudgetCommand::class,
+                LeavesRenderBenchmarkCommand::class,
+            ]);
+        }
     }
 
     public function boot(): void

@@ -180,6 +180,17 @@ class Leaves extends Component
         $result = $base->clone()
             ->with([
                 'personnel' => fn ($q) => $q
+                    ->select([
+                        'id',
+                        'tabel_no',
+                        'surname',
+                        'name',
+                        'patronymic',
+                        'gender',
+                        'join_work_date',
+                        'structure_id',
+                        'position_id',
+                    ])
                     ->withStructureTree()   // burada parent zincirini preload eder
                     ->with([
                         'position:id,name',
@@ -191,9 +202,20 @@ class Leaves extends Component
                         ),
                         'currentWork:id,tabel_no,join_date,leave_date,is_current,position',
                     ]),
-                'leaveType',
-                'status',
-                'latestLog.changedBy',
+                'leaveType:id,name',
+                'status:id,name',
+                'latestLog' => fn ($q) => $q
+                    ->select([
+                        'leave_status_logs.id',
+                        'leave_status_logs.leave_id',
+                        'leave_status_logs.status_id',
+                        'leave_status_logs.changed_by',
+                        'leave_status_logs.comment',
+                        'leave_status_logs.changed_at',
+                    ])
+                    ->with([
+                        'changedBy:id,surname,name,patronymic',
+                    ]),
             ])
             ->orderByDesc('created_at');
 
@@ -214,7 +236,7 @@ class Leaves extends Component
             ->select(
                 't.name as name',
                 DB::raw('COUNT(*) as count'),
-                DB::raw('SUM(DATEDIFF(ends_at, starts_at) + 1) as total_days')
+                DB::raw($this->totalDaysAggregateExpression().' as total_days')
             )
             ->groupBy('t.name')
             ->get()
@@ -225,6 +247,13 @@ class Leaves extends Component
                 ],
             ])
             ->toArray();
+    }
+
+    protected function totalDaysAggregateExpression(): string
+    {
+        return DB::connection()->getDriverName() === 'sqlite'
+            ? "SUM(CAST(julianday(ends_at) - julianday(starts_at) + 1 AS INTEGER))"
+            : 'SUM(DATEDIFF(ends_at, starts_at) + 1)';
     }
 
     protected function finalizePagination($query, $type)

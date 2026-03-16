@@ -37,7 +37,7 @@ class EditLeave extends Component
 
         $this->leaveModel = $leaveModel;
         $this->record = Leave::query()
-            ->with(['personnel', 'assigned'])
+            ->with($this->leaveRelations())
             ->find($leaveModel);
 
         if (! $this->record) {
@@ -66,7 +66,7 @@ class EditLeave extends Component
 
         DB::transaction(fn () => $this->record->update($payload));
 
-        $this->record = $this->record->fresh(['personnel', 'assigned']);
+        $this->record = $this->record->fresh($this->leaveRelations());
         $this->leave->fillFromModel($this->record);
 
         if ($file instanceof TemporaryUploadedFile) {
@@ -81,5 +81,24 @@ class EditLeave extends Component
     public function render()
     {
         return view('leaves::livewire.leaves.edit-leave');
+    }
+
+    protected function leaveRelations(): array
+    {
+        return [
+            'personnel' => fn ($query) => $query->select([
+                'tabel_no',
+                'surname',
+                'name',
+                'patronymic',
+            ]),
+            'assigned' => fn ($query) => $query->select([
+                'id',
+                'tabel_no',
+                'surname',
+                'name',
+                'patronymic',
+            ]),
+        ];
     }
 }

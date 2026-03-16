@@ -3,6 +3,8 @@
 namespace Tests\Feature\Candidates;
 
 use App\Models\User;
+use App\Models\Candidate;
+use App\Models\Structure;
 use App\Modules\Candidates\Livewire\CandidateList;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
@@ -18,7 +20,7 @@ class CandidateListInteractionTest extends TestCase
     {
         parent::setUp();
 
-        Cache::forget('settings');
+        Cache::forget(CandidateList::SETTINGS_CACHE_KEY);
         Cache::forget('appeal-statuses:'.app()->getLocale());
         config()->set('candidates.mode', 'military');
     }
@@ -51,5 +53,54 @@ class CandidateListInteractionTest extends TestCase
             ->set('filter.fullname', 'Ali')
             ->call('searchFilter')
             ->assertSet('search.fullname', 'Ali');
+    }
+
+    public function test_restore_action_is_forbidden_without_delete_permission(): void
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo(Permission::findOrCreate('show-candidates', 'web'));
+
+        $candidate = $this->makeCandidate();
+        $candidate->delete();
+
+        $this->actingAs($user);
+
+        Livewire::test(CandidateList::class)
+            ->call('restoreData', $candidate->id)
+            ->assertForbidden();
+    }
+
+    public function test_force_delete_action_is_forbidden_without_delete_permission(): void
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo(Permission::findOrCreate('show-candidates', 'web'));
+
+        $candidate = $this->makeCandidate();
+        $candidate->delete();
+
+        $this->actingAs($user);
+
+        Livewire::test(CandidateList::class)
+            ->call('forceDeleteData', $candidate->id)
+            ->assertForbidden();
+    }
+
+    private function makeCandidate(): Candidate
+    {
+        $structure = Structure::query()->create([
+            'name' => 'Candidate Structure',
+            'shortname' => 'CS',
+        ]);
+
+        $creator = User::factory()->create();
+
+        return Candidate::query()->create([
+            'surname' => 'Aliyev',
+            'name' => 'Ali',
+            'patronymic' => 'Test',
+            'structure_id' => $structure->id,
+            'height' => 180,
+            'creator_id' => $creator->id,
+        ]);
     }
 }

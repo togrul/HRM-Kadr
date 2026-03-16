@@ -19,7 +19,7 @@ class CandidateListPresetSettingsTest extends TestCase
     {
         parent::setUp();
 
-        Cache::forget('settings');
+        Cache::forget(\App\Modules\Candidates\Livewire\CandidateList::SETTINGS_CACHE_KEY);
         Cache::forget('appeal-statuses:'.app()->getLocale());
         config()->set('candidates.mode', 'military');
     }

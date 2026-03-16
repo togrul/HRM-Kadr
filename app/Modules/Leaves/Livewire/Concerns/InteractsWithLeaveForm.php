@@ -63,21 +63,15 @@ trait InteractsWithLeaveForm
     }
 
     #[Computed]
-    public function personnelList()
+    public function applicantPersonnelList()
     {
-        $canSearch = (strlen($this->personnelName) > 2) || (strlen($this->assignedSearch) > 2);
+        return $this->searchPersonnelOptions($this->personnelName);
+    }
 
-        if (! $canSearch) {
-            return collect();
-        }
-
-        return Personnel::query()
-            ->when($this->personnelName !== '', fn ($q) => $q->nameLike($this->personnelName))
-            ->when($this->assignedSearch !== '', fn ($q) => $q->nameLike($this->assignedSearch))
-            ->active()
-            ->whereNull('deleted_at')
-            ->limit(20)
-            ->get();
+    #[Computed]
+    public function assignedPersonnelList()
+    {
+        return $this->searchPersonnelOptions($this->assignedSearch);
     }
 
     #[Computed(cache: true)]
@@ -177,5 +171,19 @@ trait InteractsWithLeaveForm
         }
 
         $this->leave->total_days = null;
+    }
+
+    protected function searchPersonnelOptions(string $term)
+    {
+        if (mb_strlen(trim($term)) <= 2) {
+            return collect();
+        }
+
+        return Personnel::query()
+            ->nameLike($term)
+            ->active()
+            ->whereNull('deleted_at')
+            ->limit(20)
+            ->get();
     }
 }

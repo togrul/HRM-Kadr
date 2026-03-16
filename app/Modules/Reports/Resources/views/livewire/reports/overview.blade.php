@@ -136,7 +136,7 @@
                                 $visibleBarValue = $barValue > 0 ? max(6, $barValue) : 3;
                             @endphp
                             <div class="space-y-2">
-                                <p class="text-[13px] font-medium leading-5 text-zinc-800">{{ $row['label'] }}</p>
+                                <p class="text-[14px] font-medium leading-5 text-zinc-500">{{ $row['label'] }}</p>
                                 <div class="flex items-center gap-3">
                                     <div class="h-4 flex-1 rounded-md border border-zinc-100 bg-zinc-50 px-[5px] py-[4px]">
                                         <div
@@ -144,7 +144,7 @@
                                             style="width: {{ $visibleBarValue }}%"
                                         ></div>
                                     </div>
-                                    <p class="w-16 flex-none text-right text-[13px] font-semibold tracking-tight text-zinc-950">{{ number_format((float) $row['value'], 1) }}%</p>
+                                    <p class="w-16 flex-none text-right text-[14px] font-semibold tracking-tight text-zinc-950">{{ number_format((float) $row['value'], 1) }}%</p>
                                 </div>
                             </div>
                         @endforeach
@@ -212,14 +212,14 @@
                             ] as $item)
                                 <div class="grid min-h-[176px] grid-rows-[3.5rem,1fr,5rem] bg-white px-5 py-5">
                                     <div class="space-y-2">
-                                        <p class="text-[9px] font-semibold uppercase tracking-[0.28em] text-zinc-400">{{ $item['label'] }}</p>
+                                        <p class="text-[12px] font-semibold uppercase tracking-tight text-zinc-400">{{ $item['label'] }}</p>
                                         <span class="block h-px w-full bg-zinc-100"></span>
                                     </div>
                                     <div class="flex items-center">
                                         <p class="text-[3.35rem] font-semibold leading-[0.88] tracking-[-0.055em] text-zinc-950">{{ $item['value'] }}</p>
                                     </div>
                                     <div class="flex items-end">
-                                        <p class="max-w-[11rem] text-[13px] leading-6 text-zinc-400">{{ $item['hint'] }}</p>
+                                        <p class="max-w-[11rem] text-[13px] leading-6 tracking-tighter text-zinc-400">{{ $item['hint'] }}</p>
                                     </div>
                                 </div>
                             @endforeach

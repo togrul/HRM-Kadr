@@ -42,6 +42,8 @@ class CandidateList extends Component
 
     protected array $accessibleStructureIds = [];
 
+    public const SETTINGS_CACHE_KEY = 'candidates:list-settings';
+
     protected const TEST_SCORE_COLOR_MAP = [
         0 => 'slate',
         1 => 'gray',
@@ -111,6 +113,7 @@ class CandidateList extends Component
     public function restoreData($id): void
     {
         $candidate = Candidate::withTrashed()->findOrFail($id);
+        $this->authorize('restore', $candidate);
         $candidate->restore();
         $candidate->update([
             'deleted_by' => null,
@@ -121,6 +124,7 @@ class CandidateList extends Component
     public function forceDeleteData($id): void
     {
         $model = Candidate::withTrashed()->findOrFail($id);
+        $this->authorize('forceDelete', $model);
         $model->forceDelete();
         $this->dispatch('candidateWasDeleted', __('candidates::common.messages.candidate_deleted'));
     }
@@ -282,7 +286,7 @@ class CandidateList extends Component
             return $this->settingsMapCache;
         }
 
-        return $this->settingsMapCache = Cache::rememberForever('settings', static fn () => Setting::pluck('value', 'name')->toArray());
+        return $this->settingsMapCache = Cache::rememberForever(self::SETTINGS_CACHE_KEY, static fn () => Setting::pluck('value', 'name')->toArray());
     }
 
     private function normalizeStatusWhitelist(mixed $value): array

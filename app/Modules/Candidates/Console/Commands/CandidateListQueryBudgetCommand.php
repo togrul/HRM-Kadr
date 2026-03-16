@@ -41,7 +41,7 @@ class CandidateListQueryBudgetCommand extends Command
         $results = [];
         $results[] = $this->probe('candidate_list_render', $budgets['candidate_list_render'], function () use ($user): void {
             config()->set('candidates.mode', 'military');
-            Cache::forget('settings');
+            Cache::forget(CandidateList::SETTINGS_CACHE_KEY);
             Cache::forget('appeal-statuses:'.app()->getLocale());
 
             Livewire::actingAs($user);
@@ -49,7 +49,7 @@ class CandidateListQueryBudgetCommand extends Command
         });
         $results[] = $this->probe('candidate_filter_update', $budgets['candidate_filter_update'], function () use ($user): void {
             config()->set('candidates.mode', 'military');
-            Cache::forget('settings');
+            Cache::forget(CandidateList::SETTINGS_CACHE_KEY);
             Cache::forget('appeal-statuses:'.app()->getLocale());
 
             Livewire::actingAs($user);
@@ -60,7 +60,7 @@ class CandidateListQueryBudgetCommand extends Command
         });
         $results[] = $this->probe('candidate_add_modal_open', $budgets['candidate_add_modal_open'], function () use ($modalUser): void {
             config()->set('candidates.mode', 'military');
-            Cache::forget('settings');
+            Cache::forget(CandidateList::SETTINGS_CACHE_KEY);
             Cache::forget('appeal-statuses:'.app()->getLocale());
 
             Livewire::actingAs($modalUser);

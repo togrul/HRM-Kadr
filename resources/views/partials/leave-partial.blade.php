@@ -17,7 +17,7 @@
                 clearField="tabel_no"
                 placeholder="{{ __('leaves::common.labels.search_placeholder') }}"
             >
-                @forelse($this->personnelList as $pl)
+                @forelse($this->applicantPersonnelList as $pl)
                     <p
                         wire:click="selectPersonnel('{{ $pl->tabel_no }}', '{{ $pl->fullname }}','tabel_no')"
                         class="flex flex-col px-2 py-1 transition-all duration-300 rounded-md cursor-pointer hover:bg-white text-slate-600 drop-shadow-sm"
@@ -154,7 +154,7 @@
                 clearField="assigned_to"
                 placeholder="{{ __('leaves::common.labels.search_placeholder') }}"
             >
-                @forelse($this->personnelList as $pl)
+                @forelse($this->assignedPersonnelList as $pl)
                     <p
                         wire:click="selectPersonnel('{{ $pl->tabel_no }}', '{{ $pl->fullname }}','assigned_to', {{ $pl->id }})"
                         class="flex flex-col px-2 py-1 transition-all duration-300 rounded-md cursor-pointer hover:bg-white text-slate-600 drop-shadow-sm"
