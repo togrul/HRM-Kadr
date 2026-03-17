@@ -13,6 +13,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         $schedule->command('notify:birthdays')->dailyAt('08:00');
+        $schedule->command('notify:holidays --days-ahead=1')->dailyAt('09:00');
 
         if ((bool) config('orders.observability.reports.enabled', false)) {
             $dailyAt = (string) config('orders.observability.reports.daily_at', '09:00');

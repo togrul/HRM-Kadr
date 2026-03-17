@@ -4,6 +4,7 @@ namespace App\Modules\Notifications\Livewire;
 
 use App\Modules\Notifications\Support\NotificationCountCache;
 use App\Modules\Notifications\Support\DispatchesNotificationRefresh;
+use Illuminate\Support\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -40,6 +41,44 @@ class NotificationList extends Component
         $this->dispatchNotificationRefresh();
     }
 
+    protected function groupLabel(string $key): string
+    {
+        return match ($key) {
+            'today' => __('notifications::common.groups.today'),
+            'yesterday' => __('notifications::common.groups.yesterday'),
+            'this_week' => __('notifications::common.groups.this_week'),
+            default => __('notifications::common.groups.older'),
+        };
+    }
+
+    protected function groupedNotifications(Collection $notifications): Collection
+    {
+        return $notifications
+            ->groupBy(function ($notification) {
+                $createdAt = $notification->created_at;
+
+                if ($createdAt?->isToday()) {
+                    return 'today';
+                }
+
+                if ($createdAt?->isYesterday()) {
+                    return 'yesterday';
+                }
+
+                if ($createdAt?->greaterThanOrEqualTo(now()->startOfWeek())) {
+                    return 'this_week';
+                }
+
+                return 'older';
+            })
+            ->map(fn (Collection $items, string $key) => [
+                'key' => $key,
+                'label' => $this->groupLabel($key),
+                'items' => $items,
+            ])
+            ->values();
+    }
+
     public function render()
     {
         $user = auth()->user();
@@ -56,7 +95,10 @@ class NotificationList extends Component
                 ]
             );
 
-            return view('notification::livewire.notification.notification-list', compact('notifications'));
+            return view('notification::livewire.notification.notification-list', [
+                'notifications' => $notifications,
+                'groupedNotifications' => collect([]),
+            ]);
         }
 
         $notifications = $user->notifications()
@@ -65,6 +107,9 @@ class NotificationList extends Component
             ->latest()
             ->paginate(self::NOTIFICATION_THRESHOLD);
 
-        return view('notification::livewire.notification.notification-list', compact('notifications'));
+        return view('notification::livewire.notification.notification-list', [
+            'notifications' => $notifications,
+            'groupedNotifications' => $this->groupedNotifications($notifications->getCollection()),
+        ]);
     }
 }

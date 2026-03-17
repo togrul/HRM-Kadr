@@ -234,6 +234,13 @@ class Personnel extends Model
         return $this->hasMany(PersonnelDocument::class, 'tabel_no', 'tabel_no');
     }
 
+    public function latestManagerAssignment(): HasOne
+    {
+        return $this->hasOne(PerformanceForm::class)
+            ->whereNotNull('manager_id')
+            ->latestOfMany('id');
+    }
+
     public function kinships(): HasMany
     {
         return $this->hasMany(PersonnelKinship::class, 'tabel_no', 'tabel_no')->orderBy('kinship_id');

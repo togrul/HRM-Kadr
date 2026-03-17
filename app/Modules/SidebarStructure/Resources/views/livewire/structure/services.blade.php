@@ -7,6 +7,10 @@
         <x-icons.candidate-icon size="w-6 h-6" color="text-green-600"></x-icons.candidate-icon>
     </x-services-menu-item>
 
+    <x-services-menu-item key="notifications-settings" :selected-service="$selectedService" :title="__('services::common.labels.notifications')">
+        <x-icons.notification-icon size="w-6 h-6" color="text-green-600"></x-icons.notification-icon>
+    </x-services-menu-item>
+
     <x-services-menu-item key="menus" :selected-service="$selectedService" :title="__('services::common.labels.menus')">
         <x-icons.menu-icon size="w-6 h-6" color="text-green-600"></x-icons.menu-icon>
     </x-services-menu-item>

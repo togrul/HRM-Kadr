@@ -4,6 +4,7 @@ namespace App\Modules\Notifications\Livewire;
 
 use App\Modules\Notifications\Support\NotificationCountCache;
 use App\Modules\Notifications\Support\DispatchesNotificationRefresh;
+use Illuminate\Support\Collection;
 use Illuminate\Http\Response;
 use Livewire\Attributes\Isolate;
 use Livewire\Attributes\On;
@@ -115,8 +116,48 @@ class Notifications extends Component
         return view('notification::livewire.notification.placeholders.notifications-nav');
     }
 
+    protected function groupLabel(string $key): string
+    {
+        return match ($key) {
+            'today' => __('notifications::common.groups.today'),
+            'yesterday' => __('notifications::common.groups.yesterday'),
+            'this_week' => __('notifications::common.groups.this_week'),
+            default => __('notifications::common.groups.older'),
+        };
+    }
+
+    protected function groupedNotifications(Collection $notifications): Collection
+    {
+        return $notifications
+            ->groupBy(function ($notification) {
+                $createdAt = $notification->created_at;
+
+                if ($createdAt?->isToday()) {
+                    return 'today';
+                }
+
+                if ($createdAt?->isYesterday()) {
+                    return 'yesterday';
+                }
+
+                if ($createdAt?->greaterThanOrEqualTo(now()->startOfWeek())) {
+                    return 'this_week';
+                }
+
+                return 'older';
+            })
+            ->map(fn (Collection $items, string $key) => [
+                'key' => $key,
+                'label' => $this->groupLabel($key),
+                'items' => $items,
+            ])
+            ->values();
+    }
+
     public function render()
     {
-        return view('notification::livewire.notification.notifications');
+        return view('notification::livewire.notification.notifications', [
+            'groupedNotifications' => $this->groupedNotifications($this->notifications),
+        ]);
     }
 }

@@ -40,11 +40,28 @@
         x-transition:leave-end="opacity-0 scale-90"
         x-on:click.away="if (!loadingRequest) { isOpen = false }"
         x-on:click.stop
-        class="absolute right-0 z-50 mt-2 origin-top-right border bg-white text-left text-neutral-700 shadow-2xl shadow-neutral-200 border-neutral-200 top-full w-[32rem] max-w-[calc(100vw-2rem)] rounded-xl"
+        class="absolute right-0 z-50 mt-3 origin-top-right overflow-hidden border border-zinc-200 bg-white text-left text-neutral-700 shadow-[0_30px_80px_rgba(15,23,42,0.16)] top-full w-[34rem] max-w-[calc(100vw-2rem)] rounded-[1.4rem]"
     >
-        <ul class="overflow-y-auto text-xs font-normal divide-y divide-dashed max-h-96 rounded-tl-xl rounded-tr-xl">
-            @forelse($notifications as $notification)
-                <x-notification.item :notification="$notification" />
+        <div class="border-b border-zinc-200 bg-zinc-50/80 px-5 py-4">
+            <div class="flex items-center justify-between gap-3">
+                <div>
+                    <p class="text-sm font-semibold text-zinc-950">{{ __('notifications::common.titles.module') }}</p>
+                    <p class="mt-1 text-xs text-zinc-500">{{ __('notifications::common.helpers.dropdown_hint') }}</p>
+                </div>
+                @if ($notificationCount)
+                    <span class="rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs font-semibold text-zinc-600">{{ $notificationCount }}</span>
+                @endif
+            </div>
+        </div>
+
+        <ul class="max-h-[30rem] overflow-y-auto text-xs font-normal">
+            @forelse($groupedNotifications as $group)
+                <li class="sticky top-0 z-[1] border-y border-zinc-200 bg-white/95 px-5 py-2 backdrop-blur">
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ $group['label'] }}</p>
+                </li>
+                @foreach($group['items'] as $notification)
+                    <x-notification.item :notification="$notification" />
+                @endforeach
             @empty
                 @if($isLoading)
                     @foreach(range(1,3) as $item)
@@ -68,14 +85,14 @@
             @endforelse
         </ul>
 
-        <div class="flex justify-between text-center border-t border-dashed border-neutral-300">
-            <a wire:navigate href="{{ route('notifications') }}" class="px-5 py-3 text-sm font-medium transition duration-300 text-neutral-500 hover:text-green-400">
+        <div class="flex justify-between border-t border-zinc-200 bg-zinc-50/70 text-center">
+            <a wire:navigate href="{{ route('notifications') }}" class="px-5 py-3 text-sm font-medium transition duration-300 text-neutral-500 hover:text-zinc-950">
                 {{ __('notifications::common.labels.show_all_notifications') }}
             </a>
             <button
                 wire:click="markAllAsRead"
                 @click="isOpen = false"
-                class="px-5 py-3 text-sm font-medium transition duration-150 ease-in appearance-none text-neutral-500 hover:text-blue-500"
+                class="px-5 py-3 text-sm font-medium transition duration-150 ease-in appearance-none text-neutral-500 hover:text-zinc-950"
             >
                 {{ __('notifications::common.labels.mark_all_as_read') }}
             </button>

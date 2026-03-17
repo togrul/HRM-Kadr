@@ -49,6 +49,7 @@ return [
         'appeal_date' => 'Appeal date',
         'general' => 'General',
         'candidate_preferences' => 'Candidates',
+        'notifications' => 'Notifications',
         'menus' => 'Menus',
         'roles' => 'Roles',
         'users' => 'Users',

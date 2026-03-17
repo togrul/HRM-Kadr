@@ -38,9 +38,18 @@
         </button>
     </div>
 
-    <div class="flex flex-col">
-        @forelse ($notifications as $notification)
-            <x-notification.list-item :$notification />
+    <div class="flex flex-col gap-4">
+        @forelse ($groupedNotifications as $group)
+            <div class="rounded-[1.4rem] border border-zinc-200 bg-zinc-50/70">
+                <div class="border-b border-zinc-200 px-6 py-3">
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ $group['label'] }}</p>
+                </div>
+                <div class="space-y-3 px-4 py-4">
+                    @foreach ($group['items'] as $notification)
+                        <x-notification.list-item :$notification />
+                    @endforeach
+                </div>
+            </div>
         @empty
             <div class="px-8 py-10 text-center text-sm text-slate-400">
                 {{ __('notifications::common.labels.no_notifications_found') }}

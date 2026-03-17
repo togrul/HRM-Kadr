@@ -3,8 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Personnel;
-use App\Models\User;
-use App\Notifications\BirthdayNotification;
+use App\Modules\Notifications\Support\NotificationCampaignDispatcher;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 
@@ -33,14 +32,16 @@ class NotifyBirthdays extends Command
             ->whereDay('birthdate', '=', Carbon::now()->format('d'))
             ->whereNull('leave_work_date')
             ->where('is_pending', false)
+            ->with(['position:id,name', 'structure:id,parent_id,name'])
             ->get();
 
-        $adminUsers = User::role('admin')->permission('get-notification')->get();
+        $dispatcher = app(NotificationCampaignDispatcher::class);
+        $sent = 0;
+
         foreach ($birthdays as $birthday) {
-            foreach ($adminUsers as $admin) {
-                $admin->notify(new BirthdayNotification($birthday));
-            }
+            $sent += $dispatcher->dispatchBirthday($birthday);
         }
-        $this->info('Sent successfully!');
+
+        $this->info("Sent successfully! Dispatches: {$sent}");
     }
 }

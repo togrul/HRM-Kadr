@@ -45,6 +45,10 @@
                         @livewire('services.settings.settings-list', ['section' => 'candidate'], key('settings-candidate'))
                     @break
 
+                    @case('notifications-settings')
+                        @livewire('notification.settings-hub', key('notifications-settings-hub'))
+                    @break
+
                     @case('menus')
                         @livewire('services.menus.all-menus', key('menus'))
                     @break
