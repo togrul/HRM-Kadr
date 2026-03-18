@@ -5,7 +5,7 @@
 @endphp
 
 <x-surface-card :title="__('notifications::common.titles.announcement_composer')" icon="icons.notification-icon">
-    <div class="grid gap-5 min-[1700px]:grid-cols-[minmax(0,1.18fr)_minmax(24rem,0.82fr)]">
+    <div class="grid gap-5 min-[1700px]:grid-cols-[minmax(0,1.12fr)_minmax(25rem,0.88fr)]">
         <div class="space-y-4 rounded-[1.6rem] border border-zinc-200 bg-zinc-50/70 p-4">
             <div class="grid gap-4 md:grid-cols-2">
                 <div class="space-y-2">
@@ -114,55 +114,15 @@
         <div class="space-y-4 rounded-[1.6rem] border border-zinc-200 bg-zinc-50/70 p-4">
             <div class="grid gap-4">
                 <div class="space-y-2">
-                    <label class="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.fields.audience_targets') }}</label>
-                    <div class="rounded-[1.5rem] border border-zinc-200 bg-white p-5">
-                        <div class="flex flex-wrap items-start justify-between gap-4 border-b border-zinc-200/80 pb-4">
-                            <div class="max-w-2xl">
-                                <p class="text-sm font-semibold text-zinc-950">{{ __('notifications::common.helpers.audience_targets_summary_title_announcements') }}</p>
-                                <p class="mt-1 text-sm leading-6 text-zinc-500">{{ __('notifications::common.helpers.audience_targets_summary_hint_announcements') }}</p>
-                            </div>
-                            <div class="flex flex-wrap items-center gap-2">
-                                @forelse ($selectedAudienceTargets as $target)
-                                    <span class="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">
-                                        {{ $displayAudienceTarget($target) }}
-                                    </span>
-                                @empty
-                                    <span class="rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700">
-                                        {{ __('notifications::common.helpers.audience_targets_empty') }}
-                                    </span>
-                                @endforelse
-                            </div>
-                        </div>
-
-                        <div class="mt-4 space-y-3">
-                            @foreach ($audienceTargetDefinitions as $targetKey => $targetDefinition)
-                                @php($isSelected = in_array($targetKey, $selectedAudienceTargets, true))
-                                <button
-                                    type="button"
-                                    wire:click="toggleAudienceTarget('{{ $targetKey }}')"
-                                    @class([
-                                        'w-full rounded-[1.35rem] border px-4 py-4 text-left transition',
-                                        'border-emerald-200 bg-emerald-50/80 shadow-[0_14px_28px_rgba(16,185,129,0.08)]' => $isSelected,
-                                        'border-zinc-200 bg-zinc-50/70 hover:border-zinc-300 hover:bg-white' => ! $isSelected,
-                                    ])
-                                >
-                                    <div class="flex items-start justify-between gap-4">
-                                        <div class="min-w-0 flex-1">
-                                            <p class="text-lg font-semibold tracking-tight text-zinc-950">{{ $targetDefinition['label'] }}</p>
-                                            <p class="mt-2 max-w-2xl text-sm leading-7 text-zinc-500">{{ $targetDefinition['description'] }}</p>
-                                        </div>
-                                        <span @class([
-                                            'mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-sm font-bold',
-                                            'border-emerald-300 bg-white text-emerald-700' => $isSelected,
-                                            'border-zinc-200 bg-white text-zinc-400' => ! $isSelected,
-                                        ])>
-                                            {{ $isSelected ? '✓' : '+' }}
-                                        </span>
-                                    </div>
-                                </button>
-                            @endforeach
-                        </div>
-                    </div>
+                    <x-notification.audience-selector
+                        :field-label="__('notifications::common.fields.audience_targets')"
+                        :summary-title="__('notifications::common.helpers.audience_targets_summary_title_announcements')"
+                        :summary-hint="__('notifications::common.helpers.audience_targets_summary_hint_announcements')"
+                        :definitions="$audienceTargetDefinitions"
+                        :selected="$selectedAudienceTargets"
+                        :empty-label="__('notifications::common.helpers.audience_targets_empty')"
+                        :selected-label="__('notifications::common.labels.selected')"
+                    />
                     @error('form.audience_targets') <p class="text-xs text-rose-600">{{ $message }}</p> @enderror
                 </div>
 
@@ -210,50 +170,40 @@
                 </label>
             </div>
 
-                <div class="rounded-2xl border border-zinc-200 bg-white px-4 py-4 shadow-[0_14px_30px_rgba(15,23,42,0.04)]">
-                    <p class="text-sm font-semibold text-zinc-900">{{ __('notifications::common.announcements.preview') }}</p>
-                    <p class="mt-1 text-xs leading-5 text-zinc-500">{{ __('notifications::common.helpers.manual_announcement_hint') }}</p>
-                    <div class="mt-3 flex flex-wrap items-center gap-2 text-xs text-zinc-500">
-                        <span class="rounded-full border border-zinc-200 bg-zinc-50 px-2.5 py-1 font-medium text-zinc-600">{{ __('notifications::common.fields.channel') }}: {{ __('notifications::common.channels.'.$form['channel']) }}</span>
-                        <span class="rounded-full border border-zinc-200 bg-zinc-50 px-2.5 py-1 font-medium text-zinc-600">{{ __('notifications::common.fields.schedule_mode') }}: {{ __('notifications::common.schedule_modes.'.$form['schedule_mode']) }}</span>
-                    </div>
-                    <div class="mt-4 rounded-[1.35rem] border border-zinc-200 bg-zinc-50/70 p-4">
-                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.helpers.audience_summary_preview') }}</p>
+                <x-notification.preview-card
+                    :title="__('notifications::common.announcements.preview')"
+                    :subject-label="__('notifications::common.fields.title')"
+                    :subject="$form['title'] ?: __('notifications::common.announcements.preview_title_fallback')"
+                    :body-label="__('notifications::common.fields.body')"
+                    :body="$form['body'] ?: __('notifications::common.helpers.announcement_preview_empty')"
+                    :meta="[
+                        __('notifications::common.fields.channel').': '.__('notifications::common.channels.'.$form['channel']),
+                        __('notifications::common.fields.schedule_mode').': '.__('notifications::common.schedule_modes.'.$form['schedule_mode']),
+                    ]"
+                    :audience="$audienceSelectionSummary['highlights']"
+                >
+                    <p class="text-xs leading-5 text-zinc-500">{{ __('notifications::common.helpers.manual_announcement_hint') }}</p>
+                    @if ($audienceSelectionSummary['facts'] !== [])
                         <div class="mt-3 flex flex-wrap gap-2">
-                            @forelse ($audienceSelectionSummary['highlights'] as $highlight)
-                                <span class="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">{{ $highlight }}</span>
-                            @empty
-                                <span class="text-sm text-zinc-400">{{ __('notifications::common.helpers.audience_targets_empty') }}</span>
-                            @endforelse
+                            @foreach ($audienceSelectionSummary['facts'] as $fact)
+                                <x-notification.chip mode="muted">{{ $fact }}</x-notification.chip>
+                            @endforeach
                         </div>
-                        @if ($audienceSelectionSummary['facts'] !== [])
-                            <div class="mt-3 flex flex-wrap gap-2">
-                                @foreach ($audienceSelectionSummary['facts'] as $fact)
-                                    <span class="rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-600">{{ $fact }}</span>
-                                @endforeach
-                            </div>
-                        @endif
-                    </div>
-                    <p class="mt-4 text-base font-semibold tracking-tight text-zinc-900">{{ $form['title'] ?: __('notifications::common.announcements.preview_title_fallback') }}</p>
+                    @endif
                     @if ($form['category'] === 'holiday')
-                        <div class="mt-3 flex flex-wrap gap-2 text-xs text-zinc-500">
-                            <span>{{ $form['holiday_name'] ?: '—' }}</span>
-                        <span>{{ $form['holiday_date'] ?: '—' }}</span>
-                        <span>{{ $form['duration'] ?: '—' }}</span>
-                        <span>{{ $form['scope'] ?: '—' }}</span>
-                    </div>
-                @endif
-                <p class="mt-2 text-sm leading-6 text-zinc-500">{{ $form['body'] ?: __('notifications::common.helpers.announcement_preview_empty') }}</p>
-            </div>
+                        <div class="mt-3 flex flex-wrap gap-2">
+                            <x-notification.chip mode="muted">{{ $form['holiday_name'] ?: '—' }}</x-notification.chip>
+                            <x-notification.chip mode="muted">{{ $form['holiday_date'] ?: '—' }}</x-notification.chip>
+                            <x-notification.chip mode="muted">{{ $form['duration'] ?: '—' }}</x-notification.chip>
+                            <x-notification.chip mode="muted">{{ $form['scope'] ?: '—' }}</x-notification.chip>
+                        </div>
+                    @endif
+                </x-notification.preview-card>
 
             <div class="flex items-center justify-end gap-2">
-                <button type="button" wire:click="resetForm" wire:loading.attr="disabled" wire:target="resetForm" class="rounded-2xl border border-zinc-200 px-5 py-2.5 text-sm font-semibold text-zinc-700 disabled:cursor-not-allowed disabled:opacity-60">
-                    {{ __('notifications::common.buttons.clear') }}
-                </button>
+                <x-ui.async-button type="button" variant="secondary" wire:click="resetForm" wire:loading.attr="disabled" wire:target="resetForm">{{ __('notifications::common.buttons.clear') }}</x-ui.async-button>
                 @if ($canManageCampaigns)
-                <button type="button" wire:click="save" wire:loading.attr="disabled" wire:target="save" class="rounded-2xl bg-zinc-950 px-5 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60">
-                    {{ __('notifications::common.buttons.save_campaign') }}
-                </button>
+                <x-ui.async-button type="button" variant="primary" wire:click="save" wire:loading.attr="disabled" wire:target="save">{{ __('notifications::common.buttons.save_campaign') }}</x-ui.async-button>
                 @endif
             </div>
         </div>

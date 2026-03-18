@@ -30,6 +30,7 @@ class ApprovalQueue extends Component
         app(NotificationCampaignDispatcher::class)->approveCampaign($campaign, $this->notes[$campaignId] ?? null);
         unset($this->notes[$campaignId]);
         $this->dispatch('notification-campaign-changed');
+        $this->dispatch('notify', type: 'success', message: __('notifications::common.messages.campaign_approved'));
     }
 
     public function reject(int $campaignId): void
@@ -39,6 +40,7 @@ class ApprovalQueue extends Component
         app(NotificationCampaignDispatcher::class)->rejectCampaign($campaign, $this->notes[$campaignId] ?? null);
         unset($this->notes[$campaignId]);
         $this->dispatch('notification-campaign-changed');
+        $this->dispatch('notify', type: 'success', message: __('notifications::common.messages.campaign_rejected'));
     }
 
     #[Computed]

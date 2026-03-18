@@ -63,6 +63,7 @@ class CampaignBoard extends Component
             ->update(['status' => $status]);
 
         $this->dispatch('notification-campaign-changed');
+        $this->dispatch('notify', type: 'success', message: __('notifications::common.messages.campaign_status_updated'));
     }
 
     public function duplicate(int $campaignId): void
@@ -73,6 +74,7 @@ class CampaignBoard extends Component
         app(NotificationCampaignDispatcher::class)->duplicateCampaign($campaign);
 
         $this->dispatch('notification-campaign-changed');
+        $this->dispatch('notify', type: 'success', message: __('notifications::common.messages.campaign_duplicated'));
     }
 
     public function resend(int $campaignId): void
@@ -83,6 +85,7 @@ class CampaignBoard extends Component
         app(NotificationCampaignDispatcher::class)->duplicateCampaign($campaign, dispatchNow: true);
 
         $this->dispatch('notification-campaign-changed');
+        $this->dispatch('notify', type: 'success', message: __('notifications::common.messages.campaign_resent'));
     }
 
     public function retry(int $campaignId): void
@@ -93,6 +96,7 @@ class CampaignBoard extends Component
         app(NotificationCampaignDispatcher::class)->retryFailedDispatches($campaign);
 
         $this->dispatch('notification-campaign-changed');
+        $this->dispatch('notify', type: 'success', message: __('notifications::common.messages.campaign_retried'));
     }
 
     public function dispatchNow(int $campaignId): void
@@ -103,6 +107,7 @@ class CampaignBoard extends Component
         app(NotificationCampaignDispatcher::class)->dispatchCampaign($campaign, forceNow: true);
 
         $this->dispatch('notification-campaign-changed');
+        $this->dispatch('notify', type: 'success', message: __('notifications::common.messages.campaign_dispatched'));
     }
 
     public function delete(int $campaignId): void
@@ -110,6 +115,7 @@ class CampaignBoard extends Component
         $this->authorizeCampaignManagement();
         NotificationCampaign::query()->whereKey($campaignId)->delete();
         $this->dispatch('notification-campaign-changed');
+        $this->dispatch('notify', type: 'success', message: __('notifications::common.messages.campaign_deleted'));
     }
 
     #[Computed]

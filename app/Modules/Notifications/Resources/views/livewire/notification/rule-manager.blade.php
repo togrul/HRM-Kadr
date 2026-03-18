@@ -26,104 +26,59 @@
                         <p class="mt-1 text-sm leading-6 text-zinc-500">{{ __('notifications::common.helpers.audience_targets_hint_rules') }}</p>
                     </div>
                     <div class="flex flex-wrap gap-2">
-                        <span class="rounded-full border border-zinc-200 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">{{ $categoryLabels[$form['category']] ?? $form['category'] }}</span>
-                        <span class="rounded-full border border-zinc-200 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">{{ __('notifications::common.channels.'.$form['channel']) }}</span>
+                        <x-notification.chip mode="neutral" size="sm" uppercase>{{ $categoryLabels[$form['category']] ?? $form['category'] }}</x-notification.chip>
+                        <x-notification.chip mode="neutral" size="sm" uppercase>{{ __('notifications::common.channels.'.$form['channel']) }}</x-notification.chip>
                     </div>
                 </div>
 
                 <div class="mt-4 grid gap-4 xl:grid-cols-2">
-                <div class="space-y-2">
-                    <label class="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.fields.category') }}</label>
+                <x-ui.input-shell class="space-y-2" :label="__('notifications::common.fields.category')">
                     <select wire:model.live="form.category" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
                         @foreach ($categories as $category)
                             <option value="{{ $category }}">{{ $categoryLabels[$category] ?? $category }}</option>
                         @endforeach
                     </select>
-                </div>
+                </x-ui.input-shell>
 
-                <div class="space-y-2">
-                    <label class="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.fields.channel') }}</label>
+                <x-ui.input-shell class="space-y-2" :label="__('notifications::common.fields.channel')">
                     <select wire:model.defer="form.channel" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
                         <option value="database">{{ __('notifications::common.channels.database') }}</option>
                         <option value="mail">{{ __('notifications::common.channels.mail') }}</option>
                     </select>
-                </div>
+                </x-ui.input-shell>
 
-                <div class="space-y-2">
-                    <label class="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.fields.trigger') }}</label>
+                <x-ui.input-shell class="space-y-2" :label="__('notifications::common.fields.trigger')" :error="$errors->first('form.trigger')">
                     <select wire:key="notification-trigger-{{ $form['category'] }}" wire:model.defer="form.trigger" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
                         @foreach ($triggerOptions as $triggerValue => $triggerLabel)
                             <option value="{{ $triggerValue }}">{{ $triggerLabel }}</option>
                         @endforeach
                     </select>
-                    @error('form.trigger') <p class="text-xs text-rose-600">{{ $message }}</p> @enderror
-                </div>
+                </x-ui.input-shell>
 
-                <div class="space-y-2">
-                    <label class="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.fields.template') }}</label>
+                <x-ui.input-shell class="space-y-2" :label="__('notifications::common.fields.template')">
                     <select wire:model.defer="form.template_id" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
                         <option value="">{{ __('notifications::common.badges.untemplated') }}</option>
                         @foreach ($templates as $template)
                             <option value="{{ $template->id }}">{{ $displayTemplateKey($template->key) }}</option>
                         @endforeach
                     </select>
-                </div>
+                </x-ui.input-shell>
 
                 <div class="space-y-2 xl:col-span-2">
-                    <label class="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.fields.audience_targets') }}</label>
-                    <div class="rounded-[1.5rem] border border-zinc-200 bg-white p-5">
-                        <div class="flex flex-wrap items-start justify-between gap-4 border-b border-zinc-200/80 pb-4">
-                            <div class="max-w-2xl">
-                                <p class="text-sm font-semibold text-zinc-950">{{ __('notifications::common.helpers.audience_targets_summary_title') }}</p>
-                                <p class="mt-1 text-sm leading-6 text-zinc-500">{{ __('notifications::common.helpers.audience_targets_summary_hint') }}</p>
-                            </div>
-                            <div class="flex flex-wrap items-center gap-2">
-                                @forelse ($selectedAudienceTargets as $target)
-                                    <span class="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">
-                                        {{ $displayAudienceTarget($target) }}
-                                    </span>
-                                @empty
-                                    <span class="rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700">
-                                        {{ __('notifications::common.helpers.audience_targets_empty') }}
-                                    </span>
-                                @endforelse
-                            </div>
-                        </div>
-
-                        <div class="mt-4 space-y-3">
-                            @foreach ($audienceTargetDefinitions as $targetKey => $targetDefinition)
-                                @php($isSelected = in_array($targetKey, $selectedAudienceTargets, true))
-                                <button
-                                    type="button"
-                                    wire:click="toggleAudienceTarget('{{ $targetKey }}')"
-                                    @class([
-                                        'w-full rounded-[1.35rem] border px-4 py-4 text-left transition',
-                                        'border-emerald-200 bg-emerald-50/80 shadow-[0_14px_28px_rgba(16,185,129,0.08)]' => $isSelected,
-                                        'border-zinc-200 bg-zinc-50/70 hover:border-zinc-300 hover:bg-white' => ! $isSelected,
-                                    ])
-                                >
-                                    <div class="flex items-start justify-between gap-4">
-                                        <div class="min-w-0 flex-1">
-                                            <p class="text-lg font-semibold tracking-tight text-zinc-950">{{ $targetDefinition['label'] }}</p>
-                                            <p class="mt-2 max-w-2xl text-sm leading-7 text-zinc-500">{{ $targetDefinition['description'] }}</p>
-                                        </div>
-                                        <span @class([
-                                            'mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-sm font-bold',
-                                            'border-emerald-300 bg-white text-emerald-700' => $isSelected,
-                                            'border-zinc-200 bg-white text-zinc-400' => ! $isSelected,
-                                        ])>
-                                            {{ $isSelected ? '✓' : '+' }}
-                                        </span>
-                                    </div>
-                                </button>
-                            @endforeach
-                        </div>
-                    </div>
+                    <x-notification.audience-selector
+                        :field-label="__('notifications::common.fields.audience_targets')"
+                        :summary-title="__('notifications::common.helpers.audience_targets_summary_title')"
+                        :summary-hint="__('notifications::common.helpers.audience_targets_summary_hint')"
+                        :definitions="$audienceTargetDefinitions"
+                        :selected="$selectedAudienceTargets"
+                        :empty-label="__('notifications::common.helpers.audience_targets_empty')"
+                        :selected-label="__('notifications::common.labels.selected')"
+                    />
                     @error('form.audience_targets') <p class="text-xs text-rose-600">{{ $message }}</p> @enderror
                 </div>
 
                 @if ($showDepartmentPicker || $showSpecificUsersPicker)
-                    <div class="xl:col-span-2 grid gap-4 xl:grid-cols-2">
+                    <div class="xl:col-span-2 grid gap-4 min-[1400px]:grid-cols-2">
                         @if ($showDepartmentPicker)
                             <div class="space-y-2">
                                 <x-ui.searchable-multiselect
@@ -164,9 +119,7 @@
                     <div class="flex flex-wrap items-center justify-between gap-2 px-1">
                         <p class="text-xs leading-5 text-zinc-500">{{ __('notifications::common.helpers.rule_approval_hint') }}</p>
                         @if ($canApproveCampaigns)
-                            <button type="button" wire:click="$dispatch('notification-settings-open-tab', { tab: 'approval' })" class="rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-xs font-semibold text-zinc-700">
-                                {{ __('notifications::common.buttons.go_to_approval_queue') }}
-                            </button>
+                            <x-ui.async-button type="button" variant="secondary" size="sm" wire:click="$dispatch('notification-settings-open-tab', { tab: 'approval' })">{{ __('notifications::common.buttons.go_to_approval_queue') }}</x-ui.async-button>
                         @endif
                     </div>
                 </div>
@@ -180,14 +133,10 @@
 
             <div class="flex items-center justify-end gap-3">
                 @if ($editingId && $canManageRules)
-                    <button type="button" wire:click="resetForm" wire:loading.attr="disabled" wire:target="resetForm" class="rounded-2xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-600 disabled:cursor-not-allowed disabled:opacity-60">
-                        {{ __('notifications::common.buttons.clear') }}
-                    </button>
+                    <x-ui.async-button type="button" variant="secondary" wire:click="resetForm" wire:loading.attr="disabled" wire:target="resetForm">{{ __('notifications::common.buttons.clear') }}</x-ui.async-button>
                 @endif
                 @if ($canManageRules)
-                    <button type="button" wire:click="save" wire:loading.attr="disabled" wire:target="save" class="rounded-2xl bg-zinc-950 px-5 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60">
-                        {{ $editingId ? __('notifications::common.buttons.update_rule') : __('notifications::common.buttons.save_rule') }}
-                    </button>
+                    <x-ui.async-button type="button" variant="primary" wire:click="save" wire:loading.attr="disabled" wire:target="save">{{ $editingId ? __('notifications::common.buttons.update_rule') : __('notifications::common.buttons.save_rule') }}</x-ui.async-button>
                 @endif
             </div>
         </div>
@@ -205,27 +154,27 @@
                                 <p class="text-sm font-semibold text-zinc-950">{{ $categoryLabels[$rule->category] ?? $rule->category }} / {{ $displayTrigger($rule->trigger) }}</p>
                                 <p class="text-xs uppercase tracking-tight font-semibold text-zinc-400">{{ __('notifications::common.channels.'.$rule->channel) }} @if($rule->template) / {{ $displayTemplateKey($rule->template->key) }} @endif</p>
                             </div>
-                            <span class="rounded-full border border-zinc-200 px-2.5 py-1 text-[11px] font-semibold {{ $rule->is_active ? 'bg-emerald-50 text-emerald-700' : 'bg-zinc-100 text-zinc-500' }}">
+                            <x-notification.chip :mode="$rule->is_active ? 'active' : 'inactive'" size="sm">
                                 {{ $rule->is_active ? __('notifications::common.badges.active') : __('notifications::common.badges.inactive') }}
-                            </span>
+                            </x-notification.chip>
                         </div>
                         <div class="mt-3 space-y-2">
                             <p class="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-400">{{ __('notifications::common.fields.audience_targets') }}</p>
                             <div class="flex flex-wrap gap-2">
                                 @forelse ((array) data_get($rule->audience_config, 'targets', []) as $target)
-                                    <span class="whitespace-nowrap rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-xs font-semibold text-zinc-700">{{ $displayAudienceTarget($target) }}</span>
+                                    <x-notification.chip mode="muted">{{ $displayAudienceTarget($target) }}</x-notification.chip>
                                 @empty
-                                    <span class="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-xs font-semibold text-zinc-500">—</span>
+                                    <x-notification.chip mode="muted">—</x-notification.chip>
                                 @endforelse
                                 @if ($rule->approval_required)
-                                    <span class="whitespace-nowrap rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700">{{ __('notifications::common.helpers.approval_required_short') }}</span>
+                                    <x-notification.chip mode="amber" uppercase>{{ __('notifications::common.helpers.approval_required_short') }}</x-notification.chip>
                                 @endif
                             </div>
                         </div>
                         @if ($canManageRules)
                             <div class="mt-4 flex items-center justify-end gap-2">
-                                <button type="button" wire:click="edit({{ $rule->id }})" wire:loading.attr="disabled" wire:target="edit" class="rounded-xl border border-zinc-200 px-3 py-2 text-xs font-semibold text-zinc-600 disabled:cursor-not-allowed disabled:opacity-60">{{ __('notifications::common.buttons.edit') }}</button>
-                                <button type="button" wire:click="delete({{ $rule->id }})" wire:loading.attr="disabled" wire:target="delete" class="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 disabled:cursor-not-allowed disabled:opacity-60">{{ __('notifications::common.buttons.delete') }}</button>
+                                <x-ui.async-button type="button" variant="secondary" size="sm" wire:click="edit({{ $rule->id }})" wire:loading.attr="disabled" wire:target="edit">{{ __('notifications::common.buttons.edit') }}</x-ui.async-button>
+                                <x-ui.async-button type="button" variant="danger" size="sm" wire:click="delete({{ $rule->id }})" wire:loading.attr="disabled" wire:target="delete">{{ __('notifications::common.buttons.delete') }}</x-ui.async-button>
                             </div>
                         @endif
                     </div>

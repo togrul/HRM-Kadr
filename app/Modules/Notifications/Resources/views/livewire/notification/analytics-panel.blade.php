@@ -2,24 +2,21 @@
     <div class="space-y-4">
         <div class="rounded-[1.6rem] border border-zinc-200 bg-zinc-50/70 p-4">
             <div class="grid gap-4 xl:grid-cols-[16rem_minmax(0,1fr)]">
-                <div class="space-y-2">
-                    <label class="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.fields.date_range') }}</label>
+                <x-ui.input-shell :label="__('notifications::common.fields.date_range')">
                     <select wire:model.live="range" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
                         @foreach ($rangeOptions as $value => $label)
                             <option value="{{ $value }}">{{ $label }}</option>
                         @endforeach
                     </select>
-                </div>
+                </x-ui.input-shell>
                 @if ($range === 'custom')
                     <div class="grid gap-4 md:grid-cols-2">
-                        <div class="space-y-2">
-                            <label class="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.fields.date_from') }}</label>
+                        <x-ui.input-shell :label="__('notifications::common.fields.date_from')">
                             <input type="date" wire:model.live="dateFrom" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
-                        </div>
-                        <div class="space-y-2">
-                            <label class="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.fields.date_to') }}</label>
+                        </x-ui.input-shell>
+                        <x-ui.input-shell :label="__('notifications::common.fields.date_to')">
                             <input type="date" wire:model.live="dateTo" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
-                        </div>
+                        </x-ui.input-shell>
                     </div>
                 @else
                     <div class="flex items-end">
@@ -53,23 +50,24 @@
                 <p class="text-sm font-semibold text-zinc-950">{{ __('notifications::common.titles.channel_health') }}</p>
                 <div class="mt-4 space-y-3">
                     @forelse ($statusByChannel as $channelRow)
-                        <div class="rounded-2xl border border-zinc-200 bg-zinc-50/70 px-4 py-4">
-                            <div class="grid gap-4 min-[980px]:grid-cols-[minmax(0,12rem)_minmax(0,1fr)]">
-                                <div class="rounded-[1.35rem] border border-zinc-200 bg-white px-4 py-4">
+                        <div class="overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-50/70 px-4 py-4">
+                            <div class="rounded-[1.35rem] border border-zinc-200 bg-white px-4 py-4">
+                                <div class="max-w-xl">
                                     <p class="text-lg font-semibold tracking-tight text-zinc-950">{{ __('notifications::common.channels.'.$channelRow['channel']) }}</p>
-                                    <p class="mt-2 text-sm leading-6 text-zinc-500">{{ __('notifications::common.helpers.channel_health_hint') }}</p>
+                                    <p class="mt-1 text-sm leading-6 text-zinc-500">{{ __('notifications::common.helpers.channel_health_hint') }}</p>
                                 </div>
-                                <div class="grid gap-3 md:grid-cols-3">
-                                    <div class="rounded-[1.25rem] border border-zinc-200 bg-white px-4 py-3">
-                                        <p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-400">{{ __('notifications::common.stats.sent') }}</p>
+
+                                <div class="mt-4 grid grid-cols-3 gap-3">
+                                    <div class="min-w-0 rounded-[1.25rem] border border-zinc-200 bg-zinc-50/70 px-3 py-3 text-center">
+                                        <x-ui.field-label as="p" class="whitespace-nowrap text-[10px] tracking-[0.12em]">{{ __('notifications::common.stats.sent') }}</x-ui.field-label>
                                         <p class="mt-2 text-2xl font-semibold tracking-tight text-emerald-700">{{ $channelRow['sent'] }}</p>
                                     </div>
-                                    <div class="rounded-[1.25rem] border border-zinc-200 bg-white px-4 py-3">
-                                        <p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-400">{{ __('notifications::common.stats.failed') }}</p>
+                                    <div class="min-w-0 rounded-[1.25rem] border border-zinc-200 bg-zinc-50/70 px-3 py-3 text-center">
+                                        <x-ui.field-label as="p" class="whitespace-nowrap text-[10px] tracking-[0.12em]">{{ __('notifications::common.stats.failed') }}</x-ui.field-label>
                                         <p class="mt-2 text-2xl font-semibold tracking-tight text-rose-700">{{ $channelRow['failed'] }}</p>
                                     </div>
-                                    <div class="rounded-[1.25rem] border border-zinc-200 bg-white px-4 py-3">
-                                        <p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-400">{{ __('notifications::common.statuses.pending') }}</p>
+                                    <div class="min-w-0 rounded-[1.25rem] border border-zinc-200 bg-zinc-50/70 px-3 py-3 text-center">
+                                        <x-ui.field-label as="p" class="whitespace-nowrap text-[10px] tracking-[0.12em]">{{ __('notifications::common.statuses.pending') }}</x-ui.field-label>
                                         <p class="mt-2 text-2xl font-semibold tracking-tight text-amber-700">{{ $channelRow['pending'] }}</p>
                                     </div>
                                 </div>

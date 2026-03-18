@@ -7,10 +7,21 @@
 
     $approvalBadgeClasses = static function (string $status): string {
         return match ($status) {
-            'pending' => 'border-amber-200 bg-amber-50 text-amber-700',
-            'approved' => 'border-emerald-200 bg-emerald-50 text-emerald-700',
-            'rejected' => 'border-rose-200 bg-rose-50 text-rose-700',
-            default => 'border-zinc-200 bg-zinc-50 text-zinc-600',
+            'pending' => 'amber',
+            'approved' => 'emerald',
+            'rejected' => 'rose',
+            default => 'muted',
+        };
+    };
+
+    $statusChipMode = static function (string $status): string {
+        return match ($status) {
+            'sent' => 'emerald',
+            'failed' => 'rose',
+            'queued', 'pending' => 'amber',
+            'approved' => 'emerald',
+            'rejected', 'cancelled' => 'rose',
+            default => 'muted',
         };
     };
 @endphp
@@ -19,13 +30,17 @@
     <div class="space-y-4">
         <div class="rounded-[1.6rem] border border-zinc-200 bg-zinc-50/70 p-4">
             <div class="grid gap-3 lg:grid-cols-[minmax(0,1fr)_14rem]">
-                <input type="text" wire:model.live.debounce.300ms="search" placeholder="{{ __('notifications::common.helpers.search_history') }}" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
-                <select wire:model.live="categoryFilter" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
-                    <option value="all">{{ __('notifications::common.helpers.all_categories') }}</option>
-                    @foreach ($categoryLabels as $category => $label)
-                        <option value="{{ $category }}">{{ $label }}</option>
-                    @endforeach
-                </select>
+                <x-ui.input-shell>
+                    <input type="text" wire:model.live.debounce.300ms="search" placeholder="{{ __('notifications::common.helpers.search_history') }}" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
+                </x-ui.input-shell>
+                <x-ui.input-shell>
+                    <select wire:model.live="categoryFilter" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
+                        <option value="all">{{ __('notifications::common.helpers.all_categories') }}</option>
+                        @foreach ($categoryLabels as $category => $label)
+                            <option value="{{ $category }}">{{ $label }}</option>
+                        @endforeach
+                    </select>
+                </x-ui.input-shell>
             </div>
         </div>
 
@@ -38,19 +53,19 @@
                                 <div class="flex flex-wrap items-center gap-2.5">
                                     <h4 class="text-xl font-semibold tracking-tight text-zinc-950">{{ $campaign->display_title ?? $campaign->title }}</h4>
                                     @if (($campaign->display_copy_count ?? 0) > 0)
-                                        <span class="rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-[11px] font-semibold text-sky-700">
+                                        <x-notification.chip mode="sky" size="sm" uppercase>
                                             {{ __('notifications::common.badges.copy_label') }}{{ $campaign->display_copy_count > 1 ? ' ×'.$campaign->display_copy_count : '' }}
-                                        </span>
+                                        </x-notification.chip>
                                     @endif
-                                    <span class="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-500">{{ $categoryLabels[$campaign->category] ?? $campaign->category }}</span>
-                                    <span class="rounded-full px-3 py-1 text-[11px] font-semibold {{ $campaign->status === 'failed' ? 'bg-rose-50 text-rose-700 ring-1 ring-rose-200' : ($campaign->status === 'sent' ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200' : 'bg-zinc-100 text-zinc-700 ring-1 ring-zinc-200') }}">{{ __('notifications::common.statuses.'.$campaign->status) }}</span>
+                                    <x-notification.chip mode="muted" size="sm" uppercase>{{ $categoryLabels[$campaign->category] ?? $campaign->category }}</x-notification.chip>
+                                    <x-notification.chip :mode="$statusChipMode($campaign->status)" size="sm" uppercase>{{ __('notifications::common.statuses.'.$campaign->status) }}</x-notification.chip>
                                 </div>
                                 <div class="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-zinc-500">
                                     <span>{{ __('notifications::common.fields.creator') }}: <span class="font-medium text-zinc-700">{{ $campaign->creator?->name ?? '—' }}</span></span>
                                     <span>{{ __('notifications::common.fields.scheduled_at') }}: <span class="font-medium text-zinc-700">{{ optional($campaign->scheduled_at ?? $campaign->created_at)->format('d.m.Y H:i') ?: '—' }}</span></span>
-                                    <span class="inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold tracking-tight {{ $approvalBadgeClasses($campaign->approval_status) }}">
+                                    <x-notification.chip :mode="$approvalBadgeClasses($campaign->approval_status)" size="sm" uppercase>
                                         {{ __('notifications::common.statuses.'.$campaign->approval_status) }}
-                                    </span>
+                                    </x-notification.chip>
                                 </div>
                             </div>
 
@@ -74,7 +89,7 @@
                             <section class="rounded-[1.45rem] border border-zinc-200 bg-zinc-50/50 p-4">
                                 <div class="flex items-center justify-between gap-3">
                                     <p class="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.titles.audit_timeline') }}</p>
-                                    <span class="rounded-full border border-zinc-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-zinc-500">{{ $campaign->approvals->count() }}</span>
+                                    <x-notification.chip mode="neutral" size="sm">{{ $campaign->approvals->count() }}</x-notification.chip>
                                 </div>
 
                                 <div class="mt-4 space-y-3">
@@ -104,9 +119,9 @@
                             <section class="rounded-[1.45rem] border border-zinc-200 bg-zinc-50/50 p-4">
                                 <div class="flex items-center justify-between gap-3">
                                     <p class="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.titles.delivery_summary') }}</p>
-                                    <span class="rounded-full border border-zinc-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-zinc-500">
+                                    <x-notification.chip mode="neutral" size="sm">
                                         {{ $campaign->dispatches->isNotEmpty() ? $campaign->dispatches->count() : __('notifications::common.statuses.'.$campaign->status) }}
-                                    </span>
+                                    </x-notification.chip>
                                 </div>
 
                                 <div class="mt-4 grid gap-3 sm:grid-cols-2">
@@ -133,7 +148,7 @@
                                                         @endif
                                                     </div>
                                                     <div class="shrink-0 text-right">
-                                                        <p class="text-sm font-semibold {{ $dispatch->status === 'failed' ? 'text-rose-700' : 'text-emerald-700' }}">{{ __('notifications::common.statuses.'.$dispatch->status) }}</p>
+                                                        <x-notification.chip :mode="$statusChipMode($dispatch->status)" size="sm" uppercase>{{ __('notifications::common.statuses.'.$dispatch->status) }}</x-notification.chip>
                                                         <p class="mt-1 text-xs text-zinc-500">{{ __('notifications::common.labels.attempts') }}: {{ max(1, (int) $dispatch->attempt_count) }}</p>
                                                         <p class="mt-1 text-xs text-zinc-400">{{ optional($dispatch->sent_at ?? $dispatch->failed_at ?? $dispatch->last_attempt_at)->format('d.m.Y H:i') ?: '—' }}</p>
                                                     </div>

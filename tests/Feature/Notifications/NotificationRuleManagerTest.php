@@ -126,4 +126,17 @@ class NotificationRuleManagerTest extends TestCase
 
         $this->assertDatabaseCount('notification_rules', 0);
     }
+
+    public function test_rule_manager_save_requires_manage_permission(): void
+    {
+        $user = User::factory()->create();
+        Permission::findOrCreate('access-settings', 'web');
+        $user->givePermissionTo(['access-settings']);
+        $this->actingAs($user);
+
+        Livewire::test(\App\Modules\Notifications\Livewire\RuleManager::class)
+            ->set('form.trigger', 'birthday_due')
+            ->call('save')
+            ->assertForbidden();
+    }
 }

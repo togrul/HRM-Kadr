@@ -31,13 +31,14 @@
                                 {{ $flowTitle }}
                             </h3>
                         </div>
-                        <button
+                        <x-ui.async-button
                             type="button"
+                            variant="primary"
                             wire:click="{{ $flowKey === 'birthday' ? 'seedBirthdayStarter' : ($flowKey === 'position_change' ? 'seedPositionChangeStarter' : 'seedHolidayStarter') }}"
-                            class="inline-flex shrink-0 items-center justify-center rounded-2xl bg-zinc-950 px-4 py-2.5 text-sm font-semibold tracking-tight text-white shadow-[0_14px_28px_rgba(15,23,42,0.16)] transition hover:bg-zinc-900"
+                            class="shrink-0 shadow-[0_14px_28px_rgba(15,23,42,0.16)]"
                         >
                             {{ __('notifications::common.buttons.seed') }}
-                        </button>
+                        </x-ui.async-button>
                     </div>
 
                     <p class="w-full text-sm leading-2 text-zinc-500 mt-2">
@@ -51,60 +52,23 @@
                   </p>
 
                     <div class="mt-4 flex flex-wrap items-center gap-2">
-                        <span class="inline-flex rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-tight text-zinc-500 shadow-[0_6px_14px_rgba(15,23,42,0.04)]">
-                            {{ $displayTemplateKey($starterFlows[$flowKey]['template_key']) }}
-                        </span>
-                        <span class="inline-flex rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-tight text-zinc-500 shadow-[0_6px_14px_rgba(15,23,42,0.04)]">
-                            {{ $displayTrigger($starterFlows[$flowKey]['trigger'] ?? null) }}
-                        </span>
-                        <span class="inline-flex rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-tight text-zinc-500 shadow-[0_6px_14px_rgba(15,23,42,0.04)]">
-                            {{ __('notifications::common.channels.'.$starterFlows[$flowKey]['channel']) }}
-                        </span>
-                        <span class="inline-flex rounded-full border px-3 py-1.5 text-[11px] uppercase font-semibold tracking-tight {{ $starterFlows[$flowKey]['approval_required'] ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-emerald-200 bg-emerald-50 text-emerald-700' }}">
-                            {{ $starterFlows[$flowKey]['approval_required'] ? __('notifications::common.badges.approval_required') : __('notifications::common.badges.instant_send') }}
-                        </span>
+                        <x-notification.chip mode="neutral" size="sm" uppercase class="shadow-[0_6px_14px_rgba(15,23,42,0.04)]">{{ $displayTemplateKey($starterFlows[$flowKey]['template_key']) }}</x-notification.chip>
+                        <x-notification.chip mode="neutral" size="sm" uppercase class="shadow-[0_6px_14px_rgba(15,23,42,0.04)]">{{ $displayTrigger($starterFlows[$flowKey]['trigger'] ?? null) }}</x-notification.chip>
+                        <x-notification.chip mode="neutral" size="sm" uppercase class="shadow-[0_6px_14px_rgba(15,23,42,0.04)]">{{ __('notifications::common.channels.'.$starterFlows[$flowKey]['channel']) }}</x-notification.chip>
+                        <x-notification.chip :mode="$starterFlows[$flowKey]['approval_required'] ? 'amber' : 'emerald'" size="sm" uppercase>{{ $starterFlows[$flowKey]['approval_required'] ? __('notifications::common.badges.approval_required') : __('notifications::common.badges.instant_send') }}</x-notification.chip>
                     </div>
 
-                    <div class="mt-4 rounded-[1.45rem] border border-zinc-200 bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.045)]">
-                        <div class="space-y-2">
-                            <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400">
-                                {{ __('notifications::common.flows.subject') }}
-                            </p>
-                            <p class="line-clamp-2 break-words text-[1.05rem] font-semibold leading-8 tracking-tight text-zinc-950">
-                                {{ $starterFlows[$flowKey]['subject'] ?: $fallbackPreviewText }}
-                            </p>
-                        </div>
-
-                        <div class="my-4 h-px bg-zinc-200"></div>
-
-                        <div class="space-y-2">
-                            <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400">
-                                {{ __('notifications::common.flows.body') }}
-                            </p>
-                            <p class="line-clamp-5 break-words text-[15px] leading-7 text-zinc-700">
-                                {{ $starterFlows[$flowKey]['body'] ?: $fallbackPreviewText }}
-                            </p>
-                        </div>
-
-                        <div class="mt-5 flex flex-wrap gap-2">
-                            @foreach ($starterFlows[$flowKey]['meta_items'] as $metaItem)
-                                <span class="inline-flex rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-xs font-medium tracking-tight text-zinc-600">
-                                    {{ $metaItem }}
-                                </span>
-                            @endforeach
-                        </div>
-
-                        <div class="mt-4 border-t border-zinc-200 pt-4">
-                            <div class="flex flex-wrap gap-2">
-                                @forelse ($starterFlows[$flowKey]['audience_labels'] as $audienceLabel)
-                                    <span class="inline-flex rounded-full border border-sky-200 bg-sky-50 px-3 py-1.5 text-xs font-medium tracking-tight text-sky-700">
-                                        {{ $audienceLabel }}
-                                    </span>
-                                @empty
-                                    <span class="text-sm text-zinc-500">{{ $fallbackPreviewText }}</span>
-                                @endforelse
-                            </div>
-                        </div>
+                    <div class="mt-4">
+                        <x-notification.preview-card
+                            :subject-label="__('notifications::common.flows.subject')"
+                            :subject="$starterFlows[$flowKey]['subject'] ?: $fallbackPreviewText"
+                            :body-label="__('notifications::common.flows.body')"
+                            :body="$starterFlows[$flowKey]['body'] ?: $fallbackPreviewText"
+                            :meta="$starterFlows[$flowKey]['meta_items']"
+                            :audience="$starterFlows[$flowKey]['audience_labels']"
+                            :fallback="$fallbackPreviewText"
+                            body-class="line-clamp-5"
+                        />
                     </div>
                 </div>
             @endforeach
@@ -145,7 +109,12 @@
                         <div class="flex items-start justify-between gap-3">
                             <div>
                                 <p class="text-sm font-semibold text-zinc-950">{{ __('notifications::common.categories.'.$rule->category) }} / {{ $displayTrigger($rule->trigger) }}</p>
-                                <p class="mt-1 text-xs uppercase tracking-tight text-zinc-400">{{ __('notifications::common.channels.'.$rule->channel) }} @if($rule->approval_required)/ {{ __('notifications::common.helpers.approval_required_short') }} @endif</p>
+                                <div class="mt-2 flex flex-wrap items-center gap-2">
+                                    <span class="whitespace-nowrap rounded-full border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-tight text-zinc-500">{{ __('notifications::common.channels.'.$rule->channel) }}</span>
+                                    @if($rule->approval_required)
+                                        <span class="whitespace-nowrap rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-700">{{ __('notifications::common.helpers.approval_required_short') }}</span>
+                                    @endif
+                                </div>
                             </div>
                             <span class="inline-flex rounded-full border border-zinc-200 px-2.5 py-1 text-[11px] uppercase font-semibold {{ $rule->is_active ? 'bg-emerald-50 text-emerald-700' : 'bg-zinc-100 text-zinc-500' }}">
                                 {{ $rule->is_active ? __('notifications::common.badges.active') : __('notifications::common.badges.inactive') }}

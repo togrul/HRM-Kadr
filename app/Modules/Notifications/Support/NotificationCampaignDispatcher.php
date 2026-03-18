@@ -357,7 +357,8 @@ class NotificationCampaignDispatcher
                         recipientEmail: $recipient->email,
                         channel: $campaign->channel,
                         attemptCount: ((int) $dispatch->attempt_count) + 1,
-                        existingMeta: (array) ($dispatch->meta ?? [])
+                        existingMeta: (array) ($dispatch->meta ?? []),
+                        driver: $campaign->channel === 'mail' ? (string) config('mail.default') : null,
                     ),
                     'failed_at' => now(),
                 ]);
@@ -432,7 +433,8 @@ class NotificationCampaignDispatcher
                     'meta' => $this->failedDispatchMeta(
                         recipientEmail: $recipient->email,
                         channel: $campaign->channel,
-                        attemptCount: 1
+                        attemptCount: 1,
+                        driver: $campaign->channel === 'mail' ? (string) config('mail.default') : null,
                     ),
                 ]);
             }
@@ -488,7 +490,8 @@ class NotificationCampaignDispatcher
                     'meta' => $this->failedDispatchMeta(
                         recipientEmail: $recipient->email,
                         channel: $rule->channel,
-                        attemptCount: 1
+                        attemptCount: 1,
+                        driver: $rule->channel === 'mail' ? (string) config('mail.default') : null,
                     ),
                 ]);
             }
@@ -715,11 +718,13 @@ class NotificationCampaignDispatcher
         ?string $recipientEmail,
         ?string $channel,
         int $attemptCount,
-        array $existingMeta = []
+        array $existingMeta = [],
+        ?string $driver = null,
     ): array {
         return array_merge($existingMeta, [
             'recipient_email' => $recipientEmail,
             'channel' => $channel,
+            'driver' => $driver,
             'retry_after_minutes' => $this->retryBackoffMinutes($attemptCount),
             'next_retry_at' => $this->nextRetryAt($attemptCount)->toIso8601String(),
         ]);

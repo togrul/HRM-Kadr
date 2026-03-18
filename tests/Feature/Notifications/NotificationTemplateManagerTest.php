@@ -90,4 +90,19 @@ class NotificationTemplateManagerTest extends TestCase
                 && $mail->isHtml === true;
         });
     }
+
+    public function test_template_manager_save_requires_manage_permission(): void
+    {
+        $user = User::factory()->create();
+        Permission::findOrCreate('access-settings', 'web');
+        $user->givePermissionTo(['access-settings']);
+        $this->actingAs($user);
+
+        Livewire::test(\App\Modules\Notifications\Livewire\TemplateManager::class)
+            ->set('form.key', 'birthday.mail')
+            ->set('form.category', 'birthday')
+            ->set('form.body_template', 'Salam')
+            ->call('save')
+            ->assertForbidden();
+    }
 }

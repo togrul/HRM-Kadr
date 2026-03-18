@@ -142,6 +142,80 @@ class NotificationCampaignWorkflowTest extends TestCase
         $this->assertDatabaseCount('notifications', 0);
     }
 
+    public function test_announcement_mail_channel_records_provider_failure_when_mailer_throws(): void
+    {
+        $creator = User::factory()->create(['is_active' => true]);
+        $recipient = User::factory()->create([
+            'is_active' => true,
+            'email' => 'recipient@example.test',
+        ]);
+        $this->grantNotificationWorkflowPermissions($creator);
+        $this->actingAs($creator);
+
+        $pendingMail = new class
+        {
+            public function send(object $mailable): void
+            {
+                throw new \RuntimeException('SMTP provider rejected recipient');
+            }
+        };
+
+        Mail::shouldReceive('to')
+            ->once()
+            ->with('recipient@example.test')
+            ->andReturn($pendingMail);
+
+        Livewire::test(\App\Modules\Notifications\Livewire\AnnouncementComposer::class)
+            ->set('form.title', 'Mail failure')
+            ->set('form.body', '<p>Provider failure.</p>')
+            ->set('form.channel', 'mail')
+            ->set('form.format', 'html')
+            ->set('form.audience_targets', 'specific_users')
+            ->set('form.user_ids', [$recipient->id])
+            ->set('form.approval_required', false)
+            ->set('form.send_now', true)
+            ->call('save')
+            ->assertDispatched('notify');
+
+        $campaign = NotificationCampaign::query()->firstOrFail();
+        $dispatch = NotificationDispatch::query()->firstOrFail();
+
+        $this->assertSame('failed', $campaign->status);
+        $this->assertSame('failed', $dispatch->status);
+        $this->assertSame('SMTP provider rejected recipient', $dispatch->error_message);
+        $this->assertSame(config('mail.default'), data_get($dispatch->meta, 'driver'));
+    }
+
+    public function test_announcement_mail_channel_fails_when_recipient_has_no_email(): void
+    {
+        $creator = User::factory()->create(['is_active' => true]);
+        $recipient = User::factory()->create([
+            'is_active' => true,
+            'email' => '',
+        ]);
+        $this->grantNotificationWorkflowPermissions($creator);
+        $this->actingAs($creator);
+
+        Livewire::test(\App\Modules\Notifications\Livewire\AnnouncementComposer::class)
+            ->set('form.title', 'Mail without recipient email')
+            ->set('form.body', 'Test')
+            ->set('form.channel', 'mail')
+            ->set('form.audience_targets', 'specific_users')
+            ->set('form.user_ids', [$recipient->id])
+            ->set('form.approval_required', false)
+            ->set('form.send_now', true)
+            ->call('save')
+            ->assertDispatched('notify');
+
+        $campaign = NotificationCampaign::query()->firstOrFail();
+        $dispatch = NotificationDispatch::query()->firstOrFail();
+
+        $this->assertSame('failed', $campaign->status);
+        $this->assertSame('failed', $dispatch->status);
+        $this->assertSame('Recipient e-poçt ünvanı yoxdur.', $dispatch->error_message);
+        $this->assertSame(config('mail.default'), data_get($dispatch->meta, 'driver'));
+    }
+
     public function test_announcement_composer_can_store_scheduled_holiday_campaign_without_dispatching(): void
     {
         $creator = User::factory()->create(['is_active' => true]);
@@ -326,6 +400,46 @@ class NotificationCampaignWorkflowTest extends TestCase
         $campaign->refresh();
 
         $this->assertSame('draft', $campaign->status);
+    }
+
+    public function test_announcement_composer_save_requires_campaign_management_permission(): void
+    {
+        $user = User::factory()->create(['is_active' => true]);
+        Permission::findOrCreate('access-settings', 'web');
+        $user->givePermissionTo(['access-settings']);
+        $this->actingAs($user);
+
+        Livewire::test(\App\Modules\Notifications\Livewire\AnnouncementComposer::class)
+            ->set('form.title', 'Unauthorized announcement')
+            ->set('form.body', 'Test')
+            ->call('save')
+            ->assertForbidden();
+    }
+
+    public function test_approval_queue_approve_requires_approval_permission(): void
+    {
+        $user = User::factory()->create(['is_active' => true]);
+        Permission::findOrCreate('access-settings', 'web');
+        Permission::findOrCreate('manage-notification-campaigns', 'web');
+        $user->givePermissionTo(['access-settings', 'manage-notification-campaigns']);
+        $this->actingAs($user);
+
+        $campaign = NotificationCampaign::query()->create([
+            'category' => 'announcement',
+            'trigger' => 'manual_announcement',
+            'title' => 'Needs approval',
+            'channel' => 'database',
+            'audience_config' => ['targets' => ['admins']],
+            'payload' => ['action' => 'announcement'],
+            'format' => 'text',
+            'status' => 'draft',
+            'approval_status' => 'pending',
+            'created_by' => $user->id,
+        ]);
+
+        Livewire::test(\App\Modules\Notifications\Livewire\ApprovalQueue::class)
+            ->call('approve', $campaign->id)
+            ->assertForbidden();
     }
 
     public function test_campaign_retry_respects_backoff_window(): void
