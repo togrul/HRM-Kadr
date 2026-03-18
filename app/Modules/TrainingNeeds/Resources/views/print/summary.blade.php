@@ -24,7 +24,7 @@
 <body>
     <div class="brand-shell">
         <div class="brand-header">
-            <p class="brand-kicker">DMX HR • Training Needs</p>
+            <p class="brand-kicker">DMX HR • {{ __('training_needs::dashboard.title') }}</p>
             <h1>{{ __('training_needs::dashboard.cards.reporting_summary') }}</h1>
             <p class="brand-meta">{{ now()->format('d.m.Y H:i') }}</p>
         </div>

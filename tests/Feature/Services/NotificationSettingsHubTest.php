@@ -43,7 +43,8 @@ class NotificationSettingsHubTest extends TestCase
             ->assertSee('Bildirişlər modulu')
             ->assertSee('Ümumi baxış')
             ->assertSee('Analitika')
-            ->assertSee('Qaydalar');
+            ->assertSee('Qaydalar')
+            ->assertSee(route('docs.guide', ['focus' => 'notifications']), false);
     }
 
     public function test_services_page_can_open_notifications_settings_section(): void

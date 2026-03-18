@@ -15,6 +15,7 @@ use App\Models\TrainingProgram;
 use App\Models\TrainingSession;
 use App\Modules\TrainingNeeds\Livewire\Dashboard;
 use App\Modules\TrainingNeeds\Livewire\Analytics as TrainingNeedsAnalytics;
+use App\Modules\TrainingNeeds\Livewire\CertificateViewer as TrainingNeedsCertificateViewer;
 use App\Modules\TrainingNeeds\Livewire\Lists as TrainingNeedsLists;
 use App\Modules\TrainingNeeds\Livewire\Overview as TrainingNeedsOverview;
 use App\Modules\TrainingNeeds\Livewire\Reports as TrainingNeedsReports;
@@ -79,6 +80,31 @@ class TrainingNeedsDashboardTest extends TestCase
             ->assertSee(__('training_needs::dashboard.cards.recent_feedback_forms'))
             ->assertSee(__('training_needs::dashboard.cards.feedback_session_summary'))
             ->assertSee(__('training_needs::dashboard.cards.export_reports'));
+    }
+
+    public function test_certificate_viewer_can_render_from_snapshot_without_querying_record_model(): void
+    {
+        $user = \App\Models\User::factory()->create();
+        $this->grantTrainingNeedsPermissions($user);
+
+        $this->actingAs($user);
+
+        Livewire::test(TrainingNeedsCertificateViewer::class, [
+            'recordSnapshot' => [
+                'id' => 99,
+                'certificate_path' => 'training-certificates/demo.png',
+                'certificate_name' => 'demo.png',
+                'result_status' => 'completed',
+                'completed_at' => '2026-03-18T21:00:00+04:00',
+                'session' => ['title' => 'Daxili təlim'],
+                'program' => ['title' => 'PTX'],
+                'personnel' => ['fullname' => 'Məhərrəmli Rəşid Rəşad'],
+            ],
+        ])
+            ->assertSee('demo.png')
+            ->assertSee('Daxili təlim')
+            ->assertSee('PTX')
+            ->assertSee('Məhərrəmli Rəşid Rəşad');
     }
 
     public function test_reports_component_renders_executive_and_coverage_cards(): void

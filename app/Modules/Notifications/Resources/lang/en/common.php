@@ -97,6 +97,7 @@ return [
         'duplicate' => 'Duplicate',
         'send_now' => 'Send now',
         'go_to_approval_queue' => 'Go to approval queue',
+        'open_docs' => 'Open guide',
     ],
     'badges' => [
         'active' => 'Active',

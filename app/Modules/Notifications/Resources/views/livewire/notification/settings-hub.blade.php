@@ -7,7 +7,13 @@
                         <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400">{{ __('notifications::common.titles.module') }}</p>
                         <div class="mt-2 flex flex-wrap items-center gap-3">
                             <h3 class="text-xl font-semibold tracking-tight text-zinc-950">{{ data_get($tabs, $activeTab.'.label', __('notifications::common.tabs.'.$activeTab)) }}</h3>
-                            <span class="rounded-full border border-zinc-200 bg-white px-3 py-1 text-[11px] font-semibold text-zinc-500">{{ __('notifications::common.badges.active_tab') }}</span>
+                            <x-notification.chip mode="neutral" size="sm">{{ __('notifications::common.badges.active_tab') }}</x-notification.chip>
+                            <a
+                                href="{{ route('docs.guide', ['focus' => 'notifications']) }}"
+                                class="inline-flex items-center rounded-full border border-rose-200 bg-rose-50 px-3 py-1 text-[11px] font-semibold text-rose-700 transition hover:border-rose-300 hover:bg-rose-100"
+                            >
+                                {{ __('notifications::common.buttons.open_docs') }}
+                            </a>
                         </div>
                     </div>
 

@@ -2,7 +2,7 @@
     <p class="docs-header-kicker text-zinc-500">Ümumi baxış</p>
     <h1 class="docs-page-title">HR modullarının ortaq istifadə bələdçisi</h1>
     <p class="docs-lead">
-        Bu səhifə təlim ehtiyacı, performans qiymətləndirməsi, davamiyyət və əmrlər modullarını birlikdə başa düşmək, düzgün iş sırası qurmaq və hər işi hansı modulda etmək lazım olduğunu aydın görmək üçündür.
+        Bu səhifə təlim ehtiyacı, performans qiymətləndirməsi, davamiyyət, əmrlər və bildirişlər modullarını birlikdə başa düşmək, düzgün iş sırası qurmaq və hər işi hansı modulda etmək lazım olduğunu aydın görmək üçündür.
     </p>
 
     <div class="docs-callout">
@@ -53,6 +53,16 @@
                 <a href="#orders-doc" class="docs-index-link">Bələdçi</a>
             </div>
         </div>
+        <div class="docs-index-card">
+            <p class="docs-card-title">Sürətli modul indeksi</p>
+            <p class="docs-card-strong">Bildirişlər</p>
+            <div class="docs-index-links">
+                <a href="#notifications-module" class="docs-index-link">Modul</a>
+                <a href="#notifications-outline" class="docs-index-link">Bölmələr</a>
+                <a href="#notifications-workflow" class="docs-index-link">Axın</a>
+                <a href="#notifications-doc" class="docs-index-link">Bələdçi</a>
+            </div>
+        </div>
     </div>
 
     <div class="docs-grid docs-grid-2">
@@ -75,6 +85,11 @@
             <p class="docs-card-title">Əmrlər</p>
             <p class="docs-card-strong">Əmr reyestri, şablon və çap axını</p>
             <p class="docs-card-body">Əmr məlumatı ilə DOCX şablon mühərrikini birləşdirib printable sənəd verir.</p>
+        </div>
+        <div class="docs-card docs-card-muted">
+            <p class="docs-card-title">Bildirişlər</p>
+            <p class="docs-card-strong">Şablon, qayda, approval və dispatch platforması</p>
+            <p class="docs-card-body">Avtomatik və manual bildiriş axınlarını approval, history və analytics ilə birlikdə idarə edir.</p>
         </div>
         <div class="docs-card docs-card-muted">
             <p class="docs-card-title">Ortaq məntiq</p>
@@ -109,6 +124,11 @@
             <p class="docs-card-title">Əmrlər xətti</p>
             <p class="docs-card-strong">Reyestr, şablon və çap</p>
             <p class="docs-card-body">Əmr qeydiyyatını şablon, publish readiness və print nəticəsi ilə bağlayır.</p>
+        </div>
+        <div class="docs-card docs-card-muted">
+            <p class="docs-card-title">Bildirişlər xətti</p>
+            <p class="docs-card-strong">Trigger, qayda, approval və göndəriş</p>
+            <p class="docs-card-body">Hadisəni şablon və audience qaydasına çevirib kampaniya, history və analytics nəticəsinə bağlayır.</p>
         </div>
     </div>
 

@@ -1253,20 +1253,38 @@
                             @error('deliveryDocumentForm.certificate_file') <x-validation>{{ $message }}</x-validation> @enderror
                         </div>
 
-                        @if (data_get($deliveryDocumentForm, 'training_delivery_record_id') && ($selectedDeliveryRecord = $this->recentDeliveryRecords->firstWhere('id', data_get($deliveryDocumentForm, 'training_delivery_record_id'))))
+                        @if ($selectedDeliveryRecord = $this->selectedDeliveryRecord)
+                            @php
+                                $pendingCertificate = data_get($deliveryDocumentForm, 'certificate_file');
+                                $hasPendingCertificate = $pendingCertificate instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+                                $pendingCertificateName = $hasPendingCertificate ? $pendingCertificate->getClientOriginalName() : null;
+                                $pendingCertificateExtension = $pendingCertificateName
+                                    ? strtolower(pathinfo($pendingCertificateName, PATHINFO_EXTENSION) ?: 'file')
+                                    : null;
+                                $pendingCertificatePreviewUrl = $hasPendingCertificate
+                                    && in_array($pendingCertificateExtension, ['jpg', 'jpeg', 'png', 'webp', 'gif'], true)
+                                    ? $pendingCertificate->temporaryUrl()
+                                    : null;
+                                $pendingCertificateKey = $hasPendingCertificate ? $pendingCertificate->getFilename() : 'persisted';
+                            @endphp
                             <livewire:training-needs.certificate-viewer
-                                :delivery-record-id="(int) data_get($deliveryDocumentForm, 'training_delivery_record_id')"
-                                lazy
-                                :key="'training-certificate-viewer-'.(int) data_get($deliveryDocumentForm, 'training_delivery_record_id')"
+                                :delivery-record-id="(int) $selectedDeliveryRecord->id"
+                                :record-snapshot="[
+                                    'id' => $selectedDeliveryRecord->id,
+                                    'certificate_path' => $selectedDeliveryRecord->certificate_path,
+                                    'certificate_name' => $selectedDeliveryRecord->certificate_name,
+                                    'result_status' => $selectedDeliveryRecord->result_status,
+                                    'completed_at' => optional($selectedDeliveryRecord->completed_at)?->toISOString(),
+                                    'session' => ['title' => $selectedDeliveryRecord->session?->title],
+                                    'program' => ['title' => $selectedDeliveryRecord->program?->title],
+                                    'personnel' => ['fullname' => $selectedDeliveryRecord->personnel?->fullname],
+                                ]"
+                                :temporary-certificate-name="$pendingCertificateName"
+                                :temporary-certificate-preview-url="$pendingCertificatePreviewUrl"
+                                :temporary-certificate-extension="$pendingCertificateExtension"
+                                :has-pending-upload="$hasPendingCertificate"
+                                :key="'training-certificate-viewer-'.(int) $selectedDeliveryRecord->id.'-'.$pendingCertificateKey"
                             />
-
-                            @if ($selectedDeliveryRecord->certificate_path)
-                                <div class="flex flex-wrap gap-2">
-                                    <x-ui.action-pill mode="secondary" wire:click="previewDeliveryCertificate({{ $selectedDeliveryRecord->id }})">{{ __('training_needs::dashboard.actions.preview_certificate') }}</x-ui.action-pill>
-                                    <x-ui.action-pill mode="secondary" wire:click="downloadDeliveryCertificate({{ $selectedDeliveryRecord->id }})">{{ __('training_needs::dashboard.actions.download_certificate') }}</x-ui.action-pill>
-                                    <x-ui.action-pill mode="delete" wire:click="confirmDeleteDeliveryCertificate({{ $selectedDeliveryRecord->id }})" icon="icons.delete-icon">{{ __('training_needs::dashboard.actions.delete_certificate') }}</x-ui.action-pill>
-                                </div>
-                            @endif
                         @endif
 
                         <x-button mode="black" wire:click="storeDeliveryDocument">{{ __('training_needs::dashboard.actions.save_certificate') }}</x-button>

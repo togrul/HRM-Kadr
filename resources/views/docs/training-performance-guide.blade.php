@@ -54,6 +54,17 @@
                     ['id' => 'orders-role-guides', 'label' => 'Rol üzrə bələdçilər'],
                 ],
             ],
+            [
+                'label' => 'Bildirişlər',
+                'tone' => 'rose',
+                'items' => [
+                    ['id' => 'notifications-module', 'label' => 'Modulun məqsədi'],
+                    ['id' => 'notifications-outline', 'label' => 'Bölmələr və sıra'],
+                    ['id' => 'notifications-workflow', 'label' => 'Ekran xəritəsi'],
+                    ['id' => 'notifications-scenarios', 'label' => 'Ssenarilər'],
+                    ['id' => 'notifications-doc', 'label' => 'Tam bələdçi'],
+                ],
+            ],
         ];
 
         $allSectionIds = collect($sidebarGroups)->flatMap(fn ($group) => array_column($group['items'], 'id'))->values()->all();
@@ -64,6 +75,7 @@
                     'Performans qiymətləndirməsi' => 'performance',
                     'Davamiyyət' => 'attendance',
                     'Əmrlər' => 'orders',
+                    'Bildirişlər' => 'notifications',
                     default => 'overview',
                 };
 
@@ -76,6 +88,7 @@
             ['href' => route('performance-evaluation'), 'label' => 'Performans paneli'],
             ['href' => route('attendance'), 'label' => 'Davamiyyət paneli'],
             ['href' => route('orders'), 'label' => 'Əmrlər paneli'],
+            ['href' => route('services', ['selectedService' => 'notifications-settings']), 'label' => 'Bildirişlər paneli'],
         ];
 
         $initialSection = match ($focus) {
@@ -83,6 +96,7 @@
             'performance' => 'performance-module',
             'attendance' => 'attendance-module',
             'orders' => 'orders-module',
+            'notifications' => 'notifications-module',
             default => 'overview',
         };
     @endphp
@@ -207,6 +221,12 @@
                 border-color: #fde68a;
                 background: #fff7ed;
                 color: #92400e;
+            }
+
+            .docs-sidebar-link[data-tone="rose"][data-active="true"] {
+                border-color: #fecdd3;
+                background: #fff1f2;
+                color: #9f1239;
             }
 
             .docs-quick-link {
@@ -675,6 +695,10 @@
                         return;
                     }
 
+                    if (focus !== 'overview' || window.location.hash) {
+                        window.scrollTo({ top: 0, behavior: 'auto' });
+                    }
+
                     const setActive = (id) => {
                         links.forEach((link) => {
                             const active = link.dataset.docsLink === id;
@@ -729,18 +753,43 @@
                         }
                     };
 
-                    const scrollToSection = (id, replaceHash = true) => {
+                    const scrollToSection = (id, replaceHash = true, behavior = 'auto') => {
                         const target = document.getElementById(id);
 
                         if (!target) {
                             return;
                         }
 
-                        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        const performScroll = () => {
+                            const top = Math.max(window.scrollY + target.getBoundingClientRect().top - 80, 0);
+                            window.scrollTo({ top, behavior });
+                        };
+
+                        window.setTimeout(performScroll, 40);
 
                         if (replaceHash) {
                             history.replaceState(null, '', `#${id}`);
                         }
+                    };
+
+                    const pinSectionIntoView = (id, replaceHash = true) => {
+                        scrollToSection(id, replaceHash, 'auto');
+
+                        [140, 320, 640].forEach((delay) => {
+                            window.setTimeout(() => {
+                                const target = document.getElementById(id);
+
+                                if (!target) {
+                                    return;
+                                }
+
+                                const top = Math.round(target.getBoundingClientRect().top);
+
+                                if (Math.abs(top - 80) > 8) {
+                                    scrollToSection(id, replaceHash, 'auto');
+                                }
+                            }, delay);
+                        });
                     };
 
                     const loadSection = async (module) => {
@@ -837,7 +886,7 @@
                             await ensureSectionLoaded(sectionId);
                             setActive(sectionId);
                             closeMobileNav();
-                            requestAnimationFrame(() => scrollToSection(sectionId));
+                            requestAnimationFrame(() => pinSectionIntoView(sectionId));
                         });
                     });
 
@@ -888,7 +937,7 @@
                                 setActive(initialSection);
                                 ensureSectionLoaded(initialSection).then(() => {
                                     requestAnimationFrame(() => {
-                                        scrollToSection(initialSection);
+                                        pinSectionIntoView(initialSection);
                                     });
                                 });
 
@@ -897,7 +946,11 @@
 
                             ensureSectionLoaded(hashed).then(() => {
                                 setActive(hashed);
-                                requestAnimationFrame(() => syncActiveSection());
+
+                                requestAnimationFrame(() => {
+                                    pinSectionIntoView(hashed, false);
+                                    syncActiveSection();
+                                });
                             });
                             return;
                         }
@@ -906,6 +959,10 @@
                     if (initialSection) {
                         ensureSectionLoaded(initialSection).then(() => {
                             setActive(initialSection);
+
+                            if (focus !== 'overview') {
+                                requestAnimationFrame(() => pinSectionIntoView(initialSection));
+                            }
                         });
                     }
 
@@ -970,6 +1027,12 @@
         data-initial-section="{{ $initialSection }}"
         data-section-endpoint-template="{{ route('docs.section', ['module' => '__MODULE__']) }}"
     >
+        <script>
+            if ('scrollRestoration' in history) {
+                history.scrollRestoration = 'manual';
+            }
+        </script>
+
         <details class="docs-mobile-nav mb-4 rounded-2xl border border-zinc-200 bg-white px-4 py-3 lg:hidden" data-docs-mobile-nav>
             <summary class="flex cursor-pointer items-center justify-between gap-3">
                 <div>
@@ -1009,7 +1072,7 @@
         <main class="docs-main">
             @include('docs.partials.guide-overview', $initialModulePayloads['overview'] ?? [])
 
-            @foreach (['training', 'performance', 'attendance', 'orders'] as $module)
+            @foreach (['training', 'performance', 'attendance', 'orders', 'notifications'] as $module)
                 <div
                     data-docs-module-host="{{ $module }}"
                     data-loaded="{{ in_array($module, $initialModules, true) ? 'true' : 'false' }}"
@@ -1024,6 +1087,7 @@
                                     'performance' => 'Performans qiymətləndirməsi',
                                     'attendance' => 'Davamiyyət',
                                     'orders' => 'Əmrlər',
+                                    'notifications' => 'Bildirişlər',
                                     default => 'Modul',
                                 } }}
                             </p>

@@ -119,13 +119,14 @@ class TrainingNeedsQueryBudgetCommand extends Command
             $analyticsService->priorityMix();
             $analyticsService->topGapPositions();
         });
-        $results[] = $this->probe('results_summary_build', $budgets['results_summary_build'], function () use ($analyticsService, $reportingService): void {
-            TrainingFeedbackForm::query()->with(['session:id,title', 'responses'])->latest('id')->limit(6)->get();
+        $results[] = $this->probe('results_summary_build', $budgets['results_summary_build'], function () use ($reportingService): void {
+            TrainingFeedbackForm::query()
+                ->with(['session:id,title'])
+                ->withCount('responses')
+                ->latest('id')
+                ->limit(6)
+                ->get();
             $reportingService->feedbackSessionSummaries();
-            $analyticsService->deliverySummary();
-            $reportingService->deliveryRows();
-            $reportingService->feedbackRows();
-            $reportingService->auditRows();
         });
         $results[] = $this->probe('reports_build', $budgets['reports_build'], function () use ($executiveReportingService, $coverageService, $year, $quarter): void {
             $executiveReportingService->availableYears();

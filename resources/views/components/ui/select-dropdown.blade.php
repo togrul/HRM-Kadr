@@ -41,6 +41,7 @@
     isOpen: false,
     openUp: false,
     panelMaxHeight: 224,
+    panelStyles: {},
     preferredDirection: @js($direction),
     isDisabled: @js((bool) $disabled),
     loadOnOpen: @js($loadOnOpen),
@@ -174,6 +175,7 @@
 
       const buttonRect = button.getBoundingClientRect();
       const viewportHeight = window.visualViewport?.height || window.innerHeight;
+      const viewportWidth = window.visualViewport?.width || window.innerWidth;
       const gap = 8;
       const viewportPadding = 12;
       const naturalHeight = Math.min(panel.scrollHeight || 224, 320);
@@ -190,6 +192,23 @@
       this.panelMaxHeight = this.openUp
         ? Math.min(320, availableAbove)
         : Math.min(320, availableBelow);
+
+      const panelHeight = Math.min(naturalHeight, this.panelMaxHeight);
+      const desiredWidth = Math.max(buttonRect.width, 220);
+      const clampedWidth = Math.min(desiredWidth, viewportWidth - (viewportPadding * 2));
+      const maxLeft = Math.max(viewportPadding, viewportWidth - clampedWidth - viewportPadding);
+      const left = Math.min(Math.max(buttonRect.left, viewportPadding), maxLeft);
+      const top = this.openUp
+        ? Math.max(viewportPadding, buttonRect.top - gap - panelHeight)
+        : Math.min(buttonRect.bottom + gap, viewportHeight - panelHeight - viewportPadding);
+
+      this.panelStyles = {
+        position: 'fixed',
+        top: `${Math.round(top)}px`,
+        left: `${Math.round(left)}px`,
+        width: `${Math.round(clampedWidth)}px`,
+        maxHeight: `${Math.round(this.panelMaxHeight)}px`,
+      };
     },
 
     selectedLabel(){
@@ -253,6 +272,7 @@
     $nextTick(() => requestAnimationFrame(() => repositionPanel()));
   "
   x-on:resize.window.debounce.100ms="if (isOpen) repositionPanel()"
+  x-on:scroll.window.debounce.50ms="if (isOpen) repositionPanel()"
   {{ $attributes->except(['wire:model','wire:model.live','wire:model.defer','wire:model.lazy','wire:model.blur'])->class('relative isolate w-full') }}
   x-bind:class="isOpen ? 'z-[520]' : 'z-10'"
 >
@@ -282,9 +302,9 @@
     <ul
       x-ref="panel"
       x-show="isOpen && !isDisabled" x-transition.opacity.duration.100ms x-cloak
-      :class="openUp ? 'bottom-full mb-2 origin-bottom' : 'top-full mt-1 origin-top'"
-      :style="{ maxHeight: `${panelMaxHeight}px` }"
-      class="absolute z-[330] w-full px-3 py-2 space-y-2 overflow-auto text-base bg-white rounded-md shadow-xl focus:outline-none sm:text-sm"
+      :class="openUp ? 'origin-bottom' : 'origin-top'"
+      :style="panelStyles"
+      class="z-[330] px-3 py-2 space-y-2 overflow-auto text-base bg-white rounded-md shadow-xl focus:outline-none sm:text-sm"
     >
       {{-- slot: search input --}}
       @if ($searchModel)

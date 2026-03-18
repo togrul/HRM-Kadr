@@ -97,6 +97,7 @@ return [
         'duplicate' => 'Dublikat yarat',
         'send_now' => 'İndi göndər',
         'go_to_approval_queue' => 'Təsdiq növbəsinə get',
+        'open_docs' => 'Bələdçini aç',
     ],
     'badges' => [
         'active' => 'Aktiv',

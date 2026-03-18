@@ -10,7 +10,7 @@
                         </div>
                         <x-small-badge mode="sky">{{ __('training_needs::dashboard.feedback_statuses.'.$form->status) }}</x-small-badge>
                     </div>
-                    <p class="mt-2 text-xs text-zinc-500">{{ __('training_needs::dashboard.labels.feedback_form_meta', ['count' => $form->responses->count(), 'questions' => count($form->questions ?? [])]) }}</p>
+                    <p class="mt-2 text-xs text-zinc-500">{{ __('training_needs::dashboard.labels.feedback_form_meta', ['count' => $form->responses_count, 'questions' => count($form->questions ?? [])]) }}</p>
                     <div class="mt-3 flex flex-wrap gap-2">
                         <x-ui.action-pill mode="secondary" wire:click="relayEditFeedbackForm({{ $form->id }})" icon="icons.edit-icon">{{ __('training_needs::dashboard.actions.edit') }}</x-ui.action-pill>
                         <x-ui.action-pill mode="delete" wire:click="relayDeleteFeedbackForm({{ $form->id }})" icon="icons.delete-icon">{{ __('training_needs::dashboard.actions.delete') }}</x-ui.action-pill>

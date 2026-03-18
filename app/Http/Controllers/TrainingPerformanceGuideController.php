@@ -38,7 +38,7 @@ class TrainingPerformanceGuideController extends Controller
 
     private function normalizeFocus(?string $focus): string
     {
-        if (! in_array($focus, ['overview', 'training', 'performance', 'attendance', 'orders'], true)) {
+        if (! in_array($focus, ['overview', 'training', 'performance', 'attendance', 'orders', 'notifications'], true)) {
             return 'overview';
         }
 
@@ -66,6 +66,9 @@ class TrainingPerformanceGuideController extends Controller
                 'ordersAdminHtml' => $this->renderMarkdown('docs/scenario/orders-admin-guide.md'),
                 'ordersApprovalHtml' => $this->renderMarkdown('docs/scenario/orders-approval-guide.md'),
                 'ordersOpsHtml' => $this->renderMarkdown('docs/scenario/orders-ops-commands-guide.md'),
+            ],
+            'notifications' => [
+                'notificationsHtml' => $this->renderMarkdown('docs/scenario/notifications-module-guide.md'),
             ],
             default => [],
         };

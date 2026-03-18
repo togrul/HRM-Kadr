@@ -34,7 +34,7 @@
                             </select>
                         </div>
                         <div class="rounded-2xl border border-zinc-200 bg-white p-4">
-                            <p class="text-[11px] font-semibold uppercase tracking-[0.12em] text-zinc-400">{{ __('training_needs::dashboard.labels.visible_records') }}</p>
+                            <p class="text-[11px] font-semibold uppercase tracking-tight text-zinc-400">{{ __('training_needs::dashboard.labels.visible_records') }}</p>
                             <p class="mt-2 text-2xl font-semibold text-zinc-900">{{ $this->summary['visible'] }}</p>
                             <p class="text-xs text-zinc-500">{{ __('training_needs::dashboard.labels.total_records_value', ['count' => $this->summary['total']]) }}</p>
                         </div>
@@ -44,7 +44,7 @@
                         <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-zinc-200 text-sm">
                         <thead class="bg-zinc-50">
-                            <tr class="text-left text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                            <tr class="text-left text-xs font-semibold uppercase tracking-tight text-zinc-500">
                                 @if ($entity === 'needs')
                                     <th class="px-4 py-3">{{ __('training_needs::dashboard.fields.personnel') }}</th>
                                     <th class="px-4 py-3">{{ __('training_needs::dashboard.fields.competency') }}</th>
@@ -86,7 +86,7 @@
                                         <td class="px-4 py-3 text-zinc-600">{{ $row->program?->title ?? '—' }}</td>
                                         <td class="px-4 py-3 text-zinc-600">{{ $row->competency?->name ?? '—' }}</td>
                                         <td class="px-4 py-3 text-zinc-600">{{ $row->participant_count }}</td>
-                                        <td class="px-4 py-3 text-zinc-600">{{ __('training_needs::dashboard.plan_item_statuses.'.$row->status) }}</td>
+                                        <td class="px-4 py-3 text-zinc-600">{{ __('training_needs::dashboard.plan_item_statuses.'.($row->review_status ?? 'draft')) }}</td>
                                     @elseif ($entity === 'sessions')
                                         <td class="px-4 py-3 text-zinc-800">{{ $row->title }}</td>
                                         <td class="px-4 py-3 text-zinc-600">{{ $row->program?->title ?? '—' }}</td>
@@ -119,7 +119,7 @@
                     @if ($this->selectedRow)
                         <div class="space-y-4">
                             <div>
-                                <p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-400">{{ __('training_needs::dashboard.labels.detail_panel') }}</p>
+                                <p class="text-[11px] font-semibold uppercase tracking-tight text-zinc-400">{{ __('training_needs::dashboard.labels.detail_panel') }}</p>
                                 <p class="mt-2 text-xl font-semibold text-zinc-900">
                                     @if ($entity === 'needs')
                                         {{ $this->selectedRow->personnel?->fullname ?? '—' }}
@@ -133,27 +133,85 @@
                                 </p>
                             </div>
 
-                            <div class="grid gap-3 sm:grid-cols-2">
+                            <div class="grid gap-3">
                                 @if ($entity === 'needs')
-                                    <x-small-badge mode="secondary">{{ __('training_needs::dashboard.fields.competency') }}: {{ $this->selectedRow->competency?->name ?? '—' }}</x-small-badge>
-                                    <x-small-badge mode="secondary">{{ __('training_needs::dashboard.fields.recommended_program') }}: {{ $this->selectedRow->recommendedProgram?->title ?? '—' }}</x-small-badge>
-                                    <x-small-badge mode="sky">{{ __('training_needs::dashboard.fields.priority') }}: {{ __('training_needs::dashboard.priorities.'.$this->selectedRow->priority) }}</x-small-badge>
-                                    <x-small-badge mode="amber">{{ __('training_needs::dashboard.fields.status') }}: {{ __('training_needs::dashboard.need_statuses.'.$this->selectedRow->status) }}</x-small-badge>
+                                    <div class="rounded-2xl border border-zinc-200 bg-white px-4 py-3">
+                                        <p class="text-[11px] font-semibold uppercase tracking-tight text-zinc-400">{{ __('training_needs::dashboard.fields.competency') }}</p>
+                                        <p class="mt-2 text-sm font-semibold leading-6 text-zinc-900 break-words">{{ $this->selectedRow->competency?->name ?? '—' }}</p>
+                                    </div>
+                                    <div class="rounded-2xl border border-zinc-200 bg-white px-4 py-3">
+                                        <p class="text-[11px] font-semibold uppercase tracking-tight text-zinc-400">{{ __('training_needs::dashboard.fields.recommended_program') }}</p>
+                                        <p class="mt-2 text-sm font-semibold leading-6 text-zinc-900 break-words">{{ $this->selectedRow->recommendedProgram?->title ?? '—' }}</p>
+                                    </div>
+                                    <div class="grid gap-3 sm:grid-cols-2">
+                                        <div class="rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3">
+                                            <p class="text-[11px] font-semibold uppercase tracking-tight text-sky-700">{{ __('training_needs::dashboard.fields.priority') }}</p>
+                                            <p class="mt-2 text-sm font-semibold text-sky-950">{{ __('training_needs::dashboard.priorities.'.$this->selectedRow->priority) }}</p>
+                                        </div>
+                                        <div class="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
+                                            <p class="text-[11px] font-semibold uppercase tracking-tight text-amber-700">{{ __('training_needs::dashboard.fields.status') }}</p>
+                                            <p class="mt-2 text-sm font-semibold text-amber-950">{{ __('training_needs::dashboard.need_statuses.'.$this->selectedRow->status) }}</p>
+                                        </div>
+                                    </div>
                                 @elseif ($entity === 'plans')
-                                    <x-small-badge mode="secondary">{{ __('training_needs::dashboard.fields.program') }}: {{ $this->selectedRow->program?->title ?? '—' }}</x-small-badge>
-                                    <x-small-badge mode="secondary">{{ __('training_needs::dashboard.fields.competency') }}: {{ $this->selectedRow->competency?->name ?? '—' }}</x-small-badge>
-                                    <x-small-badge mode="sky">{{ __('training_needs::dashboard.fields.participant_count') }}: {{ $this->selectedRow->participant_count }}</x-small-badge>
-                                    <x-small-badge mode="amber">{{ __('training_needs::dashboard.fields.status') }}: {{ __('training_needs::dashboard.plan_item_statuses.'.$this->selectedRow->status) }}</x-small-badge>
+                                    <div class="rounded-2xl border border-zinc-200 bg-white px-4 py-3">
+                                        <p class="text-[11px] font-semibold uppercase tracking-tight text-zinc-400">{{ __('training_needs::dashboard.fields.program') }}</p>
+                                        <p class="mt-2 text-sm font-semibold leading-6 text-zinc-900 break-words">{{ $this->selectedRow->program?->title ?? '—' }}</p>
+                                    </div>
+                                    <div class="rounded-2xl border border-zinc-200 bg-white px-4 py-3">
+                                        <p class="text-[11px] font-semibold uppercase tracking-tight text-zinc-400">{{ __('training_needs::dashboard.fields.competency') }}</p>
+                                        <p class="mt-2 text-sm font-semibold leading-6 text-zinc-900 break-words">{{ $this->selectedRow->competency?->name ?? '—' }}</p>
+                                    </div>
+                                    <div class="grid gap-3 sm:grid-cols-2">
+                                        <div class="rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3">
+                                            <p class="text-[11px] font-semibold uppercase tracking-tight text-sky-700">{{ __('training_needs::dashboard.fields.participant_count') }}</p>
+                                            <p class="mt-2 text-sm font-semibold text-sky-950">{{ $this->selectedRow->participant_count }}</p>
+                                        </div>
+                                        <div class="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
+                                            <p class="text-[11px] font-semibold uppercase tracking-tight text-amber-700">{{ __('training_needs::dashboard.fields.status') }}</p>
+                                            <p class="mt-2 text-sm font-semibold text-amber-950">{{ __('training_needs::dashboard.plan_item_statuses.'.($this->selectedRow->review_status ?? 'draft')) }}</p>
+                                        </div>
+                                    </div>
                                 @elseif ($entity === 'sessions')
-                                    <x-small-badge mode="secondary">{{ __('training_needs::dashboard.fields.program') }}: {{ $this->selectedRow->program?->title ?? '—' }}</x-small-badge>
-                                    <x-small-badge mode="secondary">{{ __('training_needs::dashboard.fields.plan') }}: {{ $this->selectedRow->plan?->title ?? '—' }}</x-small-badge>
-                                    <x-small-badge mode="sky">{{ __('training_needs::dashboard.fields.participant_count') }}: {{ $this->selectedRow->participants_count }}</x-small-badge>
-                                    <x-small-badge mode="amber">{{ __('training_needs::dashboard.fields.status') }}: {{ __('training_needs::dashboard.session_statuses.'.$this->selectedRow->status) }}</x-small-badge>
+                                    <div class="rounded-2xl border border-zinc-200 bg-white px-4 py-3">
+                                        <p class="text-[11px] font-semibold uppercase tracking-tight text-zinc-400">{{ __('training_needs::dashboard.fields.program') }}</p>
+                                        <p class="mt-2 text-sm font-semibold leading-6 text-zinc-900 break-words">{{ $this->selectedRow->program?->title ?? '—' }}</p>
+                                    </div>
+                                    <div class="rounded-2xl border border-zinc-200 bg-white px-4 py-3">
+                                        <p class="text-[11px] font-semibold uppercase tracking-tight text-zinc-400">{{ __('training_needs::dashboard.fields.plan') }}</p>
+                                        <p class="mt-2 text-sm font-semibold leading-6 text-zinc-900 break-words">{{ $this->selectedRow->plan?->title ?? '—' }}</p>
+                                    </div>
+                                    <div class="grid gap-3 sm:grid-cols-2">
+                                        <div class="rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3">
+                                            <p class="text-[11px] font-semibold uppercase tracking-tight text-sky-700">{{ __('training_needs::dashboard.fields.participant_count') }}</p>
+                                            <p class="mt-2 text-sm font-semibold text-sky-950">{{ $this->selectedRow->participants_count }}</p>
+                                        </div>
+                                        <div class="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
+                                            <p class="text-[11px] font-semibold uppercase tracking-tight text-amber-700">{{ __('training_needs::dashboard.fields.status') }}</p>
+                                            <p class="mt-2 text-sm font-semibold text-amber-950">{{ __('training_needs::dashboard.session_statuses.'.$this->selectedRow->status) }}</p>
+                                        </div>
+                                    </div>
                                 @else
-                                    <x-small-badge mode="secondary">{{ __('training_needs::dashboard.fields.program') }}: {{ $this->selectedRow->program?->title ?? '—' }}</x-small-badge>
-                                    <x-small-badge mode="secondary">{{ __('training_needs::dashboard.fields.certificate_name') }}: {{ $this->selectedRow->certificate_name ?: '—' }}</x-small-badge>
-                                    <x-small-badge mode="sky">{{ __('training_needs::dashboard.fields.completed_at') }}: {{ optional($this->selectedRow->completed_at)->format('d.m.Y H:i') ?: '—' }}</x-small-badge>
-                                    <x-small-badge mode="green">{{ __('training_needs::dashboard.delivery_result_statuses.'.$this->selectedRow->result_status) }}</x-small-badge>
+                                    <div class="rounded-2xl border border-zinc-200 bg-white px-4 py-3">
+                                        <p class="text-[11px] font-semibold uppercase tracking-tight text-zinc-400">{{ __('training_needs::dashboard.fields.program') }}</p>
+                                        <p class="mt-2 text-sm font-semibold leading-6 text-zinc-900 break-words">{{ $this->selectedRow->program?->title ?? '—' }}</p>
+                                    </div>
+                                    <div class="rounded-2xl border border-zinc-200 bg-white px-4 py-3">
+                                        <p class="text-[11px] font-semibold uppercase tracking-tight text-zinc-400">{{ __('training_needs::dashboard.fields.certificate_name') }}</p>
+                                        <p class="mt-2 text-sm font-semibold leading-6 text-zinc-900 break-words">{{ $this->selectedRow->certificate_name ?: '—' }}</p>
+                                    </div>
+                                    <div class="rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3">
+                                        <p class="text-[11px] font-semibold uppercase tracking-tight text-sky-700">{{ __('training_needs::dashboard.fields.completed_at') }}</p>
+                                        <p class="mt-2 text-sm font-semibold text-sky-950">{{ optional($this->selectedRow->completed_at)->format('d.m.Y H:i') ?: '—' }}</p>
+                                    </div>
+                                    <div class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+                                        <p class="text-[11px] font-semibold uppercase tracking-tight text-emerald-700">{{ __('training_needs::dashboard.fields.status') }}</p>
+                                        <div class="mt-2">
+                                            <span class="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold uppercase tracking-tight text-emerald-800">
+                                                {{ __('training_needs::dashboard.delivery_result_statuses.'.$this->selectedRow->result_status) }}
+                                            </span>
+                                        </div>
+                                    </div>
                                 @endif
                             </div>
 

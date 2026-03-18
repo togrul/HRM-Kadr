@@ -2,7 +2,7 @@
     <x-surface-card :title="__('training_needs::dashboard.cards.executive_reports')" icon="icons.pending-icon">
         <div class="flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
             <div class="space-y-1">
-                <p class="text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-400">{{ __('training_needs::dashboard.labels.executive_snapshot') }}</p>
+                <p class="text-[11px] font-semibold uppercase tracking-tight text-zinc-400">{{ __('training_needs::dashboard.labels.executive_snapshot') }}</p>
                 <p class="max-w-3xl text-sm text-zinc-500">{{ __('training_needs::dashboard.labels.executive_reports_hint') }}</p>
             </div>
 

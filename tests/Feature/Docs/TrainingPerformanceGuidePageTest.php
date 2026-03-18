@@ -20,7 +20,8 @@ class TrainingPerformanceGuidePageTest extends TestCase
             ->assertSee('Təlim ehtiyacı')
             ->assertSee('Performans qiymətləndirməsi')
             ->assertSee('Davamiyyət')
-            ->assertSee('Əmrlər');
+            ->assertSee('Əmrlər')
+            ->assertSee('Bildirişlər');
     }
 
     public function test_focus_parameter_loads_requested_module_on_initial_render(): void
@@ -32,5 +33,18 @@ class TrainingPerformanceGuidePageTest extends TestCase
             ->assertOk()
             ->assertSee('Təlim ehtiyacı istifadəçi bələdçisi')
             ->assertDontSee('Performans qiymətləndirmə istifadəçi bələdçisi');
+    }
+
+    public function test_focus_parameter_can_load_notifications_module_on_initial_render(): void
+    {
+        $user = \App\Models\User::factory()->create();
+
+        $this->actingAs($user)
+            ->get(route('docs.guide', ['focus' => 'notifications']))
+            ->assertOk()
+            ->assertSee('Bildirişlər modulu')
+            ->assertSee('Bildirişlər')
+            ->assertSee('Şablonlar')
+            ->assertDontSee('Təlim ehtiyacı istifadəçi bələdçisi');
     }
 }

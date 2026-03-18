@@ -435,10 +435,34 @@ trait InteractsWithTrainingNeedsQueries
             ->get();
     }
 
+    public function getSelectedDeliveryRecordProperty(): ?TrainingDeliveryRecord
+    {
+        $selectedId = (int) data_get($this->deliveryDocumentForm, 'training_delivery_record_id');
+
+        if (! $selectedId) {
+            return null;
+        }
+
+        $recentRecord = $this->recentDeliveryRecords->firstWhere('id', $selectedId);
+
+        if ($recentRecord) {
+            return $recentRecord;
+        }
+
+        return TrainingDeliveryRecord::query()
+            ->with([
+                'session:id,title,scheduled_start_at',
+                'program:id,title',
+                'personnel:id,tabel_no,surname,name,patronymic',
+            ])
+            ->find($selectedId);
+    }
+
     public function getRecentFeedbackFormsProperty()
     {
         return TrainingFeedbackForm::query()
-            ->with(['session:id,title', 'responses'])
+            ->with(['session:id,title'])
+            ->withCount('responses')
             ->latest('id')
             ->limit(6)
             ->get();

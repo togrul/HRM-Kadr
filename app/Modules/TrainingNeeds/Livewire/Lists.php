@@ -167,7 +167,7 @@ class Lists extends Component
                                 ->orWhereHas('competency', fn ($competency) => $competency->where('name', 'like', "%{$search}%"));
                         });
                     })
-                    ->when($this->statusFilter !== 'all', fn ($query) => $query->where('status', $this->statusFilter))
+                    ->when($this->statusFilter !== 'all', fn ($query) => $query->where('review_status', $this->statusFilter))
                     ->with([
                         'plan:id,title,plan_year,plan_quarter,status',
                         'program:id,title',
