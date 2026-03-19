@@ -69,11 +69,13 @@ class AttendanceQueryBudgetCommandTest extends TestCase
         $this->assertSame(0, $exitCode);
         $this->assertSame(0, data_get($payload, 'summary.failed_probes'));
         $this->assertSame(0, data_get($payload, 'summary.over_budget_probes'));
-        $this->assertSame(3, data_get($payload, 'summary.passed_probes'));
-        $this->assertCount(3, data_get($payload, 'results'));
+        $this->assertSame(5, data_get($payload, 'summary.passed_probes'));
+        $this->assertCount(5, data_get($payload, 'results'));
         $this->assertSame('overview_build', data_get($payload, 'results.0.flow'));
         $this->assertSame('daily_monitor_load', data_get($payload, 'results.1.flow'));
         $this->assertSame('puantaj_grid_load', data_get($payload, 'results.2.flow'));
+        $this->assertSame('history_log_load', data_get($payload, 'results.3.flow'));
+        $this->assertSame('month_close_status_load', data_get($payload, 'results.4.flow'));
     }
 
     public function test_it_stays_within_tightened_default_query_budgets_for_larger_dataset(): void

@@ -69,6 +69,56 @@
         </div>
     </div>
 
+    <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="flex flex-col">
+            <x-ui.select-dropdown
+                label="{{ __('leaves::common.labels.duration_unit') }}"
+                placeholder="---"
+                mode="gray"
+                class="w-full"
+                wire:model.live="leave.duration_unit"
+                :model="$this->durationUnits"
+            />
+            @error('leave.duration_unit')
+                <x-validation>{{ $message }}</x-validation>
+            @enderror
+        </div>
+
+        @if ($leave->duration_unit === 'half_day')
+            <div class="flex flex-col sm:col-span-1 lg:col-span-2">
+                <x-ui.select-dropdown
+                    label="{{ __('leaves::common.labels.partial_day_part') }}"
+                    placeholder="---"
+                    mode="gray"
+                    class="w-full"
+                    wire:model.live="leave.partial_day_part"
+                    :model="$this->partialDayParts"
+                />
+                @error('leave.partial_day_part')
+                    <x-validation>{{ $message }}</x-validation>
+                @enderror
+            </div>
+        @endif
+
+        @if ($leave->duration_unit === 'hour')
+            <div class="flex flex-col">
+                <x-label for="leave.starts_time">{{ __('leaves::common.labels.start_time') }}</x-label>
+                <input id="leave.starts_time" type="time" wire:model.live="leave.starts_time" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
+                @error('leave.starts_time')
+                    <x-validation>{{ $message }}</x-validation>
+                @enderror
+            </div>
+
+            <div class="flex flex-col">
+                <x-label for="leave.ends_time">{{ __('leaves::common.labels.end_time') }}</x-label>
+                <input id="leave.ends_time" type="time" wire:model.live="leave.ends_time" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
+                @error('leave.ends_time')
+                    <x-validation>{{ $message }}</x-validation>
+                @enderror
+            </div>
+        @endif
+    </div>
+
     <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
         <div class="flex flex-col">
             <x-label for="leave.starts_at">{{ __('leaves::common.labels.start_date') }}</x-label>
@@ -93,11 +143,17 @@
                     }
                 </x-slot>
             </x-pikaday-input>
+            @error("leave.ends_at")
+                <x-validation> {{ $message }} </x-validation>
+            @enderror
         </div>
 
         <div class="flex flex-col">
             <x-label for="leave.total_days">{{ __('leaves::common.labels.total_days') }}</x-label>
             <x-livewire-input mode="gray"  name="leave.total_days" wire:model="leave.total_days" disabled readonly></x-livewire-input>
+            @if($this->leaveDurationSummary)
+                <p class="mt-2 text-xs font-medium text-zinc-500">{{ $this->leaveDurationSummary }}</p>
+            @endif
         </div>
     </div>
 

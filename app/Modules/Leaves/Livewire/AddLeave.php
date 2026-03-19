@@ -28,6 +28,7 @@ class AddLeave extends Component
         $this->authorize('create', Leave::class);
         $this->title = __('leaves::common.titles.add_leave');
         $this->leave->resetForm();
+        $this->syncSelectedLeaveTypeMeta();
     }
 
     public function store(): void
@@ -47,6 +48,7 @@ class AddLeave extends Component
         $this->dispatch('leaveAdded', __('leaves::common.messages.leave_added'));
 
         $this->leave->resetForm();
+        $this->syncSelectedLeaveTypeMeta();
         $this->reset('personnelName', 'assignedSearch');
     }
 

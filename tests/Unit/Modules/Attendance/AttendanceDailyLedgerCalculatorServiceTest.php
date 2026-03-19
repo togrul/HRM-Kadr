@@ -209,4 +209,105 @@ class AttendanceDailyLedgerCalculatorServiceTest extends TestCase
         $this->assertSame(7, $result['meta']['leave_type_id']);
         $this->assertSame('Xəstəlik', $result['meta']['leave_type_name']);
     }
+
+    public function test_half_day_leave_adjusts_expected_shift_window(): void
+    {
+        $service = new AttendanceDailyLedgerCalculatorService();
+
+        $shift = new AttendanceShift([
+            'start_time' => '09:00:00',
+            'end_time' => '18:00:00',
+            'break_minutes' => 60,
+            'is_night_shift' => false,
+        ]);
+        $shift->id = 5;
+
+        $result = $service->calculate(
+            date: Carbon::parse('2026-03-11'),
+            pairing: [
+                'worked_minutes' => 240,
+                'break_minutes' => 0,
+                'unmatched' => 0,
+                'first_in_at' => '2026-03-11 13:00:00',
+                'last_out_at' => '2026-03-11 18:00:00',
+                'pairs' => [],
+            ],
+            shift: $shift,
+            manualEntry: null,
+            setting: new AttendanceSetting([
+                'late_grace_minutes' => 0,
+                'early_leave_grace_minutes' => 0,
+                'overtime_policy' => 'after_shift',
+            ]),
+            calendarDayType: 'workday',
+            override: [
+                'type' => 'leave',
+                'source' => 'leave',
+                'absence_code' => 'LEAVE',
+                'duration_unit' => 'half_day',
+                'partial_day_part' => 'first_half',
+            ]
+        );
+
+        $this->assertSame(240, $result['scheduled_minutes']);
+        $this->assertSame(240, $result['worked_minutes']);
+        $this->assertSame(0, $result['late_minutes']);
+        $this->assertSame(0, $result['early_leave_minutes']);
+        $this->assertSame('present', $result['attendance_status']);
+        $this->assertSame('half_day', $result['meta']['duration_unit']);
+        $this->assertSame('first_half', $result['meta']['partial_day_part']);
+        $this->assertSame(240, $result['meta']['covered_leave_minutes']);
+    }
+
+    public function test_hourly_leave_adjusts_schedule_and_late_threshold(): void
+    {
+        $service = new AttendanceDailyLedgerCalculatorService();
+
+        $shift = new AttendanceShift([
+            'start_time' => '09:00:00',
+            'end_time' => '18:00:00',
+            'break_minutes' => 60,
+            'is_night_shift' => false,
+        ]);
+        $shift->id = 6;
+
+        $result = $service->calculate(
+            date: Carbon::parse('2026-03-12'),
+            pairing: [
+                'worked_minutes' => 355,
+                'break_minutes' => 0,
+                'unmatched' => 0,
+                'first_in_at' => '2026-03-12 11:05:00',
+                'last_out_at' => '2026-03-12 18:00:00',
+                'pairs' => [],
+            ],
+            shift: $shift,
+            manualEntry: null,
+            setting: new AttendanceSetting([
+                'late_grace_minutes' => 0,
+                'early_leave_grace_minutes' => 0,
+                'overtime_policy' => 'after_shift',
+            ]),
+            calendarDayType: 'workday',
+            override: [
+                'type' => 'leave',
+                'source' => 'leave',
+                'absence_code' => 'LEAVE',
+                'duration_unit' => 'hour',
+                'starts_time' => '09:00',
+                'ends_time' => '11:00',
+                'total_minutes' => 120,
+            ]
+        );
+
+        $this->assertSame(360, $result['scheduled_minutes']);
+        $this->assertSame(355, $result['worked_minutes']);
+        $this->assertSame(5, $result['late_minutes']);
+        $this->assertSame(0, $result['early_leave_minutes']);
+        $this->assertSame('present', $result['attendance_status']);
+        $this->assertSame('hour', $result['meta']['duration_unit']);
+        $this->assertSame('09:00', $result['meta']['starts_time']);
+        $this->assertSame('11:00', $result['meta']['ends_time']);
+        $this->assertSame(120, $result['meta']['covered_leave_minutes']);
+    }
 }

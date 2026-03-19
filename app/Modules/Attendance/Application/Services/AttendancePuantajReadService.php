@@ -24,6 +24,17 @@ class AttendancePuantajReadService
         $toDate = $to?->toDateString();
 
         return Personnel::query()
+            ->select([
+                'id',
+                'tabel_no',
+                'surname',
+                'name',
+                'patronymic',
+                'structure_id',
+                'join_work_date',
+                'leave_work_date',
+                'is_pending',
+            ])
             ->where('is_pending', 0)
             ->when($toDate !== null, fn ($query) => $query->whereDate('join_work_date', '<=', $toDate))
             ->when($fromDate !== null, function ($query) use ($fromDate): void {
@@ -72,7 +83,14 @@ class AttendancePuantajReadService
                         'absence_code' => (string) ($ledger->absence_code ?? ''),
                         'leave_type_id' => data_get($ledger->meta, 'leave_type_id'),
                         'leave_type_name' => (string) data_get($ledger->meta, 'leave_type_name', ''),
+                        'leave_type_code' => trim((string) data_get($ledger->meta, 'leave_type_code', '')),
                         'calendar_day_type' => (string) data_get($ledger->meta, 'calendar_day_type', ''),
+                        'duration_unit' => (string) data_get($ledger->meta, 'duration_unit', 'day'),
+                        'partial_day_part' => data_get($ledger->meta, 'partial_day_part'),
+                        'starts_time' => data_get($ledger->meta, 'starts_time'),
+                        'ends_time' => data_get($ledger->meta, 'ends_time'),
+                        'total_minutes' => data_get($ledger->meta, 'total_minutes'),
+                        'covered_leave_minutes' => (int) data_get($ledger->meta, 'covered_leave_minutes', 0),
                     ],
                 ])->all();
             })

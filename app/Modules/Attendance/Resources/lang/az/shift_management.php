@@ -83,7 +83,7 @@ return [
         'shift_deactivated' => 'Növbə deaktiv edildi.',
         'assignment_saved' => 'Növbə təyinatı yadda saxlanıldı.',
         'assignment_deactivated' => 'Növbə təyinatı deaktiv edildi.',
-        'default_shift_selected' => 'Bu növbə default növbə kimi seçilib. Əvvəlcə onu ayarlardan çıxarın.',
+        'default_shift_selected' => 'Bu növbə standart növbə kimi seçilib. Əvvəlcə onu ayarlardan çıxarın.',
         'active_assignments_exist' => 'Bu növbənin aktiv əməkdaş təyinatları var. Əvvəlcə təyinatları deaktiv edin.',
         'assignment_overlap' => 'Bu tarix aralığı ilə üst-üstə düşən aktiv növbə təyinatı artıq mövcuddur.',
     ],

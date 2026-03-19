@@ -790,7 +790,7 @@
                             <p class="mt-2 text-xs text-zinc-500">{{ __('training_needs::dashboard.labels.review_note_meta', ['note' => $item->review_note]) }}</p>
                         @endif
                         <div class="mt-3 flex flex-wrap gap-2">
-                            <x-button mode="default" wire:click="selectPlanItemForReview({{ $item->id }})">{{ __('training_needs::dashboard.actions.review_plan_item') }}</x-button>
+                            <x-button mode="black" wire:click="selectPlanItemForReview({{ $item->id }})">{{ __('training_needs::dashboard.actions.review_plan_item') }}</x-button>
                             @if ($item->review_status !== 'approved')
                                 <x-button mode="black" wire:click="selectPlanItemForReview({{ $item->id }})">{{ __('training_needs::dashboard.actions.open_review') }}</x-button>
                             @endif

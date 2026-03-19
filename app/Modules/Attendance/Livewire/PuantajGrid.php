@@ -170,8 +170,32 @@ class PuantajGrid extends Component
         $status = (string) ($ledger['attendance_status'] ?? 'none');
         $absenceCode = strtoupper((string) ($ledger['absence_code'] ?? ''));
         $leaveTypeName = trim((string) ($ledger['leave_type_name'] ?? ''));
+        $leaveTypeCode = strtoupper(trim((string) ($ledger['leave_type_code'] ?? '')));
         $leaveTypeId = is_numeric($ledger['leave_type_id'] ?? null) ? (int) $ledger['leave_type_id'] : null;
         $calendarDayType = (string) ($ledger['calendar_day_type'] ?? '');
+        $durationUnit = (string) ($ledger['duration_unit'] ?? 'day');
+        $partialDayPart = $ledger['partial_day_part'] ?? null;
+        $startsTime = $ledger['starts_time'] ?? null;
+        $endsTime = $ledger['ends_time'] ?? null;
+        $totalMinutes = is_numeric($ledger['total_minutes'] ?? null) ? (int) $ledger['total_minutes'] : null;
+        $coveredLeaveMinutes = (int) ($ledger['covered_leave_minutes'] ?? 0);
+        $isPartialLeave = $leaveTypeName !== '' && in_array($durationUnit, ['half_day', 'hour'], true);
+        $durationSummary = $isPartialLeave
+            ? $this->buildLeaveDurationSummary($durationUnit, $totalMinutes)
+            : '';
+        $durationWindow = $isPartialLeave
+            ? $this->buildLeaveDurationWindow($durationUnit, $partialDayPart, $startsTime, $endsTime)
+            : '';
+        $detailLines = $this->buildCellDetailLines(
+            workedMinutes: $workedMinutes,
+            status: $status,
+            absenceCode: $absenceCode,
+            leaveTypeName: $leaveTypeName,
+            calendarDayType: $calendarDayType,
+            durationSummary: $durationSummary,
+            durationWindow: $durationWindow,
+            coveredLeaveMinutes: $coveredLeaveMinutes
+        );
 
         if ($status === 'none') {
             return [
@@ -179,6 +203,7 @@ class PuantajGrid extends Component
                 'status' => 'none',
                 'worked_minutes' => 0,
                 'title' => '',
+                'detail_lines' => [],
                 'cell_classes' => 'text-zinc-400 bg-white',
                 'icon' => null,
                 'icon_color' => 'text-zinc-400',
@@ -186,35 +211,49 @@ class PuantajGrid extends Component
         }
 
         if ($workedMinutes > 0) {
+            $tone = $this->resolveLeaveTone($leaveTypeId, $leaveTypeName, $absenceCode);
+            $legendFamilyKey = $this->resolveLeaveLegendFamilyKey($leaveTypeId, $leaveTypeCode, $leaveTypeName, $absenceCode);
+            $legendLabel = $this->buildLeaveLegendFamilyLabel($leaveTypeName, $absenceCode);
+
             return [
                 'display' => $this->formatHours($workedMinutes),
                 'status' => $status,
                 'worked_minutes' => $workedMinutes,
-                'title' => $this->buildCellTitle($workedMinutes, $status, $absenceCode, $leaveTypeName, $calendarDayType),
-                'cell_classes' => $this->resolveWorkedMinuteClasses($workedMinutes, $status),
+                'title' => $this->joinCellDetailLines($detailLines),
+                'detail_lines' => $detailLines,
+                'cell_classes' => $this->resolveWorkedMinuteClasses($workedMinutes, $status, $isPartialLeave),
                 'icon' => null,
                 'icon_color' => 'text-zinc-500',
+                'legend_key' => $isPartialLeave ? $legendFamilyKey : null,
+                'legend_label' => $isPartialLeave ? $legendLabel : null,
+                'legend_code' => $isPartialLeave ? $this->resolveLeaveLegendCode($leaveTypeCode, $leaveTypeName, $absenceCode) : null,
+                'legend_mode' => $isPartialLeave ? $this->resolveLeaveToneBadgeMode($tone) : null,
+                'legend_code_classes' => $isPartialLeave ? $this->resolveLeaveToneCodeClasses($tone) : null,
+                'legend_description' => $isPartialLeave ? __('attendance::puantaj.legend.leave_code_hint') : null,
             ];
         }
 
-        if ($status === 'leave') {
-            $legendCode = $this->resolveLeaveLegendCode($leaveTypeName, $absenceCode);
+        if ($status === 'leave' || ($isPartialLeave && $status === 'absent')) {
+            $legendCode = $this->resolveLeaveLegendCode($leaveTypeCode, $leaveTypeName, $absenceCode);
             $tone = $this->resolveLeaveTone($leaveTypeId, $leaveTypeName, $absenceCode);
+            $legendFamilyKey = $this->resolveLeaveLegendFamilyKey($leaveTypeId, $leaveTypeCode, $leaveTypeName, $absenceCode);
+            $legendLabel = $this->buildLeaveLegendFamilyLabel($leaveTypeName, $absenceCode);
 
             return [
-                'display' => '',
+                'display' => $legendCode !== '' ? $legendCode : __('attendance::puantaj.short_labels.leave'),
                 'status' => $status,
                 'worked_minutes' => 0,
-                'title' => '',
+                'title' => $this->joinCellDetailLines($detailLines),
+                'detail_lines' => $detailLines,
                 'cell_classes' => $this->resolveLeaveToneClasses($tone),
-                'icon' => 'icons.document-icon',
+                'icon' => null,
                 'icon_color' => $this->resolveLeaveToneIconColor($tone),
-                'legend_key' => 'leave:'.($leaveTypeId ?? $leaveTypeName ?? $absenceCode),
-                'legend_label' => $leaveTypeName !== '' ? $leaveTypeName : ($absenceCode !== '' ? $absenceCode : __('attendance::puantaj.legend.unknown_leave')),
+                'legend_key' => $legendFamilyKey,
+                'legend_label' => $legendLabel,
                 'legend_code' => $legendCode,
                 'legend_mode' => $this->resolveLeaveToneBadgeMode($tone),
-                'legend_icon' => 'icons.document-icon',
-                'legend_icon_color' => $this->resolveLeaveToneIconColor($tone),
+                'legend_code_classes' => $this->resolveLeaveToneCodeClasses($tone),
+                'legend_description' => __('attendance::puantaj.legend.leave_code_hint'),
             ];
         }
 
@@ -223,7 +262,8 @@ class PuantajGrid extends Component
                 'display' => __('attendance::puantaj.short_labels.vacation'),
                 'status' => $status,
                 'worked_minutes' => 0,
-                'title' => $this->buildCellTitle($workedMinutes, $status, $absenceCode, $leaveTypeName, $calendarDayType),
+                'title' => $this->joinCellDetailLines($detailLines),
+                'detail_lines' => $detailLines,
                 'cell_classes' => 'text-violet-700 bg-violet-50/80',
                 'icon' => 'icons.vacation-icon',
                 'icon_color' => 'text-violet-600',
@@ -235,7 +275,8 @@ class PuantajGrid extends Component
                 'display' => __('attendance::puantaj.short_labels.business_trip'),
                 'status' => $status,
                 'worked_minutes' => 0,
-                'title' => $this->buildCellTitle($workedMinutes, $status, $absenceCode, $leaveTypeName, $calendarDayType),
+                'title' => $this->joinCellDetailLines($detailLines),
+                'detail_lines' => $detailLines,
                 'cell_classes' => 'text-sky-700 bg-sky-50/80',
                 'icon' => 'icons.briefcase-icon',
                 'icon_color' => 'text-sky-600',
@@ -247,7 +288,8 @@ class PuantajGrid extends Component
                 'display' => $status === 'holiday' ? '' : '-',
                 'status' => $status,
                 'worked_minutes' => 0,
-                'title' => $this->buildCellTitle($workedMinutes, $status, $absenceCode, $leaveTypeName, $calendarDayType),
+                'title' => $this->joinCellDetailLines($detailLines),
+                'detail_lines' => $detailLines,
                 'cell_classes' => $status === 'holiday'
                     ? 'text-fuchsia-700 bg-fuchsia-50/80'
                     : 'text-zinc-400 bg-zinc-50/80',
@@ -260,20 +302,24 @@ class PuantajGrid extends Component
             'display' => $absenceCode !== '' ? $absenceCode : '0',
             'status' => $status,
             'worked_minutes' => 0,
-            'title' => $this->buildCellTitle($workedMinutes, $status, $absenceCode, $leaveTypeName, $calendarDayType),
+            'title' => $this->joinCellDetailLines($detailLines),
+            'detail_lines' => $detailLines,
             'cell_classes' => 'text-rose-600 bg-rose-50/70',
             'icon' => null,
             'icon_color' => 'text-rose-500',
         ];
     }
 
-    private function buildCellTitle(
+    private function buildCellDetailLines(
         int $workedMinutes,
         string $status,
         string $absenceCode,
         string $leaveTypeName = '',
-        string $calendarDayType = ''
-    ): string
+        string $calendarDayType = '',
+        string $durationSummary = '',
+        string $durationWindow = '',
+        int $coveredLeaveMinutes = 0
+    ): array
     {
         $parts = [];
         $statusLabels = [
@@ -300,6 +346,20 @@ class PuantajGrid extends Component
             $parts[] = __('attendance::puantaj.tooltips.leave_type', ['type' => $leaveTypeName]);
         }
 
+        if ($durationSummary !== '') {
+            $parts[] = __('attendance::puantaj.tooltips.duration', ['duration' => $durationSummary]);
+        }
+
+        if ($durationWindow !== '') {
+            $parts[] = __('attendance::puantaj.tooltips.leave_window', ['window' => $durationWindow]);
+        }
+
+        if ($coveredLeaveMinutes > 0) {
+            $parts[] = __('attendance::puantaj.tooltips.covered_leave', [
+                'hours' => $this->formatHours($coveredLeaveMinutes),
+            ]);
+        }
+
         if ($absenceCode !== '') {
             $parts[] = __('attendance::puantaj.tooltips.absence', ['code' => strtoupper($absenceCode)]);
         }
@@ -310,11 +370,23 @@ class PuantajGrid extends Component
             ]);
         }
 
+        return $parts;
+    }
+
+    /**
+     * @param  array<int,string>  $parts
+     */
+    private function joinCellDetailLines(array $parts): string
+    {
         return implode(' | ', $parts);
     }
 
-    private function resolveWorkedMinuteClasses(int $workedMinutes, string $status): string
+    private function resolveWorkedMinuteClasses(int $workedMinutes, string $status, bool $isPartialLeave = false): string
     {
+        if ($isPartialLeave) {
+            return 'text-sky-700 bg-sky-50/80 font-semibold';
+        }
+
         if (in_array($status, ['holiday_worked', 'weekend_worked'], true)) {
             return 'text-emerald-700 bg-emerald-50/70';
         }
@@ -343,16 +415,19 @@ class PuantajGrid extends Component
                 'label' => (string) $cell['legend_label'],
                 'code' => (string) ($cell['legend_code'] ?? ''),
                 'mode' => (string) $cell['legend_mode'],
-                'icon' => (string) ($cell['legend_icon'] ?? 'icons.info-circle-icon'),
-                'icon_color' => (string) ($cell['legend_icon_color'] ?? 'text-blue-600'),
+                'code_classes' => (string) ($cell['legend_code_classes'] ?? 'border-zinc-200 bg-zinc-50 text-zinc-700'),
             ])
             ->sortBy(fn (array $item) => mb_strtolower($item['label']))
             ->values()
             ->all();
     }
 
-    private function resolveLeaveLegendCode(string $leaveTypeName, string $absenceCode): string
+    private function resolveLeaveLegendCode(string $leaveTypeCode, string $leaveTypeName, string $absenceCode): string
     {
+        if ($leaveTypeCode !== '') {
+            return strtoupper($leaveTypeCode);
+        }
+
         if ($absenceCode !== '') {
             return strtoupper($absenceCode);
         }
@@ -362,7 +437,48 @@ class PuantajGrid extends Component
             return '';
         }
 
-        return mb_strtoupper(mb_substr($trimmed, 0, 3));
+        $parts = collect(preg_split('/[\s\-\/]+/u', $trimmed) ?: [])
+            ->map(fn ($part) => trim((string) $part))
+            ->filter()
+            ->values();
+
+        if ($parts->count() >= 2) {
+            return mb_strtoupper(
+                mb_substr((string) $parts[0], 0, 1).mb_substr((string) $parts[1], 0, 1)
+            );
+        }
+
+        $first = (string) $parts->first();
+
+        return mb_strtoupper(mb_substr($first, 0, min(2, mb_strlen($first))));
+    }
+
+    private function resolveLeaveLegendFamilyKey(?int $leaveTypeId, string $leaveTypeCode, string $leaveTypeName, string $absenceCode): string
+    {
+        if ($leaveTypeId !== null) {
+            return 'leave-family:id:'.$leaveTypeId;
+        }
+
+        $normalizedCode = trim($leaveTypeCode);
+        if ($normalizedCode !== '') {
+            return 'leave-family:code:'.$normalizedCode;
+        }
+
+        $normalizedName = trim($leaveTypeName);
+        if ($normalizedName !== '') {
+            return 'leave-family:name:'.$normalizedName;
+        }
+
+        $normalizedAbsence = trim($absenceCode);
+
+        return 'leave-family:absence:'.($normalizedAbsence !== '' ? $normalizedAbsence : 'unknown');
+    }
+
+    private function buildLeaveLegendFamilyLabel(string $leaveTypeName, string $absenceCode = ''): string
+    {
+        return $leaveTypeName !== ''
+            ? $leaveTypeName
+            : ($absenceCode !== '' ? $absenceCode : __('attendance::puantaj.legend.unknown_leave'));
     }
 
     private function resolveLeaveTone(?int $leaveTypeId, string $leaveTypeName, string $absenceCode): string
@@ -409,6 +525,46 @@ class PuantajGrid extends Component
             'green' => 'green',
             default => 'secondary',
         };
+    }
+
+    private function resolveLeaveToneCodeClasses(string $tone): string
+    {
+        return match ($tone) {
+            'blue' => 'border-blue-200 bg-blue-100/90 text-blue-700',
+            'purple' => 'border-violet-200 bg-violet-100/90 text-violet-700',
+            'red' => 'border-rose-200 bg-rose-100/90 text-rose-700',
+            'sky' => 'border-sky-200 bg-sky-100/90 text-sky-700',
+            'green' => 'border-emerald-200 bg-emerald-100/90 text-emerald-700',
+            default => 'border-zinc-200 bg-zinc-100/90 text-zinc-700',
+        };
+    }
+
+    private function buildLeaveDurationSummary(string $durationUnit, ?int $totalMinutes): string
+    {
+        if ($durationUnit === 'hour' && $totalMinutes !== null && $totalMinutes > 0) {
+            return __('leaves::common.labels.duration_summary_hour', [
+                'hours' => number_format($totalMinutes / 60, 1),
+            ]);
+        }
+
+        if ($durationUnit === 'half_day') {
+            return __('leaves::common.labels.duration_summary_half_day');
+        }
+
+        return '';
+    }
+
+    private function buildLeaveDurationWindow(string $durationUnit, mixed $partialDayPart, mixed $startsTime, mixed $endsTime): string
+    {
+        if ($durationUnit === 'half_day' && is_string($partialDayPart) && $partialDayPart !== '') {
+            return __('leaves::common.labels.partial_day_parts.'.$partialDayPart);
+        }
+
+        if ($durationUnit === 'hour' && is_string($startsTime) && is_string($endsTime) && $startsTime !== '' && $endsTime !== '') {
+            return substr($startsTime, 0, 5).' - '.substr($endsTime, 0, 5);
+        }
+
+        return '';
     }
 
     /**

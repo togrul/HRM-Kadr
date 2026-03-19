@@ -130,6 +130,46 @@ class AttendanceOverrideResolutionTest extends TestCase
         $this->assertSame('leave', $override['source'] ?? null);
     }
 
+    public function test_partial_leave_override_carries_duration_metadata(): void
+    {
+        $personnel = $this->makePersonnel();
+        $this->seedOrderStatuses();
+
+        Leave::withoutEvents(fn () => Leave::query()->create([
+            'tabel_no' => $personnel->tabel_no,
+            'leave_type_id' => null,
+            'starts_at' => '2026-03-11',
+            'ends_at' => '2026-03-11',
+            'duration_unit' => 'hour',
+            'starts_time' => '10:00',
+            'ends_time' => '12:30',
+            'total_minutes' => 150,
+            'status_id' => OrderStatusEnum::APPROVED->value,
+            'approved_at' => '2026-03-10 10:00:00',
+        ]));
+
+        $resolver = app(AttendanceDayContextResolverService::class);
+        $context = $resolver->build(
+            from: Carbon::parse('2026-03-11')->startOfDay(),
+            to: Carbon::parse('2026-03-11')->endOfDay(),
+            tabelNos: new Collection([$personnel->tabel_no]),
+            structureByTabel: [$personnel->tabel_no => $personnel->structure_id]
+        );
+
+        $override = $resolver->resolveOverride(
+            Carbon::parse('2026-03-11'),
+            $personnel->tabel_no,
+            $context['overrides']
+        );
+
+        $this->assertNotNull($override);
+        $this->assertSame('leave', $override['type'] ?? null);
+        $this->assertSame('hour', $override['duration_unit'] ?? null);
+        $this->assertSame('10:00', $override['starts_time'] ?? null);
+        $this->assertSame('12:30', $override['ends_time'] ?? null);
+        $this->assertSame(150, $override['total_minutes'] ?? null);
+    }
+
     private function seedOrderStatuses(): void
     {
         foreach ([

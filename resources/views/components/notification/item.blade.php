@@ -147,6 +147,19 @@
                             @endif
                         </div>
                     @endif
+                    @if (in_array($action, ['leave', 'leaveStatusChanged'], true) && (!empty($data['duration_summary']) || !empty($data['duration_window']) || !empty($data['leave_period'])))
+                        <div class="flex flex-wrap items-center gap-2 text-xs text-neutral-500">
+                            @if (!empty($data['leave_period']))
+                                <span>{{ $data['leave_period'] }}</span>
+                            @endif
+                            @if (!empty($data['duration_summary']))
+                                <span>{{ $data['duration_summary'] }}</span>
+                            @endif
+                            @if (!empty($data['duration_window']))
+                                <span>{{ $data['duration_window'] }}</span>
+                            @endif
+                        </div>
+                    @endif
                     <span class="text-xs font-normal text-neutral-500">{{ $notification->created_at->format('d.m.Y H:i') }}</span>
                 </div>
                 <span class="text-xs font-normal text-neutral-500">{{ $notification->created_at->diffForHumans() }}</span>

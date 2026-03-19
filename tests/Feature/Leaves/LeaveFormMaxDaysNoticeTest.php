@@ -68,6 +68,34 @@ class LeaveFormMaxDaysNoticeTest extends TestCase
             ->assertHasErrors(['leave.document_path']);
     }
 
+    public function test_half_day_duration_recalculates_to_single_day_and_summary(): void
+    {
+        $this->actingAs($this->userWithCreatePermission());
+
+        Livewire::test(AddLeave::class)
+            ->set('leave.duration_unit', 'half_day')
+            ->set('leave.starts_at', '2026-03-10')
+            ->set('leave.partial_day_part', 'first_half')
+            ->assertSet('leave.ends_at', '2026-03-10')
+            ->assertSet('leave.total_days', 1)
+            ->assertSee(__('leaves::common.labels.duration_summary_half_day'));
+    }
+
+    public function test_hour_duration_recalculates_minutes_and_summary(): void
+    {
+        $this->actingAs($this->userWithCreatePermission());
+
+        Livewire::test(AddLeave::class)
+            ->set('leave.duration_unit', 'hour')
+            ->set('leave.starts_at', '2026-03-10')
+            ->set('leave.starts_time', '09:00')
+            ->set('leave.ends_time', '11:30')
+            ->assertSet('leave.ends_at', '2026-03-10')
+            ->assertSet('leave.total_days', 1)
+            ->assertSet('leave.total_minutes', 150)
+            ->assertSee(__('leaves::common.labels.duration_summary_hour', ['hours' => number_format(2.5, 1)]));
+    }
+
     private function userWithCreatePermission(): User
     {
         $user = User::factory()->create();

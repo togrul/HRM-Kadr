@@ -49,9 +49,14 @@ class LeavesRenderBenchmarkCommand extends Command
         ];
 
         $results = [];
-        $results[] = $this->probe('leaves_render', $budgets['leaves_render'], fn () => $profiler->measureRender($user, Leaves::class));
+        $results[] = $this->probe('leaves_render', $budgets['leaves_render'], function () use ($profiler, $user) {
+            // Warm Blade/Livewire compilation so the benchmark reflects steady-state render cost.
+            $profiler->measureRender($user, Leaves::class);
+
+            return $profiler->measureRender($user, Leaves::class);
+        });
         $results[] = $this->probe('leaves_status_update', $budgets['leaves_status_update'], fn () => $profiler->measureInteraction($user, Leaves::class, fn ($component) => $component->call('setStatus', 'deleted')));
-        $results[] = $this->probe('leaves_add_modal_open', $budgets['leaves_add_modal_open'], fn () => $profiler->measureInteraction($modalUser, Leaves::class, fn ($component) => $component->call('openSideMenu', 'add-leave')));
+        $results[] = $this->probe('leaves_add_modal_open', $budgets['leaves_add_modal_open'], fn () => $profiler->measureInteraction($modalUser, Leaves::class, fn ($component) => $component->call('openAddLeaveModal')));
 
         return $this->finalize($results);
     }

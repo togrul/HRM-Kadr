@@ -6,6 +6,7 @@ use App\Data\LeaveFilterData;
 use Carbon\CarbonImmutable;
 use App\Enums\OrderStatusEnum;
 use App\Traits\PersonnelTrait;
+use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -23,7 +24,12 @@ class Leave extends Model
         'leave_type_id',
         'starts_at',
         'ends_at',
+        'duration_unit',
+        'partial_day_part',
+        'starts_time',
+        'ends_time',
         'total_days',
+        'total_minutes',
         'reason',
         'status_id',
         'document_path',
@@ -36,6 +42,7 @@ class Leave extends Model
         'starts_at'   => 'immutable_date',
         'ends_at'     => 'immutable_date',
         'approved_at' => 'immutable_datetime',
+        'total_minutes' => 'integer',
     ];
 
     /* -------------------------------- Relations ------------------------------- */
@@ -205,11 +212,12 @@ class Leave extends Model
                 [$startDate, $endDate] = [$endDate, $startDate];
             }
 
-            $query->whereBetween('starts_at', [$startDate, $endDate]);
+            $query->whereDate('starts_at', '<=', $endDate->toDateString())
+                ->whereDate('ends_at', '>=', $startDate->toDateString());
         } elseif ($startDate) {
-            $query->whereDate('starts_at', '>=', $startDate);
+            $query->whereDate('ends_at', '>=', $startDate->toDateString());
         } elseif ($endDate) {
-            $query->whereDate('ends_at', '<=', $endDate);
+            $query->whereDate('starts_at', '<=', $endDate->toDateString());
         }
 
         return $query;
@@ -227,17 +235,113 @@ class Leave extends Model
         return $s->diffInDays($e) + 1;
     }
 
+    public function normalizedDurationUnit(): string
+    {
+        $unit = trim((string) ($this->duration_unit ?? 'day'));
+
+        return in_array($unit, ['day', 'half_day', 'hour'], true) ? $unit : 'day';
+    }
+
+    public function durationUnitLabel(): string
+    {
+        return __('leaves::common.labels.duration_units.'.$this->normalizedDurationUnit());
+    }
+
+    public function durationWindowLabel(): ?string
+    {
+        $durationUnit = $this->normalizedDurationUnit();
+
+        if ($durationUnit === 'half_day') {
+            return $this->partial_day_part
+                ? __('leaves::common.labels.partial_day_parts.'.$this->partial_day_part)
+                : null;
+        }
+
+        if ($durationUnit === 'hour' && filled($this->starts_time) && filled($this->ends_time)) {
+            return Str::substr((string) $this->starts_time, 0, 5).' - '.Str::substr((string) $this->ends_time, 0, 5);
+        }
+
+        return null;
+    }
+
+    public function durationSummary(): string
+    {
+        $durationUnit = $this->normalizedDurationUnit();
+
+        if ($durationUnit === 'hour') {
+            $minutes = (int) ($this->total_minutes ?? 0);
+
+            if ($minutes <= 0) {
+                return $this->durationUnitLabel();
+            }
+
+            return __('leaves::common.labels.duration_summary_hour', [
+                'hours' => number_format($minutes / 60, 1),
+            ]);
+        }
+
+        if ($durationUnit === 'half_day') {
+            return __('leaves::common.labels.duration_summary_half_day');
+        }
+
+        $days = (int) ($this->total_days ?: $this->durationDays());
+
+        return __('leaves::common.labels.duration_summary_day', ['days' => $days]);
+    }
+
+    public function durationDetailLabel(): string
+    {
+        $window = $this->durationWindowLabel();
+
+        return $window
+            ? $this->durationSummary().' • '.$window
+            : $this->durationSummary();
+    }
+
     /** Keep model source-of-truth in sync (or move to an Observer) */
     protected static function booted(): void
     {
         static::saving(function (self $model) {
-            if (!$model->starts_at || !$model->ends_at) {
+            if (! $model->starts_at) {
                 return;
             }
 
-            // If total_days not set or dates changed, recompute
-            if ($model->isDirty(['starts_at', 'ends_at']) || is_null($model->total_days)) {
-                $model->total_days = $model->durationDays();
+            $durationUnit = $model->normalizedDurationUnit();
+            $model->duration_unit = $durationUnit;
+
+            if ($durationUnit !== 'day') {
+                $model->ends_at = $model->starts_at;
+            } elseif (! $model->ends_at) {
+                $model->ends_at = $model->starts_at;
+            }
+
+            if ($durationUnit === 'day') {
+                $model->partial_day_part = null;
+                $model->starts_time = null;
+                $model->ends_time = null;
+                $model->total_minutes = null;
+            } elseif ($durationUnit === 'half_day') {
+                $model->starts_time = null;
+                $model->ends_time = null;
+                $model->total_minutes = null;
+            } else {
+                $model->partial_day_part = null;
+
+                if (filled($model->starts_time) && filled($model->ends_time)) {
+                    $start = CarbonImmutable::parse($model->starts_at->format('Y-m-d').' '.(string) $model->starts_time);
+                    $end = CarbonImmutable::parse($model->starts_at->format('Y-m-d').' '.(string) $model->ends_time);
+                    $model->total_minutes = $end->greaterThan($start)
+                        ? $start->diffInMinutes($end)
+                        : null;
+                } else {
+                    $model->total_minutes = null;
+                }
+            }
+
+            if ($model->isDirty(['starts_at', 'ends_at', 'duration_unit']) || is_null($model->total_days)) {
+                $model->total_days = $durationUnit === 'day'
+                    ? $model->durationDays()
+                    : 1;
             }
         });
     }

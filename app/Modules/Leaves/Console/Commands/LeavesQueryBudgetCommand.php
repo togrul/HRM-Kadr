@@ -50,7 +50,7 @@ class LeavesQueryBudgetCommand extends Command
         $results[] = $this->probe('leaves_add_modal_open', $budgets['leaves_add_modal_open'], function () use ($modalUser): void {
             Livewire::actingAs($modalUser);
             Livewire::test(Leaves::class)
-                ->call('openSideMenu', 'add-leave');
+                ->call('openAddLeaveModal');
         });
 
         $summary = [

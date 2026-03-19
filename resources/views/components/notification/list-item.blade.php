@@ -91,6 +91,19 @@
                @if (!empty($data['body']))
                     <p class="line-clamp-2 text-sm leading-6 text-zinc-500">{{ $data['body'] }}</p>
                @endif
+               @if (in_array($action, ['leave', 'leaveStatusChanged'], true) && (!empty($data['duration_summary']) || !empty($data['duration_window']) || !empty($data['leave_period'])))
+                    <div class="flex flex-wrap items-center gap-2 text-xs text-zinc-500">
+                        @if (!empty($data['leave_period']))
+                            <span>{{ $data['leave_period'] }}</span>
+                        @endif
+                        @if (!empty($data['duration_summary']))
+                            <span>{{ $data['duration_summary'] }}</span>
+                        @endif
+                        @if (!empty($data['duration_window']))
+                            <span>{{ $data['duration_window'] }}</span>
+                        @endif
+                    </div>
+               @endif
           </div>
           <div class="text-right text-xs text-zinc-500">
                <p>{{ $notification->created_at->format('d.m.Y H:i') }}</p>

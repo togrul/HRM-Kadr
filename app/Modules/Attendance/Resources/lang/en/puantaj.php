@@ -21,6 +21,9 @@ return [
         'status' => 'Status: :status',
         'absence' => 'Absence: :code',
         'leave_type' => 'Leave type: :type',
+        'duration' => 'Duration: :duration',
+        'leave_window' => 'Leave window: :window',
+        'covered_leave' => 'Covered by leave: :hours h',
         'calendar' => 'Work regime: :type',
     ],
     'statuses' => [
@@ -38,15 +41,18 @@ return [
     'short_labels' => [
         'vacation' => 'VAC',
         'business_trip' => 'TRP',
+        'leave' => 'LEV',
     ],
     'legend' => [
         'title' => 'Colors and markers',
         'unknown_leave' => 'Leave',
         'leave_description' => 'This marker shows the approved leave type for that day.',
         'leave_description_with_code' => 'This marker shows the approved leave type for that day. Code: :code.',
+        'leave_code_hint' => 'Shown in the grid with the same short code.',
+        'leave_code_note' => 'The short code shown in the grid identifies the leave type. Read the date from the column.',
         'sections' => [
             'colors' => 'Color meanings',
-            'leave_types' => 'Leave types',
+            'leave_types' => 'Leave codes',
             'calendar' => 'Work regime calendar overrides',
         ],
         'items' => [
@@ -58,7 +64,7 @@ return [
         ],
         'descriptions' => [
             'full_day' => 'Days with exactly 9 worked hours stay white with black text.',
-            'partial_day' => 'Shows workdays with fewer than expected hours.',
+            'partial_day' => 'Shows workdays that were partially covered by half-day or hourly leave.',
             'absence' => 'Represents absence or manual absence on a workday.',
             'weekend' => 'Weekend days are indicated with a single calendar marker in the legend.',
             'holiday' => 'Holiday days are shown with the holiday calendar icon.',

@@ -144,7 +144,17 @@ class AttendanceDayContextResolverService
                             ->whereNotNull('approved_at');
                     });
             })
-            ->get(['tabel_no', 'leave_type_id', 'starts_at', 'ends_at']);
+            ->get([
+                'tabel_no',
+                'leave_type_id',
+                'starts_at',
+                'ends_at',
+                'duration_unit',
+                'partial_day_part',
+                'starts_time',
+                'ends_time',
+                'total_minutes',
+            ]);
 
         foreach ($rows as $row) {
             $start = Carbon::parse($row->starts_at)->startOfDay();
@@ -161,6 +171,12 @@ class AttendanceDayContextResolverService
                     'absence_code' => $this->resolveLeaveAttendanceCode($this->resolveLeaveTypeAttendanceCode($row->leaveType)),
                     'leave_type_id' => $row->leave_type_id ? (int) $row->leave_type_id : null,
                     'leave_type_name' => $row->leaveType?->name,
+                    'leave_type_code' => $this->resolveLeaveTypeAttendanceCode($row->leaveType),
+                    'duration_unit' => $this->resolveLeaveDurationUnit($row->duration_unit),
+                    'partial_day_part' => $row->partial_day_part ?: null,
+                    'starts_time' => filled($row->starts_time) ? substr((string) $row->starts_time, 0, 5) : null,
+                    'ends_time' => filled($row->ends_time) ? substr((string) $row->ends_time, 0, 5) : null,
+                    'total_minutes' => $row->total_minutes !== null ? (int) $row->total_minutes : null,
                 ],
                 priority: 300,
                 source: 'leave',
@@ -297,6 +313,13 @@ class AttendanceDayContextResolverService
         }
 
         return data_get($leaveType, 'attendance_code');
+    }
+
+    private function resolveLeaveDurationUnit(mixed $value): string
+    {
+        $unit = trim((string) $value);
+
+        return in_array($unit, ['day', 'half_day', 'hour'], true) ? $unit : 'day';
     }
 
     private function leaveTypesHaveAttendanceCode(): bool

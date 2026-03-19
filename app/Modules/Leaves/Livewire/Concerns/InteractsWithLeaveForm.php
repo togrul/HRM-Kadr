@@ -19,6 +19,10 @@ trait InteractsWithLeaveForm
 
     public function updatedLeave($value, $name): void
     {
+        if (str_ends_with((string) $name, 'leave_type_id')) {
+            $this->syncSelectedLeaveTypeMeta();
+        }
+
         $this->recalculateLeaveDuration();
     }
 
@@ -75,21 +79,54 @@ trait InteractsWithLeaveForm
     }
 
     #[Computed(cache: true)]
+    public function leaveTypeMetaMap(): array
+    {
+        return LeaveType::query()
+            ->select('id', 'name', 'attendance_code', 'max_days', 'requires_document')
+            ->orderBy('id')
+            ->get()
+            ->mapWithKeys(fn (LeaveType $leaveType) => [
+                (int) $leaveType->id => [
+                    'id' => (int) $leaveType->id,
+                    'name' => (string) $leaveType->name,
+                    'attendance_code' => trim((string) ($leaveType->attendance_code ?? '')),
+                    'max_days' => max(0, (int) $leaveType->max_days),
+                    'requires_document' => (bool) $leaveType->requires_document,
+                ],
+            ])
+            ->all();
+    }
+
+    #[Computed(cache: true)]
     public function leaveTypes(): array
     {
-        $selected = $this->leave->leave_type_id;
+        return collect($this->leaveTypeMetaMap)
+            ->map(fn (array $meta) => [
+                'id' => (int) $meta['id'],
+                'label' => (string) $meta['name'],
+            ])
+            ->sortBy('label', SORT_NATURAL | SORT_FLAG_CASE)
+            ->values()
+            ->all();
+    }
 
-        $base = LeaveType::query()
-            ->select('id', DB::raw('name as label'))
-            ->orderBy('id');
+    #[Computed(cache: true)]
+    public function durationUnits(): array
+    {
+        return collect([
+            ['id' => 'day', 'label' => __('leaves::common.labels.duration_units.day')],
+            ['id' => 'half_day', 'label' => __('leaves::common.labels.duration_units.half_day')],
+            ['id' => 'hour', 'label' => __('leaves::common.labels.duration_units.hour')],
+        ])->all();
+    }
 
-        return $this->optionsWithSelected(
-            base: $base,
-            searchCol: null,
-            searchTerm: '',
-            selectedId: $selected,
-            limit: 50
-        );
+    #[Computed(cache: true)]
+    public function partialDayParts(): array
+    {
+        return collect([
+            ['id' => 'first_half', 'label' => __('leaves::common.labels.partial_day_parts.first_half')],
+            ['id' => 'second_half', 'label' => __('leaves::common.labels.partial_day_parts.second_half')],
+        ])->all();
     }
 
     #[Computed]
@@ -101,21 +138,7 @@ trait InteractsWithLeaveForm
             return null;
         }
 
-        /** @var LeaveType|null $leaveType */
-        $leaveType = LeaveType::query()
-            ->select('id', 'name', 'max_days', 'requires_document')
-            ->find((int) $leaveTypeId);
-
-        if (! $leaveType) {
-            return null;
-        }
-
-        return [
-            'id' => (int) $leaveType->id,
-            'name' => (string) $leaveType->name,
-            'max_days' => max(0, (int) $leaveType->max_days),
-            'requires_document' => (bool) $leaveType->requires_document,
-        ];
+        return $this->leaveTypeMetaMap[(int) $leaveTypeId] ?? null;
     }
 
     #[Computed]
@@ -141,6 +164,34 @@ trait InteractsWithLeaveForm
         ];
     }
 
+    #[Computed]
+    public function leaveDurationSummary(): ?string
+    {
+        $durationUnit = in_array($this->leave->duration_unit, ['day', 'half_day', 'hour'], true)
+            ? $this->leave->duration_unit
+            : 'day';
+
+        if ($durationUnit === 'hour') {
+            $minutes = (int) ($this->leave->total_minutes ?? 0);
+
+            if ($minutes <= 0) {
+                return null;
+            }
+
+            return __('leaves::common.labels.duration_summary_hour', ['hours' => number_format($minutes / 60, 1)]);
+        }
+
+        if ($durationUnit === 'half_day') {
+            return __('leaves::common.labels.duration_summary_half_day');
+        }
+
+        $days = (int) ($this->leave->total_days ?? 0);
+
+        return $days > 0
+            ? __('leaves::common.labels.duration_summary_day', ['days' => $days])
+            : null;
+    }
+
     #[Computed(cache: true)]
     public function statuses(): array
     {
@@ -161,16 +212,47 @@ trait InteractsWithLeaveForm
 
     protected function recalculateLeaveDuration(): void
     {
-        if ($this->leave->starts_at && $this->leave->ends_at) {
-            $start = Carbon::parse($this->leave->starts_at);
-            $end = Carbon::parse($this->leave->ends_at);
-
-            $this->leave->total_days = $start->diffInDays($end) + 1;
+        if (! $this->leave->starts_at) {
+            $this->leave->total_days = null;
+            $this->leave->total_minutes = null;
 
             return;
         }
 
-        $this->leave->total_days = null;
+        $durationUnit = in_array($this->leave->duration_unit, ['day', 'half_day', 'hour'], true)
+            ? $this->leave->duration_unit
+            : 'day';
+
+        if ($durationUnit === 'day') {
+            $start = Carbon::parse($this->leave->starts_at);
+            $end = Carbon::parse($this->leave->ends_at ?: $this->leave->starts_at);
+
+            $this->leave->total_days = $start->diffInDays($end) + 1;
+            $this->leave->total_minutes = null;
+
+            return;
+        }
+
+        $this->leave->ends_at = $this->leave->starts_at;
+        $this->leave->total_days = 1;
+
+        if ($durationUnit === 'half_day') {
+            $this->leave->total_minutes = null;
+
+            return;
+        }
+
+        if ($this->leave->starts_time && $this->leave->ends_time) {
+            $start = Carbon::createFromFormat('H:i', $this->leave->starts_time);
+            $end = Carbon::createFromFormat('H:i', $this->leave->ends_time);
+            $this->leave->total_minutes = $end->greaterThan($start)
+                ? $start->diffInMinutes($end)
+                : null;
+
+            return;
+        }
+
+        $this->leave->total_minutes = null;
     }
 
     protected function searchPersonnelOptions(string $term)
@@ -185,5 +267,10 @@ trait InteractsWithLeaveForm
             ->whereNull('deleted_at')
             ->limit(20)
             ->get();
+    }
+
+    protected function syncSelectedLeaveTypeMeta(): void
+    {
+        $this->leave->syncLeaveTypeMeta($this->selectedLeaveTypeMeta);
     }
 }

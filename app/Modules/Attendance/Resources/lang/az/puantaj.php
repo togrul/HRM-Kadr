@@ -21,6 +21,9 @@ return [
         'status' => 'Status: :status',
         'absence' => 'Yoxluq: :code',
         'leave_type' => 'İcazə növü: :type',
+        'duration' => 'Müddət: :duration',
+        'leave_window' => 'İcazə pəncərəsi: :window',
+        'covered_leave' => 'İcazə ilə örtülən vaxt: :hours saat',
         'calendar' => 'İş rejimi: :type',
     ],
     'statuses' => [
@@ -38,15 +41,18 @@ return [
     'short_labels' => [
         'vacation' => 'MZN',
         'business_trip' => 'EZM',
+        'leave' => 'İC',
     ],
     'legend' => [
         'title' => 'Rənglər və işarələr',
         'unknown_leave' => 'İcazə',
         'leave_description' => 'Bu işarə həmin gün üçün təsdiqlənmiş icazə növünü göstərir.',
         'leave_description_with_code' => 'Bu işarə həmin gün üçün təsdiqlənmiş icazə növünü göstərir. Kod: :code.',
+        'leave_code_hint' => 'Cədvəldə eyni qısa kodla göstərilir.',
+        'leave_code_note' => 'Cədvəldə görünən qısa kod icazə növünü göstərir. Tarixi sütundan oxuya bilərsiniz.',
         'sections' => [
             'colors' => 'Rənglərin mənası',
-            'leave_types' => 'İcazə növləri',
+            'leave_types' => 'İcazə kodları',
             'calendar' => 'İş rejimi təqvim override-ları',
         ],
         'items' => [
@@ -58,7 +64,7 @@ return [
         ],
         'descriptions' => [
             'full_day' => '9 saat işlənən günlər ağ fonda qara yazı ilə göstərilir.',
-            'partial_day' => 'İş saatı normadan aşağı olan iş günlərini göstərir.',
+            'partial_day' => 'Yarım gün və ya saatlıq icazə ilə birlikdə işlənən günləri göstərir.',
             'absence' => 'İş günü üçün yoxluq və ya manual yoxluq qeydidir.',
             'weekend' => 'Həftəsonu günləri legenddə bir təqvim işarəsi ilə göstərilir.',
             'holiday' => 'Bayram günləri təqvim ikonu ilə göstərilir.',

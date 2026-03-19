@@ -69,6 +69,19 @@ class AttendanceDailyLedgerCalculatorService
         }
 
         if ($override !== null) {
+            if ($this->isPartialLeaveOverride($override)) {
+                return $this->buildPartialLeavePayload(
+                    date: $date,
+                    pairing: $pairing,
+                    shift: $shift,
+                    setting: $setting,
+                    calendarDayType: $calendarDayType,
+                    override: $override,
+                    scheduledMinutes: $scheduledMinutes,
+                    approvedOvertimeMinutes: $approvedOvertimeMinutes
+                );
+            }
+
             return $this->buildOverridePayload(
                 date: $date,
                 shift: $shift,
@@ -207,9 +220,217 @@ class AttendanceDailyLedgerCalculatorService
                 'override_source' => (string) ($override['source'] ?? $type),
                 'leave_type_id' => $override['leave_type_id'] ?? null,
                 'leave_type_name' => $override['leave_type_name'] ?? null,
+                'leave_type_code' => $override['leave_type_code'] ?? null,
+                'duration_unit' => $override['duration_unit'] ?? 'day',
+                'partial_day_part' => $override['partial_day_part'] ?? null,
+                'starts_time' => $override['starts_time'] ?? null,
+                'ends_time' => $override['ends_time'] ?? null,
+                'total_minutes' => $override['total_minutes'] ?? null,
                 'requestable_overtime_minutes' => 0,
             ],
         ];
+    }
+
+    /**
+     * @param  array<string,mixed>  $override
+     * @param  array{
+     *   worked_minutes:int,
+     *   break_minutes:int,
+     *   unmatched:int,
+     *   first_in_at:?string,
+     *   last_out_at:?string,
+     *   consumed_punch_ids?:array<int,int>,
+     *   pairs:array<int,array{in:string,out:string,duration_minutes:int}>
+     * }  $pairing
+     * @return array<string,mixed>
+     */
+    private function buildPartialLeavePayload(
+        Carbon $date,
+        array $pairing,
+        ?AttendanceShift $shift,
+        ?AttendanceSetting $setting,
+        string $calendarDayType,
+        array $override,
+        int $scheduledMinutes,
+        ?int $approvedOvertimeMinutes
+    ): array {
+        if ($shift === null || $calendarDayType !== 'workday' || $scheduledMinutes <= 0) {
+            return $this->buildOverridePayload(
+                date: $date,
+                shift: $shift,
+                calendarDayType: $calendarDayType,
+                override: $override,
+                scheduledMinutes: $scheduledMinutes
+            );
+        }
+
+        $policy = app(AttendanceRulePolicyService::class);
+        $adjustment = $this->resolvePartialLeaveAdjustment($date, $shift, $scheduledMinutes, $override);
+        $coveredMinutes = (int) ($adjustment['covered_minutes'] ?? 0);
+        $adjustedScheduledMinutes = max(0, $scheduledMinutes - $coveredMinutes);
+
+        if ($adjustedScheduledMinutes === 0) {
+            return $this->buildOverridePayload(
+                date: $date,
+                shift: $shift,
+                calendarDayType: $calendarDayType,
+                override: $override,
+                scheduledMinutes: $scheduledMinutes
+            );
+        }
+
+        $workedMinutes = $policy->roundMinutes(max(0, (int) ($pairing['worked_minutes'] ?? 0)), $setting);
+        $breakMinutes = $policy->roundMinutes(max(0, (int) ($pairing['break_minutes'] ?? 0)), $setting);
+        $lateMinutes = 0;
+        $earlyLeaveMinutes = 0;
+        $graceLate = max(0, (int) ($setting?->late_grace_minutes ?? 0));
+        $graceEarly = max(0, (int) ($setting?->early_leave_grace_minutes ?? 0));
+        $window = app(AttendanceShiftWindowService::class)->resolve($date, $shift);
+        $expectedStart = $adjustment['expected_start'] ?? $window['shift_start'];
+        $expectedEnd = $adjustment['expected_end'] ?? $window['shift_end'];
+
+        if (! empty($pairing['first_in_at'])) {
+            $firstIn = Carbon::parse((string) $pairing['first_in_at']);
+            $lateMinutes = $policy->applyGrace(
+                max(0, $expectedStart->diffInMinutes($firstIn, false)),
+                $graceLate
+            );
+        }
+
+        if (! empty($pairing['last_out_at'])) {
+            $lastOut = Carbon::parse((string) $pairing['last_out_at']);
+            $earlyLeaveMinutes = $policy->applyGrace(
+                max(0, $lastOut->diffInMinutes($expectedEnd, false)),
+                $graceEarly
+            );
+        }
+
+        $overtimeMinutes = $policy->resolveOvertimeMinutes(
+            workedMinutes: $workedMinutes,
+            scheduledMinutes: $adjustedScheduledMinutes,
+            calendarDayType: $calendarDayType,
+            setting: $setting,
+            approvedOvertimeMinutes: $approvedOvertimeMinutes
+        );
+        $requestableOvertimeMinutes = $policy->resolveRequestableOvertimeMinutes(
+            workedMinutes: $workedMinutes,
+            scheduledMinutes: $adjustedScheduledMinutes,
+            calendarDayType: $calendarDayType,
+            setting: $setting
+        );
+
+        return [
+            'date' => $date->toDateString(),
+            'shift_id' => $shift->id,
+            'scheduled_minutes' => $adjustedScheduledMinutes,
+            'worked_minutes' => $workedMinutes,
+            'break_minutes' => $breakMinutes,
+            'overtime_minutes' => $overtimeMinutes,
+            'late_minutes' => (int) $lateMinutes,
+            'early_leave_minutes' => (int) $earlyLeaveMinutes,
+            'attendance_status' => $workedMinutes > 0 ? 'present' : 'absent',
+            'absence_code' => $workedMinutes > 0 ? null : strtoupper((string) ($override['absence_code'] ?? 'LEAVE')),
+            'source_summary' => 'policy_override',
+            'meta' => [
+                'calendar_day_type' => $calendarDayType,
+                'override_type' => 'leave',
+                'override_source' => (string) ($override['source'] ?? 'leave'),
+                'leave_type_id' => $override['leave_type_id'] ?? null,
+                'leave_type_name' => $override['leave_type_name'] ?? null,
+                'leave_type_code' => $override['leave_type_code'] ?? null,
+                'duration_unit' => $override['duration_unit'] ?? 'day',
+                'partial_day_part' => $override['partial_day_part'] ?? null,
+                'starts_time' => $override['starts_time'] ?? null,
+                'ends_time' => $override['ends_time'] ?? null,
+                'total_minutes' => $override['total_minutes'] ?? null,
+                'covered_leave_minutes' => $coveredMinutes,
+                'requestable_overtime_minutes' => $requestableOvertimeMinutes,
+            ],
+        ];
+    }
+
+    /**
+     * @param  array<string,mixed>  $override
+     * @return array{covered_minutes:int,expected_start:Carbon,expected_end:Carbon}
+     */
+    private function resolvePartialLeaveAdjustment(
+        Carbon $date,
+        AttendanceShift $shift,
+        int $scheduledMinutes,
+        array $override
+    ): array {
+        $window = app(AttendanceShiftWindowService::class)->resolve($date, $shift);
+        $shiftStart = $window['shift_start'];
+        $shiftEnd = $window['shift_end'];
+        $durationUnit = (string) ($override['duration_unit'] ?? 'day');
+
+        if ($durationUnit === 'half_day') {
+            $halfMinutes = max(0, intdiv($scheduledMinutes, 2));
+            $part = (string) ($override['partial_day_part'] ?? 'first_half');
+
+            if ($part === 'second_half') {
+                return [
+                    'covered_minutes' => $halfMinutes,
+                    'expected_start' => $shiftStart,
+                    'expected_end' => $shiftEnd->copy()->subMinutes($halfMinutes),
+                ];
+            }
+
+            return [
+                'covered_minutes' => $halfMinutes,
+                'expected_start' => $shiftStart->copy()->addMinutes($halfMinutes),
+                'expected_end' => $shiftEnd,
+            ];
+        }
+
+        $startsTime = (string) ($override['starts_time'] ?? '');
+        $endsTime = (string) ($override['ends_time'] ?? '');
+        if ($startsTime === '' || $endsTime === '') {
+            return [
+                'covered_minutes' => 0,
+                'expected_start' => $shiftStart,
+                'expected_end' => $shiftEnd,
+            ];
+        }
+
+        $leaveStart = Carbon::parse($date->toDateString().' '.$startsTime);
+        $leaveEnd = Carbon::parse($date->toDateString().' '.$endsTime);
+        if (! $leaveEnd->greaterThan($leaveStart)) {
+            return [
+                'covered_minutes' => 0,
+                'expected_start' => $shiftStart,
+                'expected_end' => $shiftEnd,
+            ];
+        }
+
+        $coveredStart = $leaveStart->greaterThan($shiftStart) ? $leaveStart : $shiftStart;
+        $coveredEnd = $leaveEnd->lessThan($shiftEnd) ? $leaveEnd : $shiftEnd;
+        $coveredMinutes = $coveredEnd->greaterThan($coveredStart) ? $coveredStart->diffInMinutes($coveredEnd) : 0;
+
+        $expectedStart = $shiftStart;
+        if ($leaveStart->lte($shiftStart) && $leaveEnd->gt($shiftStart)) {
+            $expectedStart = $leaveEnd->lessThan($shiftEnd) ? $leaveEnd : $shiftEnd;
+        }
+
+        $expectedEnd = $shiftEnd;
+        if ($leaveEnd->gte($shiftEnd) && $leaveStart->lt($shiftEnd)) {
+            $expectedEnd = $leaveStart->greaterThan($shiftStart) ? $leaveStart : $shiftStart;
+        }
+
+        return [
+            'covered_minutes' => $coveredMinutes,
+            'expected_start' => $expectedStart,
+            'expected_end' => $expectedEnd,
+        ];
+    }
+
+    /**
+     * @param  array<string,mixed>  $override
+     */
+    private function isPartialLeaveOverride(array $override): bool
+    {
+        return ($override['type'] ?? null) === 'leave'
+            && in_array((string) ($override['duration_unit'] ?? 'day'), ['half_day', 'hour'], true);
     }
 
     private function resolveStatus(string $calendarDayType, int $workedMinutes): string

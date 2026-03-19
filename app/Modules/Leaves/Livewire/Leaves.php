@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
+use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -25,6 +26,8 @@ use Maatwebsite\Excel\Facades\Excel;
 class Leaves extends Component
 {
     use AuthorizesRequests, DropdownConstructTrait ,SideModalAction, WithPagination;
+
+    private const PER_PAGE = 10;
 
     public LeaveFilterData $filter;
 
@@ -109,6 +112,13 @@ class Leaves extends Component
     public function setDeleteLeave($leaveId)
     {
         $this->dispatch('setDeleteLeave', $leaveId);
+    }
+
+    #[Renderless]
+    public function openAddLeaveModal(): void
+    {
+        $this->authorize('create', \App\Models\Leave::class);
+        $this->dispatch('openSideMenu', showSideMenu: 'add-leave');
     }
 
     public function forceDeleteData($id)
@@ -242,7 +252,7 @@ class Leaves extends Component
             ->get()
             ->mapWithKeys(fn ($row) => [
                 $row->name => [
-                    'total_days' => (int) $row->total_days,
+                    'total_days' => round((float) $row->total_days, 1),
                     'count' => (int) $row->count,
                 ],
             ])
@@ -252,8 +262,16 @@ class Leaves extends Component
     protected function totalDaysAggregateExpression(): string
     {
         return DB::connection()->getDriverName() === 'sqlite'
-            ? "SUM(CAST(julianday(ends_at) - julianday(starts_at) + 1 AS INTEGER))"
-            : 'SUM(DATEDIFF(ends_at, starts_at) + 1)';
+            ? "SUM(CASE
+                WHEN COALESCE(duration_unit, 'day') = 'hour' THEN COALESCE(total_minutes, 0) / 480.0
+                WHEN COALESCE(duration_unit, 'day') = 'half_day' THEN 0.5
+                ELSE COALESCE(total_days, CAST(julianday(ends_at) - julianday(starts_at) + 1 AS INTEGER))
+            END)"
+            : "SUM(CASE
+                WHEN COALESCE(duration_unit, 'day') = 'hour' THEN COALESCE(total_minutes, 0) / 480.0
+                WHEN COALESCE(duration_unit, 'day') = 'half_day' THEN 0.5
+                ELSE COALESCE(total_days, DATEDIFF(ends_at, starts_at) + 1)
+            END)";
     }
 
     protected function finalizePagination($query, $type)
@@ -262,7 +280,7 @@ class Leaves extends Component
             return $query->cursor();
         }
 
-        $paginated = $query->paginate(15)->withQueryString();
+        $paginated = $query->paginate(self::PER_PAGE)->withQueryString();
 
         return $this->decoratePagination($paginated);
     }

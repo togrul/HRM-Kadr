@@ -3,7 +3,6 @@
 namespace App\Livewire\Forms;
 
 use App\Models\Leave;
-use App\Models\LeaveType;
 use App\Models\Personnel;
 use Livewire\Form;
 use Illuminate\Validation\Rule;
@@ -17,23 +16,33 @@ class LeaveForm extends Form
     public ?int $status_id = null;
     public ?string $starts_at = null;
     public ?string $ends_at = null;
+    public string $duration_unit = 'day';
+    public ?string $partial_day_part = null;
+    public ?string $starts_time = null;
+    public ?string $ends_time = null;
     public ?int $total_days = null;
+    public ?int $total_minutes = null;
     public ?string $reason = null;
 
     public ?array $assigned_to = null;
+    public ?array $leave_type_meta = null;
 
     public $document_path = null;
 
     public function rules(): array
     {
-        $requiresDocument = $this->selectedLeaveTypeRequiresDocument();
+        $requiresDocument = (bool) data_get($this->leave_type_meta, 'requires_document', false);
 
         return [
             'tabel_no.tabel_no' => ['required', 'string', 'exists:personnels,tabel_no'],
             'leave_type_id'     => ['required', 'integer', Rule::exists('leave_types', 'id')],
             'status_id'         => ['required', 'integer', Rule::exists('order_statuses', 'id')],
             'starts_at'         => ['required', 'date'],
-            'ends_at'           => ['nullable', 'date', 'after_or_equal:starts_at'],
+            'duration_unit'     => ['required', Rule::in(['day', 'half_day', 'hour'])],
+            'ends_at'           => [Rule::requiredIf($this->duration_unit === 'day'), 'nullable', 'date', 'after_or_equal:starts_at'],
+            'partial_day_part'  => [Rule::requiredIf($this->duration_unit === 'half_day'), 'nullable', Rule::in(['first_half', 'second_half'])],
+            'starts_time'       => [Rule::requiredIf($this->duration_unit === 'hour'), 'nullable', 'date_format:H:i'],
+            'ends_time'         => [Rule::requiredIf($this->duration_unit === 'hour'), 'nullable', 'date_format:H:i', 'after:starts_time'],
             'assigned_to.id'    => ['nullable', 'integer', Rule::exists('personnels', 'id')],
             'document_path'     => [
                 Rule::requiredIf($requiresDocument),
@@ -58,6 +67,11 @@ class LeaveForm extends Form
             'tabel_no.tabel_no' => __('leaves::common.labels.personnel'),
             'leave_type_id'     => __('leaves::common.labels.leave_type'),
             'starts_at'         => __('leaves::common.labels.start_date'),
+            'ends_at'           => __('leaves::common.labels.end_date'),
+            'duration_unit'     => __('leaves::common.labels.duration_unit'),
+            'partial_day_part'  => __('leaves::common.labels.partial_day_part'),
+            'starts_time'       => __('leaves::common.labels.start_time'),
+            'ends_time'         => __('leaves::common.labels.end_time'),
             'status_id'         => __('leaves::common.labels.status'),
             'document_path'     => __('leaves::common.labels.file'),
         ];
@@ -109,19 +123,47 @@ class LeaveForm extends Form
         $this->status_id     = $leave->status_id;
         $this->starts_at     = optional($leave->starts_at)->format('Y-m-d');
         $this->ends_at       = optional($leave->ends_at)->format('Y-m-d');
+        $this->duration_unit = $leave->normalizedDurationUnit();
+        $this->partial_day_part = $leave->partial_day_part;
+        $this->starts_time = filled($leave->starts_time) ? substr((string) $leave->starts_time, 0, 5) : null;
+        $this->ends_time = filled($leave->ends_time) ? substr((string) $leave->ends_time, 0, 5) : null;
         $this->total_days    = $leave->total_days;
+        $this->total_minutes = $leave->total_minutes;
         $this->reason        = $leave->reason;
         $this->document_path = $leave->document_path;
     }
 
+    public function syncLeaveTypeMeta(?array $meta): void
+    {
+        $this->leave_type_meta = $meta ? [
+            'id' => (int) data_get($meta, 'id'),
+            'name' => (string) data_get($meta, 'name', ''),
+            'attendance_code' => trim((string) data_get($meta, 'attendance_code', '')),
+            'max_days' => max(0, (int) data_get($meta, 'max_days', 0)),
+            'requires_document' => (bool) data_get($meta, 'requires_document', false),
+        ] : null;
+    }
+
     public function toPayload(): array
     {
+        $durationUnit = in_array($this->duration_unit, ['day', 'half_day', 'hour'], true)
+            ? $this->duration_unit
+            : 'day';
+        $endsAt = $durationUnit === 'day'
+            ? ($this->ends_at ?: $this->starts_at)
+            : $this->starts_at;
+
         return [
             'tabel_no'      => data_get($this->tabel_no, 'tabel_no'),
             'leave_type_id' => $this->leave_type_id !== null ? (int) $this->leave_type_id : null,
             'starts_at'     => $this->starts_at,
-            'ends_at'       => $this->ends_at,
+            'ends_at'       => $endsAt,
+            'duration_unit' => $durationUnit,
+            'partial_day_part' => $durationUnit === 'half_day' ? $this->partial_day_part : null,
+            'starts_time'   => $durationUnit === 'hour' ? $this->starts_time : null,
+            'ends_time'     => $durationUnit === 'hour' ? $this->ends_time : null,
             'total_days'    => $this->total_days,
+            'total_minutes' => $this->total_minutes,
             'reason'        => $this->reason,
             'status_id'     => $this->status_id !== null ? (int) $this->status_id : null,
             'assigned_to'   => data_get($this->assigned_to, 'id'),
@@ -137,21 +179,16 @@ class LeaveForm extends Form
             'status_id'     => null,
             'starts_at'     => null,
             'ends_at'       => null,
+            'duration_unit' => 'day',
+            'partial_day_part' => null,
+            'starts_time'   => null,
+            'ends_time'     => null,
             'total_days'    => null,
+            'total_minutes' => null,
             'reason'        => null,
             'assigned_to'   => null,
+            'leave_type_meta' => null,
             'document_path' => null,
         ];
-    }
-
-    private function selectedLeaveTypeRequiresDocument(): bool
-    {
-        if (! $this->leave_type_id) {
-            return false;
-        }
-
-        return (bool) LeaveType::query()
-            ->whereKey((int) $this->leave_type_id)
-            ->value('requires_document');
     }
 }

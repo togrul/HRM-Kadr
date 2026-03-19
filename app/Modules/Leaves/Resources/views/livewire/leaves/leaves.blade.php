@@ -84,10 +84,13 @@
             <div class="grid w-full gap-2 md:grid-cols-3 lg:grid-cols-4">
                 @foreach ($stats as $type => $row)
                     <x-surface-card :title="$type" class="" icon="icons.calendar-icon">
+                      @php
+                          $equivalentDays = rtrim(rtrim(number_format((float) $row['total_days'], 1, '.', ''), '0'), '.');
+                      @endphp
                       <div class="flex items-center justify-between text-slate-800">
                         <div class="flex items-baseline space-x-1">
-                            <span class="text-lg font-bold font-title">{{ $row['total_days'] }}</span>
-                            <span class="text-[12px] font-medium font-mono text-gray-500 uppercase">{{ __('leaves::common.labels.day') }}</span>
+                            <span class="text-lg font-bold font-title">{{ $equivalentDays }}</span>
+                            <span class="text-[12px] font-medium font-mono text-gray-500 uppercase">{{ __('leaves::common.labels.day_equivalent') }}</span>
                         </div>
                         <div class="flex items-baseline space-x-1 text-emerald-700">
                             <span class="text-lg font-bold font-title">{{ $row['count'] }}</span>
@@ -120,7 +123,9 @@
 
            <div class="flex space-x-4">
                 @can('create', App\Models\Leave::class)
-                    <button wire:click="openSideMenu('add-leave')"
+                    <button wire:click="openAddLeaveModal"
+                           wire:loading.attr="disabled"
+                           wire:target="openAddLeaveModal"
                            class="flex items-center justify-center w-12 h-12 transition-all duration-300 rounded-xl hover:bg-blue-50"
                            type="button"
                    >
@@ -154,14 +159,25 @@
                             $authUser = auth()->user();
                         @endphp
                         @forelse ($permits as $leave)
+                            @php
+                                $durationTone = $leave->normalizedDurationUnit() === 'day'
+                                    ? 'bg-gray-100 text-gray-900'
+                                    : 'bg-sky-100 text-sky-700';
+                                $statusTone = match ($leave->status_id) {
+                                    10 => 'bg-neutral-200/60 text-neutral-600 border-neutral-200',
+                                    20 => 'bg-emerald-50 border-emerald-200 text-emerald-600',
+                                    30 => 'bg-rose-50 border-rose-200 text-rose-600',
+                                    default => 'bg-slate-50 text-slate-600 border-slate-200',
+                                };
+                            @endphp
                             <tr wire:key="leave-row-{{ $leave->id }}">
-                                <x-table.td>
+                                <td class="px-5 py-3 align-middle text-sm text-zinc-700 whitespace-nowrap">
                                     <span class="text-sm font-medium text-gray-700">
                                         {{ $leave->row_no }}
                                     </span>
-                                </x-table.td>
+                                </td>
 
-                                <x-table.td>
+                                <td class="px-5 py-3 align-middle text-sm text-zinc-700 whitespace-nowrap">
                                     <div class="flex flex-col">
                                         <span class="text-sm font-medium text-neutral-900">
                                             {{ $leave->personnel->fullname_max }}
@@ -173,16 +189,27 @@
                                             {{ $leave->personnel->position_label }}
                                         </span>
                                     </div>
-                                </x-table.td>
+                                </td>
 
-                                <x-table.td>
-                                    <x-status :status-id="$leave->leave_type_id * 10" :label="$leave->leaveType->name"></x-status>
-                                </x-table.td>
+                                <td class="px-5 py-3 align-middle text-sm text-zinc-700 whitespace-nowrap">
+                                    <span class="inline-flex w-max items-center rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium uppercase tracking-tight text-slate-700">
+                                        {{ $leave->leaveType->name }}
+                                    </span>
+                                </td>
 
-                                <x-table.td>
+                                <td class="px-5 py-3 align-middle text-sm text-zinc-700 whitespace-nowrap">
                                     <div class="flex flex-col space-y-1">
                                       <span class="flex-wrap text-sm font-medium whitespace-normal">{{ $leave->periodLabel }}</span>
-                                      <span class="text-sm font-medium text-neutral-700/80">({{ $leave->total_days }} {{ __('leaves::common.labels.day') }})</span>
+                                      <div class="flex flex-wrap items-center gap-2">
+                                          <span class="inline-flex h-5 w-fit shrink-0 items-center justify-center rounded-4xl bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-900">
+                                              {{ $leave->durationSummary() }}
+                                          </span>
+                                          @if($leave->durationWindowLabel())
+                                              <span class="inline-flex h-5 w-fit shrink-0 items-center justify-center rounded-4xl bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-700">
+                                                  {{ $leave->durationWindowLabel() }}
+                                              </span>
+                                          @endif
+                                      </div>
                                     </div>
                                       @if ($leave->deleted_at)
                                           <hr class="my-1" >
@@ -191,23 +218,23 @@
                                                 <span class="text-black">{{ \Carbon\Carbon::parse($leave->deleted_at)->format('d-m-Y H:i') }}</span>
                                             </div>
                                         @endif
-                                </x-table.td>
+                                </td>
 
-                               <x-table.td>
+                               <td class="px-5 py-3 align-middle text-sm text-zinc-700">
                                     <span class="text-sm font-medium text-gray-700 whitespace-normal flex w-[160px] bg-zinc-100/70 rounded-xl shadow-sm border border-gray-200 px-3 py-2">
                                         {{ $leave->reason }}
                                     </span>
-                                </x-table.td>
+                                </td>
 
-                                <x-table.td>
+                                <td class="px-5 py-3 align-middle text-sm text-zinc-700 whitespace-nowrap">
                                     <div class="flex flex-col space-y-1">
                                         <div class="flex items-center gap-2">
-                                            <x-status
-                                                :status-id="$leave->status_id"
-                                                :label="$leave->status->name"
-                                                type="order"
-                                                design="modern"
-                                            ></x-status>
+                                            <span class="inline-flex w-max items-center rounded-full border px-2.5 py-1 text-xs font-semibold uppercase tracking-tight {{ $statusTone }}">
+                                                {{ $leave->status->name }}
+                                            </span>
+                                            <span class="inline-flex h-5 w-fit shrink-0 items-center justify-center rounded-4xl px-2 py-0.5 text-xs font-medium {{ $durationTone }}">
+                                                {{ $leave->durationSummary() }}
+                                            </span>
                                             @if($leave?->latestLog?->comment)
                                             <div class="relative top-1" x-data="{showComment: false}">
                                                 <button @click="showComment = true" class="appearance-none">
@@ -232,6 +259,12 @@
                                             @endif
                                         </div>
 
+                                        @if($leave->durationWindowLabel())
+                                            <div class="text-xs text-zinc-500">
+                                                {{ $leave->durationWindowLabel() }}
+                                            </div>
+                                        @endif
+
                                         @if ($leave->status_id <> 10 && $leave->latestLog)
                                         <div class="flex flex-col">
                                              <div class="flex items-center space-x-1 text-sm">
@@ -247,9 +280,9 @@
                                         </div>
                                         @endif
                                     </div>
-                                </x-table.td>
+                                </td>
 
-                                <x-table.td standartWidth>
+                                <td class="px-5 py-3 align-middle text-sm text-zinc-700">
                                     <div class="flex flex-col flex-wrap space-y-2 whitespace-normal">
                                         @if($leave->document_path)
                                         <a
@@ -286,9 +319,9 @@
                                         </div>
                                         @endif
                                     </div>
-                                </x-table.td>
+                                </td>
 
-                                <x-table.td isButton>
+                                <td class="px-4 py-3 align-middle text-sm text-zinc-700 text-right whitespace-nowrap">
                                     @if ($status != 'deleted')
                                         @can('update', $leave)
                                             <button
@@ -311,9 +344,9 @@
                                             </button>
                                         @endcan
                                     @endif
-                                </x-table.td>
+                                </td>
 
-                                <x-table.td isButton>
+                                <td class="px-4 py-3 align-middle text-sm text-zinc-700 text-right whitespace-nowrap">
                                     @if ($status != 'deleted')
                                         @can('delete', $leave)
                                             <button
@@ -338,7 +371,7 @@
                                             </button>
                                         @endcan
                                     @endif
-                                </x-table.td>
+                                </td>
                             </tr>
                         @empty
                             <x-table.empty :rows="count($this->getTableHeaders())"></x-table.empty>
@@ -357,11 +390,11 @@
         @livewire('ui.confirmation.add-comment')
     </div>
 
-    <x-side-modal>
+    <x-side-modal :local-state="true">
         @can('create', App\Models\Leave::class)
-            @if ($showSideMenu == 'add-leave')
-                <livewire:leaves.add-leave />
-            @endif
+            <div x-show="activeMenu === 'add-leave'" x-cloak>
+                <livewire:leaves.add-leave wire:key="leaves-add-modal" />
+            </div>
         @endcan
 
         @can('update', App\Models\Leave::class)

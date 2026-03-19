@@ -1,6 +1,7 @@
 @props([
     'size' => 'large',
     'showHeaderClose' => true,
+    'localState' => false,
 ])
 
 @php
@@ -17,7 +18,12 @@
 
 <div
     x-data="{
+        @if($localState)
+        isOpen: false,
+        @else
         isOpen: @entangle('isSideModalOpen').live,
+        @endif
+        activeMenu: '',
         closeEvents: @js($closeOnEvents),
         previousFocus: null,
         lockBody() {
@@ -41,6 +47,7 @@
         },
         onClose() {
             this.unlockBody();
+            this.activeMenu = '';
             if (this.previousFocus && typeof this.previousFocus.focus === 'function') {
                 this.$nextTick(() => this.previousFocus.focus());
             }
@@ -64,7 +71,11 @@
         });
 
         if ($wire && typeof $wire.on === 'function') {
-            $wire.on('openSideMenu', () => {
+            $wire.on('openSideMenu', payload => {
+                const menu = payload?.showSideMenu ?? payload?.detail?.showSideMenu ?? payload?.[0]?.showSideMenu ?? '';
+                if (typeof menu === 'string' && menu.length > 0) {
+                    activeMenu = menu;
+                }
                 isOpen = true;
             });
 

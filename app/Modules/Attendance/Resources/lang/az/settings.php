@@ -7,13 +7,13 @@ return [
     'default_shift' => [
         'current_title' => 'Cari default növbə',
         'current_description' => 'Əməkdaş üçün aktiv təyinat olmadıqda bu növbə istifadə olunur.',
-        'none_badge' => 'Default növbə təyin edilməyib',
+        'none_badge' => 'Standart növbə təyin edilməyib',
         'none_description' => 'Manual hesablamalar əməkdaşa xüsusi təyinat olmadan işləməlidirsə, burada default növbə seçin.',
-        'option_none' => 'Default növbə yoxdur',
+        'option_none' => 'Standart növbə yoxdur',
     ],
     'fields' => [
         'timezone' => 'Saat qurşağı',
-        'default_shift' => 'Default növbə',
+        'default_shift' => 'Standart növbə',
         'late_grace' => 'Gecikmə güzəşti (dəqiqə)',
         'early_grace' => 'Erkən çıxış güzəşti (dəqiqə)',
         'rounding_policy' => 'Yuvarlaqlaşdırma siyasəti',

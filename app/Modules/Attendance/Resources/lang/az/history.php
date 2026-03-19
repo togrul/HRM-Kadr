@@ -67,7 +67,7 @@ return [
         'effective_to' => 'Etibarlıdır: bitmə',
         'source' => 'Mənbə',
         'timezone' => 'Saat qurşağı',
-        'default_shift_id' => 'Default növbə',
+        'default_shift_id' => 'Standart növbə',
         'late_grace_minutes' => 'Gecikmə güzəşti',
         'early_leave_grace_minutes' => 'Erkən çıxış güzəşti',
         'rounding_policy' => 'Yuvarlaqlaşdırma siyasəti',

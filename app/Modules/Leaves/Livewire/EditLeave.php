@@ -30,6 +30,7 @@ class EditLeave extends Component
         $this->authorize('viewAny', Leave::class);
         $this->title = __('leaves::common.titles.edit_leave');
         $this->leave->resetForm();
+        $this->syncSelectedLeaveTypeMeta();
 
         if (! $leaveModel) {
             return;
@@ -46,6 +47,7 @@ class EditLeave extends Component
 
         $this->authorize('update', $this->record);
         $this->leave->fillFromModel($this->record);
+        $this->syncSelectedLeaveTypeMeta();
     }
 
     public function store(): void
@@ -68,6 +70,7 @@ class EditLeave extends Component
 
         $this->record = $this->record->fresh($this->leaveRelations());
         $this->leave->fillFromModel($this->record);
+        $this->syncSelectedLeaveTypeMeta();
 
         if ($file instanceof TemporaryUploadedFile) {
             $this->leave->document_path = null;

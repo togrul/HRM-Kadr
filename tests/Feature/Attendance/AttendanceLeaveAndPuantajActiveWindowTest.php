@@ -3,6 +3,7 @@
 namespace Tests\Feature\Attendance;
 
 use App\Enums\OrderStatusEnum;
+use App\Models\AttendanceDailyLedger;
 use App\Models\Country;
 use App\Models\EducationDegree;
 use App\Models\Leave;
@@ -83,6 +84,55 @@ class AttendanceLeaveAndPuantajActiveWindowTest extends TestCase
 
         $this->assertContains($activeWithinMonth->tabel_no, $tabelNos);
         $this->assertNotContains($inactiveBeforeMonth->tabel_no, $tabelNos);
+    }
+
+    public function test_puantaj_ledger_map_exposes_partial_leave_duration_metadata(): void
+    {
+        $personnel = $this->makePersonnel([
+            'join_work_date' => '2026-03-01',
+        ]);
+
+        AttendanceDailyLedger::query()->create([
+            'tabel_no' => $personnel->tabel_no,
+            'date' => '2026-03-14',
+            'scheduled_minutes' => 360,
+            'worked_minutes' => 355,
+            'break_minutes' => 0,
+            'overtime_minutes' => 0,
+            'late_minutes' => 5,
+            'early_leave_minutes' => 0,
+            'attendance_status' => 'present',
+            'absence_code' => null,
+            'source_summary' => 'policy_override',
+            'is_locked' => false,
+            'meta' => [
+                'leave_type_id' => 5,
+                'leave_type_name' => 'Saatlıq icazə',
+                'leave_type_code' => 'SI',
+                'duration_unit' => 'hour',
+                'starts_time' => '09:00',
+                'ends_time' => '11:00',
+                'total_minutes' => 120,
+                'covered_leave_minutes' => 120,
+            ],
+        ]);
+
+        $service = app(AttendancePuantajReadService::class);
+        $ledgerMap = $service->loadLedgerMap(
+            [$personnel->tabel_no],
+            Carbon::parse('2026-03-01')->startOfMonth(),
+            Carbon::parse('2026-03-31')->endOfMonth()
+        );
+
+        $cell = $ledgerMap[$personnel->tabel_no]['2026-03-14'] ?? null;
+
+        $this->assertNotNull($cell);
+        $this->assertSame('SI', $cell['leave_type_code']);
+        $this->assertSame('hour', $cell['duration_unit']);
+        $this->assertSame('09:00', $cell['starts_time']);
+        $this->assertSame('11:00', $cell['ends_time']);
+        $this->assertSame(120, $cell['total_minutes']);
+        $this->assertSame(120, $cell['covered_leave_minutes']);
     }
 
     public function test_leave_override_follows_approve_cancel_reapprove_lifecycle(): void
