@@ -43,16 +43,17 @@ return [
         'business_trip' => 'TRP',
         'leave' => 'LEV',
     ],
+    'absence_codes' => [
+        'leave' => 'Leave',
+    ],
     'legend' => [
         'title' => 'Colors and markers',
         'unknown_leave' => 'Leave',
-        'leave_description' => 'This marker shows the approved leave type for that day.',
-        'leave_description_with_code' => 'This marker shows the approved leave type for that day. Code: :code.',
-        'leave_code_hint' => 'Shown in the grid with the same short code.',
-        'leave_code_note' => 'The short code shown in the grid identifies the leave type. Read the date from the column.',
+        'leave_code_note' => 'The icon or short code shown in the grid identifies the leave type. Tap the day cell for details.',
+        'leave_code_tap_hint' => 'Tap the day cell for details.',
         'sections' => [
             'colors' => 'Color meanings',
-            'leave_types' => 'Leave codes',
+            'leave_types' => 'Leave markers',
             'calendar' => 'Work regime calendar overrides',
         ],
         'items' => [

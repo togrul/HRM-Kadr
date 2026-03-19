@@ -396,11 +396,7 @@ class AttendanceDailyLedgerCalculatorService
         $leaveStart = Carbon::parse($date->toDateString().' '.$startsTime);
         $leaveEnd = Carbon::parse($date->toDateString().' '.$endsTime);
         if (! $leaveEnd->greaterThan($leaveStart)) {
-            return [
-                'covered_minutes' => 0,
-                'expected_start' => $shiftStart,
-                'expected_end' => $shiftEnd,
-            ];
+            $leaveEnd = $leaveEnd->copy()->addDay();
         }
 
         $coveredStart = $leaveStart->greaterThan($shiftStart) ? $leaveStart : $shiftStart;

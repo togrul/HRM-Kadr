@@ -204,6 +204,62 @@ class AttendanceLeaveAndPuantajActiveWindowTest extends TestCase
         )['type'] ?? null);
     }
 
+    public function test_multi_day_leave_and_following_half_day_leave_are_both_resolved(): void
+    {
+        $personnel = $this->makePersonnel([
+            'join_work_date' => '2026-03-01',
+        ]);
+
+        $this->seedOrderStatuses();
+
+        Leave::withoutEvents(fn () => Leave::query()->create([
+            'tabel_no' => $personnel->tabel_no,
+            'leave_type_id' => null,
+            'starts_at' => '2026-03-10',
+            'ends_at' => '2026-03-12',
+            'duration_unit' => 'day',
+            'status_id' => OrderStatusEnum::APPROVED->value,
+            'approved_at' => '2026-03-09 09:00:00',
+        ]));
+
+        Leave::withoutEvents(fn () => Leave::query()->create([
+            'tabel_no' => $personnel->tabel_no,
+            'leave_type_id' => null,
+            'starts_at' => '2026-03-13',
+            'ends_at' => '2026-03-13',
+            'duration_unit' => 'half_day',
+            'partial_day_part' => 'second_half',
+            'status_id' => OrderStatusEnum::APPROVED->value,
+            'approved_at' => '2026-03-12 18:00:00',
+        ]));
+
+        $resolver = app(AttendanceDayContextResolverService::class);
+        $context = $resolver->build(
+            from: Carbon::parse('2026-03-01')->startOfMonth(),
+            to: Carbon::parse('2026-03-31')->endOfMonth(),
+            tabelNos: new Collection([$personnel->tabel_no]),
+            structureByTabel: [$personnel->tabel_no => $personnel->structure_id]
+        );
+
+        $fullDayOverride = $resolver->resolveOverride(
+            Carbon::parse('2026-03-11'),
+            $personnel->tabel_no,
+            $context['overrides']
+        );
+
+        $halfDayOverride = $resolver->resolveOverride(
+            Carbon::parse('2026-03-13'),
+            $personnel->tabel_no,
+            $context['overrides']
+        );
+
+        $this->assertSame('leave', $fullDayOverride['type'] ?? null);
+        $this->assertSame('day', $fullDayOverride['duration_unit'] ?? null);
+        $this->assertSame('leave', $halfDayOverride['type'] ?? null);
+        $this->assertSame('half_day', $halfDayOverride['duration_unit'] ?? null);
+        $this->assertSame('second_half', $halfDayOverride['partial_day_part'] ?? null);
+    }
+
     private function seedOrderStatuses(): void
     {
         foreach ([

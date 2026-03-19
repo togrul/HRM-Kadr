@@ -42,7 +42,25 @@
                 </div>
                 <div class="flex flex-col">
                     <x-label for="form.attendance_code">{{ __('admin::leave_types.fields.attendance_code') }}</x-label>
-                    <x-livewire-input mode="default" name="form.attendance_code" wire:model="form.attendance_code"></x-livewire-input>
+                    <x-livewire-input
+                        mode="default"
+                        name="form.attendance_code"
+                        wire:model.live.debounce.150ms="form.attendance_code"
+                        placeholder="{{ __('admin::leave_types.placeholders.attendance_code') }}"
+                    ></x-livewire-input>
+                    <p class="mt-1 text-xs leading-5 text-slate-500">{{ __('admin::leave_types.hints.attendance_code') }}</p>
+                    <div class="mt-2 flex flex-wrap items-center gap-2">
+                        <span class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">
+                            {{ __('admin::leave_types.hints.attendance_code_preview') }}
+                        </span>
+                        @if(filled($form['attendance_code'] ?? null))
+                            <span class="inline-flex min-w-[3rem] items-center justify-center rounded-lg border border-violet-200 bg-violet-100/90 px-2 py-1 text-[11px] font-semibold uppercase tracking-tight text-violet-700 shadow-sm">
+                                {{ $form['attendance_code'] }}
+                            </span>
+                        @else
+                            <span class="text-xs text-slate-500">{{ __('admin::leave_types.hints.attendance_code_empty') }}</span>
+                        @endif
+                    </div>
                     @error('form.attendance_code')
                         <x-validation> {{ $message }} </x-validation>
                     @enderror

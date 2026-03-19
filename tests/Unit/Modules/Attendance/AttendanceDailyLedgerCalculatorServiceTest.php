@@ -310,4 +310,104 @@ class AttendanceDailyLedgerCalculatorServiceTest extends TestCase
         $this->assertSame('11:00', $result['meta']['ends_time']);
         $this->assertSame(120, $result['meta']['covered_leave_minutes']);
     }
+
+    public function test_cross_midnight_hourly_leave_adjusts_night_shift_window(): void
+    {
+        $service = new AttendanceDailyLedgerCalculatorService();
+
+        $shift = new AttendanceShift([
+            'start_time' => '22:00:00',
+            'end_time' => '06:00:00',
+            'break_minutes' => 30,
+            'is_night_shift' => true,
+        ]);
+        $shift->id = 7;
+
+        $result = $service->calculate(
+            date: Carbon::parse('2026-03-18'),
+            pairing: [
+                'worked_minutes' => 330,
+                'break_minutes' => 0,
+                'unmatched' => 0,
+                'first_in_at' => '2026-03-18 22:00:00',
+                'last_out_at' => '2026-03-19 06:00:00',
+                'pairs' => [],
+            ],
+            shift: $shift,
+            manualEntry: null,
+            setting: new AttendanceSetting([
+                'late_grace_minutes' => 0,
+                'early_leave_grace_minutes' => 0,
+                'overtime_policy' => 'after_shift',
+            ]),
+            calendarDayType: 'workday',
+            override: [
+                'type' => 'leave',
+                'source' => 'leave',
+                'absence_code' => 'LEAVE',
+                'duration_unit' => 'hour',
+                'starts_time' => '23:00',
+                'ends_time' => '01:00',
+                'total_minutes' => 120,
+            ]
+        );
+
+        $this->assertSame(330, $result['scheduled_minutes']);
+        $this->assertSame(330, $result['worked_minutes']);
+        $this->assertSame(0, $result['late_minutes']);
+        $this->assertSame(0, $result['early_leave_minutes']);
+        $this->assertSame('present', $result['attendance_status']);
+        $this->assertSame(120, $result['meta']['covered_leave_minutes']);
+        $this->assertSame('23:00', $result['meta']['starts_time']);
+        $this->assertSame('01:00', $result['meta']['ends_time']);
+    }
+
+    public function test_second_half_leave_adjusts_night_shift_expected_end(): void
+    {
+        $service = new AttendanceDailyLedgerCalculatorService();
+
+        $shift = new AttendanceShift([
+            'start_time' => '22:00:00',
+            'end_time' => '06:00:00',
+            'break_minutes' => 30,
+            'is_night_shift' => true,
+        ]);
+        $shift->id = 8;
+
+        $result = $service->calculate(
+            date: Carbon::parse('2026-03-19'),
+            pairing: [
+                'worked_minutes' => 225,
+                'break_minutes' => 0,
+                'unmatched' => 0,
+                'first_in_at' => '2026-03-19 22:00:00',
+                'last_out_at' => '2026-03-20 02:15:00',
+                'pairs' => [],
+            ],
+            shift: $shift,
+            manualEntry: null,
+            setting: new AttendanceSetting([
+                'late_grace_minutes' => 0,
+                'early_leave_grace_minutes' => 0,
+                'overtime_policy' => 'after_shift',
+            ]),
+            calendarDayType: 'workday',
+            override: [
+                'type' => 'leave',
+                'source' => 'leave',
+                'absence_code' => 'LEAVE',
+                'duration_unit' => 'half_day',
+                'partial_day_part' => 'second_half',
+            ]
+        );
+
+        $this->assertSame(225, $result['scheduled_minutes']);
+        $this->assertSame(225, $result['worked_minutes']);
+        $this->assertSame(0, $result['late_minutes']);
+        $this->assertSame(0, $result['early_leave_minutes']);
+        $this->assertSame('present', $result['attendance_status']);
+        $this->assertSame('half_day', $result['meta']['duration_unit']);
+        $this->assertSame('second_half', $result['meta']['partial_day_part']);
+        $this->assertSame(225, $result['meta']['covered_leave_minutes']);
+    }
 }

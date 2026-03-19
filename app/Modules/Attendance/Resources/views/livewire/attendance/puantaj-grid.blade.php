@@ -6,8 +6,53 @@
             this.detailPopover = {
                 lines: payload.lines || [],
                 label: payload.label || '',
-                left: Math.min(window.innerWidth - 280, Math.max(12, rect.left + (rect.width / 2) - 132)),
-                top: Math.max(12, rect.bottom + 8),
+                anchorLeft: rect.left,
+                anchorTop: rect.top,
+                anchorBottom: rect.bottom,
+                anchorWidth: rect.width,
+                left: 12,
+                top: 12,
+                maxHeight: 320,
+            };
+            this.$nextTick(() => {
+                this.positionDetail();
+                requestAnimationFrame(() => this.positionDetail());
+            });
+        },
+        positionDetail() {
+            if (!this.detailPopover || !this.$refs.detailPanel) {
+                return;
+            }
+
+            const margin = 12;
+            const panel = this.$refs.detailPanel;
+            const width = panel.offsetWidth || 256;
+            const height = panel.offsetHeight || 220;
+            const preferredLeft = this.detailPopover.anchorLeft + (this.detailPopover.anchorWidth / 2) - (width / 2);
+            const maxLeft = Math.max(margin, window.innerWidth - width - margin);
+            const left = Math.min(maxLeft, Math.max(margin, preferredLeft));
+            const gap = 8;
+            const availableBelow = Math.max(0, window.innerHeight - this.detailPopover.anchorBottom - margin - gap);
+            const availableAbove = Math.max(0, this.detailPopover.anchorTop - margin - gap);
+            const preferredBelow = availableBelow >= Math.min(height, 220) || availableBelow >= availableAbove;
+            const maxHeight = Math.max(180, Math.min(availableBelow, availableAbove, window.innerHeight - (margin * 2)));
+
+            let top = this.detailPopover.anchorBottom + gap;
+            let constrainedMaxHeight = Math.max(180, preferredBelow ? availableBelow : availableAbove);
+
+            if (!preferredBelow) {
+                top = Math.max(margin, this.detailPopover.anchorTop - Math.min(height, constrainedMaxHeight) - gap);
+            }
+
+            if (preferredBelow && top + Math.min(height, constrainedMaxHeight) > window.innerHeight - margin) {
+                top = Math.max(margin, window.innerHeight - Math.min(height, constrainedMaxHeight) - margin);
+            }
+
+            this.detailPopover = {
+                ...this.detailPopover,
+                left,
+                top,
+                maxHeight: Math.max(180, Math.min(constrainedMaxHeight, window.innerHeight - (margin * 2))),
             };
         },
         closeDetail() {
@@ -15,6 +60,8 @@
         }
     }"
     x-on:keydown.escape.window="closeDetail()"
+    x-on:resize.window.debounce.75ms="positionDetail()"
+    x-on:scroll.window.throttle.50ms="positionDetail()"
     class="space-y-4"
 >
     <x-surface-card :title="__('attendance::puantaj.title')" icon="icons.calendar-icon">
@@ -81,12 +128,23 @@
                                             @click="openDetail($event, { label: @js($cellLabel), lines: @js($cell['detail_lines']) })"
                                         @endif
                                     >
-                                        @if(!empty($cell['legend_code']) && (int) ($cell['worked_minutes'] ?? 0) > 0)
+                                        @if(!empty($cell['legend_icon']) && (int) ($cell['worked_minutes'] ?? 0) > 0)
+                                            <div class="relative flex min-h-[1.75rem] items-center justify-center">
+                                                <span class="font-medium text-zinc-900">{{ $cell['display'] }}</span>
+                                                <span class="absolute right-0 top-0 inline-flex h-6 w-6 items-center justify-center rounded-md border border-zinc-200 bg-white/95 shadow-sm">
+                                                    <x-dynamic-component :component="$cell['legend_icon']" size="w-4 h-4" :color="$cell['legend_icon_color'] ?? 'text-zinc-600'" />
+                                                </span>
+                                            </div>
+                                        @elseif(!empty($cell['legend_code']) && (int) ($cell['worked_minutes'] ?? 0) > 0)
                                             <div class="relative flex min-h-[1.75rem] items-center justify-center">
                                                 <span class="font-medium text-zinc-900">{{ $cell['display'] }}</span>
                                                 <span class="absolute right-0 top-0 inline-flex min-w-[1.65rem] items-center justify-center rounded-md border px-1 py-0.5 text-[10px] font-semibold uppercase tracking-tight shadow-sm {{ $cell['legend_code_classes'] ?? 'border-zinc-200 bg-zinc-100 text-zinc-700' }}">
                                                     {{ $cell['legend_code'] }}
                                                 </span>
+                                            </div>
+                                        @elseif(!empty($cell['legend_icon']))
+                                            <div class="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-zinc-200 bg-white/95 shadow-sm">
+                                                <x-dynamic-component :component="$cell['legend_icon']" size="w-4 h-4" :color="$cell['legend_icon_color'] ?? 'text-zinc-600'" />
                                             </div>
                                         @elseif(!empty($cell['legend_code']))
                                             <div class="inline-flex min-w-[2rem] items-center justify-center rounded-md border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-tight shadow-sm {{ $cell['legend_code_classes'] ?? 'border-zinc-200 bg-zinc-100 text-zinc-700' }}">
@@ -129,10 +187,11 @@
         @click="closeDetail()"
     >
         <div
+            x-ref="detailPanel"
             x-show="detailPopover"
             x-transition
-            class="absolute w-64 rounded-2xl border border-zinc-200 bg-white p-3 shadow-2xl"
-            :style="detailPopover ? `left:${detailPopover.left}px; top:${detailPopover.top}px;` : ''"
+            class="absolute w-64 overflow-y-auto rounded-2xl border border-zinc-200 bg-white p-3 shadow-2xl"
+            :style="detailPopover ? `left:${detailPopover.left}px; top:${detailPopover.top}px; max-height:${detailPopover.maxHeight}px;` : ''"
             @click.stop
         >
             <div class="text-xs font-semibold uppercase tracking-tight text-zinc-400" x-text="detailPopover?.label"></div>
@@ -163,16 +222,25 @@
             @if($leaveLegend !== [])
                 <div class="rounded-xl border border-zinc-200 bg-zinc-50/70 p-3 space-y-2">
                     <p class="text-xs font-semibold uppercase  text-zinc-400">{{ __('attendance::puantaj.legend.sections.leave_types') }}</p>
-                    <p class="text-xs leading-5 text-zinc-500">{{ __('attendance::puantaj.legend.leave_code_note') }}</p>
+                    <div class="rounded-xl border border-dashed border-zinc-200 bg-white/80 px-3 py-2 text-xs leading-5 text-zinc-500">
+                        {{ __('attendance::puantaj.legend.leave_code_note') }}
+                    </div>
                     <div class="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
                         @foreach($leaveLegend as $item)
-                            <div class="rounded-xl border border-zinc-200 bg-white px-3 py-3 text-sm text-zinc-700 shadow-sm">
+                            <div class="rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-700 shadow-sm">
                                 <div class="flex items-center gap-3">
-                                    <span class="inline-flex min-w-[3.25rem] items-center justify-center rounded-lg border px-2 py-1 text-[11px] font-semibold uppercase tracking-tight shadow-sm {{ $item['code_classes'] ?? 'border-zinc-200 bg-zinc-100 text-zinc-700' }}">
-                                        {{ $item['code'] !== '' ? $item['code'] : __('attendance::puantaj.short_labels.leave') }}
-                                    </span>
+                                    @if(!empty($item['icon']))
+                                        <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-50 shadow-sm">
+                                            <x-dynamic-component :component="$item['icon']" size="w-5 h-5" :color="$item['icon_color'] ?? 'text-zinc-600'" />
+                                        </span>
+                                    @else
+                                        <span class="inline-flex min-w-[3.25rem] items-center justify-center rounded-lg border px-2 py-1 text-[11px] font-semibold uppercase tracking-tight shadow-sm {{ $item['code_classes'] ?? 'border-zinc-200 bg-zinc-100 text-zinc-700' }}">
+                                            {{ $item['code'] !== '' ? $item['code'] : __('attendance::puantaj.short_labels.leave') }}
+                                        </span>
+                                    @endif
                                     <div class="min-w-0">
                                         <div class="font-medium leading-5 text-zinc-900">{{ $item['label'] }}</div>
+                                        <div class="text-xs leading-5 text-zinc-500">{{ __('attendance::puantaj.legend.leave_code_tap_hint') }}</div>
                                     </div>
                                 </div>
                             </div>

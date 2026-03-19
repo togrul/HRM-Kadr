@@ -43,16 +43,17 @@ return [
         'business_trip' => 'EZM',
         'leave' => 'İC',
     ],
+    'absence_codes' => [
+        'leave' => 'İcazə',
+    ],
     'legend' => [
         'title' => 'Rənglər və işarələr',
         'unknown_leave' => 'İcazə',
-        'leave_description' => 'Bu işarə həmin gün üçün təsdiqlənmiş icazə növünü göstərir.',
-        'leave_description_with_code' => 'Bu işarə həmin gün üçün təsdiqlənmiş icazə növünü göstərir. Kod: :code.',
-        'leave_code_hint' => 'Cədvəldə eyni qısa kodla göstərilir.',
-        'leave_code_note' => 'Cədvəldə görünən qısa kod icazə növünü göstərir. Tarixi sütundan oxuya bilərsiniz.',
+        'leave_code_note' => 'Hüceyrədə görünən ikon və ya qısa kod həmin icazə növünü göstərir. Ətraflı məlumat üçün gün hüceyrəsinə toxunun.',
+        'leave_code_tap_hint' => 'Ətraflı məlumat üçün gün hüceyrəsinə toxunun.',
         'sections' => [
             'colors' => 'Rənglərin mənası',
-            'leave_types' => 'İcazə kodları',
+            'leave_types' => 'İcazə işarələri',
             'calendar' => 'İş rejimi təqvim override-ları',
         ],
         'items' => [

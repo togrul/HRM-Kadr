@@ -174,6 +174,7 @@ class PuantajGrid extends Component
         $leaveTypeId = is_numeric($ledger['leave_type_id'] ?? null) ? (int) $ledger['leave_type_id'] : null;
         $calendarDayType = (string) ($ledger['calendar_day_type'] ?? '');
         $durationUnit = (string) ($ledger['duration_unit'] ?? 'day');
+        $legendIcon = $this->resolveLeaveLegendIcon($leaveTypeCode, $absenceCode);
         $partialDayPart = $ledger['partial_day_part'] ?? null;
         $startsTime = $ledger['starts_time'] ?? null;
         $endsTime = $ledger['ends_time'] ?? null;
@@ -226,7 +227,9 @@ class PuantajGrid extends Component
                 'icon_color' => 'text-zinc-500',
                 'legend_key' => $isPartialLeave ? $legendFamilyKey : null,
                 'legend_label' => $isPartialLeave ? $legendLabel : null,
-                'legend_code' => $isPartialLeave ? $this->resolveLeaveLegendCode($leaveTypeCode, $leaveTypeName, $absenceCode) : null,
+                'legend_code' => $isPartialLeave && $legendIcon === null ? $this->resolveLeaveLegendCode($leaveTypeCode, $leaveTypeName, $absenceCode) : null,
+                'legend_icon' => $isPartialLeave ? $legendIcon : null,
+                'legend_icon_color' => $isPartialLeave && $legendIcon !== null ? $this->resolveLeaveToneIconColor($tone) : null,
                 'legend_mode' => $isPartialLeave ? $this->resolveLeaveToneBadgeMode($tone) : null,
                 'legend_code_classes' => $isPartialLeave ? $this->resolveLeaveToneCodeClasses($tone) : null,
                 'legend_description' => $isPartialLeave ? __('attendance::puantaj.legend.leave_code_hint') : null,
@@ -240,17 +243,21 @@ class PuantajGrid extends Component
             $legendLabel = $this->buildLeaveLegendFamilyLabel($leaveTypeName, $absenceCode);
 
             return [
-                'display' => $legendCode !== '' ? $legendCode : __('attendance::puantaj.short_labels.leave'),
+                'display' => $legendIcon === null
+                    ? ($legendCode !== '' ? $legendCode : __('attendance::puantaj.short_labels.leave'))
+                    : '',
                 'status' => $status,
                 'worked_minutes' => 0,
                 'title' => $this->joinCellDetailLines($detailLines),
                 'detail_lines' => $detailLines,
                 'cell_classes' => $this->resolveLeaveToneClasses($tone),
-                'icon' => null,
-                'icon_color' => $this->resolveLeaveToneIconColor($tone),
+                'icon' => $legendIcon,
+                'icon_color' => $legendIcon !== null ? $this->resolveLeaveToneIconColor($tone) : $this->resolveLeaveToneIconColor($tone),
                 'legend_key' => $legendFamilyKey,
                 'legend_label' => $legendLabel,
-                'legend_code' => $legendCode,
+                'legend_code' => $legendIcon === null ? $legendCode : null,
+                'legend_icon' => $legendIcon,
+                'legend_icon_color' => $legendIcon !== null ? $this->resolveLeaveToneIconColor($tone) : null,
                 'legend_mode' => $this->resolveLeaveToneBadgeMode($tone),
                 'legend_code_classes' => $this->resolveLeaveToneCodeClasses($tone),
                 'legend_description' => __('attendance::puantaj.legend.leave_code_hint'),
@@ -361,7 +368,9 @@ class PuantajGrid extends Component
         }
 
         if ($absenceCode !== '') {
-            $parts[] = __('attendance::puantaj.tooltips.absence', ['code' => strtoupper($absenceCode)]);
+            $parts[] = __('attendance::puantaj.tooltips.absence', [
+                'code' => $this->resolveAbsenceDisplayLabel($absenceCode),
+            ]);
         }
 
         if ($calendarDayType !== '') {
@@ -414,6 +423,8 @@ class PuantajGrid extends Component
             ->map(fn (array $cell) => [
                 'label' => (string) $cell['legend_label'],
                 'code' => (string) ($cell['legend_code'] ?? ''),
+                'icon' => $cell['legend_icon'] ?? null,
+                'icon_color' => (string) ($cell['legend_icon_color'] ?? 'text-zinc-600'),
                 'mode' => (string) $cell['legend_mode'],
                 'code_classes' => (string) ($cell['legend_code_classes'] ?? 'border-zinc-200 bg-zinc-50 text-zinc-700'),
             ])
@@ -453,6 +464,17 @@ class PuantajGrid extends Component
         return mb_strtoupper(mb_substr($first, 0, min(2, mb_strlen($first))));
     }
 
+    private function resolveLeaveLegendIcon(string $leaveTypeCode, string $absenceCode): ?string
+    {
+        if (trim($leaveTypeCode) !== '') {
+            return null;
+        }
+
+        return strtoupper(trim($absenceCode)) === 'LEAVE'
+            ? 'icons.personal-affair-icon'
+            : null;
+    }
+
     private function resolveLeaveLegendFamilyKey(?int $leaveTypeId, string $leaveTypeCode, string $leaveTypeName, string $absenceCode): string
     {
         if ($leaveTypeId !== null) {
@@ -478,7 +500,15 @@ class PuantajGrid extends Component
     {
         return $leaveTypeName !== ''
             ? $leaveTypeName
-            : ($absenceCode !== '' ? $absenceCode : __('attendance::puantaj.legend.unknown_leave'));
+            : ($absenceCode !== '' ? $this->resolveAbsenceDisplayLabel($absenceCode) : __('attendance::puantaj.legend.unknown_leave'));
+    }
+
+    private function resolveAbsenceDisplayLabel(string $absenceCode): string
+    {
+        return match (strtoupper(trim($absenceCode))) {
+            'LEAVE' => __('attendance::puantaj.absence_codes.leave'),
+            default => strtoupper(trim($absenceCode)),
+        };
     }
 
     private function resolveLeaveTone(?int $leaveTypeId, string $leaveTypeName, string $absenceCode): string
