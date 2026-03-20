@@ -7,6 +7,7 @@ use App\Modules\Personnel\Services\PersonnelListStateNormalizer;
 use App\Modules\Personnel\Services\PersonnelQueryService;
 use App\Modules\Personnel\Services\PersonnelRowActionService;
 use App\Modules\Personnel\Services\PersonnelRowViewModelService;
+use App\Modules\Personnel\Support\ProfessionalPortfolio\ProfessionalPortfolioPermissionMatrix;
 use App\Services\StructureService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -114,7 +115,7 @@ class TablePanel extends Component
     }
 
     /**
-     * @return array{can_edit: bool, can_delete: bool}
+     * @return array{can_edit: bool, can_delete: bool, can_view_portfolio: bool}
      */
     protected function rowActionCapabilities(): array
     {
@@ -127,6 +128,7 @@ class TablePanel extends Component
         return $this->rowActionCapabilities = [
             'can_edit' => $user?->can('edit-personnels') ?? false,
             'can_delete' => $user?->can('delete-personnels') ?? false,
+            'can_view_portfolio' => ProfessionalPortfolioPermissionMatrix::canViewPortfolio($user),
         ];
     }
 

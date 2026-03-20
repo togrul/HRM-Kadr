@@ -2,7 +2,7 @@
     <p class="docs-header-kicker text-zinc-500">Ümumi baxış</p>
     <h1 class="docs-page-title">HR modullarının ortaq istifadə bələdçisi</h1>
     <p class="docs-lead">
-        Bu səhifə təlim ehtiyacı, performans qiymətləndirməsi, davamiyyət, əmrlər və bildirişlər modullarını birlikdə başa düşmək, düzgün iş sırası qurmaq və hər işi hansı modulda etmək lazım olduğunu aydın görmək üçündür.
+        Bu səhifə təlim ehtiyacı, performans qiymətləndirməsi, davamiyyət, əmrlər, bildirişlər və peşəkar portfel modullarını birlikdə başa düşmək, düzgün iş sırası qurmaq və hər işi hansı modulda etmək lazım olduğunu aydın görmək üçündür.
     </p>
 
     <div class="docs-callout">
@@ -63,6 +63,16 @@
                 <a href="#notifications-doc" class="docs-index-link">Bələdçi</a>
             </div>
         </div>
+        <div class="docs-index-card">
+            <p class="docs-card-title">Sürətli modul indeksi</p>
+            <p class="docs-card-strong">Peşəkar portfel</p>
+            <div class="docs-index-links">
+                <a href="#professional-portfolio-module" class="docs-index-link">Modul</a>
+                <a href="#professional-portfolio-outline" class="docs-index-link">Bölmələr</a>
+                <a href="#professional-portfolio-workflow" class="docs-index-link">Axın</a>
+                <a href="#professional-portfolio-doc" class="docs-index-link">Bələdçi</a>
+            </div>
+        </div>
     </div>
 
     <div class="docs-grid docs-grid-2">
@@ -90,6 +100,11 @@
             <p class="docs-card-title">Bildirişlər</p>
             <p class="docs-card-strong">Şablon, qayda, approval və dispatch platforması</p>
             <p class="docs-card-body">Avtomatik və manual bildiriş axınlarını approval, history və analytics ilə birlikdə idarə edir.</p>
+        </div>
+        <div class="docs-card docs-card-muted">
+            <p class="docs-card-title">Peşəkar portfel</p>
+            <p class="docs-card-strong">Tədbir, media və layihə record-larının HR portfeli</p>
+            <p class="docs-card-body">Əməkdaşın dəyərli tədbirlərini, mediada görünürlüğünü və layihə iştirakını verified timeline şəklində saxlayır.</p>
         </div>
         <div class="docs-card docs-card-muted">
             <p class="docs-card-title">Ortaq məntiq</p>

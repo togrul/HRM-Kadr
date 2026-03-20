@@ -33,6 +33,12 @@
         @endif
     @endcan
 
+    @if (\App\Modules\Personnel\Support\ProfessionalPortfolio\ProfessionalPortfolioPermissionMatrix::canViewPortfolio(auth()->user()))
+        @if ($showSideMenu == 'professional-portfolio')
+            <livewire:personnel.professional-portfolio :personnelModel="$modelName" :key="'professional-portfolio-' . $modelName" />
+        @endif
+    @endif
+
 </x-side-modal>
 
 @can('delete-personnels')

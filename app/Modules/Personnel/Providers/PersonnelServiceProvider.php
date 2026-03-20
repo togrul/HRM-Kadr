@@ -6,6 +6,10 @@ use App\Modules\Personnel\Console\Commands\PersonnelListQueryBudgetCommand;
 use App\Modules\Personnel\Console\Commands\PersonnelListRenderBenchmarkCommand;
 use App\Modules\Personnel\Console\Commands\PersonnelCrudQueryBudgetCommand;
 use App\Modules\Personnel\Console\Commands\PersonnelCrudRenderBenchmarkCommand;
+use App\Modules\Personnel\Console\Commands\ProfessionalPortfolioBackfillRegistryKeysCommand;
+use App\Modules\Personnel\Console\Commands\ProfessionalPortfolioCheckMediaLinksCommand;
+use App\Modules\Personnel\Console\Commands\ProfessionalPortfolioEnforcePoliciesCommand;
+use App\Modules\Personnel\Console\Commands\ProfessionalPortfolioSyncRegistriesCommand;
 use App\Providers\Concerns\RegistersLivewireAliases;
 use App\Services\Modules\ModuleState;
 use Illuminate\Support\Facades\Gate;
@@ -23,6 +27,10 @@ class PersonnelServiceProvider extends ServiceProvider
                 PersonnelListRenderBenchmarkCommand::class,
                 PersonnelCrudQueryBudgetCommand::class,
                 PersonnelCrudRenderBenchmarkCommand::class,
+                ProfessionalPortfolioCheckMediaLinksCommand::class,
+                ProfessionalPortfolioBackfillRegistryKeysCommand::class,
+                ProfessionalPortfolioSyncRegistriesCommand::class,
+                ProfessionalPortfolioEnforcePoliciesCommand::class,
             ]);
         }
     }
@@ -68,6 +76,12 @@ class PersonnelServiceProvider extends ServiceProvider
             'files' => \App\Modules\Personnel\Livewire\Files::class,
             'information' => \App\Modules\Personnel\Livewire\Information::class,
             'vacation-list' => \App\Modules\Personnel\Livewire\VacationList::class,
+            'professional-portfolio' => \App\Modules\Personnel\Livewire\ProfessionalPortfolio\ProfessionalPortfolio::class,
+            'professional-portfolio.events-manager' => \App\Modules\Personnel\Livewire\ProfessionalPortfolio\EventsManager::class,
+            'professional-portfolio.media-manager' => \App\Modules\Personnel\Livewire\ProfessionalPortfolio\MediaManager::class,
+            'professional-portfolio.projects-manager' => \App\Modules\Personnel\Livewire\ProfessionalPortfolio\ProjectsManager::class,
+            'professional-portfolio.timeline-panel' => \App\Modules\Personnel\Livewire\ProfessionalPortfolio\TimelinePanel::class,
+            'professional-portfolio.analytics-panel' => \App\Modules\Personnel\Livewire\ProfessionalPortfolio\AnalyticsPanel::class,
         ];
     }
 

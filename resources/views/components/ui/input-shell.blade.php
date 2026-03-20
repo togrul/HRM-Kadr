@@ -5,11 +5,12 @@
     'error' => null,
     'labelAs' => 'label',
     'containerClass' => '',
+    'labelClass' => '',
 ])
 
 <div {{ $attributes->merge(['class' => trim('space-y-2 '.$containerClass)]) }}>
     @if (filled($label))
-        <x-ui.field-label :for="$for" :as="$labelAs">{{ $label }}</x-ui.field-label>
+        <x-ui.field-label :for="$for" :as="$labelAs" :class="$labelClass">{{ $label }}</x-ui.field-label>
     @endif
 
     {{ $slot }}

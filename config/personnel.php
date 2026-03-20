@@ -1,6 +1,31 @@
 <?php
 
 return [
+    'portfolio' => [
+        'link_health' => [
+            'schedule_enabled' => (bool) env('PERSONNEL_PORTFOLIO_LINK_HEALTH_SCHEDULE_ENABLED', false),
+            'daily_at' => (string) env('PERSONNEL_PORTFOLIO_LINK_HEALTH_DAILY_AT', '03:15'),
+            'timeout_seconds' => (int) env('PERSONNEL_PORTFOLIO_LINK_HEALTH_TIMEOUT', 8),
+            'batch_limit' => (int) env('PERSONNEL_PORTFOLIO_LINK_HEALTH_BATCH_LIMIT', 100),
+        ],
+        'registry_sync' => [
+            'schedule_enabled' => (bool) env('PERSONNEL_PORTFOLIO_REGISTRY_SYNC_SCHEDULE_ENABLED', false),
+            'daily_at' => (string) env('PERSONNEL_PORTFOLIO_REGISTRY_SYNC_DAILY_AT', '03:45'),
+        ],
+        'policy' => [
+            'schedule_enabled' => (bool) env('PERSONNEL_PORTFOLIO_POLICY_SCHEDULE_ENABLED', false),
+            'daily_at' => (string) env('PERSONNEL_PORTFOLIO_POLICY_DAILY_AT', '04:15'),
+            'require_archive_for_media_verification' => (bool) env('PERSONNEL_PORTFOLIO_REQUIRE_ARCHIVE_FOR_MEDIA_VERIFICATION', true),
+            'require_healthy_archive_for_media_verification' => (bool) env('PERSONNEL_PORTFOLIO_REQUIRE_HEALTHY_ARCHIVE_FOR_MEDIA_VERIFICATION', true),
+            'block_verification_when_link_broken' => (bool) env('PERSONNEL_PORTFOLIO_BLOCK_VERIFICATION_WHEN_LINK_BROKEN', true),
+            'allow_manual_broken_without_url' => (bool) env('PERSONNEL_PORTFOLIO_ALLOW_MANUAL_BROKEN_WITHOUT_URL', false),
+            'auto_archive_on_broken_link' => (bool) env('PERSONNEL_PORTFOLIO_AUTO_ARCHIVE_ON_BROKEN_LINK', true),
+            'reject_media_without_archive' => (bool) env('PERSONNEL_PORTFOLIO_REJECT_MEDIA_WITHOUT_ARCHIVE', true),
+            'reject_broken_media_without_archive' => (bool) env('PERSONNEL_PORTFOLIO_REJECT_BROKEN_MEDIA_WITHOUT_ARCHIVE', true),
+            'auto_reject_stale_pending' => (bool) env('PERSONNEL_PORTFOLIO_AUTO_REJECT_STALE_PENDING', false),
+            'stale_pending_days' => (int) env('PERSONNEL_PORTFOLIO_STALE_PENDING_DAYS', 30),
+        ],
+    ],
     'performance' => [
         'render_budget' => [
             'all_personnel_render' => [

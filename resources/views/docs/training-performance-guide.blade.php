@@ -65,6 +65,17 @@
                     ['id' => 'notifications-doc', 'label' => 'Tam bələdçi'],
                 ],
             ],
+            [
+                'label' => 'Peşəkar portfel',
+                'tone' => 'violet',
+                'items' => [
+                    ['id' => 'professional-portfolio-module', 'label' => 'Modulun məqsədi'],
+                    ['id' => 'professional-portfolio-outline', 'label' => 'Bölmələr və sıra'],
+                    ['id' => 'professional-portfolio-workflow', 'label' => 'İş axını'],
+                    ['id' => 'professional-portfolio-scenarios', 'label' => 'Ssenarilər'],
+                    ['id' => 'professional-portfolio-doc', 'label' => 'Tam bələdçi'],
+                ],
+            ],
         ];
 
         $allSectionIds = collect($sidebarGroups)->flatMap(fn ($group) => array_column($group['items'], 'id'))->values()->all();
@@ -76,6 +87,7 @@
                     'Davamiyyət' => 'attendance',
                     'Əmrlər' => 'orders',
                     'Bildirişlər' => 'notifications',
+                    'Peşəkar portfel' => 'professional-portfolio',
                     default => 'overview',
                 };
 
@@ -89,6 +101,7 @@
             ['href' => route('attendance'), 'label' => 'Davamiyyət paneli'],
             ['href' => route('orders'), 'label' => 'Əmrlər paneli'],
             ['href' => route('services', ['selectedService' => 'notifications-settings']), 'label' => 'Bildirişlər paneli'],
+            ['href' => route('home'), 'label' => 'Əməkdaşlar paneli'],
         ];
 
         $initialSection = match ($focus) {
@@ -97,6 +110,7 @@
             'attendance' => 'attendance-module',
             'orders' => 'orders-module',
             'notifications' => 'notifications-module',
+            'professional-portfolio' => 'professional-portfolio-module',
             default => 'overview',
         };
     @endphp
@@ -227,6 +241,12 @@
                 border-color: #fecdd3;
                 background: #fff1f2;
                 color: #9f1239;
+            }
+
+            .docs-sidebar-link[data-tone="violet"][data-active="true"] {
+                border-color: #ddd6fe;
+                background: #f5f3ff;
+                color: #6d28d9;
             }
 
             .docs-quick-link {
@@ -1072,7 +1092,7 @@
         <main class="docs-main">
             @include('docs.partials.guide-overview', $initialModulePayloads['overview'] ?? [])
 
-            @foreach (['training', 'performance', 'attendance', 'orders', 'notifications'] as $module)
+            @foreach (['training', 'performance', 'attendance', 'orders', 'notifications', 'professional-portfolio'] as $module)
                 <div
                     data-docs-module-host="{{ $module }}"
                     data-loaded="{{ in_array($module, $initialModules, true) ? 'true' : 'false' }}"
@@ -1088,6 +1108,7 @@
                                     'attendance' => 'Davamiyyət',
                                     'orders' => 'Əmrlər',
                                     'notifications' => 'Bildirişlər',
+                                    'professional-portfolio' => 'Peşəkar portfel',
                                     default => 'Modul',
                                 } }}
                             </p>

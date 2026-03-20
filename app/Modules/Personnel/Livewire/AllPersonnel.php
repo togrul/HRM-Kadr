@@ -8,6 +8,7 @@ use App\Models\Personnel;
 use App\Modules\Personnel\Services\PersonnelListStateNormalizer;
 use App\Modules\Personnel\Services\PersonnelLookupService;
 use App\Modules\Personnel\Services\PersonnelQueryService;
+use App\Modules\Personnel\Support\ProfessionalPortfolio\ProfessionalPortfolioPermissionMatrix;
 use App\Services\StructureService;
 use App\Traits\NestedStructureTrait;
 use Carbon\Carbon;
@@ -284,6 +285,11 @@ class AllPersonnel extends Component
         return auth()->user()?->can('delete-personnels') ?? false;
     }
 
+    public function canViewProfessionalPortfolio(): bool
+    {
+        return ProfessionalPortfolioPermissionMatrix::canViewPortfolio(auth()->user());
+    }
+
     public function handleRowAction(string $type, mixed $payload = null): void
     {
         if (is_object($payload)) {
@@ -298,7 +304,13 @@ class AllPersonnel extends Component
         }
         $value = (string) data_get($payload, 'value', '');
 
-        if ($actionType === 'open' && ! $this->canEditPersonnels()) {
+        $menu = (string) data_get($payload, 'menu', '');
+
+        if ($actionType === 'open' && $menu === 'professional-portfolio' && ! $this->canViewProfessionalPortfolio()) {
+            return;
+        }
+
+        if ($actionType === 'open' && $menu !== 'professional-portfolio' && ! $this->canEditPersonnels()) {
             return;
         }
 

@@ -16,6 +16,7 @@ return [
         'cv' => 'CV',
         'information' => 'Məlumat',
         'vacations' => 'Məzuniyyətlər',
+        'professional_portfolio' => 'Peşəkar portfel',
         'restore' => 'Bərpa et',
         'force_delete' => 'Tam sil',
         'choose_photo' => 'Şəkil seç',

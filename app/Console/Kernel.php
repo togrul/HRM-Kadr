@@ -78,6 +78,30 @@ class Kernel extends ConsoleKernel
                 $weeklyEvent->appendOutputTo($outputPath);
             }
         }
+
+        if ((bool) config('personnel.portfolio.link_health.schedule_enabled', false)) {
+            $at = (string) config('personnel.portfolio.link_health.daily_at', '03:15');
+
+            $schedule->command('personnel:portfolio-check-media-links --limit='.(int) config('personnel.portfolio.link_health.batch_limit', 100))
+                ->dailyAt($at)
+                ->withoutOverlapping();
+        }
+
+        if ((bool) config('personnel.portfolio.registry_sync.schedule_enabled', false)) {
+            $at = (string) config('personnel.portfolio.registry_sync.daily_at', '03:45');
+
+            $schedule->command('personnel:portfolio-sync-registries')
+                ->dailyAt($at)
+                ->withoutOverlapping();
+        }
+
+        if ((bool) config('personnel.portfolio.policy.schedule_enabled', false)) {
+            $at = (string) config('personnel.portfolio.policy.daily_at', '04:15');
+
+            $schedule->command('personnel:portfolio-enforce-policies')
+                ->dailyAt($at)
+                ->withoutOverlapping();
+        }
     }
 
     /**

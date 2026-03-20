@@ -16,6 +16,7 @@ return [
         'cv' => 'CV',
         'information' => 'Information',
         'vacations' => 'Vacations',
+        'professional_portfolio' => 'Professional portfolio',
         'restore' => 'Restore',
         'force_delete' => 'Force delete',
         'choose_photo' => 'Choose photo',

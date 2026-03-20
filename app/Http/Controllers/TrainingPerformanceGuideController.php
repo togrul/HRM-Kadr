@@ -38,7 +38,7 @@ class TrainingPerformanceGuideController extends Controller
 
     private function normalizeFocus(?string $focus): string
     {
-        if (! in_array($focus, ['overview', 'training', 'performance', 'attendance', 'orders', 'notifications'], true)) {
+        if (! in_array($focus, ['overview', 'training', 'performance', 'attendance', 'orders', 'notifications', 'professional-portfolio'], true)) {
             return 'overview';
         }
 
@@ -69,6 +69,9 @@ class TrainingPerformanceGuideController extends Controller
             ],
             'notifications' => [
                 'notificationsHtml' => $this->renderMarkdown('docs/scenario/notifications-module-guide.md'),
+            ],
+            'professional-portfolio' => [
+                'professionalPortfolioHtml' => $this->renderMarkdown('docs/scenario/personnel-professional-portfolio-module-guide.md'),
             ],
             default => [],
         };
@@ -149,6 +152,7 @@ class TrainingPerformanceGuideController extends Controller
                 'User Guide',
                 'Admin / Operations guide',
                 'Admin / Ops guide',
+                'Professional Portfolio',
                 'Overview',
             ],
             [
@@ -207,6 +211,7 @@ class TrainingPerformanceGuideController extends Controller
                 'İstifadəçi bələdçisi',
                 'Admin / əməliyyat bələdçisi',
                 'Admin / əməliyyat bələdçisi',
+                'Peşəkar portfel',
                 'Xülasə',
             ],
             $contents

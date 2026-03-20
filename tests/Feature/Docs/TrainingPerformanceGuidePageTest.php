@@ -21,7 +21,8 @@ class TrainingPerformanceGuidePageTest extends TestCase
             ->assertSee('Performans qiymətləndirməsi')
             ->assertSee('Davamiyyət')
             ->assertSee('Əmrlər')
-            ->assertSee('Bildirişlər');
+            ->assertSee('Bildirişlər')
+            ->assertSee('Peşəkar portfel');
     }
 
     public function test_focus_parameter_loads_requested_module_on_initial_render(): void
@@ -45,6 +46,19 @@ class TrainingPerformanceGuidePageTest extends TestCase
             ->assertSee('Bildirişlər modulu')
             ->assertSee('Bildirişlər')
             ->assertSee('Şablonlar')
+            ->assertDontSee('Təlim ehtiyacı istifadəçi bələdçisi');
+    }
+
+    public function test_focus_parameter_can_load_professional_portfolio_module_on_initial_render(): void
+    {
+        $user = \App\Models\User::factory()->create();
+
+        $this->actingAs($user)
+            ->get(route('docs.guide', ['focus' => 'professional-portfolio']))
+            ->assertOk()
+            ->assertSee('Peşəkar portfel modulu')
+            ->assertSee('Tədbirlər')
+            ->assertSee('Zaman xətti')
             ->assertDontSee('Təlim ehtiyacı istifadəçi bələdçisi');
     }
 }

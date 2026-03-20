@@ -3,11 +3,12 @@
 namespace App\Modules\Personnel\Services;
 
 use App\Models\Personnel;
+use App\Modules\Personnel\Support\ProfessionalPortfolio\ProfessionalPortfolioPermissionMatrix;
 
 class PersonnelRowActionService
 {
     /**
-     * @param  array{can_edit: bool, can_delete: bool}|null  $capabilities
+     * @param  array{can_edit: bool, can_delete: bool, can_view_portfolio: bool}|null  $capabilities
      * @return PersonnelRowActionDescriptor[]
      */
     public function build(Personnel $personnel, string $status, ?array $capabilities = null): array
@@ -16,6 +17,20 @@ class PersonnelRowActionService
         $actions = [];
 
         if ($status !== 'deleted') {
+            if ($capabilities['can_view_portfolio']) {
+                $actions[] = PersonnelRowActionDescriptor::action(
+                    id: 'professional-portfolio',
+                    label: __('personnel::common.actions.professional_portfolio'),
+                    icon: 'icons.briefcase-outline-icon',
+                    actionPayload: [
+                        'type' => 'open',
+                        'menu' => 'professional-portfolio',
+                        'value' => $personnel->id,
+                    ],
+                    inMenu: true,
+                );
+            }
+
             if ($capabilities['can_edit']) {
                 $actions[] = PersonnelRowActionDescriptor::action(
                     id: 'edit',
@@ -130,7 +145,7 @@ class PersonnelRowActionService
     }
 
     /**
-     * @return array{can_edit: bool, can_delete: bool}
+     * @return array{can_edit: bool, can_delete: bool, can_view_portfolio: bool}
      */
     protected function resolveCapabilities(): array
     {
@@ -139,6 +154,7 @@ class PersonnelRowActionService
         return [
             'can_edit' => $user?->can('edit-personnels') ?? false,
             'can_delete' => $user?->can('delete-personnels') ?? false,
+            'can_view_portfolio' => ProfessionalPortfolioPermissionMatrix::canViewPortfolio($user),
         ];
     }
 }

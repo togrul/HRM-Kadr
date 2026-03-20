@@ -234,6 +234,21 @@ class Personnel extends Model
         return $this->hasMany(PersonnelDocument::class, 'tabel_no', 'tabel_no');
     }
 
+    public function eventRecords(): HasMany
+    {
+        return $this->hasMany(PersonnelEventRecord::class)->latest('start_date');
+    }
+
+    public function mediaMentions(): HasMany
+    {
+        return $this->hasMany(PersonnelMediaMention::class)->latest('published_at');
+    }
+
+    public function projectRecords(): HasMany
+    {
+        return $this->hasMany(PersonnelProjectRecord::class)->latest('start_date');
+    }
+
     public function latestManagerAssignment(): HasOne
     {
         return $this->hasOne(PerformanceForm::class)
