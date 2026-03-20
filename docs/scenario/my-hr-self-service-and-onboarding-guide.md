@@ -6,6 +6,7 @@ Məqsəd ayrı-ayrı “kiçik feature”lər toplamaq deyil. Məqsəd budur ki:
 - əməkdaş üçün vahid şəxsi kabinet yaransın
 - elektron ərizələr bir yerdən idarə olunsun
 - onboarding sənədləri və learning content vahid employee experience içində toplansın
+- fərdi inkişaf planı employee üçün aydın və izlənə bilən iş sahəsinə çevrilsin
 - rəhbər, struktur və tabellik xətti aydın görünsün
 - mövcud HR modulları employee-facing contract ilə reuse olunsun
 
@@ -23,6 +24,7 @@ Portalın əsas bölmələri:
 - `Ərizələrim`
 - `Bildirişlər`
 - `Onboarding`
+- `Fərdi inkişaf planım`
 - `Öyrənmə materialları`
 - `Sənədlərim`
 - `Mənim strukturum`
@@ -49,7 +51,7 @@ Bu sistem sıfırdan paralel HR platforması kimi qurulmayacaq. Mövcud repo-da 
 - `Personnel.files`
   - employee documents tabı üçün mövcud sənəd bazası
 - `TrainingNeeds`
-  - employee learning history və content relation-ləri üçün uyğun baza
+  - employee learning history, approved development need və development plan relation-ləri üçün uyğun baza
 - `Personnel.parent_id`
   - rəhbər və tabellik xətti üçün əsas source
 - `Personnel.structure_id`
@@ -232,19 +234,152 @@ Bu hissə ayrıca paralel inbox qurmur; mövcud notification platforması employ
 
 ---
 
-## 7. Onboarding sənədləri
+## 7. Fərdi inkişaf planım
+
+Müştərinin yeni əlavəsi olan `fərdi inkişaf planı` employee kabinetində ayrıca görünməlidir.
+
+Bu hissə sadəcə training history deyil. Professional HR sistemində bu ekran employee üçün aşağıdakı sualları cavablandırmalıdır:
+- mənim üçün hansı inkişaf istiqamətləri açılıb
+- bu istiqamətlər haradan yaranıb
+- hansı action planlaşdırılıb
+- hansısı icradadır
+- hansısı tamamlanıb
+
+### 7.1. Məhsul mənası
+
+Fərdi inkişaf planı employee üçün aşağıdakı komponentləri birləşdirir:
+- approved development need-lər
+- weak area və ya inkişaf hədəfi
+- həmin hədəfə bağlı action-lar
+- target quarter / year
+- owner
+- progress
+
+Bu hissə employee üçün şəffaflıq verir, HR üçün isə follow-up görünüşü yaradır.
+
+### 7.2. Source-of-truth
+
+Yeni paralel development engine qurulmayacaq.
+
+Authoritative source olacaq:
+- `TrainingNeeds`
+- approved need-lər
+- plan item-lər
+- delivery/result record-ları
+- performance və assessment source-ları
+
+Employee-facing yeni read layer:
+- `MyDevelopmentPlanReadService`
+
+### 7.3. Employee UX
+
+Yeni tab:
+- `Fərdi inkişaf planım`
+
+Bu tabda section-lər:
+- `Aktiv plan`
+- `Gözləyən addımlar`
+- `Tamamlananlar`
+- `İnkişaf tarixçəsi`
+
+Employee burada aşağıdakıları görəcək:
+- development goal
+- source
+- plan type
+- target period
+- status
+- owner
+- progress
+- bağlı session və ya learning action
+
+### 7.4. Plan item contract
+
+Employee-facing contract:
+- `plan_type`
+  - `training`
+  - `mentoring`
+  - `coaching`
+  - `reading`
+  - `project_assignment`
+  - `other`
+- `source_type`
+  - `performance_review`
+  - `manager_request`
+  - `hr_request`
+  - `self_request`
+  - `assessment`
+- `title`
+- `weakness_or_goal`
+- `target_period`
+- `status`
+  - `planned`
+  - `approved`
+  - `in_progress`
+  - `completed`
+  - `cancelled`
+- `owner_label`
+- `progress_percent`
+- `related_session`
+- `completion_note`
+
+### 7.5. Məhsul qaydaları
+
+- employee planı birbaşa publish etməyəcək
+- employee status-u sərbəst `approved` və ya `completed` edə bilməyəcək
+- cancelled və rejected source need-lər active plan görünüşündə qalmayacaq
+- completed training delivery varsa plan progress avtomatik sync oluna bilər
+
+### 7.6. Employee action-ları
+
+Bu ekran read-only summary olmayacaq. Yüngül action-lar olacaq:
+- detail bax
+- bağlı session-a keç
+- bağlı materialı aç
+- self-note əlavə et
+- evidence upload tələb olunursa yüklə
+
+### 7.7. HR/Admin görünüşü
+
+HR/Admin üçün:
+- employee development plan snapshot
+- source coverage
+- progress vəziyyəti
+- overdue action-lar
+- need-to-action closure
+
+Bu hissə ayrıca paralel HR moduluna çevrilməyəcək; `TrainingNeeds` və bağlı performance nəticələri ilə yaşayacaq.
+
+### 7.8. Automation
+
+Automation qaydaları:
+- approved need employee development plan görünüşünə düşür
+- completed training delivery bağlı plan item progress-ini yeniləyir
+- overdue action-lar reminder yaradır
+- stale planned action analytics-ə düşür
+
+### 7.9. Niyə ayrıca tab lazımdır
+
+`Öyrənmə materialları` ilə `Fərdi inkişaf planım` eyni şey deyil:
+- learning content ümumi və ya targeted materialdır
+- fərdi inkişaf planı employee-yə bağlı goal/action/progress xəttidir
+
+Professional HR sistemində bunlar ayrıca qalmalıdır.
+
+---
+
+## 8. Onboarding sənədləri
 
 Müştərinin onboarding document tələbi compliance xarakterli bir domendir. Sadəcə “faylı employee-yə göstər” kifayət deyil.
 
 Oxunma tarixi ayrıca izlənməlidir və lazım gəlsə tanış olma təsdiqi ayrıca saxlanmalıdır.
 
-### 7.1. Yeni cədvəllər
+### 8.1. Yeni cədvəllər
 
 - `onboarding_document_templates`
 - `onboarding_document_assignments`
 - `onboarding_document_receipts`
 
-### 7.2. Template shape
+### 8.2. Template shape
 
 - `title`
 - `document_type`
@@ -262,7 +397,7 @@ Oxunma tarixi ayrıca izlənməlidir və lazım gəlsə tanış olma təsdiqi ay
 - `effective_to`
 - `target_mode`
 
-### 7.3. Assignment shape
+### 8.3. Assignment shape
 
 - `template_id`
 - `personnel_id`
@@ -276,7 +411,7 @@ Oxunma tarixi ayrıca izlənməlidir və lazım gəlsə tanış olma təsdiqi ay
   - `overdue`
   - `waived`
 
-### 7.4. Receipt shape
+### 8.4. Receipt shape
 
 - `assignment_id`
 - `opened_at`
@@ -284,7 +419,7 @@ Oxunma tarixi ayrıca izlənməlidir və lazım gəlsə tanış olma təsdiqi ay
 - `acknowledged_ip`
 - `acknowledged_user_agent`
 
-### 7.5. Məhsul qaydası
+### 8.5. Məhsul qaydası
 
 Oxunma tarixi üçün:
 - `opened_at`
@@ -294,7 +429,7 @@ Tanış oldum / qəbul etdim xətti üçün:
 
 Professional yanaşma budur ki, hər ikisi ayrıca saxlanılsın.
 
-### 7.6. Employee UX
+### 8.6. Employee UX
 
 `Onboarding` tabında:
 - oxunmalı sənədlər
@@ -307,14 +442,14 @@ Action-lar:
 - yüklə
 - tanış oldum
 
-### 7.7. HR/Admin UX
+### 8.7. HR/Admin UX
 
 - template library
 - assignment list
 - unread / overdue görünüşü
 - version history
 
-### 7.8. Automation
+### 8.8. Automation
 
 Yeni əməkdaş aktivləşəndə:
 - default onboarding pack assign olunur
@@ -325,7 +460,7 @@ Reminder job-lar:
 
 ---
 
-## 8. Mənim strukturum
+## 9. Mənim strukturum
 
 Müştərinin istəyi:
 - əməkdaşın rəhbəri görünsün
@@ -333,7 +468,7 @@ Müştərinin istəyi:
 - tabellik xətti görünsün
 - kimə tabedir və kim ona tabedir ierarxiya şəklində görünsün
 
-### 8.1. Authority source
+### 9.1. Authority source
 
 Bu hissə üçün authoritative source:
 - `personnels.parent_id`
@@ -341,7 +476,7 @@ Bu hissə üçün authoritative source:
 
 Burada dolayı inference etməyəcəyik.
 
-### 8.2. Yeni relation-lar
+### 9.2. Yeni relation-lar
 
 `Personnel` modelinə əlavə ediləcək:
 - `manager()`
@@ -351,7 +486,7 @@ Lazım olduqda recursive helper:
 - upstream chain
 - downstream direct list
 
-### 8.3. Employee UX
+### 9.3. Employee UX
 
 `Mənim strukturum` tabında:
 - öz kartı
@@ -364,7 +499,7 @@ Qaydalar:
 - `parent_id` boşdursa fallback state görünür
 - direct reports yoxdursa boş grid qalmır
 
-### 8.4. Nə üçün vacibdir
+### 9.4. Nə üçün vacibdir
 
 Bu hissə employee portal üçün çox dəyərlidir:
 - kimə hesabat verir
@@ -375,7 +510,7 @@ Bu data HR sistemində employee orientation üçün əsasdır.
 
 ---
 
-## 9. Öyrənmə materialları, videolar və təqdimatlar
+## 10. Öyrənmə materialları, videolar və təqdimatlar
 
 Müştərinin istədiyi welcome videoları və materiallar formal training session-lardan ayrı düşünülməlidir.
 
@@ -385,13 +520,13 @@ Bunlar:
 - targeted təqdimat ola bilər
 - hər zaman attendance və training delivery yaratmır
 
-### 9.1. Yeni domain
+### 10.1. Yeni domain
 
 - `employee_content_assets`
 - `employee_content_assignments`
 - `employee_content_views`
 
-### 9.2. Asset shape
+### 10.2. Asset shape
 
 - `title`
 - `content_type`
@@ -409,7 +544,7 @@ Bunlar:
 - `is_required`
 - `estimated_minutes`
 
-### 9.3. Assignment targeting
+### 10.3. Assignment targeting
 
 Targeting imkanları:
 - specific personnel
@@ -418,13 +553,13 @@ Targeting imkanları:
 - new hires cohort
 - manual selected group
 
-### 9.4. View tracking
+### 10.4. View tracking
 
 - `opened_at`
 - `completed_at`
 - `watch_progress_percent`
 
-### 9.6. Employee UX
+### 10.6. Employee UX
 
 `Öyrənmə materialları` tabında:
 - mənə təyin edilənlər
@@ -432,7 +567,7 @@ Targeting imkanları:
 - tamamlanmamışlar
 - tamamlananlar
 
-### 9.7. HR/Admin UX
+### 10.7. HR/Admin UX
 
 - content library
 - assignment rules
@@ -440,11 +575,11 @@ Targeting imkanları:
 
 ---
 
-## 10. Sənədlərim
+## 11. Sənədlərim
 
 Mövcud `Personnel.files` və `personnel.files` Livewire capability-si reuse ediləcək, amma employee-facing contract ayrıca olacaq.
 
-### 10.1. Məqsəd
+### 11.1. Məqsəd
 
 Employee öz sənədlərini görə bilməlidir:
 - mövcud yüklənmiş sənədlər
@@ -453,7 +588,7 @@ Employee öz sənədlərini görə bilməlidir:
 - yükləmə
 - baxış
 
-### 10.2. Məhdudiyyət
+### 11.2. Məhdudiyyət
 
 Bu tab employee üçün read-only olacaq.
 
@@ -461,7 +596,7 @@ HR tərəfdə olan tam edit experience burada açılmayacaq.
 
 ---
 
-## 11. Permissions
+## 12. Permissions
 
 Yeni permission-lar:
 - `show-my-hr`
@@ -473,10 +608,13 @@ Yeni permission-lar:
 - `view-own-notifications`
 - `view-own-onboarding-documents`
 - `acknowledge-own-onboarding-documents`
+- `view-own-development-plan`
+- `view-own-development-history`
 - `view-own-learning-content`
 - `view-own-hierarchy`
 - `manage-onboarding-document-templates`
 - `assign-onboarding-documents`
+- `manage-development-plan-assignments`
 - `review-request-change-requests`
 - `manage-employee-content-library`
 - `assign-employee-content`
@@ -490,7 +628,7 @@ Manager self-service üçün ayrıca permission qatı sonra genişlənəcək.
 
 ---
 
-## 12. Livewire və UI strukturu
+## 13. Livewire və UI strukturu
 
 Yeni shell:
 - `my-hr.dashboard`
@@ -500,6 +638,7 @@ Child komponentlər:
 - `my-hr.requests`
 - `my-hr.notifications`
 - `my-hr.onboarding`
+- `my-hr.development-plan`
 - `my-hr.learning`
 - `my-hr.documents`
 - `my-hr.hierarchy`
@@ -517,11 +656,11 @@ Portal ayrıca employee-facing olacaq; HR-heavy mutation ekranları mövcud modu
 
 ---
 
-## 13. Reporting və automation
+## 14. Reporting və automation
 
 Bu sistemin dəyəri yalnız form submission deyil. Tracking və automation vacibdir.
 
-### 13.1. Reporting
+### 14.1. Reporting
 
 Yeni admin/report capability-lər:
 - `My HR adoption summary`
@@ -529,26 +668,30 @@ Yeni admin/report capability-lər:
 - correction request aging
 - onboarding read completion
 - overdue acknowledgements
+- development plan progress və overdue action-lar
+- development source mix
 - learning content completion
 
-### 13.2. Automation
+### 14.2. Automation
 
 Job-lar:
 - `my-hr:assign-onboarding`
 - `my-hr:remind-unread-docs`
 - `my-hr:enforce-request-policies`
+- `my-hr:sync-development-plan-progress`
 - `my-hr:remind-learning-content`
 
-### 13.3. Policy sərtləşdirmə
+### 14.3. Policy sərtləşdirmə
 
 - employee başqa employee data-sını görə bilməz
 - restricted content ayrıca permission ilə qorunur
 - archived və expired content ayrıca state alır
 - correction request-lər stale qalmamalıdır
+- stale development action-lar ayrıca analytics və reminder xəttinə düşməlidir
 
 ---
 
-## 14. İcra ardıcıllığı
+## 15. İcra ardıcıllığı
 
 ### Faza 1. Foundation
 
@@ -564,28 +707,35 @@ Job-lar:
 - correction request workflow
 - request status notification deep-link
 
-### Faza 3. Onboarding docs
+### Faza 3. Fərdi inkişaf planı
+
+- `MyDevelopmentPlanReadService`
+- employee-facing development plan tabı
+- training/performance linked plan summary
+- progress sync qaydaları
+
+### Faza 4. Onboarding docs
 
 - template/assignment/receipt domain
 - employee acknowledgement UX
 - HR assignment panel
 - reminder automation
 
-### Faza 4. Struktur və profil konteksti
+### Faza 5. Struktur və profil konteksti
 
 - rəhbər və direct reports chain
 - structure breadcrumb
 - own profile summary
 - own documents tab
 
-### Faza 5. Learning content
+### Faza 6. Learning content
 
 - storage-backed content library
 - targeted assignments
 - read/watch tracking
 - welcome area
 
-### Faza 6. Analytics və docs
+### Faza 7. Analytics və docs
 
 - admin dashboard-lar
 - acceptance checklist
@@ -593,7 +743,7 @@ Job-lar:
 
 ---
 
-## 15. Test plan
+## 16. Test plan
 
 ### Mapping
 
@@ -618,6 +768,13 @@ Job-lar:
 - request status update inbox-a düşür
 - onboarding unread reminder düşür
 - read tracking işləyir
+
+### Development plan
+
+- approved need employee development plan-da görünür
+- completed training delivery progress-i yeniləyir
+- cancelled source need active view-dən çıxır
+- employee yalnız öz plan item-lərini görür
 
 ### Onboarding
 
@@ -649,20 +806,22 @@ Job-lar:
 
 ---
 
-## 16. Default qərarlar
+## 17. Default qərarlar
 
 - Bu plan yalnız `Employee Self-Service` üçündür
 - `Leaves`, `Vacation`, `BusinessTrips` source-of-truth olaraq qalır
 - correction request ayrıca generic workflow kimi qurulur
 - hierarchy üçün source `personnels.parent_id` olur
 - onboarding üçün həm `opened_at`, həm `acknowledged_at` saxlanır
+- fərdi inkişaf planı üçün source-of-truth `TrainingNeeds` və bağlı delivery/result data olur
+- employee development plan statusunu sərbəst dəyişmir
 - welcome content `TrainingNeeds` session-larına qarışdırılmır
 - ayrıca `employee_content` storage disk qurulur
 - employee portal read/write contract ilə gəlir, HR master ekranlarını əvəz etmir
 
 ---
 
-## 17. Qısa yekun
+## 18. Qısa yekun
 
 Bu tələbin düzgün professional forması belədir:
 - ayrı-ayrı xırda button və form yığımı yox
@@ -672,8 +831,435 @@ Bu platforma:
 - request mərkəzi
 - inbox
 - onboarding compliance
+- fərdi inkişaf planı
 - learning content
 - hierarchy
 - own documents
 
 xəttlərini birləşdirir və mövcud HR sistemini employee-facing təcrübəyə çevirir.
+
+---
+
+## 19. Sprint task breakdown
+
+Bu bölmə implementasiyanı mərhələli və icra edilə bilən backlog-a çevirir. Məqsəd odur ki, iş paralel və təhlükəsiz şəkildə bölünsün, amma məhsul axını qırılmasın.
+
+### Sprint 1. Foundation və shell
+
+- [ ] `My HR` route yarat
+- [ ] `My HR` navigation entry əlavə et
+- [ ] `my-hr.dashboard` Livewire shell yarat
+- [ ] `UserPersonnelLinkResolver` əsasında employee context bootstrap et
+- [ ] mapping olmayan user üçün remediation empty-state yarat
+- [ ] `show-my-hr` permission əlavə et
+- [ ] employee-only authorization guard-larını qur
+- [ ] docs hub üçün `focus=my-hr` section hazırlığını et
+
+### Sprint 2. Ərizələrim workspace
+
+- [ ] `MyRequestsReadService` yarat
+- [ ] `Leaves`, `Vacation`, `BusinessTrips` üçün unified request contract qur
+- [ ] source metadata sahələrini əlavə et:
+  - `submission_source`
+  - `submitted_by_user_id`
+- [ ] `Ərizələrim` tab UI-ni qur
+- [ ] request type, status, date filter-ləri əlavə et
+- [ ] detail drawer contract-ını tamamla
+- [ ] employee leave self-service create flow qur
+- [ ] employee vacation self-service create flow qur
+- [ ] employee business trip self-service create flow qur
+- [ ] submit sonrası toast/notify dispatch-lərini bağla
+
+### Sprint 3. Düzəliş müraciəti workflow-u
+
+- [ ] `employee_request_change_requests` cədvəlini yarat
+- [ ] correction request model və policy qatını qur
+- [ ] `Düzəliş istə` action-ını request detail içində əlavə et
+- [ ] proposed patch JSON contract-ını təyin et
+- [ ] reviewer üçün correction review paneli qur
+- [ ] approve/reject/writeback axınını əlavə et
+- [ ] audit və notification sync-ni bağla
+- [ ] stale correction request policy-lərini əlavə et
+
+### Sprint 4. Bildirişlər və inbox
+
+- [ ] employee inbox tabını mövcud notifications query-ləri ilə bağla
+- [ ] unread count widget-i dashboard-a çıxar
+- [ ] request status update bildirişlərini employee deep-link ilə bağla
+- [ ] correction result bildirişlərini əlavə et
+- [ ] onboarding assignment bildirişlərini əlavə et
+- [ ] unread onboarding reminder bildirişlərini əlavə et
+- [ ] learning content assignment bildirişlərini əlavə et
+- [ ] `read_at` əsaslı grouped inbox görünüşünü employee panelində tamamla
+
+### Sprint 5. Fərdi inkişaf planı
+
+- [ ] `MyDevelopmentPlanReadService` yarat
+- [ ] approved need, plan item və delivery nəticələrini vahid employee contract-a çevir
+- [ ] `Fərdi inkişaf planım` tabını qur
+- [ ] `Aktiv plan`, `Gözləyən addımlar`, `Tamamlananlar`, `İnkişaf tarixçəsi` bölmələrini əlavə et
+- [ ] progress status və source badge-lərini qur
+- [ ] related session/material deep-link-lərini əlavə et
+- [ ] self-note və evidence upload qaydasını dəqiqləşdirib UI əlavə et
+- [ ] completed delivery -> progress sync automation-ını qur
+- [ ] overdue development action reminder-lərini əlavə et
+
+### Sprint 6. Onboarding sənədləri
+
+- [ ] `onboarding_document_templates` cədvəlini yarat
+- [ ] `onboarding_document_assignments` cədvəlini yarat
+- [ ] `onboarding_document_receipts` cədvəlini yarat
+- [ ] HR/Admin template library UI-ni qur
+- [ ] employee onboarding tabını qur
+- [ ] `opened_at` tracking-i əlavə et
+- [ ] `acknowledged_at` tracking-i əlavə et
+- [ ] overdue state və due date semantics-ını əlavə et
+- [ ] new-hire auto-assignment job-ını qur
+- [ ] unread/overdue reminder job-larını əlavə et
+
+### Sprint 7. Hierarchy və profile context
+
+- [ ] `Personnel` modelinə `manager()` relation əlavə et
+- [ ] `Personnel` modelinə `directReports()` relation əlavə et
+- [ ] structure breadcrumb/query helper-lərini əlavə et
+- [ ] `Mənim strukturum` tabını qur
+- [ ] rəhbər kartı görünüşünü əlavə et
+- [ ] direct reports list görünüşünü əlavə et
+- [ ] upstream tabellik chain görünüşünü əlavə et
+- [ ] manager olmayan employee üçün fallback state əlavə et
+- [ ] dashboard summary-də rəhbər/struktur qısa info widget-i əlavə et
+
+### Sprint 8. Öyrənmə materialları və welcome content
+
+- [ ] `employee_content_assets` cədvəlini yarat
+- [ ] `employee_content_assignments` cədvəlini yarat
+- [ ] `employee_content_views` cədvəlini yarat
+- [ ] `employee_content` disk config əlavə et
+- [ ] HR/Admin content library UI-ni qur
+- [ ] targeting rules əlavə et:
+  - personnel
+  - structure
+  - position
+  - new hires cohort
+- [ ] employee learning content tabını qur
+- [ ] `opened_at`, `completed_at`, `watch_progress_percent` tracking-i əlavə et
+- [ ] required content semantics və reminder-ləri qur
+- [ ] welcome content block-u dashboard-a əlavə et
+
+### Sprint 9. Sənədlərim
+
+- [ ] mövcud `Personnel.files` read layer-i employee contract-a uyğunlaşdır
+- [ ] `Sənədlərim` tabını read-only qur
+- [ ] preview/download link-lərini employee-safe şəkildə təqdim et
+- [ ] file type, ölçü, title və uploaded date görünüşünü sabitləşdir
+- [ ] HR-only mutating actions-ı employee səthindən çıxart
+
+### Sprint 10. Analytics, policy və docs
+
+- [ ] `My HR` adoption summary analytics qur
+- [ ] request type/status analytics qur
+- [ ] correction request aging analytics qur
+- [ ] onboarding read completion analytics qur
+- [ ] development plan progress analytics qur
+- [ ] learning content completion analytics qur
+- [ ] scheduler command-ları əlavə et:
+  - `my-hr:assign-onboarding`
+  - `my-hr:remind-unread-docs`
+  - `my-hr:enforce-request-policies`
+  - `my-hr:sync-development-plan-progress`
+  - `my-hr:remind-learning-content`
+- [ ] permission matrix-i seeding və role mapping ilə tamamla
+- [ ] `/docs?focus=my-hr` docs section-u əlavə et
+- [ ] employee acceptance checklist və admin ops checklist yaz
+
+### Cross-cutting task-lar
+
+- [ ] bütün self-service form-larda validation attribute map əlavə et
+- [ ] bütün save/update/review action-larında `notify` dispatch olduğundan əmin ol
+- [ ] query budget command-ları əlavə et
+- [ ] render benchmark command-ları əlavə et
+- [ ] employee-facing tab-lar üçün lazy placeholder və loading state-ləri qur
+- [ ] mobile-first layout yoxlaması et
+- [ ] notification deep-link və return URL axınlarını sabitləşdir
+- [ ] audit log coverage-ni yoxla
+
+### Final acceptance sprint
+
+- [ ] employee link olan user `/my-hr`-ə girə bilir
+- [ ] employee öz leave/vacation/business trip müraciətini yarada bilir
+- [ ] employee öz request-i üçün correction request yarada bilir
+- [ ] onboarding sənədi açılır, read və acknowledgement yazılır
+- [ ] fərdi inkişaf planı düzgün source-lardan yığılır
+- [ ] hierarchy görünüşündə rəhbər və tabellik xətti görünür
+- [ ] targeted learning content yalnız uyğun employee-yə görünür
+- [ ] inbox-da bütün self-service bildirişləri görünür
+- [ ] HR/Admin assignment və review axınları işləyir
+- [ ] docs və in-app help keçidləri doğru yerə gedir
+
+---
+
+## 20. Implementation backlog appendix
+
+Bu bölmə sprint-ləri implementasiya səviyyəsində konkretləşdirir. Buradakı fayl adları və yerləşimlər repo-nun hazırkı modul strukturuna uyğun seçilib.
+
+### Sprint 1. Foundation və shell
+
+Yeni route və provider inteqrasiyası:
+- `app/Modules/Personnel/Routes/web.php`
+- `app/Modules/Personnel/Providers/PersonnelServiceProvider.php`
+- `app/Support/Permissions/PermissionDescriptionCatalog.php`
+- `database/seeders/PersonnelSeeder.php`
+
+Yeni Livewire komponentlər:
+- `app/Modules/Personnel/Livewire/MyHr/MyHrDashboard.php`
+- `app/Modules/Personnel/Livewire/MyHr/MyHrSummary.php`
+
+Yeni blade view-lər:
+- `app/Modules/Personnel/Resources/views/livewire/personnel/my-hr/dashboard.blade.php`
+- `app/Modules/Personnel/Resources/views/livewire/personnel/my-hr/summary.blade.php`
+
+Mümkün shared support qatları:
+- `app/Modules/Personnel/Support/MyHr/MyHrAccess.php`
+- `app/Modules/Personnel/Support/MyHr/MyHrTabs.php`
+
+Testlər:
+- `tests/Feature/Personnel/MyHr/MyHrDashboardTest.php`
+- `tests/Feature/Personnel/MyHr/MyHrAccessTest.php`
+
+### Sprint 2. Ərizələrim workspace
+
+Mövcud model dəyişiklikləri:
+- `app/Models/Leave.php`
+- `app/Models/PersonnelVacation.php`
+- `app/Models/PersonnelBusinessTrip.php`
+
+Yeni migration-lar:
+- `app/Modules/Leaves/Database/Migrations/*_add_self_service_submission_fields_to_leaves_table.php`
+- `app/Modules/Vacation/Database/Migrations/*_add_self_service_submission_fields_to_personnel_vacations_table.php`
+- `app/Modules/BusinessTrips/Database/Migrations/*_add_self_service_submission_fields_to_personnel_business_trips_table.php`
+
+Yeni service-lər:
+- `app/Modules/Personnel/Application/Services/MyHr/MyRequestsReadService.php`
+- `app/Modules/Personnel/Application/Services/MyHr/MyRequestPresenter.php`
+
+Yeni Livewire komponent:
+- `app/Modules/Personnel/Livewire/MyHr/MyRequests.php`
+
+Yeni blade view:
+- `app/Modules/Personnel/Resources/views/livewire/personnel/my-hr/requests.blade.php`
+
+Testlər:
+- `tests/Feature/Personnel/MyHr/MyRequestsTest.php`
+- `tests/Feature/Leaves/LeaveSelfServiceSubmissionTest.php`
+- `tests/Feature/Vacation/VacationSelfServiceSubmissionTest.php`
+- `tests/Feature/BusinessTrips/BusinessTripSelfServiceSubmissionTest.php`
+
+### Sprint 3. Düzəliş müraciəti workflow-u
+
+Yeni model və migration:
+- `app/Models/EmployeeRequestChangeRequest.php`
+- `app/Modules/Personnel/Database/Migrations/*_create_employee_request_change_requests_table.php`
+
+Yeni service/policy qatları:
+- `app/Modules/Personnel/Application/Services/MyHr/RequestChangeRequestService.php`
+- `app/Modules/Personnel/Policies/EmployeeRequestChangeRequestPolicy.php`
+
+Yeni Livewire komponentlər:
+- `app/Modules/Personnel/Livewire/MyHr/RequestChangeRequestForm.php`
+- `app/Modules/Personnel/Livewire/MyHr/RequestChangeReviewPanel.php`
+
+Yeni blade view-lər:
+- `app/Modules/Personnel/Resources/views/livewire/personnel/my-hr/request-change-request-form.blade.php`
+- `app/Modules/Personnel/Resources/views/livewire/personnel/my-hr/request-change-review-panel.blade.php`
+
+Testlər:
+- `tests/Feature/Personnel/MyHr/RequestChangeRequestTest.php`
+- `tests/Feature/Personnel/MyHr/RequestChangeReviewTest.php`
+
+### Sprint 4. Bildirişlər və inbox
+
+Reuse ediləcək mövcud qat:
+- `app/Modules/Notifications/Livewire/NotificationList.php`
+
+Yeni employee-facing qat:
+- `app/Modules/Personnel/Livewire/MyHr/MyNotifications.php`
+- `app/Modules/Personnel/Resources/views/livewire/personnel/my-hr/notifications.blade.php`
+- `app/Modules/Personnel/Application/Services/MyHr/MyNotificationDeepLinkService.php`
+
+Mümkün yeni notification class-ları:
+- `app/Notifications/OnboardingDocumentAssigned.php`
+- `app/Notifications/RequestChangeReviewed.php`
+- `app/Notifications/LearningContentAssigned.php`
+
+Testlər:
+- `tests/Feature/Personnel/MyHr/MyNotificationsTest.php`
+- `tests/Feature/Notifications/MyHrNotificationFlowTest.php`
+
+### Sprint 5. Fərdi inkişaf planı
+
+Yeni read qat:
+- `app/Modules/Personnel/Application/Services/MyHr/MyDevelopmentPlanReadService.php`
+- `app/Modules/Personnel/Application/Services/MyHr/MyDevelopmentPlanPresenter.php`
+
+Yeni Livewire komponent:
+- `app/Modules/Personnel/Livewire/MyHr/MyDevelopmentPlan.php`
+
+Yeni blade view:
+- `app/Modules/Personnel/Resources/views/livewire/personnel/my-hr/development-plan.blade.php`
+
+Mümkün supporting concern:
+- `app/Modules/Personnel/Livewire/MyHr/Concerns/InteractsWithDevelopmentPlan.php`
+
+Əgər evidence/self-note tələb olunarsa:
+- `app/Modules/Personnel/Database/Migrations/*_create_employee_development_plan_notes_table.php`
+- `app/Models/EmployeeDevelopmentPlanNote.php`
+
+Testlər:
+- `tests/Feature/Personnel/MyHr/MyDevelopmentPlanTest.php`
+- `tests/Feature/TrainingNeeds/MyDevelopmentPlanSyncTest.php`
+
+### Sprint 6. Onboarding sənədləri
+
+Yeni model-lər:
+- `app/Models/OnboardingDocumentTemplate.php`
+- `app/Models/OnboardingDocumentAssignment.php`
+- `app/Models/OnboardingDocumentReceipt.php`
+
+Yeni migration-lar:
+- `app/Modules/Personnel/Database/Migrations/*_create_onboarding_document_templates_table.php`
+- `app/Modules/Personnel/Database/Migrations/*_create_onboarding_document_assignments_table.php`
+- `app/Modules/Personnel/Database/Migrations/*_create_onboarding_document_receipts_table.php`
+
+Yeni service-lər:
+- `app/Modules/Personnel/Application/Services/MyHr/OnboardingAssignmentService.php`
+- `app/Modules/Personnel/Application/Services/MyHr/OnboardingReceiptService.php`
+
+Yeni Livewire komponentlər:
+- `app/Modules/Personnel/Livewire/MyHr/MyOnboarding.php`
+- `app/Modules/Personnel/Livewire/MyHr/OnboardingTemplateManager.php`
+- `app/Modules/Personnel/Livewire/MyHr/OnboardingAssignmentsManager.php`
+
+Yeni blade view-lər:
+- `app/Modules/Personnel/Resources/views/livewire/personnel/my-hr/onboarding.blade.php`
+- `app/Modules/Personnel/Resources/views/livewire/personnel/my-hr/onboarding-template-manager.blade.php`
+- `app/Modules/Personnel/Resources/views/livewire/personnel/my-hr/onboarding-assignments-manager.blade.php`
+
+Yeni command-lar:
+- `app/Modules/Personnel/Console/Commands/AssignOnboardingDocumentsCommand.php`
+- `app/Modules/Personnel/Console/Commands/RemindUnreadOnboardingDocumentsCommand.php`
+
+Testlər:
+- `tests/Feature/Personnel/MyHr/MyOnboardingTest.php`
+- `tests/Feature/Personnel/MyHr/OnboardingAssignmentAdminTest.php`
+
+### Sprint 7. Hierarchy və profile context
+
+Mövcud model update:
+- `app/Models/Personnel.php`
+
+Yeni read/service qat:
+- `app/Modules/Personnel/Application/Services/MyHr/MyHierarchyReadService.php`
+
+Yeni Livewire komponent:
+- `app/Modules/Personnel/Livewire/MyHr/MyHierarchy.php`
+
+Yeni blade view:
+- `app/Modules/Personnel/Resources/views/livewire/personnel/my-hr/hierarchy.blade.php`
+
+Testlər:
+- `tests/Feature/Personnel/MyHr/MyHierarchyTest.php`
+
+### Sprint 8. Öyrənmə materialları və welcome content
+
+Yeni model-lər:
+- `app/Models/EmployeeContentAsset.php`
+- `app/Models/EmployeeContentAssignment.php`
+- `app/Models/EmployeeContentView.php`
+
+Yeni migration-lar:
+- `app/Modules/Personnel/Database/Migrations/*_create_employee_content_assets_table.php`
+- `app/Modules/Personnel/Database/Migrations/*_create_employee_content_assignments_table.php`
+- `app/Modules/Personnel/Database/Migrations/*_create_employee_content_views_table.php`
+
+Config:
+- `config/personnel.php` və ya ayrıca `config/my_hr.php`
+- `config/filesystems.php` içində `employee_content` disk
+
+Yeni service-lər:
+- `app/Modules/Personnel/Application/Services/MyHr/EmployeeContentAssignmentService.php`
+- `app/Modules/Personnel/Application/Services/MyHr/EmployeeContentTrackingService.php`
+
+Yeni Livewire komponentlər:
+- `app/Modules/Personnel/Livewire/MyHr/MyLearning.php`
+- `app/Modules/Personnel/Livewire/MyHr/EmployeeContentLibraryManager.php`
+
+Yeni blade view-lər:
+- `app/Modules/Personnel/Resources/views/livewire/personnel/my-hr/learning.blade.php`
+- `app/Modules/Personnel/Resources/views/livewire/personnel/my-hr/employee-content-library-manager.blade.php`
+
+Yeni command:
+- `app/Modules/Personnel/Console/Commands/RemindEmployeeLearningContentCommand.php`
+
+Testlər:
+- `tests/Feature/Personnel/MyHr/MyLearningContentTest.php`
+- `tests/Feature/Personnel/MyHr/EmployeeContentAssignmentAdminTest.php`
+
+### Sprint 9. Sənədlərim
+
+Reuse ediləcək mövcud qat:
+- `app/Modules/Personnel/Livewire/Files.php`
+- `app/Models/PersonnelDocument.php`
+
+Yeni employee-facing qat:
+- `app/Modules/Personnel/Application/Services/MyHr/MyDocumentsReadService.php`
+- `app/Modules/Personnel/Livewire/MyHr/MyDocuments.php`
+- `app/Modules/Personnel/Resources/views/livewire/personnel/my-hr/documents.blade.php`
+
+Testlər:
+- `tests/Feature/Personnel/MyHr/MyDocumentsTest.php`
+
+### Sprint 10. Analytics, policy və docs
+
+Yeni analytics qat:
+- `app/Modules/Personnel/Application/Services/MyHr/MyHrAnalyticsService.php`
+
+Yeni Livewire komponent:
+- `app/Modules/Personnel/Livewire/MyHr/MyHrAnalytics.php`
+- `app/Modules/Personnel/Resources/views/livewire/personnel/my-hr/analytics.blade.php`
+
+Yeni command-lar:
+- `app/Modules/Personnel/Console/Commands/EnforceMyHrPoliciesCommand.php`
+- `app/Modules/Personnel/Console/Commands/SyncMyHrDevelopmentPlanProgressCommand.php`
+
+Docs inteqrasiyası:
+- `app/Http/Controllers/TrainingPerformanceGuideController.php`
+- `resources/views/docs/partials/guide-overview.blade.php`
+- `resources/views/docs/partials/guide-my-hr.blade.php`
+- `routes/web.php`
+
+Testlər:
+- `tests/Feature/Personnel/MyHr/MyHrAnalyticsTest.php`
+- `tests/Feature/Docs/MyHrGuidePageTest.php`
+
+### Shared UI komponent backlog-u
+
+Yeni reusable komponentlər:
+- `resources/views/components/my-hr/request-status-chip.blade.php`
+- `resources/views/components/my-hr/timeline-card.blade.php`
+- `resources/views/components/my-hr/acknowledgement-panel.blade.php`
+- `resources/views/components/my-hr/content-assignment-card.blade.php`
+- `resources/views/components/my-hr/hierarchy-card.blade.php`
+
+Mümkün shared translation faylları:
+- `app/Modules/Personnel/Resources/lang/az/my_hr.php`
+- `app/Modules/Personnel/Resources/lang/en/my_hr.php`
+
+### Query/render guard backlog-u
+
+Yeni benchmark və budget command-ları:
+- `app/Modules/Personnel/Console/Commands/MyHrQueryBudgetCommand.php`
+- `app/Modules/Personnel/Console/Commands/MyHrRenderBenchmarkCommand.php`
+
+Testlər:
+- `tests/Feature/Console/MyHrQueryBudgetCommandTest.php`
+- `tests/Feature/Console/MyHrRenderBenchmarkCommandTest.php`
