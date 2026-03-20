@@ -274,7 +274,7 @@
   x-on:resize.window.debounce.100ms="if (isOpen) repositionPanel()"
   x-on:scroll.window.debounce.50ms="if (isOpen) repositionPanel()"
   {{ $attributes->except(['wire:model','wire:model.live','wire:model.defer','wire:model.lazy','wire:model.blur'])->class('relative isolate w-full') }}
-  x-bind:class="isOpen ? 'z-[520]' : 'z-10'"
+  x-bind:class="isOpen ? 'z-[900]' : 'z-10'"
 >
   @if($label)
     <x-label id="{{ $labelId }}" for="{{ $uid }}">{{ $label }}</x-label>
@@ -304,7 +304,7 @@
       x-show="isOpen && !isDisabled" x-transition.opacity.duration.100ms x-cloak
       :class="openUp ? 'origin-bottom' : 'origin-top'"
       :style="panelStyles"
-      class="z-[330] px-3 py-2 space-y-2 overflow-auto text-base bg-white rounded-md shadow-xl focus:outline-none sm:text-sm"
+      class="z-[910] px-3 py-2 space-y-2 overflow-auto text-base bg-white rounded-md shadow-xl focus:outline-none sm:text-sm"
     >
       {{-- slot: search input --}}
       @if ($searchModel)
