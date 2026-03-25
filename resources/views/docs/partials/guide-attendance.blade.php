@@ -4,7 +4,7 @@
             <p class="docs-header-kicker text-indigo-700">Davamiyyət modulu</p>
             <h2 class="docs-section-title">Davamiyyət</h2>
             <p class="docs-lead !mt-3 !max-w-none">
-                Bu modul punch, növbə, iş rejimi təqvimi, manual düzəliş, əlavə iş və ay bağlanışı nəticələrini vahid əməliyyat xəttində idarə etmək üçündür.
+                Bu modul gündəlik davamiyyəti, düzəlişləri və ay yekununu izləmək üçündür.
             </p>
         </div>
         <a href="{{ route('attendance') }}" class="docs-module-link">Modulu aç</a>
@@ -14,12 +14,12 @@
         <div class="docs-card docs-card-muted">
             <p class="docs-card-title">Bölmələr və sıra</p>
             <p class="docs-card-strong">Monitor, puantaj, düzəliş, qayda, ay bağlanışı</p>
-            <p class="docs-card-body">Gündəlik nəzarət və düzəlişlərdən başlayıb aylıq yekun nəticəyə çıxır.</p>
+            <p class="docs-card-body">Əvvəl gündəlik nəzarət edilir, sonra düzəlişlər bağlanır, sonda ay yekunu yoxlanır.</p>
         </div>
         <div class="docs-card docs-card-muted">
             <p class="docs-card-title">İstifadəçi rolu</p>
             <p class="docs-card-strong">Operator, admin və təsdiq verən şəxs</p>
-            <p class="docs-card-body">Əməliyyat, qayda idarəsi və qərar xətti ayrı istifadəçi səviyyələrinə bölünür.</p>
+            <p class="docs-card-body">Bu modulu əsasən operator, admin və təsdiq verən istifadəçi işlədir.</p>
         </div>
     </div>
 

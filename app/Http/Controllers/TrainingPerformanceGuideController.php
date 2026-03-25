@@ -38,7 +38,7 @@ class TrainingPerformanceGuideController extends Controller
 
     private function normalizeFocus(?string $focus): string
     {
-        if (! in_array($focus, ['overview', 'training', 'performance', 'attendance', 'orders', 'notifications', 'professional-portfolio', 'my-hr'], true)) {
+        if (! in_array($focus, ['overview', 'training', 'performance', 'attendance', 'orders', 'notifications', 'professional-portfolio', 'my-hr', 'onboarding-library', 'learning-library'], true)) {
             return 'overview';
         }
 
@@ -61,7 +61,7 @@ class TrainingPerformanceGuideController extends Controller
                 'attendanceHtml' => $this->renderMarkdown('docs/scenario/attendance-user-guide.md'),
             ],
             'orders' => [
-                'ordersModuleHtml' => $this->renderMarkdown('docs/scenario/orders-module-guide.md'),
+                'ordersModuleHtml' => $this->renderMarkdown('docs/scenario/orders-user-guide.md'),
                 'ordersUserHtml' => $this->renderMarkdown('docs/scenario/orders-user-guide.md'),
                 'ordersAdminHtml' => $this->renderMarkdown('docs/scenario/orders-admin-guide.md'),
                 'ordersApprovalHtml' => $this->renderMarkdown('docs/scenario/orders-approval-guide.md'),
@@ -71,10 +71,16 @@ class TrainingPerformanceGuideController extends Controller
                 'notificationsHtml' => $this->renderMarkdown('docs/scenario/notifications-module-guide.md'),
             ],
             'professional-portfolio' => [
-                'professionalPortfolioHtml' => $this->renderMarkdown('docs/scenario/personnel-professional-portfolio-module-guide.md'),
+                'professionalPortfolioHtml' => $this->renderMarkdown('docs/scenario/professional-portfolio-user-guide.md'),
             ],
             'my-hr' => [
-                'myHrHtml' => $this->renderMarkdown('docs/scenario/my-hr-self-service-and-onboarding-guide.md'),
+                'myHrHtml' => $this->renderMarkdown('docs/scenario/my-hr-user-guide.md'),
+            ],
+            'onboarding-library' => [
+                'onboardingLibraryHtml' => $this->renderMarkdown('docs/scenario/onboarding-library-user-guide.md'),
+            ],
+            'learning-library' => [
+                'learningLibraryHtml' => $this->renderMarkdown('docs/scenario/learning-library-user-guide.md'),
             ],
             default => [],
         };

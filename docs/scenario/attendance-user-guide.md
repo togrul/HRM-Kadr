@@ -1,659 +1,194 @@
 # Davamiyyət istifadəçi bələdçisi
 
-Bu sənəd Davamiyyət modulunun son vəziyyətinə uyğun əsas istifadəçi və əməliyyat bələdçisidir.
-
-Sənədin məqsədi:
-
-- modulun nə iş gördüyünü başa salmaq
-- hər tabın nə üçün istifadə olunduğunu izah etmək
-- operator, rəhbər və admin üçün tipik ssenariləri göstərmək
-- hansı məlumatın haradan gəldiyini və nəyə təsir etdiyini izah etmək
-- gələcək documentation bölməsi üçün əsas giriş sənədi olmaq
-
-## 1. Modulun məqsədi
-
-Davamiyyət modulu əməkdaşın işə giriş-çıxış məlumatını, iş rejimini, icazə/məzuniyyət/ezamiyyət override-larını, manual düzəlişləri, əlavə iş prosesini və aylıq yekunları vahid iş sahəsində idarə edir.
-
-Modulun əsas nəticəsi:
-
-- hər əməkdaş üçün gündəlik ledger yaranır
-- həmin ledger puantaj, daily monitor, overtime, exception və month close ekranlarına qidalanır
-- ay bağlandıqda payroll/export üçün aylıq yekun çıxarılır
-
-Qısa desək, Davamiyyət modulunda əsas istinad mənbəyi `attendance_daily_ledgers` cədvəlidir. Ekranların böyük hissəsi bu hesablanmış nəticəni oxuyur.
-
-## 2. İş məntiqi necə qurulub
-
-Davamiyyət məlumatı bu ardıcıllıqla işləyir:
-
-1. Məlumat daxil olur
-   - cihaz/API punch
-   - manual attendance entry
-   - iş rejimi təqvim qaydası
-   - icazə, məzuniyyət, ezamiyyət
-2. Pipeline məlumatı normallaşdırır
-3. Shift və calendar context seçilir
-4. Leave/vacation/business trip override-ları tətbiq olunur
-5. Günlük ledger hesablanır
-6. Exception və overtime record-ları sinxronlaşdırılır
-7. Puantaj, daily monitor, overview və month close bu nəticəni göstərir
-
-Bu səbəbdən istifadəçi tərəfdə görünən hər fərq adətən bu 4 mənbədən birinə bağlı olur:
-
-- punch
-- shift
-- calendar
-- override (leave/vacation/business trip/manual)
-
-## 3. Davamiyyət iş sahəsinə giriş
-
-Əsas giriş nöqtəsi:
-
-- `/attendance`
-
-Bu ekran tab əsaslı vahid workspace-dir.
-
-Mövcud əsas tablar:
-
-- Xülasə
-- Rəhbər xülasəsi
-- Günlük monitor
-- Puantaj cədvəli
-- İstisnalar qutusu
-- Əlavə iş lövhəsi
-- Ay bağlanışı
-- Manual girişlər
-- Tarixçə
-- Tənzimləmələr
-- Növbələr
-- İş rejimi təqvimi
-
-Hər istifadəçi bütün tabları görmür. Görünən tablar permission matrisinə bağlıdır.
-
-## 4. Kim hansı tabdan istifadə edir
-
-### HR Operator
-
-Ən çox istifadə etdiyi tablar:
-
-- Günlük monitor
-- Puantaj cədvəli
-- Manual girişlər
-- İstisnalar qutusu
-- Əlavə iş lövhəsi
-
-### HR Manager / təsdiq verən şəxs
-
-Ən çox istifadə etdiyi tablar:
-
-- Rəhbər xülasəsi
-- Günlük monitor
-- Puantaj cədvəli
-- Əlavə iş lövhəsi
-- Ay bağlanışı
-- İstisnalar qutusu
-
-### Admin / HR settings owner
-
-Ən çox istifadə etdiyi tablar:
-
-- Tarixçə
-- Tənzimləmələr
-- Növbələr
-- İş rejimi təqvimi
-
-## 5. Tab-lar üzrə tam izah
-
-## 5.1 Xülasə
-
-Bu tab aylıq ümumi vəziyyəti göstərir.
-
-Burada görünən əsas göstəricilər:
-
-- iş günlərinin sayı
-- bayram / həftəsonu sayı
-- planlaşdırılmış dəqiqələr
-- işlənmiş dəqiqələr
-- əlavə iş dəqiqələri
-- əhatə göstəricisi
-- yoxluq nisbəti
-- intizam göstəricisi
-- open exceptions
-- gözləyən manual girişlər
-- gözləyən əlavə iş qeydləri
-
-### Nə üçün istifadə olunur
-
-- ayın ümumi intizam mənzərəsini görmək
-- problem ayları erkən aşkar etmək
-- overtime və absence trend-i müqayisə etmək
-
-### Nədən qidalanır
-
-- `attendance_daily_ledgers`
-- `attendance_daily_structure_summaries`
-- `attendance_exceptions`
-- `attendance_overtime_requests`
-- `attendance_manual_entries`
-
-### Nəyə diqqət etmək lazımdır
-
-- əhatə göstəricisi aşağıdırsa punch, leave və ya shift tərəfi yoxlanmalıdır
-- yoxluq nisbəti yüksəlibsə puantaj və manual növbə birlikdə yoxlanmalıdır
-- open exceptions yüksəkdirsə əvvəlcə həmin queue təmizlənməlidir
-
-## 5.2 Rəhbər xülasəsi
-
-Bu tab rəhbər üçün komanda üzrə aylıq qərar panelidir.
-
-Əsas məqsədi:
-
-- problemli əməkdaşları tez ayırmaq
-- gecikmə, yoxluq və istisna siqnallarını toplu görmək
-- puantaj detalına keçməzdən əvvəl rəhbər səviyyəsində qısa qərar mənzərəsi qurmaq
-
-Bu tab aşağıdakıları əməkdaş səviyyəsində toplu göstərir:
-
-- plan günləri
-- iştirak günləri
-- yoxluq günləri
-- gecikmə dəqiqələri və gün sayı
-- erkən çıxış dəqiqələri və gün sayı
-- əlavə iş saatı
-- açıq istisna sayı
-
-### Nə vaxt istifadə olunur
-
-- rəhbər ay ortasında komandasının intizam vəziyyətini yoxlayanda
-- ay sonu bağlanışdan əvvəl riskli əməkdaşları seçəndə
-- HR ilə birlikdə problemli hallar üçün prioritet siyahı quranda
-
-### Haraya keçirir
-
-- daha detallı matrisa üçün `Puantaj`
-- gün səviyyəli nəzarət üçün `Günlük monitor`
-- correction və qərar axını üçün `İstisnalar` və `Manual girişlər`
-
-## 5.3 Günlük monitor
-
-Bu tab konkret bir gün üçün operativ nəzarət ekranıdır.
-
-Əsas məqsədi:
-
-- həmin gün kim işdədir
-- kim gecikib
-- kim yoxdur
-- kimdə punch problemi var
-
-### Operator necə istifadə edir
-
-1. tarixi seçir
-2. lazımdırsa structure filter seçir
-3. axtarış ilə konkret şəxsi tapır
-4. status və worked hours sütununa baxır
-5. problem varsa manual entry və ya exceptions tab-a keçir
-
-### Status nə deməkdir
-
-- `present`: işləyib
-- `manual_present`: manual təsdiqli işləyib
-- `absent`: iş günü olub, iş görünməyib
-- `manual_absence`: manual yoxluq yazılıb
-- `holiday`: bayram günüdür
-- `weekend`: həftəsonudur
-- `leave`: icazə override-ıdır
-- `vacation`: məzuniyyət override-ıdır
-- `business_trip`: ezamiyyət override-ıdır
-
-### Tipik ssenari
-
-Əməkdaş punch verməyib, amma faktiki işdə olub:
-
-1. Daily monitor-da `missing` və ya `absent` görünür
-2. Operator Manual girişlər tab-ına keçir
-3. Həmin gün üçün manual entry yaradır
-4. Təsdiq olunduqdan sonra ledger yenilənir
-5. Daily monitor düzgün nəticə göstərir
-
-## 5.4 Puantaj cədvəli
-
-Bu tab ay üzrə tam günlük matrisa görünüşüdür.
-
-Hər sətir bir əməkdaşdır.
-Hər sütun bir gündür.
-
-Bu ekran aşağıdakıları bir yerdə göstərir:
-
-- tam iş günü
-- natamam iş günü
-- yoxluq
-- əlavə işə işarə edən artıq saat
-- icazə
-- məzuniyyət
-- ezamiyyət
-- bayram
-- həftəsonu
-- calendar override
-
-### Puantaj rənglərinin mənası
-
-- ağ fon + qara yazı: tam 9 saatlıq iş günü
-- amber: 0-dan böyük, 9 saatdan az işlənmiş gün
-- rose: iş günü üçün yoxluq
-- yaşıl: 9 saatdan çox iş, yəni overtime məntiqi
-- boz: həftəsonu
-- fuchsia/purple holiday marker: bayram günü
-- leave hüceyrələri: document icon ilə, icazə növünə görə fərqli rəng
-
-### Puantaj icon və marker məntiqi
-
-- bütün leave növləri eyni document icon ilə göstərilir
-- fərq rəng və altdakı leave legend vasitəsilə verilir
-- holiday günləri holiday/calendar işarəsi ilə görünür
-- weekend günləri sütun başlığında seçili görünür və hüceyrə boz qalır
-- explicit workday override olan gün sütun başlığında ayrıca işarələnir
-
-### Leave legend nə üçündür
-
-Puantajın altında görünən `İcazə növləri` bölməsi:
-
-- ay ərzində rast gəlinən icazə növlərini siyahılayır
-- hər növün rəngini sabitləyir
-- kod və ad birlikdə göstərilir
-
-Nümunə:
-
-- `SICK` -> xəstəlik icazəsi
-- `UNPD` -> ödənişsiz icazə
-- `STD` -> təhsil icazəsi
-
-### İş rejimi override-ları nədir
-
-Puantajın altında görünən `İş rejimi təqvim override-ları` bölməsində yalnız real explicit qaydalar göstərilir:
-
-- manual holiday
-- manual workday override
-- structure-level special rule
-
-Avtomatik seed olunan həftəsonları burada ayrıca tarix-tarix göstərilmir.
-
-### Tipik ssenari 1: Xəstəlik icazəsi
-
-1. Leave modulu üzərindən xəstəlik icazəsi approve olunur
-2. Davamiyyət həmin tarix aralığını avtomatik yenidən hesablayır
-3. Puantajda həmin günlər leave hüceyrəsinə çevrilir
-4. Leave type legend-də xəstəlik icazəsi görünür
-
-### Tipik ssenari 2: Bayram günü
-
-1. İş rejimi təqvimi tab-ında müəyyən tarix `holiday` kimi qeyd olunur
-2. Sistem həmin gün üçün ledger-ləri recalc edir
-3. Puantajda həmin sütun holiday kimi işarələnir
-4. Daily monitor və overview da buna uyğun dəyişir
-
-## 5.5 İstisnalar qutusu
-
-Bu tab attendance anomaly inbox-dur.
-
-Burada görünən əsas halllar:
-
-- `missing_in`
-- `missing_out`
-- `unmatched_punch`
-
-### Nə vaxt istifadə olunur
-
-- punch cütləşməsi alınmayıbsa
-- cihaz məlumatı natamamdırsa
-- manual müdaxilə lazımdırsa
-
-### Operator axını
-
-1. tarix və ya status üzrə filter tətbiq edir
-2. problemi açır
-3. həll variantını seçir
-4. `resolve` edir
-5. səhv bağlanıbsa `reopen` edə bilir
-
-### Əsas qayda
-
-Exception həll olunmadan problem tam bağlanmış sayılmamalıdır. Manual entry ilə birlikdə düşünülməlidir.
-
-## 5.6 Əlavə iş lövhəsi
-
-Bu tab overtime request workflow ekranıdır.
+## Bu modul nə üçündür?
+Bu modul əməkdaşların işə giriş-çıxışını, gündəlik davamiyyətini, düzəlişləri və ay yekununu izləmək üçündür.
+
+Sadə dildə bu modul sizə bu suallara cavab verir:
+- kim işdədir?
+- kim gecikib?
+- hansı gündə problem var?
+- puantaj necə görünür?
+- ay sonunda yekun nəticə nə oldu?
+
+Bu modul gündəlik nəzarət üçün də, ay sonu yekunu üçün də istifadə olunur.
+
+## Harada açılır?
+Sol menyudan `Davamiyyət` bölməsini açın.
+
+## Bu modul kimlər üçündür?
+
+### Operator
+Ən çox bunlarla işləyir:
+- günlük monitor
+- puantaj
+- manual düzəlişlər
+- problemli halların yoxlanması
+
+### Rəhbər və təsdiq verən şəxs
+Əsasən bunlara baxır:
+- komanda görünüşü
+- gecikmə və iştirak
+- təsdiq gözləyən hallar
+
+### Admin və məsul əməkdaş
+Əsasən bunları edir:
+- qayda və tənzimləmələri idarə edir
+- ay sonu nəticəsini yoxlayır
+- sistemin ümumi düzgün işləməsinə baxır
+
+## Əsas bölmələr nə üçündür?
+
+### Xülasə
+Bu hissə ay üzrə ümumi görünüş verir.
 
 Burada:
-
-- gözləyən əlavə iş müraciətləri görünür
-- approve / reject edilir
-- approved minutes düzəldilə bilir
-- mənbə görünür:
-  - manual request
-  - ledger-generated
-  - manual entry source
-
-### Nə zaman yaranır
-
-Overtime policy-dən asılı olaraq sistem request yarada və ya mövcud request-i sync edə bilər.
-
-### Tipik ssenari
-
-1. əməkdaş faktiki 11 saat işləyib
-2. sistem bunu overtime candidate kimi görür
-3. əlavə iş lövhəsində gözləyən müraciət yaranır
-4. təsdiq edən şəxs approve edir
-5. ledger və month summary buna uyğun yenilənir
-
-## 5.7 Ay bağlanışı
-
-Bu tab ayın yekun bağlanması üçündür.
-
-Əsas funksiyalar:
-
-- ayı bağlamaq
-- ayı açmaq
-- export almaq
-- locked period qoruması
-
-### Ay bağlananda nə olur
-
-- həmin period locked sayılır
-- manual və digər dəyişikliklər guard ilə bloklana bilər
-- payroll/export sabit snapshot məntiqi ilə götürülür
-
-### Nə üçün vacibdir
-
-Ay bağlanışı bordro və hesabatın stabil qalması üçündür.
-
-## 5.8 Manual girişlər
-
-Bu tab cihaz məlumatı olmayan və ya düzəliş tələb olunan hallarda istifadə edilir.
-
-### Nə etmək olur
-
-- əməkdaş seçmək
-- tarix seçmək
-- giriş/çıxış saatı yazmaq
-- explicit shift seçmək
-- auto-calc və ya manual metric override tətbiq etmək
-- approval queue-yə göndərmək
-
-### Əsas qayda
-
-Manual override yalnız əsaslandırılmış hallarda istifadə olunmalıdır.
-
-### Axın
-
-1. structure seç
-2. personnel seç
-3. tarix və saatları daxil et
-4. lazım olsa shift seç
-5. səbəb yaz
-6. save et
-7. approval queue-dan approve olunduqdan sonra ledger-a düşür
-
-## 5.9 Tarixçə
-
-Bu tab attendance üzrə audit və dəyişiklik tarixçəsi üçündür.
-
-Burada əsasən aşağıdakı dəyişikliklər görünür:
-
-- iş rejimi təqvimi dəyişiklikləri
-- növbə yaradılması və yenilənməsi
-- növbə təyinatları
-- attendance policy dəyişiklikləri
-- manual, overtime, exception və month close audit hadisələri
-
-### Admin niyə istifadə edir
-
-- hansı qaydanın nə vaxt dəyişdiyini görmək
-- problem yarandıqda dəyişikliyin mənbəyini tapmaq
-- kim tərəfindən hansı parametrlərin dəyişdirildiyini izləmək
-
-### Görünən əsas hissələr
-
-- hadisə vaxtı
-- bölmə və event kodu
-- obyekt
-- icra edən şəxs
-- dəyişən sahələr
-- əvvəlki / yeni vəziyyət
-
-## 5.10 Tənzimləmələr
-
-Bu tab attendance qaydalarının əsas policy ekranıdır.
-
-Burada idarə olunan əsas parametrlər:
-
-- default shift
-- late grace
-- early leave grace
-- overtime policy
-- rounding policy
-
-### Nəyə təsir edir
-
-Bu ekran calculator davranışına təsir edir.
-
-Yəni burada edilən dəyişiklik:
-
-- worked minutes round edilməsi
-- overtime hesabı
-- gecikmə / erkən çıxış dəqiqəsi
-
-kimi hesablamalara təsir edir.
-
-## 5.11 Növbələr
-
-Bu tab iki hissədən ibarətdir:
-
-- shift definition catalog
-- shift assignment history
-
-### Shift definition nədir
-
-Burada növbənin özü yaradılır:
-
-- adı
-- start/end
-- break
-- flex pəncərələr
-- night shift flag
-
-### Shift assignment nədir
-
-Burada həmin növbə konkret əməkdaşa tarix aralığı üzrə bağlanır.
-
-### Tipik ssenari
-
-1. yeni gecə növbəsi yaradılır
-2. müəyyən struktur və ya əməkdaş qrupu üçün assignment verilir
-3. pipeline həmin tarixdən etibarən bu shift ilə hesablayır
-
-## 5.12 İş rejimi təqvimi
-
-Bu tab workday/weekend/holiday qaydalarının idarəetmə ekranıdır.
-
-### Burada nə etmək olur
-
-- qlobal bayram əlavə etmək
-- qlobal iş günü override yazmaq
-- struktur üçün xüsusi gün qaydası əlavə etmək
-- ödənişli / ödənişsiz flag təyin etmək
-
-### Həftəsonu necə işləyir
-
-Həftəsonları iki qat məntiqlə işləyir:
-
-- sistem default olaraq şənbə/bazar gününü weekend sayır
-- əlavə olaraq ayın əvvəlində explicit global weekend qaydaları seed oluna bilər
-
-Amma istifadəçi görünüşündə həftəsonu real manual override kimi tarix-tarix listələnmir.
-
-### Bu ekrana nə əlavə edəndə nəyə təsir edir
-
-İş rejimi təqviminə holiday/workday override əlavə edildikdə:
-
-- həmin gün üçün attendance recalc edilir
-- puantaj dəyişir
-- daily monitor dəyişir
-- overview day counts dəyişə bilər
-- overtime hesabına dolayı təsir edə bilər
-
-### Tipik ssenari
-
-8 Mart üçün bayram əlavə edilir:
-
-1. tarix seçilir
-2. `day_type = holiday`
-3. ad yazılır
-4. save edilir
-5. sistem həmin tarix üzrə ledger-ləri yenidən hesablayır
-6. puantaj və digər ekranlar bayram kimi göstərir
-
-## 6. Leave, Vacation, Business Trip attendance-ə necə düşür
-
-Davamiyyət override prioriteti belədir:
-
-1. leave
-2. vacation
-3. business trip
-
-Yəni eyni tarixdə birdən çox qeyd düşsə, leave üstün gəlir.
-
-### Leave
-
-- approve olduqda attendance-a düşür
-- cancel olduqda attendance-dan çıxır
-- reapprove olduqda yenidən düşür
-- subtype metadata `absence_code` və `meta.leave_type_*` üzərindən qorunur
-
-### Vacation
-
-- ayrıca override type kimi işlənir
-- puantajda ayrıca marker alır
-
-### Business trip
-
-- ayrıca override type kimi işlənir
-- bəzi hallarda scheduled workday kimi təsir göstərə bilər
-
-## 7. Calendar və shift precedence qaydası
-
-Günün son hesabında bu qaydalar vacibdir:
-
-- structure-scoped calendar override qlobal qaydadan üstündür
-- explicit calendar rule default weekend logic-dən üstündür
-- manual entry system pairing-dən üstündür
-- leave override vacation/business trip-dən üstündür
-
-Bu precedence attendance nəticəsində sürprizləri izah etmək üçün əsas qaydadır.
-
-## 8. Ay ərzində operator üçün tövsiyə olunan iş axını
-
-### Hər səhər
-
-1. Günlük monitor aç
-2. late / absent / missing saylarına bax
-3. problemli əməkdaşları təyin et
-
-### Gün ərzində
-
-1. exceptions inbox-u izlə
-2. manual entry lazım olan halları doldur
-3. gözləyən əlavə iş müraciətlərini yığılmağa qoyma
-
-### Həftəlik
-
-1. Puantajdan anomaliyaları yoxla
-2. leave/vacation/business trip legend-lərinin düzgün düşdüyünü təsdiqlə
-3. structure filter ilə bölmələr üzrə nəzarət et
-
-### Ay sonunda
-
-1. open exception qalmadığını yoxla
-2. manual queue təmiz olsun
-3. gözləyən əlavə iş müraciətləri qərarlaşdırılsın
-4. month close et
-5. export çıxart
-
-## 9. Problem olanda haraya baxmaq lazımdır
-
-### Problem: əməkdaş absent görünür, amma işdə olub
-
-Yoxlanacaq yerlər:
-
-1. raw punch var?
-2. shift düzgündür?
-3. manual entry lazımdır?
-4. exception açılıb?
-
-### Problem: leave görsənmir
-
-Yoxlanacaq yerlər:
-
-1. leave approve olunub?
-2. leave type düzgün seçilib?
-3. attendance recalc trigger olunub?
-4. puantaj legend-də leave type çıxır?
-
-### Problem: bayram günü iş günü kimi görünür
-
-Yoxlanacaq yerlər:
-
-1. calendar-regimes-də holiday qaydası var?
-2. scope global-dir, yoxsa structure?
-3. həmin tarix üçün recalc işləyib?
-
-### Problem: overtime gözlənildiyi kimi çıxmır
-
-Yoxlanacaq yerlər:
-
-1. overtime policy nədir?
-2. approved overtime varmı?
-3. manual entry override edilibmi?
-4. shift scheduled minutes düzgündürmü?
-
-## 10. Texniki idarəetmə və əməliyyat komandası üçün
-
-Ops tərəfi üçün ayrıca tam sənəd mövcuddur:
-
-- `Davamiyyət əməliyyat / komandalar bələdçisi`
-
-Qısa xatırlatma olaraq əsas command-lər:
-
-- `attendance:punches:process`
-- `attendance:recalculate`
-- `attendance:monthly-snapshot`
-- `attendance:query-budget`
-- `attendance:calendars:seed-weekends`
-
-## 11. Documentation bölməsi üçün tövsiyə olunan quruluş
-
-Sonradan ayrıca sənədləşmə bölməsi açılacaqsa, Davamiyyət üçün giriş ağacı belə olmalıdır:
-
-1. `Davamiyyətə ümumi baxış`
-   - bu sənəd
-2. `Operator üçün qısa bələdçi`
-   - gündəlik operator işi
-3. `Admin bələdçisi`
-   - settings, shifts, calendar
-4. `Təsdiq bələdçisi`
-   - overtime, month close, leave impact
-5. `Əməliyyat / komandalar bələdçisi`
-6. `Permission Matrix`
-7. `Data Dictionary`
-
-Yəni bu sənəd sənədləşmə bölməsində Davamiyyət üçün əsas giriş sənədi olmalıdır.
-
-## 12. Bu sənədlə birlikdə baxılmalı digər sənədlər
-
-- `[Attendance README](/Users/togruljalalli/Desktop/projects/HRM/app/Modules/Attendance/README.md)`
-- `Davamiyyət operatoru üçün qısa bələdçi`
-- `Davamiyyət admin bələdçisi`
-- `Davamiyyət təsdiq bələdçisi`
-- `Davamiyyət əməliyyat / komandalar bələdçisi`
-- `[Attendance Permission Matrix](/Users/togruljalalli/Desktop/projects/HRM/docs/scenario/attendance-permission-matrix.md)`
-- `[Attendance Core Data Dictionary](/Users/togruljalalli/Desktop/projects/HRM/docs/attendance-core-data-dictionary.md)`
-- `[Attendance Gap Closure Plan](/Users/togruljalalli/Desktop/projects/HRM/docs/attendance-gap-closure-plan.md)`
+- ümumi davamiyyət
+- gecikmə
+- əlavə iş
+- açıq problemlər
+kimi göstəricilər görünə bilər.
+
+Bu bölmə daha çox ümumi vəziyyəti tez görmək üçündür.
+
+### Rəhbər xülasəsi
+Bu hissə komanda üzrə qısa görünüş verir.
+
+Burada rəhbər:
+- komandada kim problem yaşayır
+- kimdə gecikmə artır
+- hansı günlərdə problem çox olur
+kimi məlumatlara baxa bilər.
+
+### Günlük monitor
+Bu gün və ya seçilmiş gün üzrə ən vacib operativ hissə budur.
+
+Burada görə bilərsiniz:
+- kim işdədir
+- kim gecikib
+- kim yoxdur
+- kimdə problem var
+
+Əgər siz günlük nəzarət edirsinizsə, bu hissə adətən ilk baxılan hissə olur.
+
+### Puantaj cədvəli
+Ay üzrə tam görünüş verir.
+
+Bu hissədə:
+- hər gün üzrə nəticə
+- ümumi ay vəziyyəti
+- fərdi görünüş
+görünə bilər.
+
+Ay sonu yekununa getməzdən əvvəl ən vacib hissələrdən biridir.
+
+### İstisnalar qutusu
+Problemli halları toplu şəkildə göstərir.
+
+Məsələn:
+- natamam giriş-çıxış
+- uyğunsuz saat
+- yoxlama tələb edən hal
+
+Bu hissə “harada problem var?” sualına ən qısa cavabı verir.
+
+### Əlavə iş lövhəsi
+Əlavə işlə bağlı məlumat və təsdiqlər burada görünür.
+
+Əgər artıq saatlar, növbədənkənar iş və ya buna bənzər qeyd varsa, bu hissə vacib olur.
+
+### Ay bağlanışı
+Ayın yekun nəticəsini bağlamaq üçün istifadə olunur.
+
+Ay bağlanışından əvvəl adətən aşağıdakılar yoxlanır:
+- manual düzəlişlər
+- açıq problemlər
+- puantaj
+- əlavə iş
+
+### Manual girişlər
+Əl ilə düzəliş yazmaq üçündür.
+
+Əgər sistemdə saat natamamdırsa və ya əlavə düzəliş lazımdırsa, bu hissə istifadə olunur.
+
+## Yeni istifadəçi üçün ən rahat iş sırası
+1. Əvvəl `Günlük monitor`a baxın.
+2. Problem görsəniz `İstisnalar qutusu` və `Manual girişlər` hissəsinə keçin.
+3. Ay ərzində `Puantaj cədvəli`ni vaxtaşırı yoxlayın.
+4. Ay sonunda `Əlavə iş` və açıq problemləri bağlayın.
+5. Sonda `Ay bağlanışı` hissəsinə baxın.
+
+## Ən çox görülən işlər necə edilir?
+
+### 1. Günlük vəziyyəti yoxlamaq
+1. `Günlük monitor`u açın.
+2. Tarixi seçin.
+3. Problemli şəxsi tapın.
+4. Lazımdırsa digər hissəyə keçin.
+
+#### Sonra nə olur?
+- həmin gün üzrə problemli hallar daha aydın görünür
+- lazım olarsa düzəlişə keçə bilərsiniz
+
+### 2. Manual düzəliş əlavə etmək
+1. `Manual girişlər` bölməsinə keçin.
+2. Şəxsi seçin.
+3. Tarix və saatı yazın.
+4. Səbəbi yazın.
+5. `Yadda saxla` düyməsini basın.
+
+#### Sonra nə olur?
+- düzəliş siyahıda görünür
+- təsdiq və ya yoxlama gözləyə bilər
+- nəticə günlük və aylıq görünüşə təsir edə bilər
+
+### 3. Puantajı yoxlamaq
+1. `Puantaj cədvəli`ni açın.
+2. Ayı seçin.
+3. Lazım olan şəxsi tapın.
+4. Günlər üzrə nəticəni yoxlayın.
+
+#### Bu nə üçün vacibdir?
+- ay sonu bağlanışdan əvvəl səhvləri görmək olur
+- bir günü deyil, bütün ayı birlikdə yoxlamaq mümkün olur
+
+### 4. Ay sonu yoxlaması
+1. Açıq problemləri bağlayın.
+2. Əlavə iş və manual girişləri yoxlayın.
+3. Puantajı bir daha nəzərdən keçirin.
+4. Sonra ay yekununa baxın.
+
+#### Sonra nə olur?
+- ay yekunu daha təmiz görünür
+- sonradan səhv düzəltmək ehtiyacı azalır
+
+## Bu məlumatlar harada görünür?
+- günlük dəyişikliklər `Günlük monitor`da görünür
+- manual düzəlişlər `Manual girişlər`də görünür
+- aylıq nəticə `Puantaj cədvəli`ndə görünür
+- yekun nəticə `Ay bağlanışı`na təsir edir
+
+## Problem olanda əvvəl haraya baxmaq lazımdır?
+
+### Bir gün səhv görünürsə
+Əvvəl:
+- `Günlük monitor`
+- `Manual girişlər`
+- `İstisnalar qutusu`
+hissələrinə baxın.
+
+### Ay yekunu səhv görünürsə
+Əvvəl:
+- `Puantaj cədvəli`
+- açıq problemlər
+- manual düzəlişlər
+- əlavə iş qeydləri
+yoxlanmalıdır.
+
+## Nəyə diqqət etmək lazımdır?
+- Günlük problem ay sonuna saxlanmamalıdır.
+- Manual düzəlişdən sonra nəticəni yenidən yoxlayın.
+- Puantaj və günlük monitoru birlikdə yoxlamaq daha doğrudur.
+- Ay bağlanışına keçməzdən əvvəl açıq məsələləri tamamlamaq vacibdir.
+
+## Qısa nəticə
+Bu modul sadəcə giriş-çıxış siyahısı deyil. Burada gündəlik nəzarət, düzəliş, komanda görünüşü və ay yekunu birlikdə idarə olunur.

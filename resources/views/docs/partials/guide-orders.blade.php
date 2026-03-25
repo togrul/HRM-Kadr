@@ -4,7 +4,7 @@
             <p class="docs-header-kicker text-amber-700">Əmrlər modulu</p>
             <h2 class="docs-section-title">Əmrlər</h2>
             <p class="docs-lead !mt-3 !max-w-none">
-                Bu modul əmrlərin qeydiyyatı, status izlənməsi, template uyğunluğu və printable DOCX sənəd alınması üçün işləyir.
+                Bu modul əmrləri yaratmaq, izləmək və çap etmək üçündür.
             </p>
         </div>
         <a href="{{ route('orders') }}" class="docs-module-link">Modulu aç</a>
@@ -14,12 +14,12 @@
         <div class="docs-card docs-card-muted">
             <p class="docs-card-title">Bölmələr və sıra</p>
             <p class="docs-card-strong">Reyestr, şablon, publish, print</p>
-            <p class="docs-card-body">Əvvəl əmr məlumatı qurulur, sonra tip-şablon uyğunluğu və printable nəticə yoxlanır.</p>
+            <p class="docs-card-body">Əvvəl əmr yaradılır, sonra siyahıda izlənir və lazım olduqda çap olunur.</p>
         </div>
         <div class="docs-card docs-card-muted">
             <p class="docs-card-title">İstifadəçi rolu</p>
-            <p class="docs-card-strong">Operator, admin, şablon sahibi, əməliyyat</p>
-            <p class="docs-card-body">Gündəlik qeydiyyat, şablon idarəsi və texniki smoke/check qatları ayrı rollarla işləyir.</p>
+            <p class="docs-card-strong">Əsas istifadəçi və məsul əməkdaş</p>
+            <p class="docs-card-body">Gündəlik istifadəçi əmrlə işləyir, şablon hissəsi isə məsul əməkdaş tərəfindən idarə olunur.</p>
         </div>
     </div>
 
@@ -31,13 +31,13 @@
         </div>
         <div class="docs-card">
             <p class="docs-card-title">Ekran xəritəsi 2</p>
-            <p class="docs-card-strong">Şablon lifecycle</p>
-            <p class="docs-card-body">Tip bağlama, onboarding, publish readiness və aktiv versiya xətti.</p>
+            <p class="docs-card-strong">Şablon hissəsi</p>
+            <p class="docs-card-body">Əmrin sənəd görünüşü bu hissədə idarə olunur.</p>
         </div>
         <div class="docs-card">
             <p class="docs-card-title">Ekran xəritəsi 3</p>
-            <p class="docs-card-strong">Print və incident yoxlaması</p>
-            <p class="docs-card-body">Printable nəticə, smoke, query budget və render benchmark yoxlamaları.</p>
+            <p class="docs-card-strong">Çap və nəticə</p>
+            <p class="docs-card-body">Hazır əmri açmaq, yoxlamaq və çap etmək üçün istifadə olunur.</p>
         </div>
     </div>
 
@@ -45,43 +45,16 @@
         <div class="docs-card docs-card-muted">
             <p class="docs-card-title">Ssenari 1</p>
             <p class="docs-card-strong">Yeni əmr yarat və çap et</p>
-            <p class="docs-card-body">Əmr məlumatı tamamlanır, şablon bağlılığı yoxlanır və printable sənəd alınır.</p>
+            <p class="docs-card-body">Əmr məlumatı tamamlanır, sonra siyahıdan açılıb çap edilir.</p>
         </div>
         <div class="docs-card docs-card-muted">
             <p class="docs-card-title">Ssenari 2</p>
-            <p class="docs-card-strong">Yeni tip üçün şablon aç</p>
-            <p class="docs-card-body">Onboarding wizard, publish readiness və smoke komandaları ilə yeni tip işə salınır.</p>
+            <p class="docs-card-strong">Hazır əmri tap və yenidən aç</p>
+            <p class="docs-card-body">Əmri siyahıdan tapıb yoxlamaq, redaktə etmək və ya çap etmək mümkündür.</p>
         </div>
     </div>
 
     <div id="orders-doc" class="docs-content">
         {!! $ordersModuleHtml !!}
-    </div>
-
-    <div id="orders-role-guides" class="docs-grid docs-grid-2">
-        <div class="docs-card docs-card-muted">
-            <p class="docs-card-title">İstifadəçi bələdçisi</p>
-            <div class="docs-content mt-3">
-                {!! $ordersUserHtml !!}
-            </div>
-        </div>
-        <div class="docs-card docs-card-muted">
-            <p class="docs-card-title">Admin bələdçisi</p>
-            <div class="docs-content mt-3">
-                {!! $ordersAdminHtml !!}
-            </div>
-        </div>
-        <div class="docs-card docs-card-muted">
-            <p class="docs-card-title">Təsdiq bələdçisi</p>
-            <div class="docs-content mt-3">
-                {!! $ordersApprovalHtml !!}
-            </div>
-        </div>
-        <div class="docs-card docs-card-muted">
-            <p class="docs-card-title">Əməliyyat / komandalar bələdçisi</p>
-            <div class="docs-content mt-3">
-                {!! $ordersOpsHtml !!}
-            </div>
-        </div>
     </div>
 </section>

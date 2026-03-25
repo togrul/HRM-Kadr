@@ -4,7 +4,7 @@
             <p class="docs-header-kicker text-emerald-700">Performans qiymətləndirməsi modulu</p>
             <h2 class="docs-section-title">Performans qiymətləndirməsi</h2>
             <p class="docs-lead !mt-3 !max-w-none">
-                Bu modul forma, test, review, transcript və zəif sahə xəttini idarə etmək, nəticəni izləmək və lazım olduqda təlim ehtiyacına ötürmək üçündür.
+                Bu modul qiymətləndirmə və test nəticələrini toplamaq və izləmək üçündür.
             </p>
         </div>
         <a href="{{ route('performance-evaluation') }}" class="docs-module-link">Modulu aç</a>
@@ -13,31 +13,31 @@
     <div id="performance-outline" class="docs-grid docs-grid-2">
         <div class="docs-card docs-card-muted">
             <p class="docs-card-title">Bölmələr və sıra</p>
-            <p class="docs-card-strong">Dövr, şablon, təyinat, review, report</p>
-            <p class="docs-card-body">Əvvəl skeleton qurulur, sonra təyinat və icra xətti, sonda nəticə və hesabat oxunur.</p>
+            <p class="docs-card-strong">Dövr, forma, təyinat və nəticə</p>
+            <p class="docs-card-body">Əvvəl dövr və forma hazırlanır, sonra qiymətləndirmə verilir, sonda nəticə görünür.</p>
         </div>
         <div class="docs-card docs-card-muted">
             <p class="docs-card-title">İstifadəçi rolu</p>
             <p class="docs-card-strong">HR, rəhbər, yoxlayan və əməkdaş</p>
-            <p class="docs-card-body">Qiymətləndirmə və test xəttində hər rolun ayrıca iş sahəsi və məsuliyyəti var.</p>
+            <p class="docs-card-body">Bu modulu əsasən HR, rəhbər və yoxlayan istifadəçilər işlədir.</p>
         </div>
     </div>
 
     <div id="performance-workflow" class="docs-grid docs-grid-3">
         <div class="docs-card">
             <p class="docs-card-title">Ekran xəritəsi 1</p>
-            <p class="docs-card-strong">Skeleton qur</p>
-            <p class="docs-card-body">Dövr, şablon, bank və sual xətti yaradılır.</p>
+            <p class="docs-card-strong">Əsas hissəni hazırla</p>
+            <p class="docs-card-body">Dövr, forma və test üçün əsas məlumatlar hazırlanır.</p>
         </div>
         <div class="docs-card">
             <p class="docs-card-title">Ekran xəritəsi 2</p>
             <p class="docs-card-strong">Təyinat və icra</p>
-            <p class="docs-card-body">Form və test sessiyası verilir, cavab və review bağlanır.</p>
+            <p class="docs-card-body">Qiymətləndirmə verilir və cavablar toplanır.</p>
         </div>
         <div class="docs-card">
             <p class="docs-card-title">Ekran xəritəsi 3</p>
             <p class="docs-card-strong">Nəticə və ötürülmə</p>
-            <p class="docs-card-body">Zəif nəticə təlim ehtiyacına çevrilə və hesabatlara düşə bilər.</p>
+            <p class="docs-card-body">Yekun nəticə görünür və lazım olarsa növbəti addım planlanır.</p>
         </div>
     </div>
 
@@ -49,8 +49,8 @@
         </div>
         <div class="docs-card docs-card-muted">
             <p class="docs-card-title">Ssenari 2</p>
-            <p class="docs-card-strong">Test həlli və review</p>
-            <p class="docs-card-body">Sessiya, cəhd, açıq cavab review və transcript axını.</p>
+            <p class="docs-card-strong">Test ver və nəticəyə bax</p>
+            <p class="docs-card-body">Test verilir, cavablar toplanır və nəticə görünür.</p>
         </div>
     </div>
 

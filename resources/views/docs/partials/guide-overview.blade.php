@@ -2,13 +2,13 @@
     <p class="docs-header-kicker text-zinc-500">Ümumi baxış</p>
     <h1 class="docs-page-title">HR modullarının ortaq istifadə bələdçisi</h1>
     <p class="docs-lead">
-        Bu səhifə təlim ehtiyacı, performans qiymətləndirməsi, davamiyyət, əmrlər, bildirişlər, peşəkar portfel və şəxsi kabinet modullarını birlikdə başa düşmək, düzgün iş sırası qurmaq və hər işi hansı modulda etmək lazım olduğunu aydın görmək üçündür.
+        Bu səhifə əsas HR modullarının nə iş gördüyünü qısa və aydın şəkildə göstərir. Hansı işi hansı bölmədə etməli olduğunuzu buradan rahat tapa bilərsiniz.
     </p>
 
     <div class="docs-callout">
         <p class="docs-callout-title">Bu bələdçi nə verir</p>
         <p class="docs-callout-text">
-            Modulların bir-birinə necə bağlandığını, hansı rolun hansı addımı atmalı olduğunu və gündəlik istifadə zamanı haradan başlamağın daha doğru olduğunu bir sənəddə göstərir.
+            Hər modulun nə üçün istifadə olunduğunu, hansı bölmədən başlamağın daha rahat olduğunu və gündəlik işdə hara baxmalı olduğunuzu bir yerdə göstərir.
         </p>
     </div>
 
@@ -89,42 +89,42 @@
         <div class="docs-card docs-card-muted">
             <p class="docs-card-title">Təlim ehtiyacı</p>
             <p class="docs-card-strong">Ehtiyacdan nəticəyə və büdcəyə qədər olan inkişaf xətti</p>
-            <p class="docs-card-body">Kataloq, ehtiyac, plan, sessiya, rəy və hesabat xəttini birləşdirir.</p>
+            <p class="docs-card-body">Təlim ehtiyacını toplamaq, planlamaq və nəticəni izləmək üçündür.</p>
         </div>
         <div class="docs-card docs-card-muted">
             <p class="docs-card-title">Performans qiymətləndirməsi</p>
             <p class="docs-card-strong">Qiymətləndirmə, test və zəif sahə analitikası</p>
-            <p class="docs-card-body">Forma, test, review, transcript və zəif sahə axınını bağlayır.</p>
+            <p class="docs-card-body">Qiymətləndirmə və test nəticələrini toplamaq və izləmək üçündür.</p>
         </div>
         <div class="docs-card docs-card-muted">
             <p class="docs-card-title">Davamiyyət</p>
             <p class="docs-card-strong">Punch, növbə, təqvim və düzəliş nəticə xətti</p>
-            <p class="docs-card-body">Gündəlik ledger, puantaj, overtime, istisna və ay bağlanışı nəticəsini qurur.</p>
+            <p class="docs-card-body">Davamiyyət, düzəliş və ay yekununu izləmək üçündür.</p>
         </div>
         <div class="docs-card docs-card-muted">
             <p class="docs-card-title">Əmrlər</p>
             <p class="docs-card-strong">Əmr reyestri, şablon və çap axını</p>
-            <p class="docs-card-body">Əmr məlumatı ilə DOCX şablon mühərrikini birləşdirib printable sənəd verir.</p>
+            <p class="docs-card-body">Əmr yaratmaq, izləmək və çap etmək üçündür.</p>
         </div>
         <div class="docs-card docs-card-muted">
             <p class="docs-card-title">Bildirişlər</p>
-            <p class="docs-card-strong">Şablon, qayda, approval və dispatch platforması</p>
-            <p class="docs-card-body">Avtomatik və manual bildiriş axınlarını approval, history və analytics ilə birlikdə idarə edir.</p>
+            <p class="docs-card-strong">Mətn, qayda və göndəriş idarəsi</p>
+            <p class="docs-card-body">Bildirişləri hazırlamaq, göndərmək və izləmək üçündür.</p>
         </div>
         <div class="docs-card docs-card-muted">
             <p class="docs-card-title">Peşəkar portfel</p>
-            <p class="docs-card-strong">Tədbir, media və layihə record-larının HR portfeli</p>
-            <p class="docs-card-body">Əməkdaşın dəyərli tədbirlərini, mediada görünürlüğünü və layihə iştirakını verified timeline şəklində saxlayır.</p>
+            <p class="docs-card-strong">Tədbir, media və layihə qeydləri</p>
+            <p class="docs-card-body">Əməkdaşın vacib tədbir, media və layihə fəaliyyətlərini toplamaq üçündür.</p>
         </div>
         <div class="docs-card docs-card-muted">
             <p class="docs-card-title">Şəxsi kabinet</p>
-            <p class="docs-card-strong">Employee self-service, onboarding və şəxsi inkişaf görünüşü</p>
-            <p class="docs-card-body">Əməkdaşın öz müraciətləri, bildirişləri, onboarding sənədləri, fərdi inkişaf planı və struktur ierarxiyası vahid kabinetdə toplanır.</p>
+            <p class="docs-card-strong">Müraciətlər, sənədlər və şəxsi görünüş</p>
+            <p class="docs-card-body">Əməkdaşın öz müraciətləri, bildirişləri, sənədləri və struktur məlumatı burada görünür.</p>
         </div>
         <div class="docs-card docs-card-muted">
             <p class="docs-card-title">Ortaq məntiq</p>
             <p class="docs-card-strong">Düzgün iş sırası və rol bölgüsü</p>
-            <p class="docs-card-body">HR, rəhbər və əməliyyat istifadəçilərinin hansı addımı nə zaman etməli olduğunu göstərir.</p>
+            <p class="docs-card-body">Hər işi hansı moduldə və hansı sırayla görməyin daha rahat olduğunu göstərir.</p>
         </div>
     </div>
 
@@ -138,32 +138,32 @@
         <div class="docs-card docs-tone-sky">
             <p class="docs-card-title">Təlim xətti</p>
             <p class="docs-card-strong">Kataloq, ehtiyac, plan və sessiya</p>
-            <p class="docs-card-body">İnkişaf ehtiyacını konkret sessiyaya, nəticəyə və rəhbər hesabatına çevirir.</p>
+            <p class="docs-card-body">Təlim ehtiyacını sessiyaya və nəticəyə çevirir.</p>
         </div>
         <div class="docs-card docs-tone-emerald">
             <p class="docs-card-title">Performans xətti</p>
-            <p class="docs-card-strong">Qiymətləndirmə, test və review</p>
-            <p class="docs-card-body">Ölçmə nəticəsini zəif sahəyə və lazım olduqda təlim ehtiyacına daşıyır.</p>
+            <p class="docs-card-strong">Qiymətləndirmə və test</p>
+            <p class="docs-card-body">Qiymətləndirmə nəticəsini toplamaq və izləmək üçündür.</p>
         </div>
         <div class="docs-card docs-tone-indigo">
             <p class="docs-card-title">Davamiyyət xətti</p>
             <p class="docs-card-strong">Gündəlik nəzarət və ay yekunu</p>
-            <p class="docs-card-body">Punch, növbə və düzəlişləri ledger nəticəsinə çevirib puantaj və ay bağlanışına çıxarır.</p>
+            <p class="docs-card-body">Gündəlik nəzarət və ay yekununu birləşdirir.</p>
         </div>
         <div class="docs-card docs-tone-amber">
             <p class="docs-card-title">Əmrlər xətti</p>
             <p class="docs-card-strong">Reyestr, şablon və çap</p>
-            <p class="docs-card-body">Əmr qeydiyyatını şablon, publish readiness və print nəticəsi ilə bağlayır.</p>
+            <p class="docs-card-body">Əmrin yaradılması, saxlanması və çapı burada birləşir.</p>
         </div>
         <div class="docs-card docs-card-muted">
             <p class="docs-card-title">Bildirişlər xətti</p>
-            <p class="docs-card-strong">Trigger, qayda, approval və göndəriş</p>
-            <p class="docs-card-body">Hadisəni şablon və audience qaydasına çevirib kampaniya, history və analytics nəticəsinə bağlayır.</p>
+            <p class="docs-card-strong">Hadisə, qayda və göndəriş</p>
+            <p class="docs-card-body">Bildirişin hazırlanması, göndərilməsi və izlənməsi burada toplanır.</p>
         </div>
         <div class="docs-card docs-card-muted">
             <p class="docs-card-title">Şəxsi kabinet xətti</p>
-            <p class="docs-card-strong">Employee self-service və acknowledgement</p>
-            <p class="docs-card-body">Ərizələri, onboarding sənədlərini, development planı və learning assignment-ləri əməkdaşın öz kabinətində birləşdirir.</p>
+            <p class="docs-card-strong">Müraciətlər və şəxsi görünüş</p>
+            <p class="docs-card-body">Əməkdaşın öz müraciətləri, sənədləri və öyrənmə materialları burada toplanır.</p>
         </div>
     </div>
 

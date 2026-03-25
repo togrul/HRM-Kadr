@@ -4,7 +4,7 @@
             <p class="docs-header-kicker text-sky-700">Təlim ehtiyacı modulu</p>
             <h2 class="docs-section-title">Təlim ehtiyacı</h2>
             <p class="docs-lead !mt-3 !max-w-none">
-                Bu modul inkişaf ehtiyacını toplamaq, planlaşdırmaq, sessiyaya çevirmək və nəticəni saat, rəy, büdcə və rəhbər hesabatı ilə izləmək üçündür.
+                Bu modul təlim ehtiyaclarını toplamaq, planlaşdırmaq və nəticəni izləmək üçündür.
             </p>
         </div>
         <a href="{{ route('training-needs') }}" class="docs-module-link">Modulu aç</a>
@@ -14,12 +14,12 @@
         <div class="docs-card docs-card-muted">
             <p class="docs-card-title">Bölmələr və sıra</p>
             <p class="docs-card-strong">Kataloq, ehtiyac, plan, sessiya, hesabat</p>
-            <p class="docs-card-body">Əvvəl əsas bazalar qurulur, sonra ehtiyac və plan xətti, sonda sessiya və hesabatlar izlənir.</p>
+            <p class="docs-card-body">Əvvəl əsas siyahılar hazırlanır, sonra ehtiyac daxil edilir, sonda sessiya və hesabat izlənir.</p>
         </div>
         <div class="docs-card docs-card-muted">
             <p class="docs-card-title">İstifadəçi rolu</p>
             <p class="docs-card-strong">HR, təlim koordinatoru və rəhbərlik</p>
-            <p class="docs-card-body">Əməliyyat istifadəçisi plan və sessiya qurur, rəhbərlik isə nəticə və büdcə kəsiyini izləyir.</p>
+            <p class="docs-card-body">Bu modulu əsasən HR və təlimə cavabdeh istifadəçilər işlədir.</p>
         </div>
     </div>
 
@@ -27,17 +27,17 @@
         <div class="docs-card">
             <p class="docs-card-title">Ekran xəritəsi 1</p>
             <p class="docs-card-strong">Kataloqlar və ehtiyaclar</p>
-            <p class="docs-card-body">Kompetensiya, proqram və ehtiyac yaratma xətti.</p>
+            <p class="docs-card-body">Əsas siyahılar və ehtiyacların daxil edilməsi.</p>
         </div>
         <div class="docs-card">
             <p class="docs-card-title">Ekran xəritəsi 2</p>
             <p class="docs-card-strong">Plan və sessiya</p>
-            <p class="docs-card-body">İllik plan, plan sətri, sessiya və iştirakçı əlaqələri.</p>
+            <p class="docs-card-body">Planın qurulması və sessiyanın hazırlanması.</p>
         </div>
         <div class="docs-card">
             <p class="docs-card-title">Ekran xəritəsi 3</p>
             <p class="docs-card-strong">Nəticə və rəhbər hesabatı</p>
-            <p class="docs-card-body">Rəy, nəticə, saat və büdcə analitikası oxunur.</p>
+            <p class="docs-card-body">Nəticə və ümumi göstəricilər burada görünür.</p>
         </div>
     </div>
 

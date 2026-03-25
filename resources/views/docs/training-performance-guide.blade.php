@@ -87,6 +87,28 @@
                     ['id' => 'my-hr-doc', 'label' => 'Tam bələdçi'],
                 ],
             ],
+            [
+                'label' => 'Uyğunlaşma kitabxanası',
+                'tone' => 'amber',
+                'items' => [
+                    ['id' => 'onboarding-library-module', 'label' => 'Modulun məqsədi'],
+                    ['id' => 'onboarding-library-outline', 'label' => 'Bölmələr və sıra'],
+                    ['id' => 'onboarding-library-workflow', 'label' => 'İş axını'],
+                    ['id' => 'onboarding-library-scenarios', 'label' => 'Ssenarilər'],
+                    ['id' => 'onboarding-library-doc', 'label' => 'Tam bələdçi'],
+                ],
+            ],
+            [
+                'label' => 'Öyrənmə kitabxanası',
+                'tone' => 'emerald',
+                'items' => [
+                    ['id' => 'learning-library-module', 'label' => 'Modulun məqsədi'],
+                    ['id' => 'learning-library-outline', 'label' => 'Bölmələr və sıra'],
+                    ['id' => 'learning-library-workflow', 'label' => 'İş axını'],
+                    ['id' => 'learning-library-scenarios', 'label' => 'Ssenarilər'],
+                    ['id' => 'learning-library-doc', 'label' => 'Tam bələdçi'],
+                ],
+            ],
         ];
 
         $allSectionIds = collect($sidebarGroups)->flatMap(fn ($group) => array_column($group['items'], 'id'))->values()->all();
@@ -100,6 +122,8 @@
                     'Bildirişlər' => 'notifications',
                     'Peşəkar portfel' => 'professional-portfolio',
                     'Şəxsi kabinet' => 'my-hr',
+                    'Uyğunlaşma kitabxanası' => 'onboarding-library',
+                    'Öyrənmə kitabxanası' => 'learning-library',
                     default => 'overview',
                 };
 
@@ -115,6 +139,8 @@
             ['href' => route('services', ['selectedService' => 'notifications-settings']), 'label' => 'Bildirişlər paneli'],
             ['href' => route('home'), 'label' => 'Əməkdaşlar paneli'],
             ['href' => route('my-hr'), 'label' => 'Şəxsi kabinet'],
+            ['href' => route('onboarding-library'), 'label' => 'Uyğunlaşma kitabxanası'],
+            ['href' => route('learning-library'), 'label' => 'Öyrənmə kitabxanası'],
         ];
 
         $initialSection = match ($focus) {
@@ -125,6 +151,8 @@
             'notifications' => 'notifications-module',
             'professional-portfolio' => 'professional-portfolio-module',
             'my-hr' => 'my-hr-module',
+            'onboarding-library' => 'onboarding-library-module',
+            'learning-library' => 'learning-library-module',
             default => 'overview',
         };
     @endphp
@@ -219,6 +247,7 @@
 
             .docs-sidebar-link[data-active="true"] {
                 font-weight: 500;
+                box-shadow: inset 0 0 0 1px rgba(228, 228, 231, 0.85);
             }
 
             .docs-sidebar-link[data-tone="zinc"][data-active="true"] {
@@ -261,6 +290,12 @@
                 border-color: #ddd6fe;
                 background: #f5f3ff;
                 color: #6d28d9;
+            }
+
+            .docs-sidebar-link[data-tone="cyan"][data-active="true"] {
+                border-color: #a5f3fc;
+                background: #ecfeff;
+                color: #155e75;
             }
 
             .docs-quick-link {
@@ -1106,7 +1141,7 @@
         <main class="docs-main">
             @include('docs.partials.guide-overview', $initialModulePayloads['overview'] ?? [])
 
-            @foreach (['training', 'performance', 'attendance', 'orders', 'notifications', 'professional-portfolio', 'my-hr'] as $module)
+            @foreach (['training', 'performance', 'attendance', 'orders', 'notifications', 'professional-portfolio', 'my-hr', 'onboarding-library', 'learning-library'] as $module)
                 <div
                     data-docs-module-host="{{ $module }}"
                     data-loaded="{{ in_array($module, $initialModules, true) ? 'true' : 'false' }}"
@@ -1124,6 +1159,8 @@
                                     'notifications' => 'Bildirişlər',
                                     'professional-portfolio' => 'Peşəkar portfel',
                                     'my-hr' => 'Şəxsi kabinet',
+                                    'onboarding-library' => 'Uyğunlaşma kitabxanası',
+                                    'learning-library' => 'Öyrənmə kitabxanası',
                                     default => 'Modul',
                                 } }}
                             </p>
