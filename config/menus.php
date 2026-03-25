@@ -101,5 +101,16 @@ return [
             'permission_id' => 41,
             'types' => ['military', 'public', 'private'],
         ],
+        [
+            'id' => 11,
+            'name' => 'ui::menu.items.my_hr',
+            'icon' => 'profile-outline-icon',
+            'color' => 'zinc',
+            'order' => 7,
+            'is_active' => 1,
+            'url' => 'my-hr',
+            'permission_id' => null,
+            'types' => ['military', 'public', 'private'],
+        ],
     ],
 ];

@@ -38,6 +38,12 @@
 
             <div class="flex flex-col">
                 <div class="flex space-x-4">
+                    @can('review-self-service-requests')
+                        <a href="{{ route('self-service-reviews') }}"
+                            class="inline-flex items-center justify-center px-4 h-12 text-sm font-semibold text-zinc-700 transition-all duration-300 bg-white border border-zinc-200 rounded-xl hover:border-zinc-300 hover:bg-zinc-50">
+                            {{ __('ui::menu.items.self_service_reviews') }}
+                        </a>
+                    @endcan
                     @can('export-business_trips')
                         <button wire:click.prevent="exportExcel"
                             class="flex items-center justify-center w-12 h-12 transition-all duration-300 rounded-xl hover:bg-green-50"
@@ -156,17 +162,23 @@
                                 </x-table.td>
 
                                 <x-table.td>
+                                    @php
+                                        $tripAttributes = is_array($_bTrip->attributes) ? $_bTrip->attributes : [];
+                                        $tripRank = data_get($tripAttributes, '$rank.value') ?: '—';
+                                        $tripFullname = data_get($tripAttributes, '$fullname.value') ?: ($_bTrip->personnel?->fullname ?? '—');
+                                        $tripStructure = data_get($tripAttributes, '$structure.value') ?: ($_bTrip->personnel?->structure?->name ?? '—');
+                                    @endphp
                                     <div class="flex flex-col items-start space-y-1">
                                         <span
                                             class="flex items-center justify-center text-sm font-medium rounded-lg text-slate-500 drop-shadow-2xl">
-                                            {{ $_bTrip->attributes['$rank']['value'] }}
+                                            {{ $tripRank }}
                                         </span>
                                         <span class="text-sm font-medium text-slate-900">
-                                            {{ $_bTrip->attributes['$fullname']['value'] }}
+                                            {{ $tripFullname }}
                                         </span>
                                         <span
                                             class="px-2 py-1 text-sm font-medium text-blue-500 rounded-lg bg-slate-100">
-                                            {{ $_bTrip->attributes['$structure']['value'] }}
+                                            {{ $tripStructure }}
                                         </span>
                                         @if ($_bTrip->is_active_trip)
                                             <span
@@ -207,7 +219,7 @@
                                     <div class="flex flex-col space-y-1 text-sm font-medium">
                                         <span
                                             class="px-2 py-1 text-sm font-medium text-teal-500 bg-gray-100 rounded-lg">
-                                            {{ $_bTrip->order->orderType->name }}
+                                            {{ $_bTrip->order?->orderType?->name ?: '—' }}
                                         </span>
                                         <span class="text-sm font-medium text-slate-900">
                                             {{ $_bTrip->location }}
@@ -219,9 +231,13 @@
                                     <div class="flex flex-col text-sm font-medium">
                                         <div class="flex items-center space-x-1">
                                             <span class="text-gray-500">{{ __('business_trips::common.table.order_no') }}:</span>
-                                            <a href="{{ route('orders', ['search' => ['order_no' => $_bTrip->order_no]]) }}"
-                                                class="text-blue-600">{{ $_bTrip->order_no }}</a>
-                                            @if ($_bTrip->is_multi_order_trip)
+                                            @if (filled($_bTrip->order_no))
+                                                <a href="{{ route('orders', ['search' => ['order_no' => $_bTrip->order_no]]) }}"
+                                                    class="text-blue-600">{{ $_bTrip->order_no }}</a>
+                                            @else
+                                                <span class="text-slate-400">—</span>
+                                            @endif
+                                            @if ($_bTrip->is_multi_order_trip && filled($_bTrip->order_no))
                                                 <button
                                                     wire:click="printBusinessTripDocument('{{ $_bTrip->id }}',{{ $_bTrip->is_multi_order_trip ? 'true' : 'false' }})"
                                                     class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg bg-teal-50 hover:bg-teal-100 hover:text-gray-700">
@@ -243,11 +259,13 @@
                                 <x-table.td :isButton="true">
                                     @if (!$_bTrip->is_multi_order_trip)
                                         @can('export-business_trips')
-                                            <button
-                                                wire:click="printBusinessTripDocument('{{ $_bTrip->id }}',{{ $_bTrip->is_multi_order_trip ? 'true' : 'false' }})"
-                                                class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg bg-teal-50 hover:bg-teal-100 hover:text-gray-700">
-                                                <x-icons.document-icon color="text-teal-500" hover="text-teal-600"></x-icons.document-icon>
-                                            </button>
+                                            @if (filled($_bTrip->order_no))
+                                                <button
+                                                    wire:click="printBusinessTripDocument('{{ $_bTrip->id }}',{{ $_bTrip->is_multi_order_trip ? 'true' : 'false' }})"
+                                                    class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg bg-teal-50 hover:bg-teal-100 hover:text-gray-700">
+                                                    <x-icons.document-icon color="text-teal-500" hover="text-teal-600"></x-icons.document-icon>
+                                                </button>
+                                            @endif
                                         @endcan
                                     @endif
                                 </x-table.td>

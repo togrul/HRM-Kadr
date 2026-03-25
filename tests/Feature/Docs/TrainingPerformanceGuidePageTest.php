@@ -22,7 +22,8 @@ class TrainingPerformanceGuidePageTest extends TestCase
             ->assertSee('Davamiyyət')
             ->assertSee('Əmrlər')
             ->assertSee('Bildirişlər')
-            ->assertSee('Peşəkar portfel');
+            ->assertSee('Peşəkar portfel')
+            ->assertSee('Şəxsi kabinet');
     }
 
     public function test_focus_parameter_loads_requested_module_on_initial_render(): void
@@ -59,6 +60,19 @@ class TrainingPerformanceGuidePageTest extends TestCase
             ->assertSee('Peşəkar portfel modulu')
             ->assertSee('Tədbirlər')
             ->assertSee('Zaman xətti')
+            ->assertDontSee('Təlim ehtiyacı istifadəçi bələdçisi');
+    }
+
+    public function test_focus_parameter_can_load_my_hr_module_on_initial_render(): void
+    {
+        $user = \App\Models\User::factory()->create();
+
+        $this->actingAs($user)
+            ->get(route('docs.guide', ['focus' => 'my-hr']))
+            ->assertOk()
+            ->assertSee('Şəxsi kabinet')
+            ->assertSee('Employee self-service')
+            ->assertSee('Onboarding')
             ->assertDontSee('Təlim ehtiyacı istifadəçi bələdçisi');
     }
 }

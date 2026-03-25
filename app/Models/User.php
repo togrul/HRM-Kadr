@@ -27,6 +27,8 @@ class User extends Authenticatable
         'email',
         'password',
         'is_active',
+        'must_reset_password',
+        'self_service_invited_at',
         'deleted_by',
     ];
 
@@ -48,6 +50,8 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'must_reset_password' => 'boolean',
+        'self_service_invited_at' => 'datetime',
     ];
 
     public function personDidDelete(): BelongsTo

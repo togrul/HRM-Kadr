@@ -2,7 +2,7 @@
     <p class="docs-header-kicker text-zinc-500">Ümumi baxış</p>
     <h1 class="docs-page-title">HR modullarının ortaq istifadə bələdçisi</h1>
     <p class="docs-lead">
-        Bu səhifə təlim ehtiyacı, performans qiymətləndirməsi, davamiyyət, əmrlər, bildirişlər və peşəkar portfel modullarını birlikdə başa düşmək, düzgün iş sırası qurmaq və hər işi hansı modulda etmək lazım olduğunu aydın görmək üçündür.
+        Bu səhifə təlim ehtiyacı, performans qiymətləndirməsi, davamiyyət, əmrlər, bildirişlər, peşəkar portfel və şəxsi kabinet modullarını birlikdə başa düşmək, düzgün iş sırası qurmaq və hər işi hansı modulda etmək lazım olduğunu aydın görmək üçündür.
     </p>
 
     <div class="docs-callout">
@@ -73,6 +73,16 @@
                 <a href="#professional-portfolio-doc" class="docs-index-link">Bələdçi</a>
             </div>
         </div>
+        <div class="docs-index-card">
+            <p class="docs-card-title">Sürətli modul indeksi</p>
+            <p class="docs-card-strong">Şəxsi kabinet</p>
+            <div class="docs-index-links">
+                <a href="#my-hr-module" class="docs-index-link">Modul</a>
+                <a href="#my-hr-outline" class="docs-index-link">Bölmələr</a>
+                <a href="#my-hr-workflow" class="docs-index-link">Axın</a>
+                <a href="#my-hr-doc" class="docs-index-link">Bələdçi</a>
+            </div>
+        </div>
     </div>
 
     <div class="docs-grid docs-grid-2">
@@ -105,6 +115,11 @@
             <p class="docs-card-title">Peşəkar portfel</p>
             <p class="docs-card-strong">Tədbir, media və layihə record-larının HR portfeli</p>
             <p class="docs-card-body">Əməkdaşın dəyərli tədbirlərini, mediada görünürlüğünü və layihə iştirakını verified timeline şəklində saxlayır.</p>
+        </div>
+        <div class="docs-card docs-card-muted">
+            <p class="docs-card-title">Şəxsi kabinet</p>
+            <p class="docs-card-strong">Employee self-service, onboarding və şəxsi inkişaf görünüşü</p>
+            <p class="docs-card-body">Əməkdaşın öz müraciətləri, bildirişləri, onboarding sənədləri, fərdi inkişaf planı və struktur ierarxiyası vahid kabinetdə toplanır.</p>
         </div>
         <div class="docs-card docs-card-muted">
             <p class="docs-card-title">Ortaq məntiq</p>
@@ -144,6 +159,11 @@
             <p class="docs-card-title">Bildirişlər xətti</p>
             <p class="docs-card-strong">Trigger, qayda, approval və göndəriş</p>
             <p class="docs-card-body">Hadisəni şablon və audience qaydasına çevirib kampaniya, history və analytics nəticəsinə bağlayır.</p>
+        </div>
+        <div class="docs-card docs-card-muted">
+            <p class="docs-card-title">Şəxsi kabinet xətti</p>
+            <p class="docs-card-strong">Employee self-service və acknowledgement</p>
+            <p class="docs-card-body">Ərizələri, onboarding sənədlərini, development planı və learning assignment-ləri əməkdaşın öz kabinətində birləşdirir.</p>
         </div>
     </div>
 

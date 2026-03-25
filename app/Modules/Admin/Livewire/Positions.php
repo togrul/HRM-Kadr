@@ -27,6 +27,8 @@ class Positions extends Component
             'form.id' => 'required|integer|min:1|unique:positions,id'.($this->model ? ','.$this->form['id'] : ''),
             'form.name' => 'required|string|min:2',
             'form.rank_category_id' => 'nullable|integer|exists:rank_categories,id',
+            'form.approval_rank' => 'required|integer|min:0|max:999',
+            'form.is_approval_target' => 'boolean',
         ];
     }
 
@@ -36,6 +38,8 @@ class Positions extends Component
             'form.id' => __('admin::references.fields.id'),
             'form.name' => __('admin::references.fields.name'),
             'form.rank_category_id' => __('admin::references.fields.rank_category'),
+            'form.approval_rank' => __('admin::references.fields.approval_rank'),
+            'form.is_approval_target' => __('admin::references.fields.is_approval_target'),
         ];
     }
 
@@ -45,6 +49,8 @@ class Positions extends Component
             'id' => null,
             'name' => '',
             'rank_category_id' => null,
+            'approval_rank' => 0,
+            'is_approval_target' => true,
         ];
     }
 
@@ -60,6 +66,8 @@ class Positions extends Component
             $this->form['id'] = $this->model->id;
             $this->form['name'] = $this->model->name;
             $this->form['rank_category_id'] = $this->model->rank_category_id;
+            $this->form['approval_rank'] = $this->model->approval_rank ?? 0;
+            $this->form['is_approval_target'] = (bool) ($this->model->is_approval_target ?? true);
         }
         $this->isAdded = true;
     }

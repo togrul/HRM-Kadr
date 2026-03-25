@@ -14,5 +14,13 @@ class PersonnelDocument extends Model
         'tabel_no',
         'file',
         'filename',
+        'employee_visibility',
+        'visible_from',
+        'visible_until',
+    ];
+
+    protected $casts = [
+        'visible_from' => 'datetime',
+        'visible_until' => 'datetime',
     ];
 }

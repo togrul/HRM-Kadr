@@ -40,6 +40,8 @@ Bu sistem sıfırdan paralel HR platforması kimi qurulmayacaq. Mövcud repo-da 
 Əsas reuse nöqtələri:
 - `UserPersonnelLinkResolver`
   - current user -> personnel mapping üçün authoritative source
+- `user_personnel_links`
+  - explicit `user -> personnel` bağını saxlamaq üçün əsas cədvəl
 - `Leaves`
   - icazə müraciətləri
 - `Vacation`
@@ -52,10 +54,10 @@ Bu sistem sıfırdan paralel HR platforması kimi qurulmayacaq. Mövcud repo-da 
   - employee documents tabı üçün mövcud sənəd bazası
 - `TrainingNeeds`
   - employee learning history, approved development need və development plan relation-ləri üçün uyğun baza
-- `Personnel.parent_id`
-  - rəhbər və tabellik xətti üçün əsas source
 - `Personnel.structure_id`
   - struktur bölməsi üçün source
+- `structures.parent_id`
+  - struktur ağacı və breadcrumb üçün mövcud source
 - mövcud docs hub
   - sonradan `/docs?focus=my-hr` şəklində inteqrasiya olunacaq
 
@@ -90,6 +92,52 @@ Bütün read/query qatları bu prinsipə tabe olacaq:
 - yalnız həmin personnel üçün data yüklənir
 
 Bu, query və authorization qatında ayrıca `my_*` read service-lərlə qurulacaq.
+
+### 3.3. Employee account provisioning və giriş axını
+
+`My HR` üçün employee profilinin qurulması ayrıca, aydın onboarding axını tələb edir. Düzgün professional model budur:
+
+1. source-of-truth kimi `Personnel` qalır
+2. employee üçün ayrıca `User` hesabı provision olunur
+3. `user_personnel_links` ilə explicit bağ yazılır
+4. employee `email + password` ilə daxil olur
+5. ilk girişdə parolun dəyişdirilməsi məcburi olur
+
+Bu yanaşma niyə vacibdir:
+- employee girişləri audit edilə bilir
+- personnel kartı ilə auth hesabı qarışmır
+- sonradan SSO/OTP/LDAP əlavə etmək asan qalır
+- employee başqa personnel record-a yanlış düşmür
+
+Provisioning axını:
+- HR personnel kartını yaradır və ya tamamlayır
+- personnel email/mobil/aktiv status yoxlanır
+- `Create self-service account` action-u seçilir
+- sistem `User` hesabı yaradır və employee role verir
+- `user_personnel_links` cədvəlinə explicit bağ yazılır
+- employee-yə `set password` linki və ya temp password göndərilir
+- ilk uğurlu login-dən sonra forced password reset tamamlanır
+
+Məhsul qaydaları:
+- email unikal olmalıdır
+- inactive personnel üçün self-service account default olaraq aktivləşdirilməməlidir
+- personnel deaktiv olunarsa self-service login də ayrıca policy ilə bağlanmalıdır
+- email match yalnız fallback resolver kimi qala bilər; əsas xətt explicit link olmalıdır
+
+V1 üçün tövsiyə edilən auth davranışı:
+- login: `email + password`
+- first-login requirement: `must_reset_password = true`
+- future-ready əlavələr:
+  - OTP
+  - SSO
+  - LDAP / Azure AD
+
+Admin/HR üçün lazım olan görünüş:
+- current self-service account status
+- linked user
+- son invitation göndəriş tarixi
+- password set tamamlanıb/tamamlanmayıb
+- link yenilə / deactivate action-ları
 
 ---
 
@@ -470,11 +518,15 @@ Müştərinin istəyi:
 
 ### 9.1. Authority source
 
-Bu hissə üçün authoritative source:
-- `personnels.parent_id`
+Bu hissə üçün authoritative source belə qurulmalıdır:
+- `personnels.manager_personnel_id`
+  - employee -> birbaşa rəhbər bağı üçün yeni field
 - `personnels.structure_id`
+  - employee-nin aid olduğu struktur üçün mövcud field
+- `structures.parent_id`
+  - struktur ağacını və breadcrumb-u qurmaq üçün mövcud field
 
-Burada dolayı inference etməyəcəyik.
+Burada dolayı inference etməyəcəyik. Cari repo-da `personnels.parent_id` yoxdur, ona görə hierarchy sprint-i birbaşa explicit manager field ilə başlamalıdır.
 
 ### 9.2. Yeni relation-lar
 
@@ -852,6 +904,10 @@ Bu bölmə implementasiyanı mərhələli və icra edilə bilən backlog-a çevi
 - [ ] `UserPersonnelLinkResolver` əsasında employee context bootstrap et
 - [ ] mapping olmayan user üçün remediation empty-state yarat
 - [ ] `show-my-hr` permission əlavə et
+- [ ] `employee` self-service role seed et
+- [ ] `Create self-service account` admin action-ını planlaşdır
+- [ ] explicit `user_personnel_links` idarəetmə UI backlog-unu ayır
+- [ ] `set password` və forced reset flow contract-ını təyin et
 - [ ] employee-only authorization guard-larını qur
 - [ ] docs hub üçün `focus=my-hr` section hazırlığını et
 
@@ -919,6 +975,7 @@ Bu bölmə implementasiyanı mərhələli və icra edilə bilən backlog-a çevi
 
 ### Sprint 7. Hierarchy və profile context
 
+- [ ] `personnels.manager_personnel_id` migration-ını yaz
 - [ ] `Personnel` modelinə `manager()` relation əlavə et
 - [ ] `Personnel` modelinə `directReports()` relation əlavə et
 - [ ] structure breadcrumb/query helper-lərini əlavə et
@@ -1022,9 +1079,19 @@ Mümkün shared support qatları:
 - `app/Modules/Personnel/Support/MyHr/MyHrAccess.php`
 - `app/Modules/Personnel/Support/MyHr/MyHrTabs.php`
 
+Self-service account provisioning üçün backlog:
+- `app/Modules/Personnel/Livewire/MyHr/MyHrAccountProvisioning.php`
+- `app/Modules/Personnel/Resources/views/livewire/personnel/my-hr/account-provisioning.blade.php`
+- `app/Modules/Personnel/Application/Services/MyHr/MyHrAccountProvisioningService.php`
+- `app/Modules/Personnel/Application/Services/MyHr/MyHrPasswordInvitationService.php`
+- `app/Modules/Personnel/Database/Migrations/*_add_must_reset_password_to_users_table.php`
+- `app/Modules/Personnel/Database/Migrations/*_seed_employee_self_service_role.php`
+- `app/Modules/Personnel/Policies/MyHrAccountProvisioningPolicy.php`
+
 Testlər:
 - `tests/Feature/Personnel/MyHr/MyHrDashboardTest.php`
 - `tests/Feature/Personnel/MyHr/MyHrAccessTest.php`
+- `tests/Feature/Personnel/MyHr/MyHrAccountProvisioningTest.php`
 
 ### Sprint 2. Ərizələrim workspace
 
@@ -1157,6 +1224,9 @@ Testlər:
 Mövcud model update:
 - `app/Models/Personnel.php`
 
+Yeni migration:
+- `app/Modules/Personnel/Database/Migrations/*_add_manager_personnel_id_to_personnels_table.php`
+
 Yeni read/service qat:
 - `app/Modules/Personnel/Application/Services/MyHr/MyHierarchyReadService.php`
 
@@ -1263,3 +1333,52 @@ Yeni benchmark və budget command-ları:
 Testlər:
 - `tests/Feature/Console/MyHrQueryBudgetCommandTest.php`
 - `tests/Feature/Console/MyHrRenderBenchmarkCommandTest.php`
+
+---
+
+## 21. Current execution backlog
+
+Bu bölmə hazırkı implementasiya vəziyyətinə görə qalan işləri prioritet sırası ilə yığır.
+
+### Sprint A. Requests write-path hardening
+
+- [ ] `Leaves` üçün employee self-service submit flow-u tamamla
+- [ ] `leaves` cədvəlinə `submission_source` və `submitted_by_user_id` metadata-sını əlavə et
+- [ ] `Vacation` üçün employee submit axınına uyğun approval-state contract qur
+- [ ] `personnel_vacations` cədvəlində self-service source və review-state sahələrini tamamla
+- [ ] `BusinessTrips` üçün employee submit axınına uyğun approval-state contract qur
+- [ ] `personnel_business_trips` cədvəlində self-service source və review-state sahələrini tamamla
+- [ ] `Ərizələrim` tabında create CTA-ları və detail drawer action-larını tamamla
+
+### Sprint B. Request correction workflow
+
+- [ ] `employee_request_change_requests` cədvəlini yarat
+- [ ] `Düzəliş istə` employee action-ını request detail-ə qoş
+- [ ] HR review panelini və approve/reject writeback axınını qur
+- [ ] correction audit və notification sync-ni bağla
+
+### Sprint C. Onboarding automation və compliance reporting
+
+- [ ] new-hire auto-assignment rule-larını qur
+- [ ] unread / overdue onboarding reminder job-larını əlavə et
+- [ ] onboarding acknowledgement export-larını əlavə et
+- [ ] template lifecycle: active/inactive, archive, version replace flow-u tamamla
+- [ ] ayrıca onboarding analytics/report page-ni genişləndir
+
+### Sprint D. Learning targeting və completion automation
+
+- [ ] targeting rules əlavə et:
+  - structure
+  - position
+  - new hires cohort
+  - manual bulk groups
+- [ ] required/optional semantics və overdue completion state-ni sərtləşdir
+- [ ] learning reminder automation və stale-content report-u qur
+- [ ] completion/export/report qatını tamamla
+
+### Sprint E. Employee workspace polish və guard rails
+
+- [ ] `Sənədlərim` visibility policy-lərini sərtləşdir
+- [ ] `Mənim strukturum` üçün richer hierarchy UX əlavə et
+- [ ] `My HR` adoption analytics və budget/benchmark command-larını əlavə et
+- [ ] employee-facing create/review action-ları üçün acceptance checklist-i bağla

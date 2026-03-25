@@ -92,5 +92,15 @@ return [
             'enabled' => true,
             'migrations' => app_path('Modules/Reports/Database/Migrations'),
         ],
+        'onboarding-library' => [
+            'provider' => \App\Modules\OnboardingLibrary\Providers\OnboardingLibraryServiceProvider::class,
+            'enabled' => true,
+            'migrations' => app_path('Modules/OnboardingLibrary/Database/Migrations'),
+        ],
+        'learning-library' => [
+            'provider' => \App\Modules\LearningLibrary\Providers\LearningLibraryServiceProvider::class,
+            'enabled' => true,
+            'migrations' => app_path('Modules/LearningLibrary/Database/Migrations'),
+        ],
     ],
 ];

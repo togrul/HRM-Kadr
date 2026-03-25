@@ -10,6 +10,7 @@ use App\Modules\Personnel\Console\Commands\ProfessionalPortfolioBackfillRegistry
 use App\Modules\Personnel\Console\Commands\ProfessionalPortfolioCheckMediaLinksCommand;
 use App\Modules\Personnel\Console\Commands\ProfessionalPortfolioEnforcePoliciesCommand;
 use App\Modules\Personnel\Console\Commands\ProfessionalPortfolioSyncRegistriesCommand;
+use App\Modules\Personnel\Console\Commands\RepairLegacySelfServiceVacationOrdersCommand;
 use App\Providers\Concerns\RegistersLivewireAliases;
 use App\Services\Modules\ModuleState;
 use Illuminate\Support\Facades\Gate;
@@ -31,6 +32,7 @@ class PersonnelServiceProvider extends ServiceProvider
                 ProfessionalPortfolioBackfillRegistryKeysCommand::class,
                 ProfessionalPortfolioSyncRegistriesCommand::class,
                 ProfessionalPortfolioEnforcePoliciesCommand::class,
+                RepairLegacySelfServiceVacationOrdersCommand::class,
             ]);
         }
     }
@@ -76,6 +78,19 @@ class PersonnelServiceProvider extends ServiceProvider
             'files' => \App\Modules\Personnel\Livewire\Files::class,
             'information' => \App\Modules\Personnel\Livewire\Information::class,
             'vacation-list' => \App\Modules\Personnel\Livewire\VacationList::class,
+            'my-hr.dashboard' => \App\Modules\Personnel\Livewire\MyHr\MyHrDashboard::class,
+            'my-hr.summary' => \App\Modules\Personnel\Livewire\MyHr\MyHrSummary::class,
+            'my-hr.requests' => \App\Modules\Personnel\Livewire\MyHr\MyHrRequests::class,
+            'my-hr.notifications' => \App\Modules\Personnel\Livewire\MyHr\MyHrNotifications::class,
+            'my-hr.onboarding' => \App\Modules\Personnel\Livewire\MyHr\MyHrOnboarding::class,
+            'my-hr.onboarding-assignment-manager' => \App\Modules\Personnel\Livewire\MyHr\OnboardingAssignmentManager::class,
+            'my-hr.development-plan' => \App\Modules\Personnel\Livewire\MyHr\MyHrDevelopmentPlan::class,
+            'my-hr.learning' => \App\Modules\Personnel\Livewire\MyHr\MyHrLearning::class,
+            'my-hr.learning-assignment-manager' => \App\Modules\Personnel\Livewire\MyHr\LearningAssignmentManager::class,
+            'my-hr.documents' => \App\Modules\Personnel\Livewire\MyHr\MyHrDocuments::class,
+            'my-hr.hierarchy' => \App\Modules\Personnel\Livewire\MyHr\MyHrHierarchy::class,
+            'my-hr.account-provisioning' => \App\Modules\Personnel\Livewire\MyHr\MyHrAccountProvisioning::class,
+            'my-hr.self-service-request-reviews' => \App\Modules\Personnel\Livewire\MyHr\SelfServiceRequestReviews::class,
             'professional-portfolio' => \App\Modules\Personnel\Livewire\ProfessionalPortfolio\ProfessionalPortfolio::class,
             'professional-portfolio.events-manager' => \App\Modules\Personnel\Livewire\ProfessionalPortfolio\EventsManager::class,
             'professional-portfolio.media-manager' => \App\Modules\Personnel\Livewire\ProfessionalPortfolio\MediaManager::class,

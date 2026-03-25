@@ -33,6 +33,12 @@
 
             <div class="flex flex-col">
                 <div class="flex space-x-4">
+                    @can('review-self-service-requests')
+                        <a href="{{ route('self-service-reviews') }}"
+                            class="inline-flex items-center justify-center px-4 h-12 text-sm font-semibold text-zinc-700 transition-all duration-300 bg-white border border-zinc-200 rounded-xl hover:border-zinc-300 hover:bg-zinc-50">
+                            {{ __('ui::menu.items.self_service_reviews') }}
+                        </a>
+                    @endcan
                     @can('export-vacations')
                         <button wire:click.prevent="exportExcel"
                             class="flex items-center justify-center w-12 h-12 transition-all duration-300 rounded-xl hover:bg-green-50"
@@ -226,8 +232,18 @@
                                     <div class="flex flex-col text-sm font-medium">
                                         <div class="flex items-center space-x-1">
                                             <span class="text-gray-500">{{ __('vacation::common.labels.order_hash') }}:</span>
-                                            <a href="{{ route('orders', ['search' => ['order_no' => $_vacation->order_no]]) }}"
-                                                class="text-blue-600">{{ $_vacation->order_no }}</a>
+                                            @if (filled($_vacation->order_no))
+                                                <a href="{{ route('orders', ['search' => ['order_no' => $_vacation->order_no]]) }}"
+                                                    class="text-blue-600">{{ $_vacation->order_no }}</a>
+                                            @elseif ($_vacation->submission_source === 'employee_self_service' && $_vacation->approval_status === 'approved')
+                                                <button
+                                                    wire:click="bindOperationalOrder('{{ $_vacation->id }}')"
+                                                    class="inline-flex items-center justify-center rounded-lg border border-zinc-200 bg-zinc-50 px-2 py-1 text-xs font-semibold text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-100">
+                                                    {{ __('vacation::common.actions.bind_order') }}
+                                                </button>
+                                            @else
+                                                <span class="text-slate-400">—</span>
+                                            @endif
                                         </div>
                                         <div class="flex items-center space-x-1">
                                             <span class="text-gray-500">{{ __('vacation::common.labels.given_by') }}:</span>
@@ -235,18 +251,32 @@
                                         </div>
                                         <div class="flex items-center space-x-1">
                                             <span class="text-gray-500">{{ __('vacation::common.labels.given_date') }}:</span>
-                                            <span
-                                                class="text-black">{{ \Carbon\Carbon::parse($_vacation->order_date)->format('d.m.Y') }}</span>
+                                            <span class="text-black">{{ $_vacation->order_date ? \Carbon\Carbon::parse($_vacation->order_date)->format('d.m.Y') : '—' }}</span>
                                         </div>
                                     </div>
                                 </x-table.td>
 
                                 <x-table.td :isButton="true">
+                                    @if ($_vacation->submission_source === 'employee_self_service' && $_vacation->approval_status === 'approved' && blank($_vacation->order_no))
+                                        <button wire:click="bindOperationalOrder('{{ $_vacation->id }}')"
+                                            class="inline-flex items-center justify-center w-8 h-8 text-xs font-medium text-amber-600 uppercase transition duration-300 rounded-lg bg-amber-50 hover:bg-amber-100 hover:text-amber-700"
+                                            title="{{ __('vacation::common.actions.bind_order') }}">
+                                            <x-icons.document-icon color="text-amber-500" hover="text-amber-700"></x-icons.document-icon>
+                                        </button>
+                                    @endif
+                                    @if (filled($_vacation->order_no))
+                                        <a href="{{ route('orders', ['search' => ['order_no' => $_vacation->order_no]]) }}"
+                                            class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg bg-slate-100 hover:bg-slate-200 hover:text-gray-700">
+                                            <x-icons.edit-icon color="text-slate-500" hover="text-slate-700"></x-icons.edit-icon>
+                                        </a>
+                                    @endif
                                     @can('export-vacations')
+                                        @if (filled($_vacation->order_no))
                                         <button wire:click="printVacationDocument('{{ $_vacation->id }}')"
                                             class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg bg-teal-50 hover:bg-teal-50 hover:text-gray-700">
                                             <x-icons.document-icon color="text-teal-500" hover="text-teal-600"></x-icons.document-icon>
                                         </button>
+                                        @endif
                                     @endcan
                                 </x-table.td>
                             </tr>

@@ -111,6 +111,7 @@ class AdminServiceProvider extends ServiceProvider
             'rank-categories' => \App\Modules\Admin\Livewire\RankCategories::class,
             'rank-reasons' => \App\Modules\Admin\Livewire\RankReasons::class,
             'scientific-degrees' => \App\Modules\Admin\Livewire\ScientificDegrees::class,
+            'self-service-approval-routes' => \App\Modules\Admin\Livewire\SelfServiceApprovalRoutes::class,
             'social-origins' => \App\Modules\Admin\Livewire\SocialOrigins::class,
             'structures' => \App\Modules\Admin\Livewire\Structures::class,
             'weapons' => \App\Modules\Admin\Livewire\Weapons::class,

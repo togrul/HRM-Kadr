@@ -62,6 +62,7 @@ class Personnel extends Model
         'registered_address',
         'education_degree_id',
         'structure_id',
+        'parent_id',
         'position_id',
         'work_norm_id',
         'join_work_date',
@@ -141,6 +142,16 @@ class Personnel extends Model
     public function structure(): BelongsTo
     {
         return $this->belongsTo(Structure::class);
+    }
+
+    public function manager(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'parent_id');
+    }
+
+    public function directReports(): HasMany
+    {
+        return $this->hasMany(self::class, 'parent_id');
     }
 
     public function scopeWithStructureTree($query): void
@@ -234,6 +245,11 @@ class Personnel extends Model
         return $this->hasMany(PersonnelDocument::class, 'tabel_no', 'tabel_no');
     }
 
+    public function userLinks(): HasMany
+    {
+        return $this->hasMany(UserPersonnelLink::class);
+    }
+
     public function eventRecords(): HasMany
     {
         return $this->hasMany(PersonnelEventRecord::class)->latest('start_date');
@@ -247,6 +263,16 @@ class Personnel extends Model
     public function projectRecords(): HasMany
     {
         return $this->hasMany(PersonnelProjectRecord::class)->latest('start_date');
+    }
+
+    public function onboardingAssignments(): HasMany
+    {
+        return $this->hasMany(OnboardingDocumentAssignment::class)->latest('assigned_at');
+    }
+
+    public function learningAssignments(): HasMany
+    {
+        return $this->hasMany(EmployeeContentAssignment::class)->latest('assigned_at');
     }
 
     public function latestManagerAssignment(): HasOne

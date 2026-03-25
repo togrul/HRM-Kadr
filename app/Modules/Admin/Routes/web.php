@@ -21,6 +21,7 @@ use App\Modules\Admin\Livewire\Punishments;
 use App\Modules\Admin\Livewire\RankCategories;
 use App\Modules\Admin\Livewire\RankReasons;
 use App\Modules\Admin\Livewire\ScientificDegrees;
+use App\Modules\Admin\Livewire\SelfServiceApprovalRoutes;
 use App\Modules\Admin\Livewire\SocialOrigins;
 use App\Modules\Admin\Livewire\Structures;
 use App\Modules\Admin\Livewire\Weapons;
@@ -49,6 +50,7 @@ Route::middleware(['web', 'auth', 'can:access-admin'])->prefix('/admin')->group(
     Route::get('/rank-categories', RankCategories::class)->name('admin.rank-categories');
     Route::get('/rank-reasons', RankReasons::class)->name('admin.rank-reasons');
     Route::get('/scientific-degrees', ScientificDegrees::class)->name('admin.scientific-degrees');
+    Route::get('/self-service-approval-routes', SelfServiceApprovalRoutes::class)->name('admin.self-service-approval-routes');
     Route::get('/social-origins', SocialOrigins::class)->name('admin.social-origins');
     Route::get('/structures', Structures::class)->name('admin.structures');
     Route::get('/weapons', Weapons::class)->name('admin.weapons');

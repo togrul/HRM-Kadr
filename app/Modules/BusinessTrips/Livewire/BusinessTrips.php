@@ -82,6 +82,13 @@ class BusinessTrips extends Component
     public function printBusinessTripDocument(PersonnelBusinessTrip $model, $multi = false)
     {
         $model->load(['personnel', 'order.orderType', 'order.attributes', 'personnel.idDocuments']);
+
+        if (! $model->order || ! $model->order->orderType) {
+            $this->dispatch('notify', type: 'warning', message: __('business_trips::common.messages.order_not_ready'));
+
+            return null;
+        }
+
         $filepath = $multi
             ? '/storage/templates/general/Ezamiyyet-vesiqesi.docx'
             : '/storage/templates/general/Ezamiyyet-kagizi.docx';
@@ -155,6 +162,16 @@ class BusinessTrips extends Component
             'personDidDelete:id,name',
         ])
             ->whereHas('personnel', fn($query) => $query->whereIn('structure_id', $this->accessibleStructureIds))
+            ->where(function ($query) {
+                $query->whereNull('submission_source')
+                    ->orWhere(function ($selfService) {
+                        $selfService->where('submission_source', '!=', 'employee_self_service')
+                            ->orWhere(function ($approved) {
+                                $approved->where('submission_source', 'employee_self_service')
+                                    ->where('approval_status', 'approved');
+                            });
+                    });
+            })
             ->filter($this->search)
             ->orderByDesc('end_date');
 

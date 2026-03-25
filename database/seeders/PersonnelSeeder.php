@@ -556,7 +556,8 @@ class PersonnelSeeder extends Seeder
           'approve-attendance-overtime',
           'manage-attendance-month-close',
           'edit-attendance-exceptions',
-          'export-attendance'
+          'export-attendance',
+          'show-my-hr',
         ];
 
         $now = now();

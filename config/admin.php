@@ -25,5 +25,6 @@ return [
         ['label' => 'admin::references.menu.social_origin', 'icon' => 'shield-user-icon', 'route' => 'admin.social-origins'],
         ['label' => 'admin::references.menu.rank_reasons', 'icon' => 'double-arrow-icon', 'route' => 'admin.rank-reasons'],
         ['label' => 'admin::references.menu.rank_category', 'icon' => 'arrow-icon', 'route' => 'admin.rank-categories'],
+        ['label' => 'admin::references.menu.approval_routes', 'icon' => 'network-icon', 'route' => 'admin.self-service-approval-routes'],
     ],
 ];

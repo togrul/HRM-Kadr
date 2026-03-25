@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\{BelongsTo, HasMany, HasOne};
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Leave extends Model
 {
@@ -34,6 +35,11 @@ class Leave extends Model
         'status_id',
         'document_path',
         'assigned_to',
+        'fallback_approver_personnel_id',
+        'approval_route_source',
+        'hr_always_included',
+        'submission_source',
+        'submitted_by_user_id',
         'approved_by',
         'approved_at',
     ];
@@ -75,6 +81,21 @@ class Leave extends Model
     public function assigned(): BelongsTo
     {
          return $this->belongsTo(Personnel::class, 'assigned_to', 'id');
+    }
+
+    public function fallbackApprover(): BelongsTo
+    {
+         return $this->belongsTo(Personnel::class, 'fallback_approver_personnel_id', 'id');
+    }
+
+    public function submittedBy(): BelongsTo
+    {
+         return $this->belongsTo(User::class, 'submitted_by_user_id');
+    }
+
+    public function changeRequests(): MorphMany
+    {
+        return $this->morphMany(EmployeeRequestChangeRequest::class, 'requestable');
     }
 
     /* ----------------------------- Accessors / Attrs -------------------------- */

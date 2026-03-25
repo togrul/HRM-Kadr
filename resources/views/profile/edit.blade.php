@@ -7,6 +7,16 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+            @php($mustResetPassword = (bool) ($user->getAttributes()['must_reset_password'] ?? false))
+            @php($showForceResetBanner = $mustResetPassword && $user->hasRole(\App\Modules\Personnel\Application\Services\MyHr\MyHrAccountProvisioningService::EMPLOYEE_ROLE))
+
+            @if (request()->boolean('force_password_reset') || $showForceResetBanner)
+                <div class="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm leading-6 text-amber-800 shadow-sm">
+                    <p class="font-semibold">{{ __('ui::profile.titles.force_password_reset') }}</p>
+                    <p class="mt-1">{{ __('ui::profile.descriptions.force_password_reset') }}</p>
+                </div>
+            @endif
+
             <div class="p-4 sm:p-8 bg-gray-50 dark:bg-gray-800 shadow sm:rounded-lg">
                 <div class="max-w-xl">
                     @include('profile.partials.update-profile-information-form')

@@ -39,6 +39,24 @@
         @endif
     @endif
 
+    @can('manage-my-hr-accounts')
+        @if ($showSideMenu == 'my-hr-account')
+            <livewire:personnel.my-hr.account-provisioning :personnelModel="$modelName" :key="'my-hr-account-' . $modelName" />
+        @endif
+    @endcan
+
+    @canany(['assign-onboarding-documents', 'manage-onboarding-document-templates'])
+        @if ($showSideMenu == 'onboarding-documents')
+            <livewire:personnel.my-hr.onboarding-assignment-manager :personnelModel="$modelName" :key="'onboarding-documents-' . $modelName" />
+        @endif
+    @endcanany
+
+    @canany(['assign-employee-content', 'manage-employee-content-library'])
+        @if ($showSideMenu == 'learning-materials')
+            <livewire:personnel.my-hr.learning-assignment-manager :personnelModel="$modelName" :key="'learning-materials-' . $modelName" />
+        @endif
+    @endcanany
+
 </x-side-modal>
 
 @can('delete-personnels')

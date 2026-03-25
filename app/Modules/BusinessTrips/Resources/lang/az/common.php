@@ -53,4 +53,7 @@ return [
         'yes' => 'var',
         'no' => 'yoxdur',
     ],
+    'messages' => [
+        'order_not_ready' => 'Bu ezamiyyət müraciəti hələ təsdiqlənmiş əmrlə bağlanmayıb.',
+    ],
 ];

@@ -25,19 +25,19 @@
         @enderror
       </div>
        <div>
+            <x-label for="roleId">{{ __('services::common.labels.role') }}</x-label>
             <x-ui.select-dropdown
-                :label="__('services::common.labels.role')"
+                :label="null"
                 placeholder="---"
                 mode="gray"
                 class="w-full"
+                instance="services-user-edit-role"
                 wire:model.live="roleId"
                 :model="$this->roleOptions"
-                    search-model="search.role"
-            >
-            </x-ui.select-dropdown>
-        @error('roleId')
-          <x-validation> {{ $message }} </x-validation>
-        @enderror
+            ></x-ui.select-dropdown>
+            @error('roleId')
+                <x-validation> {{ $message }} </x-validation>
+            @enderror
         </div>
     </div>
 

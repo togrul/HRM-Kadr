@@ -29,4 +29,11 @@ return [
         'reset' => 'Sıfırla',
         'day' => 'gün',
     ],
+    'messages' => [
+        'order_not_ready' => 'Bu məzuniyyət müraciəti hələ təsdiqlənmiş əmrlə bağlanmayıb.',
+        'order_bound' => 'Self-service məzuniyyət üçün əmrlə bağlama tamamlandı.',
+    ],
+    'actions' => [
+        'bind_order' => 'Əmr bağla',
+    ],
 ];

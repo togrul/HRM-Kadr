@@ -290,6 +290,23 @@ class AllPersonnel extends Component
         return ProfessionalPortfolioPermissionMatrix::canViewPortfolio(auth()->user());
     }
 
+    public function canManageMyHrAccounts(): bool
+    {
+        return auth()->user()?->can('manage-my-hr-accounts') ?? false;
+    }
+
+    public function canManageOnboardingDocuments(): bool
+    {
+        return (auth()->user()?->can('assign-onboarding-documents') ?? false)
+            || (auth()->user()?->can('manage-onboarding-document-templates') ?? false);
+    }
+
+    public function canManageLearningMaterials(): bool
+    {
+        return (auth()->user()?->can('assign-employee-content') ?? false)
+            || (auth()->user()?->can('manage-employee-content-library') ?? false);
+    }
+
     public function handleRowAction(string $type, mixed $payload = null): void
     {
         if (is_object($payload)) {
@@ -306,12 +323,26 @@ class AllPersonnel extends Component
 
         $menu = (string) data_get($payload, 'menu', '');
 
-        if ($actionType === 'open' && $menu === 'professional-portfolio' && ! $this->canViewProfessionalPortfolio()) {
-            return;
-        }
+        if ($actionType === 'open') {
+            if ($menu === 'professional-portfolio' && ! $this->canViewProfessionalPortfolio()) {
+                return;
+            }
 
-        if ($actionType === 'open' && $menu !== 'professional-portfolio' && ! $this->canEditPersonnels()) {
-            return;
+            if ($menu === 'my-hr-account' && ! $this->canManageMyHrAccounts()) {
+                return;
+            }
+
+            if ($menu === 'onboarding-documents' && ! $this->canManageOnboardingDocuments()) {
+                return;
+            }
+
+            if ($menu === 'learning-materials' && ! $this->canManageLearningMaterials()) {
+                return;
+            }
+
+            if (! in_array($menu, ['professional-portfolio', 'my-hr-account', 'onboarding-documents', 'learning-materials'], true) && ! $this->canEditPersonnels()) {
+                return;
+            }
         }
 
         if (! $this->canDeletePersonnels() && in_array($actionType, ['delete', 'force-delete'], true)) {

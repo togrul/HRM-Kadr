@@ -102,6 +102,18 @@ class Kernel extends ConsoleKernel
                 ->dailyAt($at)
                 ->withoutOverlapping();
         }
+
+        if ((bool) config('personnel.my_hr.onboarding.automation.schedule_enabled', false)) {
+            $schedule->command('onboarding-library:automation')
+                ->dailyAt((string) config('personnel.my_hr.onboarding.automation.daily_at', '05:00'))
+                ->withoutOverlapping();
+        }
+
+        if ((bool) config('personnel.my_hr.learning.automation.schedule_enabled', false)) {
+            $schedule->command('learning-library:automation')
+                ->dailyAt((string) config('personnel.my_hr.learning.automation.daily_at', '05:20'))
+                ->withoutOverlapping();
+        }
     }
 
     /**

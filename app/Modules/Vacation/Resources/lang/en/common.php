@@ -29,4 +29,11 @@ return [
         'reset' => 'Reset',
         'day' => 'day',
     ],
+    'messages' => [
+        'order_not_ready' => 'This vacation request is not yet linked to an approved order.',
+        'order_bound' => 'The self-service vacation request has been linked to an operational order.',
+    ],
+    'actions' => [
+        'bind_order' => 'Bind order',
+    ],
 ];

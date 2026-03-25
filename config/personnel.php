@@ -26,6 +26,30 @@ return [
             'stale_pending_days' => (int) env('PERSONNEL_PORTFOLIO_STALE_PENDING_DAYS', 30),
         ],
     ],
+    'my_hr' => [
+        'onboarding' => [
+            'automation' => [
+                'schedule_enabled' => (bool) env('MY_HR_ONBOARDING_AUTOMATION_SCHEDULE_ENABLED', true),
+                'daily_at' => (string) env('MY_HR_ONBOARDING_AUTOMATION_DAILY_AT', '05:00'),
+                'new_hire_lookback_days' => (int) env('MY_HR_ONBOARDING_NEW_HIRE_LOOKBACK_DAYS', 30),
+                'default_due_days' => (int) env('MY_HR_ONBOARDING_DEFAULT_DUE_DAYS', 7),
+                'reminder_days_ahead' => (int) env('MY_HR_ONBOARDING_REMINDER_DAYS_AHEAD', 2),
+                'reminder_cooldown_hours' => (int) env('MY_HR_ONBOARDING_REMINDER_COOLDOWN_HOURS', 24),
+                'max_reminders_per_run' => (int) env('MY_HR_ONBOARDING_MAX_REMINDERS_PER_RUN', 150),
+            ],
+        ],
+        'learning' => [
+            'automation' => [
+                'schedule_enabled' => (bool) env('MY_HR_LEARNING_AUTOMATION_SCHEDULE_ENABLED', true),
+                'daily_at' => (string) env('MY_HR_LEARNING_AUTOMATION_DAILY_AT', '05:20'),
+                'new_hire_lookback_days' => (int) env('MY_HR_LEARNING_NEW_HIRE_LOOKBACK_DAYS', 30),
+                'default_due_days' => (int) env('MY_HR_LEARNING_DEFAULT_DUE_DAYS', 14),
+                'reminder_days_ahead' => (int) env('MY_HR_LEARNING_REMINDER_DAYS_AHEAD', 3),
+                'reminder_cooldown_hours' => (int) env('MY_HR_LEARNING_REMINDER_COOLDOWN_HOURS', 24),
+                'max_reminders_per_run' => (int) env('MY_HR_LEARNING_MAX_REMINDERS_PER_RUN', 150),
+            ],
+        ],
+    ],
     'performance' => [
         'render_budget' => [
             'all_personnel_render' => [

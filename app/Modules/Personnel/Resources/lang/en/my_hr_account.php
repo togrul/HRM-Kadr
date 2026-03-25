@@ -1,0 +1,52 @@
+<?php
+
+return [
+    'labels' => [
+        'kicker' => 'Self-service account',
+        'position' => 'Position',
+        'structure' => 'Structure',
+        'account_status' => 'Account status',
+        'user_name' => 'User name',
+        'user_email' => 'User email',
+        'invited_at' => 'Latest set-password time',
+        'link_source' => 'Link source',
+        'set_password_link' => 'Set-password link',
+        'manual_link' => 'Manual explicit link',
+        'user_picker' => 'Select user',
+    ],
+    'actions' => [
+        'create_account' => 'Create account',
+        'regenerate_link' => 'Regenerate link',
+        'save_manual_link' => 'Save link',
+        'copy_link' => 'Copy link',
+        'open_link' => 'Open link',
+    ],
+    'badges' => [
+        'account_exists' => 'Account exists',
+        'account_missing' => 'Account missing',
+        'email_ready' => 'Email ready',
+        'email_missing' => 'Email missing',
+    ],
+    'link_sources' => [
+        'self_service_provisioned' => 'Provisioned by the system for self-service',
+        'manual_self_service_link' => 'Manually linked for self-service',
+    ],
+    'messages' => [
+        'provisioning_hint' => 'This action creates a user account or explicitly links an existing user to the employee record. The system generates a set-password link; the employee should set the first password through that link.',
+        'set_password_help' => 'Share this link with the employee through a trusted channel. If you regenerate the link, the previous link may become invalid.',
+        'reset_link_placeholder' => 'The set-password link will appear here after the account is created or the invitation is regenerated.',
+        'reset_link_ready' => 'The set-password link is ready',
+        'reset_link_ready_hint' => 'Share this link with the employee. The employee should set the first password through this link.',
+        'reset_link_copied' => 'The set-password link was copied.',
+        'email_required' => 'An email is required on the personnel card before a self-service account can be provisioned.',
+        'pending_personnel' => 'A self-service account cannot be created while the personnel record is still pending approval.',
+        'email_conflict' => 'Another user account with a different personnel link already uses this email.',
+        'existing_user_requires_manual_link' => 'A user account already exists with this email. For safety it will not be auto-claimed; use the manual explicit link instead.',
+        'user_already_linked' => 'The selected user is already linked to another personnel record.',
+        'account_created' => 'The self-service account was created and the set-password link is ready.',
+        'reset_link_regenerated' => 'The set-password link was regenerated.',
+        'email_missing_short' => 'Email is missing',
+        'manual_link_help' => 'If a user account already exists, you can explicitly bind it to this personnel record. This link will remain authoritative even if email matching changes later.',
+        'manual_link_saved' => 'The user-to-personnel link was saved.',
+    ],
+];

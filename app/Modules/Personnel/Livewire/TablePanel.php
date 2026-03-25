@@ -115,7 +115,14 @@ class TablePanel extends Component
     }
 
     /**
-     * @return array{can_edit: bool, can_delete: bool, can_view_portfolio: bool}
+     * @return array{
+     *     can_edit: bool,
+     *     can_delete: bool,
+     *     can_view_portfolio: bool,
+     *     can_manage_my_hr_accounts: bool,
+     *     can_manage_onboarding_documents: bool,
+     *     can_manage_learning_materials: bool
+     * }
      */
     protected function rowActionCapabilities(): array
     {
@@ -129,6 +136,11 @@ class TablePanel extends Component
             'can_edit' => $user?->can('edit-personnels') ?? false,
             'can_delete' => $user?->can('delete-personnels') ?? false,
             'can_view_portfolio' => ProfessionalPortfolioPermissionMatrix::canViewPortfolio($user),
+            'can_manage_my_hr_accounts' => $user?->can('manage-my-hr-accounts') ?? false,
+            'can_manage_onboarding_documents' => ($user?->can('assign-onboarding-documents') ?? false)
+                || ($user?->can('manage-onboarding-document-templates') ?? false),
+            'can_manage_learning_materials' => ($user?->can('assign-employee-content') ?? false)
+                || ($user?->can('manage-employee-content-library') ?? false),
         ];
     }
 

@@ -40,6 +40,7 @@
     placeholder: @js($placeholder),
     isOpen: false,
     openUp: false,
+    alignRight: false,
     panelMaxHeight: 224,
     panelStyles: {},
     preferredDirection: @js($direction),
@@ -193,19 +194,11 @@
         ? Math.min(320, availableAbove)
         : Math.min(320, availableBelow);
 
-      const panelHeight = Math.min(naturalHeight, this.panelMaxHeight);
       const desiredWidth = Math.max(buttonRect.width, 220);
       const clampedWidth = Math.min(desiredWidth, viewportWidth - (viewportPadding * 2));
-      const maxLeft = Math.max(viewportPadding, viewportWidth - clampedWidth - viewportPadding);
-      const left = Math.min(Math.max(buttonRect.left, viewportPadding), maxLeft);
-      const top = this.openUp
-        ? Math.max(viewportPadding, buttonRect.top - gap - panelHeight)
-        : Math.min(buttonRect.bottom + gap, viewportHeight - panelHeight - viewportPadding);
+      this.alignRight = buttonRect.left + clampedWidth > viewportWidth - viewportPadding;
 
       this.panelStyles = {
-        position: 'fixed',
-        top: `${Math.round(top)}px`,
-        left: `${Math.round(left)}px`,
         width: `${Math.round(clampedWidth)}px`,
         maxHeight: `${Math.round(this.panelMaxHeight)}px`,
       };
@@ -302,9 +295,12 @@
     <ul
       x-ref="panel"
       x-show="isOpen && !isDisabled" x-transition.opacity.duration.100ms x-cloak
-      :class="openUp ? 'origin-bottom' : 'origin-top'"
+      :class="[
+        openUp ? 'bottom-full mb-2 origin-bottom' : 'top-full mt-2 origin-top',
+        alignRight ? 'right-0' : 'left-0'
+      ]"
       :style="panelStyles"
-      class="z-[910] px-3 py-2 space-y-2 overflow-auto text-base bg-white rounded-md shadow-xl focus:outline-none sm:text-sm"
+      class="absolute z-[910] px-3 py-2 space-y-2 overflow-auto text-base bg-white rounded-md shadow-xl focus:outline-none sm:text-sm"
     >
       {{-- slot: search input --}}
       @if ($searchModel)

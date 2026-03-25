@@ -53,4 +53,7 @@ return [
         'yes' => 'yes',
         'no' => 'no',
     ],
+    'messages' => [
+        'order_not_ready' => 'This business trip request is not yet linked to an approved order.',
+    ],
 ];

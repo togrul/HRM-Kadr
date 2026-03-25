@@ -6,6 +6,7 @@ use App\Modules\Vacation\Exports\VacationExport;
 use App\Livewire\Traits\DropdownConstructTrait;
 use App\Livewire\Traits\SideModalAction;
 use App\Models\PersonnelVacation;
+use App\Modules\Personnel\Application\Services\MyHr\MyHrRequestReviewService;
 use App\Models\Structure;
 use App\Services\NumberToWordsService;
 use App\Services\StructureService;
@@ -13,6 +14,7 @@ use App\Services\WordSuffixService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
@@ -88,6 +90,12 @@ class Vacations extends Component
             'order.orderType',
         ]);
 
+        if (! $model->order || ! $model->order->orderType) {
+            $this->dispatch('notify', type: 'warning', message: __('vacation::common.messages.order_not_ready'));
+
+            return null;
+        }
+
         //        $chief = Personnel::with(['latestRank.rank'])
         //            ->where(['structure_id' => 8, 'position_id' => 10])
         //            ->active()
@@ -145,6 +153,25 @@ class Vacations extends Component
         return response()->download($filename . '.docx')->deleteFileAfterSend();
     }
 
+    public function bindOperationalOrder(PersonnelVacation $model): void
+    {
+        abort_unless(
+            auth()->user()?->can('review-self-service-requests') || auth()->user()?->can('edit-vacations'),
+            403
+        );
+
+        abort_unless(
+            (string) $model->submission_source === 'employee_self_service'
+            && (string) $model->approval_status === 'approved'
+            && blank($model->order_no),
+            422
+        );
+
+        app(MyHrRequestReviewService::class)->bindOperationalVacationOrder($model, auth()->user());
+
+        $this->dispatch('notify', type: 'success', message: __('vacation::common.messages.order_bound'));
+    }
+
     protected function fillFilter(): void
     {
         $this->filter = [
@@ -163,6 +190,16 @@ class Vacations extends Component
             ]),
         ])
             ->whereHas('personnel', fn($query) => $query->whereIn('structure_id', $this->accessibleStructureIds))
+            ->where(function ($query) {
+                $query->whereNull('submission_source')
+                    ->orWhere(function ($selfService) {
+                        $selfService->where('submission_source', '!=', 'employee_self_service')
+                            ->orWhere(function ($approved) {
+                                $approved->where('submission_source', 'employee_self_service')
+                                    ->where('approval_status', 'approved');
+                            });
+                    });
+            })
             ->filter($this->search)
             ->when((empty($this->search['date']['min'] ?? null) && empty($this->search['date']['max'] ?? null)), fn($qq) => $qq->whereDateInYear($this->selectedYear))
             ->orderByDesc('end_date')
@@ -209,7 +246,11 @@ class Vacations extends Component
 
     protected function fillYear(): void
     {
-        $this->years = PersonnelVacation::selectRaw('YEAR(start_date) as year')
+        $yearExpression = DB::connection()->getDriverName() === 'sqlite'
+            ? "strftime('%Y', start_date)"
+            : 'YEAR(start_date)';
+
+        $this->years = PersonnelVacation::selectRaw("{$yearExpression} as year")
             ->distinct()
             ->orderBy('year', 'desc')
             ->pluck('year')

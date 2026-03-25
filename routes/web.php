@@ -26,7 +26,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/docs', TrainingPerformanceGuideController::class)
         ->name('docs.guide');
     Route::get('/docs/sections/{module}', [TrainingPerformanceGuideController::class, 'section'])
-        ->whereIn('module', ['training', 'performance', 'attendance', 'orders', 'notifications', 'professional-portfolio'])
+        ->whereIn('module', ['training', 'performance', 'attendance', 'orders', 'notifications', 'professional-portfolio', 'my-hr'])
         ->name('docs.section');
 });
 

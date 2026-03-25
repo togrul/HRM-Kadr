@@ -76,6 +76,17 @@
                     ['id' => 'professional-portfolio-doc', 'label' => 'Tam bələdçi'],
                 ],
             ],
+            [
+                'label' => 'Şəxsi kabinet',
+                'tone' => 'cyan',
+                'items' => [
+                    ['id' => 'my-hr-module', 'label' => 'Modulun məqsədi'],
+                    ['id' => 'my-hr-outline', 'label' => 'Bölmələr və sıra'],
+                    ['id' => 'my-hr-workflow', 'label' => 'İş axını'],
+                    ['id' => 'my-hr-scenarios', 'label' => 'Ssenarilər'],
+                    ['id' => 'my-hr-doc', 'label' => 'Tam bələdçi'],
+                ],
+            ],
         ];
 
         $allSectionIds = collect($sidebarGroups)->flatMap(fn ($group) => array_column($group['items'], 'id'))->values()->all();
@@ -88,6 +99,7 @@
                     'Əmrlər' => 'orders',
                     'Bildirişlər' => 'notifications',
                     'Peşəkar portfel' => 'professional-portfolio',
+                    'Şəxsi kabinet' => 'my-hr',
                     default => 'overview',
                 };
 
@@ -102,6 +114,7 @@
             ['href' => route('orders'), 'label' => 'Əmrlər paneli'],
             ['href' => route('services', ['selectedService' => 'notifications-settings']), 'label' => 'Bildirişlər paneli'],
             ['href' => route('home'), 'label' => 'Əməkdaşlar paneli'],
+            ['href' => route('my-hr'), 'label' => 'Şəxsi kabinet'],
         ];
 
         $initialSection = match ($focus) {
@@ -111,6 +124,7 @@
             'orders' => 'orders-module',
             'notifications' => 'notifications-module',
             'professional-portfolio' => 'professional-portfolio-module',
+            'my-hr' => 'my-hr-module',
             default => 'overview',
         };
     @endphp
@@ -1092,7 +1106,7 @@
         <main class="docs-main">
             @include('docs.partials.guide-overview', $initialModulePayloads['overview'] ?? [])
 
-            @foreach (['training', 'performance', 'attendance', 'orders', 'notifications', 'professional-portfolio'] as $module)
+            @foreach (['training', 'performance', 'attendance', 'orders', 'notifications', 'professional-portfolio', 'my-hr'] as $module)
                 <div
                     data-docs-module-host="{{ $module }}"
                     data-loaded="{{ in_array($module, $initialModules, true) ? 'true' : 'false' }}"
@@ -1109,6 +1123,7 @@
                                     'orders' => 'Əmrlər',
                                     'notifications' => 'Bildirişlər',
                                     'professional-portfolio' => 'Peşəkar portfel',
+                                    'my-hr' => 'Şəxsi kabinet',
                                     default => 'Modul',
                                 } }}
                             </p>

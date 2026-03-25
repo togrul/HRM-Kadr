@@ -13,7 +13,14 @@ class Position extends Model
     protected $fillable = [
         'id',
         'rank_category_id',
+        'approval_rank',
+        'is_approval_target',
         'name',
+    ];
+
+    protected $casts = [
+        'approval_rank' => 'integer',
+        'is_approval_target' => 'boolean',
     ];
 
     public $timestamps = false;
