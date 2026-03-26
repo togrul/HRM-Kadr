@@ -48,5 +48,6 @@ return [
         'email_missing_short' => 'Email göstərilməyib',
         'manual_link_help' => 'Əgər user hesabı artıq ayrıca yaradılıbsa, onu bu əməkdaş kartına explicit şəkildə bağlamaq olar. Bu bağ gələcəkdə email uyğunluğundan asılı qalmayacaq.',
         'manual_link_saved' => 'İstifadəçi və əməkdaş bağı yadda saxlanıldı.',
+        'unknown_link_source' => 'Şəxsi kabinet üçün bağ qurulub',
     ],
 ];

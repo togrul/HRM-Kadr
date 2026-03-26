@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\User;
 use App\Services\Features\FeatureState;
+use App\Services\HrPolicies\HrPolicyPackService;
 use App\Services\NumberToWordsService;
 use App\Services\Orders\OrderTemplateAuditLogger;
 use App\Services\Orders\OrderTemplateSnapshotService;
@@ -33,6 +34,10 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(NumberToWordsService::class, fn () => new NumberToWordsService);
         $this->app->singleton(StructureService::class, fn () => new StructureService);
         $this->app->singleton(FeatureState::class, fn () => new FeatureState($this->app->make(ProfileState::class)->features()));
+        $this->app->singleton(HrPolicyPackService::class, fn () => new HrPolicyPackService(
+            $this->app->make(ProfileState::class),
+            config('hr_policies', []),
+        ));
         $this->app->singleton(TemplateRegistry::class);
         $this->app->singleton(OrderTemplateAuditLogger::class);
         $this->app->singleton(OrderTemplateSnapshotService::class);

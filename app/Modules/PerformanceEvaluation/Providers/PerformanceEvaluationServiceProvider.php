@@ -39,6 +39,8 @@ class PerformanceEvaluationServiceProvider extends ServiceProvider
     {
         return [
             'dashboard' => \App\Modules\PerformanceEvaluation\Livewire\Dashboard::class,
+            'foundation-workspace' => \App\Modules\PerformanceEvaluation\Livewire\FoundationWorkspace::class,
+            'operations-workspace' => \App\Modules\PerformanceEvaluation\Livewire\OperationsWorkspace::class,
             'evaluator-workspace' => \App\Modules\PerformanceEvaluation\Livewire\EvaluatorWorkspace::class,
             'test-workspace' => \App\Modules\PerformanceEvaluation\Livewire\TestWorkspace::class,
             'user-personnel-links' => \App\Modules\PerformanceEvaluation\Livewire\UserPersonnelLinks::class,

@@ -4,11 +4,14 @@ namespace App\Modules\Personnel\Livewire\MyHr;
 
 use App\Modules\Personnel\Support\MyHr\MyHrAccess;
 use App\Modules\Personnel\Support\MyHr\MyHrTabs;
+use App\Support\Livewire\InteractsWithTabbedWorkspace;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 
 class MyHrDashboard extends Component
 {
+    use InteractsWithTabbedWorkspace;
+
     public ?int $personnelId = null;
 
     public string $activeTab = 'overview';
@@ -18,20 +21,12 @@ class MyHrDashboard extends Component
         $access->authorize(auth()->user());
 
         $this->personnelId = $access->resolvePersonnelId(auth()->user());
-
-        $requestedTab = (string) request()->query('tab', 'overview');
-        if (in_array($requestedTab, MyHrTabs::all(), true)) {
-            $this->activeTab = $requestedTab;
-        }
+        $this->bootActiveTabFromRequest();
     }
 
     public function setActiveTab(string $tab): void
     {
-        if (! in_array($tab, MyHrTabs::all(), true)) {
-            return;
-        }
-
-        $this->activeTab = $tab;
+        $this->switchTab($tab);
     }
 
     #[Computed]
@@ -44,6 +39,11 @@ class MyHrDashboard extends Component
      * @return array<int, string>
      */
     public function tabs(): array
+    {
+        return MyHrTabs::all();
+    }
+
+    protected function allowedTabs(): array
     {
         return MyHrTabs::all();
     }

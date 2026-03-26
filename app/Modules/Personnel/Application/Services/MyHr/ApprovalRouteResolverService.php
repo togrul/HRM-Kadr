@@ -5,10 +5,15 @@ namespace App\Modules\Personnel\Application\Services\MyHr;
 use App\Models\Personnel;
 use App\Models\SelfServiceApprovalRoute;
 use App\Models\Structure;
+use App\Services\HrPolicies\HrPolicyPackService;
 use Illuminate\Database\Eloquent\Builder;
 
 class ApprovalRouteResolverService
 {
+    public function __construct(
+        private readonly HrPolicyPackService $policyPackService,
+    ) {}
+
     /**
      * @var array<string, array<string, int|string|bool|null>>
      */
@@ -163,6 +168,7 @@ class ApprovalRouteResolverService
 
     private function policy(string $requestType): array
     {
+        $packPolicy = $this->policyPackService->selfServiceApproval($requestType);
         $route = SelfServiceApprovalRoute::query()
             ->where('request_type', $requestType)
             ->where('is_active', true)
@@ -170,9 +176,9 @@ class ApprovalRouteResolverService
             ->first();
 
         return [
-            'include_primary_approver' => $route?->include_primary_approver ?? true,
-            'include_upper_approver' => $route?->include_upper_approver ?? false,
-            'hr_always_included' => $route?->hr_always_included ?? true,
+            'include_primary_approver' => $route?->include_primary_approver ?? ($packPolicy['include_primary_approver'] ?? true),
+            'include_upper_approver' => $route?->include_upper_approver ?? ($packPolicy['include_upper_approver'] ?? false),
+            'hr_always_included' => $route?->hr_always_included ?? ($packPolicy['hr_always_included'] ?? true),
         ];
     }
 

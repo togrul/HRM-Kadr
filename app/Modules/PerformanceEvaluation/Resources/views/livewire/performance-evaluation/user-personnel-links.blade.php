@@ -1,3 +1,15 @@
+@php
+    $resolutionSourceLabel = static function (?string $source): string {
+        return match ($source) {
+            'manual' => __('performance_evaluation::dashboard.resolution_sources.manual'),
+            'self_service_provisioned' => __('performance_evaluation::dashboard.resolution_sources.self_service_provisioned'),
+            'manual_self_service_link' => __('performance_evaluation::dashboard.resolution_sources.manual_self_service_link'),
+            null, '' => '—',
+            default => __('performance_evaluation::dashboard.resolution_sources.unknown'),
+        };
+    };
+@endphp
+
 <div class="flex flex-col space-y-4 px-6 py-4">
     <div class="flex items-center justify-between gap-3">
         <a href="{{ $this->backUrl }}" class="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-700 shadow-sm transition hover:bg-zinc-50">
@@ -77,7 +89,7 @@
                                         <p class="text-xs text-zinc-500">#{{ $link->personnel_tabel_no ?: '—' }}</p>
                                     </div>
                                     <div class="flex flex-wrap gap-2">
-                                        <x-small-badge mode="secondary">{{ __('performance_evaluation::dashboard.fields.resolution_source') }}: {{ $link->resolution_source ?: '—' }}</x-small-badge>
+                                        <x-small-badge mode="secondary">{{ __('performance_evaluation::dashboard.fields.resolution_source') }}: {{ $resolutionSourceLabel($link->resolution_source) }}</x-small-badge>
                                         <x-small-badge mode="sky">{{ optional($link->resolved_at)->format('d.m.Y H:i') ?: '—' }}</x-small-badge>
                                     </div>
                                     <div class="flex flex-wrap gap-2">

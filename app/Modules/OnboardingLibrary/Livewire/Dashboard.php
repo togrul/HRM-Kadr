@@ -6,28 +6,12 @@ use App\Models\OnboardingDocumentTemplate;
 use App\Modules\OnboardingLibrary\Application\Services\OnboardingLibraryReadService;
 use App\Modules\Personnel\Application\Services\MyHr\OnboardingAssignmentManagerService;
 use App\Support\Library\LibraryExportAction;
-use App\Support\Livewire\DownloadsReportsTable;
-use App\Support\Livewire\InteractsWithBulkTargetSelections;
+use App\Support\Livewire\AbstractLibraryDashboard;
 use Livewire\Attributes\Computed;
-use Livewire\Component;
-use Livewire\WithFileUploads;
-use Livewire\WithPagination;
 
-class Dashboard extends Component
+class Dashboard extends AbstractLibraryDashboard
 {
-    use DownloadsReportsTable;
-    use InteractsWithBulkTargetSelections;
-    use WithFileUploads;
-    use WithPagination;
-
-    public string $activeTab = 'general';
     public string $searchTemplate = '';
-    public string $searchPersonnel = '';
-    public string $searchStructure = '';
-    public string $searchPosition = '';
-    public array $selectedPersonnelIds = [];
-    public array $selectedStructureIds = [];
-    public array $selectedPositionIds = [];
     public ?int $versionSourceTemplateId = null;
     public $templateUpload = null;
 
@@ -49,20 +33,6 @@ class Dashboard extends Component
         'include_recent_hires' => false,
         'recent_hire_days' => 30,
     ];
-
-    public function mount(): void
-    {
-        abort_unless($this->canView(), 403);
-    }
-
-    public function switchTab(string $tab): void
-    {
-        if (! in_array($tab, ['general', 'library', 'reports'], true)) {
-            return;
-        }
-
-        $this->activeTab = $tab;
-    }
 
     public function saveTemplate(): void
     {
@@ -149,12 +119,11 @@ class Dashboard extends Component
             'selectedPositionIds.*' => __('onboarding-library::dashboard.fields.target_position'),
         ]);
 
-        if ($this->selectedPersonnelIds === []
-            && $this->selectedStructureIds === []
-            && $this->selectedPositionIds === []
-            && ! (bool) data_get($validated, 'assignmentForm.include_recent_hires', false)) {
-            $this->addError('selectedPersonnelIds', __('onboarding-library::dashboard.messages.target_required'));
-
+        if (! $this->ensureTargetsSelected(
+            (bool) data_get($validated, 'assignmentForm.include_recent_hires', false),
+            'selectedPersonnelIds',
+            __('onboarding-library::dashboard.messages.target_required')
+        )) {
             return;
         }
 

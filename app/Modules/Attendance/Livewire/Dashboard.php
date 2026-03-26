@@ -5,12 +5,15 @@ namespace App\Modules\Attendance\Livewire;
 use App\Modules\Attendance\Application\Services\AttendanceAuthorizationService;
 use App\Modules\Attendance\Application\Services\AttendanceOverviewService;
 use App\Modules\Attendance\Application\Services\AttendanceStructureScopeReadService;
+use App\Support\Livewire\InteractsWithTabbedWorkspace;
 use Livewire\Attributes\On;
 use Carbon\Carbon;
 use Livewire\Component;
 
 class Dashboard extends Component
 {
+    use InteractsWithTabbedWorkspace;
+
     private const ALLOWED_TABS = ['overview', 'manager-summary', 'daily-monitor', 'puantaj', 'exceptions', 'overtime', 'month-close', 'manual', 'history', 'settings', 'shifts', 'calendar-regimes'];
 
     public int $year;
@@ -57,12 +60,7 @@ class Dashboard extends Component
             ? (int) request()->query('history_subject_id')
             : null;
 
-        $requestedTab = (string) request()->query('tab', 'overview');
-        if (in_array($requestedTab, $this->availableTabs, true)) {
-            $this->activeTab = $requestedTab;
-        } else {
-            $this->activeTab = $this->availableTabs[0] ?? 'overview';
-        }
+        $this->bootActiveTabFromRequest();
 
         $this->overview = $overviewService->build(
             $this->year,
@@ -94,13 +92,9 @@ class Dashboard extends Component
         );
     }
 
-    public function switchTab(string $tab): void
+    protected function allowedTabs(): array
     {
-        if (! in_array($tab, $this->availableTabs, true)) {
-            return;
-        }
-
-        $this->activeTab = $tab;
+        return $this->availableTabs;
     }
 
     #[On('selectStructure')]

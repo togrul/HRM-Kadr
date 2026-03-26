@@ -55,10 +55,22 @@ class UserPersonnelLinks extends Component
     public function getLinkStatsProperty(): array
     {
         return $this->rememberRuntime('performanceEvaluation.userPersonnelLinks.stats', function (): array {
+            $startOfDay = now()->startOfDay();
+            $endOfDay = $startOfDay->copy()->addDay();
+
+            $stats = UserPersonnelLink::query()
+                ->selectRaw('COUNT(*) as total')
+                ->selectRaw("SUM(CASE WHEN resolution_source = 'manual' THEN 1 ELSE 0 END) as manual_links")
+                ->selectRaw('SUM(CASE WHEN resolved_at >= ? AND resolved_at < ? THEN 1 ELSE 0 END) as resolved_today', [
+                    $startOfDay,
+                    $endOfDay,
+                ])
+                ->first();
+
             return [
-                'total' => UserPersonnelLink::query()->count(),
-                'manual' => UserPersonnelLink::query()->where('resolution_source', 'manual')->count(),
-                'resolved_today' => UserPersonnelLink::query()->whereDate('resolved_at', now()->toDateString())->count(),
+                'total' => (int) ($stats?->total ?? 0),
+                'manual' => (int) ($stats?->manual_links ?? 0),
+                'resolved_today' => (int) ($stats?->resolved_today ?? 0),
             ];
         });
     }
@@ -108,49 +120,77 @@ class UserPersonnelLinks extends Component
 
     public function userOptions(): array
     {
-        return User::query()
-            ->whereNull('deleted_at')
-            ->when($this->searchLinkedUser !== '', function ($query): void {
-                $search = '%'.$this->searchLinkedUser.'%';
-                $query->where(function ($nested) use ($search): void {
-                    $nested->where('name', 'like', $search)
-                        ->orWhere('email', 'like', $search);
-                });
-            })
-            ->orderBy('name')
-            ->limit(20)
-            ->get(['id', 'name', 'email'])
-            ->map(fn (User $user) => [
-                'id' => $user->id,
-                'label' => trim($user->name.' / '.$user->email),
-            ])
-            ->values()
-            ->all();
+        $selectedUserId = (int) ($this->linkForm['user_id'] ?? 0);
+
+        return $this->rememberRuntime(
+            'performanceEvaluation.userPersonnelLinks.userOptions.'.md5($this->searchLinkedUser.'|'.$selectedUserId),
+            function () use ($selectedUserId): array {
+                return User::query()
+                    ->where(function ($query) use ($selectedUserId): void {
+                        $query->whereNull('deleted_at')
+                            ->when($this->searchLinkedUser !== '', function ($query): void {
+                                $search = '%'.$this->searchLinkedUser.'%';
+                                $query->where(function ($nested) use ($search): void {
+                                    $nested->where('name', 'like', $search)
+                                        ->orWhere('email', 'like', $search);
+                                });
+                            });
+
+                        if ($selectedUserId > 0) {
+                            $query->orWhere('id', $selectedUserId);
+                        }
+                    })
+                    ->orderBy('name')
+                    ->limit(20)
+                    ->get(['id', 'name', 'email'])
+                    ->unique('id')
+                    ->map(fn (User $user) => [
+                        'id' => $user->id,
+                        'label' => trim($user->name.' / '.$user->email),
+                    ])
+                    ->values()
+                    ->all();
+            }
+        );
     }
 
     public function personnelOptions(): array
     {
-        return Personnel::query()
-            ->active()
-            ->when($this->searchLinkedPersonnel !== '', function ($query): void {
-                $search = '%'.$this->searchLinkedPersonnel.'%';
-                $query->where(function ($nested) use ($search): void {
-                    $nested->where('surname', 'like', $search)
-                        ->orWhere('name', 'like', $search)
-                        ->orWhere('patronymic', 'like', $search)
-                        ->orWhere('tabel_no', 'like', $search)
-                        ->orWhere('email', 'like', $search);
-                });
-            })
-            ->orderBy('surname')
-            ->limit(20)
-            ->get(['id', 'surname', 'name', 'patronymic', 'tabel_no'])
-            ->map(fn (Personnel $personnel) => [
-                'id' => $personnel->id,
-                'label' => trim($personnel->fullname.' (#'.$personnel->tabel_no.')'),
-            ])
-            ->values()
-            ->all();
+        $selectedPersonnelId = (int) ($this->linkForm['personnel_id'] ?? 0);
+
+        return $this->rememberRuntime(
+            'performanceEvaluation.userPersonnelLinks.personnelOptions.'.md5($this->searchLinkedPersonnel.'|'.$selectedPersonnelId),
+            function () use ($selectedPersonnelId): array {
+                return Personnel::query()
+                    ->where(function ($query) use ($selectedPersonnelId): void {
+                        $query->active()
+                            ->when($this->searchLinkedPersonnel !== '', function ($query): void {
+                                $search = '%'.$this->searchLinkedPersonnel.'%';
+                                $query->where(function ($nested) use ($search): void {
+                                    $nested->where('surname', 'like', $search)
+                                        ->orWhere('name', 'like', $search)
+                                        ->orWhere('patronymic', 'like', $search)
+                                        ->orWhere('tabel_no', 'like', $search)
+                                        ->orWhere('email', 'like', $search);
+                                });
+                            });
+
+                        if ($selectedPersonnelId > 0) {
+                            $query->orWhere('id', $selectedPersonnelId);
+                        }
+                    })
+                    ->orderBy('surname')
+                    ->limit(20)
+                    ->get(['id', 'surname', 'name', 'patronymic', 'tabel_no'])
+                    ->unique('id')
+                    ->map(fn (Personnel $personnel) => [
+                        'id' => $personnel->id,
+                        'label' => trim($personnel->fullname.' (#'.$personnel->tabel_no.')'),
+                    ])
+                    ->values()
+                    ->all();
+            }
+        );
     }
 
     public function saveLink(): void

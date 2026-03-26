@@ -16,9 +16,12 @@ use App\Models\TrainingSession;
 use App\Modules\TrainingNeeds\Livewire\Dashboard;
 use App\Modules\TrainingNeeds\Livewire\Analytics as TrainingNeedsAnalytics;
 use App\Modules\TrainingNeeds\Livewire\CertificateViewer as TrainingNeedsCertificateViewer;
+use App\Modules\TrainingNeeds\Livewire\FoundationWorkspace as TrainingNeedsFoundationWorkspace;
 use App\Modules\TrainingNeeds\Livewire\Lists as TrainingNeedsLists;
+use App\Modules\TrainingNeeds\Livewire\OperationsWorkspace as TrainingNeedsOperationsWorkspace;
 use App\Modules\TrainingNeeds\Livewire\Overview as TrainingNeedsOverview;
 use App\Modules\TrainingNeeds\Livewire\Reports as TrainingNeedsReports;
+use App\Modules\TrainingNeeds\Livewire\ResultsWorkspace as TrainingNeedsResultsWorkspace;
 use App\Modules\TrainingNeeds\Livewire\ResultsSummary as TrainingNeedsResultsSummary;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -178,7 +181,7 @@ class TrainingNeedsDashboardTest extends TestCase
 
         $this->actingAs($user);
 
-        Livewire::test(Dashboard::class)
+        Livewire::test(TrainingNeedsResultsWorkspace::class, ['tab' => 'results'])
             ->assertSet('resultsSummaryVersion', 0)
             ->set('feedbackForm.training_session_id', $session->id)
             ->set('feedbackForm.title', 'Session Feedback')
@@ -222,7 +225,7 @@ class TrainingNeedsDashboardTest extends TestCase
 
         $this->actingAs($user);
 
-        Livewire::test(Dashboard::class)
+        Livewire::test(TrainingNeedsFoundationWorkspace::class, ['tab' => 'catalogs'])
             ->set('groupForm.name', 'Leadership')
             ->set('groupForm.description', 'Leadership competencies')
             ->call('storeGroup')
@@ -428,11 +431,11 @@ class TrainingNeedsDashboardTest extends TestCase
 
         $this->actingAs($user);
 
-        Livewire::test(Dashboard::class)
+        Livewire::test(TrainingNeedsResultsWorkspace::class, ['tab' => 'results'])
             ->call('confirmDeleteDeliveryCertificate', $record->id)
             ->assertSet('showDeleteConfirmation', true)
-            ->assertSee(__('training_needs::dashboard.confirmations.delete_certificate'))
-            ->assertSee('test-certificate.pdf')
+            ->assertSet('deleteConfirmation.message', __('training_needs::dashboard.confirmations.delete_certificate'))
+            ->assertSet('deleteConfirmation.description', fn ($value) => str_contains((string) $value, 'test-certificate.pdf'))
             ->call('runConfirmedDeletion')
             ->assertSet('showDeleteConfirmation', false);
 
@@ -484,7 +487,7 @@ class TrainingNeedsDashboardTest extends TestCase
 
         $this->actingAs($user);
 
-        Livewire::test(Dashboard::class)
+        Livewire::test(TrainingNeedsOperationsWorkspace::class, ['tab' => 'planning'])
             ->call('editPlan', $plan->id)
             ->assertSet('editingPlanId', $plan->id)
             ->set('planForm.title', '2026 Revised Plan')
@@ -500,7 +503,9 @@ class TrainingNeedsDashboardTest extends TestCase
             ->set('sessionForm.auto_fill_participants', false)
             ->call('storeSession')
             ->assertHasNoErrors()
-            ->assertSet('editingSessionId', null)
+            ->assertSet('editingSessionId', null);
+
+        Livewire::test(TrainingNeedsResultsWorkspace::class, ['tab' => 'results'])
             ->call('editFeedbackForm', $feedbackForm->id)
             ->assertSet('editingFeedbackFormId', $feedbackForm->id)
             ->set('feedbackForm.title', 'Updated Feedback')
@@ -573,17 +578,20 @@ class TrainingNeedsDashboardTest extends TestCase
 
         $this->actingAs($user);
 
-        Livewire::test(Dashboard::class)
+        Livewire::test(TrainingNeedsResultsWorkspace::class, ['tab' => 'results'])
             ->call('confirmDeleteFeedbackForm', $feedbackForm->id)
             ->assertSet('showDeleteConfirmation', true)
-            ->assertSee(__('training_needs::dashboard.confirmations.delete_feedback_form'))
+            ->assertSet('deleteConfirmation.message', __('training_needs::dashboard.confirmations.delete_feedback_form'))
+            ->call('runConfirmedDeletion')
+            ->assertSet('showDeleteConfirmation', false);
+
+        Livewire::test(TrainingNeedsOperationsWorkspace::class, ['tab' => 'calendar'])
+            ->call('confirmDeleteSession', $session->id)
+            ->assertSet('deleteConfirmation.message', __('training_needs::dashboard.confirmations.delete_session'))
             ->call('runConfirmedDeletion')
             ->assertSet('showDeleteConfirmation', false)
-            ->call('confirmDeleteSession', $session->id)
-            ->assertSee(__('training_needs::dashboard.confirmations.delete_session'))
-            ->call('runConfirmedDeletion')
             ->call('confirmDeletePlan', $plan->id)
-            ->assertSee(__('training_needs::dashboard.confirmations.delete_plan'))
+            ->assertSet('deleteConfirmation.message', __('training_needs::dashboard.confirmations.delete_plan'))
             ->call('runConfirmedDeletion');
 
         $this->assertDatabaseMissing('training_feedback_forms', [

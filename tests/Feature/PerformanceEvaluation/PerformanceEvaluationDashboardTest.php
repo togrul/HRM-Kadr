@@ -23,8 +23,10 @@ use App\Modules\PerformanceEvaluation\Livewire\Dashboard;
 use App\Modules\PerformanceEvaluation\Livewire\EvaluationsSummary as PerformanceEvaluationEvaluationsSummary;
 use App\Modules\PerformanceEvaluation\Livewire\EvaluatorScoreCapture;
 use App\Modules\PerformanceEvaluation\Livewire\EvaluatorWorkspace;
+use App\Modules\PerformanceEvaluation\Livewire\FoundationWorkspace as PerformanceEvaluationFoundationWorkspace;
 use App\Modules\PerformanceEvaluation\Livewire\Lists as PerformanceEvaluationLists;
 use App\Modules\PerformanceEvaluation\Livewire\Overview as PerformanceEvaluationOverview;
+use App\Modules\PerformanceEvaluation\Livewire\OperationsWorkspace as PerformanceEvaluationOperationsWorkspace;
 use App\Modules\PerformanceEvaluation\Livewire\Reports as PerformanceEvaluationReports;
 use App\Modules\PerformanceEvaluation\Livewire\TestWorkspace as PerformanceEvaluationTestWorkspace;
 use App\Modules\PerformanceEvaluation\Livewire\TestsSummary as PerformanceEvaluationTestsSummary;
@@ -114,7 +116,7 @@ class PerformanceEvaluationDashboardTest extends TestCase
             ->call('relayDeleteEvaluationForm', $form->id)
             ->assertDispatched('performance-evaluation:confirm-delete-form', formId: $form->id);
 
-        Livewire::test(Dashboard::class)
+        Livewire::test(PerformanceEvaluationOperationsWorkspace::class, ['tab' => 'evaluations'])
             ->dispatch('performance-evaluation:edit-form', formId: $form->id)
             ->assertSet('editingEvaluationFormId', $form->id)
             ->dispatch('performance-evaluation:confirm-delete-form', formId: $form->id)
@@ -152,9 +154,8 @@ class PerformanceEvaluationDashboardTest extends TestCase
 
         $this->actingAs($user);
 
-        $component = Livewire::test(Dashboard::class)
+        $component = Livewire::test(PerformanceEvaluationOperationsWorkspace::class, ['tab' => 'evaluations'])
             ->assertSet('evaluationsSummaryVersion', 0)
-            ->set('activeTab', 'evaluations')
             ->set('evaluationForm.performance_cycle_id', $cycle->id)
             ->set('evaluationForm.performance_form_template_id', $template->id)
             ->set('evaluationForm.personnel_id', $personnel->id)
@@ -227,7 +228,7 @@ class PerformanceEvaluationDashboardTest extends TestCase
 
         $this->actingAs($user);
 
-        Livewire::test(Dashboard::class)
+        Livewire::test(PerformanceEvaluationOperationsWorkspace::class, ['tab' => 'evaluations'])
             ->assertSet('evaluationsSummaryVersion', 0)
             ->assertSet('testsSummaryVersion', 0)
             ->set('scoreForm.performance_form_id', $form->id)
@@ -395,7 +396,7 @@ class PerformanceEvaluationDashboardTest extends TestCase
 
         $this->actingAs($user);
 
-        $component = Livewire::test(Dashboard::class);
+        $component = Livewire::test(PerformanceEvaluationOperationsWorkspace::class, ['tab' => 'evaluations']);
         $labels = collect($component->instance()->personnelOptions())->pluck('label')->all();
 
         $this->assertContains($activePersonnel->fullname.' (#DMX-26-000002)', $labels);
@@ -971,7 +972,7 @@ class PerformanceEvaluationDashboardTest extends TestCase
 
         $this->actingAs($user);
 
-        Livewire::test(Dashboard::class)
+        Livewire::test(PerformanceEvaluationFoundationWorkspace::class, ['tab' => 'cycles'])
             ->set('cycleForm.name', '2026 Academic Performance')
             ->set('cycleForm.cycle_type', 'academic')
             ->set('cycleForm.period_start', '2026-09-01')
@@ -994,7 +995,9 @@ class PerformanceEvaluationDashboardTest extends TestCase
             ->set('itemForm.weight_percent', 30)
             ->set('itemForm.low_score_threshold', 60)
             ->call('storeItem')
-            ->assertHasNoErrors()
+            ->assertHasNoErrors();
+
+        Livewire::test(PerformanceEvaluationOperationsWorkspace::class, ['tab' => 'evaluations'])
             ->set('evaluationForm.performance_cycle_id', \App\Models\PerformanceCycle::query()->where('name', '2026 Academic Performance')->value('id'))
             ->set('evaluationForm.performance_form_template_id', PerformanceFormTemplate::query()->where('code', 'PE-AC-01')->value('id'))
             ->set('evaluationForm.personnel_id', $personnel->id)
@@ -1052,7 +1055,7 @@ class PerformanceEvaluationDashboardTest extends TestCase
             'training_competency_id' => $competency->id,
         ]);
 
-        Livewire::test(Dashboard::class)
+        Livewire::test(PerformanceEvaluationOperationsWorkspace::class, ['tab' => 'evaluations'])
             ->set('scoreForm.performance_form_id', $formId)
             ->set('scoreForm.performance_form_template_item_id', PerformanceFormTemplateItem::query()->where('name', 'Teaching Methodology')->value('id'))
             ->set('scoreForm.evaluator_type', 'manager')
@@ -1101,7 +1104,7 @@ class PerformanceEvaluationDashboardTest extends TestCase
 
         $this->actingAs($user);
 
-        Livewire::test(Dashboard::class)
+        Livewire::test(PerformanceEvaluationFoundationWorkspace::class, ['tab' => 'cycles'])
             ->set('cycleForm.name', '2026 Annual Performance')
             ->set('cycleForm.cycle_type', 'annual')
             ->set('cycleForm.period_start', '2026-01-01')
@@ -1121,7 +1124,7 @@ class PerformanceEvaluationDashboardTest extends TestCase
 
         $sectionId = PerformanceFormTemplateSection::query()->where('name', 'Core Criteria')->value('id');
 
-        Livewire::test(Dashboard::class)
+        Livewire::test(PerformanceEvaluationFoundationWorkspace::class, ['tab' => 'templates'])
             ->set('itemForm.performance_form_template_section_id', $sectionId)
             ->set('itemForm.training_competency_id', $competency->id)
             ->set('itemForm.name', 'Criterion A')
@@ -1135,7 +1138,9 @@ class PerformanceEvaluationDashboardTest extends TestCase
             ->set('itemForm.weight_percent', 50)
             ->set('itemForm.low_score_threshold', 60)
             ->call('storeItem')
-            ->assertHasNoErrors()
+            ->assertHasNoErrors();
+
+        Livewire::test(PerformanceEvaluationOperationsWorkspace::class, ['tab' => 'evaluations'])
             ->set('evaluationForm.performance_cycle_id', \App\Models\PerformanceCycle::query()->where('name', '2026 Annual Performance')->value('id'))
             ->set('evaluationForm.performance_form_template_id', PerformanceFormTemplate::query()->where('code', 'PE-AN-01')->value('id'))
             ->set('evaluationForm.personnel_id', $personnel->id)
@@ -1148,7 +1153,7 @@ class PerformanceEvaluationDashboardTest extends TestCase
         $itemAId = PerformanceFormTemplateItem::query()->where('name', 'Criterion A')->value('id');
         $itemBId = PerformanceFormTemplateItem::query()->where('name', 'Criterion B')->value('id');
 
-        Livewire::test(Dashboard::class)
+        Livewire::test(PerformanceEvaluationOperationsWorkspace::class, ['tab' => 'evaluations'])
             ->set('scoreForm.performance_form_id', $formId)
             ->set('scoreForm.performance_form_template_item_id', $itemAId)
             ->set('scoreForm.evaluator_type', 'manager')
@@ -1162,7 +1167,7 @@ class PerformanceEvaluationDashboardTest extends TestCase
             'priority' => 'medium',
         ]);
 
-        Livewire::test(Dashboard::class)
+        Livewire::test(PerformanceEvaluationOperationsWorkspace::class, ['tab' => 'evaluations'])
             ->set('scoreForm.performance_form_id', $formId)
             ->set('scoreForm.performance_form_template_item_id', $itemBId)
             ->set('scoreForm.evaluator_type', 'hr')
@@ -1294,11 +1299,11 @@ class PerformanceEvaluationDashboardTest extends TestCase
 
         $this->actingAs($user);
 
-        Livewire::test(Dashboard::class)
+        Livewire::test(PerformanceEvaluationFoundationWorkspace::class, ['tab' => 'cycles'])
             ->call('confirmDeleteCycle', $cycle->id)
             ->assertSet('showDeleteConfirmation', true)
-            ->assertSee(__('performance_evaluation::dashboard.confirmations.delete_cycle'))
-            ->assertSee('2026 Annual Performance')
+            ->assertSet('deleteConfirmation.message', __('performance_evaluation::dashboard.confirmations.delete_cycle'))
+            ->assertSet('deleteConfirmation.description', '2026 Annual Performance')
             ->call('runConfirmedDeletion')
             ->assertSet('showDeleteConfirmation', false);
 
@@ -1416,6 +1421,43 @@ class PerformanceEvaluationDashboardTest extends TestCase
             'personnel_id' => $personnel->id,
             'resolution_source' => 'manual',
         ]);
+    }
+
+    public function test_user_personnel_links_render_stays_within_query_budget(): void
+    {
+        $user = \App\Models\User::factory()->create();
+        $this->grantPerformancePermissions($user);
+        Role::findOrCreate('admin', 'web');
+        Permission::findOrCreate('get-notification', 'web');
+
+        $linkedUser = \App\Models\User::factory()->create([
+            'name' => 'Linked User',
+            'email' => 'linked@example.com',
+        ]);
+
+        Position::query()->create([
+            'id' => 505,
+            'name' => 'Operator',
+        ]);
+
+        $personnel = $this->createPersonnel($user->id, 505, 'PE-505');
+
+        UserPersonnelLink::query()->create([
+            'user_id' => $linkedUser->id,
+            'personnel_id' => $personnel->id,
+            'resolution_source' => 'manual',
+            'resolved_at' => now(),
+        ]);
+
+        $this->actingAs($user);
+
+        DB::flushQueryLog();
+        DB::enableQueryLog();
+
+        Livewire::test(PerformanceEvaluationUserPersonnelLinks::class)
+            ->assertOk();
+
+        $this->assertLessThanOrEqual(8, count(DB::getQueryLog()));
     }
 
     private function createCompetency(): TrainingCompetency

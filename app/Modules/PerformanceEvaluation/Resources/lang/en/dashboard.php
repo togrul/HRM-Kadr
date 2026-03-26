@@ -269,6 +269,12 @@ return [
         'skill_gap_reason' => 'Weak test result detected on attempt #:attempt for competency #:competency: :percentage%',
         'test_attempt_limit_reached' => 'The maximum attempt limit has already been used for this test.',
     ],
+    'resolution_sources' => [
+        'manual' => 'Manual link',
+        'self_service_provisioned' => 'Provisioned by the system for self-service',
+        'manual_self_service_link' => 'Manually linked for self-service',
+        'unknown' => 'Linked',
+    ],
     'cycle_types' => [
         'annual' => 'Annual',
         'academic' => 'Academic year',

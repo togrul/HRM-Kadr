@@ -48,5 +48,6 @@ return [
         'email_missing_short' => 'Email is missing',
         'manual_link_help' => 'If a user account already exists, you can explicitly bind it to this personnel record. This link will remain authoritative even if email matching changes later.',
         'manual_link_saved' => 'The user-to-personnel link was saved.',
+        'unknown_link_source' => 'A self-service link is connected',
     ],
 ];

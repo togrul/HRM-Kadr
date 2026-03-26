@@ -45,6 +45,7 @@
 @endonce
 
 @php
+    use App\Services\HrPolicies\HrPolicyPackService;
     use App\Support\Translations\ModuleTranslation;
 
     $menuLiteralMap = [
@@ -78,7 +79,11 @@
         'business-trips.list' => 'business-trips',
     ];
 
-    $preparedMenus = collect($menus)->map(static function ($menuItem) use ($moduleAliases, $menuLiteralMap) {
+    $policyPack = app(HrPolicyPackService::class);
+
+    $preparedMenus = collect($menus)
+        ->filter(static fn ($menuItem) => $policyPack->menuVisible((string) $menuItem->url))
+        ->map(static function ($menuItem) use ($moduleAliases, $menuLiteralMap) {
         $routeBase = (string) $menuItem->url;
         $iconComponent = match ($routeBase) {
             'my-hr' => 'icons.my-hr-icon',

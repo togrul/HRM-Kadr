@@ -1,3 +1,13 @@
+@php
+    $linkSource = $this->snapshot['link']?->resolution_source;
+    $linkSourceKey = $linkSource ? 'personnel::my_hr_account.link_sources.'.$linkSource : null;
+    $linkSourceLabel = match ($linkSource) {
+        'self_service_provisioned' => __('personnel::my_hr_account.link_sources.self_service_provisioned'),
+        'manual_self_service_link' => __('personnel::my_hr_account.link_sources.manual_self_service_link'),
+        default => $linkSource ? __('personnel::my_hr_account.messages.unknown_link_source') : '—',
+    };
+@endphp
+
 <div class="flex flex-col gap-6 px-6 py-5">
     <div class="space-y-2">
         <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __('personnel::my_hr_account.labels.kicker') }}</x-ui.field-label>
@@ -59,7 +69,7 @@
                 <div class="rounded-2xl border border-zinc-200 bg-zinc-50/70 px-4 py-4">
                     <x-ui.field-label as="div" class="tracking-tight">{{ __('personnel::my_hr_account.labels.link_source') }}</x-ui.field-label>
                     <p class="mt-2 text-sm font-semibold tracking-tight text-zinc-900">
-                        {{ $this->snapshot['link']?->resolution_source ? __('personnel::my_hr_account.link_sources.'.$this->snapshot['link']->resolution_source) : '—' }}
+                        {{ $linkSourceLabel }}
                     </p>
                 </div>
             </div>

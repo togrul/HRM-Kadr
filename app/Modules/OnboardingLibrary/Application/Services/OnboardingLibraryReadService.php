@@ -4,68 +4,15 @@ namespace App\Modules\OnboardingLibrary\Application\Services;
 
 use App\Models\OnboardingDocumentAssignment;
 use App\Models\OnboardingDocumentTemplate;
-use App\Support\Library\BuildsLibraryDirectoryPayload;
+use App\Support\Library\AbstractLibraryReadService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
-class OnboardingLibraryReadService
+class OnboardingLibraryReadService extends AbstractLibraryReadService
 {
-    use BuildsLibraryDirectoryPayload;
-
-    public function build(string $templateSearch = '', string $personnelSearch = '', string $structureSearch = '', string $positionSearch = ''): array
-    {
-        return [
-            'summary' => $this->summary(),
-            'analytics' => $this->analytics(),
-            'templates' => $this->mapTemplates($this->templatesQuery($templateSearch)->get()),
-            'assignment_templates' => $this->assignmentTemplates(),
-            'personnels' => $this->personnels($personnelSearch),
-            'structures' => $this->structures($structureSearch),
-            'positions' => $this->positions($positionSearch),
-            'recent_assignments' => $this->recentAssignments(),
-        ];
-    }
-
-    public function buildGeneral(
-        string $personnelSearch = '',
-        string $structureSearch = '',
-        string $positionSearch = '',
-        string $pageName = 'onboardingRecentAssignmentsPage'
-    ): array {
-        return [
-            'summary' => $this->summary(),
-            'assignment_templates' => $this->assignmentTemplates(),
-            'personnels' => $this->personnels($personnelSearch),
-            'structures' => $this->structures($structureSearch),
-            'positions' => $this->positions($positionSearch),
-            'recent_assignments' => $this->recentAssignmentsPaginated(10, $pageName),
-        ];
-    }
-
-    public function buildSummary(): array
-    {
-        return [
-            'summary' => $this->summary(),
-        ];
-    }
-
-    public function buildLibrary(string $templateSearch = ''): array
-    {
-        return [
-            'templates' => $this->mapTemplates($this->templatesQuery($templateSearch)->get()),
-        ];
-    }
-
-    public function buildReports(): array
-    {
-        return [
-            'analytics' => $this->analytics(),
-        ];
-    }
-
     public function exportTemplates(string $templateSearch = ''): array
     {
         return $this->templatesQuery($templateSearch)
@@ -166,7 +113,7 @@ class OnboardingLibraryReadService
         return 'onboarding-library';
     }
 
-    private function summary(): array
+    protected function summaryData(): array
     {
         return Cache::remember('onboarding-library:summary', now()->addMinutes(2), function (): array {
             $dueSoonCutoff = now()->addDays(7)->toDateString();
@@ -201,7 +148,7 @@ class OnboardingLibraryReadService
         });
     }
 
-    private function analytics(): array
+    protected function analyticsData(): array
     {
         return Cache::remember('onboarding-library:analytics', now()->addMinutes(2), function (): array {
             $typeBreakdown = OnboardingDocumentTemplate::query()
@@ -324,7 +271,7 @@ class OnboardingLibraryReadService
         ])->all();
     }
 
-    public function assignmentTemplates(): array
+    protected function assignmentItems(): array
     {
         return OnboardingDocumentTemplate::query()
             ->select(['id', 'title', 'version'])
@@ -339,7 +286,7 @@ class OnboardingLibraryReadService
             ->all();
     }
 
-    private function recentAssignments(): array
+    protected function recentAssignmentsData(): array
     {
         return $this->recentAssignmentRowsQuery()
             ->get()
@@ -347,7 +294,7 @@ class OnboardingLibraryReadService
             ->all();
     }
 
-    public function recentAssignmentsPaginated(int $perPage = 10, string $pageName = 'onboardingRecentAssignmentsPage'): LengthAwarePaginator
+    protected function recentAssignmentsPaginatedData(int $perPage, string $pageName): LengthAwarePaginator
     {
         $paginator = $this->assignmentRowsBaseQuery()
             ->latest('onboarding_document_assignments.assigned_at')
@@ -358,6 +305,21 @@ class OnboardingLibraryReadService
         );
 
         return $paginator;
+    }
+
+    protected function libraryItems(string $librarySearch): array
+    {
+        return $this->mapTemplates($this->templatesQuery($librarySearch)->get());
+    }
+
+    protected function libraryItemsKey(): string
+    {
+        return 'templates';
+    }
+
+    protected function assignmentItemsKey(): string
+    {
+        return 'assignment_templates';
     }
 
     private function recentAssignmentRowsQuery(): Builder

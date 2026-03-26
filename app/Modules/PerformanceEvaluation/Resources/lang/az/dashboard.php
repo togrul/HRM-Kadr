@@ -269,6 +269,12 @@ return [
         'skill_gap_reason' => 'Cəhd #:attempt, kompetensiya #:competency üzrə zəif test nəticəsi qeydə alındı: :percentage%',
         'test_attempt_limit_reached' => 'Bu test üzrə maksimum cəhd sayı istifadə olunub.',
     ],
+    'resolution_sources' => [
+        'manual' => 'Manual bağ',
+        'self_service_provisioned' => 'Şəxsi kabinet üçün sistem tərəfindən yaradılıb',
+        'manual_self_service_link' => 'Şəxsi kabinet üçün manual bağ qurulub',
+        'unknown' => 'Bağ qurulub',
+    ],
     'cycle_types' => [
         'annual' => 'İllik',
         'academic' => 'Tədris ili',

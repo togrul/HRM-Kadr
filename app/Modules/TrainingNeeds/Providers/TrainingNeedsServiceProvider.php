@@ -39,6 +39,9 @@ class TrainingNeedsServiceProvider extends ServiceProvider
     {
         return [
             'dashboard' => \App\Modules\TrainingNeeds\Livewire\Dashboard::class,
+            'foundation-workspace' => \App\Modules\TrainingNeeds\Livewire\FoundationWorkspace::class,
+            'operations-workspace' => \App\Modules\TrainingNeeds\Livewire\OperationsWorkspace::class,
+            'results-workspace' => \App\Modules\TrainingNeeds\Livewire\ResultsWorkspace::class,
             'overview' => \App\Modules\TrainingNeeds\Livewire\Overview::class,
             'analytics' => \App\Modules\TrainingNeeds\Livewire\Analytics::class,
             'reports' => \App\Modules\TrainingNeeds\Livewire\Reports::class,

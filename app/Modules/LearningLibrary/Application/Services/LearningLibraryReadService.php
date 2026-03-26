@@ -4,68 +4,15 @@ namespace App\Modules\LearningLibrary\Application\Services;
 
 use App\Models\EmployeeContentAsset;
 use App\Models\EmployeeContentAssignment;
-use App\Support\Library\BuildsLibraryDirectoryPayload;
+use App\Support\Library\AbstractLibraryReadService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
-class LearningLibraryReadService
+class LearningLibraryReadService extends AbstractLibraryReadService
 {
-    use BuildsLibraryDirectoryPayload;
-
-    public function build(string $assetSearch = '', string $personnelSearch = '', string $structureSearch = '', string $positionSearch = ''): array
-    {
-        return [
-            'summary' => $this->summary(),
-            'analytics' => $this->analytics(),
-            'assets' => $this->mapAssets($this->assetsQuery($assetSearch)->get()),
-            'assignment_assets' => $this->assignmentAssets(),
-            'personnels' => $this->personnels($personnelSearch),
-            'structures' => $this->structures($structureSearch),
-            'positions' => $this->positions($positionSearch),
-            'recent_assignments' => $this->recentAssignments(),
-        ];
-    }
-
-    public function buildGeneral(
-        string $personnelSearch = '',
-        string $structureSearch = '',
-        string $positionSearch = '',
-        string $pageName = 'learningRecentAssignmentsPage'
-    ): array {
-        return [
-            'summary' => $this->summary(),
-            'assignment_assets' => $this->assignmentAssets(),
-            'personnels' => $this->personnels($personnelSearch),
-            'structures' => $this->structures($structureSearch),
-            'positions' => $this->positions($positionSearch),
-            'recent_assignments' => $this->recentAssignmentsPaginated(10, $pageName),
-        ];
-    }
-
-    public function buildSummary(): array
-    {
-        return [
-            'summary' => $this->summary(),
-        ];
-    }
-
-    public function buildLibrary(string $assetSearch = ''): array
-    {
-        return [
-            'assets' => $this->mapAssets($this->assetsQuery($assetSearch)->get()),
-        ];
-    }
-
-    public function buildReports(): array
-    {
-        return [
-            'analytics' => $this->analytics(),
-        ];
-    }
-
     public function exportAssets(string $assetSearch = ''): array
     {
         return $this->assetsQuery($assetSearch)
@@ -167,7 +114,7 @@ class LearningLibraryReadService
         return 'learning-library';
     }
 
-    private function summary(): array
+    protected function summaryData(): array
     {
         return Cache::remember('learning-library:summary', now()->addMinutes(2), function (): array {
             $dueSoonCutoff = now()->addDays(7)->toDateString();
@@ -202,7 +149,7 @@ class LearningLibraryReadService
         });
     }
 
-    private function analytics(): array
+    protected function analyticsData(): array
     {
         return Cache::remember('learning-library:analytics', now()->addMinutes(2), function (): array {
             $typeBreakdown = EmployeeContentAsset::query()
@@ -326,7 +273,7 @@ class LearningLibraryReadService
         ])->all();
     }
 
-    public function assignmentAssets(): array
+    protected function assignmentItems(): array
     {
         return EmployeeContentAsset::query()
             ->select(['id', 'title', 'content_type'])
@@ -341,7 +288,7 @@ class LearningLibraryReadService
             ->all();
     }
 
-    private function recentAssignments(): array
+    protected function recentAssignmentsData(): array
     {
         return $this->recentAssignmentRowsQuery()
             ->get()
@@ -349,7 +296,7 @@ class LearningLibraryReadService
             ->all();
     }
 
-    public function recentAssignmentsPaginated(int $perPage = 10, string $pageName = 'learningRecentAssignmentsPage'): LengthAwarePaginator
+    protected function recentAssignmentsPaginatedData(int $perPage, string $pageName): LengthAwarePaginator
     {
         $paginator = $this->assignmentRowsBaseQuery()
             ->latest('employee_content_assignments.assigned_at')
@@ -360,6 +307,21 @@ class LearningLibraryReadService
         );
 
         return $paginator;
+    }
+
+    protected function libraryItems(string $librarySearch): array
+    {
+        return $this->mapAssets($this->assetsQuery($librarySearch)->get());
+    }
+
+    protected function libraryItemsKey(): string
+    {
+        return 'assets';
+    }
+
+    protected function assignmentItemsKey(): string
+    {
+        return 'assignment_assets';
     }
 
     private function recentAssignmentRowsQuery(): Builder
