@@ -17,6 +17,7 @@ use App\Modules\Admin\Livewire\LeaveTypes;
 use App\Modules\Admin\Livewire\OrderCategories;
 use App\Modules\Admin\Livewire\OrderStatuses;
 use App\Modules\Admin\Livewire\Positions;
+use App\Modules\Admin\Livewire\HrPolicyDiagnostics;
 use App\Modules\Admin\Livewire\Punishments;
 use App\Modules\Admin\Livewire\RankCategories;
 use App\Modules\Admin\Livewire\RankReasons;
@@ -51,6 +52,7 @@ Route::middleware(['web', 'auth', 'can:access-admin'])->prefix('/admin')->group(
     Route::get('/rank-reasons', RankReasons::class)->name('admin.rank-reasons');
     Route::get('/scientific-degrees', ScientificDegrees::class)->name('admin.scientific-degrees');
     Route::get('/self-service-approval-routes', SelfServiceApprovalRoutes::class)->name('admin.self-service-approval-routes');
+    Route::get('/hr-policy-diagnostics', HrPolicyDiagnostics::class)->name('admin.hr-policy-diagnostics');
     Route::get('/social-origins', SocialOrigins::class)->name('admin.social-origins');
     Route::get('/structures', Structures::class)->name('admin.structures');
     Route::get('/weapons', Weapons::class)->name('admin.weapons');

@@ -3,6 +3,7 @@
 namespace App\Modules\OnboardingLibrary\Providers;
 
 use App\Modules\OnboardingLibrary\Console\Commands\OnboardingLibraryAutomationCommand;
+use App\Modules\OnboardingLibrary\Console\Commands\OnboardingLibraryQueryBudgetCommand;
 use App\Providers\Concerns\RegistersLivewireAliases;
 use App\Services\Modules\ModuleState;
 use Illuminate\Support\ServiceProvider;
@@ -16,6 +17,7 @@ class OnboardingLibraryServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 OnboardingLibraryAutomationCommand::class,
+                OnboardingLibraryQueryBudgetCommand::class,
             ]);
         }
     }

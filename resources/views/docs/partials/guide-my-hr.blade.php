@@ -69,6 +69,25 @@
         </div>
     </div>
 
+    <div class="docs-visual-block">
+        <div class="docs-card docs-card-muted">
+            <p class="docs-card-title">Ekranda nə görəcəksiniz</p>
+            <p class="docs-card-strong">Şəxsi kabinetin əsas görünüşü</p>
+            <p class="docs-card-body">Bu görünüşdə yuxarıda modul başlığı, altında isə tab-lar görünür. Ən çox istifadə olunan işlər `Ərizələrim`, `Bildirişlər`, `Uyğunlaşma sənədləri`, `Öyrənmə materialları` və `Mənim strukturum` hissələrində edilir.</p>
+        </div>
+        <div class="docs-visual-frame">
+            <img
+                src="{{ asset('docs/screenshots/my-hr-dashboard.png') }}"
+                alt="Şəxsi kabinet əsas görünüşü"
+                class="docs-visual-image"
+                loading="lazy"
+            >
+            <div class="docs-visual-caption">
+                Bu ekranı açdıqda əvvəlcə əməkdaş məlumatlarınızı və yuxarıdakı tab-ları görəcəksiniz. Gündəlik işə başlamaq üçün adətən əvvəl `Ərizələrim`, sonra lazım olduqda digər tab-lara keçilir.
+            </div>
+        </div>
+    </div>
+
     <div id="my-hr-doc" class="docs-content">
         {!! $myHrHtml !!}
     </div>

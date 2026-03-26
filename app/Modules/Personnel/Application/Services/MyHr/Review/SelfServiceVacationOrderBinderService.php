@@ -5,6 +5,7 @@ namespace App\Modules\Personnel\Application\Services\MyHr\Review;
 use App\Enums\OrderStatusEnum;
 use App\Models\Component;
 use App\Models\Order;
+use App\Models\OrderCategory;
 use App\Models\OrderLog;
 use App\Models\OrderType;
 use App\Models\PersonnelVacation;
@@ -171,7 +172,7 @@ class SelfServiceVacationOrderBinderService
             return $byModel;
         }
 
-        return Order::query()
+        $byName = Order::query()
             ->where(function ($query) {
                 $query->where('name', 'like', '%məzuniyyət%')
                     ->orWhere('name', 'like', '%mezuniyyet%')
@@ -182,6 +183,58 @@ class SelfServiceVacationOrderBinderService
             })
             ->orderBy('id')
             ->first();
+
+        if ($byName) {
+            return $byName;
+        }
+
+        $category = $this->resolveOrCreateVacationOrderCategory();
+        if (! $category) {
+            return null;
+        }
+
+        $orderId = $this->nextOrderId();
+        $payload = [
+            'id' => $orderId,
+            'order_category_id' => $category->id,
+            'name' => 'Məzuniyyət əmri',
+            'content' => 'Auto-generated operational order for self-service vacations.',
+            'order_model' => PersonnelVacation::class,
+        ];
+
+        if (Schema::hasColumn('orders', 'blade')) {
+            $payload['blade'] = Order::BLADE_VACATION;
+        }
+
+        DB::table('orders')->insert($payload);
+
+        return Order::query()->find($orderId);
+    }
+
+    private function resolveOrCreateVacationOrderCategory(): ?OrderCategory
+    {
+        $existing = OrderCategory::query()->orderBy('id')->first();
+
+        if ($existing) {
+            return $existing;
+        }
+
+        return OrderCategory::query()->create([
+            'id' => $this->nextOrderCategoryId(),
+            'name_az' => 'Ümumi',
+            'name_en' => 'General',
+            'name_ru' => 'General',
+        ]);
+    }
+
+    private function nextOrderId(): int
+    {
+        return ((int) Order::query()->max('id')) + 1;
+    }
+
+    private function nextOrderCategoryId(): int
+    {
+        return ((int) OrderCategory::query()->max('id')) + 1;
     }
 
     private function resolveOrCreateVacationOperationalComponent(OrderType $orderType): Component

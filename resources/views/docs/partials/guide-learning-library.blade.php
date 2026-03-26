@@ -69,6 +69,25 @@
         </div>
     </div>
 
+    <div class="docs-visual-block">
+        <div class="docs-card docs-card-muted">
+            <p class="docs-card-title">Ekranda nə görəcəksiniz</p>
+            <p class="docs-card-strong">Material yaratma və təyin etmə görünüşü</p>
+            <p class="docs-card-body">Bu görünüşdə solda yeni material yaratma hissəsi, altında son təyinatlar, sağda isə toplu təyinat hissəsi görünür. Material hazır olduqdan sonra sağ hissədən seçilmiş əməkdaşlara göndərilir.</p>
+        </div>
+        <div class="docs-visual-frame">
+            <img
+                src="{{ asset('docs/screenshots/learning-library-dashboard.png') }}"
+                alt="Öyrənmə kitabxanası əsas görünüşü"
+                class="docs-visual-image"
+                loading="lazy"
+            >
+            <div class="docs-visual-caption">
+                Materialı yaratdıqdan sonra eyni ekranda onu seçib əməkdaşlara təyin edə bilərsiniz. Aşağıdakı `Son təyinatlar` hissəsi kimə göndərildiyini və kim tərəfindən tamamlandığını göstərir.
+            </div>
+        </div>
+    </div>
+
     <div id="learning-library-doc" class="docs-content">
         {!! $learningLibraryHtml !!}
     </div>

@@ -107,6 +107,7 @@ class AdminServiceProvider extends ServiceProvider
             'order-categories' => \App\Modules\Admin\Livewire\OrderCategories::class,
             'order-statuses' => \App\Modules\Admin\Livewire\OrderStatuses::class,
             'positions' => \App\Modules\Admin\Livewire\Positions::class,
+            'hr-policy-diagnostics' => \App\Modules\Admin\Livewire\HrPolicyDiagnostics::class,
             'punishments' => \App\Modules\Admin\Livewire\Punishments::class,
             'rank-categories' => \App\Modules\Admin\Livewire\RankCategories::class,
             'rank-reasons' => \App\Modules\Admin\Livewire\RankReasons::class,

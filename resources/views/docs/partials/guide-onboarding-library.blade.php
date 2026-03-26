@@ -69,6 +69,25 @@
         </div>
     </div>
 
+    <div class="docs-visual-block">
+        <div class="docs-card docs-card-muted">
+            <p class="docs-card-title">Ekranda nə görəcəksiniz</p>
+            <p class="docs-card-strong">Şablon yaratma və toplu təyinat görünüşü</p>
+            <p class="docs-card-body">Bu görünüşdə solda yeni şablon yaratma hissəsi, altında son təyinatlar, sağda isə toplu təyinat sahəsi görünür. Adətən iş soldan başlayır, sonra sağ hissədən əməkdaş seçilib təyinat göndərilir.</p>
+        </div>
+        <div class="docs-visual-frame">
+            <img
+                src="{{ asset('docs/screenshots/onboarding-library-dashboard.png') }}"
+                alt="Uyğunlaşma kitabxanası əsas görünüşü"
+                class="docs-visual-image"
+                loading="lazy"
+            >
+            <div class="docs-visual-caption">
+                Əvvəl şablonu yaradın, sonra sağ hissədən struktur, vəzifə və ya əməkdaş seçin. Təyinat göndərildikdən sonra nəticəni soldakı `Son təyinatlar` kartında dərhal izləyə bilərsiniz.
+            </div>
+        </div>
+    </div>
+
     <div id="onboarding-library-doc" class="docs-content">
         {!! $onboardingLibraryHtml !!}
     </div>

@@ -1,0 +1,145 @@
+<?php
+
+namespace App\Modules\LearningLibrary\Console\Commands;
+
+use App\Modules\LearningLibrary\Application\Services\LearningLibraryReadService;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Throwable;
+
+class LearningLibraryQueryBudgetCommand extends Command
+{
+    protected $signature = 'learning-library:query-budget
+        {--allow-empty : Return success when learning dataset is empty}
+        {--general-budget= : Max query count for general tab}
+        {--library-budget= : Max query count for library tab}
+        {--reports-budget= : Max query count for reports tab}
+        {--json : Print report as JSON}';
+
+    protected $description = 'Run query-budget checks for Learning Library dashboard flows';
+
+    public function handle(LearningLibraryReadService $service): int
+    {
+        if (! $this->hasRequiredTables()) {
+            $this->error('Learning Library tables are missing. Run migrations first.');
+
+            return self::FAILURE;
+        }
+
+        $hasData = DB::table('employee_content_assets')->exists()
+            || DB::table('employee_content_assignments')->exists();
+
+        if (! $hasData && (bool) $this->option('allow-empty')) {
+            $payload = [
+                'summary' => [
+                    'failed_probes' => 0,
+                    'over_budget_probes' => 0,
+                    'passed_probes' => 0,
+                    'skipped' => true,
+                    'reason' => 'learning_library_dataset_empty',
+                ],
+                'results' => [],
+            ];
+
+            return $this->outputPayload($payload);
+        }
+
+        $budgets = [
+            'general_build' => max(1, (int) ($this->option('general-budget') ?: 16)),
+            'library_build' => max(1, (int) ($this->option('library-budget') ?: 10)),
+            'reports_build' => max(1, (int) ($this->option('reports-budget') ?: 10)),
+        ];
+
+        $results = [
+            $this->probe('general_build', $budgets['general_build'], fn () => $service->buildGeneral('', '', '', 'learningLibraryQueryBudgetPage')),
+            $this->probe('library_build', $budgets['library_build'], fn () => $service->buildLibrary('')),
+            $this->probe('reports_build', $budgets['reports_build'], fn () => $service->buildReports()),
+        ];
+
+        $payload = [
+            'summary' => [
+                'failed_probes' => collect($results)->where('status', 'failed')->count(),
+                'over_budget_probes' => collect($results)->where('over_budget', true)->count(),
+                'passed_probes' => collect($results)->where('status', 'ok')->where('over_budget', false)->count(),
+            ],
+            'results' => $results,
+        ];
+
+        return $this->outputPayload($payload);
+    }
+
+    private function hasRequiredTables(): bool
+    {
+        foreach (['employee_content_assets', 'employee_content_assignments', 'personnels', 'structures', 'positions'] as $table) {
+            if (! Schema::hasTable($table)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private function outputPayload(array $payload): int
+    {
+        if ((bool) $this->option('json')) {
+            $this->line(json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        } else {
+            $this->table(
+                ['flow', 'status', 'queries', 'budget', 'over_budget', 'elapsed_ms', 'db_time_ms', 'error'],
+                collect($payload['results'])->map(fn (array $result) => [
+                    $result['flow'],
+                    $result['status'],
+                    $result['queries'],
+                    $result['budget'],
+                    $result['over_budget'] ? 'yes' : 'no',
+                    $result['elapsed_ms'],
+                    $result['db_time_ms'],
+                    $result['error'] ?? '-',
+                ])->all()
+            );
+        }
+
+        return ($payload['summary']['failed_probes'] === 0 && $payload['summary']['over_budget_probes'] === 0)
+            ? self::SUCCESS
+            : self::FAILURE;
+    }
+
+    private function probe(string $flow, int $budget, callable $callback): array
+    {
+        $connection = DB::connection();
+        $wasLogging = method_exists($connection, 'logging') ? (bool) $connection->logging() : false;
+
+        $connection->flushQueryLog();
+        $connection->enableQueryLog();
+
+        $startedAt = microtime(true);
+        $status = 'ok';
+        $error = null;
+
+        try {
+            $callback();
+        } catch (Throwable $throwable) {
+            $status = 'failed';
+            $error = $throwable->getMessage();
+        } finally {
+            $queries = $connection->getQueryLog();
+            if (! $wasLogging) {
+                $connection->disableQueryLog();
+            }
+        }
+
+        $queryCount = count($queries);
+
+        return [
+            'flow' => $flow,
+            'status' => $status,
+            'queries' => $queryCount,
+            'budget' => $budget,
+            'over_budget' => $queryCount > $budget,
+            'elapsed_ms' => round((microtime(true) - $startedAt) * 1000, 2),
+            'db_time_ms' => round((float) collect($queries)->sum(fn ($query) => (float) ($query['time'] ?? 0)), 2),
+            'error' => $error,
+        ];
+    }
+}

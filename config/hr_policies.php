@@ -29,6 +29,11 @@ return [
 
     'packs' => [
         'corporate' => [
+            'meta' => [
+                'label' => 'Corporate',
+                'description' => 'Şirkət tipli deployment üçün standart HR qaydaları.',
+                'recommended_for' => 'Özəl şirkətlər və korporativ qurumlar',
+            ],
             'menu_visibility' => $allMenuVisibility,
             'permission_flags' => [
                 'training_needs.view' => true,
@@ -69,6 +74,11 @@ return [
             ],
         ],
         'public' => [
+            'meta' => [
+                'label' => 'Public',
+                'description' => 'Dövlət qurumları üçün daha sabit və standart təsdiq axını.',
+                'recommended_for' => 'Dövlət idarələri və publik təşkilatlar',
+            ],
             'menu_visibility' => $allMenuVisibility,
             'permission_flags' => [
                 'training_needs.view' => true,
@@ -109,6 +119,11 @@ return [
             ],
         ],
         'private' => [
+            'meta' => [
+                'label' => 'Private',
+                'description' => 'Daha yüngül HR xətti olan özəl təşkilatlar üçün preset.',
+                'recommended_for' => 'Kiçik və orta özəl qurumlar',
+            ],
             'menu_visibility' => $allMenuVisibility,
             'permission_flags' => [
                 'training_needs.view' => true,
@@ -149,6 +164,11 @@ return [
             ],
         ],
         'military' => [
+            'meta' => [
+                'label' => 'Military',
+                'description' => 'İyerarxik və çoxpilləli təsdiq axını olan hərbi profil.',
+                'recommended_for' => 'Hərbi və sərt komanda strukturlu qurumlar',
+            ],
             'menu_visibility' => $allMenuVisibility,
             'permission_flags' => [
                 'training_needs.view' => true,

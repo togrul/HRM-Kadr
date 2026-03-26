@@ -57,6 +57,49 @@ class RepairLegacySelfServiceVacationOrdersCommandTest extends TestCase
         $this->assertNotNull($vacation->fresh()->order_no);
     }
 
+    public function test_command_auto_creates_operational_order_skeleton_when_missing(): void
+    {
+        $this->seedReferenceData(withOrderSetup: false);
+
+        $reviewer = User::factory()->create(['is_active' => true]);
+        $reviewer->givePermissionTo(Permission::findOrCreate('review-self-service-requests', 'web'));
+
+        $employee = User::factory()->create(['is_active' => true, 'email' => 'employee2@example.test']);
+        $personnel = $this->makePersonnel($employee->email);
+
+        $this->actingAs($employee);
+
+        $vacation = PersonnelVacation::query()->create([
+            'tabel_no' => $personnel->tabel_no,
+            'vacation_places' => 'Quba',
+            'duration' => 3,
+            'start_date' => '2026-06-01',
+            'end_date' => '2026-06-03',
+            'return_work_date' => '2026-06-04',
+            'order_given_by' => 'Employee Self-Service',
+            'order_no' => null,
+            'order_date' => null,
+            'vacation_days_total' => 0,
+            'remaining_days' => 0,
+            'approval_status' => 'approved',
+            'submission_source' => 'employee_self_service',
+            'submitted_by_user_id' => $employee->id,
+            'added_by' => $employee->id,
+        ]);
+
+        $this->artisan(RepairLegacySelfServiceVacationOrdersCommand::class, [
+            '--reviewer-id' => $reviewer->id,
+            '--json' => true,
+        ])->assertSuccessful();
+
+        $this->assertNotNull($vacation->fresh()->order_no);
+        $this->assertDatabaseHas('orders', [
+            'blade' => Order::BLADE_VACATION,
+            'order_model' => \App\Models\PersonnelVacation::class,
+        ]);
+        $this->assertDatabaseCount('order_types', 1);
+    }
+
     private function makePersonnel(string $email): Personnel
     {
         return Personnel::withoutEvents(fn () => Personnel::query()->create([
@@ -81,7 +124,7 @@ class RepairLegacySelfServiceVacationOrdersCommandTest extends TestCase
         ]));
     }
 
-    private function seedReferenceData(): void
+    private function seedReferenceData(bool $withOrderSetup = true): void
     {
         if (! DB::table('countries')->where('id', 1)->exists()) {
             DB::table('countries')->insert(['id' => 1, 'code' => 'AZ']);
@@ -101,7 +144,7 @@ class RepairLegacySelfServiceVacationOrdersCommandTest extends TestCase
         if (! DB::table('work_norms')->where('id', 1)->exists()) {
             DB::table('work_norms')->insert(['id' => 1, 'name_az' => 'Tam iş günü', 'name_en' => 'Full time', 'name_ru' => 'Full time']);
         }
-        if (! DB::table('order_categories')->where('id', 1)->exists()) {
+        if ($withOrderSetup && ! DB::table('order_categories')->where('id', 1)->exists()) {
             DB::table('order_categories')->insert([
                 'id' => 1,
                 'name_az' => 'Ümumi',
@@ -109,7 +152,7 @@ class RepairLegacySelfServiceVacationOrdersCommandTest extends TestCase
                 'name_ru' => 'General',
             ]);
         }
-        if (! DB::table('orders')->where('id', 1001)->exists()) {
+        if ($withOrderSetup && ! DB::table('orders')->where('id', 1001)->exists()) {
             DB::table('orders')->insert([
                 'id' => 1001,
                 'order_category_id' => 1,
@@ -119,15 +162,18 @@ class RepairLegacySelfServiceVacationOrdersCommandTest extends TestCase
                 'blade' => Order::BLADE_VACATION,
             ]);
         }
-        if (! DB::table('order_types')->where('id', 1)->exists()) {
+        if ($withOrderSetup && ! DB::table('order_types')->where('id', 1)->exists()) {
             DB::table('order_types')->insert([
                 'id' => 1,
                 'order_id' => 1001,
                 'name' => 'İllik məzuniyyət',
             ]);
         }
-        OrderStatus::query()->firstOrCreate(['id' => 1], ['name' => 'Pending']);
-        OrderStatus::query()->firstOrCreate(['id' => 2], ['name' => 'Approved']);
-        OrderType::query()->firstOrCreate(['id' => 1], ['order_id' => 1001, 'name' => 'İllik məzuniyyət']);
+        OrderStatus::query()->firstOrCreate(['id' => 10], ['name' => 'Pending']);
+        OrderStatus::query()->firstOrCreate(['id' => 20], ['name' => 'Approved']);
+        OrderStatus::query()->firstOrCreate(['id' => 30], ['name' => 'Cancelled']);
+        if ($withOrderSetup) {
+            OrderType::query()->firstOrCreate(['id' => 1], ['order_id' => 1001, 'name' => 'İllik məzuniyyət']);
+        }
     }
 }

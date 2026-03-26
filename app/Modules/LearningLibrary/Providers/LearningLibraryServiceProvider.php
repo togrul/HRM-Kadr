@@ -3,6 +3,7 @@
 namespace App\Modules\LearningLibrary\Providers;
 
 use App\Modules\LearningLibrary\Console\Commands\LearningLibraryAutomationCommand;
+use App\Modules\LearningLibrary\Console\Commands\LearningLibraryQueryBudgetCommand;
 use App\Providers\Concerns\RegistersLivewireAliases;
 use App\Services\Modules\ModuleState;
 use Illuminate\Support\ServiceProvider;
@@ -16,6 +17,7 @@ class LearningLibraryServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 LearningLibraryAutomationCommand::class,
+                LearningLibraryQueryBudgetCommand::class,
             ]);
         }
     }

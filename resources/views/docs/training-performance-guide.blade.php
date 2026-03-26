@@ -537,11 +537,57 @@
             border-bottom: 1px solid #eef2f6;
         }
 
+        .docs-workflow-shell {
+            display: grid;
+            gap: 1rem;
+            grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+            align-items: start;
+        }
+
+        .docs-workflow-lead {
+            min-height: 100%;
+        }
+
+        .docs-workflow-steps {
+            display: grid;
+            gap: 1rem;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
         .docs-content {
             width: 100%;
             max-width: none;
             margin-top: 2rem;
             color: #475569;
+        }
+
+        .docs-visual-block {
+            margin-top: 1.75rem;
+        }
+
+        .docs-visual-frame {
+            margin-top: 0.9rem;
+            overflow: hidden;
+            border: 1px solid #dbe5ed;
+            border-radius: 1.5rem;
+            background: #fff;
+            box-shadow: 0 10px 28px rgba(148, 163, 184, 0.12);
+        }
+
+        .docs-visual-image {
+            display: block;
+            width: 100%;
+            height: auto;
+            background: #f8fafc;
+        }
+
+        .docs-visual-caption {
+            padding: 0.95rem 1.15rem 1.1rem;
+            border-top: 1px solid #eef2f6;
+            background: #fbfdff;
+            font-size: 0.92rem;
+            line-height: 1.65;
+            color: #64748b;
         }
 
         .docs-grid + .docs-content,
@@ -732,6 +778,8 @@
 
             .docs-grid-2,
             .docs-grid-3,
+            .docs-workflow-shell,
+            .docs-workflow-steps,
             .docs-index-grid {
                 grid-template-columns: 1fr;
             }

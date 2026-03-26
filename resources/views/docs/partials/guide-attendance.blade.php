@@ -23,25 +23,30 @@
         </div>
     </div>
 
-    <div id="attendance-workflow" class="docs-grid docs-grid-3">
-        <div class="lg:col-span-3">
+    <div id="attendance-workflow" class="docs-workflow-shell">
+        <div class="docs-card docs-card-muted docs-workflow-lead">
             <p class="docs-card-title">Ekran xəritəsi</p>
-            <p class="mt-2 text-[1.05rem] font-semibold tracking-tight text-zinc-950">Davamiyyət iş axını</p>
+            <p class="docs-card-strong">Davamiyyət iş axını</p>
+            <p class="docs-card-body">
+                Bu hissə gündəlik davamiyyət işinin hansı ardıcıllıqla aparıldığını bir baxışda göstərir. Əvvəl gün izlənir, sonra düzəliş qərarı verilir, sonda qayda və ay bağlanışı ilə yekun nəticə tamamlanır.
+            </p>
         </div>
-        <div class="docs-card">
-            <p class="docs-card-title">Addım 1</p>
-            <p class="docs-card-strong">Gündəlik nəzarət</p>
-            <p class="docs-card-body">Günlük monitor, puantaj və istisna qutusu üzrə operativ izləmə aparılır.</p>
-        </div>
-        <div class="docs-card">
-            <p class="docs-card-title">Addım 2</p>
-            <p class="docs-card-strong">Düzəliş və qərar</p>
-            <p class="docs-card-body">Manual giriş və əlavə iş qərarı ilə günlük nəticə sabitlənir.</p>
-        </div>
-        <div class="docs-card">
-            <p class="docs-card-title">Addım 3</p>
-            <p class="docs-card-strong">Qayda və yekun</p>
-            <p class="docs-card-body">Növbə, təqvim və ay bağlanışı ledger nəticəsini tamamlayır.</p>
+        <div class="docs-workflow-steps">
+            <div class="docs-card">
+                <p class="docs-card-title">Addım 1</p>
+                <p class="docs-card-strong">Gündəlik nəzarət</p>
+                <p class="docs-card-body">Günlük monitor, puantaj və istisna qutusu üzrə operativ izləmə aparılır.</p>
+            </div>
+            <div class="docs-card">
+                <p class="docs-card-title">Addım 2</p>
+                <p class="docs-card-strong">Düzəliş və qərar</p>
+                <p class="docs-card-body">Əl ilə giriş və əlavə iş qərarı ilə günlük nəticə sabitlənir.</p>
+            </div>
+            <div class="docs-card">
+                <p class="docs-card-title">Addım 3</p>
+                <p class="docs-card-strong">Qayda və yekun</p>
+                <p class="docs-card-body">Növbə, təqvim və ay bağlanışı yekun ledger nəticəsini tamamlayır.</p>
+            </div>
         </div>
     </div>
 
@@ -54,12 +59,12 @@
         <div class="docs-card docs-card-muted">
             <p class="docs-card-title">Admin</p>
             <p class="docs-card-strong">Qayda və təqvim idarəsi</p>
-            <p class="docs-card-body">Növbə, policy və təqvim dəyişikliklərinin təsirini idarə et.</p>
+            <p class="docs-card-body">Növbə, qayda və təqvim dəyişikliklərinin təsirini idarə et.</p>
         </div>
         <div class="docs-card docs-card-muted">
             <p class="docs-card-title">Təsdiq verən şəxs</p>
             <p class="docs-card-strong">Qərar və bağlanış</p>
-            <p class="docs-card-body">Manual giriş, əlavə iş və ay bağlanışı qərarını sabit saxla.</p>
+            <p class="docs-card-body">Əl ilə giriş, əlavə iş və ay bağlanışı qərarını sabit saxla.</p>
         </div>
     </div>
 
