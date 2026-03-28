@@ -114,11 +114,20 @@ class Leaves extends Component
         $this->dispatch('setDeleteLeave', $leaveId);
     }
 
-    #[Renderless]
     public function openAddLeaveModal(): void
     {
         $this->authorize('create', \App\Models\Leave::class);
+        $this->showSideMenu = 'add-leave';
         $this->dispatch('openSideMenu', showSideMenu: 'add-leave');
+    }
+
+    public function openEditLeaveModal(int $leaveId): void
+    {
+        $this->authorize('update', \App\Models\Leave::class);
+        $this->showSideMenu = 'edit-leave';
+        $this->modelName = $leaveId;
+        $this->dispatch('setEditLeaveModel', leaveId: $leaveId);
+        $this->dispatch('openSideMenu', showSideMenu: 'edit-leave');
     }
 
     public function forceDeleteData($id)

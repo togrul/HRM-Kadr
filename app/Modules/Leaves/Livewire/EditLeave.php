@@ -8,6 +8,7 @@ use App\Modules\Leaves\Livewire\Concerns\InteractsWithLeaveForm;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
@@ -22,41 +23,32 @@ class EditLeave extends Component
     public string $title = '';
 
     public LeaveForm $leave;
-    public ?Leave $record = null;
     public ?int $leaveModel = null;
 
     public function mount(?int $leaveModel = null): void
     {
         $this->authorize('viewAny', Leave::class);
-        $this->title = __('leaves::common.titles.edit_leave');
-        $this->leave->resetForm();
-        $this->syncSelectedLeaveTypeMeta();
+        $this->resetEditor();
 
-        if (! $leaveModel) {
-            return;
+        if ($leaveModel) {
+            $this->loadLeaveForEdit($leaveModel);
         }
-
-        $this->leaveModel = $leaveModel;
-        $this->record = Leave::query()
-            ->with($this->leaveRelations())
-            ->find($leaveModel);
-
-        if (! $this->record) {
-            return;
-        }
-
-        $this->authorize('update', $this->record);
-        $this->leave->fillFromModel($this->record);
-        $this->syncSelectedLeaveTypeMeta();
     }
 
     public function store(): void
     {
-        if (! $this->record) {
+        if (! $this->leaveModel) {
             return;
         }
 
-        $this->authorize('update', $this->record);
+        $record = Leave::query()->find($this->leaveModel);
+
+        if (! $record) {
+            return;
+        }
+
+        $this->authorize('update', $record);
+        $this->syncAssignmentForPersistence();
         $this->leave->validate();
 
         $payload = $this->leave->toPayload();
@@ -66,11 +58,12 @@ class EditLeave extends Component
             $payload['document_path'] = $file->store('leaves', 'public');
         }
 
-        DB::transaction(fn () => $this->record->update($payload));
+        DB::transaction(fn () => $record->update($payload));
 
-        $this->record = $this->record->fresh($this->leaveRelations());
-        $this->leave->fillFromModel($this->record);
+        $record = $record->fresh($this->leaveRelations());
+        $this->leave->fillFromModel($record);
         $this->syncSelectedLeaveTypeMeta();
+        $this->initializeAssignmentMode($record);
 
         if ($file instanceof TemporaryUploadedFile) {
             $this->leave->document_path = null;
@@ -79,6 +72,38 @@ class EditLeave extends Component
         $this->reset('personnelName', 'assignedSearch');
 
         $this->dispatch('leaveAdded', __('leaves::common.messages.leave_updated'));
+    }
+
+    #[On('setEditLeaveModel')]
+    public function loadLeaveForEdit(int $leaveId): void
+    {
+        $this->resetEditor();
+        $this->leaveModel = $leaveId;
+        $record = Leave::query()
+            ->with($this->leaveRelations())
+            ->find($leaveId);
+
+        if (! $record) {
+            return;
+        }
+
+        $this->authorize('update', $record);
+        $this->leave->fillFromModel($record);
+        $this->resetAssignmentPreviewState();
+        $this->syncSelectedLeaveTypeMeta();
+        $this->initializeAssignmentMode($record);
+    }
+
+    #[On('closeSideMenu')]
+    public function resetEditor(): void
+    {
+        $this->title = __('leaves::common.titles.edit_leave');
+        $this->leaveModel = null;
+        $this->leave->resetForm();
+        $this->resetAssignmentPreviewState();
+        $this->syncSelectedLeaveTypeMeta();
+        $this->initializeAssignmentMode();
+        $this->reset('personnelName', 'assignedSearch');
     }
 
     public function render()
@@ -101,6 +126,21 @@ class EditLeave extends Component
                 'surname',
                 'name',
                 'patronymic',
+                'position_id',
+                'structure_id',
+            ])->with([
+                'position:id,name,approval_rank,is_approval_target',
+            ]),
+            'fallbackApprover' => fn ($query) => $query->select([
+                'id',
+                'tabel_no',
+                'surname',
+                'name',
+                'patronymic',
+                'position_id',
+                'structure_id',
+            ])->with([
+                'position:id,name,approval_rank,is_approval_target',
             ]),
         ];
     }

@@ -15,6 +15,8 @@ class LeavesQueryBudgetCommand extends Command
         {--render-budget= : Max query count for leaves list render}
         {--status-budget= : Max query count for leaves status update}
         {--modal-budget= : Max query count for add leave modal open}
+        {--edit-modal-budget= : Max query count for edit leave modal open}
+        {--edit-manual-budget= : Max query count for edit leave manual toggle}
         {--json : Print report as JSON}';
 
     protected $description = 'Run query-budget checks for Leaves list flows';
@@ -30,11 +32,15 @@ class LeavesQueryBudgetCommand extends Command
         }
 
         $modalUser = $this->resolveUserForPermissions('show-leaves', 'add-leaves') ?? $user;
+        $editModalUser = $this->resolveUserForPermissions('show-leaves', 'edit-leaves') ?? $modalUser ?? $user;
+        $editableLeaveId = $this->resolveEditableLeaveId();
 
         $budgets = [
             'leaves_render' => max(1, (int) ($this->option('render-budget') ?: config('leaves.performance.query_budget.leaves_render', 14))),
             'leaves_status_update' => max(1, (int) ($this->option('status-budget') ?: config('leaves.performance.query_budget.leaves_status_update', 16))),
             'leaves_add_modal_open' => max(1, (int) ($this->option('modal-budget') ?: config('leaves.performance.query_budget.leaves_add_modal_open', 8))),
+            'leaves_edit_modal_open' => max(1, (int) ($this->option('edit-modal-budget') ?: config('leaves.performance.query_budget.leaves_edit_modal_open', 12))),
+            'leaves_edit_manual_toggle' => max(1, (int) ($this->option('edit-manual-budget') ?: config('leaves.performance.query_budget.leaves_edit_manual_toggle', 10))),
         ];
 
         $results = [];
@@ -52,6 +58,40 @@ class LeavesQueryBudgetCommand extends Command
             Livewire::test(Leaves::class)
                 ->call('openAddLeaveModal');
         });
+        $results[] = $editableLeaveId
+            ? $this->probe('leaves_edit_modal_open', $budgets['leaves_edit_modal_open'], function () use ($editModalUser, $editableLeaveId): void {
+                Livewire::actingAs($editModalUser);
+                $component = Livewire::test(Leaves::class);
+                DB::connection()->flushQueryLog();
+                $component->call('openEditLeaveModal', $editableLeaveId);
+            })
+            : [
+                'flow' => 'leaves_edit_modal_open',
+                'status' => 'skipped',
+                'queries' => 0,
+                'budget' => $budgets['leaves_edit_modal_open'],
+                'over_budget' => false,
+                'elapsed_ms' => 0,
+                'db_time_ms' => 0,
+                'error' => 'No editable leave found.',
+            ];
+        $results[] = $editableLeaveId
+            ? $this->probe('leaves_edit_manual_toggle', $budgets['leaves_edit_manual_toggle'], function () use ($editModalUser, $editableLeaveId): void {
+                Livewire::actingAs($editModalUser);
+                $component = Livewire::test(\App\Modules\Leaves\Livewire\EditLeave::class, ['leaveModel' => $editableLeaveId]);
+                DB::connection()->flushQueryLog();
+                $component->call('setAssignmentMode', 'manual');
+            })
+            : [
+                'flow' => 'leaves_edit_manual_toggle',
+                'status' => 'skipped',
+                'queries' => 0,
+                'budget' => $budgets['leaves_edit_manual_toggle'],
+                'over_budget' => false,
+                'elapsed_ms' => 0,
+                'db_time_ms' => 0,
+                'error' => 'No editable leave found.',
+            ];
 
         $summary = [
             'failed_probes' => collect($results)->where('status', 'failed')->count(),
@@ -124,5 +164,12 @@ class LeavesQueryBudgetCommand extends Command
             ->orderBy('id')
             ->cursor()
             ->first(fn (User $user): bool => collect($permissions)->every(fn (string $permission) => $user->can($permission)));
+    }
+
+    private function resolveEditableLeaveId(): ?int
+    {
+        return \App\Models\Leave::query()
+            ->orderByDesc('id')
+            ->value('id');
     }
 }

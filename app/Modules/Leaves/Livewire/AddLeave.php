@@ -29,11 +29,13 @@ class AddLeave extends Component
         $this->title = __('leaves::common.titles.add_leave');
         $this->leave->resetForm();
         $this->syncSelectedLeaveTypeMeta();
+        $this->initializeAssignmentMode();
     }
 
     public function store(): void
     {
         $this->authorize('create', Leave::class);
+        $this->syncAssignmentForPersistence();
         $this->leave->validate();
 
         $payload = $this->leave->toPayload();
@@ -49,6 +51,7 @@ class AddLeave extends Component
 
         $this->leave->resetForm();
         $this->syncSelectedLeaveTypeMeta();
+        $this->initializeAssignmentMode();
         $this->reset('personnelName', 'assignedSearch');
     }
 

@@ -19,7 +19,9 @@ return [
         'query_budget' => [
             'leaves_render' => (int) env('LEAVES_QUERY_BUDGET_RENDER', 28),
             'leaves_status_update' => (int) env('LEAVES_QUERY_BUDGET_STATUS', 32),
-            'leaves_add_modal_open' => (int) env('LEAVES_QUERY_BUDGET_MODAL_OPEN', 18),
+            'leaves_add_modal_open' => (int) env('LEAVES_QUERY_BUDGET_MODAL_OPEN', 28),
+            'leaves_edit_modal_open' => (int) env('LEAVES_QUERY_BUDGET_EDIT_MODAL_OPEN', 24),
+            'leaves_edit_manual_toggle' => (int) env('LEAVES_QUERY_BUDGET_EDIT_MANUAL_TOGGLE', 10),
         ],
     ],
 ];

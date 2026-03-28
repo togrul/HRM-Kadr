@@ -4,10 +4,10 @@ namespace App\Modules\Personnel\Application\Services\MyHr;
 
 use App\Models\Personnel;
 use App\Models\SelfServiceApprovalRoute;
-use App\Models\Structure;
 use App\Services\HrPolicies\HrPolicyPackService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 
 class ApprovalRouteResolverService
 {
@@ -19,6 +19,11 @@ class ApprovalRouteResolverService
      * @var array<string, array<string, int|string|bool|null>>
      */
     private array $routeCache = [];
+
+    /**
+     * @var array<string, array{route: array<string, int|string|bool|null>, chain: array<int, array<string, int|string|null>>}>
+     */
+    private array $previewCache = [];
 
     /**
      * @var array<int, array<int, array<string, string|int|null>>>
@@ -45,21 +50,37 @@ class ApprovalRouteResolverService
      */
     private array $structureLineCache = [];
 
+    /**
+     * @var array<int, array{id:int,parent_id:int|null,name:string}|null>
+     */
+    private array $structureMetaCache = [];
+
+    /**
+     * @var array<int, string>
+     */
+    private array $structurePathCache = [];
+
     public function resolve(Personnel $personnel, string $requestType): array
     {
-        $cacheKey = $personnel->getKey().':'.$requestType;
+        return $this->preview($personnel, $requestType, 2)['route'];
+    }
 
-        if (array_key_exists($cacheKey, $this->routeCache)) {
-            return $this->routeCache[$cacheKey];
+    /**
+     * @return array{route: array<string, int|string|bool|null>, chain: array<int, array<string, int|string|null>>}
+     */
+    public function preview(Personnel $personnel, string $requestType, int $chainLimit = 5): array
+    {
+        $effectiveLimit = max(2, $chainLimit);
+        $cacheKey = $personnel->getKey().':'.$requestType.':'.$effectiveLimit;
+
+        if (array_key_exists($cacheKey, $this->previewCache)) {
+            return $this->previewCache[$cacheKey];
         }
 
-        $personnel->loadMissing([
-            'position:id,name,approval_rank,is_approval_target',
-            'structure' => fn ($query) => $query->select('id', 'parent_id', 'name')->withRecursive('parent', false),
-        ]);
+        $this->hydratePersonnelContext($personnel, withStructure: false);
 
         $policy = $this->policy($requestType);
-        $approvers = $this->resolveHierarchyApprovers($personnel, 2);
+        $approvers = $this->resolveHierarchyApprovers($personnel, $effectiveLimit);
 
         $primaryApprover = ($policy['include_primary_approver'] ?? true)
             ? ($approvers[0] ?? null)
@@ -69,20 +90,22 @@ class ApprovalRouteResolverService
             ? ($approvers[1] ?? null)
             : null;
 
-        if ($primaryApprover || $upperApprover) {
-            return $this->routeCache[$cacheKey] = [
-                'approver_personnel_id' => $primaryApprover?->id,
-                'fallback_approver_personnel_id' => $upperApprover?->id,
-                'approval_route_source' => 'hierarchy_policy',
-                'hr_always_included' => (bool) ($policy['hr_always_included'] ?? true),
-            ];
-        }
-
-        return $this->routeCache[$cacheKey] = [
-            'approver_personnel_id' => null,
-            'fallback_approver_personnel_id' => null,
-            'approval_route_source' => 'hr_only_policy',
+        $route = [
+            'approver_personnel_id' => $primaryApprover?->id,
+            'fallback_approver_personnel_id' => $upperApprover?->id,
+            'approval_route_source' => ($primaryApprover || $upperApprover) ? 'hierarchy_policy' : 'hr_only_policy',
             'hr_always_included' => (bool) ($policy['hr_always_included'] ?? true),
+        ];
+
+        $this->routeCache[$personnel->getKey().':'.$requestType] = $route;
+
+        return $this->previewCache[$cacheKey] = [
+            'route' => $route,
+            'chain' => collect($approvers)
+                ->take($effectiveLimit)
+                ->map(fn (Personnel $approver): array => $this->personnelCard($approver))
+                ->values()
+                ->all(),
         ];
     }
 
@@ -113,14 +136,9 @@ class ApprovalRouteResolverService
 
     public function directReports(Personnel $manager): array
     {
-        $manager->loadMissing([
-            'position:id,name,approval_rank,is_approval_target',
-            'structure' => fn ($query) => $query->select('id', 'parent_id', 'name')->withRecursive('parent', false),
-        ]);
+        $this->hydratePersonnelContext($manager, withStructure: false);
 
-        $structureIds = $manager->structure
-            ? $manager->structure->getAllNestedIds()
-            : [(int) $manager->structure_id];
+        $structureIds = $this->nestedStructureIds((int) $manager->structure_id);
 
         $candidates = Personnel::query()
             ->active()
@@ -128,7 +146,6 @@ class ApprovalRouteResolverService
             ->whereIn('structure_id', array_filter($structureIds))
             ->with([
                 'position:id,name,approval_rank,is_approval_target',
-                'structure' => fn ($query) => $query->select('id', 'parent_id', 'name')->withRecursive('parent', false),
             ])
             ->orderBy('surname')
             ->orderBy('name')
@@ -165,6 +182,14 @@ class ApprovalRouteResolverService
         return $manager ? $this->personnelCard($manager) : null;
     }
 
+    /**
+     * @return array<string, int|string|null>
+     */
+    public function personnelPreviewCard(Personnel $personnel): array
+    {
+        return $this->personnelCard($personnel);
+    }
+
     private function resolveHierarchyApprover(Personnel $personnel): ?Personnel
     {
         return $this->resolveHierarchyApprovers($personnel, 1)[0] ?? null;
@@ -172,14 +197,11 @@ class ApprovalRouteResolverService
 
     private function resolveHierarchyApproverFromPool(Personnel $personnel, Collection $byStructure, int $stopStructureId): ?Personnel
     {
-        $personnel->loadMissing([
-            'position:id,name,approval_rank,is_approval_target',
-            'structure' => fn ($query) => $query->select('id', 'parent_id', 'name')->withRecursive('parent', false),
-        ]);
+        $this->hydratePersonnelContext($personnel, withStructure: false);
 
         $currentRank = (int) ($personnel->position?->approval_rank ?? 0);
 
-        foreach ($this->structureLineUntil($personnel->structure, $stopStructureId) as $structureId) {
+        foreach ($this->structureLineUntilId((int) $personnel->structure_id, $stopStructureId) as $structureId) {
             /** @var Collection<int, Personnel> $candidates */
             $candidates = $byStructure->get($structureId, collect());
 
@@ -204,29 +226,30 @@ class ApprovalRouteResolverService
     /**
      * @return array<int, int>
      */
-    private function structureLine(?Structure $structure): array
+    private function structureLineFromId(?int $structureId): array
     {
-        if (! $structure) {
+        if (! $structureId) {
             return [];
         }
 
-        $cacheKey = (int) $structure->id;
+        $cacheKey = (int) $structureId;
 
         if (array_key_exists($cacheKey, $this->structureLineCache)) {
             return $this->structureLineCache[$cacheKey];
         }
 
         $line = [];
-        $cursor = $structure;
+        $cursorId = $structureId;
 
-        while ($cursor) {
-            $line[] = (int) $cursor->id;
+        while ($cursorId) {
+            $meta = $this->loadStructureMeta($cursorId);
 
-            if (! $cursor->relationLoaded('parent') && ! is_null($cursor->parent_id)) {
-                $cursor->loadMissing('parent');
+            if (! $meta) {
+                break;
             }
 
-            $cursor = $cursor->parent;
+            $line[] = (int) $meta['id'];
+            $cursorId = $meta['parent_id'];
         }
 
         return $this->structureLineCache[$cacheKey] = $line;
@@ -235,14 +258,14 @@ class ApprovalRouteResolverService
     /**
      * @return array<int, int>
      */
-    private function structureLineUntil(?Structure $structure, int $stopStructureId): array
+    private function structureLineUntilId(int $structureId, int $stopStructureId): array
     {
         $line = [];
 
-        foreach ($this->structureLine($structure) as $structureId) {
-            $line[] = $structureId;
+        foreach ($this->structureLineFromId($structureId) as $currentStructureId) {
+            $line[] = $currentStructureId;
 
-            if ($structureId === $stopStructureId) {
+            if ($currentStructureId === $stopStructureId) {
                 break;
             }
         }
@@ -275,13 +298,24 @@ class ApprovalRouteResolverService
             return $this->routeOverridesCache;
         }
 
-        return $this->routeOverridesCache = SelfServiceApprovalRoute::query()
-            ->where('is_active', true)
-            ->orderByDesc('id')
-            ->get()
-            ->unique('request_type')
-            ->keyBy('request_type')
-            ->all();
+        return $this->routeOverridesCache = Cache::remember(
+            'self-service-approval-routes:active',
+            now()->addMinutes(10),
+            fn (): array => SelfServiceApprovalRoute::query()
+                ->where('is_active', true)
+                ->orderByDesc('id')
+                ->get([
+                    'id',
+                    'request_type',
+                    'include_primary_approver',
+                    'include_upper_approver',
+                    'hr_always_included',
+                    'is_active',
+                ])
+                ->unique('request_type')
+                ->keyBy('request_type')
+                ->all()
+        );
     }
 
     /**
@@ -295,16 +329,13 @@ class ApprovalRouteResolverService
             return $this->approversCache[$cacheKey];
         }
 
-        $personnel->loadMissing([
-            'position:id,name,approval_rank,is_approval_target',
-            'structure' => fn ($query) => $query->select('id', 'parent_id', 'name')->withRecursive('parent', false),
-        ]);
+        $this->hydratePersonnelContext($personnel, withStructure: false);
 
         $currentRank = (int) ($personnel->position?->approval_rank ?? 0);
         $resolved = [];
         $seen = [];
 
-        foreach ($this->structureLine($personnel->structure) as $structureId) {
+        foreach ($this->structureLineFromId((int) $personnel->structure_id) as $structureId) {
             $candidates = Personnel::query()
                 ->active()
                 ->whereKeyNot($personnel->id)
@@ -314,7 +345,6 @@ class ApprovalRouteResolverService
                     ->where('approval_rank', '>', $currentRank))
                 ->with([
                     'position:id,name,approval_rank,is_approval_target',
-                    'structure' => fn ($query) => $query->select('id', 'parent_id', 'name')->withRecursive('parent', false),
                 ])
                 ->join('positions', 'positions.id', '=', 'personnels.position_id')
                 ->orderBy('positions.approval_rank')
@@ -344,11 +374,108 @@ class ApprovalRouteResolverService
      */
     private function personnelCard(Personnel $personnel): array
     {
+        $this->hydratePersonnelContext($personnel, withStructure: false);
+
         return [
             'id' => (int) $personnel->id,
             'fullname' => $personnel->fullname,
             'position' => $personnel->position?->name ?: '—',
-            'structure' => $personnel->structure?->fullStructureName(includeRoot: true) ?: '—',
+            'structure' => $this->structurePathLabel($personnel),
         ];
+    }
+
+    private function hydratePersonnelContext(Personnel $personnel, bool $withStructure = true): void
+    {
+        $personnel->loadMissing([
+            'position:id,name,approval_rank,is_approval_target',
+        ]);
+
+        if (! $withStructure || ! $personnel->structure_id) {
+            return;
+        }
+    }
+
+    private function loadStructureMeta(int $structureId): ?array
+    {
+        if (array_key_exists($structureId, $this->structureMetaCache)) {
+            return $this->structureMetaCache[$structureId];
+        }
+
+        $row = \App\Models\Structure::query()
+            ->select('id', 'parent_id', 'name')
+            ->find($structureId);
+
+        return $this->structureMetaCache[$structureId] = $row
+            ? [
+                'id' => (int) $row->id,
+                'parent_id' => $row->parent_id ? (int) $row->parent_id : null,
+                'name' => (string) $row->name,
+            ]
+            : null;
+    }
+
+    private function structurePathLabel(Personnel $personnel): string
+    {
+        $structureId = (int) ($personnel->structure_id ?? 0);
+
+        if (! $structureId) {
+            return '—';
+        }
+
+        if (array_key_exists($structureId, $this->structurePathCache)) {
+            return $this->structurePathCache[$structureId];
+        }
+
+        $segments = [];
+        $cursorId = $structureId;
+
+        while ($cursorId) {
+            $meta = $this->loadStructureMeta($cursorId);
+
+            if (! $meta) {
+                break;
+            }
+
+            $segments[] = $meta['name'];
+            $cursorId = $meta['parent_id'];
+        }
+
+        return $this->structurePathCache[$structureId] = $segments === []
+            ? '—'
+            : implode(' / ', array_reverse($segments));
+    }
+
+    /**
+     * @return array<int, int>
+     */
+    private function nestedStructureIds(int $rootStructureId): array
+    {
+        $pending = [$rootStructureId];
+        $resolved = [];
+
+        while ($pending !== []) {
+            $batch = array_values(array_diff($pending, $resolved));
+            $pending = [];
+
+            if ($batch === []) {
+                continue;
+            }
+
+            $resolved = array_merge($resolved, $batch);
+
+            $children = \App\Models\Structure::query()
+                ->whereIn('parent_id', $batch)
+                ->pluck('id')
+                ->map(fn ($id) => (int) $id)
+                ->all();
+
+            foreach ($children as $childId) {
+                if (! in_array($childId, $resolved, true)) {
+                    $pending[] = $childId;
+                }
+            }
+        }
+
+        return $resolved;
     }
 }

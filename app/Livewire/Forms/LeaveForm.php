@@ -26,6 +26,10 @@ class LeaveForm extends Form
 
     public ?array $assigned_to = null;
     public ?array $leave_type_meta = null;
+    public string $assignment_mode = 'auto';
+    public ?int $fallback_approver_personnel_id = null;
+    public ?string $approval_route_source = null;
+    public bool $hr_always_included = true;
 
     public $document_path = null;
 
@@ -130,6 +134,10 @@ class LeaveForm extends Form
         $this->total_days    = $leave->total_days;
         $this->total_minutes = $leave->total_minutes;
         $this->reason        = $leave->reason;
+        $this->fallback_approver_personnel_id = $leave->fallback_approver_personnel_id ? (int) $leave->fallback_approver_personnel_id : null;
+        $this->approval_route_source = $leave->approval_route_source;
+        $this->hr_always_included = (bool) ($leave->hr_always_included ?? true);
+        $this->assignment_mode = $leave->approval_route_source === 'manual_assignment' ? 'manual' : 'auto';
         $this->document_path = $leave->document_path;
     }
 
@@ -167,6 +175,9 @@ class LeaveForm extends Form
             'reason'        => $this->reason,
             'status_id'     => $this->status_id !== null ? (int) $this->status_id : null,
             'assigned_to'   => data_get($this->assigned_to, 'id'),
+            'fallback_approver_personnel_id' => $this->fallback_approver_personnel_id,
+            'approval_route_source' => $this->approval_route_source,
+            'hr_always_included' => $this->hr_always_included,
             'document_path' => is_string($this->document_path) ? $this->document_path : null,
         ];
     }
@@ -188,6 +199,10 @@ class LeaveForm extends Form
             'reason'        => null,
             'assigned_to'   => null,
             'leave_type_meta' => null,
+            'assignment_mode' => 'auto',
+            'fallback_approver_personnel_id' => null,
+            'approval_route_source' => null,
+            'hr_always_included' => true,
             'document_path' => null,
         ];
     }

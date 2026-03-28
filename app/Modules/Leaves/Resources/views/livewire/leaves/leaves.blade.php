@@ -325,9 +325,9 @@
                                     @if ($status != 'deleted')
                                         @can('update', $leave)
                                             <button
-                                                wire:click="openSideMenu('edit-leave',{{ $leave->id }})"
+                                                wire:click="openEditLeaveModal({{ $leave->id }})"
                                                 wire:loading.attr="disabled"
-                                                wire:target="openSideMenu"
+                                                wire:target="openEditLeaveModal"
                                                 class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase bg-gray-100 rounded-lg hover:bg-gray-200 hover:text-gray-700"
                                             >
                                                 <x-icons.document-icon></x-icons.document-icon>
@@ -392,14 +392,18 @@
 
     <x-side-modal :local-state="true">
         @can('create', App\Models\Leave::class)
-            <div x-show="activeMenu === 'add-leave'" x-cloak>
-                <livewire:leaves.add-leave wire:key="leaves-add-modal" />
-            </div>
+            @if($showSideMenu === 'add-leave')
+                <div x-show="activeMenu === 'add-leave'" x-cloak>
+                    <livewire:leaves.add-leave wire:key="leaves-add-modal" />
+                </div>
+            @endif
         @endcan
 
         @can('update', App\Models\Leave::class)
-            @if ($showSideMenu == 'edit-leave')
-                <livewire:leaves.edit-leave :leaveModel="$modelName" />
+            @if($showSideMenu === 'edit-leave')
+                <div x-show="activeMenu === 'edit-leave'" x-cloak>
+                    <livewire:leaves.edit-leave :leave-model="$modelName" wire:key="leaves-edit-modal-{{ $modelName ?? 'empty' }}" />
+                </div>
             @endif
         @endcan
     </x-side-modal>

@@ -3,10 +3,13 @@
 namespace App\Modules\Leaves\Livewire\Concerns;
 
 use App\Livewire\Traits\DropdownConstructTrait;
+use App\Models\Leave;
 use App\Models\LeaveType;
 use App\Models\OrderStatus;
 use App\Models\Personnel;
+use App\Modules\Personnel\Application\Services\MyHr\ApprovalRouteResolverService;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 
@@ -16,6 +19,11 @@ trait InteractsWithLeaveForm
 
     public string $personnelName = '';
     public string $assignedSearch = '';
+    protected ?ApprovalRouteResolverService $approvalRouteResolver = null;
+    protected ?array $assignmentPreviewSnapshot = null;
+    protected ?string $assignmentPreviewKey = null;
+    protected ?Personnel $selectedApplicantPersonnelSnapshot = null;
+    protected ?string $selectedApplicantPersonnelKey = null;
 
     public function updatedLeave($value, $name): void
     {
@@ -34,7 +42,9 @@ trait InteractsWithLeaveForm
                 'fullname' => $fullname,
             ];
 
+            $this->resetAssignmentPreviewState();
             $this->reset('personnelName', 'assignedSearch');
+            $this->syncAutomaticAssignment();
 
             return;
         }
@@ -44,16 +54,51 @@ trait InteractsWithLeaveForm
                 'id' => $personnelId,
                 'fullname' => $fullname,
             ];
+            $this->leave->approval_route_source = 'manual_assignment';
 
             $this->reset('personnelName', 'assignedSearch');
         }
+    }
+
+    public function setAssignmentMode(string $mode): void
+    {
+        $targetMode = $mode === 'manual' ? 'manual' : 'auto';
+
+        if ($this->leave->assignment_mode === $targetMode) {
+            return;
+        }
+
+        $this->leave->assignment_mode = $targetMode;
+
+        if ($this->leave->assignment_mode === 'auto') {
+            $this->reset('assignedSearch');
+            $this->resetAssignmentPreviewState();
+            $this->syncAutomaticAssignment();
+
+            return;
+        }
+
+        if (! data_get($this->leave->assigned_to, 'id') && data_get($this->assignmentPreview, 'approver.id')) {
+            $this->leave->assigned_to = [
+                'id' => (int) data_get($this->assignmentPreview, 'approver.id'),
+                'fullname' => (string) data_get($this->assignmentPreview, 'approver.fullname'),
+            ];
+        }
+
+        $this->leave->approval_route_source = 'manual_assignment';
+        $this->leave->fallback_approver_personnel_id = null;
     }
 
     public function removePersonnel(string $key): void
     {
         if ($key === 'tabel_no') {
             $this->leave->tabel_no = null;
+            $this->leave->assigned_to = null;
+            $this->leave->fallback_approver_personnel_id = null;
+            $this->leave->approval_route_source = null;
+            $this->leave->hr_always_included = true;
 
+            $this->resetAssignmentPreviewState();
             $this->reset('personnelName');
 
             return;
@@ -61,6 +106,9 @@ trait InteractsWithLeaveForm
 
         if ($key === 'assigned_to') {
             $this->leave->assigned_to = null;
+            $this->leave->approval_route_source = $this->leave->assignment_mode === 'manual'
+                ? 'manual_assignment'
+                : $this->leave->approval_route_source;
 
             $this->reset('assignedSearch');
         }
@@ -76,6 +124,55 @@ trait InteractsWithLeaveForm
     public function assignedPersonnelList()
     {
         return $this->searchPersonnelOptions($this->assignedSearch);
+    }
+
+    #[Computed]
+    public function selectedApplicantPersonnel(): ?Personnel
+    {
+        $tabelNo = data_get($this->leave->tabel_no, 'tabel_no');
+
+        if (! $tabelNo) {
+            $this->selectedApplicantPersonnelKey = null;
+            $this->selectedApplicantPersonnelSnapshot = null;
+
+            return null;
+        }
+
+        if ($this->selectedApplicantPersonnelKey === $tabelNo && $this->selectedApplicantPersonnelSnapshot !== null) {
+            return $this->selectedApplicantPersonnelSnapshot;
+        }
+
+        $this->selectedApplicantPersonnelKey = $tabelNo;
+
+        return $this->selectedApplicantPersonnelSnapshot = Personnel::query()
+            ->active()
+            ->where('tabel_no', $tabelNo)
+            ->with([
+                'position:id,name,approval_rank,is_approval_target',
+            ])
+            ->first([
+                'id',
+                'tabel_no',
+                'surname',
+                'name',
+                'patronymic',
+                'position_id',
+                'structure_id',
+            ]);
+    }
+
+    #[Computed]
+    public function assignmentPreview(): array
+    {
+        $cacheKey = data_get($this->leave->tabel_no, 'tabel_no', 'none');
+
+        if ($this->assignmentPreviewSnapshot !== null && $this->assignmentPreviewKey === $cacheKey) {
+            return $this->assignmentPreviewSnapshot;
+        }
+
+        $this->assignmentPreviewKey = $cacheKey;
+
+        return $this->assignmentPreviewSnapshot = $this->buildAssignmentPreview();
     }
 
     #[Computed(cache: true)]
@@ -196,18 +293,49 @@ trait InteractsWithLeaveForm
     public function statuses(): array
     {
         $selected = $this->leave->status_id;
+        $cacheKey = 'leaves:form-statuses:'.app()->getLocale();
 
-        $base = OrderStatus::query()
-            ->select('id', DB::raw('name as label'))
-            ->orderBy('id');
-
-        return $this->optionsWithSelected(
-            base: $base,
-            searchCol: 'name',
-            searchTerm: '',
-            selectedId: $selected,
-            limit: 50
+        $options = Cache::remember(
+            $cacheKey,
+            now()->addMinutes(10),
+            fn (): array => OrderStatus::query()
+                ->select('id', DB::raw('name as label'))
+                ->orderBy('id')
+                ->get()
+                ->map(fn (OrderStatus $status): array => [
+                    'id' => (int) $status->id,
+                    'label' => (string) $status->label,
+                ])
+                ->values()
+                ->all()
         );
+
+        if (! $selected) {
+            return $options;
+        }
+
+        $hasSelected = collect($options)->contains(fn (array $option): bool => (int) $option['id'] === (int) $selected);
+
+        if ($hasSelected) {
+            return $options;
+        }
+
+        $selectedOption = OrderStatus::query()
+            ->select('id', DB::raw('name as label'))
+            ->find($selected);
+
+        if (! $selectedOption) {
+            return $options;
+        }
+
+        return collect($options)
+            ->prepend([
+                'id' => (int) $selectedOption->id,
+                'label' => (string) $selectedOption->label,
+            ])
+            ->unique('id')
+            ->values()
+            ->all();
     }
 
     protected function recalculateLeaveDuration(): void
@@ -272,5 +400,245 @@ trait InteractsWithLeaveForm
     protected function syncSelectedLeaveTypeMeta(): void
     {
         $this->leave->syncLeaveTypeMeta($this->selectedLeaveTypeMeta);
+    }
+
+    protected function syncAutomaticAssignment(): void
+    {
+        if ($this->leave->assignment_mode !== 'auto') {
+            return;
+        }
+
+        $preview = $this->assignmentPreview;
+        $route = $preview['route'] ?? null;
+        $approver = $preview['approver'] ?? $this->emptyPersonnelCard();
+
+        $this->leave->assigned_to = ($route['approver_personnel_id'] ?? null) && ($approver['id'] ?? null)
+            ? [
+                'id' => (int) $approver['id'],
+                'fullname' => (string) $approver['fullname'],
+            ]
+            : null;
+        $this->leave->fallback_approver_personnel_id = $route['fallback_approver_personnel_id'] ?? null;
+        $this->leave->approval_route_source = $route['approval_route_source'] ?? null;
+        $this->leave->hr_always_included = (bool) ($route['hr_always_included'] ?? true);
+    }
+
+    protected function initializeAssignmentMode(?Leave $record = null): void
+    {
+        $this->resetAssignmentPreviewState();
+
+        if ($record?->approval_route_source === 'manual_assignment') {
+            $this->leave->assignment_mode = 'manual';
+            $this->leave->approval_route_source = 'manual_assignment';
+            $this->leave->fallback_approver_personnel_id = null;
+
+            return;
+        }
+
+        if ($record && data_get($this->leave->assigned_to, 'id')) {
+            $this->leave->assignment_mode = 'auto';
+            $this->leave->approval_route_source = $record->approval_route_source;
+            $this->leave->fallback_approver_personnel_id = $record->fallback_approver_personnel_id
+                ? (int) $record->fallback_approver_personnel_id
+                : null;
+            $this->leave->hr_always_included = (bool) ($record->hr_always_included ?? true);
+            $this->seedAssignmentPreviewFromRecord($record);
+
+            return;
+        }
+
+        $route = $this->assignmentPreview['route'] ?? null;
+        $autoApproverId = $route['approver_personnel_id'] ?? null;
+        $currentAssignedId = data_get($this->leave->assigned_to, 'id');
+
+        $shouldUseManual = $currentAssignedId && $autoApproverId && (int) $currentAssignedId !== (int) $autoApproverId;
+
+        if ($shouldUseManual) {
+            $this->leave->assignment_mode = 'manual';
+            $this->leave->approval_route_source = 'manual_assignment';
+            $this->leave->fallback_approver_personnel_id = $route['fallback_approver_personnel_id'] ?? null;
+            $this->leave->hr_always_included = (bool) ($route['hr_always_included'] ?? true);
+
+            return;
+        }
+
+        if ($record && ! $autoApproverId && $currentAssignedId) {
+            $this->leave->assignment_mode = 'auto';
+            $this->leave->approval_route_source = $record->approval_route_source;
+            $this->leave->fallback_approver_personnel_id = $record->fallback_approver_personnel_id
+                ? (int) $record->fallback_approver_personnel_id
+                : null;
+            $this->leave->hr_always_included = (bool) ($record->hr_always_included ?? true);
+            $this->seedAssignmentPreviewFromRecord($record);
+
+            return;
+        }
+
+        $this->leave->assignment_mode = 'auto';
+        $this->syncAutomaticAssignment();
+    }
+
+    protected function syncAssignmentForPersistence(): void
+    {
+        if ($this->leave->assignment_mode === 'manual') {
+            $this->leave->approval_route_source = 'manual_assignment';
+            $this->leave->fallback_approver_personnel_id = null;
+
+            return;
+        }
+
+        $this->syncAutomaticAssignment();
+    }
+
+    private function findPersonnelCardById(?int $personnelId, array $chain): array
+    {
+        if (! $personnelId) {
+            return $this->emptyPersonnelCard();
+        }
+
+        foreach ($chain as $row) {
+            if ((int) ($row['id'] ?? 0) === (int) $personnelId) {
+                return $row;
+            }
+        }
+
+        return $this->emptyPersonnelCard();
+    }
+
+    private function emptyPersonnelCard(): array
+    {
+        return [
+            'id' => null,
+            'fullname' => __('leaves::common.empty.not_assigned'),
+            'position' => '—',
+            'structure' => '—',
+        ];
+    }
+
+    private function seedAssignmentPreviewFromRecord(Leave $record): void
+    {
+        $relationCards = [];
+
+        if ($record->relationLoaded('assigned') && $record->assigned) {
+            $relationCards[(int) $record->assigned->id] = $this->approvalRouteResolver()->personnelPreviewCard($record->assigned);
+        }
+
+        if ($record->relationLoaded('fallbackApprover') && $record->fallbackApprover) {
+            $relationCards[(int) $record->fallbackApprover->id] = $this->approvalRouteResolver()->personnelPreviewCard($record->fallbackApprover);
+        }
+
+        $ids = collect([
+            $record->assigned_to,
+            $record->fallback_approver_personnel_id,
+        ])
+            ->filter()
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values();
+
+        if ($ids->isEmpty() && $relationCards === []) {
+            return;
+        }
+
+        $missingIds = $ids
+            ->reject(fn (int $id) => array_key_exists($id, $relationCards))
+            ->values();
+
+        $cards = $relationCards;
+
+        if ($missingIds->isNotEmpty()) {
+            $cards += Personnel::query()
+                ->whereIn('id', $missingIds->all())
+                ->with(['position:id,name,approval_rank,is_approval_target'])
+                ->get(['id', 'surname', 'name', 'patronymic', 'position_id', 'structure_id'])
+                ->mapWithKeys(fn (Personnel $personnel) => [
+                    (int) $personnel->id => $this->approvalRouteResolver()->personnelPreviewCard($personnel),
+                ])
+                ->all();
+        }
+
+        $approver = $cards[(int) $record->assigned_to] ?? $this->previewCardFromSelectedAssignee();
+        $fallback = $record->fallback_approver_personnel_id
+            ? ($cards[(int) $record->fallback_approver_personnel_id] ?? $this->emptyPersonnelCard())
+            : $this->emptyPersonnelCard();
+
+        $chain = array_values(array_filter([
+            ($approver['id'] ?? null) ? $approver : null,
+            ($fallback['id'] ?? null) ? $fallback : null,
+        ]));
+
+        $this->assignmentPreviewKey = data_get($this->leave->tabel_no, 'tabel_no', 'none');
+        $this->assignmentPreviewSnapshot = [
+            'route' => [
+                'approver_personnel_id' => $record->assigned_to ? (int) $record->assigned_to : null,
+                'fallback_approver_personnel_id' => $record->fallback_approver_personnel_id ? (int) $record->fallback_approver_personnel_id : null,
+                'approval_route_source' => $record->approval_route_source,
+                'hr_always_included' => (bool) ($record->hr_always_included ?? true),
+            ],
+            'chain' => $chain,
+            'approver' => $approver,
+            'fallback' => $fallback,
+            'upper_candidate' => $chain[1] ?? $this->emptyPersonnelCard(),
+            'upper_enabled' => (bool) ($fallback['id'] ?? null),
+        ];
+    }
+
+    private function approvalRouteResolver(): ApprovalRouteResolverService
+    {
+        return $this->approvalRouteResolver ??= app(ApprovalRouteResolverService::class);
+    }
+
+    private function buildAssignmentPreview(): array
+    {
+        $personnel = $this->selectedApplicantPersonnel;
+
+        if (! $personnel) {
+            return [
+                'route' => null,
+                'chain' => [],
+                'approver' => $this->emptyPersonnelCard(),
+                'fallback' => $this->emptyPersonnelCard(),
+                'upper_candidate' => $this->emptyPersonnelCard(),
+                'upper_enabled' => false,
+            ];
+        }
+
+        $preview = $this->approvalRouteResolver()->preview($personnel, 'leave', 5);
+        $route = $preview['route'] ?? null;
+        $chain = $preview['chain'] ?? [];
+
+        return [
+            'route' => $route,
+            'chain' => $chain,
+            'approver' => $this->findPersonnelCardById($route['approver_personnel_id'] ?? null, $chain),
+            'fallback' => $this->findPersonnelCardById($route['fallback_approver_personnel_id'] ?? null, $chain),
+            'upper_candidate' => $chain[1] ?? $this->emptyPersonnelCard(),
+            'upper_enabled' => ! empty($route['fallback_approver_personnel_id']),
+        ];
+    }
+
+    private function resetAssignmentPreviewState(): void
+    {
+        $this->assignmentPreviewSnapshot = null;
+        $this->assignmentPreviewKey = null;
+        $this->selectedApplicantPersonnelSnapshot = null;
+        $this->selectedApplicantPersonnelKey = null;
+        unset($this->assignmentPreview, $this->selectedApplicantPersonnel);
+    }
+
+    private function previewCardFromSelectedAssignee(): array
+    {
+        $assignedId = (int) data_get($this->leave->assigned_to, 'id', 0);
+
+        if ($assignedId <= 0) {
+            return $this->emptyPersonnelCard();
+        }
+
+        return [
+            'id' => $assignedId,
+            'fullname' => (string) data_get($this->leave->assigned_to, 'fullname', __('leaves::common.empty.not_assigned')),
+            'position' => '—',
+            'structure' => '—',
+        ];
     }
 }
