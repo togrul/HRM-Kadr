@@ -39,10 +39,7 @@
             <div class="flex flex-col">
                 <div class="flex space-x-4">
                     @can('review-self-service-requests')
-                        <a href="{{ route('self-service-reviews') }}"
-                            class="inline-flex items-center justify-center px-4 h-12 text-sm font-semibold text-zinc-700 transition-all duration-300 bg-white border border-zinc-200 rounded-xl hover:border-zinc-300 hover:bg-zinc-50">
-                            {{ __('ui::menu.items.self_service_reviews') }}
-                        </a>
+                        <x-ui.self-service-review-link />
                     @endcan
                     @can('export-business_trips')
                         <button wire:click.prevent="exportExcel"

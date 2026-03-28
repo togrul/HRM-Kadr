@@ -19,4 +19,7 @@ return [
         'training' => 'Training',
         'performance' => 'Performance',
     ],
+    'shortcuts' => [
+        'review_queue' => 'Quick access',
+    ],
 ];

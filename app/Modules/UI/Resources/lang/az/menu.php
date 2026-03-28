@@ -19,4 +19,7 @@ return [
         'training' => 'Təlim',
         'performance' => 'Performans',
     ],
+    'shortcuts' => [
+        'review_queue' => 'Tez baxış',
+    ],
 ];

@@ -39,7 +39,22 @@
     {{-- end sidebar --}}
 
     <div class="flex flex-col px-6 py-4 space-y-4">
-        <div class="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+        <div class="flex items-center justify-between gap-4 rounded-2xl border border-teal-200 bg-teal-50/80 px-5 py-4 shadow-sm">
+            <div class="min-w-0">
+                <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
+                    <p class="shrink-0 text-[11px] font-semibold uppercase tracking-[0.22em] text-teal-700">{{ __('orders::order_list.guide.title') }}</p>
+                    <p class="text-sm leading-6 text-teal-900/80">{{ __('orders::order_list.guide.description') }}</p>
+                </div>
+            </div>
+            <a
+                href="{{ route('docs.guide', ['focus' => 'orders']) }}#orders-module"
+                class="inline-flex h-10 shrink-0 items-center justify-center whitespace-nowrap rounded-md bg-teal-600 px-4 text-sm font-medium tracking-tight text-white shadow-sm transition-colors duration-200 hover:bg-teal-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-200"
+            >
+                {{ __('orders::order_list.actions.open_user_guide') }}
+            </a>
+        </div>
+
+        <div class="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
             <div class="flex flex-col items-center justify-between px-2 py-2 bg-white sm:flex-row filter rounded-xl">
                 <x-filter.nav>
                     <x-filter.item wire:click.prevent="setStatus('all')" :active="$status === 'all'">
@@ -57,36 +72,21 @@
                     @endrole
                 </x-filter.nav>
             </div>
-            <div class="w-full xl:max-w-md">
-                <div class="flex items-center justify-between gap-4 rounded-2xl border border-teal-200 bg-teal-50/80 px-4 py-3 shadow-sm">
-                    <div class="min-w-0">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-teal-700">{{ __('orders::order_list.guide.title') }}</p>
-                        <p class="mt-1 text-sm leading-6 text-teal-900/80">{{ __('orders::order_list.guide.description') }}</p>
-                    </div>
-                    <a
-                        href="{{ route('docs.guide', ['focus' => 'orders']) }}#orders-module"
-                        class="inline-flex h-10 shrink-0 items-center justify-center whitespace-nowrap rounded-md bg-teal-600 px-4 text-sm font-medium tracking-tight text-white shadow-sm transition-colors duration-200 hover:bg-teal-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-200"
-                    >
-                        {{ __('orders::order_list.actions.open_user_guide') }}
-                    </a>
-                </div>
-
-                <div class="mt-3 flex flex-wrap items-center gap-3">
-                    @can('add-orders')
-                        <button wire:click="openSideMenu('add-order',{{ $selectedOrder }})"
-                            class="flex items-center justify-center w-12 h-12 transition-all duration-300 rounded-xl hover:bg-blue-50"
-                            type="button">
-                            <x-icons.add-file></x-icons.add-file>
-                        </button>
-                    @endcan
-                    @can('export-orders')
-                        <button wire:click.prevent="exportExcel"
-                            class="flex items-center justify-center w-12 h-12 transition-all duration-300 rounded-xl hover:bg-green-50"
-                            type="button">
-                            <x-icons.excel-icon />
-                        </button>
-                    @endcan
-                </div>
+            <div class="flex flex-wrap items-center gap-3">
+                @can('add-orders')
+                    <button wire:click="openSideMenu('add-order',{{ $selectedOrder }})"
+                        class="flex items-center justify-center w-12 h-12 transition-all duration-300 rounded-xl hover:bg-blue-50"
+                        type="button">
+                        <x-icons.add-file></x-icons.add-file>
+                    </button>
+                @endcan
+                @can('export-orders')
+                    <button wire:click.prevent="exportExcel"
+                        class="flex items-center justify-center w-12 h-12 transition-all duration-300 rounded-xl hover:bg-green-50"
+                        type="button">
+                        <x-icons.excel-icon />
+                    </button>
+                @endcan
             </div>
         </div>
 
