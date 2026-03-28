@@ -77,16 +77,37 @@
                                 </span>
                             </div>
 
-                            <div class="mt-4 grid gap-3 md:grid-cols-2">
+                            <p class="mt-4 text-sm leading-6 text-zinc-600">
+                                @if (! $route['primary_enabled'])
+                                    {{ __('personnel::my_hr.hierarchy.messages.hr_only_help') }}
+                                @elseif ($route['upper_enabled'])
+                                    {{ __('personnel::my_hr.hierarchy.messages.upper_policy_help') }}
+                                @else
+                                    {{ __('personnel::my_hr.hierarchy.messages.primary_policy_help') }}
+                                @endif
+                            </p>
+
+                            <div class="mt-4 grid gap-3 xl:grid-cols-3">
                                 <div class="rounded-2xl border border-zinc-200 bg-white px-4 py-4">
-                                    <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __('personnel::my_hr.hierarchy.labels.primary_approver') }}</x-ui.field-label>
+                                    <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __('personnel::my_hr.hierarchy.labels.primary_step') }}</x-ui.field-label>
                                     <p class="mt-2 text-sm font-semibold tracking-tight text-zinc-950">{{ $route['approver']['fullname'] }}</p>
-                                    <p class="mt-1 text-xs text-zinc-600">{{ $route['approver']['position'] }}</p>
+                                    <p class="mt-1 text-xs leading-5 text-zinc-600">{{ $route['approver']['position'] }}</p>
                                 </div>
+
                                 <div class="rounded-2xl border border-zinc-200 bg-white px-4 py-4">
-                                    <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __('personnel::my_hr.hierarchy.labels.upper_approver') }}</x-ui.field-label>
+                                    <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __('personnel::my_hr.hierarchy.labels.upper_step') }}</x-ui.field-label>
                                     <p class="mt-2 text-sm font-semibold tracking-tight text-zinc-950">{{ $route['fallback_approver']['fullname'] }}</p>
-                                    <p class="mt-1 text-xs text-zinc-600">{{ $route['fallback_approver']['id'] ? $route['fallback_approver']['position'] : __('personnel::my_hr.hierarchy.empty.fallback') }}</p>
+                                    <p class="mt-1 text-xs leading-5 text-zinc-600">{{ $route['fallback_approver']['id'] ? $route['fallback_approver']['position'] : __('personnel::my_hr.hierarchy.empty.fallback') }}</p>
+                                </div>
+
+                                <div class="rounded-2xl border border-zinc-200 bg-white px-4 py-4">
+                                    <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __('personnel::my_hr.hierarchy.labels.hr_step') }}</x-ui.field-label>
+                                    <p class="mt-2 text-sm font-semibold tracking-tight text-zinc-950">
+                                        {{ $route['hr_always_included'] ? __('personnel::my_hr.hierarchy.labels.hr_active') : __('personnel::my_hr.hierarchy.labels.hr_inactive') }}
+                                    </p>
+                                    <p class="mt-1 text-xs leading-5 text-zinc-600">
+                                        {{ $route['hr_always_included'] ? __('personnel::my_hr.hierarchy.messages.hr_policy_help') : __('personnel::my_hr.hierarchy.messages.hr_policy_inactive_help') }}
+                                    </p>
                                 </div>
                             </div>
                         </div>

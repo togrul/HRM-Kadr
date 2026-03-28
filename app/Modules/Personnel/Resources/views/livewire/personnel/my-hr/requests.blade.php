@@ -27,28 +27,32 @@
                 <p class="max-w-3xl text-sm leading-6 text-zinc-500">{{ __('personnel::my_hr.requests.description') }}</p>
             </div>
 
-            <div class="grid gap-2 sm:grid-cols-3">
+            <div class="w-full lg:max-w-3xl">
+                <div class="rounded-[24px] border border-zinc-200 bg-zinc-50/90 p-2 shadow-sm">
+                    <div class="grid gap-2 sm:grid-cols-3">
                 <button wire:key="my-hr-request-create-leave-{{ $activeCreateForm ?: 'none' }}" type="button" wire:click="openCreateForm('leave')" @class([
-                    'rounded-2xl px-4 py-3 text-sm font-semibold tracking-tight transition',
-                    'bg-zinc-950 text-white shadow-sm' => $activeCreateForm === 'leave',
-                    'border border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300 hover:bg-zinc-50' => $activeCreateForm !== 'leave',
+                    'flex min-h-[58px] items-center justify-center rounded-[18px] px-4 py-3 text-center text-[15px] font-semibold tracking-tight transition-all duration-200',
+                    'bg-white text-zinc-950 shadow-sm ring-1 ring-zinc-200' => $activeCreateForm === 'leave',
+                    'text-zinc-600 hover:bg-white hover:text-zinc-900 hover:shadow-sm' => $activeCreateForm !== 'leave',
                 ])>
                     {{ __('personnel::my_hr.requests.actions.create_leave') }}
                 </button>
                 <button wire:key="my-hr-request-create-vacation-{{ $activeCreateForm ?: 'none' }}" type="button" wire:click="openCreateForm('vacation')" @class([
-                    'rounded-2xl px-4 py-3 text-sm font-semibold tracking-tight transition',
-                    'bg-zinc-950 text-white shadow-sm' => $activeCreateForm === 'vacation',
-                    'border border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300 hover:bg-zinc-50' => $activeCreateForm !== 'vacation',
+                    'flex min-h-[58px] items-center justify-center rounded-[18px] px-4 py-3 text-center text-[15px] font-semibold tracking-tight transition-all duration-200',
+                    'bg-white text-zinc-950 shadow-sm ring-1 ring-zinc-200' => $activeCreateForm === 'vacation',
+                    'text-zinc-600 hover:bg-white hover:text-zinc-900 hover:shadow-sm' => $activeCreateForm !== 'vacation',
                 ])>
                     {{ __('personnel::my_hr.requests.actions.create_vacation') }}
                 </button>
                 <button wire:key="my-hr-request-create-business-trip-{{ $activeCreateForm ?: 'none' }}" type="button" wire:click="openCreateForm('business_trip')" @class([
-                    'rounded-2xl px-4 py-3 text-sm font-semibold tracking-tight transition',
-                    'bg-zinc-950 text-white shadow-sm' => $activeCreateForm === 'business_trip',
-                    'border border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300 hover:bg-zinc-50' => $activeCreateForm !== 'business_trip',
+                    'flex min-h-[58px] items-center justify-center rounded-[18px] px-4 py-3 text-center text-[15px] font-semibold tracking-tight transition-all duration-200',
+                    'bg-white text-zinc-950 shadow-sm ring-1 ring-zinc-200' => $activeCreateForm === 'business_trip',
+                    'text-zinc-600 hover:bg-white hover:text-zinc-900 hover:shadow-sm' => $activeCreateForm !== 'business_trip',
                 ])>
                     {{ __('personnel::my_hr.requests.actions.create_business_trip') }}
                 </button>
+                    </div>
+                </div>
             </div>
         </div>
 

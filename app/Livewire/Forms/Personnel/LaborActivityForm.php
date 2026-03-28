@@ -81,10 +81,13 @@ class LaborActivityForm extends Form
                 );
 
                 $payload['position'] = $activity->position;
-                $payload['position_id'] = $activity->position_id ?? null;
-                $payload['structure_id'] = $activity->structure_id ?? null;
                 $payload['is_special_service'] = (bool) ($payload['is_special_service'] ?? false);
                 $payload['is_current'] = (bool) ($payload['is_current'] ?? false);
+                $payload['position_id'] = $activity->position_id
+                    ?? ($payload['is_current'] && empty($activity->leave_date) ? $personnel->position_id : null);
+                $payload['structure_id'] = $activity->structure_id
+                    ?? ($payload['is_current'] && empty($activity->leave_date) ? $personnel->structure_id : null);
+                $payload['use_lookup'] = ! empty($payload['position_id']) && ! empty($payload['structure_id']);
                 $payload['time'] = '12:00';
                 $payload['company_name_display'] = $payload['company_name'] ?? null;
 
@@ -196,6 +199,7 @@ class LaborActivityForm extends Form
     protected function defaultLaborActivity(): array
     {
         return [
+            'id' => null,
             'company_name' => null,
             'company_name_display' => null,
             'position' => null,

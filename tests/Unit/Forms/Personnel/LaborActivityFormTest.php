@@ -71,6 +71,8 @@ class LaborActivityFormTest extends TestCase
             'position' => 'Programçı',
             'position_label' => 'Programçı',
             'structure_label' => 'DMX / Full path',
+            'position_id' => 1,
+            'structure_id' => 101,
             'use_lookup' => true,
             'join_date' => '2026-02-25',
             'time' => '12:00',
@@ -80,11 +82,45 @@ class LaborActivityFormTest extends TestCase
         $payload = $form->laborActivitiesForPersistence();
 
         $this->assertSame('DMX', $payload[0]['company_name']);
+        $this->assertSame(1, $payload[0]['position_id']);
+        $this->assertSame(101, $payload[0]['structure_id']);
         $this->assertArrayNotHasKey('company_name_display', $payload[0]);
         $this->assertArrayNotHasKey('position_label', $payload[0]);
         $this->assertArrayNotHasKey('structure_label', $payload[0]);
         $this->assertArrayNotHasKey('use_lookup', $payload[0]);
         $this->assertArrayNotHasKey('time', $payload[0]);
+    }
+
+    public function test_fill_from_model_restores_lookup_ids_for_current_labor_activity(): void
+    {
+        $personnel = $this->makePersonnelWithStructurePath();
+
+        $personnel->laborActivities()->create([
+            'company_name' => 'DMX',
+            'structure_id' => $personnel->structure_id,
+            'position' => 'Programçı',
+            'position_id' => $personnel->position_id,
+            'coefficient' => null,
+            'join_date' => '2026-02-25',
+            'leave_date' => null,
+            'is_special_service' => false,
+            'is_current' => true,
+        ]);
+
+        $component = new class extends Component
+        {
+            public function render()
+            {
+                return '';
+            }
+        };
+
+        $form = new LaborActivityForm($component, 'laborActivityForm');
+        $form->fillFromModel($personnel->fresh());
+
+        $this->assertSame($personnel->position_id, $form->laborActivityList[0]['position_id']);
+        $this->assertSame($personnel->structure_id, $form->laborActivityList[0]['structure_id']);
+        $this->assertTrue($form->laborActivityList[0]['use_lookup']);
     }
 
     private function makePersonnelWithStructurePath(): Personnel

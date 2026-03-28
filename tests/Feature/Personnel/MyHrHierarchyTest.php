@@ -58,11 +58,63 @@ class MyHrHierarchyTest extends TestCase
             ->get(route('my-hr', ['tab' => 'hierarchy']))
             ->assertOk()
             ->assertSee('Mənim strukturum')
+            ->assertSee('Tabe olduğu şəxslər')
+            ->assertSee('Tabeliyində olan şəxslər')
             ->assertSee($manager->fullname)
             ->assertSee($upperManager->fullname)
             ->assertSee($report->fullname)
             ->assertSee('İcazə')
-            ->assertSee('İerarxik təsdiq siyasəti');
+            ->assertSee('İerarxik təsdiq siyasəti')
+            ->assertSee('Bu müraciət əvvəl birbaşa rəhbərinizə, sonra isə rəhbərinizin rəhbərinə keçir.');
+    }
+
+    public function test_my_hr_hierarchy_tab_stays_within_query_budget(): void
+    {
+        $this->seedReferenceData();
+
+        $user = User::factory()->create(['is_active' => true, 'email' => 'employee@example.test']);
+        $user->givePermissionTo(
+            Permission::findOrCreate('show-my-hr', 'web'),
+            Permission::findOrCreate('view-own-hierarchy', 'web'),
+        );
+
+        DB::table('structures')->insert([
+            'id' => 2,
+            'name' => 'Field Unit',
+            'shortname' => 'FU',
+            'parent_id' => 1,
+            'coefficient' => 1.10,
+            'code' => 11,
+            'level' => 2,
+        ]);
+
+        DB::table('positions')->insert([
+            ['id' => 2, 'name' => 'Section Chief', 'approval_rank' => 20, 'is_approval_target' => true],
+            ['id' => 3, 'name' => 'Department Head', 'approval_rank' => 30, 'is_approval_target' => true],
+        ]);
+
+        $this->makePersonnel('manager@example.test', 'Boss', 'Major', 'A', 2, 3);
+        $this->makePersonnel('upper@example.test', 'Boss', 'Colonel', 'B', 1, 3);
+        $this->makePersonnel($user->email, 'Doe', 'Jane', 'Smith', 2, 2);
+        $this->makePersonnel('report@example.test', 'Roe', 'Sam', 'Junior', 2, 1);
+
+        SelfServiceApprovalRoute::query()->create([
+            'request_type' => 'leave',
+            'include_primary_approver' => true,
+            'include_upper_approver' => true,
+            'hr_always_included' => true,
+            'is_active' => true,
+            'created_by' => $user->id,
+        ]);
+
+        DB::flushQueryLog();
+        DB::enableQueryLog();
+
+        $this->actingAs($user)
+            ->get(route('my-hr', ['tab' => 'hierarchy']))
+            ->assertOk();
+
+        $this->assertLessThanOrEqual(43, count(DB::getQueryLog()));
     }
 
     private function makePersonnel(string $email, string $surname, string $name, string $patronymic, int $structureId, int $positionId): Personnel

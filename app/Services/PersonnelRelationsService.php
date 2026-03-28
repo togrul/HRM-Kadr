@@ -262,9 +262,9 @@ class PersonnelRelationsService
 
         $normalized = collect($list)
             ->map(function (array $item) use (&$currentPositionId, &$currentStructureId, &$currentJoinDate) {
-                $useLookup = ! empty($item['use_lookup']);
                 $positionId = $item['position_id'] ?? null;
                 $structureId = $item['structure_id'] ?? null;
+                $useLookup = filled($positionId) && filled($structureId);
 
                 if (! empty($item['is_current']) && empty($item['leave_date'])) {
                     if (! empty($item['join_date'])) {
@@ -280,7 +280,7 @@ class PersonnelRelationsService
                     }
                 }
 
-                unset($item['use_lookup'], $item['position_label'], $item['structure_label'], $item['position_id'], $item['structure_id']);
+                unset($item['use_lookup'], $item['position_label'], $item['structure_label']);
 
                 return $item;
             })

@@ -27,4 +27,8 @@ return [
     'actions' => [
         'open_user_guide' => 'İstifadəçi bələdçisi',
     ],
+    'guide' => [
+        'title' => 'Əmrlərlə ilk dəfə işləyirsiniz?',
+        'description' => 'Əmr yaratma, axtarış, filtr və redaktə addımlarını qısa bələdçidən aça bilərsiniz.',
+    ],
 ];

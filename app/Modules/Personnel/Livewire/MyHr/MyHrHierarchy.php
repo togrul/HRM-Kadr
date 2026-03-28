@@ -32,7 +32,7 @@ class MyHrHierarchy extends Component
     {
         return Personnel::query()
             ->with([
-                'position:id,name',
+                'position:id,name,approval_rank,is_approval_target',
                 'structure' => fn ($query) => $query->select('id', 'parent_id', 'name')->withRecursive('parent', false),
             ])
             ->select(['id', 'surname', 'name', 'patronymic', 'position_id', 'structure_id'])

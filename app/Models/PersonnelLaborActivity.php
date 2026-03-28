@@ -28,7 +28,9 @@ class PersonnelLaborActivity extends Model
     protected $fillable = [
         'tabel_no',
         'company_name',
+        'structure_id',
         'position',
+        'position_id',
         'coefficient',
         'join_date',
         'leave_date',
@@ -46,6 +48,8 @@ class PersonnelLaborActivity extends Model
     ];
 
     protected $casts = [
+        'structure_id' => 'integer',
+        'position_id' => 'integer',
         'join_date' => self::FORMAT_CAST,
         'leave_date' => self::FORMAT_CAST,
         'order_date' => self::FORMAT_CAST,
