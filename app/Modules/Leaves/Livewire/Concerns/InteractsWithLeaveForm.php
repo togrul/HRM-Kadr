@@ -435,6 +435,17 @@ trait InteractsWithLeaveForm
             return;
         }
 
+        $livePreview = $this->assignmentPreview;
+        $liveRoute = $livePreview['route'] ?? null;
+        $liveApproverId = data_get($livePreview, 'approver.id');
+
+        if ($record && $liveRoute && $liveApproverId) {
+            $this->leave->assignment_mode = 'auto';
+            $this->syncAutomaticAssignment();
+
+            return;
+        }
+
         if ($record && data_get($this->leave->assigned_to, 'id')) {
             $this->leave->assignment_mode = 'auto';
             $this->leave->approval_route_source = $record->approval_route_source;
@@ -447,7 +458,7 @@ trait InteractsWithLeaveForm
             return;
         }
 
-        $route = $this->assignmentPreview['route'] ?? null;
+        $route = $liveRoute;
         $autoApproverId = $route['approver_personnel_id'] ?? null;
         $currentAssignedId = data_get($this->leave->assigned_to, 'id');
 
@@ -488,6 +499,43 @@ trait InteractsWithLeaveForm
         }
 
         $this->syncAutomaticAssignment();
+    }
+
+    protected function rehydrateAssignmentModeAfterSave(Leave $record, ?array $currentPreview = null): void
+    {
+        $this->resetAssignmentPreviewState();
+
+        if ($record->approval_route_source === 'manual_assignment') {
+            $this->leave->assignment_mode = 'manual';
+            $this->leave->approval_route_source = 'manual_assignment';
+            $this->leave->fallback_approver_personnel_id = null;
+
+            return;
+        }
+
+        $this->leave->assignment_mode = 'auto';
+        $this->leave->approval_route_source = $record->approval_route_source;
+        $this->leave->fallback_approver_personnel_id = $record->fallback_approver_personnel_id
+            ? (int) $record->fallback_approver_personnel_id
+            : null;
+        $this->leave->hr_always_included = (bool) ($record->hr_always_included ?? true);
+
+        if ($currentPreview && data_get($currentPreview, 'route.approver_personnel_id')) {
+            $preview = $currentPreview;
+            $preview['route'] = [
+                'approver_personnel_id' => $record->assigned_to ? (int) $record->assigned_to : null,
+                'fallback_approver_personnel_id' => $record->fallback_approver_personnel_id ? (int) $record->fallback_approver_personnel_id : null,
+                'approval_route_source' => $record->approval_route_source,
+                'hr_always_included' => (bool) ($record->hr_always_included ?? true),
+            ];
+
+            $this->assignmentPreviewKey = data_get($this->leave->tabel_no, 'tabel_no', 'none');
+            $this->assignmentPreviewSnapshot = $preview;
+
+            return;
+        }
+
+        $this->seedAssignmentPreviewFromRecord($record);
     }
 
     private function findPersonnelCardById(?int $personnelId, array $chain): array

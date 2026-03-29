@@ -48,6 +48,9 @@ class EditLeave extends Component
         }
 
         $this->authorize('update', $record);
+        $currentAssignmentPreview = $this->leave->assignment_mode === 'auto'
+            ? $this->assignmentPreview
+            : null;
         $this->syncAssignmentForPersistence();
         $this->leave->validate();
 
@@ -63,7 +66,7 @@ class EditLeave extends Component
         $record = $record->fresh($this->leaveRelations());
         $this->leave->fillFromModel($record);
         $this->syncSelectedLeaveTypeMeta();
-        $this->initializeAssignmentMode($record);
+        $this->rehydrateAssignmentModeAfterSave($record, $currentAssignmentPreview);
 
         if ($file instanceof TemporaryUploadedFile) {
             $this->leave->document_path = null;

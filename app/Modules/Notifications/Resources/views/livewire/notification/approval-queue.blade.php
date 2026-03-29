@@ -10,7 +10,7 @@
             <div class="rounded-[1.6rem] border border-zinc-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,250,252,0.92))] px-4 py-4 shadow-[0_14px_32px_rgba(15,23,42,0.04)] sm:px-5">
                 <div class="space-y-4">
                     <div class="space-y-3">
-                        <p class="max-w-[28ch] text-[clamp(1.55rem,2vw,1.95rem)] font-semibold leading-[1.05] tracking-tight text-zinc-950 break-words">
+                        <p class="max-w-[30ch] text-[clamp(1.15rem,1.45vw,1.45rem)] font-semibold leading-[1.15] tracking-tight text-zinc-950 break-words">
                             {{ $normalizeCampaignTitle($campaign->title) }}
                         </p>
 
