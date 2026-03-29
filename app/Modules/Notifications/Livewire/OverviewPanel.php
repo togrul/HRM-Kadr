@@ -109,6 +109,44 @@ class OverviewPanel extends Component
         $this->dispatch('notification-rule-changed');
     }
 
+    public function seedEmploymentStartedStarter(): void
+    {
+        $this->authorizeTemplateManagement();
+        $template = NotificationTemplate::query()->updateOrCreate(
+            ['key' => 'employment-started.default'],
+            [
+                'category' => 'employment_started',
+                'channel' => 'database',
+                'format' => 'text',
+                'subject_template' => __('notifications::common.mail.subject_employment_started').': {{ name }}',
+                'body_template' => '{{ name }} - {{ position }} - {{ structure }} - {{ join_work_date_label }} - {{ direct_manager }}',
+                'variables_schema' => ['name', 'position', 'structure', 'join_work_date_label', 'direct_manager'],
+                'is_active' => true,
+                'created_by' => auth()->id(),
+                'updated_by' => auth()->id(),
+            ]
+        );
+
+        NotificationRule::query()->updateOrCreate(
+            [
+                'category' => 'employment_started',
+                'trigger' => NotificationTriggerRegistry::trigger('employment_started') ?? 'employment_started',
+                'channel' => 'database',
+            ],
+            [
+                'template_id' => $template->id,
+                'audience_config' => ['targets' => ['manager_chain']],
+                'approval_required' => false,
+                'is_active' => true,
+                'created_by' => auth()->id(),
+                'updated_by' => auth()->id(),
+            ]
+        );
+
+        $this->dispatch('notification-template-changed');
+        $this->dispatch('notification-rule-changed');
+    }
+
     public function seedHolidayStarter(): void
     {
         $this->authorizeTemplateManagement();
@@ -207,6 +245,10 @@ class OverviewPanel extends Component
                     'detail' => __('notifications::common.flows.position_change_detail'),
                 ],
                 [
+                    'title' => __('notifications::common.flows.employment_started_title'),
+                    'detail' => __('notifications::common.flows.employment_started_detail'),
+                ],
+                [
                     'title' => __('notifications::common.flows.announcement_title'),
                     'detail' => __('notifications::common.flows.announcement_detail'),
                 ],
@@ -230,6 +272,13 @@ class OverviewPanel extends Component
                     'new_structure' => 'İnsan resursları şöbəsi',
                     'change_reason' => 'Daxili rotasiya',
                     'effective_date' => now()->format('d.m.Y'),
+                ]),
+                'employment_started' => $this->starterPreview('employment-started.default', 'employment_started', NotificationTriggerRegistry::trigger('employment_started') ?? 'employment_started', [
+                    'name' => 'Murad Əliyev',
+                    'position' => 'Proqramçı',
+                    'structure' => 'Texniki vasitələr və rabitə idarəsi',
+                    'join_work_date_label' => now()->format('d.m.Y'),
+                    'direct_manager' => 'Ələkbərova Ayşən Səməd',
                 ]),
                 'holiday' => $this->starterPreview('holiday.default', 'holiday', NotificationTriggerRegistry::trigger('holiday') ?? 'holiday_due', [
                     'holiday_name' => 'Novruz bayramı',

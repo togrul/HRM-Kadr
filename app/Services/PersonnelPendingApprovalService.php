@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Events\StaffScheduleUpdated;
 use App\Models\Personnel;
+use App\Modules\Notifications\Support\NotificationCampaignDispatcher;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -60,6 +61,10 @@ class PersonnelPendingApprovalService
                         position_id: (int) $personnel->position_id
                     ));
                 }
+
+                app(NotificationCampaignDispatcher::class)->dispatchEmploymentStarted($personnel, [
+                    'event_source' => 'pending_personnel_approved',
+                ]);
             });
         });
     }

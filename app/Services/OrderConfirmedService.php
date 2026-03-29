@@ -12,6 +12,7 @@ use App\Helpers\UsefulHelpers;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Events\StaffScheduleUpdated;
+use App\Modules\Notifications\Support\NotificationCampaignDispatcher;
 
 class OrderConfirmedService
 {
@@ -213,13 +214,18 @@ class OrderConfirmedService
                 'order_given_by' => "{$orderLog->given_by_rank} {$orderLog->given_by}",
             ]);
 
-            DB::afterCommit(function () use ($_personnel) {
+            DB::afterCommit(function () use ($_personnel, $orderLog) {
                 if ($_personnel->structure_id && $_personnel->position_id) {
                     event(new StaffScheduleUpdated(
                         structure_id: (int) $_personnel->structure_id,
                         position_id: (int) $_personnel->position_id
                     ));
                 }
+
+                app(NotificationCampaignDispatcher::class)->dispatchEmploymentStarted($_personnel, [
+                    'order_no' => $orderLog->order_no,
+                    'event_source' => 'employment_order_approved',
+                ]);
             });
 
             $this->endCurrentLaborActivity($_personnel, $date);

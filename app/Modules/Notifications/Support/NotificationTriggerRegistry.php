@@ -20,6 +20,11 @@ final class NotificationTriggerRegistry
             'kind' => 'system',
             'default' => true,
         ],
+        'employment_started' => [
+            'category' => 'employment_started',
+            'kind' => 'system',
+            'default' => true,
+        ],
         'holiday_due' => [
             'category' => 'holiday',
             'kind' => 'system',

@@ -20,14 +20,14 @@
                                         <div
                                             class="flex justify-center items-center p-2 rounded-xl bg-{{ $menu->color }}-100">
                                             <x-dynamic-component
-                                                  :component="'icons.' . $menu->icon"
+                                                  :component="$this->displayMenuIconComponent($menu)"
                                                   color="text-zinc-600"
                                                   size="w-6 h-6"
                                               />
                                         </div>
 
                                         <span class="text-sm font-medium">
-                                            {{ $menu->name }}
+                                            {{ $this->displayMenuName($menu) }}
                                         </span>
                                     </div>
                                 </x-table.td>

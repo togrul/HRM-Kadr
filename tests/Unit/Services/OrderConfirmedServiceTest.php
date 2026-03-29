@@ -14,6 +14,7 @@ use App\Models\OrderLog;
 use App\Models\OrderLogComponentAttributes;
 use App\Models\OrderStatus;
 use App\Models\OrderType;
+use App\Models\NotificationCampaign;
 use App\Models\Personnel;
 use App\Models\Position;
 use App\Models\Rank;
@@ -77,6 +78,98 @@ class OrderConfirmedServiceTest extends TestCase
         ]);
     }
 
+    public function test_it_notifies_manager_chain_when_employment_order_is_approved(): void
+    {
+        $ctx = $this->buildEmploymentContext(orderNo: 'IG-2026-3003');
+        $structureId = (int) $ctx['personnel']->structure_id;
+
+        $directManagerPosition = Position::query()->create([
+            'id' => 110,
+            'name' => 'Bölmə rəisi',
+            'approval_rank' => 1,
+            'is_approval_target' => true,
+        ]);
+        $upperManagerPosition = Position::query()->create([
+            'id' => 120,
+            'name' => 'Şöbə müdiri',
+            'approval_rank' => 2,
+            'is_approval_target' => true,
+        ]);
+
+        $directManagerUser = User::factory()->create([
+            'email' => 'direct-manager@example.test',
+            'is_active' => true,
+        ]);
+        $upperManagerUser = User::factory()->create([
+            'email' => 'upper-manager@example.test',
+            'is_active' => true,
+        ]);
+
+        Personnel::withoutEvents(function () use ($structureId, $directManagerPosition, $directManagerUser): void {
+            Personnel::query()->create([
+                'tabel_no' => 'MGR-1001',
+                'surname' => 'Ələkbərova',
+                'name' => 'Ayşən',
+                'patronymic' => 'Səməd',
+                'birthdate' => '1988-01-01',
+                'gender' => 2,
+                'mobile' => '994501000001',
+                'email' => $directManagerUser->email,
+                'nationality_id' => 1,
+                'pin' => 'PIN1001',
+                'residental_address' => 'Main st',
+                'education_degree_id' => 1,
+                'structure_id' => $structureId,
+                'position_id' => $directManagerPosition->id,
+                'work_norm_id' => 1,
+                'join_work_date' => '2024-01-01',
+                'added_by' => $directManagerUser->id,
+                'is_pending' => false,
+            ]);
+        });
+
+        Personnel::withoutEvents(function () use ($structureId, $upperManagerPosition, $upperManagerUser): void {
+            Personnel::query()->create([
+                'tabel_no' => 'MGR-1002',
+                'surname' => 'Məhərrəmli',
+                'name' => 'Rəşid',
+                'patronymic' => 'Rəşad',
+                'birthdate' => '1985-01-01',
+                'gender' => 1,
+                'mobile' => '994501000002',
+                'email' => $upperManagerUser->email,
+                'nationality_id' => 1,
+                'pin' => 'PIN1002',
+                'residental_address' => 'Main st',
+                'education_degree_id' => 1,
+                'structure_id' => $structureId,
+                'position_id' => $upperManagerPosition->id,
+                'work_norm_id' => 1,
+                'join_work_date' => '2024-01-01',
+                'added_by' => $upperManagerUser->id,
+                'is_pending' => false,
+            ]);
+        });
+
+        (new OrderConfirmedService($ctx['orderLog']))->handle([
+            ['id' => $ctx['candidate']->id],
+        ], 'create');
+
+        $campaign = NotificationCampaign::query()->latest('id')->first();
+
+        $this->assertNotNull($campaign);
+        $this->assertSame('employment_started', $campaign->category);
+        $this->assertSame('sent', $campaign->status);
+        $this->assertSame(2, (int) data_get($campaign->payload, 'manager_chain_count'));
+        $this->assertDatabaseCount('notification_dispatches', 2);
+        $this->assertDatabaseHas('notifications', [
+            'notifiable_id' => $directManagerUser->id,
+        ]);
+        $this->assertDatabaseHas('notifications', [
+            'notifiable_id' => $upperManagerUser->id,
+        ]);
+    }
+
     /**
      * @return array{candidate:Candidate,personnel:Personnel,orderLog:OrderLog}
      */
@@ -120,6 +213,8 @@ class OrderConfirmedServiceTest extends TestCase
         $position = Position::query()->create([
             'id' => 100,
             'name' => 'Programmer',
+            'approval_rank' => 0,
+            'is_approval_target' => true,
         ]);
 
         AppealStatus::query()->create([

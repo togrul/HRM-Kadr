@@ -4,6 +4,7 @@ namespace Tests\Unit\Services;
 
 use App\Models\Country;
 use App\Models\EducationDegree;
+use App\Models\NotificationCampaign;
 use App\Models\Personnel;
 use App\Models\PersonnelLaborActivity;
 use App\Models\Position;
@@ -64,6 +65,59 @@ class PersonnelPendingApprovalServiceTest extends TestCase
         );
     }
 
+    public function test_it_notifies_manager_chain_when_pending_personnel_is_approved(): void
+    {
+        $personnel = $this->makePersonnel(isPending: true, joinDate: '2026-02-03');
+        $structureId = (int) $personnel->structure_id;
+
+        $directManagerPosition = Position::query()->create([
+            'id' => 110,
+            'name' => 'Bölmə rəisi',
+            'approval_rank' => 1,
+            'is_approval_target' => true,
+        ]);
+
+        $managerUser = User::factory()->create([
+            'email' => 'pending-manager@example.test',
+            'is_active' => true,
+        ]);
+
+        Personnel::withoutEvents(function () use ($structureId, $directManagerPosition, $managerUser): void {
+            Personnel::query()->create([
+                'tabel_no' => 'MGRP'.Str::upper(Str::random(4)),
+                'surname' => 'Rəhbər',
+                'name' => 'Bir',
+                'patronymic' => 'Test',
+                'birthdate' => '1980-01-01',
+                'gender' => 1,
+                'mobile' => '994501234567',
+                'email' => $managerUser->email,
+                'nationality_id' => 1,
+                'pin' => 'PMANAGER',
+                'residental_address' => 'Main st',
+                'education_degree_id' => 1,
+                'structure_id' => $structureId,
+                'position_id' => $directManagerPosition->id,
+                'work_norm_id' => 1,
+                'join_work_date' => '2024-01-01',
+                'added_by' => $managerUser->id,
+                'is_pending' => false,
+            ]);
+        });
+
+        app(PersonnelPendingApprovalService::class)->approve($personnel);
+
+        $campaign = NotificationCampaign::query()->latest('id')->first();
+
+        $this->assertNotNull($campaign);
+        $this->assertSame('employment_started', $campaign->category);
+        $this->assertSame('sent', $campaign->status);
+        $this->assertDatabaseHas('notifications', [
+            'notifiable_id' => $managerUser->id,
+        ]);
+        $this->assertDatabaseCount('notification_dispatches', 1);
+    }
+
     private function makePersonnel(bool $isPending, string $joinDate): Personnel
     {
         $user = User::factory()->create();
@@ -95,6 +149,8 @@ class PersonnelPendingApprovalServiceTest extends TestCase
         $position = Position::query()->create([
             'id' => 1,
             'name' => 'Officer',
+            'approval_rank' => 0,
+            'is_approval_target' => true,
         ]);
 
         return Personnel::withoutEvents(function () use ($user, $country, $structure, $position, $isPending, $joinDate) {
@@ -120,4 +176,3 @@ class PersonnelPendingApprovalServiceTest extends TestCase
         });
     }
 }
-

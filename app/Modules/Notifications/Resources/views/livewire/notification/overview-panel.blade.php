@@ -3,6 +3,7 @@
         return match ($key) {
             'birthday.default' => __('notifications::common.template_keys.birthday.default'),
             'position-change.default' => __('notifications::common.template_keys.position_change.default'),
+            'employment-started.default' => __('notifications::common.template_keys.employment_started.default'),
             'holiday.default' => __('notifications::common.template_keys.holiday.default'),
             default => $key,
         };
@@ -18,47 +19,58 @@
 
 <div class="space-y-5">
     <x-surface-card :title="__('notifications::common.titles.flow_starter')" icon="icons.cake-icon">
-        <div class="grid gap-4 lg:grid-cols-2 2xl:grid-cols-3">
+        <div class="grid gap-4 xl:grid-cols-2">
             @foreach ([
                 'birthday' => __('notifications::common.flows.birthday_starter'),
                 'position_change' => __('notifications::common.flows.position_change_starter'),
+                'employment_started' => __('notifications::common.flows.employment_started_starter'),
                 'holiday' => __('notifications::common.flows.holiday_starter'),
             ] as $flowKey => $flowTitle)
-                <div class="rounded-[1.75rem] border border-zinc-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,250,252,0.94))] p-4 shadow-[0_18px_36px_rgba(15,23,42,0.05)] sm:p-5">
+                <div class="flex h-full flex-col rounded-[1.75rem] border border-zinc-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,250,252,0.94))] p-4 shadow-[0_18px_36px_rgba(15,23,42,0.05)]">
                     <div class="flex items-start justify-between gap-3">
                         <div class="min-w-0 space-y-2">
-                            <h3 class="text-[1.1rem] font-semibold leading-6 tracking-tight text-zinc-950">
+                            <h3 class="text-[1rem] font-semibold leading-6 tracking-tight text-zinc-950">
                                 {{ $flowTitle }}
                             </h3>
                         </div>
-                        <x-ui.async-button
-                            type="button"
-                            variant="primary"
-                            wire:click="{{ $flowKey === 'birthday' ? 'seedBirthdayStarter' : ($flowKey === 'position_change' ? 'seedPositionChangeStarter' : 'seedHolidayStarter') }}"
+                            <x-ui.async-button
+                                type="button"
+                                variant="primary"
+                            wire:click="{{ $flowKey === 'birthday' ? 'seedBirthdayStarter' : ($flowKey === 'position_change' ? 'seedPositionChangeStarter' : ($flowKey === 'employment_started' ? 'seedEmploymentStartedStarter' : 'seedHolidayStarter')) }}"
                             class="shrink-0 shadow-[0_14px_28px_rgba(15,23,42,0.16)]"
                         >
                             {{ __('notifications::common.buttons.seed') }}
                         </x-ui.async-button>
                     </div>
 
-                    <p class="w-full text-sm leading-2 text-zinc-500 mt-2">
+                    <p class="mt-2 w-full text-sm leading-8 text-zinc-500">
                       @if ($flowKey === 'birthday')
                           {{ __('notifications::common.flows.birthday_starter_hint') }}
                       @elseif ($flowKey === 'position_change')
                           {{ __('notifications::common.flows.position_change_starter_hint') }}
+                      @elseif ($flowKey === 'employment_started')
+                          {{ __('notifications::common.flows.employment_started_starter_hint') }}
                       @else
                           {{ __('notifications::common.flows.holiday_starter_hint') }}
                       @endif
                   </p>
 
-                    <div class="mt-4 flex flex-wrap items-center gap-2">
-                        <x-notification.chip mode="neutral" size="sm" uppercase class="shadow-[0_6px_14px_rgba(15,23,42,0.04)]">{{ $displayTemplateKey($starterFlows[$flowKey]['template_key']) }}</x-notification.chip>
-                        <x-notification.chip mode="neutral" size="sm" uppercase class="shadow-[0_6px_14px_rgba(15,23,42,0.04)]">{{ $displayTrigger($starterFlows[$flowKey]['trigger'] ?? null) }}</x-notification.chip>
-                        <x-notification.chip mode="neutral" size="sm" uppercase class="shadow-[0_6px_14px_rgba(15,23,42,0.04)]">{{ __('notifications::common.channels.'.$starterFlows[$flowKey]['channel']) }}</x-notification.chip>
-                        <x-notification.chip :mode="$starterFlows[$flowKey]['approval_required'] ? 'amber' : 'emerald'" size="sm" uppercase>{{ $starterFlows[$flowKey]['approval_required'] ? __('notifications::common.badges.approval_required') : __('notifications::common.badges.instant_send') }}</x-notification.chip>
+                    <div class="mt-3 flex flex-wrap items-start gap-2">
+                        <x-notification.chip mode="neutral" size="sm" uppercase class="max-w-full whitespace-normal break-words text-left leading-5 shadow-[0_6px_14px_rgba(15,23,42,0.04)]">
+                            {{ $displayTemplateKey($starterFlows[$flowKey]['template_key']) }}
+                        </x-notification.chip>
+                        <x-notification.chip mode="neutral" size="sm" uppercase class="max-w-full whitespace-normal break-words text-left leading-5 shadow-[0_6px_14px_rgba(15,23,42,0.04)]">
+                            {{ $displayTrigger($starterFlows[$flowKey]['trigger'] ?? null) }}
+                        </x-notification.chip>
+                        <x-notification.chip mode="neutral" size="sm" uppercase class="max-w-full whitespace-normal break-words text-left leading-5 shadow-[0_6px_14px_rgba(15,23,42,0.04)]">
+                            {{ __('notifications::common.channels.'.$starterFlows[$flowKey]['channel']) }}
+                        </x-notification.chip>
+                        <x-notification.chip :mode="$starterFlows[$flowKey]['approval_required'] ? 'amber' : 'emerald'" size="sm" uppercase class="max-w-full whitespace-normal break-words text-left leading-5">
+                            {{ $starterFlows[$flowKey]['approval_required'] ? __('notifications::common.badges.approval_required') : __('notifications::common.badges.instant_send') }}
+                        </x-notification.chip>
                     </div>
 
-                    <div class="mt-4">
+                    <div class="mt-3 flex-1">
                         <x-notification.preview-card
                             :subject-label="__('notifications::common.flows.subject')"
                             :subject="$starterFlows[$flowKey]['subject'] ?: $fallbackPreviewText"
@@ -67,7 +79,7 @@
                             :meta="$starterFlows[$flowKey]['meta_items']"
                             :audience="$starterFlows[$flowKey]['audience_labels']"
                             :fallback="$fallbackPreviewText"
-                            body-class="line-clamp-5"
+                            body-class="line-clamp-4"
                         />
                     </div>
                 </div>

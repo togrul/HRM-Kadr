@@ -11,6 +11,7 @@ use App\Models\NotificationTemplate;
 use App\Models\Personnel;
 use App\Models\Position;
 use App\Models\Structure;
+use App\Modules\Personnel\Application\Services\MyHr\ApprovalRouteResolverService;
 use App\Notifications\BirthdayNotification;
 use App\Notifications\PlatformNotification;
 use Illuminate\Support\Carbon;
@@ -45,6 +46,7 @@ class NotificationCampaignDispatcher
         protected NotificationAudienceResolver $audienceResolver,
         protected NotificationTemplateRenderer $templateRenderer,
         protected NotificationCountCache $countCache,
+        protected ApprovalRouteResolverService $approvalRouteResolver,
     ) {}
 
     public function dispatchBirthday(Personnel $personnel): int
@@ -117,6 +119,80 @@ class NotificationCampaignDispatcher
                 'trigger' => $trigger,
                 'template_id' => $rule->template_id,
                 'title' => 'Vəzifə dəyişikliyi: '.$personnel->fullname,
+                'channel' => $rule->channel,
+                'audience_config' => $rule->audience_config,
+                'payload' => $payload,
+                'format' => $rule->template?->format ?? 'text',
+                'status' => $rule->approval_required ? 'draft' : 'queued',
+                'approval_status' => $rule->approval_required ? 'pending' : 'not_required',
+                'created_by' => auth()->id(),
+            ]);
+
+            if ($rule->approval_required) {
+                continue;
+            }
+
+            $sentDispatches += $this->dispatchCampaign($campaign, $personnel);
+        }
+
+        return $sentDispatches;
+    }
+
+    public function dispatchEmploymentStarted(Personnel $personnel, array $context = []): int
+    {
+        $trigger = NotificationTriggerRegistry::trigger('employment_started') ?? 'employment_started';
+
+        $rules = NotificationRule::query()
+            ->with('template:id,key,subject_template,body_template,channel,format')
+            ->where('category', 'employment_started')
+            ->where('trigger', $trigger)
+            ->where('is_active', true)
+            ->get();
+
+        $payload = $this->employmentStartedPayload($personnel, $context);
+        $sentDispatches = 0;
+
+        if ($rules->isEmpty()) {
+            $recipients = $this->audienceResolver->resolve([
+                'targets' => ['manager_chain'],
+            ], $personnel);
+
+            if ($recipients->isEmpty()) {
+                return 0;
+            }
+
+            $campaign = NotificationCampaign::query()->create([
+                'category' => 'employment_started',
+                'trigger' => $trigger,
+                'template_id' => null,
+                'title' => 'İşə başlayan əməkdaş: '.$personnel->fullname,
+                'channel' => 'database',
+                'audience_config' => [
+                    'targets' => ['specific_users'],
+                    'user_ids' => $recipients->pluck('id')->all(),
+                ],
+                'payload' => $payload,
+                'format' => 'text',
+                'status' => 'queued',
+                'approval_status' => 'not_required',
+                'created_by' => auth()->id(),
+            ]);
+
+            return $this->dispatchCampaign($campaign, $personnel);
+        }
+
+        foreach ($rules as $rule) {
+            $recipients = $this->audienceResolver->resolve((array) $rule->audience_config, $personnel);
+
+            if ($recipients->isEmpty()) {
+                continue;
+            }
+
+            $campaign = NotificationCampaign::query()->create([
+                'category' => 'employment_started',
+                'trigger' => $trigger,
+                'template_id' => $rule->template_id,
+                'title' => 'İşə başlayan əməkdaş: '.$personnel->fullname,
                 'channel' => $rule->channel,
                 'audience_config' => $rule->audience_config,
                 'payload' => $payload,
@@ -618,6 +694,38 @@ class NotificationCampaignDispatcher
             'holiday_rules' => $calendar->is_paid ? 'Ödənişli qeyri-iş günü' : 'Qeyri-iş günü',
             'category' => __('notifications::common.categories.holiday'),
             'message' => __('notifications::common.messages.holiday_due'),
+        ];
+    }
+
+    protected function employmentStartedPayload(Personnel $personnel, array $context = []): array
+    {
+        $personnel->loadMissing([
+            'position:id,name,approval_rank,is_approval_target',
+        ]);
+
+        $managerChain = collect($this->approvalRouteResolver->managerChain($personnel))
+            ->values();
+
+        $directManager = $managerChain->first();
+        $preview = $this->approvalRouteResolver->personnelPreviewCard($personnel);
+
+        return [
+            'type' => 'EmploymentStarted',
+            'action' => 'employment_started',
+            'personnel_id' => $personnel->id,
+            'tabel_no' => $personnel->tabel_no,
+            'name' => $personnel->fullname,
+            'position' => data_get($preview, 'position'),
+            'structure' => data_get($preview, 'structure'),
+            'join_work_date' => optional($personnel->join_work_date)->format('Y-m-d'),
+            'join_work_date_label' => optional($personnel->join_work_date)->format('d.m.Y'),
+            'direct_manager' => data_get($directManager, 'fullname'),
+            'manager_chain' => $managerChain->pluck('fullname')->all(),
+            'manager_chain_count' => $managerChain->count(),
+            'order_no' => data_get($context, 'order_no'),
+            'event_source' => data_get($context, 'event_source', 'employment_activation'),
+            'category' => __('notifications::common.categories.employment_started'),
+            'message' => __('notifications::common.messages.employment_started'),
         ];
     }
 

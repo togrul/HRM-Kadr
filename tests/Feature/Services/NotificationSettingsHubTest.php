@@ -123,9 +123,11 @@ class NotificationSettingsHubTest extends TestCase
         Livewire::test(\App\Modules\Notifications\Livewire\OverviewPanel::class)
             ->call('seedBirthdayStarter')
             ->call('seedPositionChangeStarter')
+            ->call('seedEmploymentStartedStarter')
             ->call('seedHolidayStarter')
             ->assertSee('Ad günü başlanğıc şablonu')
             ->assertSee('Vəzifə dəyişikliyi başlanğıc şablonu')
+            ->assertSee('İşə başlayan əməkdaş başlanğıc şablonu')
             ->assertSee('Bayram / tətil başlanğıc şablonu');
 
         $this->assertDatabaseHas('notification_templates', [
@@ -146,6 +148,11 @@ class NotificationSettingsHubTest extends TestCase
         $this->assertDatabaseHas('notification_rules', [
             'category' => 'position_change',
             'trigger' => 'position_changed',
+        ]);
+
+        $this->assertDatabaseHas('notification_rules', [
+            'category' => 'employment_started',
+            'trigger' => 'employment_started',
         ]);
 
         $this->assertDatabaseHas('notification_rules', [

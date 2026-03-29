@@ -4,12 +4,19 @@ namespace App\Modules\Notifications\Support;
 
 use App\Models\Personnel;
 use App\Models\User;
+use App\Models\UserPersonnelLink;
+use App\Modules\Personnel\Application\Services\MyHr\ApprovalRouteResolverService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 
 class NotificationAudienceResolver
 {
     protected ?bool $performanceFormsTableReady = null;
+
+    public function __construct(
+        protected ApprovalRouteResolverService $approvalRouteResolver,
+    ) {}
 
     public function resolve(array $audienceConfig, ?Personnel $subject = null, array $context = []): Collection
     {
@@ -33,6 +40,7 @@ class NotificationAudienceResolver
                 'hr' => $this->hrUsers(),
                 'same_structure' => $this->sameStructureUsers($subject, $context),
                 'direct_manager' => $this->directManagerUsers($subject, $context),
+                'manager_chain' => $this->managerChainUsers($subject),
                 'department' => $this->departmentUsers($audienceConfig, $subject, $context),
                 'specific_users' => $this->specificUsers($audienceConfig),
                 'notification_permission' => $this->notificationPermissionUsers(),
@@ -151,6 +159,86 @@ class NotificationAudienceResolver
         }
 
         return collect();
+    }
+
+    protected function managerChainUsers(?Personnel $subject): Collection
+    {
+        if (! $subject) {
+            return collect();
+        }
+
+        $managerIds = collect($this->approvalRouteResolver->managerChain($subject))
+            ->pluck('id')
+            ->filter()
+            ->map(fn ($id) => (int) $id)
+            ->values();
+
+        if ($managerIds->isEmpty()) {
+            return collect();
+        }
+
+        $links = UserPersonnelLink::query()
+            ->whereIn('personnel_id', $managerIds->all())
+            ->pluck('user_id', 'personnel_id');
+
+        $linkedUsers = User::query()
+            ->where('is_active', true)
+            ->whereIn('id', $links->values()->filter()->unique()->all())
+            ->get(['id', 'name', 'email', 'is_active'])
+            ->keyBy('id');
+
+        $resolved = $managerIds
+            ->map(function (int $personnelId) use ($links, $linkedUsers) {
+                $userId = (int) ($links->get($personnelId) ?? 0);
+
+                return $userId > 0 ? $linkedUsers->get($userId) : null;
+            })
+            ->filter();
+
+        $unresolvedIds = $managerIds
+            ->reject(fn (int $personnelId) => $links->has($personnelId))
+            ->values();
+
+        if ($unresolvedIds->isEmpty()) {
+            return $resolved->unique('id')->values();
+        }
+
+        $fallbackPersonnels = Personnel::query()
+            ->active()
+            ->whereIn('id', $unresolvedIds->all())
+            ->get(['id', 'email']);
+
+        $emailMap = $fallbackPersonnels
+            ->mapWithKeys(function (Personnel $personnel): array {
+                $email = Str::lower(trim((string) $personnel->email));
+
+                return $email !== '' ? [$personnel->id => $email] : [];
+            });
+
+        if ($emailMap->isEmpty()) {
+            return $resolved->unique('id')->values();
+        }
+
+        $fallbackUsers = User::query()
+            ->where('is_active', true)
+            ->where(function ($query) use ($emailMap): void {
+                foreach ($emailMap->unique()->values() as $email) {
+                    $query->orWhereRaw('LOWER(TRIM(email)) = ?', [$email]);
+                }
+            })
+            ->get(['id', 'name', 'email', 'is_active'])
+            ->keyBy(fn (User $user) => Str::lower(trim((string) $user->email)));
+
+        return $resolved
+            ->concat(
+                $unresolvedIds->map(function (int $personnelId) use ($emailMap, $fallbackUsers) {
+                    $email = $emailMap->get($personnelId);
+
+                    return $email ? $fallbackUsers->get($email) : null;
+                })->filter()
+            )
+            ->unique('id')
+            ->values();
     }
 
     protected function departmentUsers(array $audienceConfig, ?Personnel $subject, array $context = []): Collection

@@ -262,4 +262,99 @@ class NotificationAudienceResolverTest extends TestCase
             $resolved->pluck('id')->all()
         );
     }
+
+    public function test_it_resolves_manager_chain_target_against_hierarchy(): void
+    {
+        Role::findOrCreate('admin');
+        Permission::findOrCreate('get-notification');
+        $creator = User::factory()->create();
+        DB::table('countries')->insert(['id' => 1, 'code' => 'AZ']);
+        DB::table('education_degrees')->insert(['id' => 1, 'title_az' => 'Bakalavr']);
+        DB::table('work_norms')->insert(['id' => 1, 'name_az' => 'Tam ştat']);
+
+        $structure = Structure::query()->create(['id' => 18, 'name' => 'Texniki vasitələr', 'shortname' => 'TV', 'code' => 18, 'level' => 1]);
+        $employeePosition = Position::query()->create(['id' => 1000, 'name' => 'Proqramçı', 'approval_rank' => 0, 'is_approval_target' => true]);
+        $managerPosition = Position::query()->create(['id' => 110, 'name' => 'Bölmə rəisi', 'approval_rank' => 1, 'is_approval_target' => true]);
+        $upperManagerPosition = Position::query()->create(['id' => 100, 'name' => 'Şöbə müdiri', 'approval_rank' => 2, 'is_approval_target' => true]);
+
+        $subject = Personnel::withoutEvents(fn () => Personnel::factory()->create([
+            'tabel_no' => '0006',
+            'surname' => 'Subject',
+            'name' => 'Chain',
+            'patronymic' => 'Test',
+            'birthdate' => '1991-03-16',
+            'email' => 'subject-chain@example.test',
+            'mobile' => '0500000006',
+            'nationality_id' => 1,
+            'pin' => 'PIN0006',
+            'residental_address' => 'Baku',
+            'education_degree_id' => 1,
+            'structure_id' => $structure->id,
+            'position_id' => $employeePosition->id,
+            'work_norm_id' => 1,
+            'join_work_date' => now()->toDateString(),
+            'added_by' => $creator->id,
+            'is_pending' => false,
+            'leave_work_date' => null,
+        ]));
+
+        Personnel::withoutEvents(fn () => Personnel::factory()->create([
+            'tabel_no' => '0007',
+            'surname' => 'Manager',
+            'name' => 'Direct',
+            'patronymic' => 'Test',
+            'birthdate' => '1987-03-16',
+            'email' => 'manager-chain@example.test',
+            'mobile' => '0500000007',
+            'nationality_id' => 1,
+            'pin' => 'PIN0007',
+            'residental_address' => 'Baku',
+            'education_degree_id' => 1,
+            'structure_id' => $structure->id,
+            'position_id' => $managerPosition->id,
+            'work_norm_id' => 1,
+            'join_work_date' => now()->toDateString(),
+            'added_by' => $creator->id,
+            'is_pending' => false,
+            'leave_work_date' => null,
+        ]));
+        $managerUser = User::factory()->create([
+            'email' => 'manager-chain@example.test',
+            'is_active' => true,
+        ]);
+
+        Personnel::withoutEvents(fn () => Personnel::factory()->create([
+            'tabel_no' => '0008',
+            'surname' => 'Manager',
+            'name' => 'Upper',
+            'patronymic' => 'Test',
+            'birthdate' => '1985-03-16',
+            'email' => 'upper-chain@example.test',
+            'mobile' => '0500000008',
+            'nationality_id' => 1,
+            'pin' => 'PIN0008',
+            'residental_address' => 'Baku',
+            'education_degree_id' => 1,
+            'structure_id' => $structure->id,
+            'position_id' => $upperManagerPosition->id,
+            'work_norm_id' => 1,
+            'join_work_date' => now()->toDateString(),
+            'added_by' => $creator->id,
+            'is_pending' => false,
+            'leave_work_date' => null,
+        ]));
+        $upperManagerUser = User::factory()->create([
+            'email' => 'upper-chain@example.test',
+            'is_active' => true,
+        ]);
+
+        $resolved = app(NotificationAudienceResolver::class)->resolve([
+            'targets' => ['manager_chain'],
+        ], $subject);
+
+        $this->assertEqualsCanonicalizing(
+            [$managerUser->id, $upperManagerUser->id],
+            $resolved->pluck('id')->all()
+        );
+    }
 }

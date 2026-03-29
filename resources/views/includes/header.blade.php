@@ -46,71 +46,23 @@
 
 @php
     use App\Services\HrPolicies\HrPolicyPackService;
-    use App\Support\Translations\ModuleTranslation;
-
-    $menuLiteralMap = [
-        'Staff table' => 'ui::menu.items.staff_table',
-        'Orders' => 'ui::menu.items.orders',
-        'Personal affairs' => 'ui::menu.items.personal_affairs',
-        'Reports' => 'ui::menu.items.reports',
-        'Queries' => 'ui::menu.items.queries',
-        'Candidates' => 'ui::menu.items.candidates',
-        'Vacations' => 'ui::menu.items.vacations',
-        'Business trips' => 'ui::menu.items.business_trips',
-        'Time off' => 'ui::menu.items.time_off',
-        'Attendance' => 'ui::menu.items.attendance',
-        'Training' => 'ui::menu.items.training',
-        'Performance' => 'ui::menu.items.performance',
-        'My HR' => 'ui::menu.items.my_hr',
-        'Self-service review' => 'ui::menu.items.self_service_reviews',
-        'SELF-SERVICE REVIEW' => 'ui::menu.items.self_service_reviews',
-        'Onboarding library' => 'ui::menu.items.onboarding_library',
-        'Learning library' => 'ui::menu.items.learning_library',
-    ];
-
-    $moduleAliases = [
-        'home' => 'personnel',
-        'my-hr' => 'personnel',
-        'self-service-reviews' => 'personnel',
-        'onboarding-library' => 'onboarding-library',
-        'learning-library' => 'learning-library',
-        'staffs' => 'staff',
-        'vacations.list' => 'vacation',
-        'business-trips.list' => 'business-trips',
-    ];
+    use App\Support\Navigation\MenuPresentation;
 
     $policyPack = app(HrPolicyPackService::class);
 
     $preparedMenus = collect($menus)
         ->filter(static fn ($menuItem) => $policyPack->menuVisible((string) $menuItem->url))
-        ->map(static function ($menuItem) use ($moduleAliases, $menuLiteralMap) {
+        ->map(static function ($menuItem) {
         $routeBase = (string) $menuItem->url;
-        $iconComponent = match ($routeBase) {
-            'my-hr' => 'icons.my-hr-icon',
-            'self-service-reviews' => 'icons.self-service-review-icon',
-            'onboarding-library' => 'icons.onboarding-library-icon',
-            'learning-library' => 'icons.learning-library-icon',
-            default => 'icons.' . $menuItem->icon,
-        };
 
         return (object) [
             'item' => $menuItem,
-            'moduleName' => $moduleAliases[$routeBase] ?? $routeBase,
+            'moduleName' => MenuPresentation::moduleName($routeBase),
             'route' => route($menuItem->url),
             'routeBase' => $routeBase,
             'isActive' => request()->routeIs($routeBase) || request()->routeIs($routeBase . '.*'),
-            'iconComponent' => $iconComponent,
-            'label' => (static function (string $value) use ($menuLiteralMap): string {
-                $resolved = ModuleTranslation::resolveStoredText($value);
-
-                if ($resolved !== $value) {
-                    return $resolved;
-                }
-
-                $mapped = $menuLiteralMap[$value] ?? null;
-
-                return is_string($mapped) ? __($mapped) : $value;
-            })((string) $menuItem->name),
+            'iconComponent' => MenuPresentation::iconComponent($menuItem),
+            'label' => MenuPresentation::label((string) $menuItem->name),
         ];
     });
 @endphp
