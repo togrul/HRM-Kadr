@@ -38,6 +38,51 @@ return [
         'civilian' => 'Civilian',
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Candidate Workflow Pack
+    |--------------------------------------------------------------------------
+    |
+    | This is the long-term hiring architecture pack and is separate from the
+    | current dual-mode UI behavior.
+    |
+    */
+    'workflow_pack' => env('APP_CANDIDATE_WORKFLOW_PACK', 'auto'),
+
+    'workflow_pack_map' => [
+        'default' => 'military',
+        'military' => 'military',
+        'public' => 'public',
+        'private' => 'private',
+    ],
+
+    'workflow_pack_labels' => [
+        'military' => 'Military',
+        'public' => 'Public',
+        'private' => 'Private',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Visible Workflow Packs Per Deployment
+    |--------------------------------------------------------------------------
+    |
+    | Most customers operate a single hiring model. Keep the UI scoped to only
+    | the packs relevant for that deployment.
+    |
+    | - array/string: explicitly allow those packs only
+    | - auto: resolve from active profile mapping below
+    |
+    */
+    'workflow_visible_packs' => env('APP_CANDIDATE_WORKFLOW_VISIBLE_PACKS', 'auto'),
+
+    'workflow_visible_pack_map' => [
+        'default' => ['military'],
+        'military' => ['military'],
+        'public' => ['public'],
+        'private' => ['private'],
+    ],
+
     'documents' => [
         'disk' => env('CANDIDATES_DOCUMENTS_DISK', 'local'),
         'directory' => env('CANDIDATES_DOCUMENTS_DIRECTORY', 'candidates'),

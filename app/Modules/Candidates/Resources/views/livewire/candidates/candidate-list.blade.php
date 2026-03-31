@@ -19,6 +19,33 @@
         }
     "
 >
+    <div class="px-6 pt-4">
+        @include('candidates::livewire.candidates.partials.recruitment-nav')
+    </div>
+
+    <div class="grid grid-cols-1 gap-3 px-6 py-2 md:grid-cols-2 xl:grid-cols-4">
+        <div class="rounded-[24px] border border-slate-200 bg-white p-4 shadow-[0_18px_40px_-34px_rgba(15,23,42,0.35)]">
+            <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">{{ __('candidates::recruitment.titles.requisitions') }}</div>
+            <div class="mt-3 text-3xl font-semibold tracking-tight text-slate-900">{{ $this->recruitmentSummary['requisitions'] }}</div>
+            <p class="mt-2 text-sm text-slate-500">{{ __('candidates::recruitment.labels.recruitment_owner') }}</p>
+        </div>
+        <div class="rounded-[24px] border border-slate-200 bg-white p-4 shadow-[0_18px_40px_-34px_rgba(15,23,42,0.35)]">
+            <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">{{ __('candidates::recruitment.titles.openings') }}</div>
+            <div class="mt-3 text-3xl font-semibold tracking-tight text-slate-900">{{ $this->recruitmentSummary['openings'] }}</div>
+            <p class="mt-2 text-sm text-slate-500">{{ __('candidates::recruitment.labels.openings_count') }}</p>
+        </div>
+        <div class="rounded-[24px] border border-slate-200 bg-white p-4 shadow-[0_18px_40px_-34px_rgba(15,23,42,0.35)]">
+            <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">{{ __('candidates::recruitment.titles.pipeline') }}</div>
+            <div class="mt-3 text-3xl font-semibold tracking-tight text-slate-900">{{ $this->recruitmentSummary['applications'] }}</div>
+            <p class="mt-2 text-sm text-slate-500">{{ __('candidates::recruitment.labels.applications') }}</p>
+        </div>
+        <div class="rounded-[24px] border border-slate-200 bg-white p-4 shadow-[0_18px_40px_-34px_rgba(15,23,42,0.35)]">
+            <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">{{ __('candidates::recruitment.labels.current_stage') }}</div>
+            <div class="mt-3 text-3xl font-semibold tracking-tight text-slate-900">{{ $this->recruitmentSummary['active_applications'] }}</div>
+            <p class="mt-2 text-sm text-slate-500">{{ __('candidates::recruitment.statuses.active') }}</p>
+        </div>
+    </div>
+
     <div class="grid grid-cols-1 gap-2 px-6 py-4 sm:grid-cols-2 lg:grid-cols-4">
         @if ($this->filterEnabled('fullname'))
             <div class="flex flex-col">
@@ -130,7 +157,7 @@
                     >
                         <div class="flex w-full flex-col justify-between gap-1">
                             <div class="space-y-2">
-                                <div class="{{ $categoryStat['active'] ? 'text-slate-300' : 'text-slate-400' }} text-[11px] font-semibold uppercase tracking-[0.2em]">
+                                <div class="{{ $categoryStat['active'] ? 'text-slate-300' : 'text-slate-400' }} text-[11px] font-semibold uppercase tracking-tight">
                                     0{{ $loop->iteration }}
                                 </div>
                                 <div class="text-[1rem] font-semibold leading-6">{{ $categoryStat['label'] }}</div>
@@ -151,7 +178,7 @@
         @endif
 
         <div class="flex items-center justify-between">
-            <div class="flex flex-col">
+            <div class="flex flex-col gap-4">
                 <div class="flex space-x-4">
                     @can('create', App\Models\Candidate::class)
                         <button wire:click="openSideMenu('add-candidate')"
@@ -189,6 +216,29 @@
                                         <span class="text-sm font-medium text-slate-900">
                                             {{ $_candidate->fullname_max }}
                                         </span>
+                                        @if ($_candidate->latestApplication)
+                                            <div class="flex flex-wrap items-center gap-2 pt-1">
+                                                <span class="inline-flex rounded-full bg-sky-50 px-2.5 py-1 text-[11px] font-semibold text-sky-700">
+                                                    {{ $this->recruitmentStageLabel($_candidate->latestApplication->current_stage) }}
+                                                </span>
+                                                <span class="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-600">
+                                                    {{ $_candidate->latestApplication->opening?->title ?? __('candidates::recruitment.labels.latest_opening') }}
+                                                </span>
+                                            </div>
+                                            <div class="flex flex-wrap gap-2 pt-1">
+                                                <a href="{{ route('candidates.applications.show', $_candidate->latestApplication) }}" class="inline-flex h-8 items-center rounded-xl border border-slate-200 px-3 text-[11px] font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900">
+                                                    {{ __('candidates::recruitment.actions.open_latest_application') }}
+                                                </a>
+                                                @if ($_candidate->latestApplication->opening)
+                                                    <a href="{{ route('candidates.openings.show', $_candidate->latestApplication->opening) }}" class="inline-flex h-8 items-center rounded-xl border border-slate-200 px-3 text-[11px] font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900">
+                                                        {{ __('candidates::recruitment.actions.open_latest_opening') }}
+                                                    </a>
+                                                @endif
+                                                <a href="{{ route('candidates.applications', ['candidate' => $_candidate->id]) }}" class="inline-flex h-8 items-center rounded-xl border border-slate-200 px-3 text-[11px] font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900">
+                                                    {{ __('candidates::recruitment.actions.open_candidate_pipeline') }}
+                                                </a>
+                                            </div>
+                                        @endif
                                         @if (!empty($_candidate->deleted_at))
                                             <div class="flex flex-col text-xs font-medium">
                                                 <div class="flex items-center space-x-1">

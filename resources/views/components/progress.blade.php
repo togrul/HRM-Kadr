@@ -5,8 +5,15 @@
 ])
 
 @php
+    $startDate = $startDate instanceof \Illuminate\Support\Carbon
+        ? $startDate->copy()
+        : \Illuminate\Support\Carbon::parse($startDate);
+    $endDate = $endDate instanceof \Illuminate\Support\Carbon
+        ? $endDate->copy()
+        : \Illuminate\Support\Carbon::parse($endDate);
+
     $duration = $startDate->diffInDays($endDate);
-    $currentProgress = $startDate->diffInDays(\Carbon\Carbon::now()->addDay());
+    $currentProgress = $startDate->diffInDays(\Illuminate\Support\Carbon::now()->addDay());
     $percentage = ($duration > 0) ? ($currentProgress / $duration) * 100 : 0;
 @endphp
 

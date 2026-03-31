@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\LogOptions;
@@ -107,6 +108,16 @@ class Candidate extends Model
     public function documents(): HasMany
     {
         return $this->hasMany(CandidateDocument::class)->orderBy('sort_order')->orderBy('id');
+    }
+
+    public function applications(): HasMany
+    {
+        return $this->hasMany(CandidateApplication::class);
+    }
+
+    public function latestApplication(): HasOne
+    {
+        return $this->hasOne(CandidateApplication::class)->latestOfMany('id');
     }
 
     public function scopeFilter($query, array $filters)

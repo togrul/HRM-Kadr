@@ -22,7 +22,7 @@
                         <x-icons.files-icon size="w-8 h-8" color="text-white"></x-icons.files-icon>
                     </div>
                     <div class="space-y-2">
-                        <div class="inline-flex items-center rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-white">
+                        <div class="inline-flex items-center rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold uppercase tracking-tight text-white">
                             {{ __('candidates::files.labels.archive') }}
                         </div>
                         <h3 class="text-2xl font-semibold text-slate-900">{{ __('candidates::files.titles.all_documents') }}</h3>
@@ -164,7 +164,7 @@
                                                     <x-dynamic-component :component="$icon" size="w-5 h-5" color="text-slate-600" hover="text-slate-700" />
                                                 @endif
                                             </div>
-                                            <div class="rounded-full border border-slate-900 bg-black px-2.5 py-1 text-[11px] font-semibold font-mono uppercase tracking-tighter text-slate-50 shadow-sm">
+                                            <div class="rounded-full border border-slate-900 bg-black px-2.5 py-1 text-[11px] font-semibold font-mono uppercase tracking-tight text-slate-50 shadow-sm">
                                                 {{ $file['extension'] }}
                                             </div>
                                         </div>
@@ -172,7 +172,7 @@
                                         <div class="space-y-2">
                                             <select
                                                 wire:model.live="files.{{ $key }}.category"
-                                                class="w-full rounded-full border border-slate-200 bg-white px-3 py-2 text-[12px] font-semibold uppercase tracking-tighter text-slate-700 shadow-sm"
+                                                class="w-full rounded-full border border-slate-200 bg-white px-3 py-2 text-[12px] font-semibold uppercase tracking-tight text-slate-700 shadow-sm"
                                             >
                                                 @foreach($categoryOptions as $option)
                                                     <option value="{{ $option['id'] }}">{{ $option['label'] }}</option>
@@ -192,11 +192,11 @@
                                         <div class="rounded-[20px] border border-slate-200 bg-slate-50 px-3 py-2 shadow-sm">
                                             <dl class="space-y-2 text-sm">
                                                 <div class="space-y-1">
-                                                    <dt class="text-[12px] font-semibold uppercase tracking-tighter text-slate-400">{{ __('candidates::common.labels.created_date') }}</dt>
+                                                    <dt class="text-[12px] font-semibold uppercase tracking-tight text-slate-400">{{ __('candidates::common.labels.created_date') }}</dt>
                                                     <dd class="break-words text-slate-700">{{ $file['created_at_label'] }}</dd>
                                                 </div>
                                                 <div class="space-y-1">
-                                                    <dt class="text-[12px] font-semibold uppercase tracking-tighter text-slate-400">{{ __('candidates::files.labels.size') }}</dt>
+                                                    <dt class="text-[12px] font-semibold uppercase tracking-tight text-slate-400">{{ __('candidates::files.labels.size') }}</dt>
                                                     <dd class="text-slate-700">{{ \Illuminate\Support\Number::fileSize((int) $file['size_bytes']) }}</dd>
                                                 </div>
                                             </dl>

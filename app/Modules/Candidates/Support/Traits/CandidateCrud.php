@@ -3,13 +3,13 @@
 namespace App\Modules\Candidates\Support\Traits;
 
 use App\Concerns\LoadsAppealStatuses;
-use App\Enums\AttitudeMilitaryEnum;
-use App\Modules\Candidates\Support\CandidateModeResolver;
-use App\Models\Structure;
 use App\Models\Candidate;
+use App\Models\Structure;
 use App\Livewire\Traits\DropdownConstructTrait;
+use App\Modules\Candidates\Application\Services\CandidateProfileFieldSchemaService;
+use App\Modules\Candidates\Support\CandidateModeResolver;
+use App\Modules\Candidates\Support\CandidateWorkflowPackResolver;
 use App\Traits\NormalizesDropdownPayloads;
-use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 
@@ -33,44 +33,15 @@ trait CandidateCrud
 
     public function rules()
     {
-        $rules = [
-            'candidate.name' => 'required|string|min:2',
-            'candidate.surname' => 'required|string|min:2',
-            'candidate.patronymic' => 'required|string|min:2',
-            'candidate.structure_id' => 'required|int|exists:structures,id',
-            'candidate.birthdate' => 'required|date',
-            'candidate.gender' => 'required|int',
-            'candidate.height' => 'required|int',
-            'candidate.knowledge_test' => 'required|int',
-            'candidate.status_id' => 'required|int|exists:appeal_statuses,id',
-        ];
-
-        if ($this->isMilitaryCandidateMode()) {
-            $rules['candidate.physical_fitness_exam'] = 'required|int';
-            $rules['candidate.attitude_to_military'] = ['required', Rule::in(AttitudeMilitaryEnum::values())];
-        } else {
-            $rules['candidate.physical_fitness_exam'] = 'nullable|int';
-            $rules['candidate.attitude_to_military'] = ['nullable', Rule::in(AttitudeMilitaryEnum::values())];
-        }
-
-        return $rules;
+        return array_merge(
+            app(CandidateProfileFieldSchemaService::class)->coreRules(),
+            app(CandidateProfileFieldSchemaService::class)->packRules($this->candidateWorkflowPack())
+        );
     }
 
     protected function validationAttributes()
     {
-        return [
-            'candidate.name' => __('candidates::common.labels.name'),
-            'candidate.surname' => __('candidates::common.labels.surname'),
-            'candidate.patronymic' => __('candidates::common.labels.patronymic'),
-            'candidate.structure_id' => __('candidates::common.labels.structure'),
-            'candidate.birthdate' => __('candidates::common.labels.birthdate'),
-            'candidate.gender' => __('candidates::common.labels.gender'),
-            'candidate.height' => __('candidates::common.labels.height'),
-            'candidate.knowledge_test' => __('candidates::common.labels.knowledge_test'),
-            'candidate.physical_fitness_exam' => __('candidates::common.labels.physical_fitness'),
-            'candidate.attitude_to_military' => __('candidates::common.labels.attitude_to_military'),
-            'candidate.status_id' => __('candidates::common.labels.status'),
-        ];
+        return app(CandidateProfileFieldSchemaService::class)->validationAttributeLabels($this->candidateWorkflowPack());
     }
 
     public function mount()
@@ -84,8 +55,8 @@ trait CandidateCrud
             $this->authorize('create', Candidate::class);
             $this->title = __('candidates::common.titles.add_candidate');
             $this->candidate = [
-              'structure_id' => null,
-              'status_id' => null
+                'structure_id' => null,
+                'status_id' => null,
             ];
         }
 
@@ -146,6 +117,21 @@ trait CandidateCrud
     public function candidateModeLabel(): string
     {
         return app(CandidateModeResolver::class)->label($this->candidateMode);
+    }
+
+    public function candidateWorkflowPack(): string
+    {
+        return app(CandidateWorkflowPackResolver::class)->resolve();
+    }
+
+    public function candidatePackFieldRows(): array
+    {
+        return app(CandidateProfileFieldSchemaService::class)->rowsForPack($this->candidateWorkflowPack());
+    }
+
+    public function candidateFieldOptions(array $field): array
+    {
+        return app(CandidateProfileFieldSchemaService::class)->optionsForField($field);
     }
 
     protected function normalizeByMode(): void

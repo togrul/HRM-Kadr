@@ -385,13 +385,19 @@ class Personnel extends Model
 
     public function hasActiveVacation(): HasOne
     {
-        return $this->latestVacation()
+        return $this->hasOne(PersonnelVacation::class, 'tabel_no', 'tabel_no')
             ->where('start_date', '<=', Carbon::now())
-            ->where('return_work_date', '>', Carbon::now());
+            ->where('return_work_date', '>', Carbon::now())
+            ->orderByDesc('return_work_date')
+            ->select('personnel_vacations.*');
     }
 
     public function getActiveVacationAttribute(): ?PersonnelVacation
     {
+        if ($this->relationLoaded('hasActiveVacation')) {
+            return $this->getRelation('hasActiveVacation');
+        }
+
         if (! $this->relationLoaded('latestVacation')) {
             return null;
         }
@@ -423,13 +429,19 @@ class Personnel extends Model
 
     public function hasActiveBusinessTrip(): HasOne
     {
-        return $this->latestBusinessTrip()
+        return $this->hasOne(PersonnelBusinessTrip::class, 'tabel_no', 'tabel_no')
             ->where('start_date', '<=', Carbon::now())
-            ->where('end_date', '>', Carbon::now());
+            ->where('end_date', '>', Carbon::now())
+            ->orderByDesc('end_date')
+            ->select('personnel_business_trips.*');
     }
 
     public function getActiveBusinessTripAttribute(): ?PersonnelBusinessTrip
     {
+        if ($this->relationLoaded('hasActiveBusinessTrip')) {
+            return $this->getRelation('hasActiveBusinessTrip');
+        }
+
         if (! $this->relationLoaded('latestBusinessTrip')) {
             return null;
         }

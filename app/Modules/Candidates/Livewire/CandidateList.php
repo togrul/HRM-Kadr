@@ -5,10 +5,14 @@ namespace App\Modules\Candidates\Livewire;
 use App\Concerns\LoadsAppealStatuses;
 use App\Modules\Candidates\Exports\CandidateExport;
 use App\Modules\Candidates\Support\CandidateModeResolver;
+use App\Modules\Candidates\Support\Traits\InteractsWithRecruitmentPresentation;
 use App\Livewire\Traits\SideModalAction;
 use App\Models\Setting;
 use App\Models\Candidate;
+use App\Models\CandidateApplication;
 use App\Models\CandidateDocument;
+use App\Models\JobOpening;
+use App\Models\JobRequisition;
 use App\Services\StructureService;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -29,6 +33,7 @@ class CandidateList extends Component
 {
     use AuthorizesRequests;
     use LoadsAppealStatuses;
+    use InteractsWithRecruitmentPresentation;
     use SideModalAction;
     use WithPagination;
 
@@ -154,7 +159,21 @@ class CandidateList extends Component
     protected function returnData($type = 'normal')
     {
         $result = $this->filteredCandidateQuery()
-            ->with(['structure', 'status', 'creator', 'personDidDelete'])
+            ->with([
+                'structure',
+                'status',
+                'creator',
+                'personDidDelete',
+                'latestApplication' => fn ($query) => $query->select([
+                    'candidate_applications.id',
+                    'candidate_applications.candidate_id',
+                    'candidate_applications.job_opening_id',
+                    'candidate_applications.current_stage',
+                    'candidate_applications.status',
+                ]),
+                'latestApplication.opening:id,title,job_requisition_id',
+                'latestApplication.opening.requisition:id,title',
+            ])
             ->withCount('documents')
             ->orderByDesc('appeal_date');
 
@@ -211,6 +230,17 @@ class CandidateList extends Component
     public function render()
     {
         return view('candidates::livewire.candidates.candidate-list');
+    }
+
+    #[Computed]
+    public function recruitmentSummary(): array
+    {
+        return [
+            'requisitions' => (int) JobRequisition::query()->count(),
+            'openings' => (int) JobOpening::query()->count(),
+            'applications' => (int) CandidateApplication::query()->count(),
+            'active_applications' => (int) CandidateApplication::query()->where('status', 'active')->count(),
+        ];
     }
 
     #[Computed]

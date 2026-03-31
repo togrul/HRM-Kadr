@@ -12,6 +12,7 @@ class CandidateDocument extends Model
 
     protected $fillable = [
         'candidate_id',
+        'candidate_application_id',
         'display_name',
         'original_name',
         'file_path',
@@ -20,6 +21,8 @@ class CandidateDocument extends Model
         'extension',
         'size_bytes',
         'category',
+        'stage_key',
+        'document_key',
         'notes',
         'uploaded_by',
         'sort_order',
@@ -28,6 +31,11 @@ class CandidateDocument extends Model
     public function candidate(): BelongsTo
     {
         return $this->belongsTo(Candidate::class);
+    }
+
+    public function application(): BelongsTo
+    {
+        return $this->belongsTo(CandidateApplication::class, 'candidate_application_id');
     }
 
     public function uploader(): BelongsTo

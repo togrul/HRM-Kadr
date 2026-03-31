@@ -142,9 +142,24 @@
 
                     <x-table.tbl :headers="$this->getTableHeaders()" title="{{ __('vacation::common.titles.vacations') }}">
                         @forelse ($this->vacations as $_vacation)
-                            <tr @class([
-                                'bg-teal-50' => $_vacation->is_active_vacation,
-                            ])>
+                            @php
+                                $startDate = \Carbon\Carbon::parse($_vacation->start_date);
+                                $endDate = \Carbon\Carbon::parse($_vacation->end_date);
+                                $returnWorkDate = \Carbon\Carbon::parse($_vacation->return_work_date);
+                                $isActiveVacation = $_vacation->is_active_vacation;
+                                $statusCardClasses = $isActiveVacation
+                                    ? 'border-emerald-200/80 bg-gradient-to-r from-emerald-50 via-white to-teal-50 shadow-emerald-100/60'
+                                    : 'border-zinc-200 bg-gradient-to-r from-zinc-50 via-white to-slate-50 shadow-zinc-100/70';
+                                $statusDotClasses = $isActiveVacation
+                                    ? 'bg-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.12)]'
+                                    : 'bg-zinc-500 shadow-[0_0_0_4px_rgba(113,113,122,0.10)]';
+                                $statusTextClasses = $isActiveVacation ? 'text-emerald-700' : 'text-zinc-700';
+                                $statusPillClasses = $isActiveVacation
+                                    ? 'ring-emerald-100 text-emerald-700'
+                                    : 'ring-zinc-200 text-zinc-600';
+                                $progressRailClasses = $isActiveVacation ? 'bg-white ring-emerald-100' : 'bg-white ring-zinc-200';
+                            @endphp
+                            <tr>
                                 <x-table.td>
                                     <span class="text-sm font-medium text-gray-700">
                                         {{ $_vacation->row_no }}
@@ -160,61 +175,54 @@
                                         <span class="text-sm font-medium text-slate-900">
                                             {{ $_vacation->personnel?->fullname }}
                                         </span>
-                                        @if ($_vacation->is_active_vacation)
-                                            <span
-                                                class="flex items-center justify-center px-2 py-1 text-sm font-medium text-green-700 bg-green-200 rounded-lg">
-                                                {{ __('vacation::common.labels.in_vacation') }}
-                                            </span>
-                                        @endif
                                     </div>
                                 </x-table.td>
 
                                 <x-table.td>
                                     <div class="flex flex-col space-y-1">
                                         <span
-                                            class="px-2 py-1 text-sm font-medium text-blue-500 rounded-lg bg-slate-100">
+                                            class="px-2 py-1 text-sm font-medium text-slate-600 rounded-lg bg-slate-100">
                                             {{ $_vacation->personnel?->structure?->name }}
                                         </span>
                                         <span
-                                            class="px-2 py-1 text-sm font-medium rounded-lg text-rose-500 bg-slate-100">
+                                            class="px-2 py-1 text-sm font-medium rounded-lg text-teal-600 bg-slate-100">
                                             {{ $_vacation->personnel?->position_label }}
                                         </span>
                                     </div>
                                 </x-table.td>
 
                                 <x-table.td>
-                                    <div class="flex flex-col text-sm font-medium">
-                                        <div class="flex items-center space-x-1">
-                                            <span class="text-gray-500">{{ __('vacation::common.labels.duration') }}:</span>
-                                            <span class="text-teal-500">{{ $_vacation->duration }}
-                                                {{ __('vacation::common.labels.day') }}</span>
-                                        </div>
-                                        <div class="flex items-center space-x-1">
-                                            <span class="text-gray-500">{{ __('vacation::common.labels.start_date') }}:</span>
-                                            <span
-                                                class="text-sky-500">{{ \Carbon\Carbon::parse($_vacation->start_date)->format('d.m.Y') }}</span>
-                                        </div>
-                                        <div class="flex items-center space-x-1">
-                                            <span class="text-gray-500">{{ __('vacation::common.labels.end_date') }}:</span>
-                                            <span
-                                                class="text-rose-500">{{ \Carbon\Carbon::parse($_vacation->end_date)->format('d.m.Y') }}</span>
-                                        </div>
-                                        <div class="flex items-center space-x-1">
-                                            <span class="text-gray-500">{{ __('vacation::common.labels.return_work_date') }}:</span>
-                                            <span
-                                                class="text-green-500">{{ \Carbon\Carbon::parse($_vacation->return_work_date)->format('d.m.Y') }}</span>
-                                        </div>
-                                        <div class="flex items-center space-x-2">
-                                            <span
-                                                class="flex-shrink-0 text-sm text-gray-500">{{ __('vacation::common.labels.vacation_days') }}:
-                                            </span>
-                                            <div
-                                                class="relative flex items-center justify-center w-20 h-2 overflow-hidden rounded-lg bg-slate-200">
-                                                <div class="absolute left-0 h-full bg-{{ $_vacation->remaining_color }}-500 shadow-sm"
-                                                    style="width: {{ $_vacation->remaining_percentage }}%"></div>
+                                    <div class="w-full max-w-sm rounded-2xl border px-3 py-1 shadow-sm {{ $statusCardClasses }}">
+                                        <div class="flex items-center justify-between gap-3">
+                                            <div class="inline-flex items-center gap-2 text-xs font-semibold {{ $statusTextClasses }}">
+                                                <span class="h-2.5 w-2.5 rounded-full {{ $statusDotClasses }}"></span>
+                                                {{ $isActiveVacation ? __('vacation::common.labels.in_vacation') : __('vacation::common.labels.at_work') }}
                                             </div>
-                                            <span
-                                                class="z-10 text-sm font-medium text-slate-900">{{ $_vacation->remaining_days }}/{{ $_vacation->vacation_days_total }}</span>
+                                            <span class="rounded-full bg-white/90 px-2 py-0.5 text-[11px] font-semibold ring-1 {{ $statusPillClasses }}">
+                                                {{ $_vacation->remaining_days }}/{{ $_vacation->vacation_days_total }}
+                                            </span>
+                                        </div>
+
+                                        <div class="mt-1 flex items-center gap-2 text-xs font-medium text-slate-500">
+                                            <span>{{ $startDate->format('d.m.Y') }}</span>
+                                            <span class="text-slate-300">→</span>
+                                            <span>{{ $endDate->format('d.m.Y') }}</span>
+                                        </div>
+
+                                        <div class="mt-1 grid grid-cols-2 gap-2 text-[11px] font-medium text-slate-500">
+                                            <div class="rounded-xl bg-white/80 px-2 py-1 ring-1 ring-black/5">
+                                                <span class="block text-[10px] uppercase font-semibold tracking-tight text-slate-400">{{ __('vacation::common.labels.duration') }}</span>
+                                                <span class="mt-0.5 block text-[13px] font-semibold text-slate-800">{{ $_vacation->duration }} {{ __('vacation::common.labels.day') }}</span>
+                                            </div>
+                                            <div class="rounded-xl bg-white/80 px-2 py-1 ring-1 ring-black/5">
+                                                <span class="block text-[10px] uppercase font-semibold tracking-tight text-slate-400">{{ __('vacation::common.labels.return_work_date') }}</span>
+                                                <span class="mt-0.5 block text-[13px] font-semibold text-slate-800">{{ $returnWorkDate->format('d.m.Y') }}</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="mt-2 h-1.5 overflow-hidden rounded-full ring-1 {{ $progressRailClasses }}">
+                                            <div class="h-full rounded-full bg-{{ $_vacation->remaining_color }}-500"
+                                                style="width: {{ $_vacation->remaining_percentage }}%"></div>
                                         </div>
                                     </div>
                                 </x-table.td>

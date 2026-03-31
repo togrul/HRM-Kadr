@@ -58,6 +58,23 @@ class PersonnelListRegressionTest extends TestCase
         $this->assertNull($query->getQuery()->joins);
     }
 
+    public function test_listing_query_eager_loads_active_travel_and_vacation_relations(): void
+    {
+        $query = app(PersonnelQueryService::class)->build(
+            status: 'current',
+            filters: [],
+            selectedStructureIds: [1],
+            accessibleStructureIds: [1],
+            selectedPosition: null,
+            withStructureTree: false,
+        );
+
+        $eagerLoads = array_keys($query->getEagerLoads());
+
+        $this->assertContains('hasActiveVacation', $eagerLoads);
+        $this->assertContains('hasActiveBusinessTrip', $eagerLoads);
+    }
+
     public function test_state_normalizer_is_shared_and_stable(): void
     {
         $normalizer = app(PersonnelListStateNormalizer::class);
