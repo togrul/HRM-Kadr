@@ -23,9 +23,9 @@ Route::middleware('auth')->group(function () {
         Route::delete('/', 'destroy')->name('profile.destroy');
     });
 
-    Route::get('/docs', TrainingPerformanceGuideController::class)
+    Route::get('/guide', TrainingPerformanceGuideController::class)
         ->name('docs.guide');
-    Route::get('/docs/sections/{module}', [TrainingPerformanceGuideController::class, 'section'])
+    Route::get('/guide/sections/{module}', [TrainingPerformanceGuideController::class, 'section'])
         ->whereIn('module', ['training', 'performance', 'attendance', 'orders', 'notifications', 'professional-portfolio', 'my-hr', 'onboarding-library', 'learning-library'])
         ->name('docs.section');
 });
