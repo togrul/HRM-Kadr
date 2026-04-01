@@ -10,11 +10,19 @@ return new class extends Migration
     {
         Schema::table('personnel_vacations', function (Blueprint $table): void {
             if (! Schema::hasColumn('personnel_vacations', 'approver_personnel_id')) {
-                $table->foreignId('approver_personnel_id')->nullable()->after('approval_status')->constrained('personnels')->nullOnDelete();
+                $table->foreignId('approver_personnel_id')->nullable()->after('approval_status');
+                $table->foreign('approver_personnel_id', 'pv_approver_fk')
+                    ->references('id')
+                    ->on('personnels')
+                    ->nullOnDelete();
             }
 
             if (! Schema::hasColumn('personnel_vacations', 'fallback_approver_personnel_id')) {
-                $table->foreignId('fallback_approver_personnel_id')->nullable()->after('approver_personnel_id')->constrained('personnels')->nullOnDelete();
+                $table->foreignId('fallback_approver_personnel_id')->nullable()->after('approver_personnel_id');
+                $table->foreign('fallback_approver_personnel_id', 'pv_fallback_fk')
+                    ->references('id')
+                    ->on('personnels')
+                    ->nullOnDelete();
             }
 
             if (! Schema::hasColumn('personnel_vacations', 'approval_route_source')) {
@@ -27,11 +35,13 @@ return new class extends Migration
     {
         Schema::table('personnel_vacations', function (Blueprint $table): void {
             if (Schema::hasColumn('personnel_vacations', 'fallback_approver_personnel_id')) {
-                $table->dropConstrainedForeignId('fallback_approver_personnel_id');
+                $table->dropForeign('pv_fallback_fk');
+                $table->dropColumn('fallback_approver_personnel_id');
             }
 
             if (Schema::hasColumn('personnel_vacations', 'approver_personnel_id')) {
-                $table->dropConstrainedForeignId('approver_personnel_id');
+                $table->dropForeign('pv_approver_fk');
+                $table->dropColumn('approver_personnel_id');
             }
 
             if (Schema::hasColumn('personnel_vacations', 'approval_route_source')) {

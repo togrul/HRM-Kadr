@@ -10,7 +10,11 @@ return new class extends Migration
     {
         Schema::table('leaves', function (Blueprint $table): void {
             if (! Schema::hasColumn('leaves', 'fallback_approver_personnel_id')) {
-                $table->foreignId('fallback_approver_personnel_id')->nullable()->after('assigned_to')->constrained('personnels')->nullOnDelete();
+                $table->foreignId('fallback_approver_personnel_id')->nullable()->after('assigned_to');
+                $table->foreign('fallback_approver_personnel_id', 'leaves_fallback_approver_fk')
+                    ->references('id')
+                    ->on('personnels')
+                    ->nullOnDelete();
             }
 
             if (! Schema::hasColumn('leaves', 'approval_route_source')) {
@@ -23,7 +27,8 @@ return new class extends Migration
     {
         Schema::table('leaves', function (Blueprint $table): void {
             if (Schema::hasColumn('leaves', 'fallback_approver_personnel_id')) {
-                $table->dropConstrainedForeignId('fallback_approver_personnel_id');
+                $table->dropForeign('leaves_fallback_approver_fk');
+                $table->dropColumn('fallback_approver_personnel_id');
             }
 
             if (Schema::hasColumn('leaves', 'approval_route_source')) {

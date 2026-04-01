@@ -15,14 +15,14 @@ return new class extends Migration
         Schema::create('self_service_approval_routes', function (Blueprint $table): void {
             $table->id();
             $table->string('request_type', 32);
-            $table->foreignId('personnel_id')->nullable()->constrained('personnels')->nullOnDelete();
-            $table->foreignId('structure_id')->nullable()->constrained('structures')->nullOnDelete();
+            $table->foreignId('personnel_id')->nullable();
+            $table->foreignId('structure_id')->nullable();
             $table->integer('position_id')->nullable();
-            $table->foreignId('approver_personnel_id')->nullable()->constrained('personnels')->nullOnDelete();
-            $table->foreignId('fallback_approver_personnel_id')->nullable()->constrained('personnels')->nullOnDelete();
+            $table->foreignId('approver_personnel_id')->nullable();
+            $table->foreignId('fallback_approver_personnel_id')->nullable();
             $table->boolean('hr_always_included')->default(true);
             $table->boolean('is_active')->default(true);
-            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('created_by')->nullable();
             $table->timestamps();
 
             $table->index(['request_type', 'personnel_id']);
@@ -30,7 +30,12 @@ return new class extends Migration
             $table->index(['request_type', 'position_id']);
             $table->index(['request_type', 'is_active']);
 
-            $table->foreign('position_id')->references('id')->on('positions')->nullOnDelete();
+            $table->foreign('personnel_id', 'ssar_personnel_fk')->references('id')->on('personnels')->nullOnDelete();
+            $table->foreign('structure_id', 'ssar_structure_fk')->references('id')->on('structures')->nullOnDelete();
+            $table->foreign('approver_personnel_id', 'ssar_approver_fk')->references('id')->on('personnels')->nullOnDelete();
+            $table->foreign('fallback_approver_personnel_id', 'ssar_fallback_fk')->references('id')->on('personnels')->nullOnDelete();
+            $table->foreign('created_by', 'ssar_created_by_fk')->references('id')->on('users')->nullOnDelete();
+            $table->foreign('position_id', 'ssar_position_fk')->references('id')->on('positions')->nullOnDelete();
         });
     }
 
