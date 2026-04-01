@@ -8,6 +8,7 @@ use App\Models\Rank;
 use App\Models\Setting;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Arr;
+use Spatie\Permission\Models\Permission;
 
 class GlobalSeeder extends Seeder
 {
@@ -56,9 +57,18 @@ class GlobalSeeder extends Seeder
               continue;
             }
 
+            $payload = Arr::only($menu, ['icon', 'color', 'order', 'is_active', 'url', 'permission_id']);
+
+            if (! empty($menu['permission_name'])) {
+                $payload['permission_id'] = Permission::query()
+                    ->where('name', $menu['permission_name'])
+                    ->where('guard_name', 'web')
+                    ->value('id');
+            }
+
             Menu::updateOrCreate(
                 ['name' => $menu['name']],
-                Arr::only($menu, ['icon', 'color', 'order', 'is_active', 'url'])
+                $payload
             );
         }
     }
