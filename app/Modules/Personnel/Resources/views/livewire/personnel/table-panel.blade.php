@@ -19,7 +19,7 @@
                             'bg-rose-50/70' => !empty($personnel->leave_work_date),
                         ])>
                         <x-table.td>
-                            <div class="absolute top-0 left-0 flex flex-col justify-between h-full">
+                            <div class="absolute top-0 left-[-7px] flex flex-col justify-between h-full">
                                 @if ($personnel->active_vacation)
                                     <x-progress :startDate="$personnel->active_vacation_start" :endDate="$personnel->active_vacation_end" color="emerald">
                                         {{ __('personnel::common.states.in_vacation') }}

@@ -515,6 +515,27 @@ class CandidateRecruitmentScreensTest extends TestCase
             ->assertDontSee(__('candidates::common.labels.attitude_to_military'));
     }
 
+    public function test_legacy_candidate_edit_screen_prefers_public_pack_when_profile_maps_to_public(): void
+    {
+        config()->set('profiles.active', 'public');
+        config()->set('candidates.mode', 'military');
+        config()->set('candidates.workflow_pack', 'auto');
+        config()->set('candidates.workflow_pack_map', [
+            'default' => 'military',
+            'public' => 'public',
+        ]);
+
+        [$user] = $this->seedRecruitmentData();
+        $candidate = Candidate::query()->firstOrFail();
+
+        Livewire::actingAs($user)
+            ->test(EditCandidate::class, ['candidateModel' => $candidate->id])
+            ->assertSee('Public')
+            ->assertDontSee(__('candidates::common.labels.height'))
+            ->assertDontSee(__('candidates::common.labels.knowledge_test'))
+            ->assertDontSee(__('candidates::common.labels.military_service'));
+    }
+
     public function test_recruitment_analytics_component_renders_private_pack_metrics(): void
     {
         config()->set('candidates.workflow_pack', 'private');

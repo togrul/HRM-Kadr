@@ -10,26 +10,29 @@ class CandidateModeResolver
     public const CIVILIAN = 'civilian';
     public const AUTO = 'auto';
 
-    public function __construct(private readonly ProfileState $profileState)
+    public function __construct(
+        private readonly ProfileState $profileState,
+        private readonly CandidateWorkflowPackResolver $workflowPackResolver,
+    )
     {
     }
 
     public function resolve(): string
     {
-        $workflowPack = strtolower((string) config('candidates.workflow_pack', CandidateWorkflowPackResolver::AUTO));
+        $workflowPack = strtolower($this->workflowPackResolver->resolve());
 
         if (in_array($workflowPack, [CandidateWorkflowPackResolver::PUBLIC, CandidateWorkflowPackResolver::PRIVATE], true)) {
             return self::CIVILIAN;
-        }
-
-        if ($workflowPack === CandidateWorkflowPackResolver::MILITARY) {
-            return self::MILITARY;
         }
 
         $mode = strtolower((string) config('candidates.mode', self::AUTO));
 
         if (in_array($mode, [self::MILITARY, self::CIVILIAN], true)) {
             return $mode;
+        }
+
+        if ($workflowPack === CandidateWorkflowPackResolver::MILITARY) {
+            return self::MILITARY;
         }
 
         $activeProfile = strtolower($this->profileState->active());
@@ -43,7 +46,7 @@ class CandidateModeResolver
 
     public function label(string $mode): string
     {
-        $workflowPack = strtolower((string) config('candidates.workflow_pack', CandidateWorkflowPackResolver::AUTO));
+        $workflowPack = strtolower($this->workflowPackResolver->resolve());
 
         if ($mode === self::CIVILIAN && in_array($workflowPack, [CandidateWorkflowPackResolver::PUBLIC, CandidateWorkflowPackResolver::PRIVATE], true)) {
             $packLabels = (array) config('candidates.workflow_pack_labels', []);
