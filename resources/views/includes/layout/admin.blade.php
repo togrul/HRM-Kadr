@@ -83,10 +83,11 @@
 
                 <div class="flex flex-col space-y-4 h-full max-h-[calc(100vh-300px)] overflow-y-auto">
                     @foreach(config('admin.menu_items') as $menuItem)
+                        @continue($menuItem['route'] !== '#' && ! \App\Support\Navigation\MenuPresentation::hasRoute($menuItem['route']))
                         @php
                             $iconClass = $menuItem['icon'];
                             $name = "icons.{$iconClass}";
-                            $route = $menuItem['route'] !== '#' ? route($menuItem['route']) : $menuItem['route'];
+                            $route = \App\Support\Navigation\MenuPresentation::route($menuItem['route']);
                             $active = request()->routeIs($menuItem['route']);
                         @endphp
                         <a href="{{ $route }}" wire:navigate class="flex space-x-3 items-center px-2 group">

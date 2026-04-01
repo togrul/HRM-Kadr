@@ -52,13 +52,14 @@
 
     $preparedMenus = collect($menus)
         ->filter(static fn ($menuItem) => $policyPack->menuVisible((string) $menuItem->url))
+        ->filter(static fn ($menuItem) => MenuPresentation::hasRoute((string) $menuItem->url))
         ->map(static function ($menuItem) {
         $routeBase = (string) $menuItem->url;
 
         return (object) [
             'item' => $menuItem,
             'moduleName' => MenuPresentation::moduleName($routeBase),
-            'route' => route($menuItem->url),
+            'route' => MenuPresentation::route($routeBase),
             'routeBase' => $routeBase,
             'isActive' => request()->routeIs($routeBase) || request()->routeIs($routeBase . '.*'),
             'iconComponent' => MenuPresentation::iconComponent($menuItem),

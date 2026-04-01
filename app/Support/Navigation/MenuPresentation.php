@@ -3,6 +3,7 @@
 namespace App\Support\Navigation;
 
 use Illuminate\Support\Facades\Lang;
+use Illuminate\Support\Facades\Route;
 use App\Support\Translations\ModuleTranslation;
 
 class MenuPresentation
@@ -53,6 +54,24 @@ class MenuPresentation
             'vacations.list' => 'vacation',
             'business-trips.list' => 'business-trips',
         ][$routeBase] ?? $routeBase;
+    }
+
+    public static function hasRoute(string $routeName): bool
+    {
+        $routeName = trim($routeName);
+
+        if ($routeName === '' || $routeName === '#') {
+            return true;
+        }
+
+        return Route::has($routeName);
+    }
+
+    public static function route(string $routeName): string
+    {
+        return self::hasRoute($routeName) && $routeName !== '#'
+            ? route($routeName)
+            : '#';
     }
 
     /**
