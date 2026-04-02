@@ -34,14 +34,10 @@ return new class extends Migration
         }
 
         if (! $hasOrderTypeId) {
-            Schema::table('components', function (Blueprint $table) use ($hasOrderId) {
-                $column = $table->foreignIdFor(\App\Models\OrderType::class)->nullable();
-
-                if ($hasOrderId) {
-                    $column->after('order_id');
-                }
-
-                $column->constrained();
+            Schema::table('components', function (Blueprint $table) {
+                $table->foreignIdFor(\App\Models\OrderType::class)
+                    ->nullable()
+                    ->constrained();
             });
         }
     }
