@@ -179,6 +179,7 @@ bash ops/bootstrap-server.sh
 - `DB_DATABASE`
 - `DB_USERNAME`
 - `DB_PASSWORD`
+- `LOCAL_DB_FLAVOR`
 - `INSTALL_MYSQL_SERVER=1`
 - `SETUP_LOCAL_MYSQL=1`
 
@@ -381,7 +382,8 @@ Optional depending on your release flow:
   - default runtime user/group becomes `nginx`
   - default PHP-FPM service becomes `php-fpm`
   - default socket becomes `/run/php-fpm/www.sock`
-  - local DB install uses MariaDB packages via `dnf`, but Laravel still uses `DB_CONNECTION=mysql`
+  - local DB install defaults to MySQL Community Server via `dnf`
+  - if you explicitly want MariaDB, set `LOCAL_DB_FLAVOR=mariadb`
 - If you want `QUEUE_CONNECTION=database`, your codebase also needs queue tables and queue strategy aligned with production.
 - `bootstrap-server.sh` is intended to be idempotent. Re-running it should update config rather than destroy the server state.
 - `deploy-update.sh` should be your normal post-setup deployment path.

@@ -8,13 +8,16 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     private const INDEX_NAME = 'order_template_versions_single_active_per_set';
+    private const MARIA_DB_COLUMN = 'active_order_template_set_id';
 
     public function up(): void
     {
         $driver = Schema::getConnection()->getDriverName();
 
         if ($driver === 'mysql') {
-            if (! $this->hasIndex('order_template_versions', self::INDEX_NAME)) {
+            if ($this->isMariaDb()) {
+                $this->createMariaDbIndex();
+            } elseif (! $this->hasIndex('order_template_versions', self::INDEX_NAME)) {
                 // MySQL 8 supports functional indexes. This avoids generated-column/FK edge cases.
                 DB::statement(
                     'CREATE UNIQUE INDEX '.self::INDEX_NAME
@@ -38,7 +41,9 @@ return new class extends Migration
         $driver = Schema::getConnection()->getDriverName();
 
         if ($driver === 'mysql') {
-            if ($this->hasIndex('order_template_versions', self::INDEX_NAME)) {
+            if ($this->isMariaDb()) {
+                $this->dropMariaDbIndex();
+            } elseif ($this->hasIndex('order_template_versions', self::INDEX_NAME)) {
                 Schema::table('order_template_versions', function (Blueprint $table) {
                     $table->dropUnique(self::INDEX_NAME);
                 });
@@ -72,5 +77,44 @@ return new class extends Migration
                 ->contains(fn ($row) => (($row->name ?? null) === $indexName)),
             default => false,
         };
+    }
+
+    private function isMariaDb(): bool
+    {
+        $version = (string) DB::scalar('select version()');
+
+        return str_contains(strtolower($version), 'mariadb');
+    }
+
+    private function createMariaDbIndex(): void
+    {
+        if (! Schema::hasColumn('order_template_versions', self::MARIA_DB_COLUMN)) {
+            DB::statement(
+                'ALTER TABLE order_template_versions '
+                .'ADD COLUMN '.self::MARIA_DB_COLUMN
+                .' BIGINT UNSIGNED GENERATED ALWAYS AS (CASE WHEN is_active = 1 THEN order_template_set_id ELSE NULL END) STORED'
+            );
+        }
+
+        if (! $this->hasIndex('order_template_versions', self::INDEX_NAME)) {
+            Schema::table('order_template_versions', function (Blueprint $table) {
+                $table->unique(self::MARIA_DB_COLUMN, self::INDEX_NAME);
+            });
+        }
+    }
+
+    private function dropMariaDbIndex(): void
+    {
+        if ($this->hasIndex('order_template_versions', self::INDEX_NAME)) {
+            Schema::table('order_template_versions', function (Blueprint $table) {
+                $table->dropUnique(self::INDEX_NAME);
+            });
+        }
+
+        if (Schema::hasColumn('order_template_versions', self::MARIA_DB_COLUMN)) {
+            Schema::table('order_template_versions', function (Blueprint $table) {
+                $table->dropColumn(self::MARIA_DB_COLUMN);
+            });
+        }
     }
 };

@@ -38,6 +38,7 @@ NPM_BIN="${NPM_BIN:-}"
 INSTALL_NODE="${INSTALL_NODE:-1}"
 INSTALL_MYSQL_SERVER="${INSTALL_MYSQL_SERVER:-0}"
 SETUP_LOCAL_MYSQL="${SETUP_LOCAL_MYSQL:-0}"
+LOCAL_DB_FLAVOR="${LOCAL_DB_FLAVOR:-auto}"
 QUEUE_CONNECTION="${QUEUE_CONNECTION:-sync}"
 ENABLE_QUEUE_WORKER="${ENABLE_QUEUE_WORKER:-0}"
 ENABLE_SCHEDULER_TIMER="${ENABLE_SCHEDULER_TIMER:-1}"
@@ -169,6 +170,9 @@ detect_platform() {
     ubuntu|debian)
       PLATFORM_FAMILY="debian"
       PACKAGE_MANAGER="apt"
+      if [[ "${LOCAL_DB_FLAVOR}" == "auto" ]]; then
+        LOCAL_DB_FLAVOR="mysql"
+      fi
       DATABASE_SERVICE="mysql"
       APP_USER="${APP_USER:-www-data}"
       APP_GROUP="${APP_GROUP:-www-data}"
@@ -180,7 +184,10 @@ detect_platform() {
     almalinux|rocky|rhel|centos|fedora)
       PLATFORM_FAMILY="redhat"
       PACKAGE_MANAGER="dnf"
-      DATABASE_SERVICE="mariadb"
+      if [[ "${LOCAL_DB_FLAVOR}" == "auto" ]]; then
+        LOCAL_DB_FLAVOR="mysql"
+      fi
+      DATABASE_SERVICE="mysqld"
       APP_USER="${APP_USER:-nginx}"
       APP_GROUP="${APP_GROUP:-nginx}"
       PHP_FPM_SERVICE="${PHP_FPM_SERVICE:-php-fpm}"
@@ -192,6 +199,18 @@ detect_platform() {
       fail "Unsupported platform ID=${OS_ID}"
       ;;
   esac
+}
+
+ensure_redhat_mysql_repo() {
+  local major_version
+
+  major_version="$(printf '%s' "${OS_VERSION_ID}" | cut -d. -f1)"
+
+  if rpm -q mysql84-community-release-el"${major_version}" >/dev/null 2>&1 || [[ -f /etc/yum.repos.d/mysql-community.repo ]]; then
+    return
+  fi
+
+  dnf install -y "https://repo.mysql.com/mysql84-community-release-el${major_version}.rpm"
 }
 
 run_as_app() {
@@ -434,25 +453,52 @@ ensure_node() {
 ensure_mysql() {
   case "${PLATFORM_FAMILY}" in
     debian)
-      if [[ "${INSTALL_MYSQL_SERVER}" == "1" ]]; then
-        log "Installing MySQL server"
-        export DEBIAN_FRONTEND=noninteractive
-        apt-get install -y mysql-server
-        systemctl enable "${DATABASE_SERVICE}"
-        systemctl restart "${DATABASE_SERVICE}"
-      else
-        apt-get install -y default-mysql-client
-      fi
+      case "${LOCAL_DB_FLAVOR}" in
+        mysql)
+          if [[ "${INSTALL_MYSQL_SERVER}" == "1" ]]; then
+            log "Installing MySQL server"
+            export DEBIAN_FRONTEND=noninteractive
+            apt-get install -y mysql-server
+            systemctl enable "${DATABASE_SERVICE}"
+            systemctl restart "${DATABASE_SERVICE}"
+          else
+            apt-get install -y default-mysql-client
+          fi
+          ;;
+        *)
+          fail "Unsupported LOCAL_DB_FLAVOR=${LOCAL_DB_FLAVOR} for Debian family"
+          ;;
+      esac
       ;;
     redhat)
-      if [[ "${INSTALL_MYSQL_SERVER}" == "1" ]]; then
-        log "Installing MariaDB server"
-        dnf install -y mariadb-server mariadb
-        systemctl enable "${DATABASE_SERVICE}"
-        systemctl restart "${DATABASE_SERVICE}"
-      else
-        dnf install -y mariadb
-      fi
+      case "${LOCAL_DB_FLAVOR}" in
+        mysql)
+          ensure_redhat_mysql_repo
+
+          if [[ "${INSTALL_MYSQL_SERVER}" == "1" ]]; then
+            log "Installing MySQL Community Server"
+            dnf install -y mysql-community-server mysql-community-client
+            systemctl enable "${DATABASE_SERVICE}"
+            systemctl restart "${DATABASE_SERVICE}"
+          else
+            dnf install -y mysql-community-client
+          fi
+          ;;
+        mariadb)
+          if [[ "${INSTALL_MYSQL_SERVER}" == "1" ]]; then
+            log "Installing MariaDB server"
+            dnf install -y mariadb-server mariadb
+            DATABASE_SERVICE="mariadb"
+            systemctl enable "${DATABASE_SERVICE}"
+            systemctl restart "${DATABASE_SERVICE}"
+          else
+            dnf install -y mariadb
+          fi
+          ;;
+        *)
+          fail "Unsupported LOCAL_DB_FLAVOR=${LOCAL_DB_FLAVOR} for Red Hat family. Supported: mysql, mariadb"
+          ;;
+      esac
       ;;
     *)
       fail "Unsupported platform family for database install: ${PLATFORM_FAMILY}"

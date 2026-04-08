@@ -8,7 +8,7 @@ Target stack:
 - `dnf`
 - Nginx
 - PHP 8.3 via Remi
-- MariaDB packages for local database hosting
+- MySQL Community Server for local database hosting
 - Laravel 12 / Livewire 4
 
 ## What the scripts already handle
@@ -21,6 +21,7 @@ Target stack:
 - uses `php-fpm` service and `/run/php-fpm/www.sock`
 - writes Nginx config into `/etc/nginx/conf.d`
 - can install local database packages and provision DB/user
+- defaults local DB flavor to `mysql`
 
 ## Fresh install
 
@@ -33,6 +34,7 @@ sudo BOOTSTRAP_OS=almalinux \
 APP_ROOT=/var/www/hrm \
 APP_USER=nginx \
 APP_GROUP=nginx \
+LOCAL_DB_FLAVOR=mysql \
 HRM_DEPLOYMENT_PRESET=public \
 GIT_REPOSITORY=git@github.com:your-org/HRM.git \
 GIT_REF=main \
@@ -63,6 +65,7 @@ sudo BOOTSTRAP_OS=almalinux \
 APP_ROOT=/var/www/hrm \
 APP_USER=nginx \
 APP_GROUP=nginx \
+LOCAL_DB_FLAVOR=mysql \
 HRM_DEPLOYMENT_PRESET=private \
 GIT_REPOSITORY=git@github.com:your-org/HRM.git \
 GIT_REF=main \
@@ -83,6 +86,7 @@ sudo BOOTSTRAP_OS=almalinux \
 APP_ROOT=/var/www/hrm \
 APP_USER=nginx \
 APP_GROUP=nginx \
+LOCAL_DB_FLAVOR=mysql \
 HRM_DEPLOYMENT_PRESET=military \
 GIT_REPOSITORY=git@github.com:your-org/HRM.git \
 GIT_REF=main \
@@ -106,6 +110,7 @@ bash ops/bootstrap-server.sh
 - `DB_DATABASE`
 - `DB_USERNAME`
 - `DB_PASSWORD`
+- `LOCAL_DB_FLAVOR`
 - `MAIL_HOST`
 - `MAIL_USERNAME`
 - `MAIL_PASSWORD`
@@ -121,6 +126,8 @@ bash ops/bootstrap-server.sh
 - If you do not want local database packages installed, remove:
   - `INSTALL_MYSQL_SERVER=1`
   - `SETUP_LOCAL_MYSQL=1`
+- If you explicitly want MariaDB instead of MySQL on AlmaLinux:
+  - set `LOCAL_DB_FLAVOR=mariadb`
 
 ## Later updates
 
