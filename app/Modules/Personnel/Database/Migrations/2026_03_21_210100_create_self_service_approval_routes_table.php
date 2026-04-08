@@ -25,10 +25,10 @@ return new class extends Migration
             $table->foreignId('created_by')->nullable();
             $table->timestamps();
 
-            $table->index(['request_type', 'personnel_id']);
-            $table->index(['request_type', 'structure_id', 'position_id']);
-            $table->index(['request_type', 'position_id']);
-            $table->index(['request_type', 'is_active']);
+            $table->index(['request_type', 'personnel_id'], 'ssar_req_personnel_idx');
+            $table->index(['request_type', 'structure_id', 'position_id'], 'ssar_req_structure_position_idx');
+            $table->index(['request_type', 'position_id'], 'ssar_req_position_idx');
+            $table->index(['request_type', 'is_active'], 'ssar_req_active_idx');
 
             $table->foreign('personnel_id', 'ssar_personnel_fk')->references('id')->on('personnels')->nullOnDelete();
             $table->foreign('structure_id', 'ssar_structure_fk')->references('id')->on('structures')->nullOnDelete();
