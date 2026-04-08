@@ -9,6 +9,9 @@ APP_GROUP="${APP_GROUP:-}"
 BOOTSTRAP_OS="${BOOTSTRAP_OS:-auto}"
 PHP_VERSION="${PHP_VERSION:-8.3}"
 PHP_FPM_SERVICE="${PHP_FPM_SERVICE:-}"
+PHP_BIN="${PHP_BIN:-}"
+COMPOSER_BIN="${COMPOSER_BIN:-}"
+NPM_BIN="${NPM_BIN:-}"
 QUEUE_SERVICE_NAME="${QUEUE_SERVICE_NAME:-${APP_SLUG}-queue-worker.service}"
 PULL_REMOTE="${PULL_REMOTE:-origin}"
 PULL_REF="${PULL_REF:-main}"
@@ -50,6 +53,18 @@ lower() {
   printf '%s' "$1" | tr '[:upper:]' '[:lower:]'
 }
 
+resolve_bin() {
+  local current_value="$1"
+  local binary_name="$2"
+
+  if [[ -n "${current_value}" ]]; then
+    printf '%s' "${current_value}"
+    return
+  fi
+
+  command -v "${binary_name}" 2>/dev/null || true
+}
+
 detect_platform() {
   [[ -r /etc/os-release ]] || fail "/etc/os-release not found; cannot detect platform"
 
@@ -88,6 +103,27 @@ detect_platform() {
   esac
 }
 
+resolve_runtime_binaries() {
+  PHP_BIN="$(resolve_bin "${PHP_BIN}" php)"
+  COMPOSER_BIN="$(resolve_bin "${COMPOSER_BIN}" composer)"
+
+  if [[ -z "${PHP_BIN}" ]]; then
+    fail "php binary not found in PATH"
+  fi
+
+  if [[ "${RUN_COMPOSER}" == "1" && -z "${COMPOSER_BIN}" ]]; then
+    fail "composer binary not found in PATH"
+  fi
+
+  if [[ "${RUN_NPM_BUILD}" == "1" && -f "${APP_ROOT}/package.json" ]]; then
+    NPM_BIN="$(resolve_bin "${NPM_BIN}" npm)"
+
+    if [[ -z "${NPM_BIN}" ]]; then
+      fail "npm binary not found in PATH"
+    fi
+  fi
+}
+
 run_as_app() {
   if command_exists sudo; then
     sudo -u "${APP_USER}" "$@"
@@ -122,7 +158,7 @@ composer_install() {
 
   log "Installing Composer dependencies"
   install -d -o "${APP_USER}" -g "${APP_GROUP}" "${COMPOSER_CACHE_DIR}"
-  run_as_app env COMPOSER_CACHE_DIR="${COMPOSER_CACHE_DIR}" composer install \
+  run_as_app env COMPOSER_CACHE_DIR="${COMPOSER_CACHE_DIR}" "${COMPOSER_BIN}" install \
     --working-dir="${APP_ROOT}" \
     --no-dev \
     --prefer-dist \
@@ -138,30 +174,30 @@ npm_build() {
   log "Building frontend assets"
   install -d -o "${APP_USER}" -g "${APP_GROUP}" "${NPM_CACHE_DIR}"
   if [[ -f "${APP_ROOT}/package-lock.json" ]]; then
-    run_as_app env npm_config_cache="${NPM_CACHE_DIR}" npm --prefix "${APP_ROOT}" ci
+    run_as_app env npm_config_cache="${NPM_CACHE_DIR}" "${NPM_BIN}" --prefix "${APP_ROOT}" ci
   else
-    run_as_app env npm_config_cache="${NPM_CACHE_DIR}" npm --prefix "${APP_ROOT}" install
+    run_as_app env npm_config_cache="${NPM_CACHE_DIR}" "${NPM_BIN}" --prefix "${APP_ROOT}" install
   fi
-  run_as_app env npm_config_cache="${NPM_CACHE_DIR}" npm --prefix "${APP_ROOT}" run build
+  run_as_app env npm_config_cache="${NPM_CACHE_DIR}" "${NPM_BIN}" --prefix "${APP_ROOT}" run build
 }
 
 artisan_refresh() {
   log "Refreshing Laravel caches and runtime state"
-  run_as_app php "${APP_ROOT}/artisan" optimize:clear
+  run_as_app "${PHP_BIN}" "${APP_ROOT}/artisan" optimize:clear
 
   if [[ "${RUN_MIGRATIONS}" == "1" ]]; then
-    run_as_app php "${APP_ROOT}/artisan" migrate --force
+    run_as_app "${PHP_BIN}" "${APP_ROOT}/artisan" migrate --force
   fi
 
-  run_as_app php "${APP_ROOT}/artisan" config:cache
-  run_as_app php "${APP_ROOT}/artisan" view:cache
+  run_as_app "${PHP_BIN}" "${APP_ROOT}/artisan" config:cache
+  run_as_app "${PHP_BIN}" "${APP_ROOT}/artisan" view:cache
 
   if [[ "${RUN_EVENT_CACHE}" == "1" ]]; then
-    run_as_app php "${APP_ROOT}/artisan" event:cache
+    run_as_app "${PHP_BIN}" "${APP_ROOT}/artisan" event:cache
   fi
 
   if [[ "${RUN_ROUTE_CACHE}" == "1" ]]; then
-    run_as_app php "${APP_ROOT}/artisan" route:cache
+    run_as_app "${PHP_BIN}" "${APP_ROOT}/artisan" route:cache
   fi
 }
 
@@ -180,6 +216,7 @@ restart_services() {
 main() {
   require_root
   detect_platform
+  resolve_runtime_binaries
   assert_project_root
   git_pull
   composer_install

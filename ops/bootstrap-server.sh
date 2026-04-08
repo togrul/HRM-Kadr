@@ -32,6 +32,9 @@ BOOTSTRAP_OS="${BOOTSTRAP_OS:-auto}"
 PHP_VERSION="${PHP_VERSION:-8.3}"
 PHP_FPM_SERVICE="${PHP_FPM_SERVICE:-}"
 PHP_FPM_SOCKET="${PHP_FPM_SOCKET:-}"
+PHP_BIN="${PHP_BIN:-}"
+COMPOSER_BIN="${COMPOSER_BIN:-}"
+NPM_BIN="${NPM_BIN:-}"
 INSTALL_NODE="${INSTALL_NODE:-1}"
 INSTALL_MYSQL_SERVER="${INSTALL_MYSQL_SERVER:-0}"
 SETUP_LOCAL_MYSQL="${SETUP_LOCAL_MYSQL:-0}"
@@ -93,6 +96,18 @@ command_exists() {
 
 lower() {
   printf '%s' "$1" | tr '[:upper:]' '[:lower:]'
+}
+
+resolve_bin() {
+  local current_value="$1"
+  local binary_name="$2"
+
+  if [[ -n "${current_value}" ]]; then
+    printf '%s' "${current_value}"
+    return
+  fi
+
+  command -v "${binary_name}" 2>/dev/null || true
 }
 
 detect_platform() {
@@ -327,6 +342,27 @@ ensure_composer() {
   rm -f /tmp/composer-setup.php
 }
 
+resolve_runtime_binaries() {
+  PHP_BIN="$(resolve_bin "${PHP_BIN}" php)"
+  COMPOSER_BIN="$(resolve_bin "${COMPOSER_BIN}" composer)"
+
+  if [[ -z "${PHP_BIN}" ]]; then
+    fail "php binary not found in PATH"
+  fi
+
+  if [[ -z "${COMPOSER_BIN}" ]]; then
+    fail "composer binary not found in PATH"
+  fi
+
+  if [[ "${INSTALL_NODE}" == "1" && "${SKIP_NPM_BUILD}" != "1" ]]; then
+    NPM_BIN="$(resolve_bin "${NPM_BIN}" npm)"
+
+    if [[ -z "${NPM_BIN}" ]]; then
+      fail "npm binary not found in PATH"
+    fi
+  fi
+}
+
 ensure_node() {
   if [[ "${INSTALL_NODE}" != "1" ]]; then
     return
@@ -478,12 +514,12 @@ ensure_app_key() {
   fi
 
   log "Generating APP_KEY"
-    run_as_app php "${APP_ROOT}/artisan" key:generate --force --no-interaction
+  run_as_app "${PHP_BIN}" "${APP_ROOT}/artisan" key:generate --force --no-interaction
 }
 
 install_php_dependencies() {
   log "Installing PHP dependencies"
-  run_as_app env COMPOSER_CACHE_DIR="${COMPOSER_CACHE_DIR}" composer install \
+  run_as_app env COMPOSER_CACHE_DIR="${COMPOSER_CACHE_DIR}" "${COMPOSER_BIN}" install \
     --working-dir="${APP_ROOT}" \
     --no-dev \
     --prefer-dist \
@@ -498,35 +534,35 @@ install_node_dependencies() {
 
   log "Installing Node dependencies and building assets"
   if [[ -f "${APP_ROOT}/package-lock.json" ]]; then
-    run_as_app env npm_config_cache="${NPM_CACHE_DIR}" npm --prefix "${APP_ROOT}" ci
+    run_as_app env npm_config_cache="${NPM_CACHE_DIR}" "${NPM_BIN}" --prefix "${APP_ROOT}" ci
   else
-    run_as_app env npm_config_cache="${NPM_CACHE_DIR}" npm --prefix "${APP_ROOT}" install
+    run_as_app env npm_config_cache="${NPM_CACHE_DIR}" "${NPM_BIN}" --prefix "${APP_ROOT}" install
   fi
-  run_as_app env npm_config_cache="${NPM_CACHE_DIR}" npm --prefix "${APP_ROOT}" run build
+  run_as_app env npm_config_cache="${NPM_CACHE_DIR}" "${NPM_BIN}" --prefix "${APP_ROOT}" run build
 }
 
 run_artisan_bootstrap() {
   log "Running Laravel bootstrap commands"
-  run_as_app php "${APP_ROOT}/artisan" optimize:clear
-  run_as_app php "${APP_ROOT}/artisan" storage:link || true
+  run_as_app "${PHP_BIN}" "${APP_ROOT}/artisan" optimize:clear
+  run_as_app "${PHP_BIN}" "${APP_ROOT}/artisan" storage:link || true
 
   if [[ "${RUN_MIGRATIONS}" == "1" ]]; then
-    run_as_app php "${APP_ROOT}/artisan" migrate --force
+    run_as_app "${PHP_BIN}" "${APP_ROOT}/artisan" migrate --force
   fi
 
   if [[ "${RUN_SEEDERS}" == "1" ]]; then
-    run_as_app php "${APP_ROOT}/artisan" db:seed --force
+    run_as_app "${PHP_BIN}" "${APP_ROOT}/artisan" db:seed --force
   fi
 
-  run_as_app php "${APP_ROOT}/artisan" config:cache
-  run_as_app php "${APP_ROOT}/artisan" view:cache
+  run_as_app "${PHP_BIN}" "${APP_ROOT}/artisan" config:cache
+  run_as_app "${PHP_BIN}" "${APP_ROOT}/artisan" view:cache
 
   if [[ "${RUN_EVENT_CACHE}" == "1" ]]; then
-    run_as_app php "${APP_ROOT}/artisan" event:cache
+    run_as_app "${PHP_BIN}" "${APP_ROOT}/artisan" event:cache
   fi
 
   if [[ "${RUN_ROUTE_CACHE}" == "1" ]]; then
-    run_as_app php "${APP_ROOT}/artisan" route:cache
+    run_as_app "${PHP_BIN}" "${APP_ROOT}/artisan" route:cache
   fi
 }
 
@@ -630,6 +666,7 @@ main() {
   ensure_php
   ensure_composer
   ensure_node
+  resolve_runtime_binaries
   ensure_mysql
   clone_project_if_needed
   assert_project_root
