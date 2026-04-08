@@ -101,13 +101,30 @@ lower() {
 resolve_bin() {
   local current_value="$1"
   local binary_name="$2"
+  local candidate=""
 
   if [[ -n "${current_value}" ]]; then
     printf '%s' "${current_value}"
     return
   fi
 
-  command -v "${binary_name}" 2>/dev/null || true
+  candidate="$(command -v "${binary_name}" 2>/dev/null || true)"
+  if [[ -n "${candidate}" ]]; then
+    printf '%s' "${candidate}"
+    return
+  fi
+
+  for candidate in \
+    "/usr/local/bin/${binary_name}" \
+    "/usr/bin/${binary_name}" \
+    "/bin/${binary_name}" \
+    "/opt/homebrew/bin/${binary_name}"
+  do
+    if [[ -x "${candidate}" ]]; then
+      printf '%s' "${candidate}"
+      return
+    fi
+  done
 }
 
 detect_platform() {
