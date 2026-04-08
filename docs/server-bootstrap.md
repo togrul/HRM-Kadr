@@ -1,17 +1,30 @@
 # Server Bootstrap Guide
 
-This repository includes production helper scripts for Ubuntu/Debian hosts:
+This repository includes production helper scripts for:
+
+- Ubuntu / Debian
+- AlmaLinux / Rocky / RHEL-compatible hosts
 
 - [ops/bootstrap-server.sh](/Users/togruljalalli/Desktop/projects/HRM/ops/bootstrap-server.sh)
 - [ops/bootstrap-certbot.sh](/Users/togruljalalli/Desktop/projects/HRM/ops/bootstrap-certbot.sh)
 - [ops/deploy-update.sh](/Users/togruljalalli/Desktop/projects/HRM/ops/deploy-update.sh)
+
+Primary scripts:
+
+- [ops/bootstrap-server.sh](/Users/togruljalalli/Desktop/projects/HRM/ops/bootstrap-server.sh)
+- [ops/bootstrap-certbot.sh](/Users/togruljalalli/Desktop/projects/HRM/ops/bootstrap-certbot.sh)
+- [ops/deploy-update.sh](/Users/togruljalalli/Desktop/projects/HRM/ops/deploy-update.sh)
+
+AlmaLinux-specific step-by-step guide:
+
+- [server-bootstrap-almalinux.md](/Users/togruljalalli/Desktop/projects/HRM/docs/server-bootstrap-almalinux.md)
 
 It is designed for this stack:
 
 - Laravel 12
 - Livewire 4
 - PHP 8.3
-- MySQL
+- MySQL-compatible database
 - Nginx
 
 ## Script split
@@ -59,7 +72,7 @@ Example project root:
 
 ## Quick usage
 
-Example for a standard production install:
+Example for a standard Ubuntu/Debian install:
 
 ```bash
 sudo APP_ROOT=/var/www/hrm \
@@ -112,6 +125,26 @@ DB_PASSWORD='strong-password' \
 bash ops/bootstrap-server.sh
 ```
 
+Example for AlmaLinux with local LAN IP and `public` preset:
+
+```bash
+sudo BOOTSTRAP_OS=almalinux \
+APP_ROOT=/var/www/hrm \
+HRM_DEPLOYMENT_PRESET=public \
+GIT_REPOSITORY=git@github.com:your-org/HRM.git \
+GIT_REF=main \
+APP_DOMAIN=192.168.4.25 \
+APP_URL=http://192.168.4.25 \
+INSTALL_MYSQL_SERVER=1 \
+SETUP_LOCAL_MYSQL=1 \
+DB_HOST=127.0.0.1 \
+DB_PORT=3306 \
+DB_DATABASE=hrm \
+DB_USERNAME=hrm \
+DB_PASSWORD='strong-password' \
+bash ops/bootstrap-server.sh
+```
+
 ## Useful variables
 
 ### App and server
@@ -119,6 +152,7 @@ bash ops/bootstrap-server.sh
 - `APP_SLUG`
 - `APP_NAME`
 - `APP_ROOT`
+- `BOOTSTRAP_OS`
 - `HRM_DEPLOYMENT_PRESET`
 - `GIT_REPOSITORY`
 - `GIT_REF`
@@ -342,6 +376,12 @@ Optional depending on your release flow:
 
 ## Notes
 
+- `bootstrap-server.sh` auto-detects Debian/Ubuntu vs AlmaLinux/RHEL family from `/etc/os-release`. Use `BOOTSTRAP_OS=almalinux` only if you want to force the AlmaLinux path.
+- On AlmaLinux/RHEL family:
+  - default runtime user/group becomes `nginx`
+  - default PHP-FPM service becomes `php-fpm`
+  - default socket becomes `/run/php-fpm/www.sock`
+  - local DB install uses MariaDB packages via `dnf`, but Laravel still uses `DB_CONNECTION=mysql`
 - If you want `QUEUE_CONNECTION=database`, your codebase also needs queue tables and queue strategy aligned with production.
 - `bootstrap-server.sh` is intended to be idempotent. Re-running it should update config rather than destroy the server state.
 - `deploy-update.sh` should be your normal post-setup deployment path.

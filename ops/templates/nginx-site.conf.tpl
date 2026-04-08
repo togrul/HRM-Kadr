@@ -25,10 +25,10 @@ server {
     error_page 404 /index.php;
 
     location ~ \.php$ {
-        include snippets/fastcgi-php.conf;
+        fastcgi_index index.php;
         fastcgi_pass unix:__PHP_FPM_SOCKET__;
-        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
         include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
     }
 
     location ~ /\.(?!well-known).* {

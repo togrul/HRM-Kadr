@@ -19,8 +19,8 @@ APP_URL="${APP_URL:-${APP_SCHEME}://${DEFAULT_APP_HOST}}"
 APP_ENV="${APP_ENV:-production}"
 APP_DEBUG="${APP_DEBUG:-false}"
 APP_PORT="${APP_PORT:-80}"
-APP_USER="${APP_USER:-www-data}"
-APP_GROUP="${APP_GROUP:-www-data}"
+APP_USER="${APP_USER:-}"
+APP_GROUP="${APP_GROUP:-}"
 HRM_DEPLOYMENT_PRESET="${HRM_DEPLOYMENT_PRESET:-custom}"
 APP_TYPE="${APP_TYPE:-default}"
 APP_CANDIDATE_MODE="${APP_CANDIDATE_MODE:-auto}"
@@ -28,9 +28,10 @@ APP_CANDIDATE_WORKFLOW_PACK="${APP_CANDIDATE_WORKFLOW_PACK:-auto}"
 APP_CANDIDATE_WORKFLOW_VISIBLE_PACKS="${APP_CANDIDATE_WORKFLOW_VISIBLE_PACKS:-auto}"
 GIT_REPOSITORY="${GIT_REPOSITORY:-}"
 GIT_REF="${GIT_REF:-main}"
+BOOTSTRAP_OS="${BOOTSTRAP_OS:-auto}"
 PHP_VERSION="${PHP_VERSION:-8.3}"
-PHP_FPM_SERVICE="${PHP_FPM_SERVICE:-php${PHP_VERSION}-fpm}"
-PHP_FPM_SOCKET="${PHP_FPM_SOCKET:-/run/php/php${PHP_VERSION}-fpm.sock}"
+PHP_FPM_SERVICE="${PHP_FPM_SERVICE:-}"
+PHP_FPM_SOCKET="${PHP_FPM_SOCKET:-}"
 INSTALL_NODE="${INSTALL_NODE:-1}"
 INSTALL_MYSQL_SERVER="${INSTALL_MYSQL_SERVER:-0}"
 SETUP_LOCAL_MYSQL="${SETUP_LOCAL_MYSQL:-0}"
@@ -59,11 +60,16 @@ MAIL_PASSWORD="${MAIL_PASSWORD:-}"
 MAIL_ENCRYPTION="${MAIL_ENCRYPTION:-tls}"
 MAIL_FROM_ADDRESS="${MAIL_FROM_ADDRESS:-noreply@example.com}"
 MAIL_FROM_NAME="${MAIL_FROM_NAME:-$APP_NAME}"
-NGINX_SITE_PATH="/etc/nginx/sites-available/${APP_SLUG}.conf"
-NGINX_SITE_LINK="/etc/nginx/sites-enabled/${APP_SLUG}.conf"
+NGINX_SITE_PATH=""
+NGINX_SITE_LINK=""
 QUEUE_SERVICE_NAME="${APP_SLUG}-queue-worker.service"
 SCHEDULER_SERVICE_NAME="${APP_SLUG}-scheduler.service"
 SCHEDULER_TIMER_NAME="${APP_SLUG}-scheduler.timer"
+OS_ID=""
+OS_VERSION_ID=""
+PLATFORM_FAMILY=""
+PACKAGE_MANAGER=""
+DATABASE_SERVICE=""
 
 require_root() {
   if [[ "${EUID}" -ne 0 ]]; then
@@ -87,6 +93,57 @@ command_exists() {
 
 lower() {
   printf '%s' "$1" | tr '[:upper:]' '[:lower:]'
+}
+
+detect_platform() {
+  if [[ ! -r /etc/os-release ]]; then
+    fail "/etc/os-release not found; cannot detect platform"
+  fi
+
+  OS_ID="$(. /etc/os-release && echo "${ID}")"
+  OS_VERSION_ID="$(. /etc/os-release && echo "${VERSION_ID:-}")"
+
+  case "$(lower "${BOOTSTRAP_OS}")" in
+    ""|auto)
+      ;;
+    ubuntu|debian)
+      OS_ID="$(lower "${BOOTSTRAP_OS}")"
+      ;;
+    almalinux|alma|rocky|rhel|centos)
+      OS_ID="almalinux"
+      ;;
+    *)
+      fail "Unsupported BOOTSTRAP_OS=${BOOTSTRAP_OS}. Supported: auto, ubuntu, debian, almalinux"
+      ;;
+  esac
+
+  case "${OS_ID}" in
+    ubuntu|debian)
+      PLATFORM_FAMILY="debian"
+      PACKAGE_MANAGER="apt"
+      DATABASE_SERVICE="mysql"
+      APP_USER="${APP_USER:-www-data}"
+      APP_GROUP="${APP_GROUP:-www-data}"
+      PHP_FPM_SERVICE="${PHP_FPM_SERVICE:-php${PHP_VERSION}-fpm}"
+      PHP_FPM_SOCKET="${PHP_FPM_SOCKET:-/run/php/php${PHP_VERSION}-fpm.sock}"
+      NGINX_SITE_PATH="${NGINX_SITE_PATH:-/etc/nginx/sites-available/${APP_SLUG}.conf}"
+      NGINX_SITE_LINK="${NGINX_SITE_LINK:-/etc/nginx/sites-enabled/${APP_SLUG}.conf}"
+      ;;
+    almalinux|rocky|rhel|centos|fedora)
+      PLATFORM_FAMILY="redhat"
+      PACKAGE_MANAGER="dnf"
+      DATABASE_SERVICE="mariadb"
+      APP_USER="${APP_USER:-nginx}"
+      APP_GROUP="${APP_GROUP:-nginx}"
+      PHP_FPM_SERVICE="${PHP_FPM_SERVICE:-php-fpm}"
+      PHP_FPM_SOCKET="${PHP_FPM_SOCKET:-/run/php-fpm/www.sock}"
+      NGINX_SITE_PATH="${NGINX_SITE_PATH:-/etc/nginx/conf.d/${APP_SLUG}.conf}"
+      NGINX_SITE_LINK="${NGINX_SITE_LINK:-${NGINX_SITE_PATH}}"
+      ;;
+    *)
+      fail "Unsupported platform ID=${OS_ID}"
+      ;;
+  esac
 }
 
 run_as_app() {
@@ -151,57 +208,112 @@ apply_deployment_preset() {
 
 install_base_packages() {
   log "Installing base packages"
-  export DEBIAN_FRONTEND=noninteractive
-  apt-get update -y
-  apt-get install -y software-properties-common ca-certificates curl unzip git gnupg2 lsb-release apt-transport-https nginx
+
+  case "${PACKAGE_MANAGER}" in
+    apt)
+      export DEBIAN_FRONTEND=noninteractive
+      apt-get update -y
+      apt-get install -y software-properties-common ca-certificates curl unzip git gnupg2 lsb-release apt-transport-https nginx
+      ;;
+    dnf)
+      dnf install -y dnf-plugins-core epel-release ca-certificates curl unzip git gnupg2 nginx shadow-utils
+      ;;
+    *)
+      fail "Unsupported package manager: ${PACKAGE_MANAGER}"
+      ;;
+  esac
 }
 
 ensure_php_repo() {
-  local os_id
-  local os_codename
-  os_id="$(. /etc/os-release && echo "${ID}")"
-  os_codename="$(. /etc/os-release && echo "${VERSION_CODENAME:-}")"
-
-  if dpkg -s "php${PHP_VERSION}-fpm" >/dev/null 2>&1; then
-    return
-  fi
-
-  case "${os_id}" in
-    ubuntu)
-      add-apt-repository -y ppa:ondrej/php
-      apt-get update -y
-      ;;
+  case "${PLATFORM_FAMILY}" in
     debian)
-      curl -fsSL https://packages.sury.org/php/apt.gpg | gpg --dearmor -o /usr/share/keyrings/sury-php.gpg
-      echo "deb [signed-by=/usr/share/keyrings/sury-php.gpg] https://packages.sury.org/php/ ${os_codename} main" \
-        > /etc/apt/sources.list.d/sury-php.list
-      apt-get update -y
+      local os_codename
+      os_codename="$(. /etc/os-release && echo "${VERSION_CODENAME:-}")"
+
+      if dpkg -s "php${PHP_VERSION}-fpm" >/dev/null 2>&1; then
+        return
+      fi
+
+      case "${OS_ID}" in
+        ubuntu)
+          add-apt-repository -y ppa:ondrej/php
+          apt-get update -y
+          ;;
+        debian)
+          curl -fsSL https://packages.sury.org/php/apt.gpg | gpg --dearmor -o /usr/share/keyrings/sury-php.gpg
+          echo "deb [signed-by=/usr/share/keyrings/sury-php.gpg] https://packages.sury.org/php/ ${os_codename} main" \
+            > /etc/apt/sources.list.d/sury-php.list
+          apt-get update -y
+          ;;
+        *)
+          fail "Unsupported OS for automatic PHP repo setup: ${OS_ID}"
+          ;;
+      esac
+      ;;
+    redhat)
+      if rpm -q php-fpm >/dev/null 2>&1; then
+        return
+      fi
+
+      local major_version
+      major_version="$(printf '%s' "${OS_VERSION_ID}" | cut -d. -f1)"
+      dnf install -y "https://rpms.remirepo.net/enterprise/remi-release-${major_version}.rpm"
+      dnf config-manager --set-enabled crb >/dev/null 2>&1 || true
+      dnf module reset -y php
+      dnf module enable -y "php:remi-${PHP_VERSION}"
       ;;
     *)
-      fail "Unsupported OS for automatic PHP repo setup: ${os_id}"
+      fail "Unsupported platform family for PHP repo setup: ${PLATFORM_FAMILY}"
       ;;
   esac
 }
 
 ensure_php() {
-  if ! dpkg -s "php${PHP_VERSION}-fpm" >/dev/null 2>&1; then
-    log "Installing PHP ${PHP_VERSION} packages"
-    ensure_php_repo
-  fi
+  case "${PLATFORM_FAMILY}" in
+    debian)
+      if ! dpkg -s "php${PHP_VERSION}-fpm" >/dev/null 2>&1; then
+        log "Installing PHP ${PHP_VERSION} packages"
+        ensure_php_repo
+      fi
 
-  apt-get install -y \
-    "php${PHP_VERSION}-cli" \
-    "php${PHP_VERSION}-fpm" \
-    "php${PHP_VERSION}-common" \
-    "php${PHP_VERSION}-mysql" \
-    "php${PHP_VERSION}-mbstring" \
-    "php${PHP_VERSION}-xml" \
-    "php${PHP_VERSION}-curl" \
-    "php${PHP_VERSION}-zip" \
-    "php${PHP_VERSION}-bcmath" \
-    "php${PHP_VERSION}-intl" \
-    "php${PHP_VERSION}-gd" \
-    "php${PHP_VERSION}-sqlite3"
+      apt-get install -y \
+        "php${PHP_VERSION}-cli" \
+        "php${PHP_VERSION}-fpm" \
+        "php${PHP_VERSION}-common" \
+        "php${PHP_VERSION}-mysql" \
+        "php${PHP_VERSION}-mbstring" \
+        "php${PHP_VERSION}-xml" \
+        "php${PHP_VERSION}-curl" \
+        "php${PHP_VERSION}-zip" \
+        "php${PHP_VERSION}-bcmath" \
+        "php${PHP_VERSION}-intl" \
+        "php${PHP_VERSION}-gd" \
+        "php${PHP_VERSION}-sqlite3"
+      ;;
+    redhat)
+      if ! rpm -q php-fpm >/dev/null 2>&1; then
+        log "Installing PHP ${PHP_VERSION} packages"
+        ensure_php_repo
+      fi
+
+      dnf install -y \
+        php-cli \
+        php-fpm \
+        php-common \
+        php-mysqlnd \
+        php-mbstring \
+        php-xml \
+        php-curl \
+        php-zip \
+        php-bcmath \
+        php-intl \
+        php-gd \
+        php-sqlite3
+      ;;
+    *)
+      fail "Unsupported platform family for PHP install: ${PLATFORM_FAMILY}"
+      ;;
+  esac
 }
 
 ensure_composer() {
@@ -225,20 +337,49 @@ ensure_node() {
   fi
 
   log "Installing Node.js 20"
+  curl -fsSL https://rpm.nodesource.com/setup_20.x | bash - >/dev/null 2>&1 || \
   curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-  apt-get install -y nodejs
+
+  case "${PACKAGE_MANAGER}" in
+    apt)
+      apt-get install -y nodejs
+      ;;
+    dnf)
+      dnf install -y nodejs
+      ;;
+    *)
+      fail "Unsupported package manager for Node.js install: ${PACKAGE_MANAGER}"
+      ;;
+  esac
 }
 
 ensure_mysql() {
-  if [[ "${INSTALL_MYSQL_SERVER}" == "1" ]]; then
-    log "Installing MySQL server"
-    export DEBIAN_FRONTEND=noninteractive
-    apt-get install -y mysql-server
-    systemctl enable mysql
-    systemctl restart mysql
-  else
-    apt-get install -y default-mysql-client
-  fi
+  case "${PLATFORM_FAMILY}" in
+    debian)
+      if [[ "${INSTALL_MYSQL_SERVER}" == "1" ]]; then
+        log "Installing MySQL server"
+        export DEBIAN_FRONTEND=noninteractive
+        apt-get install -y mysql-server
+        systemctl enable "${DATABASE_SERVICE}"
+        systemctl restart "${DATABASE_SERVICE}"
+      else
+        apt-get install -y default-mysql-client
+      fi
+      ;;
+    redhat)
+      if [[ "${INSTALL_MYSQL_SERVER}" == "1" ]]; then
+        log "Installing MariaDB server"
+        dnf install -y mariadb-server mariadb
+        systemctl enable "${DATABASE_SERVICE}"
+        systemctl restart "${DATABASE_SERVICE}"
+      else
+        dnf install -y mariadb
+      fi
+      ;;
+    *)
+      fail "Unsupported platform family for database install: ${PLATFORM_FAMILY}"
+      ;;
+  esac
 
   if [[ "${SETUP_LOCAL_MYSQL}" != "1" ]]; then
     return
@@ -248,7 +389,9 @@ ensure_mysql() {
   mysql <<SQL
 CREATE DATABASE IF NOT EXISTS \`${DB_DATABASE}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 CREATE USER IF NOT EXISTS '${DB_USERNAME}'@'localhost' IDENTIFIED BY '${DB_PASSWORD}';
+CREATE USER IF NOT EXISTS '${DB_USERNAME}'@'127.0.0.1' IDENTIFIED BY '${DB_PASSWORD}';
 GRANT ALL PRIVILEGES ON \`${DB_DATABASE}\`.* TO '${DB_USERNAME}'@'localhost';
+GRANT ALL PRIVILEGES ON \`${DB_DATABASE}\`.* TO '${DB_USERNAME}'@'127.0.0.1';
 FLUSH PRIVILEGES;
 SQL
 }
@@ -408,8 +551,11 @@ configure_nginx() {
     "${TEMPLATE_DIR}/nginx-site.conf.tpl" \
     "${NGINX_SITE_PATH}"
 
-  ln -sf "${NGINX_SITE_PATH}" "${NGINX_SITE_LINK}"
-  rm -f /etc/nginx/sites-enabled/default
+  if [[ "${PLATFORM_FAMILY}" == "debian" ]]; then
+    ln -sf "${NGINX_SITE_PATH}" "${NGINX_SITE_LINK}"
+    rm -f /etc/nginx/sites-enabled/default
+  fi
+
   nginx -t
   systemctl enable nginx
   systemctl restart nginx
@@ -478,6 +624,7 @@ EOF
 
 main() {
   require_root
+  detect_platform
   apply_deployment_preset
   install_base_packages
   ensure_php

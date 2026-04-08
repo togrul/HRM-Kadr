@@ -4,10 +4,11 @@ set -Eeuo pipefail
 
 APP_SLUG="${APP_SLUG:-hrm}"
 APP_ROOT="${APP_ROOT:-$(pwd)}"
-APP_USER="${APP_USER:-www-data}"
-APP_GROUP="${APP_GROUP:-www-data}"
+APP_USER="${APP_USER:-}"
+APP_GROUP="${APP_GROUP:-}"
+BOOTSTRAP_OS="${BOOTSTRAP_OS:-auto}"
 PHP_VERSION="${PHP_VERSION:-8.3}"
-PHP_FPM_SERVICE="${PHP_FPM_SERVICE:-php${PHP_VERSION}-fpm}"
+PHP_FPM_SERVICE="${PHP_FPM_SERVICE:-}"
 QUEUE_SERVICE_NAME="${QUEUE_SERVICE_NAME:-${APP_SLUG}-queue-worker.service}"
 PULL_REMOTE="${PULL_REMOTE:-origin}"
 PULL_REF="${PULL_REF:-main}"
@@ -22,6 +23,8 @@ RESTART_QUEUE_WORKER="${RESTART_QUEUE_WORKER:-1}"
 RESTART_PHP_FPM="${RESTART_PHP_FPM:-1}"
 COMPOSER_CACHE_DIR="${COMPOSER_CACHE_DIR:-/tmp/${APP_SLUG}-composer-cache}"
 NPM_CACHE_DIR="${NPM_CACHE_DIR:-/tmp/${APP_SLUG}-npm-cache}"
+OS_ID=""
+PLATFORM_FAMILY=""
 
 require_root() {
   if [[ "${EUID}" -ne 0 ]]; then
@@ -41,6 +44,48 @@ fail() {
 
 command_exists() {
   command -v "$1" >/dev/null 2>&1
+}
+
+lower() {
+  printf '%s' "$1" | tr '[:upper:]' '[:lower:]'
+}
+
+detect_platform() {
+  [[ -r /etc/os-release ]] || fail "/etc/os-release not found; cannot detect platform"
+
+  OS_ID="$(. /etc/os-release && echo "${ID}")"
+
+  case "$(lower "${BOOTSTRAP_OS}")" in
+    ""|auto)
+      ;;
+    ubuntu|debian)
+      OS_ID="$(lower "${BOOTSTRAP_OS}")"
+      ;;
+    almalinux|alma|rocky|rhel|centos)
+      OS_ID="almalinux"
+      ;;
+    *)
+      fail "Unsupported BOOTSTRAP_OS=${BOOTSTRAP_OS}. Supported: auto, ubuntu, debian, almalinux"
+      ;;
+  esac
+
+  case "${OS_ID}" in
+    ubuntu|debian)
+      PLATFORM_FAMILY="debian"
+      APP_USER="${APP_USER:-www-data}"
+      APP_GROUP="${APP_GROUP:-www-data}"
+      PHP_FPM_SERVICE="${PHP_FPM_SERVICE:-php${PHP_VERSION}-fpm}"
+      ;;
+    almalinux|rocky|rhel|centos|fedora)
+      PLATFORM_FAMILY="redhat"
+      APP_USER="${APP_USER:-nginx}"
+      APP_GROUP="${APP_GROUP:-nginx}"
+      PHP_FPM_SERVICE="${PHP_FPM_SERVICE:-php-fpm}"
+      ;;
+    *)
+      fail "Unsupported platform ID=${OS_ID}"
+      ;;
+  esac
 }
 
 run_as_app() {
@@ -134,6 +179,7 @@ restart_services() {
 
 main() {
   require_root
+  detect_platform
   assert_project_root
   git_pull
   composer_install
