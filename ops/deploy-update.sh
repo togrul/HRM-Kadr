@@ -82,6 +82,22 @@ resolve_bin() {
   done
 }
 
+current_php_version() {
+  local php_bin="$1"
+
+  if [[ -z "${php_bin}" || ! -x "${php_bin}" ]]; then
+    return
+  fi
+
+  "${php_bin}" -r 'echo PHP_MAJOR_VERSION,".",PHP_MINOR_VERSION;' 2>/dev/null || true
+}
+
+php_version_matches_target() {
+  local current_version="$1"
+
+  [[ -n "${current_version}" && "${current_version}" == "${PHP_VERSION}" ]]
+}
+
 detect_platform() {
   [[ -r /etc/os-release ]] || fail "/etc/os-release not found; cannot detect platform"
 
@@ -126,6 +142,10 @@ resolve_runtime_binaries() {
 
   if [[ -z "${PHP_BIN}" ]]; then
     fail "php binary not found in PATH"
+  fi
+
+  if ! php_version_matches_target "$(current_php_version "${PHP_BIN}")"; then
+    fail "Detected php binary ${PHP_BIN} is version $(current_php_version "${PHP_BIN}"), but PHP_VERSION=${PHP_VERSION} is required"
   fi
 
   if [[ "${RUN_COMPOSER}" == "1" && -z "${COMPOSER_BIN}" ]]; then
@@ -175,7 +195,7 @@ composer_install() {
 
   log "Installing Composer dependencies"
   install -d -o "${APP_USER}" -g "${APP_GROUP}" "${COMPOSER_CACHE_DIR}"
-  run_as_app env COMPOSER_CACHE_DIR="${COMPOSER_CACHE_DIR}" "${COMPOSER_BIN}" install \
+  run_as_app env COMPOSER_CACHE_DIR="${COMPOSER_CACHE_DIR}" "${PHP_BIN}" "${COMPOSER_BIN}" install \
     --working-dir="${APP_ROOT}" \
     --no-dev \
     --prefer-dist \

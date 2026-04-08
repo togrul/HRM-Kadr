@@ -127,6 +127,22 @@ resolve_bin() {
   done
 }
 
+current_php_version() {
+  local php_bin="$1"
+
+  if [[ -z "${php_bin}" || ! -x "${php_bin}" ]]; then
+    return
+  fi
+
+  "${php_bin}" -r 'echo PHP_MAJOR_VERSION,".",PHP_MINOR_VERSION;' 2>/dev/null || true
+}
+
+php_version_matches_target() {
+  local current_version="$1"
+
+  [[ -n "${current_version}" && "${current_version}" == "${PHP_VERSION}" ]]
+}
+
 detect_platform() {
   if [[ ! -r /etc/os-release ]]; then
     fail "/etc/os-release not found; cannot detect platform"
@@ -323,7 +339,12 @@ ensure_php() {
         "php${PHP_VERSION}-sqlite3"
       ;;
     redhat)
-      if ! rpm -q php-fpm >/dev/null 2>&1; then
+      local detected_php_bin
+      local detected_php_version
+      detected_php_bin="$(resolve_bin "${PHP_BIN}" php)"
+      detected_php_version="$(current_php_version "${detected_php_bin}")"
+
+      if ! rpm -q php-fpm >/dev/null 2>&1 || ! php_version_matches_target "${detected_php_version}"; then
         log "Installing PHP ${PHP_VERSION} packages"
         ensure_php_repo
       fi
@@ -365,6 +386,10 @@ resolve_runtime_binaries() {
 
   if [[ -z "${PHP_BIN}" ]]; then
     fail "php binary not found in PATH"
+  fi
+
+  if ! php_version_matches_target "$(current_php_version "${PHP_BIN}")"; then
+    fail "Detected php binary ${PHP_BIN} is version $(current_php_version "${PHP_BIN}"), but PHP_VERSION=${PHP_VERSION} is required"
   fi
 
   if [[ -z "${COMPOSER_BIN}" ]]; then
@@ -536,7 +561,7 @@ ensure_app_key() {
 
 install_php_dependencies() {
   log "Installing PHP dependencies"
-  run_as_app env COMPOSER_CACHE_DIR="${COMPOSER_CACHE_DIR}" "${COMPOSER_BIN}" install \
+  run_as_app env COMPOSER_CACHE_DIR="${COMPOSER_CACHE_DIR}" "${PHP_BIN}" "${COMPOSER_BIN}" install \
     --working-dir="${APP_ROOT}" \
     --no-dev \
     --prefer-dist \
