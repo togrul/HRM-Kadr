@@ -51,21 +51,28 @@
     $policyPack = app(HrPolicyPackService::class);
 
     $preparedMenus = collect($menus)
-        ->filter(static fn ($menuItem) => $policyPack->menuVisible((string) $menuItem->url))
-        ->filter(static fn ($menuItem) => MenuPresentation::hasRoute((string) $menuItem->url))
         ->map(static function ($menuItem) {
-        $routeBase = (string) $menuItem->url;
+        $routeBase = MenuPresentation::routeBase($menuItem);
+        $canonicalKey = MenuPresentation::canonicalKey($menuItem) ?? $routeBase;
 
         return (object) [
             'item' => $menuItem,
+            'canonicalKey' => $canonicalKey,
             'moduleName' => MenuPresentation::moduleName($routeBase),
+            'permissionName' => MenuPresentation::permissionName($menuItem),
             'route' => MenuPresentation::route($routeBase),
             'routeBase' => $routeBase,
             'isActive' => request()->routeIs($routeBase) || request()->routeIs($routeBase . '.*'),
             'iconComponent' => MenuPresentation::iconComponent($menuItem),
-            'label' => MenuPresentation::label((string) $menuItem->name),
+            'label' => MenuPresentation::railLabel($menuItem),
+            'visibleInRail' => MenuPresentation::visibleInRail($menuItem),
         ];
-    });
+    })
+        ->filter(static fn ($menu) => $menu->visibleInRail)
+        ->filter(static fn ($menu) => $policyPack->menuVisible($menu->routeBase))
+        ->filter(static fn ($menu) => MenuPresentation::hasRoute($menu->routeBase))
+        ->unique('canonicalKey')
+        ->values();
 @endphp
 
 <header class="relative z-20">
@@ -75,7 +82,7 @@
                 <ul class="flex  flex-col gap-1.5 overflow-y-auto">
                     @foreach ($preparedMenus as $menu)
                         @module($menu->moduleName)
-                        @can($menu->item->permission?->name)
+                        @can($menu->permissionName)
                             <li class="relative">
                                 <a
                                     href="{{ $menu->route }}"
@@ -107,7 +114,7 @@
         <div class="module-rail-fallback grid-cols-2 gap-3 py-2 sm:grid-cols-4 md:grid-cols-8">
             @foreach ($preparedMenus as $menu)
                 @module($menu->moduleName)
-                @can($menu->item->permission?->name)
+                @can($menu->permissionName)
                     <a
                         href="{{ $menu->route }}"
                         wire:navigate

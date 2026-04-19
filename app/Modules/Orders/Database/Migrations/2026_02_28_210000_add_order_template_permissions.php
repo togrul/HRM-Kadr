@@ -3,6 +3,7 @@
 use App\Support\Permissions\PermissionDescriptionCatalog;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Spatie\Permission\PermissionRegistrar;
 
 return new class extends Migration
@@ -16,18 +17,32 @@ return new class extends Migration
     public function up(): void
     {
         $now = now();
+        $hasDescriptionColumn = Schema::hasColumn('permissions', 'description');
 
         $rows = collect($this->permissions)
-            ->map(fn (string $name) => [
-                'name' => $name,
-                'description' => PermissionDescriptionCatalog::describe($name),
-                'guard_name' => 'web',
-                'created_at' => $now,
-                'updated_at' => $now,
-            ])
+            ->map(function (string $name) use ($hasDescriptionColumn, $now): array {
+                $row = [
+                    'name' => $name,
+                    'guard_name' => 'web',
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+
+                if ($hasDescriptionColumn) {
+                    $row['description'] = PermissionDescriptionCatalog::describe($name);
+                }
+
+                return $row;
+            })
             ->all();
 
-        DB::table('permissions')->upsert($rows, ['name', 'guard_name'], ['description', 'updated_at']);
+        $updateColumns = ['updated_at'];
+
+        if ($hasDescriptionColumn) {
+            $updateColumns[] = 'description';
+        }
+
+        DB::table('permissions')->upsert($rows, ['name', 'guard_name'], $updateColumns);
 
         app(PermissionRegistrar::class)->forgetCachedPermissions();
     }
