@@ -92,7 +92,16 @@ return [
         'upper_step_inactive_help' => 'Only the direct manager approval is required for this leave. The upper manager is shown in the chain, but does not approve separately.',
     ],
     'actions' => [
+        'add_leave' => 'Add leave',
+        'export_excel' => 'Export to Excel',
+        'show_comment' => 'Show comment',
+        'download_document' => 'Open document',
+        'approve' => 'Approve',
+        'reject' => 'Reject',
+        'edit' => 'Edit',
+        'restore' => 'Restore',
         'delete' => 'Delete',
+        'force_delete' => 'Force delete',
         'save' => 'Save',
     ],
     'empty' => [

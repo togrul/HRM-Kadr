@@ -34,7 +34,7 @@ class SettingsHub extends Component
 
     public function render()
     {
-        $pendingApprovalCount = $this->canApproveCampaigns()
+        $pendingApprovalCount = ($this->activeTab === 'approval' && $this->canApproveCampaigns())
             ? NotificationCampaign::query()->where('approval_status', 'pending')->count()
             : 0;
 
@@ -47,8 +47,11 @@ class SettingsHub extends Component
         if ($this->canApproveCampaigns()) {
             $tabs['approval'] = [
                 'label' => __('notifications::common.tabs.approval'),
-                'count' => $pendingApprovalCount,
             ];
+
+            if ($this->activeTab === 'approval') {
+                $tabs['approval']['count'] = $pendingApprovalCount;
+            }
         }
 
         if ($this->canManageCampaigns()) {

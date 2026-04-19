@@ -8,7 +8,11 @@
     {{ $attributes->class([
         'flex relative items-center justify-center rounded-xl w-12 h-12 transition-all duration-300 hover:bg-gray-100',
         'bg-gray-100' => count($filters) > 0,
-    ])->merge(['type' => 'button', 'title' => 'Filter']) }}
+    ])->merge([
+        'type' => 'button',
+        'title' => __('ui::filters.actions.open_filters'),
+        'aria-label' => __('ui::filters.actions.open_filters'),
+    ]) }}
     @unless($hasWireClick)
         @click="$wire.dispatch('setOpenFilter')"
     @endunless

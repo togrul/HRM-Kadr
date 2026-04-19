@@ -59,6 +59,7 @@ class AttendanceOverviewService
 
         $summaryQuery = $this->summaryQuery($start, $end, $structureIds);
         $summaryAgg = (clone $summaryQuery)
+            ->selectRaw('COUNT(*) as summary_rows')
             ->selectRaw('COALESCE(SUM(scheduled_minutes_sum),0) as scheduled_sum')
             ->selectRaw('COALESCE(SUM(overtime_minutes_sum),0) as overtime_sum')
             ->selectRaw('COALESCE(SUM(worked_minutes_sum),0) as worked_sum')
@@ -67,12 +68,11 @@ class AttendanceOverviewService
             ->selectRaw('COALESCE(SUM(compliant_days),0) as compliant_days')
             ->first();
 
-        $summaryRows = (clone $summaryQuery)->count();
+        $summaryRows = (int) ($summaryAgg?->summary_rows ?? 0);
 
         $useSummary = $summaryRows > 0;
 
         $ledgerAgg = null;
-        $ledgerCounts = null;
 
         if (! $useSummary) {
             $ledgerQuery = $this->ledgerQuery($start, $end, $structureIds);
@@ -81,9 +81,6 @@ class AttendanceOverviewService
                 ->selectRaw('COALESCE(SUM(scheduled_minutes),0) as scheduled_sum')
                 ->selectRaw('COALESCE(SUM(overtime_minutes),0) as overtime_sum')
                 ->selectRaw('COALESCE(SUM(worked_minutes),0) as worked_sum')
-                ->first();
-
-            $ledgerCounts = (clone $ledgerQuery)
                 ->selectRaw('COUNT(*) as ledger_rows')
                 ->selectRaw('COALESCE(SUM(CASE WHEN scheduled_minutes > 0 THEN 1 ELSE 0 END),0) as scheduled_days')
                 ->selectRaw('COALESCE(SUM(CASE WHEN attendance_status IN ("absent","manual_absence") THEN 1 ELSE 0 END),0) as absence_days')
@@ -92,46 +89,29 @@ class AttendanceOverviewService
         }
 
         $previousSummaryQuery = $this->summaryQuery($previousStart, $previousEnd, $structureIds);
-        $previousSummaryRows = (clone $previousSummaryQuery)->count();
+        $previousSummaryAgg = (clone $previousSummaryQuery)
+            ->selectRaw('COUNT(*) as summary_rows')
+            ->selectRaw('COALESCE(SUM(overtime_minutes_sum), 0) as overtime_sum')
+            ->first();
 
-        if ($previousSummaryRows > 0) {
-            $previousOvertimeMinutes = (int) (clone $previousSummaryQuery)->sum('overtime_minutes_sum');
+        if ((int) ($previousSummaryAgg?->summary_rows ?? 0) > 0) {
+            $previousOvertimeMinutes = (int) ($previousSummaryAgg?->overtime_sum ?? 0);
         } else {
             $previousOvertimeMinutes = (int) (clone $this->ledgerQuery($previousStart, $previousEnd, $structureIds))->sum('overtime_minutes');
         }
 
-        $scopedTabelNos = $this->scopedTabelNosSubquery($structureIds);
-
-        $manualPending = AttendanceManualEntry::query()
-            ->whereBetween('date', [$start->toDateString(), $end->toDateString()])
-            ->where('approval_status', 'pending')
-            ->when($scopedTabelNos !== null, fn ($query) => $query->whereIn('tabel_no', $scopedTabelNos))
-            ->count();
-
-        $rawPending = AttendanceRawPunch::query()
-            ->whereBetween('punched_at', [$start->toDateTimeString(), $end->toDateTimeString()])
-            ->where('is_processed', false)
-            ->when($scopedTabelNos !== null, fn ($query) => $query->whereIn('tabel_no', $scopedTabelNos))
-            ->count();
-
-        $openExceptions = AttendanceException::query()
-            ->whereBetween('date', [$start->toDateString(), $end->toDateString()])
-            ->where('status', 'open')
-            ->when($scopedTabelNos !== null, fn ($query) => $query->whereIn('tabel_no', $scopedTabelNos))
-            ->count();
-
-        $pendingOvertime = AttendanceOvertimeRequest::query()
-            ->whereBetween('date', [$start->toDateString(), $end->toDateString()])
-            ->where('status', 'pending')
-            ->when($scopedTabelNos !== null, fn ($query) => $query->whereIn('tabel_no', $scopedTabelNos))
-            ->count();
+        $pendingCounts = $this->pendingActionCounts($start, $end, $structureIds);
+        $manualPending = $pendingCounts['manual_pending'] ?? 0;
+        $rawPending = $pendingCounts['raw_pending'] ?? 0;
+        $openExceptions = $pendingCounts['open_exceptions'] ?? 0;
+        $pendingOvertime = $pendingCounts['pending_overtime'] ?? 0;
 
         $scheduledMinutes = (int) ($useSummary ? ($summaryAgg?->scheduled_sum ?? 0) : ($ledgerAgg?->scheduled_sum ?? 0));
         $overtimeMinutes = (int) ($useSummary ? ($summaryAgg?->overtime_sum ?? 0) : ($ledgerAgg?->overtime_sum ?? 0));
         $workedMinutes = (int) ($useSummary ? ($summaryAgg?->worked_sum ?? 0) : ($ledgerAgg?->worked_sum ?? 0));
-        $scheduledDays = (int) ($useSummary ? ($summaryAgg?->scheduled_days ?? 0) : ($ledgerCounts?->scheduled_days ?? 0));
-        $absenceDays = (int) ($useSummary ? ($summaryAgg?->absence_days ?? 0) : ($ledgerCounts?->absence_days ?? 0));
-        $compliantDays = (int) ($useSummary ? ($summaryAgg?->compliant_days ?? 0) : ($ledgerCounts?->compliant_days ?? 0));
+        $scheduledDays = (int) ($useSummary ? ($summaryAgg?->scheduled_days ?? 0) : ($ledgerAgg?->scheduled_days ?? 0));
+        $absenceDays = (int) ($useSummary ? ($summaryAgg?->absence_days ?? 0) : ($ledgerAgg?->absence_days ?? 0));
+        $compliantDays = (int) ($useSummary ? ($summaryAgg?->compliant_days ?? 0) : ($ledgerAgg?->compliant_days ?? 0));
 
         if ($scheduledMinutes === 0 && $workedMinutes === 0 && $overtimeMinutes === 0) {
             $scheduledMinutes = $workdays * 9 * 60;
@@ -195,6 +175,54 @@ class AttendanceOverviewService
                 $structureIds !== [],
                 fn ($query) => $query->whereIn('structure_id', $structureIds)
             );
+    }
+
+    /**
+     * @param  array<int,int>  $structureIds
+     * @return array<string,int>
+     */
+    private function pendingActionCounts(Carbon $start, Carbon $end, array $structureIds = []): array
+    {
+        $scopedTabelNos = $this->scopedTabelNosSubquery($structureIds);
+        $dateRange = [$start->toDateString(), $end->toDateString()];
+
+        $manualPending = DB::table('attendance_manual_entries')
+            ->selectRaw('? as metric, COUNT(*) as total', ['manual_pending'])
+            ->whereBetween('date', $dateRange)
+            ->where('approval_status', 'pending')
+            ->whereNull('deleted_at')
+            ->when($scopedTabelNos !== null, fn ($query) => $query->whereIn('tabel_no', $scopedTabelNos));
+
+        $rawPending = DB::table('attendance_raw_punches')
+            ->selectRaw('? as metric, COUNT(*) as total', ['raw_pending'])
+            ->whereBetween('punched_at', [$start->toDateTimeString(), $end->toDateTimeString()])
+            ->where('is_processed', false)
+            ->when($scopedTabelNos !== null, fn ($query) => $query->whereIn('tabel_no', $scopedTabelNos));
+
+        $openExceptions = DB::table('attendance_exceptions')
+            ->selectRaw('? as metric, COUNT(*) as total', ['open_exceptions'])
+            ->whereBetween('date', $dateRange)
+            ->where('status', 'open')
+            ->when($scopedTabelNos !== null, fn ($query) => $query->whereIn('tabel_no', $scopedTabelNos));
+
+        $pendingOvertime = DB::table('attendance_overtime_requests')
+            ->selectRaw('? as metric, COUNT(*) as total', ['pending_overtime'])
+            ->whereBetween('date', $dateRange)
+            ->where('status', 'pending')
+            ->whereNull('deleted_at')
+            ->when($scopedTabelNos !== null, fn ($query) => $query->whereIn('tabel_no', $scopedTabelNos));
+
+        return DB::query()
+            ->fromSub(
+                $manualPending
+                    ->unionAll($rawPending)
+                    ->unionAll($openExceptions)
+                    ->unionAll($pendingOvertime),
+                'attendance_pending_counts'
+            )
+            ->pluck('total', 'metric')
+            ->map(fn ($value) => (int) $value)
+            ->all();
     }
 
     /**

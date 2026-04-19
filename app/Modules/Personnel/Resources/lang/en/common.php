@@ -26,6 +26,7 @@ return [
         'get_data_by_pin' => 'Get data by PIN',
         'reset' => 'Reset',
         'reset_filter' => 'Reset filter',
+        'export_excel' => 'Export to Excel',
         'export_to_word' => 'Export to Word',
     ],
     'titles' => [

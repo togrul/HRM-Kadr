@@ -21,8 +21,10 @@ return [
     ],
     'actions' => [
         'add' => 'Add',
+        'add_staff' => 'Add staff',
         'save' => 'Save',
         'delete' => 'Delete',
+        'export_excel' => 'Export to Excel',
         'get_all_vacancies' => 'Get all vacancies',
         'all_data' => 'All data',
     ],

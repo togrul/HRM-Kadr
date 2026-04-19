@@ -92,7 +92,16 @@ return [
         'upper_step_inactive_help' => 'Bu icazə üçün yalnız birbaşa rəhbər təsdiqi tələb olunur. Yuxarı rəhbər xəttdə görünür, amma ayrıca təsdiq vermir.',
     ],
     'actions' => [
+        'add_leave' => 'İcazə əlavə et',
+        'export_excel' => 'Excel-ə ixrac et',
+        'show_comment' => 'Şərhi göstər',
+        'download_document' => 'Sənədi aç',
+        'approve' => 'Təsdiqlə',
+        'reject' => 'Rədd et',
+        'edit' => 'Redaktə et',
+        'restore' => 'Bərpa et',
         'delete' => 'Sil',
+        'force_delete' => 'Tam sil',
         'save' => 'Yadda saxla',
     ],
     'empty' => [

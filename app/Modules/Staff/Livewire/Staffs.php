@@ -12,6 +12,7 @@ use App\Traits\NestedStructureTrait;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
@@ -109,6 +110,17 @@ class Staffs extends Component
 
     protected function returnData($type = 'normal')
     {
+        if ($type === 'normal') {
+            return Cache::remember($this->staffListCacheKey(), now()->addSeconds(10), fn () => $this->buildStaffRows());
+        }
+
+        $result = $this->buildStaffRows(raw: true);
+
+        return $result->toArray();
+    }
+
+    protected function buildStaffRows(bool $raw = false)
+    {
         $result = StaffSchedule::with([
             'position',
             'structure:id,parent_id,name',
@@ -126,13 +138,22 @@ class Staffs extends Component
                 ->values();
         }
 
-        if ($type === 'normal') {
-            return $this->selectedPage === 'all'
-                ? $this->buildStructureGroups($result)
-                : $result;
+        if ($raw) {
+            return $result;
         }
 
-        return $result->toArray();
+        return $this->selectedPage === 'all'
+            ? $this->buildStructureGroups($result)
+            : $result;
+    }
+
+    protected function staffListCacheKey(): string
+    {
+        return 'staff:list:'.md5(json_encode([
+            'selected_page' => $this->selectedPage,
+            'structure' => $this->structure,
+            'accessible' => $this->accessibleStructureIds,
+        ]));
     }
 
     protected function hydrateFilledAndVacant(Collection $rows): void

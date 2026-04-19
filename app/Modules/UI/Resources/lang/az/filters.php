@@ -13,6 +13,7 @@ return [
         'employment' => 'İş məlumatları',
     ],
     'actions' => [
+        'open_filters' => 'Filtrləri aç',
         'apply_filters' => 'Filtrləri tətbiq et',
         'cancel' => 'Ləğv et',
         'clear_all' => 'Hamısını təmizlə',

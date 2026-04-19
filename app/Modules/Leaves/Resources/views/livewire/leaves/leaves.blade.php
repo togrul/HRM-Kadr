@@ -128,6 +128,8 @@
                            wire:target="openAddLeaveModal"
                            class="flex items-center justify-center w-12 h-12 transition-all duration-300 rounded-xl hover:bg-blue-50"
                            type="button"
+                           title="{{ __('leaves::common.actions.add_leave') }}"
+                           aria-label="{{ __('leaves::common.actions.add_leave') }}"
                    >
                            <x-icons.add-file></x-icons.add-file>
                     </button>
@@ -138,6 +140,8 @@
                            wire:target="exportExcel"
                            class="flex items-center justify-center w-12 h-12 transition-all duration-300 rounded-xl hover:bg-green-50"
                            type="button"
+                           title="{{ __('leaves::common.actions.export_excel') }}"
+                           aria-label="{{ __('leaves::common.actions.export_excel') }}"
                    >
                            <x-icons.excel-icon />
                     </button>
@@ -237,7 +241,7 @@
                                             </span>
                                             @if($leave?->latestLog?->comment)
                                             <div class="relative top-1" x-data="{showComment: false}">
-                                                <button @click="showComment = true" class="appearance-none">
+                                                <button @click="showComment = true" class="appearance-none" type="button" title="{{ __('leaves::common.actions.show_comment') }}" aria-label="{{ __('leaves::common.actions.show_comment') }}">
                                                     <x-icons.comment-icon color="text-sky-500" hover="text-indigo-700" />
                                                 </button>
                                                  <div @class([
@@ -290,6 +294,8 @@
                                             target="_blank"
                                             class="flex flex-col gap-1 text-sm font-medium"
                                             style="word-break: break-word;"
+                                            title="{{ __('leaves::common.actions.download_document') }}"
+                                            aria-label="{{ __('leaves::common.actions.download_document') }}"
                                         >
                                             <x-icons.link-icon size="w-6 h-6" color="text-blue-600" hover="text-sky-300" />
                                         </a>
@@ -299,6 +305,9 @@
                                             <button
                                                 wire:loading.attr="disabled"
                                                 @click="$dispatch('comment:open', { action: 'APPROVED', leaveId: @js($leave->id) })"
+                                                type="button"
+                                                title="{{ __('leaves::common.actions.approve') }}"
+                                                aria-label="{{ __('leaves::common.actions.approve') }}"
                                             >
                                                 <x-icons.check-icon
                                                     color="text-green-500"
@@ -309,6 +318,9 @@
                                             <button
                                                 wire:loading.attr="disabled"
                                                 @click="$dispatch('comment:open', { action: 'CANCELLED', leaveId: @js($leave->id) })"
+                                                type="button"
+                                                title="{{ __('leaves::common.actions.reject') }}"
+                                                aria-label="{{ __('leaves::common.actions.reject') }}"
                                             >
                                                 <x-icons.x-circle-icon
                                                     color="text-rose-500"
@@ -329,6 +341,9 @@
                                                 wire:loading.attr="disabled"
                                                 wire:target="openEditLeaveModal"
                                                 class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase bg-gray-100 rounded-lg hover:bg-gray-200 hover:text-gray-700"
+                                                type="button"
+                                                title="{{ __('leaves::common.actions.edit') }}"
+                                                aria-label="{{ __('leaves::common.actions.edit') }}"
                                             >
                                                 <x-icons.document-icon></x-icons.document-icon>
                                             </button>
@@ -339,6 +354,9 @@
                                                     wire:loading.attr="disabled"
                                                     wire:target="restoreData('{{ $leave->id }}')"
                                                     class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-teal-50 hover:text-gray-700"
+                                                    type="button"
+                                                    title="{{ __('leaves::common.actions.restore') }}"
+                                                    aria-label="{{ __('leaves::common.actions.restore') }}"
                                             >
                                                 <x-icons.recover color="text-teal-500" hover="text-teal-600"></x-icons.recover>
                                             </button>
@@ -354,6 +372,9 @@
                                                 wire:loading.attr="disabled"
                                                 wire:target="setDeleteLeave('{{ $leave->id }}')"
                                                 class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-100 hover:text-gray-700"
+                                                type="button"
+                                                title="{{ __('leaves::common.actions.delete') }}"
+                                                aria-label="{{ __('leaves::common.actions.delete') }}"
                                             >
                                                 <x-icons.delete-icon></x-icons.delete-icon>
                                             </button>
@@ -366,6 +387,9 @@
                                                 wire:loading.attr="disabled"
                                                 wire:target="forceDeleteData('{{ $leave->id }}')"
                                                 class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700"
+                                                type="button"
+                                                title="{{ __('leaves::common.actions.force_delete') }}"
+                                                aria-label="{{ __('leaves::common.actions.force_delete') }}"
                                             >
                                                 <x-icons.force-delete></x-icons.force-delete>
                                             </button>

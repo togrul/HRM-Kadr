@@ -68,6 +68,12 @@ return [
         'delete_confirm' => 'Bu namizədi silmək istədiyinizə əminsiniz?',
     ],
     'actions' => [
+        'add_candidate' => 'Namizəd əlavə et',
+        'export_excel' => 'Excel-ə ixrac et',
+        'open_files' => 'Faylları aç',
+        'edit_candidate' => 'Namizədi redaktə et',
+        'restore_candidate' => 'Namizədi bərpa et',
         'delete' => 'Sil',
+        'force_delete' => 'Tam sil',
     ],
 ];

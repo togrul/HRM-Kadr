@@ -135,8 +135,10 @@ class AttendanceHistoryReadService
     {
         $labels = trans('attendance::history.events');
 
-        if (is_array($labels) && array_key_exists((string) $activity->event, $labels)) {
-            return (string) $labels[(string) $activity->event];
+        $eventKey = str_replace('.', '_', (string) $activity->event);
+
+        if (is_array($labels) && array_key_exists($eventKey, $labels)) {
+            return (string) $labels[$eventKey];
         }
 
         return str((string) $activity->event)

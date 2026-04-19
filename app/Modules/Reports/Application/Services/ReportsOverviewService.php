@@ -28,26 +28,15 @@ class ReportsOverviewService
         $reportDate = CarbonImmutable::create($year, $month, 1)->endOfMonth();
         $yearStart = $reportDate->startOfYear();
         $structureIds = $this->structureScope->resolveIds($structureId);
-        $basePersonnel = $this->activePersonnelQueryAt($reportDate->toDateString(), $structureIds);
-
-        $activePersonnelCount = (clone $basePersonnel)->count();
-        $structuresCovered = (clone $basePersonnel)->distinct('structure_id')->count('structure_id');
-        $newHires = Personnel::query()
-            ->where('is_pending', false)
-            ->whereNull('deleted_at')
-            ->whereBetween('join_work_date', [$yearStart->toDateString(), $reportDate->toDateString()])
-            ->when($structureIds !== [], fn (Builder $query) => $query->whereIn('structure_id', $structureIds))
-            ->count();
-        $exits = Personnel::query()
-            ->where('is_pending', false)
-            ->whereNull('deleted_at')
-            ->whereNotNull('leave_work_date')
-            ->whereBetween('leave_work_date', [$yearStart->toDateString(), $reportDate->toDateString()])
-            ->when($structureIds !== [], fn (Builder $query) => $query->whereIn('structure_id', $structureIds))
-            ->count();
+        $personnelSnapshot = $this->personnelSnapshot($yearStart->toDateString(), $reportDate->toDateString(), $structureIds);
+        $activePersonnelCount = (int) ($personnelSnapshot?->active_personnel_count ?? 0);
+        $structuresCovered = (int) ($personnelSnapshot?->structures_covered ?? 0);
+        $newHires = (int) ($personnelSnapshot?->new_hires ?? 0);
+        $exits = (int) ($personnelSnapshot?->exits ?? 0);
 
         $attendance = $this->attendanceOverview->build($year, $month, $structureId, true, $structureIds);
         $training = $this->trainingKpis($year, $structureIds);
+        $performance = $this->performanceKpis($structureIds);
 
         $topStructures = Structure::query()
             ->selectRaw('structures.id, structures.name, COUNT(personnels.id) as personnel_count')
@@ -79,8 +68,8 @@ class ReportsOverviewService
                 'attendance_absence_rate_pct' => (float) data_get($attendance, 'kpi.absence_rate_pct', 0),
                 'delivered_trainings_count' => (int) ($training['delivered_trainings_count'] ?? 0),
                 'training_attended_hours' => (float) ($training['attended_hours'] ?? 0),
-                'performance_forms_count' => $this->performanceFormsCount($structureIds),
-                'performance_weak_links_count' => $this->performanceWeakLinksCount($structureIds),
+                'performance_forms_count' => (int) ($performance->forms_count ?? 0),
+                'performance_weak_links_count' => (int) ($performance->weak_links_count ?? 0),
             ],
             'headcount_trend' => $this->headcountTrend($reportDate, $trendWindow, $structureIds),
             'top_structures' => $topStructures,
@@ -104,6 +93,21 @@ class ReportsOverviewService
             ->when($structureIds !== [], fn (Builder $query) => $query->whereIn('structure_id', $structureIds));
     }
 
+    protected function personnelSnapshot(string $yearStart, string $reportDate, array $structureIds = []): object
+    {
+        $activeCondition = 'join_work_date <= ? AND (leave_work_date IS NULL OR leave_work_date >= ?)';
+
+        return Personnel::query()
+            ->where('is_pending', false)
+            ->whereNull('deleted_at')
+            ->when($structureIds !== [], fn (Builder $query) => $query->whereIn('structure_id', $structureIds))
+            ->selectRaw("SUM(CASE WHEN {$activeCondition} THEN 1 ELSE 0 END) as active_personnel_count", [$reportDate, $reportDate])
+            ->selectRaw("COUNT(DISTINCT CASE WHEN {$activeCondition} THEN structure_id END) as structures_covered", [$reportDate, $reportDate])
+            ->selectRaw('SUM(CASE WHEN join_work_date BETWEEN ? AND ? THEN 1 ELSE 0 END) as new_hires', [$yearStart, $reportDate])
+            ->selectRaw('SUM(CASE WHEN leave_work_date IS NOT NULL AND leave_work_date BETWEEN ? AND ? THEN 1 ELSE 0 END) as exits', [$yearStart, $reportDate])
+            ->first();
+    }
+
     /**
      * @return array<int,array{label:string,value:int}>
      */
@@ -120,23 +124,34 @@ class ReportsOverviewService
 
         $joins = Personnel::query()
             ->selectRaw($this->yearMonthSelect('join_work_date').', COUNT(*) as total')
+            ->selectRaw('? as movement_type', ['join'])
             ->where('is_pending', false)
             ->whereNull('deleted_at')
             ->whereBetween('join_work_date', [$startMonth->toDateString(), $reportDate->toDateString()])
             ->when($structureIds !== [], fn (Builder $query) => $query->whereIn('structure_id', $structureIds))
-            ->groupBy('metric_year', 'metric_month')
-            ->get()
-            ->mapWithKeys(fn ($row) => [sprintf('%04d-%02d', $row->metric_year, $row->metric_month) => (int) $row->total]);
+            ->groupBy('metric_year', 'metric_month');
 
         $exits = Personnel::query()
             ->selectRaw($this->yearMonthSelect('leave_work_date').', COUNT(*) as total')
+            ->selectRaw('? as movement_type', ['exit'])
             ->where('is_pending', false)
             ->whereNull('deleted_at')
             ->whereNotNull('leave_work_date')
             ->whereBetween('leave_work_date', [$startMonth->toDateString(), $reportDate->toDateString()])
             ->when($structureIds !== [], fn (Builder $query) => $query->whereIn('structure_id', $structureIds))
-            ->groupBy('metric_year', 'metric_month')
+            ->groupBy('metric_year', 'metric_month');
+
+        $movements = DB::query()
+            ->fromSub($joins->unionAll($exits), 'personnel_movements')
             ->get()
+            ->groupBy('movement_type');
+
+        $joinsByMonth = $movements
+            ->get('join', collect())
+            ->mapWithKeys(fn ($row) => [sprintf('%04d-%02d', $row->metric_year, $row->metric_month) => (int) $row->total]);
+
+        $exitsByMonth = $movements
+            ->get('exit', collect())
             ->mapWithKeys(fn ($row) => [sprintf('%04d-%02d', $row->metric_year, $row->metric_month) => (int) $row->total]);
 
         $running = $baselineCount;
@@ -144,8 +159,8 @@ class ReportsOverviewService
         return $months
             ->map(function (CarbonImmutable $date) use (&$running, $joins, $exits): array {
                 $key = $date->format('Y-m');
-                $running += (int) ($joins[$key] ?? 0);
-                $running -= (int) ($exits[$key] ?? 0);
+                $running += (int) ($joinsByMonth[$key] ?? 0);
+                $running -= (int) ($exitsByMonth[$key] ?? 0);
 
                 return [
                     'label' => $this->shortMonthLabel((int) $date->month),
@@ -178,26 +193,30 @@ class ReportsOverviewService
             ->whereYear('training_delivery_records.completed_at', $year)
             ->when($structureIds !== [], fn (Builder $builder) => $builder->whereIn('personnels.structure_id', $structureIds));
 
+        $row = $query
+            ->selectRaw('COUNT(DISTINCT training_delivery_records.training_session_id) as delivered_trainings_count')
+            ->selectRaw('COALESCE(SUM(training_delivery_records.attended_hours), 0) as attended_hours')
+            ->first();
+
         return [
-            'delivered_trainings_count' => (clone $query)->distinct('training_delivery_records.training_session_id')->count('training_delivery_records.training_session_id'),
-            'attended_hours' => round((float) ((clone $query)->sum('training_delivery_records.attended_hours') ?: 0), 1),
+            'delivered_trainings_count' => (int) ($row?->delivered_trainings_count ?? 0),
+            'attended_hours' => round((float) ($row?->attended_hours ?? 0), 1),
         ];
     }
 
-    protected function performanceFormsCount(array $structureIds = []): int
+    protected function performanceKpis(array $structureIds = []): object
     {
-        return PerformanceForm::query()
-            ->join('personnels', 'personnels.id', '=', 'performance_forms.personnel_id')
-            ->when($structureIds !== [], fn (Builder $builder) => $builder->whereIn('personnels.structure_id', $structureIds))
-            ->count();
-    }
-
-    protected function performanceWeakLinksCount(array $structureIds = []): int
-    {
-        return PerformanceTrainingNeedLink::query()
+        $weakLinks = PerformanceTrainingNeedLink::query()
             ->join('performance_forms', 'performance_forms.id', '=', 'performance_training_need_links.performance_form_id')
             ->join('personnels', 'personnels.id', '=', 'performance_forms.personnel_id')
             ->when($structureIds !== [], fn (Builder $builder) => $builder->whereIn('personnels.structure_id', $structureIds))
-            ->count();
+            ->selectRaw('COUNT(*)');
+
+        return PerformanceForm::query()
+            ->join('personnels', 'personnels.id', '=', 'performance_forms.personnel_id')
+            ->when($structureIds !== [], fn (Builder $builder) => $builder->whereIn('personnels.structure_id', $structureIds))
+            ->selectRaw('COUNT(*) as forms_count')
+            ->selectSub($weakLinks, 'weak_links_count')
+            ->first();
     }
 }

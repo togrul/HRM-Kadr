@@ -13,6 +13,7 @@ return [
         'employment' => 'Employment',
     ],
     'actions' => [
+        'open_filters' => 'Open filters',
         'apply_filters' => 'Apply Filters',
         'cancel' => 'Cancel',
         'clear_all' => 'Clear All',

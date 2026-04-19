@@ -50,7 +50,9 @@
             @can('add-staff')
                 <button wire:click="openSideMenu('add-staff')"
                     class="flex items-center justify-center p-2 space-x-2 transition-all duration-300 rounded-xl bg-slate-100 text-slate-500 hover:bg-slate-200"
-                    type="button">
+                    type="button"
+                    title="{{ __('staff::common.actions.add_staff') }}"
+                    aria-label="{{ __('staff::common.actions.add_staff') }}">
                     <x-icons.add-icon></x-icons.add-icon>
                 </button>
             @endcan
@@ -58,7 +60,9 @@
                 @if ($selectedPage == 'vacancies')
                     <button wire:click.prevent="exportExcel"
                         class="flex items-center justify-center p-2 space-x-2 text-green-500 transition-all duration-300 rounded-xl bg-green-50 hover:bg-green-100"
-                        type="button">
+                        type="button"
+                        title="{{ __('staff::common.actions.export_excel') }}"
+                        aria-label="{{ __('staff::common.actions.export_excel') }}">
                         <x-icons.excel-icon />
                     </button>
                 @endif

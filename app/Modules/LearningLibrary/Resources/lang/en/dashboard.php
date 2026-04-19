@@ -16,6 +16,8 @@ return [
         'active_assignments' => 'Active assignments',
         'completed_assignments' => 'Completed assignments',
         'overdue_assignments' => 'Overdue assignments',
+        'archived_assets' => 'Archived assets',
+        'due_soon_assignments' => 'Due soon',
     ],
     'sections' => [
         'create_asset' => 'Create asset',
@@ -24,6 +26,7 @@ return [
         'recent_assignments' => 'Recent assignments',
         'target_people' => 'Employee targeting',
         'target_structures' => 'Structure targeting',
+        'reports' => 'Reports',
         'targeting_rules' => 'Assignment rules',
     ],
     'fields' => [

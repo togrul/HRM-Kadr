@@ -26,6 +26,7 @@ return [
         'get_data_by_pin' => 'FİN ilə məlumatı gətir',
         'reset' => 'Sıfırla',
         'reset_filter' => 'Filtri sıfırla',
+        'export_excel' => 'Excel-ə ixrac et',
         'export_to_word' => 'Word-ə ixrac et',
     ],
     'titles' => [

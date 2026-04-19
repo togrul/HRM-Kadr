@@ -21,8 +21,10 @@ return [
     ],
     'actions' => [
         'add' => 'Əlavə et',
+        'add_staff' => 'Ştat əlavə et',
         'save' => 'Yadda saxla',
         'delete' => 'Sil',
+        'export_excel' => 'Excel-ə ixrac et',
         'get_all_vacancies' => 'Bütün vakantları gətir',
         'all_data' => 'Bütün məlumatlar',
     ],

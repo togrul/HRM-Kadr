@@ -10,6 +10,7 @@ use App\Modules\Notifications\Livewire\Concerns\InteractsWithNotificationAuthori
 use App\Modules\Notifications\Support\NotificationTriggerRegistry;
 use App\Modules\Notifications\Support\NotificationTemplateRenderer;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -257,37 +258,7 @@ class OverviewPanel extends Component
                     'detail' => __('notifications::common.flows.holiday_detail'),
                 ],
             ],
-            'starterFlows' => [
-                'birthday' => $this->starterPreview('birthday.default', 'birthday', NotificationTriggerRegistry::trigger('birthday') ?? 'birthday_due', [
-                    'name' => 'Murad Əliyev',
-                    'position' => 'Baş məsləhətçi',
-                    'structure' => 'İnsan resursları şöbəsi',
-                    'birthday_label' => '16.03.2026',
-                ]),
-                'position_change' => $this->starterPreview('position-change.default', 'position_change', NotificationTriggerRegistry::trigger('position_change') ?? 'position_changed', [
-                    'name' => 'Leyla Məmmədova',
-                    'old_position' => 'Məsləhətçi',
-                    'new_position' => 'Aparıcı məsləhətçi',
-                    'old_structure' => 'Maliyyə şöbəsi',
-                    'new_structure' => 'İnsan resursları şöbəsi',
-                    'change_reason' => 'Daxili rotasiya',
-                    'effective_date' => now()->format('d.m.Y'),
-                ]),
-                'employment_started' => $this->starterPreview('employment-started.default', 'employment_started', NotificationTriggerRegistry::trigger('employment_started') ?? 'employment_started', [
-                    'name' => 'Murad Əliyev',
-                    'position' => 'Proqramçı',
-                    'structure' => 'Texniki vasitələr və rabitə idarəsi',
-                    'join_work_date_label' => now()->format('d.m.Y'),
-                    'direct_manager' => 'Ələkbərova Ayşən Səməd',
-                ]),
-                'holiday' => $this->starterPreview('holiday.default', 'holiday', NotificationTriggerRegistry::trigger('holiday') ?? 'holiday_due', [
-                    'holiday_name' => 'Novruz bayramı',
-                    'holiday_date' => '20.03.2026',
-                    'duration' => '3 gün',
-                    'scope' => 'Bütün əməkdaşlar',
-                    'holiday_rules' => 'Rəsmi qeyri-iş günləri',
-                ]),
-            ],
+            'starterFlows' => $this->starterPreviews(),
         ]);
     }
 
@@ -307,28 +278,49 @@ class OverviewPanel extends Component
             ];
         }
 
+        $stats = DB::query()
+            ->selectSub(
+                NotificationTemplate::query()->where('is_active', true)->selectRaw('COUNT(*)'),
+                'templates_count'
+            )
+            ->selectSub(
+                NotificationRule::query()->where('is_active', true)->selectRaw('COUNT(*)'),
+                'rules_count'
+            )
+            ->selectSub(
+                NotificationCampaign::query()
+                    ->where(function ($query) {
+                        $query->whereIn('status', ['draft', 'queued'])
+                            ->orWhere('approval_status', 'pending');
+                    })
+                    ->selectRaw('COUNT(*)'),
+                'queued_count'
+            )
+            ->selectSub(
+                NotificationDispatch::query()->where('status', 'failed')->selectRaw('COUNT(*)'),
+                'failed_count'
+            )
+            ->first();
+
         return [
             [
                 'label' => __('notifications::common.stats.templates'),
-                'value' => NotificationTemplate::query()->where('is_active', true)->count(),
+                'value' => (int) ($stats->templates_count ?? 0),
                 'detail' => __('notifications::common.stats.templates_detail'),
             ],
             [
                 'label' => __('notifications::common.stats.rules'),
-                'value' => NotificationRule::query()->where('is_active', true)->count(),
+                'value' => (int) ($stats->rules_count ?? 0),
                 'detail' => __('notifications::common.stats.rules_detail'),
             ],
             [
                 'label' => __('notifications::common.stats.queued'),
-                'value' => NotificationCampaign::query()
-                    ->whereIn('status', ['draft', 'queued'])
-                    ->orWhere('approval_status', 'pending')
-                    ->count(),
+                'value' => (int) ($stats->queued_count ?? 0),
                 'detail' => __('notifications::common.stats.queued_detail'),
             ],
             [
                 'label' => __('notifications::common.stats.failed'),
-                'value' => NotificationDispatch::query()->where('status', 'failed')->count(),
+                'value' => (int) ($stats->failed_count ?? 0),
                 'detail' => __('notifications::common.stats.failed_detail'),
             ],
         ];
@@ -439,6 +431,114 @@ class OverviewPanel extends Component
             'meta_items' => $this->starterMetaItems($category, $samplePayload),
             'approval_required' => (bool) $rule?->approval_required,
         ];
+    }
+
+    protected function starterPreviews(): array
+    {
+        $definitions = [
+            'birthday' => [
+                'template_key' => 'birthday.default',
+                'category' => 'birthday',
+                'trigger' => NotificationTriggerRegistry::trigger('birthday') ?? 'birthday_due',
+                'payload' => [
+                    'name' => 'Murad Əliyev',
+                    'position' => 'Baş məsləhətçi',
+                    'structure' => 'İnsan resursları şöbəsi',
+                    'birthday_label' => '16.03.2026',
+                ],
+            ],
+            'position_change' => [
+                'template_key' => 'position-change.default',
+                'category' => 'position_change',
+                'trigger' => NotificationTriggerRegistry::trigger('position_change') ?? 'position_changed',
+                'payload' => [
+                    'name' => 'Leyla Məmmədova',
+                    'old_position' => 'Məsləhətçi',
+                    'new_position' => 'Aparıcı məsləhətçi',
+                    'old_structure' => 'Maliyyə şöbəsi',
+                    'new_structure' => 'İnsan resursları şöbəsi',
+                    'change_reason' => 'Daxili rotasiya',
+                    'effective_date' => now()->format('d.m.Y'),
+                ],
+            ],
+            'employment_started' => [
+                'template_key' => 'employment-started.default',
+                'category' => 'employment_started',
+                'trigger' => NotificationTriggerRegistry::trigger('employment_started') ?? 'employment_started',
+                'payload' => [
+                    'name' => 'Murad Əliyev',
+                    'position' => 'Proqramçı',
+                    'structure' => 'Texniki vasitələr və rabitə idarəsi',
+                    'join_work_date_label' => now()->format('d.m.Y'),
+                    'direct_manager' => 'Ələkbərova Ayşən Səməd',
+                ],
+            ],
+            'holiday' => [
+                'template_key' => 'holiday.default',
+                'category' => 'holiday',
+                'trigger' => NotificationTriggerRegistry::trigger('holiday') ?? 'holiday_due',
+                'payload' => [
+                    'holiday_name' => 'Novruz bayramı',
+                    'holiday_date' => '20.03.2026',
+                    'duration' => '3 gün',
+                    'scope' => 'Bütün əməkdaşlar',
+                    'holiday_rules' => 'Rəsmi qeyri-iş günləri',
+                ],
+            ],
+        ];
+
+        if (! $this->managementTablesReady()) {
+            return collect($definitions)
+                ->map(fn (array $definition) => $this->starterPreview(
+                    $definition['template_key'],
+                    $definition['category'],
+                    $definition['trigger'],
+                    $definition['payload']
+                ))
+                ->all();
+        }
+
+        $templates = NotificationTemplate::query()
+            ->whereIn('key', collect($definitions)->pluck('template_key')->all())
+            ->get(['id', 'key', 'channel', 'format', 'subject_template', 'body_template'])
+            ->keyBy('key');
+
+        $rules = NotificationRule::query()
+            ->whereIn('category', collect($definitions)->pluck('category')->all())
+            ->whereIn('trigger', collect($definitions)->pluck('trigger')->all())
+            ->latest('id')
+            ->get(['id', 'category', 'trigger', 'audience_config', 'approval_required'])
+            ->unique(fn (NotificationRule $rule) => $rule->category.'|'.$rule->trigger)
+            ->keyBy(fn (NotificationRule $rule) => $rule->category.'|'.$rule->trigger);
+
+        $renderer = app(NotificationTemplateRenderer::class);
+
+        return collect($definitions)
+            ->map(function (array $definition) use ($templates, $rules, $renderer): array {
+                $template = $templates->get($definition['template_key']);
+                $rule = $rules->get($definition['category'].'|'.$definition['trigger']);
+                $targets = Arr::wrap(data_get($rule?->audience_config, 'targets', []));
+
+                return [
+                    'template_key' => $definition['template_key'],
+                    'trigger' => $definition['trigger'],
+                    'exists' => $template !== null,
+                    'rule_exists' => $rule !== null,
+                    'subject' => $template?->subject_template
+                        ? $renderer->render($template->subject_template, $definition['payload'])
+                        : null,
+                    'body' => $template?->body_template
+                        ? $renderer->render($template->body_template, $definition['payload'])
+                        : null,
+                    'channel' => $template?->channel ?? 'database',
+                    'format' => $template?->format ?? 'text',
+                    'targets' => $targets,
+                    'audience_labels' => $this->starterAudienceLabels($targets),
+                    'meta_items' => $this->starterMetaItems($definition['category'], $definition['payload']),
+                    'approval_required' => (bool) $rule?->approval_required,
+                ];
+            })
+            ->all();
     }
 
     protected function starterAudienceLabels(array $targets): array

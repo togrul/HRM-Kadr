@@ -35,12 +35,19 @@ class ComparativeReportService
 
     protected function headcountYearComparison(int $year, array $structureIds = []): array
     {
-        $current = $this->headcountAtDate(Carbon::create($year, 12, 31)->endOfDay(), $structureIds);
-        $previous = $this->headcountAtDate(Carbon::create($year - 1, 12, 31)->endOfDay(), $structureIds);
+        $currentDate = Carbon::create($year, 12, 31)->endOfDay()->toDateString();
+        $previousDate = Carbon::create($year - 1, 12, 31)->endOfDay()->toDateString();
+        $snapshot = Personnel::query()
+            ->where('is_pending', false)
+            ->whereNull('deleted_at')
+            ->when($structureIds !== [], fn (Builder $query) => $query->whereIn('structure_id', $structureIds))
+            ->selectRaw('SUM(CASE WHEN join_work_date <= ? AND (leave_work_date IS NULL OR leave_work_date >= ?) THEN 1 ELSE 0 END) as current_count', [$currentDate, $currentDate])
+            ->selectRaw('SUM(CASE WHEN join_work_date <= ? AND (leave_work_date IS NULL OR leave_work_date >= ?) THEN 1 ELSE 0 END) as previous_count', [$previousDate, $previousDate])
+            ->first();
 
         return [
-            ['label' => (string) ($year - 1), 'value' => $previous],
-            ['label' => (string) $year, 'value' => $current],
+            ['label' => (string) ($year - 1), 'value' => (int) ($snapshot?->previous_count ?? 0)],
+            ['label' => (string) $year, 'value' => (int) ($snapshot?->current_count ?? 0)],
         ];
     }
 
@@ -118,20 +125,6 @@ class ComparativeReportService
             ])
             ->values()
             ->all();
-    }
-
-    protected function headcountAtDate(Carbon $date, array $structureIds = []): int
-    {
-        return Personnel::query()
-            ->where('is_pending', false)
-            ->whereNull('deleted_at')
-            ->whereDate('join_work_date', '<=', $date->toDateString())
-            ->where(function (Builder $query) use ($date): void {
-                $query->whereNull('leave_work_date')
-                    ->orWhereDate('leave_work_date', '>=', $date->toDateString());
-            })
-            ->when($structureIds !== [], fn (Builder $query) => $query->whereIn('structure_id', $structureIds))
-            ->count();
     }
 
     protected function reportYearSelect(string $column): string

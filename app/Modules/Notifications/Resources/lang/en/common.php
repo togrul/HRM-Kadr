@@ -181,6 +181,7 @@ return [
         'history_empty' => 'No audit history yet.',
         'all_employees_scope' => 'All employees',
         'channel_health_hint' => 'Recent delivery indicators for this channel.',
+        'channel_health_none' => 'No active delivery statistics have been formed by channel yet.',
         'provider_preview_none' => 'No provider telemetry yet.',
         'dispatch_history_none' => 'No dispatch has been created for this campaign yet.',
         'dispatch_history_failed_without_recipient' => 'The campaign failed before dispatch because no matching recipient was found.',

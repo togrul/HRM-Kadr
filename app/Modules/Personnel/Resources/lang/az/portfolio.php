@@ -54,8 +54,8 @@ return [
         'mark_broken_link' => 'Link işləmir',
         'mark_archived_only' => 'Arxivdə saxla',
         'choose_file' => 'Fayl seç',
-        'export_excel' => 'Excel export',
-        'export_csv' => 'CSV export',
+        'export_excel' => 'Excel-ə ixrac et',
+        'export_csv' => 'CSV-yə ixrac et',
     ],
     'status' => [
         'pending' => 'Gözləyir',

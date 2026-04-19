@@ -1,13 +1,13 @@
 <div class="flex flex-col">
     <div class="flex space-x-4">
         @can('add-personnels')
-            <x-action-button wire:click="openSideMenu('add-personnel')" wire:loading.attr="disabled" wire:target="openSideMenu" class="hover:bg-blue-50" title="Add Personnel">
+            <x-action-button wire:click="openSideMenu('add-personnel')" wire:loading.attr="disabled" wire:target="openSideMenu" class="hover:bg-blue-50" title="{{ __('personnel::common.titles.new_personnel') }}" aria-label="{{ __('personnel::common.titles.new_personnel') }}">
                 <x-icons.add-file />
             </x-action-button>
         @endcan
 
         @can('export-personnels')
-            <x-action-button wire:click.prevent="exportExcel" wire:loading.class="opacity-75 pointer-events-none" wire:target="exportExcel" class="hover:bg-green-50" title="Export Excel">
+            <x-action-button wire:click.prevent="exportExcel" wire:loading.class="opacity-75 pointer-events-none" wire:target="exportExcel" class="hover:bg-green-50" title="{{ __('personnel::common.actions.export_excel') }}" aria-label="{{ __('personnel::common.actions.export_excel') }}">
                 <x-icons.excel-icon />
             </x-action-button>
         @endcan

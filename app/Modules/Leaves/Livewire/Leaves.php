@@ -240,7 +240,9 @@ class Leaves extends Component
 
         return match ($type) {
             'stats' => $this->computeStats($base),
-            default => $this->finalizePagination($result, $type),
+            default => $type === 'normal'
+                ? Cache::remember($this->listCacheKey(), now()->addSeconds(10), fn () => $this->finalizePagination($result, $type))
+                : $this->finalizePagination($result, $type),
         };
     }
 
@@ -250,7 +252,7 @@ class Leaves extends Component
             return $this->statsCache;
         }
 
-        return $this->statsCache = $base->clone()
+        return $this->statsCache = Cache::remember($this->statsCacheKey(), now()->addSeconds(10), fn () => $base->clone()
             ->join('leave_types as t', 't.id', '=', 'leaves.leave_type_id')
             ->select(
                 't.name as name',
@@ -265,7 +267,24 @@ class Leaves extends Component
                     'count' => (int) $row->count,
                 ],
             ])
-            ->toArray();
+            ->toArray());
+    }
+
+    protected function listCacheKey(): string
+    {
+        return 'leaves:list:'.md5(json_encode([
+            'status' => $this->status,
+            'search' => $this->search->toArray(),
+            'page' => method_exists($this, 'getPage') ? $this->getPage() : 1,
+        ]));
+    }
+
+    protected function statsCacheKey(): string
+    {
+        return 'leaves:stats:'.md5(json_encode([
+            'status' => $this->status,
+            'search' => $this->search->toArray(),
+        ]));
     }
 
     protected function totalDaysAggregateExpression(): string

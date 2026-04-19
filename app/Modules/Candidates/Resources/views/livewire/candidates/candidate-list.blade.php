@@ -183,14 +183,18 @@
                     @can('create', App\Models\Candidate::class)
                         <button wire:click="openSideMenu('add-candidate')"
                             class="flex items-center justify-center w-12 h-12 transition-all duration-300 rounded-xl hover:bg-blue-50"
-                            type="button">
+                            type="button"
+                            title="{{ __('candidates::common.actions.add_candidate') }}"
+                            aria-label="{{ __('candidates::common.actions.add_candidate') }}">
                             <x-icons.add-file></x-icons.add-file>
                         </button>
                     @endcan
                     @can('export', App\Models\Candidate::class)
                         <button wire:click.prevent="exportExcel"
                             class="flex items-center justify-center w-12 h-12 transition-all duration-300 rounded-xl hover:bg-green-50"
-                            type="button">
+                            type="button"
+                            title="{{ __('candidates::common.actions.export_excel') }}"
+                            aria-label="{{ __('candidates::common.actions.export_excel') }}">
                             <x-icons.excel-icon />
                         </button>
                     @endcan
@@ -299,6 +303,7 @@
                                             wire:click="openSideMenu('candidate-files',{{ $_candidate->id }})"
                                             class="relative flex items-center justify-center w-10 h-10 text-xs font-medium text-gray-500 uppercase bg-gray-100 rounded-lg hover:bg-gray-200 hover:text-gray-700"
                                             title="{{ __('candidates::common.labels.files') }}"
+                                            aria-label="{{ __('candidates::common.actions.open_files') }}"
                                         >
                                             <x-icons.document-icon></x-icons.document-icon>
                                             <span class="absolute -right-1 -top-1 inline-flex min-w-5 items-center justify-center rounded-full bg-zinc-100 px-1.5 py-0.5 text-[10px] font-semibold text-zinc-600">
@@ -313,14 +318,19 @@
                                         @can('update', $_candidate)
                                             <a href="#"
                                                 wire:click="openSideMenu('edit-candidate',{{ $_candidate->id }})"
-                                                class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase bg-gray-100 rounded-lg hover:bg-gray-200 hover:text-gray-700">
+                                                class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase bg-gray-100 rounded-lg hover:bg-gray-200 hover:text-gray-700"
+                                                title="{{ __('candidates::common.actions.edit_candidate') }}"
+                                                aria-label="{{ __('candidates::common.actions.edit_candidate') }}">
                                                 <x-icons.profile-icon></x-icons.profile-icon>
                                             </a>
                                         @endcan
                                     @else
                                         @role('Admin')
                                             <button wire:click="restoreData('{{ $_candidate->id }}')"
-                                                class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-teal-50 hover:text-gray-700">
+                                                class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-teal-50 hover:text-gray-700"
+                                                type="button"
+                                                title="{{ __('candidates::common.actions.restore_candidate') }}"
+                                                aria-label="{{ __('candidates::common.actions.restore_candidate') }}">
                                                 <x-icons.recover color="text-teal-500" hover="text-teal-600"></x-icons.recover>
                                             </button>
                                         @endrole
@@ -331,7 +341,10 @@
                                     @if ($status != 'deleted')
                                         @can('delete', $_candidate)
                                             <button wire:click="setDeleteCandidate('{{ $_candidate->id }}')"
-                                                class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-100 hover:text-gray-700">
+                                                class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-100 hover:text-gray-700"
+                                                type="button"
+                                                title="{{ __('candidates::common.actions.delete') }}"
+                                                aria-label="{{ __('candidates::common.actions.delete') }}">
                                                 <x-icons.delete-icon></x-icons.delete-icon>
                                             </button>
                                         @endcan
@@ -339,7 +352,10 @@
                                         @can('delete', $_candidate)
                                             <button wire:confirm="{{ __('candidates::common.messages.remove_confirm') }}"
                                                 wire:click="forceDeleteData('{{ $_candidate->id }}')"
-                                                class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700">
+                                                class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700"
+                                                type="button"
+                                                title="{{ __('candidates::common.actions.force_delete') }}"
+                                                aria-label="{{ __('candidates::common.actions.force_delete') }}">
                                                 <x-icons.force-delete></x-icons.force-delete>
                                             </button>
                                         @endcan

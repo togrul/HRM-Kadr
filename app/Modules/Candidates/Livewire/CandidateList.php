@@ -235,12 +235,21 @@ class CandidateList extends Component
     #[Computed]
     public function recruitmentSummary(): array
     {
-        return [
-            'requisitions' => (int) JobRequisition::query()->count(),
-            'openings' => (int) JobOpening::query()->count(),
-            'applications' => (int) CandidateApplication::query()->count(),
-            'active_applications' => (int) CandidateApplication::query()->where('status', 'active')->count(),
-        ];
+        return Cache::remember('candidates:recruitment-summary', now()->addMinute(), function (): array {
+            $summary = DB::query()
+                ->selectSub(JobRequisition::query()->selectRaw('COUNT(*)'), 'requisitions')
+                ->selectSub(JobOpening::query()->selectRaw('COUNT(*)'), 'openings')
+                ->selectSub(CandidateApplication::query()->selectRaw('COUNT(*)'), 'applications')
+                ->selectSub(CandidateApplication::query()->where('status', 'active')->selectRaw('COUNT(*)'), 'active_applications')
+                ->first();
+
+            return [
+                'requisitions' => (int) ($summary->requisitions ?? 0),
+                'openings' => (int) ($summary->openings ?? 0),
+                'applications' => (int) ($summary->applications ?? 0),
+                'active_applications' => (int) ($summary->active_applications ?? 0),
+            ];
+        });
     }
 
     #[Computed]

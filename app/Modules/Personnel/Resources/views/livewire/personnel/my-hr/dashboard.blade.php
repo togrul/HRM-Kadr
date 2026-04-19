@@ -28,6 +28,9 @@
         <div class="rounded-[28px] border border-zinc-200 bg-zinc-50/60 p-5 shadow-sm">
             <div class="flex flex-wrap gap-2">
                 @foreach ($this->tabs() as $tab)
+                    @php
+                        $tabLabelKey = str_replace('-', '_', $tab);
+                    @endphp
                     <button
                         type="button"
                         wire:click="setActiveTab('{{ $tab }}')"
@@ -35,7 +38,7 @@
                         wire:target="setActiveTab"
                         class="{{ $activeTab === $tab ? 'bg-zinc-950 text-white shadow-sm' : 'border border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300 hover:bg-zinc-50' }} rounded-2xl px-4 py-2.5 text-sm font-semibold tracking-tight transition"
                     >
-                        {{ __('personnel::my_hr.tabs.'.$tab) }}
+                        {{ __('personnel::my_hr.tabs.'.$tabLabelKey) }}
                     </button>
                 @endforeach
             </div>
@@ -60,9 +63,12 @@
                 @else
                     <div class="rounded-[28px] border border-zinc-200 bg-white p-6 shadow-sm">
                         <div class="space-y-3">
-                            <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __('personnel::my_hr.tabs.'.$activeTab) }}</x-ui.field-label>
+                            @php
+                                $activeTabLabelKey = str_replace('-', '_', $activeTab);
+                            @endphp
+                            <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __('personnel::my_hr.tabs.'.$activeTabLabelKey) }}</x-ui.field-label>
                             <h2 class="text-2xl font-semibold tracking-tight text-zinc-950">{{ __('personnel::my_hr.messages.foundation_title') }}</h2>
-                            <p class="max-w-3xl text-sm leading-6 text-zinc-600">{{ __('personnel::my_hr.messages.foundation_body', ['tab' => __('personnel::my_hr.tabs.'.$activeTab)]) }}</p>
+                            <p class="max-w-3xl text-sm leading-6 text-zinc-600">{{ __('personnel::my_hr.messages.foundation_body', ['tab' => __('personnel::my_hr.tabs.'.$activeTabLabelKey)]) }}</p>
                         </div>
                     </div>
                 @endif

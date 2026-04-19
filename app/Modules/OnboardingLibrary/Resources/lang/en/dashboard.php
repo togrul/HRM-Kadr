@@ -16,6 +16,8 @@ return [
         'active_assignments' => 'Active assignments',
         'overdue_assignments' => 'Overdue assignments',
         'acknowledged_assignments' => 'Acknowledged assignments',
+        'archived_templates' => 'Archived templates',
+        'due_soon_assignments' => 'Due soon',
     ],
     'sections' => [
         'create_template' => 'Create template',
@@ -24,6 +26,7 @@ return [
         'recent_assignments' => 'Recent assignments',
         'target_people' => 'Employee targeting',
         'target_structures' => 'Structure targeting',
+        'reports' => 'Reports',
         'targeting_rules' => 'Assignment rules',
     ],
     'fields' => [

@@ -68,6 +68,12 @@ return [
         'delete_confirm' => 'Are you sure you want to delete this candidate?',
     ],
     'actions' => [
+        'add_candidate' => 'Add candidate',
+        'export_excel' => 'Export to Excel',
+        'open_files' => 'Open files',
+        'edit_candidate' => 'Edit candidate',
+        'restore_candidate' => 'Restore candidate',
         'delete' => 'Delete',
+        'force_delete' => 'Force delete',
     ],
 ];
