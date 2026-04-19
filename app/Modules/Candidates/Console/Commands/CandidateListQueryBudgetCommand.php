@@ -64,8 +64,11 @@ class CandidateListQueryBudgetCommand extends Command
             Cache::forget('appeal-statuses:'.app()->getLocale());
 
             Livewire::actingAs($modalUser);
-            Livewire::test(CandidateList::class)
-                ->call('openSideMenu', 'add-candidate');
+            $component = Livewire::test(CandidateList::class);
+
+            DB::connection()->flushQueryLog();
+
+            $component->call('openSideMenu', 'add-candidate');
         });
 
         $summary = [

@@ -104,39 +104,43 @@
                                         </div>
                                     @else
                                         {{-- @can('manage-settings') --}}
-                                        <a href="#"
+                                        <x-action-button
                                             wire:click.prevent="openSideMenu('edit-user',{{ $user->id }})"
-                                            class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase rounded-lg text-gray-500 bg-gray-100 hover:bg-gray-200 hover:text-gray-700">
+                                            class="h-9 w-9 bg-zinc-100 hover:bg-zinc-200"
+                                            :title="__('services::users.titles.edit')">
                                             <x-icons.edit-icon color="text-slate-400"
                                                 hover="text-slate-500"></x-icons.edit-icon>
-                                        </a>
+                                        </x-action-button>
                                         {{-- @endcan --}}
                                     @endif
                                 </x-table.td>
 
                                 <x-table.td :isButton="true">
                                     @if ($status == 2)
-                                        <button wire:click="restoreData({{ $user->id }})"
-                                            class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-teal-50 hover:text-gray-700">
+                                        <x-action-button wire:click="restoreData({{ $user->id }})"
+                                            class="h-9 w-9 hover:bg-teal-50"
+                                            :title="__('services::common.actions.restore')">
                                             <x-icons.recover color="text-teal-500"
                                                 hover="text-teal-600"></x-icons.recover>
-                                        </button>
+                                        </x-action-button>
                                         {{-- @role('admin') --}}
-                                        <button
+                                        <x-action-button
                                             onclick="confirm('{{ __('services::users.messages.force_delete_confirm') }}') || event.stopImmediatePropagation()"
                                             wire:click.prevent="forceDeleteData({{ $user->id }})"
-                                            class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-50 hover:text-gray-700">
+                                            class="h-9 w-9 hover:bg-red-50"
+                                            :title="__('services::common.actions.force_delete')">
                                             <x-icons.force-delete color="text-rose-400"
                                                 hover="text-rose-500"></x-icons.force-delete>
-                                        </button>
+                                        </x-action-button>
                                         {{-- @endrole --}}
                                     @else
                                         {{-- @can('manage-settings') --}}
-                                        <button wire:click.prevent = "setDeleteUser({{ $user->id }})"
-                                            class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 bg-rose-50 hover:bg-red-100 hover:text-gray-700">
+                                        <x-action-button wire:click.prevent = "setDeleteUser({{ $user->id }})"
+                                            class="h-9 w-9 bg-rose-50 hover:bg-red-100"
+                                            :title="__('services::users.titles.delete')">
                                             <x-icons.delete-icon color="text-rose-500"
                                                 hover="text-rose-600"></x-icons.delete-icon>
-                                        </button>
+                                        </x-action-button>
                                         {{-- @endcan --}}
                                     @endif
                                 </x-table.td>

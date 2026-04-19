@@ -8,6 +8,9 @@ return [
         'all' => 'All',
     ],
     'actions' => [
+        'close' => 'Close',
+        'delete' => 'Delete',
+        'edit' => 'Edit',
         'save' => 'Save',
     ],
     'fields' => [

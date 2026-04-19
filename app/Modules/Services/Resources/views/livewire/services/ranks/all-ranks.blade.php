@@ -112,22 +112,24 @@
                                 </x-table.td>
 
                                 <x-table.td :isButton="true">
-                                        <button
+                                        <x-action-button
                                         wire:click.prevent="openSideMenu('edit-rank',{{ $rank->id }})"
-                                        class="appearance-none flex items-center justify-center w-8 h-8 text-xs font-medium uppercase rounded-lg text-gray-500 bg-gray-100 hover:bg-gray-200 hover:text-gray-700"
+                                        class="h-9 w-9 bg-zinc-100 hover:bg-zinc-200"
+                                        :title="__('services::ranks.titles.edit')"
                                     >
                                         <x-icons.edit-icon color="text-slate-400" hover="text-slate-500"></x-icons.edit-icon>
-                                    </button>
+                                    </x-action-button>
                                 </x-table.td>
 
                                 <x-table.td :isButton="true">
                                     {{-- @can('manage-settings') --}}
-                                    <button
+                                    <x-action-button
                                         wire:click.prevent = "setDeleteRank({{ $rank->id }})"
-                                        class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-100 hover:text-gray-700"
+                                        class="h-9 w-9 hover:bg-red-100"
+                                        :title="__('services::ranks.titles.delete')"
                                     >
                                         <x-icons.delete-icon color="text-rose-500" hover="text-rose-600"></x-icons.delete-icon>
-                                    </button>
+                                    </x-action-button>
                                     {{-- @endcan --}}
                                 </x-table.td>
                             </tr>

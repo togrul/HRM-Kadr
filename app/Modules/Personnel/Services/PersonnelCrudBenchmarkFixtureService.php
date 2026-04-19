@@ -10,9 +10,9 @@ class PersonnelCrudBenchmarkFixtureService
 {
     public function ensureEditablePersonnel(User $user): Personnel
     {
-        $this->ensureReferenceData();
+        $referenceIds = $this->ensureReferenceData();
 
-        return Personnel::withoutEvents(function () use ($user): Personnel {
+        return Personnel::withoutEvents(function () use ($user, $referenceIds): Personnel {
             return Personnel::query()->firstOrCreate(
                 ['tabel_no' => 'CRUD-BENCH-001'],
                 [
@@ -22,14 +22,14 @@ class PersonnelCrudBenchmarkFixtureService
                     'birthdate' => '1990-01-01',
                     'gender' => 1,
                     'mobile' => '0500000000',
-                    'nationality_id' => 1,
+                    'nationality_id' => $referenceIds['country_id'],
                     'pin' => 'ABC1234',
                     'residental_address' => 'Benchmark address',
                     'registered_address' => 'Benchmark address',
-                    'education_degree_id' => 1,
-                    'structure_id' => 1,
-                    'position_id' => 1,
-                    'work_norm_id' => 1,
+                    'education_degree_id' => $referenceIds['education_degree_id'],
+                    'structure_id' => $referenceIds['structure_id'],
+                    'position_id' => $referenceIds['position_id'],
+                    'work_norm_id' => $referenceIds['work_norm_id'],
                     'join_work_date' => '2020-01-01',
                     'added_by' => $user->getKey(),
                     'is_pending' => false,
@@ -38,9 +38,12 @@ class PersonnelCrudBenchmarkFixtureService
         });
     }
 
-    private function ensureReferenceData(): void
+    /**
+     * @return array{country_id:int,education_degree_id:int,structure_id:int,position_id:int,work_norm_id:int}
+     */
+    private function ensureReferenceData(): array
     {
-        DB::table('countries')->upsert([['id' => 1, 'code' => 'AZ']], ['id'], ['code']);
+        DB::table('countries')->updateOrInsert(['code' => 'AZ'], ['code' => 'AZ']);
         DB::table('education_degrees')->upsert(
             [[
                 'id' => 1,
@@ -78,5 +81,13 @@ class PersonnelCrudBenchmarkFixtureService
             ['id'],
             ['name_az', 'name_en', 'name_ru']
         );
+
+        return [
+            'country_id' => (int) DB::table('countries')->where('code', 'AZ')->value('id'),
+            'education_degree_id' => (int) DB::table('education_degrees')->where('id', 1)->value('id'),
+            'structure_id' => (int) DB::table('structures')->where('id', 1)->value('id'),
+            'position_id' => (int) DB::table('positions')->where('id', 1)->value('id'),
+            'work_norm_id' => (int) DB::table('work_norms')->where('id', 1)->value('id'),
+        ];
     }
 }

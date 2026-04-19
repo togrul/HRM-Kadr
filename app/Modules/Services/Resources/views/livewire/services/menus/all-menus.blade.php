@@ -62,21 +62,23 @@
 
                                 <x-table.td :isButton="true">
                                     {{-- @can('manage-settings') --}}
-                                    <a href="#" wire:click.prevent="openSideMenu('edit-menu',{{ $menu->id }})"
-                                        class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase rounded-lg text-gray-500 bg-gray-100 hover:bg-gray-200 hover:text-gray-700">
+                                    <x-action-button wire:click.prevent="openSideMenu('edit-menu',{{ $menu->id }})"
+                                        class="h-9 w-9 bg-zinc-100 hover:bg-zinc-200"
+                                        :title="__('services::menus.titles.edit')">
                                         <x-icons.edit-icon color="text-slate-400"
                                             hover="text-slate-500"></x-icons.edit-icon>
-                                    </a>
+                                    </x-action-button>
                                     {{-- @endcan --}}
                                 </x-table.td>
 
                                 <x-table.td :isButton="true">
                                     {{-- @can('manage-settings') --}}
-                                    <button wire:click.prevent = "setDeleteMenu({{ $menu->id }})"
-                                        class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 bg-rose-50 hover:bg-rose-100 hover:text-gray-700">
+                                    <x-action-button wire:click.prevent = "setDeleteMenu({{ $menu->id }})"
+                                        class="h-9 w-9 bg-rose-50 hover:bg-rose-100"
+                                        :title="__('services::menus.titles.delete')">
                                         <x-icons.delete-icon color="text-rose-500"
                                             hover="text-rose-600"></x-icons.delete-icon>
-                                    </button>
+                                    </x-action-button>
                                     {{-- @endcan --}}
                                 </x-table.td>
                             </tr>

@@ -64,10 +64,19 @@ class AnalyticsPanel extends Component
     }
 
     #[Computed]
+    public function dispatchStatusAggregate(): Collection
+    {
+        return $this->dispatchQuery()
+            ->select('channel', 'status')
+            ->selectRaw('COUNT(*) as total')
+            ->groupBy('channel', 'status')
+            ->get();
+    }
+
+    #[Computed]
     public function stats(): array
     {
-        $sentDispatches = (clone $this->dispatchQuery())->where('status', 'sent')->count();
-        $failedDispatches = (clone $this->dispatchQuery())->where('status', 'failed')->count();
+        $statusTotals = $this->dispatchStatusAggregate;
 
         $approvalTurnaround = $this->campaignQuery()
             ->whereNotNull('approved_at')
@@ -77,8 +86,8 @@ class AnalyticsPanel extends Component
             ->values();
 
         return [
-            'sent' => $sentDispatches,
-            'failed' => $failedDispatches,
+            'sent' => (int) $statusTotals->where('status', 'sent')->sum('total'),
+            'failed' => (int) $statusTotals->where('status', 'failed')->sum('total'),
             'approval_turnaround_minutes' => $approvalTurnaround->isNotEmpty()
                 ? round($approvalTurnaround->avg(), 1)
                 : null,
@@ -92,16 +101,14 @@ class AnalyticsPanel extends Component
     #[Computed]
     public function statusByChannel(): Collection
     {
-        return $this->dispatchQuery()
-            ->select('channel', 'status')
-            ->get()
+        return $this->dispatchStatusAggregate
             ->groupBy('channel')
             ->map(function (Collection $items, string $channel): array {
                 return [
                     'channel' => $channel,
-                    'sent' => $items->where('status', 'sent')->count(),
-                    'failed' => $items->where('status', 'failed')->count(),
-                    'pending' => $items->where('status', 'pending')->count(),
+                    'sent' => (int) $items->where('status', 'sent')->sum('total'),
+                    'failed' => (int) $items->where('status', 'failed')->sum('total'),
+                    'pending' => (int) $items->where('status', 'pending')->sum('total'),
                 ];
             })
             ->values();

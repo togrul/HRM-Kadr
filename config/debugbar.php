@@ -14,7 +14,7 @@ return [
      |
      */
 
-    'enabled' => env('APP_ENV') === 'local' && env('DEBUGBAR_ENABLED', true),
+    'enabled' => env('APP_ENV') === 'local' && (bool) env('DEBUGBAR_ENABLED', false),
     'except' => [
         'telescope*',
         'horizon*',
@@ -37,8 +37,8 @@ return [
      | Leaving it to null will allow localhost only.
      */
     'storage' => [
-        'enabled' => true,
-        'open' => env('DEBUGBAR_OPEN_STORAGE'), // bool/callback.
+        'enabled' => env('APP_ENV') === 'local' && (bool) env('DEBUGBAR_STORAGE_ENABLED', false),
+        'open' => false, // bool/callback.
         'driver' => 'file', // redis, file, pdo, socket, custom
         'path' => storage_path('debugbar'), // For file driver
         'connection' => null,   // Leave null for default connection (Redis/PDO)

@@ -36,11 +36,11 @@
     </div>
 
     @if($isAdded)
-        <div wire:transition class="flex border border-gray-300 rounded-md bg-slate-50 relative px-3 py-2 my-3">
-            <button class="appearance-none absolute top-2 right-2" wire:click="closeCrud()">
+        <div wire:transition class="relative my-3 flex rounded-2xl border border-zinc-200 bg-white px-4 py-4 shadow-sm">
+            <x-action-button class="absolute right-2 top-2 h-9 w-9 hover:bg-zinc-100" wire:click="closeCrud()" :title="__('admin::references.actions.close')">
                 <x-icons.close-icon></x-icons.close-icon>
-            </button>
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 mt-4 w-full">
+            </x-action-button>
+            <div class="mt-6 grid w-full grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
                 <div class="flex flex-col">
                     <x-label for="form.id">{{ __('admin::references.fields.id') }}</x-label>
                     <x-livewire-input mode="default" type="number" name="form.id" wire:model="form.id"></x-livewire-input>
@@ -99,18 +99,20 @@
 
                                 <x-table.td :isButton="true" width="100">
                                     <div class="flex items-center space-x-2">
-                                        <button
+                                        <x-action-button
                                             wire:click.prevent="openCrud({{ $country->id }})"
-                                            class="appearance-none flex items-center justify-center w-8 h-8 text-xs font-medium uppercase rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+                                            class="h-9 w-9 hover:bg-zinc-100"
+                                            :title="__('admin::references.actions.edit')"
                                         >
                                             <x-icons.edit-icon color="text-slate-400" hover="text-slate-500"></x-icons.edit-icon>
-                                        </button>
-                                        <button
+                                        </x-action-button>
+                                        <x-action-button
                                             wire:click.prevent = "deleteModel({{ $country->id }})"
-                                            class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-100 hover:text-gray-700"
+                                            class="h-9 w-9 hover:bg-red-100"
+                                            :title="__('admin::references.actions.delete')"
                                         >
                                             <x-icons.delete-icon color="text-rose-500" hover="text-rose-600"></x-icons.delete-icon>
-                                        </button>
+                                        </x-action-button>
                                     </div>
                                 </x-table.td>
                             </tr>

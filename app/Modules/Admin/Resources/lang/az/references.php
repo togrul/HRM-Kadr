@@ -8,6 +8,9 @@ return [
         'all' => 'Hamısı',
     ],
     'actions' => [
+        'close' => 'Bağla',
+        'delete' => 'Sil',
+        'edit' => 'Redaktə et',
         'save' => 'Yadda saxla',
     ],
     'fields' => [

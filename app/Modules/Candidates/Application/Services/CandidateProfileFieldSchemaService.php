@@ -23,7 +23,6 @@ class CandidateProfileFieldSchemaService
     protected const PACK_FIELDS = [
         'private' => [
             [
-                ['key' => 'application_date', 'type' => 'date', 'cols' => 1],
                 ['key' => 'requisition_date', 'type' => 'date', 'cols' => 1],
                 ['key' => 'presented_by', 'type' => 'text', 'cols' => 1],
             ],
@@ -38,8 +37,6 @@ class CandidateProfileFieldSchemaService
         ],
         'public' => [
             [
-                ['key' => 'appeal_date', 'type' => 'date', 'cols' => 1],
-                ['key' => 'application_date', 'type' => 'date', 'cols' => 1],
                 ['key' => 'requisition_date', 'type' => 'date', 'cols' => 1],
             ],
             [
@@ -128,11 +125,11 @@ class CandidateProfileFieldSchemaService
         $attributes = [];
 
         foreach (array_keys(self::CORE_FIELDS) as $key) {
-            $attributes['candidate.'.$key] = __('candidates::common.labels.'.$key);
+            $attributes['candidate.'.$key] = $this->labelForField($key);
         }
 
         foreach ($this->fieldsForPack($pack) as $field) {
-            $attributes['candidate.'.$field['key']] = __('candidates::common.labels.'.$field['key']);
+            $attributes['candidate.'.$field['key']] = $this->labelForField($field['key']);
         }
 
         return $attributes;
@@ -162,5 +159,27 @@ class CandidateProfileFieldSchemaService
             ])),
             default => [$required ? 'required' : 'nullable', 'string'],
         };
+    }
+
+    private function labelForField(string $key): string
+    {
+        $translationKey = 'candidates::common.labels.'.$key;
+        $label = __($translationKey);
+
+        if ($label !== $translationKey) {
+            return $label;
+        }
+
+        if (str_ends_with($key, '_id')) {
+            $fallbackKey = substr($key, 0, -3);
+            $fallbackTranslationKey = 'candidates::common.labels.'.$fallbackKey;
+            $fallbackLabel = __($fallbackTranslationKey);
+
+            if ($fallbackLabel !== $fallbackTranslationKey) {
+                return $fallbackLabel;
+            }
+        }
+
+        return $label;
     }
 }

@@ -5,6 +5,8 @@ return [
         'add' => 'Add',
         'save' => 'Save',
         'delete' => 'Delete',
+        'force_delete' => 'Force delete',
+        'restore' => 'Restore',
         'cancel' => 'Cancel',
         'clear' => 'Clear',
         'all' => 'All',

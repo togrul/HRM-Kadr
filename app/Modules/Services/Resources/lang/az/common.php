@@ -5,6 +5,8 @@ return [
         'add' => 'Əlavə et',
         'save' => 'Yadda saxla',
         'delete' => 'Sil',
+        'force_delete' => 'Tam sil',
+        'restore' => 'Bərpa et',
         'cancel' => 'Ləğv et',
         'clear' => 'Təmizlə',
         'all' => 'Hamısı',

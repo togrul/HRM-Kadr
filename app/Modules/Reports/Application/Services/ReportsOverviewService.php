@@ -7,7 +7,6 @@ use App\Models\PerformanceTrainingNeedLink;
 use App\Models\Personnel;
 use App\Models\Structure;
 use App\Models\TrainingDeliveryRecord;
-use App\Modules\Attendance\Application\Services\AttendanceOverviewService;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
@@ -15,8 +14,7 @@ use Illuminate\Support\Facades\DB;
 class ReportsOverviewService
 {
     public function __construct(
-        protected ReportsStructureScopeService $structureScope,
-        protected AttendanceOverviewService $attendanceOverview
+        protected ReportsStructureScopeService $structureScope
     ) {
     }
 
@@ -34,7 +32,7 @@ class ReportsOverviewService
         $newHires = (int) ($personnelSnapshot?->new_hires ?? 0);
         $exits = (int) ($personnelSnapshot?->exits ?? 0);
 
-        $attendance = $this->attendanceOverview->build($year, $month, $structureId, true, $structureIds);
+        $attendance = $this->attendanceReportKpis($year, $month, $structureIds);
         $training = $this->trainingKpis($year, $structureIds);
         $performance = $this->performanceKpis($structureIds);
 
@@ -120,7 +118,12 @@ class ReportsOverviewService
             ->map(fn (int $offset) => $startMonth->addMonthsNoOverflow($offset))
             ->values();
 
-        $baselineCount = $this->activePersonnelQueryAt($baselineDate->toDateString(), $structureIds)->count();
+        $baseline = $this->activePersonnelQueryAt($baselineDate->toDateString(), $structureIds)
+            ->selectRaw('? as metric_year, ? as metric_month, COUNT(*) as total', [
+                (int) $baselineDate->year,
+                (int) $baselineDate->month,
+            ])
+            ->selectRaw('? as movement_type', ['baseline']);
 
         $joins = Personnel::query()
             ->selectRaw($this->yearMonthSelect('join_work_date').', COUNT(*) as total')
@@ -142,9 +145,11 @@ class ReportsOverviewService
             ->groupBy('metric_year', 'metric_month');
 
         $movements = DB::query()
-            ->fromSub($joins->unionAll($exits), 'personnel_movements')
+            ->fromSub($baseline->unionAll($joins)->unionAll($exits), 'personnel_movements')
             ->get()
             ->groupBy('movement_type');
+
+        $baselineCount = (int) data_get($movements->get('baseline', collect())->first(), 'total', 0);
 
         $joinsByMonth = $movements
             ->get('join', collect())
@@ -157,7 +162,7 @@ class ReportsOverviewService
         $running = $baselineCount;
 
         return $months
-            ->map(function (CarbonImmutable $date) use (&$running, $joins, $exits): array {
+            ->map(function (CarbonImmutable $date) use (&$running, $joinsByMonth, $exitsByMonth): array {
                 $key = $date->format('Y-m');
                 $running += (int) ($joinsByMonth[$key] ?? 0);
                 $running -= (int) ($exitsByMonth[$key] ?? 0);
@@ -168,6 +173,67 @@ class ReportsOverviewService
                 ];
             })
             ->all();
+    }
+
+    /**
+     * @return array{coverage_pct:float,absence_rate_pct:float}
+     */
+    protected function attendanceReportKpis(int $year, int $month, array $structureIds = []): array
+    {
+        $start = CarbonImmutable::create($year, $month, 1)->startOfMonth();
+        $end = $start->endOfMonth();
+
+        $summary = DB::table('attendance_daily_structure_summaries')
+            ->whereBetween('date', [$start->toDateString(), $end->toDateString()])
+            ->when($structureIds !== [], fn ($query) => $query->whereIn('structure_id', $structureIds))
+            ->selectRaw('COUNT(*) as summary_rows')
+            ->selectRaw('COALESCE(SUM(scheduled_minutes_sum),0) as scheduled_sum')
+            ->selectRaw('COALESCE(SUM(worked_minutes_sum),0) as worked_sum')
+            ->selectRaw('COALESCE(SUM(scheduled_days),0) as scheduled_days')
+            ->selectRaw('COALESCE(SUM(absence_days),0) as absence_days')
+            ->first();
+
+        if ((int) ($summary?->summary_rows ?? 0) > 0) {
+            return $this->attendanceKpiPayload(
+                (int) ($summary?->scheduled_sum ?? 0),
+                (int) ($summary?->worked_sum ?? 0),
+                (int) ($summary?->scheduled_days ?? 0),
+                (int) ($summary?->absence_days ?? 0)
+            );
+        }
+
+        $ledger = DB::table('attendance_daily_ledgers')
+            ->whereBetween('date', [$start->toDateString(), $end->toDateString()])
+            ->when($structureIds !== [], function ($query) use ($structureIds): void {
+                $query->whereIn('tabel_no', DB::table('personnels')->select('tabel_no')->whereIn('structure_id', $structureIds));
+            })
+            ->selectRaw('COALESCE(SUM(scheduled_minutes),0) as scheduled_sum')
+            ->selectRaw('COALESCE(SUM(worked_minutes),0) as worked_sum')
+            ->selectRaw('COALESCE(SUM(CASE WHEN scheduled_minutes > 0 THEN 1 ELSE 0 END),0) as scheduled_days')
+            ->selectRaw('COALESCE(SUM(CASE WHEN attendance_status IN ("absent","manual_absence") THEN 1 ELSE 0 END),0) as absence_days')
+            ->first();
+
+        return $this->attendanceKpiPayload(
+            (int) ($ledger?->scheduled_sum ?? 0),
+            (int) ($ledger?->worked_sum ?? 0),
+            (int) ($ledger?->scheduled_days ?? 0),
+            (int) ($ledger?->absence_days ?? 0)
+        );
+    }
+
+    /**
+     * @return array{coverage_pct:float,absence_rate_pct:float}
+     */
+    protected function attendanceKpiPayload(int $scheduledMinutes, int $workedMinutes, int $scheduledDays, int $absenceDays): array
+    {
+        return [
+            'coverage_pct' => $scheduledMinutes > 0
+                ? round(min(100, ($workedMinutes / $scheduledMinutes) * 100), 1)
+                : 0.0,
+            'absence_rate_pct' => $scheduledDays > 0
+                ? round(min(100, ($absenceDays / $scheduledDays) * 100), 1)
+                : 0.0,
+        ];
     }
 
     protected function shortMonthLabel(int $month): string
