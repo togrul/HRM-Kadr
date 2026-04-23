@@ -22,8 +22,20 @@
             @else
                 <div class="mt-4 grid max-h-[18rem] gap-3 overflow-y-auto pr-1">
                     @foreach ($payload['structures'] as $structure)
+                        @php($isSelected = in_array($structure['id'], $selectedStructureIds, true))
                         <label class="flex cursor-pointer items-start gap-3 rounded-2xl border border-zinc-200 bg-white px-4 py-3">
-                            <input type="checkbox" wire:click="toggleStructure({{ $structure['id'] }})" @checked(in_array($structure['id'], $selectedStructureIds, true)) class="mt-1 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-300" />
+                            <input type="checkbox" wire:click="toggleStructure({{ $structure['id'] }})" @checked($isSelected) class="peer sr-only" />
+                            <span @class([
+                                'mt-1 flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-zinc-400 peer-focus-visible:ring-offset-2',
+                                'border-zinc-900 bg-zinc-900 text-white' => $isSelected,
+                                'border-zinc-300 bg-white text-transparent' => ! $isSelected,
+                            ])>
+                                @if ($isSelected)
+                                    <svg class="h-3 w-3" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                                        <path d="M3.75 8.25 6.75 11.25 12.25 4.75" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                @endif
+                            </span>
                             <div class="min-w-0">
                                 <p class="break-words text-sm font-semibold tracking-tight text-zinc-950">{{ $structure['name'] }}</p>
                             </div>
@@ -46,8 +58,20 @@
             @else
                 <div class="mt-4 grid max-h-[18rem] gap-3 overflow-y-auto pr-1">
                     @foreach ($payload['positions'] as $position)
+                        @php($isSelected = in_array($position['id'], $selectedPositionIds, true))
                         <label class="flex cursor-pointer items-start gap-3 rounded-2xl border border-zinc-200 bg-white px-4 py-3">
-                            <input type="checkbox" wire:click="togglePosition({{ $position['id'] }})" @checked(in_array($position['id'], $selectedPositionIds, true)) class="mt-1 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-300" />
+                            <input type="checkbox" wire:click="togglePosition({{ $position['id'] }})" @checked($isSelected) class="peer sr-only" />
+                            <span @class([
+                                'mt-1 flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-zinc-400 peer-focus-visible:ring-offset-2',
+                                'border-zinc-900 bg-zinc-900 text-white' => $isSelected,
+                                'border-zinc-300 bg-white text-transparent' => ! $isSelected,
+                            ])>
+                                @if ($isSelected)
+                                    <svg class="h-3 w-3" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                                        <path d="M3.75 8.25 6.75 11.25 12.25 4.75" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                @endif
+                            </span>
                             <div class="min-w-0">
                                 <p class="break-words text-sm font-semibold tracking-tight text-zinc-950">{{ $position['name'] }}</p>
                             </div>
@@ -74,8 +98,20 @@
         @else
             <div class="mt-4 grid max-h-[24rem] gap-3 overflow-y-auto pr-1 md:grid-cols-2 xl:grid-cols-3">
                 @foreach ($payload['personnels'] as $personnel)
+                    @php($isSelected = in_array($personnel['id'], $selectedPersonnelIds, true))
                     <label class="flex min-w-0 cursor-pointer items-start gap-3 rounded-2xl border border-zinc-200 bg-white px-4 py-3">
-                        <input type="checkbox" wire:click="togglePersonnel({{ $personnel['id'] }})" @checked(in_array($personnel['id'], $selectedPersonnelIds, true)) class="mt-1 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-300" />
+                        <input type="checkbox" wire:click="togglePersonnel({{ $personnel['id'] }})" @checked($isSelected) class="peer sr-only" />
+                        <span @class([
+                            'mt-1 flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-zinc-400 peer-focus-visible:ring-offset-2',
+                            'border-zinc-900 bg-zinc-900 text-white' => $isSelected,
+                            'border-zinc-300 bg-white text-transparent' => ! $isSelected,
+                        ])>
+                            @if ($isSelected)
+                                <svg class="h-3 w-3" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                                    <path d="M3.75 8.25 6.75 11.25 12.25 4.75" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            @endif
+                        </span>
                         <div class="min-w-0">
                             <p class="text-sm font-semibold tracking-tight text-zinc-950">{{ $personnel['fullname'] }}</p>
                             <p class="mt-1 text-xs leading-5 text-zinc-600">{{ $personnel['tabel_no'] }} · {{ $personnel['position'] }}</p>
@@ -108,8 +144,20 @@
             <div class="space-y-4">
                 <div class="space-y-2">
                     <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __($translationNs.'.fields.include_recent_hires') }}</x-ui.field-label>
+                    @php($includeRecentHires = (bool) ($assignmentForm['include_recent_hires'] ?? false))
                     <label class="inline-flex items-center gap-2 text-sm text-zinc-700">
-                        <input wire:model.live="assignmentForm.include_recent_hires" type="checkbox" class="rounded border-zinc-300 text-zinc-900 focus:ring-zinc-300" />
+                        <input wire:model.live="assignmentForm.include_recent_hires" type="checkbox" @checked($includeRecentHires) class="peer sr-only" />
+                        <span @class([
+                            'flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-zinc-400 peer-focus-visible:ring-offset-2',
+                            'border-zinc-900 bg-zinc-900 text-white' => $includeRecentHires,
+                            'border-zinc-300 bg-white text-transparent' => ! $includeRecentHires,
+                        ])>
+                            @if ($includeRecentHires)
+                                <svg class="h-3 w-3" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                                    <path d="M3.75 8.25 6.75 11.25 12.25 4.75" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            @endif
+                        </span>
                         {{ __($translationNs.'.fields.include_recent_hires') }}
                     </label>
                 </div>

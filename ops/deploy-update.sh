@@ -220,7 +220,11 @@ npm_build() {
 
 artisan_refresh() {
   log "Refreshing Laravel caches and runtime state"
-  run_as_app "${PHP_BIN}" "${APP_ROOT}/artisan" optimize:clear
+  run_as_app "${PHP_BIN}" "${APP_ROOT}/artisan" config:clear
+  run_as_app "${PHP_BIN}" "${APP_ROOT}/artisan" cache:clear
+  run_as_app "${PHP_BIN}" "${APP_ROOT}/artisan" route:clear
+  run_as_app "${PHP_BIN}" "${APP_ROOT}/artisan" view:clear
+  run_as_app "${PHP_BIN}" "${APP_ROOT}/artisan" event:clear
 
   if [[ "${RUN_MIGRATIONS}" == "1" ]]; then
     run_as_app "${PHP_BIN}" "${APP_ROOT}/artisan" migrate --force
