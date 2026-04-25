@@ -73,7 +73,9 @@
 
                                 <div class="flex flex-wrap gap-2">
                                     <x-small-badge mode="secondary">{{ __('performance_evaluation::dashboard.labels.current_role', ['role' => $form->manager_id === auth()->id() ? __('performance_evaluation::dashboard.evaluators.manager') : __('performance_evaluation::dashboard.evaluators.hr')]) }}</x-small-badge>
-                                    @php($progress = data_get($this->assignedFormProgress, $form->id))
+                                    @php
+                                        $progress = data_get($this->assignedFormProgress, $form->id);
+                                    @endphp
                                     @if ($progress)
                                         <x-small-badge :mode="$progress['remaining'] > 0 ? 'amber' : 'green'">
                                             {{ $progress['remaining'] > 0

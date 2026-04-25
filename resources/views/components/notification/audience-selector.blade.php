@@ -27,7 +27,9 @@
 
         <div class="mt-4 space-y-3">
             @foreach ($definitions as $targetKey => $targetDefinition)
-                @php($isSelected = in_array($targetKey, $selected, true))
+                @php
+                    $isSelected = in_array($targetKey, $selected, true);
+                @endphp
                 <button
                     type="button"
                     wire:click="{{ $actionMethod }}('{{ $targetKey }}')"

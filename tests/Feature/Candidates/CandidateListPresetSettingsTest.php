@@ -22,6 +22,7 @@ class CandidateListPresetSettingsTest extends TestCase
         Cache::forget(\App\Modules\Candidates\Livewire\CandidateList::SETTINGS_CACHE_KEY);
         Cache::forget('appeal-statuses:'.app()->getLocale());
         config()->set('candidates.mode', 'military');
+        config()->set('candidates.workflow_pack', 'military');
     }
 
     public function test_status_tabs_stay_stable_after_livewire_status_change(): void

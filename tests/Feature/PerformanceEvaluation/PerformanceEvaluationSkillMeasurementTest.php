@@ -19,7 +19,7 @@ use App\Models\TrainingLevel;
 use App\Models\TrainingNeedItem;
 use App\Models\TrainingProgram;
 use App\Models\TrainingProgramCompetency;
-use App\Modules\PerformanceEvaluation\Livewire\Dashboard;
+use App\Modules\PerformanceEvaluation\Livewire\OperationsWorkspace;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
@@ -60,7 +60,7 @@ class PerformanceEvaluationSkillMeasurementTest extends TestCase
 
         $this->actingAs($user);
 
-        Livewire::test(Dashboard::class)
+        Livewire::test(OperationsWorkspace::class)
             ->set('activeTab', 'tests')
             ->set('bankForm.name', 'Pedagogy Skill Test')
             ->set('bankForm.code', 'SKILL-101')
@@ -72,7 +72,7 @@ class PerformanceEvaluationSkillMeasurementTest extends TestCase
 
         $bankId = PerformanceTestBank::query()->where('code', 'SKILL-101')->value('id');
 
-        Livewire::test(Dashboard::class)
+        Livewire::test(OperationsWorkspace::class)
             ->set('activeTab', 'tests')
             ->set('questionForm.performance_test_bank_id', $bankId)
             ->set('questionForm.training_competency_id', $competency->id)
@@ -101,7 +101,7 @@ class PerformanceEvaluationSkillMeasurementTest extends TestCase
         $openQuestionId = PerformanceTestQuestion::query()->where('question_type', 'open_answer')->value('id');
         $correctOptionId = PerformanceTestQuestionOption::query()->where('performance_test_question_id', $mcQuestionId)->where('is_correct', true)->value('id');
 
-        Livewire::test(Dashboard::class)
+        Livewire::test(OperationsWorkspace::class)
             ->set('activeTab', 'tests')
             ->set('attemptAnswerForm.performance_test_session_id', $sessionId)
             ->set('attemptAnswerForm.performance_test_question_id', $mcQuestionId)
@@ -118,7 +118,7 @@ class PerformanceEvaluationSkillMeasurementTest extends TestCase
 
         $attemptId = PerformanceTestAttempt::query()->where('performance_test_session_id', $sessionId)->value('id');
 
-        Livewire::test(Dashboard::class)
+        Livewire::test(OperationsWorkspace::class)
             ->set('activeTab', 'tests')
             ->set('attemptSubmitForm.performance_test_attempt_id', $attemptId)
             ->call('finalizeAttempt')
@@ -135,7 +135,7 @@ class PerformanceEvaluationSkillMeasurementTest extends TestCase
         $this->assertSame('auto_scored', $mcAnswer->review_status);
         $this->assertSame('pending', $openAnswer->review_status);
 
-        Livewire::test(Dashboard::class)
+        Livewire::test(OperationsWorkspace::class)
             ->set('activeTab', 'tests')
             ->set('reviewForm.performance_test_attempt_answer_id', $openAnswer->id)
             ->set('reviewForm.score', 0)
@@ -167,7 +167,7 @@ class PerformanceEvaluationSkillMeasurementTest extends TestCase
             'training_competency_id' => $competency->id,
         ]);
 
-        Livewire::test(Dashboard::class)
+        Livewire::test(OperationsWorkspace::class)
             ->set('activeTab', 'tests')
             ->set('reviewForm.performance_test_attempt_answer_id', $openAnswer->id)
             ->set('reviewForm.score', 100)

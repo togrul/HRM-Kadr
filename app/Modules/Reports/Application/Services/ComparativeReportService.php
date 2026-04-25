@@ -5,7 +5,6 @@ namespace App\Modules\Reports\Application\Services;
 use App\Models\PerformanceForm;
 use App\Models\Personnel;
 use App\Models\TrainingDeliveryRecord;
-use App\Modules\Attendance\Application\Services\AttendanceOverviewService;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
@@ -13,8 +12,7 @@ use Illuminate\Support\Facades\DB;
 class ComparativeReportService
 {
     public function __construct(
-        protected ReportsStructureScopeService $structureScope,
-        protected AttendanceOverviewService $attendanceOverview
+        protected ReportsStructureScopeService $structureScope
     ) {
     }
 
@@ -53,22 +51,89 @@ class ComparativeReportService
 
     protected function attendanceMonthComparison(int $year, int $month, ?int $structureId, array $structureIds = []): array
     {
-        $current = $this->attendanceOverview->build($year, $month, $structureId, true, $structureIds);
+        $currentMonth = Carbon::createFromDate($year, $month, 1)->startOfMonth();
         $previousMonth = Carbon::createFromDate($year, $month, 1)->subMonthNoOverflow();
-        $previous = $this->attendanceOverview->build((int) $previousMonth->year, (int) $previousMonth->month, $structureId, true, $structureIds);
+        $kpis = $this->attendanceKpisForMonths($previousMonth, $currentMonth, $structureIds);
 
         return [
             [
                 'label' => $previousMonth->translatedFormat('F Y'),
-                'coverage_pct' => (float) data_get($previous, 'kpi.coverage_pct', 0),
-                'absence_rate_pct' => (float) data_get($previous, 'kpi.absence_rate_pct', 0),
+                'coverage_pct' => (float) data_get($kpis, $previousMonth->format('Y-m').'.coverage_pct', 0),
+                'absence_rate_pct' => (float) data_get($kpis, $previousMonth->format('Y-m').'.absence_rate_pct', 0),
             ],
             [
-                'label' => Carbon::createFromDate($year, $month, 1)->translatedFormat('F Y'),
-                'coverage_pct' => (float) data_get($current, 'kpi.coverage_pct', 0),
-                'absence_rate_pct' => (float) data_get($current, 'kpi.absence_rate_pct', 0),
+                'label' => $currentMonth->translatedFormat('F Y'),
+                'coverage_pct' => (float) data_get($kpis, $currentMonth->format('Y-m').'.coverage_pct', 0),
+                'absence_rate_pct' => (float) data_get($kpis, $currentMonth->format('Y-m').'.absence_rate_pct', 0),
             ],
         ];
+    }
+
+    /**
+     * @param  array<int,int>  $structureIds
+     * @return array<string,array{coverage_pct:float,absence_rate_pct:float}>
+     */
+    protected function attendanceKpisForMonths(Carbon $previousMonth, Carbon $currentMonth, array $structureIds = []): array
+    {
+        $from = $previousMonth->copy()->startOfMonth();
+        $to = $currentMonth->copy()->endOfMonth();
+        $monthSelect = $this->reportMonthSelect('date');
+
+        $summaryRows = DB::table('attendance_daily_structure_summaries')
+            ->selectRaw("{$monthSelect} as report_month")
+            ->selectRaw('COUNT(*) as source_rows')
+            ->selectRaw('COALESCE(SUM(scheduled_minutes_sum), 0) as scheduled_minutes')
+            ->selectRaw('COALESCE(SUM(worked_minutes_sum), 0) as worked_minutes')
+            ->selectRaw('COALESCE(SUM(scheduled_days), 0) as scheduled_days')
+            ->selectRaw('COALESCE(SUM(absence_days), 0) as absence_days')
+            ->whereBetween('date', [$from->toDateString(), $to->toDateString()])
+            ->when($structureIds !== [], fn ($query) => $query->whereIn('structure_id', $structureIds))
+            ->groupBy('report_month')
+            ->get()
+            ->keyBy('report_month');
+
+        if ($summaryRows->isEmpty()) {
+            $ledgerRows = DB::table('attendance_daily_ledgers')
+                ->selectRaw("{$monthSelect} as report_month")
+                ->selectRaw('COUNT(*) as source_rows')
+                ->selectRaw('COALESCE(SUM(scheduled_minutes), 0) as scheduled_minutes')
+                ->selectRaw('COALESCE(SUM(worked_minutes), 0) as worked_minutes')
+                ->selectRaw('COALESCE(SUM(CASE WHEN scheduled_minutes > 0 THEN 1 ELSE 0 END), 0) as scheduled_days')
+                ->selectRaw('COALESCE(SUM(CASE WHEN attendance_status IN ("absent", "manual_absence") THEN 1 ELSE 0 END), 0) as absence_days')
+                ->whereBetween('date', [$from->toDateString(), $to->toDateString()])
+                ->when($structureIds !== [], function ($query) use ($structureIds): void {
+                    $query->whereIn('tabel_no', DB::table('personnels')
+                        ->select('tabel_no')
+                        ->whereIn('structure_id', $structureIds));
+                })
+                ->groupBy('report_month')
+                ->get()
+                ->keyBy('report_month');
+        } else {
+            $ledgerRows = collect();
+        }
+
+        $rows = $summaryRows->isNotEmpty() ? $summaryRows : $ledgerRows;
+
+        return collect([$previousMonth, $currentMonth])
+            ->mapWithKeys(function (Carbon $month) use ($rows): array {
+                $key = $month->format('Y-m');
+                $row = $rows->get($key);
+                $scheduledMinutes = (int) ($row?->scheduled_minutes ?? 0);
+                $workedMinutes = (int) ($row?->worked_minutes ?? 0);
+                $scheduledDays = (int) ($row?->scheduled_days ?? 0);
+                $absenceDays = (int) ($row?->absence_days ?? 0);
+
+                return [$key => [
+                    'coverage_pct' => $scheduledMinutes > 0
+                        ? round(min(100, ($workedMinutes / $scheduledMinutes) * 100), 1)
+                        : 0.0,
+                    'absence_rate_pct' => $scheduledDays > 0
+                        ? round(min(100, ($absenceDays / $scheduledDays) * 100), 1)
+                        : 0.0,
+                ]];
+            })
+            ->all();
     }
 
     protected function trainingYearComparison(int $year, array $structureIds = []): array
@@ -132,6 +197,14 @@ class ComparativeReportService
         return match (DB::connection()->getDriverName()) {
             'sqlite' => "CAST(strftime('%Y', {$column}) AS INTEGER) as report_year",
             default => "YEAR({$column}) as report_year",
+        };
+    }
+
+    protected function reportMonthSelect(string $column): string
+    {
+        return match (DB::connection()->getDriverName()) {
+            'sqlite' => "strftime('%Y-%m', {$column})",
+            default => "DATE_FORMAT({$column}, '%Y-%m')",
         };
     }
 }

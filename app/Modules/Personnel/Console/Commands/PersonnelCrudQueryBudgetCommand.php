@@ -46,16 +46,20 @@ class PersonnelCrudQueryBudgetCommand extends Command
             }),
         ];
 
+        Livewire::actingAs($user);
+        $addComponent = Livewire::test(AddPersonnel::class);
+        Livewire::actingAs($user);
+        $editComponent = Livewire::test(EditPersonnel::class, ['personnelModel' => $personnel->getKey()]);
+
         foreach (range(2, 8) as $step) {
-            $results[] = $this->probe("add_personnel_step_{$step}_select", $stepBudget, function () use ($user, $step): void {
+            $results[] = $this->probe("add_personnel_step_{$step}_select", $stepBudget, function () use ($user, $addComponent, $step): void {
                 Livewire::actingAs($user);
-                Livewire::test(AddPersonnel::class)->call('selectStep', $step);
+                $addComponent->call('selectStep', $step);
             });
 
-            $results[] = $this->probe("edit_personnel_step_{$step}_select", $stepBudget, function () use ($user, $personnel, $step): void {
+            $results[] = $this->probe("edit_personnel_step_{$step}_select", $stepBudget, function () use ($user, $editComponent, $step): void {
                 Livewire::actingAs($user);
-                Livewire::test(EditPersonnel::class, ['personnelModel' => $personnel->getKey()])
-                    ->call('selectStep', $step);
+                $editComponent->call('selectStep', $step);
             });
         }
 

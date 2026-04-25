@@ -46,6 +46,11 @@ class AttendanceHistoryLogTabTest extends TestCase
             ->latest('id')
             ->value('id');
 
+        Activity::query()->whereKey($activityId)->update([
+            'created_at' => '2026-03-05 10:00:00',
+            'updated_at' => '2026-03-05 10:00:00',
+        ]);
+
         $this->actingAs($user);
 
         Livewire::test(AttendanceHistoryLog::class, ['year' => 2026, 'month' => 3])
@@ -90,6 +95,11 @@ class AttendanceHistoryLogTabTest extends TestCase
             ->where('log_name', 'attendance')
             ->latest('id')
             ->value('id');
+
+        Activity::query()->whereKey($activityId)->update([
+            'created_at' => '2026-03-14 10:00:00',
+            'updated_at' => '2026-03-14 10:00:00',
+        ]);
 
         $this->actingAs($user);
 

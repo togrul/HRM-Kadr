@@ -58,7 +58,9 @@ class OrderTemplateVersionLifecycleServiceTest extends TestCase
         $this->mockCoverage(inspectable: true, missing: ['$fullname']);
 
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Cannot publish. Missing mappings');
+        $this->expectExceptionMessage(__('orders::template_lifecycle.messages.cannot_publish_missing_mappings', [
+            'placeholders' => '$fullname',
+        ]));
 
         app(OrderTemplateVersionLifecycleService::class)->publishVersion((int) $version->id);
     }

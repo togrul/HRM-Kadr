@@ -10,16 +10,15 @@ it('renders notifications dropdown component for guest without crashing', functi
         ->call('getNotifications')
         ->assertSet('hasLoaded', true)
         ->assertSet('isLoading', false)
-        ->assertSee('No new notifications');
+        ->assertSee(__('notifications::common.labels.no_new_notifications'));
 });
 
 it('renders notification list page component for guest without root-tag issues', function () {
     Livewire::test(NotificationList::class)
-        ->assertSee('No notifications found');
+        ->assertSee(__('notifications::common.labels.no_notifications_found'));
 });
 
 it('renders notifications counter component for guest', function () {
     Livewire::test(NotificationsCounter::class)
         ->assertSet('notificationCount', null);
 });
-

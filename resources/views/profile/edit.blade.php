@@ -7,8 +7,12 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            @php($mustResetPassword = (bool) ($user->getAttributes()['must_reset_password'] ?? false))
-            @php($showForceResetBanner = $mustResetPassword && $user->hasRole(\App\Modules\Personnel\Application\Services\MyHr\MyHrAccountProvisioningService::EMPLOYEE_ROLE))
+            @php
+                $mustResetPassword = (bool) ($user->getAttributes()['must_reset_password'] ?? false);
+            @endphp
+            @php
+                $showForceResetBanner = $mustResetPassword && $user->hasRole(\App\Modules\Personnel\Application\Services\MyHr\MyHrAccountProvisioningService::EMPLOYEE_ROLE);
+            @endphp
 
             @if (request()->boolean('force_password_reset') || $showForceResetBanner)
                 <div class="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm leading-6 text-amber-800 shadow-sm">

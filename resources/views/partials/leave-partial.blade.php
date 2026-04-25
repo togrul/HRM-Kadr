@@ -241,7 +241,9 @@
                 </div>
 
                 @if($leave->assignment_mode === 'auto')
-                    @php($assignmentPreview = $this->assignmentPreview)
+                    @php
+                        $assignmentPreview = $this->assignmentPreview;
+                    @endphp
                     <div class="mt-4 space-y-4">
                         <div class="rounded-2xl border border-zinc-200 bg-white p-4">
                             <div class="flex flex-wrap items-center gap-2">

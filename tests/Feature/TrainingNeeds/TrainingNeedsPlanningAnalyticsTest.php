@@ -13,7 +13,7 @@ use App\Models\TrainingLevel;
 use App\Models\TrainingNeedItem;
 use App\Models\TrainingPlanItem;
 use App\Models\TrainingProgram;
-use App\Modules\TrainingNeeds\Livewire\Dashboard;
+use App\Modules\TrainingNeeds\Livewire\OperationsWorkspace;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
@@ -112,7 +112,7 @@ class TrainingNeedsPlanningAnalyticsTest extends TestCase
 
         $this->actingAs($user);
 
-        $component = Livewire::test(Dashboard::class)
+        $component = Livewire::test(OperationsWorkspace::class)
             ->set('activeTab', 'planning')
             ->set('planForm.title', '2026 Təlim planı')
             ->set('planForm.plan_year', 2026)
@@ -221,7 +221,7 @@ class TrainingNeedsPlanningAnalyticsTest extends TestCase
 
         $this->actingAs($user);
 
-        Livewire::test(Dashboard::class)
+        Livewire::test(OperationsWorkspace::class)
             ->set('activeTab', 'planning')
             ->set('planForm.title', '2026 Review planı')
             ->set('planForm.plan_year', 2026)
@@ -235,7 +235,7 @@ class TrainingNeedsPlanningAnalyticsTest extends TestCase
         $this->assertSame('suggested', $item->review_status);
         $this->assertSame('review', $plan->fresh()->status);
 
-        Livewire::test(Dashboard::class)
+        Livewire::test(OperationsWorkspace::class)
             ->set('activeTab', 'planning')
             ->call('selectPlanItemForReview', $item->id)
             ->set('planItemReviewForm.participant_count', 3)
@@ -251,7 +251,7 @@ class TrainingNeedsPlanningAnalyticsTest extends TestCase
         $this->assertSame(3, $item->participant_count);
         $this->assertSame('review', $plan->fresh()->status);
 
-        Livewire::test(Dashboard::class)
+        Livewire::test(OperationsWorkspace::class)
             ->set('activeTab', 'planning')
             ->call('selectPlanItemForReview', $item->id)
             ->set('planItemReviewForm.participant_count', 3)

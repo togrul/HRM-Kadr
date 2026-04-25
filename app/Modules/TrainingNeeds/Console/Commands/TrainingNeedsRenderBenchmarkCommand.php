@@ -9,6 +9,7 @@ use App\Models\TrainingProgram;
 use App\Models\User;
 use App\Modules\TrainingNeeds\Livewire\Analytics;
 use App\Modules\TrainingNeeds\Livewire\Dashboard;
+use App\Modules\TrainingNeeds\Livewire\OperationsWorkspace;
 use App\Modules\TrainingNeeds\Livewire\Reports;
 use App\Modules\TrainingNeeds\Livewire\ResultsSummary;
 use App\Modules\TrainingNeeds\Livewire\SessionDetailWorkspace;
@@ -107,7 +108,7 @@ class TrainingNeedsRenderBenchmarkCommand extends Command
             $results[] = $sessionId > 0
                 ? $this->probe('calendar_session_detail_update', $budgets['calendar_session_detail_update'], fn () => $profiler->measureInteraction(
                     $user,
-                    Dashboard::class,
+                    OperationsWorkspace::class,
                     fn ($test) => $test->call('selectSessionDetail', $sessionId),
                     queryParams: ['tab' => 'calendar'],
                 ))

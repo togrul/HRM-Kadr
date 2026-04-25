@@ -17,8 +17,8 @@ it('normalizes legacy menu rows to canonical route and label', function () {
 
 it('hides unknown menus from the module rail', function () {
     $menu = (object) [
-        'name' => 'Service',
-        'url' => 'service',
+        'name' => 'Legacy Unknown',
+        'url' => 'legacy.unknown',
         'icon' => 'document-icon',
     ];
 

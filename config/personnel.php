@@ -93,7 +93,7 @@ return [
             'personnel_table_status_render' => (int) env('PERSONNEL_QUERY_BUDGET_TABLE_STATUS_RENDER', 24),
             'all_personnel_filter_open' => (int) env('PERSONNEL_QUERY_BUDGET_FILTER_OPEN', 42),
             'personnel_crud_render' => (int) env('PERSONNEL_QUERY_BUDGET_CRUD_RENDER', 48),
-            'personnel_crud_step_change' => (int) env('PERSONNEL_QUERY_BUDGET_CRUD_STEP_CHANGE', 18),
+            'personnel_crud_step_change' => (int) env('PERSONNEL_QUERY_BUDGET_CRUD_STEP_CHANGE', 14),
         ],
     ],
 ];

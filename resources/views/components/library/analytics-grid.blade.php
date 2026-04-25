@@ -10,7 +10,9 @@
     </div>
 
     @foreach (['type_breakdown', 'status_breakdown', 'top_structures', 'top_positions'] as $reportKey)
-        @php($maxCount = max(1, collect($analytics[$reportKey])->max('count') ?: 1))
+        @php
+            $maxCount = max(1, collect($analytics[$reportKey])->max('count') ?: 1);
+        @endphp
         <div class="rounded-2xl border border-zinc-200 bg-zinc-50/70 px-4 py-4">
             <x-ui.field-label as="div" class="tracking-tight">{{ __($translationNs.'.reports.'.$reportKey) }}</x-ui.field-label>
             <div class="mt-3 space-y-2">

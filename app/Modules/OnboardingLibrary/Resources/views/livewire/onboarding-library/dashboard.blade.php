@@ -6,7 +6,11 @@
             <p class="max-w-3xl text-sm leading-6 text-zinc-500">{{ __('onboarding-library::dashboard.description') }}</p>
         </div>
 
-        @php($summary = $activeTab === 'general' ? $this->generalPayload['summary'] : $this->summaryPayload['summary'])
+        @php
+
+            $summary = $activeTab === 'general' ? $this->generalPayload['summary'] : $this->summaryPayload['summary'];
+
+        @endphp
         <div class="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-7">
             @foreach (['template_total', 'required_templates', 'active_templates', 'auto_assign_templates', 'active_assignments', 'acknowledged_assignments', 'overdue_assignments'] as $metric)
                 <div class="rounded-2xl border border-zinc-200 bg-white px-4 py-4">
@@ -44,7 +48,9 @@
 
     <div wire:loading.remove wire:target="switchTab">
         @if ($activeTab === 'general')
-            @php($payload = $this->generalPayload)
+            @php
+                $payload = $this->generalPayload;
+            @endphp
             <div class="grid gap-6 xl:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
                 <div class="space-y-6">
                     <div class="rounded-[28px] border border-zinc-200 bg-white p-6 shadow-sm">
@@ -180,7 +186,9 @@
                 </div>
             </div>
         @elseif ($activeTab === 'library')
-            @php($payload = $this->libraryPayload)
+            @php
+                $payload = $this->libraryPayload;
+            @endphp
             <div class="space-y-6">
                 <div class="rounded-[28px] border border-zinc-200 bg-white p-6 shadow-sm">
                     <x-library.browser-toolbar
@@ -257,7 +265,9 @@
                 </div>
             </div>
         @else
-            @php($payload = $this->reportsPayload)
+            @php
+                $payload = $this->reportsPayload;
+            @endphp
             <div class="rounded-[28px] border border-zinc-200 bg-white p-6 shadow-sm">
                 <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __('onboarding-library::dashboard.sections.reports') }}</x-ui.field-label>
                 <p class="mt-2 max-w-2xl text-sm leading-7 text-zinc-500">{{ __('onboarding-library::dashboard.messages.report_hint') }}</p>

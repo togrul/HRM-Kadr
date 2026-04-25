@@ -16,7 +16,8 @@ use App\Models\TrainingPlanItem;
 use App\Models\TrainingProgram;
 use App\Models\TrainingSession;
 use App\Modules\TrainingNeeds\Application\Services\TrainingNeedReportingService;
-use App\Modules\TrainingNeeds\Livewire\Dashboard;
+use App\Modules\TrainingNeeds\Livewire\OperationsWorkspace;
+use App\Modules\TrainingNeeds\Livewire\ResultsWorkspace;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -78,7 +79,7 @@ class TrainingNeedsCalendarDeliveryFeedbackExportTest extends TestCase
 
         $this->actingAs($user);
 
-        Livewire::test(Dashboard::class)
+        Livewire::test(OperationsWorkspace::class)
             ->set('activeTab', 'planning')
             ->set('planForm.title', '2026 Delivery Plan')
             ->set('planForm.plan_year', 2026)
@@ -90,7 +91,7 @@ class TrainingNeedsCalendarDeliveryFeedbackExportTest extends TestCase
         $plan = TrainingAnnualPlan::query()->where('title', '2026 Delivery Plan')->firstOrFail();
         $this->assertSame('review', $plan->status);
 
-        Livewire::test(Dashboard::class)
+        Livewire::test(OperationsWorkspace::class)
             ->set('activeTab', 'calendar')
             ->set('sessionForm.training_annual_plan_id', $plan->id)
             ->set('sessionForm.training_program_id', $program->id)
@@ -105,7 +106,7 @@ class TrainingNeedsCalendarDeliveryFeedbackExportTest extends TestCase
 
         $session = TrainingSession::query()->where('training_annual_plan_id', $plan->id)->firstOrFail();
 
-        Livewire::test(Dashboard::class)
+        Livewire::test(OperationsWorkspace::class)
             ->set('activeTab', 'calendar')
             ->set('participantForm.training_session_id', $session->id)
             ->set('participantForm.personnel_id', $personnel->id)
@@ -117,7 +118,7 @@ class TrainingNeedsCalendarDeliveryFeedbackExportTest extends TestCase
             ->call('completeSession')
             ->assertHasNoErrors();
 
-        Livewire::test(Dashboard::class)
+        Livewire::test(ResultsWorkspace::class)
             ->set('activeTab', 'results')
             ->set('feedbackForm.training_session_id', $session->id)
             ->set('feedbackForm.title', 'Presentation Lab Feedback')
@@ -127,7 +128,7 @@ class TrainingNeedsCalendarDeliveryFeedbackExportTest extends TestCase
 
         $feedbackForm = TrainingFeedbackForm::query()->where('training_session_id', $session->id)->firstOrFail();
 
-        Livewire::test(Dashboard::class)
+        Livewire::test(ResultsWorkspace::class)
             ->set('activeTab', 'results')
             ->set('feedbackResponseForm.training_feedback_form_id', $feedbackForm->id)
             ->set('feedbackResponseForm.personnel_id', $personnel->id)
@@ -221,7 +222,7 @@ class TrainingNeedsCalendarDeliveryFeedbackExportTest extends TestCase
 
         $this->actingAs($user);
 
-        Livewire::test(Dashboard::class)
+        Livewire::test(OperationsWorkspace::class)
             ->set('activeTab', 'calendar')
             ->set('sessionForm.training_annual_plan_id', $plan->id)
             ->set('sessionForm.training_program_id', $program->id)
@@ -242,7 +243,7 @@ class TrainingNeedsCalendarDeliveryFeedbackExportTest extends TestCase
             'attendance_status' => 'planned',
         ]);
 
-        Livewire::test(Dashboard::class)
+        Livewire::test(OperationsWorkspace::class)
             ->set('activeTab', 'calendar')
             ->set('participantForm.training_session_id', $session->id)
             ->set('participantForm.personnel_id', $personnel->id)
@@ -251,7 +252,7 @@ class TrainingNeedsCalendarDeliveryFeedbackExportTest extends TestCase
             ->call('storeSessionParticipant')
             ->assertHasNoErrors();
 
-        Livewire::test(Dashboard::class)
+        Livewire::test(OperationsWorkspace::class)
             ->set('activeTab', 'calendar')
             ->set('participantForm.training_session_id', $session->id)
             ->call('completeSession')
@@ -259,7 +260,7 @@ class TrainingNeedsCalendarDeliveryFeedbackExportTest extends TestCase
 
         $record = TrainingDeliveryRecord::query()->where('training_session_id', $session->id)->firstOrFail();
 
-        Livewire::test(Dashboard::class)
+        Livewire::test(ResultsWorkspace::class)
             ->set('activeTab', 'results')
             ->set('deliveryDocumentForm.training_delivery_record_id', $record->id)
             ->set('deliveryDocumentForm.certificate_file', UploadedFile::fake()->image('certificate.jpg'))
@@ -293,7 +294,7 @@ class TrainingNeedsCalendarDeliveryFeedbackExportTest extends TestCase
 
         $this->actingAs($user);
 
-        Livewire::test(Dashboard::class)
+        Livewire::test(ResultsWorkspace::class)
             ->set('activeTab', 'results')
             ->set('feedbackForm.training_session_id', $session->id)
             ->set('feedbackForm.title', 'Soft Skills Survey')
@@ -348,7 +349,7 @@ class TrainingNeedsCalendarDeliveryFeedbackExportTest extends TestCase
 
         $this->actingAs($user);
 
-        Livewire::test(Dashboard::class)
+        Livewire::test(OperationsWorkspace::class)
             ->call('selectSessionDetail', $session->id)
             ->set('searchSelectedParticipant', 'TN-553')
             ->assertCount('filteredSelectedParticipants', 1)
@@ -362,12 +363,12 @@ class TrainingNeedsCalendarDeliveryFeedbackExportTest extends TestCase
             'attendance_status' => 'attended',
         ]);
 
-        $response = app(Dashboard::class)->downloadDeliveryCertificate($record->id);
+        $response = app(ResultsWorkspace::class)->downloadDeliveryCertificate($record->id);
 
         $this->assertNotNull($response);
         $this->assertStringContainsString('test-certificate.pdf', (string) $response->headers->get('content-disposition'));
 
-        Livewire::test(Dashboard::class)
+        Livewire::test(ResultsWorkspace::class)
             ->call('deleteDeliveryCertificate', $record->id)
             ->assertHasNoErrors();
 
@@ -431,7 +432,7 @@ class TrainingNeedsCalendarDeliveryFeedbackExportTest extends TestCase
 
         $this->actingAs($user);
 
-        $component = Livewire::test(Dashboard::class)
+        $component = Livewire::test(OperationsWorkspace::class)
             ->set('activeTab', 'calendar');
 
         $proposals = $component->instance()->sessionProposals;
@@ -446,7 +447,7 @@ class TrainingNeedsCalendarDeliveryFeedbackExportTest extends TestCase
         $this->assertSame($program->id, data_get($component->get('sessionForm'), 'training_program_id'));
         $this->assertSame(6, data_get($component->get('sessionForm'), 'capacity'));
 
-        Livewire::test(Dashboard::class)
+        Livewire::test(OperationsWorkspace::class)
             ->set('activeTab', 'calendar')
             ->call('createSessionFromProposal', $item->id)
             ->assertHasNoErrors();

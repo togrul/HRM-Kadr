@@ -25,7 +25,7 @@ class OrderTemplateSnapshotServiceTest extends TestCase
         $orderType = $this->seedOrderType('StrictMissingVersion', 'templates/legacy-missing.docx');
 
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Active metadata template version not found for this order type.');
+        $this->expectExceptionMessage(__('orders::template_runtime.messages.active_metadata_version_not_found_for_order_type'));
 
         app(OrderTemplateSnapshotService::class)->capture((int) $orderType->id);
     }
@@ -50,7 +50,7 @@ class OrderTemplateSnapshotServiceTest extends TestCase
         ]);
 
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Metadata template mappings are required for this order type.');
+        $this->expectExceptionMessage(__('orders::template_runtime.messages.metadata_mappings_required_for_order_type'));
 
         app(OrderTemplateSnapshotService::class)->capture((int) $orderType->id);
     }

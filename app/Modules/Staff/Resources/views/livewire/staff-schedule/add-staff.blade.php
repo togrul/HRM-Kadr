@@ -24,7 +24,9 @@
     </div>
 
     @foreach ($this->staff as $key => $stf)
-    @php($hidePosition = (bool) data_get($stf, 'hide_position', false))
+    @php
+        $hidePosition = (bool) data_get($stf, 'hide_position', false);
+    @endphp
     <div
         @class([
             'grid grid-cols-1 gap-2',

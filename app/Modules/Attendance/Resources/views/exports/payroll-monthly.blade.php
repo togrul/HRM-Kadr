@@ -8,7 +8,9 @@
     </thead>
     <tbody>
     @foreach($rows as $row)
-        @php($cells = $contract->mapRow($row, $loop->iteration))
+        @php
+            $cells = $contract->mapRow($row, $loop->iteration);
+        @endphp
         <tr>
             @foreach($cells as $cell)
                 <td>{{ $cell }}</td>

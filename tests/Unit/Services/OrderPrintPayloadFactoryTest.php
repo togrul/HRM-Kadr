@@ -100,7 +100,7 @@ class OrderPrintPayloadFactoryTest extends TestCase
         $metadataBuilder->shouldNotReceive('build');
 
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Metadata template mappings are required for this order type.');
+        $this->expectExceptionMessage(__('orders::template_runtime.messages.metadata_mappings_required_for_order_type'));
 
         (new OrderPrintPayloadFactory($registry, $snapshotService, $metadataBuilder))
             ->build($context['orderLog']);
@@ -140,7 +140,7 @@ class OrderPrintPayloadFactoryTest extends TestCase
         $registry->shouldNotReceive('activeVersionForOrderType');
 
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Metadata template mappings are required for this order type.');
+        $this->expectExceptionMessage(__('orders::template_runtime.messages.metadata_mappings_required_for_order_type'));
 
         (new OrderPrintPayloadFactory($registry, $snapshotService, $metadataBuilder))
             ->build($context['orderLog']);

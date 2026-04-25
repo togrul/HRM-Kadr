@@ -1,4 +1,6 @@
-@php($payload = $this->payload)
+@php
+    $payload = $this->payload;
+@endphp
 
 <div class="space-y-6">
     <div class="rounded-[28px] border border-zinc-200 bg-white p-6 shadow-sm">

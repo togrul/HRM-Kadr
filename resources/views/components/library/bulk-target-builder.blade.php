@@ -22,7 +22,9 @@
             @else
                 <div class="mt-4 grid max-h-[18rem] gap-3 overflow-y-auto pr-1">
                     @foreach ($payload['structures'] as $structure)
-                        @php($isSelected = in_array($structure['id'], $selectedStructureIds, true))
+                        @php
+                            $isSelected = in_array($structure['id'], $selectedStructureIds, true);
+                        @endphp
                         <label class="flex cursor-pointer items-start gap-3 rounded-2xl border border-zinc-200 bg-white px-4 py-3">
                             <input type="checkbox" wire:click="toggleStructure({{ $structure['id'] }})" @checked($isSelected) class="peer sr-only" />
                             <span @class([
@@ -58,7 +60,9 @@
             @else
                 <div class="mt-4 grid max-h-[18rem] gap-3 overflow-y-auto pr-1">
                     @foreach ($payload['positions'] as $position)
-                        @php($isSelected = in_array($position['id'], $selectedPositionIds, true))
+                        @php
+                            $isSelected = in_array($position['id'], $selectedPositionIds, true);
+                        @endphp
                         <label class="flex cursor-pointer items-start gap-3 rounded-2xl border border-zinc-200 bg-white px-4 py-3">
                             <input type="checkbox" wire:click="togglePosition({{ $position['id'] }})" @checked($isSelected) class="peer sr-only" />
                             <span @class([
@@ -98,7 +102,9 @@
         @else
             <div class="mt-4 grid max-h-[24rem] gap-3 overflow-y-auto pr-1 md:grid-cols-2 xl:grid-cols-3">
                 @foreach ($payload['personnels'] as $personnel)
-                    @php($isSelected = in_array($personnel['id'], $selectedPersonnelIds, true))
+                    @php
+                        $isSelected = in_array($personnel['id'], $selectedPersonnelIds, true);
+                    @endphp
                     <label class="flex min-w-0 cursor-pointer items-start gap-3 rounded-2xl border border-zinc-200 bg-white px-4 py-3">
                         <input type="checkbox" wire:click="togglePersonnel({{ $personnel['id'] }})" @checked($isSelected) class="peer sr-only" />
                         <span @class([
@@ -144,7 +150,9 @@
             <div class="space-y-4">
                 <div class="space-y-2">
                     <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __($translationNs.'.fields.include_recent_hires') }}</x-ui.field-label>
-                    @php($includeRecentHires = (bool) ($assignmentForm['include_recent_hires'] ?? false))
+                    @php
+                        $includeRecentHires = (bool) ($assignmentForm['include_recent_hires'] ?? false);
+                    @endphp
                     <label class="inline-flex items-center gap-2 text-sm text-zinc-700">
                         <input wire:model.live="assignmentForm.include_recent_hires" type="checkbox" @checked($includeRecentHires) class="peer sr-only" />
                         <span @class([

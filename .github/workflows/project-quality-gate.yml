@@ -14,7 +14,7 @@ on:
       - 'composer.lock'
       - '.github/workflows/project-quality-gate.yml'
   push:
-    branches: [ "main", "master" ]
+    branches: [ "main", "master", "laravel12" ]
     paths:
       - 'app/**'
       - 'bootstrap/**'
@@ -41,6 +41,12 @@ jobs:
           extensions: mbstring, bcmath, pdo, pdo_sqlite
           coverage: none
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
       - name: Cache composer dependencies
         uses: actions/cache@v4
         with:
@@ -51,6 +57,9 @@ jobs:
 
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Install frontend dependencies
+        run: npm ci
 
       - name: Prepare environment
         run: |
@@ -69,6 +78,9 @@ jobs:
 
       - name: PHP syntax lint
         run: git ls-files '*.php' | xargs -n 1 php -l
+
+      - name: Build frontend assets
+        run: npm run build
 
       - name: Run test suite
         env:

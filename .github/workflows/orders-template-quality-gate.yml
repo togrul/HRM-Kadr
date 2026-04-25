@@ -12,7 +12,7 @@ on:
       - 'composer.lock'
       - '.github/workflows/orders-template-quality-gate.yml'
   push:
-    branches: [ "main", "master" ]
+    branches: [ "main", "master", "laravel12" ]
     paths:
       - 'app/**'
       - 'config/**'

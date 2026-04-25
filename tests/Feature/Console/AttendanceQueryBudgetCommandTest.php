@@ -19,19 +19,32 @@ class AttendanceQueryBudgetCommandTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_it_can_skip_when_dataset_is_empty_and_allow_empty_enabled(): void
+    public function test_it_uses_a_temporary_fixture_when_dataset_is_empty_and_allow_empty_enabled(): void
     {
         $exitCode = Artisan::call('attendance:query-budget', [
+            '--year' => 2026,
+            '--month' => 3,
+            '--date' => '2026-03-05',
             '--allow-empty' => true,
+            '--overview-budget' => 200,
+            '--daily-budget' => 200,
+            '--puantaj-budget' => 200,
+            '--history-budget' => 200,
+            '--month-close-budget' => 200,
             '--json' => true,
         ]);
 
         $payload = json_decode(Artisan::output(), true);
 
         $this->assertSame(0, $exitCode);
-        $this->assertTrue((bool) data_get($payload, 'summary.skipped'));
-        $this->assertSame('attendance_dataset_empty', data_get($payload, 'summary.reason'));
-        $this->assertCount(0, data_get($payload, 'results', []));
+        $this->assertTrue((bool) data_get($payload, 'summary.seeded_benchmark_fixture'));
+        $this->assertSame(0, data_get($payload, 'summary.failed_probes'));
+        $this->assertSame(0, data_get($payload, 'summary.over_budget_probes'));
+        $this->assertCount(5, data_get($payload, 'results', []));
+        $this->assertDatabaseMissing('attendance_daily_ledgers', [
+            'tabel_no' => 'QB-FIXTURE-001',
+            'date' => '2026-03-05',
+        ]);
     }
 
     public function test_it_reports_overview_daily_and_puantaj_budgets(): void

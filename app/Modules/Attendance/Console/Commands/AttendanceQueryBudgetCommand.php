@@ -2,6 +2,14 @@
 
 namespace App\Modules\Attendance\Console\Commands;
 
+use App\Models\AttendanceDailyLedger;
+use App\Models\Country;
+use App\Models\EducationDegree;
+use App\Models\Personnel;
+use App\Models\Position;
+use App\Models\Structure;
+use App\Models\User;
+use App\Models\WorkNorm;
 use App\Modules\Attendance\Application\Services\AttendanceDailyMonitorReadService;
 use App\Modules\Attendance\Application\Services\AttendanceHistoryReadService;
 use App\Modules\Attendance\Application\Services\AttendanceMonthLockService;
@@ -9,6 +17,7 @@ use App\Modules\Attendance\Application\Services\AttendanceOverviewService;
 use App\Modules\Attendance\Application\Services\AttendancePuantajReadService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Throwable;
@@ -70,64 +79,60 @@ class AttendanceQueryBudgetCommand extends Command
             || DB::table('attendance_manual_entries')->exists()
             || DB::table('attendance_raw_punches')->exists();
 
-        if (! $hasData && (bool) $this->option('allow-empty')) {
-            $payload = [
-                'summary' => [
-                    'failed_probes' => 0,
-                    'over_budget_probes' => 0,
-                    'passed_probes' => 0,
-                    'skipped' => true,
-                    'reason' => 'attendance_dataset_empty',
-                ],
-                'results' => [],
-            ];
+        $results = [];
+        $seededBenchmarkFixture = false;
+        $fixtureTransactionStarted = false;
 
-            if ((bool) $this->option('json')) {
-                $this->line(json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-            } else {
-                $this->warn('Attendance dataset is empty. Skipping probes because --allow-empty is enabled.');
+        try {
+            if (! $hasData && (bool) $this->option('allow-empty')) {
+                DB::beginTransaction();
+                $fixtureTransactionStarted = true;
+                $this->seedBenchmarkFixture($date);
+                $seededBenchmarkFixture = true;
             }
 
-            return self::SUCCESS;
+            $results[] = $this->probe('overview_build', $budgets['overview_build'], function () use ($overviewService, $year, $month): void {
+                $overviewService->build($year, $month, null, false);
+            });
+            $results[] = $this->probe('daily_monitor_load', $budgets['daily_monitor_load'], function () use ($dailyMonitorReadService, $date, $perPage): void {
+                $dailyMonitorReadService->paginateRows($date, '', 'all', $perPage);
+                $dailyMonitorReadService->totals($date, '', 'all');
+            });
+            $results[] = $this->probe('puantaj_grid_load', $budgets['puantaj_grid_load'], function () use ($puantajReadService, $year, $month, $perPage): void {
+                $from = Carbon::createFromDate($year, $month, 1)->startOfMonth();
+                $to = $from->copy()->endOfMonth();
+
+                $page = $puantajReadService->paginatePersonnels('', $perPage, [], $from, $to);
+                $tabelNos = $page->getCollection()->pluck('tabel_no')->filter()->values()->all();
+                $puantajReadService->loadLedgerMap($tabelNos, $from, $to);
+                $puantajReadService->globalCalendarDayTypeByDate($from, $to);
+            });
+            $results[] = $this->probe('history_log_load', $budgets['history_log_load'], function () use ($historyReadService, $year, $month, $perPage): void {
+                $from = Carbon::createFromDate($year, $month, 1)->startOfMonth()->toDateString();
+                $to = Carbon::createFromDate($year, $month, 1)->endOfMonth()->toDateString();
+
+                $historyReadService->paginateRows('all', '', $from, $to, $perPage);
+                $historyReadService->totals('all', '', $from, $to);
+            });
+            $results[] = $this->probe('month_close_status_load', $budgets['month_close_status_load'], function () use ($monthLockService, $year, $month): void {
+                $monthLockService->periodStatus($year, $month);
+                $monthLockService->exportStatus($year, $month);
+            });
+
+            $summary = [
+                'year' => $year,
+                'month' => $month,
+                'date' => $date,
+                'failed_probes' => collect($results)->where('status', 'failed')->count(),
+                'over_budget_probes' => collect($results)->where('over_budget', true)->count(),
+                'passed_probes' => collect($results)->where('status', 'ok')->where('over_budget', false)->count(),
+                'seeded_benchmark_fixture' => $seededBenchmarkFixture,
+            ];
+        } finally {
+            if ($fixtureTransactionStarted) {
+                DB::rollBack();
+            }
         }
-
-        $results = [];
-        $results[] = $this->probe('overview_build', $budgets['overview_build'], function () use ($overviewService, $year, $month): void {
-            $overviewService->build($year, $month, null, false);
-        });
-        $results[] = $this->probe('daily_monitor_load', $budgets['daily_monitor_load'], function () use ($dailyMonitorReadService, $date, $perPage): void {
-            $dailyMonitorReadService->paginateRows($date, '', 'all', $perPage);
-            $dailyMonitorReadService->totals($date, '', 'all');
-        });
-        $results[] = $this->probe('puantaj_grid_load', $budgets['puantaj_grid_load'], function () use ($puantajReadService, $year, $month, $perPage): void {
-            $from = Carbon::createFromDate($year, $month, 1)->startOfMonth();
-            $to = $from->copy()->endOfMonth();
-
-            $page = $puantajReadService->paginatePersonnels('', $perPage, [], $from, $to);
-            $tabelNos = $page->getCollection()->pluck('tabel_no')->filter()->values()->all();
-            $puantajReadService->loadLedgerMap($tabelNos, $from, $to);
-            $puantajReadService->globalCalendarDayTypeByDate($from, $to);
-        });
-        $results[] = $this->probe('history_log_load', $budgets['history_log_load'], function () use ($historyReadService, $year, $month, $perPage): void {
-            $from = Carbon::createFromDate($year, $month, 1)->startOfMonth()->toDateString();
-            $to = Carbon::createFromDate($year, $month, 1)->endOfMonth()->toDateString();
-
-            $historyReadService->paginateRows('all', '', $from, $to, $perPage);
-            $historyReadService->totals('all', '', $from, $to);
-        });
-        $results[] = $this->probe('month_close_status_load', $budgets['month_close_status_load'], function () use ($monthLockService, $year, $month): void {
-            $monthLockService->periodStatus($year, $month);
-            $monthLockService->exportStatus($year, $month);
-        });
-
-        $summary = [
-            'year' => $year,
-            'month' => $month,
-            'date' => $date,
-            'failed_probes' => collect($results)->where('status', 'failed')->count(),
-            'over_budget_probes' => collect($results)->where('over_budget', true)->count(),
-            'passed_probes' => collect($results)->where('status', 'ok')->where('over_budget', false)->count(),
-        ];
 
         $payload = [
             'summary' => $summary,
@@ -178,6 +183,83 @@ class AttendanceQueryBudgetCommand extends Command
         }
 
         return true;
+    }
+
+    private function seedBenchmarkFixture(string $date): void
+    {
+        $user = User::query()->first() ?? User::query()->create([
+            'name' => 'Attendance Benchmark',
+            'email' => 'attendance-benchmark@example.test',
+            'password' => Hash::make('password'),
+        ]);
+
+        $country = Country::query()->first() ?? Country::query()->create([
+            'id' => 1,
+            'code' => 'AZ',
+        ]);
+
+        EducationDegree::query()->firstOrCreate(['id' => 1], [
+            'title_az' => 'Bakalavr',
+            'title_en' => 'Bachelor',
+            'title_ru' => 'Bakalavr',
+        ]);
+
+        WorkNorm::query()->firstOrCreate(['id' => 1], [
+            'name_az' => 'Tam',
+            'name_en' => 'Full',
+            'name_ru' => 'Polniy',
+        ]);
+
+        $structure = Structure::query()->first() ?? Structure::query()->create([
+            'name' => 'Benchmark HQ',
+            'shortname' => 'BHQ',
+            'parent_id' => null,
+            'coefficient' => 1.00,
+            'code' => 9000,
+            'level' => 1,
+        ]);
+
+        $position = Position::query()->first() ?? Position::query()->create([
+            'id' => 1,
+            'name' => 'Benchmark Officer',
+        ]);
+
+        $personnel = Personnel::query()->first() ?? Personnel::withoutEvents(fn () => Personnel::query()->create([
+            'tabel_no' => 'QB-FIXTURE-001',
+            'surname' => 'Benchmark',
+            'name' => 'Attendance',
+            'patronymic' => 'Probe',
+            'birthdate' => '1990-01-01',
+            'gender' => 1,
+            'mobile' => '994501112233',
+            'nationality_id' => $country->id,
+            'pin' => 'QB000001',
+            'residental_address' => 'Benchmark address',
+            'education_degree_id' => 1,
+            'structure_id' => $structure->id,
+            'position_id' => $position->id,
+            'work_norm_id' => 1,
+            'join_work_date' => $date,
+            'added_by' => $user->id,
+            'is_pending' => false,
+        ]));
+
+        AttendanceDailyLedger::query()->updateOrCreate([
+            'tabel_no' => $personnel->tabel_no,
+            'date' => $date,
+        ], [
+            'scheduled_minutes' => 540,
+            'worked_minutes' => 510,
+            'break_minutes' => 30,
+            'overtime_minutes' => 0,
+            'late_minutes' => 15,
+            'early_leave_minutes' => 0,
+            'attendance_status' => 'present',
+            'absence_code' => null,
+            'source_summary' => 'benchmark',
+            'is_locked' => false,
+            'meta' => null,
+        ]);
     }
 
     /**
