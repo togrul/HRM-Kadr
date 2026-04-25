@@ -25,19 +25,12 @@
                         @php
                             $isSelected = in_array($structure['id'], $selectedStructureIds, true);
                         @endphp
-                        <label class="flex cursor-pointer items-start gap-3 rounded-2xl border border-zinc-200 bg-white px-4 py-3">
-                            <input type="checkbox" wire:click="toggleStructure({{ $structure['id'] }})" @checked($isSelected) class="peer sr-only" />
-                            <span @class([
-                                'mt-1 flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-zinc-400 peer-focus-visible:ring-offset-2',
-                                'border-zinc-900 bg-zinc-900 text-white' => $isSelected,
-                                'border-zinc-300 bg-white text-transparent' => ! $isSelected,
-                            ])>
-                                @if ($isSelected)
-                                    <svg class="h-3 w-3" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                                        <path d="M3.75 8.25 6.75 11.25 12.25 4.75" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                                    </svg>
-                                @endif
-                            </span>
+                        <label @class([
+                            'flex cursor-pointer items-start gap-3 rounded-2xl border bg-white px-4 py-3 transition-colors',
+                            'border-zinc-300 ring-1 ring-zinc-200' => $isSelected,
+                            'border-zinc-200' => ! $isSelected,
+                        ])>
+                            <input type="checkbox" wire:click="toggleStructure({{ $structure['id'] }})" @checked($isSelected) class="library-target-checkbox mt-1" />
                             <div class="min-w-0">
                                 <p class="break-words text-sm font-semibold tracking-tight text-zinc-950">{{ $structure['name'] }}</p>
                             </div>
@@ -63,19 +56,12 @@
                         @php
                             $isSelected = in_array($position['id'], $selectedPositionIds, true);
                         @endphp
-                        <label class="flex cursor-pointer items-start gap-3 rounded-2xl border border-zinc-200 bg-white px-4 py-3">
-                            <input type="checkbox" wire:click="togglePosition({{ $position['id'] }})" @checked($isSelected) class="peer sr-only" />
-                            <span @class([
-                                'mt-1 flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-zinc-400 peer-focus-visible:ring-offset-2',
-                                'border-zinc-900 bg-zinc-900 text-white' => $isSelected,
-                                'border-zinc-300 bg-white text-transparent' => ! $isSelected,
-                            ])>
-                                @if ($isSelected)
-                                    <svg class="h-3 w-3" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                                        <path d="M3.75 8.25 6.75 11.25 12.25 4.75" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                                    </svg>
-                                @endif
-                            </span>
+                        <label @class([
+                            'flex cursor-pointer items-start gap-3 rounded-2xl border bg-white px-4 py-3 transition-colors',
+                            'border-zinc-300 ring-1 ring-zinc-200' => $isSelected,
+                            'border-zinc-200' => ! $isSelected,
+                        ])>
+                            <input type="checkbox" wire:click="togglePosition({{ $position['id'] }})" @checked($isSelected) class="library-target-checkbox mt-1" />
                             <div class="min-w-0">
                                 <p class="break-words text-sm font-semibold tracking-tight text-zinc-950">{{ $position['name'] }}</p>
                             </div>
@@ -105,19 +91,12 @@
                     @php
                         $isSelected = in_array($personnel['id'], $selectedPersonnelIds, true);
                     @endphp
-                    <label class="flex min-w-0 cursor-pointer items-start gap-3 rounded-2xl border border-zinc-200 bg-white px-4 py-3">
-                        <input type="checkbox" wire:click="togglePersonnel({{ $personnel['id'] }})" @checked($isSelected) class="peer sr-only" />
-                        <span @class([
-                            'mt-1 flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-zinc-400 peer-focus-visible:ring-offset-2',
-                            'border-zinc-900 bg-zinc-900 text-white' => $isSelected,
-                            'border-zinc-300 bg-white text-transparent' => ! $isSelected,
-                        ])>
-                            @if ($isSelected)
-                                <svg class="h-3 w-3" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                                    <path d="M3.75 8.25 6.75 11.25 12.25 4.75" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                                </svg>
-                            @endif
-                        </span>
+                    <label @class([
+                        'flex min-w-0 cursor-pointer items-start gap-3 rounded-2xl border bg-white px-4 py-3 transition-colors',
+                        'border-zinc-300 ring-1 ring-zinc-200' => $isSelected,
+                        'border-zinc-200' => ! $isSelected,
+                    ])>
+                        <input type="checkbox" wire:click="togglePersonnel({{ $personnel['id'] }})" @checked($isSelected) class="library-target-checkbox mt-1" />
                         <div class="min-w-0">
                             <p class="text-sm font-semibold tracking-tight text-zinc-950">{{ $personnel['fullname'] }}</p>
                             <p class="mt-1 text-xs leading-5 text-zinc-600">{{ $personnel['tabel_no'] }} · {{ $personnel['position'] }}</p>
