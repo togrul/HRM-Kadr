@@ -350,10 +350,60 @@ class AllPersonnel extends Component
         }
 
         match ($actionType) {
-            'open' => $this->openSideMenu(data_get($payload, 'menu'), $value),
+            'open' => $this->openPersonnelProfileSideMenu((string) data_get($payload, 'menu'), $value),
             'restore' => $this->restoreData($value),
             'delete' => $this->setDeletePersonnel($value),
             'force-delete' => $this->forceDeleteData($value),
+            default => null,
+        };
+    }
+
+    protected function openPersonnelProfileSideMenu(string $menu, string $value): void
+    {
+        $this->logPersonnelProfileAccess($menu, $value);
+        $this->openSideMenu($menu, $value);
+    }
+
+    protected function logPersonnelProfileAccess(string $menu, string $value): void
+    {
+        $personnel = $this->resolvePersonnelForAccessLog($menu, $value);
+
+        if (! $personnel || ! auth()->check()) {
+            return;
+        }
+
+        activity('personnel_access')
+            ->causedBy(auth()->user())
+            ->performedOn($personnel)
+            ->event('profile_opened')
+            ->withProperties([
+                'menu' => $menu,
+                'personnel_id' => $personnel->id,
+                'tabel_no' => $personnel->tabel_no,
+                'fullname' => $personnel->fullname,
+                'ip' => request()?->ip(),
+                'user_agent' => request()?->userAgent(),
+            ])
+            ->log('Personnel profile opened');
+    }
+
+    protected function resolvePersonnelForAccessLog(string $menu, string $value): ?Personnel
+    {
+        if ($value === '') {
+            return null;
+        }
+
+        $query = Personnel::withTrashed()->select(['id', 'tabel_no', 'surname', 'name', 'patronymic']);
+
+        return match ($menu) {
+            'edit-personnel',
+            'professional-portfolio',
+            'my-hr-account',
+            'onboarding-documents',
+            'learning-materials' => is_numeric($value) ? $query->find((int) $value) : null,
+            'show-files',
+            'show-information',
+            'show-vacations' => $query->where('tabel_no', $value)->first(),
             default => null,
         };
     }

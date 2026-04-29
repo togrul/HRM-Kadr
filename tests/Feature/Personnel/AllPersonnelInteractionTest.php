@@ -68,6 +68,37 @@ class AllPersonnelInteractionTest extends TestCase
             ->assertSet('isSideModalOpen', true);
     }
 
+    public function test_opening_personnel_profile_writes_access_log(): void
+    {
+        $personnel = $this->makePersonnel();
+        $user = User::factory()->create();
+        $user->givePermissionTo([
+            Permission::findOrCreate('show-personnels', 'web'),
+            Permission::findOrCreate('edit-personnels', 'web'),
+        ]);
+
+        $this->actingAs($user);
+
+        Livewire::test(AllPersonnel::class)
+            ->call('handleRowAction', 'edit', [
+                'type' => 'open',
+                'menu' => 'edit-personnel',
+                'value' => (string) $personnel->id,
+            ])
+            ->assertSet('showSideMenu', 'edit-personnel')
+            ->assertSet('isSideModalOpen', true);
+
+        $this->assertDatabaseHas('activity_log', [
+            'log_name' => 'personnel_access',
+            'event' => 'profile_opened',
+            'description' => 'Personnel profile opened',
+            'causer_type' => User::class,
+            'causer_id' => $user->id,
+            'subject_type' => Personnel::class,
+            'subject_id' => $personnel->id,
+        ]);
+    }
+
     public function test_authorized_user_can_open_learning_materials_side_menu(): void
     {
         $personnel = $this->makePersonnel();
