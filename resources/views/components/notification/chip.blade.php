@@ -1,13 +1,13 @@
 @props([
     'mode' => 'neutral',
-    'uppercase' => false,
+    'uppercase' => true,
     'size' => 'md',
     'as' => 'span',
 ])
 
 @php
     $tag = in_array($as, ['span', 'div', 'a', 'button'], true) ? $as : 'span';
-    $base = 'inline-flex items-center rounded-full border font-medium whitespace-nowrap';
+    $base = 'inline-flex items-center rounded-full border font-semibold whitespace-nowrap';
     $sizes = [
         'sm' => 'px-2.5 py-1 text-[11px]',
         'md' => 'px-3 py-1.5 text-xs',

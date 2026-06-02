@@ -10,14 +10,14 @@ use App\Models\ProfessionalEventRegistry;
 use App\Models\ProfessionalMediaOutletRegistry;
 use App\Models\ProfessionalProjectRegistry;
 use App\Models\ProfessionalRecordAttachment;
-use App\Modules\Personnel\Application\Services\ProfessionalPortfolioWorkflowPolicyService;
 use App\Models\User;
-use App\Modules\Personnel\Livewire\ProfessionalPortfolio\EventsManager;
+use App\Modules\Personnel\Application\Services\ProfessionalPortfolioWorkflowPolicyService;
+use App\Modules\Personnel\Livewire\Employee360Timeline;
 use App\Modules\Personnel\Livewire\ProfessionalPortfolio\AnalyticsPanel;
+use App\Modules\Personnel\Livewire\ProfessionalPortfolio\EventsManager;
 use App\Modules\Personnel\Livewire\ProfessionalPortfolio\MediaManager;
 use App\Modules\Personnel\Livewire\ProfessionalPortfolio\ProfessionalPortfolio;
 use App\Modules\Personnel\Livewire\ProfessionalPortfolio\ProjectsManager;
-use App\Modules\Personnel\Livewire\ProfessionalPortfolio\TimelinePanel;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Artisan;
@@ -64,6 +64,20 @@ class ProfessionalPortfolioTest extends TestCase
             ->set('form.start_date', '2026-03-20')
             ->call('save')
             ->assertHasErrors(['form.hr_value_reason']);
+    }
+
+    public function test_professional_portfolio_no_longer_exposes_timeline_tab(): void
+    {
+        $user = $this->makeUserWithPermissions(['view-professional-portfolio']);
+        $personnel = $this->makePersonnel($user->id);
+
+        $this->actingAs($user);
+
+        Livewire::test(ProfessionalPortfolio::class, ['personnelModel' => $personnel->id])
+            ->assertSet('activeTab', 'events')
+            ->assertDontSee(__('personnel::portfolio.tabs.timeline'))
+            ->call('setActiveTab', 'timeline')
+            ->assertSet('activeTab', 'events');
     }
 
     public function test_media_mention_requires_archive_evidence(): void
@@ -166,9 +180,9 @@ class ProfessionalPortfolioTest extends TestCase
         Excel::assertDownloaded("professional-portfolio-events-{$personnel->id}.xlsx");
     }
 
-    public function test_verified_records_appear_in_timeline_and_rejected_records_stay_hidden(): void
+    public function test_verified_records_appear_in_employee_360_timeline_and_rejected_records_stay_hidden(): void
     {
-        $user = $this->makeUserWithPermissions(['view-professional-portfolio']);
+        $user = $this->makeUserWithPermissions(['view-professional-portfolio', 'show-personnels']);
         $personnel = $this->makePersonnel($user->id);
 
         PersonnelEventRecord::query()->create([
@@ -199,7 +213,7 @@ class ProfessionalPortfolioTest extends TestCase
 
         $this->actingAs($user);
 
-        Livewire::test(TimelinePanel::class, ['personnelId' => $personnel->id])
+        Livewire::test(Employee360Timeline::class, ['personnelId' => $personnel->id])
             ->assertSee('Security seminar')
             ->assertSee('Çıxışçı')
             ->assertSee('Təsdiqlənib')
@@ -445,9 +459,9 @@ class ProfessionalPortfolioTest extends TestCase
         ]);
     }
 
-    public function test_timeline_includes_broken_and_archived_media_records(): void
+    public function test_employee_360_timeline_includes_broken_and_archived_media_records(): void
     {
-        $user = $this->makeUserWithPermissions(['view-professional-portfolio']);
+        $user = $this->makeUserWithPermissions(['view-professional-portfolio', 'show-personnels']);
         $personnel = $this->makePersonnel($user->id);
         $attachment = $this->makeAttachment($user->id);
 
@@ -485,7 +499,7 @@ class ProfessionalPortfolioTest extends TestCase
 
         $this->actingAs($user);
 
-        Livewire::test(TimelinePanel::class, ['personnelId' => $personnel->id])
+        Livewire::test(Employee360Timeline::class, ['personnelId' => $personnel->id])
             ->assertSee('Broken portal mention')
             ->assertSee(__('personnel::portfolio.status.broken_link'))
             ->assertSee('Archive-only mention')

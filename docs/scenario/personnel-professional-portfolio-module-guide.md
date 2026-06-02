@@ -545,7 +545,8 @@ Child komponentlər:
 - `EventsManager`
 - `MediaMentionsManager`
 - `ProjectParticipationManager`
-- `PortfolioTimelinePanel`
+
+Timeline professional portfolio shell daxilində ayrıca tab kimi saxlanmır. Əməkdaşın bütün HR 360 tarixçəsi personnel profilindəki `HR 360` tabında mərkəzləşdirilir.
 
 UI qaydaları:
 

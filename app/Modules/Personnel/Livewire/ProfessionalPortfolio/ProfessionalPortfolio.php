@@ -51,7 +51,7 @@ class ProfessionalPortfolio extends Component
 
     public function setActiveTab(string $tab): void
     {
-        $allowedTabs = ['events', 'media', 'projects', 'timeline'];
+        $allowedTabs = ['events', 'media', 'projects'];
         if ($this->canViewAnalytics()) {
             $allowedTabs[] = 'analytics';
         }

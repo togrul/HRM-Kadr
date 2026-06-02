@@ -15,7 +15,7 @@
     ];
     $variants = [
         'primary' => 'bg-zinc-950 text-white hover:bg-zinc-900',
-        'secondary' => 'border border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300',
+        'secondary' => 'border border-zinc-200 bg-white text-zinc-800 shadow-sm hover:border-zinc-300 hover:bg-zinc-950 hover:text-white',
         'danger' => 'border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100',
         'warning' => 'border border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100',
         'success' => 'border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100',

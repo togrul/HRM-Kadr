@@ -2,17 +2,20 @@
 
 namespace App\Services;
 
-use Carbon\Carbon;
+use App\Enums\OrderStatusEnum;
+use App\Events\StaffScheduleUpdated;
+use App\Helpers\UsefulHelpers;
+use App\Models\Candidate;
 use App\Models\Order;
 use App\Models\OrderLog;
-use App\Models\Candidate;
 use App\Models\Personnel;
-use App\Enums\OrderStatusEnum;
-use App\Helpers\UsefulHelpers;
+use App\Modules\Candidates\Application\Services\CandidateHireConversionService;
+use App\Modules\EmployeeLifecycle\Application\Services\OrderLifecycleIntegrationService;
+use App\Modules\Notifications\Support\NotificationCampaignDispatcher;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Events\StaffScheduleUpdated;
-use App\Modules\Notifications\Support\NotificationCampaignDispatcher;
+use InvalidArgumentException;
 
 class OrderConfirmedService
 {
@@ -53,6 +56,8 @@ class OrderConfirmedService
                 $this->processBusinessTripsOrder($this->orderLog);
                 break;
         }
+
+        app(OrderLifecycleIntegrationService::class)->handleApprovedOrder($this->orderLog, auth()->id() ?: $this->orderLog->creator_id);
     }
 
     private function handleCancelledOrder($order): void
@@ -87,6 +92,7 @@ class OrderConfirmedService
             $candidateIdMap = array_fill_keys($candidateIds, true);
             $filtered = $personnelModel->filter(function (Personnel $personnel) use ($candidateIdMap) {
                 $candidateId = $this->extractCandidateIdFromValue($personnel->tabel_no);
+
                 return $candidateId !== null && isset($candidateIdMap[$candidateId]);
             })->values();
 
@@ -143,11 +149,13 @@ class OrderConfirmedService
 
         if (is_numeric($value)) {
             $resolved = (int) $value;
+
             return $resolved > 0 ? $resolved : null;
         }
 
         if (is_string($value) && preg_match('/NMZD(\d+)/', $value, $matches)) {
             $resolved = (int) ($matches[1] ?? 0);
+
             return $resolved > 0 ? $resolved : null;
         }
 
@@ -156,6 +164,8 @@ class OrderConfirmedService
 
     private function updatePersonnelEmployment($_personnel, $orderLog): void
     {
+        $candidateId = $this->extractCandidateIdFromValue($_personnel->tabel_no);
+
         $component_id = $orderLog->personnels()
             ->where('order_log_personnels.tabel_no', $_personnel->tabel_no)
             ->value('component_id');
@@ -165,6 +175,7 @@ class OrderConfirmedService
                 'order_no' => $orderLog->order_no,
                 'tabel_no' => $_personnel->tabel_no,
             ]);
+
             return;
         }
 
@@ -178,6 +189,7 @@ class OrderConfirmedService
                 'component_id' => $component_id,
                 'tabel_no' => $_personnel->tabel_no,
             ]);
+
             return;
         }
 
@@ -193,17 +205,29 @@ class OrderConfirmedService
                 'tabel_no' => $_personnel->tabel_no,
                 'attributes_keys' => array_keys($_attr),
             ]);
+
             return;
         }
 
         $date = "{$year}-{$month}-{$day}";
 
-        DB::transaction(function () use ($_personnel, $date, $_attr, $orderLog) {
+        DB::transaction(function () use ($_personnel, $date, $_attr, $orderLog, $candidateId) {
             $_personnel->update([
                 'join_work_date' => $date,
                 'is_pending' => false,
                 'tabel_no' => $this->tabelNoGenerator()->resolveForApprovedPersonnel($_personnel, $date),
             ]);
+
+            if ($candidateId !== null) {
+                $candidate = Candidate::query()->find($candidateId);
+
+                if ($candidate) {
+                    app(CandidateHireConversionService::class)->ensureOrderLifecycleForCandidate($candidate, $_personnel, [
+                        'join_date' => $date,
+                        'actor_id' => auth()->id() ?? $candidate->creator_id,
+                    ]);
+                }
+            }
 
             $_personnel->ranks()->create([
                 'rank_id' => $_attr['$rank']['id'] ?? 10,
@@ -341,7 +365,7 @@ class OrderConfirmedService
                 $relationshipMethod = 'businessTrips';
                 break;
             default:
-                throw new \InvalidArgumentException("Unsupported order type: $type");
+                throw new InvalidArgumentException("Unsupported order type: $type");
         }
         $_person->{$relationshipMethod}()->withTrashed()->updateOrCreate(
             $commonAttributes,
@@ -361,9 +385,11 @@ class OrderConfirmedService
     {
         return array_filter($mainArray, function ($item) use ($arrayKey, $filteredKey, $isNested) {
             if ($isNested) {
-                $key = '$' . $arrayKey;
+                $key = '$'.$arrayKey;
+
                 return isset($item[$key]['value']) && $item[$key]['value'] === $filteredKey;
             }
+
             return isset($item[$arrayKey]) && $item[$arrayKey] == $filteredKey;
         });
     }

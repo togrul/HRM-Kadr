@@ -4,7 +4,7 @@
     'message' => null,
 ])
 
-<div {{ $attributes->merge(['class' => 'rounded-2xl border border-dashed border-zinc-200 bg-zinc-50/80 px-5 py-6']) }}>
+<div {{ $attributes->merge(['class' => 'rounded-[28px] bg-[#f5f5f7] px-6 py-8 shadow-[inset_0_1px_0_rgba(255,255,255,0.75),0_10px_22px_rgba(0,0,0,0.035)]']) }}>
     <div class="flex items-start gap-3">
         <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-zinc-400 shadow-sm">
             <x-dynamic-component :component="$icon" size="w-5 h-5" />

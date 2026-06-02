@@ -76,6 +76,18 @@
             "@php artisan attendance:query-budget --json --allow-empty",
             "@php artisan test tests/Unit/Architecture/AttendanceLivewireReadBoundaryTest.php tests/Feature/Console/AttendanceQueryBudgetCommandTest.php"
         ],
+        "ci:audit-gate": [
+            "@php artisan audit:query-budget --json --allow-empty",
+            "@php artisan audit:retention-status --json",
+            "@php artisan test tests/Feature/Audit/AuditLogDashboardTest.php tests/Feature/Console/AuditQueryBudgetCommandTest.php"
+        ],
+        "ci:strategic-hr-gate": [
+            "@php artisan employee-lifecycle:query-budget --json --allow-empty",
+            "@php artisan compliance:document-query-budget --json --allow-empty",
+            "@php artisan candidates:ats-query-budget --json --allow-empty",
+            "@php artisan assets:manifest-check --json",
+            "@php artisan test tests/Feature/Console/EmployeeLifecycleQueryBudgetCommandTest.php tests/Feature/Console/ComplianceDocumentQueryBudgetCommandTest.php tests/Feature/Console/CandidateAtsQueryBudgetCommandTest.php tests/Feature/Console/BuildAssetManifestCheckCommandTest.php tests/Feature/Compliance/ComplianceDocumentReminderCommandTest.php tests/Feature/Navigation/StrategicModuleMenuVisibilityTest.php tests/Unit/Modules/Candidates/CandidateApplicationStageServiceTest.php"
+        ],
         "post-update-cmd": [
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
         ],

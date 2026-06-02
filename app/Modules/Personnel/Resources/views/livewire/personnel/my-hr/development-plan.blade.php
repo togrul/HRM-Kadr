@@ -39,15 +39,15 @@
     <div class="rounded-[28px] border border-zinc-200 bg-zinc-50/60 p-5 shadow-sm">
         <div class="grid gap-1 lg:grid-cols-2 2xl:grid-cols-4">
             <x-ui.input-shell :label="__('personnel::my_hr.development_plan.fields.search')" labelClass="tracking-tight text-zinc-500">
-                <input wire:model.live.debounce.300ms="search" type="text" placeholder="{{ __('personnel::my_hr.development_plan.messages.search_placeholder') }}" class="w-full rounded-2xl border border-zinc-200 bg-white px-2 py-2 text-sm text-zinc-800 placeholder:text-zinc-400 focus:border-zinc-300 focus:outline-none" />
+                <x-ui.filter-input wire:model.live.debounce.300ms="search" type="text" placeholder="{{ __('personnel::my_hr.development_plan.messages.search_placeholder') }}" />
             </x-ui.input-shell>
             <x-ui.input-shell :label="__('personnel::my_hr.development_plan.fields.status')" labelClass="tracking-tight text-zinc-500">
-                <select wire:model.live="statusFilter" class="w-full rounded-2xl border border-zinc-200 bg-white px-2 py-2 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none">
+                <x-ui.filter-native-select wire:model.live="statusFilter">
                     <option value="all">{{ __('personnel::my_hr.development_plan.filters.all') }}</option>
                     @foreach (['draft', 'review', 'approved', 'planned', 'completed'] as $status)
                         <option value="{{ $status }}">{{ __('training_needs::dashboard.need_statuses.'.$status) }}</option>
                     @endforeach
-                </select>
+                </x-ui.filter-native-select>
             </x-ui.input-shell>
         </div>
 
@@ -128,17 +128,12 @@
                                 @endforeach
                             </div>
                         @else
-                            <div class="mt-3 rounded-2xl border border-dashed border-zinc-300 bg-white px-4 py-6 text-sm text-zinc-500">
-                                {{ __('personnel::my_hr.development_plan.messages.no_sessions') }}
-                            </div>
+                            <x-ui.empty-state icon="icons.calendar-icon" :message="__('personnel::my_hr.development_plan.messages.no_sessions')" class="mt-3 py-6" />
                         @endif
                     </div>
                 </div>
             @empty
-                <div class="rounded-[28px] border border-dashed border-zinc-300 bg-white px-6 py-12 text-center shadow-sm">
-                    <h3 class="text-xl font-semibold tracking-tight text-zinc-950">{{ __('personnel::my_hr.development_plan.empty.title') }}</h3>
-                    <p class="mx-auto mt-3 max-w-2xl text-sm leading-6 text-zinc-500">{{ __('personnel::my_hr.development_plan.empty.body') }}</p>
-                </div>
+                <x-ui.empty-state icon="icons.training-icon" :title="__('personnel::my_hr.development_plan.empty.title')" :message="__('personnel::my_hr.development_plan.empty.body')" class="py-12" />
             @endforelse
         </div>
     </div>

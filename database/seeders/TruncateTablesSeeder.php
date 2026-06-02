@@ -20,8 +20,18 @@ class TruncateTablesSeeder extends Seeder
             // Some managed DB environments may reject session-level FK toggles.
         }
 
+        $activityLogConnection = config('activitylog.database_connection') ?: config('database.default');
+        $activityLogTable = config('activitylog.table_name', 'activity_log');
+
+        if (Schema::connection($activityLogConnection)->hasTable($activityLogTable)) {
+            try {
+                DB::connection($activityLogConnection)->table($activityLogTable)->truncate();
+            } catch (Throwable) {
+                DB::connection($activityLogConnection)->table($activityLogTable)->delete();
+            }
+        }
+
         $truncateTables = [
-            'activity_log',
             'structures',
             'weapons',
             'notifications',

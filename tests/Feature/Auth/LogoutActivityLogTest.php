@@ -14,7 +14,7 @@ test('successful logout is written to activity log', function () {
 
     $this->assertGuest();
 
-    $this->assertDatabaseHas('activity_log', [
+    $this->assertDatabaseHas(config('activitylog.table_name'), [
         'log_name' => 'auth',
         'description' => 'User logged out',
         'event' => 'logout',
@@ -22,6 +22,5 @@ test('successful logout is written to activity log', function () {
         'causer_id' => $user->id,
         'subject_type' => User::class,
         'subject_id' => $user->id,
-    ]);
+    ], config('activitylog.database_connection'));
 });
-

@@ -23,6 +23,9 @@ it('resolves services permission group labels from canonical permission names', 
 
     expect(__('services::permissions.groups.'.PermissionTranslationKey::groupKeyFromPermission('show-personnels')))
         ->toBe('Şəxsi heyət');
+
+    expect(__('services::permissions.groups.'.PermissionTranslationKey::groupKeyFromPermission('manage-employee-lifecycle')))
+        ->toBe('Əməkdaş həyat dövrü');
 });
 
 it('resolves services permission method labels from canonical keys', function () {
@@ -38,5 +41,6 @@ it('resolves services permission method labels from canonical keys', function ()
         ->and(__('services::permissions.methods.delete'))->toBe('Sil')
         ->and(__('services::permissions.methods.approve'))->toBe('Təsdiq et')
         ->and(__('services::permissions.methods.access'))->toBe('Giriş')
-        ->and(__('services::permissions.methods.confirmation'))->toBe('Təsdiqləmə');
+        ->and(__('services::permissions.methods.confirmation'))->toBe('Təsdiqləmə')
+        ->and(__('services::permissions.methods.manage'))->toBe('İdarə et');
 });

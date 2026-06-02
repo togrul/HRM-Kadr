@@ -57,6 +57,11 @@
             :key="'application-stage-action-panel-'.$application->id"
         />
 
+        <livewire:candidates.application-ats-panel
+            :application="$application"
+            :key="'application-ats-panel-'.$application->id"
+        />
+
         <livewire:candidates.application-stage-timeline-panel
             :application-id="$application->id"
             :key="'application-stage-timeline-panel-'.$application->id"

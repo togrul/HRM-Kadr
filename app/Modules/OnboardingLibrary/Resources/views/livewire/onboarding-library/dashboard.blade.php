@@ -57,41 +57,41 @@
                         <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __('onboarding-library::dashboard.sections.create_template') }}</x-ui.field-label>
                         <div class="mt-4 grid gap-4 md:grid-cols-2">
                             <x-ui.input-shell :label="__('onboarding-library::dashboard.fields.template_title')" :error="$errors->first('templateForm.title')" labelClass="tracking-tight text-zinc-500">
-                                <input wire:model.live="templateForm.title" type="text" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none" />
+                                <x-ui.filter-input wire:model.live="templateForm.title" type="text" />
                             </x-ui.input-shell>
                             <x-ui.input-shell :label="__('onboarding-library::dashboard.fields.document_type')" :error="$errors->first('templateForm.document_type')" labelClass="tracking-tight text-zinc-500">
-                                <select wire:model.live="templateForm.document_type" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none">
+                                <x-ui.filter-native-select wire:model.live="templateForm.document_type">
                                     @foreach (['policy', 'internal_regulation', 'job_instruction', 'security_rule', 'welcome_pack', 'other'] as $type)
                                         <option value="{{ $type }}">{{ __('personnel::my_hr.onboarding.document_types.'.$type) }}</option>
                                     @endforeach
-                                </select>
+                                </x-ui.filter-native-select>
                             </x-ui.input-shell>
                             <x-ui.input-shell :label="__('onboarding-library::dashboard.fields.version')" :error="$errors->first('templateForm.version')" labelClass="tracking-tight text-zinc-500">
-                                <input wire:model.live="templateForm.version" type="text" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none" />
+                                <x-ui.filter-input wire:model.live="templateForm.version" type="text" />
                             </x-ui.input-shell>
                             <x-ui.file-upload-shell wire:model="templateUpload" :label="__('onboarding-library::dashboard.fields.file')" :error="$errors->first('templateUpload')" :upload="$templateUpload" />
                             <x-ui.input-shell :label="__('onboarding-library::dashboard.fields.effective_from')" :error="$errors->first('templateForm.effective_from')" labelClass="tracking-tight text-zinc-500">
-                                <input wire:model.live="templateForm.effective_from" type="date" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none" />
+                                <x-ui.filter-input wire:model.live="templateForm.effective_from" type="date" />
                             </x-ui.input-shell>
                             <x-ui.input-shell :label="__('onboarding-library::dashboard.fields.effective_to')" :error="$errors->first('templateForm.effective_to')" labelClass="tracking-tight text-zinc-500">
-                                <input wire:model.live="templateForm.effective_to" type="date" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none" />
+                                <x-ui.filter-input wire:model.live="templateForm.effective_to" type="date" />
                             </x-ui.input-shell>
                         </div>
                         <div class="mt-4 flex flex-wrap gap-4">
                             <label class="inline-flex items-center gap-2 text-sm text-zinc-700">
-                                <input wire:model.live="templateForm.is_required" type="checkbox" class="rounded border-zinc-300 text-zinc-900 focus:ring-zinc-300" />
+                                <input wire:model.live="templateForm.is_required" type="checkbox" class="library-target-checkbox" />
                                 {{ __('onboarding-library::dashboard.fields.is_required') }}
                             </label>
                             <label class="inline-flex items-center gap-2 text-sm text-zinc-700">
-                                <input wire:model.live="templateForm.requires_acknowledgement" type="checkbox" class="rounded border-zinc-300 text-zinc-900 focus:ring-zinc-300" />
+                                <input wire:model.live="templateForm.requires_acknowledgement" type="checkbox" class="library-target-checkbox" />
                                 {{ __('onboarding-library::dashboard.fields.requires_acknowledgement') }}
                             </label>
                             <label class="inline-flex items-center gap-2 text-sm text-zinc-700">
-                                <input wire:model.live="templateForm.is_active" type="checkbox" class="rounded border-zinc-300 text-zinc-900 focus:ring-zinc-300" />
+                                <input wire:model.live="templateForm.is_active" type="checkbox" class="library-target-checkbox" />
                                 {{ __('onboarding-library::dashboard.fields.is_active') }}
                             </label>
                             <label class="inline-flex items-center gap-2 text-sm text-zinc-700">
-                                <input wire:model.live="templateForm.auto_assign_new_hires" type="checkbox" class="rounded border-zinc-300 text-zinc-900 focus:ring-zinc-300" />
+                                <input wire:model.live="templateForm.auto_assign_new_hires" type="checkbox" class="library-target-checkbox" />
                                 {{ __('onboarding-library::dashboard.fields.auto_assign_new_hires') }}
                             </label>
                         </div>
@@ -156,16 +156,16 @@
 
                     <div class="mt-5 grid gap-4 md:grid-cols-2">
                         <x-ui.input-shell :label="__('onboarding-library::dashboard.fields.template')" :error="$errors->first('assignmentForm.template_id')" labelClass="tracking-tight text-zinc-500">
-                            <select wire:model.live="assignmentForm.template_id" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none">
+                            <x-ui.filter-native-select wire:model.live="assignmentForm.template_id">
                                 <option value="">---</option>
                                 @foreach ($payload['assignment_templates'] as $template)
                                     <option value="{{ $template['id'] }}">{{ $template['title'] }} · v{{ $template['version'] }}</option>
                                 @endforeach
-                            </select>
+                            </x-ui.filter-native-select>
                         </x-ui.input-shell>
 
                         <x-ui.input-shell :label="__('onboarding-library::dashboard.fields.due_at')" :error="$errors->first('assignmentForm.due_at')" labelClass="tracking-tight text-zinc-500">
-                            <input wire:model.live="assignmentForm.due_at" type="date" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none" />
+                            <x-ui.filter-input wire:model.live="assignmentForm.due_at" type="date" />
                         </x-ui.input-shell>
                     </div>
 
@@ -232,12 +232,12 @@
 
                                 <div class="flex flex-wrap gap-2">
                                     @if ($template['file_url'])
-                                        <a href="{{ $template['file_url'] }}" target="_blank" class="inline-flex items-center justify-center rounded-2xl border border-zinc-200 bg-white px-4 py-2 text-sm font-semibold tracking-tight text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50">{{ __('onboarding-library::dashboard.actions.open_file') }}</a>
+                                        <a href="{{ $template['file_url'] }}" target="_blank" class="inline-flex items-center justify-center rounded-2xl bg-[#f5f5f7] px-4 py-2 text-sm font-semibold tracking-tight text-zinc-800 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] transition hover:bg-zinc-950 hover:text-white">{{ __('onboarding-library::dashboard.actions.open_file') }}</a>
                                     @endif
                                     @can('manage-onboarding-document-templates')
-                                        <button type="button" wire:click="prepareNextTemplateVersion({{ $template['id'] }})" class="inline-flex items-center justify-center rounded-2xl border border-zinc-200 bg-white px-4 py-2 text-sm font-semibold tracking-tight text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50">{{ __('onboarding-library::dashboard.actions.new_version') }}</button>
-                                        <button type="button" wire:click="toggleTemplateActive({{ $template['id'] }})" class="inline-flex items-center justify-center rounded-2xl border border-zinc-200 bg-white px-4 py-2 text-sm font-semibold tracking-tight text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50">{{ $template['toggle_active_label'] }}</button>
-                                        <button type="button" wire:click="toggleTemplateArchived({{ $template['id'] }})" class="inline-flex items-center justify-center rounded-2xl border border-zinc-200 bg-white px-4 py-2 text-sm font-semibold tracking-tight text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50">{{ $template['is_archived'] ? __('onboarding-library::dashboard.actions.restore_template') : __('onboarding-library::dashboard.actions.archive_template') }}</button>
+                                        <button type="button" wire:click="prepareNextTemplateVersion({{ $template['id'] }})" class="inline-flex items-center justify-center rounded-2xl bg-[#f5f5f7] px-4 py-2 text-sm font-semibold tracking-tight text-zinc-800 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] transition hover:bg-zinc-950 hover:text-white">{{ __('onboarding-library::dashboard.actions.new_version') }}</button>
+                                        <button type="button" wire:click="toggleTemplateActive({{ $template['id'] }})" class="inline-flex items-center justify-center rounded-2xl bg-[#f5f5f7] px-4 py-2 text-sm font-semibold tracking-tight text-zinc-800 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] transition hover:bg-zinc-950 hover:text-white">{{ $template['toggle_active_label'] }}</button>
+                                        <button type="button" wire:click="toggleTemplateArchived({{ $template['id'] }})" class="inline-flex items-center justify-center rounded-2xl bg-[#f5f5f7] px-4 py-2 text-sm font-semibold tracking-tight text-zinc-800 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] transition hover:bg-zinc-950 hover:text-white">{{ $template['is_archived'] ? __('onboarding-library::dashboard.actions.restore_template') : __('onboarding-library::dashboard.actions.archive_template') }}</button>
                                     @endcan
                                 </div>
                             </div>

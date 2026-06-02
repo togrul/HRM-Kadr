@@ -62,6 +62,21 @@ return [
             'enabled' => true,
             'migrations' => app_path('Modules/Notifications/Database/Migrations'),
         ],
+        'audit' => [
+            'provider' => \App\Modules\Audit\Providers\AuditServiceProvider::class,
+            'enabled' => true,
+            'migrations' => app_path('Modules/Audit/Database/Migrations'),
+        ],
+        'compliance' => [
+            'provider' => \App\Modules\Compliance\Providers\ComplianceServiceProvider::class,
+            'enabled' => true,
+            'migrations' => app_path('Modules/Compliance/Database/Migrations'),
+        ],
+        'employee-lifecycle' => [
+            'provider' => \App\Modules\EmployeeLifecycle\Providers\EmployeeLifecycleServiceProvider::class,
+            'enabled' => true,
+            'migrations' => app_path('Modules/EmployeeLifecycle/Database/Migrations'),
+        ],
         'structure' => [
             'provider' => \App\Modules\SidebarStructure\Providers\SidebarStructureServiceProvider::class,
             'enabled' => true,

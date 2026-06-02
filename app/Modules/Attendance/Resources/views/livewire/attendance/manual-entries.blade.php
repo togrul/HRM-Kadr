@@ -95,7 +95,7 @@
                             </span>
                         @endforelse
                     </x-ui.search-input-select>
-                    @error('form.tabel_no') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                    @error('form.tabel_no') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
                 <div>
                     <x-label for="manual-form-date">{{ __('attendance::manual_entries.labels.date') }}</x-label>
@@ -105,7 +105,7 @@
                         type="date"
                         class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500"
                     />
-                    @error('form.date') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                    @error('form.date') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
                 <div>
                     <x-label for="manual-form-check-in">{{ __('attendance::manual_entries.labels.check_in_time') }}</x-label>
@@ -115,7 +115,7 @@
                         type="time"
                         class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500"
                     />
-                    @error('form.check_in_at') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                    @error('form.check_in_at') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
                 <div>
                     <x-label for="manual-form-check-out">{{ __('attendance::manual_entries.labels.check_out_time') }}</x-label>
@@ -125,7 +125,7 @@
                         type="time"
                         class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500"
                     />
-                    @error('form.check_out_at') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                    @error('form.check_out_at') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
                 <div>
                     <x-label for="manual-form-shift-source">{{ __('attendance::manual_entries.labels.shift_source') }}</x-label>
@@ -137,7 +137,7 @@
                         <option value="auto">{{ __('attendance::manual_entries.options.shift_source_auto') }}</option>
                         <option value="explicit">{{ __('attendance::manual_entries.options.shift_source_explicit') }}</option>
                     </select>
-                    @error('form.shift_source_mode') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                    @error('form.shift_source_mode') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
                 <div>
                     <x-label for="manual-form-explicit-shift">{{ __('attendance::manual_entries.labels.calculation_shift') }}</x-label>
@@ -152,7 +152,7 @@
                             <option value="{{ $shift->id }}">{{ $shift->name }}</option>
                         @endforeach
                     </select>
-                    @error('form.explicit_shift_id') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                    @error('form.explicit_shift_id') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
                 <div class="md:col-span-3">
                     <div class="grid gap-3 xl:grid-cols-[1.55fr_1fr]">
@@ -340,22 +340,22 @@
                                     <div>
                                         <x-label for="manual-form-worked">{{ __('attendance::manual_entries.labels.worked_minutes') }}</x-label>
                                         <x-livewire-input id="manual-form-worked" mode="gray" type="number" min="0" name="form.worked_minutes" wire:model.defer="form.worked_minutes" :readonly="!$manualMetricOverride" />
-                                        @error('form.worked_minutes') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                                        @error('form.worked_minutes') <x-validation>{{ $message }}</x-validation> @enderror
                                     </div>
                                     <div>
                                         <x-label for="manual-form-overtime">{{ __('attendance::manual_entries.labels.overtime_minutes') }}</x-label>
                                         <x-livewire-input id="manual-form-overtime" mode="gray" type="number" min="0" name="form.overtime_minutes" wire:model.defer="form.overtime_minutes" :readonly="!$manualMetricOverride" />
-                                        @error('form.overtime_minutes') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                                        @error('form.overtime_minutes') <x-validation>{{ $message }}</x-validation> @enderror
                                     </div>
                                     <div>
                                         <x-label for="manual-form-late">{{ __('attendance::manual_entries.labels.late_minutes') }}</x-label>
                                         <x-livewire-input id="manual-form-late" mode="gray" type="number" min="0" name="form.late_minutes" wire:model.defer="form.late_minutes" :readonly="!$manualMetricOverride" />
-                                        @error('form.late_minutes') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                                        @error('form.late_minutes') <x-validation>{{ $message }}</x-validation> @enderror
                                     </div>
                                     <div>
                                         <x-label for="manual-form-early-leave">{{ __('attendance::manual_entries.labels.early_leave_minutes') }}</x-label>
                                         <x-livewire-input id="manual-form-early-leave" mode="gray" type="number" min="0" name="form.early_leave_minutes" wire:model.defer="form.early_leave_minutes" :readonly="!$manualMetricOverride" />
-                                        @error('form.early_leave_minutes') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                                        @error('form.early_leave_minutes') <x-validation>{{ $message }}</x-validation> @enderror
                                     </div>
                                     <div>
                                         <x-label for="manual-form-absence">{{ __('attendance::manual_entries.labels.absence_code') }}</x-label>

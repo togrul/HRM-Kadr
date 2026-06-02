@@ -7,6 +7,7 @@ return [
         'master_degrees' => 'Elmi dərəcələr',
         'pension_cards' => 'Pensiya kartları',
         'disposals' => 'Sərəncamlar',
+        'employee_360' => 'HR 360',
     ],
     'fields' => [
         'rank' => 'Rütbə',

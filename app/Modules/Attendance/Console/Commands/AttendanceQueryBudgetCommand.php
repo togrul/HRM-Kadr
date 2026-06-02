@@ -17,8 +17,8 @@ use App\Modules\Attendance\Application\Services\AttendanceOverviewService;
 use App\Modules\Attendance\Application\Services\AttendancePuantajReadService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 use Throwable;
 
@@ -175,14 +175,14 @@ class AttendanceQueryBudgetCommand extends Command
             'attendance_raw_punches',
             'attendance_daily_structure_summaries',
             'attendance_monthly_summaries',
-            'activity_log',
         ] as $table) {
             if (! Schema::hasTable($table)) {
                 return false;
             }
         }
 
-        return true;
+        return Schema::connection(config('activitylog.database_connection'))
+            ->hasTable(config('activitylog.table_name'));
     }
 
     private function seedBenchmarkFixture(string $date): void

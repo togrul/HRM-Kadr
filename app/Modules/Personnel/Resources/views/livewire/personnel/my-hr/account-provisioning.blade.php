@@ -104,13 +104,13 @@
 
             <div class="mt-4 rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
                 @if ($resetUrl)
-                    <textarea readonly rows="6" class="w-full resize-none rounded-2xl border border-zinc-200 bg-white px-3 py-3 text-sm text-zinc-700 focus:outline-none">{{ $resetUrl }}</textarea>
+                    <textarea readonly rows="6" class="w-full resize-none rounded-2xl border-0 bg-[#f5f5f7] px-4 py-3 text-sm font-semibold text-zinc-800 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] outline-none ring-0 transition focus:bg-white focus:outline-none focus:ring-0">{{ $resetUrl }}</textarea>
                     <div class="mt-3 flex flex-wrap gap-3">
                         <button
                             type="button"
                             x-data
                             x-on:click="navigator.clipboard.writeText(@js($resetUrl)); window.dispatchEvent(new CustomEvent('notify', { detail: { type: 'success', message: @js(__('personnel::my_hr_account.messages.reset_link_copied')) } }))"
-                            class="inline-flex items-center justify-center rounded-2xl border border-zinc-200 bg-white px-4 py-2 text-sm font-semibold tracking-tight text-zinc-700 transition hover:border-zinc-300 hover:text-zinc-900"
+                            class="inline-flex items-center justify-center rounded-2xl bg-[#f5f5f7] px-4 py-2 text-sm font-semibold tracking-tight text-zinc-800 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] transition hover:bg-zinc-950 hover:text-white"
                         >
                             {{ __('personnel::my_hr_account.actions.copy_link') }}
                         </button>
@@ -124,7 +124,7 @@
                         </a>
                     </div>
                 @else
-                    <div class="rounded-2xl border border-dashed border-zinc-200 bg-white px-4 py-8 text-center text-sm text-zinc-500">
+                    <div class="rounded-2xl bg-[#f5f5f7] px-4 py-8 text-center text-sm font-semibold text-zinc-500 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)]">
                         {{ __('personnel::my_hr_account.messages.reset_link_placeholder') }}
                     </div>
                 @endif

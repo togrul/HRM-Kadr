@@ -43,7 +43,7 @@
                         <option value="{{ $tz }}">{{ $tz }}</option>
                     @endforeach
                 </select>
-                @error('form.timezone') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                @error('form.timezone') <x-validation>{{ $message }}</x-validation> @enderror
             </div>
 
             <div>
@@ -59,7 +59,7 @@
                         <option value="{{ $shift->id }}">{{ $shift->name }}</option>
                     @endforeach
                 </select>
-                @error('form.default_shift_id') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                @error('form.default_shift_id') <x-validation>{{ $message }}</x-validation> @enderror
             </div>
 
             <div>
@@ -73,7 +73,7 @@
                     wire:model.defer="form.late_grace_minutes"
                     @disabled(! $canManage)
                 />
-                @error('form.late_grace_minutes') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                @error('form.late_grace_minutes') <x-validation>{{ $message }}</x-validation> @enderror
             </div>
 
             <div>
@@ -87,7 +87,7 @@
                     wire:model.defer="form.early_leave_grace_minutes"
                     @disabled(! $canManage)
                 />
-                @error('form.early_leave_grace_minutes') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                @error('form.early_leave_grace_minutes') <x-validation>{{ $message }}</x-validation> @enderror
             </div>
 
             <div>
@@ -103,7 +103,7 @@
                     <option value="ceil">{{ __('attendance::settings.options.ceil') }}</option>
                     <option value="nearest">{{ __('attendance::settings.options.nearest') }}</option>
                 </select>
-                @error('form.rounding_policy') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                @error('form.rounding_policy') <x-validation>{{ $message }}</x-validation> @enderror
             </div>
 
             <div>
@@ -117,7 +117,7 @@
                     wire:model.defer="form.rounding_step_minutes"
                     @disabled(! $canManage)
                 />
-                @error('form.rounding_step_minutes') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                @error('form.rounding_step_minutes') <x-validation>{{ $message }}</x-validation> @enderror
             </div>
 
             <div class="md:col-span-2 lg:col-span-3">
@@ -133,7 +133,7 @@
                     <option value="all_worked">{{ __('attendance::settings.options.all_worked') }}</option>
                     <option value="after_shift">{{ __('attendance::settings.options.after_shift') }}</option>
                 </select>
-                @error('form.overtime_policy') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                @error('form.overtime_policy') <x-validation>{{ $message }}</x-validation> @enderror
             </div>
         </div>
 

@@ -83,7 +83,7 @@
                     </div>
                 </div>
             @empty
-                <div class="rounded-[28px] border border-dashed border-zinc-300 bg-white px-6 py-12 text-center shadow-sm">
+                <div class="rounded-[28px] bg-[#f5f5f7] px-6 py-12 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.75),0_10px_22px_rgba(0,0,0,0.035)]">
                     <h3 class="text-xl font-semibold tracking-tight text-zinc-950">{{ __('personnel::my_hr.onboarding.empty.title') }}</h3>
                     <p class="mx-auto mt-3 max-w-2xl text-sm leading-6 text-zinc-500">{{ __('personnel::my_hr.onboarding.empty.body') }}</p>
                 </div>

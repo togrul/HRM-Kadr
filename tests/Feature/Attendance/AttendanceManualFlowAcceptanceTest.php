@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Attendance;
 
-use App\Models\AttendanceManualEntry;
 use App\Models\AttendanceDailyLedger;
+use App\Models\AttendanceManualEntry;
 use App\Models\AttendanceOvertimeRequest;
 use App\Models\AttendanceSetting;
 use App\Models\AttendanceShift;
@@ -247,31 +247,31 @@ class AttendanceManualFlowAcceptanceTest extends TestCase
         );
         $service->reject($rejectedEntry->fresh(), $user->id, 'Invalid evidence');
 
-        $this->assertDatabaseHas('activity_log', [
+        $this->assertDatabaseHas(config('activitylog.table_name'), [
             'log_name' => 'attendance',
             'event' => 'manual_entry.created',
             'causer_type' => User::class,
             'causer_id' => $user->id,
             'subject_type' => AttendanceManualEntry::class,
-        ]);
+        ], config('activitylog.database_connection'));
 
-        $this->assertDatabaseHas('activity_log', [
+        $this->assertDatabaseHas(config('activitylog.table_name'), [
             'log_name' => 'attendance',
             'event' => 'manual_entry.approved',
             'description' => 'Manual attendance entry approved.',
             'causer_type' => User::class,
             'causer_id' => $user->id,
             'subject_type' => AttendanceManualEntry::class,
-        ]);
+        ], config('activitylog.database_connection'));
 
-        $this->assertDatabaseHas('activity_log', [
+        $this->assertDatabaseHas(config('activitylog.table_name'), [
             'log_name' => 'attendance',
             'event' => 'manual_entry.rejected',
             'description' => 'Manual attendance entry rejected.',
             'causer_type' => User::class,
             'causer_id' => $user->id,
             'subject_type' => AttendanceManualEntry::class,
-        ]);
+        ], config('activitylog.database_connection'));
     }
 
     private function makePersonnel(array $overrides = []): Personnel

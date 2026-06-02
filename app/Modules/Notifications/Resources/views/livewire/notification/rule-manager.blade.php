@@ -74,7 +74,7 @@
                         :empty-label="__('notifications::common.helpers.audience_targets_empty')"
                         :selected-label="__('notifications::common.labels.selected')"
                     />
-                    @error('form.audience_targets') <p class="text-xs text-rose-600">{{ $message }}</p> @enderror
+                    @error('form.audience_targets') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
 
                 @if ($showDepartmentPicker || $showSpecificUsersPicker)
@@ -90,7 +90,7 @@
                                     search-placeholder="{{ __('notifications::common.helpers.search_structure') }}"
                                     help="{{ __('notifications::common.helpers.audience_targets_structure_hint') }}"
                                 />
-                                @error('form.structure_ids') <p class="text-xs text-rose-600">{{ $message }}</p> @enderror
+                                @error('form.structure_ids') <x-validation>{{ $message }}</x-validation> @enderror
                             </div>
                         @endif
 
@@ -105,7 +105,7 @@
                                     search-placeholder="{{ __('notifications::common.helpers.search_user') }}"
                                     help="{{ __('notifications::common.helpers.audience_targets_user_hint') }}"
                                 />
-                                @error('form.user_ids') <p class="text-xs text-rose-600">{{ $message }}</p> @enderror
+                                @error('form.user_ids') <x-validation>{{ $message }}</x-validation> @enderror
                             </div>
                         @endif
                     </div>

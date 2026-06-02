@@ -25,6 +25,9 @@ class CandidateApplication extends Model
         'rejected_at',
         'withdrawn_at',
         'hired_at',
+        'personnel_id',
+        'converted_at',
+        'converted_by',
         'note',
     ];
 
@@ -34,6 +37,7 @@ class CandidateApplication extends Model
         'rejected_at' => 'datetime',
         'withdrawn_at' => 'datetime',
         'hired_at' => 'datetime',
+        'converted_at' => 'datetime',
     ];
 
     public function candidate(): BelongsTo
@@ -61,6 +65,16 @@ class CandidateApplication extends Model
         return $this->belongsTo(User::class, 'assigned_recruiter_id');
     }
 
+    public function personnel(): BelongsTo
+    {
+        return $this->belongsTo(Personnel::class);
+    }
+
+    public function converter(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'converted_by');
+    }
+
     public function stageEvents(): HasMany
     {
         return $this->hasMany(CandidateStageEvent::class)->orderBy('occurred_at')->orderBy('id');
@@ -84,5 +98,20 @@ class CandidateApplication extends Model
     public function documents(): HasMany
     {
         return $this->hasMany(CandidateDocument::class, 'candidate_application_id')->orderBy('stage_key')->orderBy('document_key')->orderBy('id');
+    }
+
+    public function interviews(): HasMany
+    {
+        return $this->hasMany(CandidateInterview::class, 'candidate_application_id')->orderBy('scheduled_at')->orderBy('id');
+    }
+
+    public function offers(): HasMany
+    {
+        return $this->hasMany(CandidateOffer::class, 'candidate_application_id')->orderByDesc('id');
+    }
+
+    public function talentPoolEntries(): HasMany
+    {
+        return $this->hasMany(CandidateTalentPoolEntry::class, 'candidate_application_id')->orderByDesc('id');
     }
 }

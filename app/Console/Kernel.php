@@ -114,6 +114,24 @@ class Kernel extends ConsoleKernel
                 ->dailyAt((string) config('personnel.my_hr.learning.automation.daily_at', '05:20'))
                 ->withoutOverlapping();
         }
+
+        if ((bool) config('employee_lifecycle.reminders.schedule_enabled', false)) {
+            $schedule->command('employee-lifecycle:send-reminders')
+                ->dailyAt((string) config('employee_lifecycle.reminders.daily_at', '05:40'))
+                ->withoutOverlapping();
+        }
+
+        if ((bool) config('compliance.document_expiry.reminders.schedule_enabled', false)) {
+            $schedule->command('compliance:document-reminders --notify')
+                ->dailyAt((string) config('compliance.document_expiry.reminders.daily_at', '05:55'))
+                ->withoutOverlapping();
+        }
+
+        if ((bool) config('activitylog.retention.schedule_enabled', false)) {
+            $schedule->command('activitylog:clean --force')
+                ->dailyAt((string) config('activitylog.retention.daily_at', '02:30'))
+                ->withoutOverlapping();
+        }
     }
 
     /**

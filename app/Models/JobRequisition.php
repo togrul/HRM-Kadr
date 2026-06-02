@@ -20,11 +20,16 @@ class JobRequisition extends Model
         'hiring_reason',
         'headcount',
         'status',
+        'approval_status',
         'opens_at',
         'closes_at',
         'requested_by',
         'owner_id',
         'approved_at',
+        'approved_by',
+        'rejected_by',
+        'rejected_at',
+        'approval_note',
         'note',
     ];
 
@@ -33,6 +38,7 @@ class JobRequisition extends Model
         'opens_at' => 'date:Y-m-d',
         'closes_at' => 'date:Y-m-d',
         'approved_at' => 'datetime',
+        'rejected_at' => 'datetime',
     ];
 
     public function structure(): BelongsTo
@@ -53,6 +59,16 @@ class JobRequisition extends Model
     public function owner(): BelongsTo
     {
         return $this->belongsTo(User::class, 'owner_id');
+    }
+
+    public function approver(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    public function rejecter(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'rejected_by');
     }
 
     public function openings(): HasMany

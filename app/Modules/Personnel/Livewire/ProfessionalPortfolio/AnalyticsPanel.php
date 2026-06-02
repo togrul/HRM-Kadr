@@ -3,8 +3,8 @@
 namespace App\Modules\Personnel\Livewire\ProfessionalPortfolio;
 
 use App\Models\Personnel;
-use App\Modules\Personnel\Exports\ProfessionalPortfolioAnalyticsExport;
 use App\Modules\Personnel\Application\Services\ProfessionalPortfolioAnalyticsService;
+use App\Modules\Personnel\Exports\ProfessionalPortfolioAnalyticsExport;
 use App\Modules\Personnel\Support\ProfessionalPortfolio\ProfessionalPortfolioPermissionMatrix;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -65,6 +65,13 @@ class AnalyticsPanel extends Component
             "professional-portfolio-analytics-{$this->personnelId}.csv",
             ExcelWriter::CSV
         );
+    }
+
+    public function resetAnalyticsFilters(): void
+    {
+        $this->statusFilter = 'verified';
+        $this->dateFrom = null;
+        $this->dateTo = null;
     }
 
     protected function personnel(): Personnel

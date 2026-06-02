@@ -6,22 +6,22 @@
                 <div>
                     <x-label for="attendance-shift-name">{{ __('attendance::shift_management.fields.shift_name') }}</x-label>
                     <x-livewire-input id="attendance-shift-name" mode="gray" name="shiftForm.name" wire:model.defer="shiftForm.name" />
-                    @error('shiftForm.name') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                    @error('shiftForm.name') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
                 <div>
                     <x-label for="attendance-shift-start">{{ __('attendance::shift_management.fields.start_time') }}</x-label>
                     <input id="attendance-shift-start" type="time" wire:model.defer="shiftForm.start_time" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
-                    @error('shiftForm.start_time') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                    @error('shiftForm.start_time') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
                 <div>
                     <x-label for="attendance-shift-end">{{ __('attendance::shift_management.fields.end_time') }}</x-label>
                     <input id="attendance-shift-end" type="time" wire:model.defer="shiftForm.end_time" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
-                    @error('shiftForm.end_time') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                    @error('shiftForm.end_time') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
                 <div>
                     <x-label for="attendance-shift-break">{{ __('attendance::shift_management.fields.break_minutes') }}</x-label>
                     <x-livewire-input id="attendance-shift-break" mode="gray" type="number" min="0" name="shiftForm.break_minutes" wire:model.defer="shiftForm.break_minutes" />
-                    @error('shiftForm.break_minutes') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                    @error('shiftForm.break_minutes') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
                 <div>
                     <x-label for="attendance-shift-in-before">{{ __('attendance::shift_management.fields.check_in_flex_before') }}</x-label>
@@ -152,7 +152,7 @@
                             </span>
                         @endforelse
                     </x-ui.search-input-select>
-                    @error('assignmentForm.tabel_no') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                    @error('assignmentForm.tabel_no') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
                 <div>
                     <x-label for="attendance-assignment-shift">{{ __('attendance::shift_management.fields.shift') }}</x-label>
@@ -162,17 +162,17 @@
                             <option value="{{ $shift->id }}">{{ $shift->name }}</option>
                         @endforeach
                     </select>
-                    @error('assignmentForm.shift_id') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                    @error('assignmentForm.shift_id') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
                 <div>
                     <x-label for="attendance-assignment-from">{{ __('attendance::shift_management.fields.effective_from') }}</x-label>
                     <input id="attendance-assignment-from" type="date" wire:model.defer="assignmentForm.effective_from" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
-                    @error('assignmentForm.effective_from') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                    @error('assignmentForm.effective_from') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
                 <div>
                     <x-label for="attendance-assignment-to">{{ __('attendance::shift_management.fields.effective_to') }}</x-label>
                     <input id="attendance-assignment-to" type="date" wire:model.defer="assignmentForm.effective_to" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
-                    @error('assignmentForm.effective_to') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                    @error('assignmentForm.effective_to') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
             </div>
 

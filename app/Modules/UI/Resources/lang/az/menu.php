@@ -18,6 +18,9 @@ return [
         'attendance' => 'Davamiyyət',
         'training' => 'Təlim',
         'performance' => 'Performans',
+        'audit_logs' => 'Audit jurnalı',
+        'document_compliance' => 'Sənəd uyğunluğu',
+        'employee_lifecycle' => 'Əməkdaş həyat dövrü',
     ],
     'shortcuts' => [
         'review_queue' => 'Tez baxış',

@@ -17,6 +17,10 @@ class CandidateApplicationReadService
                 'source:id,name',
                 'assignedRecruiter:id,name,email',
                 'rejectionReason:id,name,profile_pack',
+                'interviews:id,candidate_application_id,stage_key,interviewer_id,scheduled_at,duration_minutes,status,score',
+                'interviews.interviewer:id,name,email',
+                'offers:id,candidate_application_id,status,salary_amount,currency,start_date,expires_at,created_by',
+                'talentPoolEntries:id,candidate_application_id,pool_name,status,valid_until,created_by',
             ])
             ->findOrFail($applicationId);
     }

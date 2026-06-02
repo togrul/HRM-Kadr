@@ -134,6 +134,8 @@ return [
             'candidate_list_render' => (int) env('CANDIDATES_QUERY_BUDGET_RENDER', 16),
             'candidate_filter_update' => (int) env('CANDIDATES_QUERY_BUDGET_FILTER_UPDATE', 30),
             'candidate_add_modal_open' => (int) env('CANDIDATES_QUERY_BUDGET_MODAL_OPEN', 16),
+            'ats_requisition_aging' => (int) env('CANDIDATES_ATS_QUERY_BUDGET_REQUISITION_AGING', 15),
+            'ats_application_snapshot' => (int) env('CANDIDATES_ATS_QUERY_BUDGET_APPLICATION_SNAPSHOT', 18),
         ],
     ],
 ];

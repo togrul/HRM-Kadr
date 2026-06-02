@@ -2,9 +2,9 @@
 
 namespace App\Support\Navigation;
 
+use App\Support\Translations\ModuleTranslation;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Route;
-use App\Support\Translations\ModuleTranslation;
 
 class MenuPresentation
 {
@@ -38,7 +38,7 @@ class MenuPresentation
             ? (string) ($definition['icon'] ?? 'document-icon')
             : self::normalizeIcon((string) ($menu->icon ?? 'document-icon'));
 
-        return 'icons.' . $icon;
+        return 'icons.'.$icon;
     }
 
     public static function moduleName(string $routeBase): string
@@ -49,6 +49,9 @@ class MenuPresentation
             'self-service-reviews' => 'personnel',
             'onboarding-library' => 'onboarding-library',
             'learning-library' => 'learning-library',
+            'audit.logs' => 'audit',
+            'document-compliance' => 'compliance',
+            'employee-lifecycle' => 'employee-lifecycle',
             'staffs' => 'staff',
             'vacations.list' => 'vacation',
             'business-trips.list' => 'business-trips',
@@ -133,6 +136,9 @@ class MenuPresentation
             'SELF-SERVICE REVIEW' => 'ui::menu.items.self_service_reviews',
             'Onboarding library' => 'ui::menu.items.onboarding_library',
             'Learning library' => 'ui::menu.items.learning_library',
+            'Audit log' => 'ui::menu.items.audit_logs',
+            'Document compliance' => 'ui::menu.items.document_compliance',
+            'Employee lifecycle' => 'ui::menu.items.employee_lifecycle',
             'Ştat cədvəli' => 'ui::menu.items.staff_table',
             'Əmrlər' => 'ui::menu.items.orders',
             'Şəxsi işlər' => 'ui::menu.items.personal_affairs',
@@ -149,6 +155,9 @@ class MenuPresentation
             'Davamiyyət' => 'ui::menu.items.attendance',
             'Təlim' => 'ui::menu.items.training',
             'Performans' => 'ui::menu.items.performance',
+            'Audit jurnalı' => 'ui::menu.items.audit_logs',
+            'Sənəd uyğunluğu' => 'ui::menu.items.document_compliance',
+            'Əməkdaş həyat dövrü' => 'ui::menu.items.employee_lifecycle',
         ];
     }
 
@@ -290,6 +299,9 @@ class MenuPresentation
             'ui::menu.items.attendance' => ['attendance.index'],
             'ui::menu.items.training' => ['training', 'training-needs.index'],
             'ui::menu.items.performance' => ['performance', 'performance-evaluation.index'],
+            'ui::menu.items.audit_logs' => ['audit-logs', 'audit-log'],
+            'ui::menu.items.document_compliance' => ['document-compliance.index', 'compliance', 'document_compliance'],
+            'ui::menu.items.employee_lifecycle' => ['employee-lifecycle.index', 'lifecycle', 'employee_lifecycle'],
             default => [],
         };
     }
@@ -335,6 +347,9 @@ class MenuPresentation
             'ui::menu.items.attendance' => 'show-attendance',
             'ui::menu.items.training' => 'show-training-needs',
             'ui::menu.items.performance' => 'show-performance-evaluation',
+            'ui::menu.items.audit_logs' => 'show-audit-logs',
+            'ui::menu.items.document_compliance' => 'show-document-compliance',
+            'ui::menu.items.employee_lifecycle' => 'show-employee-lifecycle',
             'ui::menu.items.self_service_reviews' => 'review-self-service-requests',
             'ui::menu.items.onboarding_library' => 'view-onboarding-library',
             'ui::menu.items.learning_library' => 'view-learning-library',

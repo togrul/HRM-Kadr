@@ -31,4 +31,29 @@ trait SideModalAction
         $this->modelName = null;
         $this->secondModel = null;
     }
+
+    #[On([
+        'ui:modal-close',
+        'personnelAdded',
+        'permissionSet',
+        'staffAdded',
+        'userAdded',
+        'menuAdded',
+        'fileAdded',
+        'candidateAdded',
+        'templateAdded',
+        'componentAdded',
+        'orderAdded',
+        'rankAdded',
+        'leaveAdded',
+        'leaveUpdated',
+    ])]
+    public function closeSideMenuAfterModalEvent(): void
+    {
+        if (! $this->isSideModalOpen) {
+            return;
+        }
+
+        $this->closeSideMenu();
+    }
 }

@@ -37,7 +37,17 @@ class CandidateList extends Component
     use SideModalAction;
     use WithPagination;
 
-    public array $filter = [];
+    public array $filter = [
+        'fullname' => null,
+        'gender' => null,
+        'results' => null,
+        'age' => null,
+        'appeal_date' => [
+            'min' => null,
+            'max' => null,
+        ],
+        'document_category' => null,
+    ];
 
     public array $search = [];
 
@@ -115,13 +125,13 @@ class CandidateList extends Component
 
     public function applyFilter(array $filter = []): void
     {
-        $this->search = $this->sanitizeFilterForMode($filter ?: $this->filter);
+        $this->search = $this->searchableFilterForMode($filter ?: $this->filter);
         $this->resetPage();
     }
 
     public function resetFilter(): void
     {
-        $this->filter = [];
+        $this->filter = $this->defaultFilter();
         $this->applyFilter([]);
     }
 
@@ -222,8 +232,8 @@ class CandidateList extends Component
         $this->authorize('viewAny', Candidate::class);
         $this->candidateMode = app(CandidateModeResolver::class)->resolve();
         $this->status = $this->sanitizeStatus(request()->query('status', $this->defaultStatus()));
-        $this->filter = $this->sanitizeFilterForMode($this->filter);
-        $this->search = $this->sanitizeFilterForMode($this->search);
+        $this->filter = array_replace_recursive($this->defaultFilter(), $this->filter);
+        $this->search = $this->searchableFilterForMode($this->search);
         $this->accessibleStructureIds = $structureService->getAccessibleStructures();
     }
 
@@ -304,13 +314,43 @@ class CandidateList extends Component
     {
         $allowedTopLevel = array_flip($this->enabledFilterKeys());
 
-        $sanitized = array_intersect_key($filter, $allowedTopLevel);
+        $sanitized = array_intersect_key(array_replace_recursive($this->defaultFilter(), $filter), $allowedTopLevel);
 
         if (! $this->isMilitaryCandidateMode()) {
             unset($sanitized['results']);
         }
 
         return $sanitized;
+    }
+
+    private function searchableFilterForMode(array $filter): array
+    {
+        return collect($this->sanitizeFilterForMode($filter))
+            ->reject(function ($value) {
+                if (is_array($value)) {
+                    return collect($value)
+                        ->filter(fn ($nestedValue) => $nestedValue !== null && $nestedValue !== '')
+                        ->isEmpty();
+                }
+
+                return $value === null || $value === '';
+            })
+            ->all();
+    }
+
+    private function defaultFilter(): array
+    {
+        return [
+            'fullname' => null,
+            'gender' => null,
+            'results' => null,
+            'age' => null,
+            'appeal_date' => [
+                'min' => null,
+                'max' => null,
+            ],
+            'document_category' => null,
+        ];
     }
 
     public function filterEnabled(string $key): bool

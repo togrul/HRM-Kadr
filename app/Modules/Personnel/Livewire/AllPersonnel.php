@@ -2,9 +2,9 @@
 
 namespace App\Modules\Personnel\Livewire;
 
-use App\Modules\Personnel\Exports\PersonnelExport;
 use App\Livewire\Traits\SideModalAction;
 use App\Models\Personnel;
+use App\Modules\Personnel\Exports\PersonnelExport;
 use App\Modules\Personnel\Services\PersonnelListStateNormalizer;
 use App\Modules\Personnel\Services\PersonnelLookupService;
 use App\Modules\Personnel\Services\PersonnelQueryService;
@@ -378,9 +378,9 @@ class AllPersonnel extends Component
             ->event('profile_opened')
             ->withProperties([
                 'menu' => $menu,
-                'personnel_id' => $personnel->id,
-                'tabel_no' => $personnel->tabel_no,
-                'fullname' => $personnel->fullname,
+                'viewed_personnel_id' => $personnel->id,
+                'viewed_personnel_tabel_no' => $personnel->tabel_no,
+                'viewed_personnel_fullname' => $personnel->fullname,
                 'ip' => request()?->ip(),
                 'user_agent' => request()?->userAgent(),
             ])

@@ -9,13 +9,13 @@
 
 <div class="mt-4 space-y-4">
     <div class="grid gap-4 xl:grid-cols-2">
-        <div class="rounded-[24px] border border-zinc-200 bg-zinc-50/70 p-4">
+        <div class="rounded-[24px] bg-[#f5f5f7] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.75),0_10px_22px_rgba(0,0,0,0.035)]">
             <div class="flex items-center justify-between gap-3">
                 <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __($translationNs.'.sections.target_structures') }}</x-ui.field-label>
                 <span class="inline-flex min-w-7 items-center justify-center rounded-full bg-white px-2 py-1 text-[11px] font-semibold tracking-tight text-zinc-500">{{ count($selectedStructureIds) }}</span>
             </div>
             <div class="mt-3">
-                <input wire:model.live.debounce.300ms="searchStructure" type="text" placeholder="{{ __($translationNs.'.messages.search_structure_placeholder') }}" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-800 placeholder:text-zinc-400 focus:border-zinc-300 focus:outline-none" />
+                <x-ui.filter-input wire:model.live.debounce.300ms="searchStructure" type="text" placeholder="{{ __($translationNs.'.messages.search_structure_placeholder') }}" />
             </div>
             @if ($payload['structures'] === [])
                 <p class="mt-4 text-sm text-zinc-500">{{ __($translationNs.'.messages.empty_structures') }}</p>
@@ -26,9 +26,8 @@
                             $isSelected = in_array($structure['id'], $selectedStructureIds, true);
                         @endphp
                         <label @class([
-                            'flex cursor-pointer items-start gap-3 rounded-2xl border bg-white px-4 py-3 transition-colors',
-                            'border-zinc-300 ring-1 ring-zinc-200' => $isSelected,
-                            'border-zinc-200' => ! $isSelected,
+                            'flex cursor-pointer items-start gap-3 rounded-2xl bg-white px-4 py-3 shadow-sm transition',
+                            'ring-1 ring-zinc-300' => $isSelected,
                         ])>
                             <input type="checkbox" wire:click="toggleStructure({{ $structure['id'] }})" @checked($isSelected) class="library-target-checkbox mt-1" />
                             <div class="min-w-0">
@@ -40,13 +39,13 @@
             @endif
         </div>
 
-        <div class="rounded-[24px] border border-zinc-200 bg-zinc-50/70 p-4">
+        <div class="rounded-[24px] bg-[#f5f5f7] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.75),0_10px_22px_rgba(0,0,0,0.035)]">
             <div class="flex items-center justify-between gap-3">
                 <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __($translationNs.'.fields.target_positions') }}</x-ui.field-label>
                 <span class="inline-flex min-w-7 items-center justify-center rounded-full bg-white px-2 py-1 text-[11px] font-semibold tracking-tight text-zinc-500">{{ count($selectedPositionIds) }}</span>
             </div>
             <div class="mt-3">
-                <input wire:model.live.debounce.300ms="searchPosition" type="text" placeholder="{{ __($translationNs.'.messages.search_position_placeholder') }}" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-800 placeholder:text-zinc-400 focus:border-zinc-300 focus:outline-none" />
+                <x-ui.filter-input wire:model.live.debounce.300ms="searchPosition" type="text" placeholder="{{ __($translationNs.'.messages.search_position_placeholder') }}" />
             </div>
             @if ($payload['positions'] === [])
                 <p class="mt-4 text-sm text-zinc-500">{{ __($translationNs.'.messages.empty_positions') }}</p>
@@ -57,9 +56,8 @@
                             $isSelected = in_array($position['id'], $selectedPositionIds, true);
                         @endphp
                         <label @class([
-                            'flex cursor-pointer items-start gap-3 rounded-2xl border bg-white px-4 py-3 transition-colors',
-                            'border-zinc-300 ring-1 ring-zinc-200' => $isSelected,
-                            'border-zinc-200' => ! $isSelected,
+                            'flex cursor-pointer items-start gap-3 rounded-2xl bg-white px-4 py-3 shadow-sm transition',
+                            'ring-1 ring-zinc-300' => $isSelected,
                         ])>
                             <input type="checkbox" wire:click="togglePosition({{ $position['id'] }})" @checked($isSelected) class="library-target-checkbox mt-1" />
                             <div class="min-w-0">
@@ -72,16 +70,16 @@
         </div>
     </div>
 
-    <div class="rounded-[24px] border border-zinc-200 bg-zinc-50/70 p-4">
+    <div class="rounded-[24px] bg-[#f5f5f7] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.75),0_10px_22px_rgba(0,0,0,0.035)]">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div class="flex items-center gap-3">
                 <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __($translationNs.'.sections.target_people') }}</x-ui.field-label>
                 <span class="inline-flex min-w-7 items-center justify-center rounded-full bg-white px-2 py-1 text-[11px] font-semibold tracking-tight text-zinc-500">{{ count($selectedPersonnelIds) }}</span>
             </div>
-            <button type="button" wire:click="clearSelection" class="inline-flex items-center justify-center self-start rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-xs font-semibold tracking-tight text-zinc-500 transition hover:border-zinc-300 hover:text-zinc-700">{{ __($translationNs.'.actions.clear_selection') }}</button>
+            <button type="button" wire:click="clearSelection" class="inline-flex items-center justify-center self-start rounded-full bg-white px-3 py-1.5 text-xs font-semibold tracking-tight text-zinc-600 shadow-sm transition hover:text-zinc-950">{{ __($translationNs.'.actions.clear_selection') }}</button>
         </div>
         <div class="mt-3">
-            <input wire:model.live.debounce.300ms="searchPersonnel" type="text" placeholder="{{ __($translationNs.'.messages.search_personnel_placeholder') }}" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-800 placeholder:text-zinc-400 focus:border-zinc-300 focus:outline-none" />
+            <x-ui.filter-input wire:model.live.debounce.300ms="searchPersonnel" type="text" placeholder="{{ __($translationNs.'.messages.search_personnel_placeholder') }}" />
         </div>
         @if ($payload['personnels'] === [])
             <p class="mt-4 text-sm text-zinc-500">{{ __($translationNs.'.messages.empty_personnels') }}</p>
@@ -92,9 +90,8 @@
                         $isSelected = in_array($personnel['id'], $selectedPersonnelIds, true);
                     @endphp
                     <label @class([
-                        'flex min-w-0 cursor-pointer items-start gap-3 rounded-2xl border bg-white px-4 py-3 transition-colors',
-                        'border-zinc-300 ring-1 ring-zinc-200' => $isSelected,
-                        'border-zinc-200' => ! $isSelected,
+                        'flex min-w-0 cursor-pointer items-start gap-3 rounded-2xl bg-white px-4 py-3 shadow-sm transition',
+                        'ring-1 ring-zinc-300' => $isSelected,
                     ])>
                         <input type="checkbox" wire:click="togglePersonnel({{ $personnel['id'] }})" @checked($isSelected) class="library-target-checkbox mt-1" />
                         <div class="min-w-0">
@@ -109,11 +106,11 @@
     </div>
 
     @if ($errors->has('selectedPersonnelIds'))
-        <p class="text-sm font-medium text-rose-600">{{ $errors->first('selectedPersonnelIds') }}</p>
+        <x-validation>{{ $errors->first('selectedPersonnelIds') }}</x-validation>
     @endif
 
     <div class="grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(20rem,0.9fr)]">
-        <div class="rounded-[24px] border border-zinc-200 bg-white px-4 py-4">
+        <div class="rounded-[24px] bg-[#f5f5f7] px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.75),0_10px_22px_rgba(0,0,0,0.035)]">
             <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __($translationNs.'.sections.targeting_rules') }}</x-ui.field-label>
             <div class="mt-3 flex flex-wrap gap-2">
                 <span class="inline-flex items-center rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-xs font-semibold text-zinc-700">{{ __($translationNs.'.fields.target_structures') }}: {{ count($selectedStructureIds) }}</span>
@@ -125,7 +122,7 @@
             </div>
         </div>
 
-        <div class="rounded-[24px] border border-zinc-200 bg-white px-4 py-4">
+        <div class="rounded-[24px] bg-[#f5f5f7] px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.75),0_10px_22px_rgba(0,0,0,0.035)]">
             <div class="space-y-4">
                 <div class="space-y-2">
                     <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __($translationNs.'.fields.include_recent_hires') }}</x-ui.field-label>
@@ -149,7 +146,7 @@
                     </label>
                 </div>
                 <x-ui.input-shell :label="__($translationNs.'.fields.recent_hire_days')" :error="$errors->first('assignmentForm.recent_hire_days')" labelClass="tracking-tight text-zinc-500">
-                    <input wire:model.live="assignmentForm.recent_hire_days" type="number" min="1" max="365" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none" />
+                    <x-ui.filter-input wire:model.live="assignmentForm.recent_hire_days" type="number" min="1" max="365" />
                 </x-ui.input-shell>
             </div>
         </div>

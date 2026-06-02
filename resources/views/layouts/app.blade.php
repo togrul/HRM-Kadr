@@ -9,6 +9,9 @@
     <title>{{ config('app.name', 'HR Management system') }}</title>
 
     <!-- Scripts -->
+    <link rel="stylesheet" href="{{ asset('assets/css/pikaday.min.css') }}">
+    <script src="{{ asset('assets/js/moment.min.js') }}"></script>
+    <script src="{{ asset('assets/js/pikaday.min.js') }}"></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
     @stack('css')

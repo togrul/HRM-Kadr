@@ -7,6 +7,7 @@ return [
         'master_degrees' => 'Master degrees',
         'pension_cards' => 'Pension cards',
         'disposals' => 'Disposals',
+        'employee_360' => 'HR 360',
     ],
     'fields' => [
         'rank' => 'Rank',

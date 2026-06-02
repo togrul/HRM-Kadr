@@ -27,30 +27,28 @@
         </div>
     </div>
 
-    <div class="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
-        <div class="grid gap-1 lg:grid-cols-3 2xl:grid-cols-4">
+    <x-ui.filter-panel>
             <x-ui.input-shell :label="__('personnel::my_hr.requests.fields.search')" labelClass="tracking-tight text-zinc-500">
-                <input wire:model.live.debounce.300ms="search" type="text" placeholder="{{ __('personnel::my_hr.review.messages.search_placeholder') }}" class="w-full rounded-2xl border border-zinc-200 bg-white px-2 py-2 text-sm text-zinc-800 placeholder:text-zinc-400 focus:border-zinc-300 focus:outline-none" />
+                <x-ui.filter-input wire:model.live.debounce.300ms="search" type="text" placeholder="{{ __('personnel::my_hr.review.messages.search_placeholder') }}" />
             </x-ui.input-shell>
             <x-ui.input-shell :label="__('personnel::my_hr.requests.fields.type')" labelClass="tracking-tight text-zinc-500">
-                <select wire:model.live="typeFilter" class="w-full rounded-2xl border border-zinc-200 bg-white px-2 py-2 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none">
+                <x-ui.filter-native-select wire:model.live="typeFilter">
                     <option value="all">{{ __('personnel::my_hr.requests.filters.all') }}</option>
                     <option value="leave">{{ __('personnel::my_hr.requests.types.leave') }}</option>
                     <option value="vacation">{{ __('personnel::my_hr.requests.types.vacation') }}</option>
                     <option value="business_trip">{{ __('personnel::my_hr.requests.types.business_trip') }}</option>
                     <option value="correction">{{ __('personnel::my_hr.review.types.correction') }}</option>
-                </select>
+                </x-ui.filter-native-select>
             </x-ui.input-shell>
             @if (auth()->user()?->can('review-all-self-service-requests'))
                 <x-ui.input-shell :label="__('personnel::my_hr.review.labels.scope')" labelClass="tracking-tight text-zinc-500">
-                    <select wire:model.live="scopeFilter" class="w-full rounded-2xl border border-zinc-200 bg-white px-2 py-2 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none">
+                    <x-ui.filter-native-select wire:model.live="scopeFilter">
                         <option value="mine">{{ __('personnel::my_hr.review.scope.mine') }}</option>
                         <option value="all">{{ __('personnel::my_hr.review.scope.all') }}</option>
-                    </select>
+                    </x-ui.filter-native-select>
                 </x-ui.input-shell>
             @endif
-        </div>
-    </div>
+    </x-ui.filter-panel>
 
     <div class="space-y-4">
         @forelse ($payload['rows'] as $row)
@@ -103,7 +101,7 @@
 
                 <div class="mt-4 border-t border-zinc-200 pt-4">
                     <x-ui.input-shell :label="__('personnel::my_hr.review.labels.review_note')" labelClass="tracking-tight text-zinc-500">
-                        <textarea wire:model.live="notes.{{ $row['request_type'] }}_{{ $row['record_id'] }}" rows="3" class="w-full rounded-3xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none"></textarea>
+                        <x-ui.filter-textarea wire:model.live="notes.{{ $row['request_type'] }}_{{ $row['record_id'] }}" rows="3" />
                     </x-ui.input-shell>
 
                     <div class="mt-4 flex flex-wrap gap-2">
@@ -117,10 +115,12 @@
                 </div>
             </div>
         @empty
-            <div class="rounded-[28px] border border-dashed border-zinc-300 bg-white px-6 py-12 text-center shadow-sm">
-                <h3 class="text-xl font-semibold tracking-tight text-zinc-950">{{ __('personnel::my_hr.review.empty.title') }}</h3>
-                <p class="mx-auto mt-3 max-w-2xl text-sm leading-6 text-zinc-500">{{ __('personnel::my_hr.review.empty.body') }}</p>
-            </div>
+            <x-ui.empty-state
+                icon="icons.comment-icon"
+                :title="__('personnel::my_hr.review.empty.title')"
+                :message="__('personnel::my_hr.review.empty.body')"
+                class="py-12"
+            />
         @endforelse
     </div>
 </div>

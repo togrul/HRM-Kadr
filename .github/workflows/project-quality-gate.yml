@@ -8,10 +8,16 @@ on:
       - 'bootstrap/**'
       - 'config/**'
       - 'database/**'
+      - 'resources/**'
       - 'routes/**'
       - 'tests/**'
       - 'composer.json'
       - 'composer.lock'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'tailwind.config.js'
+      - 'postcss.config.js'
+      - 'vite.config.js'
       - '.github/workflows/project-quality-gate.yml'
   push:
     branches: [ "main", "master", "laravel12" ]
@@ -20,10 +26,16 @@ on:
       - 'bootstrap/**'
       - 'config/**'
       - 'database/**'
+      - 'resources/**'
       - 'routes/**'
       - 'tests/**'
       - 'composer.json'
       - 'composer.lock'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'tailwind.config.js'
+      - 'postcss.config.js'
+      - 'vite.config.js'
       - '.github/workflows/project-quality-gate.yml'
 
 jobs:
@@ -82,8 +94,21 @@ jobs:
       - name: Build frontend assets
         run: npm run build
 
+      - name: Verify built frontend assets
+        run: php artisan assets:manifest-check --json
+
       - name: Run test suite
         env:
           DB_CONNECTION: sqlite
           DB_DATABASE: database/database.sqlite
         run: php artisan test --stop-on-failure
+
+      - name: Run strategic HR query budgets
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: database/database.sqlite
+        run: |
+          php artisan hr:strategic-query-budget --json
+          php artisan employee-lifecycle:query-budget --json --allow-empty
+          php artisan compliance:document-query-budget --json --allow-empty
+          php artisan candidates:ats-query-budget --json --allow-empty

@@ -20,6 +20,6 @@
     @endif
 
     @if (filled($error))
-        <p class="text-xs text-rose-600">{{ $error }}</p>
+        <x-validation>{{ $error }}</x-validation>
     @endif
 </div>

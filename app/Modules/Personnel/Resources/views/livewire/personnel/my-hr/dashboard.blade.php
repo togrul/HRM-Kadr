@@ -7,7 +7,7 @@
                 <p class="max-w-3xl text-sm text-zinc-500">{{ __('personnel::my_hr.description') }}</p>
             </div>
 
-            <a href="{{ route('docs.guide', ['focus' => 'my-hr']) }}#my-hr-module" class="inline-flex items-center rounded-2xl border border-zinc-200 bg-white px-4 py-2 text-sm font-semibold text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50">
+            <a href="{{ route('docs.guide', ['focus' => 'my-hr']) }}#my-hr-module" class="inline-flex items-center rounded-2xl bg-[#f5f5f7] px-4 py-2 text-sm font-semibold text-zinc-800 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] transition hover:bg-zinc-950 hover:text-white">
                 {{ __('personnel::my_hr.actions.open_docs') }}
             </a>
         </div>
@@ -36,7 +36,7 @@
                         wire:click="setActiveTab('{{ $tab }}')"
                         wire:loading.attr="disabled"
                         wire:target="setActiveTab"
-                        class="{{ $activeTab === $tab ? 'bg-zinc-950 text-white shadow-sm' : 'border border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300 hover:bg-zinc-50' }} rounded-2xl px-4 py-2.5 text-sm font-semibold tracking-tight transition"
+                        class="{{ $activeTab === $tab ? 'bg-zinc-950 text-white shadow-sm' : 'bg-[#f5f5f7] text-zinc-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] hover:bg-zinc-950 hover:text-white' }} rounded-2xl px-4 py-2.5 text-sm font-semibold tracking-tight transition"
                     >
                         {{ __('personnel::my_hr.tabs.'.$tabLabelKey) }}
                     </button>

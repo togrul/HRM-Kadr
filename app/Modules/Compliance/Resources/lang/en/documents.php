@@ -1,0 +1,78 @@
+<?php
+
+return [
+    'kicker' => 'Document compliance',
+    'title' => 'Document expiry and compliance center',
+    'description' => 'Track expired and soon-expiring employee documents from one operational panel.',
+    'summary' => [
+        'total' => 'Total documents',
+        'expired' => 'Expired',
+        'expiring_30' => 'Expires in 30 days',
+        'expiring_60' => 'Expires in 60 days',
+        'valid' => 'Valid',
+        'missing' => 'Missing',
+        'compliance_score' => 'Compliance score',
+    ],
+    'fields' => [
+        'search' => 'Search',
+        'document_type' => 'Document type',
+        'status' => 'Status',
+    ],
+    'placeholders' => [
+        'search' => 'Employee, tabel, structure or document number...',
+    ],
+    'filters' => [
+        'all_types' => 'All types',
+        'all_statuses' => 'All statuses',
+    ],
+    'types' => [
+        'service_card' => 'Service card',
+        'passport' => 'Passport',
+        'contract' => 'Employment contract',
+    ],
+    'status' => [
+        'expired' => 'Expired',
+        'expiring_30' => 'Needs urgent renewal',
+        'expiring_60' => 'Approaching',
+        'valid' => 'Valid',
+        'missing' => 'Missing document',
+    ],
+    'actions' => [
+        'reset_filters' => 'Reset filters',
+        'reset_short' => 'Reset',
+        'export_csv' => 'Export CSV',
+    ],
+    'labels' => [
+        'unassigned' => 'Unassigned',
+        'result_count' => ':count results',
+        'required_document' => 'Required document has not been added',
+        'not_available' => 'Not available',
+        'indefinite' => 'Indefinite',
+        'contract_from' => 'From :date',
+        'contract_duration' => ':months months',
+        'structure_score' => 'Structure compliance',
+        'risk_summary' => ':missing missing · :expired expired',
+    ],
+    'columns' => [
+        'employee' => 'Employee',
+        'document' => 'Document',
+        'expires_at' => 'Expiry date',
+        'days_left' => 'Days left',
+        'status' => 'Status',
+        'structure' => 'Structure',
+        'position' => 'Position',
+        'document_number' => 'Document number',
+        'score' => 'Score',
+        'risk' => 'Risk',
+    ],
+    'sections' => [
+        'structure_scores' => 'Compliance risk by structure',
+        'document_register' => 'Required document registry',
+    ],
+    'reminders' => [
+        'notification_title' => 'Document compliance risk: :count records',
+        'notification_created' => 'Notification campaign created: #:id',
+        'more_items' => ':count more risk records exist.',
+    ],
+    'empty' => 'No matching documents found.',
+];

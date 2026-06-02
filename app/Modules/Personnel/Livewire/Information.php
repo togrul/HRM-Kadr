@@ -2,19 +2,20 @@
 
 namespace App\Modules\Personnel\Livewire;
 
+use App\Livewire\Traits\DropdownConstructTrait;
 use App\Livewire\Traits\Helpers\FillComplexArrayTrait;
+use App\Models\Personnel;
+use App\Models\Rank;
 use App\Modules\Personnel\Support\Traits\DispatchesPersonnelUiEvents;
 use App\Modules\Personnel\Support\Traits\Information\ContractTrait;
 use App\Modules\Personnel\Support\Traits\Information\DisposalTrait;
 use App\Modules\Personnel\Support\Traits\Information\EducationRequestTrait;
 use App\Modules\Personnel\Support\Traits\Information\MasterDegreeTrait;
 use App\Modules\Personnel\Support\Traits\Information\PensionCardTrait;
-use App\Livewire\Traits\DropdownConstructTrait;
 use App\Traits\NormalizesDropdownPayloads;
-use App\Models\Personnel;
-use App\Models\Rank;
-use Illuminate\Support\Facades\DB;
+use DateTime;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
@@ -24,15 +25,15 @@ use Livewire\Component;
 class Information extends Component
 {
     use AuthorizesRequests;
-    use DispatchesPersonnelUiEvents;
     use ContractTrait;
+    use DispatchesPersonnelUiEvents;
     use DisposalTrait;
-    use EducationRequestTrait;
-    use MasterDegreeTrait;
-    use FillComplexArrayTrait;
-    use PensionCardTrait;
     use DropdownConstructTrait;
+    use EducationRequestTrait;
+    use FillComplexArrayTrait;
+    use MasterDegreeTrait;
     use NormalizesDropdownPayloads;
+    use PensionCardTrait;
 
     public string $title;
 
@@ -114,7 +115,7 @@ class Information extends Component
 
     protected function formatDate($date): string
     {
-        return $date instanceof \DateTime ? $date->format('d.m.Y') : (string) $date;
+        return $date instanceof DateTime ? $date->format('d.m.Y') : (string) $date;
     }
 
     public function mount()
@@ -139,6 +140,7 @@ class Information extends Component
             __('personnel::information.tabs.master_degrees'),
             __('personnel::information.tabs.pension_cards'),
             __('personnel::information.tabs.disposals'),
+            __('personnel::information.tabs.employee_360'),
         ];
         $this->stepViews = [
             'contracts',
@@ -146,6 +148,7 @@ class Information extends Component
             'master-degrees',
             'pension-cards',
             'disposals',
+            'employee-360',
         ];
 
         $this->currentStep = 0;

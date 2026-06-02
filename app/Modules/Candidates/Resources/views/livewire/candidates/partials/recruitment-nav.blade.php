@@ -1,10 +1,10 @@
 @php
     $tabs = [
-        ['route' => 'candidates', 'label' => __('candidates::common.titles.candidates')],
-        ['route' => 'candidates.requisitions', 'label' => __('candidates::recruitment.actions.open_requisitions')],
-        ['route' => 'candidates.openings', 'label' => __('candidates::recruitment.actions.open_openings')],
-        ['route' => 'candidates.applications', 'label' => __('candidates::recruitment.actions.open_pipeline')],
-        ['route' => 'candidates.analytics', 'label' => __('candidates::recruitment.actions.open_analytics')],
+        ['route' => 'candidates', 'label' => __('candidates::common.titles.candidates'), 'patterns' => ['candidates']],
+        ['route' => 'candidates.requisitions', 'label' => __('candidates::recruitment.actions.open_requisitions'), 'patterns' => ['candidates.requisitions', 'candidates.requisitions.*']],
+        ['route' => 'candidates.openings', 'label' => __('candidates::recruitment.actions.open_openings'), 'patterns' => ['candidates.openings', 'candidates.openings.*']],
+        ['route' => 'candidates.applications', 'label' => __('candidates::recruitment.actions.open_pipeline'), 'patterns' => ['candidates.applications', 'candidates.applications.*']],
+        ['route' => 'candidates.analytics', 'label' => __('candidates::recruitment.actions.open_analytics'), 'patterns' => ['candidates.analytics']],
     ];
 @endphp
 
@@ -22,7 +22,7 @@
         <nav class="flex flex-wrap items-center gap-2">
             @foreach ($tabs as $tab)
                 @php
-                    $active = request()->routeIs($tab['route']) || request()->routeIs($tab['route'].'.*');
+                    $active = request()->routeIs(...$tab['patterns']);
                 @endphp
                 <a
                     href="{{ route($tab['route']) }}"

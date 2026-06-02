@@ -88,7 +88,7 @@ class AllPersonnelInteractionTest extends TestCase
             ->assertSet('showSideMenu', 'edit-personnel')
             ->assertSet('isSideModalOpen', true);
 
-        $this->assertDatabaseHas('activity_log', [
+        $this->assertDatabaseHas(config('activitylog.table_name'), [
             'log_name' => 'personnel_access',
             'event' => 'profile_opened',
             'description' => 'Personnel profile opened',
@@ -96,7 +96,19 @@ class AllPersonnelInteractionTest extends TestCase
             'causer_id' => $user->id,
             'subject_type' => Personnel::class,
             'subject_id' => $personnel->id,
-        ]);
+        ], config('activitylog.database_connection'));
+
+        $properties = DB::connection(config('activitylog.database_connection'))
+            ->table(config('activitylog.table_name'))
+            ->where('event', 'profile_opened')
+            ->latest('id')
+            ->value('properties');
+
+        $properties = json_decode((string) $properties, true);
+
+        $this->assertSame($personnel->id, $properties['viewed_personnel_id']);
+        $this->assertSame($personnel->tabel_no, $properties['viewed_personnel_tabel_no']);
+        $this->assertSame($personnel->fullname, $properties['viewed_personnel_fullname']);
     }
 
     public function test_authorized_user_can_open_learning_materials_side_menu(): void

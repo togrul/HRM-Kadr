@@ -11,20 +11,21 @@ use App\Models\JobRequisition;
 use App\Models\Position;
 use App\Models\Structure;
 use App\Models\User;
-use App\Modules\Candidates\Livewire\ApplicationPipeline;
-use App\Modules\Candidates\Livewire\ApplicationStageActionPanel;
 use App\Modules\Candidates\Livewire\AddApplication;
-use App\Modules\Candidates\Livewire\ApplicationDetail;
 use App\Modules\Candidates\Livewire\AddOpening;
 use App\Modules\Candidates\Livewire\AddRequisition;
+use App\Modules\Candidates\Livewire\ApplicationPipeline;
+use App\Modules\Candidates\Livewire\ApplicationStageActionPanel;
+use App\Modules\Candidates\Livewire\CandidateList;
 use App\Modules\Candidates\Livewire\EditCandidate;
 use App\Modules\Candidates\Livewire\RecruitmentAnalytics;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
-use Illuminate\Http\UploadedFile;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class CandidateRecruitmentScreensTest extends TestCase
@@ -174,6 +175,19 @@ class CandidateRecruitmentScreensTest extends TestCase
             'stage_key' => 'applied',
             'action' => 'created',
         ]);
+    }
+
+    public function test_candidate_saved_event_closes_legacy_side_modal(): void
+    {
+        [$user] = $this->seedRecruitmentData();
+
+        Livewire::actingAs($user)
+            ->test(CandidateList::class)
+            ->call('openSideMenu', 'add-candidate')
+            ->assertSet('isSideModalOpen', true)
+            ->dispatch('candidateAdded', message: __('candidates::common.messages.candidate_added'))
+            ->assertSet('isSideModalOpen', false)
+            ->assertSet('showSideMenu', '');
     }
 
     public function test_application_detail_route_and_stage_transition_work(): void
@@ -593,6 +607,26 @@ class CandidateRecruitmentScreensTest extends TestCase
 
     private function seedRecruitmentData(): array
     {
+        Role::findOrCreate('admin', 'web');
+        Permission::findOrCreate('get-notification', 'web');
+
+        DB::table('countries')->insertOrIgnore([
+            'id' => 11,
+            'code' => 'AZ',
+        ]);
+
+        DB::table('education_degrees')->insertOrIgnore([
+            'id' => 100,
+            'title_az' => 'Ali',
+            'title_en' => 'Higher',
+        ]);
+
+        DB::table('work_norms')->insertOrIgnore([
+            'id' => 10,
+            'name_az' => 'Tam ştat',
+            'name_en' => 'Full-time',
+        ]);
+
         $user = User::factory()->create();
         $user->givePermissionTo([
             Permission::findOrCreate('show-candidates', 'web'),
@@ -623,6 +657,9 @@ class CandidateRecruitmentScreensTest extends TestCase
             'structure_id' => $structure->id,
             'status_id' => $status->id,
             'height' => 180,
+            'phone' => '0501234567',
+            'birthdate' => now()->subYears(27)->toDateString(),
+            'gender' => 1,
             'creator_id' => $user->id,
         ]);
 

@@ -57,51 +57,51 @@
                         <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __('learning-library::dashboard.sections.create_asset') }}</x-ui.field-label>
                         <div class="mt-4 grid gap-4 md:grid-cols-2">
                             <x-ui.input-shell :label="__('learning-library::dashboard.fields.asset_title')" :error="$errors->first('assetForm.title')" labelClass="tracking-tight text-zinc-500">
-                                <input wire:model.live="assetForm.title" type="text" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none" />
+                                <x-ui.filter-input wire:model.live="assetForm.title" type="text" />
                             </x-ui.input-shell>
                             <x-ui.input-shell :label="__('learning-library::dashboard.fields.content_type')" :error="$errors->first('assetForm.content_type')" labelClass="tracking-tight text-zinc-500">
-                                <select wire:model.live="assetForm.content_type" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none">
+                                <x-ui.filter-native-select wire:model.live="assetForm.content_type">
                                     @foreach (['video', 'presentation', 'pdf', 'link', 'other'] as $type)
                                         <option value="{{ $type }}">{{ __('personnel::my_hr.learning.content_types.'.$type) }}</option>
                                     @endforeach
-                                </select>
+                                </x-ui.filter-native-select>
                             </x-ui.input-shell>
                             <x-ui.input-shell :label="__('learning-library::dashboard.fields.version')" :error="$errors->first('assetForm.version')" labelClass="tracking-tight text-zinc-500">
-                                <input wire:model.live="assetForm.version" type="text" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none" />
+                                <x-ui.filter-input wire:model.live="assetForm.version" type="text" />
                             </x-ui.input-shell>
                             <x-ui.input-shell :label="__('learning-library::dashboard.fields.visibility')" :error="$errors->first('assetForm.visibility')" labelClass="tracking-tight text-zinc-500">
-                                <select wire:model.live="assetForm.visibility" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none">
+                                <x-ui.filter-native-select wire:model.live="assetForm.visibility">
                                     @foreach (['internal', 'public'] as $visibility)
                                         <option value="{{ $visibility }}">{{ __('personnel::my_hr.learning_admin.visibility.'.$visibility) }}</option>
                                     @endforeach
-                                </select>
+                                </x-ui.filter-native-select>
                             </x-ui.input-shell>
                             <div class="md:col-span-2">
                                 <x-ui.input-shell :label="__('learning-library::dashboard.fields.description')" :error="$errors->first('assetForm.description')" labelClass="tracking-tight text-zinc-500">
-                                    <textarea wire:model.live="assetForm.description" rows="4" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none"></textarea>
+                                    <x-ui.filter-textarea wire:model.live="assetForm.description" rows="4" />
                                 </x-ui.input-shell>
                             </div>
                             <x-ui.file-upload-shell wire:model="assetUpload" :label="__('learning-library::dashboard.fields.file')" :error="$errors->first('assetUpload')" :upload="$assetUpload" />
                             <div class="space-y-4">
                                 <x-ui.input-shell :label="__('learning-library::dashboard.fields.estimated_minutes')" :error="$errors->first('assetForm.estimated_minutes')" labelClass="tracking-tight text-zinc-500">
-                                    <input wire:model.live="assetForm.estimated_minutes" type="number" min="1" max="600" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none" />
+                                    <x-ui.filter-input wire:model.live="assetForm.estimated_minutes" type="number" min="1" max="600" />
                                 </x-ui.input-shell>
                                 <x-ui.input-shell :label="__('learning-library::dashboard.fields.external_url')" :error="$errors->first('assetForm.external_url')" labelClass="tracking-tight text-zinc-500">
-                                    <input wire:model.live="assetForm.external_url" type="url" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none" />
+                                    <x-ui.filter-input wire:model.live="assetForm.external_url" type="url" />
                                 </x-ui.input-shell>
                             </div>
                         </div>
                         <div class="mt-4 flex flex-wrap gap-4">
                             <label class="inline-flex items-center gap-2 text-sm text-zinc-700">
-                                <input wire:model.live="assetForm.is_active" type="checkbox" class="rounded border-zinc-300 text-zinc-900 focus:ring-zinc-300" />
+                                <input wire:model.live="assetForm.is_active" type="checkbox" class="library-target-checkbox" />
                                 {{ __('learning-library::dashboard.fields.is_active') }}
                             </label>
                             <label class="inline-flex items-center gap-2 text-sm text-zinc-700">
-                                <input wire:model.live="assetForm.auto_assign_new_hires" type="checkbox" class="rounded border-zinc-300 text-zinc-900 focus:ring-zinc-300" />
+                                <input wire:model.live="assetForm.auto_assign_new_hires" type="checkbox" class="library-target-checkbox" />
                                 {{ __('learning-library::dashboard.fields.auto_assign_new_hires') }}
                             </label>
                             <label class="inline-flex items-center gap-2 text-sm text-zinc-700">
-                                <input wire:model.live="assetForm.is_required" type="checkbox" class="rounded border-zinc-300 text-zinc-900 focus:ring-zinc-300" />
+                                <input wire:model.live="assetForm.is_required" type="checkbox" class="library-target-checkbox" />
                                 {{ __('learning-library::dashboard.fields.is_required') }}
                             </label>
                         </div>
@@ -166,16 +166,16 @@
 
                     <div class="mt-5 grid gap-4 md:grid-cols-2">
                         <x-ui.input-shell :label="__('learning-library::dashboard.fields.asset')" :error="$errors->first('assignmentForm.asset_id')" labelClass="tracking-tight text-zinc-500">
-                            <select wire:model.live="assignmentForm.asset_id" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none">
+                            <x-ui.filter-native-select wire:model.live="assignmentForm.asset_id">
                                 <option value="">---</option>
                                 @foreach ($payload['assignment_assets'] as $asset)
                                     <option value="{{ $asset['id'] }}">{{ $asset['title'] }} · {{ $asset['type'] }}</option>
                                 @endforeach
-                            </select>
+                            </x-ui.filter-native-select>
                         </x-ui.input-shell>
 
                         <x-ui.input-shell :label="__('learning-library::dashboard.fields.due_at')" :error="$errors->first('assignmentForm.due_at')" labelClass="tracking-tight text-zinc-500">
-                            <input wire:model.live="assignmentForm.due_at" type="date" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none" />
+                            <x-ui.filter-input wire:model.live="assignmentForm.due_at" type="date" />
                         </x-ui.input-shell>
                     </div>
 
@@ -245,12 +245,12 @@
 
                                 <div class="flex flex-wrap gap-2">
                                     @if ($asset['content_url'])
-                                        <a href="{{ $asset['content_url'] }}" target="_blank" class="inline-flex items-center justify-center rounded-2xl border border-zinc-200 bg-white px-4 py-2 text-sm font-semibold tracking-tight text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50">{{ __('learning-library::dashboard.actions.open_asset') }}</a>
+                                        <a href="{{ $asset['content_url'] }}" target="_blank" class="inline-flex items-center justify-center rounded-2xl bg-[#f5f5f7] px-4 py-2 text-sm font-semibold tracking-tight text-zinc-800 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] transition hover:bg-zinc-950 hover:text-white">{{ __('learning-library::dashboard.actions.open_asset') }}</a>
                                     @endif
                                     @can('manage-employee-content-library')
-                                        <button type="button" wire:click="prepareNextAssetVersion({{ $asset['id'] }})" class="inline-flex items-center justify-center rounded-2xl border border-zinc-200 bg-white px-4 py-2 text-sm font-semibold tracking-tight text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50">{{ __('learning-library::dashboard.actions.new_version') }}</button>
-                                        <button type="button" wire:click="toggleAssetActive({{ $asset['id'] }})" class="inline-flex items-center justify-center rounded-2xl border border-zinc-200 bg-white px-4 py-2 text-sm font-semibold tracking-tight text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50">{{ $asset['toggle_active_label'] }}</button>
-                                        <button type="button" wire:click="toggleAssetArchived({{ $asset['id'] }})" class="inline-flex items-center justify-center rounded-2xl border border-zinc-200 bg-white px-4 py-2 text-sm font-semibold tracking-tight text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50">{{ $asset['is_archived'] ? __('learning-library::dashboard.actions.restore_asset') : __('learning-library::dashboard.actions.archive_asset') }}</button>
+                                        <button type="button" wire:click="prepareNextAssetVersion({{ $asset['id'] }})" class="inline-flex items-center justify-center rounded-2xl bg-[#f5f5f7] px-4 py-2 text-sm font-semibold tracking-tight text-zinc-800 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] transition hover:bg-zinc-950 hover:text-white">{{ __('learning-library::dashboard.actions.new_version') }}</button>
+                                        <button type="button" wire:click="toggleAssetActive({{ $asset['id'] }})" class="inline-flex items-center justify-center rounded-2xl bg-[#f5f5f7] px-4 py-2 text-sm font-semibold tracking-tight text-zinc-800 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] transition hover:bg-zinc-950 hover:text-white">{{ $asset['toggle_active_label'] }}</button>
+                                        <button type="button" wire:click="toggleAssetArchived({{ $asset['id'] }})" class="inline-flex items-center justify-center rounded-2xl bg-[#f5f5f7] px-4 py-2 text-sm font-semibold tracking-tight text-zinc-800 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] transition hover:bg-zinc-950 hover:text-white">{{ $asset['is_archived'] ? __('learning-library::dashboard.actions.restore_asset') : __('learning-library::dashboard.actions.archive_asset') }}</button>
                                     @endcan
                                 </div>
                             </div>

@@ -230,7 +230,11 @@ class CandidateApplicationStageService
                 'note' => $context['note'] ?? null,
             ]);
 
-            return $application->fresh(['opening', 'stageEvents', 'assessments', 'documentChecks']);
+            if (in_array($toStage, ['hired', 'appointed'], true)) {
+                app(CandidateHireConversionService::class)->convert($application, $context);
+            }
+
+            return $application->fresh(['opening', 'personnel', 'stageEvents', 'assessments', 'documentChecks']);
         });
     }
 
@@ -242,7 +246,7 @@ class CandidateApplicationStageService
      * @return array<string, mixed>
      */
     protected function buildAuditPayload(
-        string|null $fromStage,
+        ?string $fromStage,
         string $toStage,
         array $assessmentItems,
         array $documentItems,

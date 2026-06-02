@@ -106,6 +106,10 @@ class PermissionDescriptionCatalog
             'assign-employee-content' => 'Öyrənmə materiallarını əməkdaşlara təyin etmək, son tarix vermək və assignment axınını idarə etmək icazəsi verir.',
             'view-onboarding-library' => 'Onboarding kitabxanası modulunu görmək, şablonları və assignment statistikasını mərkəzi paneldən izləmək icazəsi verir.',
             'view-learning-library' => 'Öyrənmə kitabxanası modulunu görmək, material kitabxanasını və assignment statistikasını mərkəzi paneldən izləmək icazəsi verir.',
+            'show-audit-logs' => 'Audit jurnalı modulunu görmək, sistem hadisələri, istifadəçi fəaliyyətləri və log detallarını izləmək icazəsi verir.',
+            'show-document-compliance' => 'Sənəd compliance modulunu görmək, vaxtı bitmiş və yaxın müddətdə bitəcək əməkdaş sənədlərini izləmək icazəsi verir.',
+            'show-employee-lifecycle' => 'Əməkdaş lifecycle modulunu görmək, onboarding, probation, daxili yerdəyişmə və offboarding proseslərini izləmək icazəsi verir.',
+            'manage-employee-lifecycle' => 'Lifecycle plan şablonlarını yaratmaq, əməkdaş üçün lifecycle proseslərini başlatmaq və task axınını idarə etmək icazəsi verir.',
         ];
     }
 

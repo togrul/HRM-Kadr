@@ -20,7 +20,7 @@
                         }
                     </x-slot>
                 </x-pikaday-input>
-                @error('form.date') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                @error('form.date') <x-validation>{{ $message }}</x-validation> @enderror
             </div>
 
             <div>
@@ -30,7 +30,7 @@
                     <option value="weekend">{{ __('attendance::calendar_regimes.options.weekend') }}</option>
                     <option value="holiday">{{ __('attendance::calendar_regimes.options.holiday') }}</option>
                 </select>
-                @error('form.day_type') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                @error('form.day_type') <x-validation>{{ $message }}</x-validation> @enderror
             </div>
 
             <div>
@@ -39,7 +39,7 @@
                     <option value="global">{{ __('attendance::calendar_regimes.options.global') }}</option>
                     <option value="structure">{{ __('attendance::calendar_regimes.options.structure') }}</option>
                 </select>
-                @error('form.scope_type') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                @error('form.scope_type') <x-validation>{{ $message }}</x-validation> @enderror
             </div>
 
             @if(($form['scope_type'] ?? 'global') === 'structure')
@@ -51,14 +51,14 @@
                             <option value="{{ $structure->id }}">{{ $structure->name }}</option>
                         @endforeach
                     </select>
-                    @error('form.scope_id') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                    @error('form.scope_id') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
             @endif
 
             <div>
                 <x-label for="attendance-calendar-name">{{ __('attendance::calendar_regimes.fields.name') }}</x-label>
                 <x-livewire-input id="attendance-calendar-name" mode="gray" name="form.name" wire:model.live="form.name" />
-                @error('form.name') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                @error('form.name') <x-validation>{{ $message }}</x-validation> @enderror
             </div>
 
             <div class="flex items-end">

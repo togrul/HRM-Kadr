@@ -1,3 +1,14 @@
+FROM node:20-alpine AS frontend
+
+WORKDIR /app
+
+COPY package*.json vite.config.js postcss.config.js tailwind.config.js ./
+COPY resources ./resources
+COPY app ./app
+COPY public ./public
+
+RUN npm ci && npm run build
+
 FROM unit:1.34.1-php8.3
 
 RUN apt update && apt install -y \
@@ -30,6 +41,9 @@ RUN mkdir -p storage/framework/views \
 RUN chown -R unit:unit /var/www/html/storage bootstrap/cache && chmod -R 775 /var/www/html/storage
 
 COPY . .
+
+COPY --from=frontend /app/public/build /var/www/html/public/build
+
 RUN mkdir -p /var/www/html/storage/framework/cache/data \
  && chown -R unit:unit /var/www/html/storage \
  && chmod -R ug+rwX /var/www/html/storage

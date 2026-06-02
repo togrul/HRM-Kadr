@@ -81,7 +81,7 @@
                         </h3>
                     </div>
 
-                    <button type="button" wire:click="cancelCreateForm" class="rounded-2xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-semibold tracking-tight text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50">
+                    <button type="button" wire:click="cancelCreateForm" class="rounded-2xl bg-[#f5f5f7] px-4 py-2.5 text-sm font-semibold tracking-tight text-zinc-800 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] transition hover:bg-zinc-950 hover:text-white">
                         {{ __('personnel::my_hr.requests.actions.cancel_form') }}
                     </button>
                 </div>
@@ -90,7 +90,7 @@
                     <div class="mt-5 space-y-5">
                         <div class="grid gap-3 lg:grid-cols-2 2xl:grid-cols-4">
                             <x-ui.input-shell :label="__('personnel::my_hr.requests.fields.leave_type')" :error="$errors->first('leaveForm.leave_type_id')" labelClass="tracking-tight text-zinc-500">
-                                <select wire:model.live="leaveForm.leave_type_id" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none">
+                                <select wire:model.live="leaveForm.leave_type_id" class="w-full rounded-2xl border-0 bg-[#f5f5f7] px-4 py-3 text-sm font-semibold text-zinc-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] outline-none ring-0 transition focus:bg-white focus:outline-none focus:ring-0">
                                     <option value="">{{ __('personnel::my_hr.requests.filters.all') }}</option>
                                     @foreach ($this->leaveTypeOptions as $option)
                                         <option value="{{ $option['id'] }}">{{ $option['label'] }}</option>
@@ -98,22 +98,22 @@
                                 </select>
                             </x-ui.input-shell>
                             <x-ui.input-shell :label="__('personnel::my_hr.requests.fields.duration_unit')" :error="$errors->first('leaveForm.duration_unit')" labelClass="tracking-tight text-zinc-500">
-                                <select wire:model.live="leaveForm.duration_unit" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none">
+                                <select wire:model.live="leaveForm.duration_unit" class="w-full rounded-2xl border-0 bg-[#f5f5f7] px-4 py-3 text-sm font-semibold text-zinc-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] outline-none ring-0 transition focus:bg-white focus:outline-none focus:ring-0">
                                     @foreach (['day', 'half_day', 'hour'] as $unit)
                                         <option value="{{ $unit }}">{{ __('personnel::my_hr.requests.duration_units.'.$unit) }}</option>
                                     @endforeach
                                 </select>
                             </x-ui.input-shell>
                             <x-ui.input-shell :label="__('personnel::my_hr.requests.fields.start_date')" :error="$errors->first('leaveForm.starts_at')" labelClass="tracking-tight text-zinc-500">
-                                <input wire:model.live="leaveForm.starts_at" type="date" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none" />
+                                <input wire:model.live="leaveForm.starts_at" type="date" class="w-full rounded-2xl border-0 bg-[#f5f5f7] px-4 py-3 text-sm font-semibold text-zinc-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] outline-none ring-0 transition focus:bg-white focus:outline-none focus:ring-0" />
                             </x-ui.input-shell>
                             @if (($leaveForm['duration_unit'] ?? 'day') === 'day')
                                 <x-ui.input-shell :label="__('personnel::my_hr.requests.fields.end_date')" :error="$errors->first('leaveForm.ends_at')" labelClass="tracking-tight text-zinc-500">
-                                    <input wire:model.live="leaveForm.ends_at" type="date" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none" />
+                                    <input wire:model.live="leaveForm.ends_at" type="date" class="w-full rounded-2xl border-0 bg-[#f5f5f7] px-4 py-3 text-sm font-semibold text-zinc-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] outline-none ring-0 transition focus:bg-white focus:outline-none focus:ring-0" />
                                 </x-ui.input-shell>
                             @elseif (($leaveForm['duration_unit'] ?? 'day') === 'half_day')
                                 <x-ui.input-shell :label="__('personnel::my_hr.requests.fields.partial_day_part')" :error="$errors->first('leaveForm.partial_day_part')" labelClass="tracking-tight text-zinc-500">
-                                    <select wire:model.live="leaveForm.partial_day_part" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none">
+                                    <select wire:model.live="leaveForm.partial_day_part" class="w-full rounded-2xl border-0 bg-[#f5f5f7] px-4 py-3 text-sm font-semibold text-zinc-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] outline-none ring-0 transition focus:bg-white focus:outline-none focus:ring-0">
                                         <option value="">{{ __('personnel::my_hr.requests.filters.all') }}</option>
                                         <option value="first_half">{{ __('personnel::my_hr.requests.partial_day_parts.first_half') }}</option>
                                         <option value="second_half">{{ __('personnel::my_hr.requests.partial_day_parts.second_half') }}</option>
@@ -122,21 +122,21 @@
                             @else
                                 <div class="grid gap-3 sm:grid-cols-2 lg:col-span-2">
                                     <x-ui.input-shell :label="__('personnel::my_hr.requests.fields.start_time')" :error="$errors->first('leaveForm.starts_time')" labelClass="tracking-tight text-zinc-500">
-                                        <input wire:model.live="leaveForm.starts_time" type="time" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none" />
+                                        <input wire:model.live="leaveForm.starts_time" type="time" class="w-full rounded-2xl border-0 bg-[#f5f5f7] px-4 py-3 text-sm font-semibold text-zinc-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] outline-none ring-0 transition focus:bg-white focus:outline-none focus:ring-0" />
                                     </x-ui.input-shell>
                                     <x-ui.input-shell :label="__('personnel::my_hr.requests.fields.end_time')" :error="$errors->first('leaveForm.ends_time')" labelClass="tracking-tight text-zinc-500">
-                                        <input wire:model.live="leaveForm.ends_time" type="time" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none" />
+                                        <input wire:model.live="leaveForm.ends_time" type="time" class="w-full rounded-2xl border-0 bg-[#f5f5f7] px-4 py-3 text-sm font-semibold text-zinc-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] outline-none ring-0 transition focus:bg-white focus:outline-none focus:ring-0" />
                                     </x-ui.input-shell>
                                 </div>
                             @endif
                         </div>
 
                         <x-ui.input-shell :label="__('personnel::my_hr.requests.fields.reason')" :error="$errors->first('leaveForm.reason')" labelClass="tracking-tight text-zinc-500">
-                            <textarea wire:model.live="leaveForm.reason" rows="4" class="w-full rounded-3xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none"></textarea>
+                            <textarea wire:model.live="leaveForm.reason" rows="4" class="w-full rounded-2xl border-0 bg-[#f5f5f7] px-4 py-3 text-sm font-semibold leading-6 text-zinc-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] outline-none ring-0 transition focus:bg-white focus:outline-none focus:ring-0"></textarea>
                         </x-ui.input-shell>
 
                         <x-ui.input-shell :label="__('personnel::my_hr.requests.fields.supporting_document')" :error="$errors->first('leaveDocument')" labelClass="tracking-tight text-zinc-500">
-                            <div class="rounded-[24px] border border-dashed border-zinc-300 bg-white px-4 py-4">
+                            <div class="rounded-[24px] bg-[#f5f5f7] px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.75),0_8px_18px_rgba(0,0,0,0.035)]">
                                 <input wire:model.live="leaveDocument" type="file" class="block w-full text-sm text-zinc-700 file:mr-4 file:rounded-2xl file:border-0 file:bg-zinc-950 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-zinc-800" />
                             </div>
                         </x-ui.input-shell>
@@ -151,13 +151,13 @@
                     <div class="mt-5 space-y-5">
                         <div class="grid gap-3 lg:grid-cols-3">
                             <x-ui.input-shell :label="__('personnel::my_hr.requests.fields.destination')" :error="$errors->first('vacationForm.vacation_places')" labelClass="tracking-tight text-zinc-500">
-                                <input wire:model.live="vacationForm.vacation_places" type="text" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none" />
+                                <input wire:model.live="vacationForm.vacation_places" type="text" class="w-full rounded-2xl border-0 bg-[#f5f5f7] px-4 py-3 text-sm font-semibold text-zinc-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] outline-none ring-0 transition focus:bg-white focus:outline-none focus:ring-0" />
                             </x-ui.input-shell>
                             <x-ui.input-shell :label="__('personnel::my_hr.requests.fields.start_date')" :error="$errors->first('vacationForm.start_date')" labelClass="tracking-tight text-zinc-500">
-                                <input wire:model.live="vacationForm.start_date" type="date" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none" />
+                                <input wire:model.live="vacationForm.start_date" type="date" class="w-full rounded-2xl border-0 bg-[#f5f5f7] px-4 py-3 text-sm font-semibold text-zinc-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] outline-none ring-0 transition focus:bg-white focus:outline-none focus:ring-0" />
                             </x-ui.input-shell>
                             <x-ui.input-shell :label="__('personnel::my_hr.requests.fields.end_date')" :error="$errors->first('vacationForm.end_date')" labelClass="tracking-tight text-zinc-500">
-                                <input wire:model.live="vacationForm.end_date" type="date" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none" />
+                                <input wire:model.live="vacationForm.end_date" type="date" class="w-full rounded-2xl border-0 bg-[#f5f5f7] px-4 py-3 text-sm font-semibold text-zinc-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] outline-none ring-0 transition focus:bg-white focus:outline-none focus:ring-0" />
                             </x-ui.input-shell>
                         </div>
 
@@ -171,18 +171,18 @@
                     <div class="mt-5 space-y-5">
                         <div class="grid gap-3 lg:grid-cols-3">
                             <x-ui.input-shell :label="__('personnel::my_hr.requests.fields.location')" :error="$errors->first('businessTripForm.location')" labelClass="tracking-tight text-zinc-500">
-                                <input wire:model.live="businessTripForm.location" type="text" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none" />
+                                <input wire:model.live="businessTripForm.location" type="text" class="w-full rounded-2xl border-0 bg-[#f5f5f7] px-4 py-3 text-sm font-semibold text-zinc-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] outline-none ring-0 transition focus:bg-white focus:outline-none focus:ring-0" />
                             </x-ui.input-shell>
                             <x-ui.input-shell :label="__('personnel::my_hr.requests.fields.start_date')" :error="$errors->first('businessTripForm.start_date')" labelClass="tracking-tight text-zinc-500">
-                                <input wire:model.live="businessTripForm.start_date" type="date" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none" />
+                                <input wire:model.live="businessTripForm.start_date" type="date" class="w-full rounded-2xl border-0 bg-[#f5f5f7] px-4 py-3 text-sm font-semibold text-zinc-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] outline-none ring-0 transition focus:bg-white focus:outline-none focus:ring-0" />
                             </x-ui.input-shell>
                             <x-ui.input-shell :label="__('personnel::my_hr.requests.fields.end_date')" :error="$errors->first('businessTripForm.end_date')" labelClass="tracking-tight text-zinc-500">
-                                <input wire:model.live="businessTripForm.end_date" type="date" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none" />
+                                <input wire:model.live="businessTripForm.end_date" type="date" class="w-full rounded-2xl border-0 bg-[#f5f5f7] px-4 py-3 text-sm font-semibold text-zinc-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] outline-none ring-0 transition focus:bg-white focus:outline-none focus:ring-0" />
                             </x-ui.input-shell>
                         </div>
 
                         <x-ui.input-shell :label="__('personnel::my_hr.requests.fields.description')" :error="$errors->first('businessTripForm.description')" labelClass="tracking-tight text-zinc-500">
-                            <textarea wire:model.live="businessTripForm.description" rows="4" class="w-full rounded-3xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none"></textarea>
+                            <textarea wire:model.live="businessTripForm.description" rows="4" class="w-full rounded-2xl border-0 bg-[#f5f5f7] px-4 py-3 text-sm font-semibold leading-6 text-zinc-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] outline-none ring-0 transition focus:bg-white focus:outline-none focus:ring-0"></textarea>
                         </x-ui.input-shell>
 
                         <div class="flex justify-end">
@@ -199,30 +199,30 @@
     <div class="rounded-[28px] border border-zinc-200 bg-zinc-50/60 p-5 shadow-sm">
         <div class="grid gap-1 lg:grid-cols-2 2xl:grid-cols-4">
             <x-ui.input-shell :label="__('personnel::my_hr.requests.fields.search')" labelClass="tracking-tight text-zinc-500">
-                <input wire:model.live.debounce.300ms="search" type="text" placeholder="{{ __('personnel::my_hr.requests.messages.search_placeholder') }}" class="w-full rounded-2xl border border-zinc-200 bg-white px-2 py-2 text-sm text-zinc-800 placeholder:text-zinc-400 focus:border-zinc-300 focus:outline-none" />
+                <x-ui.filter-input wire:model.live.debounce.300ms="search" type="text" placeholder="{{ __('personnel::my_hr.requests.messages.search_placeholder') }}" />
             </x-ui.input-shell>
             <x-ui.input-shell :label="__('personnel::my_hr.requests.fields.type')" labelClass="tracking-tight text-zinc-500">
-                <select wire:model.live="typeFilter" class="w-full rounded-2xl border border-zinc-200 bg-white px-2 py-2 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none">
+                <x-ui.filter-native-select wire:model.live="typeFilter">
                     <option value="all">{{ __('personnel::my_hr.requests.filters.all') }}</option>
                     <option value="leave">{{ __('personnel::my_hr.requests.types.leave') }}</option>
                     <option value="vacation">{{ __('personnel::my_hr.requests.types.vacation') }}</option>
                     <option value="business_trip">{{ __('personnel::my_hr.requests.types.business_trip') }}</option>
-                </select>
+                </x-ui.filter-native-select>
             </x-ui.input-shell>
             <x-ui.input-shell :label="__('personnel::my_hr.requests.fields.status')" labelClass="tracking-tight text-zinc-500">
-                <select wire:model.live="statusFilter" class="w-full rounded-2xl border border-zinc-200 bg-white px-2 py-2 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none">
+                <x-ui.filter-native-select wire:model.live="statusFilter">
                     <option value="all">{{ __('personnel::my_hr.requests.filters.all') }}</option>
                     @foreach (['pending', 'approved', 'upcoming', 'active', 'completed', 'cancelled', 'deleted'] as $status)
                         <option value="{{ $status }}">{{ __('personnel::my_hr.requests.status.'.$status) }}</option>
                     @endforeach
-                </select>
+                </x-ui.filter-native-select>
             </x-ui.input-shell>
             <div class="grid gap-1 sm:grid-cols-2 2xl:grid-cols-2">
                 <x-ui.input-shell :label="__('personnel::my_hr.requests.fields.date_from')" labelClass="tracking-tight text-zinc-500">
-                    <input wire:model.live="dateFrom" type="date" class="w-full rounded-2xl border border-zinc-200 bg-white px-2 py-2 text-[13px] text-zinc-800 focus:border-zinc-300 focus:outline-none" />
+                    <x-ui.filter-input wire:model.live="dateFrom" type="date" />
                 </x-ui.input-shell>
                 <x-ui.input-shell :label="__('personnel::my_hr.requests.fields.date_to')" labelClass="tracking-tight text-zinc-500">
-                    <input wire:model.live="dateTo" type="date" class="w-full rounded-2xl border border-zinc-200 bg-white px-2 py-2 text-[13px] text-zinc-800 focus:border-zinc-300 focus:outline-none" />
+                    <x-ui.filter-input wire:model.live="dateTo" type="date" />
                 </x-ui.input-shell>
             </div>
         </div>
@@ -269,17 +269,14 @@
 
                     @if (($row['can_request_correction'] ?? false) === true)
                         <div class="mt-4 border-t border-zinc-200 pt-4">
-                            <button type="button" wire:click="openCorrectionForm('{{ $row['request_type'] }}', {{ $row['record_id'] }})" class="inline-flex items-center justify-center rounded-2xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-semibold tracking-tight text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50">
+                            <button type="button" wire:click="openCorrectionForm('{{ $row['request_type'] }}', {{ $row['record_id'] }})" class="inline-flex items-center justify-center rounded-2xl bg-[#f5f5f7] px-4 py-2.5 text-sm font-semibold tracking-tight text-zinc-800 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] transition hover:bg-zinc-950 hover:text-white">
                                 {{ __('personnel::my_hr.requests.actions.request_correction') }}
                             </button>
                         </div>
                     @endif
                 </div>
             @empty
-                <div class="rounded-[28px] border border-dashed border-zinc-300 bg-white px-6 py-12 text-center shadow-sm">
-                    <h3 class="text-xl font-semibold tracking-tight text-zinc-950">{{ __('personnel::my_hr.requests.empty.title') }}</h3>
-                    <p class="mx-auto mt-3 max-w-2xl text-sm leading-6 text-zinc-500">{{ __('personnel::my_hr.requests.empty.body') }}</p>
-                </div>
+                <x-ui.empty-state icon="icons.comment-icon" :title="__('personnel::my_hr.requests.empty.title')" :message="__('personnel::my_hr.requests.empty.body')" class="py-12" />
             @endforelse
         </div>
     </div>
@@ -292,7 +289,7 @@
                     <h3 class="text-xl font-semibold tracking-tight text-zinc-950">{{ __('personnel::my_hr.requests.actions.request_correction') }}</h3>
                 </div>
 
-                <button type="button" wire:click="cancelCorrectionForm" class="rounded-2xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-semibold tracking-tight text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50">
+                <button type="button" wire:click="cancelCorrectionForm" class="rounded-2xl bg-[#f5f5f7] px-4 py-2.5 text-sm font-semibold tracking-tight text-zinc-800 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] transition hover:bg-zinc-950 hover:text-white">
                     {{ __('personnel::my_hr.requests.actions.cancel_form') }}
                 </button>
             </div>
@@ -301,44 +298,44 @@
                 @if ($correctionRequestType === 'leave')
                     <div class="grid gap-3 lg:grid-cols-2">
                         <x-ui.input-shell :label="__('personnel::my_hr.requests.fields.start_date')" :error="$errors->first('correctionForm.starts_at')" labelClass="tracking-tight text-zinc-500">
-                            <input wire:model.live="correctionForm.starts_at" type="date" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none" />
+                            <input wire:model.live="correctionForm.starts_at" type="date" class="w-full rounded-2xl border-0 bg-[#f5f5f7] px-4 py-3 text-sm font-semibold text-zinc-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] outline-none ring-0 transition focus:bg-white focus:outline-none focus:ring-0" />
                         </x-ui.input-shell>
                         <x-ui.input-shell :label="__('personnel::my_hr.requests.fields.end_date')" :error="$errors->first('correctionForm.ends_at')" labelClass="tracking-tight text-zinc-500">
-                            <input wire:model.live="correctionForm.ends_at" type="date" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none" />
+                            <input wire:model.live="correctionForm.ends_at" type="date" class="w-full rounded-2xl border-0 bg-[#f5f5f7] px-4 py-3 text-sm font-semibold text-zinc-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] outline-none ring-0 transition focus:bg-white focus:outline-none focus:ring-0" />
                         </x-ui.input-shell>
                     </div>
                 @elseif ($correctionRequestType === 'vacation')
                     <div class="grid gap-3 lg:grid-cols-3">
                         <x-ui.input-shell :label="__('personnel::my_hr.requests.fields.destination')" :error="$errors->first('correctionForm.vacation_places')" labelClass="tracking-tight text-zinc-500">
-                            <input wire:model.live="correctionForm.vacation_places" type="text" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none" />
+                            <input wire:model.live="correctionForm.vacation_places" type="text" class="w-full rounded-2xl border-0 bg-[#f5f5f7] px-4 py-3 text-sm font-semibold text-zinc-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] outline-none ring-0 transition focus:bg-white focus:outline-none focus:ring-0" />
                         </x-ui.input-shell>
                         <x-ui.input-shell :label="__('personnel::my_hr.requests.fields.start_date')" :error="$errors->first('correctionForm.start_date')" labelClass="tracking-tight text-zinc-500">
-                            <input wire:model.live="correctionForm.start_date" type="date" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none" />
+                            <input wire:model.live="correctionForm.start_date" type="date" class="w-full rounded-2xl border-0 bg-[#f5f5f7] px-4 py-3 text-sm font-semibold text-zinc-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] outline-none ring-0 transition focus:bg-white focus:outline-none focus:ring-0" />
                         </x-ui.input-shell>
                         <x-ui.input-shell :label="__('personnel::my_hr.requests.fields.end_date')" :error="$errors->first('correctionForm.end_date')" labelClass="tracking-tight text-zinc-500">
-                            <input wire:model.live="correctionForm.end_date" type="date" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none" />
+                            <input wire:model.live="correctionForm.end_date" type="date" class="w-full rounded-2xl border-0 bg-[#f5f5f7] px-4 py-3 text-sm font-semibold text-zinc-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] outline-none ring-0 transition focus:bg-white focus:outline-none focus:ring-0" />
                         </x-ui.input-shell>
                     </div>
                 @else
                     <div class="grid gap-3 lg:grid-cols-3">
                         <x-ui.input-shell :label="__('personnel::my_hr.requests.fields.location')" :error="$errors->first('correctionForm.location')" labelClass="tracking-tight text-zinc-500">
-                            <input wire:model.live="correctionForm.location" type="text" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none" />
+                            <input wire:model.live="correctionForm.location" type="text" class="w-full rounded-2xl border-0 bg-[#f5f5f7] px-4 py-3 text-sm font-semibold text-zinc-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] outline-none ring-0 transition focus:bg-white focus:outline-none focus:ring-0" />
                         </x-ui.input-shell>
                         <x-ui.input-shell :label="__('personnel::my_hr.requests.fields.start_date')" :error="$errors->first('correctionForm.start_date')" labelClass="tracking-tight text-zinc-500">
-                            <input wire:model.live="correctionForm.start_date" type="date" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none" />
+                            <input wire:model.live="correctionForm.start_date" type="date" class="w-full rounded-2xl border-0 bg-[#f5f5f7] px-4 py-3 text-sm font-semibold text-zinc-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] outline-none ring-0 transition focus:bg-white focus:outline-none focus:ring-0" />
                         </x-ui.input-shell>
                         <x-ui.input-shell :label="__('personnel::my_hr.requests.fields.end_date')" :error="$errors->first('correctionForm.end_date')" labelClass="tracking-tight text-zinc-500">
-                            <input wire:model.live="correctionForm.end_date" type="date" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none" />
+                            <input wire:model.live="correctionForm.end_date" type="date" class="w-full rounded-2xl border-0 bg-[#f5f5f7] px-4 py-3 text-sm font-semibold text-zinc-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] outline-none ring-0 transition focus:bg-white focus:outline-none focus:ring-0" />
                         </x-ui.input-shell>
                     </div>
 
                     <x-ui.input-shell :label="__('personnel::my_hr.requests.fields.description')" :error="$errors->first('correctionForm.description')" labelClass="tracking-tight text-zinc-500">
-                        <textarea wire:model.live="correctionForm.description" rows="3" class="w-full rounded-3xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none"></textarea>
+                        <textarea wire:model.live="correctionForm.description" rows="3" class="w-full rounded-2xl border-0 bg-[#f5f5f7] px-4 py-3 text-sm font-semibold leading-6 text-zinc-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] outline-none ring-0 transition focus:bg-white focus:outline-none focus:ring-0"></textarea>
                     </x-ui.input-shell>
                 @endif
 
                 <x-ui.input-shell :label="__('personnel::my_hr.requests.fields.reason')" :error="$errors->first('correctionForm.reason')" labelClass="tracking-tight text-zinc-500">
-                    <textarea wire:model.live="correctionForm.reason" rows="4" class="w-full rounded-3xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none"></textarea>
+                    <textarea wire:model.live="correctionForm.reason" rows="4" class="w-full rounded-2xl border-0 bg-[#f5f5f7] px-4 py-3 text-sm font-semibold leading-6 text-zinc-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] outline-none ring-0 transition focus:bg-white focus:outline-none focus:ring-0"></textarea>
                 </x-ui.input-shell>
 
                 <div class="flex justify-end">

@@ -61,7 +61,7 @@
                     <div class="mt-4 space-y-2">
                         <label class="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.fields.scheduled_at') }}</label>
                         <input type="datetime-local" wire:model.defer="form.scheduled_at" class="w-full rounded-2xl border border-zinc-200 bg-zinc-50/70 px-4 py-3 text-sm text-zinc-800">
-                        @error('form.scheduled_at') <p class="text-xs text-rose-600">{{ $message }}</p> @enderror
+                        @error('form.scheduled_at') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                 @endif
             </div>
@@ -70,20 +70,20 @@
                 <div class="space-y-2 md:col-span-2">
                     <label class="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.fields.title') }}</label>
                     <input type="text" wire:model.defer="form.title" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
-                    @error('form.title') <p class="text-xs text-rose-600">{{ $message }}</p> @enderror
+                    @error('form.title') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
 
                 @if ($form['category'] === 'holiday')
                     <div class="space-y-2">
                         <label class="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.fields.holiday_name') }}</label>
                         <input type="text" wire:model.defer="form.holiday_name" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
-                        @error('form.holiday_name') <p class="text-xs text-rose-600">{{ $message }}</p> @enderror
+                        @error('form.holiday_name') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
 
                     <div class="space-y-2">
                         <label class="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.fields.holiday_date') }}</label>
                         <input type="date" wire:model.defer="form.holiday_date" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
-                        @error('form.holiday_date') <p class="text-xs text-rose-600">{{ $message }}</p> @enderror
+                        @error('form.holiday_date') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
 
                     <div class="space-y-2">
@@ -94,7 +94,7 @@
                     <div class="space-y-2">
                         <label class="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.fields.scope') }}</label>
                         <input type="text" wire:model.defer="form.scope" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
-                        @error('form.scope') <p class="text-xs text-rose-600">{{ $message }}</p> @enderror
+                        @error('form.scope') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
 
                     <div class="space-y-2 md:col-span-2">
@@ -106,7 +106,7 @@
                 <div class="space-y-2 md:col-span-2">
                     <label class="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.fields.body') }}</label>
                     <textarea wire:model.defer="form.body" rows="{{ $form['category'] === 'holiday' ? 4 : 7 }}" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm leading-6 text-zinc-800"></textarea>
-                    @error('form.body') <p class="text-xs text-rose-600">{{ $message }}</p> @enderror
+                    @error('form.body') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
             </div>
         </div>
@@ -123,7 +123,7 @@
                         :empty-label="__('notifications::common.helpers.audience_targets_empty')"
                         :selected-label="__('notifications::common.labels.selected')"
                     />
-                    @error('form.audience_targets') <p class="text-xs text-rose-600">{{ $message }}</p> @enderror
+                    @error('form.audience_targets') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
 
                 @if ($needsStructurePicker)
@@ -137,7 +137,7 @@
                             search-placeholder="{{ __('notifications::common.helpers.search_structure') }}"
                             help="{{ __('notifications::common.helpers.audience_targets_structure_hint') }}"
                         />
-                        @error('form.structure_ids') <p class="text-xs text-rose-600">{{ $message }}</p> @enderror
+                        @error('form.structure_ids') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                 @endif
 
@@ -152,7 +152,7 @@
                             search-placeholder="{{ __('notifications::common.helpers.search_user') }}"
                             help="{{ __('notifications::common.helpers.audience_targets_user_hint') }}"
                         />
-                        @error('form.user_ids') <p class="text-xs text-rose-600">{{ $message }}</p> @enderror
+                        @error('form.user_ids') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                 @endif
 

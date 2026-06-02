@@ -19,6 +19,7 @@ return [
         'attendance_shifts' => 'Davamiyyət - növbələr',
         'business_trips' => 'Ezamiyyətlər',
         'candidates' => 'Namizədlər',
+        'employee_lifecycle' => 'Əməkdaş həyat dövrü',
         'general' => 'Ümumi',
         'leaves' => 'İcazələr',
         'notification' => 'Bildirişlər',

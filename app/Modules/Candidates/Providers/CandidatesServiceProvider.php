@@ -2,6 +2,7 @@
 
 namespace App\Modules\Candidates\Providers;
 
+use App\Modules\Candidates\Console\Commands\CandidateAtsQueryBudgetCommand;
 use App\Modules\Candidates\Console\Commands\CandidateListQueryBudgetCommand;
 use App\Modules\Candidates\Console\Commands\CandidateListRenderBenchmarkCommand;
 use App\Providers\Concerns\RegistersLivewireAliases;
@@ -16,6 +17,7 @@ class CandidatesServiceProvider extends ServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->commands([
+                CandidateAtsQueryBudgetCommand::class,
                 CandidateListQueryBudgetCommand::class,
                 CandidateListRenderBenchmarkCommand::class,
             ]);
@@ -70,6 +72,7 @@ class CandidatesServiceProvider extends ServiceProvider
             'add-application' => \App\Modules\Candidates\Livewire\AddApplication::class,
             'application-pipeline' => \App\Modules\Candidates\Livewire\ApplicationPipeline::class,
             'application-detail' => \App\Modules\Candidates\Livewire\ApplicationDetail::class,
+            'application-ats-panel' => \App\Modules\Candidates\Livewire\ApplicationAtsPanel::class,
             'application-stage-action-panel' => \App\Modules\Candidates\Livewire\ApplicationStageActionPanel::class,
             'application-stage-timeline-panel' => \App\Modules\Candidates\Livewire\ApplicationStageTimelinePanel::class,
             'application-artifact-timeline-panel' => \App\Modules\Candidates\Livewire\ApplicationArtifactTimelinePanel::class,

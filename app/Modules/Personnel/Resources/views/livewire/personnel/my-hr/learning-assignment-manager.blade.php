@@ -45,7 +45,7 @@
                     <h3 class="text-xl font-semibold tracking-tight text-zinc-950">{{ __('personnel::my_hr.learning_admin.titles.assign_asset') }}</h3>
                     <p class="max-w-2xl text-sm leading-6 text-zinc-500">{{ __('personnel::my_hr.learning_admin.messages.assignment_help') }}</p>
                 </div>
-                <a href="{{ route('learning-library') }}" class="inline-flex items-center justify-center rounded-2xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-semibold tracking-tight text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50">
+                <a href="{{ route('learning-library') }}" class="inline-flex items-center justify-center rounded-2xl bg-[#f5f5f7] px-4 py-2.5 text-sm font-semibold tracking-tight text-zinc-800 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] transition hover:bg-zinc-950 hover:text-white">
                     {{ __('personnel::my_hr.learning_admin.actions.open_library') }}
                 </a>
             </div>
@@ -70,7 +70,7 @@
                 </x-ui.input-shell>
 
                 <x-ui.input-shell :label="__('personnel::my_hr.learning_admin.fields.due_at')" :error="$errors->first('assignmentForm.due_at')" labelClass="tracking-tight text-zinc-500">
-                    <input wire:model.live="assignmentForm.due_at" type="date" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-3 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none" />
+                    <x-ui.filter-input wire:model.live="assignmentForm.due_at" type="date" />
                 </x-ui.input-shell>
             </div>
 
@@ -98,7 +98,7 @@
                             </div>
                             <div class="flex flex-wrap gap-2">
                                 <span class="inline-flex items-center rounded-full border px-4 py-2 text-sm font-semibold tracking-tight {{ $toneClasses[$row['status_mode']] ?? $toneClasses['muted'] }}">{{ $row['status_label'] }}</span>
-                                <span class="inline-flex items-center rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm font-semibold tracking-tight text-zinc-700">{{ $row['content_type_label'] }}</span>
+                                <span class="inline-flex items-center rounded-full bg-[#f5f5f7] px-4 py-2 text-sm font-semibold tracking-tight text-zinc-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)]">{{ $row['content_type_label'] }}</span>
                                 @if ($row['estimated_minutes'])
                                     <span class="inline-flex items-center rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm font-medium tracking-tight text-zinc-600">{{ $row['estimated_minutes'] }} {{ __('personnel::my_hr.learning.labels.minutes') }}</span>
                                 @endif
@@ -106,7 +106,7 @@
                         </div>
                         <div class="flex flex-wrap gap-3">
                             @if ($row['content_url'])
-                                <a href="{{ $row['content_url'] }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center rounded-2xl border border-zinc-200 bg-white px-4 py-2 text-sm font-semibold tracking-tight text-zinc-700 transition hover:border-zinc-300">{{ __('personnel::my_hr.learning_admin.actions.open_asset') }}</a>
+                                <a href="{{ $row['content_url'] }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center rounded-2xl bg-[#f5f5f7] px-4 py-2 text-sm font-semibold tracking-tight text-zinc-800 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] transition hover:bg-zinc-950 hover:text-white">{{ __('personnel::my_hr.learning_admin.actions.open_asset') }}</a>
                             @endif
                             @if ($this->canAssignContent())
                                 <x-ui.async-button wire:click="waiveAssignment({{ $row['id'] }})" wire:target="waiveAssignment({{ $row['id'] }})" variant="secondary">
@@ -139,10 +139,7 @@
                     </div>
                 </div>
             @empty
-                <div class="rounded-[28px] border border-dashed border-zinc-300 bg-white px-6 py-12 text-center shadow-sm">
-                    <h3 class="text-xl font-semibold tracking-tight text-zinc-950">{{ __('personnel::my_hr.learning.empty.title') }}</h3>
-                    <p class="mx-auto mt-3 max-w-2xl text-sm leading-6 text-zinc-500">{{ __('personnel::my_hr.learning.empty.body') }}</p>
-                </div>
+                <x-ui.empty-state icon="icons.learning-library-icon" :title="__('personnel::my_hr.learning.empty.title')" :message="__('personnel::my_hr.learning.empty.body')" class="py-12" />
             @endforelse
         </div>
     </div>

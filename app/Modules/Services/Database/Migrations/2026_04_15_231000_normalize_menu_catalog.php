@@ -56,6 +56,7 @@ return new class extends Migration
 
             if ($matches->isEmpty()) {
                 DB::table('menus')->insert($payload);
+
                 continue;
             }
 

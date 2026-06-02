@@ -35,7 +35,7 @@
     <div class="rounded-[28px] border border-zinc-200 bg-zinc-50/60 p-5 shadow-sm">
         <div class="flex flex-wrap gap-2">
             @php
-                $tabs = ['events', 'media', 'projects', 'timeline'];
+                $tabs = ['events', 'media', 'projects'];
                 if ($this->canViewAnalytics()) {
                     $tabs[] = 'analytics';
                 }
@@ -57,8 +57,6 @@
                 <livewire:personnel.professional-portfolio.projects-manager :personnelId="$personnelId" :key="'portfolio-projects-'.$personnelId" lazy />
             @elseif ($activeTab === 'analytics')
                 <livewire:personnel.professional-portfolio.analytics-panel :personnelId="$personnelId" :key="'portfolio-analytics-'.$personnelId" lazy />
-            @else
-                <livewire:personnel.professional-portfolio.timeline-panel :personnelId="$personnelId" :key="'portfolio-timeline-'.$personnelId" lazy />
             @endif
         </div>
     </div>

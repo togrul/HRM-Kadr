@@ -19,6 +19,7 @@ return [
         'attendance_shifts' => 'Attendance - shifts',
         'business_trips' => 'Business trips',
         'candidates' => 'Candidates',
+        'employee_lifecycle' => 'Employee lifecycle',
         'general' => 'General',
         'leaves' => 'Leaves',
         'notification' => 'Notifications',
