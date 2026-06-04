@@ -1,0 +1,119 @@
+stages:
+  - validate
+  - build
+  - deploy
+
+variables:
+  DEPLOY_PATH: "/var/www/laravel"
+  DEPLOY_BRANCH: "laravel12"
+  SSH_PORT: "22"
+
+.docker_runner:
+  tags:
+    - scalis_0.3
+
+composer:
+  stage: validate
+  extends: .docker_runner
+  image: php:8.3-cli-alpine
+  before_script:
+    - apk add --no-cache curl freetype-dev git libjpeg-turbo-dev libpng-dev libzip-dev unzip zip
+    - docker-php-ext-configure gd --with-freetype --with-jpeg
+    - docker-php-ext-install gd bcmath zip
+    - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+    - mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views bootstrap/cache
+  cache:
+    key:
+      files:
+        - composer.lock
+    paths:
+      - vendor/
+  script:
+    - composer validate --no-check-publish
+    - composer install --prefer-dist --no-interaction --no-progress --optimize-autoloader
+  artifacts:
+    paths:
+      - vendor/
+    expire_in: 1 hour
+
+frontend:
+  stage: build
+  extends: .docker_runner
+  image: node:20
+  cache:
+    key:
+      files:
+        - package-lock.json
+    paths:
+      - .npm/
+  script:
+    - npm ci --cache .npm --prefer-offline
+    - npm run build
+  artifacts:
+    paths:
+      - public/build/
+    expire_in: 1 hour
+
+deploy_production:
+  stage: deploy
+  extends: .docker_runner
+  image: alpine:3.20
+  needs:
+    - composer
+    - frontend
+  before_script:
+    - apk add --no-cache openssh-client rsync
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - ssh-keyscan -p "$SSH_PORT" "$DEPLOY_HOST" >> ~/.ssh/known_hosts
+  script:
+    - ssh -p "$SSH_PORT" "$DEPLOY_USER@$DEPLOY_HOST" "mkdir -p '$DEPLOY_PATH'"
+    - >
+      rsync -rz --delete --no-perms --no-owner --no-group --omit-dir-times
+      -e "ssh -p $SSH_PORT"
+      --exclude='.git/'
+      --exclude='.env'
+      --exclude='bootstrap/cache/'
+      --exclude='node_modules/'
+      --exclude='vendor/'
+      --exclude='storage/'
+      ./ "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/"
+    - |
+      ssh -p "$SSH_PORT" "$DEPLOY_USER@$DEPLOY_HOST" "DEPLOY_PATH='$DEPLOY_PATH' DEPLOY_BRANCH='$DEPLOY_BRANCH' bash -s" << 'EOF'
+      set -euo pipefail
+
+      cd "$DEPLOY_PATH"
+
+      mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views bootstrap/cache
+
+      if [ ! -f .env ]; then
+          echo "Missing $DEPLOY_PATH/.env. Create the Laravel production .env file on the server before running deploy."
+          exit 1
+      fi
+
+      if ! grep -q '^DB_DATABASE=' .env || grep -q '^DB_DATABASE=forge$' .env; then
+          echo "Invalid DB_DATABASE in $DEPLOY_PATH/.env. Set the real production database name."
+          exit 1
+      fi
+
+      composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
+
+      php artisan migrate --force
+      php artisan storage:link || true
+      php artisan config:clear
+      php artisan cache:clear
+      php artisan route:clear
+      php artisan view:clear
+      php artisan config:cache
+      php artisan route:cache
+      php artisan view:cache
+      EOF
+  environment:
+    name: production
+    url: $APP_URL
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "laravel12"'
+      when: manual
+    - when: never
