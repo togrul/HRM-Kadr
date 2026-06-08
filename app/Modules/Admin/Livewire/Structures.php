@@ -26,9 +26,9 @@ class Structures extends Component
         return [
             'form.name' => 'required|string|min:2',
             'form.shortname' => 'required|string|min:2',
-            'form.coefficient' => 'required|int',
-            'form.code' => 'required|int|min:0',
-            'form.level' => 'required|int|min:0',
+            'form.coefficient' => 'nullable|int|min:1',
+            'form.code' => 'nullable|int|min:1',
+            'form.level' => 'nullable|int|min:1',
         ];
     }
 
@@ -50,9 +50,9 @@ class Structures extends Component
             'id' => null,
             'name' => '',
             'shortname' => '',
-            'coefficient' => null,
-            'code' => null,
-            'level' => null,
+            'coefficient' => 1,
+            'code' => 1,
+            'level' => 1,
             'parent_id' => null,
         ];
     }
@@ -92,6 +92,10 @@ class Structures extends Component
 
     public function store(): void
     {
+        $this->form['code'] = blank($this->form['code'] ?? null) ? 1 : (int) $this->form['code'];
+        $this->form['level'] = blank($this->form['level'] ?? null) ? 1 : (int) $this->form['level'];
+        $this->form['coefficient'] = blank($this->form['coefficient'] ?? null) ? 1 : (int) $this->form['coefficient'];
+
         $this->validate();
 
         $this->form['parent_id'] = $this->form['parent_id'] ?? null;

@@ -108,7 +108,8 @@
       }
     },
     syncOptionsFromDom(){
-      const optionNodes = Array.from(this.$root.querySelectorAll('[data-option-id]'));
+      const optionRoot = this.$refs.panel ?? this.$root;
+      const optionNodes = Array.from(optionRoot.querySelectorAll('[data-option-id]'));
       const domOptions = optionNodes.map((node) => ({
         id: node.dataset.optionId,
         label: node.dataset.optionLabel ?? '',
@@ -197,8 +198,16 @@
       const desiredWidth = Math.max(buttonRect.width, 220);
       const clampedWidth = Math.min(desiredWidth, viewportWidth - (viewportPadding * 2));
       this.alignRight = buttonRect.left + clampedWidth > viewportWidth - viewportPadding;
+      const left = this.alignRight
+        ? Math.max(viewportPadding, buttonRect.right - clampedWidth)
+        : Math.min(Math.max(viewportPadding, buttonRect.left), viewportWidth - viewportPadding - clampedWidth);
+      const top = this.openUp
+        ? Math.max(viewportPadding, buttonRect.top - gap - this.panelMaxHeight)
+        : Math.min(buttonRect.bottom + gap, viewportHeight - viewportPadding - this.panelMaxHeight);
 
       this.panelStyles = {
+        left: `${Math.round(left)}px`,
+        top: `${Math.round(top)}px`,
         width: `${Math.round(clampedWidth)}px`,
         maxHeight: `${Math.round(this.panelMaxHeight)}px`,
       };
@@ -255,7 +264,7 @@
       }
     },
   }"
-  x-on:click.window="if (!$el.contains($event.target)) setOpen(false)"
+  x-on:click.window="if (!$el.contains($event.target) && !($refs.panel && $refs.panel.contains($event.target))) setOpen(false)"
   x-on:keydown.escape.window="setOpen(false)"
   x-on:ui-select-opened.window="if ($event.detail?.uid !== uid) setOpen(false)"
   x-on:ui-select-option-group-loaded.window="
@@ -292,78 +301,77 @@
       </span>
     </button>
 
-    <ul
-      x-ref="panel"
-      x-show="isOpen && !isDisabled" x-transition.opacity.duration.100ms x-cloak
-      :class="[
-        openUp ? 'bottom-full mb-2 origin-bottom' : 'top-full mt-2 origin-top',
-        alignRight ? 'right-0' : 'left-0'
-      ]"
-      :style="panelStyles"
-      class="absolute z-[910] px-3 py-2 space-y-2 overflow-auto text-base bg-white rounded-md shadow-xl focus:outline-none sm:text-sm"
-    >
-      {{-- slot: search input --}}
-      @if ($searchModel)
-        <li class="sticky top-0 bg-white pt-1 pb-2 z-20">
-          <div class="px-1">
-            <x-livewire-input
-              mode="gray"
-              :name="$searchModel"
-              wire:model.live.debounce.300ms="{{ $searchModel }}"
-              x-model.live.debounce.150ms="localSearch"
-              placeholder="{{ $searchPlaceholder ?? __('ui::common.placeholders.search') }}"
-              x-on:click.stop="$event.stopPropagation()"
-              x-on:focus.stop="setOpen(true)"
-              x-on:input.stop="setOpen(true)"
-              x-on:keyup.stop="setOpen(true)"
-              x-on:keydown.stop="setOpen(true)"
-              x-on:change.stop="null"
-            />
-          </div>
-        </li>
-      @elseif (isset($slot) && ! $slot->isEmpty())
-        <li class="sticky top-0 bg-white pt-1 pb-2 z-20">
-          <div class="px-1">
-            {{ $slot }}
-          </div>
-        </li>
-      @endif
+    <template x-teleport="body">
+      <ul
+        x-ref="panel"
+        x-show="isOpen && !isDisabled" x-transition.opacity.duration.100ms x-cloak
+        :class="openUp ? 'origin-bottom' : 'origin-top'"
+        :style="panelStyles"
+        class="fixed z-[9999] px-3 py-2 space-y-2 overflow-auto text-base bg-white rounded-md shadow-xl focus:outline-none sm:text-sm"
+      >
+        {{-- slot: search input --}}
+        @if ($searchModel)
+          <li class="sticky top-0 bg-white pt-1 pb-2 z-20">
+            <div class="px-1">
+              <x-livewire-input
+                mode="gray"
+                :name="$searchModel"
+                wire:model.live.debounce.300ms="{{ $searchModel }}"
+                x-model.live.debounce.150ms="localSearch"
+                placeholder="{{ $searchPlaceholder ?? __('ui::common.placeholders.search') }}"
+                x-on:click.stop="$event.stopPropagation()"
+                x-on:focus.stop="setOpen(true)"
+                x-on:input.stop="setOpen(true)"
+                x-on:keyup.stop="setOpen(true)"
+                x-on:keydown.stop="setOpen(true)"
+                x-on:change.stop="null"
+              />
+            </div>
+          </li>
+        @elseif (isset($slot) && ! $slot->isEmpty())
+          <li class="sticky top-0 bg-white pt-1 pb-2 z-20">
+            <div class="px-1">
+              {{ $slot }}
+            </div>
+          </li>
+        @endif
 
-      {{-- null/placeholder option --}}
-      <li class="relative py-2 pl-3 rounded-lg cursor-pointer select-none group pr-9 hover:bg-blue-400 bg-neutral-50"
-          x-show="matchesSearch(placeholder)"
-          x-on:click.prevent.stop="select(null, placeholder)">
-        <div class="flex items-center">
-          <span class="block ml-3 truncate"> {{ $placeholder }} </span>
-          <span
-            x-show="toId(currentValue) === null"
-            class="absolute inset-y-0 right-0 flex items-center pr-4 text-blue-600"
-          >
-            ✓
-          </span>
-        </div>
-      </li>
-
-      @foreach($model as $idx => $opt)
-        <li
-          wire:key="{{ $uid }}-{{ data_get($opt,'id') }}"
-          class="relative py-2 pl-3 rounded-lg cursor-pointer select-none group pr-9 hover:bg-blue-400 bg-neutral-50"
-          data-option-id="{{ data_get($opt,'id') }}"
-          data-option-label="{{ data_get($opt,'label', data_get($opt,'name', data_get($opt,'title', data_get($opt,'text')))) }}"
-          x-show="matchesSearch($el.dataset.optionLabel)"
-          x-on:click.prevent.stop="select($el.dataset.optionId, $el.dataset.optionLabel)"
-        >
+        {{-- null/placeholder option --}}
+        <li class="relative py-2 pl-3 rounded-lg cursor-pointer select-none group pr-9 hover:bg-blue-400 bg-neutral-50"
+            x-show="matchesSearch(placeholder)"
+            x-on:click.prevent.stop="select(null, placeholder)">
           <div class="flex items-center">
-            <span class="block ml-3 truncate">{{ data_get($opt,'label', data_get($opt,'name', data_get($opt,'title', data_get($opt,'text')))) }}</span>
+            <span class="block ml-3 truncate"> {{ $placeholder }} </span>
             <span
-              x-show="toId(currentValue) === toId(@js(data_get($opt,'id')))"
+              x-show="toId(currentValue) === null"
               class="absolute inset-y-0 right-0 flex items-center pr-4 text-blue-600"
             >
               ✓
             </span>
           </div>
         </li>
-      @endforeach
-    </ul>
+
+        @foreach($model as $idx => $opt)
+          <li
+            wire:key="{{ $uid }}-{{ data_get($opt,'id') }}"
+            class="relative py-2 pl-3 rounded-lg cursor-pointer select-none group pr-9 hover:bg-blue-400 bg-neutral-50"
+            data-option-id="{{ data_get($opt,'id') }}"
+            data-option-label="{{ data_get($opt,'label', data_get($opt,'name', data_get($opt,'title', data_get($opt,'text')))) }}"
+            x-show="matchesSearch($el.dataset.optionLabel)"
+            x-on:click.prevent.stop="select($el.dataset.optionId, $el.dataset.optionLabel)"
+          >
+            <div class="flex items-center">
+              <span class="block ml-3 truncate">{{ data_get($opt,'label', data_get($opt,'name', data_get($opt,'title', data_get($opt,'text')))) }}</span>
+              <span
+                x-show="toId(currentValue) === toId(@js(data_get($opt,'id')))"
+                class="absolute inset-y-0 right-0 flex items-center pr-4 text-blue-600"
+              >
+                ✓
+              </span>
+            </div>
+          </li>
+        @endforeach
+      </ul>
+    </template>
   </div>
 </div>

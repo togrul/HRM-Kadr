@@ -492,7 +492,10 @@ trait OrderCrud
             ->flatten()
             ->map(function ($token) {
                 $normalizedToken = (string) $token;
-                $resolvedField = data_get($this->dynamicFieldCatalog, $normalizedToken.'.field');
+                $catalogKey = array_key_exists($normalizedToken, $this->dynamicFieldCatalog)
+                    ? $normalizedToken
+                    : '$'.ltrim($normalizedToken, '$');
+                $resolvedField = data_get($this->dynamicFieldCatalog, $catalogKey.'.field');
 
                 if (is_string($resolvedField) && trim($resolvedField) !== '') {
                     return trim($resolvedField);

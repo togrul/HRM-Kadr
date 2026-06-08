@@ -4,7 +4,9 @@ namespace App\Services\Orders;
 
 use App\Models\OrderLog;
 use App\Models\OrderTemplateVersion;
+use App\Support\Translations\ModuleTranslation;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 
 class OrderMetadataRenderPayloadBuilder
 {
@@ -147,7 +149,7 @@ class OrderMetadataRenderPayloadBuilder
             $rows[$rowNumber] = array_merge($rows[$rowNumber], $flattened);
 
             if ($attributeRow->component) {
-                $rows[$rowNumber]['component_title'] = (string) $attributeRow->component->title;
+                $rows[$rowNumber]['component_title'] = $this->resolveStoredTitle((string) $attributeRow->component->title);
                 $rows[$rowNumber]['component_content'] = (string) $attributeRow->component->content;
             }
         }
@@ -155,6 +157,27 @@ class OrderMetadataRenderPayloadBuilder
         ksort($rows);
 
         return $rows;
+    }
+
+    private function resolveStoredTitle(string $value): string
+    {
+        $resolved = ModuleTranslation::resolveStoredText($value);
+        if ($resolved !== $value) {
+            return $resolved;
+        }
+
+        $key = match (Str::of($value)->squish()->lower()->toString()) {
+            'select personnel' => 'orders::template_metadata_defaults.fields.select_personnel',
+            'select rank' => 'orders::template_metadata_defaults.fields.select_rank',
+            'start date' => 'orders::template_metadata_defaults.fields.start_date',
+            'end date' => 'orders::template_metadata_defaults.fields.end_date',
+            'location' => 'orders::template_metadata_defaults.fields.location',
+            'personnel' => 'orders::template_metadata_defaults.groups.personnel',
+            'timing' => 'orders::template_metadata_defaults.groups.timing',
+            default => null,
+        };
+
+        return $key ? __($key) : $resolved;
     }
 
     private function flattenAttributes(array $attributes): array

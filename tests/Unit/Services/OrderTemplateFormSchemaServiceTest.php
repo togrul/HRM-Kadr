@@ -123,7 +123,7 @@ class OrderTemplateFormSchemaServiceTest extends TestCase
         $this->assertSame('metadata', $result['source']);
         $this->assertSame(['$fullname', '$day'], $result['row_field_keys']);
         $this->assertSame('personnel_id', $result['field_catalog']['$fullname']['field']);
-        $this->assertSame('Select personnel', $result['field_catalog']['$fullname']['title']);
+        $this->assertSame('Əməkdaş seçin', $result['field_catalog']['$fullname']['title']);
         $this->assertSame('_personnels', $result['field_catalog']['$fullname']['model']);
         $this->assertSame('select', $result['field_catalog']['$fullname']['input']);
         $this->assertSame('nullable|int', $result['field_catalog']['$fullname']['rules']);
@@ -131,17 +131,17 @@ class OrderTemplateFormSchemaServiceTest extends TestCase
         $this->assertSame(['default' => 1, 'sm' => 2], $result['field_catalog']['$fullname']['grid_cols']);
         $this->assertSame(['default' => 1, 'sm' => 2], $result['field_catalog']['$fullname']['col_span']);
         $this->assertSame('day', $result['field_catalog']['$day']['field']);
-        $this->assertSame('Day', $result['field_catalog']['$day']['title']);
+        $this->assertSame('Gün', $result['field_catalog']['$day']['title']);
         $this->assertSame('numeric-input', $result['field_catalog']['$day']['input']);
         $this->assertSame('nullable|numeric', $result['field_catalog']['$day']['rules']);
         $this->assertSame('timing', $result['field_catalog']['$day']['group']);
         $this->assertContains('personnel_id', $result['dropdown_fields']);
         $this->assertCount(2, $result['row_groups']);
         $this->assertSame('personnel', $result['row_groups'][0]['key']);
-        $this->assertSame('Personnel', $result['row_groups'][0]['title']);
+        $this->assertSame('Əməkdaş məlumatları', $result['row_groups'][0]['title']);
         $this->assertSame(['$fullname'], $result['row_groups'][0]['fields']);
         $this->assertSame('timing', $result['row_groups'][1]['key']);
-        $this->assertSame('Timing', $result['row_groups'][1]['title']);
+        $this->assertSame('Tarix məlumatları', $result['row_groups'][1]['title']);
         $this->assertSame(['$day'], $result['row_groups'][1]['fields']);
     }
 
@@ -205,6 +205,87 @@ class OrderTemplateFormSchemaServiceTest extends TestCase
         $this->assertSame('Əməkdaş seçin', $result['field_catalog']['$fullname']['title']);
         $this->assertSame('Qrup başlığı', $result['row_groups'][0]['title']);
         $this->assertSame('Bölmə blokları', $result['section_blocks'][0]['title']);
+    }
+
+    public function test_it_applies_canonical_lookup_defaults_when_metadata_ui_config_is_incomplete(): void
+    {
+        app()->setLocale('az');
+
+        $orderType = $this->seedOrderType('IncompleteUiConfig');
+        $set = OrderTemplateSet::query()->create([
+            'order_type_id' => $orderType->id,
+            'name' => 'Set',
+        ]);
+
+        $version = OrderTemplateVersion::query()->create([
+            'order_template_set_id' => $set->id,
+            'version_no' => 1,
+            'template_path' => 'templates/incomplete-ui-config.docx',
+            'status' => 'published',
+            'is_active' => true,
+            'published_at' => now(),
+        ]);
+
+        foreach ([
+            '$rank' => 'Rank',
+            '$fullname' => 'Fullname',
+            '$structure_main' => 'Structure Main',
+            '$structure' => 'Structure',
+            '$position' => 'Position',
+            '$day' => 'Day',
+            '$month' => 'Month',
+        ] as $fieldKey => $label) {
+            OrderTemplateField::query()->create([
+                'order_template_version_id' => $version->id,
+                'field_key' => $fieldKey,
+                'label' => $label,
+                'field_type' => 'text',
+                'sort_order' => 10,
+                'ui_config' => [],
+            ]);
+
+            OrderTemplateMapping::query()->create([
+                'order_template_version_id' => $version->id,
+                'placeholder' => '{'.ltrim($fieldKey, '$').'}',
+                'field_key' => $fieldKey,
+                'scope' => 'row',
+                'sort_order' => 10,
+            ]);
+        }
+
+        $result = app(OrderTemplateFormSchemaService::class)->resolveForOrderType((int) $orderType->id);
+
+        $this->assertSame('rank_id', $result['field_catalog']['$rank']['field']);
+        $this->assertSame('Rütbə seçin', $result['field_catalog']['$rank']['title']);
+        $this->assertSame('_ranks', $result['field_catalog']['$rank']['model']);
+        $this->assertSame('select', $result['field_catalog']['$rank']['input']);
+
+        $this->assertSame('personnel_id', $result['field_catalog']['$fullname']['field']);
+        $this->assertSame('Əməkdaş seçin', $result['field_catalog']['$fullname']['title']);
+        $this->assertSame('_personnels', $result['field_catalog']['$fullname']['model']);
+
+        $this->assertSame('structure_main_id', $result['field_catalog']['$structure_main']['field']);
+        $this->assertSame('Əsas struktur seçin', $result['field_catalog']['$structure_main']['title']);
+        $this->assertSame('_main_structures', $result['field_catalog']['$structure_main']['model']);
+
+        $this->assertSame('structure_id', $result['field_catalog']['$structure']['field']);
+        $this->assertSame('Struktur seçin', $result['field_catalog']['$structure']['title']);
+        $this->assertSame('_structures', $result['field_catalog']['$structure']['model']);
+        $this->assertSame('radio-list', $result['field_catalog']['$structure']['input']);
+
+        $this->assertSame('position_id', $result['field_catalog']['$position']['field']);
+        $this->assertSame('Vəzifə seçin', $result['field_catalog']['$position']['title']);
+        $this->assertSame('_positions', $result['field_catalog']['$position']['model']);
+
+        $this->assertSame('Gün', $result['field_catalog']['$day']['title']);
+        $this->assertSame('numeric-input', $result['field_catalog']['$day']['input']);
+        $this->assertSame('Ay', $result['field_catalog']['$month']['title']);
+
+        $this->assertContains('rank_id', $result['dropdown_fields']);
+        $this->assertContains('personnel_id', $result['dropdown_fields']);
+        $this->assertContains('structure_main_id', $result['dropdown_fields']);
+        $this->assertContains('structure_id', $result['dropdown_fields']);
+        $this->assertContains('position_id', $result['dropdown_fields']);
     }
 
     private function seedOrderType(string $suffix): OrderType

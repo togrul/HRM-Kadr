@@ -4,6 +4,7 @@ return [
     'actions' => [
         'add' => 'Add',
         'save' => 'Save',
+        'edit' => 'Edit',
         'delete' => 'Delete',
         'force_delete' => 'Force delete',
         'restore' => 'Restore',

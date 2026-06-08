@@ -25,4 +25,11 @@ return [
         'weapon' => 'Silah',
         'car' => 'Maşın',
     ],
+    'groups' => [
+        'personnel' => 'Əməkdaş məlumatları',
+        'timing' => 'Tarix məlumatları',
+        'order_details' => 'Əmr məlumatları',
+        'assignment_details' => 'Təyinat məlumatları',
+        'candidate' => 'Namizəd məlumatları',
+    ],
 ];

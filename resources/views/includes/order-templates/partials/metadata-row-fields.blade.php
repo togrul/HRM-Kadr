@@ -22,6 +22,82 @@
         ->values();
 
     $groups = $configuredGroups->isNotEmpty() ? $configuredGroups : collect($fallbackGroup);
+
+    $legacyFieldConfig = function (string $token): array {
+        $normalized = ltrim(trim($token), '$');
+
+        return match ($normalized) {
+            'fullname', 'personnel', 'personnel_id' => [
+                'field' => 'personnel_id',
+                'title' => __('orders::template_metadata_defaults.fields.select_personnel'),
+                'model' => '_personnels',
+                'selectedName' => 'personnel',
+                'searchField' => 'search.personnel',
+                'input' => 'select',
+            ],
+            'rank', 'rank_id' => [
+                'field' => 'rank_id',
+                'title' => __('orders::template_metadata_defaults.fields.select_rank'),
+                'model' => '_ranks',
+                'selectedName' => 'rank',
+                'searchField' => 'search.rank',
+                'input' => 'select',
+            ],
+            'day', 'days' => [
+                'field' => $normalized,
+                'title' => __('orders::template_metadata_defaults.fields.day'),
+                'input' => 'numeric-input',
+            ],
+            'month' => [
+                'field' => 'month',
+                'title' => __('orders::template_metadata_defaults.fields.month'),
+                'input' => 'text-input',
+            ],
+            'year' => [
+                'field' => 'year',
+                'title' => __('orders::template_metadata_defaults.fields.year'),
+                'input' => 'numeric-input',
+            ],
+            'name' => [
+                'field' => 'name',
+                'title' => __('orders::template_metadata_defaults.fields.name'),
+                'input' => 'text-input',
+            ],
+            'surname' => [
+                'field' => 'surname',
+                'title' => __('orders::template_metadata_defaults.fields.surname'),
+                'input' => 'text-input',
+            ],
+            'structure_main', 'structure_main_id', 'main_structure', 'main_structure_id' => [
+                'field' => 'structure_main_id',
+                'title' => __('orders::template_metadata_defaults.fields.select_main_structure'),
+                'model' => '_main_structures',
+                'selectedName' => 'mainStructure',
+                'searchField' => 'search.mainStructure',
+                'input' => 'select',
+            ],
+            'structure', 'structure_id' => [
+                'field' => 'structure_id',
+                'title' => __('orders::template_metadata_defaults.fields.select_structure'),
+                'model' => '_structures',
+                'selectedName' => 'structure',
+                'searchField' => 'search.structure',
+                'input' => 'radio-list',
+            ],
+            'position', 'position_id' => [
+                'field' => 'position_id',
+                'title' => __('orders::template_metadata_defaults.fields.select_position'),
+                'model' => '_positions',
+                'selectedName' => 'position',
+                'searchField' => 'search.position',
+                'input' => 'select',
+            ],
+            default => [
+                'field' => $normalized,
+                'title' => \Illuminate\Support\Str::headline(str_replace('_', ' ', $normalized)),
+            ],
+        };
+    };
 @endphp
 
 @if($currentTokens->isNotEmpty())
@@ -45,10 +121,12 @@
             <div class="{{ $gridClass }}">
                 @foreach($group['fields'] as $fieldIndex => $_field)
                     @php
-                        $fieldConfig = $dynamicFieldCatalog[$_field] ?? [
-                            'field' => ltrim((string) $_field, '$'),
-                            'title' => \Illuminate\Support\Str::headline(ltrim((string) $_field, '$')),
-                        ];
+                        $token = (string) $_field;
+                        $normalizedToken = ltrim(trim($token), '$');
+                        $catalogKey = array_key_exists($token, $dynamicFieldCatalog ?? [])
+                            ? $token
+                            : ('$' . $normalizedToken);
+                        $fieldConfig = ($dynamicFieldCatalog ?? [])[$catalogKey] ?? $legacyFieldConfig($token);
 
                         $fieldName = $fieldConfig['field'];
                         $resolvedLabel = $this->componentFieldLabel($i, $fieldName);

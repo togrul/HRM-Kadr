@@ -109,6 +109,10 @@ class CandidateHireConversionService
                 ->lockForUpdate()
                 ->findOrFail($application->id);
 
+            if (! $this->hasApplicationConversionColumns()) {
+                throw new RuntimeException('Candidate application conversion columns are missing. Run the latest migrations.');
+            }
+
             if ($application->personnel_id) {
                 $personnel = Personnel::withTrashed()->find($application->personnel_id);
 
@@ -219,6 +223,10 @@ class CandidateHireConversionService
 
     private function linkedApplicationPersonnel(Candidate $candidate): ?Personnel
     {
+        if (! $this->hasApplicationConversionColumns()) {
+            return null;
+        }
+
         $application = CandidateApplication::query()
             ->where('candidate_id', $candidate->id)
             ->whereNotNull('personnel_id')
@@ -232,6 +240,10 @@ class CandidateHireConversionService
 
     private function linkLatestApplication(Candidate $candidate, Personnel $personnel): void
     {
+        if (! $this->hasApplicationConversionColumns()) {
+            return;
+        }
+
         $application = CandidateApplication::query()
             ->where('candidate_id', $candidate->id)
             ->latest('id')
@@ -246,6 +258,19 @@ class CandidateHireConversionService
             'converted_at' => now(),
             'converted_by' => auth()->id() ?? $candidate->creator_id,
         ])->save();
+    }
+
+    private function hasApplicationConversionColumns(): bool
+    {
+        static $hasColumns = null;
+
+        if ($hasColumns !== null) {
+            return $hasColumns;
+        }
+
+        return $hasColumns = Schema::hasColumn('candidate_applications', 'personnel_id')
+            && Schema::hasColumn('candidate_applications', 'converted_at')
+            && Schema::hasColumn('candidate_applications', 'converted_by');
     }
 
     private function ensureLifecycleEvent(CandidateApplication $application, Personnel $personnel, array $context): void

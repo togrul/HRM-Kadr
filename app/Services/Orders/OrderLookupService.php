@@ -3,6 +3,7 @@
 namespace App\Services\Orders;
 
 use App\Models\Component;
+use App\Models\OrderType;
 use App\Modules\Orders\Domain\Contracts\AccessibleStructureScopeReadRepository;
 use App\Modules\Orders\Domain\Contracts\OrderTypeStatusLookupReadRepository;
 use App\Modules\Orders\Domain\Contracts\PersonnelLookupReadRepository;
@@ -11,6 +12,7 @@ use App\Modules\Orders\Domain\Contracts\StructureLookupReadRepository;
 use App\Support\OrderLookupCache;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Schema;
 
 class OrderLookupService
 {
@@ -39,12 +41,28 @@ class OrderLookupService
             return collect();
         }
 
-        $cacheKey = OrderLookupCache::key('components', (string) $templateId);
+        $usesOrderTypeColumn = Schema::hasColumn('components', 'order_type_id');
+        $cacheKey = OrderLookupCache::key('components', ($usesOrderTypeColumn ? 'type:' : 'order:').(string) $templateId);
 
-        return Cache::remember($cacheKey, 600, function () use ($templateId) {
-            return Component::query()
-                ->with('orderType')
-                ->where('order_type_id', $templateId)
+        return Cache::remember($cacheKey, 600, function () use ($templateId, $usesOrderTypeColumn) {
+            $query = Component::query();
+
+            if ($usesOrderTypeColumn) {
+                $query->with('orderType')
+                    ->where('order_type_id', $templateId);
+            } else {
+                $orderId = OrderType::query()
+                    ->whereKey($templateId)
+                    ->value('order_id');
+
+                if (! $orderId) {
+                    return collect();
+                }
+
+                $query->where('order_id', $orderId);
+            }
+
+            return $query
                 ->orderBy('name')
                 ->get();
         });

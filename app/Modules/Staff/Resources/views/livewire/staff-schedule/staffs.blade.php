@@ -156,7 +156,10 @@
     <x-side-modal>
         @can('add-staff')
             @if ($showSideMenu == 'add-staff')
-                <livewire:staff-schedule.add-staff wire:key="staff-add-modal" />
+                <livewire:staff-schedule.add-staff
+                    :selectedStructureId="$selectedStructureId"
+                    :key="'staff-add-modal-' . ($selectedStructureId ?? 'all')"
+                />
             @endif
         @endcan
 

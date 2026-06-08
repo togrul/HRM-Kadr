@@ -30,7 +30,7 @@ trait HandlesPersonnelSelections
             'row' => $row,
             'key' => $tabelNo,
             'rank' => $person->latestRank?->rank->name,
-            'fullname' => $person->fullname,
+            'fullname' => $person->fullname_max,
         ];
 
         switch ($this->selectedBlade) {

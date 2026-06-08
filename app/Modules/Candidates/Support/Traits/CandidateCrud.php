@@ -3,6 +3,7 @@
 namespace App\Modules\Candidates\Support\Traits;
 
 use App\Concerns\LoadsAppealStatuses;
+use App\Enums\AttitudeMilitaryEnum;
 use App\Models\Candidate;
 use App\Models\Structure;
 use App\Livewire\Traits\DropdownConstructTrait;
@@ -141,7 +142,12 @@ trait CandidateCrud
         }
 
         // Keep civilian add/edit forms consistent; military-only fields are hidden.
-        $this->candidate['attitude_to_military'] = data_get($this->candidate, 'attitude_to_military');
+        $this->candidate['attitude_to_military'] = data_get(
+            $this->candidate,
+            'attitude_to_military',
+            AttitudeMilitaryEnum::Hm->value
+        ) ?: AttitudeMilitaryEnum::Hm->value;
+        $this->candidate['height'] = data_get($this->candidate, 'height') ?: 0;
         $this->candidate['military_service'] = data_get($this->candidate, 'military_service');
         $this->candidate['hhk_date'] = data_get($this->candidate, 'hhk_date');
         $this->candidate['hhk_result'] = data_get($this->candidate, 'hhk_result');

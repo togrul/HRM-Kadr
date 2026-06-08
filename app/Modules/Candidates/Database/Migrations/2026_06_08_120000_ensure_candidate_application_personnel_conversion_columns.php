@@ -9,6 +9,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (! Schema::hasTable('candidate_applications')) {
+            return;
+        }
+
         Schema::table('candidate_applications', function (Blueprint $table): void {
             if (! Schema::hasColumn('candidate_applications', 'personnel_id')) {
                 $table->foreignId('personnel_id')
@@ -29,30 +33,24 @@ return new class extends Migration
                     ->constrained('users')
                     ->nullOnDelete();
             }
-
-            if (! $this->hasIndex('candidate_applications', 'candidate_applications_personnel_conversion_idx')) {
-                $table->index(['personnel_id', 'converted_at'], 'candidate_applications_personnel_conversion_idx');
-            }
         });
+
+        if (! $this->hasIndex('candidate_applications', 'candidate_applications_personnel_conversion_idx')) {
+            Schema::table('candidate_applications', function (Blueprint $table): void {
+                $table->index(['personnel_id', 'converted_at'], 'candidate_applications_personnel_conversion_idx');
+            });
+        }
     }
 
     public function down(): void
     {
+        if (! Schema::hasTable('candidate_applications')) {
+            return;
+        }
+
         Schema::table('candidate_applications', function (Blueprint $table): void {
             if ($this->hasIndex('candidate_applications', 'candidate_applications_personnel_conversion_idx')) {
                 $table->dropIndex('candidate_applications_personnel_conversion_idx');
-            }
-
-            if (Schema::hasColumn('candidate_applications', 'converted_by')) {
-                $table->dropConstrainedForeignId('converted_by');
-            }
-
-            if (Schema::hasColumn('candidate_applications', 'personnel_id')) {
-                $table->dropConstrainedForeignId('personnel_id');
-            }
-
-            if (Schema::hasColumn('candidate_applications', 'converted_at')) {
-                $table->dropColumn('converted_at');
             }
         });
     }

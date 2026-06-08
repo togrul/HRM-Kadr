@@ -14,5 +14,5 @@ it('loads enabled module translations under canonical namespaces', function () {
         ->and(__('attendance::dashboard.title'))->toBe('Davamiyyət izləmə')
         ->and(__('attendance::month_close.actions.close_month'))->toBe('Ayı bağla')
         ->and(__('orders::templates_list.actions.add_template'))->toBe('Şablon əlavə et')
-        ->and(__('services::permissions.groups.attendance_manual'))->toBe('Davamiyyət - manual giriş');
+        ->and(__('services::permissions.groups.attendance_manual'))->toBe('Davamiyyət - əl ilə giriş');
 });

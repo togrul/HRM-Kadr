@@ -20,8 +20,10 @@ class StructureObserver
         'structures',
         'staff:structures',
         'candidate:structures',
+        'candidates:recruitment:structures',
         'businessTrips:structures',
         'personnel:structures',
+        'attendance-calendar-regimes-structures',
     ];
     /**
      * Handle the Structure "created" event.

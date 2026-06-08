@@ -84,12 +84,19 @@ class OrderTemplateFormSchemaService
             }
 
             $fieldDefinition = $fieldDefinitions->get($normalizedFieldKey);
-            $uiConfig = is_array($fieldDefinition?->ui_config) ? $fieldDefinition->ui_config : [];
+            $uiConfig = $this->mergeUiConfigDefaults(
+                is_array($fieldDefinition?->ui_config) ? $fieldDefinition->ui_config : [],
+                $this->canonicalFieldUiDefaults($normalizedFieldKey),
+            );
 
             $resolvedField = (string) ($uiConfig['field'] ?? $normalizedFieldKey);
             $resolvedInput = (string) (
                 $uiConfig['input']
-                ?? $this->mapFieldTypeToInput((string) ($fieldDefinition?->field_type ?? ''))
+                ?? (
+                    ! empty($uiConfig['model']) || ! empty($uiConfig['searchField']) || ! empty($uiConfig['selectedName'])
+                        ? 'select'
+                        : $this->mapFieldTypeToInput((string) ($fieldDefinition?->field_type ?? ''))
+                )
             );
 
             // Keep structure picker on legacy tree-list behavior regardless of stored metadata input.
@@ -98,7 +105,8 @@ class OrderTemplateFormSchemaService
             }
 
             $resolvedTitle = (string) (
-                $fieldDefinition?->label
+                $uiConfig['title']
+                ?? $fieldDefinition?->label
                 ?? Str::headline(str_replace('_', ' ', $normalizedFieldKey))
             );
 
@@ -197,6 +205,92 @@ class OrderTemplateFormSchemaService
         };
     }
 
+    private function canonicalFieldUiDefaults(string $normalizedFieldKey): array
+    {
+        return match ($normalizedFieldKey) {
+            'fullname', 'personnel', 'personnel_id' => [
+                'field' => 'personnel_id',
+                'title' => 'orders::template_metadata_defaults.fields.select_personnel',
+                'model' => '_personnels',
+                'selectedName' => 'personnel',
+                'searchField' => 'search.personnel',
+                'input' => 'select',
+                'group' => 'personnel',
+                'group_title' => 'orders::template_metadata_defaults.groups.personnel',
+                'group_order' => 10,
+            ],
+            'rank', 'rank_id' => [
+                'field' => 'rank_id',
+                'title' => 'orders::template_metadata_defaults.fields.select_rank',
+                'model' => '_ranks',
+                'selectedName' => 'rank',
+                'searchField' => 'search.rank',
+                'input' => 'select',
+                'group' => 'assignment_details',
+                'group_title' => 'orders::template_metadata_defaults.groups.assignment_details',
+                'group_order' => 20,
+            ],
+            'structure_main', 'structure_main_id', 'main_structure', 'main_structure_id' => [
+                'field' => 'structure_main_id',
+                'title' => 'orders::template_metadata_defaults.fields.select_main_structure',
+                'model' => '_main_structures',
+                'selectedName' => 'mainStructure',
+                'searchField' => 'search.mainStructure',
+                'input' => 'select',
+                'group' => 'assignment_details',
+                'group_title' => 'orders::template_metadata_defaults.groups.assignment_details',
+                'group_order' => 20,
+            ],
+            'structure', 'structure_id' => [
+                'field' => 'structure_id',
+                'title' => 'orders::template_metadata_defaults.fields.select_structure',
+                'model' => '_structures',
+                'selectedName' => 'structure',
+                'searchField' => 'search.structure',
+                'input' => 'radio-list',
+                'group' => 'assignment_details',
+                'group_title' => 'orders::template_metadata_defaults.groups.assignment_details',
+                'group_order' => 20,
+            ],
+            'position', 'position_id' => [
+                'field' => 'position_id',
+                'title' => 'orders::template_metadata_defaults.fields.select_position',
+                'model' => '_positions',
+                'selectedName' => 'position',
+                'searchField' => 'search.position',
+                'input' => 'select',
+                'group' => 'assignment_details',
+                'group_title' => 'orders::template_metadata_defaults.groups.assignment_details',
+                'group_order' => 20,
+            ],
+            'day', 'days' => [
+                'field' => $normalizedFieldKey,
+                'title' => 'orders::template_metadata_defaults.fields.day',
+                'input' => 'numeric-input',
+                'group' => 'timing',
+                'group_title' => 'orders::template_metadata_defaults.groups.timing',
+                'group_order' => 30,
+            ],
+            'month' => [
+                'field' => 'month',
+                'title' => 'orders::template_metadata_defaults.fields.month',
+                'input' => 'text-input',
+                'group' => 'timing',
+                'group_title' => 'orders::template_metadata_defaults.groups.timing',
+                'group_order' => 30,
+            ],
+            'year' => [
+                'field' => 'year',
+                'title' => 'orders::template_metadata_defaults.fields.year',
+                'input' => 'numeric-input',
+                'group' => 'timing',
+                'group_title' => 'orders::template_metadata_defaults.groups.timing',
+                'group_order' => 30,
+            ],
+            default => [],
+        };
+    }
+
     private function resolveValidationRules(?array $validationConfig, string $input, bool $isRequired): string
     {
         if (is_array($validationConfig)) {
@@ -232,6 +326,28 @@ class OrderTemplateFormSchemaService
         }
 
         return trim($trimmed);
+    }
+
+    private function mergeUiConfigDefaults(array $current, array $defaults): array
+    {
+        if (empty($defaults)) {
+            return $current;
+        }
+
+        $merged = $current;
+
+        foreach ($defaults as $key => $value) {
+            if (! array_key_exists($key, $merged) || $merged[$key] === null || $merged[$key] === '') {
+                $merged[$key] = $value;
+                continue;
+            }
+
+            if (is_array($value) && is_array($merged[$key])) {
+                $merged[$key] = $this->mergeUiConfigDefaults($merged[$key], $value);
+            }
+        }
+
+        return $merged;
     }
 
     private function buildRowGroups(array $rowFieldKeys, array $fieldCatalog): array
@@ -374,6 +490,52 @@ class OrderTemplateFormSchemaService
 
     private function resolveStoredTitle(string $value): string
     {
-        return ModuleTranslation::resolveStoredText($value);
+        $resolved = ModuleTranslation::resolveStoredText($value);
+        if ($resolved !== $value) {
+            return $resolved;
+        }
+
+        $literalKey = $this->literalTitleTranslationKey($value);
+
+        return $literalKey ? __($literalKey) : $resolved;
+    }
+
+    private function literalTitleTranslationKey(string $value): ?string
+    {
+        return match (Str::of($value)->squish()->lower()->toString()) {
+            'fullname' => 'orders::template_metadata_defaults.fields.select_personnel',
+            'rank' => 'orders::template_metadata_defaults.fields.select_rank',
+            'select personnel' => 'orders::template_metadata_defaults.fields.select_personnel',
+            'select rank' => 'orders::template_metadata_defaults.fields.select_rank',
+            'day' => 'orders::template_metadata_defaults.fields.day',
+            'month' => 'orders::template_metadata_defaults.fields.month',
+            'year' => 'orders::template_metadata_defaults.fields.year',
+            'name' => 'orders::template_metadata_defaults.fields.name',
+            'surname' => 'orders::template_metadata_defaults.fields.surname',
+            'structure main', 'main structure' => 'orders::template_metadata_defaults.fields.select_main_structure',
+            'structure' => 'orders::template_metadata_defaults.fields.select_structure',
+            'position' => 'orders::template_metadata_defaults.fields.select_position',
+            'select main structure' => 'orders::template_metadata_defaults.fields.select_main_structure',
+            'select structure' => 'orders::template_metadata_defaults.fields.select_structure',
+            'select position' => 'orders::template_metadata_defaults.fields.select_position',
+            'start date' => 'orders::template_metadata_defaults.fields.start_date',
+            'end date' => 'orders::template_metadata_defaults.fields.end_date',
+            'location' => 'orders::template_metadata_defaults.fields.location',
+            'trip start day' => 'orders::template_metadata_defaults.fields.trip_start_day',
+            'trip start month' => 'orders::template_metadata_defaults.fields.trip_start_month',
+            'trip start year' => 'orders::template_metadata_defaults.fields.trip_start_year',
+            'select transportation' => 'orders::template_metadata_defaults.fields.select_transportation',
+            'meeting hour' => 'orders::template_metadata_defaults.fields.meeting_hour',
+            'return month' => 'orders::template_metadata_defaults.fields.return_month',
+            'return day' => 'orders::template_metadata_defaults.fields.return_day',
+            'weapon' => 'orders::template_metadata_defaults.fields.weapon',
+            'car' => 'orders::template_metadata_defaults.fields.car',
+            'personnel' => 'orders::template_metadata_defaults.groups.personnel',
+            'timing' => 'orders::template_metadata_defaults.groups.timing',
+            'order details' => 'orders::template_metadata_defaults.groups.order_details',
+            'assignment details' => 'orders::template_metadata_defaults.groups.assignment_details',
+            'candidate' => 'orders::template_metadata_defaults.groups.candidate',
+            default => null,
+        };
     }
 }

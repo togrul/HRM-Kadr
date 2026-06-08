@@ -3,7 +3,9 @@
 namespace App\Modules\Services\Livewire\Roles;
 
 use App\Models\Structure;
+use App\Support\Permissions\PermissionDescriptionCatalog;
 use App\Support\Permissions\PermissionTranslationKey;
+use App\Support\Permissions\RoleTranslation;
 use App\Support\Translations\ModuleTranslation;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Facades\Cache;
@@ -39,6 +41,8 @@ class SetPermission extends Component
 
     public array $permissions = [];
 
+    public string $permissionSearch = '';
+
     public function mount()
     {
         $this->initializeProperties();
@@ -58,7 +62,7 @@ class SetPermission extends Component
     {
         $this->role = Role::findOrFail($this->roleModel);
         $this->title = __('services::roles.titles.set_permission', [
-            'role' => "<span class='text-blue-500'>{$this->role->name}</span>",
+            'role' => "<span class='text-blue-500'>".e($this->roleDisplayName()).'</span>',
         ]);
     }
 
@@ -123,7 +127,9 @@ class SetPermission extends Component
     public function render()
     {
         return view('services::livewire.services.roles.set-permission', [
-            'permissions' => $this->permissions,
+            'permissions' => $this->filteredPermissionGroups(),
+            'selectedPermissionCount' => count($this->permissionList),
+            'totalPermissionCount' => count($this->permissionIdPool),
         ]);
     }
 
@@ -140,7 +146,7 @@ class SetPermission extends Component
             ->values()
             ->all();
 
-        $this->permissions = $this->groupPermissionsByModule($permissions);
+        $this->permissions = $this->sortPermissionGroups($this->groupPermissionsByModule($permissions));
     }
 
     private function preloadStructureData(): void
@@ -221,11 +227,106 @@ class SetPermission extends Component
                 'name' => $permission->name,
                 'translation_key' => 'services::permissions.methods.'.$methodKey,
                 'fallback_label' => ModuleTranslation::humanize($methodKey),
-                'description' => (string) ($permission->description ?? ''),
+                'description' => PermissionDescriptionCatalog::describe((string) $permission->name),
             ];
 
             return $carry;
         }, []);
+    }
+
+    private function filteredPermissionGroups(): array
+    {
+        $search = $this->searchableText($this->permissionSearch);
+
+        if ($search === '') {
+            return $this->permissions;
+        }
+
+        $filteredGroups = [];
+
+        foreach ($this->permissions as $groupKey => $group) {
+            $groupLabel = __($group['translation_key']);
+            $groupText = $this->searchableText($groupKey.' '.$group['fallback_label'].' '.$groupLabel);
+
+            $matchedPermissions = [];
+
+            foreach ($group['permissions'] as $methodKey => $permission) {
+                $permissionLabel = __($permission['translation_key']);
+                $permissionText = $this->searchableText(implode(' ', [
+                    $methodKey,
+                    $permission['name'],
+                    $permission['fallback_label'],
+                    $permissionLabel,
+                    $permission['description'],
+                ]));
+
+                if (str_contains($groupText, $search) || str_contains($permissionText, $search)) {
+                    $matchedPermissions[$methodKey] = $permission;
+                }
+            }
+
+            if ($matchedPermissions !== []) {
+                $filteredGroups[$groupKey] = array_merge($group, [
+                    'permissions' => $matchedPermissions,
+                ]);
+            }
+        }
+
+        return $filteredGroups;
+    }
+
+    private function sortPermissionGroups(array $groups): array
+    {
+        uasort($groups, function (array $first, array $second): int {
+            return strnatcasecmp(
+                $this->permissionSortLabel($first),
+                $this->permissionSortLabel($second)
+            );
+        });
+
+        foreach ($groups as &$group) {
+            uasort($group['permissions'], function (array $first, array $second): int {
+                return strnatcasecmp(
+                    $this->permissionSortLabel($first),
+                    $this->permissionSortLabel($second)
+                );
+            });
+        }
+
+        unset($group);
+
+        return $groups;
+    }
+
+    private function permissionSortLabel(array $item): string
+    {
+        $translated = __($item['translation_key']);
+        $label = $translated !== $item['translation_key']
+            ? $translated
+            : $item['fallback_label'];
+
+        return $this->searchableText($label);
+    }
+
+    private function searchableText(string $value): string
+    {
+        $value = str($value)->lower()->trim()->toString();
+
+        return strtr($value, [
+            'ə' => 'e',
+            'ö' => 'o',
+            'ü' => 'u',
+            'ı' => 'i',
+            'i̇' => 'i',
+            'ğ' => 'g',
+            'ş' => 's',
+            'ç' => 'c',
+        ]);
+    }
+
+    public function roleDisplayName(): string
+    {
+        return RoleTranslation::label((string) $this->role->name);
     }
 
     private function buildStructureNestedMap(EloquentCollection $structures): array

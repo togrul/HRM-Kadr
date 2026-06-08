@@ -11,6 +11,12 @@ class Sidebar extends Component
 {
     public $selectedStructure;
 
+    #[On('structureUpdated')]
+    public function refreshStructureTree(): void
+    {
+        Cache::forget('structures');
+    }
+
     public function mount(): void
     {
         $selectedFromUrl = request()->query('structure');

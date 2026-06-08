@@ -16,7 +16,7 @@ it('resolves services permission group labels from canonical permission names', 
         ->toBe('personnels');
 
     expect(__('services::permissions.groups.'.PermissionTranslationKey::groupKeyFromPermission('show-attendance-manual')))
-        ->toBe('Davamiyyət - manual giriş');
+        ->toBe('Davamiyyət - əl ilə giriş');
 
     expect(__('services::permissions.groups.'.PermissionTranslationKey::groupKeyFromPermission('manage-attendance-settings')))
         ->toBe('Davamiyyət - tənzimləmələr');

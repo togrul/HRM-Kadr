@@ -31,6 +31,8 @@ class Staffs extends Component
 
     public $structure;
 
+    public ?int $selectedStructureId = null;
+
     #[Url]
     public $selectedPage;
 
@@ -73,6 +75,7 @@ class Staffs extends Component
             return;
         }
 
+        $this->selectedStructureId = $id;
         $this->structure = $this->getNestedStructure($id);
         $this->resetPage();
     }

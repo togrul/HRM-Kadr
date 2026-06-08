@@ -25,4 +25,11 @@ return [
         'weapon' => 'Weapon',
         'car' => 'Car',
     ],
+    'groups' => [
+        'personnel' => 'Personnel',
+        'timing' => 'Timing',
+        'order_details' => 'Order details',
+        'assignment_details' => 'Assignment details',
+        'candidate' => 'Candidate',
+    ],
 ];

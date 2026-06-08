@@ -324,7 +324,8 @@ class OrderConfirmedService
     private function updateOrCreateRecord($_person, $orderAttributes, $key, $orderLog): void
     {
         $type = $orderLog->order->blade;
-        $arr = UsefulHelpers::searchInsideMultiDimensionalArray($orderAttributes, $_person->fullname, '$fullname', 'value');
+        $fullnameVariants = $this->personFullnameVariants($_person);
+        $arr = $this->searchAttributesByFullname($orderAttributes, $fullnameVariants);
 
         $commonAttributes = [
             'order_no' => $orderLog->order_no,
@@ -332,7 +333,7 @@ class OrderConfirmedService
 
         $relationshipMethod = '';
 
-        $filteredAttributes = $this->filterArrayByFullname($orderAttributes, $_person->fullname, 'fullname', true);
+        $filteredAttributes = $this->filterArrayByFullname($orderAttributes, $fullnameVariants, 'fullname', true);
 
         $spesificAttributes = [
             'start_date' => Carbon::parse($arr[$key]['$start_date']['value'])->format('Y-m-d'),
@@ -352,7 +353,7 @@ class OrderConfirmedService
                 $spesificAttributes['return_work_date'] = Carbon::parse($arr[$key]['$end_date']['value'])->addDay()->format('Y-m-d');
                 // teze days lari elave etmek
                 unset($spesificAttributes['attributes']);
-                $extraData = $this->filterArrayByFullname($this->extraData[$key], $_person->fullname, 'fullname');
+                $extraData = $this->filterArrayByFullname($this->extraData[$key], $fullnameVariants, 'fullname');
                 $extraDataConverted = array_merge(...$extraData);
                 $spesificAttributes['vacation_days_total'] = $extraDataConverted['vacation_days_total'];
                 $spesificAttributes['remaining_days'] = $extraDataConverted['vacation_days_remaining'] - $spesificAttributes['duration'];
@@ -381,16 +382,39 @@ class OrderConfirmedService
         }
     }
 
-    private function filterArrayByFullname(array $mainArray, string $filteredKey, string $arrayKey, bool $isNested = false)
+    private function searchAttributesByFullname(array $orderAttributes, array $fullnameVariants): array
     {
-        return array_filter($mainArray, function ($item) use ($arrayKey, $filteredKey, $isNested) {
+        foreach ($fullnameVariants as $fullname) {
+            $result = UsefulHelpers::searchInsideMultiDimensionalArray($orderAttributes, $fullname, '$fullname', 'value');
+
+            if (! empty($result)) {
+                return $result;
+            }
+        }
+
+        return [];
+    }
+
+    private function personFullnameVariants(Personnel $person): array
+    {
+        return array_values(array_unique(array_filter([
+            $person->fullname_max,
+            $person->fullname,
+        ])));
+    }
+
+    private function filterArrayByFullname(array $mainArray, string|array $filteredKey, string $arrayKey, bool $isNested = false)
+    {
+        $filteredKeys = is_array($filteredKey) ? $filteredKey : [$filteredKey];
+
+        return array_filter($mainArray, function ($item) use ($arrayKey, $filteredKeys, $isNested) {
             if ($isNested) {
                 $key = '$'.$arrayKey;
 
-                return isset($item[$key]['value']) && $item[$key]['value'] === $filteredKey;
+                return isset($item[$key]['value']) && in_array($item[$key]['value'], $filteredKeys, true);
             }
 
-            return isset($item[$arrayKey]) && $item[$arrayKey] == $filteredKey;
+            return isset($item[$arrayKey]) && in_array($item[$arrayKey], $filteredKeys, true);
         });
     }
 

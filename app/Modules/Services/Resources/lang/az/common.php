@@ -4,6 +4,7 @@ return [
     'actions' => [
         'add' => 'Əlavə et',
         'save' => 'Yadda saxla',
+        'edit' => 'Redaktə et',
         'delete' => 'Sil',
         'force_delete' => 'Tam sil',
         'restore' => 'Bərpa et',

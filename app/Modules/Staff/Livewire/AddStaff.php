@@ -49,10 +49,12 @@ class AddStaff extends Component
         $this->dispatch('staffAdded', __('staff::common.messages.staff_added'));
     }
 
-    public function mount()
+    public function mount(?int $selectedStructureId = null)
     {
         $this->authorize('create', StaffSchedule::class);
         $this->title = __('staff::common.titles.new_staff');
-        $this->structureId = null;
+        $this->structureId = $selectedStructureId && in_array($selectedStructureId, $this->allowedStructureIds(), true)
+            ? $selectedStructureId
+            : null;
     }
 }

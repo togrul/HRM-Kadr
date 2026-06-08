@@ -76,7 +76,14 @@ trait HandlesOrderComponentFieldState
         ]);
 
         if (! empty($parts)) {
-            return trim(implode(' ', $parts));
+            $label = trim(implode(' ', $parts));
+            $gender = data_get($model, 'gender');
+
+            if ($gender !== null && data_get($model, 'patronymic')) {
+                return $label.' '.((int) $gender === 2 ? 'qızı' : 'oğlu');
+            }
+
+            return $label;
         }
 
         return (string) data_get($model, 'fullname', '');
