@@ -2,15 +2,13 @@
 
 namespace App\Modules\Candidates\Console\Commands;
 
-use App\Models\User;
+use App\Console\Support\AbstractQueryBudgetCommand;
 use App\Modules\Candidates\Livewire\CandidateList;
-use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
-use Throwable;
 
-class CandidateListQueryBudgetCommand extends Command
+class CandidateListQueryBudgetCommand extends AbstractQueryBudgetCommand
 {
     protected $signature = 'candidates:list-query-budget
         {--render-budget= : Max query count for candidate list render}
@@ -98,53 +96,5 @@ class CandidateListQueryBudgetCommand extends Command
         }
 
         return ($summary['failed_probes'] === 0 && $summary['over_budget_probes'] === 0) ? self::SUCCESS : self::FAILURE;
-    }
-
-    private function probe(string $flow, int $budget, callable $callback): array
-    {
-        $connection = DB::connection();
-        $wasLogging = method_exists($connection, 'logging') ? (bool) $connection->logging() : false;
-
-        $connection->flushQueryLog();
-        $connection->enableQueryLog();
-
-        $startedAt = microtime(true);
-        $status = 'ok';
-        $error = null;
-
-        try {
-            $callback();
-        } catch (Throwable $throwable) {
-            $status = 'failed';
-            $error = $throwable->getMessage();
-        } finally {
-            $queries = $connection->getQueryLog();
-            if (! $wasLogging) {
-                $connection->disableQueryLog();
-            }
-        }
-
-        $queryCount = count($queries);
-        $dbTimeMs = round((float) collect($queries)->sum(fn ($query) => (float) ($query['time'] ?? 0)), 2);
-        $elapsedMs = round((microtime(true) - $startedAt) * 1000, 2);
-
-        return [
-            'flow' => $flow,
-            'status' => $status,
-            'queries' => $queryCount,
-            'budget' => $budget,
-            'over_budget' => $queryCount > $budget,
-            'elapsed_ms' => $elapsedMs,
-            'db_time_ms' => $dbTimeMs,
-            'error' => $error,
-        ];
-    }
-
-    private function resolveUserForPermissions(string ...$permissions): ?User
-    {
-        return User::query()
-            ->orderBy('id')
-            ->cursor()
-            ->first(fn (User $user): bool => collect($permissions)->every(fn (string $permission) => $user->can($permission)));
     }
 }

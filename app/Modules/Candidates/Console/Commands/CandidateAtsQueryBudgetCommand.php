@@ -2,14 +2,13 @@
 
 namespace App\Modules\Candidates\Console\Commands;
 
+use App\Console\Support\AbstractQueryBudgetCommand;
 use App\Models\CandidateApplication;
 use App\Modules\Candidates\Application\Services\CandidateAtsCompletionService;
-use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use Throwable;
 
-class CandidateAtsQueryBudgetCommand extends Command
+class CandidateAtsQueryBudgetCommand extends AbstractQueryBudgetCommand
 {
     protected $signature = 'candidates:ats-query-budget
         {--allow-empty : Return success when ATS dataset is empty}
@@ -125,41 +124,5 @@ class CandidateAtsQueryBudgetCommand extends Command
         return ($payload['summary']['failed_probes'] === 0 && $payload['summary']['over_budget_probes'] === 0)
             ? self::SUCCESS
             : self::FAILURE;
-    }
-
-    private function probe(string $flow, int $budget, callable $callback): array
-    {
-        $connection = DB::connection();
-        $wasLogging = method_exists($connection, 'logging') ? (bool) $connection->logging() : false;
-
-        $connection->flushQueryLog();
-        $connection->enableQueryLog();
-
-        $startedAt = microtime(true);
-        $status = 'ok';
-        $error = null;
-
-        try {
-            $callback();
-        } catch (Throwable $throwable) {
-            $status = 'failed';
-            $error = $throwable->getMessage();
-        } finally {
-            $queries = $connection->getQueryLog();
-            if (! $wasLogging) {
-                $connection->disableQueryLog();
-            }
-        }
-
-        return [
-            'flow' => $flow,
-            'status' => $status,
-            'queries' => count($queries),
-            'budget' => $budget,
-            'over_budget' => count($queries) > $budget,
-            'elapsed_ms' => round((microtime(true) - $startedAt) * 1000, 2),
-            'db_time_ms' => round((float) collect($queries)->sum(fn ($query) => (float) ($query['time'] ?? 0)), 2),
-            'error' => $error,
-        ];
     }
 }

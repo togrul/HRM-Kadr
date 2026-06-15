@@ -2,6 +2,7 @@
 
 namespace App\Modules\TrainingNeeds\Console\Commands;
 
+use App\Console\Support\AbstractQueryBudgetCommand;
 use App\Models\TrainingCompetency;
 use App\Models\TrainingFeedbackForm;
 use App\Models\TrainingNeedItem;
@@ -12,12 +13,10 @@ use App\Modules\TrainingNeeds\Application\Services\TrainingNeedCoverageService;
 use App\Modules\TrainingNeeds\Application\Services\TrainingNeedReportingService;
 use App\Modules\TrainingNeeds\Application\Services\TrainingNeedSuggestionService;
 use App\Modules\TrainingNeeds\Application\Services\TrainingSessionProposalService;
-use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use Throwable;
 
-class TrainingNeedsQueryBudgetCommand extends Command
+class TrainingNeedsQueryBudgetCommand extends AbstractQueryBudgetCommand
 {
     protected $signature = 'training-needs:query-budget
         {--year= : Target plan year}
@@ -189,45 +188,5 @@ class TrainingNeedsQueryBudgetCommand extends Command
                 $result['error'] ?? '-',
             ])->all()
         );
-    }
-
-    private function probe(string $flow, int $budget, callable $callback): array
-    {
-        $connection = DB::connection();
-        $wasLogging = method_exists($connection, 'logging') ? (bool) $connection->logging() : false;
-
-        $connection->flushQueryLog();
-        $connection->enableQueryLog();
-
-        $startedAt = microtime(true);
-        $status = 'ok';
-        $error = null;
-
-        try {
-            $callback();
-        } catch (Throwable $throwable) {
-            $status = 'failed';
-            $error = $throwable->getMessage();
-        } finally {
-            $queries = $connection->getQueryLog();
-            if (! $wasLogging) {
-                $connection->disableQueryLog();
-            }
-        }
-
-        $queryCount = count($queries);
-        $dbTimeMs = round((float) collect($queries)->sum(fn ($query) => (float) ($query['time'] ?? 0)), 2);
-        $elapsedMs = round((microtime(true) - $startedAt) * 1000, 2);
-
-        return [
-            'flow' => $flow,
-            'status' => $status,
-            'queries' => $queryCount,
-            'budget' => $budget,
-            'over_budget' => $queryCount > $budget,
-            'elapsed_ms' => $elapsedMs,
-            'db_time_ms' => $dbTimeMs,
-            'error' => $error,
-        ];
     }
 }

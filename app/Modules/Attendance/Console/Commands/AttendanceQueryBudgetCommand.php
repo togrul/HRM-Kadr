@@ -2,6 +2,7 @@
 
 namespace App\Modules\Attendance\Console\Commands;
 
+use App\Console\Support\AbstractQueryBudgetCommand;
 use App\Models\AttendanceDailyLedger;
 use App\Models\Country;
 use App\Models\EducationDegree;
@@ -16,13 +17,11 @@ use App\Modules\Attendance\Application\Services\AttendanceMonthLockService;
 use App\Modules\Attendance\Application\Services\AttendanceOverviewService;
 use App\Modules\Attendance\Application\Services\AttendancePuantajReadService;
 use Carbon\Carbon;
-use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
-use Throwable;
 
-class AttendanceQueryBudgetCommand extends Command
+class AttendanceQueryBudgetCommand extends AbstractQueryBudgetCommand
 {
     protected $signature = 'attendance:query-budget
         {--year= : Target year}
@@ -260,57 +259,5 @@ class AttendanceQueryBudgetCommand extends Command
             'is_locked' => false,
             'meta' => null,
         ]);
-    }
-
-    /**
-     * @return array{
-     *   flow:string,
-     *   status:string,
-     *   queries:int,
-     *   budget:int,
-     *   over_budget:bool,
-     *   elapsed_ms:float,
-     *   db_time_ms:float,
-     *   error:?string
-     * }
-     */
-    private function probe(string $flow, int $budget, callable $callback): array
-    {
-        $connection = DB::connection();
-        $wasLogging = method_exists($connection, 'logging') ? (bool) $connection->logging() : false;
-
-        $connection->flushQueryLog();
-        $connection->enableQueryLog();
-
-        $startedAt = microtime(true);
-        $status = 'ok';
-        $error = null;
-
-        try {
-            $callback();
-        } catch (Throwable $throwable) {
-            $status = 'failed';
-            $error = $throwable->getMessage();
-        } finally {
-            $queries = $connection->getQueryLog();
-            if (! $wasLogging) {
-                $connection->disableQueryLog();
-            }
-        }
-
-        $queryCount = count($queries);
-        $dbTimeMs = round((float) collect($queries)->sum(fn ($query) => (float) ($query['time'] ?? 0)), 2);
-        $elapsedMs = round((microtime(true) - $startedAt) * 1000, 2);
-
-        return [
-            'flow' => $flow,
-            'status' => $status,
-            'queries' => $queryCount,
-            'budget' => $budget,
-            'over_budget' => $queryCount > $budget,
-            'elapsed_ms' => $elapsedMs,
-            'db_time_ms' => $dbTimeMs,
-            'error' => $error,
-        ];
     }
 }

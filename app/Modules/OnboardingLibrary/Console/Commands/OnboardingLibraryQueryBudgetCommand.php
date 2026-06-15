@@ -2,13 +2,12 @@
 
 namespace App\Modules\OnboardingLibrary\Console\Commands;
 
+use App\Console\Support\AbstractQueryBudgetCommand;
 use App\Modules\OnboardingLibrary\Application\Services\OnboardingLibraryReadService;
-use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use Throwable;
 
-class OnboardingLibraryQueryBudgetCommand extends Command
+class OnboardingLibraryQueryBudgetCommand extends AbstractQueryBudgetCommand
 {
     protected $signature = 'onboarding-library:query-budget
         {--allow-empty : Return success when onboarding dataset is empty}
@@ -103,43 +102,5 @@ class OnboardingLibraryQueryBudgetCommand extends Command
         return ($payload['summary']['failed_probes'] === 0 && $payload['summary']['over_budget_probes'] === 0)
             ? self::SUCCESS
             : self::FAILURE;
-    }
-
-    private function probe(string $flow, int $budget, callable $callback): array
-    {
-        $connection = DB::connection();
-        $wasLogging = method_exists($connection, 'logging') ? (bool) $connection->logging() : false;
-
-        $connection->flushQueryLog();
-        $connection->enableQueryLog();
-
-        $startedAt = microtime(true);
-        $status = 'ok';
-        $error = null;
-
-        try {
-            $callback();
-        } catch (Throwable $throwable) {
-            $status = 'failed';
-            $error = $throwable->getMessage();
-        } finally {
-            $queries = $connection->getQueryLog();
-            if (! $wasLogging) {
-                $connection->disableQueryLog();
-            }
-        }
-
-        $queryCount = count($queries);
-
-        return [
-            'flow' => $flow,
-            'status' => $status,
-            'queries' => $queryCount,
-            'budget' => $budget,
-            'over_budget' => $queryCount > $budget,
-            'elapsed_ms' => round((microtime(true) - $startedAt) * 1000, 2),
-            'db_time_ms' => round((float) collect($queries)->sum(fn ($query) => (float) ($query['time'] ?? 0)), 2),
-            'error' => $error,
-        ];
     }
 }
