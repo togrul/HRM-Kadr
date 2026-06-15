@@ -47,6 +47,7 @@ class NotificationCampaignDispatcher
         protected NotificationTemplateRenderer $templateRenderer,
         protected NotificationCountCache $countCache,
         protected ApprovalRouteResolverService $approvalRouteResolver,
+        protected DispatchRetryScheduler $retryScheduler,
     ) {}
 
     public function dispatchBirthday(Personnel $personnel): int
@@ -397,7 +398,7 @@ class NotificationCampaignDispatcher
         $count = 0;
 
         foreach ($failedDispatches as $dispatch) {
-            if (! $this->isReadyForRetry($dispatch)) {
+            if (! $this->retryScheduler->isReadyForRetry($dispatch)) {
                 continue;
             }
 
@@ -415,7 +416,7 @@ class NotificationCampaignDispatcher
                     'attempt_count' => ((int) $dispatch->attempt_count) + 1,
                     'last_attempt_at' => now(),
                     'provider_message_id' => data_get($deliveryMeta, 'provider_message_id'),
-                    'meta' => $this->markDispatchMetaAsSent((array) data_get($deliveryMeta, 'meta', [])),
+                    'meta' => $this->retryScheduler->markDispatchMetaAsSent((array) data_get($deliveryMeta, 'meta', [])),
                     'error_message' => null,
                     'failed_at' => null,
                     'sent_at' => now(),
@@ -429,7 +430,7 @@ class NotificationCampaignDispatcher
                     'attempt_count' => ((int) $dispatch->attempt_count) + 1,
                     'last_attempt_at' => now(),
                     'error_message' => $e->getMessage(),
-                    'meta' => $this->failedDispatchMeta(
+                    'meta' => $this->retryScheduler->failedDispatchMeta(
                         recipientEmail: $recipient->email,
                         channel: $campaign->channel,
                         attemptCount: ((int) $dispatch->attempt_count) + 1,
@@ -493,7 +494,7 @@ class NotificationCampaignDispatcher
                     'attempt_count' => 1,
                     'last_attempt_at' => now(),
                     'provider_message_id' => data_get($deliveryMeta, 'provider_message_id'),
-                    'meta' => $this->markDispatchMetaAsSent((array) data_get($deliveryMeta, 'meta', [])),
+                    'meta' => $this->retryScheduler->markDispatchMetaAsSent((array) data_get($deliveryMeta, 'meta', [])),
                     'sent_at' => now(),
                 ]);
 
@@ -506,7 +507,7 @@ class NotificationCampaignDispatcher
                     'last_attempt_at' => now(),
                     'failed_at' => now(),
                     'error_message' => $e->getMessage(),
-                    'meta' => $this->failedDispatchMeta(
+                    'meta' => $this->retryScheduler->failedDispatchMeta(
                         recipientEmail: $recipient->email,
                         channel: $campaign->channel,
                         attemptCount: 1,
@@ -550,7 +551,7 @@ class NotificationCampaignDispatcher
                     'attempt_count' => 1,
                     'last_attempt_at' => now(),
                     'provider_message_id' => data_get($deliveryMeta, 'provider_message_id'),
-                    'meta' => $this->markDispatchMetaAsSent((array) data_get($deliveryMeta, 'meta', [])),
+                    'meta' => $this->retryScheduler->markDispatchMetaAsSent((array) data_get($deliveryMeta, 'meta', [])),
                     'sent_at' => now(),
                 ]);
 
@@ -563,7 +564,7 @@ class NotificationCampaignDispatcher
                     'last_attempt_at' => now(),
                     'failed_at' => now(),
                     'error_message' => $e->getMessage(),
-                    'meta' => $this->failedDispatchMeta(
+                    'meta' => $this->retryScheduler->failedDispatchMeta(
                         recipientEmail: $recipient->email,
                         channel: $rule->channel,
                         attemptCount: 1,
@@ -805,55 +806,6 @@ class NotificationCampaignDispatcher
                 'notification_type' => data_get($payload, 'type'),
             ],
         ];
-    }
-
-    protected function retryBackoffMinutes(int $attemptCount): int
-    {
-        return match (true) {
-            $attemptCount <= 1 => 5,
-            $attemptCount === 2 => 15,
-            $attemptCount === 3 => 60,
-            default => 240,
-        };
-    }
-
-    protected function nextRetryAt(int $attemptCount, ?Carbon $baseTime = null): Carbon
-    {
-        return ($baseTime ?? now())->copy()->addMinutes($this->retryBackoffMinutes($attemptCount));
-    }
-
-    protected function failedDispatchMeta(
-        ?string $recipientEmail,
-        ?string $channel,
-        int $attemptCount,
-        array $existingMeta = [],
-        ?string $driver = null,
-    ): array {
-        return array_merge($existingMeta, [
-            'recipient_email' => $recipientEmail,
-            'channel' => $channel,
-            'driver' => $driver,
-            'retry_after_minutes' => $this->retryBackoffMinutes($attemptCount),
-            'next_retry_at' => $this->nextRetryAt($attemptCount)->toIso8601String(),
-        ]);
-    }
-
-    protected function markDispatchMetaAsSent(array $meta): array
-    {
-        unset($meta['next_retry_at'], $meta['retry_after_minutes']);
-
-        return $meta;
-    }
-
-    protected function isReadyForRetry(NotificationDispatch $dispatch): bool
-    {
-        $nextRetryAt = data_get($dispatch->meta, 'next_retry_at');
-
-        if (! $nextRetryAt) {
-            return true;
-        }
-
-        return Carbon::parse((string) $nextRetryAt)->lessThanOrEqualTo(now());
     }
 
     protected function resolveSubjectFromCampaign(NotificationCampaign $campaign): ?Personnel
