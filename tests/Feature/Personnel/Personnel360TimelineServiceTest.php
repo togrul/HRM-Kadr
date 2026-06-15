@@ -97,7 +97,10 @@ class Personnel360TimelineServiceTest extends TestCase
         $this->assertContains('lifecycle', $items->pluck('type')->all());
         $this->assertContains('audit', $items->pluck('type')->all());
         $this->assertSame('lifecycle', $items->first()['type']);
-        $this->assertStringContainsString('Onboarding', $items->firstWhere('type', 'lifecycle')['title']);
+        $this->assertStringContainsString(
+            __('employee-lifecycle::dashboard.types.onboarding'),
+            $items->firstWhere('type', 'lifecycle')['title']
+        );
         $this->assertStringContainsString('HR Auditor', $items->firstWhere('type', 'audit')['role']);
         $auditSummary = $items->firstWhere('type', 'audit')['summary'];
         $this->assertStringContainsString('Regional Office', $auditSummary);
