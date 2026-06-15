@@ -7,8 +7,10 @@ use App\Models\Order;
 use App\Models\OrderCategory;
 use App\Models\Personnel;
 use App\Traits\NormalizesDropdownPayloads;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Livewire\WithFileUploads;
 use Livewire\Attributes\Computed;
 
@@ -32,12 +34,34 @@ trait TemplateCrud
     {
         return [
             'template_data.id' => 'required|int|min:2|unique:orders,id'.(! empty($this->templateModel) ? ','.$this->templateModel : ''),
-            'template_data.name' => 'required|string|min:2',
-            'template_data.content' => 'required',
+            'template_data.name' => 'required|string|min:2|max:150',
+            // On a fresh upload the content is an UploadedFile and must be a
+            // bounded .docx; on edit-without-reupload it is the stored string path.
+            'template_data.content' => $this->contentIsFreshUpload()
+                ? ['required', 'file', 'mimes:docx', 'max:10240']
+                : ['required'],
             'template_data.order_category_id' => 'required|int|exists:order_categories,id',
             'template_data.order_model' => ['required', 'string', Rule::in($this->allowedOrderModels())],
             'template_data.blade' => ['required', 'string', Rule::in($this->allowedBladeValues())],
         ];
+    }
+
+    protected function contentIsFreshUpload(): bool
+    {
+        return data_get($this->template_data, 'content') instanceof UploadedFile;
+    }
+
+    /**
+     * Persist the uploaded .docx under a sanitized, collision-free filename and
+     * return its relative storage path. The raw template name is never used as a
+     * filesystem path (prevents traversal / overwrite via crafted names).
+     */
+    protected function storeUploadedTemplate(): string
+    {
+        $safeName = Str::slug((string) ($this->template_data['name'] ?? 'template')) ?: 'template';
+        $filename = $safeName.'-'.Str::random(8).'.docx';
+
+        return $this->template_data['content']->storeAs('templates', $filename, 'public');
     }
 
     protected function validationAttributes()

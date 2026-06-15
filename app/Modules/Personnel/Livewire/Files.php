@@ -30,8 +30,10 @@ class Files extends Component
     public function rules()
     {
         return [
-            'uploadedFile' => 'required|file|mimes:pdf,doc,docx,xls,xlsx,csv,txt,jpg,jpeg,png,gif,webp,bmp,svg',
-            'files.filename' => 'required|string|min:1',
+            // svg excluded: it can carry inline <script> (stored XSS when served
+            // from the public disk). max caps upload size (KB).
+            'uploadedFile' => 'required|file|max:10240|mimes:pdf,doc,docx,xls,xlsx,csv,txt,jpg,jpeg,png,gif,webp,bmp',
+            'files.filename' => 'required|string|min:1|max:255',
         ];
     }
 

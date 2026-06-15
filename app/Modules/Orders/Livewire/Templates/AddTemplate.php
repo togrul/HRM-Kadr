@@ -4,20 +4,22 @@ namespace App\Modules\Orders\Livewire\Templates;
 
 use App\Livewire\Traits\TemplateCrud;
 use App\Modules\Orders\Domain\Contracts\OrderTemplateAdmin;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Component;
 use RuntimeException;
 
 class AddTemplate extends Component
 {
+    use AuthorizesRequests;
     use TemplateCrud;
 
     public function store()
     {
+        $this->authorize('edit-orders');
+
         $this->validate();
 
-        $filename = "{$this->template_data['name']}.docx";
-
-        $this->template_data['content'] = $this->template_data['content']->storeAs('templates', $filename, 'public');
+        $this->template_data['content'] = $this->storeUploadedTemplate();
 
         try {
             app(OrderTemplateAdmin::class)->create($this->modifyArray($this->template_data));

@@ -93,10 +93,24 @@ class Personnel extends Model
         'medical_inspection_date' => self::FORMAT_CAST,
     ];
 
+    /**
+     * Highly sensitive columns kept OUT of the activity log — audit-log viewers
+     * (gated by a single broad permission) must not see these via change history.
+     */
+    public const ACTIVITY_LOG_EXCLUDED = [
+        'pin',
+        'discrediting_information',
+        'special_inspection_result',
+        'medical_inspection_result',
+        'scientific_works_inventions',
+        'extra_important_information',
+    ];
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
             ->logAll()
+            ->logExcept(self::ACTIVITY_LOG_EXCLUDED)
             ->logOnlyDirty()
             ->useLogName('personnel')
             ->dontSubmitEmptyLogs();

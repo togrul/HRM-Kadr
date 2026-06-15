@@ -6,6 +6,7 @@ use App\Livewire\Traits\Helpers\FillComplexArrayTrait;
 use App\Livewire\Traits\TemplateCrud;
 use App\Models\Order;
 use App\Modules\Orders\Domain\Contracts\OrderTemplateAdmin;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
@@ -13,6 +14,7 @@ use RuntimeException;
 
 class EditTemplate extends Component
 {
+    use AuthorizesRequests;
     use FillComplexArrayTrait;
     use TemplateCrud;
 
@@ -69,12 +71,12 @@ class EditTemplate extends Component
 
     public function store()
     {
+        $this->authorize('edit-orders');
+
         $this->validate();
 
         if ($this->fileUpdated) {
-            $filename = "{$this->template_data['name']}.docx";
-
-            $this->template_data['content'] = $this->template_data['content']->storeAs('templates', $filename, 'public');
+            $this->template_data['content'] = $this->storeUploadedTemplate();
             $this->currentTemplateChecksum = $this->resolveStoredChecksum((string) $this->template_data['content']);
         }
 

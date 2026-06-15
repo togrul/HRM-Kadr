@@ -53,7 +53,8 @@ class CandidateFiles extends Component
                 'required',
                 'file',
                 'max:'.max(1, (int) config('candidates.documents.max_upload_kb', 10240)),
-                'mimes:pdf,doc,docx,xls,xlsx,csv,txt,jpg,jpeg,png,gif,webp,bmp,svg',
+                // svg excluded: inline <script> → stored XSS risk.
+                'mimes:pdf,doc,docx,xls,xlsx,csv,txt,jpg,jpeg,png,gif,webp,bmp',
             ],
             'draft.display_name' => ['required', 'string', 'min:1', 'max:255'],
             'draft.category' => ['required', 'string', 'in:'.implode(',', (array) config('candidates.documents.categories', ['other']))],
@@ -348,6 +349,7 @@ class CandidateFiles extends Component
 
         $normalizedExtension = Str::lower((string) $extension);
 
-        return in_array($normalizedExtension, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'], true);
+        // svg intentionally excluded: never render uploaded SVG inline (XSS).
+        return in_array($normalizedExtension, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'], true);
     }
 }
