@@ -67,6 +67,51 @@ class AzerbaijaniDeclension
     }
 
     /**
+     * Decline a noun already carrying the 3rd-person possessive suffix (the form
+     * org-unit / position names take in Azerbaijani: "şöbəsi", "mərkəzi", "anbarı").
+     * These inflect with the -n- buffer: "şöbəsi" → genitive "şöbəsinin",
+     * dative "şöbəsinə"; "anbarı" → "anbarının" / "anbarına". The last token is
+     * inflected so multi-word unit names work ("… Satış mərkəzi" → "… mərkəzinin").
+     */
+    public function possessiveGenitive(string $phrase): string
+    {
+        return $this->inflectLastTokenPossessive($phrase, 'genitive');
+    }
+
+    public function possessiveDative(string $phrase): string
+    {
+        return $this->inflectLastTokenPossessive($phrase, 'dative');
+    }
+
+    private function inflectLastTokenPossessive(string $phrase, string $case): string
+    {
+        $value = trim(preg_replace('/\s+/u', ' ', $phrase));
+        if ($value === '') {
+            return '';
+        }
+
+        $tokens = explode(' ', $value);
+        $last = array_pop($tokens);
+
+        $lastVowel = $this->lastVowel($last);
+        if ($lastVowel === null) {
+            $tokens[] = $last;
+
+            return implode(' ', $tokens);
+        }
+
+        $suffix = match ($case) {
+            'genitive' => 'n'.$this->fourWay($lastVowel).'n',
+            'dative' => 'n'.$this->twoWay($lastVowel),
+            default => '',
+        };
+
+        $tokens[] = $last.$suffix;
+
+        return implode(' ', $tokens);
+    }
+
+    /**
      * Decline a full personal name ("Surname Name Patronymic [oğlu|qızı]") by
      * inflecting its last token (the oğlu/qızı suffix when present, otherwise the
      * trailing surname/patronymic).

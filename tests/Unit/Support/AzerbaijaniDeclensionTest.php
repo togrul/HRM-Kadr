@@ -109,6 +109,31 @@ class AzerbaijaniDeclensionTest extends TestCase
         ];
     }
 
+    /**
+     * Org-unit / position names carry the 3rd-person possessive suffix and inflect
+     * with the -n- buffer — the genitive form is how structures appear in clauses.
+     *
+     * @dataProvider possessiveCases
+     */
+    public function test_possessive_noun_declension(string $phrase, string $genitive, string $dative): void
+    {
+        $this->assertSame($genitive, $this->d->possessiveGenitive($phrase));
+        $this->assertSame($dative, $this->d->possessiveDative($phrase));
+    }
+
+    public static function possessiveCases(): array
+    {
+        return [
+            ['şöbəsi', 'şöbəsinin', 'şöbəsinə'],
+            ['anbarı', 'anbarının', 'anbarına'],
+            ['mərkəzi', 'mərkəzinin', 'mərkəzinə'],
+            ['departamenti', 'departamentinin', 'departamentinə'],
+            // multi-word unit names inflect the trailing possessive head
+            ['Keşlə Qeyri-Qida Satış mərkəzi', 'Keşlə Qeyri-Qida Satış mərkəzinin', 'Keşlə Qeyri-Qida Satış mərkəzinə'],
+            ['Mərkəzi Qida Məhsulları anbarı', 'Mərkəzi Qida Məhsulları anbarının', 'Mərkəzi Qida Məhsulları anbarına'],
+        ];
+    }
+
     public function test_initials_without_vowel_are_left_untouched(): void
     {
         // No harmonizable vowel — engine must not invent a suffix.
