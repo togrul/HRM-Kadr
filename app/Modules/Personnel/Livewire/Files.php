@@ -55,7 +55,7 @@ class Files extends Component
         $path = $this->file_list[$key]['file'];
 
         if (is_string($path)) {
-            Storage::disk('public')->delete($path);
+            Storage::disk($this->fileDisk($path))->delete($path);
         }
 
         unset($this->file_list[$key]);
@@ -68,7 +68,9 @@ class Files extends Component
             foreach ($this->file_list as $fileList) {
                 $_existingFile = $this->personnelFiles->files()->where('filename', $fileList['filename'])->firstOrNew();
                 if (empty($_existingFile->file)) {
-                    $fileList['file'] = $fileList['file']->store('files', 'public');
+                    // Private disk — PII documents are served only via the gated
+                    // personnel.files.download route, never a public URL.
+                    $fileList['file'] = $fileList['file']->store('files', 'local');
                 }
                 $_existingFile->fill($fileList);
                 $_existingFile->save();
@@ -89,7 +91,7 @@ class Files extends Component
             ->withTrashed()
             ->first();
 
-       $this->authorize('update', $this->personnelFiles);
+        $this->authorize('update', $this->personnelFiles);
 
         $this->title = __('personnel::files.titles.files_for', [
             'name' => $this->personnelFiles->fullname,
@@ -108,14 +110,25 @@ class Files extends Component
     public function fileRoute(array $file): string
     {
         $raw = data_get($file, 'file');
+        $id = data_get($file, 'id');
 
         if (is_string($raw)) {
-            return Storage::url($raw);
+            // Stored documents are streamed through the authorized download route,
+            // not a public Storage::url(). Pending (unsaved) uploads keep their
+            // temporary preview URL.
+            return $id
+                ? route('personnel.files.download', $id)
+                : '#';
         }
 
         return method_exists($raw, 'temporaryUrl')
             ? $raw->temporaryUrl()
             : '#';
+    }
+
+    private function fileDisk(string $path): string
+    {
+        return Storage::disk('local')->exists($path) ? 'local' : 'public';
     }
 
     public function fileExtension(array $file): string
@@ -140,8 +153,11 @@ class Files extends Component
     {
         $raw = data_get($file, 'file');
 
-        if (is_string($raw) && Storage::disk('public')->exists($raw)) {
-            return $this->formatBytes((int) Storage::disk('public')->size($raw));
+        if (is_string($raw)) {
+            $disk = $this->fileDisk($raw);
+            if (Storage::disk($disk)->exists($raw)) {
+                return $this->formatBytes((int) Storage::disk($disk)->size($raw));
+            }
         }
 
         if (method_exists($raw, 'getSize')) {
