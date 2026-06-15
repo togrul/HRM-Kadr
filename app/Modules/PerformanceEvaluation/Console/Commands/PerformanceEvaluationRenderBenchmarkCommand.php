@@ -2,20 +2,19 @@
 
 namespace App\Modules\PerformanceEvaluation\Console\Commands;
 
+use App\Console\Support\AbstractRenderBenchmarkCommand;
 use App\Models\PerformanceForm;
 use App\Models\User;
+use App\Modules\PerformanceEvaluation\Livewire\EvaluationsSummary;
 use App\Modules\PerformanceEvaluation\Livewire\EvaluatorScoreCapture;
 use App\Modules\PerformanceEvaluation\Livewire\EvaluatorWorkspace;
-use App\Modules\PerformanceEvaluation\Livewire\EvaluationsSummary;
 use App\Modules\PerformanceEvaluation\Livewire\Overview;
 use App\Modules\PerformanceEvaluation\Livewire\TestsSummary;
 use App\Support\Livewire\LivewireComponentProfiler;
-use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use Throwable;
 
-class PerformanceEvaluationRenderBenchmarkCommand extends Command
+class PerformanceEvaluationRenderBenchmarkCommand extends AbstractRenderBenchmarkCommand
 {
     protected $signature = 'performance-evaluation:render-benchmark
         {--allow-empty : Return success when no performance dataset exists}
@@ -181,59 +180,10 @@ class PerformanceEvaluationRenderBenchmarkCommand extends Command
 
         return [[
             'id' => (int) $form->id,
-            'label' => ($form->personnel?->fullname ?? '-') . ' / ' . ($form->template?->name ?: $form->template?->code ?: '-'),
+            'label' => ($form->personnel?->fullname ?? '-').' / '.($form->template?->name ?: $form->template?->code ?: '-'),
             'template_id' => (int) $form->performance_form_template_id,
             'evaluator_type' => (int) $form->manager_id === (int) $user->id ? 'manager' : 'hr',
         ]];
-    }
-
-    /**
-     * @return array<string, float|int|string|null>
-     */
-    private function probe(string $flow, array $budget, callable $callback): array
-    {
-        try {
-            $metrics = $callback();
-            $renderMs = (float) data_get($metrics, 'render_ms', 0);
-            $responseBytes = (int) data_get($metrics, 'response_bytes', 0);
-            $exceeded = [];
-
-            if ($responseBytes > (int) $budget['response_bytes']) {
-                $exceeded[] = 'response_bytes';
-            }
-
-            if ($renderMs > (float) $budget['render_ms']) {
-                $exceeded[] = 'render_ms';
-            }
-
-            return [
-                'flow' => $flow,
-                'status' => 'ok',
-                'render_ms' => $renderMs,
-                'response_bytes' => $responseBytes,
-                'html_bytes' => data_get($metrics, 'html_bytes'),
-                'snapshot_bytes' => data_get($metrics, 'snapshot_bytes'),
-                'effects_bytes' => data_get($metrics, 'effects_bytes'),
-                'budget' => $budget,
-                'over_budget' => $exceeded !== [],
-                'exceeded' => $exceeded,
-                'error' => null,
-            ];
-        } catch (Throwable $throwable) {
-            return [
-                'flow' => $flow,
-                'status' => 'failed',
-                'render_ms' => null,
-                'response_bytes' => null,
-                'html_bytes' => null,
-                'snapshot_bytes' => null,
-                'effects_bytes' => null,
-                'budget' => $budget,
-                'over_budget' => false,
-                'exceeded' => [],
-                'error' => $throwable->getMessage(),
-            ];
-        }
     }
 
     /**

@@ -2,10 +2,11 @@
 
 namespace App\Modules\TrainingNeeds\Console\Commands;
 
-use App\Models\TrainingSession;
+use App\Console\Support\AbstractRenderBenchmarkCommand;
 use App\Models\TrainingAnnualPlan;
 use App\Models\TrainingFeedbackForm;
 use App\Models\TrainingProgram;
+use App\Models\TrainingSession;
 use App\Models\User;
 use App\Modules\TrainingNeeds\Livewire\Analytics;
 use App\Modules\TrainingNeeds\Livewire\Dashboard;
@@ -14,12 +15,10 @@ use App\Modules\TrainingNeeds\Livewire\Reports;
 use App\Modules\TrainingNeeds\Livewire\ResultsSummary;
 use App\Modules\TrainingNeeds\Livewire\SessionDetailWorkspace;
 use App\Support\Livewire\LivewireComponentProfiler;
-use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use Throwable;
 
-class TrainingNeedsRenderBenchmarkCommand extends Command
+class TrainingNeedsRenderBenchmarkCommand extends AbstractRenderBenchmarkCommand
 {
     protected $signature = 'training-needs:render-benchmark
         {--allow-empty : Return success when no training dataset exists}
@@ -194,55 +193,6 @@ class TrainingNeedsRenderBenchmarkCommand extends Command
         ]);
 
         return (int) $session->id;
-    }
-
-    /**
-     * @return array<string, float|int|string|null>
-     */
-    private function probe(string $flow, array $budget, callable $callback): array
-    {
-        try {
-            $metrics = $callback();
-            $renderMs = (float) data_get($metrics, 'render_ms', 0);
-            $responseBytes = (int) data_get($metrics, 'response_bytes', 0);
-            $exceeded = [];
-
-            if ($responseBytes > (int) $budget['response_bytes']) {
-                $exceeded[] = 'response_bytes';
-            }
-
-            if ($renderMs > (float) $budget['render_ms']) {
-                $exceeded[] = 'render_ms';
-            }
-
-            return [
-                'flow' => $flow,
-                'status' => 'ok',
-                'render_ms' => $renderMs,
-                'response_bytes' => $responseBytes,
-                'html_bytes' => data_get($metrics, 'html_bytes'),
-                'snapshot_bytes' => data_get($metrics, 'snapshot_bytes'),
-                'effects_bytes' => data_get($metrics, 'effects_bytes'),
-                'budget' => $budget,
-                'over_budget' => $exceeded !== [],
-                'exceeded' => $exceeded,
-                'error' => null,
-            ];
-        } catch (Throwable $throwable) {
-            return [
-                'flow' => $flow,
-                'status' => 'failed',
-                'render_ms' => null,
-                'response_bytes' => null,
-                'html_bytes' => null,
-                'snapshot_bytes' => null,
-                'effects_bytes' => null,
-                'budget' => $budget,
-                'over_budget' => false,
-                'exceeded' => [],
-                'error' => $throwable->getMessage(),
-            ];
-        }
     }
 
     /**
