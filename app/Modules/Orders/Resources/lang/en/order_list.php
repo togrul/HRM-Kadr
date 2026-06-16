@@ -26,6 +26,7 @@ return [
     ],
     'actions' => [
         'open_user_guide' => 'User guide',
+        'download_now' => 'Download DOCX now',
     ],
     'guide' => [
         'title' => 'Using orders for the first time?',

@@ -23,8 +23,8 @@ class ModuleTranslationStoredTextTest extends TestCase
         );
 
         $this->assertSame(
-            'Qrup başlığı',
-            ModuleTranslation::resolveStoredText('orders::template_set_type.labels.group_title')
+            'Əmrlərlə ilk dəfə işləyirsiniz?',
+            ModuleTranslation::resolveStoredText('orders::order_list.guide.title')
         );
     }
 

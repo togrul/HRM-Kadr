@@ -26,6 +26,7 @@ return [
     ],
     'actions' => [
         'open_user_guide' => 'İstifadəçi bələdçisi',
+        'download_now' => 'DOCX faylını indi yüklə',
     ],
     'guide' => [
         'title' => 'Əmrlərlə ilk dəfə işləyirsiniz?',
