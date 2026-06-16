@@ -86,13 +86,6 @@
                         {{ __('orders::order_composer.designer.title') }}
                     </a>
                 @endcan
-                @can('add-orders')
-                    <button wire:click="openSideMenu('add-order',{{ $selectedOrder }})"
-                        class="flex items-center justify-center w-12 h-12 transition-all duration-300 rounded-xl hover:bg-blue-50"
-                        type="button">
-                        <x-icons.add-file></x-icons.add-file>
-                    </button>
-                @endcan
                 @can('export-orders')
                     <button wire:click.prevent="exportExcel"
                         class="flex items-center justify-center w-12 h-12 transition-all duration-300 rounded-xl hover:bg-green-50"
