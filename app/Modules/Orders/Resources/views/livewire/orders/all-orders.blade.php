@@ -251,6 +251,15 @@
                                                 <x-icons.recover color="text-teal-500" hover="text-teal-600"></x-icons.recover>
                                             </button>
                                         @endcan
+                                    @elseif ($_order->template_render_mode === \App\Services\Orders\Document\OrderIssueService::RENDER_MODE && $_order->status_id == 10)
+                                        @can('add-orders')
+                                            <a href="{{ route('orders.composer.edit', ['orderId' => $_order->id]) }}"
+                                                title="{{ __('orders::order_composer.actions.edit') }}"
+                                                aria-label="{{ __('orders::order_composer.actions.edit') }}"
+                                                class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 bg-gray-100 rounded-lg hover:bg-gray-200 hover:text-gray-700">
+                                                <x-icons.document-icon></x-icons.document-icon>
+                                            </a>
+                                        @endcan
                                     @endif
                                 </x-table.td>
 

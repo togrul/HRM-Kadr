@@ -2,7 +2,14 @@
     {{-- Page header --}}
     <div class="flex items-center justify-between">
         <div>
-            <h1 class="text-2xl font-semibold tracking-tight text-zinc-900">{{ __('orders::order_composer.title') }}</h1>
+            <div class="flex items-center gap-3">
+                <h1 class="text-2xl font-semibold tracking-tight text-zinc-900">{{ __('orders::order_composer.title') }}</h1>
+                @if ($this->isEditing())
+                    <span class="inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">
+                        {{ __('orders::order_composer.actions.edit') }} · {{ $orderNumber }}
+                    </span>
+                @endif
+            </div>
             <p class="mt-1 text-sm text-zinc-500">{{ __('orders::order_composer.labels.edit_hint') }}</p>
         </div>
         <a href="{{ route('orders') }}" class="text-sm font-medium text-zinc-500 hover:text-zinc-900">← {{ __('orders::order_list.filters.reset') }}</a>
@@ -111,7 +118,7 @@
                 </div>
                 <button type="button" wire:click="issue"
                     class="inline-flex h-10 items-center gap-2 rounded-lg bg-emerald-600 px-5 text-sm font-semibold text-white transition hover:bg-emerald-500">
-                    {{ __('orders::order_composer.actions.issue') }}
+                    {{ $this->isEditing() ? __('orders::order_composer.actions.save') : __('orders::order_composer.actions.issue') }}
                 </button>
             </div>
 

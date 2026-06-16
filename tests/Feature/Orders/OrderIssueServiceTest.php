@@ -6,6 +6,7 @@ use App\Models\Personnel;
 use App\Services\Orders\Document\OrderIssueService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
+use RuntimeException;
 use Tests\TestCase;
 
 /**
@@ -37,6 +38,62 @@ class OrderIssueServiceTest extends TestCase
         $this->assertSame('900-M', $order->order_no);
         $this->assertSame('Əmək məzuniyyəti', data_get($order->template_snapshot, 'label'));
         $this->assertTrue($order->personnels()->where('personnels.id', $personnel->id)->exists());
+    }
+
+    public function test_it_updates_a_pending_block_order_in_place(): void
+    {
+        $first = $this->makePersonnel();
+        $second = $this->makePersonnel();
+        $service = app(OrderIssueService::class);
+
+        $order = $service->issue([
+            'template_code' => 'leave',
+            'label' => 'Əmək məzuniyyəti',
+            'personnel_id' => $first->id,
+            'fields' => ['days' => '14'],
+            'order_number' => '900-M',
+            'order_date' => '14 may 2026-cı il',
+            'snapshot_html' => '<div class="order-document"><p>Köhnə mətn</p></div>',
+        ]);
+
+        $updated = $service->update($order, [
+            'template_code' => 'leave',
+            'label' => 'Əmək məzuniyyəti',
+            'personnel_id' => $second->id,
+            'fields' => ['days' => '21'],
+            'order_number' => '901-M',
+            'order_date' => '20 may 2026-cı il',
+            'snapshot_html' => '<div class="order-document"><p>Düzəliş edilmiş mətn</p></div>',
+        ]);
+
+        $this->assertSame($order->id, $updated->id);   // same row, no new order
+        $this->assertSame('901-M', $updated->fresh()->order_no);
+        $this->assertSame('21', data_get($updated->fresh()->template_snapshot, 'fields.days'));
+        $this->assertStringContainsString('Düzəliş edilmiş mətn', data_get($updated->fresh()->template_snapshot, 'html'));
+        // personnel re-synced to the new employee only
+        $this->assertTrue($updated->personnels()->where('personnels.id', $second->id)->exists());
+        $this->assertFalse($updated->personnels()->where('personnels.id', $first->id)->exists());
+    }
+
+    public function test_it_refuses_to_edit_an_approved_order(): void
+    {
+        $personnel = $this->makePersonnel();
+        $service = app(OrderIssueService::class);
+
+        $order = $service->issue([
+            'template_code' => 'leave',
+            'personnel_id' => $personnel->id,
+            'order_number' => '902-M',
+            'snapshot_html' => '<div class="order-document"><p>x</p></div>',
+        ]);
+        $order->update(['status_id' => 20]); // approved
+
+        $this->expectException(RuntimeException::class);
+
+        $service->update($order, [
+            'order_number' => '902-M',
+            'snapshot_html' => '<div class="order-document"><p>y</p></div>',
+        ]);
     }
 
     private function makePersonnel(): Personnel

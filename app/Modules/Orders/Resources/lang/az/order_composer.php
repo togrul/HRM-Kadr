@@ -16,6 +16,8 @@ return [
         'generate' => 'Önizləməni yarat',
         'download' => 'Word sənədini yüklə',
         'issue' => 'Əmri yarat və yüklə',
+        'edit' => 'Əmri redaktə et',
+        'save' => 'Dəyişiklikləri yadda saxla',
     ],
     'errors' => [
         'unknown_type' => 'Bu əmr növü tapılmadı.',
@@ -27,6 +29,7 @@ return [
         'template_saved' => 'Şablon yadda saxlanıldı.',
         'order_issued' => 'Əmr yaradıldı və siyahıya əlavə olundu.',
         'order_approved' => 'Əmr təsdiqləndi.',
+        'order_updated' => 'Əmr yeniləndi.',
     ],
     'designer' => [
         'title' => 'Əmr növü dizayneri',

@@ -2,6 +2,7 @@
 
 namespace App\Modules\Orders\Livewire;
 
+use App\Models\OrderLog;
 use App\Models\Personnel;
 use App\Services\Orders\Document\OrderFieldTransformer;
 use App\Services\Orders\Document\OrderIssueService;
@@ -45,9 +46,22 @@ class OrderComposer extends Component
 
     public string $editedHtml = '';
 
-    public function mount(?string $presetCode = null, ?int $personnelId = null): void
+    /** Set when editing an existing pending block order (its order_logs id). */
+    public ?int $editOrderId = null;
+
+    public function mount(?string $presetCode = null, ?int $personnelId = null, ?int $orderId = null): void
     {
         $this->authorize('add-orders');
+
+        // Edit mode: re-open an existing pending block order and prefill everything
+        // from its frozen snapshot so the HR user can correct fields or the text.
+        // Keyed by id (order numbers may contain "/", which a path param can't carry).
+        if ($orderId !== null) {
+            $this->loadForEdit($orderId);
+
+            return;
+        }
+
         // Nullable + coalesced: as a full-page route component Livewire may pass null
         // for params not present in the route ({personnelId?}), so guard the defaults.
         $this->presetCode = $presetCode ?? '';
@@ -55,6 +69,37 @@ class OrderComposer extends Component
 
         if ($personnelId) {
             $this->personnelLabel = optional(Personnel::find($personnelId))->fullname;
+        }
+    }
+
+    public function isEditing(): bool
+    {
+        return $this->editOrderId !== null;
+    }
+
+    private function loadForEdit(int $orderId): void
+    {
+        $order = OrderLog::find($orderId);
+
+        abort_if($order === null, 404);
+        abort_unless((string) $order->template_render_mode === OrderIssueService::RENDER_MODE, 404);
+        // Approved orders already produced their HR side-effects — not editable.
+        abort_unless((int) $order->status_id === OrderIssueService::STATUS_PENDING, 403);
+
+        $snapshot = $order->template_snapshot ?? [];
+
+        $this->editOrderId = $order->id;
+        $this->presetCode = (string) ($snapshot['template_code'] ?? '');
+        $this->fields = (array) ($snapshot['fields'] ?? []);
+        $this->orderNumber = (string) $order->order_no;
+        $this->orderDate = (string) ($snapshot['order_date_text'] ?? '');
+        $this->previewHtml = (string) ($snapshot['html'] ?? '');
+        $this->editedHtml = $this->previewHtml;
+
+        $personnelId = $snapshot['personnel_id'] ?? null;
+        if ($personnelId) {
+            $this->personnelId = (int) $personnelId;
+            $this->personnelLabel = optional(Personnel::find($this->personnelId))->fullname;
         }
     }
 
@@ -173,7 +218,7 @@ class OrderComposer extends Component
 
         $snapshot = $renderer->finalize($html);
 
-        $issuer->issue([
+        $payload = [
             'template_code' => $this->presetCode,
             'label' => $templates->available()[$this->presetCode] ?? $this->presetCode,
             'personnel_id' => $this->personnelId,
@@ -181,7 +226,19 @@ class OrderComposer extends Component
             'order_number' => trim($this->orderNumber),
             'order_date' => $this->orderDate,
             'snapshot_html' => $snapshot->html,
-        ]);
+        ];
+
+        // Edit mode: re-freeze the existing pending order in place and return to the
+        // list so the HR user sees the correction applied (no new row, no download).
+        if ($this->isEditing()) {
+            $order = OrderLog::findOrFail($this->editOrderId);
+            $issuer->update($order, $payload);
+            session()->flash('status', __('orders::order_composer.messages.order_updated'));
+
+            return redirect()->route('orders');
+        }
+
+        $issuer->issue($payload);
 
         $this->dispatch('orderIssued', __('orders::order_composer.messages.order_issued'));
 

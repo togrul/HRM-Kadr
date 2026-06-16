@@ -16,6 +16,8 @@ return [
         'generate' => 'Generate preview',
         'download' => 'Download Word document',
         'issue' => 'Create order & download',
+        'edit' => 'Edit order',
+        'save' => 'Save changes',
     ],
     'errors' => [
         'unknown_type' => 'Unknown order type.',
@@ -27,6 +29,7 @@ return [
         'template_saved' => 'Template saved.',
         'order_issued' => 'Order created and added to the list.',
         'order_approved' => 'Order approved.',
+        'order_updated' => 'Order updated.',
     ],
     'designer' => [
         'title' => 'Order type designer',

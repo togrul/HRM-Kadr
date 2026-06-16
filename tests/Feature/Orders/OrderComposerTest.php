@@ -67,6 +67,49 @@ class OrderComposerTest extends TestCase
         $this->assertSame($personnel->id, data_get($order->template_snapshot, 'personnel_id'));
     }
 
+    public function test_it_opens_a_pending_block_order_for_editing_and_saves_in_place(): void
+    {
+        $personnel = $this->makePersonnel();
+        $this->actingAs($this->userWith('add-orders'));
+
+        // First issue an order through the composer.
+        $created = Livewire::test(OrderComposer::class, [
+            'presetCode' => 'leave',
+            'personnelId' => $personnel->id,
+        ])
+            ->set('orderNumber', '500-M')
+            ->set('orderDate', '14 may 2026-cı il')
+            ->set('fields', ['days' => '14', 'work_year' => '2025-11-26'])
+            ->call('generatePreview')
+            ->call('issue');
+
+        $order = \App\Models\OrderLog::where('order_no', '500-M')->firstOrFail();
+
+        // Re-open it in edit mode: everything is prefilled from the snapshot.
+        $editor = Livewire::test(OrderComposer::class, ['orderId' => $order->id])
+            ->assertSet('presetCode', 'leave')
+            ->assertSet('orderNumber', '500-M')
+            ->assertSet('personnelId', $personnel->id);
+
+        $this->assertTrue($editor->instance()->isEditing());
+        $this->assertStringContainsString('Bayramov Ruslan Bəxtiyar oğluna', $editor->get('previewHtml'));
+
+        // Correct the text inline and save — same row is re-frozen, then redirect to list.
+        $editedHtml = str_replace('14 təqvim günü', '20 təqvim günü', $editor->get('editedHtml'));
+
+        $editor->set('orderNumber', '500-M-DÜZ')
+            ->set('editedHtml', $editedHtml)
+            ->call('issue')
+            ->assertRedirect(route('orders'));
+
+        $order->refresh();
+        $this->assertSame('500-M-DÜZ', $order->order_no);
+        $this->assertStringContainsString('20 təqvim günü', data_get($order->template_snapshot, 'html'));
+        $this->assertSame(\App\Services\Orders\Document\OrderIssueService::STATUS_PENDING, $order->status_id);
+        // No duplicate row — editing updates in place.
+        $this->assertSame(1, \App\Models\OrderLog::where('template_render_mode', 'block_v2')->count());
+    }
+
     public function test_selecting_a_preset_renders_its_auto_derived_field_inputs(): void
     {
         $this->actingAs($this->userWith('add-orders'));
