@@ -29,7 +29,7 @@ class OrderLog extends Model
         return LogOptions::defaults()
             ->logAll()
             ->logOnlyDirty()
-            ->setDescriptionForEvent(fn(string $eventName) => "This model has been {$eventName}");
+            ->setDescriptionForEvent(fn (string $eventName) => "This model has been {$eventName}");
     }
 
     protected $fillable = [
@@ -39,6 +39,8 @@ class OrderLog extends Model
         'given_date',
         'given_by',
         'given_by_rank',
+        'signatory_personnel_id',
+        'signatory_snapshot',
         'description',
         'order_template_version_id',
         'template_render_mode',
@@ -56,6 +58,7 @@ class OrderLog extends Model
         'deleted_at' => self::FORMAT_CAST,
         'given_date' => self::FORMAT_CAST,
         'description' => 'array',
+        'signatory_snapshot' => 'array',
         'template_snapshot' => 'array',
     ];
 
@@ -111,6 +114,11 @@ class OrderLog extends Model
         return $this->belongsTo(OrderTemplateVersion::class, 'order_template_version_id');
     }
 
+    public function signatory(): BelongsTo
+    {
+        return $this->belongsTo(Personnel::class, 'signatory_personnel_id');
+    }
+
     public function attributes(): HasMany
     {
         return $this->hasMany(OrderLogComponentAttributes::class, 'order_no', 'order_no');
@@ -124,11 +132,6 @@ class OrderLog extends Model
     public function businessTrips(): HasMany
     {
         return $this->hasMany(PersonnelBusinessTrip::class, 'order_no', 'order_no');
-    }
-
-    public function generationLogs(): HasMany
-    {
-        return $this->hasMany(OrderGenerationLog::class);
     }
 
     public function handleDeletion(): void
@@ -162,6 +165,7 @@ class OrderLog extends Model
 
             if ($field === 'order_no') {
                 $query->where($field, 'LIKE', '%'.trim((string) $value).'%');
+
                 continue;
             }
 

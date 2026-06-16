@@ -7,10 +7,6 @@ use App\Models\Order;
 use App\Models\OrderLog;
 use App\Modules\Orders\Domain\Contracts\AccessibleStructureScopeReadRepository;
 use App\Modules\Orders\Domain\Contracts\OrderTypeStatusLookupReadRepository;
-use App\Modules\Orders\Jobs\GenerateOrderDocumentJob;
-use App\Services\Orders\OrderDocumentGenerationService;
-use App\Services\Orders\OrderPrintPayloadFactory;
-use App\Services\Orders\OrderTemplateRenderer;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
@@ -119,38 +115,22 @@ class AllOrders extends Component
 
     public function printOrder(string $order_no)
     {
-        $order = OrderLog::with(['order', 'components', 'attributes'])->where('order_no', $order_no)->first();
+        $order = OrderLog::where('order_no', $order_no)->first();
         if (! $order) {
             abort(404);
         }
 
-        // Block-engine orders carry their frozen HTML in the snapshot; render the
-        // final .docx straight from it (no legacy order/template needed).
-        if ((string) $order->template_render_mode === \App\Services\Orders\Document\OrderIssueService::RENDER_MODE) {
-            abort_unless((bool) auth()->user()?->can('add-orders'), 403);
-            $html = (string) data_get($order->template_snapshot, 'html', '');
-            abort_if($html === '', 404);
-            $path = app(\App\Services\Orders\Document\OrderHtmlToDocxRenderer::class)->renderToFile($html);
+        // Only block-engine orders are printable: they carry their frozen HTML in
+        // the snapshot, so the final .docx renders straight from it. Legacy orders
+        // are no longer generated and have no downloadable document.
+        abort_unless((string) $order->template_render_mode === \App\Services\Orders\Document\OrderIssueService::RENDER_MODE, 404);
+        abort_unless((bool) auth()->user()?->can('add-orders'), 403);
 
-            return response()->download($path, $order->order_no.'.docx')->deleteFileAfterSend();
-        }
+        $html = (string) data_get($order->template_snapshot, 'html', '');
+        abort_if($html === '', 404);
+        $path = app(\App\Services\Orders\Document\OrderHtmlToDocxRenderer::class)->renderToFile($html);
 
-        if (! $order->order) {
-            abort(404);
-        }
-
-        $this->authorize('view', $order->order);
-        $payload = app(OrderPrintPayloadFactory::class)->build($order);
-
-        $outputPath = app(OrderTemplateRenderer::class)->render(
-            storedTemplatePath: (string) $payload['template_path'],
-            scalarValues: (array) $payload['scalar_values'],
-            rows: (array) $payload['rows'],
-            outputBaseName: (string) $payload['output_base_name'],
-            context: (array) $payload['context'],
-        );
-
-        return response()->download($outputPath, basename($outputPath))->deleteFileAfterSend();
+        return response()->download($path, $order->order_no.'.docx')->deleteFileAfterSend();
     }
 
     public function approveOrder(string $order_no): void
@@ -167,36 +147,15 @@ class AllOrders extends Component
         $this->dispatch('orderAdded', __('orders::order_composer.messages.order_approved'));
     }
 
-    #[Renderless]
-    public function queueOrderDocument(string $order_no): void
-    {
-        $order = OrderLog::with(['order'])->where('order_no', $order_no)->first();
-
-        if (! $order || ! $order->order) {
-            $this->dispatch('notify', type: 'error', message: __('orders::order_list.generation.messages.order_not_found'));
-
-            return;
-        }
-
-        $this->authorize('view', $order->order);
-
-        $generationLog = app(OrderDocumentGenerationService::class)->queue($order);
-
-        GenerateOrderDocumentJob::dispatch((int) $order->id, (int) $generationLog->id);
-
-        $this->dispatch('notify', type: 'success', message: __('orders::order_list.generation.messages.queued'));
-    }
-
     protected function returnData($type = 'normal')
     {
         $globalOrderIds = Order::globalVisibilityOrderIds();
 
         $result = OrderLog::query()
             ->with([
-                'order:id,name,blade',
+                'order:id,name',
                 'status:id,name',
                 'orderType:id,name',
-                'latestGenerationLog',
             ])
             ->when($this->status === 'deleted', fn ($query) => $query->with('personDidDelete:id,name'))
             ->where(function ($query) use ($globalOrderIds) {

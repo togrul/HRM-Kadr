@@ -213,42 +213,13 @@
                                 <x-table.td>
                                     <div class="flex flex-col items-start gap-1.5">
                                         <x-status design="modern" :status-id="$_order->status_color_id" :label="$_order->status->name"></x-status>
-
-                                        @if($_order->latestGenerationLog)
-                                            @php
-                                                $generationStatus = (string) $_order->latestGenerationLog->status;
-                                                $generationStatusLabel = __('orders::order_list.generation.statuses.' . $generationStatus);
-                                                if ($generationStatusLabel === 'orders::order_list.generation.statuses.' . $generationStatus) {
-                                                    $generationStatusLabel = __('orders::order_list.generation.statuses.unknown');
-                                                }
-                                                $generationClasses = match ($generationStatus) {
-                                                    'queued' => 'border-sky-200 bg-sky-50 text-sky-700',
-                                                    'success' => 'border-emerald-200 bg-emerald-50 text-emerald-700',
-                                                    'failed' => 'border-rose-200 bg-rose-50 text-rose-700',
-                                                    default => 'border-amber-200 bg-amber-50 text-amber-700',
-                                                };
-                                            @endphp
-
-                                            <span
-                                                @class([
-                                                    'inline-flex max-w-[180px] items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide',
-                                                    $generationClasses,
-                                                ])
-                                                title="{{ $_order->latestGenerationLog->error_message ?: __('orders::order_list.generation.last_render') }}"
-                                            >
-                                                {{ $generationStatusLabel }}
-                                                @if($_order->latestGenerationLog->duration_ms)
-                                                    · {{ $_order->latestGenerationLog->duration_ms }}ms
-                                                @endif
-                                            </span>
-                                        @endif
                                     </div>
                                 </x-table.td>
 
                                 <x-table.td :isButton="true">
-                                    @can('export-orders')
-                                        @if ($_order->order?->blade != \App\Models\Order::BLADE_BUSINESS_TRIP)
-                                            <div class="flex items-center justify-center gap-1">
+                                    @if ($_order->template_render_mode === \App\Services\Orders\Document\OrderIssueService::RENDER_MODE)
+                                        <div class="flex items-center justify-center gap-1">
+                                            @can('export-orders')
                                                 <button
                                                     wire:click="printOrder('{{ $_order->order_no }}')"
                                                     title="{{ __('orders::order_list.actions.download_now') }}"
@@ -257,28 +228,19 @@
                                                 >
                                                     <x-icons.print-file color="text-teal-500" hover="text-teal-600"></x-icons.print-file>
                                                 </button>
-                                                <button
-                                                    type="button"
-                                                    wire:click="queueOrderDocument('{{ $_order->order_no }}')"
-                                                    title="{{ __('orders::order_list.actions.generate_in_background') }}"
-                                                    aria-label="{{ __('orders::order_list.actions.generate_in_background') }}"
-                                                    class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg bg-sky-50 hover:bg-sky-100 hover:text-gray-700"
-                                                >
-                                                    <x-icons.refresh-icon color="text-sky-500" hover="text-sky-600" size="w-4 h-4"></x-icons.refresh-icon>
-                                                </button>
-                                            </div>
-                                        @endif
-                                    @endcan
-                                    @can('add-orders')
-                                        @if ($_order->template_render_mode === \App\Services\Orders\Document\OrderIssueService::RENDER_MODE && $_order->status_id == 10)
-                                            <button
-                                                wire:click="approveOrder('{{ $_order->order_no }}')"
-                                                wire:confirm="{{ __('orders::order_composer.messages.order_approved') }}?"
-                                                class="ml-1 inline-flex items-center justify-center h-8 px-3 text-xs font-semibold text-white transition rounded-lg bg-emerald-600 hover:bg-emerald-500">
-                                                ✓ Təsdiqlə
-                                            </button>
-                                        @endif
-                                    @endcan
+                                            @endcan
+                                            @can('add-orders')
+                                                @if ($_order->status_id == 10)
+                                                    <button
+                                                        wire:click="approveOrder('{{ $_order->order_no }}')"
+                                                        wire:confirm="{{ __('orders::order_composer.messages.order_approved') }}?"
+                                                        class="ml-1 inline-flex items-center justify-center h-8 px-3 text-xs font-semibold text-white transition rounded-lg bg-emerald-600 hover:bg-emerald-500">
+                                                        ✓ Təsdiqlə
+                                                    </button>
+                                                @endif
+                                            @endcan
+                                        </div>
+                                    @endif
                                 </x-table.td>
 
                                 <x-table.td :isButton="true">
