@@ -25,7 +25,7 @@ class OrderDocumentHtmlRenderer
                 $node instanceof SplitLine => $this->splitLine($node),
                 $node instanceof NumberedList => $this->numberedList($node),
                 $node instanceof SignatureBlock => $this->signature($node),
-                $node instanceof Spacer => str_repeat('<p class="order-spacer">&nbsp;</p>', max(1, $node->lines)),
+                $node instanceof Spacer => str_repeat('<p class="order-spacer">&#160;</p>', max(1, $node->lines)),
                 default => '',
             };
         }
@@ -42,10 +42,12 @@ class OrderDocumentHtmlRenderer
 
     private function splitLine(SplitLine $node): string
     {
-        return '<div class="order-split-line" style="display:flex;justify-content:space-between;">'
-            .'<span>'.$this->e($node->left).'</span>'
-            .'<span>'.$this->e($node->right).'</span>'
-            .'</div>';
+        // Table-based (not flex) so PHPWord's HTML importer preserves the two
+        // columns when the edited preview is converted to the final .docx.
+        return '<table class="order-split-line" style="width:100%"><tr>'
+            .'<td style="text-align:left">'.$this->e($node->left).'</td>'
+            .'<td style="text-align:right">'.$this->e($node->right).'</td>'
+            .'</tr></table>';
     }
 
     private function numberedList(NumberedList $node): string
@@ -62,13 +64,13 @@ class OrderDocumentHtmlRenderer
     {
         $title = '';
         foreach ($node->titleLines as $line) {
-            $title .= $this->e($line).'<br>';
+            $title .= $this->e($line).'<br/>';
         }
 
-        return '<div class="order-signature" style="display:flex;justify-content:space-between;align-items:flex-end;">'
-            .'<div class="order-signature-title">'.$title.'</div>'
-            .'<div class="order-signature-name">'.$this->e($node->name).'</div>'
-            .'</div>';
+        return '<table class="order-signature" style="width:100%"><tr>'
+            .'<td style="text-align:left" class="order-signature-title">'.$title.'</td>'
+            .'<td style="text-align:right" class="order-signature-name">'.$this->e($node->name).'</td>'
+            .'</tr></table>';
     }
 
     private function e(string $value): string
