@@ -5,7 +5,7 @@ namespace App\Modules\Orders\Livewire;
 use App\Models\Personnel;
 use App\Services\Orders\Document\OrderFieldTransformer;
 use App\Services\Orders\Document\OrderRenderService;
-use App\Services\Orders\Document\OrderTemplatePresets;
+use App\Services\Orders\Document\OrderTemplateProvider;
 use App\Services\Orders\Document\TemplateFieldSchema;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Component;
@@ -52,9 +52,9 @@ class OrderComposer extends Component
     /**
      * @return array<string,string>
      */
-    public function getPresetsProperty(OrderTemplatePresets $presets): array
+    public function getPresetsProperty(OrderTemplateProvider $templates): array
     {
-        return $presets->available();
+        return $templates->available();
     }
 
     /**
@@ -63,13 +63,13 @@ class OrderComposer extends Component
      *
      * @return array<int,array{key:string,placeholder:string,label:string,type:string}>
      */
-    public function getFieldDefsProperty(OrderTemplatePresets $presets, TemplateFieldSchema $schema): array
+    public function getFieldDefsProperty(OrderTemplateProvider $templates, TemplateFieldSchema $schema): array
     {
         if ($this->presetCode === '') {
             return [];
         }
 
-        return $schema->for($presets->blocks($this->presetCode));
+        return $schema->for($templates->blocks($this->presetCode));
     }
 
     public function updatedPresetCode(): void
@@ -80,11 +80,11 @@ class OrderComposer extends Component
         $this->editedHtml = '';
     }
 
-    public function generatePreview(OrderTemplatePresets $presets, OrderRenderService $renderer): void
+    public function generatePreview(OrderTemplateProvider $templates, OrderRenderService $renderer): void
     {
         $this->authorize('add-orders');
 
-        $blocks = $presets->blocks($this->presetCode);
+        $blocks = $templates->blocks($this->presetCode);
         if ($blocks === []) {
             $this->addError('presetCode', __('orders::order_composer.errors.unknown_type'));
 
