@@ -4,9 +4,12 @@ namespace App\Modules\Orders\Livewire;
 
 use App\Models\OrderLog;
 use App\Models\Personnel;
+use App\Services\Orders\Document\OrderDocumentDocxRenderer;
 use App\Services\Orders\Document\OrderFieldTransformer;
+use App\Services\Orders\Document\OrderHtmlToDocxRenderer;
 use App\Services\Orders\Document\OrderIssueService;
 use App\Services\Orders\Document\OrderRenderService;
+use App\Services\Orders\Document\OrderTemplateCompiler;
 use App\Services\Orders\Document\OrderTemplateProvider;
 use App\Services\Orders\Document\TemplateFieldSchema;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -46,6 +49,13 @@ class OrderComposer extends Component
     public string $previewHtml = '';
 
     public string $editedHtml = '';
+
+    /**
+     * True once the HR user has typed into the preview. When false, the .docx is
+     * rendered from the AST (faithful Word formatting); when true, from the edited
+     * HTML so manual corrections are preserved.
+     */
+    public bool $manuallyEdited = false;
 
     /** Set when editing an existing pending block order (its order_logs id). */
     public ?int $editOrderId = null;
@@ -101,6 +111,7 @@ class OrderComposer extends Component
         $this->orderDate = (string) ($snapshot['order_date_text'] ?? '');
         $this->previewHtml = (string) ($snapshot['html'] ?? '');
         $this->editedHtml = $this->previewHtml;
+        $this->manuallyEdited = (bool) ($snapshot['edited'] ?? false);
         $this->hasUploadedDocx = ! empty($snapshot['docx_path']);
 
         $personnelId = $snapshot['personnel_id'] ?? null;
@@ -242,7 +253,12 @@ class OrderComposer extends Component
     {
         $this->authorize('add-orders');
 
-        $html = $this->editedHtml !== '' ? $this->editedHtml : $this->previewHtml;
+        $blocks = $templates->blocks($this->presetCode);
+        $context = $this->context();
+        // The clean, AST-generated HTML (used unless the user typed corrections).
+        $generatedHtml = $blocks !== [] ? $renderer->previewBlocks($blocks, $context) : '';
+
+        $html = $this->manuallyEdited && trim($this->editedHtml) !== '' ? $this->editedHtml : $generatedHtml;
         if ($html === '') {
             $this->addError('previewHtml', __('orders::order_composer.errors.nothing_to_generate'));
 
@@ -254,8 +270,6 @@ class OrderComposer extends Component
             return null;
         }
 
-        $snapshot = $renderer->finalize($html);
-
         $payload = [
             'template_code' => $this->presetCode,
             'label' => $templates->available()[$this->presetCode] ?? $this->presetCode,
@@ -263,7 +277,8 @@ class OrderComposer extends Component
             'fields' => $this->fields,
             'order_number' => trim($this->orderNumber),
             'order_date' => $this->orderDate,
-            'snapshot_html' => $snapshot->html,
+            'snapshot_html' => $html,
+            'edited' => $this->manuallyEdited,
         ];
 
         // Edit mode: re-freeze the existing pending order in place. orderAdded closes
@@ -271,18 +286,47 @@ class OrderComposer extends Component
         if ($this->isEditing()) {
             $order = OrderLog::findOrFail($this->editOrderId);
             $issuer->update($order, $payload);
+            $this->renderAndStoreDocx($order, $blocks, $context);
 
             $this->dispatch('orderAdded', __('orders::order_composer.messages.order_updated'));
 
             return null;
         }
 
-        $issuer->issue($payload);
+        $order = $issuer->issue($payload);
+        $stored = $this->renderAndStoreDocx($order, $blocks, $context);
 
         // Close the modal + refresh the list, and stream the finalized .docx down.
         $this->dispatch('orderAdded', __('orders::order_composer.messages.order_issued'));
 
-        return response()->download($snapshot->docxPath, $this->downloadName())->deleteFileAfterSend();
+        return \Illuminate\Support\Facades\Storage::disk('local')->download($stored, $this->downloadName());
+    }
+
+    /**
+     * Render the order's .docx and store it as the order's authoritative document.
+     * A clean order renders from the AST (faithful Times New Roman / bold / justified
+     * Word formatting); a manually-corrected one renders from the edited HTML so the
+     * user's inline changes are preserved.
+     *
+     * @param  TemplateBlock[]  $blocks
+     * @param  array<string,mixed>  $context
+     */
+    private function renderAndStoreDocx(OrderLog $order, array $blocks, array $context): string
+    {
+        if ($this->manuallyEdited && trim($this->editedHtml) !== '') {
+            $tmp = app(OrderHtmlToDocxRenderer::class)->renderToFile($this->editedHtml);
+        } else {
+            $document = app(OrderTemplateCompiler::class)->compileBlocks($blocks, $context);
+            $tmp = app(OrderDocumentDocxRenderer::class)->renderToFile($document);
+        }
+
+        $stored = 'order-documents/'.$order->id.'.docx';
+        \Illuminate\Support\Facades\Storage::disk('local')->put($stored, (string) file_get_contents($tmp));
+        @unlink($tmp);
+
+        app(OrderIssueService::class)->attachUploadedDocx($order, $stored);
+
+        return $stored;
     }
 
     public function render()

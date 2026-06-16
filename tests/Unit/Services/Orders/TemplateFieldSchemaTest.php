@@ -21,7 +21,7 @@ class TemplateFieldSchemaTest extends TestCase
         $keys = array_column($fields, 'key');
 
         $this->assertEqualsCanonicalizing(
-            ['work_year', 'days', 'start_date', 'end_date', 'return_date'],
+            ['work_year', 'days', 'start_date', 'end_date', 'return_date', 'responsible'],
             $keys
         );
 

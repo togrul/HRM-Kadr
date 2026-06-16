@@ -21,6 +21,13 @@ class OrderComposerTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        // Issuing now stores the generated .docx on the local disk.
+        \Illuminate\Support\Facades\Storage::fake('local');
+    }
+
     public function test_users_without_add_orders_permission_are_forbidden(): void
     {
         $this->actingAs(User::factory()->create());
@@ -46,6 +53,7 @@ class OrderComposerTest extends TestCase
                 'start_date' => '19.05.2026-cı il',
                 'end_date' => '03.06.2026-cı il',
                 'return_date' => '04.06.2026-cı il',
+                'responsible' => 'Bağırov Səbuhi',
             ])
             ->call('generatePreview');
 
@@ -116,6 +124,7 @@ class OrderComposerTest extends TestCase
 
         $editor->set('orderNumber', '500-M-DÜZ')
             ->set('editedHtml', $editedHtml)
+            ->set('manuallyEdited', true) // simulate the contenteditable @input
             ->call('issue')
             ->assertDispatched('orderAdded');
 

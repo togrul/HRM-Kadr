@@ -45,8 +45,8 @@ class OrderDocumentHtmlRenderer
         // Table-based (not flex) so PHPWord's HTML importer preserves the two
         // columns when the edited preview is converted to the final .docx.
         return '<table class="order-split-line" style="width:100%"><tr>'
-            .'<td style="text-align:left">'.$this->e($node->left).'</td>'
-            .'<td style="text-align:right">'.$this->e($node->right).'</td>'
+            .'<td style="text-align:left;font-weight:600">'.$this->e($node->left).'</td>'
+            .'<td style="text-align:right;font-weight:600">'.$this->e($node->right).'</td>'
             .'</tr></table>';
     }
 
@@ -68,8 +68,8 @@ class OrderDocumentHtmlRenderer
         }
 
         return '<table class="order-signature" style="width:100%"><tr>'
-            .'<td style="text-align:left" class="order-signature-title">'.$title.'</td>'
-            .'<td style="text-align:right" class="order-signature-name">'.$this->e($node->name).'</td>'
+            .'<td style="text-align:left;font-weight:600" class="order-signature-title">'.$title.'</td>'
+            .'<td style="text-align:right;font-weight:600" class="order-signature-name">'.$this->e($node->name).'</td>'
             .'</tr></table>';
     }
 

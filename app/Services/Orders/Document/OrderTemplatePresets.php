@@ -78,6 +78,7 @@ class OrderTemplatePresets
                 TemplateBlock::clauses([
                     '{{ employee.structure_genitive }} {{ employee.position }} {{ employee.full_name_dative }} {{ field.work_year }} iş ilinə görə {{ field.days }} təqvim günü müddətində əmək məzuniyyəti verilsin.',
                     'Məzuniyyətin başlanma tarixi {{ field.start_date }}, məzuniyyətin bitmə tarixi {{ field.end_date }}, işə başlama tarixi {{ field.return_date }} müəyyən edilsin.',
+                    'Mühasibatlıq və Hesabatlıq şöbəsinin rəisi {{ field.responsible }} bu əmrdən irəli gələn məsələləri həll etsin.',
                 ]),
                 TemplateBlock::paragraph('Əsas: {{ employee.initials_genitive }} ərizəsi.', Paragraph::ALIGN_LEFT),
             ],
@@ -283,6 +284,7 @@ class OrderTemplatePresets
             TemplateBlock::clauses([
                 $grant,
                 'Məzuniyyətin başlanma tarixi {{ field.start_date }}, məzuniyyətin bitmə tarixi {{ field.end_date }}, işə başlama tarixi {{ field.return_date }} müəyyən edilsin.',
+                'Mühasibatlıq və Hesabatlıq şöbəsinin rəisi {{ field.responsible }} bu əmrdən irəli gələn məsələləri həll etsin.',
             ]),
             TemplateBlock::paragraph($basis, Paragraph::ALIGN_LEFT),
         ];
@@ -306,7 +308,7 @@ class OrderTemplatePresets
                 TemplateBlock::split('{{ system.organization_city }}', '{{ system.order_date }}'),
                 TemplateBlock::spacer(),
                 TemplateBlock::paragraph($subject, Paragraph::ALIGN_CENTER, bold: true),
-                TemplateBlock::paragraph($preamble, Paragraph::ALIGN_LEFT),
+                TemplateBlock::paragraph($preamble, Paragraph::ALIGN_JUSTIFY),
             ],
             $body,
             [

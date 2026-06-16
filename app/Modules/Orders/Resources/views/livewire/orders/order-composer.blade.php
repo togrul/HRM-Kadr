@@ -120,7 +120,7 @@
 
                 <div
                     x-data="{
-                        sync() { $wire.set('editedHtml', $root.innerHTML, false) },
+                        sync() { $wire.set('editedHtml', $root.innerHTML, false); $wire.set('manuallyEdited', true, false) },
                         seed(html) { if (document.activeElement !== $root) { $root.innerHTML = html } },
                     }"
                     x-init="seed($wire.previewHtml)"

@@ -45,6 +45,7 @@ class OrderIssueService
                     'fields' => $data['fields'] ?? [],
                     'personnel_id' => $data['personnel_id'] ?? null,
                     'order_date_text' => $data['order_date'] ?? '',
+                    'edited' => (bool) ($data['edited'] ?? false),
                 ],
             ]);
 
@@ -91,8 +92,9 @@ class OrderIssueService
                     'fields' => $data['fields'] ?? [],
                     'personnel_id' => $data['personnel_id'] ?? null,
                     'order_date_text' => $data['order_date'] ?? ($snapshot['order_date_text'] ?? ''),
-                    // Inline-editing re-generates from HTML, so any previously uploaded
-                    // Word file is now stale — drop it and fall back to the generated doc.
+                    'edited' => (bool) ($data['edited'] ?? ($snapshot['edited'] ?? false)),
+                    // Re-issuing regenerates the document, so any previously uploaded
+                    // Word file is now stale — drop it (the caller stores the fresh one).
                     'docx_path' => null,
                 ]),
             ]);

@@ -72,8 +72,9 @@ class OrderDocumentDocxRenderer
         $table = $section->addTable(['borderSize' => 0, 'cellMargin' => 0]);
         $table->addRow();
         $half = Converter::cmToTwip(9.0);
-        $table->addCell($half)->addText($node->left, [], ['alignment' => Jc::START]);
-        $table->addCell($half)->addText($node->right, [], ['alignment' => Jc::END]);
+        // City + date are bold in the customer's sample orders.
+        $table->addCell($half)->addText($node->left, ['bold' => true], ['alignment' => Jc::START]);
+        $table->addCell($half)->addText($node->right, ['bold' => true], ['alignment' => Jc::END]);
     }
 
     private function numberedList(Section $section, NumberedList $node): void
@@ -94,12 +95,13 @@ class OrderDocumentDocxRenderer
         $table = $section->addTable(['borderSize' => 0, 'cellMargin' => 0]);
         $table->addRow();
 
+        // The signatory title + name are bold in the sample orders.
         $titleCell = $table->addCell(Converter::cmToTwip(11.0));
-        foreach ($node->titleLines as $idx => $line) {
-            $titleCell->addText($line, [], ['alignment' => Jc::START, 'spaceAfter' => 0]);
+        foreach ($node->titleLines as $line) {
+            $titleCell->addText($line, ['bold' => true], ['alignment' => Jc::START, 'spaceAfter' => 0]);
         }
 
-        $table->addCell(Converter::cmToTwip(7.0))->addText($node->name, [], ['alignment' => Jc::END]);
+        $table->addCell(Converter::cmToTwip(7.0))->addText($node->name, ['bold' => true], ['alignment' => Jc::END]);
     }
 
     private function alignment(string $align): string
