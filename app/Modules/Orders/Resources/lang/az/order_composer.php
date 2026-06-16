@@ -6,6 +6,8 @@ return [
         'type' => 'Əmrin növü',
         'number' => 'Əmrin nömrəsi',
         'date' => 'Əmrin tarixi',
+        'employee' => 'İşçi',
+        'employee_search' => 'Ad və ya tabel № ilə axtarın',
         'preview' => 'Önizləmə',
         'fields' => 'Məlumatlar',
         'edit_hint' => 'Mətni birbaşa redaktə edə bilərsiniz.',
@@ -17,6 +19,7 @@ return [
     'errors' => [
         'unknown_type' => 'Bu əmr növü tapılmadı.',
         'nothing_to_generate' => 'Yaradılacaq məzmun yoxdur. Əvvəlcə önizləmə yaradın.',
+        'personnel_required' => 'Zəhmət olmasa işçi seçin.',
     ],
     'messages' => [
         'template_saved' => 'Şablon yadda saxlanıldı.',

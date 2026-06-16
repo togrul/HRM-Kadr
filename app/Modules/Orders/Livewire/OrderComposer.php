@@ -27,6 +27,10 @@ class OrderComposer extends Component
 
     public ?int $personnelId = null;
 
+    public string $personnelQuery = '';
+
+    public ?string $personnelLabel = null;
+
     /** @var array<string,string> */
     public array $fields = [];
 
@@ -47,6 +51,55 @@ class OrderComposer extends Component
         // for params not present in the route ({personnelId?}), so guard the defaults.
         $this->presetCode = $presetCode ?? '';
         $this->personnelId = $personnelId;
+
+        if ($personnelId) {
+            $this->personnelLabel = optional(Personnel::find($personnelId))->fullname;
+        }
+    }
+
+    /**
+     * Searchable personnel picker — an HR user finds the employee by name or tabel
+     * number instead of needing an id in the URL.
+     *
+     * @return array<int,array{id:int,label:string}>
+     */
+    public function getPersonnelResultsProperty(): array
+    {
+        $term = trim($this->personnelQuery);
+        if (mb_strlen($term) < 2) {
+            return [];
+        }
+
+        return Personnel::query()
+            ->active()
+            ->where(fn ($q) => $q->nameLike($term)->orWhere('tabel_no', 'like', "%{$term}%"))
+            ->orderBy('surname')
+            ->limit(8)
+            ->get(['id', 'surname', 'name', 'patronymic', 'tabel_no'])
+            ->map(fn (Personnel $p) => [
+                'id' => $p->id,
+                'label' => trim("{$p->surname} {$p->name} {$p->patronymic}")." ({$p->tabel_no})",
+            ])
+            ->all();
+    }
+
+    public function selectPersonnel(int $id): void
+    {
+        $personnel = Personnel::find($id);
+        if ($personnel) {
+            $this->personnelId = $personnel->id;
+            $this->personnelLabel = $personnel->fullname;
+        }
+        $this->personnelQuery = '';
+        $this->previewHtml = '';
+        $this->editedHtml = '';
+    }
+
+    public function clearPersonnel(): void
+    {
+        $this->personnelId = null;
+        $this->personnelLabel = null;
+        $this->previewHtml = '';
     }
 
     /**
@@ -87,6 +140,12 @@ class OrderComposer extends Component
         $blocks = $templates->blocks($this->presetCode);
         if ($blocks === []) {
             $this->addError('presetCode', __('orders::order_composer.errors.unknown_type'));
+
+            return;
+        }
+
+        if (! $this->personnelId) {
+            $this->addError('personnelId', __('orders::order_composer.errors.personnel_required'));
 
             return;
         }

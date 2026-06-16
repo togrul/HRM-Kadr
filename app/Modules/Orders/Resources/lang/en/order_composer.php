@@ -6,6 +6,8 @@ return [
         'type' => 'Order type',
         'number' => 'Order number',
         'date' => 'Order date',
+        'employee' => 'Employee',
+        'employee_search' => 'Search by name or tabel no.',
         'preview' => 'Preview',
         'fields' => 'Details',
         'edit_hint' => 'You can edit the text directly.',
@@ -17,6 +19,7 @@ return [
     'errors' => [
         'unknown_type' => 'Unknown order type.',
         'nothing_to_generate' => 'Nothing to generate. Create a preview first.',
+        'personnel_required' => 'Please select an employee.',
     ],
     'messages' => [
         'template_saved' => 'Template saved.',

@@ -71,6 +71,31 @@ class OrderComposerTest extends TestCase
             ->assertSee('İşə başlama tarixi');
     }
 
+    public function test_employee_picker_searches_and_selects(): void
+    {
+        $personnel = $this->makePersonnel();
+        $this->actingAs($this->userWith('add-orders'));
+
+        Livewire::test(OrderComposer::class)
+            ->set('personnelQuery', 'Bayram')
+            ->assertSee('Bayramov')
+            ->call('selectPersonnel', $personnel->id)
+            ->assertSet('personnelId', $personnel->id)
+            ->assertSet('personnelLabel', 'Bayramov Ruslan Bəxtiyar')
+            ->call('clearPersonnel')
+            ->assertSet('personnelId', null);
+    }
+
+    public function test_preview_requires_an_employee(): void
+    {
+        $this->actingAs($this->userWith('add-orders'));
+
+        Livewire::test(OrderComposer::class)
+            ->set('presetCode', 'leave')
+            ->call('generatePreview')
+            ->assertHasErrors('personnelId');
+    }
+
     public function test_unknown_preset_surfaces_an_error(): void
     {
         $this->actingAs($this->userWith('add-orders'));

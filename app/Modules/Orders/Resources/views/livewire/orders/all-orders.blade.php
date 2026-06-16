@@ -74,6 +74,19 @@
             </div>
             <div class="flex flex-wrap items-center gap-3">
                 @can('add-orders')
+                    <a href="{{ route('orders.composer') }}"
+                        class="inline-flex items-center gap-2 rounded-xl bg-zinc-900 px-4 h-11 text-sm font-semibold text-white transition hover:bg-zinc-700">
+                        <x-icons.add-file class="w-5 h-5 text-white" />
+                        {{ __('orders::order_composer.title') }}
+                    </a>
+                @endcan
+                @can('edit-orders')
+                    <a href="{{ route('orders.designer') }}"
+                        class="inline-flex items-center gap-2 rounded-xl border border-zinc-300 px-4 h-11 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-50">
+                        {{ __('orders::order_composer.designer.title') }}
+                    </a>
+                @endcan
+                @can('add-orders')
                     <button wire:click="openSideMenu('add-order',{{ $selectedOrder }})"
                         class="flex items-center justify-center w-12 h-12 transition-all duration-300 rounded-xl hover:bg-blue-50"
                         type="button">
@@ -203,16 +216,62 @@
                                 </x-table.td>
 
                                 <x-table.td>
-                                    <x-status design="modern" :status-id="$_order->status_color_id" :label="$_order->status->name"></x-status>
+                                    <div class="flex flex-col items-start gap-1.5">
+                                        <x-status design="modern" :status-id="$_order->status_color_id" :label="$_order->status->name"></x-status>
+
+                                        @if($_order->latestGenerationLog)
+                                            @php
+                                                $generationStatus = (string) $_order->latestGenerationLog->status;
+                                                $generationStatusLabel = __('orders::order_list.generation.statuses.' . $generationStatus);
+                                                if ($generationStatusLabel === 'orders::order_list.generation.statuses.' . $generationStatus) {
+                                                    $generationStatusLabel = __('orders::order_list.generation.statuses.unknown');
+                                                }
+                                                $generationClasses = match ($generationStatus) {
+                                                    'queued' => 'border-sky-200 bg-sky-50 text-sky-700',
+                                                    'success' => 'border-emerald-200 bg-emerald-50 text-emerald-700',
+                                                    'failed' => 'border-rose-200 bg-rose-50 text-rose-700',
+                                                    default => 'border-amber-200 bg-amber-50 text-amber-700',
+                                                };
+                                            @endphp
+
+                                            <span
+                                                @class([
+                                                    'inline-flex max-w-[180px] items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide',
+                                                    $generationClasses,
+                                                ])
+                                                title="{{ $_order->latestGenerationLog->error_message ?: __('orders::order_list.generation.last_render') }}"
+                                            >
+                                                {{ $generationStatusLabel }}
+                                                @if($_order->latestGenerationLog->duration_ms)
+                                                    · {{ $_order->latestGenerationLog->duration_ms }}ms
+                                                @endif
+                                            </span>
+                                        @endif
+                                    </div>
                                 </x-table.td>
 
                                 <x-table.td :isButton="true">
                                     @can('export-orders')
                                         @if ($_order->order->blade != \App\Models\Order::BLADE_BUSINESS_TRIP)
-                                            <button wire:click="printOrder('{{ $_order->order_no }}')"
-                                                class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg bg-teal-50 hover:bg-teal-100 hover:text-gray-700">
-                                                <x-icons.print-file color="text-teal-500" hover="text-teal-600"></x-icons.print-file>
-                                            </button>
+                                            <div class="flex items-center justify-center gap-1">
+                                                <button
+                                                    wire:click="printOrder('{{ $_order->order_no }}')"
+                                                    title="{{ __('orders::order_list.actions.download_now') }}"
+                                                    aria-label="{{ __('orders::order_list.actions.download_now') }}"
+                                                    class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg bg-teal-50 hover:bg-teal-100 hover:text-gray-700"
+                                                >
+                                                    <x-icons.print-file color="text-teal-500" hover="text-teal-600"></x-icons.print-file>
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    wire:click="queueOrderDocument('{{ $_order->order_no }}')"
+                                                    title="{{ __('orders::order_list.actions.generate_in_background') }}"
+                                                    aria-label="{{ __('orders::order_list.actions.generate_in_background') }}"
+                                                    class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg bg-sky-50 hover:bg-sky-100 hover:text-gray-700"
+                                                >
+                                                    <x-icons.refresh-icon color="text-sky-500" hover="text-sky-600" size="w-4 h-4"></x-icons.refresh-icon>
+                                                </button>
+                                            </div>
                                         @endif
                                     @endcan
                                 </x-table.td>
