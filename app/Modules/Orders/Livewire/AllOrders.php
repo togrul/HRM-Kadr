@@ -7,11 +7,13 @@ use App\Models\Order;
 use App\Models\OrderLog;
 use App\Modules\Orders\Domain\Contracts\AccessibleStructureScopeReadRepository;
 use App\Modules\Orders\Domain\Contracts\OrderTypeStatusLookupReadRepository;
-use Illuminate\Support\Facades\Cache;
+use App\Modules\Orders\Jobs\GenerateOrderDocumentJob;
+use App\Services\Orders\OrderDocumentGenerationService;
 use App\Services\Orders\OrderPrintPayloadFactory;
 use App\Services\Orders\OrderTemplateRenderer;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Isolate;
 use Livewire\Attributes\Locked;
@@ -118,7 +120,22 @@ class AllOrders extends Component
     public function printOrder(string $order_no)
     {
         $order = OrderLog::with(['order', 'components', 'attributes'])->where('order_no', $order_no)->first();
-        if (! $order || ! $order->order) {
+        if (! $order) {
+            abort(404);
+        }
+
+        // Block-engine orders carry their frozen HTML in the snapshot; render the
+        // final .docx straight from it (no legacy order/template needed).
+        if ((string) $order->template_render_mode === \App\Services\Orders\Document\OrderIssueService::RENDER_MODE) {
+            abort_unless((bool) auth()->user()?->can('add-orders'), 403);
+            $html = (string) data_get($order->template_snapshot, 'html', '');
+            abort_if($html === '', 404);
+            $path = app(\App\Services\Orders\Document\OrderHtmlToDocxRenderer::class)->renderToFile($html);
+
+            return response()->download($path, $order->order_no.'.docx')->deleteFileAfterSend();
+        }
+
+        if (! $order->order) {
             abort(404);
         }
 
@@ -136,6 +153,26 @@ class AllOrders extends Component
         return response()->download($outputPath, basename($outputPath))->deleteFileAfterSend();
     }
 
+    #[Renderless]
+    public function queueOrderDocument(string $order_no): void
+    {
+        $order = OrderLog::with(['order'])->where('order_no', $order_no)->first();
+
+        if (! $order || ! $order->order) {
+            $this->dispatch('notify', type: 'error', message: __('orders::order_list.generation.messages.order_not_found'));
+
+            return;
+        }
+
+        $this->authorize('view', $order->order);
+
+        $generationLog = app(OrderDocumentGenerationService::class)->queue($order);
+
+        GenerateOrderDocumentJob::dispatch((int) $order->id, (int) $generationLog->id);
+
+        $this->dispatch('notify', type: 'success', message: __('orders::order_list.generation.messages.queued'));
+    }
+
     protected function returnData($type = 'normal')
     {
         $globalOrderIds = Order::globalVisibilityOrderIds();
@@ -145,25 +182,23 @@ class AllOrders extends Component
                 'order:id,name,blade',
                 'status:id,name',
                 'orderType:id,name',
+                'latestGenerationLog',
             ])
             ->when($this->status === 'deleted', fn ($query) => $query->with('personDidDelete:id,name'))
             ->where(function ($query) use ($globalOrderIds) {
-                if ($globalOrderIds !== []) {
-                    $query->whereIn('order_id', $globalOrderIds)
-                        ->orWhere(function ($innerQuery) use ($globalOrderIds) {
-                            $innerQuery->whereNotIn('order_id', $globalOrderIds)
-                                ->whereHas('personnels', fn ($personnelQuery) => $personnelQuery->whereIn('structure_id', $this->accessibleStructureIds));
-                        });
-
-                    return;
-                }
-
-                $query->whereHas('personnels', fn ($personnelQuery) => $personnelQuery->whereIn('structure_id', $this->accessibleStructureIds));
+                // Globally-visible legacy orders OR orders whose personnel sit in an
+                // accessible structure. orWhereHas (not whereNotIn) so block-engine
+                // orders with a null order_id are included rather than dropped by
+                // SQL's "NULL NOT IN (...)".
+                $query->when(
+                    $globalOrderIds !== [],
+                    fn ($q) => $q->whereIn('order_id', $globalOrderIds)
+                )->orWhereHas('personnels', fn ($personnelQuery) => $personnelQuery->whereIn('structure_id', $this->accessibleStructureIds));
             })
             ->filter($this->search ?? [])
-            ->when($this->selectedOrder, fn($q) => $q->where('order_id', $this->selectedOrder))
-            ->when(is_numeric($this->status), fn($q) => $q->where('status_id', $this->status))
-            ->when($this->status === 'deleted', fn($q) => $q->onlyTrashed())
+            ->when($this->selectedOrder, fn ($q) => $q->where('order_id', $this->selectedOrder))
+            ->when(is_numeric($this->status), fn ($q) => $q->where('status_id', $this->status))
+            ->when($this->status === 'deleted', fn ($q) => $q->onlyTrashed())
             ->orderByDesc('given_date');
 
         return $type == 'normal'
@@ -212,8 +247,7 @@ class AllOrders extends Component
     public function mount(
         AccessibleStructureScopeReadRepository $accessibleStructureScopeReadRepository,
         OrderTypeStatusLookupReadRepository $orderTypeStatusLookup
-    )
-    {
+    ) {
         $this->authorize('viewAny', Order::class);
         $this->orderTypeStatusLookup = $orderTypeStatusLookup;
         $this->fillFilter();

@@ -99,9 +99,9 @@
                     <span class="flex h-6 w-6 items-center justify-center rounded-full bg-zinc-900 text-xs text-white">3</span>
                     {{ __('orders::order_composer.labels.preview') }}
                 </div>
-                <button type="button" wire:click="download"
+                <button type="button" wire:click="issue"
                     class="inline-flex h-10 items-center gap-2 rounded-lg bg-emerald-600 px-5 text-sm font-semibold text-white transition hover:bg-emerald-500">
-                    {{ __('orders::order_composer.actions.download') }}
+                    {{ __('orders::order_composer.actions.issue') }}
                 </button>
             </div>
 

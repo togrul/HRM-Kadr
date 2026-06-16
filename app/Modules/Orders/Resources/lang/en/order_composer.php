@@ -15,14 +15,17 @@ return [
     'actions' => [
         'generate' => 'Generate preview',
         'download' => 'Download Word document',
+        'issue' => 'Create order & download',
     ],
     'errors' => [
         'unknown_type' => 'Unknown order type.',
         'nothing_to_generate' => 'Nothing to generate. Create a preview first.',
         'personnel_required' => 'Please select an employee.',
+        'number_required' => 'Enter the order number.',
     ],
     'messages' => [
         'template_saved' => 'Template saved.',
+        'order_issued' => 'Order created and added to the list.',
     ],
     'designer' => [
         'title' => 'Order type designer',

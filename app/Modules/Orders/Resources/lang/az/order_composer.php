@@ -15,14 +15,17 @@ return [
     'actions' => [
         'generate' => 'Önizləməni yarat',
         'download' => 'Word sənədini yüklə',
+        'issue' => 'Əmri yarat və yüklə',
     ],
     'errors' => [
         'unknown_type' => 'Bu əmr növü tapılmadı.',
         'nothing_to_generate' => 'Yaradılacaq məzmun yoxdur. Əvvəlcə önizləmə yaradın.',
         'personnel_required' => 'Zəhmət olmasa işçi seçin.',
+        'number_required' => 'Əmrin nömrəsini daxil edin.',
     ],
     'messages' => [
         'template_saved' => 'Şablon yadda saxlanıldı.',
+        'order_issued' => 'Əmr yaradıldı və siyahıya əlavə olundu.',
     ],
     'designer' => [
         'title' => 'Əmr növü dizayneri',

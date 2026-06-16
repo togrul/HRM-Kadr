@@ -4,6 +4,7 @@ namespace App\Modules\Orders\Livewire;
 
 use App\Models\Personnel;
 use App\Services\Orders\Document\OrderFieldTransformer;
+use App\Services\Orders\Document\OrderIssueService;
 use App\Services\Orders\Document\OrderRenderService;
 use App\Services\Orders\Document\OrderTemplateProvider;
 use App\Services\Orders\Document\TemplateFieldSchema;
@@ -154,7 +155,7 @@ class OrderComposer extends Component
         $this->editedHtml = $this->previewHtml;
     }
 
-    public function download(OrderRenderService $renderer)
+    public function issue(OrderRenderService $renderer, OrderIssueService $issuer, OrderTemplateProvider $templates)
     {
         $this->authorize('add-orders');
 
@@ -164,8 +165,25 @@ class OrderComposer extends Component
 
             return null;
         }
+        if (trim($this->orderNumber) === '') {
+            $this->addError('orderNumber', __('orders::order_composer.errors.number_required'));
+
+            return null;
+        }
 
         $snapshot = $renderer->finalize($html);
+
+        $issuer->issue([
+            'template_code' => $this->presetCode,
+            'label' => $templates->available()[$this->presetCode] ?? $this->presetCode,
+            'personnel_id' => $this->personnelId,
+            'fields' => $this->fields,
+            'order_number' => trim($this->orderNumber),
+            'order_date' => $this->orderDate,
+            'snapshot_html' => $snapshot->html,
+        ]);
+
+        $this->dispatch('orderIssued', __('orders::order_composer.messages.order_issued'));
 
         return response()->download($snapshot->docxPath, $this->downloadName())->deleteFileAfterSend();
     }

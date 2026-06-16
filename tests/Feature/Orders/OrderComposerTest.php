@@ -57,7 +57,14 @@ class OrderComposerTest extends TestCase
         $this->assertStringNotContainsString('26.11.2025-26.11.2026', $html);
         $this->assertStringNotContainsString('___', $html);
 
-        $component->call('download')->assertFileDownloaded('leave_214-M.docx');
+        // Issuing creates the order in the shared list AND downloads the .docx.
+        $component->call('issue')->assertFileDownloaded('leave_214-M.docx');
+
+        $order = \App\Models\OrderLog::where('order_no', '214-M')->first();
+        $this->assertNotNull($order);
+        $this->assertSame('block_v2', $order->template_render_mode);
+        $this->assertStringContainsString('Bayramov Ruslan Bəxtiyar oğluna', data_get($order->template_snapshot, 'html'));
+        $this->assertSame($personnel->id, data_get($order->template_snapshot, 'personnel_id'));
     }
 
     public function test_selecting_a_preset_renders_its_auto_derived_field_inputs(): void

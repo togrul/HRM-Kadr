@@ -163,20 +163,22 @@
                                    <div class="flex items-center space-x-1">
                                             <span
                                                 class="flex items-center justify-center px-3 py-1 text-xs font-medium text-zinc-100 uppercase border border-zinc-900 rounded-lg shadow-sm bg-zinc-900">
-                                                {{ $_order->order->name }}
+                                                {{ $_order->order?->name ?? (data_get($_order->template_snapshot, 'label') ?? '—') }}
                                             </span>
-                                            <span>
-                                                <svg class="w-4 h-4" data-slot="icon" fill="none" stroke-width="1.5"
-                                                    stroke="currentColor" viewBox="0 0 24 24"
-                                                    xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"></path>
-                                                </svg>
-                                            </span>
-                                            <span
-                                                class="flex items-center justify-center px-2 py-1 text-xs font-normal uppercase border rounded-lg shadow-sm medium border-neutral-200 bg-neutral-100 text-neutral-500">
-                                                {{ $_order->orderType->name }}
-                                            </span>
+                                            @if ($_order->orderType)
+                                                <span>
+                                                    <svg class="w-4 h-4" data-slot="icon" fill="none" stroke-width="1.5"
+                                                        stroke="currentColor" viewBox="0 0 24 24"
+                                                        xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"></path>
+                                                    </svg>
+                                                </span>
+                                                <span
+                                                    class="flex items-center justify-center px-2 py-1 text-xs font-normal uppercase border rounded-lg shadow-sm medium border-neutral-200 bg-neutral-100 text-neutral-500">
+                                                    {{ $_order->orderType->name }}
+                                                </span>
+                                            @endif
                                         </div>
                                 </x-table.td>
 
@@ -252,7 +254,7 @@
 
                                 <x-table.td :isButton="true">
                                     @can('export-orders')
-                                        @if ($_order->order->blade != \App\Models\Order::BLADE_BUSINESS_TRIP)
+                                        @if ($_order->order?->blade != \App\Models\Order::BLADE_BUSINESS_TRIP)
                                             <div class="flex items-center justify-center gap-1">
                                                 <button
                                                     wire:click="printOrder('{{ $_order->order_no }}')"
