@@ -7,6 +7,7 @@ return [
         'number' => 'Əmrin nömrəsi',
         'date' => 'Əmrin tarixi',
         'preview' => 'Önizləmə',
+        'fields' => 'Məlumatlar',
         'edit_hint' => 'Mətni birbaşa redaktə edə bilərsiniz.',
     ],
     'actions' => [

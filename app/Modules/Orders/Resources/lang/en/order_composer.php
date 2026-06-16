@@ -7,6 +7,7 @@ return [
         'number' => 'Order number',
         'date' => 'Order date',
         'preview' => 'Preview',
+        'fields' => 'Details',
         'edit_hint' => 'You can edit the text directly.',
     ],
     'actions' => [

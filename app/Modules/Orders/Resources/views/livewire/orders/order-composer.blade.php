@@ -2,7 +2,7 @@
     <div class="flex flex-col gap-4 rounded-xl border border-zinc-200 bg-white p-5 shadow-sm sm:flex-row sm:items-end">
         <label class="flex-1">
             <span class="mb-1 block text-sm font-medium text-zinc-700">{{ __('orders::order_composer.labels.type') }}</span>
-            <select wire:model="presetCode"
+            <select wire:model.live="presetCode"
                 class="w-full rounded-lg border-zinc-300 text-sm focus:border-zinc-900 focus:ring-zinc-900">
                 <option value="">—</option>
                 @foreach ($this->presets as $code => $label)
@@ -24,11 +24,28 @@
                 class="w-full rounded-lg border-zinc-300 text-sm focus:border-zinc-900 focus:ring-zinc-900">
         </label>
 
-        <button type="button" wire:click="generatePreview"
-            class="h-10 rounded-lg bg-zinc-900 px-5 text-sm font-semibold text-white transition hover:bg-zinc-700">
-            {{ __('orders::order_composer.actions.generate') }}
-        </button>
     </div>
+
+    @if (count($this->fieldDefs))
+        <div class="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
+            <h3 class="mb-4 text-sm font-semibold text-zinc-900">{{ __('orders::order_composer.labels.fields') }}</h3>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                @foreach ($this->fieldDefs as $field)
+                    <label>
+                        <span class="mb-1 block text-sm font-medium text-zinc-700">{{ $field['label'] }}</span>
+                        <input type="{{ $field['type'] }}" wire:model="fields.{{ $field['key'] }}"
+                            class="w-full rounded-lg border-zinc-300 text-sm focus:border-zinc-900 focus:ring-zinc-900">
+                    </label>
+                @endforeach
+            </div>
+            <div class="mt-5">
+                <button type="button" wire:click="generatePreview"
+                    class="h-10 rounded-lg bg-zinc-900 px-5 text-sm font-semibold text-white transition hover:bg-zinc-700">
+                    {{ __('orders::order_composer.actions.generate') }}
+                </button>
+            </div>
+        </div>
+    @endif
 
     @if ($previewHtml !== '')
         <div class="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">

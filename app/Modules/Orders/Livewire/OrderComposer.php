@@ -5,6 +5,7 @@ namespace App\Modules\Orders\Livewire;
 use App\Models\Personnel;
 use App\Services\Orders\Document\OrderRenderService;
 use App\Services\Orders\Document\OrderTemplatePresets;
+use App\Services\Orders\Document\TemplateFieldSchema;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Component;
 
@@ -53,6 +54,29 @@ class OrderComposer extends Component
     public function getPresetsProperty(OrderTemplatePresets $presets): array
     {
         return $presets->available();
+    }
+
+    /**
+     * The input fields the selected template needs — auto-derived from its field.*
+     * placeholders, so the form always matches the template.
+     *
+     * @return array<int,array{key:string,placeholder:string,label:string,type:string}>
+     */
+    public function getFieldDefsProperty(OrderTemplatePresets $presets, TemplateFieldSchema $schema): array
+    {
+        if ($this->presetCode === '') {
+            return [];
+        }
+
+        return $schema->for($presets->blocks($this->presetCode));
+    }
+
+    public function updatedPresetCode(): void
+    {
+        // Switching templates clears any field values from the previous one.
+        $this->fields = [];
+        $this->previewHtml = '';
+        $this->editedHtml = '';
     }
 
     public function generatePreview(OrderTemplatePresets $presets, OrderRenderService $renderer): void

@@ -57,6 +57,17 @@ class OrderComposerTest extends TestCase
         $component->call('download')->assertFileDownloaded('leave_214-M.docx');
     }
 
+    public function test_selecting_a_preset_renders_its_auto_derived_field_inputs(): void
+    {
+        $this->actingAs($this->userWith('add-orders'));
+
+        Livewire::test(OrderComposer::class)
+            ->set('presetCode', 'leave')
+            ->assertSee('Gün sayı')        // field.days
+            ->assertSee('Başlama tarixi')  // field.start_date
+            ->assertSee('İşə başlama tarixi');
+    }
+
     public function test_unknown_preset_surfaces_an_error(): void
     {
         $this->actingAs($this->userWith('add-orders'));
