@@ -21,27 +21,36 @@ class OrderTemplatePresetsTest extends TestCase
 {
     use RefreshDatabase;
 
+    /**
+     * A superset of every field any preset references; interpolation only consumes
+     * the ones a given template uses, so unused keys are harmless and this keeps the
+     * "no ___" guarantee for all presets.
+     */
     private function fieldsFor(string $code): array
     {
-        return match ($code) {
-            'leave' => [
-                'work_year' => '26.11.2025-26.11.2026-cı il',
-                'days' => '14',
-                'start_date' => '19.05.2026-cı il',
-                'end_date' => '03.06.2026-cı il',
-                'return_date' => '04.06.2026-cı il',
-            ],
-            'hire' => [
-                'start_date' => '09.06.2026-cı il',
-                'position' => 'sürücü-ekspeditor',
-                'responsible' => 'Səbuhi Bağırov',
-            ],
-            'surname_change' => [
-                'new_surname' => 'Bababəyli',
-                'basis' => 'ərizə və Şəxsiyyət vəsiqəsinin surəti.',
-            ],
-            default => [],
-        };
+        return [
+            'work_year' => '26.11.2025-25.11.2026-cı il',
+            'days' => '14',
+            'start_date' => '19.05.2026-cı il',
+            'end_date' => '03.06.2026-cı il',
+            'return_date' => '04.06.2026-cı il',
+            'position' => 'sürücü-ekspeditor',
+            'responsible' => 'Səbuhi Bağırov',
+            'new_surname' => 'Bababəyli',
+            'basis' => 'ərizə və Şəxsiyyət vəsiqəsinin surəti.',
+            'reason' => 'səhhəti ilə əlaqədar',
+            'period' => '01.05-14.05.2026-cı il',
+            'institution' => 'Odlar Yurdu Universitetinin',
+            'course' => '2-ci kurs',
+            'new_structure' => 'Dağıtım şöbəsinin',
+            'new_position' => 'rəisi',
+            'location' => 'Xəzər rayonunda',
+            'date' => '09.06.2026-cı il',
+            'legal_basis' => 'Əmək Məcəlləsinin 75-ci maddəsinə əsasən',
+            'legal_frame' => 'Əmək Məcəlləsinin 72-ci maddəsini',
+            'violation' => 'təqsirli hərəkətləri ilə maddi ziyan vurub.',
+            'investigation' => 'Araşdırma aktlarla sübuta yetirilib.',
+        ];
     }
 
     public function test_every_preset_generates_a_clean_filled_order(): void

@@ -32,6 +32,18 @@ class TemplateFieldSchema
         'responsible' => ['label' => 'Məsul şəxs', 'type' => 'text'],
         'new_surname' => ['label' => 'Yeni soyad', 'type' => 'text'],
         'basis' => ['label' => 'Əsas (sənəd)', 'type' => 'text'],
+        'reason' => ['label' => 'Səbəb', 'type' => 'text'],
+        'period' => ['label' => 'Tarix aralığı', 'type' => 'text'],
+        'institution' => ['label' => 'Təhsil müəssisəsi', 'type' => 'text'],
+        'course' => ['label' => 'Kurs', 'type' => 'text'],
+        'new_structure' => ['label' => 'Yeni struktur', 'type' => 'text'],
+        'new_position' => ['label' => 'Yeni vəzifə', 'type' => 'text'],
+        'location' => ['label' => 'Yer', 'type' => 'text'],
+        'date' => ['label' => 'Tarix', 'type' => 'text'],
+        'legal_basis' => ['label' => 'Hüquqi əsas (maddə)', 'type' => 'text'],
+        'legal_frame' => ['label' => 'Hüquqi çərçivə', 'type' => 'text'],
+        'violation' => ['label' => 'Pozuntu təsviri', 'type' => 'text'],
+        'investigation' => ['label' => 'Araşdırma təsviri', 'type' => 'text'],
     ];
 
     /**
