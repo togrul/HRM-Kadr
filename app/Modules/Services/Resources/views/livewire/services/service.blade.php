@@ -92,10 +92,6 @@
                         @livewire('services.ranks.all-ranks', key('ranks'))
                     @break
 
-                    @case('order-documents')
-                        @livewire('orders.templates.all-templates', key('templates'))
-                    @break
-
                     @case('components')
                         @livewire('services.components.all-components', key('components'))
                     @break

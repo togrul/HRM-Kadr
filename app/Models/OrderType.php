@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class OrderType extends Model
 {
@@ -16,15 +15,19 @@ class OrderType extends Model
     protected $fillable = [
         'order_id',
         'name',
+        'code',
+        'handler_class',
+        'is_active',
+        'meta',
+    ];
+
+    protected $casts = [
+        'is_active' => 'boolean',
+        'meta' => 'array',
     ];
 
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
-    }
-
-    public function templateSet(): HasOne
-    {
-        return $this->hasOne(OrderTemplateSet::class);
     }
 }

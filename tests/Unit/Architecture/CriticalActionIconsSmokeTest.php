@@ -12,7 +12,6 @@ class CriticalActionIconsSmokeTest extends TestCase
         $targets = [
             app_path('Modules/Orders/Resources/views/livewire/orders/all-orders.blade.php') => [
                 '<x-icons.print-file',
-                '<x-icons.document-icon',
                 '<x-icons.delete-icon',
             ],
             app_path('Modules/Leaves/Resources/views/livewire/leaves/leaves.blade.php') => [
@@ -49,12 +48,6 @@ class CriticalActionIconsSmokeTest extends TestCase
     public function test_additional_action_heavy_views_use_icons_for_row_and_toolbar_actions(): void
     {
         $targets = [
-            app_path('Modules/Orders/Resources/views/livewire/orders/templates/all-templates.blade.php') => [
-                '<x-icons.components-icon',
-                '<x-icons.add-icon',
-                '<x-icons.edit-icon',
-                '<x-icons.delete-icon',
-            ],
             app_path('Modules/Vacation/Resources/views/livewire/vacation/vacations.blade.php') => [
                 '<x-icons.excel-icon',
                 '<x-icons.document-icon',

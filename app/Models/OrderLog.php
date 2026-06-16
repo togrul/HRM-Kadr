@@ -109,11 +109,6 @@ class OrderLog extends Model
         return $this->belongsTo(OrderType::class);
     }
 
-    public function templateVersion(): BelongsTo
-    {
-        return $this->belongsTo(OrderTemplateVersion::class, 'order_template_version_id');
-    }
-
     public function signatory(): BelongsTo
     {
         return $this->belongsTo(Personnel::class, 'signatory_personnel_id');

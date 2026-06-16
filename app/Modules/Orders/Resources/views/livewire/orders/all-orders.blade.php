@@ -244,14 +244,7 @@
                                 </x-table.td>
 
                                 <x-table.td :isButton="true">
-                                    @if ($status != 'deleted')
-                                        @can('edit-orders')
-                                            <button wire:click="openSideMenu('edit-order','{{ $_order->order_no }}')"
-                                                class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase bg-gray-100 rounded-lg appearance-none hover:bg-gray-200 hover:text-gray-700">
-                                                <x-icons.document-icon></x-icons.document-icon>
-                                            </button>
-                                        @endcan
-                                    @else
+                                    @if ($status == 'deleted')
                                         @can('edit-orders')
                                             <button wire:click="restoreData('{{ $_order->order_no }}')"
                                                 class="flex items-center justify-center text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg w-9 h-9 bg-teal-50 hover:bg-teal-100 hover:text-gray-700">
@@ -291,14 +284,6 @@
             {{ $this->orders->links() }}
         </div>
     </div>
-
-    <x-side-modal>
-        @can('edit-orders')
-            @if ($showSideMenu == 'edit-order')
-                <livewire:orders.edit-order :orderModel="$modelName" :key="'order-edit-modal-' . ($modelName ?? 'none')" />
-            @endif
-        @endcan
-    </x-side-modal>
 
     @can('delete-orders')
         <div>

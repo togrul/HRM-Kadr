@@ -6,16 +6,10 @@ use App\Models\OrderType;
 use App\Modules\Orders\Console\Commands\OrdersListQueryBudgetCommand;
 use App\Modules\Orders\Console\Commands\OrdersListRenderBenchmarkCommand;
 use App\Modules\Orders\Domain\Contracts\AccessibleStructureScopeReadRepository;
-use App\Modules\Orders\Domain\Contracts\OrderTemplateAdmin;
-use App\Modules\Orders\Domain\Contracts\OrderTemplateReadRepository;
-use App\Modules\Orders\Domain\Contracts\OrderTemplateRegistry;
-use App\Modules\Orders\Domain\Contracts\OrderTemplateRepository;
 use App\Modules\Orders\Domain\Contracts\OrderTypeStatusLookupReadRepository;
 use App\Modules\Orders\Domain\Contracts\PersonnelLookupReadRepository;
 use App\Modules\Orders\Domain\Contracts\RankPositionLookupReadRepository;
 use App\Modules\Orders\Domain\Contracts\StructureLookupReadRepository;
-use App\Modules\Orders\Infrastructure\Persistence\Eloquent\EloquentOrderTemplateReadRepository;
-use App\Modules\Orders\Infrastructure\Persistence\Eloquent\EloquentOrderTemplateRepository;
 use App\Modules\Orders\Infrastructure\Persistence\Eloquent\EloquentOrderTypeStatusLookupReadRepository;
 use App\Modules\Orders\Infrastructure\Persistence\Eloquent\EloquentPersonnelLookupReadRepository;
 use App\Modules\Orders\Infrastructure\Persistence\Eloquent\EloquentRankPositionLookupReadRepository;
@@ -24,8 +18,6 @@ use App\Modules\Orders\Infrastructure\Persistence\Eloquent\StructureServiceAcces
 use App\Observers\OrderTypeObserver;
 use App\Providers\Concerns\RegistersLivewireAliases;
 use App\Services\Modules\ModuleState;
-use App\Services\Orders\TemplateAdminService;
-use App\Services\Orders\TemplateRegistry as TemplateRegistryService;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
@@ -43,10 +35,6 @@ class OrdersServiceProvider extends ServiceProvider
             ]);
         }
 
-        $this->app->bind(OrderTemplateRepository::class, EloquentOrderTemplateRepository::class);
-        $this->app->bind(OrderTemplateReadRepository::class, EloquentOrderTemplateReadRepository::class);
-        $this->app->bind(OrderTemplateAdmin::class, TemplateAdminService::class);
-        $this->app->bind(OrderTemplateRegistry::class, TemplateRegistryService::class);
         $this->app->bind(AccessibleStructureScopeReadRepository::class, StructureServiceAccessibleStructureScopeReadRepository::class);
         $this->app->bind(OrderTypeStatusLookupReadRepository::class, EloquentOrderTypeStatusLookupReadRepository::class);
         $this->app->bind(PersonnelLookupReadRepository::class, EloquentPersonnelLookupReadRepository::class);
@@ -84,14 +72,7 @@ class OrdersServiceProvider extends ServiceProvider
             'all-orders' => \App\Modules\Orders\Livewire\AllOrders::class,
             'order-composer' => \App\Modules\Orders\Livewire\OrderComposer::class,
             'template-designer' => \App\Modules\Orders\Livewire\OrderTemplateDesigner::class,
-            'edit-order' => \App\Modules\Orders\Livewire\EditOrder::class,
             'delete-order' => \App\Modules\Orders\Livewire\DeleteOrder::class,
-            'templates.all-templates' => \App\Modules\Orders\Livewire\Templates\AllTemplates::class,
-            'templates.add-template' => \App\Modules\Orders\Livewire\Templates\AddTemplate::class,
-            'templates.edit-template' => \App\Modules\Orders\Livewire\Templates\EditTemplate::class,
-            'templates.delete-template' => \App\Modules\Orders\Livewire\Templates\DeleteTemplate::class,
-            'templates.set-type' => \App\Modules\Orders\Livewire\Templates\SetType::class,
-            'templates.onboarding-wizard' => \App\Modules\Orders\Livewire\Templates\OnboardingWizard::class,
         ];
     }
 
