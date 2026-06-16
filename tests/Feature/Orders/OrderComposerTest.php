@@ -41,7 +41,7 @@ class OrderComposerTest extends TestCase
             ->set('orderNumber', '214-M')
             ->set('orderDate', '14 may 2026-cı il')
             ->set('fields', [
-                'work_year' => '26.11.2025-26.11.2026-cı il',
+                'work_year' => '2025-11-26', // a start date — the engine derives the span
                 'days' => '14',
                 'start_date' => '19.05.2026-cı il',
                 'end_date' => '03.06.2026-cı il',
@@ -52,6 +52,9 @@ class OrderComposerTest extends TestCase
         $html = $component->get('previewHtml');
         $this->assertStringContainsString('Bayramov Ruslan Bəxtiyar oğluna', $html);
         $this->assertStringContainsString('Keşlə Qeyri-Qida Satış mərkəzinin', $html);
+        // Labour year ends the day BEFORE the anniversary, not the same day.
+        $this->assertStringContainsString('26.11.2025-25.11.2026-cı il', $html);
+        $this->assertStringNotContainsString('26.11.2025-26.11.2026', $html);
         $this->assertStringNotContainsString('___', $html);
 
         $component->call('download')->assertFileDownloaded('leave_214-M.docx');

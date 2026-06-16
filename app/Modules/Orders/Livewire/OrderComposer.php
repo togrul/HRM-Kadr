@@ -3,6 +3,7 @@
 namespace App\Modules\Orders\Livewire;
 
 use App\Models\Personnel;
+use App\Services\Orders\Document\OrderFieldTransformer;
 use App\Services\Orders\Document\OrderRenderService;
 use App\Services\Orders\Document\OrderTemplatePresets;
 use App\Services\Orders\Document\TemplateFieldSchema;
@@ -124,7 +125,7 @@ class OrderComposer extends Component
             'personnel' => $this->personnelId
                 ? Personnel::with(['structure:id,name', 'position:id,name'])->find($this->personnelId)
                 : null,
-            'fields' => $this->fields,
+            'fields' => app(OrderFieldTransformer::class)->transform($this->fields),
             'order_number' => $this->orderNumber,
             'order_date' => $this->orderDate,
             'system' => ['organization_city' => $this->organizationCity],

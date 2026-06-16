@@ -23,7 +23,8 @@ class TemplateFieldSchema
      */
     private const CATALOG = [
         'days' => ['label' => 'Gün sayı', 'type' => 'number'],
-        'work_year' => ['label' => 'İş ili', 'type' => 'text'],
+        // A single start date; the engine derives the full "start-end-cı il" span.
+        'work_year' => ['label' => 'İş ilinin başlanğıcı', 'type' => 'date'],
         'start_date' => ['label' => 'Başlama tarixi', 'type' => 'text'],
         'end_date' => ['label' => 'Bitmə tarixi', 'type' => 'text'],
         'return_date' => ['label' => 'İşə başlama tarixi', 'type' => 'text'],
