@@ -74,7 +74,7 @@ class OrderTemplatePresets
             subject: 'Əmək məzuniyyətinin verilməsi haqqında',
             preamble: 'Azərbaycan Respublikası Əmək Məcəlləsinin 138-ci maddəsinin 2-ci hissəsini rəhbər tutaraq',
             body: [
-                TemplateBlock::paragraph('Əmr edirəm:', Paragraph::ALIGN_LEFT, bold: true),
+                TemplateBlock::paragraph('Əmr edirəm:', Paragraph::ALIGN_CENTER, bold: true),
                 TemplateBlock::clauses([
                     '{{ employee.structure_genitive }} {{ employee.position }} {{ employee.full_name_dative }} {{ field.work_year }} iş ilinə görə {{ field.days }} təqvim günü müddətində əmək məzuniyyəti verilsin.',
                     'Məzuniyyətin başlanma tarixi {{ field.start_date }}, məzuniyyətin bitmə tarixi {{ field.end_date }}, işə başlama tarixi {{ field.return_date }} müəyyən edilsin.',
@@ -94,7 +94,7 @@ class OrderTemplatePresets
             subject: 'Əmək müqaviləsinin rəsmiləşdirilməsi haqqında',
             preamble: 'Azərbaycan Respublikasının Əmək məcəlləsinin 81-ci maddəsinin 1-ci hissəsini rəhbər tutaraq',
             body: [
-                TemplateBlock::paragraph('Əmr edirəm:', Paragraph::ALIGN_LEFT, bold: true),
+                TemplateBlock::paragraph('Əmr edirəm:', Paragraph::ALIGN_CENTER, bold: true),
                 TemplateBlock::clauses([
                     '{{ employee.full_name_with_suffix }} {{ field.start_date }} tarixindən {{ employee.structure_dative }} {{ field.position }} peşəsinə qəbul edilsin.',
                     'Mühasibatlıq və Hesabatlıq şöbəsinin rəisi {{ field.responsible }} bu əmrdən irəli gələn məsələləri həll etsin.',
@@ -115,7 +115,7 @@ class OrderTemplatePresets
             subject: 'Soyadın dəyişdirilməsi haqqında',
             preamble: '{{ employee.full_name_genitive }} ərizəsini və Şəxsiyyət vəsiqəsinin dəyişdirilməsini nəzərə alaraq',
             body: [
-                TemplateBlock::paragraph('Əmr edirəm:', Paragraph::ALIGN_LEFT, bold: true),
+                TemplateBlock::paragraph('Əmr edirəm:', Paragraph::ALIGN_CENTER, bold: true),
                 TemplateBlock::clauses([
                     '{{ employee.structure_genitive }} {{ employee.position }} {{ employee.full_name_genitive }} soyadının dəyişdirilərək “{{ field.new_surname }}” olması nəzərə alınsın.',
                     'İnsan Resursları və Maliyyə, Vergi, Mühasibatlıq departamentləri zəruri sənədlərdə dəyişikliklərin edilməsini və bu əmrdən irəli gələn digər məsələlərin həllini təmin etsinlər.',
@@ -164,7 +164,7 @@ class OrderTemplatePresets
             subject: 'Ödənişsiz məzuniyyətin verilməsi haqqında',
             preamble: 'Azərbaycan Respublikası Əmək Məcəlləsinin 129-cu maddəsinin 1-ci hissəsini rəhbər tutaraq',
             body: [
-                TemplateBlock::paragraph('Əmr edirəm:', Paragraph::ALIGN_LEFT, bold: true),
+                TemplateBlock::paragraph('Əmr edirəm:', Paragraph::ALIGN_CENTER, bold: true),
                 TemplateBlock::clauses([
                     '{{ employee.structure_genitive }} {{ employee.position }} {{ employee.full_name_dative }}, {{ field.reason }}, {{ field.period }} tarixləri ödənişsiz məzuniyyət günləri hesab edilsin.',
                     'İşə başlama tarixi {{ field.return_date }} müəyyən edilsin.',
@@ -198,7 +198,7 @@ class OrderTemplatePresets
             subject: 'Başqa işə keçirilmə haqqında',
             preamble: 'Təsdiq edilmiş yeni təşkilati strukturu və ştat cədvəlini nəzərə alaraq, Azərbaycan Respublikası Əmək Məcəlləsinin 59-cu maddəsinə əsasən',
             body: [
-                TemplateBlock::paragraph('Əmr edirəm:', Paragraph::ALIGN_LEFT, bold: true),
+                TemplateBlock::paragraph('Əmr edirəm:', Paragraph::ALIGN_CENTER, bold: true),
                 TemplateBlock::clauses([
                     '{{ employee.structure_genitive }} {{ employee.position }} {{ employee.full_name_with_suffix }} {{ field.start_date }} tarixdən {{ field.new_structure }} {{ field.new_position }} vəzifəsinə keçirilsin.',
                     'İnsan Resursları və Maliyyə, Vergi, Mühasibatlıq departamentləri bu əmrdən irəli gələn məsələləri həll etsinlər.',
@@ -217,7 +217,7 @@ class OrderTemplatePresets
             subject: 'Hərbi toplantıda iştirak barədə',
             preamble: 'Səfərbərlik və Hərbi Xidmətə Çağırış üzrə Dövlət Xidmətinin çağırış vərəqəsini nəzərə alaraq',
             body: [
-                TemplateBlock::paragraph('Əmr edirəm:', Paragraph::ALIGN_LEFT, bold: true),
+                TemplateBlock::paragraph('Əmr edirəm:', Paragraph::ALIGN_CENTER, bold: true),
                 TemplateBlock::clauses([
                     '{{ employee.structure_genitive }} {{ employee.position }} {{ employee.full_name_genitive }}, Azərbaycan Respublikası Əmək Məcəlləsinin 179-cu maddəsinin 2-ci hissəsinin “g” bəndinə əsasən, orta əmək haqqı ödənilməklə, {{ field.start_date }} tarixindən {{ field.end_date }} tarixinədək, {{ field.days }} təqvim günü müddətinə, {{ field.location }} keçiriləcək hərbi toplantıda iştirakına icazə verilsin.',
                     'Mühasibatlıq və Hesabatlıq şöbəsinin rəisi {{ field.responsible }} bu əmrdən irəli gələn məsələləri həll etsin.',
@@ -236,7 +236,7 @@ class OrderTemplatePresets
             subject: 'Əmək müqaviləsinə xitam verilməsi haqqında',
             preamble: '{{ employee.structure_genitive }} {{ employee.position }} {{ employee.full_name_genitive }} ərizəsini nəzərə alaraq',
             body: [
-                TemplateBlock::paragraph('Əmr edirəm:', Paragraph::ALIGN_LEFT, bold: true),
+                TemplateBlock::paragraph('Əmr edirəm:', Paragraph::ALIGN_CENTER, bold: true),
                 TemplateBlock::clauses([
                     '{{ employee.position }} {{ employee.full_name_with_suffix }} ilə bağlanmış əmək müqaviləsinə {{ field.legal_basis }}, {{ field.reason }}, {{ field.date }} tarixdən xitam verilsin.',
                     'Mühasibatlıq və Hesabatlıq şöbəsinin rəisi {{ field.responsible }} bu əmrdən irəli gələn məsələləri həll etsin.',
@@ -260,7 +260,7 @@ class OrderTemplatePresets
             body: [
                 TemplateBlock::paragraph('{{ field.investigation }}', Paragraph::ALIGN_JUSTIFY),
                 TemplateBlock::paragraph('Yuxarıda göstərilənləri nəzərə alaraq, {{ field.legal_frame }} rəhbər tutaraq', Paragraph::ALIGN_JUSTIFY),
-                TemplateBlock::paragraph('Əmr edirəm:', Paragraph::ALIGN_LEFT, bold: true),
+                TemplateBlock::paragraph('Əmr edirəm:', Paragraph::ALIGN_CENTER, bold: true),
                 TemplateBlock::clauses([
                     '{{ employee.full_name_with_suffix }} ilə bağlanılmış əmək müqaviləsi, {{ field.legal_basis }}, {{ field.reason }}, {{ field.date }} tarixdən ləğv edilsin.',
                     '{{ field.responsible }} bu əmrdən irəli gələn məsələləri həll etsin.',
@@ -280,7 +280,7 @@ class OrderTemplatePresets
     private function leaveBody(string $grant, string $basis): array
     {
         return [
-            TemplateBlock::paragraph('Əmr edirəm:', Paragraph::ALIGN_LEFT, bold: true),
+            TemplateBlock::paragraph('Əmr edirəm:', Paragraph::ALIGN_CENTER, bold: true),
             TemplateBlock::clauses([
                 $grant,
                 'Məzuniyyətin başlanma tarixi {{ field.start_date }}, məzuniyyətin bitmə tarixi {{ field.end_date }}, işə başlama tarixi {{ field.return_date }} müəyyən edilsin.',
@@ -303,7 +303,7 @@ class OrderTemplatePresets
                 TemplateBlock::heading(self::ORG),
                 TemplateBlock::spacer(),
                 TemplateBlock::heading('ƏMR'),
-                TemplateBlock::heading('№ {{ system.order_number }}', bold: false),
+                TemplateBlock::heading('№ {{ system.order_number }}', bold: true),
                 TemplateBlock::spacer(),
                 TemplateBlock::split('{{ system.organization_city }}', '{{ system.order_date }}'),
                 TemplateBlock::spacer(),

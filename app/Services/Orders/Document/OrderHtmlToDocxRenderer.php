@@ -6,7 +6,6 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use PhpOffice\PhpWord\IOFactory;
 use PhpOffice\PhpWord\PhpWord;
-use PhpOffice\PhpWord\Shared\Converter;
 use PhpOffice\PhpWord\Shared\Html;
 
 /**
@@ -27,12 +26,13 @@ class OrderHtmlToDocxRenderer
         $phpWord->setDefaultFontName(self::FONT);
         $phpWord->setDefaultFontSize(self::SIZE);
 
+        // US Letter, 1-inch margins — matching the customer's templates.
         $section = $phpWord->addSection([
-            'paperSize' => 'A4',
-            'marginTop' => Converter::cmToTwip(1.0),
-            'marginBottom' => Converter::cmToTwip(1.0),
-            'marginLeft' => Converter::cmToTwip(1.5),
-            'marginRight' => Converter::cmToTwip(1.5),
+            'paperSize' => 'Letter',
+            'marginTop' => 1440,
+            'marginBottom' => 1440,
+            'marginLeft' => 1440,
+            'marginRight' => 1440,
         ]);
 
         Html::addHtml($section, $this->normalize($html), false, false);

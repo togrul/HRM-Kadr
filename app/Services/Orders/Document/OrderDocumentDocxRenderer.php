@@ -12,7 +12,6 @@ use Illuminate\Support\Str;
 use PhpOffice\PhpWord\Element\Section;
 use PhpOffice\PhpWord\IOFactory;
 use PhpOffice\PhpWord\PhpWord;
-use PhpOffice\PhpWord\Shared\Converter;
 use PhpOffice\PhpWord\SimpleType\Jc;
 use PhpOffice\PhpWord\Style\Tab;
 
@@ -27,11 +26,14 @@ class OrderDocumentDocxRenderer
 
     private const SIZE = 14;
 
-    /** Space after a body paragraph/clause, in twips (~8pt) — the gap between clauses. */
-    private const SPACE_AFTER = 160;
+    /** Small gap between numbered clauses (the sample uses a tiny empty paragraph). */
+    private const SPACE_AFTER = 120;
 
-    /** Near-single line spacing inside a paragraph, like the sample (tight lines, gaps between). */
-    private const LINE_HEIGHT = 1.08;
+    /** Single line spacing inside a paragraph, exactly like the sample (line=240). */
+    private const LINE_HEIGHT = 1.0;
+
+    /** Right tab stop at the text-area right edge: Letter (12240) − two 1" margins. */
+    private const RIGHT_TAB = 9360;
 
     public function renderToFile(OrderDocument $document, ?string $path = null): string
     {
@@ -39,12 +41,13 @@ class OrderDocumentDocxRenderer
         $phpWord->setDefaultFontName(self::FONT);
         $phpWord->setDefaultFontSize(self::SIZE);
 
+        // The customer's templates are US Letter with 1-inch margins (matched exactly).
         $section = $phpWord->addSection([
-            'paperSize' => 'A4',
-            'marginTop' => Converter::cmToTwip(1.0),
-            'marginBottom' => Converter::cmToTwip(1.0),
-            'marginLeft' => Converter::cmToTwip(1.5),
-            'marginRight' => Converter::cmToTwip(1.5),
+            'paperSize' => 'Letter',
+            'marginTop' => 1440,
+            'marginBottom' => 1440,
+            'marginLeft' => 1440,
+            'marginRight' => 1440,
         ]);
 
         foreach ($document->nodes() as $node) {
@@ -67,10 +70,12 @@ class OrderDocumentDocxRenderer
 
     private function paragraph(Section $section, Paragraph $node): void
     {
+        // Body paragraphs carry no space-after in the sample; the airy gaps come from
+        // the explicit spacer paragraphs between blocks.
         $section->addText(
             $node->text,
             ['bold' => $node->bold],
-            ['alignment' => $this->alignment($node->align), 'spaceAfter' => self::SPACE_AFTER, 'lineHeight' => self::LINE_HEIGHT],
+            ['alignment' => $this->alignment($node->align), 'spaceAfter' => 0, 'lineHeight' => self::LINE_HEIGHT],
         );
     }
 
@@ -97,9 +102,9 @@ class OrderDocumentDocxRenderer
                     'alignment' => Jc::BOTH,
                     'spaceAfter' => self::SPACE_AFTER,
                     'lineHeight' => self::LINE_HEIGHT,
-                    // Hanging indent: the number sits at the margin, wrapped lines align
-                    // under the clause text (like the sample orders).
-                    'indentation' => ['left' => Converter::cmToTwip(0.75), 'hanging' => Converter::cmToTwip(0.75)],
+                    // Hanging indent ~0.5 cm: the number sits at the margin, wrapped
+                    // lines align under the clause text (matches the sample's 284 twips).
+                    'indentation' => ['left' => 284, 'hanging' => 284],
                 ],
             );
             $i++;
@@ -134,8 +139,9 @@ class OrderDocumentDocxRenderer
     private function tabbed(): array
     {
         return [
-            'tabs' => [new Tab('right', Converter::cmToTwip(18.0))],
+            'tabs' => [new Tab('right', self::RIGHT_TAB)],
             'spaceAfter' => 0,
+            'lineHeight' => self::LINE_HEIGHT,
         ];
     }
 
@@ -146,7 +152,7 @@ class OrderDocumentDocxRenderer
     private function spacer(Section $section, Spacer $node): void
     {
         for ($i = 0; $i < max(1, $node->lines); $i++) {
-            $section->addText('', [], ['lineHeight' => 2.0, 'spaceAfter' => 0]);
+            $section->addText('', [], ['lineHeight' => self::LINE_HEIGHT, 'spaceAfter' => 0]);
         }
     }
 
