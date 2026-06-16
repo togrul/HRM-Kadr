@@ -83,6 +83,7 @@ class OrdersServiceProvider extends ServiceProvider
         return [
             'all-orders' => \App\Modules\Orders\Livewire\AllOrders::class,
             'order-composer' => \App\Modules\Orders\Livewire\OrderComposer::class,
+            'template-designer' => \App\Modules\Orders\Livewire\OrderTemplateDesigner::class,
             'add-order' => \App\Modules\Orders\Livewire\AddOrder::class,
             'edit-order' => \App\Modules\Orders\Livewire\EditOrder::class,
             'delete-order' => \App\Modules\Orders\Livewire\DeleteOrder::class,
