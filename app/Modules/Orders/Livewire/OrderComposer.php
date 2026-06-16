@@ -38,10 +38,12 @@ class OrderComposer extends Component
 
     public string $editedHtml = '';
 
-    public function mount(string $presetCode = '', ?int $personnelId = null): void
+    public function mount(?string $presetCode = null, ?int $personnelId = null): void
     {
         $this->authorize('add-orders');
-        $this->presetCode = $presetCode;
+        // Nullable + coalesced: as a full-page route component Livewire may pass null
+        // for params not present in the route ({personnelId?}), so guard the defaults.
+        $this->presetCode = $presetCode ?? '';
         $this->personnelId = $personnelId;
     }
 
