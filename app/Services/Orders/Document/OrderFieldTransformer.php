@@ -24,8 +24,16 @@ class OrderFieldTransformer
      */
     public function transform(array $fields): array
     {
-        if (isset($fields['work_year']) && $this->isIsoDate((string) $fields['work_year'])) {
-            $fields['work_year'] = $this->dates->workYearSpan(Carbon::parse((string) $fields['work_year']));
+        foreach ($fields as $key => $value) {
+            if (! is_string($value) || ! $this->isIsoDate($value)) {
+                continue;
+            }
+
+            // work_year is a single start date expanded into the labour-year span;
+            // every other ISO date becomes the Azerbaijani long form "19.05.2026-cı il".
+            $fields[$key] = $key === 'work_year'
+                ? $this->dates->workYearSpan(Carbon::parse($value))
+                : $this->dates->longDate(Carbon::parse($value));
         }
 
         return $fields;

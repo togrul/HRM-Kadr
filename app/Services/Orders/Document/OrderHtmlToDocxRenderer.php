@@ -19,7 +19,7 @@ class OrderHtmlToDocxRenderer
 {
     private const FONT = 'Times New Roman';
 
-    private const SIZE = 12;
+    private const SIZE = 14;
 
     public function renderToFile(string $html, ?string $path = null): string
     {

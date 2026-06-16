@@ -14,6 +14,7 @@ use PhpOffice\PhpWord\IOFactory;
 use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\Shared\Converter;
 use PhpOffice\PhpWord\SimpleType\Jc;
+use PhpOffice\PhpWord\Style\Tab;
 
 /**
  * Renders an OrderDocument to a Word2007 (.docx) file from the SAME AST the HTML
@@ -24,7 +25,13 @@ class OrderDocumentDocxRenderer
 {
     private const FONT = 'Times New Roman';
 
-    private const SIZE = 12;
+    private const SIZE = 14;
+
+    /** Space after a body paragraph/clause, in twips (~10pt) — matches the airy sample. */
+    private const SPACE_AFTER = 200;
+
+    /** 1.5 line spacing, like the sample orders. */
+    private const LINE_HEIGHT = 1.5;
 
     public function renderToFile(OrderDocument $document, ?string $path = null): string
     {
@@ -63,18 +70,20 @@ class OrderDocumentDocxRenderer
         $section->addText(
             $node->text,
             ['bold' => $node->bold],
-            ['alignment' => $this->alignment($node->align)],
+            ['alignment' => $this->alignment($node->align), 'spaceAfter' => self::SPACE_AFTER, 'lineHeight' => self::LINE_HEIGHT],
         );
     }
 
+    /**
+     * City pinned left, date pinned right — rendered with a right tab stop (not a
+     * table) so the .docx has no visible borders. Both are bold in the sample.
+     */
     private function splitLine(Section $section, SplitLine $node): void
     {
-        $table = $section->addTable(['borderSize' => 0, 'cellMargin' => 0]);
-        $table->addRow();
-        $half = Converter::cmToTwip(9.0);
-        // City + date are bold in the customer's sample orders.
-        $table->addCell($half)->addText($node->left, ['bold' => true], ['alignment' => Jc::START]);
-        $table->addCell($half)->addText($node->right, ['bold' => true], ['alignment' => Jc::END]);
+        $run = $section->addTextRun($this->tabbed());
+        $run->addText($node->left, ['bold' => true]);
+        $run->addText("\t");
+        $run->addText($node->right, ['bold' => true]);
     }
 
     private function numberedList(Section $section, NumberedList $node): void
@@ -84,24 +93,50 @@ class OrderDocumentDocxRenderer
             $section->addText(
                 $i.'. '.$item,
                 [],
-                ['alignment' => Jc::BOTH, 'spaceAfter' => 120],
+                [
+                    'alignment' => Jc::BOTH,
+                    'spaceAfter' => self::SPACE_AFTER,
+                    'lineHeight' => self::LINE_HEIGHT,
+                    // Hanging indent: the number sits at the margin, wrapped lines align
+                    // under the clause text (like the sample orders).
+                    'indentation' => ['left' => Converter::cmToTwip(0.75), 'hanging' => Converter::cmToTwip(0.75)],
+                ],
             );
             $i++;
         }
     }
 
+    /**
+     * Signatory title pinned left with the name on the first line pinned right (via a
+     * right tab stop, no table → no borders). Title + name are bold in the sample.
+     */
     private function signature(Section $section, SignatureBlock $node): void
     {
-        $table = $section->addTable(['borderSize' => 0, 'cellMargin' => 0]);
-        $table->addRow();
+        $lines = $node->titleLines;
+        $first = array_shift($lines) ?? '';
 
-        // The signatory title + name are bold in the sample orders.
-        $titleCell = $table->addCell(Converter::cmToTwip(11.0));
-        foreach ($node->titleLines as $line) {
-            $titleCell->addText($line, ['bold' => true], ['alignment' => Jc::START, 'spaceAfter' => 0]);
+        $run = $section->addTextRun($this->tabbed());
+        $run->addText($first, ['bold' => true]);
+        $run->addText("\t");
+        $run->addText($node->name, ['bold' => true]);
+
+        foreach ($lines as $line) {
+            $section->addText($line, ['bold' => true], ['alignment' => Jc::START, 'spaceAfter' => 0]);
         }
+    }
 
-        $table->addCell(Converter::cmToTwip(7.0))->addText($node->name, ['bold' => true], ['alignment' => Jc::END]);
+    /**
+     * Paragraph style with a right tab stop at the right text margin (A4 minus the
+     * 1.5 cm side margins = 18 cm), used for the city/date and signatory rows.
+     *
+     * @return array<string,mixed>
+     */
+    private function tabbed(): array
+    {
+        return [
+            'tabs' => [new Tab('right', Converter::cmToTwip(18.0))],
+            'spaceAfter' => 0,
+        ];
     }
 
     private function alignment(string $align): string
