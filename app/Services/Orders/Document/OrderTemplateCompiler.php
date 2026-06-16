@@ -8,13 +8,13 @@ use App\Services\Orders\Variables\OrderEmployeeVariableResolver;
 use App\Services\Orders\Variables\VariableInterpolator;
 
 /**
- * Compiles a template + the order's data into the OrderDocument AST: assembles the
- * fixed org chrome, resolves every variable (employee.* with declension, field.*,
- * system.*) and interpolates the per-type body. The resulting document is then
- * rendered to preview HTML and/or the final .docx.
+ * Compiles a template into the OrderDocument AST: resolves every variable
+ * (employee.* with declension, field.*, system.*) and interpolates each block,
+ * mapping it to the matching AST node.
  *
- * This is the bridge that turns phases 1-2 (declension + variable resolution) and
- * phase 3 (AST + renderers) into one end-to-end pipeline.
+ * A template is an ordered list of TemplateBlock (the general form that handles
+ * every real order shape). compile(OrderTemplateDefinition) is a convenience that
+ * lays out the standard order skeleton as blocks and delegates to compileBlocks().
  */
 class OrderTemplateCompiler
 {
@@ -24,39 +24,98 @@ class OrderTemplateCompiler
     ) {}
 
     /**
-     * @param  array{personnel?:?Personnel,fields?:array<string,mixed>,order_number?:string,order_date?:string}  $context
+     * @param  TemplateBlock[]  $blocks
+     * @param  array{personnel?:?Personnel,fields?:array<string,mixed>,order_number?:string,order_date?:string,system?:array<string,string>}  $context
+     */
+    public function compileBlocks(array $blocks, array $context = []): OrderDocument
+    {
+        $variables = $this->resolveVariables($context);
+        $document = new OrderDocument;
+
+        foreach ($blocks as $block) {
+            match ($block->kind) {
+                TemplateBlock::HEADING => $document->centered(
+                    $this->interp($block->data['text'] ?? '', $variables),
+                    bold: (bool) ($block->data['bold'] ?? true),
+                ),
+                TemplateBlock::PARAGRAPH => $document->paragraph(
+                    $this->interp($block->data['text'] ?? '', $variables),
+                    $block->data['align'] ?? Paragraph::ALIGN_JUSTIFY,
+                    bold: (bool) ($block->data['bold'] ?? false),
+                ),
+                TemplateBlock::CLAUSES => $this->clauses($document, $block, $variables),
+                TemplateBlock::SPLIT => $document->splitLine(
+                    $this->interp($block->data['left'] ?? '', $variables),
+                    $this->interp($block->data['right'] ?? '', $variables),
+                ),
+                TemplateBlock::SIGNATURE => $document->signature(
+                    array_map(fn (string $line) => $this->interp($line, $variables), $block->data['titleLines'] ?? []),
+                    $this->interp($block->data['name'] ?? '', $variables),
+                ),
+                TemplateBlock::SPACER => $document->spacer((int) ($block->data['lines'] ?? 1)),
+                default => null,
+            };
+        }
+
+        return $document;
+    }
+
+    /**
+     * @param  array{personnel?:?Personnel,fields?:array<string,mixed>,order_number?:string,order_date?:string,system?:array<string,string>}  $context
      */
     public function compile(OrderTemplateDefinition $template, array $context = []): OrderDocument
     {
-        $variables = $this->resolveVariables($template, $context);
+        $context['system'] = array_merge([
+            'organization_name' => $template->organizationName,
+            'organization_city' => $template->organizationCity,
+            'signatory_full_name' => $template->signatoryName,
+            'signatory_title' => implode(' ', $template->signatoryTitleLines),
+        ], $context['system'] ?? []);
 
-        $document = (new OrderDocument)
-            ->centered($template->organizationName, bold: true)
-            ->spacer()
-            ->centered('ƏMR', bold: true)
-            ->centered('№ '.$variables['system.order_number'])
-            ->spacer()
-            ->splitLine($variables['system.organization_city'], $variables['system.order_date'])
-            ->spacer()
-            ->paragraph($this->interp($template->subject, $variables), Paragraph::ALIGN_CENTER, bold: true)
-            ->paragraph($this->interp($template->preamble, $variables))
-            ->paragraph('Əmr edirəm:', bold: true)
-            ->numberedList(array_map(fn (string $clause) => $this->interp($clause, $variables), $template->clauses));
+        $blocks = [
+            TemplateBlock::heading($template->organizationName),
+            TemplateBlock::spacer(),
+            TemplateBlock::heading('ƏMR'),
+            TemplateBlock::heading('№ {{ system.order_number }}', bold: false),
+            TemplateBlock::spacer(),
+            TemplateBlock::split('{{ system.organization_city }}', '{{ system.order_date }}'),
+            TemplateBlock::spacer(),
+            TemplateBlock::paragraph($template->subject, Paragraph::ALIGN_CENTER, bold: true),
+            TemplateBlock::paragraph($template->preamble, Paragraph::ALIGN_LEFT),
+            TemplateBlock::paragraph('Əmr edirəm:', Paragraph::ALIGN_LEFT, bold: true),
+            TemplateBlock::clauses($template->clauses),
+        ];
 
         if (trim($template->basis) !== '') {
-            $document->paragraph('Əsas: '.$this->interp($template->basis, $variables));
+            $blocks[] = TemplateBlock::paragraph('Əsas: '.$template->basis, Paragraph::ALIGN_LEFT);
         }
 
-        return $document
-            ->spacer(2)
-            ->signature($template->signatoryTitleLines, $variables['system.signatory_full_name']);
+        $blocks[] = TemplateBlock::spacer(2);
+        $blocks[] = TemplateBlock::signature($template->signatoryTitleLines, $template->signatoryName);
+
+        return $this->compileBlocks($blocks, $context);
+    }
+
+    private function clauses(OrderDocument $document, TemplateBlock $block, array $variables): void
+    {
+        $items = array_map(fn (string $item) => $this->interp($item, $variables), $block->data['items'] ?? []);
+
+        if (($block->data['numbered'] ?? true) === false) {
+            foreach ($items as $item) {
+                $document->paragraph($item, Paragraph::ALIGN_JUSTIFY);
+            }
+
+            return;
+        }
+
+        $document->numberedList($items);
     }
 
     /**
      * @param  array<string,mixed>  $context
      * @return array<string,string>
      */
-    private function resolveVariables(OrderTemplateDefinition $template, array $context): array
+    private function resolveVariables(array $context): array
     {
         $variables = $this->employeeResolver->resolve($context['personnel'] ?? null);
 
@@ -64,12 +123,12 @@ class OrderTemplateCompiler
             $variables['field.'.$key] = (string) $value;
         }
 
-        $variables['system.order_number'] = (string) ($context['order_number'] ?? '');
-        $variables['system.order_date'] = (string) ($context['order_date'] ?? '');
-        $variables['system.organization_name'] = $template->organizationName;
-        $variables['system.organization_city'] = $template->organizationCity;
-        $variables['system.signatory_full_name'] = $template->signatoryName;
-        $variables['system.signatory_title'] = implode(' ', $template->signatoryTitleLines);
+        foreach ((array) ($context['system'] ?? []) as $key => $value) {
+            $variables['system.'.$key] = (string) $value;
+        }
+
+        $variables['system.order_number'] = (string) ($context['order_number'] ?? ($variables['system.order_number'] ?? ''));
+        $variables['system.order_date'] = (string) ($context['order_date'] ?? ($variables['system.order_date'] ?? ''));
 
         return $variables;
     }
