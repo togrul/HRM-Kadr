@@ -12,7 +12,8 @@ use PhpOffice\PhpWord\Shared\Html;
  * Renders the order's (possibly HR-edited) preview HTML into the final Word2007
  * document. Because the preview HTML is the canonical content, manual inline edits
  * made before approval are carried verbatim into the saved .docx — the renderer
- * imports the same markup, wrapped in the A4 / Times New Roman page the samples use.
+ * imports the same markup, wrapped in the US Letter / Times New Roman page the
+ * samples use.
  */
 class OrderHtmlToDocxRenderer
 {

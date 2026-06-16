@@ -17,8 +17,9 @@ use PhpOffice\PhpWord\Style\Tab;
 
 /**
  * Renders an OrderDocument to a Word2007 (.docx) file from the SAME AST the HTML
- * preview uses. Formatting mirrors the customer's sample orders (A4, ~Times New
- * Roman 12, centered header/title, left city / right date, signatory block).
+ * preview uses. Formatting mirrors the customer's sample orders exactly (US Letter,
+ * 1-inch margins, Times New Roman 14, single spacing, centered header/title, left
+ * city / right date, hanging-indent clauses, signatory block).
  */
 class OrderDocumentDocxRenderer
 {
@@ -131,8 +132,8 @@ class OrderDocumentDocxRenderer
     }
 
     /**
-     * Paragraph style with a right tab stop at the right text margin (A4 minus the
-     * 1.5 cm side margins = 18 cm), used for the city/date and signatory rows.
+     * Paragraph style with a right tab stop at the right text edge (Letter width minus
+     * the two 1-inch margins), used for the city/date and signatory rows.
      *
      * @return array<string,mixed>
      */
