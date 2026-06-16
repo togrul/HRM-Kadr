@@ -198,15 +198,53 @@ class OrderComposer extends Component
      */
     private function context(): array
     {
+        $fields = app(OrderFieldTransformer::class)->transform($this->fields);
+
+        // Structured fields (structure/position) submit an id used by the side-effect;
+        // for the DOCUMENT show the name instead. The raw id stays in $this->fields
+        // (and the snapshot) for approval.
+        foreach ($this->fieldDefs as $def) {
+            if (in_array($def['type'], ['structure', 'position'], true) && ! empty($fields[$def['key']])) {
+                $fields[$def['key']] = $this->structuredName($def['type'], (int) $fields[$def['key']]);
+            }
+        }
+
         return [
             'personnel' => $this->personnelId
                 ? Personnel::with(['structure:id,name', 'position:id,name'])->find($this->personnelId)
                 : null,
-            'fields' => app(OrderFieldTransformer::class)->transform($this->fields),
+            'fields' => $fields,
             'order_number' => $this->orderNumber,
             'order_date' => $this->orderDate,
             'system' => ['organization_city' => $this->organizationCity],
         ];
+    }
+
+    /**
+     * @return array<int,string>
+     */
+    public function getStructureOptionsProperty(): array
+    {
+        return \App\Models\Structure::query()->orderBy('name')->pluck('name', 'id')->all();
+    }
+
+    /**
+     * @return array<int,string>
+     */
+    public function getPositionOptionsProperty(): array
+    {
+        return \App\Models\Position::query()->orderBy('name')->pluck('name', 'id')->all();
+    }
+
+    private function structuredName(string $type, int $id): string
+    {
+        $name = match ($type) {
+            'structure' => optional(\App\Models\Structure::find($id))->name,
+            'position' => optional(\App\Models\Position::find($id))->name,
+            default => null,
+        };
+
+        return (string) ($name ?: $id);
     }
 
     private function downloadName(): string

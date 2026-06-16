@@ -87,11 +87,33 @@ class BlockOrderApprovalTest extends TestCase
         $this->assertSame('Bayramov', $fresh->previous_surname);
     }
 
+    public function test_approving_a_transfer_moves_the_personnel(): void
+    {
+        $this->actingAs(\App\Models\User::factory()->create());
+        $personnel = $this->makePersonnel();
+        $structure = \App\Models\Structure::query()->create(['name' => 'Yeni şöbə', 'shortname' => 'YŞ']);
+        $position = \App\Models\Position::query()->create(['name' => 'rəis']);
+
+        $order = app(OrderIssueService::class)->issue([
+            'template_code' => 'transfer',
+            'personnel_id' => $personnel->id,
+            'fields' => ['new_structure' => (string) $structure->id, 'new_position' => (string) $position->id],
+            'order_number' => '712-K',
+            'snapshot_html' => '<div>x</div>',
+        ]);
+
+        app(BlockOrderApprovalService::class)->approve($order);
+
+        $fresh = $personnel->fresh();
+        $this->assertSame($structure->id, $fresh->structure_id);
+        $this->assertSame($position->id, $fresh->position_id);
+    }
+
     public function test_unmapped_type_has_no_side_effect(): void
     {
         $personnel = $this->makePersonnel();
         $order = app(OrderIssueService::class)->issue([
-            'template_code' => 'transfer', // no effect wired yet (needs structured fields)
+            'template_code' => 'hire', // employment effect not wired yet (tabel_no/rank)
             'personnel_id' => $personnel->id,
             'order_number' => '701-İ',
             'snapshot_html' => '<div>x</div>',

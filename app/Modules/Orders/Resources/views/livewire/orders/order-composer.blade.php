@@ -76,8 +76,18 @@
                 @foreach ($this->fieldDefs as $field)
                     <label>
                         <span class="mb-1 block text-sm font-medium text-zinc-700">{{ $field['label'] }}</span>
-                        <input type="{{ $field['type'] }}" wire:model="fields.{{ $field['key'] }}"
-                            class="w-full rounded-lg border-zinc-300 text-sm focus:border-zinc-900 focus:ring-zinc-900">
+                        @if ($field['type'] === 'structure' || $field['type'] === 'position')
+                            <select wire:model="fields.{{ $field['key'] }}"
+                                class="w-full rounded-lg border-zinc-300 text-sm focus:border-zinc-900 focus:ring-zinc-900">
+                                <option value="">—</option>
+                                @foreach (($field['type'] === 'structure' ? $this->structureOptions : $this->positionOptions) as $id => $name)
+                                    <option value="{{ $id }}">{{ $name }}</option>
+                                @endforeach
+                            </select>
+                        @else
+                            <input type="{{ $field['type'] }}" wire:model="fields.{{ $field['key'] }}"
+                                class="w-full rounded-lg border-zinc-300 text-sm focus:border-zinc-900 focus:ring-zinc-900">
+                        @endif
                     </label>
                 @endforeach
             </div>
