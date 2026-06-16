@@ -42,7 +42,6 @@ class OrderLog extends Model
         'signatory_personnel_id',
         'signatory_snapshot',
         'description',
-        'order_template_version_id',
         'template_render_mode',
         'template_snapshot',
         'status_id',
