@@ -119,16 +119,17 @@ class OrderDocumentDocxRenderer
     private function signature(Section $section, SignatureBlock $node): void
     {
         $lines = $node->titleLines;
-        $first = array_shift($lines) ?? '';
-
-        $run = $section->addTextRun($this->tabbed());
-        $run->addText($first, ['bold' => true]);
-        $run->addText("\t");
-        $run->addText($node->name, ['bold' => true]);
+        // The name sits on the LAST title line (bottom), right-aligned — like the sample.
+        $last = array_pop($lines) ?? '';
 
         foreach ($lines as $line) {
-            $section->addText($line, ['bold' => true], ['alignment' => Jc::START, 'spaceAfter' => 0]);
+            $section->addText($line, ['bold' => true], ['alignment' => Jc::START, 'spaceAfter' => 0, 'lineHeight' => self::LINE_HEIGHT]);
         }
+
+        $run = $section->addTextRun($this->tabbed());
+        $run->addText($last, ['bold' => true]);
+        $run->addText("\t");
+        $run->addText($node->name, ['bold' => true]);
     }
 
     /**

@@ -3,6 +3,7 @@
 namespace App\Services\Orders\Variables;
 
 use App\Models\Personnel;
+use App\Models\Structure;
 use App\Support\Language\AzerbaijaniDeclension;
 
 /**
@@ -38,7 +39,12 @@ class OrderEmployeeVariableResolver
         $initials = $this->initials($surname, $name, $patronymic);
 
         $position = trim((string) ($personnel->position?->name ?? ''));
-        $structure = trim((string) ($personnel->structure?->name ?? ''));
+
+        // The workplace is written in full: the top organization followed by the
+        // employee's own unit, e.g. "Dinçer və Carçıoğlu Birgə Müəssisəsinin Naxçıvan
+        // Qida Satış Mərkəzinin" — each segment carries its own grammatical case.
+        $structureSegments = $this->structureSegments($personnel->structure_id);
+        $structure = implode(' ', $structureSegments);
 
         return [
             'employee.full_name' => $fullName,
@@ -56,9 +62,72 @@ class OrderEmployeeVariableResolver
             'employee.position_genitive' => $position === '' ? '' : $this->declension->possessiveGenitive($position),
             'employee.position_dative' => $position === '' ? '' : $this->declension->possessiveDative($position),
             'employee.structure' => $structure,
-            'employee.structure_genitive' => $structure === '' ? '' : $this->declension->possessiveGenitive($structure),
-            'employee.structure_dative' => $structure === '' ? '' : $this->declension->possessiveDative($structure),
+            'employee.structure_genitive' => $this->declineSegments($structureSegments, 'genitive'),
+            'employee.structure_dative' => $this->declineSegments($structureSegments, 'dative'),
         ];
+    }
+
+    /**
+     * The employee's workplace as [top organization, own unit] (deduped if the unit
+     * is itself the top). Middle management levels are skipped — the orders name the
+     * organization and the concrete unit, matching the customer's sample.
+     *
+     * @return string[]
+     */
+    private function structureSegments(?int $structureId): array
+    {
+        if (! $structureId) {
+            return [];
+        }
+
+        $leaf = Structure::find($structureId);
+        if (! $leaf) {
+            return [];
+        }
+
+        $root = $leaf;
+        while ($root->parent_id) {
+            $parent = Structure::find($root->parent_id);
+            if (! $parent) {
+                break;
+            }
+            $root = $parent;
+        }
+
+        $segments = [];
+        $rootName = trim((string) $root->name);
+        $leafName = trim((string) $leaf->name);
+        if ($rootName !== '') {
+            $segments[] = $rootName;
+        }
+        if ($leafName !== '' && $leafName !== $rootName) {
+            $segments[] = $leafName;
+        }
+
+        return $segments;
+    }
+
+    /**
+     * Decline a structure path: every segment takes the genitive except, for the
+     * dative case, the final segment — the Azerbaijani izafət chain "X-nin Y-nə".
+     *
+     * @param  string[]  $segments
+     */
+    private function declineSegments(array $segments, string $case): string
+    {
+        if ($segments === []) {
+            return '';
+        }
+
+        $last = count($segments) - 1;
+        $declined = [];
+        foreach ($segments as $i => $segment) {
+            $declined[] = ($case === 'dative' && $i === $last)
+                ? $this->declension->possessiveDative($segment)
+                : $this->declension->possessiveGenitive($segment);
+        }
+
+        return implode(' ', $declined);
     }
 
     /** Build the "Name.Patronymic.Surname" initials form, e.g. "R.B.Bayramov". */
