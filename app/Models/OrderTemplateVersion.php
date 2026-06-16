@@ -16,6 +16,7 @@ class OrderTemplateVersion extends Model
         'version_no',
         'template_name',
         'template_path',
+        'render_mode',
         'checksum',
         'status',
         'is_active',
@@ -44,6 +45,21 @@ class OrderTemplateVersion extends Model
     public function mappings(): HasMany
     {
         return $this->hasMany(OrderTemplateMapping::class);
+    }
+
+    public function blocks(): HasMany
+    {
+        return $this->hasMany(OrderTemplateBlock::class)
+            ->whereNull('parent_id')
+            ->orderBy('sort_order')
+            ->orderBy('id');
+    }
+
+    public function allBlocks(): HasMany
+    {
+        return $this->hasMany(OrderTemplateBlock::class)
+            ->orderBy('sort_order')
+            ->orderBy('id');
     }
 
     public function audits(): HasMany

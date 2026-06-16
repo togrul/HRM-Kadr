@@ -19,12 +19,7 @@ class Component extends Model
         'rank_id',
         'name',
         'content',
-        'dynamic_fields',
         'title',
-    ];
-
-    protected $casts = [
-        'dynamic_fields' => 'array',
     ];
 
     public function orderType(): BelongsTo
@@ -46,9 +41,4 @@ class Component extends Model
     {
         return $this->hasMany(OrderLogComponentAttributes::class, 'component_id', 'id');
     }
-
-    //    public function componentAttributes() : BelongsToMany
-    //    {
-    //        return $this->belongsToMany(OrderLogComponentAttributes::class,'order_log_components','row_number', 'row_number', 'component_id', 'component_id');
-    //    }
 }
