@@ -5,7 +5,6 @@ namespace App\Modules\Orders\Support\Traits;
 use App\Livewire\Forms\Orders\OrderForm;
 use App\Livewire\Forms\Orders\OrderSearchForm;
 use App\Livewire\Forms\Orders\SelectedPersonnelForm;
-use App\Models\Component;
 use App\Models\Order;
 use App\Models\PersonnelBusinessTrip;
 use App\Modules\Admin\Support\Traits\Admin\CallSwalTrait;
@@ -18,16 +17,13 @@ use App\Modules\Orders\Support\Traits\Orders\ManagesOrderComponents;
 use App\Modules\Orders\Support\Traits\SRP\BladeDataPreparation;
 use App\Modules\Orders\Support\Traits\Validations\OrderValidationTrait;
 use App\Services\Orders\OrderAttributeMappingService;
-use App\Services\Orders\OrderAttributePersister;
-use App\Services\Orders\OrderComponentPersister;
 use App\Services\Orders\OrderCrudPipelineService;
 use App\Services\Orders\OrderInteractionStateService;
 use App\Services\Orders\OrderLookupService;
 use App\Services\Orders\OrderPersonnelPersister;
 use App\Services\Orders\OrderRenderStateService;
-use App\Services\Orders\OrderTemplateFormSchemaService;
+use App\Services\Orders\OrderSchemaResolver;
 use App\Services\Orders\VacancyDiffService;
-use App\Services\Orders\VacationCleanupService;
 use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Isolate;
@@ -49,8 +45,6 @@ trait OrderCrud
 
     protected PersonnelLookupReadRepository $personnelLookupReadRepository;
 
-    protected OrderComponentPersister $componentPersister;
-
     protected OrderCrudPipelineService $crudPipelineService;
 
     protected OrderPersonnelPersister $personnelPersister;
@@ -59,15 +53,11 @@ trait OrderCrud
 
     protected OrderInteractionStateService $interactionStateService;
 
-    protected OrderTemplateFormSchemaService $templateFormSchemaService;
+    protected OrderSchemaResolver $orderSchemaResolver;
 
     protected OrderAttributeMappingService $attributeMappingService;
 
-    protected OrderAttributePersister $attributePersister;
-
     protected VacancyDiffService $vacancyDiffService;
-
-    protected VacationCleanupService $vacationCleanupService;
 
     /**
      * Cheap in-memory cache for lookup datasets that rarely change during a component lifecycle.
@@ -80,29 +70,21 @@ trait OrderCrud
 
     public string $title;
 
-    //edited data model
+    // edited data model
     public $orderModel;
 
-    //selected order category - from all order list
+    // selected order category - from all order list
     public ?int $selectedOrder = null;
 
-    //template secilende asagida komponentlerin gorunusu
+    // template secilende asagida komponentlerin gorunusu
     public $showComponent = false;
 
-    //secilen sablon modelin ID si
+    // secilen sablon modelin ID si
     public $selectedTemplate;
 
     public array $originalComponents = [];
 
     public $selectedBlade;
-
-    /**
-     * Cached component definitions keyed by id so we can avoid re-querying when
-     * emitting componentSelected events.
-     *
-     * @var array<int, array{id:int,dynamic_fields:string|null}>
-     */
-    protected array $componentDefinitions = [];
 
     public array $templateRowFieldKeys = [];
 
@@ -120,34 +102,38 @@ trait OrderCrud
 
     public array $loadedOptionGroups = [];
 
+    protected function templateSchemaIsMissing(): bool
+    {
+        return $this->templateSchemaSource === 'metadata_required';
+    }
+
+    protected function hasTemplateRowSchema(): bool
+    {
+        return ! $this->templateSchemaIsMissing() && ! empty($this->templateRowFieldKeys);
+    }
+
     public function bootOrderCrud(
         OrderLookupService $orderLookupService,
         OrderTypeStatusLookupReadRepository $orderTypeStatusLookup,
         PersonnelLookupReadRepository $personnelLookupReadRepository,
-        OrderComponentPersister $componentPersister,
         OrderCrudPipelineService $crudPipelineService,
         OrderPersonnelPersister $personnelPersister,
         OrderRenderStateService $renderStateService,
         OrderInteractionStateService $interactionStateService,
-        OrderTemplateFormSchemaService $templateFormSchemaService,
+        OrderSchemaResolver $orderSchemaResolver,
         OrderAttributeMappingService $attributeMappingService,
-        OrderAttributePersister $attributePersister,
-        VacancyDiffService $vacancyDiffService,
-        VacationCleanupService $vacationCleanupService
+        VacancyDiffService $vacancyDiffService
     ): void {
         $this->orderLookupService = $orderLookupService;
         $this->orderTypeStatusLookup = $orderTypeStatusLookup;
         $this->personnelLookupReadRepository = $personnelLookupReadRepository;
-        $this->componentPersister = $componentPersister;
         $this->crudPipelineService = $crudPipelineService;
         $this->personnelPersister = $personnelPersister;
         $this->renderStateService = $renderStateService;
         $this->interactionStateService = $interactionStateService;
-        $this->templateFormSchemaService = $templateFormSchemaService;
+        $this->orderSchemaResolver = $orderSchemaResolver;
         $this->attributeMappingService = $attributeMappingService;
-        $this->attributePersister = $attributePersister;
         $this->vacancyDiffService = $vacancyDiffService;
-        $this->vacationCleanupService = $vacationCleanupService;
     }
 
     public function setStructure($id, $list = null, $field = null, $key = null, $isCoded = null): void
@@ -177,21 +163,9 @@ trait OrderCrud
     #[On('componentSelected')]
     public function componentSelected($componentId, $rowKey = null): void
     {
-        if (! empty($this->templateRowFieldKeys)) {
-            $this->selectedComponents[$rowKey] = $this->templateRowFieldKeys;
-            return;
-        }
-
-        if ($this->templateSchemaSource === 'metadata_required') {
-            $this->selectedComponents[$rowKey] = [];
-            return;
-        }
-
-        $this->selectedComponents[$rowKey] = $this->interactionStateService->resolveSelectedComponentFields(
-            componentId: $componentId,
-            componentDefinitions: $this->componentDefinitions,
-            dynamicFieldsFallbackResolver: fn (int $resolvedId) => Component::find($resolvedId)?->dynamic_fields
-        );
+        $this->selectedComponents[$rowKey] = $this->hasTemplateRowSchema()
+            ? $this->templateRowFieldKeys
+            : [];
     }
 
     #[On('templateSelected')]
@@ -292,8 +266,8 @@ trait OrderCrud
         );
 
         if ($resolved) {
-            $this->componentForms[$rowKey]['name'] = $resolved['name'];
-            $this->componentForms[$rowKey]['surname'] = $resolved['surname'];
+            $this->setOrderRowField($rowKey, 'name', $resolved['name']);
+            $this->setOrderRowField($rowKey, 'surname', $resolved['surname']);
         }
     }
 
@@ -341,7 +315,7 @@ trait OrderCrud
             return true;
         }
 
-        return $this->templateSchemaSource !== 'metadata_required';
+        return ! $this->templateSchemaIsMissing();
     }
 
     private function diffVacancyPayload(array $current, array $original): array
@@ -363,20 +337,6 @@ trait OrderCrud
             $this->resetComponentState();
             $this->selectedPersonnel->resetState();
             $this->refreshTemplateFormSchema();
-        }
-    }
-
-    private function saveAttribute($orderModel, $_attributes, $method): void
-    {
-        $this->attributePersister->persist($orderModel, $_attributes, $method);
-
-        if ($method == 'update' && in_array($this->selectedBlade, [Order::BLADE_VACATION, Order::BLADE_BUSINESS_TRIP])) {
-            $this->vacationCleanupService->handle(
-                $orderModel,
-                collect($_attributes),
-                $this->selectedBlade,
-                $this->selectedPersonnel->personnels
-            );
         }
     }
 
@@ -426,26 +386,26 @@ trait OrderCrud
         $this->registerTemplateDropdownOptionLabels($payload);
         $payload['dynamicFieldCatalog'] = $this->dynamicFieldCatalog;
 
-        $viewName = ! empty($this->orderModel)
-            ? 'orders::livewire.orders.edit-order'
-            : 'orders::livewire.orders.add-order';
-
-        return view($viewName, $payload);
+        // The block engine is the sole create flow now; OrderCrud only backs the
+        // legacy EditOrder, which always has an order model.
+        return view('orders::livewire.orders.edit-order', $payload);
     }
 
     protected function resolveLookupCollections(): array
     {
+        $orderRows = $this->orderRows();
+
         $personnelIdList = array_filter(
-            collect($this->componentForms)->pluck('personnel_id')->toArray(),
+            collect($orderRows)->pluck('personnel_id')->toArray(),
             static fn ($value) => $value !== null
         );
         $componentIdList = array_filter(
-            collect($this->componentForms)->pluck('component_id')->toArray(),
+            collect($orderRows)->pluck('component_id')->toArray(),
             static fn ($value) => $value !== null
         );
         $selectedDropdownValues = collect(['rank_id', 'structure_main_id', 'structure_id', 'position_id'])
             ->mapWithKeys(fn (string $field) => [
-                $field => collect($this->componentForms)
+                $field => collect($orderRows)
                     ->pluck($field)
                     ->filter(static fn ($value) => $value !== null && $value !== '')
                     ->map(static fn ($value) => (int) $value)
@@ -481,8 +441,7 @@ trait OrderCrud
             componentIdList: $componentIdList,
             selectedDropdownValues: $selectedDropdownValues,
             loadedOptionGroups: $this->loadedOptionGroups,
-            visibleFields: $visibleFields,
-            rememberComponentDefinitions: fn ($componentForms) => $this->rememberComponentDefinitions($componentForms)
+            visibleFields: $visibleFields
         );
     }
 
@@ -551,22 +510,23 @@ trait OrderCrud
     {
         $orderTypeId = (int) ($this->selectedTemplate ?? $this->orderForm->order_type_id ?? 0);
 
-        if (
-            ! $force
-            && $this->resolvedTemplateSchemaOrderTypeId === $orderTypeId
-            && ! empty($this->dynamicFieldCatalog)
-        ) {
+        if (! $this->orderSchemaResolver->shouldRefresh(
+            currentOrderTypeId: $this->resolvedTemplateSchemaOrderTypeId,
+            requestedOrderTypeId: $orderTypeId,
+            currentFieldCatalog: $this->dynamicFieldCatalog,
+            force: $force,
+        )) {
             return;
         }
 
-        $resolved = $this->templateFormSchemaService->resolveForOrderType($orderTypeId);
+        $resolved = $this->orderSchemaResolver->resolve($orderTypeId);
 
-        $this->templateSchemaSource = (string) ($resolved['source'] ?? 'metadata_required');
-        $this->templateRowFieldKeys = $resolved['row_field_keys'] ?? [];
-        $this->templateRowGroups = $resolved['row_groups'] ?? [];
-        $this->templateSectionBlocks = $resolved['section_blocks'] ?? [];
-        $this->dynamicFieldCatalog = $resolved['field_catalog'] ?? [];
-        $this->dynamicDropdownFields = $resolved['dropdown_fields'] ?? [];
+        $this->templateSchemaSource = $resolved->source;
+        $this->templateRowFieldKeys = $resolved->rowFieldKeys;
+        $this->templateRowGroups = $resolved->rowGroups;
+        $this->templateSectionBlocks = $resolved->sectionBlocks;
+        $this->dynamicFieldCatalog = $resolved->fieldCatalog;
+        $this->dynamicDropdownFields = $resolved->dropdownFields;
         $this->resolvedTemplateSchemaOrderTypeId = $orderTypeId;
     }
 

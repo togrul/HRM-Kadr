@@ -29,7 +29,5 @@ class OrdersListQueryBudgetCommandTest extends TestCase
         $this->assertSame(0, data_get($payload, 'summary.failed_probes'));
         $this->assertSame('ok', data_get($results, 'orders_render.status'));
         $this->assertSame('ok', data_get($results, 'orders_filter_update.status'));
-        $this->assertSame('ok', data_get($results, 'orders_add_modal_open.status'));
-        $this->assertSame('ok', data_get($results, 'orders_add_modal_panel_render.status'));
     }
 }

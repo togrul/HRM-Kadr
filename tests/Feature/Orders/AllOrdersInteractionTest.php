@@ -13,22 +13,6 @@ class AllOrdersInteractionTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_all_orders_can_open_add_order_side_menu(): void
-    {
-        $user = User::factory()->create();
-        $user->givePermissionTo([
-            Permission::findOrCreate('show-orders', 'web'),
-            Permission::findOrCreate('add-orders', 'web'),
-        ]);
-
-        $this->actingAs($user);
-
-        Livewire::test(AllOrders::class)
-            ->call('openSideMenu', 'add-order')
-            ->assertSet('showSideMenu', 'add-order')
-            ->assertSet('isSideModalOpen', true);
-    }
-
     public function test_all_orders_can_rerender_after_status_and_search_updates(): void
     {
         $user = User::factory()->create();

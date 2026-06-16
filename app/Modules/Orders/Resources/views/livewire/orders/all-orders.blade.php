@@ -331,11 +331,6 @@
     </div>
 
     <x-side-modal>
-        @can('add-orders')
-            @if ($showSideMenu == 'add-order')
-                <livewire:orders.add-order :$selectedOrder :key="'order-add-modal-' . ($selectedOrder ?? 'none')" lazy />
-            @endif
-        @endcan
         @can('edit-orders')
             @if ($showSideMenu == 'edit-order')
                 <livewire:orders.edit-order :orderModel="$modelName" :key="'order-edit-modal-' . ($modelName ?? 'none')" />

@@ -3,7 +3,6 @@
 namespace App\Modules\Orders\Console\Commands;
 
 use App\Console\Support\AbstractRenderBenchmarkCommand;
-use App\Modules\Orders\Livewire\AddOrder;
 use App\Modules\Orders\Livewire\AllOrders;
 use App\Support\Livewire\LivewireComponentProfiler;
 
@@ -32,8 +31,6 @@ class OrdersListRenderBenchmarkCommand extends AbstractRenderBenchmarkCommand
             return self::FAILURE;
         }
 
-        $modalUser = $this->resolveUserForPermissions('show-orders', 'add-orders') ?? $user;
-
         $budgets = [
             'orders_render' => [
                 'response_bytes' => max(1, (int) ($this->option('render-response-budget') ?: config('orders.observability.list_render_budget.orders_render.response_bytes', 180000))),
@@ -43,21 +40,11 @@ class OrdersListRenderBenchmarkCommand extends AbstractRenderBenchmarkCommand
                 'response_bytes' => max(1, (int) ($this->option('filter-response-budget') ?: config('orders.observability.list_render_budget.orders_filter_update.response_bytes', 180000))),
                 'render_ms' => max(1, (float) ($this->option('filter-ms-budget') ?: config('orders.observability.list_render_budget.orders_filter_update.render_ms', 180))),
             ],
-            'orders_add_modal_open' => [
-                'response_bytes' => max(1, (int) ($this->option('modal-response-budget') ?: config('orders.observability.list_render_budget.orders_add_modal_open.response_bytes', 120000))),
-                'render_ms' => max(1, (float) ($this->option('modal-ms-budget') ?: config('orders.observability.list_render_budget.orders_add_modal_open.render_ms', 120))),
-            ],
-            'orders_add_modal_panel_render' => [
-                'response_bytes' => max(1, (int) ($this->option('modal-panel-response-budget') ?: config('orders.observability.list_render_budget.orders_add_modal_panel_render.response_bytes', 170000))),
-                'render_ms' => max(1, (float) ($this->option('modal-panel-ms-budget') ?: config('orders.observability.list_render_budget.orders_add_modal_panel_render.render_ms', 150))),
-            ],
         ];
 
         $results = [];
         $results[] = $this->probe('orders_render', $budgets['orders_render'], fn () => $profiler->measureRender($user, AllOrders::class));
         $results[] = $this->probe('orders_filter_update', $budgets['orders_filter_update'], fn () => $profiler->measureInteraction($user, AllOrders::class, fn ($component) => $component->call('setStatus', 'all')->set('search.order_no', '0908')));
-        $results[] = $this->probe('orders_add_modal_open', $budgets['orders_add_modal_open'], fn () => $profiler->measureInteraction($modalUser, AllOrders::class, fn ($component) => $component->call('openSideMenu', 'add-order')));
-        $results[] = $this->probe('orders_add_modal_panel_render', $budgets['orders_add_modal_panel_render'], fn () => $profiler->measureRender($modalUser, AddOrder::class));
 
         return $this->finalize($results);
     }

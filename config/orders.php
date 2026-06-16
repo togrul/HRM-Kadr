@@ -7,6 +7,42 @@ return [
          * Use for gradual no-legacy rollout (recommended with staging-first validation).
          */
         'strict_mode' => (bool) env('ORDERS_ENGINE_STRICT_MODE', false),
+
+        /*
+         * New order types should start from the block designer. Legacy DOCX
+         * placeholder rendering is kept only for already-onboarded old types.
+         */
+        'default_render_mode' => env('ORDERS_ENGINE_DEFAULT_RENDER_MODE', 'designer_layout'),
+
+        /*
+         * Temporary compatibility mirror for old order_log_components and
+         * order_log_component_attributes tables. Keep enabled until historical
+         * printing is fully covered by template_snapshot.
+         */
+        'write_legacy_component_snapshots' => (bool) env('ORDERS_ENGINE_WRITE_LEGACY_COMPONENT_SNAPSHOTS', true),
+
+        /*
+         * Per-order-type behavior hooks. Keys currently follow the selected blade key
+         * until order_types gets its own stable handler code column.
+         */
+        'type_handlers' => [
+            'default' => \App\Services\Orders\Handlers\DefaultOrderTypeHandler::class,
+            'hiring' => \App\Services\Orders\Handlers\HiringOrderHandler::class,
+            'hire' => \App\Services\Orders\Handlers\HiringOrderHandler::class,
+            'ise-qebul' => \App\Services\Orders\Handlers\HiringOrderHandler::class,
+            'vacation' => \App\Services\Orders\Handlers\LeaveOrderHandler::class,
+            'leave' => \App\Services\Orders\Handlers\LeaveOrderHandler::class,
+            'mezuniyyet' => \App\Services\Orders\Handlers\LeaveOrderHandler::class,
+            'business-trips' => \App\Services\Orders\Handlers\BusinessTripOrderHandler::class,
+            'business_trip' => \App\Services\Orders\Handlers\BusinessTripOrderHandler::class,
+            'ezamiyyet' => \App\Services\Orders\Handlers\BusinessTripOrderHandler::class,
+            'transfer' => \App\Services\Orders\Handlers\TransferOrderHandler::class,
+            'internal-transfer' => \App\Services\Orders\Handlers\TransferOrderHandler::class,
+            'daxili-yerdeyisme' => \App\Services\Orders\Handlers\TransferOrderHandler::class,
+            'termination' => \App\Services\Orders\Handlers\TerminationOrderHandler::class,
+            'dismissal' => \App\Services\Orders\Handlers\TerminationOrderHandler::class,
+            'isden-ayrilma' => \App\Services\Orders\Handlers\TerminationOrderHandler::class,
+        ],
     ],
 
     'template_registry' => [
@@ -60,20 +96,10 @@ return [
                 'response_bytes' => (int) env('ORDERS_LIST_RENDER_BUDGET_FILTER_RESPONSE', 180000),
                 'render_ms' => (int) env('ORDERS_LIST_RENDER_BUDGET_FILTER_MS', 400),
             ],
-            'orders_add_modal_open' => [
-                'response_bytes' => (int) env('ORDERS_LIST_RENDER_BUDGET_MODAL_RESPONSE', 145000),
-                'render_ms' => (int) env('ORDERS_LIST_RENDER_BUDGET_MODAL_MS', 750),
-            ],
-            'orders_add_modal_panel_render' => [
-                'response_bytes' => (int) env('ORDERS_LIST_RENDER_BUDGET_MODAL_PANEL_RESPONSE', 170000),
-                'render_ms' => (int) env('ORDERS_LIST_RENDER_BUDGET_MODAL_PANEL_MS', 750),
-            ],
         ],
         'list_query_budget' => [
             'orders_render' => (int) env('ORDERS_LIST_QUERY_BUDGET_RENDER', 14),
             'orders_filter_update' => (int) env('ORDERS_LIST_QUERY_BUDGET_FILTER_UPDATE', 28),
-            'orders_add_modal_open' => (int) env('ORDERS_LIST_QUERY_BUDGET_MODAL_OPEN', 14),
-            'orders_add_modal_panel_render' => (int) env('ORDERS_LIST_QUERY_BUDGET_MODAL_PANEL_RENDER', 16),
         ],
         'query_budget' => [
             'add_form_schema' => (int) env('ORDERS_QUERY_BUDGET_ADD_FORM_SCHEMA', 15),
@@ -117,6 +143,45 @@ return [
             'default',
             'vacation',
             'business-trips',
+        ],
+    ],
+
+    'variables' => [
+        'groups' => [
+            'order' => [
+                'label' => 'Əmr məlumatları',
+                'variables' => [
+                    ['key' => 'order_no', 'label' => 'Əmr nömrəsi', 'type' => 'string'],
+                    ['key' => 'given_date', 'label' => 'Əmrin tarixi', 'type' => 'date'],
+                    ['key' => 'name_director', 'label' => 'İmzalayan şəxsin adı', 'type' => 'string'],
+                    ['key' => 'rank_director', 'label' => 'İmzalayan şəxsin rütbəsi/vəzifəsi', 'type' => 'string'],
+                ],
+            ],
+            'personnel' => [
+                'label' => 'Əməkdaş məlumatları',
+                'variables' => [
+                    ['key' => 'fullname', 'label' => 'Əməkdaşın SAA', 'type' => 'string'],
+                    ['key' => 'surname', 'label' => 'Soyad', 'type' => 'string'],
+                    ['key' => 'name', 'label' => 'Ad', 'type' => 'string'],
+                    ['key' => 'patronymic', 'label' => 'Ata adı', 'type' => 'string'],
+                    ['key' => 'gender_suffix', 'label' => 'Oğlu/qızı şəkilçisi', 'type' => 'string'],
+                    ['key' => 'tabel_no', 'label' => 'Tabel nömrəsi', 'type' => 'string'],
+                    ['key' => 'position', 'label' => 'Vəzifə', 'type' => 'string'],
+                    ['key' => 'structure', 'label' => 'Struktur', 'type' => 'string'],
+                    ['key' => 'rank', 'label' => 'Rütbə', 'type' => 'string'],
+                ],
+            ],
+            'date' => [
+                'label' => 'Tarix məlumatları',
+                'variables' => [
+                    ['key' => 'day', 'label' => 'Gün', 'type' => 'number'],
+                    ['key' => 'month', 'label' => 'Ay', 'type' => 'string'],
+                    ['key' => 'year', 'label' => 'İl', 'type' => 'number'],
+                    ['key' => 'start_date', 'label' => 'Başlama tarixi', 'type' => 'date'],
+                    ['key' => 'end_date', 'label' => 'Bitmə tarixi', 'type' => 'date'],
+                    ['key' => 'days', 'label' => 'Gün sayı', 'type' => 'number'],
+                ],
+            ],
         ],
     ],
 ];

@@ -3,7 +3,6 @@
 namespace App\Modules\Orders\Console\Commands;
 
 use App\Console\Support\AbstractQueryBudgetCommand;
-use App\Modules\Orders\Livewire\AddOrder;
 use App\Modules\Orders\Livewire\AllOrders;
 use Livewire\Livewire;
 
@@ -28,13 +27,9 @@ class OrdersListQueryBudgetCommand extends AbstractQueryBudgetCommand
             return self::FAILURE;
         }
 
-        $modalUser = $this->resolveUserForPermissions('show-orders', 'add-orders') ?? $user;
-
         $budgets = [
             'orders_render' => max(1, (int) ($this->option('render-budget') ?: config('orders.observability.list_query_budget.orders_render', 14))),
             'orders_filter_update' => max(1, (int) ($this->option('filter-budget') ?: config('orders.observability.list_query_budget.orders_filter_update', 28))),
-            'orders_add_modal_open' => max(1, (int) ($this->option('modal-budget') ?: config('orders.observability.list_query_budget.orders_add_modal_open', 4))),
-            'orders_add_modal_panel_render' => max(1, (int) ($this->option('modal-panel-budget') ?: config('orders.observability.list_query_budget.orders_add_modal_panel_render', 16))),
         ];
 
         $results = [];
@@ -47,15 +42,6 @@ class OrdersListQueryBudgetCommand extends AbstractQueryBudgetCommand
             Livewire::test(AllOrders::class)
                 ->call('setStatus', 'all')
                 ->set('search.order_no', '0908');
-        });
-        $results[] = $this->probe('orders_add_modal_open', $budgets['orders_add_modal_open'], function () use ($modalUser): void {
-            Livewire::actingAs($modalUser);
-            Livewire::test(AllOrders::class)
-                ->call('openSideMenu', 'add-order');
-        });
-        $results[] = $this->probe('orders_add_modal_panel_render', $budgets['orders_add_modal_panel_render'], function () use ($modalUser): void {
-            Livewire::actingAs($modalUser);
-            Livewire::test(AddOrder::class);
         });
 
         $summary = [
