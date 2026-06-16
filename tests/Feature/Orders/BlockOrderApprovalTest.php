@@ -109,11 +109,32 @@ class BlockOrderApprovalTest extends TestCase
         $this->assertSame($position->id, $fresh->position_id);
     }
 
+    public function test_approving_a_hire_activates_employment(): void
+    {
+        $this->actingAs(\App\Models\User::factory()->create());
+        $personnel = $this->makePersonnel(['is_pending' => true]);
+
+        $order = app(OrderIssueService::class)->issue([
+            'template_code' => 'hire',
+            'personnel_id' => $personnel->id,
+            'fields' => ['start_date' => '09.06.2026-cı il'],
+            'order_number' => '713-K',
+            'snapshot_html' => '<div>x</div>',
+        ]);
+
+        app(BlockOrderApprovalService::class)->approve($order);
+
+        $fresh = $personnel->fresh();
+        $this->assertFalse((bool) $fresh->is_pending);
+        $this->assertSame('2026-06-09', $fresh->join_work_date->format('Y-m-d'));
+        $this->assertNotEmpty($fresh->tabel_no);
+    }
+
     public function test_unmapped_type_has_no_side_effect(): void
     {
         $personnel = $this->makePersonnel();
         $order = app(OrderIssueService::class)->issue([
-            'template_code' => 'hire', // employment effect not wired yet (tabel_no/rank)
+            'template_code' => 'military_gathering', // no side-effect on the personnel record
             'personnel_id' => $personnel->id,
             'order_number' => '701-İ',
             'snapshot_html' => '<div>x</div>',
@@ -125,9 +146,9 @@ class BlockOrderApprovalTest extends TestCase
         $this->assertSame(0, $personnel->vacations()->count());
     }
 
-    private function makePersonnel(): Personnel
+    private function makePersonnel(array $overrides = []): Personnel
     {
-        return Personnel::withoutEvents(fn () => Personnel::query()->create([
+        return Personnel::withoutEvents(fn () => Personnel::query()->create(array_merge([
             'tabel_no' => 'TB'.Str::upper(Str::random(6)),
             'surname' => 'Bayramov',
             'name' => 'Ruslan',
@@ -146,6 +167,6 @@ class BlockOrderApprovalTest extends TestCase
             'join_work_date' => '2026-03-01',
             'added_by' => 1,
             'is_pending' => false,
-        ]));
+        ], $overrides)));
     }
 }

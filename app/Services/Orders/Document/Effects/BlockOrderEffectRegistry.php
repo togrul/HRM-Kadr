@@ -31,6 +31,7 @@ class BlockOrderEffectRegistry
             in_array($templateCode, self::TERMINATION_CODES, true) => app(TerminationBlockEffect::class),
             $templateCode === 'surname_change' => app(SurnameChangeBlockEffect::class),
             $templateCode === 'transfer' => app(TransferBlockEffect::class),
+            $templateCode === 'hire' => app(HireBlockEffect::class),
             default => null,
         };
     }
