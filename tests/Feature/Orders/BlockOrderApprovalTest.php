@@ -48,11 +48,50 @@ class BlockOrderApprovalTest extends TestCase
         $this->assertSame('700-M', $vacation->order_no);
     }
 
+    public function test_approving_a_termination_ends_employment(): void
+    {
+        $this->actingAs(\App\Models\User::factory()->create());
+        $personnel = $this->makePersonnel();
+        $this->assertNull($personnel->leave_work_date);
+
+        $order = app(OrderIssueService::class)->issue([
+            'template_code' => 'termination_request',
+            'personnel_id' => $personnel->id,
+            'fields' => ['date' => '09.06.2026-cı il'],
+            'order_number' => '710-K',
+            'snapshot_html' => '<div>x</div>',
+        ]);
+
+        app(BlockOrderApprovalService::class)->approve($order);
+
+        $this->assertSame('2026-06-09', $personnel->fresh()->leave_work_date->format('Y-m-d'));
+    }
+
+    public function test_approving_a_surname_change_updates_the_surname(): void
+    {
+        $this->actingAs(\App\Models\User::factory()->create());
+        $personnel = $this->makePersonnel();
+
+        $order = app(OrderIssueService::class)->issue([
+            'template_code' => 'surname_change',
+            'personnel_id' => $personnel->id,
+            'fields' => ['new_surname' => 'Bababəyli'],
+            'order_number' => '711-İ',
+            'snapshot_html' => '<div>x</div>',
+        ]);
+
+        app(BlockOrderApprovalService::class)->approve($order);
+
+        $fresh = $personnel->fresh();
+        $this->assertSame('Bababəyli', $fresh->surname);
+        $this->assertSame('Bayramov', $fresh->previous_surname);
+    }
+
     public function test_unmapped_type_has_no_side_effect(): void
     {
         $personnel = $this->makePersonnel();
         $order = app(OrderIssueService::class)->issue([
-            'template_code' => 'surname_change',
+            'template_code' => 'transfer', // no effect wired yet (needs structured fields)
             'personnel_id' => $personnel->id,
             'order_number' => '701-İ',
             'snapshot_html' => '<div>x</div>',

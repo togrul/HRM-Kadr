@@ -18,12 +18,19 @@ class BlockOrderEffectRegistry
         'education_leave',
     ];
 
+    /** Termination families end employment. */
+    private const TERMINATION_CODES = [
+        'termination_request',
+        'termination_cause',
+    ];
+
     public function for(string $templateCode): ?BlockOrderEffect
     {
-        if (in_array($templateCode, self::VACATION_CODES, true)) {
-            return app(VacationBlockEffect::class);
-        }
-
-        return null;
+        return match (true) {
+            in_array($templateCode, self::VACATION_CODES, true) => app(VacationBlockEffect::class),
+            in_array($templateCode, self::TERMINATION_CODES, true) => app(TerminationBlockEffect::class),
+            $templateCode === 'surname_change' => app(SurnameChangeBlockEffect::class),
+            default => null,
+        };
     }
 }
