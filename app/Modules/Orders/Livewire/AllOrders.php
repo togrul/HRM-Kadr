@@ -153,6 +153,20 @@ class AllOrders extends Component
         return response()->download($outputPath, basename($outputPath))->deleteFileAfterSend();
     }
 
+    public function approveOrder(string $order_no): void
+    {
+        $order = OrderLog::where('order_no', $order_no)->first();
+        if (! $order) {
+            return;
+        }
+
+        abort_unless((bool) auth()->user()?->can('add-orders'), 403);
+
+        app(\App\Services\Orders\Document\Effects\BlockOrderApprovalService::class)->approve($order);
+
+        $this->dispatch('orderAdded', __('orders::order_composer.messages.order_approved'));
+    }
+
     #[Renderless]
     public function queueOrderDocument(string $order_no): void
     {

@@ -39,6 +39,27 @@ class AzerbaijaniDateFormatterTest extends TestCase
         $this->assertSame('06.06.2026-cı il', $this->formatter->longDate(Carbon::parse('2026-06-06')));
     }
 
+    /**
+     * @dataProvider parseCases
+     */
+    public function test_parse(string $input, ?string $expected): void
+    {
+        $result = $this->formatter->parse($input);
+        $this->assertSame($expected, $result?->format('Y-m-d'));
+    }
+
+    public static function parseCases(): array
+    {
+        return [
+            ['2026-05-19', '2026-05-19'],
+            ['19.05.2026', '2026-05-19'],
+            ['19.05.2026-cı il', '2026-05-19'],
+            ['04.06.2026-cu il', '2026-06-04'],
+            ['', null],
+            ['   ', null],
+        ];
+    }
+
     public function test_work_year_span_ends_the_day_before_the_anniversary(): void
     {
         // The reported bug: a labour year must not read 26.11.2025-26.11.2026 (same

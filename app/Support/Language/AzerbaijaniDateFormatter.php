@@ -2,7 +2,9 @@
 
 namespace App\Support\Language;
 
+use Carbon\Carbon;
 use Carbon\CarbonInterface;
+use Throwable;
 
 /**
  * Azerbaijani date/period formatting for orders.
@@ -55,6 +57,36 @@ class AzerbaijaniDateFormatter
     public function longDate(CarbonInterface $date): string
     {
         return $this->shortDate($date).'-'.$this->yearSuffix((int) $date->year).' il';
+    }
+
+    /**
+     * Parse a date the engine produced/accepts back into a Carbon: an ISO date
+     * (2026-05-19), a "DD.MM.YYYY" or the Azerbaijani long form "19.05.2026-cı il".
+     * Returns null when it cannot be parsed (so side-effects can fail safe).
+     */
+    public function parse(?string $value): ?Carbon
+    {
+        $value = trim((string) $value);
+        if ($value === '') {
+            return null;
+        }
+
+        // Strip the Azerbaijani ordinal-year suffix: "-cı il" / "-ci il" / …
+        $value = trim((string) preg_replace('/-(cı|ci|cu|cü)\s*il\.?$/u', '', $value));
+
+        foreach (['Y-m-d', 'd.m.Y', 'd-m-Y'] as $format) {
+            try {
+                return Carbon::createFromFormat($format, $value)->startOfDay();
+            } catch (Throwable) {
+                // try next format
+            }
+        }
+
+        try {
+            return Carbon::parse($value)->startOfDay();
+        } catch (Throwable) {
+            return null;
+        }
     }
 
     /**

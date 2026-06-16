@@ -26,6 +26,7 @@ return [
     'messages' => [
         'template_saved' => 'Template saved.',
         'order_issued' => 'Order created and added to the list.',
+        'order_approved' => 'Order approved.',
     ],
     'designer' => [
         'title' => 'Order type designer',

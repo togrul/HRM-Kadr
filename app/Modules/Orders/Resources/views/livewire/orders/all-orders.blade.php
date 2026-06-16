@@ -276,6 +276,16 @@
                                             </div>
                                         @endif
                                     @endcan
+                                    @can('add-orders')
+                                        @if ($_order->template_render_mode === \App\Services\Orders\Document\OrderIssueService::RENDER_MODE && $_order->status_id == 10)
+                                            <button
+                                                wire:click="approveOrder('{{ $_order->order_no }}')"
+                                                wire:confirm="{{ __('orders::order_composer.messages.order_approved') }}?"
+                                                class="ml-1 inline-flex items-center justify-center h-8 px-3 text-xs font-semibold text-white transition rounded-lg bg-emerald-600 hover:bg-emerald-500">
+                                                ✓ Təsdiqlə
+                                            </button>
+                                        @endif
+                                    @endcan
                                 </x-table.td>
 
                                 <x-table.td :isButton="true">

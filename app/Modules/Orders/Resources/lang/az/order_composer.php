@@ -26,6 +26,7 @@ return [
     'messages' => [
         'template_saved' => 'Şablon yadda saxlanıldı.',
         'order_issued' => 'Əmr yaradıldı və siyahıya əlavə olundu.',
+        'order_approved' => 'Əmr təsdiqləndi.',
     ],
     'designer' => [
         'title' => 'Əmr növü dizayneri',
