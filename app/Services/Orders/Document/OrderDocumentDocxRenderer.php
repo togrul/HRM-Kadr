@@ -27,11 +27,11 @@ class OrderDocumentDocxRenderer
 
     private const SIZE = 14;
 
-    /** Space after a body paragraph/clause, in twips (~10pt) — matches the airy sample. */
-    private const SPACE_AFTER = 200;
+    /** Space after a body paragraph/clause, in twips (~8pt) — the gap between clauses. */
+    private const SPACE_AFTER = 160;
 
-    /** 1.5 line spacing, like the sample orders. */
-    private const LINE_HEIGHT = 1.5;
+    /** Near-single line spacing inside a paragraph, like the sample (tight lines, gaps between). */
+    private const LINE_HEIGHT = 1.08;
 
     public function renderToFile(OrderDocument $document, ?string $path = null): string
     {
@@ -53,7 +53,7 @@ class OrderDocumentDocxRenderer
                 $node instanceof SplitLine => $this->splitLine($section, $node),
                 $node instanceof NumberedList => $this->numberedList($section, $node),
                 $node instanceof SignatureBlock => $this->signature($section, $node),
-                $node instanceof Spacer => $section->addTextBreak(max(1, $node->lines)),
+                $node instanceof Spacer => $this->spacer($section, $node),
                 default => null,
             };
         }
@@ -137,6 +137,17 @@ class OrderDocumentDocxRenderer
             'tabs' => [new Tab('right', Converter::cmToTwip(18.0))],
             'spaceAfter' => 0,
         ];
+    }
+
+    /**
+     * Render a vertical gap. Each "line" is a tall empty paragraph so the header
+     * (org → ƏMR → city/date → subject) gets the airy spacing of the sample orders.
+     */
+    private function spacer(Section $section, Spacer $node): void
+    {
+        for ($i = 0; $i < max(1, $node->lines); $i++) {
+            $section->addText('', [], ['lineHeight' => 2.0, 'spaceAfter' => 0]);
+        }
     }
 
     private function alignment(string $align): string
