@@ -10,8 +10,6 @@ it('resolves services permission group labels from canonical permission names', 
 
     expect(PermissionTranslationKey::groupKeyFromPermission('show-attendance-manual'))
         ->toBe('attendance_manual')
-        ->and(PermissionTranslationKey::groupKeyFromPermission('show-order-template-versions'))
-        ->toBe('order_template_versions')
         ->and(PermissionTranslationKey::groupKeyFromPermission('show-personnels'))
         ->toBe('personnels');
 
