@@ -28,6 +28,17 @@ class OrderRenderService
     }
 
     /**
+     * Preview from a raw block list (the form the designer/presets produce).
+     *
+     * @param  TemplateBlock[]  $blocks
+     * @param  array<string,mixed>  $context
+     */
+    public function previewBlocks(array $blocks, array $context = []): string
+    {
+        return $this->htmlRenderer->render($this->compiler->compileBlocks($blocks, $context));
+    }
+
+    /**
      * Freeze the approved (possibly edited) HTML into the order snapshot + .docx.
      */
     public function finalize(string $approvedHtml, ?string $docxPath = null): OrderSnapshot
