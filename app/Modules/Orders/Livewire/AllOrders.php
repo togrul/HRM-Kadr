@@ -24,8 +24,6 @@ class AllOrders extends Component
 {
     use AuthorizesRequests, SideModalAction, WithPagination;
 
-    protected OrderTypeStatusLookupReadRepository $orderTypeStatusLookup;
-
     public $selectedOrder;
 
     #[Url]
@@ -224,16 +222,16 @@ class AllOrders extends Component
         return Cache::remember(
             "order_statuses:{$locale}",
             now()->addMinutes(10),
-            fn () => $this->orderTypeStatusLookup->localizedStatuses((string) $locale)
+            // Resolve the repository per-call: this computed runs on every Livewire
+            // request, but mount() (where injected deps live) only runs on the first.
+            fn () => app(OrderTypeStatusLookupReadRepository::class)->localizedStatuses((string) $locale)
         );
     }
 
     public function mount(
-        AccessibleStructureScopeReadRepository $accessibleStructureScopeReadRepository,
-        OrderTypeStatusLookupReadRepository $orderTypeStatusLookup
+        AccessibleStructureScopeReadRepository $accessibleStructureScopeReadRepository
     ) {
         $this->authorize('viewAny', Order::class);
-        $this->orderTypeStatusLookup = $orderTypeStatusLookup;
         $this->fillFilter();
         $this->selectedOrder = $this->selectedOrder ?? request()->query('selectedOrder');
         $this->accessibleStructureIds = $accessibleStructureScopeReadRepository->accessibleStructureIds();
