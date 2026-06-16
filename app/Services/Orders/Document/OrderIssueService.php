@@ -91,6 +91,9 @@ class OrderIssueService
                     'fields' => $data['fields'] ?? [],
                     'personnel_id' => $data['personnel_id'] ?? null,
                     'order_date_text' => $data['order_date'] ?? ($snapshot['order_date_text'] ?? ''),
+                    // Inline-editing re-generates from HTML, so any previously uploaded
+                    // Word file is now stale — drop it and fall back to the generated doc.
+                    'docx_path' => null,
                 ]),
             ]);
 
@@ -99,5 +102,23 @@ class OrderIssueService
 
             return $orderLog;
         });
+    }
+
+    /**
+     * Record a user-uploaded, externally-corrected .docx as the authoritative
+     * document for a pending order; printing then serves this file verbatim
+     * instead of re-rendering from the HTML snapshot.
+     */
+    public function attachUploadedDocx(OrderLog $orderLog, string $storedPath): OrderLog
+    {
+        if ((int) $orderLog->status_id !== self::STATUS_PENDING) {
+            throw new RuntimeException('Only pending orders can have their document replaced.');
+        }
+
+        $snapshot = $orderLog->template_snapshot ?? [];
+        $snapshot['docx_path'] = $storedPath;
+        $orderLog->update(['template_snapshot' => $snapshot]);
+
+        return $orderLog;
     }
 }

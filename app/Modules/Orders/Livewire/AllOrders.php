@@ -126,11 +126,22 @@ class AllOrders extends Component
         abort_unless((string) $order->template_render_mode === \App\Services\Orders\Document\OrderIssueService::RENDER_MODE, 404);
         abort_unless((bool) auth()->user()?->can('add-orders'), 403);
 
+        // Order numbers may contain "/" (e.g. 2026/ƏM-145), which is illegal in a
+        // download filename — fold path separators to a dash.
+        $safeName = str_replace(['/', '\\'], '-', (string) $order->order_no);
+
+        // A user-uploaded, externally-corrected Word file (if any) is authoritative —
+        // serve it verbatim instead of re-rendering from the HTML snapshot.
+        $docxPath = (string) data_get($order->template_snapshot, 'docx_path', '');
+        if ($docxPath !== '' && \Illuminate\Support\Facades\Storage::disk('local')->exists($docxPath)) {
+            return \Illuminate\Support\Facades\Storage::disk('local')->download($docxPath, $safeName.'.docx');
+        }
+
         $html = (string) data_get($order->template_snapshot, 'html', '');
         abort_if($html === '', 404);
         $path = app(\App\Services\Orders\Document\OrderHtmlToDocxRenderer::class)->renderToFile($html);
 
-        return response()->download($path, $order->order_no.'.docx')->deleteFileAfterSend();
+        return response()->download($path, $safeName.'.docx')->deleteFileAfterSend();
     }
 
     public function approveOrder(string $order_no): void

@@ -11,6 +11,7 @@ use App\Services\Orders\Document\OrderTemplateProvider;
 use App\Services\Orders\Document\TemplateFieldSchema;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
 /**
  * Issue-time order composer: pick a template + personnel + fields, see a live
@@ -23,7 +24,7 @@ use Livewire\Component;
  */
 class OrderComposer extends Component
 {
-    use AuthorizesRequests;
+    use AuthorizesRequests, WithFileUploads;
 
     public string $presetCode = '';
 
@@ -48,6 +49,11 @@ class OrderComposer extends Component
 
     /** Set when editing an existing pending block order (its order_logs id). */
     public ?int $editOrderId = null;
+
+    /** A corrected .docx the user uploaded to replace the generated document. */
+    public $uploadedDocx = null;
+
+    public bool $hasUploadedDocx = false;
 
     public function mount(?string $presetCode = null, ?int $personnelId = null, ?int $orderId = null): void
     {
@@ -95,12 +101,44 @@ class OrderComposer extends Component
         $this->orderDate = (string) ($snapshot['order_date_text'] ?? '');
         $this->previewHtml = (string) ($snapshot['html'] ?? '');
         $this->editedHtml = $this->previewHtml;
+        $this->hasUploadedDocx = ! empty($snapshot['docx_path']);
 
         $personnelId = $snapshot['personnel_id'] ?? null;
         if ($personnelId) {
             $this->personnelId = (int) $personnelId;
             $this->personnelLabel = optional(Personnel::find($this->personnelId))->fullname;
         }
+    }
+
+    /**
+     * Replace this pending order's document with a user-corrected .docx. The file
+     * is stored verbatim and served on every future print/download until the text
+     * is inline-edited again (which reverts to the generated document).
+     */
+    public function uploadDocx(OrderIssueService $issuer): void
+    {
+        $this->authorize('add-orders');
+
+        if (! $this->isEditing()) {
+            return;
+        }
+
+        $this->validate([
+            'uploadedDocx' => ['required', 'file', 'mimes:docx,doc', 'max:10240'],
+        ], [], ['uploadedDocx' => __('orders::order_composer.labels.replace_word')]);
+
+        $order = OrderLog::findOrFail($this->editOrderId);
+        $path = $this->uploadedDocx->storeAs(
+            'order-documents',
+            $order->id.'-'.now()->timestamp.'.docx'
+        );
+
+        $issuer->attachUploadedDocx($order, $path);
+
+        $this->uploadedDocx = null;
+        $this->hasUploadedDocx = true;
+
+        $this->dispatch('orderAdded', __('orders::order_composer.messages.word_replaced'));
     }
 
     /**
@@ -228,19 +266,21 @@ class OrderComposer extends Component
             'snapshot_html' => $snapshot->html,
         ];
 
-        // Edit mode: re-freeze the existing pending order in place and return to the
-        // list so the HR user sees the correction applied (no new row, no download).
+        // Edit mode: re-freeze the existing pending order in place. orderAdded closes
+        // the side modal and refreshes the list (no new row, no download).
         if ($this->isEditing()) {
             $order = OrderLog::findOrFail($this->editOrderId);
             $issuer->update($order, $payload);
-            session()->flash('status', __('orders::order_composer.messages.order_updated'));
 
-            return redirect()->route('orders');
+            $this->dispatch('orderAdded', __('orders::order_composer.messages.order_updated'));
+
+            return null;
         }
 
         $issuer->issue($payload);
 
-        $this->dispatch('orderIssued', __('orders::order_composer.messages.order_issued'));
+        // Close the modal + refresh the list, and stream the finalized .docx down.
+        $this->dispatch('orderAdded', __('orders::order_composer.messages.order_issued'));
 
         return response()->download($snapshot->docxPath, $this->downloadName())->deleteFileAfterSend();
     }
@@ -309,6 +349,7 @@ class OrderComposer extends Component
         $code = $this->presetCode !== '' ? $this->presetCode : 'order';
         $number = $this->orderNumber !== '' ? '_'.$this->orderNumber : '';
 
-        return $code.$number.'.docx';
+        // "/" and "\" are illegal in download filenames (order numbers may carry them).
+        return str_replace(['/', '\\'], '-', $code.$number).'.docx';
     }
 }

@@ -2,6 +2,8 @@
 
 return [
     'title' => 'Əmrin tərtibatı',
+    'create_title' => 'Yeni əmr',
+    'edit_title' => 'Əmrin redaktəsi',
     'labels' => [
         'type' => 'Əmrin növü',
         'number' => 'Əmrin nömrəsi',
@@ -11,6 +13,12 @@ return [
         'preview' => 'Önizləmə',
         'fields' => 'Məlumatlar',
         'edit_hint' => 'Mətni birbaşa redaktə edə bilərsiniz.',
+        'step_basics' => 'Növ və işçi',
+        'step_details' => 'Məlumatlar',
+        'step_preview' => 'Önizləmə və redaktə',
+        'replace_word' => 'Düzəldilmiş Word faylı',
+        'replace_word_hint' => 'Sənədi Word-də düzəldib (.docx) buraya yükləyin — çapda həmin fayl istifadə olunacaq.',
+        'uploaded_word_exists' => 'Yüklənmiş Word faylı mövcuddur. Çapda o istifadə olunur.',
     ],
     'actions' => [
         'generate' => 'Önizləməni yarat',
@@ -18,6 +26,8 @@ return [
         'issue' => 'Əmri yarat və yüklə',
         'edit' => 'Əmri redaktə et',
         'save' => 'Dəyişiklikləri yadda saxla',
+        'create' => 'Yeni əmr',
+        'upload_replace' => 'Word faylını əvəz et',
     ],
     'errors' => [
         'unknown_type' => 'Bu əmr növü tapılmadı.',
@@ -30,6 +40,7 @@ return [
         'order_issued' => 'Əmr yaradıldı və siyahıya əlavə olundu.',
         'order_approved' => 'Əmr təsdiqləndi.',
         'order_updated' => 'Əmr yeniləndi.',
+        'word_replaced' => 'Word faylı əvəz olundu.',
     ],
     'designer' => [
         'title' => 'Əmr növü dizayneri',

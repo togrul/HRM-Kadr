@@ -2,6 +2,8 @@
 
 return [
     'title' => 'Compose order',
+    'create_title' => 'New order',
+    'edit_title' => 'Edit order',
     'labels' => [
         'type' => 'Order type',
         'number' => 'Order number',
@@ -11,6 +13,12 @@ return [
         'preview' => 'Preview',
         'fields' => 'Details',
         'edit_hint' => 'You can edit the text directly.',
+        'step_basics' => 'Type & employee',
+        'step_details' => 'Details',
+        'step_preview' => 'Preview & edit',
+        'replace_word' => 'Corrected Word file',
+        'replace_word_hint' => 'Correct the document in Word (.docx) and upload it here — printing will use that file.',
+        'uploaded_word_exists' => 'An uploaded Word file exists. Printing uses it.',
     ],
     'actions' => [
         'generate' => 'Generate preview',
@@ -18,6 +26,8 @@ return [
         'issue' => 'Create order & download',
         'edit' => 'Edit order',
         'save' => 'Save changes',
+        'create' => 'New order',
+        'upload_replace' => 'Replace Word file',
     ],
     'errors' => [
         'unknown_type' => 'Unknown order type.',
@@ -30,6 +40,7 @@ return [
         'order_issued' => 'Order created and added to the list.',
         'order_approved' => 'Order approved.',
         'order_updated' => 'Order updated.',
+        'word_replaced' => 'Word file replaced.',
     ],
     'designer' => [
         'title' => 'Order type designer',

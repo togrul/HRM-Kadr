@@ -67,6 +67,23 @@ class OrderComposerTest extends TestCase
         $this->assertSame($personnel->id, data_get($order->template_snapshot, 'personnel_id'));
     }
 
+    public function test_issuing_an_order_whose_number_contains_a_slash_downloads_a_safe_filename(): void
+    {
+        $personnel = $this->makePersonnel();
+        $this->actingAs($this->userWith('add-orders'));
+
+        // "/" is illegal in a download filename — it must be folded to "-".
+        Livewire::test(OrderComposer::class, [
+            'presetCode' => 'leave',
+            'personnelId' => $personnel->id,
+        ])
+            ->set('orderNumber', '2026/ƏM-145')
+            ->set('fields', ['days' => '14', 'work_year' => '2025-11-26'])
+            ->call('generatePreview')
+            ->call('issue')
+            ->assertFileDownloaded('leave_2026-ƏM-145.docx');
+    }
+
     public function test_it_opens_a_pending_block_order_for_editing_and_saves_in_place(): void
     {
         $personnel = $this->makePersonnel();
@@ -100,7 +117,7 @@ class OrderComposerTest extends TestCase
         $editor->set('orderNumber', '500-M-DÜZ')
             ->set('editedHtml', $editedHtml)
             ->call('issue')
-            ->assertRedirect(route('orders'));
+            ->assertDispatched('orderAdded');
 
         $order->refresh();
         $this->assertSame('500-M-DÜZ', $order->order_no);
@@ -108,6 +125,58 @@ class OrderComposerTest extends TestCase
         $this->assertSame(\App\Services\Orders\Document\OrderIssueService::STATUS_PENDING, $order->status_id);
         // No duplicate row — editing updates in place.
         $this->assertSame(1, \App\Models\OrderLog::where('template_render_mode', 'block_v2')->count());
+    }
+
+    public function test_it_replaces_the_generated_document_with_an_uploaded_word_file(): void
+    {
+        \Illuminate\Support\Facades\Storage::fake('local');
+        $personnel = $this->makePersonnel();
+        $this->actingAs($this->userWith('add-orders'));
+
+        $order = Livewire::test(OrderComposer::class, [
+            'presetCode' => 'leave',
+            'personnelId' => $personnel->id,
+        ])
+            ->set('orderNumber', '600-M')
+            ->set('fields', ['days' => '14', 'work_year' => '2025-11-26'])
+            ->call('generatePreview')
+            ->call('issue');
+
+        $orderLog = \App\Models\OrderLog::where('order_no', '600-M')->firstOrFail();
+
+        $file = \Illuminate\Http\UploadedFile::fake()->create('corrected.docx', 50, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+
+        Livewire::test(OrderComposer::class, ['orderId' => $orderLog->id])
+            ->set('uploadedDocx', $file)
+            ->call('uploadDocx')
+            ->assertDispatched('orderAdded')
+            ->assertSet('hasUploadedDocx', true);
+
+        $storedPath = data_get($orderLog->fresh()->template_snapshot, 'docx_path');
+        $this->assertNotEmpty($storedPath);
+        \Illuminate\Support\Facades\Storage::disk('local')->assertExists($storedPath);
+    }
+
+    public function test_inline_editing_clears_a_previously_uploaded_word_file(): void
+    {
+        $personnel = $this->makePersonnel();
+        $issuer = app(\App\Services\Orders\Document\OrderIssueService::class);
+
+        $order = $issuer->issue([
+            'template_code' => 'leave',
+            'personnel_id' => $personnel->id,
+            'order_number' => '601-M',
+            'snapshot_html' => '<div class="order-document"><p>x</p></div>',
+        ]);
+        $issuer->attachUploadedDocx($order, 'order-documents/whatever.docx');
+        $this->assertNotEmpty(data_get($order->fresh()->template_snapshot, 'docx_path'));
+
+        $issuer->update($order, [
+            'order_number' => '601-M',
+            'snapshot_html' => '<div class="order-document"><p>y</p></div>',
+        ]);
+
+        $this->assertNull(data_get($order->fresh()->template_snapshot, 'docx_path'));
     }
 
     public function test_selecting_a_preset_renders_its_auto_derived_field_inputs(): void
