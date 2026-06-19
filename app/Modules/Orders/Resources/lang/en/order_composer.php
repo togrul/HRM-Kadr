@@ -58,6 +58,8 @@ return [
         'start_blank' => 'Start blank',
         'help' => 'Arrange blocks top to bottom. Click a text block, then pick a variable on the right — it fills in automatically when the order is created. The live preview is on the right.',
         'insert_hint' => 'Click a text block first, then pick a variable — it is inserted at the cursor.',
+        'insert_short' => 'click text, then pick',
+        'reorder_hint' => 'Reorder with ↑ ↓',
         'click_text_first' => 'Click a text block first.',
         'eg' => 'e.g.',
         'live_preview' => 'Live preview',

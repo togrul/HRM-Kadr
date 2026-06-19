@@ -58,6 +58,8 @@ return [
         'start_blank' => 'Boş başla',
         'help' => 'Blokları yuxarıdan aşağı düz. Mətn blokuna klikləyin, sonra sağdakı dəyişəni seçin — o, əmr yaradılanda avtomatik doldurulacaq. Sağda canlı önizləməni görürsünüz.',
         'insert_hint' => 'Əvvəlcə mətn blokuna klikləyin, sonra dəyişəni seçin — kursora əlavə olunacaq.',
+        'insert_short' => 'mətnə klikləyin, sonra seçin',
+        'reorder_hint' => 'Sıranı ↑ ↓ ilə dəyişin',
         'click_text_first' => 'Əvvəlcə hansısa mətn blokuna klikləyin.',
         'eg' => 'Nümunə',
         'live_preview' => 'Canlı önizləmə',
