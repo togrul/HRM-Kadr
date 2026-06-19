@@ -34,6 +34,9 @@ class OrderTemplateDesigner extends Component
 
     public string $previewHtml = '';
 
+    /** Bound to the "start from an existing type" picker. */
+    public string $startFrom = '';
+
     protected function rules(): array
     {
         return [
@@ -58,6 +61,8 @@ class OrderTemplateDesigner extends Component
         } else {
             $this->rows = [app(DesignerBlockCodec::class)->blankRow(TemplateBlock::HEADING)];
         }
+
+        $this->refreshPreview();
     }
 
     /**
@@ -66,6 +71,44 @@ class OrderTemplateDesigner extends Component
     public function getVariableGroupsProperty(OrderVariableRegistry $registry): array
     {
         return $registry->grouped();
+    }
+
+    /**
+     * Existing order types the author can clone as a starting point.
+     *
+     * @return array<string,string>
+     */
+    public function getAvailableTemplatesProperty(OrderTemplateProvider $templates): array
+    {
+        return $templates->available();
+    }
+
+    /**
+     * Clone an existing type's blocks into the editor as a starting point. The author
+     * keeps editing and saves under their OWN new code — so they never start from a
+     * blank page.
+     */
+    public function updatedStartFrom(string $code): void
+    {
+        if ($code === '') {
+            return;
+        }
+
+        $this->rows = app(DesignerBlockCodec::class)->toEditable(
+            app(OrderTemplateProvider::class)->blocks($code)
+        );
+        $this->startFrom = '';
+        $this->refreshPreview();
+    }
+
+    /**
+     * Re-render the live preview whenever the author edits a block.
+     */
+    public function updated(string $name): void
+    {
+        if (str_starts_with($name, 'rows')) {
+            $this->refreshPreview();
+        }
     }
 
     /**
@@ -86,13 +129,14 @@ class OrderTemplateDesigner extends Component
     public function addBlock(string $kind = TemplateBlock::PARAGRAPH): void
     {
         $this->rows[] = app(DesignerBlockCodec::class)->blankRow($kind);
+        $this->refreshPreview();
     }
 
     public function removeBlock(int $index): void
     {
         unset($this->rows[$index]);
         $this->rows = array_values($this->rows);
-        $this->previewHtml = '';
+        $this->refreshPreview();
     }
 
     public function moveBlock(int $index, int $direction): void
@@ -102,19 +146,28 @@ class OrderTemplateDesigner extends Component
             [$this->rows[$index], $this->rows[$target]] = [$this->rows[$target], $this->rows[$index]];
             $this->rows = array_values($this->rows);
         }
+        $this->refreshPreview();
     }
 
-    public function preview(DesignerBlockCodec $codec, OrderRenderService $renderer, TemplateFieldSchema $schema): void
+    public function preview(): void
     {
-        $blocks = $codec->toBlocks($this->rows);
+        $this->refreshPreview();
+    }
 
-        // Sample data so the author sees a realistic, fully-resolved document.
+    /**
+     * Render the live, fully-resolved preview from sample data so the author always
+     * sees a realistic document as they edit.
+     */
+    private function refreshPreview(): void
+    {
+        $blocks = app(DesignerBlockCodec::class)->toBlocks($this->rows);
+
         $fields = [];
-        foreach ($schema->for($blocks) as $field) {
+        foreach (app(TemplateFieldSchema::class)->for($blocks) as $field) {
             $fields[$field['key']] = '['.$field['label'].']';
         }
 
-        $this->previewHtml = $renderer->previewBlocks($blocks, [
+        $this->previewHtml = app(OrderRenderService::class)->previewBlocks($blocks, [
             'personnel' => Personnel::with(['structure:id,name', 'position:id,name'])
                 ->whereNotNull('structure_id')->whereNotNull('position_id')->first(),
             'fields' => $fields,
