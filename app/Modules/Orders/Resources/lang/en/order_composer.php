@@ -44,6 +44,7 @@ return [
     ],
     'designer' => [
         'title' => 'Order type designer',
+        'subtitle' => 'Build an order type block by block — no code.',
         'code' => 'Code (lowercase latin)',
         'name' => 'Name',
         'blocks' => 'Blocks',

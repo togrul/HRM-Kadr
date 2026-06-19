@@ -44,6 +44,7 @@ return [
     ],
     'designer' => [
         'title' => 'Əmr növü dizayneri',
+        'subtitle' => 'Blok-blok əmr növü qurun — kod yazmadan.',
         'code' => 'Kod (latın, kiçik)',
         'name' => 'Ad',
         'blocks' => 'Bloklar',
