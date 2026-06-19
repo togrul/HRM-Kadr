@@ -8,7 +8,7 @@
 @endphp
 
 <div
-    class="space-y-5"
+    class="mx-auto max-w-7xl space-y-5 px-4 py-6 sm:px-6 lg:px-8"
     x-data="{
         active: null,
         insert(key) {
@@ -26,7 +26,7 @@
     }"
 >
     {{-- ============ Sticky toolbar ============ --}}
-    <div class="sticky top-0 z-20 -mx-2 rounded-2xl border border-zinc-200/80 bg-white/80 px-4 py-3 shadow-sm backdrop-blur-md">
+    <div class="sticky top-4 z-20 rounded-2xl border border-zinc-200/80 bg-white/80 px-4 py-3 shadow-sm backdrop-blur-md">
         <div class="flex flex-col gap-3 lg:flex-row lg:items-center">
             <div class="flex items-center gap-3">
                 <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-900 text-white">
