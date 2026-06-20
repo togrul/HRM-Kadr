@@ -71,20 +71,6 @@ class OrderLog extends Model
         return $this->belongsTo(Order::class);
     }
 
-    public function components(): BelongsToMany
-    {
-        return $this->belongsToMany(
-            Component::class,
-            'order_log_components',
-            'order_no',
-            'component_id',
-            'order_no',
-            'id'
-        )
-            ->withPivot('row_number')
-            ->orderBy('row_number');
-    }
-
     public function personnels(): BelongsToMany
     {
         return $this->belongsToMany(
@@ -111,11 +97,6 @@ class OrderLog extends Model
     public function signatory(): BelongsTo
     {
         return $this->belongsTo(Personnel::class, 'signatory_personnel_id');
-    }
-
-    public function attributes(): HasMany
-    {
-        return $this->hasMany(OrderLogComponentAttributes::class, 'order_no', 'order_no');
     }
 
     public function vacations(): HasMany

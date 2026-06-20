@@ -3,18 +3,15 @@
 namespace Tests\Feature\EmployeeLifecycle;
 
 use App\Enums\OrderStatusEnum;
-use App\Models\Component;
 use App\Models\Order;
 use App\Models\OrderCategory;
 use App\Models\OrderLog;
-use App\Models\OrderLogComponentAttributes;
 use App\Models\OrderStatus;
 use App\Models\OrderType;
 use App\Models\Personnel;
 use App\Models\User;
 use App\Modules\EmployeeLifecycle\Application\Services\LifecycleDashboardReadService;
 use App\Modules\EmployeeLifecycle\Application\Services\LifecyclePlanTemplateService;
-use App\Modules\EmployeeLifecycle\Application\Services\OrderLifecycleIntegrationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -337,69 +334,6 @@ class LifecycleDashboardReadServiceTest extends TestCase
         ]);
     }
 
-    public function test_it_creates_lifecycle_movement_and_offboarding_from_configured_orders(): void
-    {
-        Carbon::setTestNow('2026-05-03 10:00:00');
-
-        config()->set('employee_lifecycle.order_integration.promotion_order_ids', [8101]);
-        config()->set('employee_lifecycle.order_integration.offboarding_order_ids', [8102]);
-
-        $owner = User::factory()->create(['name' => 'Order Owner']);
-        $personnel = $this->makePersonnel();
-        $service = app(OrderLifecycleIntegrationService::class);
-
-        $promotionOrder = $this->makeLifecycleOrder(8101, 'PROM-2026-1', $owner, $personnel, [
-            '$target_structure_id' => ['id' => 2, 'value' => 'Lifecycle Target'],
-            '$target_position_id' => ['id' => 2, 'value' => 'Lifecycle Manager'],
-            '$day' => ['value' => '9'],
-            '$month' => ['value' => 'may'],
-            '$year' => ['value' => '2026'],
-        ]);
-
-        $service->handleApprovedOrder($promotionOrder, $owner->id);
-
-        $this->assertDatabaseHas('employee_lifecycle_movements', [
-            'personnel_id' => $personnel->id,
-            'movement_type' => 'promotion',
-            'target_structure_id' => 2,
-            'target_position_id' => 2,
-            'effective_date' => '2026-05-09',
-            'status' => 'planned',
-        ]);
-        $this->assertDatabaseHas('employee_lifecycle_events', [
-            'personnel_id' => $personnel->id,
-            'source_type' => 'order_log_movement',
-            'source_id' => $promotionOrder->id,
-        ]);
-        $orderEvent = app(LifecycleDashboardReadService::class)
-            ->events()
-            ->firstWhere('source_id', $promotionOrder->id);
-
-        $this->assertTrue($orderEvent['source_is_order']);
-        $this->assertSame('Əmr: PROM-2026-1', $orderEvent['source_label']);
-
-        $offboardingOrder = $this->makeLifecycleOrder(8102, 'EXIT-2026-1', $owner, $personnel, [
-            '$last_working_date' => ['value' => '2026-05-31'],
-        ]);
-
-        $service->handleApprovedOrder($offboardingOrder, $owner->id);
-
-        $this->assertDatabaseHas('employee_lifecycle_offboarding_cases', [
-            'personnel_id' => $personnel->id,
-            'last_working_date' => '2026-05-31',
-            'status' => 'open',
-        ]);
-        $this->assertDatabaseHas('employee_lifecycle_events', [
-            'personnel_id' => $personnel->id,
-            'source_type' => 'order_log_offboarding',
-            'source_id' => $offboardingOrder->id,
-        ]);
-
-        $service->handleApprovedOrder($promotionOrder->fresh(), $owner->id);
-
-        $this->assertSame(1, DB::table('employee_lifecycle_events')->where('source_type', 'order_log_movement')->where('source_id', $promotionOrder->id)->count());
-    }
-
     public function test_dashboard_manager_can_run_lifecycle_operations(): void
     {
         Carbon::setTestNow('2026-05-03 10:00:00');
@@ -621,70 +555,4 @@ class LifecycleDashboardReadServiceTest extends TestCase
     /**
      * @param  array<string, mixed>  $attributes
      */
-    private function makeLifecycleOrder(int $orderId, string $orderNo, User $owner, Personnel $personnel, array $attributes): OrderLog
-    {
-        OrderCategory::query()->firstOrCreate([
-            'id' => 9900,
-        ], [
-            'name_az' => 'Lifecycle order',
-            'name_en' => 'Lifecycle order',
-            'name_ru' => 'Lifecycle order',
-        ]);
-        Order::query()->forceCreate([
-            'id' => $orderId,
-            'order_category_id' => 9900,
-            'name' => 'Lifecycle order',
-            'content' => 'templates/lifecycle.docx',
-            'order_model' => '\\App\\Models\\Personnel',
-            'blade' => Order::BLADE_DEFAULT,
-        ]);
-        $orderType = OrderType::query()->create([
-            'order_id' => $orderId,
-            'name' => 'Lifecycle order',
-        ]);
-        OrderStatus::query()->firstOrCreate([
-            'id' => OrderStatusEnum::APPROVED->value,
-            'locale' => 'az',
-        ], [
-            'name' => 'Təsdiqlənib',
-        ]);
-        $componentPayload = [
-            'name' => 'Lifecycle component',
-            'title' => 'Lifecycle component',
-            'content' => '$fullname',
-            'dynamic_fields' => [],
-        ];
-
-        if (Schema::hasColumn('components', 'order_type_id')) {
-            $componentPayload['order_type_id'] = $orderType->id;
-        } else {
-            $componentPayload['order_id'] = $orderId;
-        }
-
-        $component = Component::query()->forceCreate($componentPayload);
-        $orderLog = OrderLog::query()->create([
-            'order_id' => $orderId,
-            'order_type_id' => $orderType->id,
-            'order_no' => $orderNo,
-            'given_date' => '2026-05-01 10:00:00',
-            'given_by' => 'HR Director',
-            'given_by_rank' => 'director',
-            'status_id' => OrderStatusEnum::APPROVED->value,
-            'creator_id' => $owner->id,
-        ]);
-
-        DB::table('order_log_personnels')->insert([
-            'order_no' => $orderLog->order_no,
-            'component_id' => $component->id,
-            'tabel_no' => $personnel->tabel_no,
-        ]);
-        OrderLogComponentAttributes::query()->create([
-            'order_no' => $orderLog->order_no,
-            'component_id' => $component->id,
-            'attributes' => $attributes,
-            'row_number' => 1,
-        ]);
-
-        return $orderLog;
-    }
 }

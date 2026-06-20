@@ -9,4 +9,3 @@ interface AccessibleStructureScopeReadRepository
      */
     public function accessibleStructureIds(): array;
 }
-

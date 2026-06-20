@@ -111,14 +111,21 @@ class SetPermission extends Component
     {
         $id = (int) $id;
         $nestedIds = $this->structureNestedMap[$id] ?? [$id];
-        $isCurrentlySelected = in_array($id, $this->permissionStructureList, true);
+
+        // The checkbox's wire:model adds the value as a STRING ("1"), so compare against
+        // an int-cast copy of the current list — otherwise the strict in_array check
+        // never matches and a freshly-checked box is treated as unselected (and removed).
+        $current = array_map('intval', $this->permissionStructureList);
+        $isCurrentlySelected = in_array($id, $current, true);
 
         if ($isCurrentlySelected) {
+            // Checked: cascade the selection to all nested child structures.
             $this->permissionStructureList = array_values(
-                array_unique(array_merge($this->permissionStructureList, $nestedIds))
+                array_unique(array_merge($current, $nestedIds))
             );
         } else {
-            $this->permissionStructureList = array_values(array_diff($this->permissionStructureList, $nestedIds));
+            // Unchecked: drop the structure and its whole subtree.
+            $this->permissionStructureList = array_values(array_diff($current, $nestedIds));
         }
 
         $this->permissionStructureList = $this->normalizeIdList($this->permissionStructureList, $this->structureIdPool);

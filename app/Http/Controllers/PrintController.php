@@ -219,9 +219,4 @@ class PrintController extends Controller
 
         return $personnel;
     }
-
-    public function print_page($model = null)
-    {
-        dd(request()->query('headers'));
-    }
 }

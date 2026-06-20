@@ -31,7 +31,6 @@ class OrdersServiceProvider extends ServiceProvider
             $this->commands([
                 OrdersListQueryBudgetCommand::class,
                 OrdersListRenderBenchmarkCommand::class,
-                \App\Modules\Orders\Console\Commands\SeedOrderBlockTemplatesCommand::class,
             ]);
         }
 

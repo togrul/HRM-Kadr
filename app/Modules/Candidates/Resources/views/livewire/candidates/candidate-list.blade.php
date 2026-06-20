@@ -340,8 +340,8 @@
                                         @endcan
                                     @else
                                         @can('delete', $_candidate)
-                                            <x-action-button wire:confirm="{{ __('candidates::common.messages.remove_confirm') }}"
-                                                wire:click="forceDeleteData('{{ $_candidate->id }}')"
+                                            <x-action-button
+                                                x-on:click="$dispatch('confirm-action', { title: @js(__('candidates::common.actions.force_delete')), message: @js(__('candidates::common.messages.remove_confirm')), confirmText: @js(__('candidates::common.actions.force_delete')), tone: 'rose', run: () => $wire.forceDeleteData('{{ $_candidate->id }}') })"
                                                 class="h-9 w-9 hover:bg-red-50"
                                                 :title="__('candidates::common.actions.force_delete')">
                                                 <x-icons.force-delete></x-icons.force-delete>

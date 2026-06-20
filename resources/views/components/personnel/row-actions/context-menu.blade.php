@@ -98,10 +98,9 @@
                             @else
                                 <button
                                     type="button"
-                                    wire:click="handleRowAction('{{ $menuAction->id }}', @js($menuAction->actionPayload))"
-                                    @if ($menuAction->confirmMessage)
-                                        wire:confirm="{{ $menuAction->confirmMessage }}"
-                                    @endif
+                                    @unless ($menuAction->confirmMessage)
+                                        wire:click="handleRowAction('{{ $menuAction->id }}', @js($menuAction->actionPayload))"
+                                    @endunless
                                     @if ($menuAction->wireTarget)
                                         wire:loading.attr="disabled"
                                         wire:target="{{ $menuAction->wireTarget }}"
@@ -111,7 +110,11 @@
                                     @endif
                                     class="inline-flex items-center justify-center"
                                     title="{{ $menuAction->label }}"
-                                    x-on:click="open = false"
+                                    @if ($menuAction->confirmMessage)
+                                        x-on:click="open = false; $dispatch('confirm-action', { title: @js($menuAction->label), message: @js($menuAction->confirmMessage), confirmText: @js($menuAction->label), tone: 'rose', run: () => $wire.handleRowAction(@js($menuAction->id), @js($menuAction->actionPayload)) })"
+                                    @else
+                                        x-on:click="open = false"
+                                    @endif
                                 >
                                     <x-dynamic-component
                                         :component="$menuAction->icon"

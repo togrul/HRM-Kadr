@@ -80,7 +80,7 @@
             <button
                 type="button"
                 class="inline-flex h-8 items-center rounded-md border border-zinc-300 bg-white px-2.5 text-xs font-medium text-zinc-600 transition hover:bg-zinc-100"
-                x-on:click="navigator.clipboard?.writeText(@js(($this->component['dynamic_fields'] ?? '')))"
+                x-on:click="navigator.clipboard?.writeText(@js($this->dynamicFieldTokenString()))"
             >
                 {{ __('services::components.actions.copy_all') }}
             </button>

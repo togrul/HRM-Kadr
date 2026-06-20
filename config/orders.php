@@ -1,15 +1,6 @@
 <?php
 
 return [
-    'engine' => [
-        /*
-         * Compatibility mirror for the legacy order_log_components and
-         * order_log_component_attributes tables, still written by the Personnel
-         * self-service vacation order binder (OrderLegacyComponentSnapshotPersister).
-         */
-        'write_legacy_component_snapshots' => (bool) env('ORDERS_ENGINE_WRITE_LEGACY_COMPONENT_SNAPSHOTS', true),
-    ],
-
     'listing' => [
         /*
          * Order IDs visible globally in orders listing, without structure-based

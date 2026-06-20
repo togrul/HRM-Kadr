@@ -9,24 +9,28 @@ use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
 /**
- * Persists a block-engine order into the shared order_logs list.
+ * Persists a Word-engine order into the shared order_logs list.
  *
- * The frozen content (approved HTML + the data used) is stored in
- * template_snapshot with render mode "block_v2"; the order is created pending
- * approval so it carries NO business side-effects yet (vacation/employment records
- * are still produced only by the legacy approval path — wiring those per type is
- * the next, separately-validated step). It links to no legacy order/order_type row.
+ * The order is created pending approval; its filled .docx is the authoritative
+ * document (stored separately and referenced via template_snapshot.docx_path). The
+ * snapshot freezes the manual field inputs + the picked personnel so a pending order
+ * can be re-opened and regenerated. It links to no legacy order/order_type row.
  */
 class OrderIssueService
 {
-    public const RENDER_MODE = 'block_v2';
+    /** Word-upload engine: the order is a filled .docx. */
+    public const RENDER_MODE_DOCX = 'docx_v1';
 
     public const STATUS_PENDING = 10;
 
     /**
-     * @param  array{template_code:string,label?:string,personnel_id?:?int,fields?:array<string,mixed>,order_number:string,order_date?:string,snapshot_html:string,given_by?:string}  $data
+     * Issue a Word-upload (docx engine) order. The frozen snapshot records the manual
+     * field inputs + the picked personnel; the filled .docx is attached separately via
+     * attachUploadedDocx(). No HTML is stored — the .docx is the document.
+     *
+     * @param  array{template_code:string,label?:string,personnel_id?:?int,fields?:array<string,mixed>,order_number:string,order_date?:string,given_by?:string,given_by_rank?:string}  $data
      */
-    public function issue(array $data): OrderLog
+    public function issueWord(array $data): OrderLog
     {
         return DB::transaction(function () use ($data) {
             $orderLog = OrderLog::create([
@@ -36,43 +40,39 @@ class OrderIssueService
                 'given_by_rank' => $data['given_by_rank'] ?? '',
                 'status_id' => self::STATUS_PENDING,
                 'creator_id' => auth()->id(),
-                'template_render_mode' => self::RENDER_MODE,
+                'template_render_mode' => self::RENDER_MODE_DOCX,
                 'template_snapshot' => [
-                    'engine' => self::RENDER_MODE,
+                    'engine' => self::RENDER_MODE_DOCX,
                     'template_code' => $data['template_code'],
                     'label' => $data['label'] ?? $data['template_code'],
-                    'html' => $data['snapshot_html'],
                     'fields' => $data['fields'] ?? [],
                     'personnel_id' => $data['personnel_id'] ?? null,
+                    // Hire orders reference a candidate + the structure/position they are
+                    // hired into (resolved into an employee on approval).
+                    'candidate_id' => $data['candidate_id'] ?? null,
+                    'hire_structure_id' => $data['hire_structure_id'] ?? null,
+                    'hire_position_id' => $data['hire_position_id'] ?? null,
                     'order_date_text' => $data['order_date'] ?? '',
-                    'edited' => (bool) ($data['edited'] ?? false),
+                    'docx_path' => null,
                 ],
             ]);
 
-            if (! empty($data['personnel_id'])) {
-                $personnel = Personnel::find($data['personnel_id']);
-                if ($personnel && $personnel->tabel_no) {
-                    // component_id is null — block-engine orders have no components.
-                    $orderLog->personnels()->attach($personnel->tabel_no);
-                }
-            }
+            $this->syncPersonnel($orderLog, $data['personnel_id'] ?? null, attach: true);
 
             return $orderLog;
         });
     }
 
     /**
-     * Re-freeze a still-pending block order with corrected content/data. Only the
-     * snapshot, order number/date and attached personnel change; the order stays
-     * pending so no side-effects have run yet — editing an APPROVED order is
-     * rejected because its HR records are already in place.
+     * Re-freeze a still-pending docx order with corrected fields/personnel. The caller
+     * regenerates and re-attaches the .docx, so the stale path is dropped here.
      *
-     * @param  array{template_code?:string,label?:string,personnel_id?:?int,fields?:array<string,mixed>,order_number:string,order_date?:string,snapshot_html:string}  $data
+     * @param  array{template_code?:string,label?:string,personnel_id?:?int,fields?:array<string,mixed>,order_number:string,order_date?:string}  $data
      */
-    public function update(OrderLog $orderLog, array $data): OrderLog
+    public function updateWord(OrderLog $orderLog, array $data): OrderLog
     {
-        if ((string) $orderLog->template_render_mode !== self::RENDER_MODE) {
-            throw new RuntimeException('Only block-engine orders can be edited here.');
+        if ((string) $orderLog->template_render_mode !== self::RENDER_MODE_DOCX) {
+            throw new RuntimeException('Only docx-engine orders can be edited here.');
         }
 
         if ((int) $orderLog->status_id !== self::STATUS_PENDING) {
@@ -85,25 +85,39 @@ class OrderIssueService
             $orderLog->update([
                 'order_no' => $data['order_number'],
                 'template_snapshot' => array_merge($snapshot, [
-                    'engine' => self::RENDER_MODE,
+                    'engine' => self::RENDER_MODE_DOCX,
                     'template_code' => $data['template_code'] ?? ($snapshot['template_code'] ?? ''),
                     'label' => $data['label'] ?? ($snapshot['label'] ?? ($data['template_code'] ?? '')),
-                    'html' => $data['snapshot_html'],
                     'fields' => $data['fields'] ?? [],
                     'personnel_id' => $data['personnel_id'] ?? null,
+                    'candidate_id' => $data['candidate_id'] ?? null,
+                    'hire_structure_id' => $data['hire_structure_id'] ?? null,
+                    'hire_position_id' => $data['hire_position_id'] ?? null,
                     'order_date_text' => $data['order_date'] ?? ($snapshot['order_date_text'] ?? ''),
-                    'edited' => (bool) ($data['edited'] ?? ($snapshot['edited'] ?? false)),
-                    // Re-issuing regenerates the document, so any previously uploaded
-                    // Word file is now stale — drop it (the caller stores the fresh one).
                     'docx_path' => null,
                 ]),
             ]);
 
-            $personnel = ! empty($data['personnel_id']) ? Personnel::find($data['personnel_id']) : null;
-            $orderLog->personnels()->sync($personnel && $personnel->tabel_no ? [$personnel->tabel_no] : []);
+            $this->syncPersonnel($orderLog, $data['personnel_id'] ?? null, attach: false);
 
             return $orderLog;
         });
+    }
+
+    private function syncPersonnel(OrderLog $orderLog, ?int $personnelId, bool $attach): void
+    {
+        $personnel = ! empty($personnelId) ? Personnel::find($personnelId) : null;
+        $tabel = $personnel && $personnel->tabel_no ? [$personnel->tabel_no] : [];
+
+        if ($attach) {
+            foreach ($tabel as $t) {
+                $orderLog->personnels()->attach($t);
+            }
+
+            return;
+        }
+
+        $orderLog->personnels()->sync($tabel);
     }
 
     /**

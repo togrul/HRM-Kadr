@@ -3,7 +3,6 @@
 namespace App\Modules\Personnel\Application\Services\MyHr\Review;
 
 use App\Enums\OrderStatusEnum;
-use App\Models\Component;
 use App\Models\Order;
 use App\Models\OrderCategory;
 use App\Models\OrderLog;
@@ -15,6 +14,12 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use RuntimeException;
 
+/**
+ * On self-service vacation APPROVAL, records the operational order: it creates the
+ * OrderLog, attaches the employee, decrements the leave balance, and stamps the order
+ * details onto the vacation. All vacation data lives on PersonnelVacation — the order
+ * is just the formal record (no legacy component/snapshot machinery).
+ */
 class SelfServiceVacationOrderBinderService
 {
     public function bind(PersonnelVacation $vacation, User $reviewer): void
@@ -44,31 +49,8 @@ class SelfServiceVacationOrderBinderService
             'creator_id' => $reviewer->id,
         ]);
 
-        $component = $this->resolveOrCreateVacationOperationalComponent($orderType);
-
-        if ($component && $personnel) {
-            $rowNumber = 0;
-
-            $orderLog->components()->attach([
-                $component->id => ['row_number' => $rowNumber],
-            ]);
-
-            $orderLog->attributes()->create([
-                'component_id' => $component->id,
-                'row_number' => $rowNumber,
-                'attributes' => [
-                    '$fullname' => ['id' => null, 'value' => $personnel->fullname],
-                    '$rank' => ['id' => null, 'value' => $personnel->latestRank?->rank?->name],
-                    '$location' => ['id' => null, 'value' => (string) $vacation->vacation_places],
-                    '$start_date' => ['id' => null, 'value' => $vacation->start_date?->format('Y-m-d')],
-                    '$end_date' => ['id' => null, 'value' => $vacation->end_date?->format('Y-m-d')],
-                    '$days' => ['id' => null, 'value' => (int) $vacation->duration],
-                ],
-            ]);
-
-            $orderLog->personnels()->attach([
-                $personnel->tabel_no => ['component_id' => $component->id],
-            ]);
+        if ($personnel) {
+            $orderLog->personnels()->attach([$personnel->tabel_no => []]);
 
             $currentYearlyVacation = $personnel->yearlyVacation
                 ->firstWhere('year', (int) $vacation->start_date?->year)
@@ -235,37 +217,5 @@ class SelfServiceVacationOrderBinderService
     private function nextOrderCategoryId(): int
     {
         return ((int) OrderCategory::query()->max('id')) + 1;
-    }
-
-    private function resolveOrCreateVacationOperationalComponent(OrderType $orderType): Component
-    {
-        $usesOrderTypeColumn = Schema::hasColumn('components', 'order_type_id');
-        $foreignColumn = $usesOrderTypeColumn ? 'order_type_id' : 'order_id';
-        $foreignValue = $usesOrderTypeColumn ? $orderType->id : $orderType->order_id;
-
-        $existing = Component::query()
-            ->where($foreignColumn, $foreignValue)
-            ->orderBy('id')
-            ->first();
-
-        if ($existing) {
-            return $existing;
-        }
-
-        $payload = [
-            $foreignColumn => $foreignValue,
-            'rank_id' => null,
-            'name' => $orderType->name ?: 'Məzuniyyət',
-            'content' => 'Auto-generated self-service vacation component.',
-            'dynamic_fields' => null,
-        ];
-
-        if (Schema::hasColumn('components', 'title')) {
-            $payload['title'] = $orderType->name ?: 'Məzuniyyət';
-        }
-
-        $componentId = DB::table('components')->insertGetId($payload);
-
-        return Component::query()->findOrFail($componentId);
     }
 }

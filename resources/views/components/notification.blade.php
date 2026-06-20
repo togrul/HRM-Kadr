@@ -87,7 +87,7 @@
                 'performanceEvaluationSaved',
                 'trainingNeedsSaved'
             ]
-            const errorEvents = ['staffScheduleError', 'addError']
+            const errorEvents = ['staffScheduleError', 'addError', 'orderError']
 
             if (Array.isArray(window.__hrmToastListeners)) {
                 window.__hrmToastListeners.forEach(([event, fn]) => window.removeEventListener(event, fn))

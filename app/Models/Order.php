@@ -14,6 +14,10 @@ class Order extends Model
 
     public $timestamps = false;
 
+    public $incrementing = false;
+
+    protected $keyType = 'int';
+
     protected $fillable = [
         'order_category_id',
         'name',

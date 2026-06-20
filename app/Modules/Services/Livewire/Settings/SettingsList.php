@@ -3,7 +3,10 @@
 namespace App\Modules\Services\Livewire\Settings;
 
 use App\Models\AppealStatus;
+use App\Models\ChiefDelegation;
+use App\Models\Personnel;
 use App\Models\Setting;
+use App\Services\Chief\ChiefResolver;
 use App\Support\Translations\ModuleTranslation;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\On;
@@ -38,6 +41,15 @@ class SettingsList extends Component
         'civilian' => [],
     ];
     public array $candidateStatuses = [];
+    public ?int $chiefPersonnelId = null;
+    public array $chiefSnapshot = [];
+    public array $chiefDelegationForm = [
+        'delegate_personnel_id' => null,
+        'starts_at' => null,
+        'ends_at' => null,
+        'reason' => null,
+        'basis_document' => null,
+    ];
 
     public function mount(string $section = 'general'): void
     {
@@ -55,6 +67,7 @@ class SettingsList extends Component
             ->all();
 
         $this->loadCandidateStatusWhitelist();
+        $this->loadChiefGovernance();
     }
 
     public function updatedSetting($value, $name)
@@ -143,6 +156,105 @@ class SettingsList extends Component
         $this->candidateStatusWhitelist[$mode] = [];
     }
 
+    public function saveChiefPersonnel(): void
+    {
+        if ($this->chiefPersonnelId) {
+            Setting::updateOrCreate(
+                ['name' => 'Chief personnel id'],
+                ['value' => (string) $this->chiefPersonnelId, 'type' => 'string']
+            );
+        } else {
+            Setting::query()->whereIn('name', ['Chief personnel id', 'Chief personnel_id', 'chief_personnel_id'])->delete();
+        }
+
+        $this->syncLegacyChiefSettings();
+        $this->loadChiefGovernance();
+
+        $this->dispatch('settingsUpdated', __('services::settings.messages.saved'));
+    }
+
+    public function createChiefDelegation(): void
+    {
+        $validated = $this->validate([
+            'chiefDelegationForm.delegate_personnel_id' => ['required', 'integer', 'exists:personnels,id'],
+            'chiefDelegationForm.starts_at' => ['required', 'date'],
+            'chiefDelegationForm.ends_at' => ['nullable', 'date', 'after_or_equal:chiefDelegationForm.starts_at'],
+            'chiefDelegationForm.reason' => ['nullable', 'string', 'max:255'],
+            'chiefDelegationForm.basis_document' => ['nullable', 'string', 'max:255'],
+        ], [], [
+            'chiefDelegationForm.delegate_personnel_id' => 'Vəzifəni icra edən əməkdaş',
+            'chiefDelegationForm.starts_at' => 'Başlama tarixi',
+            'chiefDelegationForm.ends_at' => 'Bitmə tarixi',
+            'chiefDelegationForm.reason' => 'Səbəb',
+            'chiefDelegationForm.basis_document' => 'Əsas sənəd',
+        ]);
+
+        $form = $validated['chiefDelegationForm'];
+
+        $chiefId = $this->chiefPersonnelId ?: data_get(app(ChiefResolver::class)->current(), 'permanent_chief_personnel_id');
+        if (! $chiefId) {
+            $this->addError('chiefDelegationForm.delegate_personnel_id', 'Daimi rəhbər təyin edilməyib.');
+
+            return;
+        }
+
+        ChiefDelegation::query()->create([
+            'chief_personnel_id' => (int) $chiefId,
+            'delegate_personnel_id' => (int) $form['delegate_personnel_id'],
+            'starts_at' => $form['starts_at'],
+            'ends_at' => $form['ends_at'] ?? null,
+            'reason' => $form['reason'] ?? null,
+            'basis_document' => $form['basis_document'] ?? null,
+            'is_active' => true,
+            'created_by' => auth()->id(),
+        ]);
+
+        $this->resetChiefDelegationForm();
+
+        $this->syncLegacyChiefSettings();
+        $this->loadChiefGovernance();
+
+        $this->dispatch('settingsUpdated', 'Rəhbər həvaləsi yaradıldı.');
+    }
+
+    public function revokeChiefDelegation(int $delegationId): void
+    {
+        $delegation = ChiefDelegation::query()
+            ->whereKey($delegationId)
+            ->where('is_active', true)
+            ->firstOrFail();
+
+        $delegation->update([
+            'is_active' => false,
+            'revoked_at' => now(),
+            'revoked_by' => auth()->id(),
+        ]);
+
+        $this->syncLegacyChiefSettings();
+        $this->loadChiefGovernance();
+
+        $this->dispatch('settingsUpdated', 'Rəhbər həvaləsi dayandırıldı.');
+    }
+
+    public function resetChiefDelegationForm(): void
+    {
+        $this->resetErrorBag([
+            'chiefDelegationForm.delegate_personnel_id',
+            'chiefDelegationForm.starts_at',
+            'chiefDelegationForm.ends_at',
+            'chiefDelegationForm.reason',
+            'chiefDelegationForm.basis_document',
+        ]);
+
+        $this->chiefDelegationForm = [
+            'delegate_personnel_id' => null,
+            'starts_at' => null,
+            'ends_at' => null,
+            'reason' => null,
+            'basis_document' => null,
+        ];
+    }
+
     public function render()
     {
         $settings = collect();
@@ -150,12 +262,37 @@ class SettingsList extends Component
         if ($this->section === 'general') {
             $settings = Setting::query()
                 ->whereNotIn('name', $this->candidateManagedSettingKeys())
+                ->whereNotIn('name', $this->chiefManagedSettingKeys())
+                ->whereNotIn('name', $this->coefficientSettingKeys())
                 ->get();
         }
 
-        $this->setting = $settings->toArray();
+        $coefficientSettings = $this->section === 'general'
+            ? Setting::query()
+                ->whereIn('name', $this->coefficientSettingKeys())
+                ->get()
+                ->sortBy(fn (Setting $setting) => array_search($setting->name, $this->coefficientSettingKeys(), true))
+                ->values()
+            : collect();
 
-        return view('services::livewire.services.settings.settings-list', compact('settings'));
+        $this->setting = $settings
+            ->concat($coefficientSettings)
+            ->values()
+            ->toArray();
+
+        $coefficientSettingIndexes = collect($this->setting)
+            ->mapWithKeys(fn (array $setting, int $index) => [(string) $setting['name'] => $index])
+            ->only($this->coefficientSettingKeys())
+            ->all();
+
+        $chiefDelegations = $this->activeChiefDelegations();
+
+        return view('services::livewire.services.settings.settings-list', compact(
+            'settings',
+            'chiefDelegations',
+            'coefficientSettings',
+            'coefficientSettingIndexes'
+        ));
     }
 
     private function candidateWhitelistSettingKeys(): array
@@ -193,6 +330,16 @@ class SettingsList extends Component
         return array_values(array_unique(array_merge($whitelistKeys, $presetKeys)));
     }
 
+    private function chiefManagedSettingKeys(): array
+    {
+        return ['Chief', 'Chief rank', 'Chief personnel id', 'Chief personnel_id', 'chief_personnel_id'];
+    }
+
+    private function coefficientSettingKeys(): array
+    {
+        return ['Work coefficient', 'Education coefficient'];
+    }
+
     private function loadCandidateStatusWhitelist(): void
     {
         $settings = Setting::query()
@@ -214,6 +361,69 @@ class SettingsList extends Component
             $this->candidatePresetSettings[$mode]['show_deleted_tab'] = $this->toBool($showDeletedRaw);
             $this->candidateEnabledFilters[$mode] = array_map('strval', $this->normalizeEnabledFilters($enabledFiltersRaw, $mode));
         }
+    }
+
+    private function loadChiefGovernance(): void
+    {
+        $manualChief = Setting::query()
+            ->whereIn('name', ['Chief personnel id', 'Chief personnel_id', 'chief_personnel_id'])
+            ->pluck('value', 'name')
+            ->toArray();
+
+        $selected = collect(['Chief personnel id', 'Chief personnel_id', 'chief_personnel_id'])
+            ->map(fn (string $key) => $manualChief[$key] ?? null)
+            ->first(fn ($value) => is_numeric($value));
+
+        $this->chiefPersonnelId = is_numeric($selected) ? (int) $selected : null;
+        $this->chiefSnapshot = app(ChiefResolver::class)->current();
+    }
+
+    private function syncLegacyChiefSettings(): void
+    {
+        $snapshot = app(ChiefResolver::class)->current();
+
+        Setting::updateOrCreate(
+            ['name' => 'Chief'],
+            ['value' => (string) data_get($snapshot, 'fullname', ''), 'type' => 'string']
+        );
+
+        Setting::updateOrCreate(
+            ['name' => 'Chief rank'],
+            ['value' => (string) data_get($snapshot, 'title', ''), 'type' => 'string']
+        );
+    }
+
+    public function chiefPersonnelOptions(): array
+    {
+        return Personnel::query()
+            ->select('personnels.id', 'personnels.surname', 'personnels.name', 'personnels.patronymic', 'positions.name as position_name')
+            ->leftJoin('positions', 'positions.id', '=', 'personnels.position_id')
+            ->whereNull('personnels.deleted_at')
+            ->where(function ($query): void {
+                $query->whereNull('personnels.leave_work_date')
+                    ->orWhereDate('personnels.leave_work_date', '>=', now()->toDateString());
+            })
+            ->orderByDesc('positions.approval_rank')
+            ->orderBy('personnels.surname')
+            ->limit(200)
+            ->get()
+            ->map(fn ($personnel) => [
+                'id' => (int) $personnel->id,
+                'label' => trim($personnel->surname.' '.$personnel->name.' '.$personnel->patronymic),
+                'position' => (string) $personnel->position_name,
+            ])
+            ->all();
+    }
+
+    private function activeChiefDelegations()
+    {
+        return ChiefDelegation::query()
+            ->with(['chief:id,surname,name,patronymic', 'delegate:id,surname,name,patronymic'])
+            ->where('is_active', true)
+            ->whereNull('revoked_at')
+            ->latest('starts_at')
+            ->limit(10)
+            ->get();
     }
 
     private function parseWhitelistInput(mixed $value): array
@@ -331,6 +541,19 @@ class SettingsList extends Component
 
     public function resolveSettingLabel(string $value): string
     {
-        return ModuleTranslation::resolveStoredText($value);
+        return match ($value) {
+            'Work coefficient' => 'İş əmsalı',
+            'Education coefficient' => 'Təhsil əmsalı',
+            default => ModuleTranslation::resolveStoredText($value),
+        };
+    }
+
+    public function settingIconName(string $value): string
+    {
+        return match ($value) {
+            'Work coefficient' => 'briefcase',
+            'Education coefficient' => 'academic',
+            default => 'settings',
+        };
     }
 }

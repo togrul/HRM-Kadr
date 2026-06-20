@@ -16,4 +16,3 @@ class StructureServiceAccessibleStructureScopeReadRepository implements Accessib
         return $this->structureService->getAccessibleStructures();
     }
 }
-

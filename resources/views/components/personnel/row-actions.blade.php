@@ -40,9 +40,10 @@
                 </a>
             @else
                 <button
-                    wire:click="handleRowAction('{{ $action->id }}', @js($action->actionPayload))"
                     @if ($action->confirmMessage)
-                        wire:confirm="{{ $action->confirmMessage }}"
+                        x-on:click="$dispatch('confirm-action', { title: @js($action->label), message: @js($action->confirmMessage), confirmText: @js($action->label), tone: 'rose', run: () => $wire.handleRowAction(@js($action->id), @js($action->actionPayload)) })"
+                    @else
+                        wire:click="handleRowAction('{{ $action->id }}', @js($action->actionPayload))"
                     @endif
                     @if ($action->wireTarget)
                         wire:loading.attr="disabled"

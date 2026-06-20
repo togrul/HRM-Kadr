@@ -50,7 +50,7 @@ class NewPersonnelAdded extends Notification
             'type' => class_basename(Personnel::class),
             'tabel_no' => $this->personnel->tabel_no,
             'name' => $this->personnel->fullname,
-            'added_by' => auth()->user()->name,
+            'added_by' => auth()->user()?->name,
             'action' => 'create',
         ];
     }

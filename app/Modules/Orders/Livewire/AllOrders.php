@@ -68,8 +68,6 @@ class AllOrders extends Component
             __('orders::order_list.table.given_by'),
             __('orders::order_list.table.status'),
             __('orders::order_list.table.action'),
-            __('orders::order_list.table.action'),
-            __('orders::order_list.table.action'),
         ];
     }
 
@@ -118,31 +116,45 @@ class AllOrders extends Component
             abort(404);
         }
 
-        // Only block-engine orders are printable: they carry their frozen HTML in
-        // the snapshot, so the final .docx renders straight from it. Legacy orders
-        // are no longer generated and have no downloadable document.
-        abort_unless((string) $order->template_render_mode === \App\Services\Orders\Document\OrderIssueService::RENDER_MODE, 404);
+        // Only Word-engine orders are printable: they carry their filled .docx.
+        abort_unless((string) $order->template_render_mode === \App\Services\Orders\Document\OrderIssueService::RENDER_MODE_DOCX, 404);
         abort_unless((bool) auth()->user()?->can('add-orders'), 403);
 
         // Order numbers may contain "/" (e.g. 2026/ƏM-145), which is illegal in a
         // download filename — fold path separators to a dash.
         $safeName = str_replace(['/', '\\'], '-', (string) $order->order_no);
 
-        // A user-uploaded, externally-corrected Word file (if any) is authoritative —
-        // serve it verbatim instead of re-rendering from the HTML snapshot.
         $docxPath = (string) data_get($order->template_snapshot, 'docx_path', '');
-        if ($docxPath !== '' && \Illuminate\Support\Facades\Storage::disk('local')->exists($docxPath)) {
-            return \Illuminate\Support\Facades\Storage::disk('local')->download($docxPath, $safeName.'.docx');
-        }
+        abort_unless($docxPath !== '' && \Illuminate\Support\Facades\Storage::disk('local')->exists($docxPath), 404);
 
-        $html = (string) data_get($order->template_snapshot, 'html', '');
-        abort_if($html === '', 404);
-        $path = app(\App\Services\Orders\Document\OrderHtmlToDocxRenderer::class)->renderToFile($html);
-
-        return response()->download($path, $safeName.'.docx')->deleteFileAfterSend();
+        return \Illuminate\Support\Facades\Storage::disk('local')->download($docxPath, $safeName.'.docx');
     }
 
     public function approveOrder(string $order_no): void
+    {
+        $this->changeStatus($order_no, 'approve', 'order_approved');
+    }
+
+    public function cancelOrder(string $order_no): void
+    {
+        $this->changeStatus($order_no, 'cancel', 'order_cancelled');
+    }
+
+    public function reopenOrder(string $order_no): void
+    {
+        $this->changeStatus($order_no, 'reopen', 'order_reopened');
+    }
+
+    public function revertOrder(string $order_no): void
+    {
+        $this->changeStatus($order_no, 'revert', 'order_reverted');
+    }
+
+    /**
+     * Run a guarded status transition (approve/cancel/reopen/revert) on a Word-engine
+     * order, surfacing any domain error (illegal jump, irreversible hire) to the user.
+     */
+    private function changeStatus(string $order_no, string $action, string $successKey): void
     {
         $order = OrderLog::where('order_no', $order_no)->first();
         if (! $order) {
@@ -151,9 +163,15 @@ class AllOrders extends Component
 
         abort_unless((bool) auth()->user()?->can('add-orders'), 403);
 
-        app(\App\Services\Orders\Document\Effects\BlockOrderApprovalService::class)->approve($order);
+        try {
+            app(\App\Services\Orders\Document\OrderStatusTransitionService::class)->{$action}($order);
+        } catch (\DomainException $e) {
+            $this->dispatch('orderError', $e->getMessage());
 
-        $this->dispatch('orderAdded', __('orders::order_composer.messages.order_approved'));
+            return;
+        }
+
+        $this->dispatch('orderAdded', __("orders::order_composer.messages.{$successKey}"));
     }
 
     protected function returnData($type = 'normal')
@@ -175,7 +193,13 @@ class AllOrders extends Component
                 $query->when(
                     $globalOrderIds !== [],
                     fn ($q) => $q->whereIn('order_id', $globalOrderIds)
-                )->orWhereHas('personnels', fn ($personnelQuery) => $personnelQuery->whereIn('structure_id', $this->accessibleStructureIds));
+                )->orWhereHas('personnels', fn ($personnelQuery) => $personnelQuery->whereIn('structure_id', $this->accessibleStructureIds))
+                    // Pending hire (işə qəbul) orders have no personnel attached until
+                    // approval, so they would otherwise be invisible. Scope them by the
+                    // target structure frozen in the order snapshot.
+                    ->orWhere(fn ($q) => $q
+                        ->where('template_render_mode', \App\Services\Orders\Document\OrderIssueService::RENDER_MODE_DOCX)
+                        ->whereIn('template_snapshot->hire_structure_id', $this->accessibleStructureIds));
             })
             ->filter($this->search ?? [])
             ->when($this->selectedOrder, fn ($q) => $q->where('order_id', $this->selectedOrder))

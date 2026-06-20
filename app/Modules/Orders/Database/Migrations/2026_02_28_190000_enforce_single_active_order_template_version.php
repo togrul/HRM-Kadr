@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     private const INDEX_NAME = 'order_template_versions_single_active_per_set';
+
     private const MARIA_DB_COLUMN = 'active_order_template_set_id';
 
     public function up(): void

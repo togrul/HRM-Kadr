@@ -62,11 +62,6 @@ class CriticalActionIconsSmokeTest extends TestCase
                 '<x-icons.delete-icon',
                 '<x-icons.recover',
             ],
-            app_path('Modules/Services/Resources/views/livewire/services/components/all-components.blade.php') => [
-                '<x-icons.add-icon',
-                '<x-icons.edit-icon',
-                '<x-icons.delete-icon',
-            ],
         ];
 
         foreach ($targets as $path => $requiredTags) {
@@ -87,7 +82,9 @@ class CriticalActionIconsSmokeTest extends TestCase
     {
         $targets = [
             resource_path('views/components/modal-confirm.blade.php'),
-            resource_path('views/components/modal-delete.blade.php'),
+            // modal-delete is now a thin adapter that routes into the single global
+            // confirm-modal (which carries the icon); check that one for icon markup.
+            resource_path('views/components/confirm-modal.blade.php'),
             resource_path('views/components/modal-confirm-lg.blade.php'),
             resource_path('views/components/ui/confirmation-modal.blade.php'),
             resource_path('views/components/side-modal.blade.php'),

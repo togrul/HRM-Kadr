@@ -91,10 +91,6 @@
                     @case('ranks')
                         @livewire('services.ranks.all-ranks', key('ranks'))
                     @break
-
-                    @case('components')
-                        @livewire('services.components.all-components', key('components'))
-                    @break
                 @endswitch
 
             </section>

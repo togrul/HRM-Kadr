@@ -22,3 +22,7 @@ yarn-error.log
 /.vscode
 /tmp
 /tmp-*.php
+
+# OS / editor / agent cruft
+.DS_Store
+/.claude

@@ -382,8 +382,7 @@
                                     @else
                                         @can('forceDelete', $leave)
                                             <button
-                                                wire:confirm="{{ __('leaves::common.messages.remove_confirm') }}"
-                                                wire:click="forceDeleteData('{{ $leave->id }}')"
+                                                x-on:click="$dispatch('confirm-action', { title: @js(__('leaves::common.actions.force_delete')), message: @js(__('leaves::common.messages.remove_confirm')), confirmText: @js(__('leaves::common.actions.force_delete')), tone: 'rose', run: () => $wire.forceDeleteData('{{ $leave->id }}') })"
                                                 wire:loading.attr="disabled"
                                                 wire:target="forceDeleteData('{{ $leave->id }}')"
                                                 class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700"

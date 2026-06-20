@@ -3,6 +3,7 @@
 namespace Tests\Feature\Services;
 
 use App\Models\Role;
+use App\Models\Structure;
 use App\Models\User;
 use App\Modules\Services\Livewire\Roles\ManageRoles;
 use App\Modules\Services\Livewire\Roles\SetPermission;
@@ -68,6 +69,31 @@ class RolesDashboardTest extends TestCase
             ->assertDispatched('permissionSet');
 
         $this->assertTrue($role->fresh()->hasPermissionTo('show-candidates'));
+    }
+
+    public function test_checking_a_structure_keeps_it_selected_and_cascades_to_children(): void
+    {
+        $user = User::factory()->create();
+        $role = Role::query()->create(['name' => 'Structure Scoper', 'guard_name' => 'web']);
+
+        // id=1 is the implicit company root; displayed roots have parent_id = 1.
+        $company = Structure::query()->create(['name' => 'Şirkət', 'shortname' => 'CO', 'code' => '001', 'parent_id' => null]);
+        $root = Structure::query()->create(['name' => 'Baş direktor', 'shortname' => 'BD', 'code' => '001.001', 'parent_id' => $company->id]);
+        $child = Structure::query()->create(['name' => 'Departament', 'shortname' => 'DEP', 'code' => '001.001.001', 'parent_id' => $root->id]);
+
+        $component = Livewire::actingAs($user)->test(SetPermission::class, ['roleModel' => $role->id]);
+
+        // The checkbox's wire:model adds the value as a STRING; the change handler must
+        // keep it selected (regression: strict in_array used to treat "1" !== 1 and drop it).
+        $component->set('permissionStructureList', [(string) $root->id])
+            ->call('updatePermissionStructureList', $root->id);
+
+        $selected = array_map('intval', $component->get('permissionStructureList'));
+        $this->assertContains($root->id, $selected, 'A freshly-checked structure must stay selected.');
+        $this->assertContains($child->id, $selected, 'Selecting a structure must cascade to its children.');
+
+        $component->call('store')->assertDispatched('permissionSet');
+        $this->assertTrue($role->fresh()->structures()->whereKey($root->id)->exists());
     }
 
     public function test_permission_panel_sorts_groups_by_translated_label(): void

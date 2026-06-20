@@ -18,4 +18,3 @@ interface OrderTypeStatusLookupReadRepository
 
     public function localizedStatuses(string $locale): Collection;
 }
-

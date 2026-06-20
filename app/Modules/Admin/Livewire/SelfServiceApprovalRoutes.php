@@ -53,6 +53,18 @@ class SelfServiceApprovalRoutes extends Component
     {
         $this->isAdded = false;
         $this->form = $this->formDefaults();
+
+        // Deep-link from the HR policy diagnostics page (?edit=<request_type>): open the
+        // editor straight onto that policy, pre-filled with its current values.
+        $type = request()->query('edit');
+        if (is_string($type) && in_array($type, ['leave', 'vacation', 'business_trip'], true)) {
+            $existing = SelfServiceApprovalRoute::query()
+                ->where('request_type', $type)
+                ->latest('id')
+                ->first();
+
+            $this->openCrud($existing?->id, $type);
+        }
     }
 
     public function openCrud(?int $id = null, ?string $requestType = null): void

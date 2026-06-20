@@ -131,6 +131,10 @@ return [
         'workflow_defaults_help' => 'Aşağıdakı kartlar modullar açılarkən hansı bölmələrin əsas iş sahəsi kimi göründüyünü göstərir.',
         'approval_defaults_help' => 'İcazə, məzuniyyət və ezamiyyət müraciətləri üçün başlanğıc təsdiq qaydaları burada görünür.',
         'stored_overrides_help' => 'Əgər ayrıca təsdiq siyasəti yaradılıbsa, burada həmin fərdi qaydalar görünür.',
+        'manage_overrides' => 'Təsdiq siyasətlərini idarə et',
+        'edit_policy' => 'Redaktə et',
+        'customize' => 'Fərdiləşdir',
+        'config_readonly_note' => 'Profil, paketlər və modul/menyu görünürlüyü deployment konfiqurasiyasından (config) gəlir və yalnız oxunur. Yalnız təsdiq siyasətlərini buradan redaktə edə bilərsiniz.',
         'pack_labels' => [
             'corporate' => 'Korporativ',
             'public' => 'Publik',

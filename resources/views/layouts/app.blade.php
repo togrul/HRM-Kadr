@@ -29,6 +29,10 @@
         />
     @endpersist
 
+    @persist('app-confirm-modal')
+        <x-confirm-modal />
+    @endpersist
+
     @livewireScripts
     @stack('js')
 </body>

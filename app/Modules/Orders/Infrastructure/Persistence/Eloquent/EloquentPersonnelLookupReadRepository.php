@@ -108,6 +108,7 @@ class EloquentPersonnelLookupReadRepository implements PersonnelLookupReadReposi
                 foreach ($columns as $index => $column) {
                     if ($index === 0) {
                         $nested->where($column, 'LIKE', "%{$term}%");
+
                         continue;
                     }
 

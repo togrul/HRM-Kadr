@@ -20,6 +20,9 @@ class OrderEmployeeVariableResolver
 {
     public function __construct(private readonly AzerbaijaniDeclension $declension) {}
 
+    /** @var array<int,Structure>|null Memoized id => structure, loaded once per resolve. */
+    private ?array $structures = null;
+
     /**
      * @return array<string,string>
      */
@@ -51,8 +54,10 @@ class OrderEmployeeVariableResolver
             'employee.full_name_with_suffix' => $fullNameWithSuffix,
             'employee.full_name_dative' => $fullName === '' ? '' : $this->declension->nameDative($fullNameWithSuffix),
             'employee.full_name_genitive' => $fullName === '' ? '' : $this->declension->nameGenitive($fullNameWithSuffix),
+            'employee.full_name_instrumental' => $fullName === '' ? '' : $fullNameWithSuffix.' ilə',
             'employee.initials' => $initials,
             'employee.initials_genitive' => $initials === '' ? '' : $this->declension->declineName($initials, 'genitive'),
+            'employee.initials_instrumental' => $initials === '' ? '' : $this->declension->instrumental($initials),
             'employee.surname' => $surname,
             'employee.name' => $name,
             'employee.patronymic' => $patronymic,
@@ -80,18 +85,18 @@ class OrderEmployeeVariableResolver
             return [];
         }
 
-        $leaf = Structure::find($structureId);
+        // One query for the whole (small) structure table, then walk the parent chain
+        // in memory — avoids a query per nesting level.
+        $all = $this->structures ??= Structure::query()->get(['id', 'name', 'parent_id'])->keyBy('id')->all();
+
+        $leaf = $all[$structureId] ?? null;
         if (! $leaf) {
             return [];
         }
 
         $root = $leaf;
-        while ($root->parent_id) {
-            $parent = Structure::find($root->parent_id);
-            if (! $parent) {
-                break;
-            }
-            $root = $parent;
+        while ($root->parent_id && isset($all[$root->parent_id])) {
+            $root = $all[$root->parent_id];
         }
 
         $segments = [];

@@ -19,7 +19,7 @@
     </div>
 
     <div class="px-1 pb-1">
-        <div class="overflow-hidden rounded-xl border border-zinc-200 bg-white">
+        <div class="overflow-x-auto rounded-xl border border-zinc-200 bg-white">
         <table {{ $attributes->merge(['class' => 'min-w-full w-full p-[5px] pb-0 border-separate border-spacing-0 bg-white text-sm']) }}>
             <thead class="bg-transparent">
                 <tr class="align-middle font-mono text-xs uppercase">

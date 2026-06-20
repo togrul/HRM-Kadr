@@ -131,6 +131,10 @@ return [
         'workflow_defaults_help' => 'These cards show which sections open as the main work areas inside each module.',
         'approval_defaults_help' => 'The default approval rules for leave, vacation, and business trip requests appear here.',
         'stored_overrides_help' => 'If a dedicated approval policy has been saved, it appears here.',
+        'manage_overrides' => 'Manage approval policies',
+        'edit_policy' => 'Edit',
+        'customize' => 'Customize',
+        'config_readonly_note' => 'Profile, packs and module/menu visibility come from the deployment configuration and are read-only. Only approval policies can be edited here.',
         'pack_labels' => [
             'corporate' => 'Corporate',
             'public' => 'Public',

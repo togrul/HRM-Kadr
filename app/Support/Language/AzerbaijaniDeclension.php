@@ -131,6 +131,15 @@ class AzerbaijaniDeclension
         return $this->declineLastToken($fullName, $case);
     }
 
+    /**
+     * Instrumental ("...la/lə" — the "ilə" postposition suffixed) on the last token,
+     * e.g. "R.B.Bayramov" → "R.B.Bayramovla". Used in order bases ("…ilə bağlanılmış").
+     */
+    public function instrumental(string $word): string
+    {
+        return $this->declineLastToken($word, 'instrumental');
+    }
+
     private function declineLastToken(string $fullName, string $case): string
     {
         $name = trim(preg_replace('/\s+/u', ' ', $fullName));
@@ -155,7 +164,7 @@ class AzerbaijaniDeclension
         }
 
         $lower = $this->mbLower($word);
-        if (isset(self::POSSESSIVE_FORMS[$lower])) {
+        if (isset(self::POSSESSIVE_FORMS[$lower][$case])) {
             return self::POSSESSIVE_FORMS[$lower][$case];
         }
 
@@ -181,6 +190,7 @@ class AzerbaijaniDeclension
             'accusative' => ($afterVowel ? 'n' : '').$four,
             'locative' => 'd'.$two,
             'ablative' => 'd'.$two.'n',
+            'instrumental' => ($afterVowel ? 'y' : '').'l'.$two,
             default => '',
         };
     }
