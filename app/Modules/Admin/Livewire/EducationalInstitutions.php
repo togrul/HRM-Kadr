@@ -28,9 +28,9 @@ class EducationalInstitutions extends Component
     protected function validationAttributes(): array
     {
         return [
-            'form.id' => __('ID'),
-            'form.name' => __('Name'),
-            'form.shortname' => __('Shortname'),
+            'form.id' => __('admin::references.fields.id'),
+            'form.name' => __('admin::references.fields.name'),
+            'form.shortname' => __('admin::references.fields.shortname'),
         ];
     }
 

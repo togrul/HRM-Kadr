@@ -9,40 +9,32 @@
     <title>{{ config('app.name', 'HR Management system') }}</title>
 
     <!-- Scripts -->
+    <link rel="stylesheet" href="{{ asset('assets/css/pikaday.min.css') }}">
+    <script src="{{ asset('assets/js/moment.min.js') }}"></script>
+    <script src="{{ asset('assets/js/pikaday.min.js') }}"></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
     @stack('css')
 </head>
-
 <body class="min-h-screen pb-1 font-sans antialiased bg-neutral-200/60 dark:bg-neutral-900/80" x-data>
     <div class="min-h-full">
         @includeWhen(!\request()->is('admin/*'), 'includes.layout.default')
         @includeWhen(\request()->is('admin/*'), 'includes.layout.admin')
     </div>
 
-    <x-notification />
+    @persist('app-toast-shell')
+        <x-notification
+            :initial-type="session()->has('error') || session()->has('error_message') ? 'error' : (session()->has('success') ? 'success' : null)"
+            :initial-message="session('error_message') ?? session('error') ?? session('success')"
+        />
+    @endpersist
 
-    @if (session()->has('success'))
-        <x-notification :redirect="true" :message-to-display="session('success')" />
-    @endif
-
-    @if (session()->has('error'))
-        <x-notification type="error" :redirect="false" :message-to-display="session('error')" />
-    @endif
-
-    @if (session()->has('error_message'))
-        <x-notification type="error" :redirect="true" :message-to-display="session('error_message')" />
-    @endif
+    @persist('app-confirm-modal')
+        <x-confirm-modal />
+    @endpersist
 
     @livewireScripts
     @stack('js')
-    <script>
-        Livewire.on('refresh-page', () => {
-            setTimeout(() => {
-                location.reload();
-            }, 2000); // 2000 milliseconds = 2 seconds
-        });
-    </script>
 </body>
 
 </html>

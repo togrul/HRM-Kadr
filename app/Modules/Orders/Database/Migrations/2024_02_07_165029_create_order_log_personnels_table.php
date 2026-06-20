@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('order_no');
             $table->foreign('order_no')->references('order_no')->on('order_logs')->onDelete('cascade')->onUpdate('cascade');
-            $table->foreignIdFor(\App\Models\Component::class)->constrained();
+            $table->foreignId('component_id')->constrained('components');
             $table->string('tabel_no');
             $table->foreign('tabel_no')->references('tabel_no')->on('personnels')->onDelete('cascade')->onUpdate('cascade');
         });

@@ -21,14 +21,14 @@ class AddRank extends Component
     public function mount()
     {
         // $this->authorize('manage-settings',$this->rank);
-        $this->title = __('Add rank');
+        $this->title = __('services::ranks.titles.add');
     }
 
     public function store()
     {
         $this->form->create();
 
-        $this->dispatch('rankAdded', __('Rank was added successfully!'));
+        $this->dispatch('rankAdded', __('services::ranks.messages.created'));
     }
 
     #[Computed]

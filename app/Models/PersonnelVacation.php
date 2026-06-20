@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class PersonnelVacation extends Model
 {
@@ -29,6 +30,15 @@ class PersonnelVacation extends Model
         'order_date',
         'vacation_days_total',
         'remaining_days',
+        'approval_status',
+        'approver_personnel_id',
+        'fallback_approver_personnel_id',
+        'approval_route_source',
+        'submission_source',
+        'submitted_by_user_id',
+        'reviewed_by_user_id',
+        'reviewed_at',
+        'review_note',
         'added_by',
         'deleted_by',
         'deleted_at',
@@ -67,6 +77,31 @@ class PersonnelVacation extends Model
     public function deletedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'deleted_by', 'id');
+    }
+
+    public function submittedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'submitted_by_user_id');
+    }
+
+    public function reviewedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'reviewed_by_user_id');
+    }
+
+    public function approver(): BelongsTo
+    {
+        return $this->belongsTo(Personnel::class, 'approver_personnel_id');
+    }
+
+    public function fallbackApprover(): BelongsTo
+    {
+        return $this->belongsTo(Personnel::class, 'fallback_approver_personnel_id');
+    }
+
+    public function changeRequests(): MorphMany
+    {
+        return $this->morphMany(EmployeeRequestChangeRequest::class, 'requestable');
     }
 
     public function order(): BelongsTo

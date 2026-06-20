@@ -10,8 +10,10 @@ use App\Models\Structure;
 use App\Services\StructureService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -29,6 +31,9 @@ class BusinessTrips extends Component
     public array $search = [];
 
     public $searchStructure;
+
+    #[Locked]
+    public array $accessibleStructureIds = [];
 
     #[Url]
     public $status;
@@ -64,12 +69,26 @@ class BusinessTrips extends Component
 
     public function getTableHeaders(): array
     {
-        return [__('#'), __('Fullname'), __('Dates'), __('Locations'), __('Order'), 'action'];
+        return [
+            __('business_trips::common.table.row_no'),
+            __('business_trips::common.table.fullname'),
+            __('business_trips::common.table.dates'),
+            __('business_trips::common.table.locations'),
+            __('business_trips::common.table.order'),
+            'action',
+        ];
     }
 
     public function printBusinessTripDocument(PersonnelBusinessTrip $model, $multi = false)
     {
         $model->load(['personnel', 'order.orderType', 'order.attributes', 'personnel.idDocuments']);
+
+        if (! $model->order || ! $model->order->orderType) {
+            $this->dispatch('notify', type: 'warning', message: __('business_trips::common.messages.order_not_ready'));
+
+            return null;
+        }
+
         $filepath = $multi
             ? '/storage/templates/general/Ezamiyyet-vesiqesi.docx'
             : '/storage/templates/general/Ezamiyyet-kagizi.docx';
@@ -136,14 +155,60 @@ class BusinessTrips extends Component
 
     protected function returnData($type = 'normal')
     {
-        $result = PersonnelBusinessTrip::with(['personnel', 'order.orderType', 'personDidDelete'])
-            ->whereHas('personnel', fn($query) => $query->whereIn('structure_id', resolve(StructureService::class)->getAccessibleStructures()))
+        $result = PersonnelBusinessTrip::with([
+            'personnel',
+            'order.orderType',
+            'order.businessTrips:id,order_no',
+            'personDidDelete:id,name',
+        ])
+            ->whereHas('personnel', fn($query) => $query->whereIn('structure_id', $this->accessibleStructureIds))
+            ->where(function ($query) {
+                $query->whereNull('submission_source')
+                    ->orWhere(function ($selfService) {
+                        $selfService->where('submission_source', '!=', 'employee_self_service')
+                            ->orWhere(function ($approved) {
+                                $approved->where('submission_source', 'employee_self_service')
+                                    ->where('approval_status', 'approved');
+                            });
+                    });
+            })
             ->filter($this->search)
             ->orderByDesc('end_date');
 
         return $type == 'normal'
-            ? $result->paginate(15)->withQueryString()
+            ? $this->decoratePagination($result->paginate(15)->withQueryString())
             : $result->cursor();
+    }
+
+    protected function decoratePagination(LengthAwarePaginator $paginated): LengthAwarePaginator
+    {
+        $start = ($paginated->currentPage() - 1) * $paginated->perPage();
+        $now = Carbon::now();
+
+        $paginated->setCollection(
+            $paginated->getCollection()->values()->map(function (PersonnelBusinessTrip $trip, int $index) use ($start, $now) {
+                $trip->row_no = $start + $index + 1;
+
+                $businessTripsCount = (int) ($trip->order?->businessTrips?->count() ?? 0);
+                $isForeign = (int) ($trip->order?->order_type_id ?? 0) === PersonnelBusinessTrip::FOREIGN_BUSINESS_TRIP;
+                $trip->is_multi_order_trip = $businessTripsCount > 1 && ! $isForeign;
+
+                $startDate = Carbon::parse($trip->start_date);
+                $endDate = Carbon::parse($trip->end_date);
+                $trip->is_active_trip = $startDate <= $now && $endDate > $now;
+                $trip->start_date_label = $startDate->format('d.m.Y');
+                $trip->end_date_label = $endDate->format('d.m.Y');
+                $trip->order_date_label = Carbon::parse($trip->order_date)->format('d.m.Y');
+
+                if ($trip->deleted_at) {
+                    $trip->deleted_at_label = Carbon::parse($trip->deleted_at)->format('d.m.Y H:i');
+                }
+
+                return $trip;
+            })
+        );
+
+        return $paginated;
     }
 
     #[Computed]
@@ -152,9 +217,10 @@ class BusinessTrips extends Component
         return $this->returnData();
     }
 
-    public function mount()
+    public function mount(StructureService $structureService)
     {
         $this->authorize('viewAny', PersonnelBusinessTrip::class);
+        $this->accessibleStructureIds = $structureService->getAccessibleStructures();
         $this->fillFilter();
     }
 
@@ -163,7 +229,7 @@ class BusinessTrips extends Component
         return view('business-trips::livewire.business-trips.business-trips');
     }
 
-    #[Computed(persist: true)]
+    #[Computed]
     public function structureOptions(): array
     {
         $search = $this->dropdownSearch('searchStructure');
@@ -192,7 +258,7 @@ class BusinessTrips extends Component
         );
     }
 
-    #[Computed(persist: true)]
+    #[Computed]
     public function orderTypeOptions(): array
     {
         $base = OrderType::query()

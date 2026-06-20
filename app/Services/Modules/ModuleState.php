@@ -7,9 +7,7 @@ use Illuminate\Support\Arr;
 
 class ModuleState implements ToggleStateInterface
 {
-    public function __construct(private array $catalog = [])
-    {
-    }
+    public function __construct(private array $catalog = []) {}
 
     public function enabled(string $slug): bool
     {

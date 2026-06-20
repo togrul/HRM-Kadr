@@ -1,0 +1,78 @@
+<?php
+
+return [
+    'title' => 'Overtime approval board',
+    'filters' => [
+        'title' => 'Approval filters',
+        'description' => 'Review overtime requests, narrow by period and approve or reject from one board.',
+        'status' => 'Status',
+        'from' => 'From',
+        'to' => 'To',
+        'active' => 'Active filters',
+        'period' => 'Period',
+        'structure' => 'Structure',
+        'personnel' => 'Personnel',
+    ],
+    'badges' => [
+        'title' => 'Request badges',
+        'manual' => 'Manual',
+        'auto_generated' => 'Auto-generated',
+        'manual_request' => 'Manual request',
+        'from_manual_entry' => 'From manual entry',
+        'from_ledger' => 'From ledger',
+        'stale_pending' => 'Stale pending',
+    ],
+    'create' => [
+        'title' => 'Create overtime request',
+        'personnel' => 'Personnel',
+        'placeholder' => 'Select personnel to create overtime request',
+        'date' => 'Date',
+        'requested_minutes' => 'Requested minutes',
+        'reason' => 'Reason',
+        'action' => 'Create request',
+    ],
+    'scope' => [
+        'badge' => 'Structure scope',
+        'description' => 'Showing personnel from the selected structure tree only.',
+    ],
+    'table' => [
+        'title' => 'Pending approvals',
+        'date' => 'Date',
+        'tabel_no' => 'Tabel no',
+        'personnel' => 'Personnel',
+        'requested_minutes' => 'Requested (min)',
+        'approved_minutes' => 'Approved (min)',
+        'status' => 'Status',
+        'action' => 'Action',
+        'request_age' => 'Request age',
+        'pending_approval_hint' => 'Approval uses the requested minutes shown in the table.',
+    ],
+    'statuses' => [
+        'pending' => 'pending',
+        'approved' => 'approved',
+        'rejected' => 'rejected',
+        'all' => 'all',
+    ],
+    'actions' => [
+        'approve' => 'Approve',
+        'reject' => 'Reject',
+    ],
+    'empty' => [
+        'title' => 'No overtime requests found.',
+        'description_filtered' => 'No overtime requests match the current filters. Adjust the filters or create a manual request.',
+        'description_default' => 'No overtime requests are waiting in the selected period yet. Approved, rejected or not-yet-generated requests will not appear here.',
+    ],
+    'messages' => [
+        'validation_failed' => 'Validation failed.',
+        'approved' => 'Overtime request approved.',
+        'rejected' => 'Overtime request rejected.',
+        'created' => 'Manual overtime request created.',
+    ],
+    'errors' => [
+        'requested_minutes_positive' => 'Requested minutes must be greater than zero.',
+        'month_locked' => 'Selected month is locked. Overtime request creation is blocked.',
+        'personnel_not_found' => 'Selected personnel was not found.',
+        'approved_exists' => 'An approved overtime request already exists for this day.',
+        'pending_exists' => 'A pending overtime request already exists for this day.',
+    ],
+];

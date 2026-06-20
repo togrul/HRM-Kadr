@@ -23,7 +23,7 @@
             <div x-show="$wire.currentStep === {{ $key }}"
                  class="flex w-full"
             >
-                @include("includes.informations.".\Illuminate\Support\Str::slug($step))
+                @include('includes.informations.'.($stepViews[$key] ?? 'contracts'))
             </div>
         @endforeach
     </div>

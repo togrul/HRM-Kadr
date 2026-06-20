@@ -26,8 +26,8 @@ class AwardTypes extends Component
     protected function validationAttributes(): array
     {
         return [
-            'childForm.id' => __('ID'),
-            'childForm.name' => __('Name'),
+            'childForm.id' => __('admin::references.fields.id'),
+            'childForm.name' => __('admin::references.fields.name'),
         ];
     }
 

@@ -28,13 +28,15 @@ trait ContractTrait {
         $contractData = $this->modifyArray($this->contracts, $modelInstance->dateList());
         $this->personnelModelData->contracts()->create($contractData);
 
-        $this->dispatch('contractAdded', __('Contract was added successfully!'));
+        $this->dispatch('contractAdded', __('personnel::information.messages.contract_created'));
+        $this->dispatchModalCloseEvent();
         $this->reset('contracts');
     }
 
     public function forceDeleteContract(PersonnelContract $contractModel): void
     {
         $contractModel->delete();
-        $this->dispatch('contractAdded', __('Contract was deleted successfully!'));
+        $this->dispatch('contractAdded', __('personnel::information.messages.contract_deleted'));
+        $this->dispatchModalCloseEvent();
     }
 }

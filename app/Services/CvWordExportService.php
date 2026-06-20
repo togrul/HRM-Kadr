@@ -132,7 +132,7 @@ class CvWordExportService extends BaseWordExportService
             .' '
             .\Illuminate\Support\Str::lower($cvData['birth']['month'] ?? '')
             .' '
-            .(($cvData['birth']['year'] ?? '') ? ($cvData['birth']['year'].' '.__('year')) : '')
+            .(($cvData['birth']['year'] ?? '') ? ($cvData['birth']['year'].' il') : '')
             .', '
             .($cvData['birth']['city'] ?? '')
             .' şəhəri'

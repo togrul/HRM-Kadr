@@ -8,6 +8,7 @@ use App\Livewire\Traits\DropdownConstructTrait;
 use App\Models\Award;
 use App\Models\AwardType;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -39,9 +40,9 @@ class Awards extends Component
     protected function validationAttributes(): array
     {
         return [
-            'form.id' => __('ID'),
-            'form.name' => __('Name'),
-            'form.award_type_id' => __('Type'),
+            'form.id' => __('admin::references.fields.id'),
+            'form.name' => __('admin::references.fields.name'),
+            'form.award_type_id' => __('admin::references.fields.type'),
         ];
     }
 
@@ -153,6 +154,21 @@ class Awards extends Component
             })
             ->paginate(20);
 
+        $awards = $this->decorateAwards($awards);
+
         return view('admin::livewire.admin.awards', compact('awards', 'award_types'));
+    }
+
+    protected function decorateAwards(LengthAwarePaginator $paginated): LengthAwarePaginator
+    {
+        $paginated->setCollection(
+            $paginated->getCollection()->values()->map(function (Award $award) {
+                $award->type_label = $award->type?->name ?? '';
+
+                return $award;
+            })
+        );
+
+        return $paginated;
     }
 }

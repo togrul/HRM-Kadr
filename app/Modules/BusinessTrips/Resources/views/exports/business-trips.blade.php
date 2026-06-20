@@ -2,17 +2,17 @@
     <thead>
         <tr>
             <th>#</th>
-            <th>{{__('Structure')}}</th>
-            <th>{{ __('Rank') }}</th>
-            <th>{{ __('Fullname') }}</th>
-            <th>{{ __('Location') }}</th>
-            <th>{{ __('Start date') }}</th>
-            <th>{{ __('End date') }}</th>
-            <th>{{ __('Order type') }}</th>
-            <th>{{ __('Order #') }}</th>
-            <th>{{ __('Given by') }}</th>
-            <th>{{ __('Given date') }}</th>
-            <th>{{ __('Extra info') }}</th>
+            <th>{{ __('business_trips::common.fields.structure') }}</th>
+            <th>{{ __('business_trips::common.fields.rank') }}</th>
+            <th>{{ __('business_trips::common.fields.fullname') }}</th>
+            <th>{{ __('business_trips::common.fields.location') }}</th>
+            <th>{{ __('business_trips::common.fields.start_date') }}</th>
+            <th>{{ __('business_trips::common.fields.end_date') }}</th>
+            <th>{{ __('business_trips::common.fields.order_type') }}</th>
+            <th>{{ __('business_trips::common.fields.order_no') }}</th>
+            <th>{{ __('business_trips::common.fields.given_by') }}</th>
+            <th>{{ __('business_trips::common.fields.given_date') }}</th>
+            <th>{{ __('business_trips::common.fields.extra_info') }}</th>
         </tr>
     </thead>
     <tbody>
@@ -31,19 +31,19 @@
             <th>{{ $r['order_date'] }}</th>
             <th>
                     @if(isset($r['attributes']['$transportation']))
-                        {{ __('Transportation') }}: {{ __($r['attributes']['$transportation']['value']) }}
+                        {{ __('business_trips::common.fields.transportation') }}: {{ __('orders::order_form.transportation.'.($r['attributes']['$transportation']['value'] ?? '')) }}
                         @if(
                             $r['attributes']['$transportation']['value'] == \App\Enums\TransportationEnum::CAR->name
                             && !empty($r['attributes']['$car']['value'])
                         )
-                            -  {{ __($r['attributes']['$car']['value']) }},
+                            -  {{ $r['attributes']['$car']['value'] }},
                         @endif,
                     @endif
                     @if(isset($r['attributes']['$weapon']))
-                        {{ __('Weapon') }}: {{ __($r['attributes']['$weapon']['value']) }},
+                        {{ __('business_trips::common.fields.weapon') }}: {{ $r['attributes']['$weapon']['value'] }},
                     @endif
                     @if(isset($r['attributes']['$service_dog']))
-                        {{ __('Service dog') }}: {{ __($r['attributes']['$service_dog']['value']) ? 'var' : 'yoxdur' }}
+                        {{ __('business_trips::common.fields.service_dog') }}: {{ !empty($r['attributes']['$service_dog']['value']) ? __('business_trips::common.boolean.yes') : __('business_trips::common.boolean.no') }}
                     @endif
             </th>
         </tr>

@@ -1,30 +1,27 @@
-<div class="flex flex-col"
-     x-data
-     x-init="
-        paginator = document.querySelector('span[aria-current=page]>span');
-        if(paginator != null)
-        {
-            paginator.classList.add('bg-blue-50','text-blue-600')
-        }
-        Livewire.hook('message.processed', (message,component) => {
-            const paginator = document.querySelector('span[aria-current=page]>span')
-            if(
-                ['gotoPage','previousPage','nextPage','setStatus','resetFilter'].includes(message.updateQueue[0].payload.method)
-                || ['punishmentSaved'].includes(message.updateQueue[0].payload.event)
-                || ['q'].includes(message.updateQueue[0].name)
-            ){
-                if(paginator != null)
-                {
-                    paginator.classList.add('bg-blue-50','text-blue-600')
-                }
+<div
+    class="flex flex-col"
+    x-data
+    x-init="
+        const root = $el;
+        const paintPaginator = () => {
+            const paginator = root.querySelector('span[aria-current=page]>span');
+            if (paginator) {
+                paginator.classList.add('bg-blue-50', 'text-blue-600');
             }
-        })
+        };
+        paintPaginator();
+        if (typeof Livewire !== 'undefined') {
+            Livewire.hook('commit', ({ component, succeed }) => {
+                if (component.id !== $wire.__instance.id) return;
+                succeed(() => queueMicrotask(paintPaginator));
+            });
+        }
     "
 >
     <div class="flex flex-col items-center justify-between sm:flex-row filter bg-white py-2 px-2 rounded-xl">
         <x-filter.nav>
             <x-filter.item  wire:click.prevent="setPunishmentType('-1')" :active="$selectedType === '-1'">
-                <span class="uppercase text-xs">{{ __('All') }}</span>
+                <span class="uppercase text-xs">{{ __('admin::references.filters.all') }}</span>
             </x-filter.item>
             @foreach($punishment_types as $type)
                 <div  class="flex space-x-1 items-center group" wire:key="{{ $type->id }}">
@@ -32,7 +29,7 @@
                         <span class="uppercase text-xs">{{ $type->name }}</span>
                     </x-filter.item>
                     <button
-                        @click.prevent="
+                        x-on:click.prevent="
                             $dispatch('close-child');
                             $wire.loadChildComponent({{ $type->id }});
                         "
@@ -54,13 +51,13 @@
         <div class="flex items-center justify-center space-x-2 action-section">
             <x-button class="space-x-2" mode="primary" wire:click.prevent="openCrud()">
                 <x-icons.add-icon color="text-white" hover="text-gray-50"></x-icons.add-icon>
-                <span>{{ __('Add punishment') }}</span>
+                <span>{{ __('admin::references.buttons.add_punishment') }}</span>
             </x-button>
         </div>
     </div>
 
     @if($showChild)
-        <livewire:admin.punishment-types :model=$childModel wire:key="punishment-type-{{ $childModel }}" />
+        <livewire:admin.punishment-types :model="$childModel" :key="'punishment-type-' . ($childModel ?? 'create')" />
     @endif
 
     @if($isAdded)
@@ -70,7 +67,7 @@
             </button>
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 mt-4 w-full">
                 <div class="flex flex-col">
-                    <x-label for="form.id">{{ __('ID') }}</x-label>
+                    <x-label for="form.id">{{ __('admin::references.fields.id') }}</x-label>
                     <x-livewire-input mode="default" type="number" name="form.id" wire:model="form.id"></x-livewire-input>
                     @error('form.id')
                     <x-validation> {{ $message }} </x-validation>
@@ -78,38 +75,28 @@
                 </div>
                 <div class="flex flex-col">
                     <x-ui.select-dropdown
-                        :label="__('Punishment types')"
+                        :label="__('admin::references.fields.punishment_types')"
                         placeholder="---"
                         mode="default"
                         class="w-full"
                         wire:model.live="form.punishment_type_id"
-                        :model="$this->punishmentTypeOptions"
+                        :model="$this->punishmentTypeOptions()"
+                    search-model="searchPunishmentType"
                     >
-                        <x-livewire-input
-                            mode="gray"
-                            name="searchPunishmentType"
-                            wire:model.live.debounce.300ms="searchPunishmentType"
-                            placeholder="{{ __('Search...') }}"
-                            @click.stop="isOpen = true"
-                            x-on:input.stop="null"
-                            x-on:keyup.stop="null"
-                            x-on:keydown.stop="null"
-                            x-on:change.stop="null"
-                        ></x-livewire-input>
                     </x-ui.select-dropdown>
                     @error('form.punishment_type_id')
                     <x-validation> {{ $message }} </x-validation>
                     @enderror
                 </div>
                 <div class="flex flex-col">
-                    <x-label for="form.name">{{ __('Name') }}</x-label>
+                    <x-label for="form.name">{{ __('admin::references.fields.name') }}</x-label>
                     <x-livewire-input mode="default" name="form.name" wire:model="form.name"></x-livewire-input>
                     @error('form.name')
                     <x-validation> {{ $message }} </x-validation>
                     @enderror
                 </div>
                 <div class="flex items-end">
-                    <x-modal-button mode="black">{{ __('Save') }}</x-modal-button>
+                    <x-modal-button mode="black">{{ __('admin::references.actions.save') }}</x-modal-button>
                 </div>
             </div>
         </div>
@@ -118,10 +105,10 @@
     <div class="flex flex-col space-y-2">
         <div class="relative min-h-[300px] -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-                <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
-                    <x-table.tbl :headers="[__('ID'),__('Type'),__('Name'),'action']">
+                <div class="overflow-visible">
+                    <x-table.tbl :headers="[__('admin::references.fields.id'),__('admin::references.fields.type'),__('admin::references.fields.name'),__('admin::references.table.action')]">
                         @forelse ($punishments as $punishment)
-                            <tr>
+                            <tr wire:key="punishment-row-{{ $punishment->id }}">
                                 <x-table.td>
                                       <span class="text-sm text-gray-500 font-medium">
                                           {{ $punishment->id }}
@@ -129,7 +116,7 @@
                                 </x-table.td>
                                 <x-table.td>
                                     <span class="text-xs font-medium flex justify-center items-center px-1 py-1 rounded-md border border-gray-300 bg-gray-50 text-gray-600">
-                                        {{ $punishment->type->name }}
+                                        {{ $punishment->type_label }}
                                     </span>
                                 </x-table.td>
                                 <x-table.td style="white-space: normal !important;">

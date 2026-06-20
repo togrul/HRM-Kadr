@@ -40,7 +40,7 @@ class VacationList extends Component
             'reserved_date_month' => $this->reservedMonthId ?: null,
         ]);
         $this->resetVacation();
-        $this->dispatch('vacation-updated', __('Vacation is updated!'));
+        $this->dispatch('vacation-updated', __('personnel::vacations.messages.updated'));
     }
 
     public function goToVacations(int $vacationYear)
@@ -73,7 +73,9 @@ class VacationList extends Component
 
         $this->months = UsefulHelpers::monthsList(config('app.locale'));
 
-        $this->title = __('Vacations') . ' - ' . "<span class='text-blue-500'>{$this->personnelModelData->fullname}</span>";
+        $this->title = __('personnel::vacations.titles.vacations_for', [
+            'name' => "<span class='text-blue-500'>{$this->personnelModelData->fullname}</span>",
+        ]);
     }
 
     public function render()

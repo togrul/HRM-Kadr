@@ -4,11 +4,11 @@
 
 <div class="flex flex-col space-y-4">
 
-    <x-form-card title="ID document">
+    <x-form-card :title="__('personnel::wizard.sections.id_document')">
         <div class="grid grid-cols-2 gap-2 items-end">
             <div class="flex flex-col">
                 <div class="flex space-x-2">
-                    <x-label for="documentForm.document.pin">{{ __('PIN') }}</x-label>
+                    <x-label for="documentForm.document.pin">{{ __('personnel::common.labels.pin') }}</x-label>
                     @error('documentForm.document.pin')
                     <x-validation> {{ $message }} </x-validation>
                     @enderror
@@ -16,7 +16,7 @@
                 <x-livewire-input mode="gray" name="documentForm.document.pin" wire:model="documentForm.document.pin"></x-livewire-input>
             </div>
             <div class="flex">
-                <x-button mode="black" wire:click="getDataByPin">{{ __('Get data by PIN') }}</x-button>
+                <x-button mode="black" wire:click="getDataByPin">{{ __('personnel::common.actions.get_data_by_pin') }}</x-button>
             </div>
         </div>
 
@@ -38,7 +38,7 @@
             class="grid grid-cols-5 gap-2"
         >
             <div class="flex flex-col">
-                <x-label for="documentForm.document.nationality_id">{{ __('Nationality') }}</x-label>
+                <x-label for="documentForm.document.nationality_id">{{ __('personnel::common.labels.nationality') }}</x-label>
                 <x-ui.select-dropdown
                     label=""
                     placeholder="---"
@@ -46,38 +46,30 @@
                     class="w-full"
                     wire:model.live="documentForm.document.nationality_id"
                     :model="$this->documentNationalityOptions"
+                    :search-model="data_get($stepSearchModels, 'searchDocumentNationality', 'searchDocumentNationality')"
+                    :search-placeholder="data_get($stepSearchPlaceholders, 'searchDocumentNationality', __('personnel::common.placeholders.search'))"
                 >
-                    <x-livewire-input
-                        mode="gray"
-                        name="searchDocumentNationality"
-                        wire:model.live.debounce.300ms="searchDocumentNationality"
-                        @click.stop="isOpen = true"
-                        x-on:input.stop="null"
-                        x-on:keyup.stop="null"
-                        x-on:keydown.stop="null"
-                        x-on:change.stop="null"
-                    />
                 </x-ui.select-dropdown>
                 @error('documentForm.document.nationality_id')
                 <x-validation> {{ $message }} </x-validation>
                 @enderror
             </div>
             <div class="flex flex-col">
-                <x-label for="documentForm.document.series">{{ __('Series') }}</x-label>
+                <x-label for="documentForm.document.series">{{ __('personnel::common.labels.series') }}</x-label>
                 <x-livewire-input mode="gray" name="documentForm.document.series" wire:model="documentForm.document.series"></x-livewire-input>
                 @error('documentForm.document.series')
                 <x-validation> {{ $message }} </x-validation>
                 @enderror
             </div>
             <div class="flex flex-col">
-                <x-label for="documentForm.document.number">{{ __('Number') }}</x-label>
+                <x-label for="documentForm.document.number">{{ __('personnel::common.labels.number') }}</x-label>
                 <x-livewire-input mode="gray" type="number" name="documentForm.document.number" wire:model="documentForm.document.number"></x-livewire-input>
                 @error('documentForm.document.number')
                 <x-validation> {{ $message }} </x-validation>
                 @enderror
             </div>
             <div class="flex flex-col">
-                <x-label for="documentForm.document.born_country_id">{{ __('Born country') }}</x-label>
+                <x-label for="documentForm.document.born_country_id">{{ __('personnel::common.labels.born_country') }}</x-label>
                 <x-ui.select-dropdown
                     label=""
                     placeholder="---"
@@ -85,24 +77,16 @@
                     class="w-full"
                     wire:model.live="documentForm.document.born_country_id"
                     :model="$this->documentBornCountryOptions"
+                    :search-model="data_get($stepSearchModels, 'searchDocumentBornCountry', 'searchDocumentBornCountry')"
+                    :search-placeholder="data_get($stepSearchPlaceholders, 'searchDocumentBornCountry', __('personnel::common.placeholders.search'))"
                 >
-                    <x-livewire-input
-                        mode="gray"
-                        name="searchDocumentBornCountry"
-                        wire:model.live.debounce.300ms="searchDocumentBornCountry"
-                        @click.stop="isOpen = true"
-                        x-on:input.stop="null"
-                        x-on:keyup.stop="null"
-                        x-on:keydown.stop="null"
-                        x-on:change.stop="null"
-                    />
                 </x-ui.select-dropdown>
                 @error('documentForm.document.born_country_id')
                 <x-validation> {{ $message }} </x-validation>
                 @enderror
             </div>
             <div class="flex flex-col">
-                <x-label for="documentForm.document.born_city_id">{{ __('City') }}</x-label>
+                <x-label for="documentForm.document.born_city_id">{{ __('personnel::common.labels.city') }}</x-label>
                 <x-ui.select-dropdown
                     label=""
                     placeholder="---"
@@ -110,17 +94,9 @@
                     class="w-full"
                     wire:model.live="documentForm.document.born_city_id"
                     :model="$this->documentCityOptions"
+                    :search-model="data_get($stepSearchModels, 'searchDocumentCity', 'searchDocumentCity')"
+                    :search-placeholder="data_get($stepSearchPlaceholders, 'searchDocumentCity', __('personnel::common.placeholders.search'))"
                 >
-                    <x-livewire-input
-                        mode="gray"
-                        name="searchDocumentCity"
-                        wire:model.live.debounce.300ms="searchDocumentCity"
-                        @click.stop="isOpen = true"
-                        x-on:input.stop="null"
-                        x-on:keyup.stop="null"
-                        x-on:keydown.stop="null"
-                        x-on:change.stop="null"
-                    />
                 </x-ui.select-dropdown>
                 @error('documentForm.document.born_city_id')
                 <x-validation> {{ $message }} </x-validation>
@@ -129,23 +105,23 @@
         </div>
         <div class="grid grid-cols-4 gap-2 mt-2">
             <div class="flex flex-col">
-                <x-label for="documentForm.document.birthplace">{{ __('Birthplace') }}</x-label>
+                <x-label for="documentForm.document.birthplace">{{ __('personnel::common.labels.birthplace') }}</x-label>
                 <x-livewire-input mode="gray" name="documentForm.document.birthplace" wire:model="documentForm.document.birthplace"></x-livewire-input>
             </div>
             <div class="flex flex-col col-span-2">
-                <x-label for="documentForm.document.registered_address">{{ __('Registered address') }}</x-label>
+                <x-label for="documentForm.document.registered_address">{{ __('personnel::common.labels.registered_address') }}</x-label>
                 <x-livewire-input mode="gray" name="documentForm.document.registered_address" wire:model="documentForm.document.registered_address"></x-livewire-input>
             </div>
             <div class="flex flex-col">
-                <x-label for="documentForm.document.is_married">{{ __('Family status') }}</x-label>
+                <x-label for="documentForm.document.is_married">{{ __('personnel::common.labels.family_status') }}</x-label>
                 <div class="flex items-center">
                     <label class="inline-flex items-center bg-gray-100 rounded shadow-sm py-2 px-2">
                         <input type="radio" class="form-radio" name="documentForm.document.is_married" wire:model="documentForm.document.is_married" value="0">
-                        <span class="ml-2 text-sm font-normal">{{__('Single')}}</span>
+                        <span class="ml-2 text-sm font-normal">{{ __('personnel::common.labels.single') }}</span>
                     </label>
                     <label class="inline-flex items-center ml-4 bg-gray-100 rounded shadow-sm py-2 px-2">
                         <input type="radio" class="form-radio" name="documentForm.document.is_married" wire:model="documentForm.document.is_married" value="1">
-                        <span class="ml-2 text-sm font-normal">{{__('Married')}}</span>
+                        <span class="ml-2 text-sm font-normal">{{ __('personnel::common.labels.married') }}</span>
                     </label>
                 </div>
                 @error('documentForm.document.is_married')
@@ -153,30 +129,30 @@
                 @enderror
             </div>
             <div class="flex flex-col">
-                <x-label for="documentForm.document.military_duty">{{ __('Military duty') }}</x-label>
+                <x-label for="documentForm.document.military_duty">{{ __('personnel::common.labels.military_duty') }}</x-label>
                 <x-livewire-input mode="gray" name="documentForm.document.military_duty" wire:model="documentForm.document.military_duty"></x-livewire-input>
             </div>
             <div class="flex flex-col">
-                <x-label for="documentForm.document.blood_group">{{ __('Blood group') }}</x-label>
+                <x-label for="documentForm.document.blood_group">{{ __('personnel::common.labels.blood_group') }}</x-label>
                 <x-livewire-input mode="gray" name="documentForm.document.blood_group" wire:model="documentForm.document.blood_group"></x-livewire-input>
             </div>
             <div class="flex flex-col">
-                <x-label for="documentForm.document.eye_color">{{ __('Eye color') }}</x-label>
+                <x-label for="documentForm.document.eye_color">{{ __('personnel::common.labels.eye_color') }}</x-label>
                 <x-livewire-input mode="gray" name="documentForm.document.eye_color" wire:model="documentForm.document.eye_color"></x-livewire-input>
             </div>
             <div class="flex flex-col">
-                <x-label for="documentForm.document.height">{{ __('Height') }}</x-label>
+                <x-label for="documentForm.document.height">{{ __('personnel::common.labels.height') }}</x-label>
                 <x-livewire-input mode="gray" name="documentForm.document.height" wire:model="documentForm.document.height"></x-livewire-input>
                 @error('documentForm.document.height')
                 <x-validation> {{ $message }} </x-validation>
                 @enderror
             </div>
             <div class="flex flex-col">
-                <x-label for="documentForm.document.document_issued_authority">{{ __('Document issued by') }}</x-label>
+                <x-label for="documentForm.document.document_issued_authority">{{ __('personnel::common.labels.document_issued_by') }}</x-label>
                 <x-livewire-input mode="gray" name="documentForm.document.document_issued_authority" wire:model="documentForm.document.document_issued_authority"></x-livewire-input>
             </div>
             <div class="flex flex-col">
-                <x-label for="documentForm.document.document_issued_date">{{ __('Document issue date') }}</x-label>
+                <x-label for="documentForm.document.document_issued_date">{{ __('personnel::common.labels.document_issue_date') }}</x-label>
                 <x-pikaday-input mode="gray" name="documentForm.document.document_issued_date" format="Y-MM-DD" wire:model.live="documentForm.document.document_issued_date">
                     <x-slot name="script">
                         $el.onchange = function () {
@@ -188,17 +164,17 @@
         </div>
     </x-form-card>
 
-    <x-form-card title="Service cards">
+    <x-form-card :title="__('personnel::wizard.sections.service_cards')">
         <div class="grid grid-cols-3 gap-2">
             <div class="flex flex-col">
-                <x-label for="documentForm.serviceCards.card_number">{{ __('Card number') }}</x-label>
+                <x-label for="documentForm.serviceCards.card_number">{{ __('personnel::common.labels.card_number') }}</x-label>
                 <x-livewire-input mode="gray" name="documentForm.serviceCards.card_number" wire:model="documentForm.serviceCards.card_number"></x-livewire-input>
                 @error('documentForm.serviceCards.card_number')
                 <x-validation> {{ $message }} </x-validation>
                 @enderror
             </div>
             <div class="flex flex-col">
-                <x-label for="documentForm.serviceCards.given_date">{{ __('Given date') }}</x-label>
+                <x-label for="documentForm.serviceCards.given_date">{{ __('personnel::common.labels.given_date') }}</x-label>
                 <x-pikaday-input mode="gray" name="documentForm.serviceCards.given_date" format="Y-MM-DD" wire:model.live="documentForm.serviceCards.given_date">
                     <x-slot name="script">
                         $el.onchange = function () {
@@ -211,7 +187,7 @@
                 @enderror
             </div>
             <div class="flex flex-col">
-                <x-label for="documentForm.serviceCards.valid_date">{{ __('Valid date') }}</x-label>
+                <x-label for="documentForm.serviceCards.valid_date">{{ __('personnel::common.labels.valid_date') }}</x-label>
                 <x-pikaday-input mode="gray" name="documentForm.serviceCards.valid_date" format="Y-MM-DD" wire:model.live="documentForm.serviceCards.valid_date">
                     <x-slot name="script">
                         $el.onchange = function () {
@@ -224,13 +200,13 @@
                 @enderror
             </div>
             <div class="flex justify-start items-end">
-                <x-button  mode="black" wire:click="addServiceCard">{{ __('Add') }}</x-button>
+                <x-button  mode="black" wire:click="addServiceCard">{{ __('personnel::common.actions.add') }}</x-button>
             </div>
         </div>
         <div class="relative -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-                <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
-                    <x-table.tbl :headers="[__('Card number'),__('Given date'),__('Valid date'),'action','action']">
+                <div class="overflow-visible">
+                    <x-table.tbl :headers="[__('personnel::common.labels.card_number'), __('personnel::common.labels.given_date'), __('personnel::common.labels.valid_date'), __('services::common.labels.action'), __('services::common.labels.action')]">
                         @forelse ($documentForm->serviceCardsList as $keyServiceCard => $valueServiceCard)
                             @php
                                 $valid = \Carbon\Carbon::parse($valueServiceCard['valid_date']) >= \Carbon\Carbon::now();
@@ -260,7 +236,7 @@
                                 </x-table.td>
                                 <x-table.td :isButton="true">
                                     <button
-                                        onclick="confirm('Are you sure you want to remove this data?') || event.stopImmediatePropagation()"
+                                        onclick="confirm('{{ __('personnel::common.messages.remove_data_confirm') }}') || event.stopImmediatePropagation()"
                                         wire:click="removeServiceCard({{ $keyServiceCard }})"
                                         class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-50 hover:text-gray-700"
                                     >
@@ -272,7 +248,7 @@
                             <tr>
                                 <td colspan="5">
                                     <div class="flex justify-center items-center py-4">
-                                        <span class="font-medium">{{ __('No information added') }}</span>
+                                        <span class="font-medium">{{ __('personnel::common.labels.no_information_added') }}</span>
                                     </div>
                                 </td>
                             </tr>
@@ -283,17 +259,17 @@
         </div>
     </x-form-card>
 
-    <x-form-card title="Foreign passports">
+    <x-form-card :title="__('personnel::wizard.sections.foreign_passports')">
         <div class="grid grid-cols-3 gap-2">
             <div class="flex flex-col">
-                <x-label for="documentForm.passports.serial_number">{{ __('Serial number') }}</x-label>
+                <x-label for="documentForm.passports.serial_number">{{ __('personnel::common.labels.serial_number') }}</x-label>
                 <x-livewire-input mode="gray" name="documentForm.passports.serial_number" wire:model="documentForm.passports.serial_number"></x-livewire-input>
                 @error('documentForm.passports.serial_number')
                 <x-validation> {{ $message }} </x-validation>
                 @enderror
             </div>
             <div class="flex flex-col">
-                <x-label for="documentForm.passports.given_date">{{ __('Given date') }}</x-label>
+                <x-label for="documentForm.passports.given_date">{{ __('personnel::common.labels.given_date') }}</x-label>
                 <x-pikaday-input mode="gray" name="documentForm.passports.given_date" format="Y-MM-DD" wire:model.live="documentForm.passports.given_date">
                     <x-slot name="script">
                         $el.onchange = function () {
@@ -306,7 +282,7 @@
                 @enderror
             </div>
             <div class="flex flex-col">
-                <x-label for="documentForm.passports.valid_date">{{ __('Valid date') }}</x-label>
+                <x-label for="documentForm.passports.valid_date">{{ __('personnel::common.labels.valid_date') }}</x-label>
                 <x-pikaday-input mode="gray" name="documentForm.passports.valid_date" format="Y-MM-DD" wire:model.live="documentForm.passports.valid_date">
                     <x-slot name="script">
                         $el.onchange = function () {
@@ -319,13 +295,13 @@
                 @enderror
             </div>
             <div class="flex justify-start items-end">
-                <x-button  mode="black" wire:click="addPassport">{{ __('Add') }}</x-button>
+                <x-button  mode="black" wire:click="addPassport">{{ __('personnel::common.actions.add') }}</x-button>
             </div>
         </div>
         <div class="relative -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-                <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
-                    <x-table.tbl :headers="[__('Serial number'),__('Given date'),__('Valid date'),'action','action']">
+                <div class="overflow-visible">
+                    <x-table.tbl :headers="[__('personnel::common.labels.serial_number'), __('personnel::common.labels.given_date'), __('personnel::common.labels.valid_date'), __('services::common.labels.action'), __('services::common.labels.action')]">
                         @forelse ($documentForm->passportsList as $keyPassport => $valuePassport)
                             @php
                                 $validPassport = \Carbon\Carbon::parse($valuePassport['valid_date']) >= \Carbon\Carbon::now();
@@ -355,7 +331,7 @@
                                 </x-table.td>
                                 <x-table.td :isButton="true">
                                     <button
-                                        onclick="confirm('Are you sure you want to remove this data?') || event.stopImmediatePropagation()"
+                                        onclick="confirm('{{ __('personnel::common.messages.remove_data_confirm') }}') || event.stopImmediatePropagation()"
                                         wire:click="removePassport({{ $keyPassport }})"
                                         class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-50 hover:text-gray-700"
                                     >
@@ -367,7 +343,7 @@
                             <tr>
                                 <td colspan="5">
                                     <div class="flex justify-center items-center py-4">
-                                        <span class="font-medium">{{ __('No information added') }}</span>
+                                        <span class="font-medium">{{ __('personnel::common.labels.no_information_added') }}</span>
                                     </div>
                                 </td>
                             </tr>

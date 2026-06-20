@@ -20,3 +20,9 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+/tmp
+/tmp-*.php
+
+# OS / editor / agent cruft
+.DS_Store
+/.claude

@@ -15,6 +15,15 @@ class OrderType extends Model
     protected $fillable = [
         'order_id',
         'name',
+        'code',
+        'handler_class',
+        'is_active',
+        'meta',
+    ];
+
+    protected $casts = [
+        'is_active' => 'boolean',
+        'meta' => 'array',
     ];
 
     public function order(): BelongsTo

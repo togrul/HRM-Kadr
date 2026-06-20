@@ -2,6 +2,7 @@
 
 namespace App\Modules\Candidates\Livewire;
 
+use App\Modules\Candidates\Application\Services\CandidateProfileFieldSchemaService;
 use App\Modules\Candidates\Support\Traits\CandidateCrud;
 use App\Livewire\Traits\Helpers\FillComplexArrayTrait;
 use App\Models\Candidate;
@@ -16,7 +17,24 @@ class EditCandidate extends Component
 
     protected function fillCandidate()
     {
-        $this->candidateModelData = Candidate::with(['status', 'structure'])
+        $this->candidateModelData = Candidate::with([
+            'status',
+            'structure',
+            'latestApplication',
+            'latestApplication.opening',
+            'latestApplication.opening.requisition',
+            'latestApplication.source:id,name',
+            'applications' => fn ($query) => $query
+                ->with([
+                    'opening:id,title,job_requisition_id',
+                    'opening.requisition:id,title',
+                ])
+                ->latest('id'),
+        ])
+            ->withCount('applications')
+            ->withCount([
+                'applications as active_applications_count' => fn ($query) => $query->where('status', 'active'),
+            ])
            ->find($this->candidateModel);
 
         if (! $this->candidateModelData) abort(404);
@@ -26,15 +44,9 @@ class EditCandidate extends Component
         $updatedData = $this->candidateModelData->toArray();
 
         $this->candidate = $this->mapAttributes(
-            attributes: [
-                'name', 'surname', 'patronymic', 'height', 'military_service',
-                'phone', 'birthdate', 'gender', 'knowledge_test',
-                'physical_fitness_exam', 'research_date', 'research_result',
-                'examination_date', 'appeal_date', 'application_date',
-                'requisition_date', 'initial_documents', 'documents_completeness',
-                'attitude_to_military', 'characteristics', 'hhk_date', 'hhk_result',
-                'useless_info', 'discrediting_information', 'note', 'presented_by',
-            ],
+            attributes: array_merge([
+                'name', 'surname', 'patronymic', 'phone', 'birthdate', 'gender',
+            ], app(CandidateProfileFieldSchemaService::class)->allCandidateAttributeKeys()),
             getFrom: $updatedData
         );
 
@@ -48,6 +60,6 @@ class EditCandidate extends Component
 
         $this->candidateModelData->update($this->modifyArray($this->candidate, $this->candidateModelData->dateList()));
 
-        $this->dispatch('candidateAdded', __('Candidate was updated successfully!'));
+        $this->dispatch('candidateAdded', __('candidates::common.messages.candidate_updated'));
     }
 }

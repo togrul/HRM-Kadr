@@ -10,13 +10,16 @@ use App\Livewire\Forms\Personnel\LaborActivityForm;
 use App\Livewire\Forms\Personnel\MiscellaneousForm;
 use App\Livewire\Forms\Personnel\ServiceHistoryForm;
 use App\Livewire\Forms\Personnel\PersonalInformationForm;
+use App\Modules\Personnel\Services\PersonnelFormAssembler;
 use App\Modules\Personnel\Support\Traits\PersonnelCrud;
 use App\Modules\Personnel\Support\Traits\RelationCruds\RelationCrudTrait;
 use App\Models\Personnel;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Livewire\Attributes\Isolate;
 use Livewire\Component;
 
+#[Isolate]
 class AddPersonnel extends Component
 {
     use AuthorizesRequests;
@@ -34,80 +37,56 @@ class AddPersonnel extends Component
 
     public function store()
     {
-        $this->step == 1 && $this->validate($this->validationRules()[$this->step]);
+        $this->validateCurrentStepForSave();
+        $this->persistPersonnel();
+    }
 
+    protected function storeFromChildValidation(): void
+    {
+        $this->validatePrimaryStepForPersist();
+        $this->persistPersonnel();
+    }
+
+    protected function persistPersonnel(): void
+    {
         $modelInstance = new Personnel;
 
         if (! empty($this->avatar)) {
             $this->personalForm->personnel['photo'] = $this->avatar->store('personnel', 'public');
         }
 
-        $personalPayload = $this->personalForm->toPayload();
-        $personnelData = $this->modifyArray(
-            $personalPayload['personnel'] ?? [],
-            $modelInstance->dateList()
+        $assembled = app(PersonnelFormAssembler::class)->buildForStore(
+            personalForm: $this->personalForm,
+            documentForm: $this->documentForm,
+            educationForm: $this->educationForm,
+            laborActivityForm: $this->laborActivityForm,
+            historyForm: $this->historyForm,
+            awardsPunishmentsForm: $this->awardsPunishmentsForm,
+            kinshipForm: $this->kinshipForm,
+            miscForm: $this->miscForm,
+            dateFields: $modelInstance->dateList(),
+            dateNormalizer: fn (array $payload, array $dates): array => $this->modifyArray($payload, $dates),
+            forcePending: ! auth()->user()->can('confirmation-general')
         );
-        $personnelData['is_pending'] = ! auth()->user()->can('confirmation-general');
-        $personnelExtra = $personalPayload['personnel_extra'] ?? [];
-
-        $documentPayload = $this->documentPayload();
-        $documentData = data_get($documentPayload, 'document', []);
-        $serviceCardsList = data_get($documentPayload, 'service_cards.list', []);
-        $passportsList = data_get($documentPayload, 'passports.list', []);
-        $education = $this->educationForm->educationForPersistence();
-        $extraEducations = $this->educationForm->extraEducationsForPersistence();
 
         in_array($this->step, [2, 3, 4], true) && $this->completeStep();
 
-        $laborActivities = $this->laborActivityForm->laborActivitiesForPersistence();
-        $ranks = $this->laborActivityForm->ranksForPersistence();
-
-        $militaryServices = $this->historyForm->militaryForPersistence();
-        $injuries = $this->historyForm->injuriesForPersistence();
-        $captivities = $this->historyForm->captivitiesForPersistence();
-        $awards = $this->awardsPunishmentsForm->awardsForPersistence();
-        $punishments = $this->awardsPunishmentsForm->punishmentsForPersistence();
-        $kinships = $this->kinshipForm->kinshipsForPersistence();
-        $languages = $this->miscForm->languagesForPersistence();
-        $events = $this->miscForm->eventsForPersistence();
-        $degrees = $this->miscForm->degreesForPersistence();
-        $elections = $this->miscForm->electionsForPersistence();
-
-        $relationPayloads = [
-            'document' => $documentData,
-            'service_cards' => $serviceCardsList,
-            'passports' => $passportsList,
-            'education' => $education,
-            'extra_educations' => $extraEducations,
-            'labor_activities' => $laborActivities,
-            'ranks' => $ranks,
-            'military' => $militaryServices,
-            'injuries' => $injuries,
-            'captivities' => $captivities,
-            'awards' => $awards,
-            'punishments' => $punishments,
-            'kinships' => $kinships,
-            'languages' => $languages,
-            'events' => $events,
-            'degrees' => $degrees,
-            'elections' => $elections,
-        ];
-
-        DB::transaction(function () use ($personnelData, $relationPayloads, $personnelExtra) {
-            $personnel = Personnel::create($personnelData);
+        DB::transaction(function () use ($assembled) {
+            $personnel = Personnel::create($assembled['personnel_data']);
+            $relationPayloads = $assembled['relation_payloads'];
             $this->createPersonnelRelations($personnel, $relationPayloads);
 
-            if (! empty($personnelExtra)) {
-                $personnel->update($personnelExtra);
+            if (! empty($assembled['personnel_extra'])) {
+                $personnel->update($assembled['personnel_extra']);
             }
         });
-        $this->dispatch('personnelAdded', __('Personnel was added successfully!'));
+        $this->dispatchPersonnelStored(__('personnel::common.messages.personnel_created'));
+        $this->dispatchModalCloseEvent();
     }
-
     public function mount()
     {
         $this->authorize('create', Personnel::class);
-        $this->title = __('New personnel');
+        $this->title = __('personnel::common.titles.new_personnel');
         $this->step = 1;
 
         if (isset($this->personalForm)) {

@@ -11,6 +11,7 @@ class LeaveType extends Model
 
     protected $fillable = [
         'name',
+        'attendance_code',
         'max_days',
         'requires_document'
     ];
@@ -18,4 +19,13 @@ class LeaveType extends Model
     protected $casts = [
         'requires_document' => 'boolean'
     ];
+
+    public function setAttendanceCodeAttribute(mixed $value): void
+    {
+        $normalized = strtoupper(trim((string) $value));
+
+        $this->attributes['attendance_code'] = $normalized !== ''
+            ? preg_replace('/\s+/', '', $normalized)
+            : null;
+    }
 }

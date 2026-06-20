@@ -1,125 +1,238 @@
-<div class="flex flex-col space-y-4" x-data wire:key="roles">
-    @if (!$isUpdate)
-        {{-- @can('manage-settings') --}}
-        <div>
-            <form wire:submit.prevent="store">
-                @csrf
+<div class="space-y-7" x-data wire:key="roles">
+    <section class="space-y-2">
+        <h1 class="text-3xl font-semibold tracking-tight text-zinc-950">{{ __('services::roles.dashboard.title') }}</h1>
+        <p class="max-w-2xl text-sm font-medium leading-6 text-zinc-600">{{ __('services::roles.dashboard.subtitle') }}</p>
+    </section>
 
-                <div class="px-0 py-5 space-y-6">
+    <section class="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+        @foreach ($roles as $role)
+            @php
+                $isAdminRole = str_contains(Str::lower($role->name), 'admin');
+                $roleDisplayName = $this->roleDisplayName($role);
+                $initials = $role->users
+                    ->take(2)
+                    ->map(function ($user) {
+                        $source = trim((string) ($user->name ?: $user->email));
 
-                    <div class="flex items-end space-x-2">
-                        <div>
-                            <x-label for="role_name" :value="__('Role')" />
+                        return Str::of($source)
+                            ->replaceMatches('/\s+/', ' ')
+                            ->explode(' ')
+                            ->filter()
+                            ->take(2)
+                            ->map(fn ($part) => Str::upper(Str::substr($part, 0, 1)))
+                            ->implode('');
+                    })
+                    ->filter()
+                    ->values();
+            @endphp
 
-                            <x-livewire-input id="role_name" name="role_name" mode="gray"
-                                class="block mt-1 w-full sm:text-sm outline-none font-medium h-10 dark:bg-gray-700 {{ $errors->any() ? 'border-red-600' : '' }}"
-                                type="text" :value="old('role_name')" wire:model="role_name" required autofocus />
-                                  @error('role_name')
-                                      <x-validation> {{ $message }} </x-validation>
-                                  @enderror
-                        </div>
-                        <x-button mode="primary" class="space-x-2">
-                            <x-icons.key-icon color="text-white" hover="text-gray-50"></x-icons.key-icon>
-                            <span> {{ __('Add role') }}</span>
-                        </x-button>
+            <article
+                wire:key="role-card-{{ $role->id }}"
+                class="group relative flex min-h-[220px] flex-col rounded-2xl border border-zinc-300 bg-white p-6 shadow-[0_18px_50px_-38px_rgba(24,24,27,0.45)] transition hover:-translate-y-0.5 hover:border-zinc-400 hover:shadow-[0_24px_70px_-42px_rgba(24,24,27,0.55)]"
+            >
+                @if ($isAdminRole)
+                    <span class="absolute left-0 top-0 z-20 inline-flex h-6 items-center rounded-br-md rounded-tl-2xl bg-zinc-100 px-2.5 text-[10px] font-bold uppercase tracking-tight text-zinc-700 ring-1 ring-zinc-200">
+                        {{ __('services::roles.badges.default') }}
+                    </span>
+                @endif
+
+                @unless ($isUpdate && (int) $role_id === (int) $role->id)
+                    <button
+                        type="button"
+                        wire:click.prevent="openSideMenu('set-permission', {{ $role->id }})"
+                        class="absolute inset-0 z-10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                        aria-label="{{ __('services::roles.actions.manage_role_permissions', ['role' => $roleDisplayName]) }}"
+                    ></button>
+                @endunless
+
+                <div class="relative grid h-14 grid-cols-[3.5rem_1fr_auto] items-start gap-3">
+                    <div class="inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                        <x-icons.shield-icon size="h-8 w-8" color="text-blue-600" hover="text-blue-700" />
+                    </div>
+
+                    <div></div>
+
+                    <div class="relative z-20 flex shrink-0 items-center justify-end gap-2">
+                        <button
+                            type="button"
+                            wire:click.stop.prevent="editRole({{ $role->id }})"
+                            class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-zinc-50 text-zinc-500 shadow-sm ring-1 ring-zinc-100 transition hover:bg-zinc-100 hover:text-zinc-950 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                            title="{{ __('services::common.actions.edit') }}"
+                            aria-label="{{ __('services::common.actions.edit') }}"
+                        >
+                            <x-icons.edit-icon size="h-4 w-4" color="text-zinc-500" hover="text-zinc-950" />
+                        </button>
+
+                        <button
+                            type="button"
+                            wire:click.stop.prevent="setDeleteRole({{ $role->id }})"
+                            class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-50 text-rose-500 shadow-sm ring-1 ring-rose-100 transition hover:bg-rose-100 hover:text-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:ring-offset-2"
+                            title="{{ __('services::common.actions.delete') }}"
+                            aria-label="{{ __('services::common.actions.delete') }}"
+                        >
+                            <x-icons.delete-icon size="h-4 w-4" color="text-rose-500" hover="text-rose-700" />
+                        </button>
                     </div>
                 </div>
-            </form>
-        </div>
-        {{-- @endcan --}}
-    @endif
 
-    <div class="relative min-h-[300px] overflow-x-auto px-2">
-        <div class="inline-block min-w-full py-2 align-middle">
-            <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
-
-                <x-table.tbl :headers="[__('Name'), 'action', 'action', 'action']">
-                    @foreach ($roles as $role)
-                        <tr wire:key={{ $role->id }}>
-                            <x-table.td>
-                                <div class="flex flex-row items-center space-x-2">
-                                    <span @class([
-                                        'px-3 py-1 inline-flex text-xs leading-4 font-medium rounded-lg flex-none uppercase',
-                                        'bg-green-100 text-green-500' => Str::contains(
-                                            Str::lower($role->name),
-                                            'admin'),
-                                        'bg-gray-100 text-gray-600' => !Str::contains(
-                                            Str::lower($role->name),
-                                            'admin'),
-                                    ])>
-                                        {{ $role->name }}
-                                    </span>
-                                    @if ($isUpdate && $role_id == $role->id)
-                                        <div class="flex flex-col">
-                                            <x-livewire-input id="role_name" name="role_name" mode="gray"
-                                                class="flex w-auto sm:text-sm outline-none font-normal h-auto dark:bg-gray-700 dark:border-black dark:text-white {{ $errors->any() ? 'border-red-600' : '' }}"
-                                                type="text" :value="old('role_name')" wire:model="role_name" autofocus />
-
-                                            <div class="flex space-x-2">
-                                                <button wire:click.prevent="store"
-                                                    class="flex items-center justify-center w-8 h-8 transition duration-300 ease-in-out rounded-lg bg-green-50 hover:bg-green-100 focus:outline-none">
-                                                    <x-icons.check-simple-icon color="text-green-600"
-                                                        hover="text-green-700"></x-icons.check-simple-icon>
-                                                </button>
-
-                                                <button wire:click.prevent="cancel"
-                                                    class="flex items-center justify-center w-8 h-8 transition duration-300 ease-in-out rounded-lg bg-red-50 hover:bg-red-100 focus:outline-none">
-                                                    <x-icons.close-icon color="text-red-500"
-                                                        hover="text-red-600"></x-icons.close-icon>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    @endif
-                                </div>
-
-                            </x-table.td>
-
-                            <x-table.td class="max-w-[50px]">
+                <div class="relative mt-9 flex-1">
+                    @if ($isUpdate && (int) $role_id === (int) $role->id)
+                        <div class="relative z-30 space-y-3 rounded-2xl border border-zinc-200 bg-[#f7f7f8] p-3 shadow-sm" wire:key="role-edit-form-{{ $role->id }}">
+                            <div class="flex items-center justify-between gap-2">
+                                <label for="role_name_{{ $role->id }}" class="text-xs font-bold uppercase tracking-tight text-zinc-500">
+                                    {{ __('services::common.labels.role') }}
+                                </label>
                                 <button
-                                    class="flex flex-row items-center w-8 h-8 space-x-1 text-blue-500 dark:text-blue-300 hover:text-blue-600 dark:hover:text-blue-400 focus:outline-none"
-                                    wire:click="editRole({{ $role->id }})">
-                                    <x-icons.edit-icon color="text-blue-500" hover="text-blue-600"></x-icons.edit-icon>
+                                    type="button"
+                                    wire:click.prevent="cancel"
+                                    class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white text-zinc-500 shadow-sm ring-1 ring-zinc-200 transition hover:text-zinc-950"
+                                    aria-label="{{ __('services::common.actions.cancel') }}"
+                                    title="{{ __('services::common.actions.cancel') }}"
+                                >
+                                    <x-icons.close-icon size="h-3.5 w-3.5" color="text-zinc-500" hover="text-zinc-950" />
                                 </button>
-                            </x-table.td>
+                            </div>
+                            <input
+                                id="role_name_{{ $role->id }}"
+                                type="text"
+                                wire:model="role_name"
+                                class="h-10 w-full min-w-0 truncate rounded-xl border border-zinc-200 bg-white px-3 text-[13px] font-semibold text-zinc-950 shadow-sm outline-none transition focus:border-zinc-400 focus:ring-0"
+                                autofocus
+                            />
+                            @error('role_name')
+                                <x-validation>{{ $message }}</x-validation>
+                            @enderror
 
-                            <x-table.td class="max-w-[50px]">
-                                {{-- @can('manage-settings') --}}
-                                <button wire:click.prevent="openSideMenu('set-permission',{{ $role->id }})"
-                                    wire:key="edit_{{ $role_id }}"
-                                    class="flex flex-row items-center w-8 h-8 space-x-1 text-teal-500 hover:text-teal-600 focus:outline-none">
-                                    <x-icons.shield-icon color="text-teal-500" hover="text-teal-600"
-                                        size="w-7 h-7"></x-icons.shield-icon>
+                            <div class="flex items-center gap-2">
+                                <button
+                                    type="button"
+                                    wire:click.prevent="store"
+                                    class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-950 text-white shadow-sm transition hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-400 focus:ring-offset-2"
+                                    aria-label="{{ __('services::common.actions.save') }}"
+                                    title="{{ __('services::common.actions.save') }}"
+                                >
+                                    <x-icons.check-simple-icon size="h-4 w-4" color="text-white" hover="text-white" />
                                 </button>
-                                {{-- @endcan --}}
-                            </x-table.td>
-
-                            <x-table.td :isButton="true" class="max-w-[50px]">
-                                {{-- @can('manage-settings') --}}
-                                <button wire:click.prevent="setDeleteRole({{ $role->id }})"
-                                    class="flex items-center justify-center w-8 h-8 text-xs font-semibold text-red-500 uppercase transition duration-300 rounded-lg hover:bg-red-100">
-                                    <x-icons.delete-icon color="text-rose-400"
-                                        hover="text-rose-300"></x-icons.delete-icon>
+                                <button
+                                    type="button"
+                                    wire:click.prevent="cancel"
+                                    class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-zinc-200 bg-white text-zinc-500 shadow-sm transition hover:bg-zinc-50 hover:text-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-300 focus:ring-offset-2"
+                                    aria-label="{{ __('services::common.actions.cancel') }}"
+                                    title="{{ __('services::common.actions.cancel') }}"
+                                >
+                                    <x-icons.close-icon size="h-4 w-4" color="text-zinc-500" hover="text-zinc-950" />
                                 </button>
-                                {{-- @endcan --}}
-                            </x-table.td>
+                            </div>
+                        </div>
+                    @else
+                        <h2 class="text-xl font-semibold tracking-tight text-zinc-950">{{ $roleDisplayName }}</h2>
+                        <p class="mt-2 max-w-[18rem] text-sm font-medium leading-5 text-zinc-600">
+                            {{ $isAdminRole ? __('services::roles.dashboard.admin_description') : __('services::roles.dashboard.role_description') }}
+                        </p>
+                    @endif
+                </div>
 
-                        </tr>
-                    @endforeach
-                </x-table.tbl>
-            </div>
-        </div>
-    </div>
+                <div class="relative mt-7 border-t border-zinc-200 pt-5">
+                    <div class="flex items-center justify-between gap-3">
+                        <button
+                            type="button"
+                            wire:click.prevent="openSideMenu('set-permission', {{ $role->id }})"
+                            class="relative z-20 text-sm font-bold tracking-tight text-blue-600 transition hover:text-blue-700"
+                        >
+                            {{ trans_choice('services::roles.dashboard.permission_count', (int) $role->permissions_count, ['count' => (int) $role->permissions_count]) }}
+                        </button>
 
-    {{-- @can('manage-settings') --}}
-    <x-side-modal>
+                        <div class="flex min-w-0 items-center justify-end">
+                            @foreach ($initials as $index => $initial)
+                                <span
+                                    class="-ml-2 inline-flex h-7 w-7 items-center justify-center rounded-full border-2 border-white text-[10px] font-bold {{ $index === 0 ? 'bg-zinc-200 text-zinc-700' : 'bg-zinc-950 text-white' }}"
+                                    title="{{ __('services::roles.dashboard.assigned_users') }}"
+                                >
+                                    {{ $initial }}
+                                </span>
+                            @endforeach
+
+                            @if ($role->users_count > $initials->count())
+                                <span class="-ml-2 inline-flex h-7 min-w-7 items-center justify-center rounded-full border-2 border-white bg-zinc-100 px-2 text-[10px] font-bold text-zinc-600">
+                                    +{{ $role->users_count - $initials->count() }}
+                                </span>
+                            @elseif ($role->users_count === 0)
+                                <span class="truncate text-xs font-semibold text-zinc-400">{{ __('services::roles.dashboard.no_users') }}</span>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </article>
+        @endforeach
+
+        <article
+            class="flex min-h-[220px] flex-col justify-center rounded-2xl border-2 border-dashed border-zinc-300 bg-zinc-50/40 p-6 text-center transition hover:border-zinc-400 hover:bg-white"
+            wire:key="role-create-card"
+        >
+            @if ($isCreating)
+                <form wire:submit.prevent="store" class="relative z-30 mx-auto w-full max-w-[15rem] space-y-3 rounded-2xl bg-white p-3 text-left shadow-sm ring-1 ring-zinc-200">
+                    <div>
+                        <label for="role_name_new" class="text-xs font-bold uppercase tracking-tight text-zinc-500">
+                            {{ __('services::common.labels.role') }}
+                        </label>
+                        <input
+                            id="role_name_new"
+                            type="text"
+                            wire:model="role_name"
+                            class="mt-2 h-10 w-full min-w-0 rounded-xl border border-zinc-200 bg-white px-3 text-[13px] font-semibold text-zinc-950 outline-none transition focus:border-zinc-400 focus:ring-0"
+                            autofocus
+                        />
+                        @error('role_name')
+                            <x-validation>{{ $message }}</x-validation>
+                        @enderror
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <button
+                            type="submit"
+                            class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-950 text-white shadow-sm transition hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-400 focus:ring-offset-2"
+                            aria-label="{{ __('services::roles.actions.create_role') }}"
+                            title="{{ __('services::roles.actions.create_role') }}"
+                        >
+                            <x-icons.check-simple-icon size="h-4 w-4" color="text-white" hover="text-white" />
+                        </button>
+                        <button
+                            type="button"
+                            wire:click.prevent="cancel"
+                            class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-zinc-200 bg-white text-zinc-500 shadow-sm transition hover:bg-zinc-50 hover:text-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-300 focus:ring-offset-2"
+                            aria-label="{{ __('services::common.actions.cancel') }}"
+                            title="{{ __('services::common.actions.cancel') }}"
+                        >
+                            <x-icons.close-icon size="h-4 w-4" color="text-zinc-500" hover="text-zinc-950" />
+                        </button>
+                    </div>
+                </form>
+            @else
+                <button
+                    type="button"
+                    wire:click.prevent="startCreate"
+                    class="flex h-full min-h-[160px] flex-col items-center justify-center gap-3 rounded-xl text-zinc-600 transition hover:text-zinc-950 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                >
+                    <span class="inline-flex h-10 w-10 items-center justify-center rounded-full border-2 border-zinc-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m7-7H5" />
+                        </svg>
+                    </span>
+                    <span class="text-sm font-bold">{{ __('services::roles.actions.create_role') }}</span>
+                </button>
+            @endif
+        </article>
+    </section>
+
+    <x-side-modal size="x-large">
         @if ($showSideMenu == 'set-permission')
-            @livewire('services.roles.set-permission', ['roleModel' => $modelName])
+            <livewire:services.roles.set-permission :roleModel="$modelName" :key="'services-role-permission-modal-' . ($modelName ?? 'none')" />
         @endif
     </x-side-modal>
-    {{-- @endcan --}}
+
     <div>
         @auth
-            @livewire('services.roles.delete-role')
+            <livewire:services.roles.delete-role wire:key="services-role-delete-modal" />
         @endauth
     </div>
 </div>

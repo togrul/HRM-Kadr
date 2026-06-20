@@ -13,9 +13,10 @@ class StructureSeeder extends Seeder
      */
     public function run(): void
     {
-        $appType = (string) config('app.app_type', env('APP_TYPE', 'public'));
+        $appType = (string) config('app.app_type', 'public');
         if ($appType === 'military') {
             $this->militaryStructureData();
+
             return;
         }
 
@@ -27,7 +28,7 @@ class StructureSeeder extends Seeder
         $structures = [
             [
                 'id' => 1,
-                'parent_id' => 0,
+                'parent_id' => null,
                 'name' => 'Azərbaycan Respublikası Təhsil Nazirliyi',
                 'shortname' => 'Təhsil Nazirliyi',
                 'code' => 1,

@@ -2,6 +2,15 @@
 
 namespace App\Modules\Personnel\Providers;
 
+use App\Modules\Personnel\Console\Commands\PersonnelCrudQueryBudgetCommand;
+use App\Modules\Personnel\Console\Commands\PersonnelCrudRenderBenchmarkCommand;
+use App\Modules\Personnel\Console\Commands\PersonnelListQueryBudgetCommand;
+use App\Modules\Personnel\Console\Commands\PersonnelListRenderBenchmarkCommand;
+use App\Modules\Personnel\Console\Commands\ProfessionalPortfolioBackfillRegistryKeysCommand;
+use App\Modules\Personnel\Console\Commands\ProfessionalPortfolioCheckMediaLinksCommand;
+use App\Modules\Personnel\Console\Commands\ProfessionalPortfolioEnforcePoliciesCommand;
+use App\Modules\Personnel\Console\Commands\ProfessionalPortfolioSyncRegistriesCommand;
+use App\Modules\Personnel\Console\Commands\RepairLegacySelfServiceVacationOrdersCommand;
 use App\Providers\Concerns\RegistersLivewireAliases;
 use App\Services\Modules\ModuleState;
 use Illuminate\Support\Facades\Gate;
@@ -13,6 +22,19 @@ class PersonnelServiceProvider extends ServiceProvider
 
     public function register(): void
     {
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                PersonnelListQueryBudgetCommand::class,
+                PersonnelListRenderBenchmarkCommand::class,
+                PersonnelCrudQueryBudgetCommand::class,
+                PersonnelCrudRenderBenchmarkCommand::class,
+                ProfessionalPortfolioCheckMediaLinksCommand::class,
+                ProfessionalPortfolioBackfillRegistryKeysCommand::class,
+                ProfessionalPortfolioSyncRegistriesCommand::class,
+                ProfessionalPortfolioEnforcePoliciesCommand::class,
+                RepairLegacySelfServiceVacationOrdersCommand::class,
+            ]);
+        }
     }
 
     public function boot(): void
@@ -42,13 +64,39 @@ class PersonnelServiceProvider extends ServiceProvider
     {
         return [
             'all-personnel' => \App\Modules\Personnel\Livewire\AllPersonnel::class,
+            'table-panel' => \App\Modules\Personnel\Livewire\TablePanel::class,
             'add-personnel' => \App\Modules\Personnel\Livewire\AddPersonnel::class,
             'edit-personnel' => \App\Modules\Personnel\Livewire\EditPersonnel::class,
+            'steps.document-step' => \App\Modules\Personnel\Livewire\Steps\DocumentStep::class,
+            'steps.education-step' => \App\Modules\Personnel\Livewire\Steps\EducationStep::class,
+            'steps.labor-activity-step' => \App\Modules\Personnel\Livewire\Steps\LaborActivityStep::class,
+            'steps.history-step' => \App\Modules\Personnel\Livewire\Steps\HistoryStep::class,
+            'steps.awards-punishments-step' => \App\Modules\Personnel\Livewire\Steps\AwardsPunishmentsStep::class,
+            'steps.kinship-step' => \App\Modules\Personnel\Livewire\Steps\KinshipStep::class,
+            'steps.misc-step' => \App\Modules\Personnel\Livewire\Steps\MiscStep::class,
             'delete-personnel' => \App\Modules\Personnel\Livewire\DeletePersonnel::class,
             'files' => \App\Modules\Personnel\Livewire\Files::class,
             'information' => \App\Modules\Personnel\Livewire\Information::class,
+            'employee-360-timeline' => \App\Modules\Personnel\Livewire\Employee360Timeline::class,
             'vacation-list' => \App\Modules\Personnel\Livewire\VacationList::class,
+            'my-hr.dashboard' => \App\Modules\Personnel\Livewire\MyHr\MyHrDashboard::class,
+            'my-hr.summary' => \App\Modules\Personnel\Livewire\MyHr\MyHrSummary::class,
+            'my-hr.requests' => \App\Modules\Personnel\Livewire\MyHr\MyHrRequests::class,
+            'my-hr.notifications' => \App\Modules\Personnel\Livewire\MyHr\MyHrNotifications::class,
+            'my-hr.onboarding' => \App\Modules\Personnel\Livewire\MyHr\MyHrOnboarding::class,
+            'my-hr.onboarding-assignment-manager' => \App\Modules\Personnel\Livewire\MyHr\OnboardingAssignmentManager::class,
+            'my-hr.development-plan' => \App\Modules\Personnel\Livewire\MyHr\MyHrDevelopmentPlan::class,
+            'my-hr.learning' => \App\Modules\Personnel\Livewire\MyHr\MyHrLearning::class,
+            'my-hr.learning-assignment-manager' => \App\Modules\Personnel\Livewire\MyHr\LearningAssignmentManager::class,
+            'my-hr.documents' => \App\Modules\Personnel\Livewire\MyHr\MyHrDocuments::class,
+            'my-hr.hierarchy' => \App\Modules\Personnel\Livewire\MyHr\MyHrHierarchy::class,
+            'my-hr.account-provisioning' => \App\Modules\Personnel\Livewire\MyHr\MyHrAccountProvisioning::class,
+            'my-hr.self-service-request-reviews' => \App\Modules\Personnel\Livewire\MyHr\SelfServiceRequestReviews::class,
+            'professional-portfolio' => \App\Modules\Personnel\Livewire\ProfessionalPortfolio\ProfessionalPortfolio::class,
+            'professional-portfolio.events-manager' => \App\Modules\Personnel\Livewire\ProfessionalPortfolio\EventsManager::class,
+            'professional-portfolio.media-manager' => \App\Modules\Personnel\Livewire\ProfessionalPortfolio\MediaManager::class,
+            'professional-portfolio.projects-manager' => \App\Modules\Personnel\Livewire\ProfessionalPortfolio\ProjectsManager::class,
+            'professional-portfolio.analytics-panel' => \App\Modules\Personnel\Livewire\ProfessionalPortfolio\AnalyticsPanel::class,
         ];
     }
-
 }

@@ -1,31 +1,27 @@
 <div class="flex flex-col"
      x-data
      x-init="
-        paginator = document.querySelector('span[aria-current=page]>span');
-        if(paginator != null)
-        {
-            paginator.classList.add('bg-blue-50','text-blue-600')
-        }
-        Livewire.hook('message.processed', (message,component) => {
-            const paginator = document.querySelector('span[aria-current=page]>span')
-            if(
-                ['gotoPage','previousPage','nextPage','setStatus','resetFilter'].includes(message.updateQueue[0].payload.method)
-                || ['educationFormUpdated'].includes(message.updateQueue[0].payload.event)
-                || ['q'].includes(message.updateQueue[0].name)
-            ){
-                if(paginator != null)
-                {
-                    paginator.classList.add('bg-blue-50','text-blue-600')
-                }
+        const root = $el;
+        const paintPaginator = () => {
+            const paginator = root.querySelector('span[aria-current=page]>span');
+            if (paginator) {
+                paginator.classList.add('bg-blue-50', 'text-blue-600');
             }
-        })
+        };
+        paintPaginator();
+        if (typeof Livewire !== 'undefined') {
+            Livewire.hook('commit', ({ component, succeed }) => {
+                if (component.id !== $wire.__instance.id) return;
+                succeed(() => queueMicrotask(paintPaginator));
+            });
+        }
     "
 >
     <div class="flex flex-col items-center justify-between sm:flex-row filter bg-white py-2 px-2 rounded-xl">
         <div class="flex items-center justify-center space-x-2 action-section">
             <x-button class="space-x-2" mode="primary" wire:click.prevent="openCrud()">
                 <x-icons.add-icon color="text-white" hover="text-gray-50"></x-icons.add-icon>
-                <span>{{ __('Add education form') }}</span>
+                <span>{{ __('admin::references.buttons.add_education_form') }}</span>
             </x-button>
         </div>
     </div>
@@ -37,29 +33,29 @@
             </button>
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 mt-4 w-full">
                 <div class="flex flex-col">
-                    <x-label for="form.id">{{ __('ID') }}</x-label>
+                    <x-label for="form.id">{{ __('admin::references.fields.id') }}</x-label>
                     <x-livewire-input mode="default" type="number" name="form.id" wire:model="form.id"></x-livewire-input>
                     @error('form.id')
                     <x-validation> {{ $message }} </x-validation>
                     @enderror
                 </div>
                 <div class="flex flex-col">
-                    <x-label for="form.name_az">{{ __('Name') }}</x-label>
+                    <x-label for="form.name_az">{{ __('admin::references.fields.name') }}</x-label>
                     <x-livewire-input mode="default" name="form.name_az" wire:model="form.name_az"></x-livewire-input>
                     @error('form.name_az')
                     <x-validation> {{ $message }} </x-validation>
                     @enderror
                 </div>
                 <div class="flex flex-col">
-                    <x-label for="form.name_en">{{ __('Name') }} (EN)</x-label>
+                    <x-label for="form.name_en">{{ __('admin::references.fields.name') }} (EN)</x-label>
                     <x-livewire-input mode="default" name="form.name_en" wire:model="form.name_en"></x-livewire-input>
                 </div>
                 <div class="flex flex-col">
-                    <x-label for="form.name_ru">{{ __('Name') }} (RU)</x-label>
+                    <x-label for="form.name_ru">{{ __('admin::references.fields.name') }} (RU)</x-label>
                     <x-livewire-input mode="default" name="form.name_ru" wire:model="form.name_ru"></x-livewire-input>
                 </div>
                 <div class="flex items-end">
-                    <x-modal-button mode="black">{{ __('Save') }}</x-modal-button>
+                    <x-modal-button mode="black">{{ __('admin::references.actions.save') }}</x-modal-button>
                 </div>
             </div>
         </div>
@@ -68,8 +64,8 @@
     <div class="flex flex-col space-y-2">
         <div class="relative min-h-[300px] -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-                <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
-                    <x-table.tbl :headers="[__('ID'),__('Name'),'action']">
+                <div class="overflow-visible">
+                    <x-table.tbl :headers="[__('admin::references.fields.id'),__('admin::references.fields.name'),__('admin::references.table.action')]">
                         @forelse ($educationForms as $eduForm)
                             <tr>
                                 <x-table.td>

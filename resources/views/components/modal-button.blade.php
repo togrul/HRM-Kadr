@@ -1,5 +1,5 @@
 @props([
-     'mode' => 'primary',
+     'mode' => 'black',
      'method' => 'store',
      'disabled' => false
 ])
@@ -7,7 +7,7 @@
 <div  {{ $attributes->merge(['class' => 'flex items-center w-full pt-4']) }}>
      <x-button
          :$mode
-         class="items-center justify-center space-x-0 px-4 py-2"
+         class="items-center justify-center space-x-0"
          wire:click="store"
          wire:loading.attr="disabled"
          type="submit"

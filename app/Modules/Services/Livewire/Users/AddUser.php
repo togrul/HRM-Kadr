@@ -6,6 +6,7 @@ use App\Livewire\Traits\DropdownConstructTrait;
 use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Spatie\Permission\Models\Role;
@@ -28,8 +29,8 @@ class AddUser extends Component
         return [
             'user.name' => 'required|string|min:1',
             'user.email' => 'required|email|unique:users,email',
-            'user.password' => 'required|min:4',
-            'user.confirm-password' => 'required_with:user.password|same:user.password|min:4',
+            'user.password' => ['required', Password::min(8)],
+            'user.confirm-password' => 'required_with:user.password|same:user.password',
             'roleId' => 'required|exists:roles,id',
         ];
     }
@@ -37,21 +38,29 @@ class AddUser extends Component
     protected function validationAttributes()
     {
         return [
-            'user.name' => __('Name'),
-            'user.email' => __('Email'),
-            'user.password' => __('Password'),
-            'user.confirm-password' => __('Confirm password'),
-            'roleId' => __('Role'),
+            'user.name' => __('services::common.labels.name'),
+            'user.email' => __('services::common.labels.email'),
+            'user.password' => __('services::common.labels.password'),
+            'user.confirm-password' => __('services::common.labels.confirm_password'),
+            'roleId' => __('services::common.labels.role'),
         ];
     }
 
     public function store()
     {
+        $this->authorize('manage-settings');
+
         $this->validate();
 
-        $this->user['password'] = Hash::make($this->user['password']);
+        // Whitelist the columns that may be set — never mass-assign the raw
+        // client-controlled $this->user array (it could carry is_active,
+        // deleted_by, must_reset_password, etc.).
+        $user = User::create([
+            'name' => $this->user['name'],
+            'email' => $this->user['email'],
+            'password' => Hash::make($this->user['password']),
+        ]);
 
-        $user = User::create($this->user);
         if ($this->roleId) {
             $role = Role::find($this->roleId);
             if ($role) {
@@ -59,13 +68,13 @@ class AddUser extends Component
             }
         }
 
-        $this->dispatch('userAdded', __('User was added successfully!'));
+        $this->dispatch('userAdded', __('services::users.messages.created'));
     }
 
     public function mount()
     {
-        // $this->authorize('manage-settings',$this->user);
-        $this->title = __('Add user');
+        $this->authorize('manage-settings');
+        $this->title = __('services::users.titles.add');
         $this->roleId = null;
     }
 

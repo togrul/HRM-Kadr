@@ -25,8 +25,6 @@ class Structure extends Model
         'level',
     ];
 
-    protected $appends = ['name_with_parent'];
-
     public $timestamps = false;
 
     public function parent(): BelongsTo
@@ -79,19 +77,17 @@ class Structure extends Model
 
     public function getNameWithParentAttribute(): string
     {
-        $list = $this->getAllParentName();
-        $arrow = '
-            <svg class="w-5 h-5 text-zinc-400" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3"></path>
-            </svg>
-        ';
-        $lastItem = end($list);
+        return implode(' / ', $this->getAllParentName());
+    }
 
-        return collect($list)->map(
-            fn($item) => $item === $lastItem
-                ? "<span class='text-zinc-900/80'>{$item}</span>"
-                : "<span class='text-zinc-500'>{$item}</span>" 
-        )->implode('');
+    public function fullStructurePath(bool $includeRoot = true, bool $rootAsShortname = false): string
+    {
+        return implode(' / ', $this->fullStructureSegments($includeRoot, $rootAsShortname));
+    }
+
+    public function fullStructureName(bool $includeRoot = false): string
+    {
+        return implode(' / ', $this->fullStructureSegments($includeRoot));
     }
 
     public function getAllNestedIds(): array
@@ -124,5 +120,33 @@ class Structure extends Model
         }
 
         return array_reverse($parentNames);
+    }
+
+    protected function fullStructureSegments(bool $includeRoot = true, bool $rootAsShortname = false): array
+    {
+        $segments = [];
+        $cursor = $this;
+
+        while ($cursor) {
+            if (! $cursor->relationLoaded('parent') && ! is_null($cursor->parent_id)) {
+                $cursor->loadMissing('parent');
+            }
+
+            $isRoot = is_null($cursor->parent_id);
+
+            if (! $isRoot || $includeRoot) {
+                $segments[] = ($isRoot && $rootAsShortname)
+                    ? (string) ($cursor->shortname ?: $cursor->name)
+                    : (string) $cursor->name;
+            }
+
+            if (! $cursor->relationLoaded('parent')) {
+                break;
+            }
+
+            $cursor = $cursor->parent;
+        }
+
+        return array_reverse(array_filter($segments));
     }
 }

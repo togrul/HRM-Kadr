@@ -14,8 +14,11 @@ class Order extends Model
 
     public $timestamps = false;
 
+    public $incrementing = false;
+
+    protected $keyType = 'int';
+
     protected $fillable = [
-        'id',
         'order_category_id',
         'name',
         'content',
@@ -31,6 +34,23 @@ class Order extends Model
 
     // ishe girme emrine id verilir ve her yerde rahat yoxlamaq ucun manual olaraq modele daxil edilir.
     const IG_EMR = 1010;
+
+    /**
+     * IDs that are globally visible in orders listing (not structure-scoped).
+     *
+     * @return array<int,int>
+     */
+    public static function globalVisibilityOrderIds(): array
+    {
+        $configured = config('orders.listing.global_visible_order_ids', [self::IG_EMR]);
+
+        return collect(is_array($configured) ? $configured : [$configured])
+            ->map(static fn ($id) => (int) $id)
+            ->filter(static fn ($id) => $id > 0)
+            ->unique()
+            ->values()
+            ->all();
+    }
 
     public function category(): BelongsTo
     {

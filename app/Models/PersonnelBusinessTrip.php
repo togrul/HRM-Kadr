@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class PersonnelBusinessTrip extends Model
@@ -21,6 +22,15 @@ class PersonnelBusinessTrip extends Model
         'end_date',
         'description',
         'attributes',
+        'approval_status',
+        'approver_personnel_id',
+        'fallback_approver_personnel_id',
+        'approval_route_source',
+        'submission_source',
+        'submitted_by_user_id',
+        'reviewed_by_user_id',
+        'reviewed_at',
+        'review_note',
         'order_given_by',
         'order_no',
         'order_date',
@@ -58,6 +68,31 @@ class PersonnelBusinessTrip extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'added_by', 'id');
+    }
+
+    public function submittedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'submitted_by_user_id');
+    }
+
+    public function reviewedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'reviewed_by_user_id');
+    }
+
+    public function approver(): BelongsTo
+    {
+        return $this->belongsTo(Personnel::class, 'approver_personnel_id');
+    }
+
+    public function fallbackApprover(): BelongsTo
+    {
+        return $this->belongsTo(Personnel::class, 'fallback_approver_personnel_id');
+    }
+
+    public function changeRequests(): MorphMany
+    {
+        return $this->morphMany(EmployeeRequestChangeRequest::class, 'requestable');
     }
 
     public function order(): BelongsTo

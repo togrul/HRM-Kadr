@@ -1,8 +1,8 @@
 <x-modal-delete
   livewire-event-to-open-modal="deleteStaffWasSet"
   event-to-close-modal="staffWasDeleted"
-  :modal-title="__('Delete staff')"
-  :modal-description="__('Are you sure you want to delete this data?')"
-  :modal-confirm-button-text="__('Delete')"
+  :modal-title="__('staff::common.titles.delete_staff')"
+  :modal-description="__('staff::common.messages.delete_confirm')"
+  :modal-confirm-button-text="__('staff::common.actions.delete')"
   wire-click="deleteStaff"
 />

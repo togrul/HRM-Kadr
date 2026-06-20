@@ -1,65 +1,87 @@
 @props(['notification'])
 
 @php
+    use App\Support\Translations\ModuleTranslation;
+
     $data = $notification->data;
-    $type = $data['type'] ?? 'notification';
     $action = $data['action'] ?? '';
     $isRead = !empty($notification->read_at);
+    $resolveText = static fn ($value, $fallback = '') => is_string($value) && $value !== ''
+        ? ModuleTranslation::resolveStoredText($value)
+        : $fallback;
+
     switch ($action) {
         case 'create':
             $color = 'emerald';
-            $message = $data['message'] ?? __('has created new personnel');
-            $category = __($data['category'] ?? ('New ' . strtolower($type)));
+            $message = $resolveText($data['message'] ?? null, __('notifications::common.messages.created_new_personnel'));
+            $category = $resolveText($data['category'] ?? null, __('notifications::common.categories.new_record'));
             $addedBy = $data['added_by'] ?? null;
             break;
         case 'delete':
             $color = 'rose';
-            $message = $data['message'] ?? __('has deleted personnel');
-            $category = __($data['category'] ?? ($type . ' deleted'));
-            $addedBy = $data['added_by'] ?? null;                                                                                                      
+            $message = $resolveText($data['message'] ?? null, __('notifications::common.messages.deleted_personnel'));
+            $category = $resolveText($data['category'] ?? null, __('notifications::common.categories.deleted_record'));
+            $addedBy = $data['added_by'] ?? null;
             break;
         case 'birthday':
             $color = 'blue';
-            $message = '';
-            $category = $type;
+            $message = $resolveText($data['message'] ?? null, __('notifications::common.messages.birthday_today'));
+            $category = $resolveText($data['category'] ?? null, __('notifications::common.categories.birthday'));
+            $addedBy = null;
+            break;
+        case 'position_change':
+            $color = 'amber';
+            $message = $resolveText($data['message'] ?? null, __('notifications::common.messages.position_changed'));
+            $category = $resolveText($data['category'] ?? null, __('notifications::common.categories.position_change'));
+            $addedBy = null;
+            break;
+        case 'announcement':
+            $color = 'teal';
+            $message = $resolveText($data['message'] ?? null, __('notifications::common.messages.manual_announcement'));
+            $category = $resolveText($data['category'] ?? null, __('notifications::common.categories.announcement'));
+            $addedBy = null;
+            break;
+        case 'holiday':
+            $color = 'violet';
+            $message = $resolveText($data['message'] ?? null, __('notifications::common.messages.holiday_due'));
+            $category = $resolveText($data['category'] ?? null, __('notifications::common.categories.holiday'));
             $addedBy = null;
             break;
         case 'leave':
             $color = 'amber';
-            $message = $data['message'] ?? __('New leave request has created');
-            $category = __($data['category'] ?? $data['leave_type'] ?? 'Leave');
+            $message = $resolveText($data['message'] ?? null, __('notifications::common.messages.new_leave_request_created'));
+            $category = $resolveText($data['category'] ?? ($data['leave_type'] ?? null), __('notifications::common.categories.leave'));
             $addedBy = $data['added_by'] ?? null;
             break;
         case 'leaveStatusChanged':
             $color = 'indigo';
-            $message = $data['message'] ?? __('Leave request has been' . ' ' . strtolower($data['status'] ?? '') );
-            $category = __($data['category'] ?? $data['leave_type'] ?? 'Leave');
+            $message = $resolveText($data['message'] ?? null, __('notifications::common.messages.leave_request_status_changed'));
+            $category = $resolveText($data['category'] ?? ($data['leave_type'] ?? null), __('notifications::common.categories.leave'));
             $addedBy = $data['added_by'] ?? null;
             break;
         default:
             $color = 'gray';
-            $message = $data['message'] ?? __('has a notification');
-            $category = __($data['category'] ?? 'Notification');
+            $message = $resolveText($data['message'] ?? null, __('notifications::common.messages.has_notification'));
+            $category = $resolveText($data['category'] ?? null, __('notifications::common.categories.notification'));
             $addedBy = $data['added_by'] ?? null;
     }
 @endphp
 <li class="w-full">
-    <button @click.prevent="isOpen = false" wire:click.prevent="markAsRead('{{ $notification->id }}');"
+    <button x-on:click.prevent="isOpen = false" wire:click.prevent="markAsRead('{{ $notification->id }}');"
         @class([
-            'flex w-full px-5 py-3 transition duration-150 ease-in hover:bg-neutral-100',
-            'bg-neutral-50' => !empty($notification->read_at),
+            'flex w-full px-5 py-4 transition duration-150 ease-in hover:bg-zinc-50',
+            'bg-zinc-50/70' => !empty($notification->read_at),
         ])>
-        <div class="flex flex-col items-start w-full space-y-1">
+        <div class="flex w-full gap-4">
+            <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-{{ $color }}-200 bg-{{ $color }}-50 text-{{ $color }}-600">
+                <span class="text-xs font-semibold uppercase tracking-[0.16em]">{{ strtoupper(substr($action ?: 'N', 0, 1)) }}</span>
+            </div>
+
+            <div class="flex flex-col items-start w-full space-y-2">
             <div class="flex items-start justify-between w-full">
                 <p class="flex items-start gap-1 pr-2 text-sm font-medium text-left text-neutral-500">
                     <span class="flex flex-wrap items-center gap-1">
-                        @if ($action === 'birthday' && $addedBy)
-                            <x-icons.cake-icon color="text-yellow-800"></x-icons.cake-icon>
-                            <span class="flex items-center flex-none text-base text-black">
-                                <span class="text-sm text-neutral-500">{{ __('Age') }}:</span>
-                                {{ \Carbon\Carbon::parse($addedBy)->age }}
-                            </span>
-                        @elseif ($addedBy)
+                        @if ($addedBy)
                             <span class="flex-none font-medium text-neutral-900">{{ $addedBy }}</span>
                         @endif
 
@@ -71,10 +93,10 @@
                             <span class="flex-wrap flex-none font-medium text-black">- {{ $data['name'] }}</span>
                         @endif
                     </span>
-                   
+
                     <span
-                        class="bg-{{ $color }}-50 border border-{{ $color }}-200 text-xs rounded-lg uppercase text-{{ $color }}-500 font-semibold px-2 py-0.5 w-max flex-none ml-1">
-                        {{ __($category) }}
+                        class="bg-{{ $color }}-50 border border-{{ $color }}-200 text-[11px] rounded-full uppercase tracking-tight text-{{ $color }}-600 font-semibold px-2.5 py-1 w-max flex-none ml-1">
+                        {{ $category }}
                     </span>
                 </p>
                 @if (!$isRead)
@@ -82,10 +104,67 @@
                 @endif
             </div>
             <div class="flex items-center justify-between w-full">
-                <span
-                    class="text-xs font-normal text-neutral-500">{{ $notification->created_at->format('d.m.Y H:i') }}</span>
+                <div class="space-y-1 text-left">
+                    @if ($action === 'birthday' && (!empty($data['position']) || !empty($data['structure']) || !empty($data['birthday_label'])))
+                        <div class="flex flex-wrap items-center gap-2 text-xs text-neutral-500">
+                            @if (!empty($data['position']))
+                                <span>{{ $data['position'] }}</span>
+                            @endif
+                            @if (!empty($data['structure']))
+                                <span>{{ $data['structure'] }}</span>
+                            @endif
+                            @if (!empty($data['birthday_label']))
+                                <span>{{ __('notifications::common.labels.birthday_date') }}: {{ $data['birthday_label'] }}</span>
+                            @endif
+                        </div>
+                    @endif
+                    @if ($action === 'position_change' && (!empty($data['old_position']) || !empty($data['new_position']) || !empty($data['effective_date'])))
+                        <div class="flex flex-wrap items-center gap-2 text-xs text-neutral-500">
+                            @if (!empty($data['old_position']) || !empty($data['new_position']))
+                                <span>{{ $data['old_position'] ?: '—' }} → {{ $data['new_position'] ?: '—' }}</span>
+                            @endif
+                            @if (!empty($data['new_structure']))
+                                <span>{{ $data['new_structure'] }}</span>
+                            @endif
+                            @if (!empty($data['effective_date']))
+                                <span>{{ $data['effective_date'] }}</span>
+                            @endif
+                        </div>
+                    @endif
+                    @if ($action === 'announcement' && (!empty($data['body']) || !empty($data['message'])))
+                        <div class="max-w-xl text-xs leading-5 text-neutral-500">{{ $data['body'] ?? $data['message'] }}</div>
+                    @endif
+                    @if ($action === 'holiday' && (!empty($data['holiday_name']) || !empty($data['holiday_date']) || !empty($data['scope'])))
+                        <div class="flex flex-wrap items-center gap-2 text-xs text-neutral-500">
+                            @if (!empty($data['holiday_name']))
+                                <span>{{ $data['holiday_name'] }}</span>
+                            @endif
+                            @if (!empty($data['holiday_date']))
+                                <span>{{ __('notifications::common.labels.holiday_date') }}: {{ $data['holiday_date'] }}</span>
+                            @endif
+                            @if (!empty($data['scope']))
+                                <span>{{ $data['scope'] }}</span>
+                            @endif
+                        </div>
+                    @endif
+                    @if (in_array($action, ['leave', 'leaveStatusChanged'], true) && (!empty($data['duration_summary']) || !empty($data['duration_window']) || !empty($data['leave_period'])))
+                        <div class="flex flex-wrap items-center gap-2 text-xs text-neutral-500">
+                            @if (!empty($data['leave_period']))
+                                <span>{{ $data['leave_period'] }}</span>
+                            @endif
+                            @if (!empty($data['duration_summary']))
+                                <span>{{ $data['duration_summary'] }}</span>
+                            @endif
+                            @if (!empty($data['duration_window']))
+                                <span>{{ $data['duration_window'] }}</span>
+                            @endif
+                        </div>
+                    @endif
+                    <span class="text-xs font-normal text-neutral-500">{{ $notification->created_at->format('d.m.Y H:i') }}</span>
+                </div>
                 <span class="text-xs font-normal text-neutral-500">{{ $notification->created_at->diffForHumans() }}</span>
             </div>
+        </div>
         </div>
     </button>
 </li>

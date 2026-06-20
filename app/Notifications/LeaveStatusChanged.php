@@ -24,28 +24,37 @@ class LeaveStatusChanged extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        $type = $this->leave->leaveType?->name ?? __('Leave');
+        $type = $this->leave->leaveType?->name ?? __('notifications::common.categories.leave');
         $fullname = $this->leave->personnel?->fullname ?? $this->leave->tabel_no;
         $status = $this->statusLabel();
+        $duration = $this->leave->durationDetailLabel();
 
         return (new MailMessage)
-            ->subject(__('Leave request updated'))
-            ->greeting(__('Hello'))
-            ->line(__(':type request :status', ['type' => $type, 'status' => $status]) . ' - ' . $fullname)
-            ->action(__('View leave'), url('/leaves'));
+            ->subject(__('notifications::common.mail.subject_leave_request_updated'))
+            ->greeting(__('notifications::common.mail.hello'))
+            ->line(__('notifications::common.mail.leave_request_status_line', ['type' => $type, 'status' => $status, 'fullname' => $fullname]))
+            ->line(__('leaves::common.labels.duration').": {$duration}")
+            ->action(__('notifications::common.mail.view_leave'), url('/leaves'));
     }
 
     public function toArray(object $notifiable): array
     {
-        $type = $this->leave->leaveType?->name ?? __('Leave');
+        $type = $this->leave->leaveType?->name ?? __('notifications::common.categories.leave');
         $fullname = $this->leave->personnel?->fullname ?? $this->leave->tabel_no;
         $status = $this->statusLabel();
+        $starts = optional($this->leave->starts_at)->format('d.m.Y');
+        $ends = optional($this->leave->ends_at)->format('d.m.Y');
 
         return [
             'type'       => class_basename(Leave::class),
             'name'       => $fullname,
             'action'     => 'leaveStatusChanged',
+            'message'    => 'notifications::common.messages.leave_request_status_changed',
+            'category'   => 'notifications::common.categories.leave',
             'leave_type' => $type,
+            'duration_summary' => $this->leave->durationSummary(),
+            'duration_window' => $this->leave->durationWindowLabel(),
+            'leave_period' => trim(implode(' - ', array_filter([$starts, $ends]))),
             'tabel_no'   => $this->leave->tabel_no,
             'status'     => $status,
             'added_by'   => null
@@ -55,9 +64,9 @@ class LeaveStatusChanged extends Notification implements ShouldQueue
     protected function statusLabel(): string
     {
         return match ((int) $this->leave->status_id) {
-            OrderStatusEnum::APPROVED->value => __('approved'),
-            OrderStatusEnum::CANCELLED->value => __('rejected'),
-            default => __('updated'),
+            OrderStatusEnum::APPROVED->value => __('notifications::common.status.approved'),
+            OrderStatusEnum::CANCELLED->value => __('notifications::common.status.rejected'),
+            default => __('notifications::common.status.updated'),
         };
     }
 }

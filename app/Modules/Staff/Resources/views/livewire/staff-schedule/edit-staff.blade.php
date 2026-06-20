@@ -5,6 +5,9 @@
         </h2>
     </div>
     @foreach ($this->staff as $key => $stf)
+    @php
+        $hidePosition = (bool) data_get($stf, 'hide_position', false);
+    @endphp
     <div
         @class([
           'grid grid-cols-1 gap-2',
@@ -15,46 +18,37 @@
       @if(!$hidePosition)
         <div class="flex flex-col sm:col-span-2">
           <x-ui.select-dropdown
-              :label="__('Position')"
-              placeholder="---"
-              mode="gray"
-              class="w-full"
-              wire:model.live="staff.{{ $key }}.position_id"
-              :model="$this->positionOptions"
-              :selected-label="data_get($staff[$key]['position'] ?? [], 'name')"
-          >
-              <x-livewire-input
-                  mode="gray"
-                  name="search.position"
-                  wire:model.live.debounce.300ms="searchPosition"
-                  @click.stop="isOpen = true"
-                  x-on:input.stop="null"
-                  x-on:keyup.stop="null"
-                  x-on:keydown.stop="null"
-                  x-on:change.stop="null"
-              ></x-livewire-input>
-          </x-ui.select-dropdown>
+                :label="__('staff::common.fields.position')"
+                placeholder="---"
+                mode="gray"
+                class="w-full"
+                wire:model.live="staff.{{ $key }}.position_id"
+                :model="$this->positionOptions"
+                    search-model="searchPosition"
+                :selected-label="data_get($staff[$key]['position'] ?? [], 'name')"
+            >
+            </x-ui.select-dropdown>
           @error("staff.$key.position_id")
           <x-validation> {{ $message }} </x-validation>
           @enderror
         </div>
         @endif
         <div class="flex flex-col">
-            <x-label for="staff.{{ $key }}.total">{{ __('Total') }}</x-label>
+            <x-label for="staff.{{ $key }}.total">{{ __('staff::common.fields.total') }}</x-label>
             <x-livewire-input mode="gray" type="number" name="staff.{{ $key }}.total" wire:model.live.debounce.300ms="staff.{{ $key }}.total"></x-livewire-input>
             @error("staff.$key.total")
             <x-validation> {{ $message }} </x-validation>
             @enderror
         </div>
         <div class="flex flex-col">
-            <x-label for="staff.{{ $key }}.filled">{{ __('Filled') }}</x-label>
+            <x-label for="staff.{{ $key }}.filled">{{ __('staff::common.fields.filled') }}</x-label>
             <x-livewire-input mode="gray" disabled="true" type="number" name="staff.{{ $key }}.filled" wire:model="staff.{{ $key }}.filled"></x-livewire-input>
             @error("staff.$key.filled")
             <x-validation> {{ $message }} </x-validation>
             @enderror
         </div>
         <div class="flex flex-col">
-            <x-label for="staff.{{ $key }}.vacant">{{ __('Vacant') }}</x-label>
+            <x-label for="staff.{{ $key }}.vacant">{{ __('staff::common.fields.vacant') }}</x-label>
             <div class="flex space-x-2 items-center">
               <x-livewire-input mode="gray" type="number" name="staff.{{ $key }}.vacant" wire:model.debounce.300ms="staff.{{ $key }}.vacant"></x-livewire-input>
               <x-button mode="rose" wire:click="deleteRow({{ $key }})">
@@ -70,9 +64,9 @@
     </div>
     @endforeach
     <div class="flex">
-        <x-button mode="black" wire:click="addRow">{{ __('Add') }}</x-button>
+        <x-button mode="black" wire:click="addRow">{{ __('staff::common.actions.add') }}</x-button>
     </div>
     <div class="flex justify-between items-end w-full">
-        <x-modal-button>{{ __('Save') }}</x-modal-button>
+        <x-modal-button>{{ __('staff::common.actions.save') }}</x-modal-button>
     </div>
 </div>

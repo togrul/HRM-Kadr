@@ -1,69 +1,135 @@
-<div class="flex flex-col space-y-4" x-data wire:key="permissions">
-    @if (empty($permission_id))
-        {{-- @can('manage-settings') --}}
-        <div>
-            <form wire:submit.prevent="store">
-                @csrf
+<div class="flex flex-col space-y-4 z-1" x-data="{ openPermissionModal: @entangle('showPermissionModal').live }" wire:key="permissions">
+    <div class="flex items-center justify-between gap-4 px-2">
+        <div class="w-full max-w-sm">
+            <x-livewire-input
+                mode="gray"
+                id="permission_search"
+                name="permission_search"
+                type="text"
+                wire:model.live.debounce.300ms="search"
+                :placeholder="__('services::roles.actions.search_permission')"
+            />
+        </div>
+        <div class="shrink-0">
+            <x-button mode="primary" class="space-x-2" wire:click="createPermission" type="button">
+                <x-icons.permission-icon color="text-white" hover="text-gray-50"></x-icons.permission-icon>
+                <span>{{ __('services::roles.actions.add_permission') }}</span>
+            </x-button>
+        </div>
+    </div>
 
-                <div class="flex items-start px-0 py-5 space-x-2 space-y-6">
+    <div
+        x-cloak
+        x-show="openPermissionModal"
+        class="fixed inset-0 z-50 overflow-y-auto !mt-0"
+        x-on:keydown.escape.window="openPermissionModal = false; $wire.closePermissionModal()"
+        style="display: none;"
+    >
+        <div class="flex min-h-screen items-center justify-center px-4 pb-6 pt-8 md:pt-10">
+            <div class="absolute inset-0 bg-zinc-900/50" @click="openPermissionModal = false; $wire.closePermissionModal()"></div>
+            <div class="relative z-10 w-full max-w-3xl rounded-3xl border border-zinc-200 bg-white shadow-2xl">
+                <div class="flex items-center justify-between border-b border-zinc-200 px-6 py-3">
                     <div>
-                        <x-label for="permission_name" :value="__('Permission')" />
-
-                        <x-livewire-input mode="gray" name="permission_name" id="permission_name"
-                            class="block mt-1 w-full sm:text-sm outline-none font-medium h-10 dark:bg-gray-700 {{ $errors->any() ? 'border-red-600' : '' }}"
-                            type="text" :value="old('permission_name')" wire:model="permission_name" autofocus />
-                            @error('permission_name')
-                                <x-validation> {{ $message }} </x-validation>
-                            @enderror
+                        <h3 class="text-xl font-semibold text-zinc-800">
+                            {{ $permission_id ? __('services::roles.titles.edit_permission') : __('services::roles.titles.add_permission') }}
+                        </h3>
                     </div>
-                    <div>
-                        <x-button mode="primary" class="space-x-2">
+                    <button type="button" class="rounded-xl p-2 text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-700" @click="openPermissionModal = false; $wire.closePermissionModal()">
+                        <x-icons.close-icon color="text-zinc-500" hover="text-zinc-700"></x-icons.close-icon>
+                    </button>
+                </div>
+
+                <form wire:submit.prevent="store" class="space-y-5 px-6 py-5">
+                    @if ($errors->any())
+                        <div class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                            {{ $errors->first() }}
+                        </div>
+                    @endif
+
+                    <div class="grid grid-cols-1 gap-5">
+                        <div>
+                            <x-label for="permission_name" :value="__('services::common.labels.permission')" />
+                            <x-livewire-input
+                                mode="gray"
+                                name="permission_name"
+                                id="permission_name"
+                                class="mt-2 block h-11 w-full text-sm font-medium outline-none {{ $errors->has('permission_name') ? 'border-red-600' : '' }}"
+                                type="text"
+                                :value="old('permission_name')"
+                                wire:model.defer="permission_name"
+                                autofocus
+                            />
+                            @error('permission_name')
+                                <x-validation>{{ $message }}</x-validation>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <x-label for="permission_description" :value="__('services::roles.fields.permission_description')" />
+                            <textarea
+                                id="permission_description"
+                                name="permission_description"
+                                wire:model.defer="permission_description"
+                                rows="5"
+                                class="mt-2 block w-full rounded-3xl border border-zinc-200 bg-white px-4 py-3 text-sm font-medium text-zinc-700 outline-none transition focus:border-zinc-400"
+                            ></textarea>
+                            @error('permission_description')
+                                <x-validation>{{ $message }}</x-validation>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-3 border-t border-zinc-100 pt-4">
+                        <button
+                            type="button"
+                            class="rounded-2xl border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-50"
+                            @click="openPermissionModal = false; $wire.closePermissionModal()"
+                        >
+                            {{ __('services::common.actions.cancel') }}
+                        </button>
+                        <x-button mode="primary" class="space-x-2" type="submit">
                             <x-icons.permission-icon color="text-white" hover="text-gray-50"></x-icons.permission-icon>
-                            <span>{{ __('Add permission') }}</span>
+                            <span>{{ __('services::common.actions.save') }}</span>
                         </x-button>
                     </div>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
-        {{-- @endcan --}}
-    @endif
+    </div>
 
     <div class="relative min-h-[300px] overflow-x-auto px-2">
         <div class="inline-block min-w-full py-2 align-middle">
-            <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
+            <div class="overflow-visible">
 
-                <x-table.tbl :headers="[__('Name'), 'action', 'action']">
+                <x-table.tbl :headers="[__('services::common.labels.name'), __('services::common.labels.description'), __('services::common.labels.action'), __('services::common.labels.action')]">
                     @foreach ($permissions as $permission)
-                        <tr>
+                        <tr wire:key="permission-row-{{ $permission->id }}">
                             <x-table.td>
-                                <div class="flex flex-row items-center space-x-2">
-                                    <span @class([
-                                        'px-3 py-1 inline-flex text-xs leading-4 font-medium rounded-full flex-none uppercase',
-                                    ])>
-                                        {{ $permission->name }}
+                                @php
+                                    $moduleBadge = $this->moduleBadge($permission->name);
+                                    $riskBadge = $this->riskBadge($permission->name);
+                                    $adminBadge = $this->adminBadge($permission->name);
+                                @endphp
+
+                                <div class="flex flex-col gap-2">
+                                    <span class="text-sm font-semibold text-zinc-800">
+                                        {!! $this->highlightText($permission->name) !!}
                                     </span>
-                                    {{-- @can('manage-settings') --}}
-                                    @if ($permission_id && $permission_id == $permission->id)
-                                        <x-livewire-input id="permission_name" name="permission_name" mode="gray"
-                                            class="flex w-auto sm:text-sm outline-none font-medium h-auto dark:bg-gray-700 dark:border-black dark:text-white {{ $errors->any() ? 'border-red-600' : '' }}"
-                                            type="text" :value="old('permission_name')" wire:model.defer="permission_name"
-                                            autofocus />
 
-                                        <button wire:click.prevent="store"
-                                            class="flex items-center justify-center w-8 h-8 transition duration-300 ease-in-out rounded-lg bg-green-50 hover:bg-green-100 focus:outline-none">
-                                            <x-icons.check-simple-icon color="text-green-600"
-                                                hover="text-green-700"></x-icons.check-simple-icon>
-                                        </button>
-
-                                        <button wire:click.prevent="cancel"
-                                            class="flex items-center justify-center w-8 h-8 transition duration-300 ease-in-out rounded-lg bg-red-50 hover:bg-red-100 focus:outline-none">
-                                            <x-icons.close-icon color="text-red-500"
-                                                hover="text-red-600"></x-icons.close-icon>
-                                        </button>
-                                    @endif
-                                    {{-- @endcan --}}
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <x-small-badge :mode="$moduleBadge['mode']">{{ $moduleBadge['label'] }}</x-small-badge>
+                                        <x-small-badge :mode="$riskBadge['mode']">{{ $riskBadge['label'] }}</x-small-badge>
+                                        @if ($adminBadge)
+                                            <x-small-badge :mode="$adminBadge['mode']">{{ $adminBadge['label'] }}</x-small-badge>
+                                        @endif
+                                    </div>
                                 </div>
+                            </x-table.td>
 
+                            <x-table.td>
+                                <p class="max-w-3xl text-sm leading-6 text-zinc-600">
+                                    {!! $this->highlightText($permission->description) !!}
+                                </p>
                             </x-table.td>
 
 
@@ -90,6 +156,9 @@
                         </tr>
                     @endforeach
                 </x-table.tbl>
+            </div>
+            <div class="mt-3">
+                {{ $permissions->links() }}
             </div>
         </div>
     </div>

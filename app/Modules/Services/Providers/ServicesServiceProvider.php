@@ -2,12 +2,10 @@
 
 namespace App\Modules\Services\Providers;
 
-use App\Models\Component;
 use App\Models\Menu;
 use App\Models\Rank;
 use App\Models\RoleStructure;
 use App\Models\Setting;
-use App\Observers\ComponentObserver;
 use App\Observers\MenuObserver;
 use App\Observers\RankObserver;
 use App\Observers\RoleStructureObserver;
@@ -45,7 +43,6 @@ class ServicesServiceProvider extends ServiceProvider
         Menu::observe(MenuObserver::class);
         RoleStructure::observe(RoleStructureObserver::class);
         Rank::observe(RankObserver::class);
-        Component::observe(ComponentObserver::class);
     }
 
     protected function registerLivewireComponents(): void
@@ -97,11 +94,6 @@ class ServicesServiceProvider extends ServiceProvider
             'ranks.add-rank' => \App\Modules\Services\Livewire\Ranks\AddRank::class,
             'ranks.edit-rank' => \App\Modules\Services\Livewire\Ranks\EditRank::class,
             'ranks.delete-rank' => \App\Modules\Services\Livewire\Ranks\DeleteRank::class,
-
-            'components.all-components' => \App\Modules\Services\Livewire\Components\AllComponents::class,
-            'components.add-component' => \App\Modules\Services\Livewire\Components\AddComponent::class,
-            'components.edit-component' => \App\Modules\Services\Livewire\Components\EditComponent::class,
-            'components.delete-component' => \App\Modules\Services\Livewire\Components\DeleteComponent::class,
 
             // roles & permissions
             'roles.manage-roles' => \App\Modules\Services\Livewire\Roles\ManageRoles::class,

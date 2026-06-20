@@ -13,5 +13,5 @@
            'bg-rose-400' => ! $valid ,
     ])>
      </span>
-    <span class="uppercase">{{ $valid ? __('Active') : __('De-active') }}</span>
+    <span class="uppercase">{{ $valid ? __('ui::common.status.active') : __('ui::common.status.inactive') }}</span>
 </div>

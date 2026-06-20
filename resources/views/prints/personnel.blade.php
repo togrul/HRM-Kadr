@@ -126,7 +126,7 @@
 <body>
 
 <a class="no-print print-action" href="{{ route('print.personnel.word', $personnel->id) }}">
-   {{ __('Export to Word') }}
+   {{ __('personnel::common.actions.export_to_word') }}
 </a>
 
 <div class="content">

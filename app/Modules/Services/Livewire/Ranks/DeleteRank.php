@@ -57,7 +57,7 @@ class DeleteRank extends Component
 
         $this->rankId = null;
 
-        $this->dispatch('rankWasDeleted', __('Rank was deleted!'));
+        $this->dispatch('rankWasDeleted', __('services::ranks.messages.deleted'));
     }
 
     public function render()

@@ -8,7 +8,6 @@ Route::middleware(['web', 'auth'])
     ->group(function () {
         Route::get('personnel/{id?}/word', [PrintController::class, 'personnelServiceBookWord'])->name('print.personnel.word');
         Route::get('personnel/{id?}', [PrintController::class, 'personnel_service_book'])->name('print.personnel');
-        Route::get('page/{model?}', [PrintController::class, 'print_page'])->name('print.page');
         Route::get('personnel/cv/{model?}', [PrintController::class, 'cv'])->name('print.cv');
         Route::get('personnel/cv/{model?}/word', [PrintController::class, 'cvWord'])->name('print.cv.word');
     });

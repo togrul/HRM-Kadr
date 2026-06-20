@@ -4,6 +4,8 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Throwable;
 
 class TruncateTablesSeeder extends Seeder
 {
@@ -12,10 +14,24 @@ class TruncateTablesSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        try {
+            DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        } catch (Throwable) {
+            // Some managed DB environments may reject session-level FK toggles.
+        }
+
+        $activityLogConnection = config('activitylog.database_connection') ?: config('database.default');
+        $activityLogTable = config('activitylog.table_name', 'activity_log');
+
+        if (Schema::connection($activityLogConnection)->hasTable($activityLogTable)) {
+            try {
+                DB::connection($activityLogConnection)->table($activityLogTable)->truncate();
+            } catch (Throwable) {
+                DB::connection($activityLogConnection)->table($activityLogTable)->delete();
+            }
+        }
 
         $truncateTables = [
-            'activity_log',
             'structures',
             'weapons',
             'notifications',
@@ -65,15 +81,26 @@ class TruncateTablesSeeder extends Seeder
         ];
 
         foreach ($truncateTables as $table) {
-            DB::table($table)->truncate();
+            if (! Schema::hasTable($table)) {
+                continue;
+            }
+
+            try {
+                DB::table($table)->truncate();
+            } catch (Throwable) {
+                DB::table($table)->delete();
+            }
         }
 
-        foreach ($deleteTables as $table) {
-            DB::table($table)->delete();
-        }
+        // foreach ($deleteTables as $table) {
+        //     DB::table($table)->delete();
+        // }
 
         // Re-enable foreign key checks
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        try {
+            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        } catch (Throwable) {
+            // Keep seeder non-blocking when FK toggle is unavailable.
+        }
     }
 }
-    

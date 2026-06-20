@@ -4,21 +4,21 @@
     </button>
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 mt-4 w-full">
         <div class="flex flex-col">
-            <x-label for="childForm.id">{{ __('ID') }}</x-label>
+            <x-label for="childForm.id">{{ __('admin::references.fields.id') }}</x-label>
             <x-livewire-input mode="default" type="number" name="childForm.id" wire:model="childForm.id"></x-livewire-input>
             @error('childForm.id')
                 <x-validation> {{ $message }} </x-validation>
             @enderror
         </div>
         <div class="flex flex-col">
-            <x-label for="childForm.name">{{ __('Name') }}</x-label>
+            <x-label for="childForm.name">{{ __('admin::references.fields.name') }}</x-label>
             <x-livewire-input mode="default" type="text" name="childForm.name" wire:model="childForm.name" required></x-livewire-input>
             @error('childForm.name')
                 <x-validation> {{ $message }} </x-validation>
             @enderror
         </div>
         <div class="flex items-end space-x-2">
-            <x-modal-button style="width: auto !important;" mode="black">{{ __('Save') }}</x-modal-button>
+            <x-modal-button style="width: auto !important;" mode="black">{{ __('admin::references.actions.save') }}</x-modal-button>
             <button
                 wire:click.prevent = "deleteModel()"
                 {{--                                            wire:click="$dispatch('delete-prompt')"--}}

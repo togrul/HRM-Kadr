@@ -51,7 +51,7 @@ class DeleteLeave extends Component
 
         $this->leaveId = null;
 
-        $this->dispatch('leaveWasDeleted', __('Leave was deleted!'));
+        $this->dispatch('leaveWasDeleted', __('leaves::common.messages.leave_deleted'));
     }
 
     public function render()

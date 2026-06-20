@@ -279,7 +279,7 @@
         <img src="{{ $watermarkUrl }}" alt="gerb" class="watermark-img">
     @endif
     @if(empty($exportWord))
-        <a class="export-word-btn" href="{{ route('print.cv.word', $cvData['id'] ?? null) }}">{{ __('Export to Word') }}</a>
+        <a class="export-word-btn" href="{{ route('print.cv.word', $cvData['id'] ?? null) }}">{{ __('personnel::common.actions.export_to_word') }}</a>
     @endif
     <div class="container">
         <div class="header">
@@ -316,7 +316,7 @@
             <div class="info-value">
                 {{ $cvData['birth']['day'] ?? '' }}
                 {{ \Illuminate\Support\Str::lower($cvData['birth']['month'] ?? '') }}
-                {{ $cvData['birth']['year'] ?? '' ? $cvData['birth']['year'] . ' ' . __('year') : '' }},
+                {{ $cvData['birth']['year'] ?? '' ? $cvData['birth']['year'] . ' ' . __('personnel::common.labels.year') : '' }},
                 {{ $cvData['birth']['city'] ?? '' }} şəhəri
             </div>
         </div>

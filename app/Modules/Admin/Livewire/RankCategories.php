@@ -29,10 +29,10 @@ class RankCategories extends Component
     protected function validationAttributes(): array
     {
         return [
-            'form.id' => __('ID'),
-            'form.name' => __('Name'),
-            'form.vacation_days_count' => __('Vacation days count'),
-            'form.contract_duration' => __('Contract duration'),
+            'form.id' => __('admin::references.fields.id'),
+            'form.name' => __('admin::references.fields.name'),
+            'form.vacation_days_count' => __('admin::references.fields.vacation_days_count'),
+            'form.contract_duration' => __('admin::references.fields.contract_duration'),
         ];
     }
 

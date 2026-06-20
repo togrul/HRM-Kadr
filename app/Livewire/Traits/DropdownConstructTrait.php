@@ -17,6 +17,13 @@ trait DropdownConstructTrait
     protected array $selectedOptionRowCache = [];
 
     /**
+     * In-request options cache to avoid repeating the same dropdown queries.
+     *
+     * @var array<string, array<int, array{id:int,label:string}>>
+     */
+    protected array $optionsCache = [];
+
+    /**
      * Labels we already have from eager-loaded relations, keyed by table name.
      *
      * @var array<string, array<int, string>>
@@ -60,6 +67,19 @@ trait DropdownConstructTrait
         int|string|null $selectedId,
         int $limit = 50
     ): array {
+        $memoKey = md5(implode('|', [
+            $base->toSql(),
+            serialize($base->getBindings()),
+            (string) $searchCol,
+            trim((string) $searchTerm),
+            (string) $selectedId,
+            (string) $limit,
+        ]));
+
+        if (array_key_exists($memoKey, $this->optionsCache)) {
+            return $this->optionsCache[$memoKey];
+        }
+
         $searchTerm = trim((string) $searchTerm);
 
         // 1) base (no LIKE) — when search is empty we limit
@@ -88,7 +108,7 @@ trait DropdownConstructTrait
         }
 
         // 4) uniq + map
-        return $this->toOptions($list->unique('id')->values());
+        return $this->optionsCache[$memoKey] = $this->toOptions($list->unique('id')->values());
     }
 
     protected function fetchSelectedOptionRow(Builder $base, int|string $selectedId): mixed
@@ -152,6 +172,12 @@ trait DropdownConstructTrait
         $this->preloadedDropdownLabels = [];
     }
 
+    protected function resetDropdownRuntimeCache(): void
+    {
+        $this->selectedOptionRowCache = [];
+        $this->optionsCache = [];
+    }
+
     protected function dropdownSearch(string $property): string
     {
         return trim((string) ($this->{$property} ?? ''));
@@ -175,7 +201,7 @@ trait DropdownConstructTrait
     {
         $options = cache()->remember(
             $cacheKey,
-            now()->addMinutes($this->dropdownCacheMinutes),
+            now()->addMinutes($this->dropdownCacheTtlMinutes()),
             function () use ($base, $limit) {
                 $query = clone $base;
                 $query->limit($limit);

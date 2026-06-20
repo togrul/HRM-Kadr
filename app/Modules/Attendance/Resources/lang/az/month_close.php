@@ -1,0 +1,58 @@
+<?php
+
+return [
+    'title' => 'Ay bağlanışı / kilidi',
+    'period_control' => [
+        'title' => 'Dövr nəzarəti',
+        'description' => 'Davamiyyət yoxlamaları tamamlandıqdan sonra seçilmiş ayı bağlayın, açın və ya eksport edin.',
+    ],
+    'actions' => [
+        'snapshot_now' => 'İndi snapshot al',
+        'snapshot_queue' => 'Snapshot növbəsi',
+        'close_month' => 'Ayı bağla',
+        'unlock_month' => 'Ayı aç',
+        'export_xlsx' => 'XLSX eksport et',
+        'export_csv' => 'CSV eksport et',
+    ],
+    'stats' => [
+        'status' => 'Status',
+        'locked' => 'bağlı',
+        'open' => 'açıq',
+        'total_ledgers' => 'Cəmi gündəlik qeyd',
+        'locked_ledgers' => 'Bağlı gündəlik qeydlər',
+        'summary_rows' => 'Xülasə sətirləri',
+        'locked_summaries' => 'Bağlı xülasələr',
+        'worked_hours' => 'İşlənmiş saatlar',
+    ],
+    'export_profile' => [
+        'title' => 'Eksport profili',
+        'format' => 'Format',
+        'contract' => 'Aylıq payroll snapshot eksport kontraktı.',
+        'csv_delimiter' => 'CSV ayırıcı',
+        'csv_encoding' => 'CSV encoding',
+        'utf8_bom' => 'UTF-8 BOM',
+        'csv_enclosure' => 'CSV enclosure',
+        'enabled' => 'Aktiv',
+        'disabled' => 'Deaktiv',
+        'description' => 'Ay sonu fayllarını aşağı sistemlərə ixrac etməzdən əvvəl payroll import uyğunluğunu bu profillə yoxlayın.',
+    ],
+    'messages' => [
+        'closed' => 'Ay bağlandı. Xülasələr: :summaries, Kilidlənmiş gündəlik qeydlər: :ledgers',
+        'unlocked' => 'Ay açıldı. Xülasələr: :summaries, Gündəlik qeydlər: :ledgers',
+        'snapshot_done' => 'Snapshot tamamlandı. Upsert olunan xülasə sətirləri: :count',
+        'snapshot_queued' => 'Aylıq snapshot növbəyə əlavə edildi.',
+        'export_requires_snapshot' => 'Eksport üçün əvvəlcə bu ay üzrə snapshot yaradılmalıdır.',
+        'export_requires_fresh_snapshot' => 'Eksport bloklandı. Son snapshot-dan sonra ledger dəyişiklikləri var; yenidən snapshot alın.',
+    ],
+    'payroll_headers' => [
+        'tabel_no' => 'Tabel nömrəsi',
+        'fullname' => 'Soyad, ad, ata adı',
+        'scheduled_hours' => 'Planlaşdırılmış (saat)',
+        'worked_hours' => 'İşlənmiş (saat)',
+        'overtime_hours' => 'Əlavə iş (saat)',
+        'absent_hours' => 'Yoxluq (saat)',
+        'workdays' => 'İş günləri',
+        'present_days' => 'İşdə olduğu günlər',
+        'absent_days' => 'Yoxluq günləri',
+    ],
+];

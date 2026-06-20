@@ -6,7 +6,7 @@ use App\Livewire\Traits\SideModalAction;
 use App\Models\Rank;
 use App\Models\RankCategory;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Livewire\Attributes\Computed;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -46,6 +46,23 @@ class AllRanks extends Component
             ->paginate(15)
             ->withQueryString();
 
+        $_ranks = $this->decorateRanks($_ranks);
+
         return view('services::livewire.services.ranks.all-ranks', compact('_ranks'));
+    }
+
+    protected function decorateRanks(LengthAwarePaginator $paginated): LengthAwarePaginator
+    {
+        $start = ($paginated->currentPage() - 1) * $paginated->perPage();
+
+        $paginated->setCollection(
+            $paginated->getCollection()->values()->map(function (Rank $rank, int $index) use ($start) {
+                $rank->row_no = $start + $index + 1;
+
+                return $rank;
+            })
+        );
+
+        return $paginated;
     }
 }

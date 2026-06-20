@@ -57,14 +57,12 @@ class GenerateWordReplaceContent
                 $contentData
             );
 
-            $replacedContent = in_array($this->selectedBlade, [Order::BLADE_VACATION, Order::BLADE_BUSINESS_TRIP])
-                ? '<w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/></w:rPr>'.$replacedContent.'<w:br/>'
-                : $replacedContent;
+            if (in_array($this->selectedBlade, [Order::BLADE_VACATION, Order::BLADE_BUSINESS_TRIP], true)) {
+                $replacedContent .= PHP_EOL;
+            }
 
             $content .= $replacedContent;
         }
-
-        $content = str_replace('<w:br/>', '</w:t><w:br/><w:tab/><w:t xml:space="preserve">', $content);
 
         return [
             'title' => $title,

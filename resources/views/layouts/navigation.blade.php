@@ -2,7 +2,7 @@
     <!-- Primary Navigation Menu -->
     <div class="px-4 mx-auto max-w-7xl lg:px-0">
         <div class="flex justify-between h-16">
-            <div class="flex">
+            <div class="flex items-center gap-1">
                 <!-- Logo -->
                 <div class="flex items-center px-2 shrink-0">
                     <a href="{{ route('home') }}">
@@ -12,38 +12,20 @@
                 </div>
 
                 <!-- Navigation Links -->
-                <div class="items-center hidden space-x-2 sm:-my-px sm:ml-10 sm:flex">
-                   @module('candidates')
-                    <x-nav-link class="space-x-2 text-xs uppercase" wire:navigate :href="route('candidates')" :active="request()->routeIs('candidates')">
-                        <x-icons.candidate-icon size="w-5 h-5"
-                            color="{{ request()->routeIs('candidates') ? 'text-gray-900' : 'text-gray-400' }}"></x-icons.candidate-icon>
-                        <span>{{ __('Candidates') }}</span>
-                    </x-nav-link>
-                    @endmodule
-                     @module('vacation')
-                    <x-nav-link class="space-x-2 text-xs uppercase" wire:navigate :href="route('vacations.list')" :active="request()->routeIs('vacations.list')">
-                        <x-icons.vacation-icon size="w-5 h-5"
-                            color="{{ request()->routeIs('vacations.list') ? 'text-gray-900' : 'text-gray-400' }}"></x-icons.vacation-icon>
-                        <span>{{ __('Vacations') }}</span>
-                    </x-nav-link>
-                    @endmodule
-                    @module('business-trips')
-                    <x-nav-link class="space-x-2 text-xs uppercase" wire:navigate :href="route('business-trips.list')" :active="request()->routeIs('business-trips.list')">
-                        <x-icons.holiday-icon size="w-5 h-5"
-                            color="{{ request()->routeIs('business-trips.list') ? 'text-gray-900' : 'text-gray-400' }}"></x-icons.holiday-icon>
-                        <span>{{ __('Business trips') }}</span>
-                    </x-nav-link>
-                    @endmodule
-                    @module('leaves')
-                     <x-nav-link class="space-x-2 text-xs uppercase" wire:navigate :href="route('leaves')" :active="request()->routeIs('leaves')">
-                        <x-icons.calendar-icon size="w-5 h-5" color="{{ request()->routeIs('leaves') ? 'text-gray-900' : 'text-gray-400' }}" size="w-7 h-7"></x-icons.calendar-icon>
-                        <span>{{ __('Time off') }}</span>
-                    </x-nav-link>
-                    @endmodule
-                </div>
+                <div class="items-center hidden space-x-2 sm:-my-px sm:ml-10 sm:flex"></div>
             </div>
 
             <div class="flex">
+                @module('services')
+                  @can('access-settings')
+                  <div class="flex items-center justify-center">
+                    <a wire:navigate href="{{ route('services') }}"
+                        class="flex items-center justify-center w-10 h-10 transition-all duration-300 rounded-md group sm:flex sm:items-center hover:bg-slate-50">
+                        <x-icons.line-settings-icon color="text-zinc-600" size="w-7 h-7"></x-icons.line-settings-icon>
+                    </a>
+                </div>
+                  @endcan
+                @endmodule
                 @can('access-admin')
                     <div class="flex items-center justify-center">
                         <a wire:navigate href="{{ route('admin') }}"
@@ -55,11 +37,13 @@
 
                 @module('notifications')
                   @can('get-notification')
-                      @livewire('notification.notifications')
+                      <div class="flex items-center">
+                          <livewire:notification.notifications />
+                      </div>
                   @endcan
                 @endmodule
                 <!-- Settings Dropdown -->
-                <div class="hidden sm:flex sm:items-center sm:ml-6">
+                <div class="hidden sm:flex sm:items-center sm:ml-4">
                     <x-dropdown align="right">
                         <x-slot name="trigger">
                             <button
@@ -77,7 +61,7 @@
 
                         <x-slot name="content">
                             <x-dropdown-link :href="route('profile.edit')">
-                                {{ __('Profile') }}
+                                {{ __('ui::profile.titles.profile') }}
                             </x-dropdown-link>
 
                             <!-- Authentication -->
@@ -87,7 +71,7 @@
                                 <x-dropdown-link :href="route('logout')"
                                     onclick="event.preventDefault();
                                                 this.closest('form').submit();">
-                                    {{ __('Log Out') }}
+                                    {{ __('ui::auth.actions.log_out') }}
                                 </x-dropdown-link>
                             </form>
                         </x-slot>
@@ -116,16 +100,7 @@
     <!-- Responsive Navigation Menu -->
     <div :class="{ 'block': open, 'hidden': !open }" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
-           @module('candidates')
-            <x-responsive-nav-link wire:navigate :href="route('candidates')" :active="request()->routeIs('candidates')">
-                {{ __('Candidates') }}
-            </x-responsive-nav-link>
-            @endmodule
-             @module('vacation')
-            <x-responsive-nav-link wire:navigate :href="route('vacations.list')" :active="request()->routeIs('vacations.list')">
-                {{ __('Vacations') }}
-            </x-responsive-nav-link>
-            @endmodule
+         
         </div>
 
         <!-- Responsive Settings Options -->
@@ -137,7 +112,7 @@
 
             <div class="mt-3 space-y-1">
                 <x-responsive-nav-link :href="route('profile.edit')">
-                    {{ __('Profile') }}
+                    {{ __('ui::profile.titles.profile') }}
                 </x-responsive-nav-link>
 
                 <!-- Authentication -->
@@ -147,10 +122,11 @@
                     <x-responsive-nav-link :href="route('logout')"
                         onclick="event.preventDefault();
                                         this.closest('form').submit();">
-                        {{ __('Log Out') }}
+                        {{ __('ui::auth.actions.log_out') }}
                     </x-responsive-nav-link>
                 </form>
             </div>
         </div>
     </div>
 </nav>
+

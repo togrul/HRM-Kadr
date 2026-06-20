@@ -29,7 +29,7 @@ class OrderLog extends Model
         return LogOptions::defaults()
             ->logAll()
             ->logOnlyDirty()
-            ->setDescriptionForEvent(fn(string $eventName) => "This model has been {$eventName}");
+            ->setDescriptionForEvent(fn (string $eventName) => "This model has been {$eventName}");
     }
 
     protected $fillable = [
@@ -39,7 +39,11 @@ class OrderLog extends Model
         'given_date',
         'given_by',
         'given_by_rank',
+        'signatory_personnel_id',
+        'signatory_snapshot',
         'description',
+        'template_render_mode',
+        'template_snapshot',
         'status_id',
         'creator_id',
         'deleted_by',
@@ -53,6 +57,8 @@ class OrderLog extends Model
         'deleted_at' => self::FORMAT_CAST,
         'given_date' => self::FORMAT_CAST,
         'description' => 'array',
+        'signatory_snapshot' => 'array',
+        'template_snapshot' => 'array',
     ];
 
     public function getForeignKeyName(): string
@@ -63,20 +69,6 @@ class OrderLog extends Model
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
-    }
-
-    public function components(): BelongsToMany
-    {
-        return $this->belongsToMany(
-            Component::class,
-            'order_log_components',
-            'order_no',
-            'component_id',
-            'order_no',
-            'id'
-        )
-            ->withPivot('row_number')
-            ->orderBy('row_number');
     }
 
     public function personnels(): BelongsToMany
@@ -102,9 +94,9 @@ class OrderLog extends Model
         return $this->belongsTo(OrderType::class);
     }
 
-    public function attributes(): HasMany
+    public function signatory(): BelongsTo
     {
-        return $this->hasMany(OrderLogComponentAttributes::class, 'order_no', 'order_no');
+        return $this->belongsTo(Personnel::class, 'signatory_personnel_id');
     }
 
     public function vacations(): HasMany
@@ -148,6 +140,7 @@ class OrderLog extends Model
 
             if ($field === 'order_no') {
                 $query->where($field, 'LIKE', '%'.trim((string) $value).'%');
+
                 continue;
             }
 

@@ -1,24 +1,21 @@
-<div class="flex flex-col"
-     x-data
-     x-init="
-        paginator = document.querySelector('span[aria-current=page]>span');
-        if(paginator != null)
-        {
-            paginator.classList.add('bg-blue-50','text-blue-600')
-        }
-        Livewire.hook('message.processed', (message,component) => {
-            const paginator = document.querySelector('span[aria-current=page]>span')
-            if(
-                ['gotoPage','previousPage','nextPage','setStatus','resetFilter'].includes(message.updateQueue[0].payload.method)
-                || ['citiesUpdated'].includes(message.updateQueue[0].payload.event)
-                || ['q'].includes(message.updateQueue[0].name)
-            ){
-                if(paginator != null)
-                {
-                    paginator.classList.add('bg-blue-50','text-blue-600')
-                }
+<div
+    class="flex flex-col"
+    x-data
+    x-init="
+        const root = $el;
+        const paintPaginator = () => {
+            const paginator = root.querySelector('span[aria-current=page]>span');
+            if (paginator) {
+                paginator.classList.add('bg-blue-50', 'text-blue-600');
             }
-        })
+        };
+        paintPaginator();
+        if (typeof Livewire !== 'undefined') {
+            Livewire.hook('commit', ({ component, succeed }) => {
+                if (component.id !== $wire.__instance.id) return;
+                succeed(() => queueMicrotask(paintPaginator));
+            });
+        }
     "
 >
     <div class="flex flex-col items-center justify-between sm:flex-row filter bg-white py-2 px-2 rounded-xl">
@@ -28,7 +25,7 @@
                       wire:click.prevent="openCrud()"
             >
                 <x-icons.add-icon color="text-white" hover="text-gray-50"></x-icons.add-icon>
-                <span>{{ __('Add city') }}</span>
+                <span>{{ __('admin::references.buttons.add_city') }}</span>
             </x-button>
         </div>
     </div>
@@ -42,7 +39,7 @@
             </button>
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 mt-4 w-full">
                 <div class="flex flex-col">
-                    <x-label for="form.id">{{ __('ID') }}</x-label>
+                    <x-label for="form.id">{{ __('admin::references.fields.id') }}</x-label>
                     <x-livewire-input mode="disabled" disabled="true" type="number" name="form.id" wire:model="form.id"></x-livewire-input>
                     @error('form.id')
                     <x-validation>{{ $message }}</x-validation>
@@ -50,24 +47,14 @@
                 </div>
                 <div class="flex flex-col">
                     <x-ui.select-dropdown
-                        :label="__('Country')"
+                        :label="__('admin::references.fields.country')"
                         placeholder="---"
                         mode="default"
                         class="w-full"
                         wire:model.live="form.country_id"
-                        :model="$this->countryOptions"
+                        :model="$this->countryOptions()"
+                    search-model="searchCountry"
                     >
-                        <x-livewire-input
-                            mode="gray"
-                            name="searchCountry"
-                            wire:model.live.debounce.300ms="searchCountry"
-                            placeholder="{{ __('Search...') }}"
-                            @click.stop="isOpen = true"
-                            x-on:input.stop="null"
-                            x-on:keyup.stop="null"
-                            x-on:keydown.stop="null"
-                            x-on:change.stop="null"
-                        ></x-livewire-input>
                     </x-ui.select-dropdown>
                     @error('form.country_id')
                     <x-validation> {{ $message }} </x-validation>
@@ -75,38 +62,28 @@
                 </div>
                 <div class="flex flex-col">
                     <x-ui.select-dropdown
-                        :label="__('Parent')"
+                        :label="__('admin::references.fields.parent')"
                         placeholder="---"
                         mode="default"
                         class="w-full"
                         wire:model.live="form.parent_id"
-                        :model="$this->parentCityOptions"
+                        :model="$this->parentCityOptions()"
+                    search-model="searchParent"
                     >
-                        <x-livewire-input
-                            mode="gray"
-                            name="searchParent"
-                            wire:model.live.debounce.300ms="searchParent"
-                            placeholder="{{ __('Search...') }}"
-                            @click.stop="isOpen = true"
-                            x-on:input.stop="null"
-                            x-on:keyup.stop="null"
-                            x-on:keydown.stop="null"
-                            x-on:change.stop="null"
-                        ></x-livewire-input>
                     </x-ui.select-dropdown>
                     @error('form.parent_id')
                     <x-validation> {{ $message }} </x-validation>
                     @enderror
                 </div>
                 <div class="flex flex-col">
-                    <x-label for="form.name">{{ __('Name') }}</x-label>
+                    <x-label for="form.name">{{ __('admin::references.fields.name') }}</x-label>
                     <x-livewire-input mode="default" name="form.name" wire:model="form.name"></x-livewire-input>
                     @error('form.name')
                     <x-validation> {{ $message }} </x-validation>
                     @enderror
                 </div>
                 <div class="flex items-end">
-                    <x-modal-button mode="black">{{ __('Save') }}</x-modal-button>
+                    <x-modal-button mode="black">{{ __('admin::references.actions.save') }}</x-modal-button>
                 </div>
             </div>
         </div>
@@ -115,10 +92,10 @@
     <div class="flex flex-col space-y-2">
         <div class="relative min-h-[300px] -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-                <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
-                    <x-table.tbl :headers="[__('ID'),__('Country'),__('Parent'),__('Name'),'action']">
+                <div class="overflow-visible">
+                    <x-table.tbl :headers="[__('admin::references.fields.id'),__('admin::references.fields.country'),__('admin::references.fields.parent'),__('admin::references.fields.name'),__('admin::references.table.action')]">
                         @forelse ($cities as $city)
-                            <tr>
+                            <tr wire:key="city-row-{{ $city->id }}">
                                 <x-table.td>
                                       <span class="text-sm text-gray-500 font-medium">
                                           {{ $city->id }}
@@ -126,14 +103,14 @@
                                 </x-table.td>
                                 <x-table.td>
                                     <span class="text-xs font-medium flex justify-center items-center px-1 py-1 rounded-md border border-gray-300 bg-gray-50 text-gray-600">
-                                        {{ $city->country->currentCountryTranslations->title }}
+                                        {{ $city->country_label }}
                                     </span>
                                 </x-table.td>
 
                                 <x-table.td>
-                                    @if($city->parent)
+                                    @if($city->parent_label)
                                     <span class="text-xs font-medium flex justify-center items-center px-1 py-1 rounded-md border border-blue-300 bg-blue-50 text-gray-600">
-                                        {{ $city->parent?->name }}
+                                        {{ $city->parent_label }}
                                     </span>
                                     @endif
                                 </x-table.td>

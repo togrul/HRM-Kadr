@@ -2,6 +2,8 @@
 
 namespace App\Modules\Staff\Providers;
 
+use App\Modules\Staff\Console\Commands\StaffListQueryBudgetCommand;
+use App\Modules\Staff\Console\Commands\StaffListRenderBenchmarkCommand;
 use App\Providers\Concerns\RegistersLivewireAliases;
 use App\Services\Modules\ModuleState;
 use Illuminate\Support\Facades\Gate;
@@ -13,6 +15,12 @@ class StaffServiceProvider extends ServiceProvider
 
     public function register(): void
     {
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                StaffListQueryBudgetCommand::class,
+                StaffListRenderBenchmarkCommand::class,
+            ]);
+        }
     }
 
     public function boot(): void

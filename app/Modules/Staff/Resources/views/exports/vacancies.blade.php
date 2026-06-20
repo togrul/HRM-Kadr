@@ -2,9 +2,9 @@
     <thead>
         <tr>
             <th>#</th>
-            <th>{{__('Structure')}}</th>
-            <th>{{ __('Position') }}</th>
-            <th>{{ __('Vacant') }}</th>
+            <th>{{ __('staff::common.fields.structure') }}</th>
+            <th>{{ __('staff::common.fields.position') }}</th>
+            <th>{{ __('staff::common.fields.vacant') }}</th>
         </tr>
     </thead>
     <tbody>

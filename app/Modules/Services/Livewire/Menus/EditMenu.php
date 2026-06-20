@@ -37,20 +37,24 @@ class EditMenu extends Component
     protected function validationAttributes()
     {
         return [
-            'menu.name' => __('Name'),
-            'menu.color' => __('Color'),
-            'menu.order' => __('Order'),
-            'menu.url' => __('URL'),
-            'menu.icon' => __('Icon'),
-            'menu.permission_id' => __('Permissions')
+            'menu.name' => __('services::common.labels.name'),
+            'menu.color' => __('services::common.labels.color'),
+            'menu.order' => __('services::common.labels.order'),
+            'menu.url' => __('services::common.labels.url'),
+            'menu.icon' => __('services::common.labels.icon'),
+            'menu.permission_id' => __('services::common.labels.permissions'),
         ];
     }
 
     public function mount()
     {
         // $this->authorize('manage-settings',$this->user);
-        $this->title = __('Edit menu');
-        $this->menuModel = Menu::with('permission')->where('id', $this->menuModel['id'])->first();
+        $this->title = __('services::menus.titles.edit');
+        $menuId = is_array($this->menuModel)
+            ? ($this->menuModel['id'] ?? null)
+            : $this->menuModel;
+
+        $this->menuModel = Menu::with('permission')->where('id', $menuId)->firstOrFail();
 
         $this->menu['name'] = $this->menuModel->name;
         $this->menu['url'] = $this->menuModel->url;
@@ -66,7 +70,7 @@ class EditMenu extends Component
         $this->validate();
         $this->menuModel->update($this->menu);
 
-        $this->dispatch('menuAdded', __('Menu was updated successfully!'));
+        $this->dispatch('menuAdded', __('services::menus.messages.updated'));
     }
 
     public function render()

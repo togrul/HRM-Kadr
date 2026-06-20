@@ -3,14 +3,18 @@
 namespace App\Providers;
 
 use App\Services\Modules\ModuleState;
+use App\Support\Translations\ModuleTranslation;
+use App\Services\Profiles\ProfileState;
 use Illuminate\Support\ServiceProvider;
 
 class ModuleServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->singleton(ModuleState::class, function () {
-            return new ModuleState(config('modules.catalog', []));
+        $this->app->singleton(ModuleState::class, function ($app) {
+            $profileState = $app->make(ProfileState::class);
+
+            return new ModuleState($profileState->modules());
         });
     }
 
@@ -18,13 +22,19 @@ class ModuleServiceProvider extends ServiceProvider
     {
         $state = $this->app->make(ModuleState::class);
 
-        $catalogProviders = collect($state->allEnabledProviders());
+        collect($state->all())
+            ->filter(fn (array $entry) => ($entry['enabled'] ?? false) && ! empty($entry['provider']))
+            ->each(function (array $entry, string $slug): void {
+                $langPath = ModuleTranslation::langPathFromProvider((string) $entry['provider']);
 
-        $legacyProviders = collect(config('modules.enabled', []))
-            ->filter(fn ($provider) => is_string($provider) && class_exists($provider));
+                if ($langPath === null) {
+                    return;
+                }
 
-        $catalogProviders
-            ->merge($legacyProviders)
+                $this->loadTranslationsFrom($langPath, ModuleTranslation::namespaceFromSlug($slug));
+            });
+
+        collect($state->allEnabledProviders())
             ->unique()
             ->each(fn ($provider) => $this->app->register($provider));
 

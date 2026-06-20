@@ -1,8 +1,8 @@
 <x-modal-delete
   livewire-event-to-open-modal="deleteMenuWasSet"
   event-to-close-modal="menuWasDeleted"
-  :modal-title="__('Delete menu')"
-  :modal-description="__('Are you sure you want to delete this menu? This action cannot be undone.')"
-  :modal-confirm-button-text="__('Delete')"
+  :modal-title="__('services::menus.titles.delete')"
+  :modal-description="__('services::menus.messages.delete_description')"
+  :modal-confirm-button-text="__('services::common.actions.delete')"
   wire-click="deleteMenu"
 />

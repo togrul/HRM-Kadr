@@ -31,14 +31,22 @@
                                 fill="currentColor" opacity="0.3" />
                         </g>
                     </svg>
-                    <h1 class="text-lg text-slate-600">{{ __('You can customize settings') }}</h1>
+                    <h1 class="text-lg text-slate-600">{{ __('services::common.messages.customize_settings') }}</h1>
                 </div>
             </div>
         @else
             <section class="" wire:target="selectService" wire:loading.remove>
                 @switch($selectedService)
                     @case('general')
-                        @livewire('services.settings.settings-list', key('settings'))
+                        @livewire('services.settings.settings-list', ['section' => 'general'], key('settings-general'))
+                    @break
+
+                    @case('candidate')
+                        @livewire('services.settings.settings-list', ['section' => 'candidate'], key('settings-candidate'))
+                    @break
+
+                    @case('notifications-settings')
+                        @livewire('notification.settings-hub', key('notifications-settings-hub'))
                     @break
 
                     @case('menus')
@@ -46,11 +54,31 @@
                     @break
 
                     @case('roles')
-                        <div class="grid grid-cols-1 gap-3 sm:grid-cols-5">
-                            <div class="sm:col-span-2" wire:key="roles-section">
+                        <div class="space-y-4" x-data="{ activeRoleTab: 'roles' }">
+                            <div class="inline-flex items-center rounded-2xl border border-zinc-200 bg-zinc-50 p-1">
+                                <button
+                                    type="button"
+                                    class="rounded-xl px-4 py-2 text-sm font-medium transition-all"
+                                    :class="activeRoleTab === 'roles' ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-500 hover:text-zinc-700'"
+                                    @click="activeRoleTab = 'roles'"
+                                >
+                                    {{ __('services::common.labels.roles') }}
+                                </button>
+                                <button
+                                    type="button"
+                                    class="rounded-xl px-4 py-2 text-sm font-medium transition-all"
+                                    :class="activeRoleTab === 'permissions' ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-500 hover:text-zinc-700'"
+                                    @click="activeRoleTab = 'permissions'"
+                                >
+                                    {{ __('services::common.labels.permissions') }}
+                                </button>
+                            </div>
+
+                            <div x-show="activeRoleTab === 'roles'" x-cloak wire:key="roles-section">
                                 @livewire('services.roles.manage-roles', key('roles'))
                             </div>
-                            <div class="sm:col-span-3" wire:key="permission-section">
+
+                            <div x-show="activeRoleTab === 'permissions'" x-cloak wire:key="permission-section">
                                 @livewire('services.roles.permissions', key('permissions'))
                             </div>
                         </div>
@@ -62,14 +90,6 @@
 
                     @case('ranks')
                         @livewire('services.ranks.all-ranks', key('ranks'))
-                    @break
-
-                    @case('order-documents')
-                        @livewire('orders.templates.all-templates', key('templates'))
-                    @break
-
-                    @case('components')
-                        @livewire('services.components.all-components', key('components'))
                     @break
                 @endswitch
 

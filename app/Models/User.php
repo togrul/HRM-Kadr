@@ -27,6 +27,8 @@ class User extends Authenticatable
         'email',
         'password',
         'is_active',
+        'must_reset_password',
+        'self_service_invited_at',
         'deleted_by',
     ];
 
@@ -48,6 +50,8 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'must_reset_password' => 'boolean',
+        'self_service_invited_at' => 'datetime',
     ];
 
     public function personDidDelete(): BelongsTo
@@ -67,13 +71,18 @@ class User extends Authenticatable
         );
     }
 
+    public function personnel(): BelongsTo
+    {
+        return $this->belongsTo(Personnel::class, 'email', 'email');
+    }
+
     protected static function boot()
     {
         parent::boot();
-        static::deleting(function ($model) {
-            $model->deleted_by = auth()->user()->id;
+        static::deleting(function (self $model): void {
+            $model->deleted_by = auth()->id();
             $model->is_active = false;
-            $model->save();
+            $model->saveQuietly();
         });
     }
 }

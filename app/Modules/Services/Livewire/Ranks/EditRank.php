@@ -19,6 +19,7 @@ class EditRank extends Component
 
     public function mount(Rank $rankModel)
     {
+        $this->title = __('services::ranks.titles.edit');
         $rankModel->load('rankCategory');
         $this->form->setPost($rankModel);
     }
@@ -43,7 +44,7 @@ class EditRank extends Component
     {
         $this->form->update();
 
-        $this->dispatch('rankAdded', __('Rank was added successfully!'));
+        $this->dispatch('rankAdded', __('services::ranks.messages.updated'));
     }
 
     public function render()

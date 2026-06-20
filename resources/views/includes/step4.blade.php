@@ -1,8 +1,12 @@
+@php
+    use App\Support\ViewNumberFormatter;
+@endphp
+
 <div class="flex flex-col space-y-4">
-    <x-form-card title="Labor activities">
+    <x-form-card title="{{ __('personnel::wizard.sections.labor_activities') }}">
         <div class="grid grid-cols-5 gap-2">
             <div class="flex flex-col">
-                <x-label for="laborActivityForm.laborActivity.company_name">{{ __('Company name') }}</x-label>
+                <x-label for="laborActivityForm.laborActivity.company_name">{{ __('personnel::common.labels.company_name') }}</x-label>
                 <x-livewire-input mode="gray" name="laborActivityForm.laborActivity.company_name" wire:model="laborActivityForm.laborActivity.company_name"></x-livewire-input>
                 @error('laborActivityForm.laborActivity.company_name')
                 <x-validation> {{ $message }} </x-validation>
@@ -10,32 +14,57 @@
             </div>
             <div class="flex flex-col space-y-2">
                 <div class="flex items-center justify-between">
-                    <x-label for="laborActivityForm.laborActivity.position">{{ __('Position') }}</x-label>
+                    <x-label for="laborActivityForm.laborActivity.position">{{ __('personnel::common.labels.position') }}</x-label>
                     <label class="flex items-center space-x-2 text-sm text-slate-600">
                         <input type="checkbox" wire:model.live="laborActivityForm.laborActivity.use_lookup" class="text-indigo-600 rounded border-slate-300 focus:ring-indigo-500">
-                        <span>{{ __('Select from list') }}</span>
+                        <span>{{ __('personnel::common.labels.select_from_list') }}</span>
                     </label>
                 </div>
                 @if($laborActivityForm->laborActivity['use_lookup'] ?? false)
-                    <x-ui.select-dropdown
-                        label=""
-                        placeholder="---"
-                        mode="gray"
-                        class="w-full"
-                        wire:model.live="laborActivityForm.laborActivity.structure_id"
-                        :model="$this->laborStructureOptions"
-                    >
-                        <x-livewire-input
-                            mode="gray"
-                            name="searchLaborStructure"
-                            wire:model.live.debounce.300ms="searchLaborStructure"
-                            @click.stop="isOpen = true"
-                            x-on:input.stop="null"
-                            x-on:keyup.stop="null"
-                            x-on:keydown.stop="null"
-                            x-on:change.stop="null"
-                        />
-                    </x-ui.select-dropdown>
+                    @php
+                        $laborStructureSelectedResolver = fn ($component, $list, $row, $field, $preset = null)
+                            => (int) (data_get($component->laborActivityForm->laborActivity, 'structure_id') ?? 0) ?: null;
+                    @endphp
+                    <div class="flex flex-col space-y-1"
+                         x-data="{ showStructures: false, openNodes: $store.laborStructureTree ?? ($store.laborStructureTree = {}) }">
+                        <div class="relative w-full">
+                            <button
+                                type="button"
+                                @click="showStructures = !showStructures"
+                                class="relative flex items-center justify-between w-full px-4 py-2 text-left rounded-lg shadow-sm bg-neutral-100 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                            >
+                                <span class="block truncate text-neutral-900">
+                                    {{ $this->optionLabelFor($this->laborStructureOptions, data_get($laborActivityForm->laborActivity, 'structure_id')) ?: '---' }}
+                                </span>
+                                <svg class="w-5 h-5 text-neutral-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    <path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                                </svg>
+                            </button>
+
+                            <div
+                                x-show="showStructures"
+                                @click.outside="showStructures = false"
+                                x-transition.opacity.duration.100ms
+                                class="absolute z-[150] w-full px-3 py-3 mt-1 space-y-2 overflow-auto bg-white rounded-md shadow-xl max-h-80"
+                            >
+                                <x-radio-tree.list>
+                                    @foreach($this->laborStructureTreeRoots as $structureRoot)
+                                        <x-radio-tree.item
+                                            :model="$structureRoot"
+                                            list-data="laborActivityForm"
+                                            field="structure_id"
+                                            :key="0"
+                                            :is-coded="false"
+                                            :selected-id="data_get($laborActivityForm->laborActivity, 'structure_id')"
+                                            :selected-resolver="$laborStructureSelectedResolver"
+                                        >
+                                            {{ $structureRoot->name }}
+                                        </x-radio-tree.item>
+                                    @endforeach
+                                </x-radio-tree.list>
+                            </div>
+                        </div>
+                    </div>
                     @error('laborActivityForm.laborActivity.structure_id')
                     <x-validation> {{ $message }} </x-validation>
                     @enderror
@@ -46,17 +75,9 @@
                         class="w-full"
                         wire:model.live="laborActivityForm.laborActivity.position_id"
                         :model="$this->laborPositionOptions"
+                    :search-model="data_get($stepSearchModels, 'searchLaborPosition', 'searchLaborPosition')"
+                    :search-placeholder="data_get($stepSearchPlaceholders, 'searchLaborPosition', __('personnel::common.placeholders.search'))"
                     >
-                        <x-livewire-input
-                            mode="gray"
-                            name="searchLaborPosition"
-                            wire:model.live.debounce.300ms="searchLaborPosition"
-                            @click.stop="isOpen = true"
-                            x-on:input.stop="null"
-                            x-on:keyup.stop="null"
-                            x-on:keydown.stop="null"
-                            x-on:change.stop="null"
-                        />
                     </x-ui.select-dropdown>
                     @error('laborActivityForm.laborActivity.position_id')
                     <x-validation> {{ $message }} </x-validation>
@@ -73,7 +94,7 @@
                 @enderror
             </div>
             <div class="flex flex-col">
-                <x-label for="laborActivityForm.laborActivity.join_date">{{ __('Join date') }}</x-label>
+                <x-label for="laborActivityForm.laborActivity.join_date">{{ __('personnel::common.labels.join_date') }}</x-label>
                 <x-pikaday-input mode="gray" name="laborActivityForm.laborActivity.join_date" format="Y-MM-DD" wire:model.live="laborActivityForm.laborActivity.join_date">
                     <x-slot name="script">
                         $el.onchange = function () {
@@ -86,7 +107,7 @@
                 @enderror
             </div>
             <div class="flex flex-col">
-                <x-label for="laborActivityForm.laborActivity.leave_date">{{ __('Leave date') }}</x-label>
+                <x-label for="laborActivityForm.laborActivity.leave_date">{{ __('personnel::common.labels.leave_date') }}</x-label>
                 <x-pikaday-input mode="gray" name="laborActivityForm.laborActivity.leave_date" format="Y-MM-DD" wire:model.live="laborActivityForm.laborActivity.leave_date">
                     <x-slot name="script">
                         $el.onchange = function () {
@@ -99,7 +120,7 @@
                 @enderror
             </div>
             <div class="flex flex-col">
-                <x-label for="laborActivityForm.laborActivity.coefficient">{{ __('Coefficient') }}</x-label>
+                <x-label for="laborActivityForm.laborActivity.coefficient">{{ __('personnel::common.labels.coefficient') }}</x-label>
                 <x-livewire-input mode="gray" type="number" name="laborActivityForm.laborActivity.coefficient" wire:model="laborActivityForm.laborActivity.coefficient"></x-livewire-input>
                 @error('laborActivityForm.laborActivity.coefficient')
                 <x-validation> {{ $message }} </x-validation>
@@ -109,14 +130,14 @@
         @if($isSpecialService)
             <div class="grid grid-cols-3 gap-2">
                 <div class="flex flex-col">
-                    <x-label for="laborActivityForm.laborActivity.order_given_by">{{ __('Order issued by') }}</x-label>
+                    <x-label for="laborActivityForm.laborActivity.order_given_by">{{ __('personnel::common.labels.order_issued_by') }}</x-label>
                     <x-livewire-input mode="gray" name="laborActivityForm.laborActivity.order_given_by" wire:model="laborActivityForm.laborActivity.order_given_by"></x-livewire-input>
                     @error('laborActivityForm.laborActivity.order_given_by')
                     <x-validation> {{ $message }} </x-validation>
                     @enderror
                 </div>
                 <div class="flex flex-col">
-                    <x-label for="laborActivityForm.laborActivity.order_no">{{ __('Order number') }}</x-label>
+                    <x-label for="laborActivityForm.laborActivity.order_no">{{ __('personnel::common.labels.order_number') }}</x-label>
                     <x-livewire-input mode="gray" name="laborActivityForm.laborActivity.order_no" wire:model="laborActivityForm.laborActivity.order_no"></x-livewire-input>
                     @error('laborActivityForm.laborActivity.order_no')
                     <x-validation> {{ $message }} </x-validation>
@@ -124,7 +145,7 @@
                 </div>
                 <div class="flex items-start justify-between w-full">
                     <div class="flex flex-col">
-                        <x-label for="laborActivityForm.laborActivity.order_date">{{ __('Order date') }}</x-label>
+                        <x-label for="laborActivityForm.laborActivity.order_date">{{ __('personnel::common.labels.order_date') }}</x-label>
                         <x-pikaday-input mode="gray" name="laborActivityForm.laborActivity.order_date" format="Y-MM-DD" wire:model.live="laborActivityForm.laborActivity.order_date">
                             <x-slot name="script">
                                 $el.onchange = function () {
@@ -137,7 +158,7 @@
                         @enderror
                     </div>
                     <div class="flex flex-col w-20">
-                        <x-label for="laborActivityForm.laborActivity.time">{{ __('Time') }}</x-label>
+                        <x-label for="laborActivityForm.laborActivity.time">{{ __('personnel::common.labels.time') }}</x-label>
                         <x-livewire-input mode="gray" name="laborActivityForm.laborActivity.time" wire:model="laborActivityForm.laborActivity.time" placeholder="12:00"></x-livewire-input>
                     </div>
                 </div>
@@ -149,21 +170,21 @@
                 name="laborActivityForm.laborActivity.is_current"
                 model="laborActivityForm.laborActivity.is_current"
             >
-                {{ __('Is current?') }}
+                {{ __('personnel::common.labels.is_current') }}
             </x-checkbox>
             <x-checkbox
                 name="isSpecialService"
                 model="isSpecialService"
             >
-                {{ __('Military forces or law enforcement?') }}
+                {{ __('personnel::common.labels.military_forces_or_law_enforcement') }}
             </x-checkbox>
-            <x-button  mode="black" wire:click="addLaborActivity">{{ __('Add') }}</x-button>
+            <x-button  mode="black" wire:click="addLaborActivity">{{ __('personnel::common.actions.add') }}</x-button>
         </div>
         {{--is yerleri siyahisi--}}
         @forelse ($laborActivityForm->laborActivityList as $key => $laModel)
         <div class="relative flex flex-col px-4 py-2 space-y-2 rounded-lg shadow-sm bg-slate-100">
             <button
-                onclick="confirm('Are you sure you want to remove this data?') || event.stopImmediatePropagation()"
+                onclick="confirm('{{ __('personnel::common.messages.remove_data_confirm') }}') || event.stopImmediatePropagation()"
                 wire:click="forceDeleteLaborActivity({{ $key }})"
                 class="absolute flex items-center justify-center p-2 transition-all duration-300 bg-transparent rounded-lg right-1 top-1 hover:bg-rose-100">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-rose-500">
@@ -172,7 +193,7 @@
             </button>
             <div class="flex items-center space-x-2 border-b border-dashed w-max border-slate-400">
                 <p class="font-medium text-gray-700">
-                    {{ $laModel['company_name'] }}
+                    {{ data_get($laModel, 'company_name_display') ?? data_get($laModel, 'company_name') }}
                 </p>
                 @if($laModel['is_current'] ??= false)
                 <span class="flex items-center justify-center w-4 h-4 bg-green-500 border-4 border-green-200 rounded-full">
@@ -187,7 +208,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-slate-500">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 2.994v2.25m10.5-2.25v2.25m-14.252 13.5V7.491a2.25 2.25 0 0 1 2.25-2.25h13.5a2.25 2.25 0 0 1 2.25 2.25v11.251m-18 0a2.25 2.25 0 0 0 2.25 2.25h13.5a2.25 2.25 0 0 0 2.25-2.25m-18 0v-7.5a2.25 2.25 0 0 1 2.25-2.25h13.5a2.25 2.25 0 0 1 2.25 2.25v7.5m-6.75-6h2.25m-9 2.25h4.5m.002-2.25h.005v.006H12v-.006Zm-.001 4.5h.006v.006h-.006v-.005Zm-2.25.001h.005v.006H9.75v-.006Zm-2.25 0h.005v.005h-.006v-.005Zm6.75-2.247h.005v.005h-.005v-.005Zm0 2.247h.006v.006h-.006v-.006Zm2.25-2.248h.006V15H16.5v-.005Z" />
                         </svg>
-                        <span class="text-sm font-medium text-slate-500">{{ __('Date') }}</span>
+                        <span class="text-sm font-medium text-slate-500">{{ __('personnel::common.labels.date') }}</span>
                     </div>
                     <div class="flex items-center space-x-2">
                         <span class="text-sm font-medium text-slate-900">{{ \Carbon\Carbon::parse($laModel['join_date'])->format('d.m.Y') }}</span>
@@ -195,7 +216,7 @@
                         @if(!empty($laModel['leave_date']))
                             <span class="text-sm font-medium text-rose-500">{{ \Carbon\Carbon::parse($laModel['leave_date'])->format('d.m.Y') }}</span>
                         @else
-                            <span class="text-sm font-medium text-green-500">aktiv</span>
+                            <span class="text-sm font-medium text-green-500">{{ __('personnel::common.labels.active') }}</span>
                         @endif
                     </div>
                 </div>
@@ -205,12 +226,12 @@
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-slate-500">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                         </svg>
-                        <span class="text-sm font-medium text-slate-500">{{ __('Duration') }}</span>
+                        <span class="text-sm font-medium text-slate-500">{{ __('personnel::common.labels.duration') }}</span>
                     </div>
                     <span class="text-sm font-medium text-slate-900">
-                        {{ $calculatedData['data'][$key]['duration']['year'] }} {{ __('year') }}
-                        {{ $calculatedData['data'][$key]['duration']['month'] }} {{ __('month') }}
-                        ({{ $calculatedData['data'][$key]['duration']['diff'] }} {{ __('month') }})
+                        {{ $calculatedData['data'][$key]['duration']['year'] }} {{ __('personnel::common.labels.year') }}
+                        {{ $calculatedData['data'][$key]['duration']['month'] }} {{ __('personnel::common.labels.month') }}
+                        ({{ ViewNumberFormatter::decimal($calculatedData['data'][$key]['duration']['diff']) }} {{ __('personnel::common.labels.month') }})
                     </span>
                 </div>
 
@@ -220,9 +241,9 @@
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-slate-500">
                             <path stroke-linecap="round" stroke-linejoin="round" d="m8.99 14.993 6-6m6 3.001c0 1.268-.63 2.39-1.593 3.069a3.746 3.746 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043 3.745 3.745 0 0 1-3.068 1.593c-1.268 0-2.39-.63-3.068-1.593a3.745 3.745 0 0 1-3.296-1.043 3.746 3.746 0 0 1-1.043-3.297 3.746 3.746 0 0 1-1.593-3.068c0-1.268.63-2.39 1.593-3.068a3.746 3.746 0 0 1 1.043-3.297 3.745 3.745 0 0 1 3.296-1.042 3.745 3.745 0 0 1 3.068-1.594c1.268 0 2.39.63 3.068 1.593a3.745 3.745 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.297 3.746 3.746 0 0 1 1.593 3.068ZM9.74 9.743h.008v.007H9.74v-.007Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm4.125 4.5h.008v.008h-.008v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
                         </svg>
-                        <span class="text-sm font-medium text-slate-500">{{ __('Coefficient') }}</span>
+                        <span class="text-sm font-medium text-slate-500">{{ __('personnel::common.labels.coefficient') }}</span>
                     </div>
-                    <span class="text-sm font-medium text-slate-900">x{{ $laModel['coefficient'] }}</span>
+                    <span class="text-sm font-medium text-slate-900">x{{ ViewNumberFormatter::decimal($laModel['coefficient']) }}</span>
                 </div>
 
 
@@ -231,10 +252,10 @@
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-slate-500">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 0 1 0 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 0 1 0-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375Z" />
                         </svg>
-                        <span class="text-sm font-medium text-slate-500">{{ __('Total') }}</span>
+                        <span class="text-sm font-medium text-slate-500">{{ __('personnel::common.labels.total') }}</span>
                     </div>
                     <span class="text-sm font-medium text-slate-900">
-                        {{ $calculatedData['data'][$key]['duration']['duration'] }} {{ __('month') }}
+                        {{ ViewNumberFormatter::decimal($calculatedData['data'][$key]['duration']['duration']) }} {{ __('personnel::common.labels.month') }}
                     </span>
                 </div>
                 @endif
@@ -249,7 +270,7 @@
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-slate-500">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                             </svg>
-                            <span class="text-sm font-medium text-slate-500">{{ __('Order given by') }}</span>
+                            <span class="text-sm font-medium text-slate-500">{{ __('personnel::common.labels.order_given_by') }}</span>
                         </div>
                         <span class="text-sm font-medium text-slate-900">{{ $laModel['order_given_by'] }}</span>
                     </div>
@@ -259,7 +280,7 @@
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-slate-500">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z" />
                             </svg>
-                            <span class="text-sm font-medium text-slate-500">{{ __('Order number') }} #</span>
+                            <span class="text-sm font-medium text-slate-500">{{ __('personnel::common.labels.order_number') }} #</span>
                         </div>
                         <span class="text-sm font-medium text-slate-900">{{ $laModel['order_no'] }}</span>
                     </div>
@@ -269,7 +290,7 @@
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-slate-500">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
                             </svg>
-                            <span class="text-sm font-medium text-slate-500">{{ __('Order date') }} #</span>
+                            <span class="text-sm font-medium text-slate-500">{{ __('personnel::common.labels.order_date') }} #</span>
                         </div>
                         <span class="text-sm font-medium text-slate-900">
                              {{ \Carbon\Carbon::parse($laModel['order_date'])->format('d.m.Y') }}
@@ -286,67 +307,67 @@
             <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
                 <div class="flex flex-col items-start px-4 py-2 space-y-1 rounded-lg shadow-md bg-slate-50">
                     <h1 class="font-medium border-b border-dashed text-slate-500">
-                        {{ __('Old seniority') }}
+                        {{ __('personnel::common.labels.old_seniority') }}
                     </h1>
                     <div class="flex items-center self-start space-x-2 text-sm">
-                        <span class="font-medium text-teal-500">{{ __('Property') }}:</span>
+                        <span class="font-medium text-teal-500">{{ __('personnel::common.labels.property') }}:</span>
                         <span class="font-medium text-gray-900">
-                            {{ $calculatedData['sum_month_old'] }} {{ __('month') }}
-                            ({{ $calculatedData['sum_old']['year'] }} {{ __('year') }}
-                            {{ $calculatedData['sum_old']['month'] }} {{ __('month') }})
+                            {{ ViewNumberFormatter::decimal($calculatedData['sum_month_old']) }} {{ __('personnel::common.labels.month') }}
+                            ({{ $calculatedData['sum_old']['year'] }} {{ __('personnel::common.labels.year') }}
+                            {{ $calculatedData['sum_old']['month'] }} {{ __('personnel::common.labels.month') }})
                         </span>
                     </div>
 
                     <div class="flex items-center self-start space-x-2 text-sm">
-                        <span class="font-medium text-yellow-400">{{ __('Military') }}:</span>
+                        <span class="font-medium text-yellow-400">{{ __('personnel::common.steps.military') }}:</span>
                         <span class="font-medium text-gray-900">
-                            {{ $calculatedData['sum_month_military_old'] }} {{ __('month') }}
-                            ({{ $calculatedData['sum_old_military']['year'] }} {{ __('year') }}
-                            {{ $calculatedData['sum_old_military']['month'] }} {{ __('month') }})
+                            {{ ViewNumberFormatter::decimal($calculatedData['sum_month_military_old']) }} {{ __('personnel::common.labels.month') }}
+                            ({{ $calculatedData['sum_old_military']['year'] }} {{ __('personnel::common.labels.year') }}
+                            {{ $calculatedData['sum_old_military']['month'] }} {{ __('personnel::common.labels.month') }})
                         </span>
                     </div>
                 </div>
 
                 <div class="flex flex-col items-start px-4 py-2 space-y-1 rounded-lg shadow-md bg-slate-50">
                     <h1 class="font-medium border-b border-dashed text-slate-500">
-                        {{ __('Current seniority') }}
+                        {{ __('personnel::common.labels.current_seniority') }}
                     </h1>
                     <div class="flex items-center self-start space-x-2 text-sm">
-                        <span class="font-medium text-teal-500">{{ __('Standart') }}:</span>
+                        <span class="font-medium text-teal-500">{{ __('personnel::common.labels.standard') }}:</span>
                         <span class="font-medium text-gray-900">
-                            {{ $calculatedData['sum_month_current_diff'] }} {{ __('month') }}
-                            ({{ $calculatedData['sum_current_diff']['year'] }} {{ __('year') }}
-                            {{ $calculatedData['sum_current_diff']['month'] }} {{ __('month') }})
+                            {{ ViewNumberFormatter::decimal($calculatedData['sum_month_current_diff']) }} {{ __('personnel::common.labels.month') }}
+                            ({{ $calculatedData['sum_current_diff']['year'] }} {{ __('personnel::common.labels.year') }}
+                            {{ $calculatedData['sum_current_diff']['month'] }} {{ __('personnel::common.labels.month') }})
                     </span>
                     </div>
                     <div class="flex items-center self-start space-x-2 text-sm">
-                        <span class="font-medium text-blue-500">{{ __('Coefficient') }}:</span>
+                        <span class="font-medium text-blue-500">{{ __('personnel::common.labels.coefficient') }}:</span>
                         <span class="font-medium text-gray-900">
-                            {{ $calculatedData['sum_month_current'] }} {{ __('month') }}
-                            ({{ $calculatedData['sum_current']['year'] }} {{ __('year') }}
-                            {{ $calculatedData['sum_current']['month'] }} {{ __('month') }})
+                            {{ ViewNumberFormatter::decimal($calculatedData['sum_month_current']) }} {{ __('personnel::common.labels.month') }}
+                            ({{ $calculatedData['sum_current']['year'] }} {{ __('personnel::common.labels.year') }}
+                            {{ $calculatedData['sum_current']['month'] }} {{ __('personnel::common.labels.month') }})
                     </span>
                     </div>
                 </div>
 
                 <div class="flex flex-col items-start px-4 py-2 space-y-1 rounded-lg shadow-md bg-slate-50">
                     <h1 class="font-medium border-b border-dashed text-slate-500">
-                        {{ __('Total seniority') }}
+                        {{ __('personnel::common.labels.total_seniority') }}
                     </h1>
                     <div class="flex items-center self-start space-x-2 text-sm">
-                        <span class="font-medium text-teal-500">{{ __('Property') }}:</span>
+                        <span class="font-medium text-teal-500">{{ __('personnel::common.labels.property') }}:</span>
                         <span class="font-medium text-gray-900">
-                            {{ $calculatedData['sum_total'] }} {{ __('month') }}
-                            ({{ $calculatedData['sum_total_full']['year'] }} {{ __('year') }}
-                            {{ $calculatedData['sum_total_full']['month'] }} {{ __('month') }})
+                            {{ ViewNumberFormatter::decimal($calculatedData['sum_total']) }} {{ __('personnel::common.labels.month') }}
+                            ({{ $calculatedData['sum_total_full']['year'] }} {{ __('personnel::common.labels.year') }}
+                            {{ $calculatedData['sum_total_full']['month'] }} {{ __('personnel::common.labels.month') }})
                         </span>
                     </div>
                     <div class="flex items-center self-start space-x-2 text-sm">
-                        <span class="font-medium text-yellow-400">{{ __('Military') }}:</span>
+                        <span class="font-medium text-yellow-400">{{ __('personnel::common.steps.military') }}:</span>
                         <span class="font-medium text-gray-900">
-                            {{ $calculatedData['sum_total_military'] }} {{ __('month') }}
-                            ({{ $calculatedData['sum_total_military_full']['year'] }} {{ __('year') }}
-                            {{ $calculatedData['sum_total_military_full']['month'] }} {{ __('month') }})
+                            {{ ViewNumberFormatter::decimal($calculatedData['sum_total_military']) }} {{ __('personnel::common.labels.month') }}
+                            ({{ $calculatedData['sum_total_military_full']['year'] }} {{ __('personnel::common.labels.year') }}
+                            {{ $calculatedData['sum_total_military_full']['month'] }} {{ __('personnel::common.labels.month') }})
                         </span>
                     </div>
                 </div>
@@ -355,27 +376,19 @@
     </x-form-card>
 </div>
 
-<x-form-card title="Ranks">
+<x-form-card title="{{ __('personnel::wizard.sections.ranks') }}">
     <div class="grid grid-cols-4 gap-3">
         <div class="flex flex-col">
             <x-ui.select-dropdown
-                label="{{ __('Ranks') }}"
+                label="{{ __('personnel::common.labels.ranks') }}"
                 placeholder="---"
                 mode="gray"
                 class="w-full"
                 wire:model.live="laborActivityForm.rank.rank_id"
                 :model="$this->rankOptions"
+                    :search-model="data_get($stepSearchModels, 'searchRank', 'searchRank')"
+                    :search-placeholder="data_get($stepSearchPlaceholders, 'searchRank', __('personnel::common.placeholders.search'))"
             >
-                <x-livewire-input
-                    mode="gray"
-                    name="searchRank"
-                    wire:model.live.debounce.300ms="searchRank"
-                    @click.stop="isOpen = true"
-                    x-on:input.stop="null"
-                    x-on:keyup.stop="null"
-                    x-on:keydown.stop="null"
-                    x-on:change.stop="null"
-                />
             </x-ui.select-dropdown>
             @error('laborActivityForm.rank.rank_id')
             <x-validation> {{ $message }} </x-validation>
@@ -383,34 +396,26 @@
         </div>
         <div class="flex flex-col">
             <x-ui.select-dropdown
-                label="{{ __('Rank reasons') }}"
+                label="{{ __('personnel::common.labels.rank_reasons') }}"
                 placeholder="---"
                 mode="gray"
                 class="w-full"
                 wire:model.live="laborActivityForm.rank.rank_reason_id"
                 :model="$this->rankReasonOptions"
+                    :search-model="data_get($stepSearchModels, 'searchRankReason', 'searchRankReason')"
+                    :search-placeholder="data_get($stepSearchPlaceholders, 'searchRankReason', __('personnel::common.placeholders.search'))"
             >
-                <x-livewire-input
-                    mode="gray"
-                    name="searchRankReason"
-                    wire:model.live.debounce.300ms="searchRankReason"
-                    @click.stop="isOpen = true"
-                    x-on:input.stop="null"
-                    x-on:keyup.stop="null"
-                    x-on:keydown.stop="null"
-                    x-on:change.stop="null"
-                />
             </x-ui.select-dropdown>
         </div>
         <div class="flex flex-col">
-            <x-label for="laborActivityForm.rank.name">{{ __('Name') }}</x-label>
+            <x-label for="laborActivityForm.rank.name">{{ __('personnel::common.labels.name') }}</x-label>
             <x-livewire-input mode="gray" name="laborActivityForm.rank.name" wire:model="laborActivityForm.rank.name"></x-livewire-input>
             @error('laborActivityForm.rank.name')
             <x-validation> {{ $message }} </x-validation>
             @enderror
         </div>
         <div class="flex flex-col">
-            <x-label for="laborActivityForm.rank.given_date">{{ __('Given date') }}</x-label>
+            <x-label for="laborActivityForm.rank.given_date">{{ __('personnel::common.labels.given_date') }}</x-label>
             <x-pikaday-input mode="gray" name="laborActivityForm.rank.given_date" format="Y-MM-DD" wire:model.live="laborActivityForm.rank.given_date">
                 <x-slot name="script">
                     $el.onchange = function () {
@@ -423,21 +428,21 @@
             @enderror
         </div>
         <div class="flex flex-col">
-            <x-label for="laborActivityForm.rank.order_given_by">{{ __('Order issued by') }}</x-label>
+            <x-label for="laborActivityForm.rank.order_given_by">{{ __('personnel::common.labels.order_issued_by') }}</x-label>
             <x-livewire-input mode="gray" name="laborActivityForm.rank.order_given_by" wire:model="laborActivityForm.rank.order_given_by"></x-livewire-input>
             @error('laborActivityForm.rank.order_given_by')
             <x-validation> {{ $message }} </x-validation>
             @enderror
         </div>
         <div class="flex flex-col">
-            <x-label for="laborActivityForm.rank.order_no">{{ __('Order number') }}</x-label>
+            <x-label for="laborActivityForm.rank.order_no">{{ __('personnel::common.labels.order_number') }}</x-label>
             <x-livewire-input mode="gray" name="laborActivityForm.rank.order_no" wire:model="laborActivityForm.rank.order_no"></x-livewire-input>
             @error('laborActivityForm.rank.order_no')
             <x-validation> {{ $message }} </x-validation>
             @enderror
         </div>
         <div class="flex flex-col">
-            <x-label for="laborActivityForm.rank.order_date">{{ __('Order date') }}</x-label>
+            <x-label for="laborActivityForm.rank.order_date">{{ __('personnel::common.labels.order_date') }}</x-label>
             <x-pikaday-input mode="gray" name="laborActivityForm.rank.order_date" format="Y-MM-DD" wire:model.live="laborActivityForm.rank.order_date">
                 <x-slot name="script">
                     $el.onchange = function () {
@@ -452,13 +457,13 @@
     </div>
 
     <div class="flex justify-end">
-        <x-button  mode="black" wire:click="addRank">{{ __('Add') }}</x-button>
+        <x-button  mode="black" wire:click="addRank">{{ __('personnel::common.actions.add') }}</x-button>
     </div>
 
     <div class="relative -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
         <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-            <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
-                <x-table.tbl :headers="[__('Rank'),__('Given date'),__('Info'),'action']">
+            <div class="overflow-visible">
+                <x-table.tbl :headers="[__('personnel::common.labels.rank'), __('personnel::common.labels.given_date'), __('personnel::common.labels.info'), __('personnel::common.labels.action')]">
                     @forelse ($laborActivityForm->rankList as $keyRank => $rModel)
                         <tr>
                             <x-table.td>
@@ -480,7 +485,7 @@
                                 <div class="flex items-center space-x-6">
                                     <div class="flex flex-col items-start space-y-1">
                                          <span class="text-sm font-medium text-gray-500 border-b border-dashed border-slate-400">
-                                                {{ __('Issued by') }}:
+                                                {{ __('personnel::common.labels.order_issued_by') }}:
                                          </span>
                                         <span class="text-sm font-medium text-gray-900">
                                                 {{ data_get($rModel, 'order_given_by', '---') }}
@@ -488,7 +493,7 @@
                                     </div>
                                     <div class="flex flex-col items-start space-y-1">
                                         <span class="text-sm font-medium text-gray-500 border-b border-dashed border-slate-400">
-                                            {{ __('Number') }} #:
+                                            {{ __('personnel::common.labels.number') }} #:
                                         </span>
                                         <span class="text-sm font-medium text-blue-500">
                                             {{ data_get($rModel, 'order_no', '---') }}
@@ -496,7 +501,7 @@
                                     </div>
                                     <div class="flex flex-col items-start space-y-1">
                                         <span class="text-sm font-medium text-gray-500 border-b border-dashed border-slate-400">
-                                            {{ __('Date') }}:
+                                            {{ __('personnel::common.labels.date') }}:
                                         </span>
                                         <span class="text-sm font-medium text-gray-700">
                                             @if(! empty($rModel['order_date']))
@@ -510,7 +515,7 @@
                             </x-table.td>
                             <x-table.td :isButton="true">
                                 <button
-                                    onclick="confirm('Are you sure you want to remove this data?') || event.stopImmediatePropagation()"
+                                    onclick="confirm('{{ __('personnel::common.messages.remove_data_confirm') }}') || event.stopImmediatePropagation()"
                                     wire:click="forceDeleteRank({{ $keyRank }})"
                                     class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700"
                                 >
@@ -522,7 +527,7 @@
                         <tr>
                             <td colspan="5">
                                 <div class="flex items-center justify-center py-4">
-                                    <span class="font-medium">{{ __('No information added') }}</span>
+                                    <span class="font-medium">{{ __('personnel::common.labels.no_information_added') }}</span>
                                 </div>
                             </td>
                         </tr>

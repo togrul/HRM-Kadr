@@ -4,7 +4,6 @@ namespace App\Notifications;
 
 use App\Models\Personnel;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -15,10 +14,13 @@ class BirthdayNotification extends Notification
     /**
      * Create a new notification instance.
      */
-    public function __construct(public Personnel $personnel)
-    {
-        //
-    }
+    public function __construct(
+        public Personnel $personnel,
+        public string $channel = 'database',
+        public ?string $renderedSubject = null,
+        public string $renderedBody = '',
+        public array $payload = [],
+    ) {}
 
     /**
      * Get the notification's delivery channels.
@@ -27,7 +29,7 @@ class BirthdayNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return [$this->channel];
     }
 
     /**
@@ -36,9 +38,8 @@ class BirthdayNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-                    ->line('The introduction to the notification.')
-                    ->action('Notification Action', url('/'))
-                    ->line('Thank you for using our application!');
+            ->subject($this->renderedSubject ?: __('notifications::common.mail.subject_birthday'))
+            ->line($this->renderedBody !== '' ? $this->renderedBody : __('notifications::common.messages.birthday_today'));
     }
 
     /**
@@ -48,11 +49,21 @@ class BirthdayNotification extends Notification
      */
     public function toArray(object $notifiable): array
     {
-        return [
+        return $this->payload !== []
+            ? array_merge([
+                'type' => 'Birthday',
+                'action' => 'birthday',
+            ], $this->payload)
+            : [
             'type' => 'Birthday',
             'tabel_no' => $this->personnel->tabel_no,
             'name' => $this->personnel->fullname,
-            'added_by' => $this->personnel->birthdate,
+            'birthdate' => optional($this->personnel->birthdate)->format('Y-m-d'),
+            'birthday_label' => optional($this->personnel->birthdate)->format('d.m.Y'),
+            'position' => $this->personnel->position?->name,
+            'structure' => $this->personnel->structure?->fullStructureName(),
+            'message' => __('notifications::common.messages.birthday_today'),
+            'category' => __('notifications::common.categories.birthday'),
             'action' => 'birthday',
         ];
     }

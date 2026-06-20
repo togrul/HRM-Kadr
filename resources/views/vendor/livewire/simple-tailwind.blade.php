@@ -1,45 +1,65 @@
-<div>
+<div class="px-4 pb-4 pt-3 sm:px-5 sm:pb-5">
     @if ($paginator->hasPages())
-        <nav role="navigation" aria-label="Pagination Navigation" class="flex justify-between">
-            <span>
-                {{-- Previous Page Link --}}
+        <nav role="navigation" aria-label="Pagination Navigation" class="rounded-[20px] border border-zinc-200 bg-white px-3 py-3 shadow-sm sm:px-4">
+            <div class="flex items-center justify-between gap-2">
                 @if ($paginator->onFirstPage())
-                    <span class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 cursor-default leading-5 rounded-md select-none">
+                    <span class="inline-flex h-9 items-center justify-center rounded-lg border border-zinc-200 bg-zinc-50 px-3 text-sm font-medium text-zinc-400">
                         {!! __('pagination.previous') !!}
                     </span>
                 @else
-                    @if(method_exists($paginator,'getCursorName'))
-                        {{-- // @todo: Remove `wire:key` once mutation observer has been fixed to detect parameter change for the `setPage()` method call --}}
-                        <button type="button" dusk="previousPage" wire:key="cursor-{{ $paginator->getCursorName() }}-{{ $paginator->previousCursor()->encode() }}" wire:click="setPage('{{$paginator->previousCursor()->encode()}}','{{ $paginator->getCursorName() }}')" wire:loading.attr="disabled" class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 leading-5 rounded-md hover:text-gray-500 focus:outline-none focus:shadow-outline-blue focus:border-blue-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150">
-                                {!! __('pagination.previous') !!}
+                    @if (method_exists($paginator, 'getCursorName'))
+                        <button
+                            type="button"
+                            dusk="previousPage"
+                            wire:key="cursor-{{ $paginator->getCursorName() }}-{{ $paginator->previousCursor()->encode() }}"
+                            wire:click="setPage('{{ $paginator->previousCursor()->encode() }}','{{ $paginator->getCursorName() }}')"
+                            wire:loading.attr="disabled"
+                            class="inline-flex h-9 items-center justify-center rounded-lg border border-zinc-200 bg-white px-3 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50"
+                        >
+                            {!! __('pagination.previous') !!}
                         </button>
                     @else
-                        <button type="button" wire:click="previousPage('{{ $paginator->getPageName() }}')" wire:loading.attr="disabled" dusk="previousPage{{ $paginator->getPageName() == 'page' ? '' : '.' . $paginator->getPageName() }}" class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 leading-5 rounded-md hover:text-gray-500 focus:outline-none focus:shadow-outline-blue focus:border-blue-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150">
-                                {!! __('pagination.previous') !!}
+                        <button
+                            type="button"
+                            wire:click="previousPage('{{ $paginator->getPageName() }}')"
+                            wire:loading.attr="disabled"
+                            dusk="previousPage{{ $paginator->getPageName() == 'page' ? '' : '.' . $paginator->getPageName() }}"
+                            class="inline-flex h-9 items-center justify-center rounded-lg border border-zinc-200 bg-white px-3 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50"
+                        >
+                            {!! __('pagination.previous') !!}
                         </button>
                     @endif
                 @endif
-            </span>
 
-            <span>
-                {{-- Next Page Link --}}
                 @if ($paginator->hasMorePages())
-                    @if(method_exists($paginator,'getCursorName'))
-                        {{-- // @todo: Remove `wire:key` once mutation observer has been fixed to detect parameter change for the `setPage()` method call --}}
-                        <button type="button" dusk="nextPage" wire:key="cursor-{{ $paginator->getCursorName() }}-{{ $paginator->nextCursor()->encode() }}" wire:click="setPage('{{$paginator->nextCursor()->encode()}}','{{ $paginator->getCursorName() }}')" wire:loading.attr="disabled" class="relative inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 leading-5 rounded-md hover:text-gray-500 focus:outline-none focus:shadow-outline-blue focus:border-blue-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150">
-                                {!! __('pagination.next') !!}
+                    @if (method_exists($paginator, 'getCursorName'))
+                        <button
+                            type="button"
+                            dusk="nextPage"
+                            wire:key="cursor-{{ $paginator->getCursorName() }}-{{ $paginator->nextCursor()->encode() }}"
+                            wire:click="setPage('{{ $paginator->nextCursor()->encode() }}','{{ $paginator->getCursorName() }}')"
+                            wire:loading.attr="disabled"
+                            class="inline-flex h-9 items-center justify-center rounded-lg border border-zinc-200 bg-white px-3 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50"
+                        >
+                            {!! __('pagination.next') !!}
                         </button>
                     @else
-                        <button type="button" wire:click="nextPage('{{ $paginator->getPageName() }}')" wire:loading.attr="disabled" dusk="nextPage{{ $paginator->getPageName() == 'page' ? '' : '.' . $paginator->getPageName() }}" class="relative inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 leading-5 rounded-md hover:text-gray-500 focus:outline-none focus:shadow-outline-blue focus:border-blue-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150">
-                                {!! __('pagination.next') !!}
+                        <button
+                            type="button"
+                            wire:click="nextPage('{{ $paginator->getPageName() }}')"
+                            wire:loading.attr="disabled"
+                            dusk="nextPage{{ $paginator->getPageName() == 'page' ? '' : '.' . $paginator->getPageName() }}"
+                            class="inline-flex h-9 items-center justify-center rounded-lg border border-zinc-200 bg-white px-3 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50"
+                        >
+                            {!! __('pagination.next') !!}
                         </button>
                     @endif
                 @else
-                    <span class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 cursor-default leading-5 rounded-md select-none">
+                    <span class="inline-flex h-9 items-center justify-center rounded-lg border border-zinc-200 bg-zinc-50 px-3 text-sm font-medium text-zinc-400">
                         {!! __('pagination.next') !!}
                     </span>
                 @endif
-            </span>
+            </div>
         </nav>
     @endif
 </div>

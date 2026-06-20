@@ -5,6 +5,7 @@ namespace App\Modules\Staff\Livewire;
 use App\Modules\Staff\Support\Traits\StaffCrud;
 use App\Models\StaffSchedule;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Validation\Rule;
 use Livewire\Component;
 
 class AddStaff extends Component
@@ -26,29 +27,34 @@ class AddStaff extends Component
         }
 
         if (! empty($this->checkStructure())) {
-            $this->dispatch('staffScheduleError', __('This structure has already been added!'));
+            $this->dispatch('staffScheduleError', __('staff::common.messages.structure_exists'));
 
             return;
         }
 
+        $this->syncComputedStaffRows();
+
         $this->validate(array_merge(
             $this->rules(),
-            ['structureId' => 'required|int|exists:structures,id']
+            ['structureId' => ['required', 'integer', Rule::in($this->allowedStructureIds())]]
         ));
 
         foreach ($this->staff as $sta) {
             $data = $sta;
             unset($data['position']);
+            unset($data['hide_position']);
             StaffSchedule::create($data);
         }
 
-        $this->dispatch('staffAdded', __('Staff was added successfully!'));
+        $this->dispatch('staffAdded', __('staff::common.messages.staff_added'));
     }
 
-    public function mount()
+    public function mount(?int $selectedStructureId = null)
     {
         $this->authorize('create', StaffSchedule::class);
-        $this->title = __('New staff');
-        $this->structureId = null;
+        $this->title = __('staff::common.titles.new_staff');
+        $this->structureId = $selectedStructureId && in_array($selectedStructureId, $this->allowedStructureIds(), true)
+            ? $selectedStructureId
+            : null;
     }
 }

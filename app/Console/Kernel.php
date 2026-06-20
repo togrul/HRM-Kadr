@@ -13,6 +13,111 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         $schedule->command('notify:birthdays')->dailyAt('08:00');
+        $schedule->command('notify:holidays --days-ahead=1')->dailyAt('09:00');
+
+        if ((bool) config('attendance.processing.schedule_enabled', false)) {
+            $everyMinutes = min(59, max(1, (int) config('attendance.processing.schedule_every_minutes', 10)));
+            $schedule->command('attendance:punches:process')
+                ->cron(sprintf('*/%d * * * *', $everyMinutes))
+                ->withoutOverlapping();
+        }
+
+        if ((bool) config('attendance.snapshot.schedule_enabled', false)) {
+            $day = min(28, max(1, (int) config('attendance.snapshot.schedule_day', 1)));
+            $at = (string) config('attendance.snapshot.schedule_at', '01:30');
+            $lock = (bool) config('attendance.snapshot.schedule_lock', false);
+
+            $command = 'attendance:monthly-snapshot --previous-month';
+            if ($lock) {
+                $command .= ' --lock';
+            }
+
+            $schedule->command($command)
+                ->monthlyOn($day, $at)
+                ->withoutOverlapping();
+        }
+
+        if ((bool) config('attendance.calendar.weekend_auto_seed.schedule_enabled', true)) {
+            $at = (string) config('attendance.calendar.weekend_auto_seed.schedule_at', '00:05');
+
+            $schedule->command('attendance:calendars:seed-weekends')
+                ->monthlyOn(1, $at)
+                ->withoutOverlapping();
+        }
+
+        if ((bool) config('attendance.observability.reports.enabled', false)) {
+            $dailyAt = (string) config('attendance.observability.reports.daily_at', '08:30');
+            $weeklyDay = (int) config('attendance.observability.reports.weekly_day', 1);
+            $weeklyAt = (string) config('attendance.observability.reports.weekly_at', '08:30');
+
+            $dailyEvent = $schedule->command('attendance:query-budget --json --allow-empty')
+                ->dailyAt($dailyAt)
+                ->withoutOverlapping();
+
+            $weeklyEvent = $schedule->command('attendance:query-budget --json --allow-empty')
+                ->weeklyOn($weeklyDay, $weeklyAt)
+                ->withoutOverlapping();
+
+            if ((bool) config('attendance.observability.reports.append_output', true)) {
+                $outputPath = storage_path((string) config('attendance.observability.reports.output_file', 'logs/attendance-query-budget.log'));
+                $dailyEvent->appendOutputTo($outputPath);
+                $weeklyEvent->appendOutputTo($outputPath);
+            }
+        }
+
+        if ((bool) config('personnel.portfolio.link_health.schedule_enabled', false)) {
+            $at = (string) config('personnel.portfolio.link_health.daily_at', '03:15');
+
+            $schedule->command('personnel:portfolio-check-media-links --limit='.(int) config('personnel.portfolio.link_health.batch_limit', 100))
+                ->dailyAt($at)
+                ->withoutOverlapping();
+        }
+
+        if ((bool) config('personnel.portfolio.registry_sync.schedule_enabled', false)) {
+            $at = (string) config('personnel.portfolio.registry_sync.daily_at', '03:45');
+
+            $schedule->command('personnel:portfolio-sync-registries')
+                ->dailyAt($at)
+                ->withoutOverlapping();
+        }
+
+        if ((bool) config('personnel.portfolio.policy.schedule_enabled', false)) {
+            $at = (string) config('personnel.portfolio.policy.daily_at', '04:15');
+
+            $schedule->command('personnel:portfolio-enforce-policies')
+                ->dailyAt($at)
+                ->withoutOverlapping();
+        }
+
+        if ((bool) config('personnel.my_hr.onboarding.automation.schedule_enabled', false)) {
+            $schedule->command('onboarding-library:automation')
+                ->dailyAt((string) config('personnel.my_hr.onboarding.automation.daily_at', '05:00'))
+                ->withoutOverlapping();
+        }
+
+        if ((bool) config('personnel.my_hr.learning.automation.schedule_enabled', false)) {
+            $schedule->command('learning-library:automation')
+                ->dailyAt((string) config('personnel.my_hr.learning.automation.daily_at', '05:20'))
+                ->withoutOverlapping();
+        }
+
+        if ((bool) config('employee_lifecycle.reminders.schedule_enabled', false)) {
+            $schedule->command('employee-lifecycle:send-reminders')
+                ->dailyAt((string) config('employee_lifecycle.reminders.daily_at', '05:40'))
+                ->withoutOverlapping();
+        }
+
+        if ((bool) config('compliance.document_expiry.reminders.schedule_enabled', false)) {
+            $schedule->command('compliance:document-reminders --notify')
+                ->dailyAt((string) config('compliance.document_expiry.reminders.daily_at', '05:55'))
+                ->withoutOverlapping();
+        }
+
+        if ((bool) config('activitylog.retention.schedule_enabled', false)) {
+            $schedule->command('activitylog:clean --force')
+                ->dailyAt((string) config('activitylog.retention.daily_at', '02:30'))
+                ->withoutOverlapping();
+        }
     }
 
     /**

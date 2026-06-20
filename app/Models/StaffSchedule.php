@@ -16,8 +16,10 @@ class StaffSchedule extends Model
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logAll()
-            ->logOnlyDirty();
+            ->useLogName('staff_schedule')
+            ->logOnly(['structure_id', 'position_id', 'total', 'filled', 'vacant'])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs();
     }
 
     public $timestamps = false;
@@ -51,9 +53,16 @@ class StaffSchedule extends Model
         $_mainStructure = StaffSchedule::where('structure_id', 1)->first();
         if ($_mainStructure) {
             $filled = Personnel::active()?->count() ?? 0;
-            $_mainStructure->filled = $filled;
-            $_mainStructure->vacant = $_mainStructure?->total - $filled;
-            $_mainStructure->save();
+            $vacant = max(0, (int) $_mainStructure->total - (int) $filled);
+
+            if ((int) $_mainStructure->filled === (int) $filled && (int) $_mainStructure->vacant === $vacant) {
+                return;
+            }
+
+            $_mainStructure->forceFill([
+                'filled' => (int) $filled,
+                'vacant' => $vacant,
+            ])->saveQuietly();
         }
     }
 

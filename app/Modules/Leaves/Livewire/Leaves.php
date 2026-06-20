@@ -2,26 +2,32 @@
 
 namespace App\Modules\Leaves\Livewire;
 
+use App\Data\LeaveFilterData;
+use App\Livewire\Traits\DropdownConstructTrait;
+use App\Livewire\Traits\SideModalAction;
 use App\Models\Leave;
-use Livewire\Component;
 use App\Models\OrderStatus;
-use Livewire\Attributes\On;
+use App\Models\Structure;
+use App\Modules\Leaves\Exports\LeaveExport;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\On;
+use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Url;
+use Livewire\Component;
 use Livewire\WithPagination;
-use Illuminate\Support\Facades\DB;
-use App\Livewire\Traits\SideModalAction;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use App\Livewire\Traits\DropdownConstructTrait;
-use App\Data\LeaveFilterData;
 use Maatwebsite\Excel\Facades\Excel;
-use App\Modules\Leaves\Exports\LeaveExport;
 
 #[On(['leaveAdded', 'filterSelected', 'leaveWasDeleted', 'leaveApproved', 'leaveRejected'])]
 class Leaves extends Component
 {
     use AuthorizesRequests, DropdownConstructTrait ,SideModalAction, WithPagination;
+
+    private const PER_PAGE = 10;
 
     public LeaveFilterData $filter;
 
@@ -32,6 +38,7 @@ class Leaves extends Component
     public $status;
 
     protected ?array $statsCache = null;
+    protected array $structurePathCache = [];
 
     public function applyFilter(?array $payload = null): void
     {
@@ -107,12 +114,28 @@ class Leaves extends Component
         $this->dispatch('setDeleteLeave', $leaveId);
     }
 
+    public function openAddLeaveModal(): void
+    {
+        $this->authorize('create', \App\Models\Leave::class);
+        $this->showSideMenu = 'add-leave';
+        $this->dispatch('openSideMenu', showSideMenu: 'add-leave');
+    }
+
+    public function openEditLeaveModal(int $leaveId): void
+    {
+        $this->authorize('update', \App\Models\Leave::class);
+        $this->showSideMenu = 'edit-leave';
+        $this->modelName = $leaveId;
+        $this->dispatch('setEditLeaveModel', leaveId: $leaveId);
+        $this->dispatch('openSideMenu', showSideMenu: 'edit-leave');
+    }
+
     public function forceDeleteData($id)
     {
         $model = Leave::withTrashed()->find($id);
         $this->authorize('delete', $model);
         $model->forceDelete();
-        $this->dispatch('leaveWasDeleted', __('Leave was deleted!'));
+        $this->dispatch('leaveWasDeleted', __('leaves::common.messages.leave_deleted'));
     }
 
     public function restoreData($id)
@@ -120,37 +143,37 @@ class Leaves extends Component
         $model = Leave::withTrashed()->find($id);
         $this->authorize('restore', $model);
         $model->restore();
-        $this->dispatch('leaveAdded', __('Leave was updated successfully!'));
+        $this->dispatch('leaveAdded', __('leaves::common.messages.leave_updated'));
     }
 
     public function getTableHeaders(): array
     {
         return [
-           '#',
-            __('Fullname'),
-            __('Type'),
-            __('Dates'),
-            __('Reason'),
-            __('Status'),
-            __('File'),
-            'action',
-            'action',
+            '#',
+            __('leaves::common.labels.fullname'),
+            __('leaves::common.labels.type'),
+            __('leaves::common.labels.dates'),
+            __('leaves::common.labels.reason'),
+            __('leaves::common.labels.status'),
+            __('leaves::common.labels.file'),
+            __('personnel::common.labels.action'),
+            __('personnel::common.labels.action'),
             // 'action'
         ];
     }
 
-    #[Computed(cache:true)]
+    #[Computed(cache: true)]
     public function leaveTypes(): array
     {
         $selected = $this->filter->leave_type_id;
 
         $base = \App\Models\LeaveType::query()
-            ->select('id', DB::raw("name as label"))
+            ->select('id', DB::raw('name as label'))
             ->orderBy('id');
 
         return $this->optionsWithSelected(
             base: $base,
-            searchCol: '',   
+            searchCol: '',
             searchTerm: '',
             selectedId: $selected,
             limit: 80
@@ -168,14 +191,25 @@ class Leaves extends Component
     protected function returnData($type = 'normal')
     {
         $base = Leave::query()
-            ->when(is_numeric($this->status), fn($q) => $q->where('status_id', $this->status))
-            ->when($this->status === 'deleted', fn($q) => $q->onlyTrashed())
+            ->when(is_numeric($this->status), fn ($q) => $q->where('status_id', $this->status))
+            ->when($this->status === 'deleted', fn ($q) => $q->onlyTrashed())
             ->filter($this->search);
 
         // Liste (eager load + paginate)
         $result = $base->clone()
             ->with([
-                 'personnel' => fn ($q) => $q
+                'personnel' => fn ($q) => $q
+                    ->select([
+                        'id',
+                        'tabel_no',
+                        'surname',
+                        'name',
+                        'patronymic',
+                        'gender',
+                        'join_work_date',
+                        'structure_id',
+                        'position_id',
+                    ])
                     ->withStructureTree()   // burada parent zincirini preload eder
                     ->with([
                         'position:id,name',
@@ -187,15 +221,28 @@ class Leaves extends Component
                         ),
                         'currentWork:id,tabel_no,join_date,leave_date,is_current,position',
                     ]),
-                'leaveType',
-                'status',
-                'latestLog.changedBy'
+                'leaveType:id,name',
+                'status:id,name',
+                'latestLog' => fn ($q) => $q
+                    ->select([
+                        'leave_status_logs.id',
+                        'leave_status_logs.leave_id',
+                        'leave_status_logs.status_id',
+                        'leave_status_logs.changed_by',
+                        'leave_status_logs.comment',
+                        'leave_status_logs.changed_at',
+                    ])
+                    ->with([
+                        'changedBy:id,surname,name,patronymic',
+                    ]),
             ])
             ->orderByDesc('created_at');
 
-        return match($type) {
+        return match ($type) {
             'stats' => $this->computeStats($base),
-            default => $this->finalizePagination($result, $type),
+            default => $type === 'normal'
+                ? Cache::remember($this->listCacheKey(), now()->addSeconds(10), fn () => $this->finalizePagination($result, $type))
+                : $this->finalizePagination($result, $type),
         };
     }
 
@@ -205,23 +252,54 @@ class Leaves extends Component
             return $this->statsCache;
         }
 
-        return $this->statsCache = $base->clone()
+        return $this->statsCache = Cache::remember($this->statsCacheKey(), now()->addSeconds(10), fn () => $base->clone()
             ->join('leave_types as t', 't.id', '=', 'leaves.leave_type_id')
             ->select(
-                'leaves.*',
                 't.name as name',
                 DB::raw('COUNT(*) as count'),
-                DB::raw('SUM(DATEDIFF(ends_at, starts_at) + 1) as total_days')
+                DB::raw($this->totalDaysAggregateExpression().' as total_days')
             )
             ->groupBy('t.name')
             ->get()
             ->mapWithKeys(fn ($row) => [
                 $row->name => [
-                    'total_days' => (int) $row->total_days,
+                    'total_days' => round((float) $row->total_days, 1),
                     'count' => (int) $row->count,
                 ],
             ])
-            ->toArray();
+            ->toArray());
+    }
+
+    protected function listCacheKey(): string
+    {
+        return 'leaves:list:'.md5(json_encode([
+            'status' => $this->status,
+            'search' => $this->search->toArray(),
+            'page' => method_exists($this, 'getPage') ? $this->getPage() : 1,
+        ]));
+    }
+
+    protected function statsCacheKey(): string
+    {
+        return 'leaves:stats:'.md5(json_encode([
+            'status' => $this->status,
+            'search' => $this->search->toArray(),
+        ]));
+    }
+
+    protected function totalDaysAggregateExpression(): string
+    {
+        return DB::connection()->getDriverName() === 'sqlite'
+            ? "SUM(CASE
+                WHEN COALESCE(duration_unit, 'day') = 'hour' THEN COALESCE(total_minutes, 0) / 480.0
+                WHEN COALESCE(duration_unit, 'day') = 'half_day' THEN 0.5
+                ELSE COALESCE(total_days, CAST(julianday(ends_at) - julianday(starts_at) + 1 AS INTEGER))
+            END)"
+            : "SUM(CASE
+                WHEN COALESCE(duration_unit, 'day') = 'hour' THEN COALESCE(total_minutes, 0) / 480.0
+                WHEN COALESCE(duration_unit, 'day') = 'half_day' THEN 0.5
+                ELSE COALESCE(total_days, DATEDIFF(ends_at, starts_at) + 1)
+            END)";
     }
 
     protected function finalizePagination($query, $type)
@@ -230,14 +308,63 @@ class Leaves extends Component
             return $query->cursor();
         }
 
-        return $query->paginate(15)->withQueryString();
+        $paginated = $query->paginate(self::PER_PAGE)->withQueryString();
+
+        return $this->decoratePagination($paginated);
+    }
+
+    protected function decoratePagination(LengthAwarePaginator $paginated): LengthAwarePaginator
+    {
+        $start = ($paginated->currentPage() - 1) * $paginated->perPage();
+
+        $paginated->setCollection(
+            $paginated->getCollection()->values()->map(function (Leave $leave, int $index) use ($start) {
+                $leave->row_no = $start + $index + 1;
+                $leave->personnel_structure_path = $this->resolveStructurePath($leave->personnel?->structure);
+
+                return $leave;
+            })
+        );
+
+        return $paginated;
+    }
+
+    protected function resolveStructurePath(?Structure $structure): string
+    {
+        if (! $structure) {
+            return '';
+        }
+
+        $cacheKey = (int) $structure->id;
+
+        if (array_key_exists($cacheKey, $this->structurePathCache)) {
+            return $this->structurePathCache[$cacheKey];
+        }
+
+        $segments = [];
+        $cursor = $structure;
+
+        while ($cursor) {
+            if (is_null($cursor->parent_id)) {
+                break;
+            }
+
+            $segments[] = (string) $cursor->name;
+
+            if (! $cursor->relationLoaded('parent')) {
+                break;
+            }
+
+            $cursor = $cursor->parent;
+        }
+
+        return $this->structurePathCache[$cacheKey] = implode(' ', array_reverse($segments));
     }
 
     public function render()
     {
         $permits = $this->returnData();
-
-        $_appeal_statuses = OrderStatus::query()->where('locale', config('app.locale'))->get();
+        $_appeal_statuses = $this->appealStatuses();
 
         $stats = $this->returnData('stats');
 
@@ -248,5 +375,19 @@ class Leaves extends Component
     {
         $this->filter = LeaveFilterData::fromArray($filters);
         $this->applyFilter();
+    }
+
+    #[Computed(cache: true, persist: true)]
+    public function appealStatuses()
+    {
+        $locale = config('app.locale');
+
+        return Cache::remember(
+            "leaves:statuses:{$locale}",
+            now()->addMinutes(10),
+            fn () => OrderStatus::query()
+                ->where('locale', $locale)
+                ->get()
+        );
     }
 }

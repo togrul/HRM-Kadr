@@ -38,12 +38,12 @@ class AddMenu extends Component
     protected function validationAttributes()
     {
         return [
-            'menu.name' => __('Name'),
-            'menu.color' => __('Color'),
-            'menu.order' => __('Order'),
-            'menu.url' => __('URL'),
-            'menu.icon' => __('Icon'),
-            'menu.permission_id' => __('Permissions'),
+            'menu.name' => __('services::common.labels.name'),
+            'menu.color' => __('services::common.labels.color'),
+            'menu.order' => __('services::common.labels.order'),
+            'menu.url' => __('services::common.labels.url'),
+            'menu.icon' => __('services::common.labels.icon'),
+            'menu.permission_id' => __('services::common.labels.permissions'),
         ];
     }
 
@@ -81,12 +81,12 @@ class AddMenu extends Component
 
         Menu::create($this->menu);
 
-        $this->dispatch('menuAdded', __('Menu was added successfully!'));
+        $this->dispatch('menuAdded', __('services::menus.messages.created'));
     }
 
     public function mount()
     {
-        $this->title = __('Add menu');
+        $this->title = __('services::menus.titles.add');
     }
 
     public function render()

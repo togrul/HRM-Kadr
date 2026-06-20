@@ -3,6 +3,18 @@
 namespace App\Modules\Orders\Providers;
 
 use App\Models\OrderType;
+use App\Modules\Orders\Console\Commands\OrdersListQueryBudgetCommand;
+use App\Modules\Orders\Console\Commands\OrdersListRenderBenchmarkCommand;
+use App\Modules\Orders\Domain\Contracts\AccessibleStructureScopeReadRepository;
+use App\Modules\Orders\Domain\Contracts\OrderTypeStatusLookupReadRepository;
+use App\Modules\Orders\Domain\Contracts\PersonnelLookupReadRepository;
+use App\Modules\Orders\Domain\Contracts\RankPositionLookupReadRepository;
+use App\Modules\Orders\Domain\Contracts\StructureLookupReadRepository;
+use App\Modules\Orders\Infrastructure\Persistence\Eloquent\EloquentOrderTypeStatusLookupReadRepository;
+use App\Modules\Orders\Infrastructure\Persistence\Eloquent\EloquentPersonnelLookupReadRepository;
+use App\Modules\Orders\Infrastructure\Persistence\Eloquent\EloquentRankPositionLookupReadRepository;
+use App\Modules\Orders\Infrastructure\Persistence\Eloquent\EloquentStructureLookupReadRepository;
+use App\Modules\Orders\Infrastructure\Persistence\Eloquent\StructureServiceAccessibleStructureScopeReadRepository;
 use App\Observers\OrderTypeObserver;
 use App\Providers\Concerns\RegistersLivewireAliases;
 use App\Services\Modules\ModuleState;
@@ -15,6 +27,18 @@ class OrdersServiceProvider extends ServiceProvider
 
     public function register(): void
     {
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                OrdersListQueryBudgetCommand::class,
+                OrdersListRenderBenchmarkCommand::class,
+            ]);
+        }
+
+        $this->app->bind(AccessibleStructureScopeReadRepository::class, StructureServiceAccessibleStructureScopeReadRepository::class);
+        $this->app->bind(OrderTypeStatusLookupReadRepository::class, EloquentOrderTypeStatusLookupReadRepository::class);
+        $this->app->bind(PersonnelLookupReadRepository::class, EloquentPersonnelLookupReadRepository::class);
+        $this->app->bind(StructureLookupReadRepository::class, EloquentStructureLookupReadRepository::class);
+        $this->app->bind(RankPositionLookupReadRepository::class, EloquentRankPositionLookupReadRepository::class);
     }
 
     public function boot(): void
@@ -45,14 +69,9 @@ class OrdersServiceProvider extends ServiceProvider
     {
         return [
             'all-orders' => \App\Modules\Orders\Livewire\AllOrders::class,
-            'add-order' => \App\Modules\Orders\Livewire\AddOrder::class,
-            'edit-order' => \App\Modules\Orders\Livewire\EditOrder::class,
+            'order-composer' => \App\Modules\Orders\Livewire\OrderComposer::class,
+            'template-designer' => \App\Modules\Orders\Livewire\OrderTemplateDesigner::class,
             'delete-order' => \App\Modules\Orders\Livewire\DeleteOrder::class,
-            'templates.all-templates' => \App\Modules\Orders\Livewire\Templates\AllTemplates::class,
-            'templates.add-template' => \App\Modules\Orders\Livewire\Templates\AddTemplate::class,
-            'templates.edit-template' => \App\Modules\Orders\Livewire\Templates\EditTemplate::class,
-            'templates.delete-template' => \App\Modules\Orders\Livewire\Templates\DeleteTemplate::class,
-            'templates.set-type' => \App\Modules\Orders\Livewire\Templates\SetType::class,
         ];
     }
 
@@ -61,4 +80,3 @@ class OrdersServiceProvider extends ServiceProvider
         OrderType::observe(OrderTypeObserver::class);
     }
 }
-

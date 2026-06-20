@@ -6,7 +6,12 @@
             @endphp
 
             @if ($hasPermission)
-                <x-filter.item wire:click.prevent="setStatus('{{ $filter['key'] }}')" :active="$status === $filter['key']">
+                <x-filter.item
+                    wire:click.prevent="setStatus('{{ $filter['key'] }}')"
+                    wire:loading.attr="disabled"
+                    wire:target="setStatus"
+                    :active="$status === $filter['key']"
+                >
                     {{ $filter['label'] }}
                 </x-filter.item>
             @endif

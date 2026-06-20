@@ -56,7 +56,7 @@ class DeleteRole extends Component
 
         $this->roleId = null;
 
-        $this->dispatch('roleWasDeleted', __('Role was deleted!'));
+        $this->dispatch('roleWasDeleted', __('services::roles.messages.role_deleted'));
     }
 
     public function render()

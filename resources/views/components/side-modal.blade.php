@@ -1,105 +1,264 @@
 @props([
-    'size' => 'large'
+    'size' => 'large',
+    'showHeaderClose' => true,
+    'localState' => false,
 ])
 
 @php
-    $sizeClass = match($size){
+    $uiEvents = app(\App\Modules\Personnel\Services\PersonnelUiEvents::class);
+    $sizeClass = match ($size) {
         'large' => 'md:max-w-3xl lg:max-w-4xl',
         'x-large' => 'md:max-w-4xl lg:max-w-5xl',
-        'xx-large' => 'md:max-w-5xl lg:max-w-6xl'
+        'xx-large' => 'md:max-w-5xl lg:max-w-6xl',
+        default => 'md:max-w-3xl lg:max-w-4xl',
     };
+
+    $closeOnEvents = $uiEvents->sideModalCloseEvents();
 @endphp
 
-<div x-data="{
-        isOpen: @entangle('isSideModalOpen').live,
-        toggleBody(open) {
-            document.body.classList.toggle('overflow-hidden', open)
-        }
-    }"
-     class="fixed inset-0 z-50 overflow-hidden"
-     aria-labelledby="slide-over-title"
-     role="dialog"
-     aria-modal="true"
-     x-show="isOpen"
-     @keydown.escape.window="isOpen = false; $wire.dispatch('closeSideMenu'); toggleBody(false);"
-     x-init="
-      @php
-        $arrEvents = ['personnelAdded','permissionSet','staffAdded','userAdded','menuAdded','fileAdded','candidateAdded','templateAdded','componentAdded','orderAdded','rankAdded', 'leaveAdded', 'leaveUpdated'];
-      @endphp
-          toggleBody(isOpen);
-          $watch('isOpen', (value) => toggleBody(value));
-          $wire.on('openSideMenu',() => {
-               console.info('[SideModal] open event received');
-               isOpen = true
-          })
-          @foreach ($arrEvents as $event)
-          $wire.on('{{$event}}',() => {
-            console.warn('[SideModal] closing because event `{{$event}}` fired');
-            isOpen = false
-            $wire.dispatch('closeSideMenu')
-          })
-        @endforeach
-     "
-     style="display: none;margin-top:0 !important"
->
-     <div class="absolute inset-0 overflow-hidden">
+@teleport('body')
+    <div
+        x-data="{
+            @if($localState)
+            serverOpen: false,
+            @else
+            serverOpen: @entangle('isSideModalOpen').live,
+            @endif
+            isOpen: false,
+            closing: false,
+            activeMenu: '',
+            closeEvents: @js($closeOnEvents),
+            previousFocus: null,
+            cleanupCallbacks: [],
+            lockBody() {
+                document.body.classList.add('overflow-hidden');
+                document.body.classList.add('side-modal-open');
+                document.documentElement.classList.add('overflow-hidden');
+            },
+            unlockBody() {
+                document.body.classList.remove('overflow-hidden');
+                document.body.classList.remove('side-modal-open');
+                document.documentElement.classList.remove('overflow-hidden');
+            },
+            focusables() {
+                return [...$el.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]):not([type=hidden]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex=\'-1\'])')]
+                    .filter((element) => element.offsetParent !== null);
+            },
+            firstFocusable() {
+                return this.focusables()[0];
+            },
+            lastFocusable() {
+                return this.focusables().slice(-1)[0];
+            },
+            handleTab(event) {
+                if (! this.isOpen) {
+                    return;
+                }
 
-       <div
-          class="absolute inset-0 transition-opacity bg-gray-500 bg-opacity-75"
-          aria-hidden="true"
-          x-show="isOpen"
-          x-transition:enter="transition ease-in-out duration-500"
-          x-transition:enter-start="transform opacity-0"
-          x-transition:enter-end="transform opacity-100"
-          x-transition:leave="transition ease-in-out duration-500"
-          x-transition:leave-start="transform opacity-100"
-          x-transition:leave-end="transform opacity-0"
-          style="display: none;"
-     ></div>
+                const first = this.firstFocusable();
+                const last = this.lastFocusable();
 
-       <div class="fixed inset-y-0 right-0 flex max-w-full pl-10">
+                if (! first || ! last) {
+                    return;
+                }
 
-         <div class="relative w-screen {{$sizeClass}}"
-               x-show="isOpen"
-               x-transition:enter="transform transition ease-in-out duration-500 sm:duration-700"
-               x-transition:enter-start="transform translate-x-full"
-               x-transition:enter-end="transform translate-x-0"
-               x-transition:leave="transform transition ease-in-out duration-500 sm:duration-700"
-               x-transition:leave-start="transform translate-x-0"
-               x-transition:leave-end="transform translate-x-full"
-               style="display: none;"
-         >
+                if (event.shiftKey && document.activeElement === first) {
+                    event.preventDefault();
+                    last.focus();
+                }
 
-           <div class="absolute top-0 right-0 flex pt-5 pr-2 sm:pr-4"
-               x-show="isOpen"
-               x-transition:enter="transition ease-in-out duration-500"
-               x-transition:enter-start="transform opacity-0"
-               x-transition:enter-end="transform opacity-100"
-               x-transition:leave="transition ease-in-out duration-500"
-               x-transition:leave-start="transform opacity-100"
-               x-transition:leave-end="transform opacity-0"
-               style="display: none;"
-           >
-             <button @click="isOpen=false;toggleBody(false);$wire.call('closeSideMenu')" class="z-20 p-1 text-white rounded-lg hover:text-white focus:outline-none focus:ring-2 focus:ring-white">
-               <span class="sr-only">{{ __('Close') }}</span>
-                 <x-icons.remove-icon size="w-7 h-7" color="text-slate-500" hover="text-slate-900"></x-icons.remove-icon>
-             </button>
-           </div>
+                if (! event.shiftKey && document.activeElement === last) {
+                    event.preventDefault();
+                    first.focus();
+                }
+            },
+            open(menu = '') {
+                if (typeof menu === 'string' && menu.length > 0) {
+                    this.activeMenu = menu;
+                }
 
-           <div class="flex flex-col h-full py-6 overflow-y-scroll bg-white shadow-xl rounded-tl-2xl rounded-bl-2xl">
+                this.closing = false;
+                this.previousFocus = document.activeElement;
+                this.lockBody();
+                this.isOpen = true;
+                this.$nextTick(() => this.$refs.closeBtn?.focus());
+            },
+            close() {
+                if (this.closing) {
+                    return;
+                }
 
-             <div class="relative flex-1 px-4 sm:px-6" wire:loading.remove>
-              {{ $slot }}
-             </div>
-             <div class="relative flex-1 px-4 sm:px-6" wire:loading>
-                <div class="flex flex-col items-center justify-center w-full h-full">
-                  <h1 class="text-2xl font-medium uppercase">{{ __('Loading') }}...</h1>
-                  <x-modal-loading />
-                </div>
-             </div>
+                this.closing = true;
+                this.isOpen = false;
 
-           </div>
-         </div>
-       </div>
-     </div>
-   </div>
+                window.setTimeout(() => {
+                    this.unlockBody();
+                    this.activeMenu = '';
+
+                    if ($wire && typeof $wire.call === 'function') {
+                        $wire.call('closeSideMenu');
+                    }
+
+                    if (this.previousFocus && typeof this.previousFocus.focus === 'function') {
+                        this.$nextTick(() => this.previousFocus.focus());
+                    }
+
+                    this.closing = false;
+                }, 220);
+            },
+            closeFromServer() {
+                if (this.closing) {
+                    return;
+                }
+
+                this.closing = true;
+                this.isOpen = false;
+
+                window.setTimeout(() => {
+                    this.unlockBody();
+                    this.activeMenu = '';
+
+                    if (this.previousFocus && typeof this.previousFocus.focus === 'function') {
+                        this.$nextTick(() => this.previousFocus.focus());
+                    }
+
+                    this.closing = false;
+                }, 220);
+            },
+            destroy() {
+                this.cleanupCallbacks.forEach((cleanup) => cleanup());
+                this.cleanupCallbacks = [];
+                this.unlockBody();
+            }
+        }"
+        x-init="
+            if (serverOpen) {
+                open();
+            }
+
+            $watch('serverOpen', value => {
+                if (value && ! isOpen) {
+                    open(activeMenu);
+                }
+
+                if (! value && isOpen && ! closing) {
+                    closeFromServer();
+                }
+            });
+
+            const registerCloseListener = (eventName) => {
+                const closeHandler = () => {
+                    if (isOpen) {
+                        close();
+                    }
+                };
+
+                window.addEventListener(eventName, closeHandler);
+                cleanupCallbacks.push(() => window.removeEventListener(eventName, closeHandler));
+
+                if (window.Livewire && typeof window.Livewire.on === 'function') {
+                    const cleanup = window.Livewire.on(eventName, closeHandler);
+
+                    if (typeof cleanup === 'function') {
+                        cleanupCallbacks.push(cleanup);
+                    }
+                }
+            };
+
+            if ($wire && typeof $wire.on === 'function') {
+                $wire.on('openSideMenu', payload => {
+                    const menu = payload?.showSideMenu ?? payload?.detail?.showSideMenu ?? payload?.[0]?.showSideMenu ?? '';
+                    open(menu);
+                });
+
+                if (Array.isArray(closeEvents)) {
+                    closeEvents.forEach((eventName) => {
+                        $wire.on(eventName, () => {
+                            if (isOpen) {
+                                close();
+                            }
+                        });
+
+                        registerCloseListener(eventName);
+                    });
+                }
+            }
+        "
+        class="fixed inset-0 z-[100] !m-0 overflow-hidden"
+        x-show="isOpen || closing"
+        x-cloak
+        aria-labelledby="slide-over-title"
+        role="dialog"
+        aria-modal="true"
+        x-on:keydown.escape.window.prevent.stop="if (isOpen) close()"
+        x-on:keydown.tab="handleTab($event)"
+    >
+        <div class="absolute inset-0 overflow-hidden">
+            <button
+                type="button"
+                class="absolute inset-0 h-full w-full cursor-default bg-zinc-950/35 backdrop-blur-sm"
+                x-show="isOpen"
+                x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100"
+                x-transition:leave="transition ease-in duration-200"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                x-on:click="close()"
+                aria-label="{{ __('ui::common.actions.close') }}"
+            ></button>
+
+            <div class="fixed inset-y-0 right-0 flex max-w-full sm:pl-10">
+                <section
+                    class="side-modal-shell pointer-events-auto relative w-screen {{ $sizeClass }}"
+                    x-show="isOpen"
+                    x-transition:enter="transform transition ease-out duration-300"
+                    x-transition:enter-start="translate-x-full opacity-95"
+                    x-transition:enter-end="translate-x-0 opacity-100"
+                    x-transition:leave="transform transition ease-in duration-200"
+                    x-transition:leave-start="translate-x-0 opacity-100"
+                    x-transition:leave-end="translate-x-full opacity-95"
+                >
+                    <div class="flex h-full flex-col overflow-hidden border-l border-zinc-200 bg-white shadow-2xl">
+                        @if($showHeaderClose)
+                            <div class="absolute top-6 right-6 z-30">
+                                <button
+                                    x-ref="closeBtn"
+                                    type="button"
+                                    @click="close()"
+                                    class="inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-zinc-200 bg-white text-zinc-500 shadow-sm transition hover:bg-zinc-50 hover:text-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-300"
+                                >
+                                    <span class="sr-only">{{ __('ui::common.actions.close') }}</span>
+                                    <x-icons.default.close-icon size="w-6 h-6" color="text-zinc-500" hover="text-zinc-950"></x-icons.default.close-icon>
+                                </button>
+                            </div>
+                        @endif
+
+                        <div class="relative flex-1 overflow-y-auto px-4 py-4 pr-16 sm:px-8 sm:py-8 sm:pr-24" wire:loading.remove>
+                            {{ $slot }}
+                        </div>
+
+                        <div class="relative flex-1 overflow-y-auto px-4 py-4 sm:px-8 sm:py-8" wire:loading>
+                            <div class="w-full space-y-4 animate-pulse">
+                                <div class="h-6 w-52 rounded-md bg-zinc-200"></div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div class="h-10 rounded-lg bg-zinc-200"></div>
+                                    <div class="h-10 rounded-lg bg-zinc-200"></div>
+                                    <div class="h-10 rounded-lg bg-zinc-200"></div>
+                                    <div class="h-10 rounded-lg bg-zinc-200"></div>
+                                </div>
+                                <div class="h-24 rounded-lg bg-zinc-200"></div>
+                                <div class="grid grid-cols-3 gap-3">
+                                    <div class="h-10 rounded-lg bg-zinc-200"></div>
+                                    <div class="h-10 rounded-lg bg-zinc-200"></div>
+                                    <div class="h-10 rounded-lg bg-zinc-200"></div>
+                                </div>
+                                <div class="h-12 rounded-lg bg-zinc-200"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+@endteleport

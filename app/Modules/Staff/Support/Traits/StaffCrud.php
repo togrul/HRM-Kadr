@@ -8,6 +8,7 @@ use App\Models\Structure;
 use App\Livewire\Traits\DropdownConstructTrait;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 trait StaffCrud
 {
@@ -23,8 +24,6 @@ trait StaffCrud
 
     public $staffModel;
 
-    public $hidePosition = false;
-
     public ?int $structureId = null;
 
     /**
@@ -33,28 +32,36 @@ trait StaffCrud
     protected array $positionLabels = [];
     protected array $structureParents = [];
     protected array $structureNestedIds = [];
+    protected ?array $structureChildrenByParent = null;
+    protected ?array $allowedStructureIdsCache = null;
+    protected ?array $allowedPositionIdsCache = null;
 
     public function rules(): array
     {
-        $positionRule = $this->hidePosition ? 'nullable' : 'required|int|exists:positions,id';
-
-        return [
-            'staff.*.structure_id' => 'required|int|exists:structures,id',
-            'staff.*.position_id' => $positionRule,
+        $rules = [
+            'staff.*.structure_id' => ['required', 'integer', Rule::in($this->allowedStructureIds())],
             'staff.*.total' => 'required|integer|min:0',
             'staff.*.filled' => 'required|integer|min:0',
             'staff.*.vacant' => 'required|integer|min:0',
         ];
+
+        foreach (array_keys($this->staff) as $index) {
+            $rules["staff.$index.position_id"] = $this->rowHidesPosition((int) $index)
+                ? ['nullable']
+                : ['required', 'integer', Rule::in($this->allowedPositionIds())];
+        }
+
+        return $rules;
     }
 
     protected function validationAttributes(): array
     {
         return [
-            'staff.*.structure_id' => __('Structure'),
-            'staff.*.position_id' => __('Position'),
-            'staff.*.total' => __('Total'),
-            'staff.*.filled' => __('Filled'),
-            'staff.*.vacant' => __('Vacant'),
+            'staff.*.structure_id' => __('staff::common.fields.structure'),
+            'staff.*.position_id' => __('staff::common.fields.position'),
+            'staff.*.total' => __('staff::common.fields.total'),
+            'staff.*.filled' => __('staff::common.fields.filled'),
+            'staff.*.vacant' => __('staff::common.fields.vacant'),
         ];
     }
 
@@ -91,13 +98,14 @@ trait StaffCrud
             'total' => 0,
             'filled' => 0,
             'vacant' => 0,
+            'hide_position' => false,
             'position' => [
                 'id' => null,
                 'name' => '---',
             ],
         ];
 
-        $this->hidePositionAction($nextKey);
+        $this->syncRowHidePosition($nextKey);
     }
 
     public function deleteRow($row)
@@ -107,7 +115,7 @@ trait StaffCrud
 
     public function setData($array_key, $model, $key, $content, $name, $id)
     {
-        $this->searchPosition = null;
+        $this->searchPosition = '';
         $this->{$model}[$array_key][$key] = $id;
         $this->{$model}[$array_key][$content] = [
             'id' => $id,
@@ -116,57 +124,45 @@ trait StaffCrud
         $this->fillAutoData($array_key, $model);
     }
 
-    protected function hidePositionAction($array_key)
-    {
-        $structureId = $this->staff[$array_key]['structure_id'] ?? null;
-        $parent_id = $structureId ? $this->resolveParentId((int) $structureId) : null;
-        $this->hidePosition = empty($parent_id);
-    }
-
     protected function fillAutoData($array_key, $model)
     {
-        if (empty($this->staff)) return;
+        if (empty($this->staff)) {
+            return;
+        }
 
-        $this->hidePosition = false;
         if (empty($this->staffModel) && $this->structureId) {
             $this->staff[$array_key]['structure_id'] = $this->structureId;
         }
 
-        if (Arr::has($this->staff[$array_key], ['structure_id', 'position_id'])) {
-            $_structureId = $this->staff[$array_key]['structure_id'];
-            $_positionId = $this->staff[$array_key]['position_id'];
-            if ($model == 'structureId') {
-                $this->hidePositionAction($array_key);
-                $this->staff[$array_key]['position_id'] = null;
-                if ($_structureId > 0) {
-                    $_ids = Structure::with('subs')->find($_structureId)->getAllNestedIds();
-                    $this->staff[$array_key]['filled'] = Personnel::whereNull('leave_work_date')
-                        ->whereIn('structure_id', $_ids)
-                        ->count();
-                }
-            } else {
-                if ($_structureId > 0 && $_positionId > 0) {
-                    $this->staff[$array_key]['filled'] = Personnel::whereNull('leave_work_date')
-                        ->where('structure_id', $_structureId)
-                        ->where('position_id', $_positionId)
-                        ->count();
-                }
-            }
+        if (! Arr::has($this->staff[$array_key], ['structure_id', 'position_id'])) {
+            return;
         }
+
+        if ($model === 'structureId') {
+            $this->syncRowHidePosition($array_key);
+            $this->staff[$array_key]['position_id'] = null;
+            $this->staff[$array_key]['position'] = [
+                'id' => null,
+                'name' => '---',
+            ];
+        }
+
+        $this->syncComputedStaffRows();
     }
 
     public function updatedStructureId($value): void
     {
         foreach ($this->staff as $index => $row) {
             $this->staff[$index]['structure_id'] = $value;
-            $this->hidePositionAction($index);
+            $this->syncRowHidePosition($index);
             $this->staff[$index]['position_id'] = null;
             $this->staff[$index]['position'] = [
                 'id' => null,
                 'name' => '---',
             ];
-            $this->recalculateFilledCounts($index);
         }
+
+        $this->syncComputedStaffRows();
     }
 
     public function render()
@@ -178,7 +174,7 @@ trait StaffCrud
         return view($view_name);
     }
 
-    #[\Livewire\Attributes\Computed(persist: true)]
+    #[\Livewire\Attributes\Computed]
     public function structureOptions(): array
     {
         $selected = $this->staffModel ?? $this->structureId;
@@ -207,7 +203,7 @@ trait StaffCrud
         );
     }
 
-    #[\Livewire\Attributes\Computed(persist: true)]
+    #[\Livewire\Attributes\Computed]
     public function positionOptions(): array
     {
         $search = $this->dropdownSearch('searchPosition');
@@ -259,10 +255,9 @@ trait StaffCrud
             return;
         }
 
-        $query = Personnel::query()
-            ->whereNull('leave_work_date');
+        $query = Personnel::query()->active();
 
-        if ($positionId > 0 && ! $this->hidePosition) {
+        if ($positionId > 0 && ! $this->rowHidesPosition($index)) {
             $query->where('structure_id', $structureId)
                 ->where('position_id', $positionId);
         } else {
@@ -274,14 +269,170 @@ trait StaffCrud
         $this->recalculateVacant($index);
     }
 
+    protected function syncComputedStaffRows(): void
+    {
+        $indexes = collect(array_keys($this->staff))
+            ->filter(fn ($index) => is_numeric($index))
+            ->map(fn ($index) => (int) $index)
+            ->values()
+            ->all();
+
+        if (empty($indexes)) {
+            return;
+        }
+
+        $structureIds = collect($indexes)
+            ->map(fn (int $index) => (int) ($this->staff[$index]['structure_id'] ?? $this->structureId ?? 0))
+            ->filter(fn (int $id) => $id > 0)
+            ->unique()
+            ->values()
+            ->all();
+
+        if (empty($structureIds)) {
+            foreach ($indexes as $index) {
+                $this->staff[$index]['filled'] = 0;
+                $this->recalculateVacant($index);
+            }
+
+            return;
+        }
+
+        foreach ($indexes as $index) {
+            $this->syncRowHidePosition($index);
+        }
+
+        $nestedIdsByStructure = $this->buildNestedIdsByStructure($structureIds);
+        $relevantStructureIds = collect($nestedIdsByStructure)
+            ->flatten()
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values()
+            ->all();
+
+        $activeByStructure = Personnel::query()
+            ->active()
+            ->whereIn('structure_id', $relevantStructureIds)
+            ->select('structure_id', DB::raw('count(*) as aggregate'))
+            ->groupBy('structure_id')
+            ->pluck('aggregate', 'structure_id')
+            ->map(fn ($value) => (int) $value)
+            ->all();
+
+        $positionIds = collect($indexes)
+            ->filter(fn (int $index) => ! $this->rowHidesPosition($index))
+            ->map(fn (int $index) => (int) ($this->staff[$index]['position_id'] ?? 0))
+            ->filter(fn (int $id) => $id > 0)
+            ->unique()
+            ->values()
+            ->all();
+
+        $activeByStructurePosition = [];
+        if (! empty($positionIds)) {
+            $activeByStructurePosition = Personnel::query()
+                ->active()
+                ->whereIn('structure_id', $structureIds)
+                ->whereIn('position_id', $positionIds)
+                ->select('structure_id', 'position_id', DB::raw('count(*) as aggregate'))
+                ->groupBy('structure_id', 'position_id')
+                ->get()
+                ->reduce(function (array $carry, $row) {
+                    $structureId = (int) $row->structure_id;
+                    $positionId = (int) $row->position_id;
+                    $carry[$structureId][$positionId] = (int) $row->aggregate;
+
+                    return $carry;
+                }, []);
+        }
+
+        foreach ($indexes as $index) {
+            $structureId = (int) ($this->staff[$index]['structure_id'] ?? $this->structureId ?? 0);
+            $positionId = (int) ($this->staff[$index]['position_id'] ?? 0);
+
+            if ($structureId <= 0) {
+                $this->staff[$index]['filled'] = 0;
+                $this->recalculateVacant($index);
+
+                continue;
+            }
+
+            if ($positionId > 0 && ! $this->rowHidesPosition($index)) {
+                $filled = (int) ($activeByStructurePosition[$structureId][$positionId] ?? 0);
+            } else {
+                $filled = 0;
+                foreach ($nestedIdsByStructure[$structureId] ?? [$structureId] as $nestedId) {
+                    $filled += (int) ($activeByStructure[(int) $nestedId] ?? 0);
+                }
+            }
+
+            $this->staff[$index]['filled'] = $filled;
+            $this->recalculateVacant($index);
+        }
+    }
+
     protected function resolveStructureTreeIds(int $structureId): array
     {
         if (! isset($this->structureNestedIds[$structureId])) {
-            $structure = Structure::with('subs')->find($structureId);
-            $this->structureNestedIds[$structureId] = $structure ? $structure->getAllNestedIds() : [$structureId];
+            $nested = $this->buildNestedIdsByStructure([$structureId]);
+            $this->structureNestedIds[$structureId] = $nested[$structureId] ?? [$structureId];
         }
 
         return $this->structureNestedIds[$structureId];
+    }
+
+    protected function buildNestedIdsByStructure(array $structureIds): array
+    {
+        if (empty($structureIds)) {
+            return [];
+        }
+
+        $childrenByParent = $this->resolveChildrenByParent();
+        $memo = $this->structureNestedIds;
+
+        $collectNestedIds = function (int $id) use (&$collectNestedIds, &$memo, $childrenByParent): array {
+            if (isset($memo[$id])) {
+                return $memo[$id];
+            }
+
+            $ids = [$id];
+            foreach ($childrenByParent[$id] ?? [] as $childId) {
+                $ids = array_merge($ids, $collectNestedIds((int) $childId));
+            }
+
+            return $memo[$id] = array_values(array_unique($ids));
+        };
+
+        $nestedIdsByStructure = [];
+        foreach ($structureIds as $structureId) {
+            $structureId = (int) $structureId;
+            if ($structureId <= 0) {
+                continue;
+            }
+
+            $nestedIdsByStructure[$structureId] = $collectNestedIds($structureId);
+        }
+
+        $this->structureNestedIds = $memo;
+
+        return $nestedIdsByStructure;
+    }
+
+    protected function resolveChildrenByParent(): array
+    {
+        if ($this->structureChildrenByParent !== null) {
+            return $this->structureChildrenByParent;
+        }
+
+        $this->structureChildrenByParent = Structure::query()
+            ->select('id', 'parent_id')
+            ->get()
+            ->reduce(function (array $carry, Structure $structure) {
+                $parentId = (int) ($structure->parent_id ?? 0);
+                $carry[$parentId][] = (int) $structure->id;
+
+                return $carry;
+            }, []);
+
+        return $this->structureChildrenByParent;
     }
 
     protected function resolveParentId(int $structureId): ?int
@@ -305,7 +456,7 @@ trait StaffCrud
 
         if ($field === 'total') {
             $this->recalculateVacant($index, (int) $value);
-            $this->recalculateFilledCounts($index);
+            $this->syncComputedStaffRows();
             return;
         }
 
@@ -316,21 +467,61 @@ trait StaffCrud
                 'name' => $label,
             ];
 
-            $this->recalculateFilledCounts($index);
+            $this->syncComputedStaffRows();
 
             return;
         }
 
         if ($field === 'structure_id') {
-            $this->hidePositionAction($index);
+            $this->syncRowHidePosition($index);
             $this->staff[$index]['position_id'] = null;
             $this->staff[$index]['position'] = [
                 'id' => null,
                 'name' => '---',
             ];
 
-            $this->recalculateFilledCounts($index);
+            $this->syncComputedStaffRows();
         }
-        
+    }
+
+    protected function syncRowHidePosition(int $index): void
+    {
+        if (! array_key_exists($index, $this->staff)) {
+            return;
+        }
+
+        $structureId = (int) ($this->staff[$index]['structure_id'] ?? 0);
+        $parentId = $structureId > 0 ? $this->resolveParentId($structureId) : null;
+        $this->staff[$index]['hide_position'] = empty($parentId);
+    }
+
+    protected function rowHidesPosition(int $index): bool
+    {
+        return (bool) data_get($this->staff[$index] ?? [], 'hide_position', false);
+    }
+
+    protected function allowedStructureIds(): array
+    {
+        if ($this->allowedStructureIdsCache === null) {
+            $this->allowedStructureIdsCache = Structure::query()
+                ->accessible()
+                ->pluck('id')
+                ->map(fn ($id) => (int) $id)
+                ->all();
+        }
+
+        return $this->allowedStructureIdsCache;
+    }
+
+    protected function allowedPositionIds(): array
+    {
+        if ($this->allowedPositionIdsCache === null) {
+            $this->allowedPositionIdsCache = Position::query()
+                ->pluck('id')
+                ->map(fn ($id) => (int) $id)
+                ->all();
+        }
+
+        return $this->allowedPositionIdsCache;
     }
 }

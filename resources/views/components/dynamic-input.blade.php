@@ -13,6 +13,7 @@
     'listProperty' => 'componentForms',
     'selectedLabel' => null,
     'selectedValue' => null,
+    'input' => null,
     'suffixService' => null,
     'structureLevels' => null,
     'inputTypes' => null,
@@ -20,6 +21,8 @@
 ])
 
 @php
+    use App\Support\Translations\ModuleTranslation;
+
     $resolvedInputTypes = $inputTypes ?? [
         '$structure_main' => 'select',
         '$position' => 'select',
@@ -46,7 +49,7 @@
         '$end_date' => 'date-input',
     ];
 
-    $input = $resolvedInputTypes[$type] ?? 'text-input';
+    $input = $input ?? ($resolvedInputTypes[$type] ?? 'text-input');
     $list_string = $listProperty;
     $suffixService = \App\Support\StructureSelect::suffixService($suffixService);
     $structureLevels = \App\Support\StructureSelect::levels($structureLevels);
@@ -54,10 +57,19 @@
         $selectedId = \App\Support\StructureSelect::resolveSelected($component, $list_string, $key, $field, $defaultId);
         $fallbackValue = data_get($component->{$list_string}[$key] ?? [], $field);
         $fieldLabel = $defaultLabel ?? (is_array($fallbackValue)
-                ? ($fallbackValue['name'] ?? __('Structure'))
-                : (! empty($fallbackValue) ? $fallbackValue : __('Structure')));
+                ? ($fallbackValue['name'] ?? __('ui::common.labels.structure'))
+                : (! empty($fallbackValue) ? $fallbackValue : __('ui::common.labels.structure')));
 
         return [$selectedId, $fieldLabel];
+    };
+
+    $resolvedSearchModel = blank($searchField) ? null : $searchField;
+    $resolvedLoadOnOpen = match ($field) {
+        'personnel_id' => 'personnels',
+        'position_id' => 'positions',
+        'structure_main_id' => 'main_structures',
+        'rank_id' => 'ranks',
+        default => null,
     };
 @endphp
 
@@ -78,6 +90,30 @@
         @enderror
     </div>
 @elseif($input == 'select')
+    @php
+        $selectModel = collect($model ?? [])
+            ->map(function ($option) use ($field, $key) {
+                $id = data_get($option, 'id', data_get($option, 'value'));
+                if ($id === null || $id === '') {
+                    return null;
+                }
+
+                $id = (int) $id;
+                $label = (string) data_get($option, 'label', data_get($option, 'name', data_get($option, 'title', data_get($option, 'text', ''))));
+
+                if ($field === 'structure_id' && method_exists($this, 'dropdownFieldLabel')) {
+                    $label = (string) $this->dropdownFieldLabel('structure_id', $id, (int) $key);
+                }
+
+                return [
+                    'id' => $id,
+                    'label' => $label,
+                ];
+            })
+            ->filter()
+            ->values()
+            ->all();
+    @endphp
     <div class="flex flex-col">
         <x-ui.select-dropdown
             :label="$title"
@@ -85,19 +121,12 @@
             mode="gray"
             class="w-full"
             wire:model.live="{{ $list_string }}.{{ $key }}.{{ $field }}"
-            :model="$model ?? []"
+            :model="$selectModel"
             :disabled="$disabled"
+            :search-model="$resolvedSearchModel"
             :selected-label="$selectedLabel"
-        >
-            @if(!empty($searchField))
-                <x-livewire-input
-                    mode="gray"
-                    name="{{ $searchField }}"
-                    wire:model.live="{{ $searchField }}"
-                    @click.stop="isOpen = true"
-                ></x-livewire-input>
-            @endif
-        </x-ui.select-dropdown>
+            :load-on-open="$resolvedLoadOnOpen"
+        />
         @error("{$list_string}.{$key}.{$field}")
             <x-validation> {{ $message }} </x-validation>
         @enderror
@@ -132,7 +161,7 @@
                     @endphp
                     @foreach($model?->where('parent_id', $mainStructureId) ?? [] as $model_item)
                         @php
-                            $_level_name = __($structureLevels[$model_item->level] ?? '');
+                            $_level_name = ModuleTranslation::resolveStoredText((string) ($structureLevels[$model_item->level] ?? ''));
                             $_select_value = ($field == 'structure_id' && $isCoded)
                                                     ? $model_item->code."{$suffixService->getNumberSuffix($model_item->code)} {$_level_name}"
                                                     : $model_item->name;         
@@ -147,7 +176,7 @@
                             :suffix-service="$suffixService"
                             :structure-levels="$structureLevels"
                         >
-                            {{ __($_select_value) }}
+                            {{ ModuleTranslation::resolveStoredText((string) $_select_value) }}
                         </x-radio-tree.item>
                     @endforeach
                 </x-radio-tree.list>

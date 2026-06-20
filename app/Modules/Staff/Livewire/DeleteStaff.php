@@ -46,7 +46,7 @@ class DeleteStaff extends Component
 
         $this->staffIds = null;
 
-        $this->dispatch('staffWasDeleted', __('Staff was deleted!'));
+        $this->dispatch('staffWasDeleted', __('staff::common.messages.staff_deleted'));
     }
 
     public function render()

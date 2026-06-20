@@ -2,17 +2,17 @@
 
 namespace App\Modules\Personnel\Livewire;
 
-use App\Modules\Personnel\Exports\PersonnelExport;
 use App\Livewire\Traits\SideModalAction;
 use App\Models\Personnel;
-use App\Models\Position;
-use App\Models\Structure;
+use App\Modules\Personnel\Exports\PersonnelExport;
+use App\Modules\Personnel\Services\PersonnelListStateNormalizer;
+use App\Modules\Personnel\Services\PersonnelLookupService;
+use App\Modules\Personnel\Services\PersonnelQueryService;
+use App\Modules\Personnel\Support\ProfessionalPortfolio\ProfessionalPortfolioPermissionMatrix;
 use App\Services\StructureService;
 use App\Traits\NestedStructureTrait;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
@@ -29,53 +29,78 @@ class AllPersonnel extends Component
     use SideModalAction;
     use WithPagination;
 
-    #[Url]
-    public ?string $status = null;
+    #[Url(as: 'status')]
+    public string $status = 'current';
 
     #[Url]
     public array $filters = [];
 
-    #[Url]
-    public array|string $structure = '';
+    #[Url(as: 'structure')]
+    public array $structure = [];
 
     #[Url(as: 'position')]
     public ?int $selectedPosition = null;
 
+    public bool $filterDetailMounted = false;
+
+    public bool $pendingFilterOpen = false;
+
     protected ?array $accessibleStructureCache = null;
 
-    protected ?Collection $positionCache = null;
+    protected array $allowedStatuses = ['current', 'leaves', 'all', 'deleted', 'pending'];
 
-    protected function queryString()
+    #[On('personnelTableRowAction')]
+    public function forwardTableRowAction(string $type, mixed $payload = null): void
     {
-        return [
-            'structure' => [
-                'compact' => ',',
-            ],
-        ];
+        $this->handleRowAction($type, $payload);
     }
 
     public function exportExcel()
     {
         $this->authorize('export', Personnel::class);
 
-        $report['data'] = $this->returnData(type: 'excel');
+        $report['data'] = $this->personnelExportRows();
         $report['filter'] = $this->filters;
         $name = Carbon::now()->format('d.m.Y H:i');
 
         return Excel::download(new PersonnelExport($report), "personnel-$name.xlsx");
     }
 
-    public function printPage($personnel, $headers = null): void
-    {
-        $headers = [__('#'), __('Tabel'), __('Fullname'), __('Gender'), __('Position'), 'action', 'action', 'action', 'action'];
-        redirect()->route('print.page', ['model' => $personnel, 'headers' => $headers]);
-    }
-
     #[On('filterSelected')]
     public function filterSelected(array $filter)
     {
-        $this->filters = $filter;
-        $this->reset(['structure']);
+        $normalized = $this->normalizeAndPersistFilters($filter);
+
+        if ($this->filters === $normalized) {
+            return;
+        }
+
+        $this->filters = $normalized;
+        $this->structure = [];
+        $this->resetPage();
+    }
+
+    public function openFilter(): void
+    {
+        if (! $this->filterDetailMounted) {
+            $this->filterDetailMounted = true;
+            $this->pendingFilterOpen = true;
+
+            return;
+        }
+
+        $this->dispatch('setOpenFilter', filter: $this->filters);
+    }
+
+    #[On('filterDetailReady')]
+    public function handleFilterDetailReady(): void
+    {
+        if (! $this->pendingFilterOpen) {
+            return;
+        }
+
+        $this->pendingFilterOpen = false;
+        $this->dispatch('setOpenFilter', filter: $this->filters);
     }
 
     public function setDeletePersonnel($personnelId)
@@ -97,7 +122,7 @@ class AllPersonnel extends Component
         $personnel->update([
             'deleted_by' => null,
         ]);
-        $this->dispatch('personnelAdded', __('Personnel was updated successfully!'));
+        $this->dispatch('personnelAdded', __('personnel::common.messages.personnel_updated'));
     }
 
     public function forceDeleteData($id)
@@ -111,47 +136,91 @@ class AllPersonnel extends Component
         $this->authorize('forceDelete', $model);
 
         $model->forceDelete();
-        $this->dispatch('personnelWasDeleted', __('Personnel was deleted!'));
+        $this->dispatch('personnelWasDeleted', __('personnel::common.messages.personnel_deleted'));
     }
 
     #[On('selectStructure')]
-    public function selectStructure($id)
+    public function selectStructure(mixed $payload = null): void
     {
+        $id = $this->resolveSelectStructureId($payload);
+
+        if ($id === null) {
+            return;
+        }
+
         $this->structure = $this->getNestedStructure($id);
+        $this->resetPage();
+    }
+
+    protected function resolveSelectStructureId(mixed $payload): ?int
+    {
+        if (is_array($payload)) {
+            if (array_key_exists('id', $payload)) {
+                $payload = $payload['id'];
+            } elseif (! empty($payload) && array_is_list($payload)) {
+                $payload = $payload[0];
+            }
+        }
+
+        if (! is_numeric($payload)) {
+            return null;
+        }
+
+        $id = (int) $payload;
+
+        return $id > 0 ? $id : null;
     }
 
     public function getStatusFilters(): array
     {
         return [
-            ['key' => 'current', 'label' => __('Active')],
-            ['key' => 'leaves', 'label' => __('Resigned')],
-            ['key' => 'all', 'label' => __('All')],
-            ['key' => 'deleted', 'label' => __('Deleted'), 'permission' => 'access-admin'],
-            ['key' => 'pending', 'label' => __('Pending')],
+            ['key' => 'current', 'label' => __('personnel::common.labels.active')],
+            ['key' => 'leaves', 'label' => __('personnel::common.labels.resigned')],
+            ['key' => 'all', 'label' => __('personnel::common.labels.all')],
+            ['key' => 'deleted', 'label' => __('personnel::common.labels.deleted'), 'permission' => 'access-admin'],
+            ['key' => 'pending', 'label' => __('personnel::common.labels.pending')],
         ];
     }
 
     public function getTableHeaders(): array
     {
         return [
-            __('#'),
-            __('Tabel'),
-            __('Fullname'),
-            __('Structure'),
-            __('Date'),
-            'action',
+            __('personnel::common.labels.number'),
+            __('personnel::common.labels.tabel'),
+            __('personnel::common.labels.fullname'),
+            __('personnel::common.labels.structure'),
+            __('personnel::common.labels.date'),
+            __('services::common.labels.action'),
         ];
     }
 
     public function setStatus($newStatus)
     {
+        if (! is_string($newStatus) || ! in_array($newStatus, $this->allowedStatuses, true)) {
+            return;
+        }
+
+        if ($this->status === $newStatus) {
+            return;
+        }
+
         $this->status = $newStatus;
         $this->resetPage();
     }
 
     public function setPosition($new)
     {
-        $this->selectedPosition = $new;
+        if (! is_numeric($new)) {
+            return;
+        }
+
+        $newPosition = (int) $new;
+
+        if ($this->selectedPosition === $newPosition) {
+            return;
+        }
+
+        $this->selectedPosition = $newPosition;
         $this->resetPage();
     }
 
@@ -166,114 +235,182 @@ class AllPersonnel extends Component
         $this->filters = [];
         $this->resetPage();
         $this->fillFilter();
-        $this->dispatch('filterResetted');
+        if ($this->filterDetailMounted) {
+            $this->dispatch('filterResetted');
+        }
     }
 
     public function fillFilter()
     {
-        $this->status = request()->query('status', 'current');
-        $this->filters ??= [];
+        $normalizer = app(PersonnelListStateNormalizer::class);
+
+        $this->status = $normalizer->normalizeStatus($this->status, $this->allowedStatuses);
+        $this->filters = $normalizer->normalizeFilters(is_array($this->filters) ? $this->filters : []);
+        $this->structure = $normalizer->normalizeStructure($this->structure);
+        $this->selectedPosition = $normalizer->normalizePosition($this->selectedPosition);
     }
 
-    #[Computed]
-    public function personnels()
+    protected function getSafeFilterPayload(): array
     {
-        return $this->returnData();
+        return app(PersonnelListStateNormalizer::class)->normalizeFilters(
+            is_array($this->filters) ? $this->filters : []
+        );
     }
 
-    #[Computed]
+    protected function normalizeAndPersistFilters(array $filter): array
+    {
+        return app(PersonnelListStateNormalizer::class)->normalizeFilters($filter);
+    }
+
+    #[Computed(persist: true)]
     public function positions()
     {
-        return $this->positionCache
-            ??= Cache::remember(
-                'personnel:positions:list',
-                now()->addMinutes(30),
-                function () {
-                    return Position::query()
-                        ->select('id', 'name')
-                        ->orderBy('id')
-                        ->get();
-                }
-            );
+        return app(PersonnelLookupService::class)->positions();
     }
 
     public function mount()
     {
         $this->authorize('viewAny', Personnel::class);
         $this->fillFilter();
-        $this->filters = $this->filters ?? [];
+        $this->filters = $this->getSafeFilterPayload();
     }
 
-    protected function returnData($type = 'normal')
+    public function canEditPersonnels(): bool
     {
-        $query = $this->personnelQuery();
-
-        return $type == 'normal'
-            ? $query->paginate(10)->withQueryString()
-            : $query->cursor();
+        return auth()->user()?->can('edit-personnels') ?? false;
     }
 
-    protected function personnelQuery(): Builder
+    public function canDeletePersonnels(): bool
     {
-        $structureIds = $this->selectedStructureIds();
+        return auth()->user()?->can('delete-personnels') ?? false;
+    }
 
-        $locale = app()->getLocale();
+    public function canViewProfessionalPortfolio(): bool
+    {
+        return ProfessionalPortfolioPermissionMatrix::canViewPortfolio(auth()->user());
+    }
 
-        $builder = Personnel::query()
-            ->with([
-                'latestRank.rank' => function ($query) use ($locale) {
-                    $query->select('id', "name_{$locale}");
-                },
-                'latestVacation',
-                'latestBusinessTrip',
-                'position:id,name',
-                'creator:id,name',
-                'deletedBy:id,name',
-                'personDidDelete:id,name',
-                'hasActiveDisposal',
+    public function canManageMyHrAccounts(): bool
+    {
+        return auth()->user()?->can('manage-my-hr-accounts') ?? false;
+    }
+
+    public function canManageOnboardingDocuments(): bool
+    {
+        return (auth()->user()?->can('assign-onboarding-documents') ?? false)
+            || (auth()->user()?->can('manage-onboarding-document-templates') ?? false);
+    }
+
+    public function canManageLearningMaterials(): bool
+    {
+        return (auth()->user()?->can('assign-employee-content') ?? false)
+            || (auth()->user()?->can('manage-employee-content-library') ?? false);
+    }
+
+    public function handleRowAction(string $type, mixed $payload = null): void
+    {
+        if (is_object($payload)) {
+            $payload = (array) $payload;
+        } elseif (! is_array($payload)) {
+            $payload = [];
+        }
+
+        $actionType = data_get($payload, 'type');
+        if (! is_string($actionType)) {
+            $actionType = in_array($type, ['edit', 'files', 'information', 'vacations'], true) ? 'open' : $type;
+        }
+        $value = (string) data_get($payload, 'value', '');
+
+        $menu = (string) data_get($payload, 'menu', '');
+
+        if ($actionType === 'open') {
+            if ($menu === 'professional-portfolio' && ! $this->canViewProfessionalPortfolio()) {
+                return;
+            }
+
+            if ($menu === 'my-hr-account' && ! $this->canManageMyHrAccounts()) {
+                return;
+            }
+
+            if ($menu === 'onboarding-documents' && ! $this->canManageOnboardingDocuments()) {
+                return;
+            }
+
+            if ($menu === 'learning-materials' && ! $this->canManageLearningMaterials()) {
+                return;
+            }
+
+            if (! in_array($menu, ['professional-portfolio', 'my-hr-account', 'onboarding-documents', 'learning-materials'], true) && ! $this->canEditPersonnels()) {
+                return;
+            }
+        }
+
+        if (! $this->canDeletePersonnels() && in_array($actionType, ['delete', 'force-delete'], true)) {
+            return;
+        }
+
+        match ($actionType) {
+            'open' => $this->openPersonnelProfileSideMenu((string) data_get($payload, 'menu'), $value),
+            'restore' => $this->restoreData($value),
+            'delete' => $this->setDeletePersonnel($value),
+            'force-delete' => $this->forceDeleteData($value),
+            default => null,
+        };
+    }
+
+    protected function openPersonnelProfileSideMenu(string $menu, string $value): void
+    {
+        $this->logPersonnelProfileAccess($menu, $value);
+        $this->openSideMenu($menu, $value);
+    }
+
+    protected function logPersonnelProfileAccess(string $menu, string $value): void
+    {
+        $personnel = $this->resolvePersonnelForAccessLog($menu, $value);
+
+        if (! $personnel || ! auth()->check()) {
+            return;
+        }
+
+        activity('personnel_access')
+            ->causedBy(auth()->user())
+            ->performedOn($personnel)
+            ->event('profile_opened')
+            ->withProperties([
+                'menu' => $menu,
+                'viewed_personnel_id' => $personnel->id,
+                'viewed_personnel_tabel_no' => $personnel->tabel_no,
+                'viewed_personnel_fullname' => $personnel->fullname,
+                'ip' => request()?->ip(),
+                'user_agent' => request()?->userAgent(),
             ])
-                ->withStructureTree()
-                ->withExists(['hasActiveDisposal as has_active_disposal'])
+            ->log('Personnel profile opened');
+    }
 
-            ->when(! empty($structureIds), function (Builder $query) use ($structureIds) {
-                $query->whereIn('structure_id', $structureIds);
-            }, function (Builder $query) {
-                $query->whereIn('structure_id', $this->accessibleStructureIds());
-            })
-            ->when(! empty($this->selectedPosition), function (Builder $query) {
-                $query->where('position_id', $this->selectedPosition);
-            })
-            ->when($this->status, function (Builder $query) {
-                switch ($this->status) {
-                    case 'current':
-                        $query->whereNull('leave_work_date');
-                        break;
-                    case 'leaves':
-                        $query->whereNotNull('leave_work_date');
-                        break;
-                    case 'deleted':
-                        $query->onlyTrashed();
-                        break;
-                    case 'pending':
-                        $query->where('is_pending', true);
-                        break;
-                    default:
-                        $query->where('is_pending', false);
-                }
-            })
-            ->when(! empty($this->filters), fn ($q) => $q->filter($this->filters))
-            ->orderBy(
-                Position::select('name')
-                    ->whereColumn('positions.id', 'personnels.position_id')
-                    ->limit(1)
-            )
-            ->orderBy(
-                Structure::select('name')
-                    ->whereColumn('structures.id', 'personnels.structure_id')
-                    ->limit(1)
-            );
+    protected function resolvePersonnelForAccessLog(string $menu, string $value): ?Personnel
+    {
+        if ($value === '') {
+            return null;
+        }
 
-        return $builder;
+        $query = Personnel::withTrashed()->select(['id', 'tabel_no', 'surname', 'name', 'patronymic']);
+
+        return match ($menu) {
+            'edit-personnel',
+            'professional-portfolio',
+            'my-hr-account',
+            'onboarding-documents',
+            'learning-materials' => is_numeric($value) ? $query->find((int) $value) : null,
+            'show-files',
+            'show-information',
+            'show-vacations' => $query->where('tabel_no', $value)->first(),
+            default => null,
+        };
+    }
+
+    protected function selectedStructureIds(): array
+    {
+        return app(PersonnelListStateNormalizer::class)->normalizeStructure($this->structure);
     }
 
     protected function accessibleStructureIds(): array
@@ -285,22 +422,38 @@ class AllPersonnel extends Component
         return $this->accessibleStructureCache = resolve(StructureService::class)->getAccessibleStructures();
     }
 
-    protected function selectedStructureIds(): array
+    protected function personnelQuery(bool $withStructureTree = true): Builder
     {
-        if (is_array($this->structure)) {
-            return array_filter(array_map('intval', $this->structure));
-        }
+        return app(PersonnelQueryService::class)->build(
+            status: $this->status,
+            filters: $this->filters,
+            selectedStructureIds: $this->selectedStructureIds(),
+            accessibleStructureIds: $this->accessibleStructureIds(),
+            selectedPosition: $this->selectedPosition,
+            withStructureTree: $withStructureTree,
+        );
+    }
 
-        if (is_string($this->structure)) {
-            $value = trim($this->structure);
-            if ($value === '') {
-                return [];
-            }
+    protected function personnelExportRows(): iterable
+    {
+        return app(PersonnelQueryService::class)->buildExport(
+            status: $this->status,
+            filters: $this->filters,
+            selectedStructureIds: $this->selectedStructureIds(),
+            accessibleStructureIds: $this->accessibleStructureIds(),
+            selectedPosition: $this->selectedPosition,
+        )
+            ->cursor()
+            ->map(fn (Personnel $personnel): array => [
+                'name' => $personnel->name,
+                'surname' => $personnel->surname,
+                'patronymic' => $personnel->patronymic,
+            ]);
+    }
 
-            return array_filter(array_map('intval', explode(',', $value)));
-        }
-
-        return [];
+    protected function normalizeStructureState(mixed $value): array
+    {
+        return app(PersonnelListStateNormalizer::class)->normalizeStructure($value);
     }
 
     public function render()

@@ -8,6 +8,8 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -103,6 +105,21 @@ class Candidate extends Model
         return $this->belongsTo(AppealStatus::class, 'status_id', 'id')->where('locale', config('app.locale'));
     }
 
+    public function documents(): HasMany
+    {
+        return $this->hasMany(CandidateDocument::class)->orderBy('sort_order')->orderBy('id');
+    }
+
+    public function applications(): HasMany
+    {
+        return $this->hasMany(CandidateApplication::class);
+    }
+
+    public function latestApplication(): HasOne
+    {
+        return $this->hasOne(CandidateApplication::class)->latestOfMany('id');
+    }
+
     public function scopeFilter($query, array $filters)
     {
         foreach ($filters as $field => $value) {
@@ -126,6 +143,13 @@ class Candidate extends Model
                             ->orWhere('surname', 'LIKE', "%$value%")
                             ->orWhere('patronymic', 'LIKE', "%$value%");
                     });
+                    break;
+                case 'document_category':
+                    if ($value !== 'all') {
+                        $query->whereHas('documents', function ($q) use ($value) {
+                            $q->where('category', $value);
+                        });
+                    }
                     break;
                 default:
                     if (in_array($field, $this->likeFilterFields) && $value !== null) {

@@ -5,8 +5,15 @@
 ])
 
 @php
+    $startDate = $startDate instanceof \Illuminate\Support\Carbon
+        ? $startDate->copy()
+        : \Illuminate\Support\Carbon::parse($startDate);
+    $endDate = $endDate instanceof \Illuminate\Support\Carbon
+        ? $endDate->copy()
+        : \Illuminate\Support\Carbon::parse($endDate);
+
     $duration = $startDate->diffInDays($endDate);
-    $currentProgress = $startDate->diffInDays(\Carbon\Carbon::now()->addDay());
+    $currentProgress = $startDate->diffInDays(\Illuminate\Support\Carbon::now()->addDay());
     $percentage = ($duration > 0) ? ($currentProgress / $duration) * 100 : 0;
 @endphp
 
@@ -15,14 +22,16 @@
         <span class="text-xs text-gray-400">
             {{ $startDate->format('d.m.Y') }}
         </span>
-        <span class="text-xs text-{{ $color }}-500">
-            {{ $slot }}
-        </span>
         <span class="text-xs text-gray-800">
             {{ $endDate->format('d.m.Y') }}
         </span>
     </div>
     <div class="w-full h-1.5 bg-{{ $color }}-100 rounded-lg relative overflow-hidden">
         <span class="bg-{{ $color }}-500 absolute left-0 top-0 h-full" style="width:{{ number_format($percentage, 2) }}%;"></span>
+    </div>
+    <div class="flex justify-center items-center">
+      <span class="text-xs text-{{ $color }}-500">
+          {{ $slot }}
+      </span>
     </div>
 </div>

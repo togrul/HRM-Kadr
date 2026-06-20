@@ -30,7 +30,7 @@ class RankForm extends Form
     protected function validationAttributes()
     {
         return [
-            'name_az' => __('Name'),
+            'name_az' => __('services::ranks.fields.name_az'),
         ];
     }
 

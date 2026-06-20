@@ -1,0 +1,53 @@
+<?php
+
+return [
+    'labels' => [
+        'kicker' => 'Self-service account',
+        'position' => 'Vəzifə',
+        'structure' => 'Struktur',
+        'account_status' => 'Hesab vəziyyəti',
+        'user_name' => 'İstifadəçi adı',
+        'user_email' => 'İstifadəçi emaili',
+        'invited_at' => 'Son set-password vaxtı',
+        'link_source' => 'Bağ mənbəyi',
+        'set_password_link' => 'Set-password keçidi',
+        'manual_link' => 'Manual explicit bağ',
+        'user_picker' => 'İstifadəçini seç',
+    ],
+    'actions' => [
+        'create_account' => 'Hesab yarat',
+        'regenerate_link' => 'Keçidi yenilə',
+        'save_manual_link' => 'Bağı yadda saxla',
+        'copy_link' => 'Keçidi kopyala',
+        'open_link' => 'Keçidi aç',
+    ],
+    'badges' => [
+        'account_exists' => 'Hesab mövcuddur',
+        'account_missing' => 'Hesab yoxdur',
+        'email_ready' => 'Email hazırdır',
+        'email_missing' => 'Email çatışmır',
+    ],
+    'link_sources' => [
+        'self_service_provisioned' => 'Şəxsi kabinet üçün sistem tərəfindən yaradılıb',
+        'manual_self_service_link' => 'Manual explicit bağ qurulub',
+    ],
+    'messages' => [
+        'provisioning_hint' => 'Bu action istifadəçi hesabını yaradır və ya mövcud hesabı həmin əməkdaşla explicit şəkildə bağlayır. Sistem set-password keçidi generasiya edir; əməkdaş ilk parolunu həmin link üzərindən təyin etməlidir.',
+        'set_password_help' => 'Bu keçid əməkdaşla təhlükəsiz kanalla paylaşılmalıdır. Keçid yenidən generasiya olunarsa əvvəlki link etibarsız qala bilər.',
+        'reset_link_placeholder' => 'Hesab yaradıldıqdan və ya keçid yeniləndikdən sonra set-password link burada görünəcək.',
+        'reset_link_ready' => 'Set-password keçidi hazırdır',
+        'reset_link_ready_hint' => 'Bu keçidi əməkdaşa göndərin. Əməkdaş ilk parolunu bu link üzərindən təyin etməlidir.',
+        'reset_link_copied' => 'Set-password keçidi kopyalandı.',
+        'email_required' => 'Şəxsi kabinet hesabı yaratmaq üçün əməkdaş kartında email göstərilməlidir.',
+        'pending_personnel' => 'Təsdiq gözləyən əməkdaş üçün self-service hesabı yaradılmır.',
+        'email_conflict' => 'Bu email ilə başqa istifadəçi hesabı və fərqli əməkdaş bağı mövcuddur.',
+        'existing_user_requires_manual_link' => 'Bu email ilə artıq istifadəçi hesabı mövcuddur. Təhlükəsizlik üçün onu avtomatik ələ keçirmək olmur; manual explicit bağdan istifadə edin.',
+        'user_already_linked' => 'Seçilən istifadəçi artıq başqa əməkdaş kartına bağlıdır.',
+        'account_created' => 'Şəxsi kabinet hesabı yaradıldı və set-password keçidi hazırlandı.',
+        'reset_link_regenerated' => 'Set-password keçidi yenidən generasiya olundu.',
+        'email_missing_short' => 'Email göstərilməyib',
+        'manual_link_help' => 'Əgər user hesabı artıq ayrıca yaradılıbsa, onu bu əməkdaş kartına explicit şəkildə bağlamaq olar. Bu bağ gələcəkdə email uyğunluğundan asılı qalmayacaq.',
+        'manual_link_saved' => 'İstifadəçi və əməkdaş bağı yadda saxlanıldı.',
+        'unknown_link_source' => 'Şəxsi kabinet üçün bağ qurulub',
+    ],
+];

@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('appeal_statuses', function (Blueprint $table) {
-            $table->unique(['id', 'locale']);
+            if (Schema::hasColumn('appeal_statuses', 'locale')) {
+                $table->unique(['id', 'locale']);
+            }
         });
     }
 

@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Modules\Personnel\Application\Services\MyHr\MyHrAccountProvisioningService;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 use Illuminate\View\View;
 
 class AuthenticatedSessionController extends Controller
@@ -29,7 +31,7 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(RouteServiceProvider::HOME);
+        return redirect()->intended($this->defaultRedirectPath());
     }
 
     /**
@@ -44,5 +46,21 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerateToken();
 
         return redirect('/');
+    }
+
+    protected function defaultRedirectPath(): string
+    {
+        $user = Auth::user();
+
+        if (
+            $user
+            && $user->hasRole(MyHrAccountProvisioningService::EMPLOYEE_ROLE)
+            && $user->can('show-my-hr')
+            && Route::has('my-hr')
+        ) {
+            return route('my-hr');
+        }
+
+        return RouteServiceProvider::HOME;
     }
 }

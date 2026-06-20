@@ -1,0 +1,76 @@
+<?php
+
+return [
+    'titles' => [
+        'set_permission' => 'İcazə təyin et - :role',
+        'add_permission' => 'İcazə əlavə et',
+        'edit_permission' => 'İcazəni redaktə et',
+        'delete_role' => 'Rolu sil',
+        'delete_permission' => 'İcazəni sil',
+    ],
+    'actions' => [
+        'add_role' => 'Rol əlavə et',
+        'create_role' => 'Yeni rol yarat',
+        'manage_role_permissions' => ':role rolu üçün icazələri idarə et',
+        'add_permission' => 'İcazə əlavə et',
+        'search_permission' => 'İcazə axtar',
+    ],
+    'fields' => [
+        'permission_description' => 'İcazə təsviri',
+    ],
+    'messages' => [
+        'role_saved' => 'Rol uğurla yeniləndi!',
+        'role_deleted' => 'Rol silindi!',
+        'permission_saved' => 'İcazə uğurla əlavə olundu!',
+        'permission_deleted' => 'İcazə silindi!',
+        'permission_assigned' => 'İcazə rola uğurla təyin olundu!',
+        'delete_role_description' => 'Bu rolu silmək istədiyinizə əminsiniz? Bu əməliyyat geri qaytarılmır.',
+        'delete_permission_description' => 'Bu icazəni silmək istədiyinizə əminsiniz? Bu əməliyyat geri qaytarılmır.',
+    ],
+    'badges' => [
+        'modules' => [
+            'attendance' => 'Davamiyyət',
+            'orders' => 'Əmrlər',
+            'candidates' => 'Namizədlər',
+            'time_off' => 'İcazələr',
+            'workforce' => 'İşçi heyəti',
+            'admin' => 'Admin',
+            'general' => 'Ümumi',
+        ],
+        'risks' => [
+            'high' => 'Yüksək risk',
+            'medium' => 'Orta risk',
+            'low' => 'Aşağı risk',
+        ],
+        'admin_only' => 'Yalnız admin',
+        'default' => 'Standart',
+    ],
+    'names' => [
+        'admin' => 'Admin',
+        'administrator' => 'Administrator',
+        'employee_self_service' => 'Əməkdaş özünəxidmət',
+        'hr_admin' => 'HR administratoru',
+        'hr_auditor' => 'HR auditoru',
+        'hr_employee' => 'HR əməkdaşı',
+        'hr_manager' => 'HR meneceri',
+    ],
+    'dashboard' => [
+        'title' => 'Rollar',
+        'subtitle' => 'Sistem daxilində təyin edilmiş istifadəçi rollarının siyahısı.',
+        'admin_description' => 'Tam giriş səlahiyyəti və sistem idarəetməsi.',
+        'role_description' => 'Modul, struktur və əməliyyat girişləri bu rol üzrə idarə olunur.',
+        'permission_count' => '{0} 0 icazə|{1} 1 icazə|[2,*] :count icazə',
+        'assigned_users' => 'Təyin edilmiş istifadəçilər',
+        'no_users' => 'İstifadəçi yoxdur',
+    ],
+    'permission_panel' => [
+        'eyebrow' => 'İcazə idarəetməsi',
+        'title' => 'İcazələrin idarə edilməsi',
+        'subtitle' => 'Təhlükəsiz təyinat qərarları üçün rol girişlərini modul qrupları üzrə seçin.',
+        'role_badge' => ':role rolu',
+        'help' => 'Təhlükəsiz təyinat qərarları üçün rol girişlərini modul qrupları üzrə seçin.',
+        'no_permissions' => 'Axtarışa uyğun icazə tapılmadı.',
+        'stats' => 'Ümumi statistika',
+        'stats_value' => ':selected / :total aktiv',
+    ],
+];

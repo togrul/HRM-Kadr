@@ -2,10 +2,8 @@
 
 namespace Tests\Unit\Services;
 
-use App\Enums\KnowledgeStatusEnum;
 use App\Models\Country;
 use App\Models\EducationDegree;
-use App\Models\Language;
 use App\Models\Personnel;
 use App\Models\Position;
 use App\Models\Structure;
@@ -20,70 +18,126 @@ class PersonnelRelationsServiceTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_it_creates_multi_relations_from_payload(): void
+    public function test_it_syncs_current_labor_activity_lookup_ids_to_personnel_and_persists_them(): void
     {
         $personnel = $this->makePersonnel();
-        $language = Language::create(['id' => 1, 'name' => 'English']);
 
-        $payloads = [
-            'service_cards' => [
-                [
-                    'card_number' => 'CARD-1',
-                    'given_date' => '2025-01-01',
-                    'valid_date' => '2030-01-01',
-                ],
-            ],
-            'languages' => [
-                [
-                    'language_id' => $language->id,
-                    'knowledge_status' => KnowledgeStatusEnum::Good->value,
-                ],
-            ],
-        ];
-
-        app(PersonnelRelationsService::class)->create($personnel, $payloads, []);
-
-        $this->assertDatabaseHas('personnel_cards', [
-            'tabel_no' => $personnel->tabel_no,
-            'card_number' => 'CARD-1',
+        $newStructure = Structure::query()->create([
+            'id' => 501,
+            'name' => 'Yeni struktur',
+            'shortname' => 'YS',
+            'parent_id' => null,
+            'coefficient' => 1,
+            'code' => 501,
+            'level' => 1,
         ]);
 
-        $this->assertDatabaseHas('personnel_foreign_languages', [
+        $newPosition = Position::query()->create([
+            'id' => 501,
+            'name' => 'Şöbə müdiri',
+            'approval_rank' => 2,
+            'is_approval_target' => true,
+        ]);
+
+        app(PersonnelRelationsService::class)->update($personnel, [
+            'labor_activities' => [[
+                'company_name' => 'YS / Yeni struktur',
+                'position' => 'Şöbə müdiri',
+                'position_id' => $newPosition->id,
+                'structure_id' => $newStructure->id,
+                'join_date' => '2026-03-15',
+                'leave_date' => null,
+                'is_current' => true,
+                'use_lookup' => true,
+                'is_special_service' => false,
+            ]],
+        ]);
+
+        $personnel->refresh();
+
+        $this->assertSame($newPosition->id, $personnel->position_id);
+        $this->assertSame($newStructure->id, $personnel->structure_id);
+
+        $this->assertDatabaseHas('personnel_labor_activities', [
             'tabel_no' => $personnel->tabel_no,
-            'language_id' => $language->id,
-            'knowledge_status' => KnowledgeStatusEnum::Good->value,
+            'position_id' => $newPosition->id,
+            'structure_id' => $newStructure->id,
+            'is_current' => 1,
         ]);
     }
 
-    public function test_it_reconciles_relations_during_update(): void
+    public function test_it_keeps_existing_labor_rows_when_adding_a_new_current_row(): void
     {
         $personnel = $this->makePersonnel();
-        $personnel->cards()->create([
-            'card_number' => 'OLD',
-            'given_date' => '2022-01-01',
-            'valid_date' => '2024-01-01',
+        $oldStructureId = $personnel->structure_id;
+        $oldPositionId = $personnel->position_id;
+
+        $existing = $personnel->laborActivities()->create([
+            'company_name' => 'Köhnə struktur',
+            'structure_id' => $oldStructureId,
+            'position' => 'Proqramçı',
+            'position_id' => $oldPositionId,
+            'join_date' => '2024-01-01',
+            'leave_date' => '2026-03-14',
+            'is_current' => false,
+            'is_special_service' => false,
         ]);
 
-        $payloads = [
-            'service_cards' => [
+        $newStructure = Structure::query()->create([
+            'id' => 601,
+            'name' => 'Yeni struktur 2',
+            'shortname' => 'YS2',
+            'parent_id' => null,
+            'coefficient' => 1,
+            'code' => 601,
+            'level' => 1,
+        ]);
+
+        $newPosition = Position::query()->create([
+            'id' => 601,
+            'name' => 'Şöbə rəisi',
+            'approval_rank' => 1,
+            'is_approval_target' => true,
+        ]);
+
+        app(PersonnelRelationsService::class)->update($personnel, [
+            'labor_activities' => [
                 [
-                    'card_number' => 'NEW',
-                    'given_date' => '2024-02-01',
-                    'valid_date' => '2026-02-01',
+                    'id' => $existing->id,
+                    'company_name' => 'Köhnə struktur',
+                    'structure_id' => $oldStructureId,
+                    'position' => 'Proqramçı',
+                    'position_id' => $oldPositionId,
+                    'join_date' => '2024-01-01',
+                    'leave_date' => '2026-03-14',
+                    'is_current' => false,
+                    'is_special_service' => false,
+                ],
+                [
+                    'company_name' => 'Yeni struktur 2',
+                    'structure_id' => $newStructure->id,
+                    'position' => 'Şöbə rəisi',
+                    'position_id' => $newPosition->id,
+                    'join_date' => '2026-03-15',
+                    'leave_date' => null,
+                    'is_current' => true,
+                    'is_special_service' => false,
                 ],
             ],
-        ];
-
-        app(PersonnelRelationsService::class)->update($personnel, $payloads);
-
-        $this->assertDatabaseHas('personnel_cards', [
-            'tabel_no' => $personnel->tabel_no,
-            'card_number' => 'NEW',
         ]);
 
-        $this->assertDatabaseMissing('personnel_cards', [
+        $this->assertSame(2, $personnel->laborActivities()->count());
+        $this->assertDatabaseHas('personnel_labor_activities', [
+            'id' => $existing->id,
             'tabel_no' => $personnel->tabel_no,
-            'card_number' => 'OLD',
+            'position_id' => $oldPositionId,
+            'structure_id' => $oldStructureId,
+        ]);
+        $this->assertDatabaseHas('personnel_labor_activities', [
+            'tabel_no' => $personnel->tabel_no,
+            'position_id' => $newPosition->id,
+            'structure_id' => $newStructure->id,
+            'is_current' => 1,
         ]);
     }
 
@@ -91,83 +145,57 @@ class PersonnelRelationsServiceTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $country = Country::create(['id' => 1, 'code' => 'AZ']);
-        $degree = EducationDegree::create([
+        Country::query()->create([
+            'id' => 1,
+            'code' => 'AZ',
+        ]);
+        EducationDegree::query()->create([
             'id' => 1,
             'title_az' => 'Bakalavr',
             'title_en' => 'Bachelor',
             'title_ru' => 'Bakalavr',
         ]);
-
-        $structure = Structure::create([
-            'name' => 'HQ',
-            'shortname' => 'HQ',
+        WorkNorm::query()->create([
+            'id' => 1,
+            'name_az' => 'Tam',
+            'name_en' => 'Full',
+            'name_ru' => 'Polniy',
+        ]);
+        $structure = Structure::query()->create([
+            'id' => 500,
+            'name' => 'Köhnə struktur',
+            'shortname' => 'KS',
             'parent_id' => null,
             'coefficient' => 1,
-            'code' => 1,
+            'code' => 500,
             'level' => 1,
         ]);
-
-        $position = Position::create([
-            'id' => 1,
-            'name' => 'Officer',
+        $position = Position::query()->create([
+            'id' => 500,
+            'name' => 'Proqramçı',
+            'approval_rank' => 0,
+            'is_approval_target' => true,
         ]);
 
-        $workNorm = WorkNorm::create([
-            'id' => 1,
-            'name_az' => 'Full',
-            'name_en' => 'Full',
-            'name_ru' => 'Full',
-        ]);
-
-        return Personnel::withoutEvents(function () use ($user, $country, $degree, $structure, $position, $workNorm) {
-            return Personnel::factory()->create([
+        return Personnel::withoutEvents(function () use ($user, $structure, $position) {
+            return Personnel::query()->create([
                 'tabel_no' => 'TB'.Str::upper(Str::random(6)),
                 'surname' => 'Doe',
                 'name' => 'John',
-            'patronymic' => 'Smith',
-            'photo' => null,
-            'has_changed_initials' => false,
-            'previous_surname' => null,
-            'previous_name' => null,
-            'previous_patronymic' => null,
-            'initials_changed_date' => null,
-            'initials_change_reason' => null,
-            'birthdate' => '1990-01-01',
-            'gender' => 1,
-            'phone' => '1234567',
-            'mobile' => '7654321',
-            'email' => 'john.doe@example.test',
-            'nationality_id' => $country->id,
-            'has_changed_nationality' => false,
-            'previous_nationality_id' => null,
-            'nationality_changed_date' => null,
-            'nationality_change_reason' => null,
-            'pin' => 'P1234567',
-            'residental_address' => 'Main street',
-            'registered_address' => 'Second street',
-            'education_degree_id' => $degree->id,
-            'structure_id' => $structure->id,
-            'position_id' => $position->id,
-            'work_norm_id' => $workNorm->id,
-            'join_work_date' => '2020-01-01',
-            'leave_work_date' => null,
-            'social_origin_id' => null,
-            'disability_id' => null,
-            'disability_given_date' => null,
-            'extra_important_information' => null,
-            'computer_knowledge' => null,
-            'participation_in_war' => null,
-            'discrediting_information' => null,
-            'scientific_works_inventions' => null,
-            'medical_inspection_result' => null,
-            'medical_inspection_date' => null,
-            'special_inspection_result' => null,
-            'special_inspection_date' => null,
-            'added_by' => $user->id,
-            'deleted_by' => null,
-            'is_pending' => false,
-                'referenced_by' => null,
+                'patronymic' => 'Smith',
+                'birthdate' => '1990-01-01',
+                'gender' => 1,
+                'mobile' => '994501112233',
+                'nationality_id' => 1,
+                'pin' => 'P1234567',
+                'residental_address' => 'Main st',
+                'education_degree_id' => 1,
+                'structure_id' => $structure->id,
+                'position_id' => $position->id,
+                'work_norm_id' => 1,
+                'join_work_date' => '2020-01-01',
+                'added_by' => $user->id,
+                'is_pending' => false,
             ]);
         });
     }

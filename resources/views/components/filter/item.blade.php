@@ -3,6 +3,10 @@
      'mode' => 'default'
 ])
 
+@php
+    $href = $attributes->get('href', '#');
+@endphp
+
 <li @class([
      'px-3 py-1 font-medium transition duration-150 ease-in rounded-lg flex justify-center items-center',
      'bg-white shadow-md' =>  $active && $mode == 'default',
@@ -10,8 +14,8 @@
      'text-black hover:bg-white' => $mode == 'default',
      'text-slate-100 hover:bg-slate-600' => $mode == 'dark'
  ])>
-     <a href="#"
-     {{ $attributes->merge(['class' => '']) }}
+     <a href="{{ $href }}"
+     {{ $attributes->except('href')->merge(['class' => '']) }}
      >
          {{ $slot }}
      </a>

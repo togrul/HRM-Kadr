@@ -1,8 +1,8 @@
 <x-modal-delete
   livewire-event-to-open-modal="deletePermissionWasSet"
   event-to-close-modal="permissionWasDeleted"
-  :modal-title="__('Delete permission')"
-  :modal-description="__('Are you sure you want to delete this permission? This action cannot be undone.')"
-  :modal-confirm-button-text="__('Delete')"
+  :modal-title="__('services::roles.titles.delete_permission')"
+  :modal-description="__('services::roles.messages.delete_permission_description')"
+  :modal-confirm-button-text="__('services::common.actions.delete')"
   wire-click="deletePermission"
 />

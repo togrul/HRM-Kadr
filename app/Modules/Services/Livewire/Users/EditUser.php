@@ -6,6 +6,7 @@ use App\Livewire\Traits\DropdownConstructTrait;
 use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Spatie\Permission\Models\Role;
@@ -29,20 +30,22 @@ class EditUser extends Component
     {
         $rules = [
             'user.name' => 'required|min:1',
-            'user.email' => 'required|unique:users,email,'.$this->userModel->id,
+            'user.email' => 'required|email|unique:users,email,'.$this->userModel->id,
             'roleId' => 'required|exists:roles,id',
         ];
 
-        if (! empty($this->user['old_password'])) {
-            if (Hash::check($this->user['old_password'], $this->userModel->password)) {
-                $rules['user.old_password'] = 'required|min:4';
-                $rules['user.password'] = 'required|min:4|different:user.old_password';
-            } else {
+        // Only validate password fields when a new password is actually supplied.
+        if (! empty($this->user['password'])) {
+            $rules['user.password'] = ['required', Password::min(8), 'different:user.old_password'];
+            $rules['user.confirm-password'] = 'required|same:user.password';
+
+            // Users changing their OWN password must prove the current one.
+            if ((int) $this->userModel->id === (int) auth()->id()) {
                 $rules['user.old_password'] = ['required', function ($attribute, $value, $fail) {
-                    if (! Hash::check($this->user['old_password'], $this->userModel->password)) {
-                        $fail(__('Old Password didn\'t match'));
+                    if (! Hash::check((string) $value, $this->userModel->password)) {
+                        $fail(__('services::users.messages.old_password_mismatch'));
                     }
-                }, ];
+                }];
             }
         }
 
@@ -52,19 +55,23 @@ class EditUser extends Component
     protected function validationAttributes()
     {
         return [
-            'user.name' => __('Name'),
-            'user.email' => __('Email'),
-            'user.password' => __('Password'),
-            'user.confirm-password' => __('Confirm password'),
-            'roleId' => __('Role'),
+            'user.name' => __('services::common.labels.name'),
+            'user.email' => __('services::common.labels.email'),
+            'user.password' => __('services::common.labels.password'),
+            'user.confirm-password' => __('services::common.labels.confirm_password'),
+            'roleId' => __('services::common.labels.role'),
         ];
     }
 
     public function mount()
     {
-        // $this->authorize('manage-settings',$this->user);
-        $this->title = __('Edit user');
-        $this->userModel = User::where('id', $this->userModel['id'])->first();
+        $this->authorize('manage-settings');
+        $this->title = __('services::users.titles.edit');
+        $userId = is_array($this->userModel)
+            ? ($this->userModel['id'] ?? null)
+            : $this->userModel;
+
+        $this->userModel = User::where('id', $userId)->firstOrFail();
         $this->userModel->load('roles');
         $role = $this->userModel->roles->first();
         $this->roleId = $role?->id;
@@ -76,18 +83,27 @@ class EditUser extends Component
 
     public function store()
     {
+        $this->authorize('manage-settings');
+
         $this->validate();
 
-        if (isset($this->user['password'])) {
-            $this->user['password'] = Hash::make($this->user['password']);
+        // Whitelist updatable columns; never mass-assign the raw client array.
+        $payload = [
+            'name' => $this->user['name'],
+            'email' => $this->user['email'],
+            'is_active' => (bool) ($this->user['is_active'] ?? false),
+        ];
+
+        if (! empty($this->user['password'])) {
+            $payload['password'] = Hash::make($this->user['password']);
         }
 
-        $this->userModel->update($this->user);
+        $this->userModel->update($payload);
         if ($this->roleId) {
             $this->userModel->roles()->sync($this->roleId);
         }
 
-        $this->dispatch('userAdded', __('User was updated successfully!'));
+        $this->dispatch('userAdded', __('services::users.messages.updated'));
     }
 
     public function render()

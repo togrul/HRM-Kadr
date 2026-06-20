@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Models\Personnel;
 use App\Models\User;
+use App\Modules\Notifications\Support\NotificationCampaignDispatcher;
 use App\Notifications\NewPersonnelAdded;
 use App\Notifications\PersonnelWasDeleted;
 
@@ -25,10 +26,14 @@ class PersonnelObserver
      */
     public function updated(Personnel $personnel): void
     {
-        //        $adminUsers = User::role('admin')->get();
-        //        foreach ($adminUsers as $admins) {
-        //            $admins->notify(new NewPersonnelAdded($personnel));
-        //        }
+        if (! $personnel->wasChanged(['position_id', 'structure_id'])) {
+            return;
+        }
+
+        app(NotificationCampaignDispatcher::class)->dispatchPositionChange($personnel, [
+            'old_position_id' => $personnel->getOriginal('position_id'),
+            'old_structure_id' => $personnel->getOriginal('structure_id'),
+        ]);
     }
 
     /**

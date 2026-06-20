@@ -3,18 +3,23 @@
 namespace App\Modules\Personnel\Livewire;
 
 use App\Models\Personnel;
+use App\Modules\Personnel\Support\Traits\DispatchesPersonnelUiEvents;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
 class Files extends Component
 {
     use AuthorizesRequests, WithFileUploads;
+    use DispatchesPersonnelUiEvents;
 
     public $title;
 
     public $files = [];
+
+    public $uploadedFile = null;
 
     public $file_list = [];
 
@@ -25,8 +30,10 @@ class Files extends Component
     public function rules()
     {
         return [
-            'files.file' => 'required|file',
-            'files.filename' => 'required|string|min:1',
+            // svg excluded: it can carry inline <script> (stored XSS when served
+            // from the public disk). max caps upload size (KB).
+            'uploadedFile' => 'required|file|max:10240|mimes:pdf,doc,docx,xls,xlsx,csv,txt,jpg,jpeg,png,gif,webp,bmp',
+            'files.filename' => 'required|string|min:1|max:255',
         ];
     }
 
@@ -34,16 +41,25 @@ class Files extends Component
     {
         $this->validate();
 
-        $this->file_list[] = $this->files;
+        $this->file_list[] = [
+            'file' => $this->uploadedFile,
+            'filename' => data_get($this->files, 'filename'),
+        ];
 
-        $this->files = [];
+        $this->uploadedFile = null;
+        $this->files = ['filename' => null];
     }
 
     public function deleteFile($key)
     {
         $path = $this->file_list[$key]['file'];
-        Storage::disk('public')->delete($path);
+
+        if (is_string($path)) {
+            Storage::disk($this->fileDisk($path))->delete($path);
+        }
+
         unset($this->file_list[$key]);
+        $this->file_list = array_values($this->file_list);
     }
 
     public function store()
@@ -52,7 +68,9 @@ class Files extends Component
             foreach ($this->file_list as $fileList) {
                 $_existingFile = $this->personnelFiles->files()->where('filename', $fileList['filename'])->firstOrNew();
                 if (empty($_existingFile->file)) {
-                    $fileList['file'] = $fileList['file']->store('files', 'public');
+                    // Private disk — PII documents are served only via the gated
+                    // personnel.files.download route, never a public URL.
+                    $fileList['file'] = $fileList['file']->store('files', 'local');
                 }
                 $_existingFile->fill($fileList);
                 $_existingFile->save();
@@ -62,7 +80,8 @@ class Files extends Component
         } else {
             $this->personnelFiles->files()->delete();
         }
-        $this->dispatch('fileAdded', __('File has added successfully!'));
+        $this->dispatch('fileAdded', __('personnel::files.messages.saved'));
+        $this->dispatchModalCloseEvent();
     }
 
     public function mount()
@@ -72,15 +91,92 @@ class Files extends Component
             ->withTrashed()
             ->first();
 
-       $this->authorize('update', $this->personnelFiles);
+        $this->authorize('update', $this->personnelFiles);
 
-        $this->title = __('Files') . "( {$this->personnelFiles->fullname} )";
+        $this->title = __('personnel::files.titles.files_for', [
+            'name' => $this->personnelFiles->fullname,
+        ]);
 
         $this->file_list = $this->personnelFiles->files->toArray();
+        $this->files = ['filename' => null];
+        $this->uploadedFile = null;
     }
 
     public function render()
     {
         return view('personnel::livewire.personnel.files');
+    }
+
+    public function fileRoute(array $file): string
+    {
+        $raw = data_get($file, 'file');
+        $id = data_get($file, 'id');
+
+        if (is_string($raw)) {
+            // Stored documents are streamed through the authorized download route,
+            // not a public Storage::url(). Pending (unsaved) uploads keep their
+            // temporary preview URL.
+            return $id
+                ? route('personnel.files.download', $id)
+                : '#';
+        }
+
+        return method_exists($raw, 'temporaryUrl')
+            ? $raw->temporaryUrl()
+            : '#';
+    }
+
+    private function fileDisk(string $path): string
+    {
+        return Storage::disk('local')->exists($path) ? 'local' : 'public';
+    }
+
+    public function fileExtension(array $file): string
+    {
+        $raw = data_get($file, 'file');
+        $name = (string) data_get($file, 'filename', '');
+
+        if (is_string($raw)) {
+            $extension = pathinfo($raw, PATHINFO_EXTENSION) ?: pathinfo($name, PATHINFO_EXTENSION);
+
+            return Str::upper((string) $extension ?: 'FILE');
+        }
+
+        if (method_exists($raw, 'getClientOriginalExtension')) {
+            return Str::upper((string) $raw->getClientOriginalExtension() ?: 'FILE');
+        }
+
+        return 'FILE';
+    }
+
+    public function fileSizeLabel(array $file): string
+    {
+        $raw = data_get($file, 'file');
+
+        if (is_string($raw)) {
+            $disk = $this->fileDisk($raw);
+            if (Storage::disk($disk)->exists($raw)) {
+                return $this->formatBytes((int) Storage::disk($disk)->size($raw));
+            }
+        }
+
+        if (method_exists($raw, 'getSize')) {
+            return $this->formatBytes((int) $raw->getSize());
+        }
+
+        return '---';
+    }
+
+    private function formatBytes(int $bytes): string
+    {
+        if ($bytes <= 0) {
+            return '0 KB';
+        }
+
+        $units = ['B', 'KB', 'MB', 'GB'];
+        $power = min((int) floor(log($bytes, 1024)), count($units) - 1);
+        $value = $bytes / (1024 ** $power);
+
+        return number_format($value, $power === 0 ? 0 : 1).' '.$units[$power];
     }
 }

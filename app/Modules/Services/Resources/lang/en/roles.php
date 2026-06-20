@@ -1,0 +1,76 @@
+<?php
+
+return [
+    'titles' => [
+        'set_permission' => 'Set permission - :role',
+        'add_permission' => 'Add permission',
+        'edit_permission' => 'Edit permission',
+        'delete_role' => 'Delete role',
+        'delete_permission' => 'Delete permission',
+    ],
+    'actions' => [
+        'add_role' => 'Add role',
+        'create_role' => 'Create new role',
+        'manage_role_permissions' => 'Manage permissions for :role',
+        'add_permission' => 'Add permission',
+        'search_permission' => 'Search permission',
+    ],
+    'fields' => [
+        'permission_description' => 'Permission description',
+    ],
+    'messages' => [
+        'role_saved' => 'Role was updated successfully!',
+        'role_deleted' => 'Role was deleted!',
+        'permission_saved' => 'Permission was added successfully!',
+        'permission_deleted' => 'Permission was deleted!',
+        'permission_assigned' => 'Permission was added to role successfully!',
+        'delete_role_description' => 'Are you sure you want to delete this role? This action cannot be undone.',
+        'delete_permission_description' => 'Are you sure you want to delete this permission? This action cannot be undone.',
+    ],
+    'badges' => [
+        'modules' => [
+            'attendance' => 'Attendance',
+            'orders' => 'Orders',
+            'candidates' => 'Candidates',
+            'time_off' => 'Time off',
+            'workforce' => 'Workforce',
+            'admin' => 'Admin',
+            'general' => 'General',
+        ],
+        'risks' => [
+            'high' => 'High risk',
+            'medium' => 'Medium risk',
+            'low' => 'Low risk',
+        ],
+        'admin_only' => 'Admin only',
+        'default' => 'Default',
+    ],
+    'names' => [
+        'admin' => 'Admin',
+        'administrator' => 'Administrator',
+        'employee_self_service' => 'Employee Self-Service',
+        'hr_admin' => 'HR Admin',
+        'hr_auditor' => 'HR Auditor',
+        'hr_employee' => 'HR Employee',
+        'hr_manager' => 'HR Manager',
+    ],
+    'dashboard' => [
+        'title' => 'Roles',
+        'subtitle' => 'List of user roles assigned inside the system.',
+        'admin_description' => 'Full access permissions and system administration.',
+        'role_description' => 'Module, structure and action access is managed through this role.',
+        'permission_count' => '{0} 0 permissions|{1} 1 permission|[2,*] :count permissions',
+        'assigned_users' => 'Assigned users',
+        'no_users' => 'No users',
+    ],
+    'permission_panel' => [
+        'eyebrow' => 'Permission management',
+        'title' => 'Manage permissions',
+        'subtitle' => 'Select role access by module groups for safe assignments.',
+        'role_badge' => ':role role',
+        'help' => 'Select role access by module groups for safe assignments.',
+        'no_permissions' => 'No permissions matched the search.',
+        'stats' => 'General statistics',
+        'stats_value' => ':selected / :total active',
+    ],
+];

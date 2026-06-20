@@ -56,7 +56,7 @@
               </div>
               <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
                 <h3 class="text-lg font-medium leading-6 text-gray-900" id="modal-title">
-                   {{ __('You cannot delete.') }}
+                   {{ __('ui::common.labels.cannot_delete') }}
                 </h3>
                 <div class="mt-2">
                   <p class="text-sm font-medium text-gray-500" x-text="messageToDisplay">
@@ -67,7 +67,7 @@
           </div>
           <div class="px-4 py-3 bg-gray-50 sm:px-6 sm:flex sm:flex-row-reverse">
             <button @click="openDelete = false" type="button" class="inline-flex justify-center w-full px-4 py-2 mt-3 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-               {{ __('Cancel') }}
+               {{ __('ui::common.actions.cancel') }}
             </button>
           </div>
 

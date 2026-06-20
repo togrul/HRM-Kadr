@@ -57,7 +57,7 @@ class DeleteCandidate extends Component
 
         $this->candidateId = null;
 
-        $this->dispatch('candidateWasDeleted', __('Candidate was deleted!'));
+        $this->dispatch('candidateWasDeleted', __('candidates::common.messages.candidate_deleted'));
     }
 
     public function render()

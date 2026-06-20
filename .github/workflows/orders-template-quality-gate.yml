@@ -1,0 +1,71 @@
+name: Orders Template Quality Gate
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'app/**'
+      - 'config/**'
+      - 'app/Modules/Orders/**'
+      - 'docs/orders-*.md'
+      - 'composer.json'
+      - 'composer.lock'
+      - '.github/workflows/orders-template-quality-gate.yml'
+  push:
+    branches: [ "main", "master", "laravel12" ]
+    paths:
+      - 'app/**'
+      - 'config/**'
+      - 'app/Modules/Orders/**'
+      - 'docs/orders-*.md'
+      - 'composer.json'
+      - 'composer.lock'
+      - '.github/workflows/orders-template-quality-gate.yml'
+
+jobs:
+  orders-template-gate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, bcmath, pdo, pdo_sqlite
+          coverage: none
+
+      - name: Cache composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate --ansi
+          touch database/database.sqlite
+
+      - name: Run migrations
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: database/database.sqlite
+        run: php artisan migrate --force
+
+      - name: Blaze-safe view lint
+        run: php artisan views:blaze-safe-lint --strict
+
+      - name: Run Orders Template quality gate
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: database/database.sqlite
+          ORDERS_ENGINE_STRICT_MODE: true
+        run: composer ci:orders-template-gate

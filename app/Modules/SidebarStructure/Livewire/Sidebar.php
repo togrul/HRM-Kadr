@@ -5,13 +5,29 @@ namespace App\Modules\SidebarStructure\Livewire;
 use App\Models\Structure;
 use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\On;
-use Livewire\Attributes\Url;
 use Livewire\Component;
 
 class Sidebar extends Component
 {
-    #[Url]
     public $selectedStructure;
+
+    #[On('structureUpdated')]
+    public function refreshStructureTree(): void
+    {
+        Cache::forget('structures');
+    }
+
+    public function mount(): void
+    {
+        $selectedFromUrl = request()->query('structure');
+
+        if (is_array($selectedFromUrl) && ! empty($selectedFromUrl)) {
+            $first = reset($selectedFromUrl);
+            if (is_numeric($first)) {
+                $this->selectedStructure = (int) $first;
+            }
+        }
+    }
 
     #[On('filterSelected')]
     public function filterSelected()
@@ -22,7 +38,7 @@ class Sidebar extends Component
     public function selectStructure($id): void
     {
         $this->selectedStructure = $id;
-        $this->dispatch('selectStructure', $id);
+        $this->dispatch('selectStructure', (int) $id);
     }
 
     public function render()
@@ -32,5 +48,10 @@ class Sidebar extends Component
         });
 
         return view('structure::livewire.structure.sidebar', compact('structures'));
+    }
+
+    public function placeholder()
+    {
+        return view('structure::livewire.structure.placeholders.sidebar');
     }
 }

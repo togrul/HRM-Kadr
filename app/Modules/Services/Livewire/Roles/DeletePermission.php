@@ -56,7 +56,7 @@ class DeletePermission extends Component
 
         $this->permissionId = null;
 
-        $this->dispatch('permissionWasDeleted', __('Permission was deleted!'));
+        $this->dispatch('permissionWasDeleted', __('services::roles.messages.permission_deleted'));
     }
 
     public function render()

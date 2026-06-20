@@ -34,7 +34,7 @@
 
                         <x-slot name="content">
                             <x-dropdown-link :href="route('profile.edit')">
-                                {{ __('Profile') }}
+                                {{ __('ui::profile.titles.profile') }}
                             </x-dropdown-link>
 
                             <!-- Authentication -->
@@ -44,7 +44,7 @@
                                 <x-dropdown-link :href="route('logout')"
                                                  onclick="event.preventDefault();
                                                 this.closest('form').submit();">
-                                    {{ __('Log Out') }}
+                                    {{ __('ui::auth.actions.log_out') }}
                                 </x-dropdown-link>
                             </form>
                         </x-slot>
@@ -83,10 +83,11 @@
 
                 <div class="flex flex-col space-y-4 h-full max-h-[calc(100vh-300px)] overflow-y-auto">
                     @foreach(config('admin.menu_items') as $menuItem)
+                        @continue($menuItem['route'] !== '#' && ! \App\Support\Navigation\MenuPresentation::hasRoute($menuItem['route']))
                         @php
                             $iconClass = $menuItem['icon'];
                             $name = "icons.{$iconClass}";
-                            $route = $menuItem['route'] !== '#' ? route($menuItem['route']) : $menuItem['route'];
+                            $route = \App\Support\Navigation\MenuPresentation::route($menuItem['route']);
                             $active = request()->routeIs($menuItem['route']);
                         @endphp
                         <a href="{{ $route }}" wire:navigate class="flex space-x-3 items-center px-2 group">
@@ -104,7 +105,7 @@
                     <div class="flex items-center justify-start">
                         <a href="{{ route('home') }}" class="group flex justify-center items-center space-x-3 text-sm transition-all duration-300 sm:flex sm:items-center">
                             <x-icons.shutdown-icon size="w-6 h-6" color="text-gray-100" hover="text-yellow-500"></x-icons.shutdown-icon>
-                            <span>{{ __('Return to dashboard') }}</span>
+                            <span>{{ __('ui::common.labels.return_to_dashboard') }}</span>
                         </a>
                     </div>
                     <!-- Settings Dropdown -->

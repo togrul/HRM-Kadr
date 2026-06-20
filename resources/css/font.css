@@ -142,3 +142,52 @@
     font-weight: 600;
     src: local('CircularSpTitle-Bold'), url('../fonts/CircularSpTitle-Bold.woff2') format('woff2');
   }
+
+  @font-face {
+    font-family: 'IBMPlexMono';
+    font-style: normal;
+    font-weight: 100;
+    src: local('IBMPlexMono-Thin'), url('../fonts/IBMPlexMono-Thin.ttf') format('truetype');
+  }
+
+  @font-face {
+    font-family: 'IBMPlexMono';
+    font-style: normal;
+    font-weight: 200;
+    src: local('IBMPlexMono-ExtraLight'), url('../fonts/IBMPlexMono-ExtraLight.ttf') format('truetype');
+  }
+
+  @font-face {
+    font-family: 'IBMPlexMono';
+    font-style: normal;
+    font-weight: 300;
+    src: local('IBMPlexMono-Light'), url('../fonts/IBMPlexMono-Light.ttf') format('truetype');
+  }
+
+  @font-face {
+    font-family: 'IBMPlexMono';
+    font-style: normal;
+    font-weight: 400;
+    src: local('IBMPlexMono-Regular'), url('../fonts/IBMPlexMono-Regular.ttf') format('truetype');
+  }
+
+  @font-face {
+    font-family: 'IBMPlexMono';
+    font-style: normal;
+    font-weight: 500;
+    src: local('IBMPlexMono-Medium'), url('../fonts/IBMPlexMono-Medium.ttf') format('truetype');
+  }
+
+  @font-face {
+    font-family: 'IBMPlexMono';
+    font-style: normal;
+    font-weight: 600;
+    src: local('IBMPlexMono-SemiBold'), url('../fonts/IBMPlexMono-SemiBold.ttf') format('truetype');
+  }
+
+  @font-face {
+    font-family: 'IBMPlexMono';
+    font-style: normal;
+    font-weight: 700;
+    src: local('IBMPlexMono-Bold'), url('../fonts/IBMPlexMono-Bold.ttf') format('truetype');
+  }

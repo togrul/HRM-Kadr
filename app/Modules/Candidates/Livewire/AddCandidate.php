@@ -12,6 +12,11 @@ class AddCandidate extends Component
     use CandidateCrud;
     use AuthorizesRequests;
 
+    public function placeholder()
+    {
+        return view('candidates::livewire.candidates.placeholders.add-candidate');
+    }
+
     public function store(): void
     {
         $this->validate();
@@ -20,6 +25,6 @@ class AddCandidate extends Component
 
         Candidate::create($this->modifyArray($this->candidate, $modelInstance->dateList()));
 
-        $this->dispatch('candidateAdded', __('Candidate was added successfully!'));
+        $this->dispatch('candidateAdded', __('candidates::common.messages.candidate_added'));
     }
 }

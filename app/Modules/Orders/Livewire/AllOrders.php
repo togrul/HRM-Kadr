@@ -2,25 +2,22 @@
 
 namespace App\Modules\Orders\Livewire;
 
-use App\Helpers\UsefulHelpers;
 use App\Livewire\Traits\SideModalAction;
 use App\Models\Order;
 use App\Models\OrderLog;
-use App\Models\OrderStatus;
-use Illuminate\Support\Facades\Cache;
-use App\Models\Structure;
-use App\Services\GenerateWordReplaceContent;
-use App\Services\StructureService;
-use App\Services\WordSuffixService;
-use Carbon\Carbon;
+use App\Modules\Orders\Domain\Contracts\AccessibleStructureScopeReadRepository;
+use App\Modules\Orders\Domain\Contracts\OrderTypeStatusLookupReadRepository;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Cache;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Isolate;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
-use PhpOffice\PhpWord\TemplateProcessor;
 
 #[On(['orderAdded', 'orderWasDeleted'])]
 class AllOrders extends Component
@@ -34,6 +31,9 @@ class AllOrders extends Component
 
     #[Url]
     public $search = [];
+
+    #[Locked]
+    public array $accessibleStructureIds = [];
 
     #[On('selectOrder')]
     public function selectOrder($id): void
@@ -61,15 +61,13 @@ class AllOrders extends Component
     public function getTableHeaders(): array
     {
         return [
-            __('#'),
-            __('Order #'),
-            __('Type'),
-            __('Given date'),
-            __('Given by'),
-            __('Status'),
-            'action',
-            'action',
-            'action',
+            __('orders::order_list.table.row_no'),
+            __('orders::order_list.table.order_no'),
+            __('orders::order_list.table.type'),
+            __('orders::order_list.table.given_date'),
+            __('orders::order_list.table.given_by'),
+            __('orders::order_list.table.status'),
+            __('orders::order_list.table.action'),
         ];
     }
 
@@ -92,7 +90,7 @@ class AllOrders extends Component
         $orderLog->update([
             'deleted_by' => null,
         ]);
-        $this->dispatch('orderAdded', __('Order was updated successfully!'));
+        $this->dispatch('orderAdded', __('orders::order_form.messages.order_updated'));
     }
 
     #[Renderless]
@@ -108,199 +106,136 @@ class AllOrders extends Component
 
         $model->handleDeletion();
 
-        $this->dispatch('orderWasDeleted', __('Order was deleted!'));
+        $this->dispatch('orderWasDeleted', __('orders::order_form.messages.order_deleted'));
     }
 
     public function printOrder(string $order_no)
     {
-        $order = OrderLog::with(['order', 'components', 'attributes'])->where('order_no', $order_no)->first();
-        if (! $order || ! $order->order) {
+        $order = OrderLog::where('order_no', $order_no)->first();
+        if (! $order) {
             abort(404);
         }
 
-        $this->authorize('view', $order->order);
-        $givenDate = $order->given_date;
-        $suffixService = new WordSuffixService;
-        $bladeType = $order->order->blade;
+        // Only Word-engine orders are printable: they carry their filled .docx.
+        abort_unless((string) $order->template_render_mode === \App\Services\Orders\Document\OrderIssueService::RENDER_MODE_DOCX, 404);
+        abort_unless((bool) auth()->user()?->can('add-orders'), 403);
 
-        $templateProcessor = new TemplateProcessor('storage/' . $order->order->content);
-        $templateProcessor->setValue('day', $givenDate->format('d'));
-        $templateProcessor->setValue('month', $givenDate->locale('AZ')->monthName);
-        $templateProcessor->setValue('year', $givenDate->format('Y'));
-        $templateProcessor->setValue('rank_director', $order->given_by_rank);
-        $templateProcessor->setValue('name_director', $order->given_by);
+        // Order numbers may contain "/" (e.g. 2026/ƏM-145), which is illegal in a
+        // download filename — fold path separators to a dash.
+        $safeName = str_replace(['/', '\\'], '-', (string) $order->order_no);
 
-        switch ($bladeType) {
-            case Order::BLADE_BUSINESS_TRIP:
-                $endDate = Carbon::parse($order->description['end_date']);
-                $startDate = Carbon::parse($order->description['start_date']);
-                $startDateFormat = $startDate->format('d');
+        $docxPath = (string) data_get($order->template_snapshot, 'docx_path', '');
+        abort_unless($docxPath !== '' && \Illuminate\Support\Facades\Storage::disk('local')->exists($docxPath), 404);
 
-                if ($startDate->format('m') != $endDate->format('m')) {
-                    $startDateFormat .= " {$startDate->locale('AZ')->monthName}";
-                }
-
-                if ($startDate->format('Y') != $endDate->format('Y')) {
-                    $startDateFormat .= " {$startDate->format('Y')}";
-                }
-                $templateProcessor->setValue('location', $order->description['location']);
-                $templateProcessor->setValue('day_start', $startDateFormat);
-                $templateProcessor->setValue('day_end', $endDate->format('d'));
-                $templateProcessor->setValue('month_trip', $endDate->locale('AZ')->monthName);
-                $templateProcessor->setValue('year_trip', $endDate->format('Y') . $suffixService->getNumberSuffix($endDate->format('Y')));
-                break;
-        }
-
-        $attributesByComponent = $order->attributes->load('component');
-
-        if ($bladeType == Order::BLADE_BUSINESS_TRIP) {
-            $_component_texts = $attributesByComponent->groupBy(function ($attribute) {
-                $rowNumber = $attribute->attributes['row']['value'] ?? null;
-                $transportation = $attribute->attributes['$transportation']['value'] ?? null;
-
-                return "{$rowNumber}_{$transportation}";
-            });
-        } else {
-            $_component_texts = $attributesByComponent->groupBy('row_number');
-        }
-
-        $_component_texts = $_component_texts->map(function ($group) {
-            $component = $group->first()->component;
-
-            return [
-                'title' => $component->title,
-                'content' => $group->pluck('component.content')->toArray(),
-            ];
-        })->toArray();
-
-        $replacements = [];
-        $_replace_texts = [];
-        $globalIndex = 0;
-
-        //                $att = $order->attributes->groupBy(function ($attribute) {
-        //                    $structure = $attribute->attributes['$structure']['value'] ?? null;
-        //
-        //                    return "{$structure}";
-        //                });
-        //                dd($att->toArray(),$order->attributes);
-        foreach ($order->components as $componentIndex => $_component) {
-            $attr_list = $order->attributes
-                ->where('component_id', $_component->id)
-                ->where('row_number', $componentIndex)
-                ->pluck('attributes')
-                ->toArray();
-
-            // pluck edib dovre salmaq olar.
-            foreach ($attr_list as $attrIndex => $attr) {
-                if ($bladeType == Order::BLADE_BUSINESS_TRIP) {
-                    $keyReplaced = "{$attr['row']['value']}_{$attr['$transportation']['value']}";
-                    $_replace_texts[$keyReplaced][] = UsefulHelpers::modifyArrayToKeyValuePair($attr);
-
-                    $lastIndex = array_key_last($_replace_texts[$keyReplaced]);
-                    $_replace_texts[$keyReplaced][$lastIndex]['order'] = $bladeType;
-                } else {
-                    $_replace_texts[] = UsefulHelpers::modifyArrayToKeyValuePair($attr);
-                    $keyReplaced = $globalIndex++;
-                    $_replace_texts[$keyReplaced]['order'] = $bladeType;
-                }
-
-                switch ($bladeType) {
-                    case Order::BLADE_DEFAULT:
-                        $_replace_texts[$keyReplaced]['$year'] .= $suffixService->getNumberSuffix((int) $_replace_texts[$keyReplaced]['$year']);
-                        $_replace_texts[$keyReplaced]['$surname'] = $suffixService->getSurnameSuffix($_replace_texts[$keyReplaced]['$surname']);
-                        $_replace_texts[$keyReplaced]['$structure_main'] = $suffixService->getStructureSuffix($_replace_texts[$keyReplaced]['$structure_main']);
-                        $_replace_texts[$keyReplaced]['$fullname'] = $this->convertWordIntoBold($_replace_texts[$keyReplaced]['$fullname']);
-                        break;
-                    case Order::BLADE_VACATION:
-                        $_replace_texts[$keyReplaced]['$start_date'] .= $suffixService->getNumberSuffix(Carbon::parse($_replace_texts[$keyReplaced]['$start_date'])->year);
-                        $_replace_texts[$keyReplaced]['$end_date'] .= $suffixService->getNumberSuffix(Carbon::parse($_replace_texts[$keyReplaced]['$end_date'])->year);
-                        $_replace_texts[$keyReplaced]['$structure'] = $this->getFullStructureNameWithSuffixes($_replace_texts[$keyReplaced]['$structure'], $suffixService);
-                        $_replace_texts[$keyReplaced]['$position'] = $suffixService->getMultiSuffix($_replace_texts[$keyReplaced]['$position'], multi: false);
-                        break;
-                    case Order::BLADE_BUSINESS_TRIP:
-                        $trip_start = Carbon::parse($_replace_texts[$keyReplaced][$lastIndex]['$start_date']);
-                        $_replace_texts[$keyReplaced][$lastIndex]['$trip_start_day'] = $trip_start->format('d');
-                        $_replace_texts[$keyReplaced][$lastIndex]['$trip_start_month'] = $trip_start->locale('AZ')->monthName;
-                        $_replace_texts[$keyReplaced][$lastIndex]['$trip_start_year'] = $trip_start->year . $suffixService->getNumberSuffix($trip_start->year) . ' ' . __('year');
-                        $_replace_texts[$keyReplaced][$lastIndex]['$trip_location'] = $_replace_texts[$keyReplaced][$lastIndex]['$location'];
-                        $_replace_texts[$keyReplaced][$lastIndex]['$return_day'] = $suffixService->getMonthDaySuffix($_replace_texts[$keyReplaced][$lastIndex]['$return_day']);
-                        $_replace_texts[$keyReplaced][$lastIndex]['$meeting_hour'] = $suffixService->getTimeSuffix($_replace_texts[$keyReplaced][$lastIndex]['$meeting_hour']);
-                        break;
-                }
-            }
-        }
-
-        $secondIndex = 0;
-
-        foreach ($_component_texts as $key => &$text) {
-            ['content' => $content, 'title' => $title] = (new GenerateWordReplaceContent($bladeType, $_replace_texts))
-                ->handle($key, $text, $secondIndex);
-            $secondIndex++;
-            $text = ! empty($title) ? $this->convertWordIntoBold($title) . PHP_EOL . '<w:p/>' . $content : $content;
-
-            $replacements[] = [
-                'content_text' => match ($bladeType) {
-                    Order::BLADE_VACATION, Order::BLADE_BUSINESS_TRIP => str_replace("\n", '<w:br/>', $text),
-                    Order::BLADE_DEFAULT => ($key + 1) . '. ' . str_replace("\n", '<w:br/>', $text),
-                },
-            ];
-        }
-
-        $templateProcessor->replaceBlock('newline', PHP_EOL);
-        $templateProcessor->cloneBlock('content', 0, true, false, $replacements);
-        // end export to word file
-
-        $filename = "{$order->order->name}_" . Carbon::now()->format('d.m.Y H:i:s');
-        $templateProcessor->saveAs($filename . '.docx');
-
-        return response()->download($filename . '.docx')->deleteFileAfterSend();
+        return \Illuminate\Support\Facades\Storage::disk('local')->download($docxPath, $safeName.'.docx');
     }
 
-    protected function getFullStructureNameWithSuffixes($name, $service)
+    public function approveOrder(string $order_no): void
     {
-        $structureModel = Structure::where('name', $name)->first();
-        $structureFullName = $structureModel->getAllParentName(isCoded: true);
-
-        return collect($structureFullName)->map(
-            fn($structure) => $service->getStructureSuffix($structure, mainStructure: true) . ' '
-        )->implode('');
+        $this->changeStatus($order_no, 'approve', 'order_approved');
     }
 
-    private function convertWordIntoBold(string $word): string
+    public function cancelOrder(string $order_no): void
     {
-        return '<w:rPr><w:b w:val="true"/></w:rPr>'
-            . $word
-            . '<w:rPr><w:b w:val="false"/></w:rPr>';
+        $this->changeStatus($order_no, 'cancel', 'order_cancelled');
+    }
+
+    public function reopenOrder(string $order_no): void
+    {
+        $this->changeStatus($order_no, 'reopen', 'order_reopened');
+    }
+
+    public function revertOrder(string $order_no): void
+    {
+        $this->changeStatus($order_no, 'revert', 'order_reverted');
+    }
+
+    /**
+     * Run a guarded status transition (approve/cancel/reopen/revert) on a Word-engine
+     * order, surfacing any domain error (illegal jump, irreversible hire) to the user.
+     */
+    private function changeStatus(string $order_no, string $action, string $successKey): void
+    {
+        $order = OrderLog::where('order_no', $order_no)->first();
+        if (! $order) {
+            return;
+        }
+
+        abort_unless((bool) auth()->user()?->can('add-orders'), 403);
+
+        try {
+            app(\App\Services\Orders\Document\OrderStatusTransitionService::class)->{$action}($order);
+        } catch (\DomainException $e) {
+            $this->dispatch('orderError', $e->getMessage());
+
+            return;
+        }
+
+        $this->dispatch('orderAdded', __("orders::order_composer.messages.{$successKey}"));
     }
 
     protected function returnData($type = 'normal')
     {
-        $structureService = app(StructureService::class);
-        $accessible = $structureService->getAccessibleStructures();
-        $result = OrderLog::with([
-            'order',
-            'components',
-            'status',
-            'personDidDelete:id,name',
-            'creator:id,name',
-            'orderType',
-        ])
-           ->where(fn ($query) => $query
-                ->where('order_id', 1010)
-                ->orWhere(fn ($query) => $query
-                    ->where('order_id', '!=', 1010)
-                    ->whereHas('personnels', fn ($query) => $query->whereIn('structure_id', $accessible))
-                )
-            )
+        $globalOrderIds = Order::globalVisibilityOrderIds();
+
+        $result = OrderLog::query()
+            ->with([
+                'order:id,name',
+                'status:id,name',
+                'orderType:id,name',
+            ])
+            ->when($this->status === 'deleted', fn ($query) => $query->with('personDidDelete:id,name'))
+            ->where(function ($query) use ($globalOrderIds) {
+                // Globally-visible legacy orders OR orders whose personnel sit in an
+                // accessible structure. orWhereHas (not whereNotIn) so block-engine
+                // orders with a null order_id are included rather than dropped by
+                // SQL's "NULL NOT IN (...)".
+                $query->when(
+                    $globalOrderIds !== [],
+                    fn ($q) => $q->whereIn('order_id', $globalOrderIds)
+                )->orWhereHas('personnels', fn ($personnelQuery) => $personnelQuery->whereIn('structure_id', $this->accessibleStructureIds))
+                    // Pending hire (işə qəbul) orders have no personnel attached until
+                    // approval, so they would otherwise be invisible. Scope them by the
+                    // target structure frozen in the order snapshot.
+                    ->orWhere(fn ($q) => $q
+                        ->where('template_render_mode', \App\Services\Orders\Document\OrderIssueService::RENDER_MODE_DOCX)
+                        ->whereIn('template_snapshot->hire_structure_id', $this->accessibleStructureIds));
+            })
             ->filter($this->search ?? [])
-            ->when($this->selectedOrder, fn($q) => $q->where('order_id', $this->selectedOrder))
-            ->when(is_numeric($this->status), fn($q) => $q->where('status_id', $this->status))
-            ->when($this->status === 'deleted', fn($q) => $q->onlyTrashed())
+            ->when($this->selectedOrder, fn ($q) => $q->where('order_id', $this->selectedOrder))
+            ->when(is_numeric($this->status), fn ($q) => $q->where('status_id', $this->status))
+            ->when($this->status === 'deleted', fn ($q) => $q->onlyTrashed())
             ->orderByDesc('given_date');
 
         return $type == 'normal'
-            ? $result->paginate(20)->withQueryString()
+            ? $this->decoratePagination($result->paginate(20)->withQueryString())
             : $result->cursor();
+    }
+
+    protected function decoratePagination(LengthAwarePaginator $paginated): LengthAwarePaginator
+    {
+        $start = ($paginated->currentPage() - 1) * $paginated->perPage();
+
+        $paginated->setCollection(
+            $paginated->getCollection()->values()->map(function (OrderLog $order, int $index) use ($start) {
+                $order->row_no = $start + $index + 1;
+                $order->status_color_id = match ((int) $order->status_id) {
+                    20 => 70,
+                    30 => 90,
+                    default => (int) $order->status_id,
+                };
+
+                return $order;
+            })
+        );
+
+        return $paginated;
+    }
+
+    #[Computed]
+    public function orders(): LengthAwarePaginator
+    {
+        return $this->returnData();
     }
 
     #[Isolate]
@@ -308,22 +243,26 @@ class AllOrders extends Component
     {
         $locale = config('app.locale');
 
-        return Cache::remember("order_statuses:{$locale}", now()->addMinutes(10), function () use ($locale) {
-            return OrderStatus::where('locale', $locale)->get();
-        });
+        return Cache::remember(
+            "order_statuses:{$locale}",
+            now()->addMinutes(10),
+            // Resolve the repository per-call: this computed runs on every Livewire
+            // request, but mount() (where injected deps live) only runs on the first.
+            fn () => app(OrderTypeStatusLookupReadRepository::class)->localizedStatuses((string) $locale)
+        );
     }
 
-    public function mount()
-    {
+    public function mount(
+        AccessibleStructureScopeReadRepository $accessibleStructureScopeReadRepository
+    ) {
         $this->authorize('viewAny', Order::class);
         $this->fillFilter();
         $this->selectedOrder = $this->selectedOrder ?? request()->query('selectedOrder');
+        $this->accessibleStructureIds = $accessibleStructureScopeReadRepository->accessibleStructureIds();
     }
 
     public function render()
     {
-        $orders = $this->returnData();
-
-        return view('orders::livewire.orders.all-orders', compact('orders'));
+        return view('orders::livewire.orders.all-orders');
     }
 }
