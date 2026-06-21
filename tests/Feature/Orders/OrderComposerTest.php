@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Orders;
 
+use App\Models\ChiefDelegation;
 use App\Models\OrderLog;
 use App\Models\OrderWordTemplate;
 use App\Models\Personnel;
@@ -582,6 +583,51 @@ class OrderComposerTest extends TestCase
         return [$candidate, $structure, $position];
     }
 
+    public function test_an_order_freezes_the_active_delegate_as_signatory_by_order_date(): void
+    {
+        $this->seedTemplate();
+        $subject = $this->makePersonnel();
+
+        // Permanent chief (highest approval rank) + a delegate acting for a May window.
+        $chief = $this->makeChief('Sührabov', 'Sübhan', approvalRank: 100);
+        $delegate = $this->makeChief('Məmmədov', 'Elçin', approvalRank: 40);
+
+        ChiefDelegation::create([
+            'chief_personnel_id' => $chief->id,
+            'delegate_personnel_id' => $delegate->id,
+            'starts_at' => '2026-05-01',
+            'ends_at' => '2026-05-31',
+            'is_active' => true,
+            'created_by' => 1,
+        ]);
+
+        $this->actingAs($this->userWith('add-orders'));
+
+        // An order dated inside the window is signed by the delegate, and the snapshot
+        // freezes that — re-reading it later still names whoever acted then.
+        Livewire::test(OrderComposer::class, ['presetCode' => 'leave', 'personnelId' => $subject->id])
+            ->set('orderNumber', 'DLG-IN')
+            ->set('orderDate', '20.05.2026')
+            ->set('fields', ['var_2' => '20.05.2026'])
+            ->call('issue');
+
+        $inside = OrderLog::where('order_no', 'DLG-IN')->firstOrFail();
+        $this->assertSame($delegate->id, (int) $inside->signatory_personnel_id);
+        $this->assertSame('delegated', data_get($inside->signatory_snapshot, 'mode'));
+        $this->assertSame($chief->id, (int) data_get($inside->signatory_snapshot, 'permanent_chief_personnel_id'));
+
+        // An order dated after the window reverts to the permanent chief.
+        Livewire::test(OrderComposer::class, ['presetCode' => 'leave', 'personnelId' => $subject->id])
+            ->set('orderNumber', 'DLG-OUT')
+            ->set('orderDate', '15.07.2026')
+            ->set('fields', ['var_2' => '15.07.2026'])
+            ->call('issue');
+
+        $outside = OrderLog::where('order_no', 'DLG-OUT')->firstOrFail();
+        $this->assertSame($chief->id, (int) $outside->signatory_personnel_id);
+        $this->assertSame('permanent', data_get($outside->signatory_snapshot, 'mode'));
+    }
+
     public function test_unknown_type_surfaces_an_error(): void
     {
         $this->actingAs($this->userWith('add-orders'));
@@ -755,6 +801,40 @@ class OrderComposerTest extends TestCase
             'structure_id' => $structure->id,
             'position_id' => $position->id,
             'join_work_date' => '2020-01-01',
+            'added_by' => 1,
+            'is_pending' => false,
+        ]));
+    }
+
+    /** A would-be chief: an active employee whose position carries the given approval rank. */
+    private function makeChief(string $surname, string $name, int $approvalRank): Personnel
+    {
+        $structure = Structure::query()->create([
+            'name' => 'İdarə '.$surname,
+            'shortname' => 'İD'.Str::upper(Str::random(3)),
+        ]);
+        $position = Position::query()->create([
+            'name' => 'rəis '.$surname,
+            'approval_rank' => $approvalRank,
+        ]);
+
+        return Personnel::withoutEvents(fn () => Personnel::query()->create([
+            'tabel_no' => 'TB'.Str::upper(Str::random(6)),
+            'surname' => $surname,
+            'name' => $name,
+            'patronymic' => 'Oğuz',
+            'birthdate' => '1980-01-01',
+            'gender' => 1,
+            'email' => Str::lower(Str::random(8)).'@example.com',
+            'mobile' => '994501112233',
+            'nationality_id' => 1,
+            'pin' => 'P'.str_pad((string) random_int(1, 9999999), 7, '0', STR_PAD_LEFT),
+            'residental_address' => 'Main st',
+            'education_degree_id' => 1,
+            'work_norm_id' => 1,
+            'structure_id' => $structure->id,
+            'position_id' => $position->id,
+            'join_work_date' => '2010-01-01',
             'added_by' => 1,
             'is_pending' => false,
         ]));

@@ -17,6 +17,17 @@
         }
     "
 >
+    {{-- Structure-delete confirmation routed into the global confirm modal: a plain
+         prompt when unused, an "in use → cascade" warning when referenced. --}}
+    <div x-data
+         @confirm-structure-delete.window="$dispatch('confirm-action', {
+            title: @js(__('admin::references.structure_delete.title')),
+            message: $event.detail.message,
+            confirmText: @js(__('admin::references.actions.delete')),
+            tone: 'rose',
+            run: () => $wire.performDelete(),
+         })"></div>
+
     <div class="flex flex-col items-center justify-between sm:flex-row filter bg-white py-2 px-2 rounded-xl">
         <div class="flex items-center justify-center space-x-2 action-section">
             <x-button class="space-x-2" mode="primary" wire:click.prevent="openCrud()">

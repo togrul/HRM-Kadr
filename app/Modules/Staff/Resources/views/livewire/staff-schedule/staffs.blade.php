@@ -28,46 +28,39 @@
     </x-slot>
     {{-- end sidebar --}}
 
-    <div class="flex flex-col items-center justify-between px-6 py-4 space-y-4 sm:flex-row">
-        <div class="flex flex-col pl-3 space-y-1">
-            @if ($selectedPage == 'all')
-                <button wire:click.prevent="showPage('vacancies')"
-                    class="flex items-center justify-center px-4 py-2 space-x-2 text-white transition-all duration-300 rounded-lg shadow-sm bg-slate-900 hover:bg-slate-200 hover:text-slate-900"
-                    type="button">
-                    <span>{{ __('staff::common.actions.get_all_vacancies') }}</span>
-                </button>
-            @endif
-            @if ($selectedPage == 'vacancies')
-                <button wire:click.prevent="showPage('all')"
-                    class="flex items-center justify-center px-4 py-2 space-x-2 text-white transition-all duration-300 shadow-sm rounded-xl bg-slate-900 hover:bg-slate-200 hover:text-slate-900"
-                    type="button">
-                    <span>{{ __('staff::common.actions.all_data') }}</span>
-                </button>
-            @endif
-        </div>
-
-        <div class="flex items-center justify-end space-x-2">
-            @can('add-staff')
-                <button wire:click="openSideMenu('add-staff')"
-                    class="flex items-center justify-center p-2 space-x-2 transition-all duration-300 rounded-xl bg-slate-100 text-slate-500 hover:bg-slate-200"
-                    type="button"
-                    title="{{ __('staff::common.actions.add_staff') }}"
-                    aria-label="{{ __('staff::common.actions.add_staff') }}">
-                    <x-icons.add-icon></x-icons.add-icon>
-                </button>
-            @endcan
-            @can('export-staff')
-                @if ($selectedPage == 'vacancies')
-                    <button wire:click.prevent="exportExcel"
-                        class="flex items-center justify-center p-2 space-x-2 text-green-500 transition-all duration-300 rounded-xl bg-green-50 hover:bg-green-100"
-                        type="button"
-                        title="{{ __('staff::common.actions.export_excel') }}"
-                        aria-label="{{ __('staff::common.actions.export_excel') }}">
-                        <x-icons.excel-icon />
-                    </button>
+    {{-- ===================== Premium header ===================== --}}
+    <div class="px-4 pt-4 sm:px-6">
+        <x-page-header :title="__('staff::common.titles.staff_schedule')">
+            <x-slot:icon>
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16M15 4v16"/></svg>
+            </x-slot:icon>
+            <x-slot:actions>
+                @if ($selectedPage == 'all')
+                    <x-pill-button variant="secondary" wire:click.prevent="showPage('vacancies')">
+                        {{ __('staff::common.actions.get_all_vacancies') }}
+                    </x-pill-button>
+                @else
+                    <x-pill-button variant="secondary" wire:click.prevent="showPage('all')">
+                        {{ __('staff::common.actions.all_data') }}
+                    </x-pill-button>
                 @endif
-            @endcan
-        </div>
+                @can('add-staff')
+                    <x-pill-button variant="primary" wire:click="openSideMenu('add-staff')"
+                        title="{{ __('staff::common.actions.add_staff') }}" aria-label="{{ __('staff::common.actions.add_staff') }}">
+                        <x-icons.add-icon color="text-white" hover="text-white" size="w-5 h-5" />
+                        {{ __('staff::common.actions.add_staff') }}
+                    </x-pill-button>
+                @endcan
+                @can('export-staff')
+                    @if ($selectedPage == 'vacancies')
+                        <x-pill-button variant="emerald" :icon="true" wire:click.prevent="exportExcel"
+                            title="{{ __('staff::common.actions.export_excel') }}" aria-label="{{ __('staff::common.actions.export_excel') }}">
+                            <x-icons.excel-icon />
+                        </x-pill-button>
+                    @endif
+                @endcan
+            </x-slot:actions>
+        </x-page-header>
     </div>
 
     @if ($selectedPage == 'all')

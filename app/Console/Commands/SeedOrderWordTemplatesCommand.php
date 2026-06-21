@@ -49,6 +49,9 @@ class SeedOrderWordTemplatesCommand extends Command
         'İşçi (yönlük)' => 'employee.full_name_dative',
         'İşçi (yiyəlik)' => 'employee.full_name_genitive',
         'İşçi (birgəlik)' => 'employee.full_name_instrumental',
+        // Signatory resolved per order (permanent chief or active delegate, by date).
+        'İmzalayan' => 'system.signatory_full_name',
+        'İmzalayanın vəzifəsi' => 'system.signatory_title',
     ];
 
     public function handle(

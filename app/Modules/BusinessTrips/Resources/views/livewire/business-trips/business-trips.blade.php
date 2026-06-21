@@ -32,25 +32,22 @@
     "
 >
     <div class="flex flex-col px-6 py-4 space-y-4">
-        <div class="flex items-center justify-between">
-            <div class="flex flex-col items-center justify-between px-2 py-2 bg-white sm:flex-row filter rounded-xl">
-            </div>
-
-            <div class="flex flex-col">
-                <div class="flex space-x-4">
-                    @can('review-self-service-requests')
-                        <x-ui.self-service-review-link />
-                    @endcan
-                    @can('export-business_trips')
-                        <button wire:click.prevent="exportExcel"
-                            class="flex items-center justify-center w-12 h-12 transition-all duration-300 rounded-xl hover:bg-green-50"
-                            type="button">
-                            <x-icons.excel-icon />
-                        </button>
-                    @endcan
-                </div>
-            </div>
-        </div>
+        {{-- ===================== Premium header ===================== --}}
+        <x-page-header :title="__('business_trips::common.table.title')" :count="$this->businessTrips->total()">
+            <x-slot:icon>
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M21 3 9 15"/><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/></svg>
+            </x-slot:icon>
+            <x-slot:actions>
+                @can('review-self-service-requests')
+                    <x-ui.self-service-review-link />
+                @endcan
+                @can('export-business_trips')
+                    <x-pill-button variant="emerald" :icon="true" wire:click.prevent="exportExcel" title="{{ __('business_trips::common.actions.export_excel') }}">
+                        <x-icons.excel-icon />
+                    </x-pill-button>
+                @endcan
+            </x-slot:actions>
+        </x-page-header>
 
         <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
             <div class="flex flex-col xl:col-span-2">

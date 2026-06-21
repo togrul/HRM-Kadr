@@ -46,9 +46,10 @@ class OrderTemplateDocxBuilder
      *     numbered?:bool,
      *     clauses:array<int,string>,
      *     basis:string,
-     *     signatory:array<int,string>,
-     *     signatory_name:string
-     * }  $spec
+     *     signatory?:array<int,string>,
+     *     signatory_name?:string
+     * }  $spec  (signatory/signatory_name are legacy — the signatory is now a
+     *           [İmzalayanın vəzifəsi]/[İmzalayan] placeholder resolved per order.)
      * @return string Path to the generated .docx (caller owns / cleans it up).
      */
     public function build(array $spec): string
@@ -104,14 +105,13 @@ class OrderTemplateDocxBuilder
         $this->blank($section);
         $this->blank($section);
 
-        // Signatory block: title lines on the left, the name right-tabbed on the last.
-        $lines = $spec['signatory'];
-        $last = array_pop($lines);
-        foreach ($lines as $line) {
-            $section->addText($line, [], ['spaceAfter' => 0]);
-        }
+        // Signatory block: title on the left, name right-tabbed below. Both are
+        // [bracket] placeholders so the engine resolves the acting signatory per order
+        // — the permanent chief, or an active temporary delegate (müvəqqəti həvalə) on
+        // the order's date. The seeder's static signatory spec is no longer baked in.
+        $section->addText('[İmzalayanın vəzifəsi]', [], ['spaceAfter' => 0]);
         $section->addText(
-            $last."\t".$spec['signatory_name'],
+            "\t[İmzalayan]",
             [],
             ['spaceAfter' => 0, 'tabs' => [new Tab('right', self::RIGHT_TAB)]],
         );

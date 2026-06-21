@@ -191,15 +191,15 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5m6 4.125 2.25 2.25m0 0 2.25 2.25M12 13.875l2.25-2.25M12 13.875l-2.25 2.25M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
                 </svg>
             </button>
-            <div class="flex items-center space-x-2 border-b border-dashed w-max border-slate-400">
-                <p class="font-medium text-gray-700">
+            <div class="flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-dashed border-slate-400 pr-10">
+                <p class="min-w-0 break-words font-medium text-gray-700">
                     {{ data_get($laModel, 'company_name_display') ?? data_get($laModel, 'company_name') }}
                 </p>
                 @if($laModel['is_current'] ??= false)
-                <span class="flex items-center justify-center w-4 h-4 bg-green-500 border-4 border-green-200 rounded-full">
+                <span class="flex items-center justify-center w-4 h-4 shrink-0 bg-green-500 border-4 border-green-200 rounded-full">
                 </span>
                 @endif
-                <span>-</span>
+                <span class="shrink-0">-</span>
                 <span class="text-sm font-medium text-slate-500">{{ $laModel['position_label'] ?? ($laModel['position'] ?? '') }}</span>
             </div>
             <div class="grid w-full grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-4">

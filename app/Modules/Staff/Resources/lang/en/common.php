@@ -2,6 +2,7 @@
 
 return [
     'titles' => [
+        'staff_schedule' => 'Staff schedule',
         'new_staff' => 'New staff',
         'edit_staff' => 'Edit staff',
         'delete_staff' => 'Delete staff',

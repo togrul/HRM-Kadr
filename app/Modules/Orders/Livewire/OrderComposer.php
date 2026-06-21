@@ -14,6 +14,8 @@ use App\Services\Orders\Document\DocxVariableResolver;
 use App\Services\Orders\Document\OrderLookupFieldRegistry;
 use App\Services\Orders\Document\OrderIssueService;
 use App\Services\Orders\Document\OrderTemplateProvider;
+use App\Services\Chief\ChiefResolver;
+use App\Support\Language\AzerbaijaniDateFormatter;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
@@ -74,6 +76,9 @@ class OrderComposer extends Component
     private ?OrderWordTemplate $templateCache = null;
 
     private bool $templateLoaded = false;
+
+    /** Per-request cache of the resolved signatory snapshot (private → not persisted). */
+    private ?array $signatoryCache = null;
 
     public function mount(?string $presetCode = null, ?int $personnelId = null, ?int $orderId = null): void
     {
@@ -505,6 +510,9 @@ class OrderComposer extends Component
             'fields' => $this->fields,
             'order_number' => trim($this->orderNumber),
             'order_date' => $this->orderDate,
+            // Freeze who signed (permanent chief or active delegate) as-of the order date,
+            // so historical orders keep naming whoever was acting then.
+            'signatory' => $this->signatorySnapshot(),
         ];
 
         $values = $resolver->resolve($template, $this->subject($template), $this->fields, $this->systemContext());
@@ -669,11 +677,34 @@ class OrderComposer extends Component
      */
     private function systemContext(): array
     {
+        $signatory = $this->signatorySnapshot();
+
         return [
             'system.order_number' => $this->orderNumber,
             'system.order_date' => $this->orderDate,
             'system.organization_city' => $this->organizationCity,
+            'system.signatory_full_name' => (string) ($signatory['fullname'] ?? ''),
+            'system.signatory_title' => (string) ($signatory['title'] ?? ''),
         ];
+    }
+
+    /**
+     * Who signs this order — the permanent chief, or the active temporary delegate
+     * (müvəqqəti həvalə) on the order's date. Resolved as-of the order date (not "now")
+     * so historical orders name whoever was acting then; cached for the request so the
+     * system context and the persisted snapshot agree. Falls back to today when the
+     * author's free-text date can't be parsed.
+     *
+     * @return array<string,mixed>
+     */
+    private function signatorySnapshot(): array
+    {
+        if ($this->signatoryCache === null) {
+            $date = app(AzerbaijaniDateFormatter::class)->parse($this->orderDate) ?? now();
+            $this->signatoryCache = app(ChiefResolver::class)->current($date);
+        }
+
+        return $this->signatoryCache;
     }
 
     private function downloadName(): string

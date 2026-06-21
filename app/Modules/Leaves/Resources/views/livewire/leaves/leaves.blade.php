@@ -3,6 +3,29 @@
     x-init="init()"
     class="flex flex-col"
 >
+    {{-- ===================== Premium header ===================== --}}
+    <div class="px-4 pt-4 sm:px-6">
+        <x-page-header :title="__('leaves::common.titles.leaves')" :count="$permits->total()" :count-label="__('leaves::common.labels.all')">
+            <x-slot:icon>
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="m9 16 2 2 4-4"/></svg>
+            </x-slot:icon>
+            <x-slot:actions>
+                @can('create', App\Models\Leave::class)
+                    <x-pill-button variant="primary" wire:click="openAddLeaveModal" wire:loading.attr="disabled" wire:target="openAddLeaveModal">
+                        <x-icons.add-file color="text-white" hover="text-white" size="w-5 h-5" />
+                        {{ __('leaves::common.actions.add_leave') }}
+                    </x-pill-button>
+                @endcan
+                @can('export', App\Models\Leave::class)
+                    <x-pill-button variant="emerald" :icon="true" wire:click.prevent="exportExcel" wire:loading.attr="disabled" wire:target="exportExcel"
+                        title="{{ __('leaves::common.actions.export_excel') }}" aria-label="{{ __('leaves::common.actions.export_excel') }}">
+                        <x-icons.excel-icon />
+                    </x-pill-button>
+                @endcan
+            </x-slot:actions>
+        </x-page-header>
+    </div>
+
     {{-- filter --}}
        <div class="grid grid-cols-1 gap-2 px-6 py-4 sm:grid-cols-2 lg:grid-cols-4">
        <x-ui.select-dropdown
@@ -102,7 +125,7 @@
             </div>
         @endif
         {{-- start  --}}
-        <div class="flex items-center justify-between">
+        <div class="flex items-center">
              <div class="px-2 py-2 bg-white filter rounded-xl">
                 <x-filter.nav>
                     <x-filter.item wire:click.prevent="setStatus('all')" :active="$status === 'all'">
@@ -120,34 +143,6 @@
                     @endcan
                 </x-filter.nav>
            </div>
-
-           <div class="flex space-x-4">
-                @can('create', App\Models\Leave::class)
-                    <button wire:click="openAddLeaveModal"
-                           wire:loading.attr="disabled"
-                           wire:target="openAddLeaveModal"
-                           class="flex items-center justify-center w-12 h-12 transition-all duration-300 rounded-xl hover:bg-blue-50"
-                           type="button"
-                           title="{{ __('leaves::common.actions.add_leave') }}"
-                           aria-label="{{ __('leaves::common.actions.add_leave') }}"
-                   >
-                           <x-icons.add-file></x-icons.add-file>
-                    </button>
-                @endcan
-                @can('export', App\Models\Leave::class)
-                    <button wire:click.prevent="exportExcel"
-                           wire:loading.attr="disabled"
-                           wire:target="exportExcel"
-                           class="flex items-center justify-center w-12 h-12 transition-all duration-300 rounded-xl hover:bg-green-50"
-                           type="button"
-                           title="{{ __('leaves::common.actions.export_excel') }}"
-                           aria-label="{{ __('leaves::common.actions.export_excel') }}"
-                   >
-                           <x-icons.excel-icon />
-                    </button>
-                @endcan  
-                {{-- @endcan --}}
-            </div>
         </div>
         {{-- end --}}
     </div>

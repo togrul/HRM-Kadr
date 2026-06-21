@@ -2,6 +2,7 @@
 
 return [
     'titles' => [
+        'staff_schedule' => 'Ştat cədvəli',
         'new_staff' => 'Yeni ştat',
         'edit_staff' => 'Ştatı düzəliş et',
         'delete_staff' => 'Ştatı sil',

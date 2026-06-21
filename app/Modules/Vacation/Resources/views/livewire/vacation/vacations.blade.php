@@ -20,7 +20,24 @@
     "
 >
     <div class="flex flex-col px-6 py-4 space-y-4">
-        <div class="flex items-center justify-between">
+        {{-- ===================== Premium header ===================== --}}
+        <x-page-header :title="__('vacation::common.titles.vacations')" :count="$this->vacations->total()">
+            <x-slot:icon>
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            </x-slot:icon>
+            <x-slot:actions>
+                @can('review-self-service-requests')
+                    <x-ui.self-service-review-link />
+                @endcan
+                @can('export-vacations')
+                    <x-pill-button variant="emerald" :icon="true" wire:click.prevent="exportExcel" title="{{ __('vacation::common.actions.export_excel') }}">
+                        <x-icons.excel-icon />
+                    </x-pill-button>
+                @endcan
+            </x-slot:actions>
+        </x-page-header>
+
+        <div class="flex items-center">
             <div class="flex flex-row items-center justify-start px-2 py-2 space-x-2 rounded-xl">
                 <x-label>{{ __('vacation::common.labels.year') }} </x-label>
                 <select name="selectedYear" id="selectedYear" wire:model.live="selectedYear" @disabled(!empty($filter['date']['min'] ?? null) || !empty($filter['date']['max'] ?? null))
@@ -29,21 +46,6 @@
                         <option value="{{ $year }}" @selected($year == $selectedYear)>{{ $year }}</option>
                     @endforeach
                 </select>
-            </div>
-
-            <div class="flex flex-col">
-                <div class="flex space-x-4">
-                    @can('review-self-service-requests')
-                        <x-ui.self-service-review-link />
-                    @endcan
-                    @can('export-vacations')
-                        <button wire:click.prevent="exportExcel"
-                            class="flex items-center justify-center w-12 h-12 transition-all duration-300 rounded-xl hover:bg-green-50"
-                            type="button">
-                            <x-icons.excel-icon />
-                        </button>
-                    @endcan
-                </div>
             </div>
         </div>
 

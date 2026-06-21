@@ -8,6 +8,7 @@ use App\Livewire\Traits\SideModalAction;
 use App\Models\PersonnelVacation;
 use App\Modules\Personnel\Application\Services\MyHr\MyHrRequestReviewService;
 use App\Models\Structure;
+use App\Services\Chief\ChiefResolver;
 use App\Services\NumberToWordsService;
 use App\Services\StructureService;
 use App\Services\WordSuffixService;
@@ -96,12 +97,12 @@ class Vacations extends Component
             return null;
         }
 
-        //        $chief = Personnel::with(['latestRank.rank'])
-        //            ->where(['structure_id' => 8, 'position_id' => 10])
-        //            ->active()
-        //            ->firstOrFail();
-        $chiefName = cache('settings')['Chief'];
-        $chiefRank = cache('settings')['Chief rank'];
+        // Signatory resolved as-of the order's date: an active temporary delegate
+        // (müvəqqəti həvalə) on that date signs in place of the permanent chief, and
+        // re-printing an old vacation paper keeps naming whoever was acting then.
+        $signatory = app(ChiefResolver::class)->current($model->order_date);
+        $chiefName = $signatory['fullname'];
+        $chiefRank = $signatory['title'];
 
         $dates = [
             'givenDate' => Carbon::parse($model->order_date),

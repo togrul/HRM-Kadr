@@ -28,7 +28,7 @@ class OrderIssueService
      * field inputs + the picked personnel; the filled .docx is attached separately via
      * attachUploadedDocx(). No HTML is stored — the .docx is the document.
      *
-     * @param  array{template_code:string,label?:string,personnel_id?:?int,fields?:array<string,mixed>,order_number:string,order_date?:string,given_by?:string,given_by_rank?:string}  $data
+     * @param  array{template_code:string,label?:string,personnel_id?:?int,fields?:array<string,mixed>,order_number:string,order_date?:string,given_by?:string,given_by_rank?:string,signatory?:array<string,mixed>}  $data
      */
     public function issueWord(array $data): OrderLog
     {
@@ -38,6 +38,8 @@ class OrderIssueService
                 'given_date' => Carbon::now(),
                 'given_by' => $data['given_by'] ?? (auth()->user()?->name ?? 'Sistem'),
                 'given_by_rank' => $data['given_by_rank'] ?? '',
+                'signatory_personnel_id' => data_get($data, 'signatory.personnel_id'),
+                'signatory_snapshot' => $data['signatory'] ?? null,
                 'status_id' => self::STATUS_PENDING,
                 'creator_id' => auth()->id(),
                 'template_render_mode' => self::RENDER_MODE_DOCX,
@@ -67,7 +69,7 @@ class OrderIssueService
      * Re-freeze a still-pending docx order with corrected fields/personnel. The caller
      * regenerates and re-attaches the .docx, so the stale path is dropped here.
      *
-     * @param  array{template_code?:string,label?:string,personnel_id?:?int,fields?:array<string,mixed>,order_number:string,order_date?:string}  $data
+     * @param  array{template_code?:string,label?:string,personnel_id?:?int,fields?:array<string,mixed>,order_number:string,order_date?:string,signatory?:array<string,mixed>}  $data
      */
     public function updateWord(OrderLog $orderLog, array $data): OrderLog
     {
@@ -84,6 +86,8 @@ class OrderIssueService
 
             $orderLog->update([
                 'order_no' => $data['order_number'],
+                'signatory_personnel_id' => data_get($data, 'signatory.personnel_id'),
+                'signatory_snapshot' => $data['signatory'] ?? $orderLog->signatory_snapshot,
                 'template_snapshot' => array_merge($snapshot, [
                     'engine' => self::RENDER_MODE_DOCX,
                     'template_code' => $data['template_code'] ?? ($snapshot['template_code'] ?? ''),

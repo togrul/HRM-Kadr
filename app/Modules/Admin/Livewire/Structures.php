@@ -81,13 +81,35 @@ class Structures extends Component
 
     public function deleteModel(?int $id = null): void
     {
-        if ($id) {
-            $this->model = Structure::findOrFail($id);
-
-            if ($this->model) {
-                $this->callDeletePromptSwal();
-            }
+        if (! $id) {
+            return;
         }
+
+        $this->model = Structure::findOrFail($id);
+
+        // Warn (via the app's confirm modal) — a plain "delete?" when the structure is
+        // unused, or an "it is in use, everything linked to it will be deleted" warning
+        // when it is referenced anywhere.
+        $used = app(\App\Services\Structures\StructureDeletionService::class)->isUsed((int) $id);
+
+        $this->dispatch('confirm-structure-delete', message: $used
+            ? __('admin::references.structure_delete.in_use')
+            : __('admin::references.structure_delete.confirm'));
+    }
+
+    public function performDelete(): void
+    {
+        if (! $this->model) {
+            return;
+        }
+
+        // Cascade is fully handled (+ audited + caches flushed via StructureObserver) by
+        // the service; we just reset the form and confirm.
+        app(\App\Services\Structures\StructureDeletionService::class)->cascadeDelete((int) $this->model->id);
+
+        $this->resetForm();
+        $this->dispatch('deleted');
+        $this->callSuccessSwal();
     }
 
     public function store(): void

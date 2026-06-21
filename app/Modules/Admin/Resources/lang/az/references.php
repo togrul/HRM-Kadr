@@ -13,6 +13,11 @@ return [
         'edit' => 'Redaktə et',
         'save' => 'Yadda saxla',
     ],
+    'structure_delete' => [
+        'title' => 'Strukturu sil',
+        'confirm' => 'Bu struktur silinsin?',
+        'in_use' => 'Bu struktur başqa yerlərdə istifadə olunur. Yenə də silsəniz, onunla əlaqəli bütün məlumatlar (işçilər, namizədlər, ştat cədvəli və s.) da silinəcək. Davam edilsin?',
+    ],
     'fields' => [
         'id' => 'ID',
         'name' => 'Ad',

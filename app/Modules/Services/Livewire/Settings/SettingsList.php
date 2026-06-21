@@ -7,6 +7,7 @@ use App\Models\ChiefDelegation;
 use App\Models\Personnel;
 use App\Models\Setting;
 use App\Services\Chief\ChiefResolver;
+use App\Support\Language\AzerbaijaniDateFormatter;
 use App\Support\Translations\ModuleTranslation;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\On;
@@ -177,8 +178,8 @@ class SettingsList extends Component
     {
         $validated = $this->validate([
             'chiefDelegationForm.delegate_personnel_id' => ['required', 'integer', 'exists:personnels,id'],
-            'chiefDelegationForm.starts_at' => ['required', 'date'],
-            'chiefDelegationForm.ends_at' => ['nullable', 'date', 'after_or_equal:chiefDelegationForm.starts_at'],
+            'chiefDelegationForm.starts_at' => ['required'],
+            'chiefDelegationForm.ends_at' => ['nullable'],
             'chiefDelegationForm.reason' => ['nullable', 'string', 'max:255'],
             'chiefDelegationForm.basis_document' => ['nullable', 'string', 'max:255'],
         ], [], [
@@ -191,6 +192,32 @@ class SettingsList extends Component
 
         $form = $validated['chiefDelegationForm'];
 
+        // The date pickers emit "DD.MM.YYYY" (app-wide), not ISO — parse format-agnostically
+        // (ISO / DD.MM.YYYY / "19.05.2026-cı il") and store as Y-m-d so the date-range
+        // resolution works. Reject unparseable dates instead of silently storing 0000-00-00.
+        $dates = app(AzerbaijaniDateFormatter::class);
+        $startsAt = $dates->parse($form['starts_at']);
+        if ($startsAt === null) {
+            $this->addError('chiefDelegationForm.starts_at', 'Başlama tarixi düzgün deyil.');
+
+            return;
+        }
+
+        $endsAt = null;
+        if (filled($form['ends_at'])) {
+            $endsAt = $dates->parse($form['ends_at']);
+            if ($endsAt === null) {
+                $this->addError('chiefDelegationForm.ends_at', 'Bitmə tarixi düzgün deyil.');
+
+                return;
+            }
+            if ($endsAt->lt($startsAt)) {
+                $this->addError('chiefDelegationForm.ends_at', 'Bitmə tarixi başlama tarixindən əvvəl ola bilməz.');
+
+                return;
+            }
+        }
+
         $chiefId = $this->chiefPersonnelId ?: data_get(app(ChiefResolver::class)->current(), 'permanent_chief_personnel_id');
         if (! $chiefId) {
             $this->addError('chiefDelegationForm.delegate_personnel_id', 'Daimi rəhbər təyin edilməyib.');
@@ -201,8 +228,8 @@ class SettingsList extends Component
         ChiefDelegation::query()->create([
             'chief_personnel_id' => (int) $chiefId,
             'delegate_personnel_id' => (int) $form['delegate_personnel_id'],
-            'starts_at' => $form['starts_at'],
-            'ends_at' => $form['ends_at'] ?? null,
+            'starts_at' => $startsAt->toDateString(),
+            'ends_at' => $endsAt?->toDateString(),
             'reason' => $form['reason'] ?? null,
             'basis_document' => $form['basis_document'] ?? null,
             'is_active' => true,

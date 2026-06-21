@@ -13,6 +13,11 @@ return [
         'edit' => 'Edit',
         'save' => 'Save',
     ],
+    'structure_delete' => [
+        'title' => 'Delete structure',
+        'confirm' => 'Delete this structure?',
+        'in_use' => 'This structure is used elsewhere. Deleting it will also remove everything linked to it (employees, candidates, staff schedule, etc.). Continue?',
+    ],
     'fields' => [
         'id' => 'ID',
         'name' => 'Name',
