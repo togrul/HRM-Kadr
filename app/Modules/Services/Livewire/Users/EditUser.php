@@ -65,7 +65,7 @@ class EditUser extends Component
 
     public function mount()
     {
-        $this->authorize('manage-settings');
+        $this->authorize('access-settings');
         $this->title = __('services::users.titles.edit');
         $userId = is_array($this->userModel)
             ? ($this->userModel['id'] ?? null)
@@ -76,14 +76,19 @@ class EditUser extends Component
         $role = $this->userModel->roles->first();
         $this->roleId = $role?->id;
 
-        $this->user['name'] = $this->userModel->name;
-        $this->user['email'] = $this->userModel->email;
+        $this->user['name'] = trim((string) $this->userModel->name);
+        $this->user['email'] = trim((string) $this->userModel->email);
         $this->user['is_active'] = (bool) $this->userModel->is_active;
     }
 
     public function store()
     {
-        $this->authorize('manage-settings');
+        $this->authorize('access-settings');
+
+        // Livewire updates skip the HTTP TrimStrings middleware, so trim here — a stray
+        // trailing space would otherwise fail the `email` rule on otherwise-valid input.
+        $this->user['name'] = trim((string) ($this->user['name'] ?? ''));
+        $this->user['email'] = trim((string) ($this->user['email'] ?? ''));
 
         $this->validate();
 

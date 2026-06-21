@@ -38,7 +38,7 @@ class UserManagementAuthorizationTest extends TestCase
     public function test_authorized_admin_can_create_user_and_password_is_hashed(): void
     {
         $admin = User::factory()->create();
-        $admin->givePermissionTo(Permission::findOrCreate('manage-settings', 'web'));
+        $admin->givePermissionTo(Permission::findOrCreate('access-settings', 'web'));
         $this->actingAs($admin);
 
         $roleId = Role::findOrCreate('staff', 'web')->id;
@@ -60,7 +60,7 @@ class UserManagementAuthorizationTest extends TestCase
     public function test_weak_password_is_rejected_on_create(): void
     {
         $admin = User::factory()->create();
-        $admin->givePermissionTo(Permission::findOrCreate('manage-settings', 'web'));
+        $admin->givePermissionTo(Permission::findOrCreate('access-settings', 'web'));
         $this->actingAs($admin);
 
         Livewire::test(AddUser::class)

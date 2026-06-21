@@ -48,7 +48,11 @@ class AddUser extends Component
 
     public function store()
     {
-        $this->authorize('manage-settings');
+        $this->authorize('access-settings');
+
+        // Livewire updates skip the HTTP TrimStrings middleware, so trim here.
+        $this->user['name'] = trim((string) ($this->user['name'] ?? ''));
+        $this->user['email'] = trim((string) ($this->user['email'] ?? ''));
 
         $this->validate();
 
@@ -73,7 +77,7 @@ class AddUser extends Component
 
     public function mount()
     {
-        $this->authorize('manage-settings');
+        $this->authorize('access-settings');
         $this->title = __('services::users.titles.add');
         $this->roleId = null;
     }
