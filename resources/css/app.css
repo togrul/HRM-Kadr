@@ -3,6 +3,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Hide Alpine-cloaked elements until Alpine initialises (prevents edit-mode flash). */
+[x-cloak] { display: none !important; }
+
 @layer base {
   input[type='checkbox']:not(.label__checkbox) {
     -webkit-appearance: none;

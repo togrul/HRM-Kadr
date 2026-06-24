@@ -55,6 +55,8 @@ Route::middleware(['web', 'auth', 'can:access-admin'])->prefix('/admin')->group(
     Route::get('/hr-policy-diagnostics', HrPolicyDiagnostics::class)->name('admin.hr-policy-diagnostics');
     Route::get('/social-origins', SocialOrigins::class)->name('admin.social-origins');
     Route::get('/structures', Structures::class)->name('admin.structures');
-    Route::get('/weapons', Weapons::class)->name('admin.weapons');
+    if (app(\App\Services\Features\FeatureState::class)->enabled('weapons')) {
+        Route::get('/weapons', Weapons::class)->name('admin.weapons');
+    }
     Route::get('/work-norms', WorkNorms::class)->name('admin.work-norms');
 });

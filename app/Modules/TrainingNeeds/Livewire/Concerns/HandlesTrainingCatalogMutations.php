@@ -11,9 +11,93 @@ use App\Models\TrainingLevel;
 use App\Models\TrainingNeedItem;
 use App\Models\TrainingProgram;
 use App\Models\TrainingProgramCompetency;
+use Illuminate\Validation\Rule;
 
 trait HandlesTrainingCatalogMutations
 {
+    // Catalog manage state: which record (if any) each form is editing, and the
+    // per-list search terms that drive the paginated manage tables.
+    public ?int $editingGroupId = null;
+
+    public ?int $editingLevelId = null;
+
+    public ?int $editingCompetencyId = null;
+
+    public ?int $editingProgramId = null;
+
+    public string $groupListSearch = '';
+
+    public string $levelListSearch = '';
+
+    public string $competencyListSearch = '';
+
+    public string $programListSearch = '';
+
+    public function updatedGroupListSearch(): void
+    {
+        $this->resetPage('groupsPage');
+    }
+
+    public function updatedLevelListSearch(): void
+    {
+        $this->resetPage('levelsPage');
+    }
+
+    public function updatedCompetencyListSearch(): void
+    {
+        $this->resetPage('competenciesPage');
+    }
+
+    public function updatedProgramListSearch(): void
+    {
+        $this->resetPage('programsPage');
+    }
+
+    /** Paginated + searchable catalog lists for the Catalogs tab manage tables. */
+    public function getCatalogGroupsProperty()
+    {
+        $term = trim($this->groupListSearch);
+
+        return TrainingCompetencyGroup::query()
+            ->withCount('competencies')
+            ->when($term !== '', fn ($q) => $q->where('name', 'like', '%'.$term.'%'))
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->paginate(8, ['*'], 'groupsPage');
+    }
+
+    public function getCatalogLevelsProperty()
+    {
+        $term = trim($this->levelListSearch);
+
+        return TrainingLevel::query()
+            ->when($term !== '', fn ($q) => $q->where('name', 'like', '%'.$term.'%'))
+            ->orderBy('score')
+            ->orderBy('sort_order')
+            ->paginate(8, ['*'], 'levelsPage');
+    }
+
+    public function getCatalogCompetenciesProperty()
+    {
+        $term = trim($this->competencyListSearch);
+
+        return TrainingCompetency::query()
+            ->with('group:id,name')
+            ->when($term !== '', fn ($q) => $q->where('name', 'like', '%'.$term.'%'))
+            ->orderBy('name')
+            ->paginate(8, ['*'], 'competenciesPage');
+    }
+
+    public function getCatalogProgramsProperty()
+    {
+        $term = trim($this->programListSearch);
+
+        return TrainingProgram::query()
+            ->when($term !== '', fn ($q) => $q->where('title', 'like', '%'.$term.'%')->orWhere('code', 'like', '%'.$term.'%'))
+            ->orderBy('title')
+            ->paginate(8, ['*'], 'programsPage');
+    }
+
     public function storeGroup(): void
     {
         $this->authorizeTrainingNeedsManage();
@@ -29,27 +113,59 @@ trait HandlesTrainingCatalogMutations
         ]);
 
         $name = trim((string) data_get($validated, 'groupForm.name'));
-
-        TrainingCompetencyGroup::query()->create([
+        $payload = [
             'name' => $name,
-            'slug' => $this->uniqueSlug(TrainingCompetencyGroup::class, $name),
             'description' => data_get($validated, 'groupForm.description'),
             'sort_order' => (int) (data_get($validated, 'groupForm.sort_order') ?? 0),
             'is_active' => (bool) (data_get($validated, 'groupForm.is_active') ?? true),
-        ]);
+        ];
 
-        $this->reset('groupForm', 'searchCompetencyGroup');
-        $this->groupForm = $this->groupDefaults();
+        if ($this->editingGroupId) {
+            $group = TrainingCompetencyGroup::query()->findOrFail($this->editingGroupId);
+            $group->update([
+                ...$payload,
+                'slug' => $group->name === $name ? $group->slug : $this->uniqueSlug(TrainingCompetencyGroup::class, $name, 'name', $group->id),
+            ]);
+        } else {
+            TrainingCompetencyGroup::query()->create([
+                ...$payload,
+                'slug' => $this->uniqueSlug(TrainingCompetencyGroup::class, $name),
+            ]);
+        }
+
+        $this->cancelGroupEdit();
+        $this->reset('searchCompetencyGroup');
         $this->refreshRuntimeCaches();
         $this->dispatch('trainingNeedsSaved', __('training_needs::dashboard.messages.group_saved'));
+    }
+
+    public function editGroup(int $id): void
+    {
+        $this->authorizeTrainingNeedsManage();
+        $group = TrainingCompetencyGroup::query()->findOrFail($id);
+        $this->editingGroupId = $group->id;
+        $this->groupForm = [
+            'name' => (string) $group->name,
+            'description' => (string) ($group->description ?? ''),
+            'sort_order' => (int) $group->sort_order,
+            'is_active' => (bool) $group->is_active,
+        ];
+        $this->resetValidation();
+    }
+
+    public function cancelGroupEdit(): void
+    {
+        $this->editingGroupId = null;
+        $this->groupForm = $this->groupDefaults();
+        $this->resetValidation();
     }
 
     public function storeLevel(): void
     {
         $this->authorizeTrainingNeedsManage();
         $validated = $this->validate([
-            'levelForm.name' => 'required|string|min:2|max:120|unique:training_levels,name',
-            'levelForm.score' => 'required|integer|min:1|max:10|unique:training_levels,score',
+            'levelForm.name' => ['required', 'string', 'min:2', 'max:120', Rule::unique('training_levels', 'name')->ignore($this->editingLevelId)],
+            'levelForm.score' => ['required', 'integer', 'min:1', 'max:10', Rule::unique('training_levels', 'score')->ignore($this->editingLevelId)],
             'levelForm.description' => 'nullable|string|max:1000',
             'levelForm.sort_order' => 'nullable|integer|min:0',
             'levelForm.is_default' => 'nullable|boolean',
@@ -60,22 +176,51 @@ trait HandlesTrainingCatalogMutations
             'levelForm.sort_order' => __('training_needs::dashboard.fields.sort_order'),
         ]);
 
-        if ((bool) data_get($validated, 'levelForm.is_default')) {
+        $isDefault = (bool) (data_get($validated, 'levelForm.is_default') ?? false);
+        if ($isDefault) {
             TrainingLevel::query()->update(['is_default' => false]);
         }
 
-        TrainingLevel::query()->create([
+        $payload = [
             'name' => trim((string) data_get($validated, 'levelForm.name')),
             'score' => (int) data_get($validated, 'levelForm.score'),
             'description' => data_get($validated, 'levelForm.description'),
             'sort_order' => (int) (data_get($validated, 'levelForm.sort_order') ?? 0),
-            'is_default' => (bool) (data_get($validated, 'levelForm.is_default') ?? false),
-        ]);
+            'is_default' => $isDefault,
+        ];
 
-        $this->reset('levelForm', 'searchCompetencyLevel');
-        $this->levelForm = $this->levelDefaults();
+        if ($this->editingLevelId) {
+            TrainingLevel::query()->findOrFail($this->editingLevelId)->update($payload);
+        } else {
+            TrainingLevel::query()->create($payload);
+        }
+
+        $this->cancelLevelEdit();
+        $this->reset('searchCompetencyLevel');
         $this->refreshRuntimeCaches();
         $this->dispatch('trainingNeedsSaved', __('training_needs::dashboard.messages.level_saved'));
+    }
+
+    public function editLevel(int $id): void
+    {
+        $this->authorizeTrainingNeedsManage();
+        $level = TrainingLevel::query()->findOrFail($id);
+        $this->editingLevelId = $level->id;
+        $this->levelForm = [
+            'name' => (string) $level->name,
+            'score' => (int) $level->score,
+            'description' => (string) ($level->description ?? ''),
+            'sort_order' => (int) $level->sort_order,
+            'is_default' => (bool) $level->is_default,
+        ];
+        $this->resetValidation();
+    }
+
+    public function cancelLevelEdit(): void
+    {
+        $this->editingLevelId = null;
+        $this->levelForm = $this->levelDefaults();
+        $this->resetValidation();
     }
 
     public function storeCompetency(): void
@@ -94,20 +239,53 @@ trait HandlesTrainingCatalogMutations
         ]);
 
         $name = trim((string) data_get($validated, 'competencyForm.name'));
-
-        TrainingCompetency::query()->create([
+        $payload = [
             'training_competency_group_id' => data_get($validated, 'competencyForm.training_competency_group_id'),
             'name' => $name,
-            'slug' => $this->uniqueSlug(TrainingCompetency::class, $name),
             'description' => data_get($validated, 'competencyForm.description'),
             'is_mandatory' => (bool) (data_get($validated, 'competencyForm.is_mandatory') ?? false),
             'is_active' => (bool) (data_get($validated, 'competencyForm.is_active') ?? true),
-        ]);
+        ];
 
-        $this->reset('competencyForm', 'searchCompetency');
-        $this->competencyForm = $this->competencyDefaults();
+        if ($this->editingCompetencyId) {
+            $competency = TrainingCompetency::query()->findOrFail($this->editingCompetencyId);
+            $competency->update([
+                ...$payload,
+                'slug' => $competency->name === $name ? $competency->slug : $this->uniqueSlug(TrainingCompetency::class, $name, 'name', $competency->id),
+            ]);
+        } else {
+            TrainingCompetency::query()->create([
+                ...$payload,
+                'slug' => $this->uniqueSlug(TrainingCompetency::class, $name),
+            ]);
+        }
+
+        $this->cancelCompetencyEdit();
+        $this->reset('searchCompetency');
         $this->refreshRuntimeCaches();
         $this->dispatch('trainingNeedsSaved', __('training_needs::dashboard.messages.competency_saved'));
+    }
+
+    public function editCompetency(int $id): void
+    {
+        $this->authorizeTrainingNeedsManage();
+        $competency = TrainingCompetency::query()->findOrFail($id);
+        $this->editingCompetencyId = $competency->id;
+        $this->competencyForm = [
+            'training_competency_group_id' => $competency->training_competency_group_id,
+            'name' => (string) $competency->name,
+            'description' => (string) ($competency->description ?? ''),
+            'is_mandatory' => (bool) $competency->is_mandatory,
+            'is_active' => (bool) $competency->is_active,
+        ];
+        $this->resetValidation();
+    }
+
+    public function cancelCompetencyEdit(): void
+    {
+        $this->editingCompetencyId = null;
+        $this->competencyForm = $this->competencyDefaults();
+        $this->resetValidation();
     }
 
     public function storeProgram(): void
@@ -129,21 +307,103 @@ trait HandlesTrainingCatalogMutations
         ]);
 
         $title = trim((string) data_get($validated, 'programForm.title'));
-
-        TrainingProgram::query()->create([
+        $payload = [
             'title' => $title,
-            'slug' => $this->uniqueSlug(TrainingProgram::class, $title, 'title'),
             'code' => blank(data_get($validated, 'programForm.code')) ? null : trim((string) data_get($validated, 'programForm.code')),
             'delivery_type' => (string) data_get($validated, 'programForm.delivery_type'),
             'duration_hours' => data_get($validated, 'programForm.duration_hours'),
             'description' => data_get($validated, 'programForm.description'),
             'is_active' => (bool) (data_get($validated, 'programForm.is_active') ?? true),
-        ]);
+        ];
 
-        $this->reset('programForm', 'searchTrainingProgram');
-        $this->programForm = $this->programDefaults();
+        if ($this->editingProgramId) {
+            $program = TrainingProgram::query()->findOrFail($this->editingProgramId);
+            $program->update([
+                ...$payload,
+                'slug' => $program->title === $title ? $program->slug : $this->uniqueSlug(TrainingProgram::class, $title, 'title', $program->id),
+            ]);
+        } else {
+            TrainingProgram::query()->create([
+                ...$payload,
+                'slug' => $this->uniqueSlug(TrainingProgram::class, $title, 'title'),
+            ]);
+        }
+
+        $this->cancelProgramEdit();
+        $this->reset('searchTrainingProgram');
         $this->refreshRuntimeCaches();
         $this->dispatch('trainingNeedsSaved', __('training_needs::dashboard.messages.program_saved'));
+    }
+
+    public function editProgram(int $id): void
+    {
+        $this->authorizeTrainingNeedsManage();
+        $program = TrainingProgram::query()->findOrFail($id);
+        $this->editingProgramId = $program->id;
+        $this->programForm = [
+            'title' => (string) $program->title,
+            'code' => (string) ($program->code ?? ''),
+            'delivery_type' => (string) $program->delivery_type,
+            'duration_hours' => $program->duration_hours,
+            'description' => (string) ($program->description ?? ''),
+            'is_active' => (bool) $program->is_active,
+        ];
+        $this->resetValidation();
+    }
+
+    public function cancelProgramEdit(): void
+    {
+        $this->editingProgramId = null;
+        $this->programForm = $this->programDefaults();
+        $this->resetValidation();
+    }
+
+    public function deleteGroup(int $id): void
+    {
+        $this->authorizeTrainingNeedsManage();
+        TrainingCompetencyGroup::query()->whereKey($id)->delete();
+        if ($this->editingGroupId === $id) {
+            $this->cancelGroupEdit();
+        }
+        $this->resetPage('groupsPage');
+        $this->refreshRuntimeCaches();
+        $this->dispatch('trainingNeedsSaved', __('training_needs::dashboard.messages.group_deleted'));
+    }
+
+    public function deleteLevel(int $id): void
+    {
+        $this->authorizeTrainingNeedsManage();
+        TrainingLevel::query()->whereKey($id)->delete();
+        if ($this->editingLevelId === $id) {
+            $this->cancelLevelEdit();
+        }
+        $this->resetPage('levelsPage');
+        $this->refreshRuntimeCaches();
+        $this->dispatch('trainingNeedsSaved', __('training_needs::dashboard.messages.level_deleted'));
+    }
+
+    public function deleteCompetency(int $id): void
+    {
+        $this->authorizeTrainingNeedsManage();
+        TrainingCompetency::query()->whereKey($id)->delete();
+        if ($this->editingCompetencyId === $id) {
+            $this->cancelCompetencyEdit();
+        }
+        $this->resetPage('competenciesPage');
+        $this->refreshRuntimeCaches();
+        $this->dispatch('trainingNeedsSaved', __('training_needs::dashboard.messages.competency_deleted'));
+    }
+
+    public function deleteProgram(int $id): void
+    {
+        $this->authorizeTrainingNeedsManage();
+        TrainingProgram::query()->whereKey($id)->delete();
+        if ($this->editingProgramId === $id) {
+            $this->cancelProgramEdit();
+        }
+        $this->resetPage('programsPage');
+        $this->refreshRuntimeCaches();
+        $this->dispatch('trainingNeedsSaved', __('training_needs::dashboard.messages.program_deleted'));
     }
 
     public function storeProgramMap(): void

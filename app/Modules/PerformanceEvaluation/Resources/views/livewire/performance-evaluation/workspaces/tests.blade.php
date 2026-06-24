@@ -391,7 +391,7 @@
                             <div class="grid gap-3">
                                 <div>
                                     <x-ui.select-dropdown :label="__('performance_evaluation::dashboard.fields.attempt')" placeholder="---" mode="gray" class="w-full" instance="perf-finalize-attempt"
-                                        direction="up"
+                                        direction="auto"
                                         wire:model.live="attemptSubmitForm.performance_test_attempt_id" :model="$this->attemptOptions()" search-model="searchTestAttempt"></x-ui.select-dropdown>
                                     @error('attemptSubmitForm.performance_test_attempt_id') <x-validation>{{ $message }}</x-validation> @enderror
                                 </div>
@@ -406,14 +406,14 @@
                             <x-surface-card :title="__('performance_evaluation::dashboard.cards.attempt_capture')" icon="icons.pending-icon" bodyClass="overflow-visible" contentClass="overflow-visible p-4">
                                 <div class="grid gap-3">
                                     <x-ui.select-dropdown :label="__('performance_evaluation::dashboard.fields.test_session')" placeholder="---" mode="gray" class="w-full" instance="perf-attempt-session"
-                                        direction="up"
+                                        direction="auto"
                                         wire:model.live="attemptAnswerForm.performance_test_session_id" :model="$this->testSessionOptions()" search-model="searchTestSession"></x-ui.select-dropdown>
                                     @error('attemptAnswerForm.performance_test_session_id') <x-validation>{{ $message }}</x-validation> @enderror
                                 </div>
                                 <div class="grid gap-3 md:grid-cols-[minmax(0,1fr)_160px]">
                                     <div>
                                     <x-ui.select-dropdown :label="__('performance_evaluation::dashboard.fields.question')" placeholder="---" mode="gray" class="w-full" instance="perf-attempt-question"
-                                        direction="up"
+                                        direction="auto"
                                         wire:model.live="attemptAnswerForm.performance_test_question_id" :model="$this->testQuestionOptions()" search-model="searchTestQuestion"></x-ui.select-dropdown>
                                     @error('attemptAnswerForm.performance_test_question_id') <x-validation>{{ $message }}</x-validation> @enderror
                                     </div>
@@ -426,7 +426,7 @@
                                 @if (data_get($attemptAnswerForm, 'performance_test_question_id') && optional(\App\Models\PerformanceTestQuestion::find(data_get($attemptAnswerForm, 'performance_test_question_id')))->isAutoScored())
                                     <div>
                                         <x-ui.select-dropdown :label="__('performance_evaluation::dashboard.fields.option')" placeholder="---" mode="gray" class="w-full" instance="perf-attempt-option"
-                                            direction="up"
+                                            direction="auto"
                                             wire:model.live="attemptAnswerForm.selected_option_id" :model="$this->testQuestionOptionChoices()"></x-ui.select-dropdown>
                                         @error('attemptAnswerForm.selected_option_id') <x-validation>{{ $message }}</x-validation> @enderror
                                     </div>
@@ -445,7 +445,7 @@
                                 <div class="grid gap-3">
                                     <div>
                                         <x-ui.select-dropdown :label="__('performance_evaluation::dashboard.fields.answer')" placeholder="---" mode="gray" class="w-full" instance="perf-review-answer"
-                                            direction="up"
+                                            direction="auto"
                                             wire:model.live="reviewForm.performance_test_attempt_answer_id" :model="$this->reviewAnswerOptions()" search-model="searchReviewAnswer"></x-ui.select-dropdown>
                                         @error('reviewForm.performance_test_attempt_answer_id') <x-validation>{{ $message }}</x-validation> @enderror
                                     </div>

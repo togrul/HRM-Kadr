@@ -373,8 +373,7 @@
                                 </x-table.td>
                                 <x-table.td :isButton="true">
                                     <button
-                                        onclick="confirm('{{ __('personnel::common.messages.remove_data_confirm') }}') || event.stopImmediatePropagation()"
-                                        wire:click="removeExtraEducation({{ $key }})"
+                                        x-on:click="$dispatch('confirm-action', { tone: 'rose', message: @js(__('personnel::common.messages.remove_data_confirm')), confirmText: @js(__('ui::common.actions.delete')), run: () => $wire.removeExtraEducation({{ $key }}) })"
                                         class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700"
                                     >
                                         <x-icons.force-delete></x-icons.force-delete>

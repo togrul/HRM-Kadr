@@ -125,8 +125,7 @@
                                         </x-action-button>
                                         {{-- @role('admin') --}}
                                         <x-action-button
-                                            onclick="confirm('{{ __('services::users.messages.force_delete_confirm') }}') || event.stopImmediatePropagation()"
-                                            wire:click.prevent="forceDeleteData({{ $user->id }})"
+                                            x-on:click="$dispatch('confirm-action', { tone: 'rose', message: @js(__('services::users.messages.force_delete_confirm')), confirmText: @js(__('services::common.actions.force_delete')), run: () => $wire.forceDeleteData({{ $user->id }}) })"
                                             class="h-9 w-9 hover:bg-red-50"
                                             :title="__('services::common.actions.force_delete')">
                                             <x-icons.force-delete color="text-rose-400"

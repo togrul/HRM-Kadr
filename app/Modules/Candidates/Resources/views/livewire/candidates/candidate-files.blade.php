@@ -212,8 +212,7 @@
                                             @endif
 
                                             <button
-                                                onclick="confirm('{{ __('candidates::files.messages.remove_confirm') }}') || event.stopImmediatePropagation()"
-                                                wire:click="removeFile({{ $key }})"
+                                                x-on:click="$dispatch('confirm-action', { tone: 'rose', message: @js(__('candidates::files.messages.remove_confirm')), confirmText: @js(__('ui::common.actions.delete')), run: () => $wire.removeFile({{ $key }}) })"
                                                 class="flex h-10 w-10 items-center justify-center rounded-full border border-rose-100 bg-rose-50 text-rose-400 shadow-sm transition hover:border-rose-200 hover:text-rose-600"
                                             >
                                                 <x-icons.delete-icon size="w-4 h-4" color="text-rose-400" hover="text-rose-600"></x-icons.delete-icon>

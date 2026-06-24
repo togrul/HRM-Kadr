@@ -18,7 +18,7 @@ return [
         ['label' => 'admin::references.menu.position', 'icon' => 'chair-icon', 'route' => 'admin.positions'],
         ['label' => 'admin::references.menu.structure', 'icon' => 'structure-icon', 'route' => 'admin.structures'],
         ['label' => 'admin::references.menu.punishments', 'icon' => 'voltage-icon', 'route' => 'admin.punishments'],
-        ['label' => 'admin::references.menu.weapons', 'icon' => 'fire-icon', 'route' => 'admin.weapons'],
+        ['label' => 'admin::references.menu.weapons', 'icon' => 'fire-icon', 'route' => 'admin.weapons', 'feature' => 'weapons'],
         ['label' => 'admin::references.menu.work_norms', 'icon' => 'timer-icon', 'route' => 'admin.work-norms'],
         ['label' => 'admin::references.menu.languages', 'icon' => 'globe-icon', 'route' => 'admin.languages'],
         ['label' => 'admin::references.menu.scientific_degree_and_names', 'icon' => 'pen-ruler-icon', 'route' => 'admin.scientific-degrees'],

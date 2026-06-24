@@ -144,8 +144,7 @@
                                 </x-table.td>
                                 <x-table.td :isButton="true">
                                     <button
-                                        onclick="confirm('{{ __('personnel::common.messages.remove_data_confirm') }}') || event.stopImmediatePropagation()"
-                                        wire:click="forceDeleteAward({{ $key }})"
+                                        x-on:click="$dispatch('confirm-action', { tone: 'rose', message: @js(__('personnel::common.messages.remove_data_confirm')), confirmText: @js(__('ui::common.actions.delete')), run: () => $wire.forceDeleteAward({{ $key }}) })"
                                         class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700"
                                     >
                                         <x-icons.force-delete></x-icons.force-delete>
@@ -326,8 +325,7 @@
                             </x-table.td>
                                 <x-table.td :isButton="true">
                                     <button
-                                        onclick="confirm('{{ __('personnel::common.messages.remove_data_confirm') }}') || event.stopImmediatePropagation()"
-                                        wire:click="forceDeletePunishment({{ $key }})"
+                                        x-on:click="$dispatch('confirm-action', { tone: 'rose', message: @js(__('personnel::common.messages.remove_data_confirm')), confirmText: @js(__('ui::common.actions.delete')), run: () => $wire.forceDeletePunishment({{ $key }}) })"
                                         class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700"
                                     >
                                         <x-icons.force-delete></x-icons.force-delete>
@@ -349,6 +347,7 @@
         </div>
     </x-form-card>
 
+    @feature('criminal_records')
     <x-form-card title="{{ __('personnel::wizard.sections.discrediting_information') }}">
         <div class="flex flex-col">
             <x-label for="personnelExtra.discrediting_information">{{ __('personnel::common.labels.description') }}</x-label>
@@ -360,4 +359,5 @@
             ></x-textarea>
         </div>
     </x-form-card>
+    @endfeature
 </div>

@@ -3,9 +3,12 @@
         'other' => __('personnel::wizard.options.injury_types.other'),
         'contusion' => __('personnel::wizard.options.injury_types.contusion'),
     ];
+    $features = app(\App\Services\Features\FeatureState::class);
+    $hasMilitaryDomains = $features->enabled('military_service') || $features->enabled('captivity');
 @endphp
 
 <div class="flex flex-col space-y-4">
+    @feature('military_service')
     <x-form-card title="{{ __('personnel::wizard.sections.military') }}">
         <div class="grid grid-cols-3 gap-2">
             <div class="flex flex-col">
@@ -125,8 +128,7 @@
                                 </x-table.td>
                                 <x-table.td :isButton="true">
                                     <button
-                                        onclick="confirm('{{ __('personnel::common.messages.remove_data_confirm') }}') || event.stopImmediatePropagation()"
-                                        wire:click="forceDeleteMilitary({{ $key }})"
+                                        x-on:click="$dispatch('confirm-action', { tone: 'rose', message: @js(__('personnel::common.messages.remove_data_confirm')), confirmText: @js(__('ui::common.actions.delete')), run: () => $wire.forceDeleteMilitary({{ $key }}) })"
                                         class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700"
                                     >
                                         <x-icons.force-delete></x-icons.force-delete>
@@ -241,8 +243,7 @@
                                 </x-table.td>
                                 <x-table.td :isButton="true">
                                     <button
-                                        onclick="confirm('{{ __('personnel::common.messages.remove_data_confirm') }}') || event.stopImmediatePropagation()"
-                                        wire:click="forceDeleteInjury({{ $key }})"
+                                        x-on:click="$dispatch('confirm-action', { tone: 'rose', message: @js(__('personnel::common.messages.remove_data_confirm')), confirmText: @js(__('ui::common.actions.delete')), run: () => $wire.forceDeleteInjury({{ $key }}) })"
                                         class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700"
                                     >
                                         <x-icons.force-delete></x-icons.force-delete>
@@ -278,7 +279,9 @@
             @enderror
         </div>
     </x-form-card>
+    @endfeature
 
+    @feature('captivity')
     <x-form-card title="{{ __('personnel::wizard.sections.captivity') }}">
         <div class="grid grid-cols-4 gap-2">
             <div class="flex flex-col">
@@ -362,8 +365,7 @@
                                 </x-table.td>
                                 <x-table.td :isButton="true">
                                     <button
-                                        onclick="confirm('{{ __('personnel::common.messages.remove_data_confirm') }}') || event.stopImmediatePropagation()"
-                                        wire:click="forceDeleteCaptivity({{ $key }})"
+                                        x-on:click="$dispatch('confirm-action', { tone: 'rose', message: @js(__('personnel::common.messages.remove_data_confirm')), confirmText: @js(__('ui::common.actions.delete')), run: () => $wire.forceDeleteCaptivity({{ $key }}) })"
                                         class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700"
                                     >
                                         <x-icons.force-delete></x-icons.force-delete>
@@ -384,4 +386,13 @@
             </div>
         </div>
     </x-form-card>
+    @endfeature
+
+    @unless($hasMilitaryDomains)
+        <x-form-card title="{{ __('personnel::wizard.sections.military') }}">
+            <div class="flex items-center justify-center py-6">
+                <span class="font-medium text-gray-500">{{ __('personnel::common.labels.no_information_added') }}</span>
+            </div>
+        </x-form-card>
+    @endunless
 </div>

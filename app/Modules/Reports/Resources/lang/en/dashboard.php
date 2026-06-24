@@ -155,6 +155,8 @@ return [
             'new_hires' => 'New hires',
             'exits' => 'Exits',
             'absence_rate' => 'Absence rate',
+            'turnover_rate' => 'Turnover rate',
+            'turnover_hint' => 'Exits / active headcount (year to date)',
         ],
     ],
     'standard' => [

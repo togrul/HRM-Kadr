@@ -12,6 +12,9 @@ return [
     ],
     'tabs' => [
         'overview' => 'Overview',
+        'goals' => 'Goals',
+        'succession' => 'Succession',
+        'feedback' => '360° feedback',
         'cycles' => 'Cycles',
         'templates' => 'Templates',
         'evaluations' => 'Evaluations',

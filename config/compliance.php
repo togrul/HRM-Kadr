@@ -6,6 +6,10 @@ return [
             'schedule_enabled' => (bool) env('COMPLIANCE_DOCUMENT_REMINDERS_ENABLED', false),
             'daily_at' => env('COMPLIANCE_DOCUMENT_REMINDERS_DAILY_AT', '05:55'),
             'days_ahead' => (int) env('COMPLIANCE_DOCUMENT_REMINDERS_DAYS_AHEAD', 30),
+            // Per-recipient reminders (in addition to the HR/admin digest campaign).
+            'notify_employee' => (bool) env('COMPLIANCE_DOCUMENT_REMINDERS_NOTIFY_EMPLOYEE', true),
+            // Statuses that escalate to the employee's manager (parent structure head).
+            'escalate_manager_statuses' => ['expired', 'missing'],
         ],
     ],
 

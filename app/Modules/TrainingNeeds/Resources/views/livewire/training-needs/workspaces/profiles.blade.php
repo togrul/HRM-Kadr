@@ -7,7 +7,7 @@
                             :label="__('training_needs::dashboard.fields.personnel')"
                             placeholder="---"
                             mode="gray"
-                            direction="up"
+                            direction="auto"
                             class="w-full"
                             wire:model.live="profileForm.personnel_id"
                             :model="$this->personnelOptions()"

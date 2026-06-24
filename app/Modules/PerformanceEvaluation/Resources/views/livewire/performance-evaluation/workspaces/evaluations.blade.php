@@ -13,31 +13,31 @@
                         @endif
                         <div class="md:col-span-2">
                             <x-ui.select-dropdown :label="__('performance_evaluation::dashboard.fields.cycle')" placeholder="---" mode="gray" class="w-full" instance="perf-eval-cycle"
-                                direction="up"
+                                direction="auto"
                                 wire:model.live="evaluationForm.performance_cycle_id" :model="$this->cycleOptions()" search-model="searchCycle"></x-ui.select-dropdown>
                             @error('evaluationForm.performance_cycle_id') <x-validation>{{ $message }}</x-validation> @enderror
                         </div>
                         <div class="md:col-span-2">
                             <x-ui.select-dropdown :label="__('performance_evaluation::dashboard.fields.template')" placeholder="---" mode="gray" class="w-full" instance="perf-eval-template"
-                                direction="up"
+                                direction="auto"
                                 wire:model.live="evaluationForm.performance_form_template_id" :model="$this->templateOptions()" search-model="searchTemplate"></x-ui.select-dropdown>
                             @error('evaluationForm.performance_form_template_id') <x-validation>{{ $message }}</x-validation> @enderror
                         </div>
                         <div class="md:col-span-2">
                             <x-ui.select-dropdown :label="__('performance_evaluation::dashboard.fields.personnel')" placeholder="---" mode="gray" class="w-full" instance="perf-eval-personnel"
-                                direction="up"
+                                direction="auto"
                                 wire:model.live="evaluationForm.personnel_id" :model="$this->personnelOptions()" search-model="searchPersonnel"></x-ui.select-dropdown>
                             @error('evaluationForm.personnel_id') <x-validation>{{ $message }}</x-validation> @enderror
                         </div>
                         <div>
                             <x-ui.select-dropdown :label="__('performance_evaluation::dashboard.fields.manager')" placeholder="---" mode="gray" class="w-full" instance="perf-eval-manager"
-                                direction="up"
+                                direction="auto"
                                 wire:model.live="evaluationForm.manager_id" :model="$this->evaluatorOptions('searchManager', 'manager_id')" search-model="searchManager"></x-ui.select-dropdown>
                             @error('evaluationForm.manager_id') <x-validation>{{ $message }}</x-validation> @enderror
                         </div>
                         <div>
                             <x-ui.select-dropdown :label="__('performance_evaluation::dashboard.fields.hr_reviewer')" placeholder="---" mode="gray" class="w-full" instance="perf-eval-hr"
-                                direction="up"
+                                direction="auto"
                                 wire:model.live="evaluationForm.hr_reviewer_id" :model="$this->evaluatorOptions('searchHrReviewer', 'hr_reviewer_id')" search-model="searchHrReviewer"></x-ui.select-dropdown>
                             @error('evaluationForm.hr_reviewer_id') <x-validation>{{ $message }}</x-validation> @enderror
                         </div>
@@ -59,13 +59,13 @@
                         </div>
                         <div class="md:col-span-2">
                             <x-ui.select-dropdown :label="__('performance_evaluation::dashboard.fields.evaluation_form')" placeholder="---" mode="gray" class="w-full" instance="perf-score-form"
-                                direction="up"
+                                direction="auto"
                                 wire:model.live="scoreForm.performance_form_id" :model="$this->performanceFormOptions()" search-model="searchPerformanceForm"></x-ui.select-dropdown>
                             @error('scoreForm.performance_form_id') <x-validation>{{ $message }}</x-validation> @enderror
                         </div>
                         <div class="md:col-span-2">
                             <x-ui.select-dropdown :label="__('performance_evaluation::dashboard.fields.item')" placeholder="---" mode="gray" class="w-full" instance="perf-score-item"
-                                direction="up"
+                                direction="auto"
                                 wire:model.live="scoreForm.performance_form_template_item_id" :model="$this->templateItemOptions()" search-model="searchTemplateItem"></x-ui.select-dropdown>
                             @error('scoreForm.performance_form_template_item_id') <x-validation>{{ $message }}</x-validation> @enderror
                             @if ($this->selectedScoreItem && blank($this->selectedScoreItem->training_competency_id))
@@ -74,7 +74,7 @@
                         </div>
                         <div>
                             <x-ui.select-dropdown :label="__('performance_evaluation::dashboard.fields.evaluator_type')" placeholder="---" mode="gray" class="w-full" instance="perf-score-evaluator-type" wire:model.live="scoreForm.evaluator_type"
-                                direction="up"
+                                direction="auto"
                                 :model="collect(['self','manager','hr'])->map(fn ($item) => ['id' => $item, 'label' => __('performance_evaluation::dashboard.evaluators.'.$item)])->values()->all()"></x-ui.select-dropdown>
                             @error('scoreForm.evaluator_type') <x-validation>{{ $message }}</x-validation> @enderror
                         </div>

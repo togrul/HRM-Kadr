@@ -67,8 +67,7 @@
                                     </x-table.td>
                                     <x-table.td :isButton="true">
                                         <button
-                                            onclick="confirm('{{ __('personnel::common.messages.remove_data_confirm') }}') || event.stopImmediatePropagation()"
-                                            wire:click="forceDeleteLanguage({{ $key }})"
+                                            x-on:click="$dispatch('confirm-action', { tone: 'rose', message: @js(__('personnel::common.messages.remove_data_confirm')), confirmText: @js(__('ui::common.actions.delete')), run: () => $wire.forceDeleteLanguage({{ $key }}) })"
                                             class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700"
                                         >
                                             <x-icons.force-delete></x-icons.force-delete>
@@ -143,8 +142,7 @@
                         </div>
                     </div>
                     <button
-                            onclick="confirm('{{ __('personnel::common.messages.remove_data_confirm') }}') || event.stopImmediatePropagation()"
-                            wire:click="forceDeleteEvent({{ $key }})"
+                            x-on:click="$dispatch('confirm-action', { tone: 'rose', message: @js(__('personnel::common.messages.remove_data_confirm')), confirmText: @js(__('ui::common.actions.delete')), run: () => $wire.forceDeleteEvent({{ $key }}) })"
                             class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700"
                         >
                             <x-icons.force-delete></x-icons.force-delete>
@@ -269,8 +267,7 @@
                 @forelse ($miscForm->degreeList ?? [] as $key => $degree)
                     <div class="relative flex flex-col px-4 py-2 space-y-2 overflow-hidden rounded-lg shadow-sm bg-neutral-100">
                         <button
-                                onclick="confirm('{{ __('personnel::common.messages.remove_data_confirm') }}') || event.stopImmediatePropagation()"
-                            wire:click="forceDeleteDegree({{ $key }})"
+                                x-on:click="$dispatch('confirm-action', { tone: 'rose', message: @js(__('personnel::common.messages.remove_data_confirm')), confirmText: @js(__('ui::common.actions.delete')), run: () => $wire.forceDeleteDegree({{ $key }}) })"
                             class="absolute flex items-center justify-center p-2 transition-all duration-300 bg-transparent rounded-lg right-1 top-1 hover:bg-rose-100"
                         >
                             <x-icons.force-delete></x-icons.force-delete>
@@ -381,8 +378,7 @@
                         </div>
                     </div>
                     <button
-                            onclick="confirm('{{ __('personnel::common.messages.remove_data_confirm') }}') || event.stopImmediatePropagation()"
-                            wire:click="forceDeleteElection({{ $key }})"
+                            x-on:click="$dispatch('confirm-action', { tone: 'rose', message: @js(__('personnel::common.messages.remove_data_confirm')), confirmText: @js(__('ui::common.actions.delete')), run: () => $wire.forceDeleteElection({{ $key }}) })"
                             class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700"
                     >
                             <x-icons.force-delete></x-icons.force-delete>

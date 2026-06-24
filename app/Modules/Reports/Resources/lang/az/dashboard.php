@@ -155,6 +155,8 @@ return [
             'new_hires' => 'İşə qəbul',
             'exits' => 'Xitam',
             'absence_rate' => 'Yoxluq faizi',
+            'turnover_rate' => 'Kadr dəyişmə faizi',
+            'turnover_hint' => 'Xitam / aktiv işçi sayı (il ərzində)',
         ],
     ],
     'standard' => [

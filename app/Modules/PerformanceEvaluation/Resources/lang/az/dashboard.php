@@ -12,6 +12,9 @@ return [
     ],
     'tabs' => [
         'overview' => 'Xülasə',
+        'goals' => 'Məqsədlər',
+        'succession' => 'Varislik',
+        'feedback' => '360° rəy',
         'cycles' => 'Dövrlər',
         'templates' => 'Şablonlar',
         'evaluations' => 'Qiymətləndirmələr',

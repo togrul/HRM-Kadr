@@ -73,6 +73,9 @@ return [
         'notification_title' => 'Sənəd uyğunluğu riski: :count qeyd',
         'notification_created' => 'Bildiriş kampaniyası yaradıldı: #:id',
         'more_items' => 'Əlavə :count riskli qeyd var.',
+        'employee_subject' => 'Sənədləriniz diqqət tələb edir: :count qeyd',
+        'manager_subject' => 'Tabeçilikdə sənəd riski: :count qeyd (vaxtı keçmiş/yox)',
+        'per_recipient' => 'Fərdi bildiriş: :employees əməkdaş, :managers rəhbər (eskalasiya).',
     ],
     'empty' => 'Uyğun sənəd tapılmadı.',
 ];

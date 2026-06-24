@@ -73,6 +73,9 @@ return [
         'notification_title' => 'Document compliance risk: :count records',
         'notification_created' => 'Notification campaign created: #:id',
         'more_items' => ':count more risk records exist.',
+        'employee_subject' => 'Your documents need attention: :count records',
+        'manager_subject' => 'Document risk in your team: :count records (expired/missing)',
+        'per_recipient' => 'Per-recipient: :employees employees, :managers managers (escalation).',
     ],
     'empty' => 'No matching documents found.',
 ];

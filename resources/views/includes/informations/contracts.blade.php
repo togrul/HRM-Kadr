@@ -101,8 +101,7 @@
                             </x-table.td>
                             <x-table.td :isButton="true">
                                 <button
-                                    onclick="confirm('Are you sure you want to remove this?') || event.stopImmediatePropagation()"
-                                    wire:click="forceDeleteContract({{ $dataContract->id }})"
+                                    x-on:click="$dispatch('confirm-action', { tone: 'rose', message: @js(__('personnel::common.messages.remove_data_confirm')), confirmText: @js(__('ui::common.actions.delete')), run: () => $wire.forceDeleteContract({{ $dataContract->id }}) })"
                                     class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-50 hover:text-gray-700"
                                 >
                                     <x-icons.force-delete></x-icons.force-delete>

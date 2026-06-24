@@ -45,6 +45,15 @@
                     <x-filter.item wire:click.prevent="switchTab('overview')" :active="$activeTab === 'overview'">
                         {{ __('performance_evaluation::dashboard.tabs.overview') }}
                     </x-filter.item>
+                    <x-filter.item wire:click.prevent="switchTab('goals')" :active="$activeTab === 'goals'">
+                        {{ __('performance_evaluation::dashboard.tabs.goals') }}
+                    </x-filter.item>
+                    <x-filter.item wire:click.prevent="switchTab('succession')" :active="$activeTab === 'succession'">
+                        {{ __('performance_evaluation::dashboard.tabs.succession') }}
+                    </x-filter.item>
+                    <x-filter.item wire:click.prevent="switchTab('feedback')" :active="$activeTab === 'feedback'">
+                        {{ __('performance_evaluation::dashboard.tabs.feedback') }}
+                    </x-filter.item>
                     <x-filter.item wire:click.prevent="switchTab('cycles')" :active="$activeTab === 'cycles'">
                         {{ __('performance_evaluation::dashboard.tabs.cycles') }}
                     </x-filter.item>
@@ -70,6 +79,18 @@
 
     @if ($activeTab === 'overview')
         <livewire:performance-evaluation.overview lazy />
+    @endif
+
+    @if ($activeTab === 'goals')
+        <livewire:performance-evaluation.goals-workspace lazy />
+    @endif
+
+    @if ($activeTab === 'succession')
+        <livewire:performance-evaluation.succession-workspace lazy />
+    @endif
+
+    @if ($activeTab === 'feedback')
+        <livewire:performance-evaluation.feedback-360-workspace lazy />
     @endif
 
     @if (in_array($activeTab, ['cycles', 'templates'], true))

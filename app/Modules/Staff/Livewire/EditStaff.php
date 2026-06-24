@@ -25,7 +25,18 @@ class EditStaff extends Component
     public function mount()
     {
         $this->authorize('edit-staff', $this->staffModel);
-        $this->staff = $this->getStaffs()[$this->staffModel]->toArray();
+
+        // Defensive: a structure with no staff-schedule rows of its own has nothing to
+        // edit (the tree only exposes edit on staffed nodes, but guard regardless).
+        $group = $this->getStaffs()->get($this->staffModel);
+        if ($group === null || $group->isEmpty()) {
+            $this->staff = [];
+            $this->title = __('staff::common.titles.edit_staff');
+
+            return;
+        }
+
+        $this->staff = $group->toArray();
         $this->title = __('staff::common.titles.edit_staff').'( '.$this->staff[0]['structure']['name'].' )';
         $this->syncComputedStaffRows();
     }

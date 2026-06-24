@@ -2,6 +2,8 @@
 
 use App\Modules\PerformanceEvaluation\Livewire\Dashboard;
 use App\Modules\PerformanceEvaluation\Livewire\EvaluatorWorkspace;
+use App\Modules\PerformanceEvaluation\Livewire\GoalsWorkspace;
+use App\Modules\PerformanceEvaluation\Livewire\SuccessionWorkspace;
 use App\Modules\PerformanceEvaluation\Livewire\TestWorkspace;
 use App\Modules\PerformanceEvaluation\Livewire\UserPersonnelLinks;
 use App\Modules\PerformanceEvaluation\Application\Services\PerformanceEvaluationReportingService;
@@ -14,6 +16,10 @@ Route::middleware(['web', 'auth'])->group(function () {
         ->name('performance-evaluation');
     Route::get('/performance-evaluation/evaluator', EvaluatorWorkspace::class)
         ->name('performance-evaluation.evaluator');
+    Route::get('/performance-evaluation/goals', GoalsWorkspace::class)
+        ->name('performance-evaluation.goals');
+    Route::get('/performance-evaluation/succession', SuccessionWorkspace::class)
+        ->name('performance-evaluation.succession');
     Route::get('/performance-evaluation/tests/take', TestWorkspace::class)
         ->name('performance-evaluation.test-workspace');
     Route::get('/performance-evaluation/user-personnel-links', UserPersonnelLinks::class)

@@ -62,6 +62,9 @@ class ReportsOverviewService
                 'structures_covered' => $structuresCovered,
                 'new_hires' => $newHires,
                 'exits' => $exits,
+                // Year-to-date turnover: exits over the active headcount (no extra query —
+                // both figures are already computed above).
+                'turnover_rate_pct' => $activePersonnelCount > 0 ? round($exits / $activePersonnelCount * 100, 1) : 0.0,
                 'attendance_coverage_pct' => (float) data_get($attendance, 'kpi.coverage_pct', 0),
                 'attendance_absence_rate_pct' => (float) data_get($attendance, 'kpi.absence_rate_pct', 0),
                 'delivered_trainings_count' => (int) ($training['delivered_trainings_count'] ?? 0),

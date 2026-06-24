@@ -159,13 +159,18 @@ abstract class AbstractTrainingNeedsWorkspace extends Component
         $this->storeSession();
     }
 
-    protected function uniqueSlug(string $modelClass, string $value, string $sourceColumn = 'name'): string
+    protected function uniqueSlug(string $modelClass, string $value, string $sourceColumn = 'name', ?int $ignoreId = null): string
     {
         $base = Str::slug($value);
         $slug = $base !== '' ? $base : 'item';
         $suffix = 2;
 
-        while ($modelClass::query()->where('slug', $slug)->exists()) {
+        while (
+            $modelClass::query()
+                ->where('slug', $slug)
+                ->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))
+                ->exists()
+        ) {
             $slug = Str::slug($value).'-'.$suffix;
             $suffix++;
         }

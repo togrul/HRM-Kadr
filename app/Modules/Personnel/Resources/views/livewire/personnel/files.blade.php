@@ -93,8 +93,7 @@
                                         </a>
 
                                         <button
-                                            onclick="confirm('{{ __('personnel::common.messages.remove_data_confirm') }}') || event.stopImmediatePropagation()"
-                                            wire:click="deleteFile({{ $key }})"
+                                            x-on:click="$dispatch('confirm-action', { tone: 'rose', message: @js(__('personnel::common.messages.remove_data_confirm')), confirmText: @js(__('ui::common.actions.delete')), run: () => $wire.deleteFile({{ $key }}) })"
                                             class="flex h-12 w-12 items-center justify-center rounded-full bg-white text-rose-300 shadow-[0_12px_28px_-18px_rgba(15,23,42,0.22)] transition hover:text-rose-500"
                                         >
                                             <x-icons.delete-icon size="w-5 h-5" color="text-rose-300" hover="text-rose-500"></x-icons.delete-icon>

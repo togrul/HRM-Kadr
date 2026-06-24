@@ -50,6 +50,10 @@ class PerformanceEvaluationServiceProvider extends ServiceProvider
             'tests-summary' => \App\Modules\PerformanceEvaluation\Livewire\TestsSummary::class,
             'reports' => \App\Modules\PerformanceEvaluation\Livewire\Reports::class,
             'lists' => \App\Modules\PerformanceEvaluation\Livewire\Lists::class,
+            'goals-workspace' => \App\Modules\PerformanceEvaluation\Livewire\GoalsWorkspace::class,
+            'succession-workspace' => \App\Modules\PerformanceEvaluation\Livewire\SuccessionWorkspace::class,
+            'feedback-360-workspace' => \App\Modules\PerformanceEvaluation\Livewire\Feedback360Workspace::class,
+            'personnel-picker' => \App\Modules\PerformanceEvaluation\Livewire\PersonnelPicker::class,
         ];
     }
 }

@@ -148,8 +148,7 @@
                                     <x-icons.edit-icon color="{{ $isEditing ? 'text-sky-500' : 'text-slate-300' }}" hover="{{ $isEditing ? 'text-sky-600' : 'text-sky-500' }}"></x-icons.edit-icon>
                                 </button>
                                 <button
-                                    onclick="confirm('{{ __('personnel::common.messages.remove_data_confirm') }}') || event.stopImmediatePropagation()"
-                                    wire:click="forceDeleteKinship('{{ $rowKey }}')"
+                                    x-on:click="$dispatch('confirm-action', { tone: 'rose', message: @js(__('personnel::common.messages.remove_data_confirm')), confirmText: @js(__('ui::common.actions.delete')), run: () => $wire.forceDeleteKinship('{{ $rowKey }}') })"
                                     class="flex h-10 w-10 items-center justify-center rounded-full border border-white/80 bg-white text-rose-300 shadow-[0_12px_28px_-18px_rgba(15,23,42,0.22)] transition hover:text-rose-500">
                                     <x-icons.force-delete color="text-rose-300" hover="text-rose-500"></x-icons.force-delete>
                                 </button>

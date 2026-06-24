@@ -62,6 +62,55 @@ kimi məlumatlar görünə bilər.
 
 Bu bölmə daha çox ümumi nəzarət üçündür.
 
+### Məqsədlər və OKR
+Bu bölmə əməkdaşların və komandaların məqsədlərini (OKR) qoymaq və irəliləyişi izləmək üçündür. Burada böyük məqsəd ölçülə bilən nəticələrə (KPI) bölünür və faiz avtomatik hesablanır.
+
+Sadə dildə bu bölmə bu suala cavab verir: **"Hədəfimizə nə qədər çatmışıq?"**
+
+Hər məqsədin əsas hissələri:
+- **Növ** — Obyektiv (böyük məqsəd), KPI (ölçülən nəticə) və ya sadə Məqsəd.
+- **Hədəf və vahid** — çatmaq istədiyiniz rəqəm (məsələn 95) və onun vahidi (%, say, AZN).
+- **Cari dəyər** — hazırkı nəticə. Bu, "İrəliləyiş qeydi" ilə yenilənir.
+- **Çəki** — bu məqsəd üst-məqsədin nəticəsinə nə qədər təsir edir.
+- **Status** — Aktiv, Risk altında, Tamamlandı, Ləğv edildi.
+
+**İrəliləyiş necə hesablanır?**
+İrəliləyiş = cari dəyər ÷ hədəf × 100.
+Məsələn hədəf 95, cari 0 isə → 0%. Cari 50 olsa → 53%, cari 95 olsa → 100%.
+Rəng: 80%-dən yuxarı yaşıl, 50–79% sarı, 50%-dən aşağı qırmızı.
+
+**Üst-məqsəd (kaskad) necə işləyir?**
+Bir məqsəd başqasının altına bağlananda, üst-məqsədin faizi alt-nəticələrin **çəkili ortası** olur. Yəni çəkisi yüksək KPI üst-məqsədə daha çox təsir edir. Üst-məqsədin öz hədəfi olmur — o, alt-nəticələrdən avtomatik yığılır.
+
+Yuxarıdakı kartlar (Cəmi məqsəd, Aktiv, Risk altında, Orta irəliləyiş) ümumi vəziyyəti bir baxışda göstərir.
+
+### Varislik və istedad
+Bu bölmə təşkilatın **gələcəyini qorumaq** üçündür: kim ən güclü əməkdaşdır, kritik vəzifə boşalsa kim əvəz edə bilər, hansı risk var? Sadə dildə bu suala cavab verir: **"Sabah açar adam getsə, hazırıqmı?"**
+
+Bölmə üç hissədən ibarətdir:
+
+**1. 9-xanalı şəbəkə (9-box).**
+Hər əməkdaş iki ox üzrə qiymətləndirilir:
+- **Performans** — indiki iş nəticəsi (aşağı / orta / yüksək)
+- **Potensial** — gələcəkdə daha böyük rola hazırlıq (aşağı / orta / yüksək)
+Bu iki ox 9 xana yaradır. Əməkdaş seçilən səviyyələrə görə bir xanaya düşür:
+- yuxarı-sağ (yüksək performans + yüksək potensial) = **Ulduz** (ən qiymətli istedad)
+- aşağı-sol (aşağı performans + aşağı potensial) = **Risk**
+- ortadakılar = əsas qüvvə, etibarlı peşəkar və s.
+Şəbəkə bütün komandanı bir baxışda görməyə imkan verir — istedad harada cəmlənib, risk harada var.
+
+**2. Varislik planları.**
+Hər kritik vəzifə üçün plan qurulur:
+- vəzifə/rol adı, cari sahib (incumbent)
+- **risk** (bu adamın getmə ehtimalı) və **təsir** (getsə nə qədər zərər olar)
+- **namizədlər** — kimlər əvəz edə bilər, hər biri **hazırlıq səviyyəsi** ilə: İndi hazır / 1–2 il / 3–5 il
+Beləcə hər kritik vəzifənin "ehtiyat planı" görünür.
+
+**3. İstedad hovuzları.**
+Əməkdaşları qruplara toplamaq üçündür: Yüksək potensial (HiPo), Varis, Kritik vəzifə. Hər hovuza üzvlər əlavə edilir — gələcək inkişaf və təyinatlar üçün hazır siyahı.
+
+Yuxarıdakı kartlar (Qiymətləndirilən, Ən yüksək istedad, Varislik planları, Hazır namizədi olmayan planlar) ümumi mənzərəni göstərir. "Hazır namizədi olmayan" rəqəmi **diqqət tələb edən risk**dir.
+
 ### Dövrlər
 Qiymətləndirmənin hansı tarix aralığında aparılacağını burada qurursunuz.
 
@@ -155,6 +204,42 @@ Bu hissə daha geniş axtarış və tam görünüş üçündür.
 - zəif qalan sahələr daha aydın görünür
 - gələcək inkişaf işi üçün əsas yaranır
 - rəhbər qərar verməkdə daha rahat olur
+
+### 4. Məqsəd (OKR) yaratmaq və irəliləyişi yeniləmək
+1. `Məqsədlər` bölməsinə keçin.
+2. Əgər heç bir performans dövrü yoxdursa, əvvəlcə `Dövr yarat` ilə bir dövr açın (ad, başlama və bitmə tarixi).
+3. Yuxarı sağdan `Məqsəd əlavə et` düyməsini basın — yan paneldə forma açılır.
+4. Başlıq, növ (Obyektiv/KPI/Məqsəd), hədəf və vahid yazın. İstəsəniz məsul əməkdaş və üst-məqsəd seçin.
+5. `Yadda saxla` ilə təsdiqləyin.
+
+İrəliləyişi yeniləmək üçün:
+1. Məqsəd sətrində yaşıl ✓ (`İrəliləyiş qeydi`) düyməsini basın.
+2. Cari dəyəri yazın (məsələn 50) və qısa qeyd əlavə edin.
+3. `Yadda saxla` basın.
+
+#### Bu nəyi dəyişir?
+- məqsədin cari dəyəri yenilənir və faiz avtomatik yenidən hesablanır
+- rəng (yaşıl/sarı/qırmızı) yeni vəziyyəti göstərir
+- üst-məqsəd varsa, onun ümumi faizi çəkiyə görə avtomatik yenilənir
+- hər qeyd tarixçədə saxlanır — kim, nə vaxt, hansı dəyəri yazıb
+
+### 5. Varislik: əməkdaşı qiymətləndirmək və plan qurmaq
+9-xanalı şəbəkəyə əməkdaş əlavə etmək:
+1. `Varislik` bölməsinə keçin, `9-xanalı şəbəkə` aktiv olsun.
+2. `Qiymətləndir` düyməsini basın — yan panel açılır.
+3. Əməkdaşı seçin, **Performans** və **Potensial** səviyyəsini (Aşağı/Orta/Yüksək) qeyd edin, `Yadda saxla` basın.
+4. Əməkdaş avtomatik uyğun xanaya düşür. Eyni əməkdaşı yenidən qiymətləndirsəniz, təkrarlanmır — sadəcə yeri dəyişir.
+
+Varislik planı qurmaq:
+1. `Varislik planları` bölməsinə keçin, `Plan əlavə et` basın.
+2. Vəzifə/rol adını, (istəyə görə) vəzifəni və cari sahibi seçin, risk və təsir səviyyəsini qeyd edin.
+3. `Yadda saxla` basın.
+4. Plan kartında `Namizəd əlavə et` ilə əvəz edə biləcək şəxsləri əlavə edin və hər birinə **hazırlıq səviyyəsi** (İndi hazır / 1–2 il / 3–5 il) verin.
+
+#### Bu nəyi dəyişir?
+- 9-box şəbəkəsi komandanın istedad mənzərəsini göstərir
+- hər kritik vəzifənin ehtiyat planı (varisləri) aydın olur
+- "hazır namizədi olmayan" planlar risk kimi önə çıxır və əvvəlcədən tədbir görmək olur
 
 ## Bu məlumatlar harada görünür?
 - yaradılan dövr `Dövrlər` hissəsində görünür

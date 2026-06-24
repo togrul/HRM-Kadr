@@ -104,6 +104,17 @@ class Staffs extends Component
         $this->dispatch('setDeleteStaff', $staffId);
     }
 
+    /**
+     * Open the add-staff modal pre-targeted at a specific structure (the tree's
+     * "Vəzifə əlavə et" per-node action).
+     */
+    public function addStaffFor(int $structureId): void
+    {
+        $this->authorize('add-staff', StaffSchedule::class);
+        $this->selectedStructureId = $structureId;
+        $this->openSideMenu('add-staff');
+    }
+
     public function mount(StructureService $structureService)
     {
         $this->authorize('viewAny', StaffSchedule::class);
@@ -328,12 +339,13 @@ class Staffs extends Component
         }
 
         $this->structureMap = Structure::query()
-            ->select('id', 'parent_id', 'name')
+            ->select('id', 'parent_id', 'name', 'level')
             ->get()
             ->reduce(function (array $carry, Structure $structure) {
                 $carry[(int) $structure->id] = [
                     'parent_id' => $structure->parent_id ? (int) $structure->parent_id : null,
                     'name' => (string) $structure->name,
+                    'level' => (int) ($structure->level ?? 0),
                 ];
 
                 return $carry;
@@ -342,10 +354,126 @@ class Staffs extends Component
         return $this->structureMap;
     }
 
+    /**
+     * Build the nested structure → position tree for the "all" view: every structure that
+     * has positions (or a descendant with positions) becomes a node, parented per the
+     * structure map, with Cəmi/Dolu/Vakant aggregated recursively (own positions + all
+     * descendants). Display roots are the top of the accessible/selected scope.
+     *
+     * @return array{tree: array<int,array<string,mixed>>, ids: array<int,int>}
+     */
+    protected function buildStructureTree(): array
+    {
+        $rows = $this->buildStaffRows(raw: true);
+        if ($rows->isEmpty()) {
+            return ['tree' => [], 'ids' => []];
+        }
+
+        $map = $this->resolveStructureMap();
+        $positionsByStructure = $rows->groupBy(fn ($row) => (int) $row->structure_id);
+
+        // Included = every structure with positions plus all of its ancestors.
+        $included = [];
+        foreach ($positionsByStructure->keys() as $structureId) {
+            $cursor = (int) $structureId;
+            while ($cursor > 0 && isset($map[$cursor]) && ! isset($included[$cursor])) {
+                $included[$cursor] = true;
+                $cursor = (int) ($map[$cursor]['parent_id'] ?? 0);
+            }
+        }
+
+        // Children index (name-sorted) among included structures.
+        $childrenByParent = [];
+        foreach (array_keys($included) as $structureId) {
+            $parentId = (int) ($map[$structureId]['parent_id'] ?? 0);
+            $childrenByParent[$parentId][] = $structureId;
+        }
+        foreach ($childrenByParent as &$siblings) {
+            usort($siblings, fn ($a, $b) => strcmp($map[$a]['name'] ?? '', $map[$b]['name'] ?? ''));
+        }
+        unset($siblings);
+
+        $ids = [];
+
+        $build = function (int $structureId) use (&$build, $map, $positionsByStructure, $childrenByParent, &$ids) {
+            $ids[] = $structureId;
+            $meta = $map[$structureId];
+
+            $positions = collect($positionsByStructure->get($structureId, []))
+                ->map(fn ($row) => [
+                    'id' => (int) $row->id,
+                    'title' => (string) ($row->position?->name ?? '—'),
+                    'structure_id' => (int) $row->structure_id,
+                    'position_id' => (int) ($row->position_id ?? 0),
+                    'total' => (int) ($row->total ?? 0),
+                    'filled' => (int) ($row->filled ?? 0),
+                    'vacant' => (int) ($row->vacant ?? 0),
+                ])
+                ->values()
+                ->all();
+
+            $children = [];
+            foreach ($childrenByParent[$structureId] ?? [] as $childId) {
+                $children[] = $build((int) $childId);
+            }
+
+            $total = array_sum(array_column($positions, 'total'));
+            $filled = array_sum(array_column($positions, 'filled'));
+            foreach ($children as $child) {
+                $total += $child['agg']['total'];
+                $filled += $child['agg']['filled'];
+            }
+
+            return [
+                'id' => $structureId,
+                'name' => (string) $meta['name'],
+                'level' => (int) ($meta['level'] ?? 0),
+                'positions' => $positions,
+                'children' => $children,
+                'agg' => [
+                    'total' => $total,
+                    'filled' => $filled,
+                    'vacant' => max(0, $total - $filled),
+                    'rate' => $total > 0 ? (int) round($filled / $total * 100) : 0,
+                ],
+            ];
+        };
+
+        // Display roots: included structures whose parent is outside the included set.
+        $rootIds = [];
+        foreach (array_keys($included) as $structureId) {
+            $parentId = (int) ($map[$structureId]['parent_id'] ?? 0);
+            if (! isset($included[$parentId])) {
+                $rootIds[] = $structureId;
+            }
+        }
+        usort($rootIds, fn ($a, $b) => strcmp($map[$a]['name'] ?? '', $map[$b]['name'] ?? ''));
+
+        $tree = array_map(fn ($id) => $build((int) $id), $rootIds);
+
+        return ['tree' => $tree, 'ids' => $ids];
+    }
+
     public function render()
     {
-        $staffs = $this->returnData();
-        
-        return view('staff::livewire.staff-schedule.staffs', compact('staffs'));
+        if ($this->selectedPage === 'all') {
+            ['tree' => $staffTree, 'ids' => $staffTreeIds] = Cache::remember(
+                'staff:tree:'.md5(json_encode([$this->structure, $this->accessibleStructureIds])),
+                now()->addSeconds(10),
+                fn () => $this->buildStructureTree(),
+            );
+
+            return view('staff::livewire.staff-schedule.staffs', [
+                'staffs' => collect(),
+                'staffTree' => $staffTree,
+                'staffTreeIds' => $staffTreeIds,
+            ]);
+        }
+
+        return view('staff::livewire.staff-schedule.staffs', [
+            'staffs' => $this->returnData(),
+            'staffTree' => [],
+            'staffTreeIds' => [],
+        ]);
     }
 }

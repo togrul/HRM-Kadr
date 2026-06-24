@@ -5,11 +5,13 @@ namespace App\Modules\TrainingNeeds\Livewire;
 use App\Modules\TrainingNeeds\Livewire\Concerns\HandlesTrainingCatalogMutations;
 use App\Services\HrPolicies\HrPolicyPackService;
 use Livewire\Attributes\Isolate;
+use Livewire\WithPagination;
 
 #[Isolate]
 class FoundationWorkspace extends AbstractTrainingNeedsWorkspace
 {
     use HandlesTrainingCatalogMutations;
+    use WithPagination;
 
     protected function allowedTabs(): array
     {

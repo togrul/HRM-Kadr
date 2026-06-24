@@ -7,7 +7,7 @@ use App\Models\OrderLog;
 use App\Models\OrderWordTemplate;
 use App\Models\Personnel;
 use App\Services\ImportCandidateToPersonnel;
-use App\Services\Orders\Document\Effects\OrderEffectRegistry;
+use App\Services\Orders\Document\Effects\OrderEffectCatalog;
 use App\Support\Language\AzerbaijaniDateFormatter;
 use DomainException;
 use Illuminate\Support\Facades\DB;
@@ -41,7 +41,7 @@ class OrderStatusTransitionService
 
     public function __construct(
         private readonly OrderWordTemplateRepository $templates,
-        private readonly OrderEffectRegistry $effects,
+        private readonly OrderEffectCatalog $effects,
         private readonly ImportCandidateToPersonnel $candidateImport,
         private readonly AzerbaijaniDateFormatter $dates,
     ) {}

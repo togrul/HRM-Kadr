@@ -208,7 +208,9 @@
                                 ['label' => __('reports::dashboard.overview.cards.active_personnel'), 'value' => $kpi['active_personnel_count'], 'hint' => __('reports::dashboard.standard.types.headcount')],
                                 ['label' => __('reports::dashboard.overview.cards.structures_covered'), 'value' => $kpi['structures_covered'], 'hint' => __('reports::dashboard.labels.scope_summary', ['count' => $kpi['structures_covered']])],
                                 ['label' => __('reports::dashboard.overview.cards.new_hires'), 'value' => $kpi['new_hires'], 'hint' => __('reports::dashboard.labels.last_evaluated', ['period' => $year])],
-                                ['label' => __('reports::dashboard.overview.cards.exits'), 'value' => $kpi['exits'], 'hint' => __('reports::dashboard.overview.cards.absence_rate').': '.number_format($absenceRate, 1).'%' ],
+                                ['label' => __('reports::dashboard.overview.cards.exits'), 'value' => $kpi['exits'], 'hint' => __('reports::dashboard.labels.last_evaluated', ['period' => $year])],
+                                ['label' => __('reports::dashboard.overview.cards.turnover_rate'), 'value' => number_format((float) $kpi['turnover_rate_pct'], 1).'%', 'hint' => __('reports::dashboard.overview.cards.turnover_hint')],
+                                ['label' => __('reports::dashboard.overview.cards.absence_rate'), 'value' => number_format($absenceRate, 1).'%', 'hint' => __('reports::dashboard.overview.cards.attendance_coverage').': '.number_format($attendanceCoverage, 1).'%'],
                             ] as $item)
                                 <div class="grid min-h-[176px] grid-rows-[3.5rem,1fr,5rem] bg-white px-5 py-5">
                                     <div class="space-y-2">

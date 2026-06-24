@@ -64,29 +64,63 @@
     </div>
 
     @if ($selectedPage == 'all')
-        <div class="flex flex-col px-4 mt-4 space-y-4">
-            @if ($staffs->isNotEmpty())
-                <div class="grid grid-cols-1 gap-3">
-                    @foreach ($staffs as $group)
-                        <div wire:key="staff-group-{{ $group['structure_id'] }}">
-                            <x-staff.root
-                                :title="$group['title']"
-                                :structureId="$group['structure_id']"
-                                :hasParent="$group['has_parent']"
-                                :total_sum="$group['total_sum']"
-                                :total_filled="$group['total_filled']"
-                                :total_vacant="$group['total_vacant']"
-                                :canEditStaff="$canEditStaff"
-                                :canDeleteStaff="$canDeleteStaff"
-                            >
-                                @foreach ($group['items'] as $st)
-                                    <div wire:key="staff-item-{{ $st->id ?? ($group['structure_id'] . '-' . $loop->index) }}">
-                                        <x-staff.item :hasParent="$group['has_parent']" :model="$st" />
-                                    </div>
-                                @endforeach
-                            </x-staff.root>
+        <div class="px-4 pt-4 sm:px-6">
+            @if (! empty($staffTree))
+                <div
+                    wire:key="staff-tree"
+                    x-data="{
+                        open: {},
+                        editMode: false,
+                        isOpen(id) { return this.open[id] !== false },
+                        toggle(id) { this.open[id] = (this.open[id] === false) },
+                        expandAll() { Object.keys(this.open).forEach(k => this.open[k] = true) },
+                        collapseAll() { Object.keys(this.open).forEach(k => this.open[k] = false) },
+                    }"
+                    x-init="@js($staffTreeIds).forEach(id => open[id] = true)"
+                    class="overflow-hidden rounded-2xl border border-zinc-200/70 bg-white shadow-sm"
+                >
+                    {{-- toolbar (tree controls — separate from the page header above) --}}
+                    <div class="flex flex-col gap-3 border-b border-zinc-100 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                        <p class="text-[13px] text-zinc-500">{{ __('staff::common.fields.tree_hint') }}</p>
+                        <div class="flex shrink-0 items-center gap-2">
+                            <button type="button" x-on:click="expandAll()"
+                                class="rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-[13px] font-medium text-zinc-600 transition-colors hover:bg-zinc-50">
+                                {{ __('staff::common.actions.expand_all') }}
+                            </button>
+                            <button type="button" x-on:click="collapseAll()"
+                                class="rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-[13px] font-medium text-zinc-600 transition-colors hover:bg-zinc-50">
+                                {{ __('staff::common.actions.collapse_all') }}
+                            </button>
+                            @if ($canEditStaff || $canDeleteStaff)
+                                <button type="button" x-on:click="editMode = ! editMode"
+                                    :class="editMode ? 'border-blue-500 bg-blue-500 text-white' : 'border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50'"
+                                    class="flex items-center gap-2 rounded-lg border px-3 py-1.5 text-[13px] font-medium transition-colors">
+                                    <span class="relative inline-flex h-4 w-7 items-center rounded-full transition-colors" :class="editMode ? 'bg-white/30' : 'bg-zinc-300'">
+                                        <span class="inline-block h-3 w-3 transform rounded-full bg-white shadow transition-transform" :class="editMode ? 'translate-x-3.5' : 'translate-x-0.5'"></span>
+                                    </span>
+                                    {{ __('staff::common.actions.edit_mode') }}
+                                </button>
+                            @endif
                         </div>
-                    @endforeach
+                    </div>
+
+                    {{-- column header (widths mirror staff.tree-node rows) --}}
+                    <div class="flex items-center gap-3 border-b border-zinc-100 bg-zinc-50/70 px-3 py-2 text-[10px] font-semibold uppercase tracking-wide text-zinc-400">
+                        <div class="min-w-0 flex-1">{{ __('staff::common.fields.structure') }} / {{ __('staff::common.fields.position') }}</div>
+                        <div class="hidden w-28 shrink-0 text-center sm:block">{{ __('staff::common.fields.fill_rate') }}</div>
+                        <div class="w-12 shrink-0 text-center">{{ __('staff::common.fields.total') }}</div>
+                        <div class="w-12 shrink-0 text-center">{{ __('staff::common.fields.filled') }}</div>
+                        <div class="w-12 shrink-0 text-center">{{ __('staff::common.fields.vacant') }}</div>
+                        <div class="w-12 shrink-0 text-center">{{ __('staff::common.fields.percent') }}</div>
+                        <div class="w-[108px] shrink-0 text-right" x-show="editMode" x-cloak>{{ __('staff::common.fields.operations') }}</div>
+                    </div>
+
+                    {{-- tree --}}
+                    <div>
+                        @foreach ($staffTree as $node)
+                            <x-staff.tree-node wire:key="staff-node-{{ $node['id'] }}" :node="$node" :depth="0" />
+                        @endforeach
+                    </div>
                 </div>
             @else
                 <x-table.empty :rows="5" />

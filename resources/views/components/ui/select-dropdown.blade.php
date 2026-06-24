@@ -39,6 +39,7 @@
     cachedOptions: @js($model),
     placeholder: @js($placeholder),
     isOpen: false,
+    positioned: false,
     openUp: false,
     alignRight: false,
     panelMaxHeight: 224,
@@ -161,13 +162,34 @@
         }
         this.lastValue = normalizedNext;
         if (this.isOpen) {
-          this.$nextTick(() => requestAnimationFrame(() => this.repositionPanel()));
+          this.scheduleReposition();
+        }
+      });
+      // Whenever the panel opens, position it reliably (covers every open path,
+      // not just toggle()). Hide it until positioned so it never flashes at the
+      // teleport origin, and re-run after layout settles (e.g. a Livewire morph
+      // reflow that shifts the trigger button) so it can't detach from the field.
+      this.$watch('isOpen', (open) => {
+        if (open) {
+          this.scheduleReposition();
+        } else {
+          this.positioned = false;
         }
       });
     },
 
     setOpen(next){
       this.isOpen = !!next;
+    },
+
+    scheduleReposition(){
+      this.$nextTick(() => {
+        requestAnimationFrame(() => {
+          this.repositionPanel();
+          setTimeout(() => { if (this.isOpen) this.repositionPanel(); }, 60);
+          setTimeout(() => { if (this.isOpen) this.repositionPanel(); }, 180);
+        });
+      });
     },
 
     repositionPanel(){
@@ -211,6 +233,7 @@
         width: `${Math.round(clampedWidth)}px`,
         maxHeight: `${Math.round(this.panelMaxHeight)}px`,
       };
+      this.positioned = true;
     },
 
     selectedLabel(){
@@ -304,7 +327,7 @@
     <template x-teleport="body">
       <ul
         x-ref="panel"
-        x-show="isOpen && !isDisabled" x-transition.opacity.duration.100ms x-cloak
+        x-show="isOpen && positioned && !isDisabled" x-transition.opacity.duration.100ms x-cloak
         :class="openUp ? 'origin-bottom' : 'origin-top'"
         :style="panelStyles"
         class="fixed z-[9999] px-3 py-2 space-y-2 overflow-auto text-base bg-white rounded-md shadow-xl focus:outline-none sm:text-sm"
