@@ -2,6 +2,10 @@
 
 namespace App\Modules\Personnel\Providers;
 
+use App\Modules\Personnel\Application\Services\MyHr\ApprovalRouteResolverService;
+use App\Modules\Personnel\Application\Services\MyHr\LearningAssignmentManagerService;
+use App\Modules\Personnel\Application\Services\MyHr\MyHrRequestReviewService;
+use App\Modules\Personnel\Application\Services\MyHr\OnboardingAssignmentManagerService;
 use App\Modules\Personnel\Console\Commands\PersonnelCrudQueryBudgetCommand;
 use App\Modules\Personnel\Console\Commands\PersonnelCrudRenderBenchmarkCommand;
 use App\Modules\Personnel\Console\Commands\PersonnelListQueryBudgetCommand;
@@ -11,6 +15,10 @@ use App\Modules\Personnel\Console\Commands\ProfessionalPortfolioCheckMediaLinksC
 use App\Modules\Personnel\Console\Commands\ProfessionalPortfolioEnforcePoliciesCommand;
 use App\Modules\Personnel\Console\Commands\ProfessionalPortfolioSyncRegistriesCommand;
 use App\Modules\Personnel\Console\Commands\RepairLegacySelfServiceVacationOrdersCommand;
+use App\Modules\Personnel\Contracts\ApprovalRouteResolver;
+use App\Modules\Personnel\Contracts\LearningAssignmentManager;
+use App\Modules\Personnel\Contracts\MyHrRequestReview;
+use App\Modules\Personnel\Contracts\OnboardingAssignmentManager;
 use App\Providers\Concerns\RegistersLivewireAliases;
 use App\Services\Modules\ModuleState;
 use Illuminate\Support\Facades\Gate;
@@ -22,6 +30,13 @@ class PersonnelServiceProvider extends ServiceProvider
 
     public function register(): void
     {
+        // Sanctioned cross-module surface: other modules depend on the contract,
+        // never on the concrete MyHr service. See Contracts\ApprovalRouteResolver.
+        $this->app->bind(ApprovalRouteResolver::class, ApprovalRouteResolverService::class);
+        $this->app->bind(LearningAssignmentManager::class, LearningAssignmentManagerService::class);
+        $this->app->bind(OnboardingAssignmentManager::class, OnboardingAssignmentManagerService::class);
+        $this->app->bind(MyHrRequestReview::class, MyHrRequestReviewService::class);
+
         if ($this->app->runningInConsole()) {
             $this->commands([
                 PersonnelListQueryBudgetCommand::class,

@@ -6,7 +6,7 @@ use App\Models\OnboardingDocumentAssignment;
 use App\Models\OnboardingDocumentTemplate;
 use App\Models\Personnel;
 use App\Models\User;
-use App\Modules\Personnel\Application\Services\MyHr\OnboardingAssignmentManagerService;
+use App\Modules\Personnel\Contracts\OnboardingAssignmentManager;
 use App\Notifications\PlatformNotification;
 
 class OnboardingLibraryAutomationService
@@ -33,7 +33,7 @@ class OnboardingLibraryAutomationService
             return 0;
         }
 
-        $service = app(OnboardingAssignmentManagerService::class);
+        $service = app(OnboardingAssignmentManager::class);
         $count = 0;
         $dueAt = now()->addDays($dueDays)->toDateString();
 

@@ -4,12 +4,13 @@ namespace App\Modules\Personnel\Application\Services\MyHr;
 
 use App\Models\Personnel;
 use App\Models\SelfServiceApprovalRoute;
+use App\Modules\Personnel\Contracts\ApprovalRouteResolver;
 use App\Services\HrPolicies\HrPolicyPackService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
-class ApprovalRouteResolverService
+class ApprovalRouteResolverService implements ApprovalRouteResolver
 {
     public function __construct(
         private readonly HrPolicyPackService $policyPackService,

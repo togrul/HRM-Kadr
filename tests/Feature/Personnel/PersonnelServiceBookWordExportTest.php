@@ -39,6 +39,96 @@ class PersonnelServiceBookWordExportTest extends TestCase
         }
     }
 
+    /**
+     * Characterization test pinning the *structure* of the rendered document so a
+     * future refactor of the page renderers cannot silently change the output.
+     * It asserts the page-break count, the presence of every static section
+     * heading, the seeded field values, and the relative order of the numbered
+     * sections inside word/document.xml.
+     */
+    public function test_export_document_structure_is_stable(): void
+    {
+        $personnel = $this->makePersonnel();
+
+        $path = app(PersonnelServiceBookWordExportService::class)->export($personnel);
+
+        try {
+            $zip = new ZipArchive;
+            $this->assertTrue($zip->open($path) === true, 'Exported file is not a valid zip/docx.');
+            $xml = $zip->getFromName('word/document.xml');
+            $zip->close();
+            $this->assertIsString($xml, 'docx is missing word/document.xml.');
+
+            // The renderer emits exactly five hard page breaks between the pages.
+            $this->assertSame(
+                5,
+                substr_count($xml, 'w:type="page"'),
+                'Page-break count drifted from the characterized output.'
+            );
+
+            // Static headings/labels that must remain in the document verbatim.
+            $staticLabels = [
+                'Azərbaycan Respublikası',
+                'Dövlət Mühafizə Xidməti',
+                'Şəxsi nömrəsi',
+                'Hərbi və ya xüsusi rütbə',
+                '1. Anadan olduğu gün, ay və il',
+                '5. Təhsili',
+                '9. Əmək fəaliyyəti',
+                '10. Silahlı Qüvvələrdə',
+                '11. Pensiya təyin edilərkən',
+                '12. Xidməti vəzifələrini',
+                '13. Azərbaycan Respublikasının',
+                '14. Xarici ezamiyyətlər',
+                '15. Hansı seçki orqanlarına seçilmişdir',
+                '16. Əsirlikdə olubmu',
+                '17. Atasının və anasının',
+                '18. Ailə vəziyyəti',
+                '19. Yaşadığı ünvan',
+            ];
+            foreach ($staticLabels as $label) {
+                $this->assertStringContainsString(
+                    $label,
+                    $xml,
+                    "Static label \"{$label}\" disappeared from the rendered document."
+                );
+            }
+
+            // Seeded personnel values surfaced by the renderer.
+            foreach (['Doe', 'Jane Smith', '01.01.1990', 'Main st', 'Subay'] as $value) {
+                $this->assertStringContainsString(
+                    $value,
+                    $xml,
+                    "Seeded value \"{$value}\" no longer appears in the rendered document."
+                );
+            }
+
+            // Numbered sections must keep their original top-to-bottom order.
+            $orderedSections = [
+                '1. Anadan olduğu gün, ay və il',
+                '9. Əmək fəaliyyəti',
+                '10. Silahlı Qüvvələrdə',
+                '11. Pensiya təyin edilərkən',
+                '13. Azərbaycan Respublikasının',
+                '14. Xarici ezamiyyətlər',
+                '17. Atasının və anasının',
+            ];
+            $previous = -1;
+            foreach ($orderedSections as $section) {
+                $position = strpos($xml, $section);
+                $this->assertNotFalse($position, "Section \"{$section}\" missing from document.");
+                $this->assertGreaterThan(
+                    $previous,
+                    $position,
+                    "Section \"{$section}\" is out of its characterized order."
+                );
+                $previous = $position;
+            }
+        } finally {
+            @unlink($path);
+        }
+    }
+
     private function makePersonnel(): Personnel
     {
         return Personnel::withoutEvents(fn () => Personnel::query()->create([

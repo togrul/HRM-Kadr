@@ -1,66 +1,80 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# HRM — İnsan Resursları İdarəetmə Sistemi
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Hərbi/uniformalı xidmət üçün insan resursları (HCM/HR) sistemi. **Modulyar Laravel monoliti** — bütün domen məntiqi `app/Modules/<Modul>/` altında, CI ilə məcbur edilən modul sərhədləri və performans büdcələri ilə.
 
-## About Laravel
+> Layihəyə xas qaydalar üçün bax: [`CLAUDE.md`](CLAUDE.md). Versiya məsələsində həmişə `composer.json`-a güvən.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Stack
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+| Sahə | Texnologiya |
+|------|-------------|
+| Backend | PHP `^8.2`, Laravel `^12` |
+| UI | Livewire `^4` + `livewire/blaze`, Alpine.js, Tailwind 3, Vite |
+| Auth / icazə | `laravel/sanctum`, `spatie/laravel-permission` |
+| Audit | `spatie/laravel-activitylog` |
+| Sənəd ixracı | `phpoffice/phpword`, `maatwebsite/excel` |
+| Test | Pest 3 (`vendor/bin/pest`) |
+| Format | Pint (`vendor/bin/pint`) |
+| Dev tooling | Laravel Boost MCP, Pail, Debugbar |
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Memarlıq
 
-## Learning Laravel
+Modulyar monolit. Hər modul öz qatları ilə özünü-tam saxlayır:
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+```
+app/Modules/<Modul>/
+  Application/Services/   # biznes məntiqi
+  Http/Controllers/
+  Livewire/               # Livewire 4 komponentləri (nazik UI qatı)
+  Database/Migrations/    # modulun öz migration-ları
+  Routes/  Policies/  Console/  Support/  Resources/{views,lang}/  Providers/
+```
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+Mövcud modullar: Admin, Attendance, Audit, BusinessTrips, Candidates, Compliance, EmployeeLifecycle, LearningLibrary, Leaves, Notifications, OnboardingLibrary, Orders, PerformanceEvaluation, Personnel, Reports, Services, SidebarStructure, Staff, TrainingNeeds, UI, Vacation.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+**Qaydalar (CI ilə yoxlanılır):**
+- Modullar arası birbaşa oxuma qadağandır — əlaqə servis/contract üzərindən (`tests/Unit/Architecture/*`).
+- Biznes məntiqi `Application/Services`-də; Livewire/Controller nazik qalır.
+- Read/render yollarında "query budget" pozulmamalıdır (`*:query-budget` artisan əmrləri).
+- View-lar blaze-safe olmalıdır (`composer ci:blaze-safe-lint`).
+- Ən mürəkkəb alt-sistem: dinamik **Orders (əmr) engine** — şablon/handler/snapshot/DOCX + statuslu iş axını.
 
-## Laravel Sponsors
+## Dillər
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+`az` (əsas), `en`, `ru`. Mətnlər hardcode edilmir — tərcümə açarı işlədilir; yeni açar bütün dillərə əlavə olunmalıdır (`php artisan translations:lint`, `ModuleTranslationNamespaceTest`).
 
-### Premium Partners
+## Qurulum
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+```bash
+composer install
+npm install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate --seed
+npm run dev          # və ya: npm run build
+```
 
-## Contributing
+Sayt lokal olaraq Laravel Herd ilə xidmət olunur.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## İş axını — dəyişiklikdən əvvəl/sonra
 
-## Code of Conduct
+```bash
+vendor/bin/pint <dəyişən-fayl>        # format (Edit/Write hook avtomatik salır)
+vendor/bin/pest                        # bütün testlər
+php artisan test tests/Feature/...     # konkret fayl
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Toxunduğun modulun CI gate-ini yoxla (lazımdırsa):
 
-## Security Vulnerabilities
+```bash
+composer ci:orders-template-gate
+composer ci:attendance-gate
+composer ci:audit-gate
+composer ci:strategic-hr-gate          # employee-lifecycle / compliance / candidates
+composer ci:translations               # tərcüməyə toxunanda
+composer ci:blaze-safe-lint            # blade-ə toxunanda
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Sənədləşmə
 
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+`docs/` qovluğunda modul plan/todo faylları var. Texniki borc auditi: [`TECH_DEBT_AUDIT.md`](TECH_DEBT_AUDIT.md).

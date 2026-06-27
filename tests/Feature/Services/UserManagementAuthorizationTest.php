@@ -4,6 +4,8 @@ namespace Tests\Feature\Services;
 
 use App\Models\User;
 use App\Modules\Services\Livewire\Users\AddUser;
+use App\Modules\Services\Livewire\Users\AllUsers;
+use App\Modules\Services\Livewire\Users\DeleteUser;
 use App\Modules\Services\Livewire\Users\EditUser;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
@@ -71,5 +73,69 @@ class UserManagementAuthorizationTest extends TestCase
             ->set('roleId', Role::findOrCreate('staff', 'web')->id)
             ->call('store')
             ->assertHasErrors('user.password');
+    }
+
+    public function test_delete_user_is_forbidden_without_permission(): void
+    {
+        $victim = User::factory()->create();
+
+        $this->actingAs(User::factory()->create());
+
+        // Regression for the commented-out authz hole: an unprivileged user must not be
+        // able to arm the delete component against an arbitrary target.
+        Livewire::test(DeleteUser::class)
+            ->call('setDeleteUser', $victim->id)
+            ->assertForbidden();
+
+        $this->assertDatabaseHas('users', ['id' => $victim->id, 'deleted_at' => null]);
+    }
+
+    public function test_all_users_screen_is_forbidden_without_permission(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        // mount() gates the whole screen — force-delete/restore are unreachable below it.
+        Livewire::test(AllUsers::class)->assertForbidden();
+    }
+
+    public function test_authorized_admin_can_soft_delete_user(): void
+    {
+        $admin = User::factory()->create();
+        $admin->givePermissionTo(Permission::findOrCreate('access-settings', 'web'));
+        $this->actingAs($admin);
+
+        $victim = User::factory()->create();
+
+        Livewire::test(DeleteUser::class)
+            ->call('setDeleteUser', $victim->id)
+            ->call('deleteUser')
+            ->assertHasNoErrors();
+
+        $this->assertSoftDeleted('users', ['id' => $victim->id]);
+        $this->assertDatabaseHas('activity_log', ['log_name' => 'users', 'event' => 'deleted']);
+    }
+
+    public function test_authorized_admin_can_force_delete_and_restore(): void
+    {
+        $admin = User::factory()->create();
+        $admin->givePermissionTo(Permission::findOrCreate('access-settings', 'web'));
+        $this->actingAs($admin);
+
+        $trashed = User::factory()->create(['is_active' => false]);
+        $trashed->delete();
+
+        Livewire::test(AllUsers::class)
+            ->call('restoreData', $trashed->id)
+            ->assertHasNoErrors();
+        $this->assertDatabaseHas('users', ['id' => $trashed->id, 'deleted_at' => null, 'is_active' => true]);
+
+        $trashed->delete();
+        Livewire::test(AllUsers::class)
+            ->call('forceDeleteData', $trashed->id)
+            ->assertHasNoErrors();
+        $this->assertDatabaseMissing('users', ['id' => $trashed->id]);
+
+        $this->assertDatabaseHas('activity_log', ['log_name' => 'users', 'event' => 'restored']);
+        $this->assertDatabaseHas('activity_log', ['log_name' => 'users', 'event' => 'force_deleted']);
     }
 }

@@ -2,8 +2,8 @@
 
 namespace App\Modules\Staff\Livewire;
 
-use App\Modules\Staff\Support\Traits\StaffCrud;
 use App\Models\StaffSchedule;
+use App\Modules\Staff\Support\Traits\StaffCrud;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -41,29 +41,31 @@ class EditStaff extends Component
         $this->syncComputedStaffRows();
     }
 
-    public function store()
+    public function store(): void
     {
         $this->syncComputedStaffRows();
         $this->validate();
         $existingData = $this->getStaffs()[$this->staffModel]->toArray();
 
+        // Compute the deletion set once, before the upsert loop — recomputing it on
+        // every iteration (and re-running destroy) was redundant query work.
+        $keptIds = collect($this->staff)->pluck('id')->filter();
+        $removedIds = collect($existingData)->pluck('id')->diff($keptIds);
+
+        if ($removedIds->isNotEmpty()) {
+            StaffSchedule::destroy($removedIds);
+        }
+
         foreach ($this->staff as $sta) {
             $data = $sta;
-            unset($data['id']);
-            unset($data['structure']);
-            unset($data['position']);
-            unset($data['hide_position']);
+            unset($data['id'], $data['structure'], $data['position'], $data['hide_position']);
+
             if (array_key_exists('id', $sta)) {
-                StaffSchedule::find($sta['id'])->update($data);
+                // findOrFail guards against a stale/forged id that would otherwise fatal on null->update().
+                StaffSchedule::findOrFail($sta['id'])->update($data);
             } else {
                 StaffSchedule::create($data);
             }
-            $updatedDataIds = collect($this->staff)->pluck('id')->filter();
-
-            $removedIds = collect($existingData)->pluck('id')->diff($updatedDataIds);
-
-            StaffSchedule::destroy($removedIds);
-
         }
 
         $this->dispatch('staffAdded', __('staff::common.messages.staff_updated'));

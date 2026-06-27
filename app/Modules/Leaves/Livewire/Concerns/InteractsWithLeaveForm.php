@@ -7,7 +7,7 @@ use App\Models\Leave;
 use App\Models\LeaveType;
 use App\Models\OrderStatus;
 use App\Models\Personnel;
-use App\Modules\Personnel\Application\Services\MyHr\ApprovalRouteResolverService;
+use App\Modules\Personnel\Contracts\ApprovalRouteResolver;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -18,11 +18,17 @@ trait InteractsWithLeaveForm
     use DropdownConstructTrait;
 
     public string $personnelName = '';
+
     public string $assignedSearch = '';
-    protected ?ApprovalRouteResolverService $approvalRouteResolver = null;
+
+    protected ?ApprovalRouteResolver $approvalRouteResolver = null;
+
     protected ?array $assignmentPreviewSnapshot = null;
+
     protected ?string $assignmentPreviewKey = null;
+
     protected ?Personnel $selectedApplicantPersonnelSnapshot = null;
+
     protected ?string $selectedApplicantPersonnelKey = null;
 
     public function updatedLeave($value, $name): void
@@ -631,9 +637,9 @@ trait InteractsWithLeaveForm
         ];
     }
 
-    private function approvalRouteResolver(): ApprovalRouteResolverService
+    private function approvalRouteResolver(): ApprovalRouteResolver
     {
-        return $this->approvalRouteResolver ??= app(ApprovalRouteResolverService::class);
+        return $this->approvalRouteResolver ??= app(ApprovalRouteResolver::class);
     }
 
     private function buildAssignmentPreview(): array

@@ -1,10 +1,12 @@
 {
-    "name": "laravel/laravel",
+    "name": "hrm/hrm",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
+    "description": "HRM — modular Laravel HR/HCM system for uniformed-service personnel management.",
     "keywords": [
         "laravel",
-        "framework"
+        "hr",
+        "hcm",
+        "modular-monolith"
     ],
     "license": "MIT",
     "require": {
@@ -12,7 +14,6 @@
         "ext-pdo": "*",
         "guzzlehttp/guzzle": "^7.2",
         "kwn/number-to-words": "^2.9",
-        "laravel/breeze": "^2.3",
         "laravel/framework": "^12.0",
         "laravel/pail": "^1.2",
         "laravel/sanctum": "^4.0",
@@ -26,8 +27,8 @@
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.13",
-        "dragon-code/laravel-data-dumper": "^1.0",
         "fakerphp/faker": "^1.9.1",
+        "larastan/larastan": "^3.0",
         "laravel/boost": "^1.0",
         "laravel/pint": "^1.17",
         "laravel/sail": "^1.18",
@@ -57,6 +58,9 @@
         ],
         "ci:blaze-safe-lint": [
             "@php artisan views:blaze-safe-lint --strict"
+        ],
+        "ci:phpstan": [
+            "@php vendor/bin/phpstan analyse --no-progress --memory-limit=1G"
         ],
         "ci:translations": [
             "@php artisan translations:lint",

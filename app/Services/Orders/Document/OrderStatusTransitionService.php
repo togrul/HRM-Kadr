@@ -100,14 +100,55 @@ class OrderStatusTransitionService
         DB::transaction(function () use ($order, $from, $target) {
             // Approving applies the effect; leaving an approved state reverses it.
             // pending↔cancelled carry no side-effect.
+            $effectDirection = 'none';
             if ($target === OrderStatusEnum::APPROVED->value) {
                 $this->applyEffect($order);
+                $effectDirection = 'applied';
             } elseif ($from === OrderStatusEnum::APPROVED->value) {
                 $this->reverseEffect($order);
+                $effectDirection = 'reversed';
             }
 
             $order->update(['status_id' => $target]);
+
+            $this->recordTransition($order, $from, $target, $effectDirection);
         });
+    }
+
+    /**
+     * Emit a domain-level audit entry for the transition. OrderLog's generic
+     * activity log already captures the raw status_id change, but not the semantic
+     * verb (approve/cancel/reopen/revert) nor whether the HR side-effect was applied
+     * or reversed — which is exactly what an auditor needs to trace a reversed hire
+     * or a cancelled transfer.
+     */
+    private function recordTransition(OrderLog $order, int $from, int $target, string $effectDirection): void
+    {
+        $verb = $this->transitionVerb($from, $target);
+
+        activity('orders')
+            ->performedOn($order)
+            ->withProperties([
+                'order_no' => $order->order_no,
+                'order_type_id' => $order->order_type_id,
+                'from_status' => $from,
+                'to_status' => $target,
+                'effect' => $effectDirection,
+            ])
+            ->event($verb)
+            ->log("order.{$verb}");
+    }
+
+    /** Map a (from, to) status pair to its semantic verb. */
+    private function transitionVerb(int $from, int $target): string
+    {
+        return match (true) {
+            $target === OrderStatusEnum::APPROVED->value => 'approved',
+            $target === OrderStatusEnum::CANCELLED->value => 'cancelled',
+            $from === OrderStatusEnum::APPROVED->value && $target === OrderStatusEnum::PENDING->value => 'reverted',
+            $from === OrderStatusEnum::CANCELLED->value && $target === OrderStatusEnum::PENDING->value => 'reopened',
+            default => 'transitioned',
+        };
     }
 
     private function applyEffect(OrderLog $order): void
@@ -199,7 +240,7 @@ class OrderStatusTransitionService
      * structured inputs (keyed by role) using the template's variable→role mapping.
      *
      * @param  array<string,mixed>  $rawFields  token => value
-     * @return array<string,mixed>  role => value
+     * @return array<string,mixed> role => value
      */
     private function effectFields(OrderWordTemplate $template, array $rawFields): array
     {

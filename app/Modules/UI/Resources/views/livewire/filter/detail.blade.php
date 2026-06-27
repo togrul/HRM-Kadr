@@ -8,14 +8,24 @@
         });
     "
     x-show="open"
+    x-on:open-filter-modal.window="open = true; $nextTick(() => $refs.applyFiltersButton?.focus())"
     x-on:keydown.escape.window="open = false"
+    x-transition.opacity.duration.200ms
     class="fixed inset-0 z-50"
     style="display: none;"
 >
     <div class="absolute inset-0 bg-black/45 backdrop-blur-[2px]" @click="open = false"></div>
 
     <div class="relative z-10 flex min-h-screen items-center justify-center p-4">
-        <div class="w-full max-w-6xl overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl">
+        <div
+            x-show="open"
+            x-transition:enter="ease-out duration-200"
+            x-transition:enter-start="opacity-0 scale-95"
+            x-transition:enter-end="opacity-100 scale-100"
+            x-transition:leave="ease-in duration-150"
+            x-transition:leave-start="opacity-100 scale-100"
+            x-transition:leave-end="opacity-0 scale-95"
+            class="w-full max-w-6xl overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl">
             <header class="flex items-start justify-between border-b border-slate-200 px-6 py-4">
                 <div>
                     <h2 class="text-2xl font-semibold tracking-tight text-slate-900">{{ __('ui::filters.titles.advanced_filters') }}</h2>

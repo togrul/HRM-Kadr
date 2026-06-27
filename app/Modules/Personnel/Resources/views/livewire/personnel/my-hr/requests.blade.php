@@ -3,10 +3,10 @@
     $summary = $payload['summary'];
     $rows = $payload['rows'];
     $statCards = [
-        ['label' => __('personnel::my_hr.requests.summary.total'), 'value' => $summary['total']],
-        ['label' => __('personnel::my_hr.requests.summary.pending'), 'value' => $summary['pending']],
-        ['label' => __('personnel::my_hr.requests.summary.active'), 'value' => $summary['active']],
-        ['label' => __('personnel::my_hr.requests.summary.completed'), 'value' => $summary['completed']],
+        ['label' => __('personnel::my_hr.requests.summary.total'), 'value' => $summary['total'], 'accent' => 'bg-zinc-400'],
+        ['label' => __('personnel::my_hr.requests.summary.pending'), 'value' => $summary['pending'], 'accent' => 'bg-amber-400'],
+        ['label' => __('personnel::my_hr.requests.summary.active'), 'value' => $summary['active'], 'accent' => 'bg-sky-500'],
+        ['label' => __('personnel::my_hr.requests.summary.completed'), 'value' => $summary['completed'], 'accent' => 'bg-emerald-500'],
     ];
 @endphp
 
@@ -27,30 +27,30 @@
                 <p class="max-w-3xl text-sm leading-6 text-zinc-500">{{ __('personnel::my_hr.requests.description') }}</p>
             </div>
 
-            <div class="w-full lg:max-w-3xl">
-                <div class="rounded-[24px] border border-zinc-200 bg-zinc-50/90 p-2 shadow-sm">
-                    <div class="grid gap-2 sm:grid-cols-3">
-                <button wire:key="my-hr-request-create-leave-{{ $activeCreateForm ?: 'none' }}" type="button" wire:click="openCreateForm('leave')" @class([
-                    'flex min-h-[58px] items-center justify-center rounded-[18px] px-4 py-3 text-center text-[15px] font-semibold tracking-tight transition-all duration-200',
-                    'bg-white text-zinc-950 shadow-sm ring-1 ring-zinc-200' => $activeCreateForm === 'leave',
-                    'text-zinc-600 hover:bg-white hover:text-zinc-900 hover:shadow-sm' => $activeCreateForm !== 'leave',
-                ])>
-                    {{ __('personnel::my_hr.requests.actions.create_leave') }}
-                </button>
-                <button wire:key="my-hr-request-create-vacation-{{ $activeCreateForm ?: 'none' }}" type="button" wire:click="openCreateForm('vacation')" @class([
-                    'flex min-h-[58px] items-center justify-center rounded-[18px] px-4 py-3 text-center text-[15px] font-semibold tracking-tight transition-all duration-200',
-                    'bg-white text-zinc-950 shadow-sm ring-1 ring-zinc-200' => $activeCreateForm === 'vacation',
-                    'text-zinc-600 hover:bg-white hover:text-zinc-900 hover:shadow-sm' => $activeCreateForm !== 'vacation',
-                ])>
-                    {{ __('personnel::my_hr.requests.actions.create_vacation') }}
-                </button>
-                <button wire:key="my-hr-request-create-business-trip-{{ $activeCreateForm ?: 'none' }}" type="button" wire:click="openCreateForm('business_trip')" @class([
-                    'flex min-h-[58px] items-center justify-center rounded-[18px] px-4 py-3 text-center text-[15px] font-semibold tracking-tight transition-all duration-200',
-                    'bg-white text-zinc-950 shadow-sm ring-1 ring-zinc-200' => $activeCreateForm === 'business_trip',
-                    'text-zinc-600 hover:bg-white hover:text-zinc-900 hover:shadow-sm' => $activeCreateForm !== 'business_trip',
-                ])>
-                    {{ __('personnel::my_hr.requests.actions.create_business_trip') }}
-                </button>
+            <div class="w-full lg:max-w-2xl">
+                <div class="rounded-2xl border border-zinc-200 bg-zinc-50 p-1.5 shadow-sm">
+                    <div class="grid gap-1.5 sm:grid-cols-3">
+                        <button wire:key="my-hr-request-create-leave-{{ $activeCreateForm ?: 'none' }}" type="button" wire:click="openCreateForm('leave')" @class([
+                            'flex items-center justify-center rounded-xl px-4 py-2.5 text-center text-sm font-semibold tracking-tight transition-all duration-200',
+                            'bg-white text-zinc-950 shadow-sm ring-1 ring-zinc-200' => $activeCreateForm === 'leave',
+                            'text-zinc-500 hover:bg-white/70 hover:text-zinc-900' => $activeCreateForm !== 'leave',
+                        ])>
+                            {{ __('personnel::my_hr.requests.actions.create_leave') }}
+                        </button>
+                        <button wire:key="my-hr-request-create-vacation-{{ $activeCreateForm ?: 'none' }}" type="button" wire:click="openCreateForm('vacation')" @class([
+                            'flex items-center justify-center rounded-xl px-4 py-2.5 text-center text-sm font-semibold tracking-tight transition-all duration-200',
+                            'bg-white text-zinc-950 shadow-sm ring-1 ring-zinc-200' => $activeCreateForm === 'vacation',
+                            'text-zinc-500 hover:bg-white/70 hover:text-zinc-900' => $activeCreateForm !== 'vacation',
+                        ])>
+                            {{ __('personnel::my_hr.requests.actions.create_vacation') }}
+                        </button>
+                        <button wire:key="my-hr-request-create-business-trip-{{ $activeCreateForm ?: 'none' }}" type="button" wire:click="openCreateForm('business_trip')" @class([
+                            'flex items-center justify-center rounded-xl px-4 py-2.5 text-center text-sm font-semibold tracking-tight transition-all duration-200',
+                            'bg-white text-zinc-950 shadow-sm ring-1 ring-zinc-200' => $activeCreateForm === 'business_trip',
+                            'text-zinc-500 hover:bg-white/70 hover:text-zinc-900' => $activeCreateForm !== 'business_trip',
+                        ])>
+                            {{ __('personnel::my_hr.requests.actions.create_business_trip') }}
+                        </button>
                     </div>
                 </div>
             </div>
@@ -58,9 +58,12 @@
 
         <div class="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
             @foreach ($statCards as $card)
-                <div class="rounded-2xl border border-zinc-200 bg-zinc-50/80 px-4 py-4">
-                    <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ $card['label'] }}</x-ui.field-label>
-                    <p class="mt-2 text-2xl font-semibold tracking-tight text-zinc-950">{{ $card['value'] }}</p>
+                <div class="group rounded-2xl border border-zinc-200 bg-white px-5 py-4 shadow-sm transition hover:border-zinc-300 hover:shadow-md">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">{{ $card['label'] }}</span>
+                        <span class="h-2 w-2 rounded-full {{ $card['accent'] }}"></span>
+                    </div>
+                    <p class="mt-3 text-3xl font-semibold tracking-tight text-zinc-950">{{ $card['value'] }}</p>
                 </div>
             @endforeach
         </div>
@@ -229,40 +232,39 @@
 
         <div class="mt-6 space-y-4">
             @forelse ($rows as $row)
-                <div class="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
-                    <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                <div class="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm transition hover:border-zinc-300 hover:shadow-md">
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                         <div class="min-w-0 flex-1 space-y-3">
-                            <div class="inline-flex max-w-full rounded-[24px] border border-zinc-200 bg-zinc-50 px-5 py-3">
-                                <h3 class="max-w-[38rem] text-lg font-semibold tracking-tight text-zinc-950">{{ $row['title'] }}</h3>
-                            </div>
+                            <h3 class="text-lg font-semibold tracking-tight text-zinc-950">{{ $row['title'] }}</h3>
 
-                            <div class="flex flex-wrap gap-2">
-                                <span class="inline-flex items-center rounded-full border px-4 py-2 text-sm font-semibold tracking-tight {{ match($row['status_mode']) {
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold tracking-tight {{ match($row['status_mode']) {
                                     'success' => 'border-emerald-200 bg-emerald-50 text-emerald-700',
                                     'warning' => 'border-amber-200 bg-amber-50 text-amber-700',
                                     'info' => 'border-sky-200 bg-sky-50 text-sky-700',
                                     'danger' => 'border-rose-200 bg-rose-50 text-rose-700',
                                     default => 'border-zinc-200 bg-white text-zinc-700',
                                 } }}">{{ $row['status_label'] }}</span>
-                                <span class="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-4 py-2 text-sm font-semibold tracking-tight text-sky-700">{{ $row['type_label'] }}</span>
-                                <span class="inline-flex items-center rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm font-medium tracking-tight text-zinc-600">{{ $row['date_badge'] }}</span>
+                                <span class="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-xs font-semibold tracking-tight text-sky-700">{{ $row['type_label'] }}</span>
+                                <span class="inline-flex items-center rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs font-medium tracking-tight text-zinc-500">{{ $row['date_badge'] }}</span>
                             </div>
                         </div>
 
-                        <div class="rounded-full border border-zinc-200 bg-zinc-50 px-4 py-2 text-sm font-semibold tracking-tight text-zinc-600">
+                        <span class="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-zinc-200 bg-zinc-50 px-3.5 py-1.5 text-xs font-semibold tracking-tight text-zinc-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 7V3m8 4V3M4 11h16M5 7h14a1 1 0 011 1v11a1 1 0 01-1 1H5a1 1 0 01-1-1V8a1 1 0 011-1z" />
+                            </svg>
                             {{ $row['period'] }}
-                        </div>
+                        </span>
                     </div>
 
-                    <div class="mt-4 rounded-[24px] border border-zinc-200 bg-zinc-50/80 px-5 py-4 text-base leading-7 text-zinc-700">
-                        {{ $row['summary'] }}
-                    </div>
+                    <p class="mt-4 text-sm leading-6 text-zinc-500">{{ $row['summary'] }}</p>
 
-                    <div class="mt-4 grid gap-3 lg:grid-cols-2 xl:grid-cols-4">
+                    <div class="mt-4 grid gap-2.5 sm:grid-cols-2 xl:grid-cols-4">
                         @foreach ($row['details'] as $detail)
-                            <div class="rounded-2xl border border-zinc-200 bg-white px-4 py-4">
-                                <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ $detail['label'] }}</x-ui.field-label>
-                                <p class="mt-2 text-sm font-semibold leading-6 text-zinc-900">{{ $detail['value'] }}</p>
+                            <div class="rounded-2xl border border-zinc-100 bg-zinc-50/70 px-4 py-3">
+                                <span class="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">{{ $detail['label'] }}</span>
+                                <p class="mt-1 text-sm font-semibold leading-6 tracking-tight text-zinc-900">{{ $detail['value'] }}</p>
                             </div>
                         @endforeach
                     </div>

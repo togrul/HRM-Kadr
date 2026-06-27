@@ -5,8 +5,9 @@ namespace App\Modules\Orders\Livewire;
 use App\Livewire\Traits\SideModalAction;
 use App\Models\Order;
 use App\Models\OrderLog;
-use App\Modules\Orders\Domain\Contracts\AccessibleStructureScopeReadRepository;
 use App\Modules\Orders\Domain\Contracts\OrderTypeStatusLookupReadRepository;
+use App\Services\StructureService;
+use DomainException;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
@@ -165,7 +166,7 @@ class AllOrders extends Component
 
         try {
             app(\App\Services\Orders\Document\OrderStatusTransitionService::class)->{$action}($order);
-        } catch (\DomainException $e) {
+        } catch (DomainException $e) {
             $this->dispatch('orderError', $e->getMessage());
 
             return;
@@ -253,12 +254,12 @@ class AllOrders extends Component
     }
 
     public function mount(
-        AccessibleStructureScopeReadRepository $accessibleStructureScopeReadRepository
+        StructureService $structureService
     ) {
         $this->authorize('viewAny', Order::class);
         $this->fillFilter();
         $this->selectedOrder = $this->selectedOrder ?? request()->query('selectedOrder');
-        $this->accessibleStructureIds = $accessibleStructureScopeReadRepository->accessibleStructureIds();
+        $this->accessibleStructureIds = $structureService->getAccessibleStructures();
     }
 
     public function render()

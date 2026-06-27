@@ -3,8 +3,13 @@
 namespace App\Models;
 
 use App\Models\Concerns\FiltersPersonnel;
+use App\Models\Concerns\HasPersonnelAbsenceRelations;
 use App\Models\Concerns\HasPersonnelAttributes;
-use App\Models\Concerns\HasPersonnelRelations;
+use App\Models\Concerns\HasPersonnelCareerRelations;
+use App\Models\Concerns\HasPersonnelDocumentRelations;
+use App\Models\Concerns\HasPersonnelEducationRelations;
+use App\Models\Concerns\HasPersonnelEngagementRelations;
+use App\Models\Concerns\HasPersonnelOrgRelations;
 use App\Observers\PersonnelObserver;
 use App\Traits\DateCastTrait;
 use App\Traits\NestedStructureTrait;
@@ -15,14 +20,26 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
+/**
+ * @property string|null $tabel_no
+ * @property mixed $birthdate
+ * @property mixed $join_work_date
+ * @property-read Position|null $position
+ * @property-read Structure|null $structure
+ */
 #[ObservedBy(PersonnelObserver::class)]
 class Personnel extends Model
 {
     use DateCastTrait;
     use FiltersPersonnel;
     use HasFactory;
+    use HasPersonnelAbsenceRelations;
     use HasPersonnelAttributes;
-    use HasPersonnelRelations;
+    use HasPersonnelCareerRelations;
+    use HasPersonnelDocumentRelations;
+    use HasPersonnelEducationRelations;
+    use HasPersonnelEngagementRelations;
+    use HasPersonnelOrgRelations;
     use LogsActivity;
     use NestedStructureTrait;
     use SoftDeletes;

@@ -5,8 +5,8 @@ namespace Tests\Feature\Orders;
 use App\Models\OrderLog;
 use App\Models\OrderStatus;
 use App\Models\User;
-use App\Modules\Orders\Domain\Contracts\AccessibleStructureScopeReadRepository;
 use App\Modules\Orders\Livewire\AllOrders;
+use App\Services\StructureService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
@@ -38,11 +38,11 @@ class AllOrdersInteractionTest extends TestCase
         $structureId = 7;
         // A pending hire order has NO personnel yet, so it can only be scoped by the
         // target structure in its snapshot — grant the viewer exactly that structure.
-        $this->app->bind(AccessibleStructureScopeReadRepository::class, fn () => new class($structureId) implements AccessibleStructureScopeReadRepository
+        $this->app->instance(StructureService::class, new class($structureId) extends StructureService
         {
             public function __construct(private int $id) {}
 
-            public function accessibleStructureIds(): array
+            public function getAccessibleStructures(?User $user = null): array
             {
                 return [$this->id];
             }

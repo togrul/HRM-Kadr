@@ -14,7 +14,7 @@
         'aria-label' => __('ui::filters.actions.open_filters'),
     ]) }}
     @unless($hasWireClick)
-        @click="$wire.dispatch('setOpenFilter')"
+        @click="window.dispatchEvent(new CustomEvent('open-filter-modal')); $wire.dispatch('setOpenFilter')"
     @endunless
 >
     <x-icons.search-file />

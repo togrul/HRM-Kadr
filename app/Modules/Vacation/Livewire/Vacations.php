@@ -2,12 +2,12 @@
 
 namespace App\Modules\Vacation\Livewire;
 
-use App\Modules\Vacation\Exports\VacationExport;
 use App\Livewire\Traits\DropdownConstructTrait;
 use App\Livewire\Traits\SideModalAction;
 use App\Models\PersonnelVacation;
-use App\Modules\Personnel\Application\Services\MyHr\MyHrRequestReviewService;
 use App\Models\Structure;
+use App\Modules\Personnel\Contracts\MyHrRequestReview;
+use App\Modules\Vacation\Exports\VacationExport;
 use App\Services\Chief\ChiefResolver;
 use App\Services\NumberToWordsService;
 use App\Services\StructureService;
@@ -120,7 +120,7 @@ class Vacations extends Component
             return [
                 'day' => $date->format('d'),
                 'month' => $date->locale('AZ')->monthName,
-                'year' => $year . $suffixService->getNumberSuffix((int) $year),
+                'year' => $year.$suffixService->getNumberSuffix((int) $year),
             ];
         }, $dates);
 
@@ -149,9 +149,9 @@ class Vacations extends Component
         $templateProcessor->setValue('person_signature', $chiefName);
 
         $filename = "{$model->personnel->fullname}_mezuniyyet_{$model->start_date->format('d.m.Y')}";
-        $templateProcessor->saveAs($filename . '.docx');
+        $templateProcessor->saveAs($filename.'.docx');
 
-        return response()->download($filename . '.docx')->deleteFileAfterSend();
+        return response()->download($filename.'.docx')->deleteFileAfterSend();
     }
 
     public function bindOperationalOrder(PersonnelVacation $model): void
@@ -168,7 +168,7 @@ class Vacations extends Component
             422
         );
 
-        app(MyHrRequestReviewService::class)->bindOperationalVacationOrder($model, auth()->user());
+        app(MyHrRequestReview::class)->bindOperationalVacationOrder($model, auth()->user());
 
         $this->dispatch('notify', type: 'success', message: __('vacation::common.messages.order_bound'));
     }
@@ -184,13 +184,13 @@ class Vacations extends Component
     protected function returnData($type = 'normal')
     {
         $result = PersonnelVacation::with([
-            'personnel' => fn($q) => $q->with([
+            'personnel' => fn ($q) => $q->with([
                 'structure',
                 'position',
                 'latestRank.rank',
             ]),
         ])
-            ->whereHas('personnel', fn($query) => $query->whereIn('structure_id', $this->accessibleStructureIds))
+            ->whereHas('personnel', fn ($query) => $query->whereIn('structure_id', $this->accessibleStructureIds))
             ->where(function ($query) {
                 $query->whereNull('submission_source')
                     ->orWhere(function ($selfService) {
@@ -202,7 +202,7 @@ class Vacations extends Component
                     });
             })
             ->filter($this->search)
-            ->when((empty($this->search['date']['min'] ?? null) && empty($this->search['date']['max'] ?? null)), fn($qq) => $qq->whereDateInYear($this->selectedYear))
+            ->when((empty($this->search['date']['min'] ?? null) && empty($this->search['date']['max'] ?? null)), fn ($qq) => $qq->whereDateInYear($this->selectedYear))
             ->orderByDesc('end_date')
             ->orderByDesc('return_work_date');
 
@@ -289,7 +289,7 @@ class Vacations extends Component
     {
         $search = $this->dropdownSearch('searchStructure');
         $selected = $this->selectedStructureFilterId();
-        $runtimeCacheKey = md5($search . '|' . ($selected ?? 'none'));
+        $runtimeCacheKey = md5($search.'|'.($selected ?? 'none'));
 
         if (array_key_exists($runtimeCacheKey, $this->runtimeStructureOptionsCache)) {
             return $this->runtimeStructureOptionsCache[$runtimeCacheKey];

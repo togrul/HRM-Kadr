@@ -4,6 +4,7 @@ namespace App\Modules\Services\Livewire\Users;
 
 use App\Livewire\Traits\SideModalAction;
 use App\Models\User;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\On;
@@ -22,59 +23,78 @@ class AllUsers extends Component
     #[Url]
     public $q;
 
-    public function updatingQ()
+    public function updatingQ(): void
     {
         $this->resetPage();
     }
 
-    public function setDeleteUser($userId)
+    public function setDeleteUser($userId): void
     {
         $this->dispatch('setDeleteUser', $userId);
     }
 
-    public function resetFilter()
+    public function resetFilter(): void
     {
         $this->reset('q');
         $this->resetPage();
         $this->fillFilter();
     }
 
-    public function fillFilter()
+    public function fillFilter(): void
     {
         $this->status = request()->query('status') ? (int) request()->query('status') : 1;
     }
 
-    public function setStatus($newStatus)
+    public function setStatus($newStatus): void
     {
         $this->status = $newStatus;
         $this->resetPage();
     }
 
-    public function forceDeleteData($id)
+    public function forceDeleteData($id): void
     {
-        $model = User::withTrashed()->find($id);
+        $this->authorize('access-settings');
+
+        $model = User::withTrashed()->findOrFail($id);
         $model->forceDelete();
+
+        activity('users')
+            ->performedOn($model)
+            ->event('force_deleted')
+            ->withProperties(['user_id' => $model->id, 'email' => $model->email])
+            ->log('user.force_deleted');
+
         $this->dispatch('userWasDeleted', __('services::users.messages.deleted'));
     }
 
     #[On('restoreData')]
-    public function restoreData($id)
+    public function restoreData($id): void
     {
-        $user = User::withTrashed()->find($id);
+        $this->authorize('access-settings');
+
+        $user = User::withTrashed()->findOrFail($id);
         $user->restore();
         $user->update([
             'deleted_by' => null,
             'is_active' => true,
         ]);
+
+        activity('users')
+            ->performedOn($user)
+            ->event('restored')
+            ->withProperties(['user_id' => $user->id, 'email' => $user->email])
+            ->log('user.restored');
+
         $this->dispatch('userAdded', __('services::users.messages.updated'));
     }
 
-    public function mount()
+    public function mount(): void
     {
+        $this->authorize('access-settings');
         $this->fillFilter();
     }
 
-    public function render()
+    public function render(): View
     {
         $_users = User::with(['roles:id,name', 'personDidDelete:id,name'])
             ->when(! empty($this->q), function ($q) {

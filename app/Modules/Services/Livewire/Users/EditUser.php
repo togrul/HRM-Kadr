@@ -4,6 +4,8 @@ namespace App\Modules\Services\Livewire\Users;
 
 use App\Livewire\Traits\DropdownConstructTrait;
 use App\Models\User;
+use DB;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -26,7 +28,7 @@ class EditUser extends Component
 
     public string $searchRole = '';
 
-    protected function rules()
+    protected function rules(): array
     {
         $rules = [
             'user.name' => 'required|min:1',
@@ -52,7 +54,7 @@ class EditUser extends Component
         return $rules;
     }
 
-    protected function validationAttributes()
+    protected function validationAttributes(): array
     {
         return [
             'user.name' => __('services::common.labels.name'),
@@ -63,7 +65,7 @@ class EditUser extends Component
         ];
     }
 
-    public function mount()
+    public function mount(): void
     {
         $this->authorize('access-settings');
         $this->title = __('services::users.titles.edit');
@@ -81,7 +83,7 @@ class EditUser extends Component
         $this->user['is_active'] = (bool) $this->userModel->is_active;
     }
 
-    public function store()
+    public function store(): void
     {
         $this->authorize('access-settings');
 
@@ -111,7 +113,7 @@ class EditUser extends Component
         $this->dispatch('userAdded', __('services::users.messages.updated'));
     }
 
-    public function render()
+    public function render(): View
     {
         return view('services::livewire.services.users.edit-user');
     }
@@ -123,7 +125,7 @@ class EditUser extends Component
         $search = $this->dropdownSearch('searchRole');
 
         $base = Role::query()
-            ->select('id', \DB::raw('name as label'))
+            ->select('id', DB::raw('name as label'))
             ->orderBy('name');
 
         if ($search === '') {

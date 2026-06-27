@@ -1,6 +1,6 @@
 {
   "resources/css/app.css": {
-    "file": "assets/app-f12809c5.css",
+    "file": "assets/app-bf0b8467.css",
     "isEntry": true,
     "src": "resources/css/app.css"
   },
@@ -89,7 +89,7 @@
     "src": "resources/fonts/IBMPlexMono-Thin.ttf"
   },
   "resources/js/app.js": {
-    "file": "assets/app-a49c3a86.js",
+    "file": "assets/app-b64771f8.js",
     "isEntry": true,
     "src": "resources/js/app.js"
   }

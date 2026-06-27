@@ -5,7 +5,7 @@ namespace App\Modules\Notifications\Support;
 use App\Models\Personnel;
 use App\Models\User;
 use App\Models\UserPersonnelLink;
-use App\Modules\Personnel\Application\Services\MyHr\ApprovalRouteResolverService;
+use App\Modules\Personnel\Contracts\ApprovalRouteResolver;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
@@ -15,7 +15,7 @@ class NotificationAudienceResolver
     protected ?bool $performanceFormsTableReady = null;
 
     public function __construct(
-        protected ApprovalRouteResolverService $approvalRouteResolver,
+        protected ApprovalRouteResolver $approvalRouteResolver,
     ) {}
 
     public function resolve(array $audienceConfig, ?Personnel $subject = null, array $context = []): Collection

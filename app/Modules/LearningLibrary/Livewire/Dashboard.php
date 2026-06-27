@@ -4,7 +4,7 @@ namespace App\Modules\LearningLibrary\Livewire;
 
 use App\Models\EmployeeContentAsset;
 use App\Modules\LearningLibrary\Application\Services\LearningLibraryReadService;
-use App\Modules\Personnel\Application\Services\MyHr\LearningAssignmentManagerService;
+use App\Modules\Personnel\Contracts\LearningAssignmentManager;
 use App\Support\Library\LibraryExportAction;
 use App\Support\Livewire\AbstractLibraryDashboard;
 use Livewire\Attributes\Computed;
@@ -12,7 +12,9 @@ use Livewire\Attributes\Computed;
 class Dashboard extends AbstractLibraryDashboard
 {
     public string $searchAsset = '';
+
     public ?int $versionSourceAssetId = null;
+
     public $assetUpload = null;
 
     public array $assetForm = [
@@ -69,7 +71,7 @@ class Dashboard extends AbstractLibraryDashboard
             ? EmployeeContentAsset::query()->find($this->versionSourceAssetId)
             : null;
 
-        $asset = app(LearningAssignmentManagerService::class)->createAsset(
+        $asset = app(LearningAssignmentManager::class)->createAsset(
             data_get($validated, 'assetForm', []),
             $this->assetUpload,
             auth()->user(),
@@ -131,7 +133,7 @@ class Dashboard extends AbstractLibraryDashboard
             return;
         }
 
-        $count = app(LearningAssignmentManagerService::class)->assignByTargets(
+        $count = app(LearningAssignmentManager::class)->assignByTargets(
             data_get($validated, 'selectedPersonnelIds', []),
             data_get($validated, 'selectedStructureIds', []),
             data_get($validated, 'selectedPositionIds', []),
@@ -150,7 +152,7 @@ class Dashboard extends AbstractLibraryDashboard
         abort_unless($this->canManageLibrary(), 403);
 
         $asset = \App\Models\EmployeeContentAsset::query()->findOrFail($assetId);
-        app(LearningAssignmentManagerService::class)->toggleAssetActive($asset);
+        app(LearningAssignmentManager::class)->toggleAssetActive($asset);
 
         unset($this->payload);
         $this->dispatch('notify', type: 'success', message: __('learning-library::dashboard.messages.asset_state_updated'));
@@ -161,7 +163,7 @@ class Dashboard extends AbstractLibraryDashboard
         abort_unless($this->canManageLibrary(), 403);
 
         $asset = EmployeeContentAsset::query()->findOrFail($assetId);
-        app(LearningAssignmentManagerService::class)->setAssetArchived($asset, $asset->archived_at === null, auth()->user());
+        app(LearningAssignmentManager::class)->setAssetArchived($asset, $asset->archived_at === null, auth()->user());
 
         unset($this->payload);
         $this->dispatch('notify', type: 'success', message: __('learning-library::dashboard.messages.asset_archive_updated'));

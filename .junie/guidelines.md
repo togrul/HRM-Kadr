@@ -8,12 +8,13 @@ The Laravel Boost guidelines are specifically curated by Laravel maintainers for
 ## Foundational Context
 This application is a Laravel application and its main Laravel ecosystems package & versions are below. You are an expert with them all. Ensure you abide by these specific packages & versions.
 
-- php - 8.3.29
-- laravel/framework (LARAVEL) - v10
+- php - ^8.2
+- laravel/framework (LARAVEL) - v12
 - laravel/prompts (PROMPTS) - v0
-- livewire/livewire (LIVEWIRE) - v3
+- livewire/livewire (LIVEWIRE) - v4
+- livewire/blaze (BLAZE) - v1
 - laravel/pint (PINT) - v1
-- pestphp/pest (PEST) - v2
+- pestphp/pest (PEST) - v3
 - alpinejs (ALPINEJS) - v3
 - tailwindcss (TAILWINDCSS) - v3
 

@@ -5,11 +5,12 @@ namespace App\Modules\TrainingNeeds\Application\Services;
 use App\Models\TrainingDeliveryRecord;
 use App\Models\TrainingFeedbackResponse;
 use App\Models\TrainingSession;
+use Illuminate\Database\Eloquent\Collection;
 use Spatie\Activitylog\Models\Activity;
 
 class TrainingNeedReportingService
 {
-    public function deliverySummaryRows()
+    public function deliverySummaryRows(): Collection
     {
         return TrainingSession::query()
             ->leftJoin('training_programs', 'training_programs.id', '=', 'training_sessions.training_program_id')
@@ -38,7 +39,7 @@ class TrainingNeedReportingService
             ->get();
     }
 
-    public function deliveryPivotRows()
+    public function deliveryPivotRows(): Collection
     {
         return TrainingSession::query()
             ->leftJoin('training_programs', 'training_programs.id', '=', 'training_sessions.training_program_id')
@@ -59,7 +60,7 @@ class TrainingNeedReportingService
             ->get();
     }
 
-    public function deliveryRows()
+    public function deliveryRows(): Collection
     {
         return TrainingDeliveryRecord::query()
             ->with([
@@ -72,7 +73,7 @@ class TrainingNeedReportingService
             ->get();
     }
 
-    public function feedbackRows()
+    public function feedbackRows(): Collection
     {
         return TrainingFeedbackResponse::query()
             ->with([
@@ -84,7 +85,7 @@ class TrainingNeedReportingService
             ->get();
     }
 
-    public function feedbackSessionSummaries()
+    public function feedbackSessionSummaries(): Collection
     {
         return TrainingSession::query()
             ->leftJoin('training_feedback_forms', 'training_feedback_forms.training_session_id', '=', 'training_sessions.id')
@@ -109,7 +110,7 @@ class TrainingNeedReportingService
             ->get();
     }
 
-    public function upcomingSessions()
+    public function upcomingSessions(): Collection
     {
         return TrainingSession::query()
             ->with(['program:id,title', 'participants'])
@@ -120,7 +121,7 @@ class TrainingNeedReportingService
             ->get();
     }
 
-    public function auditRows()
+    public function auditRows(): Collection
     {
         return Activity::query()
             ->whereIn('subject_type', [

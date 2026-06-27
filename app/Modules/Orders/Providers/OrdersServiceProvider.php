@@ -5,10 +5,8 @@ namespace App\Modules\Orders\Providers;
 use App\Models\OrderType;
 use App\Modules\Orders\Console\Commands\OrdersListQueryBudgetCommand;
 use App\Modules\Orders\Console\Commands\OrdersListRenderBenchmarkCommand;
-use App\Modules\Orders\Domain\Contracts\AccessibleStructureScopeReadRepository;
 use App\Modules\Orders\Domain\Contracts\OrderTypeStatusLookupReadRepository;
 use App\Modules\Orders\Infrastructure\Persistence\Eloquent\EloquentOrderTypeStatusLookupReadRepository;
-use App\Modules\Orders\Infrastructure\Persistence\Eloquent\StructureServiceAccessibleStructureScopeReadRepository;
 use App\Observers\OrderTypeObserver;
 use App\Providers\Concerns\RegistersLivewireAliases;
 use App\Services\Modules\ModuleState;
@@ -28,7 +26,6 @@ class OrdersServiceProvider extends ServiceProvider
             ]);
         }
 
-        $this->app->bind(AccessibleStructureScopeReadRepository::class, StructureServiceAccessibleStructureScopeReadRepository::class);
         $this->app->bind(OrderTypeStatusLookupReadRepository::class, EloquentOrderTypeStatusLookupReadRepository::class);
     }
 

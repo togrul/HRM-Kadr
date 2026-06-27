@@ -4,7 +4,7 @@ namespace App\Modules\OnboardingLibrary\Livewire;
 
 use App\Models\OnboardingDocumentTemplate;
 use App\Modules\OnboardingLibrary\Application\Services\OnboardingLibraryReadService;
-use App\Modules\Personnel\Application\Services\MyHr\OnboardingAssignmentManagerService;
+use App\Modules\Personnel\Contracts\OnboardingAssignmentManager;
 use App\Support\Library\LibraryExportAction;
 use App\Support\Livewire\AbstractLibraryDashboard;
 use Livewire\Attributes\Computed;
@@ -12,7 +12,9 @@ use Livewire\Attributes\Computed;
 class Dashboard extends AbstractLibraryDashboard
 {
     public string $searchTemplate = '';
+
     public ?int $versionSourceTemplateId = null;
+
     public $templateUpload = null;
 
     public array $templateForm = [
@@ -66,7 +68,7 @@ class Dashboard extends AbstractLibraryDashboard
             ? OnboardingDocumentTemplate::query()->find($this->versionSourceTemplateId)
             : null;
 
-        $template = app(OnboardingAssignmentManagerService::class)->createTemplate(
+        $template = app(OnboardingAssignmentManager::class)->createTemplate(
             data_get($validated, 'templateForm', []),
             $this->templateUpload,
             auth()->user(),
@@ -127,7 +129,7 @@ class Dashboard extends AbstractLibraryDashboard
             return;
         }
 
-        $count = app(OnboardingAssignmentManagerService::class)->assignByTargets(
+        $count = app(OnboardingAssignmentManager::class)->assignByTargets(
             data_get($validated, 'selectedPersonnelIds', []),
             data_get($validated, 'selectedStructureIds', []),
             data_get($validated, 'selectedPositionIds', []),
@@ -146,7 +148,7 @@ class Dashboard extends AbstractLibraryDashboard
         abort_unless($this->canManageTemplates(), 403);
 
         $template = OnboardingDocumentTemplate::query()->findOrFail($templateId);
-        app(OnboardingAssignmentManagerService::class)->toggleTemplateActive($template);
+        app(OnboardingAssignmentManager::class)->toggleTemplateActive($template);
 
         unset($this->payload);
         $this->dispatch('notify', type: 'success', message: __('onboarding-library::dashboard.messages.template_state_updated'));
@@ -157,7 +159,7 @@ class Dashboard extends AbstractLibraryDashboard
         abort_unless($this->canManageTemplates(), 403);
 
         $template = OnboardingDocumentTemplate::query()->findOrFail($templateId);
-        app(OnboardingAssignmentManagerService::class)->setTemplateArchived($template, $template->archived_at === null, auth()->user());
+        app(OnboardingAssignmentManager::class)->setTemplateArchived($template, $template->archived_at === null, auth()->user());
 
         unset($this->payload);
         $this->dispatch('notify', type: 'success', message: __('onboarding-library::dashboard.messages.template_archive_updated'));
