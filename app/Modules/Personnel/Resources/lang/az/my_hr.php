@@ -14,7 +14,20 @@ return [
         'development_plan' => 'Fərdi inkişaf planım',
         'learning' => 'Öyrənmə materialları',
         'documents' => 'Sənədlərim',
+        'payslips' => 'Maaş vərəqələrim',
         'hierarchy' => 'Mənim strukturum',
+    ],
+
+    'payslips' => [
+        'kicker' => 'Şəxsi kabinet',
+        'title' => 'Maaş vərəqələrim',
+        'description' => 'Kilidlənmiş (rəsmiləşmiş) maaş hesablamalarınız burada göstərilir.',
+        'list' => 'Vərəqələr',
+        'empty' => 'Hələ maaş vərəqəsi yoxdur',
+        'detail' => 'Vərəqə detalı',
+        'close' => 'Bağla',
+        'gross' => 'Brüt',
+        'net' => 'Net',
     ],
     'summary' => [
         'profile_kicker' => 'Əməkdaş profili',

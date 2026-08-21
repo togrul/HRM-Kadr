@@ -21,6 +21,8 @@ return [
         'audit_logs' => 'Audit log',
         'document_compliance' => 'Document compliance',
         'employee_lifecycle' => 'Employee lifecycle',
+        'compensation' => 'Compensation',
+        'payroll' => 'Payroll',
     ],
     'shortcuts' => [
         'review_queue' => 'Quick access',

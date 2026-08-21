@@ -2,10 +2,10 @@
 
 namespace App\Modules\Attendance\Livewire;
 
-use App\Services\StructurePathService;
 use App\Modules\Attendance\Application\Services\AttendanceAuthorizationService;
 use App\Modules\Attendance\Application\Services\AttendanceManagerSummaryReadService;
 use App\Modules\Attendance\Application\Services\AttendanceStructureScopeReadService;
+use App\Services\StructurePathService;
 use App\Traits\NestedStructureTrait;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -37,8 +37,7 @@ class AttendanceManagerSummary extends Component
         int $month,
         AttendanceAuthorizationService $authorization,
         AttendanceManagerSummaryReadService $readService
-    ): void
-    {
+    ): void {
         $authorization->authorize('attendance.manager.summary.view');
 
         $this->year = $year;

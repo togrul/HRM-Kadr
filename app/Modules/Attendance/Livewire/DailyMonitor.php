@@ -2,18 +2,18 @@
 
 namespace App\Modules\Attendance\Livewire;
 
-use App\Services\StructurePathService;
 use App\Modules\Attendance\Application\Services\AttendanceAuthorizationService;
 use App\Modules\Attendance\Application\Services\AttendanceDailyMonitorReadService;
 use App\Modules\Attendance\Application\Services\AttendanceStructureScopeReadService;
+use App\Services\StructurePathService;
 use App\Traits\NestedStructureTrait;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 class DailyMonitor extends Component
 {
-    use WithPagination;
     use NestedStructureTrait;
+    use WithPagination;
 
     public string $date = '';
 

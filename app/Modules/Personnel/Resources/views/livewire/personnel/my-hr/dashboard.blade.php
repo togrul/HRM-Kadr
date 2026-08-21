@@ -58,6 +58,8 @@
                     <livewire:personnel.my-hr.learning :personnel-id="$personnelId" :key="'my-hr-learning-'.$personnelId" />
                 @elseif ($activeTab === 'documents')
                     <livewire:personnel.my-hr.documents :personnel-id="$personnelId" :key="'my-hr-documents-'.$personnelId" />
+                @elseif ($activeTab === 'payslips')
+                    <livewire:personnel.my-hr.payslips :personnel-id="$personnelId" :key="'my-hr-payslips-'.$personnelId" />
                 @elseif ($activeTab === 'hierarchy')
                     <livewire:personnel.my-hr.hierarchy :personnel-id="$personnelId" :key="'my-hr-hierarchy-'.$personnelId" />
                 @else

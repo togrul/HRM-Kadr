@@ -26,8 +26,7 @@ class RecalculateAttendanceLedgersJob implements ShouldQueue
         public ?string $source = null,
         public ?int $structureId = null,
         public array $tabelNos = []
-    ) {
-    }
+    ) {}
 
     public function handle(AttendancePunchProcessingPipelineService $pipeline): void
     {
@@ -44,4 +43,3 @@ class RecalculateAttendanceLedgersJob implements ShouldQueue
         );
     }
 }
-

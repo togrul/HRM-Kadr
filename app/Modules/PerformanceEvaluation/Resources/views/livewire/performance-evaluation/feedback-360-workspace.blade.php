@@ -114,7 +114,7 @@
 
     {{-- ═════════════ DETAIL ═════════════ --}}
     @if ($section === 'detail' && $this->activeRequest)
-        @php($request = $this->activeRequest)
+        @php $request = $this->activeRequest; @endphp
         <div class="rounded-xl border border-zinc-200 bg-white px-4 py-4">
             <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
                 <div>
@@ -217,8 +217,8 @@
 
     {{-- ═════════════ CALIBRATE ═════════════ --}}
     @if ($section === 'calibrate' && $this->activeRequest)
-        @php($request = $this->activeRequest)
-        @php($aggregate = $this->aggregate)
+        @php $request = $this->activeRequest; @endphp
+        @php $aggregate = $this->aggregate; @endphp
         <div class="rounded-xl border border-zinc-200 bg-white px-4 py-4">
             <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
                 <div>

@@ -44,6 +44,7 @@ class OrderStatusTransitionService
         private readonly OrderEffectCatalog $effects,
         private readonly ImportCandidateToPersonnel $candidateImport,
         private readonly AzerbaijaniDateFormatter $dates,
+        private readonly \App\Modules\Compensation\Application\Services\CompensationService $compensation,
     ) {}
 
     /** Approve a pending order (applies its HR side-effect). */
@@ -161,7 +162,7 @@ class OrderStatusTransitionService
 
         // Hire converts the selected candidate into an active employee.
         if ($template->isHire()) {
-            $this->hire($template, $snapshot);
+            $this->hire($template, $snapshot, $order);
 
             return;
         }
@@ -206,7 +207,7 @@ class OrderStatusTransitionService
     /**
      * @param  array<string,mixed>  $snapshot
      */
-    private function hire(OrderWordTemplate $template, array $snapshot): void
+    private function hire(OrderWordTemplate $template, array $snapshot, OrderLog $order): void
     {
         $candidateId = $snapshot['candidate_id'] ?? null;
         $positionId = $snapshot['hire_position_id'] ?? null;
@@ -224,6 +225,8 @@ class OrderStatusTransitionService
             'join_date' => $joinDate?->toDateString() ?? today()->toDateString(),
         ]], OrderStatusEnum::APPROVED->value);
 
+        $this->seedHireCompensation((int) $candidateId, $joinDate, $order->order_no);
+
         // The candidate is now hired: move them off the "Əmrə hazır" (30) list to
         // "Qəbul olundu" (70) so they no longer surface in the hire picker.
         \App\Models\Candidate::query()->whereKey($candidateId)->update([
@@ -233,6 +236,42 @@ class OrderStatusTransitionService
         // Consume the staff-schedule slot the hire fills (filled +1, vacant recomputed).
         app(\App\Services\Staff\StaffScheduleVacancyService::class)
             ->consumeForHire($structureId ? (int) $structureId : null, (int) $positionId);
+    }
+
+    /**
+     * Seed a draft compensation for the newly-hired employee using the accepted candidate offer salary.
+     */
+    private function seedHireCompensation(int $candidateId, mixed $joinDate, ?string $orderNo): void
+    {
+        $application = DB::table('candidate_applications')
+            ->where('candidate_id', $candidateId)
+            ->whereNotNull('personnel_id')
+            ->orderByDesc('converted_at')
+            ->first();
+
+        if (! $application) {
+            return;
+        }
+
+        $tabelNo = DB::table('personnels')->where('id', $application->personnel_id)->value('tabel_no');
+
+        if (! $tabelNo) {
+            return;
+        }
+
+        $offer = DB::table('candidate_offers')
+            ->where('candidate_application_id', $application->id)
+            ->whereNotNull('salary_amount')
+            ->orderByDesc('id')
+            ->first();
+
+        $this->compensation->createDraftForHire(
+            (string) $tabelNo,
+            (float) ($offer->salary_amount ?? 0),
+            $offer->currency ?? 'AZN',
+            $joinDate ? \Illuminate\Support\Carbon::parse($joinDate->format('Y-m-d')) : null,
+            $orderNo,
+        );
     }
 
     /**

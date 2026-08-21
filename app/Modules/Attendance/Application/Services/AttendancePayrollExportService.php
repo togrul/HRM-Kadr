@@ -20,4 +20,3 @@ class AttendancePayrollExportService
             ->get();
     }
 }
-

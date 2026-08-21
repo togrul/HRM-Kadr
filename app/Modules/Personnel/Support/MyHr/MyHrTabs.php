@@ -17,6 +17,7 @@ class MyHrTabs
             'development-plan',
             'learning',
             'documents',
+            'payslips',
             'hierarchy',
         ];
     }

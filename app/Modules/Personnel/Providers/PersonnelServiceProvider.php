@@ -104,6 +104,7 @@ class PersonnelServiceProvider extends ServiceProvider
             'my-hr.learning' => \App\Modules\Personnel\Livewire\MyHr\MyHrLearning::class,
             'my-hr.learning-assignment-manager' => \App\Modules\Personnel\Livewire\MyHr\LearningAssignmentManager::class,
             'my-hr.documents' => \App\Modules\Personnel\Livewire\MyHr\MyHrDocuments::class,
+            'my-hr.payslips' => \App\Modules\Personnel\Livewire\MyHr\MyHrPayslips::class,
             'my-hr.hierarchy' => \App\Modules\Personnel\Livewire\MyHr\MyHrHierarchy::class,
             'my-hr.account-provisioning' => \App\Modules\Personnel\Livewire\MyHr\MyHrAccountProvisioning::class,
             'my-hr.self-service-request-reviews' => \App\Modules\Personnel\Livewire\MyHr\SelfServiceRequestReviews::class,

@@ -21,6 +21,8 @@ return [
         'audit_logs' => 'Audit jurnalı',
         'document_compliance' => 'Sənəd uyğunluğu',
         'employee_lifecycle' => 'Əməkdaş həyat dövrü',
+        'compensation' => 'Kompensasiya',
+        'payroll' => 'Əmək haqqı',
     ],
     'shortcuts' => [
         'review_queue' => 'Tez baxış',

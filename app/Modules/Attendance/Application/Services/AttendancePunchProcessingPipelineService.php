@@ -302,6 +302,7 @@ class AttendancePunchProcessingPipelineService
                             $usedPunchIds[(int) $id] = true;
                             $processedPunchIds[] = (int) $id;
                         }
+
                         continue;
                     }
 

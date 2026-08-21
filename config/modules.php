@@ -22,6 +22,16 @@ return [
             'enabled' => true,
             'migrations' => app_path('Modules/Orders/Database/Migrations'),
         ],
+        'compensation' => [
+            'provider' => \App\Modules\Compensation\Providers\CompensationServiceProvider::class,
+            'enabled' => true,
+            'migrations' => app_path('Modules/Compensation/Database/Migrations'),
+        ],
+        'payroll' => [
+            'provider' => \App\Modules\Payroll\Providers\PayrollServiceProvider::class,
+            'enabled' => true,
+            'migrations' => app_path('Modules/Payroll/Database/Migrations'),
+        ],
         'staff' => [
             'provider' => \App\Modules\Staff\Providers\StaffServiceProvider::class,
             'enabled' => true,

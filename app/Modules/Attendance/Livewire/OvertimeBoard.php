@@ -4,16 +4,16 @@ namespace App\Modules\Attendance\Livewire;
 
 use App\Models\AttendanceOvertimeRequest;
 use App\Models\Personnel;
-use App\Services\StructurePathService;
 use App\Modules\Attendance\Application\Services\AttendanceAuthorizationService;
 use App\Modules\Attendance\Application\Services\AttendanceOvertimeApprovalService;
 use App\Modules\Attendance\Application\Services\AttendanceOvertimeRequestService;
 use App\Modules\Attendance\Application\Services\AttendanceStructureScopeReadService;
+use App\Services\StructurePathService;
 use App\Traits\NestedStructureTrait;
 use Carbon\Carbon;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -21,8 +21,8 @@ use Livewire\WithPagination;
 
 class OvertimeBoard extends Component
 {
-    use WithPagination;
     use NestedStructureTrait;
+    use WithPagination;
 
     public string $status = 'pending';
 

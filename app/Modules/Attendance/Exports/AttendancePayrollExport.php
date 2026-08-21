@@ -14,8 +14,7 @@ class AttendancePayrollExport implements FromView
         public int $year,
         public int $month,
         public AttendancePayrollExportContract $contract
-    ) {
-    }
+    ) {}
 
     public function view(): View
     {

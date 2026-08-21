@@ -14,7 +14,20 @@ return [
         'development_plan' => 'My development plan',
         'learning' => 'Learning materials',
         'documents' => 'My documents',
+        'payslips' => 'My payslips',
         'hierarchy' => 'My structure',
+    ],
+
+    'payslips' => [
+        'kicker' => 'Self-service',
+        'title' => 'My payslips',
+        'description' => 'Your locked (finalised) payroll calculations are shown here.',
+        'list' => 'Payslips',
+        'empty' => 'No payslips yet',
+        'detail' => 'Payslip detail',
+        'close' => 'Close',
+        'gross' => 'Gross',
+        'net' => 'Net',
     ],
     'summary' => [
         'profile_kicker' => 'Employee profile',

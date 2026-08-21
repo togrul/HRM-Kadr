@@ -53,7 +53,7 @@ return [
                 'ranks' => false,
                 'rank_categories' => false,
                 'service_cards' => false,
-                'military_service' => false,
+                'military_service' => true,
                 'captivity' => false,
                 'criminal_records' => false,
                 'weapons' => false,

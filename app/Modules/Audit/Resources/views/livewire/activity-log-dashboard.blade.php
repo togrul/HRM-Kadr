@@ -102,7 +102,7 @@
                 ]"
             >
                 @forelse ($activities as $activity)
-                    @php($tone = $this->eventTone($activity->event))
+                    @php $tone = $this->eventTone($activity->event); @endphp
                     <tr wire:key="audit-row-{{ $activity->id }}" class="transition-colors hover:bg-zinc-50/80">
                         <x-table.td>
                             <span class="block text-sm font-semibold text-zinc-800">{{ $activity->created_at?->format('d.m.Y') }}</span>

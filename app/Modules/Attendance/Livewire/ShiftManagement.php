@@ -6,14 +6,14 @@ use App\Livewire\Concerns\WithRuntimeMemo;
 use App\Models\AttendanceShift;
 use App\Models\AttendanceShiftAssignment;
 use App\Models\Personnel;
-use App\Services\StructurePathService;
 use App\Modules\Attendance\Application\Services\AttendanceAuthorizationService;
 use App\Modules\Attendance\Application\Services\AttendanceShiftManagementService;
 use App\Modules\Attendance\Application\Services\AttendanceStructureScopeReadService;
+use App\Services\StructurePathService;
 use App\Traits\NestedStructureTrait;
 use Carbon\CarbonInterface;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
@@ -21,8 +21,8 @@ use Livewire\Component;
 
 class ShiftManagement extends Component
 {
-    use WithRuntimeMemo;
     use NestedStructureTrait;
+    use WithRuntimeMemo;
 
     public bool $canManage = false;
 
@@ -191,6 +191,7 @@ class ShiftManagement extends Component
             );
         } catch (ValidationException $exception) {
             $this->dispatch('notify', type: 'error', message: collect($exception->errors())->flatten()->first());
+
             return;
         }
 
@@ -213,6 +214,7 @@ class ShiftManagement extends Component
             $service->deactivateShift($shift, (int) Auth::id());
         } catch (ValidationException $exception) {
             $this->dispatch('notify', type: 'error', message: collect($exception->errors())->flatten()->first());
+
             return;
         }
 
@@ -284,6 +286,7 @@ class ShiftManagement extends Component
             );
         } catch (ValidationException $exception) {
             $this->dispatch('notify', type: 'error', message: collect($exception->errors())->flatten()->first());
+
             return;
         }
 

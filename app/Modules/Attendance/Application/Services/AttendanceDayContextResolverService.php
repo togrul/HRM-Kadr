@@ -54,6 +54,7 @@ class AttendanceDayContextResolverService
 
             if ($calendar->scope_type === 'structure' && $calendar->scope_id) {
                 $calendarStructure[$calendar->scope_id.'|'.$dateKey] = (string) $calendar->day_type;
+
                 continue;
             }
 
