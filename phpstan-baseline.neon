@@ -73,33 +73,9 @@ parameters:
 			path: app/Enums/OrderStatusEnum.php
 
 		-
-			message: '#^Method App\\Helpers\\UsefulHelpers\:\:compareMultidimensionalArrays\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Helpers/UsefulHelpers.php
-
-		-
-			message: '#^Method App\\Helpers\\UsefulHelpers\:\:convertToMonthNumber\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Helpers/UsefulHelpers.php
-
-		-
-			message: '#^Method App\\Helpers\\UsefulHelpers\:\:modifyArrayToKeyValuePair\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Helpers/UsefulHelpers.php
-
-		-
-			message: '#^Method App\\Helpers\\UsefulHelpers\:\:searchInsideMultiDimensionalArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Helpers/UsefulHelpers.php
-
-		-
 			message: '#^Variable \$months might not be defined\.$#'
 			identifier: variable.undefined
-			count: 2
+			count: 1
 			path: app/Helpers/UsefulHelpers.php
 
 		-
@@ -763,6 +739,12 @@ parameters:
 			path: app/Models/City.php
 
 		-
+			message: '#^Access to an undefined property App\\Models\\EmployeeCompensation\:\:\$base_amount\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/EmployeeCompensation.php
+
+		-
 			message: '#^Method App\\Models\\EmployeeCompetencyProfile\:\:gapRequirements\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -785,6 +767,12 @@ parameters:
 			identifier: property.notFound
 			count: 1
 			path: app/Models/EmployeeContentAsset.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\EmployeeLoan\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/EmployeeLoan.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$approved_at\.$#'
@@ -1031,6 +1019,18 @@ parameters:
 			identifier: nullCoalesce.offset
 			count: 1
 			path: app/Models/OrderWordTemplate.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\PayrollPeriod\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/PayrollPeriod.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\PayrollRun\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/PayrollRun.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\PerformanceGoal\:\:\$current_value\.$#'
@@ -3805,6 +3805,18 @@ parameters:
 			path: app/Modules/Attendance/Http/Controllers/AttendancePunchIngestController.php
 
 		-
+			message: '#^Access to an undefined property App\\Models\\AttendanceMonthlySummary\:\:\$total_absence_days\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Attendance/Infrastructure/Persistence/Eloquent/EloquentPayrollAttendanceReadRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\AttendanceMonthlySummary\:\:\$total_workdays\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Attendance/Infrastructure/Persistence/Eloquent/EloquentPayrollAttendanceReadRepository.php
+
+		-
 			message: '#^Call to an undefined method Illuminate\\Contracts\\Pagination\\LengthAwarePaginator\:\:getCollection\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -4185,13 +4197,13 @@ parameters:
 		-
 			message: '#^Access to an undefined property App\\Models\\AttendanceShiftAssignment\:\:\$effective_from\.$#'
 			identifier: property.notFound
-			count: 3
+			count: 2
 			path: app/Modules/Attendance/Livewire/ShiftManagement.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\AttendanceShiftAssignment\:\:\$effective_to\.$#'
 			identifier: property.notFound
-			count: 3
+			count: 2
 			path: app/Modules/Attendance/Livewire/ShiftManagement.php
 
 		-
@@ -5855,6 +5867,282 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/Modules/Candidates/Livewire/RequisitionList.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\EmployeeCompensation\:\:\$base_amount\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Application/Services/AllowanceResolver.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$amount\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Application/Services/AllowanceResolver.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$component\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Application/Services/AllowanceResolver.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$percent\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Application/Services/AllowanceResolver.php
+
+		-
+			message: '#^Method App\\Modules\\Compensation\\Application\\Services\\AllowanceResolver\:\:resolve\(\) should return Illuminate\\Support\\Collection\<int, array\<string, mixed\>\> but returns Illuminate\\Support\\Collection\<int, array\{component_code\: mixed, component_name\: mixed, type\: mixed, taxable\: bool, affects_social\: bool, is_statutory\: bool, amount\: float\}\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Modules/Compensation/Application/Services/AllowanceResolver.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\EmployeeCompensation\:\:\$currency\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Application/Services/CompensationService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\EmployeeCompensation\:\:\$regime_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Modules/Compensation/Application/Services/CompensationService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\EmployeeCompensation\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Application/Services/CompensationService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\PayGrade\:\:\$base_amount\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Application/Services/CompensationService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\StatutoryRate\:\:\$component_code\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Infrastructure/Persistence/Eloquent/EloquentCompensationReadRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\StatutoryRate\:\:\$payer\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Infrastructure/Persistence/Eloquent/EloquentCompensationReadRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\StatutoryRate\:\:\$regime_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Infrastructure/Persistence/Eloquent/EloquentCompensationReadRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\CompensationComponent\:\:\$affects_social\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Dashboard.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\CompensationComponent\:\:\$calc_type\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Dashboard.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\CompensationComponent\:\:\$code\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Dashboard.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\CompensationComponent\:\:\$is_active\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Dashboard.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\CompensationComponent\:\:\$is_statutory\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Dashboard.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\CompensationComponent\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Modules/Compensation/Livewire/Dashboard.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\CompensationComponent\:\:\$sort\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Dashboard.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\CompensationComponent\:\:\$taxable\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Dashboard.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\CompensationComponent\:\:\$type\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Dashboard.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\CompensationRegime\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Dashboard.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\EmployeeBankAccount\:\:\$iban\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Dashboard.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\EmployeeBankAccount\:\:\$is_active\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Dashboard.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\EmployeeBankAccount\:\:\$is_primary\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Dashboard.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\EmployeeBankAccount\:\:\$tabel_no\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Dashboard.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\PayGrade\:\:\$base_amount\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Dashboard.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\PayGrade\:\:\$code\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Dashboard.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\PayGrade\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Dashboard.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\PayGrade\:\:\$pay_scale_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Dashboard.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\PayGrade\:\:\$position_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Dashboard.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\PayGrade\:\:\$rank_category_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Dashboard.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\PayGrade\:\:\$sort\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Dashboard.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\PayScale\:\:\$currency\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Dashboard.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\PayScale\:\:\$effective_from\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Dashboard.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\PayScale\:\:\$effective_to\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Dashboard.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\PayScale\:\:\$is_active\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Dashboard.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\PayScale\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Dashboard.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\PayScale\:\:\$regime_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Dashboard.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Dashboard.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$surname\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Dashboard.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\CompensationComponent\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Modules/Compensation/Livewire/Dashboard.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\CompensationRegime\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Modules/Compensation/Livewire/Dashboard.php
+
+		-
+			message: '#^Return type of call to method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\CompensationComponent\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: method.unresolvableReturnType
+			count: 1
+			path: app/Modules/Compensation/Livewire/Dashboard.php
+
+		-
+			message: '#^Return type of call to method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\CompensationRegime\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: method.unresolvableReturnType
+			count: 1
+			path: app/Modules/Compensation/Livewire/Dashboard.php
+
+		-
+			message: '#^Return type of call to method Illuminate\\Support\\Collection\<int,array\<string, mixed\>\>\:\:all\(\) contains unresolvable type\.$#'
+			identifier: method.unresolvableReturnType
+			count: 2
+			path: app/Modules/Compensation/Livewire/Dashboard.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$email\.$#'
@@ -8405,6 +8693,378 @@ parameters:
 			identifier: notIdentical.alwaysFalse
 			count: 1
 			path: app/Modules/Orders/Livewire/OrderTemplateDesigner.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\EmployeeLoan\:\:\$monthly_installment\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Modules/Payroll/Application/Services/LoanService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\EmployeeLoan\:\:\$remaining\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Modules/Payroll/Application/Services/LoanService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\LoanRepayment\:\:\$amount\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Payroll/Application/Services/LoanService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$ends_on\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Payroll/Application/Services/LoanService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$remaining\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Payroll/Application/Services/LoanService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\EmployeeCompensation\:\:\$base_amount\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Payroll/Application/Services/PayrollCalculator.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\EmployeeCompensation\:\:\$currency\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Payroll/Application/Services/PayrollCalculator.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\EmployeeCompensation\:\:\$regime_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Payroll/Application/Services/PayrollCalculator.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\EmployeeBankAccount\:\:\$bank_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Payroll/Application/Services/PayrollExportService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\EmployeeBankAccount\:\:\$iban\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Payroll/Application/Services/PayrollExportService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Payslip\:\:\$currency\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Payroll/Application/Services/PayrollExportService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Payslip\:\:\$gross\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Payroll/Application/Services/PayrollExportService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Payslip\:\:\$net\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Modules/Payroll/Application/Services/PayrollExportService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Payslip\:\:\$tabel_no\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Modules/Payroll/Application/Services/PayrollExportService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\PayslipLine\:\:\$code\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Modules/Payroll/Application/Services/PayrollExportService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\PayslipLine\:\:\$kind\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Payroll/Application/Services/PayrollExportService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\PayslipLine\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Payroll/Application/Services/PayrollExportService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$pin\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Payroll/Application/Services/PayrollExportService.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<\(int\|string\),Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\PayslipLine\>\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Modules/Payroll/Application/Services/PayrollExportService.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\Payslip\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 2
+			path: app/Modules/Payroll/Application/Services/PayrollExportService.php
+
+		-
+			message: '#^Return type of call to method Illuminate\\Database\\Eloquent\\Collection\<\(int\|string\),Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\PayslipLine\>\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: method.unresolvableReturnType
+			count: 1
+			path: app/Modules/Payroll/Application/Services/PayrollExportService.php
+
+		-
+			message: '#^Return type of call to method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\Payslip\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: method.unresolvableReturnType
+			count: 2
+			path: app/Modules/Payroll/Application/Services/PayrollExportService.php
+
+		-
+			message: '#^Return type of call to method Illuminate\\Support\\Collection\<int,array\<string, mixed\>\>\:\:all\(\) contains unresolvable type\.$#'
+			identifier: method.unresolvableReturnType
+			count: 1
+			path: app/Modules/Payroll/Application/Services/PayrollExportService.php
+
+		-
+			message: '#^Return type of call to method Illuminate\\Support\\Collection\<int,array\<string, mixed\>\>\:\:values\(\) contains unresolvable type\.$#'
+			identifier: method.unresolvableReturnType
+			count: 1
+			path: app/Modules/Payroll/Application/Services/PayrollExportService.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Modules/Payroll/Application/Services/PayrollExportService.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>surname" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Modules/Payroll/Application/Services/PayrollExportService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\PayrollRun\:\:\$regime_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Modules/Payroll/Application/Services/PayrollRunService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\PayrollRun\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Modules/Payroll/Application/Services/PayrollRunService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Payslip\:\:\$currency\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Payroll/Application/Services/PayrollRunService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Payslip\:\:\$employer_cost\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Payroll/Application/Services/PayrollRunService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Payslip\:\:\$gross\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Payroll/Application/Services/PayrollRunService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Payslip\:\:\$net\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Payroll/Application/Services/PayrollRunService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Payslip\:\:\$total_deductions\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Payroll/Application/Services/PayrollRunService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\PayslipLine\:\:\$amount\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Payroll/Application/Services/PayrollRunService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\PayslipLine\:\:\$code\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Payroll/Application/Services/PayrollRunService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\PayslipLine\:\:\$kind\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Payroll/Application/Services/PayrollRunService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\PayslipLine\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Payroll/Application/Services/PayrollRunService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$ends_on\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Payroll/Application/Services/PayrollRunService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$month\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Payroll/Application/Services/PayrollRunService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$year\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Payroll/Application/Services/PayrollRunService.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\PayslipLine\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Modules/Payroll/Application/Services/PayrollRunService.php
+
+		-
+			message: '#^Return type of call to method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\PayslipLine\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: method.unresolvableReturnType
+			count: 1
+			path: app/Modules/Payroll/Application/Services/PayrollRunService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Payslip\:\:\$net\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Payroll/Application/Services/RetroService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Payslip\:\:\$payroll_run_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Payroll/Application/Services/RetroService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$code\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Payroll/Application/Services/RetroService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$ends_on\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Modules/Payroll/Application/Services/RetroService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$month\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Payroll/Application/Services/RetroService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$year\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Payroll/Application/Services/RetroService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\StatutoryRate\:\:\$base\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Payroll/Application/Services/StatutoryEngine.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\StatutoryRate\:\:\$brackets\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Payroll/Application/Services/StatutoryEngine.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\StatutoryRate\:\:\$component_code\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Modules/Payroll/Application/Services/StatutoryEngine.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\StatutoryRate\:\:\$payer\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Modules/Payroll/Application/Services/StatutoryEngine.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Payslip\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Payroll/Http/Controllers/PayslipPrintController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Payslip\:\:\$tabel_no\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Payroll/Http/Controllers/PayslipPrintController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tabel_no\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Payroll/Http/Controllers/PayslipPrintController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\CompensationRegime\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Payroll/Livewire/Dashboard.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Payroll/Livewire/Dashboard.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$surname\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Payroll/Livewire/Dashboard.php
+
+		-
+			message: '#^Access to an undefined property App\\Modules\\Payroll\\Livewire\\Dashboard\:\:\$selectedPayslip\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Payroll/Livewire/Dashboard.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\CompensationRegime\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Modules/Payroll/Livewire/Dashboard.php
+
+		-
+			message: '#^Return type of call to method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\CompensationRegime\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: method.unresolvableReturnType
+			count: 1
+			path: app/Modules/Payroll/Livewire/Dashboard.php
+
+		-
+			message: '#^Return type of call to method Illuminate\\Support\\Collection\<int,array\<string, mixed\>\>\:\:all\(\) contains unresolvable type\.$#'
+			identifier: method.unresolvableReturnType
+			count: 1
+			path: app/Modules/Payroll/Livewire/Dashboard.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\PerformanceFeedbackRequest\:\:\$performance_form_template_id\.$#'
@@ -16867,12 +17527,6 @@ parameters:
 			path: app/Modules/TrainingNeeds/Livewire/CertificateViewer.php
 
 		-
-			message: '#^Trait App\\Modules\\TrainingNeeds\\Livewire\\Concerns\\HandlesTrainingNeedPlanningAndDelivery is used zero times and is not analysed\.$#'
-			identifier: trait.unused
-			count: 1
-			path: app/Modules/TrainingNeeds/Livewire/Concerns/HandlesTrainingNeedPlanningAndDelivery.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\TrainingSessionParticipant\:\:\$attendance_status\.$#'
 			identifier: property.notFound
 			count: 1
@@ -18751,6 +19405,12 @@ parameters:
 			path: app/Services/Orders/Document/Effects/SurnameChangeEffect.php
 
 		-
+			message: '#^Access to an undefined property App\\Models\\OrderLog\:\:\$order_no\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/Orders/Document/Effects/TransferEffect.php
+
+		-
 			message: '#^Access to an undefined property App\\Models\\OrderLog\:\:\$template_snapshot\.$#'
 			identifier: property.notFound
 			count: 2
@@ -18861,7 +19521,7 @@ parameters:
 		-
 			message: '#^Access to an undefined property App\\Models\\OrderLog\:\:\$order_no\.$#'
 			identifier: property.notFound
-			count: 1
+			count: 2
 			path: app/Services/Orders/Document/OrderStatusTransitionService.php
 
 		-
@@ -19243,12 +19903,6 @@ parameters:
 			path: app/Services/Vacation/VacationBalanceService.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$join_date\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Services/Vacation/VacationBalanceService.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$leave_date\.$#'
 			identifier: property.notFound
 			count: 1
@@ -19269,7 +19923,7 @@ parameters:
 		-
 			message: '#^Using nullsafe property access on non\-nullable type Illuminate\\Database\\Eloquent\\Model\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
-			count: 2
+			count: 1
 			path: app/Services/Vacation/VacationBalanceService.php
 
 		-
@@ -19361,9 +20015,3 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/Support/ViewNumberFormatter.php
-
-		-
-			message: '#^Trait App\\Traits\\OrderNumberTrait is used zero times and is not analysed\.$#'
-			identifier: trait.unused
-			count: 1
-			path: app/Traits/OrderNumberTrait.php
