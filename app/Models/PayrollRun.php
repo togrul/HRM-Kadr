@@ -47,11 +47,13 @@ class PayrollRun extends Model
         return $this->belongsTo(PayrollPeriod::class, 'payroll_period_id');
     }
 
+    /** @return BelongsTo<CompensationRegime, $this> */
     public function regime(): BelongsTo
     {
         return $this->belongsTo(CompensationRegime::class, 'regime_id');
     }
 
+    /** @return HasMany<Payslip, $this> */
     public function payslips(): HasMany
     {
         return $this->hasMany(Payslip::class, 'payroll_run_id');

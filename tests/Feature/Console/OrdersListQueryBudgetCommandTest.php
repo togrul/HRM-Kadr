@@ -30,4 +30,25 @@ class OrdersListQueryBudgetCommandTest extends TestCase
         $this->assertSame('ok', data_get($results, 'orders_render.status'));
         $this->assertSame('ok', data_get($results, 'orders_filter_update.status'));
     }
+
+    public function test_it_skips_instead_of_failing_when_no_permitted_user_exists_and_allow_empty_enabled(): void
+    {
+        $exitCode = Artisan::call('orders:list-query-budget', [
+            '--allow-empty' => true,
+            '--json' => true,
+        ]);
+
+        $this->assertSame(0, $exitCode);
+
+        $payload = json_decode(Artisan::output(), true);
+
+        $this->assertTrue(data_get($payload, 'summary.skipped'));
+        $this->assertSame('no_user_with_show_orders_permission', data_get($payload, 'summary.reason'));
+        $this->assertSame([], data_get($payload, 'results'));
+    }
+
+    public function test_it_fails_when_no_permitted_user_exists_and_allow_empty_is_not_set(): void
+    {
+        $this->assertSame(1, Artisan::call('orders:list-query-budget', ['--json' => true]));
+    }
 }

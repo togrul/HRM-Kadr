@@ -195,6 +195,51 @@ class PayrollRunTest extends TestCase
         );
     }
 
+    /**
+     * Regression: personnelResults(), loans() and saveLoan() referenced
+     * Personnel / EmployeeLoan / LoanService without importing them, so every
+     * one of these calls fatalled on an unqualified class in the Livewire
+     * namespace.
+     */
+    public function test_manager_can_search_personnel_and_manage_loans_from_the_dashboard(): void
+    {
+        $personnel = $this->makePersonnel('loan-ui@example.test');
+
+        $user = \App\Models\User::factory()->create();
+        foreach (['show-payroll', 'manage-payroll'] as $perm) {
+            $user->givePermissionTo(Permission::findOrCreate($perm, 'web'));
+        }
+        $this->actingAs($user);
+
+        $component = Livewire::test(Dashboard::class)
+            ->set('personnelSearch', $personnel->tabel_no);
+
+        $results = $component->get('personnelResults');
+        $this->assertNotEmpty($results);
+        $this->assertSame($personnel->tabel_no, $results[0]['tabel_no']);
+
+        $component
+            ->call('selectPersonnel', $personnel->tabel_no, $results[0]['label'])
+            ->set('loanForm.type', 'loan')
+            ->set('loanForm.principal', '1200')
+            ->set('loanForm.monthly_installment', '100')
+            ->set('loanForm.currency', 'AZN')
+            ->set('loanForm.start_on', '2026-07-01')
+            ->call('saveLoan')
+            ->assertHasNoErrors();
+
+        $this->assertDatabaseHas('employee_loans', [
+            'tabel_no' => $personnel->tabel_no,
+            'type' => 'loan',
+        ]);
+
+        $loanId = \App\Models\EmployeeLoan::where('tabel_no', $personnel->tabel_no)->value('id');
+        $this->assertCount(1, $component->get('loans'));
+
+        $component->call('deleteLoan', $loanId);
+        $this->assertDatabaseMissing('employee_loans', ['id' => $loanId]);
+    }
+
     private function makePersonnel(string $email): Personnel
     {
         return Personnel::withoutEvents(fn () => Personnel::query()->create([

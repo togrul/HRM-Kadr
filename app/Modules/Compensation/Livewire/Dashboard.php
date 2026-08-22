@@ -12,7 +12,9 @@ use App\Models\Personnel;
 use App\Modules\Compensation\Application\Services\CompensationService;
 use App\Modules\Compensation\Application\Services\SalaryScaleService;
 use App\Support\Livewire\InteractsWithTabbedWorkspace;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -125,7 +127,7 @@ class Dashboard extends Component
     public array $statutoryBrackets = [];
 
     #[Computed]
-    public function statutoryRates()
+    public function statutoryRates(): Collection
     {
         return \App\Models\StatutoryRate::query()
             ->with('regime:id,name')
@@ -337,7 +339,7 @@ class Dashboard extends Component
     // ----------------------------------------------------------------
 
     #[Computed]
-    public function scales()
+    public function scales(): LengthAwarePaginator
     {
         $term = trim($this->scaleSearch);
 
@@ -441,7 +443,7 @@ class Dashboard extends Component
     }
 
     #[Computed]
-    public function grades()
+    public function grades(): Collection
     {
         if (! $this->selectedScaleId) {
             return collect();
@@ -531,7 +533,7 @@ class Dashboard extends Component
     // ----------------------------------------------------------------
 
     #[Computed]
-    public function components()
+    public function components(): LengthAwarePaginator
     {
         $term = trim($this->componentSearch);
 
@@ -722,7 +724,7 @@ class Dashboard extends Component
     // ----------------------------------------------------------------
 
     #[Computed]
-    public function bankAccounts()
+    public function bankAccounts(): Collection
     {
         if (! $this->selectedTabelNo) {
             return collect();
@@ -817,7 +819,7 @@ class Dashboard extends Component
     // ----------------------------------------------------------------
 
     #[Computed]
-    public function history()
+    public function history(): Collection
     {
         if (! $this->selectedTabelNo) {
             return collect();

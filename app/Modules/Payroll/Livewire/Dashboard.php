@@ -3,17 +3,23 @@
 namespace App\Modules\Payroll\Livewire;
 
 use App\Models\CompensationRegime;
+use App\Models\EmployeeLoan;
 use App\Models\PayrollPeriod;
 use App\Models\PayrollRun;
 use App\Models\Payslip;
+use App\Models\Personnel;
+use App\Modules\Payroll\Application\Services\LoanService;
 use App\Modules\Payroll\Application\Services\PayrollExportService;
 use App\Modules\Payroll\Application\Services\PayrollPeriodService;
 use App\Modules\Payroll\Application\Services\PayrollRunService;
 use App\Support\Livewire\DownloadsReportsTable;
 use App\Support\Livewire\InteractsWithTabbedWorkspace;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class Dashboard extends Component
 {
@@ -102,7 +108,7 @@ class Dashboard extends Component
         return auth()->user()?->can('export-payroll') ?? false;
     }
 
-    public function exportBankFile(int $runId, PayrollExportService $service)
+    public function exportBankFile(int $runId, PayrollExportService $service): BinaryFileResponse
     {
         abort_unless($this->canExport(), 403);
 
@@ -120,7 +126,7 @@ class Dashboard extends Component
         );
     }
 
-    public function exportBankCsv(int $runId, PayrollExportService $service)
+    public function exportBankCsv(int $runId, PayrollExportService $service): StreamedResponse
     {
         abort_unless($this->canExport(), 403);
 
@@ -137,7 +143,7 @@ class Dashboard extends Component
         }, 'payroll-bank-file.csv', ['Content-Type' => 'text/csv']);
     }
 
-    public function exportGl(int $runId, PayrollExportService $service)
+    public function exportGl(int $runId, PayrollExportService $service): BinaryFileResponse
     {
         abort_unless($this->canExport(), 403);
 
@@ -154,7 +160,7 @@ class Dashboard extends Component
         );
     }
 
-    public function exportStateReport(int $runId, PayrollExportService $service)
+    public function exportStateReport(int $runId, PayrollExportService $service): BinaryFileResponse
     {
         abort_unless($this->canExport(), 403);
 
@@ -222,13 +228,13 @@ class Dashboard extends Component
     }
 
     #[Computed]
-    public function periods()
+    public function periods(): Collection
     {
         return PayrollPeriod::query()->orderByDesc('year')->orderByDesc('month')->limit(24)->get();
     }
 
     #[Computed]
-    public function runs()
+    public function runs(): Collection
     {
         return PayrollRun::query()
             ->with(['period', 'regime'])
@@ -248,7 +254,7 @@ class Dashboard extends Component
     }
 
     #[Computed]
-    public function runPayslips()
+    public function runPayslips(): Collection
     {
         if (! $this->selectedRunId) {
             return collect();
@@ -457,7 +463,7 @@ class Dashboard extends Component
     }
 
     #[Computed]
-    public function loans()
+    public function loans(): Collection
     {
         if (! $this->selectedTabelNo) {
             return collect();

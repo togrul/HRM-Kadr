@@ -56,7 +56,7 @@ Modulların `*:query-budget` artisan əmrləri var (orders, attendance, audit, e
 1. **Format:** `vendor/bin/pint <dəyişən-fayl>` (Edit/Write zamanı hook avtomatik salır — aşağıya bax).
 2. **Test:** `vendor/bin/pest` və ya konkret fayl: `php artisan test tests/Feature/...`.
 3. **Toxunduğun modulun CI gate-i** (lazımdırsa):
-   - `composer ci:orders-template-gate`
+   - `composer ci:orders-gate`
    - `composer ci:attendance-gate`
    - `composer ci:audit-gate`
    - `composer ci:strategic-hr-gate` (employee-lifecycle / compliance / candidates)

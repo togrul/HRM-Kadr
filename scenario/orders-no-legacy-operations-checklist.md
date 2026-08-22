@@ -7,7 +7,7 @@ Bu sənəd production/staging mühitində Orders metadata-only mühərrikinin g�
 1. `php artisan orders:templates:readiness --json`
 2. `php artisan orders:templates:smoke --order-type=<ID> --json`
 3. `php artisan orders:templates:query-budget --order-type=<ID> --json`
-4. `composer ci:orders-template-gate`
+4. `composer ci:orders-gate`
 
 Qəbul kriteriyası:
 - readiness: `version_without_mappings=0`, `no_template=0`

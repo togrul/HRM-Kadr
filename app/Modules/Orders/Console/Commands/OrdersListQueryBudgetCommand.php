@@ -9,6 +9,7 @@ use Livewire\Livewire;
 class OrdersListQueryBudgetCommand extends AbstractQueryBudgetCommand
 {
     protected $signature = 'orders:list-query-budget
+        {--allow-empty : Return success when no user holds the Orders view permission}
         {--render-budget= : Max query count for orders render}
         {--filter-budget= : Max query count for orders filter update}
         {--modal-budget= : Max query count for add order modal shell open}
@@ -22,6 +23,10 @@ class OrdersListQueryBudgetCommand extends AbstractQueryBudgetCommand
         $user = $this->resolveUserForPermissions('show-orders');
 
         if (! $user) {
+            if ((bool) $this->option('allow-empty')) {
+                return $this->reportSkipped('no_user_with_show_orders_permission');
+            }
+
             $this->error('No user with Orders view permission was found for query budgeting.');
 
             return self::FAILURE;
@@ -71,5 +76,31 @@ class OrdersListQueryBudgetCommand extends AbstractQueryBudgetCommand
         }
 
         return ($summary['failed_probes'] === 0 && $summary['over_budget_probes'] === 0) ? self::SUCCESS : self::FAILURE;
+    }
+
+    /**
+     * Report a skipped run the same way the sibling `*:query-budget` commands do,
+     * so a freshly migrated CI database does not fail the gate.
+     */
+    private function reportSkipped(string $reason): int
+    {
+        $payload = [
+            'summary' => [
+                'skipped' => true,
+                'reason' => $reason,
+                'failed_probes' => 0,
+                'over_budget_probes' => 0,
+                'passed_probes' => 0,
+            ],
+            'results' => [],
+        ];
+
+        if ((bool) $this->option('json')) {
+            $this->line(json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        } else {
+            $this->info("Orders query budget skipped: {$reason}");
+        }
+
+        return self::SUCCESS;
     }
 }

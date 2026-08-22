@@ -38,16 +38,19 @@ class Payslip extends Model
         'snapshot' => 'array',
     ];
 
+    /** @return BelongsTo<PayrollRun, $this> */
     public function run(): BelongsTo
     {
         return $this->belongsTo(PayrollRun::class, 'payroll_run_id');
     }
 
+    /** @return BelongsTo<CompensationRegime, $this> */
     public function regime(): BelongsTo
     {
         return $this->belongsTo(CompensationRegime::class, 'regime_id');
     }
 
+    /** @return HasMany<PayslipLine, $this> */
     public function lines(): HasMany
     {
         return $this->hasMany(PayslipLine::class, 'payslip_id');

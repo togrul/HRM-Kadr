@@ -2,6 +2,7 @@
 
 namespace App\Modules\Compensation\Domain\Contracts;
 
+use App\Models\CompensationComponent;
 use App\Models\EmployeeBankAccount;
 use App\Models\EmployeeCompensation;
 use Illuminate\Support\Collection;
@@ -34,7 +35,7 @@ interface CompensationReadRepository
     public function statutoryRatesFor(?int $regimeId = null, ?string $date = null): Collection;
 
     /**
-     * @return Collection<int,EmployeeCompensation>
+     * @return Collection<int,CompensationComponent>
      */
     public function componentCatalog(): Collection;
 }

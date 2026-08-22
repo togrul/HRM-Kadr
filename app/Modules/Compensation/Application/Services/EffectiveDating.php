@@ -14,11 +14,12 @@ class EffectiveDating
         return $date->copy()->subDay();
     }
 
+    /**
+     * A null end date means the window is still open.
+     */
     public static function overlaps(Carbon $aFrom, ?Carbon $aTo, Carbon $bFrom, ?Carbon $bTo): bool
     {
-        $aTo ??= Carbon::maxValue();
-        $bTo ??= Carbon::maxValue();
-
-        return $aFrom->lte($bTo) && $bFrom->lte($aTo);
+        return ($bTo === null || $aFrom->lte($bTo))
+            && ($aTo === null || $bFrom->lte($aTo));
     }
 }

@@ -67,7 +67,7 @@ php artisan test tests/Feature/...     # konkret fayl
 Toxunduğun modulun CI gate-ini yoxla (lazımdırsa):
 
 ```bash
-composer ci:orders-template-gate
+composer ci:orders-gate
 composer ci:attendance-gate
 composer ci:audit-gate
 composer ci:strategic-hr-gate          # employee-lifecycle / compliance / candidates

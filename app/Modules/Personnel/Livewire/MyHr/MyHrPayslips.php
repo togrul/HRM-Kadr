@@ -6,6 +6,7 @@ use App\Models\Payslip;
 use App\Models\Personnel;
 use App\Modules\Payroll\Domain\Contracts\PayslipReadRepository;
 use App\Modules\Personnel\Support\MyHr\MyHrAccess;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
@@ -67,7 +68,7 @@ class MyHrPayslips extends Component
         $this->selectedPayslipId = null;
     }
 
-    public function render()
+    public function render(): View
     {
         return view('personnel::livewire.personnel.my-hr.payslips');
     }
