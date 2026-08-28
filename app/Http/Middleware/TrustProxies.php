@@ -10,9 +10,13 @@ class TrustProxies extends Middleware
     /**
      * The trusted proxies for this application.
      *
+     * ponytail: '*' — reverse proxy TLS-i terminasiya edir, real IP-si bilinmir.
+     * Origin yalnız proxy vasitəsilə əlçatandırsa təhlükəsizdir; birbaşa da
+     * açıqdırsa ['127.0.0.1', '::1'] və ya proxy-nin IP siyahısına daralt.
+     *
      * @var array<int, string>|string|null
      */
-    protected $proxies;
+    protected $proxies = '*';
 
     /**
      * The headers that should be used to detect proxies.
