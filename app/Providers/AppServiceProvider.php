@@ -11,6 +11,7 @@ use App\Services\StructureService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Blaze\Blaze;
 
@@ -44,10 +45,27 @@ class AppServiceProvider extends ServiceProvider
         //        DB::prohibitDestructiveCommands(
         //            $this->app->isProduction(),
         //        );
+        $this->configureUrlScheme();
         $this->configureModels();
         $this->registerMacros();
         $this->registerBladeDirectives();
         $this->configureBlazeOptimization();
+    }
+
+    /**
+     * Generate https URLs whenever the app is served over TLS.
+     *
+     * ponytail: TrustProxies alone is not enough here — the proxy in front of
+     * this deployment does not forward a usable X-Forwarded-Proto, so Laravel
+     * saw plain http and Livewire built an http:// update endpoint that the
+     * browser blocked as mixed content. Keyed off APP_URL rather than a new
+     * env flag: that value has to be right for mail and queued jobs anyway.
+     */
+    private function configureUrlScheme(): void
+    {
+        if (str_starts_with((string) config('app.url'), 'https://')) {
+            URL::forceScheme('https');
+        }
     }
 
     /**
