@@ -134,7 +134,7 @@
                                         {{-- @endrole --}}
                                     @else
                                         {{-- @can('manage-settings') --}}
-                                        <x-action-button wire:click.prevent = "setDeleteUser({{ $user->id }})"
+                                        <x-action-button wire:click.prevent="setDeleteUser({{ $user->id }})"
                                             class="h-9 w-9 bg-rose-50 hover:bg-red-100"
                                             :title="__('services::users.titles.delete')">
                                             <x-icons.delete-icon color="text-rose-500"

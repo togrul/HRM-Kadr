@@ -124,7 +124,7 @@
                                 <x-table.td :isButton="true">
                                     {{-- @can('manage-settings') --}}
                                     <x-action-button
-                                        wire:click.prevent = "setDeleteRank({{ $rank->id }})"
+                                        wire:click.prevent="setDeleteRank({{ $rank->id }})"
                                         class="h-9 w-9 hover:bg-red-100"
                                         :title="__('services::ranks.titles.delete')"
                                     >

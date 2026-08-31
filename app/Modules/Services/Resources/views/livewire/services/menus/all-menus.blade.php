@@ -73,7 +73,7 @@
 
                                 <x-table.td :isButton="true">
                                     {{-- @can('manage-settings') --}}
-                                    <x-action-button wire:click.prevent = "setDeleteMenu({{ $menu->id }})"
+                                    <x-action-button wire:click.prevent="setDeleteMenu({{ $menu->id }})"
                                         class="h-9 w-9 bg-rose-50 hover:bg-rose-100"
                                         :title="__('services::menus.titles.delete')">
                                         <x-icons.delete-icon color="text-rose-500"
