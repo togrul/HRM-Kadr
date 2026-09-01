@@ -1,7 +1,12 @@
 @once
     <style>
-        /* Rail popovers (notification bell) must open to the RIGHT of the 60px rail. */
-        .hrm-rail-popover [class*='absolute'][class*='right-0'] {
+        /*
+         * Rail popovers (notification bell) must open to the RIGHT of the 60px rail.
+         * Matched by an explicit marker, not by "any absolutely positioned child with
+         * right-0" — that also caught the unread-count badge on the bell and flung it
+         * outside the rail.
+         */
+        .hrm-rail-popover [data-rail-panel] {
             right: auto !important;
             left: calc(100% + 12px) !important;
             top: auto !important;

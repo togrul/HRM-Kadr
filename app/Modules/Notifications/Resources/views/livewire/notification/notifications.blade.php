@@ -39,6 +39,7 @@
         x-cloak
         x-show="isOpen"
         x-on:click.stop
+        data-rail-panel
         class="absolute right-0 z-50 mt-3 origin-top-right overflow-hidden border border-zinc-200 bg-white text-left text-neutral-700 shadow-overlay top-full w-[34rem] max-w-[calc(100vw-2rem)] rounded-2xl"
     >
         <div class="border-b border-zinc-200 bg-zinc-50/80 px-5 py-4">
