@@ -2,6 +2,7 @@
 
 namespace App\Services\Structures;
 
+use App\Support\Database\InstalledTables;
 use Illuminate\Support\Facades\Schema;
 
 /**
@@ -23,7 +24,7 @@ class StructureDependencyMap
      * Columns that logically reference a structure but carry no DB foreign key, so the
      * schema introspector cannot find them. Kept tiny and obvious on purpose.
      *
-     * @var array<int,array{0:string,1:string}>  [table, column]
+     * @var array<int,array{0:string,1:string}> [table, column]
      */
     private const UNCONSTRAINED = [
         ['staff_schedules', 'structure_id'],
@@ -67,7 +68,7 @@ class StructureDependencyMap
         }
 
         foreach (self::UNCONSTRAINED as [$table, $column]) {
-            if (Schema::hasTable($table) && Schema::hasColumn($table, $column)) {
+            if (InstalledTables::has($table) && Schema::hasColumn($table, $column)) {
                 $refs[$table.'.'.$column] ??= ['table' => $table, 'column' => $column];
             }
         }

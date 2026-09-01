@@ -17,9 +17,10 @@
     };
 @endphp
 
-<div class="flex w-12 shrink-0 flex-col items-center gap-1">
+<div class="hrm-metric">
     @if ($showLabel && $label)
         <span class="text-[10px] font-medium uppercase tracking-wide text-zinc-400">{{ $label }}</span>
     @endif
-    <span class="text-[14px] font-semibold tabular-nums leading-none {{ $valueClass }}">{{ $v }}</span>
+    {{-- an empty vacancy reads as a dash, not a zero, so a real opening stands out --}}
+    <span class="hrm-metric-value {{ $valueClass }}">{{ $tone === 'vacant' && $v === 0 ? '—' : $v }}</span>
 </div>

@@ -2,14 +2,15 @@
 
 namespace Tests\Feature\Candidates;
 
-use App\Models\User;
-use App\Models\Candidate;
 use App\Models\AppealStatus;
+use App\Models\Candidate;
 use App\Models\CandidateDocument;
 use App\Models\Structure;
+use App\Models\User;
 use App\Modules\Candidates\Livewire\CandidateList;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
@@ -25,6 +26,35 @@ class CandidateListInteractionTest extends TestCase
         Cache::forget(CandidateList::SETTINGS_CACHE_KEY);
         Cache::forget('appeal-statuses:'.app()->getLocale());
         config()->set('candidates.mode', 'military');
+    }
+
+    public function test_recruitment_panel_counts_cost_one_query_and_are_memoized(): void
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo(Permission::findOrCreate('show-candidates', 'web'));
+        $this->actingAs($user);
+
+        foreach (['Ali', 'Vali', 'Nihat'] as $name) {
+            $this->makeCandidate($name);
+        }
+
+        // A bare instance: rendering the component would warm the memo before the
+        // listener is attached, hiding the very thing under test.
+        $component = new CandidateList;
+
+        $queries = [];
+        DB::listen(function ($query) use (&$queries): void {
+            $queries[] = $query->sql;
+        });
+
+        $counts = $component->recruitmentPanelCounts();
+        $component->recruitmentPanelCounts();
+
+        // Five separate COUNT()s per render was most of this screen's query budget.
+        $this->assertCount(1, $queries);
+        $this->assertSame(3, $counts['candidates']);
+        $this->assertSame(0, $counts['applications']);
+        $this->assertSame(0, $counts['active_candidates']);
     }
 
     public function test_candidate_list_can_open_add_candidate_side_menu(): void

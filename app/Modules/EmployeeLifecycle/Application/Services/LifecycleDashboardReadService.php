@@ -2,9 +2,9 @@
 
 namespace App\Modules\EmployeeLifecycle\Application\Services;
 
+use App\Support\Database\InstalledTables;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 
 class LifecycleDashboardReadService
 {
@@ -37,7 +37,10 @@ class LifecycleDashboardReadService
             ],
             'events' => $events,
             'overdueTasks' => $tasks->where('is_overdue', true)->values(),
-            'typeBreakdown' => $this->typeBreakdown($allEvents),
+            // Facet counts drop their own filter and keep the others, so a selected facet
+            // can always be clicked back out of.
+            'typeCounts' => $this->facetCounts($allEvents, ['search' => $filters['search'] ?? '', 'status' => $filters['status'] ?? ''], 'type'),
+            'statusCounts' => $this->facetCounts($allEvents, ['search' => $filters['search'] ?? '', 'type' => $filters['type'] ?? ''], 'status'),
             'planTemplates' => $templates,
             'probationReviews' => $probationReviews,
             'movements' => $movements,
@@ -52,7 +55,7 @@ class LifecycleDashboardReadService
 
     private function allEvents(): Collection
     {
-        if (! Schema::hasTable('employee_lifecycle_events')) {
+        if (! InstalledTables::has('employee_lifecycle_events')) {
             return collect();
         }
 
@@ -64,6 +67,7 @@ class LifecycleDashboardReadService
             ->leftJoin('structures', 'structures.id', '=', 'personnels.structure_id')
             ->leftJoin('positions', 'positions.id', '=', 'personnels.position_id')
             ->leftJoin('users as owners', 'owners.id', '=', 'employee_lifecycle_events.owner_user_id')
+            ->leftJoin('employee_lifecycle_plan_templates as plan_templates', 'plan_templates.id', '=', 'employee_lifecycle_events.plan_template_id')
             ->select([
                 'employee_lifecycle_events.id',
                 'employee_lifecycle_events.type',
@@ -83,6 +87,7 @@ class LifecycleDashboardReadService
                 'structures.name as structure_name',
                 'positions.name as position_name',
                 'owners.name as owner_name',
+                'plan_templates.name as template_name',
             ])
             ->orderByRaw('case when employee_lifecycle_events.deadline_at is null then 1 else 0 end')
             ->orderBy('employee_lifecycle_events.deadline_at')
@@ -94,7 +99,7 @@ class LifecycleDashboardReadService
 
     public function planTemplates(): Collection
     {
-        if (! Schema::hasTable('employee_lifecycle_plan_templates')) {
+        if (! InstalledTables::has('employee_lifecycle_plan_templates')) {
             return collect();
         }
 
@@ -138,7 +143,7 @@ class LifecycleDashboardReadService
 
     public function probationReviews(): Collection
     {
-        if (! Schema::hasTable('employee_lifecycle_probation_reviews')) {
+        if (! InstalledTables::has('employee_lifecycle_probation_reviews')) {
             return collect();
         }
 
@@ -184,7 +189,7 @@ class LifecycleDashboardReadService
 
     public function movements(): Collection
     {
-        if (! Schema::hasTable('employee_lifecycle_movements')) {
+        if (! InstalledTables::has('employee_lifecycle_movements')) {
             return collect();
         }
 
@@ -240,7 +245,7 @@ class LifecycleDashboardReadService
 
     public function offboardingCases(): Collection
     {
-        if (! Schema::hasTable('employee_lifecycle_offboarding_cases')) {
+        if (! InstalledTables::has('employee_lifecycle_offboarding_cases')) {
             return collect();
         }
 
@@ -301,6 +306,7 @@ class LifecycleDashboardReadService
                 $row['structure_name'],
                 $row['position_name'],
                 $row['owner_name'],
+                $row['template_name'] ?? '',
                 $row['source_label'] ?? '',
             ])), $search)))
             ->when($type !== '', fn (Collection $rows) => $rows->where('type', $type))
@@ -310,7 +316,7 @@ class LifecycleDashboardReadService
 
     private function tasks(): Collection
     {
-        if (! Schema::hasTable('employee_lifecycle_tasks')) {
+        if (! InstalledTables::has('employee_lifecycle_tasks')) {
             return collect();
         }
 
@@ -355,18 +361,18 @@ class LifecycleDashboardReadService
             ]);
     }
 
-    private function typeBreakdown(Collection $events): Collection
+    /**
+     * @param  array<string, mixed>  $filters
+     * @return Collection<array-key, int<0, max>>
+     */
+    private function facetCounts(Collection $events, array $filters, string $key): Collection
     {
-        return $events
-            ->groupBy('type')
-            ->map(fn (Collection $rows, string $type): array => [
-                'type' => $type,
-                'label' => __('employee-lifecycle::dashboard.types.'.$type),
-                'count' => $rows->count(),
-                'overdue' => $rows->where('is_overdue', true)->count(),
-            ])
-            ->sortByDesc('count')
-            ->values();
+        $scoped = $this->applyEventFilters($events, $filters);
+
+        return $scoped
+            ->groupBy($key)
+            ->map(fn (Collection $rows): int => $rows->count())
+            ->put('', $scoped->count());
     }
 
     private function eventRow(object $row): array
@@ -393,6 +399,7 @@ class LifecycleDashboardReadService
             'structure_name' => $row->structure_name ?: __('employee-lifecycle::dashboard.labels.unassigned'),
             'position_name' => $row->position_name ?: __('employee-lifecycle::dashboard.labels.unassigned'),
             'owner_name' => $row->owner_name ?: __('employee-lifecycle::dashboard.labels.unassigned'),
+            'template_name' => $row->template_name,
             'source_type' => $sourceType,
             'source_id' => $sourceId,
             'source_is_order' => $isOrderSource,

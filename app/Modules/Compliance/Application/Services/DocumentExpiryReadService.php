@@ -2,10 +2,10 @@
 
 namespace App\Modules\Compliance\Application\Services;
 
+use App\Support\Database\InstalledTables;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 
 class DocumentExpiryReadService
 {
@@ -17,16 +17,26 @@ class DocumentExpiryReadService
         $requiredTotal = $allRows->whereIn('status', ['expired', 'valid', 'expiring_30', 'expiring_60', 'missing'])->count();
         $healthyTotal = $allRows->whereIn('status', ['valid', 'expiring_30', 'expiring_60'])->count();
 
+        // A facet counts inside the OTHER filters but not inside itself: status numbers keep
+        // the type filter and drop the status one, and vice versa. Counting the fully
+        // filtered set instead would leave the selected row as the only non-zero one, and
+        // the facet could never be clicked back out of.
+        $statusScope = $this->applyFilters($allRows, ['search' => $filters['search'] ?? '', 'type' => $filters['type'] ?? '']);
+        $typeScope = $this->applyFilters($allRows, ['search' => $filters['search'] ?? '', 'status' => $filters['status'] ?? '']);
+
         return [
             'summary' => [
-                'total' => $rows->count(),
-                'expired' => $rows->where('status', 'expired')->count(),
-                'expiring_30' => $rows->where('status', 'expiring_30')->count(),
-                'expiring_60' => $rows->where('status', 'expiring_60')->count(),
-                'valid' => $rows->where('status', 'valid')->count(),
-                'missing' => $rows->where('status', 'missing')->count(),
+                'total' => $statusScope->count(),
+                'expired' => $statusScope->where('status', 'expired')->count(),
+                'expiring_30' => $statusScope->where('status', 'expiring_30')->count(),
+                'expiring_60' => $statusScope->where('status', 'expiring_60')->count(),
+                'valid' => $statusScope->where('status', 'valid')->count(),
+                'missing' => $statusScope->where('status', 'missing')->count(),
                 'compliance_score' => $requiredTotal > 0 ? (int) round(($healthyTotal / $requiredTotal) * 100) : 100,
             ],
+            'typeCounts' => collect(['service_card', 'passport', 'contract'])
+                ->mapWithKeys(fn (string $type): array => [$type => $typeScope->where('document_type', $type)->count()])
+                ->all(),
             'rows' => $rows,
             'structureScores' => $structureScores,
         ];
@@ -135,7 +145,7 @@ class DocumentExpiryReadService
 
     private function serviceCards(): Collection
     {
-        if (! Schema::hasTable('personnel_cards')) {
+        if (! InstalledTables::has('personnel_cards')) {
             return collect();
         }
 
@@ -157,7 +167,7 @@ class DocumentExpiryReadService
 
     private function passports(): Collection
     {
-        if (! Schema::hasTable('personnel_passports')) {
+        if (! InstalledTables::has('personnel_passports')) {
             return collect();
         }
 
@@ -179,7 +189,7 @@ class DocumentExpiryReadService
 
     private function contracts(): Collection
     {
-        if (! Schema::hasTable('personnel_contracts')) {
+        if (! InstalledTables::has('personnel_contracts')) {
             return collect();
         }
 
@@ -249,7 +259,7 @@ class DocumentExpiryReadService
 
     private function requirements(): Collection
     {
-        if (! Schema::hasTable('compliance_document_requirements')) {
+        if (! InstalledTables::has('compliance_document_requirements')) {
             return collect([
                 ['key' => 'service_card', 'label' => __('compliance::documents.types.service_card'), 'is_required' => true],
                 ['key' => 'passport', 'label' => __('compliance::documents.types.passport'), 'is_required' => true],
@@ -272,7 +282,7 @@ class DocumentExpiryReadService
 
     private function personnelRows(): Collection
     {
-        if (! Schema::hasTable('personnels')) {
+        if (! InstalledTables::has('personnels')) {
             return collect();
         }
 

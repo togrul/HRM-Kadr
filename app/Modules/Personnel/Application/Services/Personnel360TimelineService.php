@@ -5,6 +5,7 @@ namespace App\Modules\Personnel\Application\Services;
 use App\Models\AuditActivity;
 use App\Models\Personnel;
 use App\Models\User;
+use App\Support\Database\InstalledTables;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -48,7 +49,7 @@ class Personnel360TimelineService
 
     private function orders(Personnel $personnel): Collection
     {
-        if (! Schema::hasTable('order_logs') || ! Schema::hasTable('order_log_personnels')) {
+        if (! InstalledTables::has('order_logs') || ! InstalledTables::has('order_log_personnels')) {
             return collect();
         }
 
@@ -75,7 +76,7 @@ class Personnel360TimelineService
 
     private function leaves(Personnel $personnel): Collection
     {
-        if (! Schema::hasTable('leaves')) {
+        if (! InstalledTables::has('leaves')) {
             return collect();
         }
 
@@ -99,7 +100,7 @@ class Personnel360TimelineService
 
     private function vacations(Personnel $personnel): Collection
     {
-        if (! Schema::hasTable('personnel_vacations')) {
+        if (! InstalledTables::has('personnel_vacations')) {
             return collect();
         }
 
@@ -124,7 +125,7 @@ class Personnel360TimelineService
 
     private function businessTrips(Personnel $personnel): Collection
     {
-        if (! Schema::hasTable('personnel_business_trips')) {
+        if (! InstalledTables::has('personnel_business_trips')) {
             return collect();
         }
 
@@ -150,7 +151,7 @@ class Personnel360TimelineService
 
     private function trainingNeeds(Personnel $personnel): Collection
     {
-        if (! Schema::hasTable('training_need_items')) {
+        if (! InstalledTables::has('training_need_items')) {
             return collect();
         }
 
@@ -179,7 +180,7 @@ class Personnel360TimelineService
 
     private function trainingDeliveries(Personnel $personnel): Collection
     {
-        if (! Schema::hasTable('training_delivery_records')) {
+        if (! InstalledTables::has('training_delivery_records')) {
             return collect();
         }
 
@@ -207,7 +208,7 @@ class Personnel360TimelineService
 
     private function performanceForms(Personnel $personnel): Collection
     {
-        if (! Schema::hasTable('performance_forms')) {
+        if (! InstalledTables::has('performance_forms')) {
             return collect();
         }
 
@@ -236,7 +237,7 @@ class Personnel360TimelineService
 
     private function lifecycleEvents(Personnel $personnel): Collection
     {
-        if (! Schema::hasTable('employee_lifecycle_events')) {
+        if (! InstalledTables::has('employee_lifecycle_events')) {
             return collect();
         }
 
@@ -278,7 +279,7 @@ class Personnel360TimelineService
         $connection = config('activitylog.database_connection') ?: config('database.default');
         $table = (string) config('activitylog.table_name', 'activity_log');
 
-        if (! Schema::connection($connection)->hasTable($table)) {
+        if (! InstalledTables::has($table, $connection)) {
             return collect();
         }
 
@@ -580,7 +581,7 @@ class Personnel360TimelineService
 
     private function countryLabel(mixed $id): ?string
     {
-        if (! Schema::hasTable('country_translations')) {
+        if (! InstalledTables::has('country_translations')) {
             return null;
         }
 
@@ -595,7 +596,7 @@ class Personnel360TimelineService
 
     private function localizedColumnLabel(string $table, mixed $id, string $baseColumn): ?string
     {
-        if (! Schema::hasTable($table)) {
+        if (! InstalledTables::has($table)) {
             return null;
         }
 
@@ -615,7 +616,7 @@ class Personnel360TimelineService
 
     private function tableLabel(string $table, mixed $id, string $column): ?string
     {
-        if (! Schema::hasTable($table) || ! Schema::hasColumn($table, $column)) {
+        if (! InstalledTables::has($table) || ! Schema::hasColumn($table, $column)) {
             return null;
         }
 
@@ -624,7 +625,7 @@ class Personnel360TimelineService
 
     private function orderStatusLabel(mixed $id): ?string
     {
-        if (! Schema::hasTable('order_statuses')) {
+        if (! InstalledTables::has('order_statuses')) {
             return null;
         }
 
@@ -660,7 +661,7 @@ class Personnel360TimelineService
 
     private function personnelLabel(mixed $id): ?string
     {
-        if (! Schema::hasTable('personnels')) {
+        if (! InstalledTables::has('personnels')) {
             return null;
         }
 

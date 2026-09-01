@@ -5,9 +5,9 @@ namespace App\Modules\Attendance\Infrastructure\Persistence\Eloquent;
 use App\Enums\OrderStatusEnum;
 use App\Models\AttendanceMonthlySummary;
 use App\Modules\Attendance\Domain\Contracts\PayrollAttendanceReadRepository;
+use App\Support\Database\InstalledTables;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 
 class EloquentPayrollAttendanceReadRepository implements PayrollAttendanceReadRepository
 {
@@ -40,7 +40,7 @@ class EloquentPayrollAttendanceReadRepository implements PayrollAttendanceReadRe
 
     private function unpaidLeaveDays(string $tabelNo, int $year, int $month): int
     {
-        if (! Schema::hasTable('leaves') || ! Schema::hasTable('leave_types')) {
+        if (! InstalledTables::has('leaves') || ! InstalledTables::has('leave_types')) {
             return 0;
         }
 

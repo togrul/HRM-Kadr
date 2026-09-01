@@ -12,6 +12,8 @@ return [
         'campaigns' => 'Dispatches',
     ],
     'titles' => [
+        'inbox' => 'Notifications',
+        'inbox_subtitle' => 'Inbox',
         'module' => 'Notifications module',
         'roadmap' => 'Notification management roadmap',
         'overview_host' => 'This section is the host panel that turns the current inbox behavior into a full notification platform.',
@@ -322,6 +324,9 @@ return [
     'labels' => [
         'count' => 'Count',
         'attempts' => 'Attempts',
+        'clear_all_confirm' => 'Every notification will be deleted. Continue?',
+        'unit' => 'notifications',
+        'unread' => 'Unread',
         'clear_all_notifications' => 'Clear all notifications',
         'no_notifications_found' => 'No notifications found',
         'no_new_notifications' => 'No new notifications',

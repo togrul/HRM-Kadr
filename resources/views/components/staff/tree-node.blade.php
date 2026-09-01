@@ -1,22 +1,12 @@
 @props([
   'node',
   'depth' => 0,
+  'openIds' => [],
 ])
 
 @php
     $agg = $node['agg'];
     $total = (int) $agg['total'];
-    $rate = (int) $agg['rate'];
-    $hasCap = $total > 0;
-
-    $tone = ! $hasCap ? 'muted' : ($rate >= 80 ? 'success' : ($rate >= 50 ? 'warning' : 'danger'));
-    $barClass = ['success' => 'bg-emerald-500', 'warning' => 'bg-amber-500', 'danger' => 'bg-rose-500', 'muted' => 'bg-zinc-200'][$tone];
-    $pillClass = [
-        'success' => 'bg-emerald-50 text-emerald-600',
-        'warning' => 'bg-amber-50 text-amber-600',
-        'danger'  => 'bg-rose-50 text-rose-600',
-        'muted'   => 'bg-zinc-100 text-zinc-400',
-    ][$tone];
 
     // Type chip derived from structure depth (level): müəssisə → departament → şöbə → vahid.
     [$typeLabel, $typeChip] = match (true) {
@@ -27,6 +17,9 @@
     };
 
     $hasChildren = count($node['children']) > 0 || count($node['positions']) > 0;
+    // Server-side: a closed branch is not in the DOM at all, so the page costs what is
+    // on screen rather than the whole org chart.
+    $isOpen = in_array((int) $node['id'], $openIds, true);
     $hasOwnPositions = count($node['positions']) > 0;
     $pad = $depth * 22;
 
@@ -37,12 +30,11 @@
 
 <div {{ $attributes }}>
     {{-- ── structure row ── --}}
-    <div class="group flex items-center gap-3 border-b border-zinc-100 px-3 py-2.5 transition-colors hover:bg-zinc-50/70">
+    <div class="group hrm-tree-row">
         <div class="flex min-w-0 flex-1 items-center gap-2" style="padding-left: {{ $pad }}px">
             @if ($hasChildren)
-                <button type="button" x-on:click="toggle({{ $node['id'] }})"
-                    class="flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-zinc-400 transition-colors hover:bg-zinc-200/60 hover:text-zinc-600">
-                    <svg class="h-4 w-4 transition-transform duration-200" :class="isOpen({{ $node['id'] }}) ? 'rotate-0' : '-rotate-90'"
+                <button type="button" wire:click="toggleNode({{ $node['id'] }})" wire:loading.attr="disabled" wire:target="toggleNode" class="hrm-tree-toggle">
+                    <svg @class(['h-4 w-4 transition-transform duration-200', '-rotate-90' => ! $isOpen])
                          viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
                 </button>
             @else
@@ -53,19 +45,9 @@
             <span class="truncate text-[14px] font-semibold text-zinc-900">{{ $node['name'] }}</span>
         </div>
 
-        <div class="hidden w-28 shrink-0 items-center gap-2 sm:flex">
-            <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-zinc-100">
-                <div class="h-full rounded-full {{ $barClass }} transition-all" style="width: {{ $hasCap ? max(3, $rate) : 0 }}%"></div>
-            </div>
-        </div>
-
         <x-staff.metric :value="$total" tone="total" :showLabel="false" />
         <x-staff.metric :value="$agg['filled']" tone="filled" :showLabel="false" />
         <x-staff.metric :value="$agg['vacant']" tone="vacant" :showLabel="false" />
-
-        <div class="flex w-12 shrink-0 justify-center">
-            <span class="rounded-md px-1.5 py-0.5 text-[12px] font-semibold tabular-nums {{ $pillClass }}">{{ $hasCap ? $rate.'%' : '—' }}</span>
-        </div>
 
         {{-- operations (revealed in edit mode) — add position on any node; edit/delete only
              where the structure has its own positions (avoids editing an empty container). --}}
@@ -98,21 +80,9 @@
     </div>
 
     {{-- ── collapsible body: positions then child structures ── --}}
-    <div x-show="isOpen({{ $node['id'] }})" x-collapse>
+    @if ($isOpen)
+    <div>
         @foreach ($node['positions'] as $p)
-            @php
-                $pTotal = (int) $p['total'];
-                $pRate = $pTotal > 0 ? (int) round($p['filled'] / $pTotal * 100) : 0;
-                $pCap = $pTotal > 0;
-                $pTone = ! $pCap ? 'muted' : ($pRate >= 80 ? 'success' : ($pRate >= 50 ? 'warning' : 'danger'));
-                $pBar = ['success' => 'bg-emerald-500', 'warning' => 'bg-amber-500', 'danger' => 'bg-rose-500', 'muted' => 'bg-zinc-200'][$pTone];
-                $pPill = [
-                    'success' => 'bg-emerald-50 text-emerald-600',
-                    'warning' => 'bg-amber-50 text-amber-600',
-                    'danger'  => 'bg-rose-50 text-rose-600',
-                    'muted'   => 'bg-zinc-100 text-zinc-400',
-                ][$pTone];
-            @endphp
             <div class="flex items-center gap-3 border-b border-zinc-50 px-3 py-2 transition-colors hover:bg-zinc-50/70">
                 <div class="flex min-w-0 flex-1 items-center gap-2" style="padding-left: {{ ($depth + 1) * 22 }}px">
                     <span class="h-5 w-5 shrink-0"></span>
@@ -120,12 +90,9 @@
                         <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                     </span>
                     <span class="truncate text-[14px] text-zinc-700">{{ $p['title'] }}</span>
-                </div>
-
-                <div class="hidden w-28 shrink-0 items-center gap-2 sm:flex">
-                    <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-zinc-100">
-                        <div class="h-full rounded-full {{ $pBar }} transition-all" style="width: {{ $pCap ? max(3, $pRate) : 0 }}%"></div>
-                    </div>
+                    @if ((int) $p['vacant'] > 0)
+                        <x-small-badge mode="rose">{{ __('staff::common.fields.vacant_lower') }}</x-small-badge>
+                    @endif
                 </div>
 
                 <x-staff.metric :value="$p['total']" tone="total" :showLabel="false" />
@@ -140,16 +107,13 @@
 
                 <x-staff.metric :value="$p['vacant']" tone="vacant" :showLabel="false" />
 
-                <div class="flex w-12 shrink-0 justify-center">
-                    <span class="rounded-md px-1.5 py-0.5 text-[12px] font-semibold tabular-nums {{ $pPill }}">{{ $pCap ? $pRate.'%' : '—' }}</span>
-                </div>
-
                 <span class="hidden w-[108px] shrink-0 sm:block" x-show="editMode" x-cloak aria-hidden="true"></span>
             </div>
         @endforeach
 
         @foreach ($node['children'] as $child)
-            <x-staff.tree-node wire:key="staff-node-{{ $child['id'] }}" :node="$child" :depth="$depth + 1" />
+            <x-staff.tree-node wire:key="staff-node-{{ $child['id'] }}" :node="$child" :depth="$depth + 1" :open-ids="$openIds" />
         @endforeach
     </div>
+    @endif
 </div>

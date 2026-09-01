@@ -3,11 +3,17 @@
 namespace App\Providers;
 
 use App\Models\User;
+use App\Modules\Integration\Domain\Contracts\IntegrationOutbox;
+use App\Modules\Integration\Domain\Contracts\PayrollOwnership;
+use App\Modules\Integration\Infrastructure\NullIntegrationOutbox;
+use App\Modules\Integration\Support\ConfiguredPayrollOwnership;
 use App\Services\Features\FeatureState;
 use App\Services\HrPolicies\HrPolicyPackService;
 use App\Services\NumberToWordsService;
 use App\Services\Profiles\ProfileState;
+use App\Services\StructurePathService;
 use App\Services\StructureService;
+use App\Support\Database\InstalledTables;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
@@ -21,14 +27,34 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        // Every read path that guards an optional module table shares one table listing
+        // per request instead of a Schema::hasTable() round trip apiece.
+        $this->app->singleton(InstalledTables::class);
+
         $this->app->singleton(ProfileState::class, fn () => new ProfileState(
             config('profiles.profiles', []),
             (string) config('profiles.active', 'default'),
             config('modules.catalog', []),
         ));
 
+        // Records nothing unless the integration module is loaded and overrides
+        // it. The Orders engine always records; the binding decides whether that
+        // means anything. Without a default here a standalone installation could
+        // not resolve the dependency at all.
+        $this->app->bind(IntegrationOutbox::class, NullIntegrationOutbox::class);
+
+        // Bound here rather than in the integration module's provider: that one
+        // is not loaded when the module is off, and the Payroll module must be
+        // able to resolve this either way.
+        $this->app->bind(PayrollOwnership::class, ConfiguredPayrollOwnership::class);
+
         $this->app->singleton(NumberToWordsService::class, fn () => new NumberToWordsService);
         $this->app->singleton(StructureService::class, fn () => new StructureService);
+
+        // Per-request: it reads the org chart once and every unit label on the page is
+        // answered from that map. A fresh instance per caller re-reads it — on a table
+        // that means once per row.
+        $this->app->scoped(StructurePathService::class);
         $this->app->singleton(FeatureState::class, fn () => new FeatureState($this->app->make(ProfileState::class)->features()));
         $this->app->singleton(HrPolicyPackService::class, fn () => new HrPolicyPackService(
             $this->app->make(ProfileState::class),

@@ -13,6 +13,8 @@ return [
     ],
     'titles' => [
         'module' => 'Bildirişlər modulu',
+        'inbox' => 'Bildirişlər',
+        'inbox_subtitle' => 'Gələn qutusu',
         'roadmap' => 'Bildirişlər idarə paneli yol xəritəsi',
         'overview_host' => 'Bu bölmə hazır inbox davranışını tam notification platformasına çevirmək üçün istifadə ediləcək əsas idarəetmə host-udur.',
         'phase_plan' => 'Faza planı',
@@ -323,6 +325,9 @@ return [
         'count' => 'Say',
         'attempts' => 'Cəhd sayı',
         'clear_all_notifications' => 'Bütün bildirişləri təmizlə',
+        'clear_all_confirm' => 'Bütün bildirişlər silinəcək. Davam edilsin?',
+        'unit' => 'bildiriş',
+        'unread' => 'Oxunmamış',
         'no_notifications_found' => 'Bildiriş tapılmadı',
         'no_new_notifications' => 'Yeni bildiriş yoxdur',
         'show_all_notifications' => 'Bütün bildirişləri göstər',

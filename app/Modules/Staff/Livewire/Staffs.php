@@ -2,11 +2,11 @@
 
 namespace App\Modules\Staff\Livewire;
 
-use App\Modules\Staff\Exports\VacancyExport;
 use App\Livewire\Traits\SideModalAction;
 use App\Models\Personnel;
 use App\Models\StaffSchedule;
 use App\Models\Structure;
+use App\Modules\Staff\Exports\VacancyExport;
 use App\Services\StructureService;
 use App\Traits\NestedStructureTrait;
 use Carbon\Carbon;
@@ -39,7 +39,20 @@ class Staffs extends Component
     #[Locked]
     public array $accessibleStructureIds = [];
 
+    /**
+     * Structure ids whose children are rendered. `null` until the first render seeds it
+     * with the shallow levels — the whole chart used to ship on every render, and that
+     * cost grows with the org, not with the page.
+     *
+     * @var list<int>|null
+     */
+    public ?array $openNodes = null;
+
+    /** Nodes this deep (and shallower) come with the page; anything below opens on demand. */
+    private const TREE_EAGER_DEPTH = 2;
+
     protected array $structureTitleCache = [];
+
     protected ?array $structureMap = null;
 
     protected function queryString()
@@ -77,6 +90,17 @@ class Staffs extends Component
 
         $this->selectedStructureId = $id;
         $this->structure = $this->getNestedStructure($id);
+        $this->resetPage();
+    }
+
+    /**
+     * Drop the structure scope. Without this the panel tree, which only renders the
+     * selected branch, would be a one-way trip.
+     */
+    public function clearStructure(): void
+    {
+        $this->selectedStructureId = null;
+        $this->structure = null;
         $this->resetPage();
     }
 
@@ -454,19 +478,75 @@ class Staffs extends Component
         return ['tree' => $tree, 'ids' => $ids];
     }
 
+    public function toggleNode(int $id): void
+    {
+        $open = $this->openNodes ?? [];
+
+        $this->openNodes = in_array($id, $open, true)
+            ? array_values(array_diff($open, [$id]))
+            : [...$open, $id];
+    }
+
+    public function expandAllNodes(): void
+    {
+        ['ids' => $ids] = $this->cachedStructureTree();
+
+        $this->openNodes = array_values(array_map('intval', $ids));
+    }
+
+    public function collapseAllNodes(): void
+    {
+        $this->openNodes = [];
+    }
+
+    /**
+     * The rows the page opens with: enough of the chart to read at a glance, without
+     * paying for every unit under every department.
+     *
+     * @param  array<int, array<string, mixed>>  $tree
+     * @return list<int>
+     */
+    protected function defaultOpenNodes(array $tree, int $depth = 0): array
+    {
+        if ($depth >= self::TREE_EAGER_DEPTH) {
+            return [];
+        }
+
+        $ids = [];
+
+        foreach ($tree as $node) {
+            $ids[] = (int) $node['id'];
+            $ids = [...$ids, ...$this->defaultOpenNodes($node['children'], $depth + 1)];
+        }
+
+        return $ids;
+    }
+
+    /**
+     * @return array{tree: array<int,array<string,mixed>>, ids: array<int,int>}
+     */
+    protected function cachedStructureTree(): array
+    {
+        return Cache::remember(
+            'staff:tree:'.md5(json_encode([$this->structure, $this->accessibleStructureIds])),
+            now()->addSeconds(10),
+            fn () => $this->buildStructureTree(),
+        );
+    }
+
     public function render()
     {
         if ($this->selectedPage === 'all') {
-            ['tree' => $staffTree, 'ids' => $staffTreeIds] = Cache::remember(
-                'staff:tree:'.md5(json_encode([$this->structure, $this->accessibleStructureIds])),
-                now()->addSeconds(10),
-                fn () => $this->buildStructureTree(),
-            );
+            ['tree' => $staffTree, 'ids' => $staffTreeIds] = $this->cachedStructureTree();
+
+            $this->openNodes ??= $this->defaultOpenNodes($staffTree);
 
             return view('staff::livewire.staff-schedule.staffs', [
                 'staffs' => collect(),
                 'staffTree' => $staffTree,
                 'staffTreeIds' => $staffTreeIds,
+                'staffAllOpen' => count($this->openNodes) >= count($staffTreeIds),
+                'staffSummary' => $this->summarizeTree($staffTree),
             ]);
         }
 
@@ -474,6 +554,34 @@ class Staffs extends Component
             'staffs' => $this->returnData(),
             'staffTree' => [],
             'staffTreeIds' => [],
+            'staffAllOpen' => false,
+            'staffSummary' => $this->summarizeTree([]),
         ]);
+    }
+
+    /**
+     * Roll the display roots up into one headline figure for the panel. The roots do not
+     * overlap — each node's aggregate already includes its whole subtree — so summing
+     * them is the establishment total, with no extra query.
+     *
+     * @param  array<int, array<string, mixed>>  $tree
+     * @return array{total: int, filled: int, vacant: int, rate: float}
+     */
+    protected function summarizeTree(array $tree): array
+    {
+        $total = 0;
+        $filled = 0;
+
+        foreach ($tree as $node) {
+            $total += (int) ($node['agg']['total'] ?? 0);
+            $filled += (int) ($node['agg']['filled'] ?? 0);
+        }
+
+        return [
+            'total' => $total,
+            'filled' => $filled,
+            'vacant' => max(0, $total - $filled),
+            'rate' => $total > 0 ? round($filled / $total * 100, 1) : 0.0,
+        ];
     }
 }
