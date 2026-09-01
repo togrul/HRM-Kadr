@@ -31,124 +31,15 @@ class PersonnelRowActionService
         $actions = [];
 
         if ($status !== 'deleted') {
-            if ($capabilities['can_view_portfolio']) {
-                $actions[] = PersonnelRowActionDescriptor::action(
-                    id: 'professional-portfolio',
-                    label: __('personnel::common.actions.professional_portfolio'),
-                    icon: 'icons.briefcase-outline-icon',
-                    actionPayload: [
-                        'type' => 'open',
-                        'menu' => 'professional-portfolio',
-                        'value' => $personnel->id,
-                    ],
-                    inMenu: true,
-                );
-            }
-
-            if ($capabilities['can_manage_my_hr_accounts']) {
-                $actions[] = PersonnelRowActionDescriptor::action(
-                    id: 'my-hr-account',
-                    label: __('personnel::common.actions.self_service_account'),
-                    icon: 'icons.key-icon',
-                    actionPayload: [
-                        'type' => 'open',
-                        'menu' => 'my-hr-account',
-                        'value' => $personnel->id,
-                    ],
-                    inMenu: true,
-                );
-            }
-
-            if ($capabilities['can_manage_onboarding_documents']) {
-                $actions[] = PersonnelRowActionDescriptor::action(
-                    id: 'onboarding-documents',
-                    label: __('personnel::common.actions.onboarding_documents'),
-                    icon: 'icons.onboarding-library-icon',
-                    actionPayload: [
-                        'type' => 'open',
-                        'menu' => 'onboarding-documents',
-                        'value' => $personnel->id,
-                    ],
-                    inMenu: true,
-                );
-            }
-
-            if ($capabilities['can_manage_learning_materials']) {
-                $actions[] = PersonnelRowActionDescriptor::action(
-                    id: 'learning-materials',
-                    label: __('personnel::common.actions.learning_materials'),
-                    icon: 'icons.learning-library-icon',
-                    actionPayload: [
-                        'type' => 'open',
-                        'menu' => 'learning-materials',
-                        'value' => $personnel->id,
-                    ],
-                    inMenu: true,
-                );
-            }
-
             if ($capabilities['can_edit']) {
-                $actions[] = PersonnelRowActionDescriptor::action(
+                // Files, information, vacations, portfolio, self-service, onboarding,
+                // learning materials, print and CV all live on the personnel file page
+                // now — the row just opens it.
+                $actions[] = PersonnelRowActionDescriptor::link(
                     id: 'edit',
                     label: __('personnel::common.actions.edit'),
                     icon: 'icons.profile-icon',
-                    actionPayload: [
-                        'type' => 'open',
-                        'menu' => 'edit-personnel',
-                        'value' => $personnel->id,
-                    ],
-                );
-
-                $actions[] = PersonnelRowActionDescriptor::action(
-                    id: 'files',
-                    label: __('personnel::common.actions.files'),
-                    icon: 'icons.files-icon',
-                    actionPayload: [
-                        'type' => 'open',
-                        'menu' => 'show-files',
-                        'value' => $personnel->tabel_no,
-                    ],
-                    inMenu: true,
-                );
-
-                $actions[] = PersonnelRowActionDescriptor::link(
-                    id: 'print',
-                    label: __('personnel::common.actions.print'),
-                    icon: 'icons.print-outline-icon',
-                    href: route('print.personnel', $personnel->id),
-                    inMenu: true,
-                );
-
-                $actions[] = PersonnelRowActionDescriptor::link(
-                    id: 'cv',
-                    label: __('personnel::common.actions.cv'),
-                    icon: 'icons.cv-outline',
-                    href: route('print.cv', $personnel->id),
-                    inMenu: true,
-                );
-
-                $actions[] = PersonnelRowActionDescriptor::action(
-                    id: 'information',
-                    label: __('personnel::common.actions.information'),
-                    icon: 'icons.profile-outline-icon',
-                    actionPayload: [
-                        'type' => 'open',
-                        'menu' => 'show-information',
-                        'value' => $personnel->tabel_no,
-                    ],
-                    inMenu: true,
-                );
-
-                $actions[] = PersonnelRowActionDescriptor::action(
-                    id: 'vacations',
-                    label: __('personnel::common.actions.vacations'),
-                    icon: 'icons.vacation-outline-icon',
-                    actionPayload: [
-                        'type' => 'open',
-                        'menu' => 'show-vacations',
-                        'value' => $personnel->tabel_no,
-                    ],
-                    inMenu: true,
+                    href: route('personnel.show', $personnel->id),
                 );
 
                 if ($capabilities['can_delete']) {
@@ -197,7 +88,7 @@ class PersonnelRowActionService
             }
         }
 
-        return array_values($actions);
+        return $actions;
     }
 
     /**

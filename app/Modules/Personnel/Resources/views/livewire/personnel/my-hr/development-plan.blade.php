@@ -2,139 +2,123 @@
     $payload = $this->payload;
     $summary = $payload['summary'];
     $rows = $payload['rows'];
-    $statCards = [
-        ['label' => __('personnel::my_hr.development_plan.summary.total'), 'value' => $summary['total']],
-        ['label' => __('personnel::my_hr.development_plan.summary.planned'), 'value' => $summary['planned']],
-        ['label' => __('personnel::my_hr.development_plan.summary.completed_sessions'), 'value' => $summary['completed']],
-        ['label' => __('personnel::my_hr.development_plan.summary.completed_needs'), 'value' => $summary['needs_completed']],
+
+    $label = 'hrm-eyebrow block pb-1';
+
+    $metrics = [
+        ['label' => __('personnel::my_hr.development_plan.summary.total'), 'value' => $summary['total'], 'dot' => 'bg-[#a1a1aa]'],
+        ['label' => __('personnel::my_hr.development_plan.summary.planned'), 'value' => $summary['planned'], 'dot' => 'bg-[#0284c7]'],
+        ['label' => __('personnel::my_hr.development_plan.summary.completed_sessions'), 'value' => $summary['completed'], 'dot' => 'bg-[#059669]'],
+        ['label' => __('personnel::my_hr.development_plan.summary.completed_needs'), 'value' => $summary['needs_completed'], 'dot' => 'bg-[#7c3aed]'],
     ];
 
-    $toneClasses = [
-        'success' => 'border-emerald-200 bg-emerald-50 text-emerald-700',
-        'warning' => 'border-amber-200 bg-amber-50 text-amber-700',
-        'info' => 'border-sky-200 bg-sky-50 text-sky-700',
-        'danger' => 'border-rose-200 bg-rose-50 text-rose-700',
-        'neutral' => 'border-zinc-200 bg-white text-zinc-700',
-    ];
+    $tone = fn (?string $mode): string => match ($mode) {
+        'success' => 'green',
+        'warning' => 'amber',
+        'info' => 'blue',
+        'danger' => 'rose',
+        default => 'secondary',
+    };
 @endphp
 
-<div class="space-y-6">
-    <div class="rounded-[28px] border border-zinc-200 bg-white p-6 shadow-sm">
-        <div class="space-y-2">
-            <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __('personnel::my_hr.development_plan.kicker') }}</x-ui.field-label>
-            <h2 class="text-2xl font-semibold tracking-tight text-zinc-950">{{ __('personnel::my_hr.development_plan.title') }}</h2>
-            <p class="max-w-3xl text-sm leading-6 text-zinc-500">{{ __('personnel::my_hr.development_plan.description') }}</p>
+<div class="flex flex-col gap-4">
+    <section class="rounded-xl border border-hairline bg-white">
+        <div class="border-b border-hairline-subtle px-4 py-3">
+            <p class="hrm-eyebrow">{{ __('personnel::my_hr.development_plan.kicker') }}</p>
+            <p class="mt-1 max-w-2xl text-[12.5px] leading-relaxed text-ink-muted">{{ __('personnel::my_hr.development_plan.description') }}</p>
         </div>
 
-        <div class="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-            @foreach ($statCards as $card)
-                <div class="rounded-2xl border border-zinc-200 bg-zinc-50/80 px-4 py-4">
-                    <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ $card['label'] }}</x-ui.field-label>
-                    <p class="mt-2 text-2xl font-semibold tracking-tight text-zinc-950">{{ $card['value'] }}</p>
-                </div>
-            @endforeach
-        </div>
-    </div>
+        @include('personnel::livewire.personnel.my-hr.partials.metric-strip', ['metrics' => $metrics])
 
-    <div class="rounded-[28px] border border-zinc-200 bg-zinc-50/60 p-5 shadow-sm">
-        <div class="grid gap-1 lg:grid-cols-2 2xl:grid-cols-4">
-            <x-ui.input-shell :label="__('personnel::my_hr.development_plan.fields.search')" labelClass="tracking-tight text-zinc-500">
-                <x-ui.filter-input wire:model.live.debounce.300ms="search" type="text" placeholder="{{ __('personnel::my_hr.development_plan.messages.search_placeholder') }}" />
-            </x-ui.input-shell>
-            <x-ui.input-shell :label="__('personnel::my_hr.development_plan.fields.status')" labelClass="tracking-tight text-zinc-500">
-                <x-ui.filter-native-select wire:model.live="statusFilter">
+        <div class="grid gap-3 border-t border-hairline-subtle p-3 lg:grid-cols-2">
+            <label class="min-w-0">
+                <span class="{{ $label }}">{{ __('personnel::my_hr.development_plan.fields.search') }}</span>
+                <x-ui.input wire:model.live.debounce.300ms="search" type="search" icon="search"
+                    placeholder="{{ __('personnel::my_hr.development_plan.messages.search_placeholder') }}" />
+            </label>
+
+            <label class="min-w-0">
+                <span class="{{ $label }}">{{ __('personnel::my_hr.development_plan.fields.status') }}</span>
+                <x-ui.select wire:model.live="statusFilter">
                     <option value="all">{{ __('personnel::my_hr.development_plan.filters.all') }}</option>
                     @foreach (['draft', 'review', 'approved', 'planned', 'completed'] as $status)
                         <option value="{{ $status }}">{{ __('training_needs::dashboard.need_statuses.'.$status) }}</option>
                     @endforeach
-                </x-ui.filter-native-select>
-            </x-ui.input-shell>
+                </x-ui.select>
+            </label>
         </div>
+    </section>
 
-        <div class="mt-6 space-y-4">
-            @forelse ($rows as $row)
-                <div class="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
-                    <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                        <div class="min-w-0 flex-1 space-y-3">
-                            <div class="inline-flex max-w-full rounded-[24px] border border-zinc-200 bg-zinc-50 px-5 py-3">
-                                <h3 class="max-w-[38rem] text-lg font-semibold tracking-tight text-zinc-950">{{ $row['title'] }}</h3>
-                            </div>
-
-                            <div class="flex flex-wrap gap-2">
-                                <span class="inline-flex items-center rounded-full border px-4 py-2 text-sm font-semibold tracking-tight {{ $toneClasses[$row['status_mode']] ?? $toneClasses['neutral'] }}">{{ $row['status_label'] }}</span>
-                                <span class="inline-flex items-center rounded-full border px-4 py-2 text-sm font-semibold tracking-tight {{ $toneClasses[$row['priority_mode']] ?? $toneClasses['neutral'] }}">{{ $row['priority_label'] }}</span>
-                                <span class="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-4 py-2 text-sm font-semibold tracking-tight text-sky-700">{{ $row['source_label'] }}</span>
-                            </div>
-                        </div>
-
-                        <div class="rounded-full border border-zinc-200 bg-zinc-50 px-4 py-2 text-sm font-semibold tracking-tight text-zinc-600">
-                            {{ $row['target_date_badge'] }}
-                        </div>
-                    </div>
-
-                    <div class="mt-4 rounded-[24px] border border-zinc-200 bg-zinc-50/80 px-5 py-4 text-base leading-7 text-zinc-700">
-                        {{ $row['summary'] }}
-                    </div>
-
-                    @if ($row['plan_note'])
-                        <div class="mt-4 rounded-[24px] border border-zinc-200 bg-white px-5 py-4 text-sm leading-7 text-zinc-700">
-                            <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __('personnel::my_hr.development_plan.labels.plan_note') }}</x-ui.field-label>
-                            <p class="mt-2 font-medium text-zinc-800">{{ $row['plan_note'] }}</p>
-                        </div>
-                    @endif
-
-                    <div class="mt-4 grid gap-3 lg:grid-cols-2 xl:grid-cols-4">
-                        @foreach ($row['details'] as $detail)
-                            <div class="rounded-2xl border border-zinc-200 bg-white px-4 py-4">
-                                <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ $detail['label'] }}</x-ui.field-label>
-                                <p class="mt-2 text-sm font-semibold leading-6 text-zinc-900">{{ $detail['value'] }}</p>
-                            </div>
-                        @endforeach
-                    </div>
-
-                    <div class="mt-4 rounded-[24px] border border-zinc-200 bg-zinc-50/80 p-4">
-                        <div class="flex items-center justify-between gap-3">
-                            <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __('personnel::my_hr.development_plan.labels.sessions') }}</x-ui.field-label>
-                            <span class="text-xs font-medium text-zinc-500">{{ count($row['sessions']) }}</span>
-                        </div>
-
-                        @if ($row['sessions'] !== [])
-                            <div class="mt-3 grid gap-3 xl:grid-cols-2">
-                                @foreach ($row['sessions'] as $session)
-                                    <div class="rounded-2xl border border-zinc-200 bg-white px-4 py-4">
-                                        <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-                                            <div class="space-y-2">
-                                                <p class="text-sm font-semibold text-zinc-950">{{ $session['title'] }}</p>
-                                                @if ($session['program'])
-                                                    <p class="text-xs text-zinc-500">{{ $session['program'] }}</p>
-                                                @endif
-                                            </div>
-                                            <div class="flex flex-wrap gap-2">
-                                                <span class="inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-semibold tracking-tight {{ $toneClasses[$session['attendance_status_mode']] ?? $toneClasses['neutral'] }}">{{ $session['attendance_status_label'] }}</span>
-                                                <span class="inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-semibold tracking-tight {{ $toneClasses[$session['session_status_mode']] ?? $toneClasses['neutral'] }}">{{ $session['session_status_label'] }}</span>
-                                            </div>
-                                        </div>
-                                        <div class="mt-3 grid gap-3 sm:grid-cols-2">
-                                            <div class="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-                                                <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __('personnel::my_hr.development_plan.labels.session_window') }}</x-ui.field-label>
-                                                <p class="mt-2 text-sm font-semibold text-zinc-900">{{ $session['window'] }}</p>
-                                            </div>
-                                            <div class="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-                                                <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __('personnel::my_hr.development_plan.labels.location') }}</x-ui.field-label>
-                                                <p class="mt-2 text-sm font-semibold text-zinc-900">{{ $session['location'] }}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
-                        @else
-                            <x-ui.empty-state icon="icons.calendar-icon" :message="__('personnel::my_hr.development_plan.messages.no_sessions')" class="mt-3 py-6" />
-                        @endif
+    @forelse ($rows as $row)
+        <section wire:key="my-hr-need-{{ $loop->index }}" class="rounded-xl border border-hairline bg-white">
+            <div class="flex flex-col gap-3 border-b border-hairline-subtle px-4 py-3 lg:flex-row lg:items-start lg:justify-between">
+                <div class="min-w-0">
+                    <h3 class="text-[14px] font-semibold tracking-[-0.02em] text-ink">{{ $row['title'] }}</h3>
+                    <div class="mt-1.5 flex flex-wrap items-center gap-1.5">
+                        <x-small-badge :mode="$tone($row['status_mode'])" dot>{{ $row['status_label'] }}</x-small-badge>
+                        <x-small-badge :mode="$tone($row['priority_mode'])">{{ $row['priority_label'] }}</x-small-badge>
+                        <x-small-badge mode="secondary">{{ $row['source_label'] }}</x-small-badge>
                     </div>
                 </div>
-            @empty
-                <x-ui.empty-state icon="icons.training-icon" :title="__('personnel::my_hr.development_plan.empty.title')" :message="__('personnel::my_hr.development_plan.empty.body')" class="py-12" />
-            @endforelse
-        </div>
-    </div>
+
+                <span class="hrm-num shrink-0 rounded-full border border-hairline bg-[#fafafa] px-2.5 py-1 text-[11.5px] font-medium text-ink-soft">
+                    {{ $row['target_date_badge'] }}
+                </span>
+            </div>
+
+            <div class="space-y-3 p-3">
+                <p class="text-[12.5px] leading-relaxed text-ink-muted">{{ $row['summary'] }}</p>
+
+                @if ($row['plan_note'])
+                    <div class="rounded-xl border border-hairline bg-[#fafafa] px-3.5 py-3">
+                        <p class="hrm-eyebrow">{{ __('personnel::my_hr.development_plan.labels.plan_note') }}</p>
+                        <p class="mt-1.5 text-[12.5px] leading-relaxed text-ink-soft">{{ $row['plan_note'] }}</p>
+                    </div>
+                @endif
+
+                <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                    @foreach ($row['details'] as $detail)
+                        <x-fact-tile :label="$detail['label']" :value="$detail['value']" />
+                    @endforeach
+                </div>
+
+                <div class="rounded-xl border border-hairline bg-[#fafafa] p-3">
+                    <div class="flex items-center justify-between gap-3 pb-2">
+                        <p class="hrm-eyebrow">{{ __('personnel::my_hr.development_plan.labels.sessions') }}</p>
+                        <span class="hrm-num text-[11.5px] text-ink-faint">{{ count($row['sessions']) }}</span>
+                    </div>
+
+                    @if ($row['sessions'] !== [])
+                        <div class="grid gap-3 xl:grid-cols-2">
+                            @foreach ($row['sessions'] as $session)
+                                <div class="rounded-xl border border-hairline bg-white px-3.5 py-3">
+                                    <div class="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
+                                        <div class="min-w-0 leading-tight">
+                                            <p class="truncate text-[13px] font-medium text-ink">{{ $session['title'] }}</p>
+                                            @if ($session['program'])
+                                                <p class="mt-0.5 truncate text-[11.5px] text-ink-faint">{{ $session['program'] }}</p>
+                                            @endif
+                                        </div>
+                                        <div class="flex shrink-0 flex-wrap items-center gap-1.5">
+                                            <x-small-badge :mode="$tone($session['attendance_status_mode'])" dot>{{ $session['attendance_status_label'] }}</x-small-badge>
+                                            <x-small-badge :mode="$tone($session['session_status_mode'])">{{ $session['session_status_label'] }}</x-small-badge>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-3 grid gap-3 sm:grid-cols-2">
+                                        <x-fact-tile :label="__('personnel::my_hr.development_plan.labels.session_window')" :value="$session['window']" />
+                                        <x-fact-tile :label="__('personnel::my_hr.development_plan.labels.location')" :value="$session['location']" />
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <x-ui.empty-state icon="icons.calendar-icon" :message="__('personnel::my_hr.development_plan.messages.no_sessions')" />
+                    @endif
+                </div>
+            </div>
+        </section>
+    @empty
+        <x-ui.empty-state icon="icons.training-icon" :title="__('personnel::my_hr.development_plan.empty.title')" :message="__('personnel::my_hr.development_plan.empty.body')" />
+    @endforelse
 </div>

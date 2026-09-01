@@ -19,6 +19,7 @@ use App\Modules\Personnel\Contracts\ApprovalRouteResolver;
 use App\Modules\Personnel\Contracts\LearningAssignmentManager;
 use App\Modules\Personnel\Contracts\MyHrRequestReview;
 use App\Modules\Personnel\Contracts\OnboardingAssignmentManager;
+use App\Modules\Personnel\Support\MyHr\MyHrAccess;
 use App\Providers\Concerns\RegistersLivewireAliases;
 use App\Services\Modules\ModuleState;
 use Illuminate\Support\Facades\Gate;
@@ -32,6 +33,9 @@ class PersonnelServiceProvider extends ServiceProvider
     {
         // Sanctioned cross-module surface: other modules depend on the contract,
         // never on the concrete MyHr service. See Contracts\ApprovalRouteResolver.
+        // One instance per request so its baseline-permission memo actually holds.
+        $this->app->singleton(MyHrAccess::class);
+
         $this->app->bind(ApprovalRouteResolver::class, ApprovalRouteResolverService::class);
         $this->app->bind(LearningAssignmentManager::class, LearningAssignmentManagerService::class);
         $this->app->bind(OnboardingAssignmentManager::class, OnboardingAssignmentManagerService::class);
@@ -78,7 +82,10 @@ class PersonnelServiceProvider extends ServiceProvider
     protected function componentMap(): array
     {
         return [
+            'home' => \App\Modules\Personnel\Livewire\Home::class,
             'all-personnel' => \App\Modules\Personnel\Livewire\AllPersonnel::class,
+            'profile' => \App\Modules\Personnel\Livewire\PersonnelProfile::class,
+            'quick-view' => \App\Modules\Personnel\Livewire\PersonnelQuickView::class,
             'table-panel' => \App\Modules\Personnel\Livewire\TablePanel::class,
             'add-personnel' => \App\Modules\Personnel\Livewire\AddPersonnel::class,
             'edit-personnel' => \App\Modules\Personnel\Livewire\EditPersonnel::class,

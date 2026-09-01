@@ -14,7 +14,7 @@ trait SideModalAction
 
     public bool $isSideModalOpen = false;
 
-    public function openSideMenu($showSideMenu, $modelName = null, $secondModel = null)
+    public function openSideMenu($showSideMenu, $modelName = null, $secondModel = null): void
     {
         $this->showSideMenu = $showSideMenu;
         $this->modelName = $modelName;
@@ -24,7 +24,7 @@ trait SideModalAction
     }
 
     #[On('closeSideMenu')]
-    public function closeSideMenu()
+    public function closeSideMenu(): void
     {
         $this->isSideModalOpen = false;
         $this->showSideMenu = '';

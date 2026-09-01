@@ -6,7 +6,7 @@
     $modelKey = $modelParts[1] ?? null;
 @endphp
 
-<div class="p-1 rounded-lg shadow-sm bg-neutral-100">
+<div class="min-w-0 p-1 rounded-lg shadow-sm bg-neutral-100">
     <div class="flex flex-col py-1" x-data="{ isUploading: false, progress: 0 }" x-on:livewire-upload-start="isUploading = true"
         x-on:livewire-upload-finish="isUploading = false" x-on:livewire-upload-error="isUploading = false"
         x-on:livewire-upload-progress="progress = $event.detail.progress">
@@ -33,7 +33,7 @@
         @php
             $filename = is_string($data) ? basename($data) : $data->getClientOriginalName();
         @endphp
-        <div class="px-2">
+        <div class="min-w-0 px-2">
             <a
                 class="inline-flex max-w-full text-sm text-indigo-600 hover:underline break-all"
                 href="{{ is_string($data) ? \Illuminate\Support\Facades\Storage::url($data) : '#' }}"

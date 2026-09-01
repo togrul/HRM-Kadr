@@ -3,7 +3,7 @@
         $chartMax = max(1, (float) collect($this->payload['chart'] ?? [])->max('value'));
     @endphp
 
-    <x-surface-card :title="__('reports::dashboard.standard.title')" icon="icons.report-chart-icon" class="rounded-[2rem] border-zinc-200/90 bg-white shadow-[0_10px_28px_rgba(15,23,42,0.05)]" bodyClass="rounded-[1.6rem] border-zinc-200/90 bg-[linear-gradient(180deg,#ffffff_0%,#fcfcfd_100%)]" contentClass="p-5 lg:p-6">
+    <x-surface-card :title="__('reports::dashboard.standard.title')" icon="icons.report-chart-icon" class="rounded-[2rem] border-zinc-200/90 bg-white shadow-card" bodyClass="rounded-[1.6rem] border-zinc-200/90 bg-[linear-gradient(180deg,#ffffff_0%,#fcfcfd_100%)]" contentClass="p-5 lg:p-6">
         <div class="grid gap-3 xl:grid-cols-[repeat(4,minmax(0,1fr))] xl:items-end">
             <div class="min-w-0">
                 <label class="mb-1 block text-xs font-medium text-zinc-500">{{ __('reports::dashboard.fields.report_type') }}</label>
@@ -45,21 +45,19 @@
                 <div class="flex flex-wrap items-center gap-2 lg:justify-end">
                     <x-button mode="secondary" wire:click="exportExcel" wire:loading.attr="disabled" class="whitespace-nowrap">{{ __('reports::dashboard.actions.export_excel') }}</x-button>
                     <x-button mode="secondary" wire:click="exportCsv" wire:loading.attr="disabled" class="whitespace-nowrap">{{ __('reports::dashboard.actions.export_csv') }}</x-button>
-                    <a href="{{ $this->printUrl() }}" target="_blank" class="inline-flex h-11 items-center justify-center whitespace-nowrap rounded-2xl bg-zinc-900 px-5 text-sm font-medium text-white shadow-[0_8px_18px_rgba(24,24,27,0.12)]">
-                        {{ __('reports::dashboard.actions.export_pdf') }}
-                    </a>
+                    <x-button type="link" mode="black" href="{{ $this->printUrl() }}" target="_blank" class="whitespace-nowrap">{{ __('reports::dashboard.actions.export_pdf') }}</x-button>
                 </div>
             </div>
         @endif
     </x-surface-card>
 
-    <x-surface-card :title="$this->payload['title']" icon="icons.pending-icon" class="rounded-[2rem] border-zinc-200/90 bg-white shadow-[0_10px_28px_rgba(15,23,42,0.05)]" bodyClass="rounded-[1.6rem] border-zinc-200/90 bg-[linear-gradient(180deg,#ffffff_0%,#fcfcfd_100%)]" contentClass="p-5 lg:p-6">
+    <x-surface-card :title="$this->payload['title']" icon="icons.pending-icon" class="rounded-[2rem] border-zinc-200/90 bg-white shadow-card" bodyClass="rounded-[1.6rem] border-zinc-200/90 bg-[linear-gradient(180deg,#ffffff_0%,#fcfcfd_100%)]" contentClass="p-5 lg:p-6">
         <div class="space-y-5">
             <p class="text-sm text-zinc-500">{{ $this->payload['description'] }}</p>
 
             <div class="grid gap-3 md:grid-cols-3">
                 @foreach ($this->payload['summary'] as $item)
-                    <div class="rounded-[1.4rem] border border-zinc-200/90 bg-zinc-50/70 px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]">
+                    <div class="rounded-2xl border border-zinc-200/90 bg-zinc-50/70 px-4 py-4 shadow-card">
                         <p class="text-[11px] font-semibold uppercase text-zinc-400">{{ $item['label'] }}</p>
                         <p class="mt-2 text-2xl font-semibold text-zinc-900">{{ $item['value'] }}</p>
                     </div>
@@ -67,7 +65,7 @@
             </div>
 
             <div class="grid gap-4 xl:grid-cols-[0.9fr,1.1fr]">
-                <x-surface-card :title="__('reports::dashboard.cards.visualization')" icon="icons.training-icon" class="rounded-[1.75rem] border-zinc-200/90 bg-white shadow-[0_8px_24px_rgba(15,23,42,0.04)]" bodyClass="rounded-[1.35rem] border-zinc-200/90 bg-[linear-gradient(180deg,#ffffff_0%,#fcfcfd_100%)]" contentClass="p-4">
+                <x-surface-card :title="__('reports::dashboard.cards.visualization')" icon="icons.training-icon" class="rounded-[1.75rem] border-zinc-200/90 bg-white shadow-card" bodyClass="rounded-2xl border-zinc-200/90 bg-[linear-gradient(180deg,#ffffff_0%,#fcfcfd_100%)]" contentClass="p-4">
                     <div class="space-y-3">
                         @forelse ($this->payload['chart'] as $bar)
                             @php
@@ -98,7 +96,7 @@
                     </div>
                 </x-surface-card>
 
-                <x-surface-card :title="__('reports::dashboard.cards.table_view')" icon="icons.document-icon" class="rounded-[1.75rem] border-zinc-200/90 bg-white shadow-[0_8px_24px_rgba(15,23,42,0.04)]" bodyClass="rounded-[1.35rem] border-zinc-200/90 bg-[linear-gradient(180deg,#ffffff_0%,#fcfcfd_100%)]" contentClass="p-4">
+                <x-surface-card :title="__('reports::dashboard.cards.table_view')" icon="icons.document-icon" class="rounded-[1.75rem] border-zinc-200/90 bg-white shadow-card" bodyClass="rounded-2xl border-zinc-200/90 bg-[linear-gradient(180deg,#ffffff_0%,#fcfcfd_100%)]" contentClass="p-4">
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-zinc-200 text-sm">
                             <thead>

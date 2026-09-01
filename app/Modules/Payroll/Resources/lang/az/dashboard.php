@@ -15,6 +15,8 @@ return [
         'title' => 'Kredit / avans təyini',
         'list' => 'Kreditlər',
         'empty' => 'Kredit yoxdur',
+        'active' => ':count aktiv',
+        'select_personnel' => 'Kreditləri idarə etmək üçün əməkdaş seçin.',
         'types' => [
             'loan' => 'Kredit',
             'advance' => 'Avans',
@@ -72,6 +74,12 @@ return [
         'start_on' => 'Başlama tarixi',
         'remaining' => 'Qalıq',
         'status' => 'Status',
+        'currency' => 'Valyuta',
+    ],
+
+    'columns' => [
+        'employee' => 'Əməkdaş',
+        'actions' => 'Əməliyyatlar',
     ],
 
     'actions' => [
@@ -83,6 +91,7 @@ return [
         'lock' => 'Kilidlə',
         'reopen' => 'Yenidən aç',
         'close' => 'Bağla',
+        'save' => 'Yadda saxla',
         'delete' => 'Sil',
     ],
 
@@ -109,6 +118,8 @@ return [
     ],
 
     'statutory' => [
+        'title' => 'Qanunvericilik tutulmaları',
+        'empty' => 'Bu dövr üçün tutulma yoxdur',
         'income_tax' => 'Gəlir vergisi',
         'dsmf' => 'DSMF',
         'unemployment' => 'İşsizlik sığortası',

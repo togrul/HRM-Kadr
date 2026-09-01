@@ -94,6 +94,46 @@ class DocumentExpiryReadServiceTest extends TestCase
         ], array_keys($service->exportRows(['status' => 'expired'])->first()));
     }
 
+    public function test_facet_counts_stay_clickable_while_a_status_is_selected(): void
+    {
+        Carbon::setTestNow('2026-04-30 10:00:00');
+
+        $personnel = $this->makePersonnel();
+
+        DB::table('personnel_cards')->insert([
+            'tabel_no' => $personnel->tabel_no,
+            'card_number' => 'CARD-1',
+            'valid_date' => '2026-05-15',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('personnel_passports')->insert([
+            'tabel_no' => $personnel->tabel_no,
+            'serial_number' => 'PASS-1',
+            'given_date' => '2025-01-01',
+            'valid_date' => '2026-04-01',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $service = app(DocumentExpiryReadService::class);
+        $unfiltered = $service->dashboard();
+        $filtered = $service->dashboard(['status' => 'expired']);
+
+        // The table narrows to the selected status...
+        $this->assertSame(['expired'], $filtered['rows']->pluck('status')->unique()->values()->all());
+
+        // ...but the status facet keeps every other row's number, or it could not be
+        // clicked back out of. The type facet, which is not the selected one, does narrow.
+        $this->assertSame($unfiltered['summary'], $filtered['summary']);
+        $this->assertSame(
+            $unfiltered['typeCounts']['passport'],
+            $filtered['typeCounts']['passport']
+        );
+        $this->assertSame(0, $filtered['typeCounts']['service_card']);
+    }
+
     private function makePersonnel(?string $prefix = null): Personnel
     {
         $this->seedReferenceData();

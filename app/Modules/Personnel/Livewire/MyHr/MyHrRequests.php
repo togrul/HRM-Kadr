@@ -8,11 +8,12 @@ use App\Models\LeaveType;
 use App\Models\Personnel;
 use App\Models\PersonnelBusinessTrip;
 use App\Models\PersonnelVacation;
+use App\Modules\Personnel\Application\Services\MyHr\ApprovalRouteResolverService;
 use App\Modules\Personnel\Application\Services\MyHr\MyHrRequestCorrectionService;
 use App\Modules\Personnel\Application\Services\MyHr\MyHrRequestsReadService;
-use App\Modules\Personnel\Application\Services\MyHr\ApprovalRouteResolverService;
 use App\Modules\Personnel\Support\MyHr\MyHrAccess;
 use Carbon\Carbon;
+use Closure;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -23,7 +24,16 @@ class MyHrRequests extends Component
 {
     use WithFileUploads;
 
+    /** Create form => the permission that may submit it. */
+    public const CREATE_PERMISSIONS = [
+        'leave' => 'submit-self-service-leaves',
+        'vacation' => 'submit-self-service-vacations',
+        'business_trip' => 'submit-self-service-business-trips',
+    ];
+
     public int $personnelId;
+
+    private ?Personnel $personnelRecord = null;
 
     public string $search = '';
 
@@ -53,12 +63,20 @@ class MyHrRequests extends Component
 
     public array $correctionForm = [];
 
-    public function mount(int $personnelId): void
+    public function mount(int $personnelId, string $openForm = ''): void
     {
         abort_if($personnelId <= 0, 404);
 
         $this->personnelId = $personnelId;
         $this->resetCreateForms();
+
+        // Arrived from an overview quick link: open that form straight away, but only if the
+        // employee may actually submit it (the link itself is already permission-gated).
+        $permission = self::CREATE_PERMISSIONS[$openForm] ?? null;
+
+        if ($permission && app(MyHrAccess::class)->canAccess(Auth::user(), $permission)) {
+            $this->activeCreateForm = $openForm;
+        }
     }
 
     #[Computed]
@@ -93,12 +111,7 @@ class MyHrRequests extends Component
         /** @var MyHrAccess $access */
         $access = app(MyHrAccess::class);
 
-        $permission = match ($type) {
-            'leave' => 'submit-self-service-leaves',
-            'vacation' => 'submit-self-service-vacations',
-            'business_trip' => 'submit-self-service-business-trips',
-            default => null,
-        };
+        $permission = self::CREATE_PERMISSIONS[$type] ?? null;
 
         if (! $permission || ! $access->canAccess(Auth::user(), $permission)) {
             abort(403);
@@ -258,9 +271,10 @@ class MyHrRequests extends Component
         $this->resetCreateForms();
     }
 
+    /** Memoised for the life of the request — every action path reads it two or three times. */
     protected function personnel(): Personnel
     {
-        return Personnel::query()
+        return $this->personnelRecord ??= Personnel::query()
             ->select(['id', 'tabel_no', 'surname', 'name', 'patronymic', 'structure_id', 'position_id'])
             ->findOrFail($this->personnelId);
     }
@@ -312,7 +326,7 @@ class MyHrRequests extends Component
             'leaveForm.reason' => ['nullable', 'string', 'max:2000'],
             'leaveDocument' => [
                 $requiresDocument ? 'required' : 'nullable',
-                function (string $attribute, mixed $value, \Closure $fail): void {
+                function (string $attribute, mixed $value, Closure $fail): void {
                     if ($value === null || $value === '') {
                         return;
                     }

@@ -14,7 +14,7 @@
         </h2>
     </div>
 
-    <section class="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_18px_60px_-36px_rgba(15,23,42,0.35)]">
+    <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-overlay">
         <div class="border-b border-slate-200 bg-gradient-to-br from-slate-50 via-white to-slate-100 px-5 py-5">
             <div class="flex items-start gap-4">
                 <div class="flex items-start gap-4">
@@ -35,7 +35,7 @@
         </div>
 
         <div class="space-y-6 px-5 py-5">
-            <section class="rounded-[28px] border border-slate-200 bg-white px-5 py-5 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.16)]">
+            <section class="rounded-2xl border border-slate-200 bg-white px-5 py-5 shadow-card">
                 <div class="flex flex-col gap-4 border-b border-slate-100 pb-4 xl:flex-row xl:items-start xl:justify-between">
                     <div class="flex items-start gap-4">
                         <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-sm">
@@ -129,7 +129,7 @@
                 </div>
             </section>
 
-            <div class="rounded-[28px] border border-slate-200 bg-white shadow-[0_18px_40px_-30px_rgba(15,23,42,0.12)]">
+            <div class="rounded-2xl border border-slate-200 bg-white shadow-card">
                 <div class="flex gap-4 border-b border-slate-100 px-5 py-5 items-center justify-between">
                   <div class="w-full w-max">
                     <x-ui.select-dropdown
@@ -154,7 +154,7 @@
                                     $theme = $this->categoryTheme($file['category'] ?? 'other');
                                     $icon = $this->categoryIcon($file['category'] ?? 'other');
                                 @endphp
-                                <article class="overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-[0_14px_28px_-24px_rgba(15,23,42,0.14)] transition duration-200 hover:border-slate-300 hover:shadow-[0_18px_34px_-24px_rgba(15,23,42,0.22)] focus-within:border-slate-400 focus-within:shadow-[0_20px_36px_-24px_rgba(15,23,42,0.22)]">
+                                <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-card transition duration-200 hover:border-slate-300 hover:shadow-card focus-within:border-slate-400 focus-within:shadow-card">
                                     <div class="grid gap-4 px-4 py-4 xl:grid-cols-[50px,150px,minmax(0,1fr),150px,36px] xl:items-start">
                                         <div class="flex flex-col items-start gap-2">
                                             <div class="flex h-12 w-12 items-center justify-center overflow-hidden rounded-[1rem] border border-slate-200 bg-slate-50 shadow-sm">

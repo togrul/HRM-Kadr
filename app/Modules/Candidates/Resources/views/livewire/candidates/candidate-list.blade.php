@@ -1,134 +1,148 @@
-<div
-    class="flex flex-col"
-    x-data
-    x-init="
-        const root = $el;
-        const applyPaginatorTheme = (isUpdate = false) => {
-            const paginator = root.querySelector('span[aria-current=page]>span');
-            if (!paginator) return;
-            paginator.classList.remove('bg-blue-50', 'text-blue-600', 'bg-green-100', 'text-green-600');
-            paginator.classList.add(isUpdate ? 'bg-green-100' : 'bg-blue-50', isUpdate ? 'text-green-600' : 'text-blue-600');
-        };
+@php
+    $num = fn ($value): string => number_format((int) $value, 0, ',', ' ');
+    $summary = $this->recruitmentSummary;
+@endphp
 
-        applyPaginatorTheme(false);
-        if (typeof Livewire !== 'undefined') {
-            Livewire.hook('commit', ({ component, succeed }) => {
-                if (component.id !== @js($this->getId())) return;
-                succeed(() => queueMicrotask(() => applyPaginatorTheme(true)));
-            });
-        }
-    "
->
-    <div class="px-6 pt-4">
-        @include('candidates::livewire.candidates.partials.recruitment-nav')
-    </div>
+<div class="flex flex-col">
+    {{-- ===================== contextual panel ===================== --}}
+    <x-slot name="sidebar"><div id="hrm-context-panel"></div></x-slot>
 
-    <div class="grid grid-cols-1 gap-3 px-6 py-2 md:grid-cols-2 xl:grid-cols-4">
-        <div class="rounded-[24px] border border-slate-200 bg-white p-4 shadow-[0_18px_40px_-34px_rgba(15,23,42,0.35)]">
-            <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">{{ __('candidates::recruitment.titles.requisitions') }}</div>
-            <div class="mt-3 text-3xl font-semibold tracking-tight text-slate-900">{{ $this->recruitmentSummary['requisitions'] }}</div>
-            <p class="mt-2 text-sm text-slate-500">{{ __('candidates::recruitment.labels.recruitment_owner') }}</p>
-        </div>
-        <div class="rounded-[24px] border border-slate-200 bg-white p-4 shadow-[0_18px_40px_-34px_rgba(15,23,42,0.35)]">
-            <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">{{ __('candidates::recruitment.titles.openings') }}</div>
-            <div class="mt-3 text-3xl font-semibold tracking-tight text-slate-900">{{ $this->recruitmentSummary['openings'] }}</div>
-            <p class="mt-2 text-sm text-slate-500">{{ __('candidates::recruitment.labels.openings_count') }}</p>
-        </div>
-        <div class="rounded-[24px] border border-slate-200 bg-white p-4 shadow-[0_18px_40px_-34px_rgba(15,23,42,0.35)]">
-            <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">{{ __('candidates::recruitment.titles.pipeline') }}</div>
-            <div class="mt-3 text-3xl font-semibold tracking-tight text-slate-900">{{ $this->recruitmentSummary['applications'] }}</div>
-            <p class="mt-2 text-sm text-slate-500">{{ __('candidates::recruitment.labels.applications') }}</p>
-        </div>
-        <div class="rounded-[24px] border border-slate-200 bg-white p-4 shadow-[0_18px_40px_-34px_rgba(15,23,42,0.35)]">
-            <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">{{ __('candidates::recruitment.labels.current_stage') }}</div>
-            <div class="mt-3 text-3xl font-semibold tracking-tight text-slate-900">{{ $this->recruitmentSummary['active_applications'] }}</div>
-            <p class="mt-2 text-sm text-slate-500">{{ __('candidates::recruitment.statuses.active') }}</p>
-        </div>
-    </div>
+    @teleport('#hrm-context-panel')
+        <x-context-panel
+            :title="__('candidates::common.titles.candidates')"
+            :subtitle="$num($this->candidateRows->total()).' '.__('candidates::recruitment.labels.candidates_unit')"
+        >
+            @include('candidates::livewire.candidates.partials.recruitment-context-panel', [
+                'panelCounts' => $this->recruitmentPanelCounts(),
+            ])
 
-    <div class="grid grid-cols-1 gap-2 px-6 py-4 sm:grid-cols-2 lg:grid-cols-4">
-        @if ($this->filterEnabled('fullname'))
-            <div class="flex flex-col">
-                <x-label for="filter.fullname">{{ __('candidates::common.labels.fullname') }}</x-label>
-                <x-livewire-input mode="gray" name="filter.fullname" wire:model="filter.fullname"></x-livewire-input>
+            <x-context-panel.section :title="__('candidates::common.labels.status')">
+                <x-context-panel.item wire:click.prevent="setStatus('all')" :active="$status === 'all'">
+                    {{ __('candidates::common.labels.all') }}
+                </x-context-panel.item>
+                @foreach ($this->appealStatusTabs as $_status)
+                    <x-context-panel.item
+                        wire:key="candidate-panel-status-{{ $_status->id }}"
+                        wire:click.prevent="setStatus({{ $_status->id }})"
+                        :active="$status === $_status->id"
+                    >{{ $_status->name }}</x-context-panel.item>
+                @endforeach
+                @if ($this->canShowDeletedTab)
+                    <x-context-panel.item wire:click.prevent="setStatus('deleted')" :active="$status === 'deleted'">
+                        {{ __('candidates::common.labels.deleted') }}
+                    </x-context-panel.item>
+                @endif
+            </x-context-panel.section>
+        </x-context-panel>
+    @endteleport
+
+    <div class="lg:hidden">@include('candidates::livewire.candidates.partials.recruitment-nav')</div>
+
+    {{-- ===================== header ===================== --}}
+    <x-page-header
+        :title="__('candidates::common.titles.candidates')"
+        :breadcrumb="__('candidates::common.titles.candidates')"
+    >
+        <x-slot:icon>
+            <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>
+        </x-slot:icon>
+
+        <x-slot:stats>
+            <x-page-header.stat :value="$num($this->candidateRows->total())" :label="__('candidates::recruitment.labels.candidates_unit')" />
+            <x-page-header.stat :value="$num($summary['openings'])" :label="__('candidates::recruitment.titles.openings')" tone="blue" />
+            <x-page-header.stat :value="$num($summary['active_applications'])" :label="__('candidates::recruitment.statuses.active')" tone="green" />
+        </x-slot:stats>
+
+        <x-slot:actions>
+            @can('export', App\Models\Candidate::class)
+                <x-pill-button variant="emerald" :icon="true" wire:click.prevent="exportExcel"
+                    wire:loading.attr="disabled" wire:target="exportExcel"
+                    title="{{ __('candidates::common.actions.export_excel') }}">
+                    <x-icons.excel-icon />
+                </x-pill-button>
+            @endcan
+            @can('create', App\Models\Candidate::class)
+                <x-pill-button variant="primary" wire:click="openSideMenu('add-candidate')">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                    {{ __('candidates::common.actions.add_candidate') }}
+                </x-pill-button>
+            @endcan
+        </x-slot:actions>
+
+        {{-- toolbar --}}
+        <div class="flex flex-col gap-2.5">
+            <div class="flex flex-wrap items-end gap-3">
+                @if ($this->filterEnabled('fullname'))
+                    <label class="w-full flex-1 sm:max-w-[300px]">
+                        <span class="hrm-eyebrow block pb-1">{{ __('candidates::common.labels.fullname') }}</span>
+                        <x-livewire-input mode="gray" name="filter.fullname" wire:model="filter.fullname" />
+                    </label>
+                @endif
+
+                @if ($this->filterEnabled('appeal_date'))
+                    <div class="shrink-0">
+                        <span class="hrm-eyebrow block pb-1">{{ __('candidates::common.labels.appeal_date') }}</span>
+                        <div class="flex items-center gap-2">
+                            <input type="date" wire:model="filter.appeal_date.min"
+                                class="hrm-num h-[34px] w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-[12.5px] text-ink focus:border-ink focus:bg-white focus:ring-0" />
+                            <span class="shrink-0 text-ink-faint">&ndash;</span>
+                            <input type="date" wire:model="filter.appeal_date.max"
+                                class="hrm-num h-[34px] w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-[12.5px] text-ink focus:border-ink focus:bg-white focus:ring-0" />
+                        </div>
+                    </div>
+                @endif
+
+                @if ($this->filterEnabled('age'))
+                    <label class="w-[110px] shrink-0">
+                        <span class="hrm-eyebrow block pb-1">{{ __('candidates::common.labels.age') }}</span>
+                        <x-livewire-input mode="gray" type="number" name="filter.age" wire:model="filter.age" />
+                    </label>
+                @endif
+
+                @if ($this->filterEnabled('results') && $this->isMilitaryCandidateMode())
+                    <label class="w-[130px] shrink-0">
+                        <span class="hrm-eyebrow block pb-1">{{ __('candidates::common.labels.test_results') }}</span>
+                        <x-livewire-input mode="gray" type="number" name="filter.results" wire:model="filter.results" />
+                    </label>
+                @endif
+
+                @if ($this->filterEnabled('document_category'))
+                    <div class="min-w-[200px] flex-1">
+                        <span class="hrm-eyebrow block pb-1">{{ __('candidates::common.labels.document_category') }}</span>
+                        <x-ui.select-dropdown
+                            placeholder="---"
+                            mode="gray"
+                            class="w-full"
+                            wire:model.live="filter.document_category"
+                            :model="array_merge([['id' => 'all', 'label' => __('candidates::files.labels.all_categories')]], $this->documentCategoryOptions)"
+                        />
+                    </div>
+                @endif
+
+                <x-pill-button variant="primary" wire:click="searchFilter" class="!h-[34px]">{{ __('candidates::common.labels.search') }}</x-pill-button>
+                <x-pill-button wire:click="resetFilter" class="!h-[34px]">{{ __('candidates::common.labels.reset') }}</x-pill-button>
             </div>
-        @endif
-        @if ($this->filterEnabled('gender'))
-            <div class="flex flex-col w-full space-y-1">
-                <x-label for="filter.gender">{{ __('candidates::common.labels.gender') }}</x-label>
-                <div class="flex space-x-2">
-                    @foreach (\App\Enums\GenderEnum::genderOptions() as $value => $label)
-                        <label class="inline-flex items-center w-full px-2 py-2 bg-gray-100 rounded shadow-sm">
-                            <input type="radio" class="form-radio" name="filter.gender" wire:model="filter.gender"
-                                value="{{ $value }}">
-                            <span class="ml-2 text-sm font-normal">{{ $label }}</span>
-                        </label>
-                    @endforeach
-                </div>
-            </div>
-        @endif
-        <div class="flex items-center space-x-2">
-            @if ($this->filterEnabled('results') && $this->isMilitaryCandidateMode())
-                <div class="flex flex-col">
-                    <x-label for="filter.results">{{ __('candidates::common.labels.test_results') }}</x-label>
-                    <x-livewire-input mode="gray" type="number" name="filter.results"
-                        wire:model="filter.results"></x-livewire-input>
+
+            @if ($this->filterEnabled('gender'))
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="hrm-eyebrow">{{ __('candidates::common.labels.gender') }}</span>
+                    <x-filter.nav wrap class="min-w-0">
+                        <x-filter.item
+                            wire:click.prevent="$set('filter.gender', null)"
+                            :active="blank(data_get($filter, 'gender'))"
+                        >{{ __('candidates::common.labels.all') }}</x-filter.item>
+                        @foreach (\App\Enums\GenderEnum::genderOptions() as $value => $label)
+                            <x-filter.item
+                                wire:click.prevent="$set('filter.gender', '{{ $value }}')"
+                                :active="(string) data_get($filter, 'gender') === (string) $value"
+                            >{{ $label }}</x-filter.item>
+                        @endforeach
+                    </x-filter.nav>
                 </div>
             @endif
-            @if ($this->filterEnabled('age'))
-                <div class="flex flex-col">
-                    <x-label for="filter.age">{{ __('candidates::common.labels.age') }}</x-label>
-                    <x-livewire-input mode="gray" type="number" name="filter.age"
-                        wire:model="filter.age"></x-livewire-input>
-                </div>
-            @endif
-        </div>
 
-        @if ($this->filterEnabled('appeal_date'))
-            <div class="flex flex-col">
-                <x-label for="filter.appeal_date">{{ __('candidates::common.labels.appeal_date') }}</x-label>
-                <div class="flex items-center space-x-1">
-                    <x-pikaday-input mode="gray" name="filter.appeal_date.min" format="Y-MM-DD"
-                        wire:model="filter.appeal_date.min">
-                        <x-slot name="script">
-                            $el.onchange = function () {
-                            @this.set('filter.appeal_date.min', $el.value);
-                            }
-                        </x-slot>
-                    </x-pikaday-input>
-                    <span>-</span>
-                    <x-pikaday-input mode="gray" name="filter.appeal_date.max" format="Y-MM-DD"
-                        wire:model="filter.appeal_date.max">
-                        <x-slot name="script">
-                            $el.onchange = function () {
-                            @this.set('filter.appeal_date.max', $el.value);
-                            }
-                        </x-slot>
-                    </x-pikaday-input>
-                </div>
-            </div>
-        @endif
-        @if ($this->filterEnabled('document_category'))
-            <div class="flex flex-col">
-                <x-ui.select-dropdown
-                    :label="__('candidates::common.labels.document_category')"
-                    placeholder="---"
-                    mode="gray"
-                    class="w-full"
-                    wire:model.live="filter.document_category"
-                    :model="array_merge([['id' => 'all', 'label' => __('candidates::files.labels.all_categories')]], $this->documentCategoryOptions)"
-                />
-            </div>
-        @endif
-        <div class="flex items-end space-x-2">
-            <x-button mode="primary" wire:click="searchFilter">{{ __('candidates::common.labels.search') }}</x-button>
-            <x-button mode="black" wire:click="resetFilter">{{ __('candidates::common.labels.reset') }}</x-button>
-        </div>
-    </div>
-
-    <div class="px-6">
-        <div class="flex flex-col items-center justify-between px-2 py-2 bg-white sm:flex-row filter rounded-xl">
-            <x-filter.nav>
+            {{-- small-screen fallback for the panel's status list --}}
+            <x-filter.nav wrap class="min-w-0 lg:hidden">
                 <x-filter.item wire:click.prevent="setStatus('all')" :active="$status === 'all'">
                     {{ __('candidates::common.labels.all') }}
                 </x-filter.item>
@@ -144,225 +158,160 @@
                 @endif
             </x-filter.nav>
         </div>
-    </div>
+    </x-page-header>
 
-    <div class="flex flex-col px-6 py-4 space-y-4">
-        @if ($this->documentCategoryStats->isNotEmpty())
-            <section class="grid grid-cols-1 gap-2 md:grid-cols-3 xl:grid-cols-6">
-                @foreach ($this->documentCategoryStats as $categoryStat)
-                    <button
-                        type="button"
-                        wire:click="toggleDocumentCategory('{{ $categoryStat['id'] }}')"
-                        class="{{ $categoryStat['active'] ? 'border-slate-800 bg-[linear-gradient(180deg,#111827_0%,#0f172a_100%)] text-white shadow-[0_18px_34px_-24px_rgba(15,23,42,0.58)] ring-1 ring-slate-700/30' : 'border-slate-200 bg-white text-slate-900 hover:border-slate-300 hover:bg-slate-50 hover:shadow-[0_16px_30px_-24px_rgba(15,23,42,0.25)]' }} flex rounded-[24px] border px-4 py-3 text-left transition"
-                    >
-                        <div class="flex w-full flex-col justify-between gap-1">
-                            <div class="space-y-2">
-                                <div class="{{ $categoryStat['active'] ? 'text-slate-300' : 'text-slate-400' }} text-[11px] font-semibold uppercase tracking-tight">
-                                    0{{ $loop->iteration }}
-                                </div>
-                                <div class="text-[1rem] font-semibold leading-6">{{ $categoryStat['label'] }}</div>
-                            </div>
+    @if ($this->documentCategoryStats->isNotEmpty())
+        <div class="grid grid-cols-2 gap-2 border-b border-hairline bg-white px-4 py-3 sm:px-5 md:grid-cols-3 xl:grid-cols-6">
+            @foreach ($this->documentCategoryStats as $categoryStat)
+                <button
+                    type="button"
+                    wire:key="candidate-doc-category-{{ $categoryStat['id'] }}"
+                    wire:click="toggleDocumentCategory('{{ $categoryStat['id'] }}')"
+                    @class([
+                        'flex flex-col justify-between gap-2 rounded-xl border px-3 py-2.5 text-left transition',
+                        'border-ink bg-ink text-white' => $categoryStat['active'],
+                        'border-hairline bg-white text-ink hover:border-zinc-300 hover:bg-[#fafafa]' => ! $categoryStat['active'],
+                    ])
+                >
+                    <span @class(['truncate text-[12.5px] font-semibold', 'text-white' => $categoryStat['active']])>{{ $categoryStat['label'] }}</span>
+                    <span class="flex items-end justify-between gap-2">
+                        <span @class(['hrm-num text-[11px]', 'text-white/70' => $categoryStat['active'], 'text-ink-faint' => ! $categoryStat['active']])>
+                            {{ $categoryStat['documents_count'] }} {{ __('candidates::common.labels.document') }}
+                        </span>
+                        <span @class(['hrm-num text-[11px]', 'text-white/70' => $categoryStat['active'], 'text-ink-faint' => ! $categoryStat['active']])>
+                            {{ trans_choice('candidates::common.labels.candidates_count', $categoryStat['candidates_count'], ['count' => $categoryStat['candidates_count']]) }}
+                        </span>
+                    </span>
+                </button>
+            @endforeach
+        </div>
+    @endif
 
-                            <div class="flex items-end justify-between gap-3">
-                                <div class="{{ $categoryStat['active'] ? 'text-slate-300' : 'text-slate-500' }} text-sm font-medium">
-                                    {{ $categoryStat['documents_count'] }} {{ __('candidates::common.labels.document') }}
+    <x-table.tbl :headers="$this->getTableHeaders()">
+        @forelse ($this->candidateRows as $_candidate)
+            <tr wire:key="candidate-row-{{ $_candidate->id }}">
+                <x-table.td>
+                    <span class="hrm-num text-[12px] text-ink-faint">{{ $_candidate->row_no }}</span>
+                </x-table.td>
+
+                <x-table.td standart-width>
+                    <div class="flex items-start gap-2.5">
+                        <x-avatar :name="(string) $_candidate->fullname" size="sm" />
+                        <div class="min-w-0 max-w-[320px] leading-tight">
+                            <p class="truncate text-[13px] font-medium text-ink">{{ $_candidate->fullname_max }}</p>
+
+                            @if ($_candidate->latestApplication)
+                                <div class="mt-1 flex flex-wrap items-center gap-1.5">
+                                    <x-small-badge mode="blue" dot>{{ $this->recruitmentStageLabel($_candidate->latestApplication->current_stage) }}</x-small-badge>
+                                    <x-small-badge mode="secondary">{{ $_candidate->latestApplication->opening?->title ?? __('candidates::recruitment.labels.latest_opening') }}</x-small-badge>
                                 </div>
-                                <div class="{{ $categoryStat['active'] ? 'text-slate-300' : 'text-slate-500' }} text-xs font-medium text-right">
-                                    {{ trans_choice('candidates::common.labels.candidates_count', $categoryStat['candidates_count'], ['count' => $categoryStat['candidates_count']]) }}
+                                <div class="mt-1 flex flex-wrap items-center gap-2 text-[11px]">
+                                    <a href="{{ route('candidates.applications.show', $_candidate->latestApplication) }}" wire:navigate
+                                        class="font-medium text-[#0369a1] transition hover:underline">{{ __('candidates::recruitment.actions.open_latest_application') }}</a>
+                                    @if ($_candidate->latestApplication->opening)
+                                        <a href="{{ route('candidates.openings.show', $_candidate->latestApplication->opening) }}" wire:navigate
+                                            class="font-medium text-[#0369a1] transition hover:underline">{{ __('candidates::recruitment.actions.open_latest_opening') }}</a>
+                                    @endif
+                                    <a href="{{ route('candidates.applications', ['candidate' => $_candidate->id]) }}" wire:navigate
+                                        class="font-medium text-[#0369a1] transition hover:underline">{{ __('candidates::recruitment.actions.open_candidate_pipeline') }}</a>
                                 </div>
-                            </div>
+                            @endif
+
+                            @if (! empty($_candidate->deleted_at))
+                                <p class="mt-1 text-[11px] text-ink-faint">
+                                    {{ __('candidates::common.labels.deleted_date') }}:
+                                    <span class="hrm-num">{{ \Carbon\Carbon::parse($_candidate->deleted_at)->format('d.m.Y H:i') }}</span>
+                                    · {{ __('candidates::common.labels.deleted_by') }}: {{ $_candidate->personDidDelete?->name ?? '—' }}
+                                </p>
+                            @endif
                         </div>
-                    </button>
-                @endforeach
-            </section>
-        @endif
+                    </div>
+                </x-table.td>
 
-        <div class="flex items-center justify-between">
-            <div class="flex flex-col gap-4">
-                <div class="flex space-x-4">
-                    @can('create', App\Models\Candidate::class)
-                        <x-action-button wire:click="openSideMenu('add-candidate')"
-                            class="h-12 w-12 hover:bg-blue-50"
-                            :title="__('candidates::common.actions.add_candidate')">
-                            <x-icons.add-file></x-icons.add-file>
-                        </x-action-button>
+                <x-table.td standart-width>
+                    <span class="block max-w-[200px] truncate text-[12.5px] text-ink-soft">{{ $_candidate->structure?->name ?? '—' }}</span>
+                </x-table.td>
+
+                @if ($this->isMilitaryCandidateMode())
+                    <x-table.td>
+                        <div class="flex flex-col items-start gap-1">
+                            <x-small-badge :mode="$_candidate->knowledge_test_color === 'green' ? 'green' : ($_candidate->knowledge_test_color === 'red' ? 'rose' : 'amber')">
+                                {{ __('candidates::common.labels.knowledge') }}: {{ $_candidate->knowledge_test }}
+                            </x-small-badge>
+                            <x-small-badge :mode="$_candidate->physical_fitness_exam_color === 'green' ? 'green' : ($_candidate->physical_fitness_exam_color === 'red' ? 'rose' : 'amber')">
+                                {{ __('candidates::common.labels.physical_fitness') }}: {{ $_candidate->physical_fitness_exam }}
+                            </x-small-badge>
+                        </div>
+                    </x-table.td>
+                @endif
+
+                <x-table.td>
+                    <div class="leading-tight">
+                        <p class="hrm-eyebrow">{{ __('candidates::common.labels.appeal_date') }}</p>
+                        <p class="hrm-num text-[12.5px] text-ink-soft">{{ $_candidate->appeal_date ? \Carbon\Carbon::parse($_candidate->appeal_date)->format('d.m.Y') : '—' }}</p>
+                    </div>
+                </x-table.td>
+
+                <x-table.td>
+                    <x-status design="modern" :status-id="$_candidate->status_id" :label="$_candidate->status?->name" />
+                </x-table.td>
+
+                <x-table.td>
+                    @can('update', $_candidate)
+                        <button type="button" wire:click="openSideMenu('candidate-files',{{ $_candidate->id }})"
+                            title="{{ __('candidates::common.actions.open_files') }}"
+                            class="relative flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-[#f4f4f5] hover:text-ink">
+                            <x-icons.document-icon color="text-current" hover="text-current" />
+                            <span class="hrm-num absolute -right-1 -top-1 inline-flex min-w-[18px] items-center justify-center rounded-full bg-[#f4f4f5] px-1 py-0.5 text-[10px] font-semibold text-ink-muted">
+                                {{ (int) ($_candidate->documents_count ?? 0) }}
+                            </span>
+                        </button>
                     @endcan
-                    @can('export', App\Models\Candidate::class)
-                        <x-action-button wire:click.prevent="exportExcel"
-                            class="h-12 w-12 hover:bg-green-50"
-                            :title="__('candidates::common.actions.export_excel')">
-                            <x-icons.excel-icon />
-                        </x-action-button>
-                    @endcan
-                </div>
-            </div>
-        </div>
+                </x-table.td>
 
-        <div class="relative min-h-[300px] -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-            <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-                <div class="overflow-visible">
+                <x-table.td :isButton="true">
+                    <div class="flex items-center justify-end gap-1">
+                        @if ($status != 'deleted')
+                            @can('update', $_candidate)
+                                <button type="button" wire:click="openSideMenu('edit-candidate',{{ $_candidate->id }})"
+                                    title="{{ __('candidates::common.actions.edit_candidate') }}"
+                                    class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-[#f4f4f5] hover:text-ink">
+                                    <x-icons.profile-icon color="text-current" hover="text-current" />
+                                </button>
+                            @endcan
+                            @can('delete', $_candidate)
+                                <button type="button" wire:click="setDeleteCandidate('{{ $_candidate->id }}')"
+                                    title="{{ __('candidates::common.actions.delete') }}"
+                                    class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-rose-50 hover:text-rose-600">
+                                    <x-icons.delete-icon color="text-current" hover="text-current" />
+                                </button>
+                            @endcan
+                        @else
+                            @role('Admin')
+                                <button type="button" wire:click="restoreData('{{ $_candidate->id }}')"
+                                    title="{{ __('candidates::common.actions.restore_candidate') }}"
+                                    class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-teal-50 hover:text-teal-600">
+                                    <x-icons.recover color="text-current" hover="text-current" />
+                                </button>
+                            @endrole
+                            @can('delete', $_candidate)
+                                <button type="button"
+                                    x-on:click="$dispatch('confirm-action', { title: @js(__('candidates::common.actions.force_delete')), message: @js(__('candidates::common.messages.remove_confirm')), confirmText: @js(__('candidates::common.actions.force_delete')), tone: 'rose', run: () => $wire.forceDeleteData('{{ $_candidate->id }}') })"
+                                    title="{{ __('candidates::common.actions.force_delete') }}"
+                                    class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-rose-50 hover:text-rose-600">
+                                    <x-icons.force-delete />
+                                </button>
+                            @endcan
+                        @endif
+                    </div>
+                </x-table.td>
+            </tr>
+        @empty
+            <x-table.empty :rows="count($this->getTableHeaders())" />
+        @endforelse
+    </x-table.tbl>
 
-                    <x-table.tbl :headers="$this->getTableHeaders()" title="{{ __('candidates::common.titles.candidates') }}">
-                        @forelse ($this->candidateRows as $_candidate)
-                            <tr wire:key="candidate-row-{{ $_candidate->id }}">
-                                <x-table.td>
-                                    <span class="text-sm font-medium text-gray-700">
-                                        {{ $_candidate->row_no }}
-                                    </span>
-                                </x-table.td>
-
-                                <x-table.td>
-                                    <div class="flex flex-col space-y-1">
-                                        <span class="text-sm font-medium text-slate-900">
-                                            {{ $_candidate->fullname_max }}
-                                        </span>
-                                        @if ($_candidate->latestApplication)
-                                            <div class="flex flex-wrap items-center gap-2 pt-1">
-                                                <span class="inline-flex rounded-full bg-sky-50 px-2.5 py-1 text-[11px] font-semibold text-sky-700">
-                                                    {{ $this->recruitmentStageLabel($_candidate->latestApplication->current_stage) }}
-                                                </span>
-                                                <span class="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-600">
-                                                    {{ $_candidate->latestApplication->opening?->title ?? __('candidates::recruitment.labels.latest_opening') }}
-                                                </span>
-                                            </div>
-                                            <div class="flex flex-wrap gap-2 pt-1">
-                                                <a href="{{ route('candidates.applications.show', $_candidate->latestApplication) }}" class="inline-flex h-8 items-center rounded-xl border border-slate-200 px-3 text-[11px] font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900">
-                                                    {{ __('candidates::recruitment.actions.open_latest_application') }}
-                                                </a>
-                                                @if ($_candidate->latestApplication->opening)
-                                                    <a href="{{ route('candidates.openings.show', $_candidate->latestApplication->opening) }}" class="inline-flex h-8 items-center rounded-xl border border-slate-200 px-3 text-[11px] font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900">
-                                                        {{ __('candidates::recruitment.actions.open_latest_opening') }}
-                                                    </a>
-                                                @endif
-                                                <a href="{{ route('candidates.applications', ['candidate' => $_candidate->id]) }}" class="inline-flex h-8 items-center rounded-xl border border-slate-200 px-3 text-[11px] font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900">
-                                                    {{ __('candidates::recruitment.actions.open_candidate_pipeline') }}
-                                                </a>
-                                            </div>
-                                        @endif
-                                        @if (!empty($_candidate->deleted_at))
-                                            <div class="flex flex-col text-xs font-medium">
-                                                <div class="flex items-center space-x-1">
-                                                    <span class="text-gray-500">{{ __('candidates::common.labels.deleted_date') }}:</span>
-                                                    <span
-                                                        class="text-black">{{ \Carbon\Carbon::parse($_candidate->deleted_at)->format('d-m-Y H:i') }}</span>
-                                                </div>
-                                                <div class="flex items-center space-x-1">
-                                                    <span class="text-gray-500">{{ __('candidates::common.labels.deleted_by') }}:</span>
-                                                    <span
-                                                        class="text-black">{{ $_candidate->personDidDelete->name }}</span>
-                                                </div>
-                                            </div>
-                                        @endif
-                                    </div>
-
-                                </x-table.td>
-
-                                <x-table.td>
-                                    <span
-                                        class="px-2 py-2 text-sm font-medium text-gray-900 rounded-lg bg-slate-100">{{ $_candidate->structure->name }}</span>
-                                </x-table.td>
-
-                                @if ($this->isMilitaryCandidateMode())
-                                    <x-table.td>
-                                        <div class="flex flex-col space-y-1">
-                                            <div class="flex items-center space-x-1">
-                                                <span
-                                                    class="text-sm font-medium text-gray-500">{{ __('candidates::common.labels.knowledge') }}:</span>
-                                                <span
-                                                    class="text-sm font-medium px-2 py-1 rounded-lg bg-{{ $_candidate->knowledge_test_color }}-100 text-{{ $_candidate->knowledge_test_color }}-500">{{ $_candidate->knowledge_test }}</span>
-                                            </div>
-                                            <div class="flex items-center space-x-1">
-                                                <span
-                                                    class="text-sm font-medium text-gray-500">{{ __('candidates::common.labels.physical_fitness') }}:</span>
-                                                <span
-                                                    class="text-sm font-medium px-2 py-1 rounded-lg bg-{{ $_candidate->physical_fitness_exam_color }}-100 text-{{ $_candidate->physical_fitness_exam_color }}-500">{{ $_candidate->physical_fitness_exam }}</span>
-                                            </div>
-                                        </div>
-                                    </x-table.td>
-                                @endif
-
-                                <x-table.td>
-                                    <div class="flex flex-col text-sm font-medium">
-                                        <x-table.cell-vertical title="{{ __('candidates::common.labels.appeal_date') }}">
-                                            {{ \Carbon\Carbon::parse($_candidate->appeal_date)->format('d.m.Y') }}
-                                        </x-table.cell-vertical>
-                                    </div>
-                                </x-table.td>
-
-                                <x-table.td>
-                                    <x-status  design="modern" :status-id="$_candidate->status_id" :label="$_candidate->status->name"></x-status>
-                                </x-table.td>
-
-                                <x-table.td :isButton="true">
-                                    @can('update', $_candidate)
-                                        <x-action-button
-                                            wire:click="openSideMenu('candidate-files',{{ $_candidate->id }})"
-                                            class="relative h-10 w-10 bg-gray-100 hover:bg-gray-200"
-                                            :title="__('candidates::common.actions.open_files')"
-                                        >
-                                            <x-icons.document-icon></x-icons.document-icon>
-                                            <span class="absolute -right-1 -top-1 inline-flex min-w-5 items-center justify-center rounded-full bg-zinc-100 px-1.5 py-0.5 text-[10px] font-semibold text-zinc-600">
-                                                {{ (int) ($_candidate->documents_count ?? 0) }}
-                                            </span>
-                                        </x-action-button>
-                                    @endcan
-                                </x-table.td>
-
-                                <x-table.td :isButton="true">
-                                    @if ($status != 'deleted')
-                                        @can('update', $_candidate)
-                                            <x-action-button
-                                                wire:click="openSideMenu('edit-candidate',{{ $_candidate->id }})"
-                                                class="h-9 w-9 bg-gray-100 hover:bg-gray-200"
-                                                :title="__('candidates::common.actions.edit_candidate')">
-                                                <x-icons.profile-icon></x-icons.profile-icon>
-                                            </x-action-button>
-                                        @endcan
-                                    @else
-                                        @role('Admin')
-                                            <x-action-button wire:click="restoreData('{{ $_candidate->id }}')"
-                                                class="h-9 w-9 hover:bg-teal-50"
-                                                :title="__('candidates::common.actions.restore_candidate')">
-                                                <x-icons.recover color="text-teal-500" hover="text-teal-600"></x-icons.recover>
-                                            </x-action-button>
-                                        @endrole
-                                    @endif
-                                </x-table.td>
-
-                                <x-table.td :isButton="true">
-                                    @if ($status != 'deleted')
-                                        @can('delete', $_candidate)
-                                            <x-action-button wire:click="setDeleteCandidate('{{ $_candidate->id }}')"
-                                                class="h-9 w-9 hover:bg-red-100"
-                                                :title="__('candidates::common.actions.delete')">
-                                                <x-icons.delete-icon></x-icons.delete-icon>
-                                            </x-action-button>
-                                        @endcan
-                                    @else
-                                        @can('delete', $_candidate)
-                                            <x-action-button
-                                                x-on:click="$dispatch('confirm-action', { title: @js(__('candidates::common.actions.force_delete')), message: @js(__('candidates::common.messages.remove_confirm')), confirmText: @js(__('candidates::common.actions.force_delete')), tone: 'rose', run: () => $wire.forceDeleteData('{{ $_candidate->id }}') })"
-                                                class="h-9 w-9 hover:bg-red-50"
-                                                :title="__('candidates::common.actions.force_delete')">
-                                                <x-icons.force-delete></x-icons.force-delete>
-                                            </x-action-button>
-                                        @endcan
-                                    @endif
-                                </x-table.td>
-                            </tr>
-                        @empty
-                            <x-table.empty :rows="count($this->getTableHeaders())"></x-table.empty>
-                        @endforelse
-                    </x-table.tbl>
-
-                </div>
-            </div>
-        </div>
-
-        <div class="mt-2">
-            {{ $this->candidateRows->links() }}
-        </div>
-    </div>
+    <x-pagination :paginator="$this->candidateRows" :unit="__('candidates::recruitment.labels.candidates_unit')" />
 
     <x-side-modal>
         @can('create', App\Models\Candidate::class)

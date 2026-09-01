@@ -180,6 +180,11 @@ return [
     |
     */
 
-    'attributes' => [],
+    'attributes' => [
+        'email' => 'Email',
+        'password' => 'Password',
+        'password_confirmation' => 'Password confirmation',
+        'name' => 'Name',
+    ],
 
 ];

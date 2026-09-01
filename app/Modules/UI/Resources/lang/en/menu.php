@@ -23,6 +23,7 @@ return [
         'employee_lifecycle' => 'Employee lifecycle',
         'compensation' => 'Compensation',
         'payroll' => 'Payroll',
+        'settings' => 'Settings',
     ],
     'shortcuts' => [
         'review_queue' => 'Quick access',

@@ -123,17 +123,17 @@ class ActivityLogDashboard extends Component
         return view('audit::livewire.activity-log-dashboard', [
             'activities' => $activities,
             'selectedActivity' => $selectedActivity,
-            'summary' => $this->summary($this->hasActiveFilters() ? null : (int) $activities->total()),
+            'summary' => $this->summary(),
             'logNameOptions' => $this->logNameOptions(),
-            'eventOptions' => $this->eventOptions(),
+            'eventCounts' => $this->eventCounts(),
         ]);
     }
 
-    private function filteredQuery(): Builder
+    private function filteredQuery(bool $ignoreEvent = false): Builder
     {
         return AuditActivity::query()
             ->when($this->logName !== '', fn (Builder $query) => $query->where('log_name', $this->logName))
-            ->when($this->event !== '', fn (Builder $query) => $query->where('event', $this->event))
+            ->when(! $ignoreEvent && $this->event !== '', fn (Builder $query) => $query->where('event', $this->event))
             ->when($this->dateFrom !== '', fn (Builder $query) => $query->whereDate('created_at', '>=', $this->dateFrom))
             ->when($this->dateTo !== '', fn (Builder $query) => $query->whereDate('created_at', '<=', $this->dateTo))
             ->when($this->search !== '', function (Builder $query) {
@@ -160,27 +160,32 @@ class ActivityLogDashboard extends Component
     }
 
     /**
+     * The header strip's four figures, gathered as conditional aggregates so the whole
+     * strip costs one scan instead of four counts.
+     *
      * @return array<string,int>
      */
-    private function summary(?int $knownTotal = null): array
+    private function summary(): array
     {
-        $baseQuery = AuditActivity::query();
+        $startOfDay = today();
+
+        $row = AuditActivity::query()
+            ->selectRaw('count(*) as total_count')
+            ->selectRaw('sum(case when created_at >= ? and created_at < ? then 1 else 0 end) as today_count', [
+                $startOfDay->toDateTimeString(),
+                $startOfDay->copy()->addDay()->toDateTimeString(),
+            ])
+            ->selectRaw('sum(case when event = ? then 1 else 0 end) as profile_opened_count', ['profile_opened'])
+            ->selectRaw('count(distinct causer_id) as user_count')
+            ->toBase()
+            ->first();
 
         return [
-            'total' => $knownTotal ?? (int) (clone $baseQuery)->count(),
-            'today' => (int) (clone $baseQuery)->whereDate('created_at', today())->count(),
-            'profile_opened' => (int) (clone $baseQuery)->where('event', 'profile_opened')->count(),
-            'users' => (int) (clone $baseQuery)->whereNotNull('causer_id')->distinct('causer_id')->count('causer_id'),
+            'total' => (int) ($row->total_count ?? 0),
+            'today' => (int) ($row->today_count ?? 0),
+            'profile_opened' => (int) ($row->profile_opened_count ?? 0),
+            'users' => (int) ($row->user_count ?? 0),
         ];
-    }
-
-    private function hasActiveFilters(): bool
-    {
-        return $this->search !== ''
-            || $this->logName !== ''
-            || $this->event !== ''
-            || $this->dateFrom !== ''
-            || $this->dateTo !== '';
     }
 
     private function logNameOptions(): Collection
@@ -195,16 +200,27 @@ class ActivityLogDashboard extends Component
             ->values();
     }
 
-    private function eventOptions(): Collection
+    /**
+     * Rows for the panel's HADİSƏ facet: the event and how many entries carry it inside the
+     * rest of the current filter. The event filter itself is dropped from the scope —
+     * otherwise the selected event is the only one left with a number and the list can
+     * never be clicked back out of.
+     *
+     * @return Collection<string,int>
+     */
+    private function eventCounts(): Collection
     {
-        return AuditActivity::query()
-            ->whereNotNull('event')
+        // The empty key holds the rows that carry no event at all. It stays in the map so
+        // "Hamısı" adds up to what clicking it actually lists; the panel skips it as a row,
+        // because $event = '' already means "every event".
+        return $this->filteredQuery(ignoreEvent: true)
             ->select('event')
-            ->distinct()
+            ->selectRaw('count(*) as event_count')
+            ->groupBy('event')
             ->orderBy('event')
-            ->pluck('event')
-            ->filter()
-            ->values();
+            ->toBase()
+            ->get()
+            ->mapWithKeys(fn (object $row): array => [(string) $row->event => (int) $row->event_count]);
     }
 
     public function actorLabel(AuditActivity $activity): string
@@ -293,6 +309,20 @@ class ActivityLogDashboard extends Component
             'deleted', 'force_deleted' => 'rose',
             'restored' => 'sky',
             default => 'zinc',
+        };
+    }
+
+    /**
+     * Tailwind background class for the contextual panel's event dot.
+     */
+    public function eventDot(?string $event): string
+    {
+        return match ($this->eventTone($event)) {
+            'emerald' => 'bg-[#10b981]',
+            'sky' => 'bg-[#0ea5e9]',
+            'amber' => 'bg-[#f59e0b]',
+            'rose' => 'bg-[#f43f5e]',
+            default => 'bg-[#a1a1aa]',
         };
     }
 

@@ -27,6 +27,9 @@ class Dashboard extends Component
 
     public string $activeTab = 'scales';
 
+    /** '' | scale | grade | component | bank | statutory — which editor side panel is open. */
+    public string $panel = '';
+
     // --- Scales ---
     public ?int $editingScaleId = null;
 
@@ -115,6 +118,28 @@ class Dashboard extends Component
         return ['scales', 'components', 'assignments', 'bank', 'history', 'statutory'];
     }
 
+    public function openPanel(string $panel): void
+    {
+        $this->guardManage();
+
+        match ($panel) {
+            'scale' => $this->cancelScale(),
+            'grade' => $this->cancelGrade(),
+            'component' => $this->cancelComponent(),
+            'bank' => $this->cancelBank(),
+            'statutory' => $this->resetStatutoryForm(),
+            default => null,
+        };
+
+        $this->panel = in_array($panel, ['scale', 'grade', 'component', 'bank', 'statutory'], true) ? $panel : '';
+    }
+
+    public function closePanel(): void
+    {
+        $this->panel = '';
+        $this->resetValidation();
+    }
+
     // --- Statutory rates ---
     public array $statutoryForm = [
         'regime_id' => null,
@@ -186,9 +211,16 @@ class Dashboard extends Component
             'is_active' => true,
         ]);
 
+        $this->resetStatutoryForm();
+        $this->dispatch('notify', type: 'success', message: __('compensation::dashboard.messages.saved'));
+    }
+
+    public function resetStatutoryForm(): void
+    {
         $this->statutoryForm = ['regime_id' => null, 'component_code' => 'income_tax', 'payer' => 'ee', 'base' => 'social', 'effective_from' => ''];
         $this->statutoryBrackets = [];
-        $this->dispatch('notify', type: 'success', message: __('compensation::dashboard.messages.saved'));
+        $this->panel = '';
+        $this->resetValidation();
     }
 
     public function deleteStatutoryRate(int $id): void
@@ -346,9 +378,41 @@ class Dashboard extends Component
         return PayScale::query()
             ->with('regime:id,name')
             ->withCount('grades')
+            ->withMin('grades', 'base_amount')
+            ->withMax('grades', 'base_amount')
+            ->withMin('grades', 'code')
+            ->withMax('grades', 'code')
             ->when($term !== '', fn ($q) => $q->where('name', 'like', "%{$term}%"))
             ->orderByDesc('effective_from')
             ->paginate(8, ['*'], 'scalesPage');
+    }
+
+    /**
+     * Band of a scale, derived from its grades — the table has no min/mid/max columns of its own.
+     * Midpoint is the standard (min + max) / 2, and every figure obeys the amounts permission.
+     *
+     * @return array{grades: int, range: string, min: string, midpoint: string, max: string}
+     */
+    public function scaleRange(PayScale $scale): array
+    {
+        $min = $scale->getAttribute('grades_min_base_amount');
+        $max = $scale->getAttribute('grades_max_base_amount');
+        $first = $scale->getAttribute('grades_min_code');
+        $last = $scale->getAttribute('grades_max_code');
+
+        $show = fn (?float $value): string => match (true) {
+            $value === null => '—',
+            ! $this->canViewAmounts() => '•••',
+            default => number_format($value, 0, ',', ' '),
+        };
+
+        return [
+            'grades' => (int) $scale->getAttribute('grades_count'),
+            'range' => $first === null ? '—' : ($first === $last ? (string) $first : $first.'–'.$last),
+            'min' => $show($min === null ? null : (float) $min),
+            'midpoint' => $show(($min === null || $max === null) ? null : ((float) $min + (float) $max) / 2),
+            'max' => $show($max === null ? null : (float) $max),
+        ];
     }
 
     public function updatedScaleSearch(): void
@@ -360,6 +424,7 @@ class Dashboard extends Component
     {
         $scale = PayScale::findOrFail($id);
         $this->editingScaleId = $scale->id;
+        $this->panel = 'scale';
         $this->scaleForm = [
             'name' => $scale->name,
             'regime_id' => $scale->regime_id,
@@ -429,6 +494,7 @@ class Dashboard extends Component
             'name' => '', 'regime_id' => null, 'currency' => 'AZN',
             'effective_from' => '', 'effective_to' => '', 'is_active' => true, 'description' => '',
         ];
+        $this->panel = '';
         $this->resetValidation();
     }
 
@@ -461,6 +527,7 @@ class Dashboard extends Component
         $grade = PayGrade::findOrFail($id);
         $this->selectedScaleId = $grade->pay_scale_id;
         $this->editingGradeId = $grade->id;
+        $this->panel = 'grade';
         $this->gradeForm = [
             'code' => $grade->code,
             'name' => $grade->name,
@@ -525,6 +592,7 @@ class Dashboard extends Component
             'code' => '', 'name' => '', 'base_amount' => '',
             'rank_category_id' => null, 'position_id' => null, 'sort' => 0,
         ];
+        $this->panel = '';
         $this->resetValidation();
     }
 
@@ -554,6 +622,7 @@ class Dashboard extends Component
     {
         $component = CompensationComponent::findOrFail($id);
         $this->editingComponentId = $component->id;
+        $this->panel = 'component';
         $this->componentForm = [
             'code' => $component->code,
             'name' => $component->name,
@@ -636,6 +705,7 @@ class Dashboard extends Component
             'taxable' => true, 'affects_social' => true, 'is_statutory' => false,
             'gl_code' => '', 'sort' => 0, 'is_active' => true,
         ];
+        $this->panel = '';
         $this->resetValidation();
     }
 
@@ -742,6 +812,7 @@ class Dashboard extends Component
         $account = EmployeeBankAccount::findOrFail($id);
         $this->selectedTabelNo = $account->tabel_no;
         $this->editingBankId = $account->id;
+        $this->panel = 'bank';
         $this->bankForm = [
             'iban' => $account->iban,
             'bank_name' => $account->bank_name ?? '',
@@ -811,6 +882,7 @@ class Dashboard extends Component
         $this->bankForm = [
             'iban' => '', 'bank_name' => '', 'account_no' => '', 'is_primary' => true, 'is_active' => true,
         ];
+        $this->panel = '';
         $this->resetValidation();
     }
 

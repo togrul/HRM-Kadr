@@ -10,6 +10,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
+/**
+ * @property string $tabel_no
+ * @property float|string $base_amount
+ * @property string|null $currency
+ * @property mixed $effective_from
+ * @property mixed $effective_to
+ */
 class EmployeeCompensation extends Model
 {
     use HasFactory;

@@ -214,6 +214,10 @@ class OvertimeBoard extends Component
                     $structurePathService->resolve((int) $personnel->structure_id)
                 );
                 $personnel->setAttribute(
+                    'structure_name',
+                    $structurePathService->current((int) $personnel->structure_id)
+                );
+                $personnel->setAttribute(
                     'fullname',
                     trim($personnel->surname.' '.$personnel->name.' '.$personnel->patronymic)
                 );
@@ -253,6 +257,10 @@ class OvertimeBoard extends Component
                     $item->personnel->setAttribute(
                         'structure_path',
                         $structurePathService->resolve((int) $item->personnel->structure_id)
+                    );
+                    $item->personnel->setAttribute(
+                        'structure_name',
+                        $structurePathService->current((int) $item->personnel->structure_id)
                     );
                 }
 

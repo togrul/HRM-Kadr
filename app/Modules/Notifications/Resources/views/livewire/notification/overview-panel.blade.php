@@ -26,7 +26,7 @@
                 'employment_started' => __('notifications::common.flows.employment_started_starter'),
                 'holiday' => __('notifications::common.flows.holiday_starter'),
             ] as $flowKey => $flowTitle)
-                <div class="flex h-full flex-col rounded-[1.75rem] border border-zinc-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,250,252,0.94))] p-4 shadow-[0_18px_36px_rgba(15,23,42,0.05)]">
+                <div class="flex h-full flex-col rounded-[1.75rem] border border-zinc-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,250,252,0.94))] p-4 shadow-card">
                     <div class="flex items-start justify-between gap-3">
                         <div class="min-w-0 space-y-2">
                             <h3 class="text-[1rem] font-semibold leading-6 tracking-tight text-zinc-950">
@@ -37,7 +37,7 @@
                                 type="button"
                                 variant="primary"
                             wire:click="{{ $flowKey === 'birthday' ? 'seedBirthdayStarter' : ($flowKey === 'position_change' ? 'seedPositionChangeStarter' : ($flowKey === 'employment_started' ? 'seedEmploymentStartedStarter' : 'seedHolidayStarter')) }}"
-                            class="shrink-0 shadow-[0_14px_28px_rgba(15,23,42,0.16)]"
+                            class="shrink-0 shadow-card"
                         >
                             {{ __('notifications::common.buttons.seed') }}
                         </x-ui.async-button>
@@ -56,13 +56,13 @@
                   </p>
 
                     <div class="mt-3 flex flex-wrap items-start gap-2">
-                        <x-notification.chip mode="neutral" size="sm" uppercase class="max-w-full whitespace-normal break-words text-left leading-5 shadow-[0_6px_14px_rgba(15,23,42,0.04)]">
+                        <x-notification.chip mode="neutral" size="sm" uppercase class="max-w-full whitespace-normal break-words text-left leading-5 shadow-card">
                             {{ $displayTemplateKey($starterFlows[$flowKey]['template_key']) }}
                         </x-notification.chip>
-                        <x-notification.chip mode="neutral" size="sm" uppercase class="max-w-full whitespace-normal break-words text-left leading-5 shadow-[0_6px_14px_rgba(15,23,42,0.04)]">
+                        <x-notification.chip mode="neutral" size="sm" uppercase class="max-w-full whitespace-normal break-words text-left leading-5 shadow-card">
                             {{ $displayTrigger($starterFlows[$flowKey]['trigger'] ?? null) }}
                         </x-notification.chip>
-                        <x-notification.chip mode="neutral" size="sm" uppercase class="max-w-full whitespace-normal break-words text-left leading-5 shadow-[0_6px_14px_rgba(15,23,42,0.04)]">
+                        <x-notification.chip mode="neutral" size="sm" uppercase class="max-w-full whitespace-normal break-words text-left leading-5 shadow-card">
                             {{ __('notifications::common.channels.'.$starterFlows[$flowKey]['channel']) }}
                         </x-notification.chip>
                         <x-notification.chip :mode="$starterFlows[$flowKey]['approval_required'] ? 'amber' : 'emerald'" size="sm" uppercase class="max-w-full whitespace-normal break-words text-left leading-5">

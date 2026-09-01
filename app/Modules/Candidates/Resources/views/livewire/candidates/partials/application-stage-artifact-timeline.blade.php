@@ -1,15 +1,15 @@
 @if ($this->stageArtifactTimeline)
-    <section class="rounded-[32px] border border-slate-200 bg-white p-6 shadow-[0_28px_60px_-45px_rgba(15,23,42,0.35)]">
+    <section class="rounded-[32px] border border-slate-200 bg-white p-6 shadow-overlay">
         <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">
             {{ __('candidates::recruitment.titles.stage_artifact_timeline') }}
         </div>
-        <h2 class="mt-2 text-2xl font-semibold tracking-tight text-slate-900">
+        <h2 class="mt-2 text-[18px] font-semibold tracking-tight text-slate-900">
             {{ __('candidates::recruitment.titles.stage_artifact_timeline') }}
         </h2>
 
         <div class="mt-6 space-y-4">
             @foreach ($this->stageArtifactTimeline as $stage)
-                <article class="rounded-[24px] border border-slate-200 bg-slate-50 p-4">
+                <article class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                     <div class="flex flex-wrap items-center gap-2">
                         <span class="inline-flex rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-700">{{ $stage['label'] }}</span>
                         <span class="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">{{ count($stage['assessments']) }} {{ __('candidates::recruitment.labels.assessment_records') }}</span>

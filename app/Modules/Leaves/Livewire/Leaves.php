@@ -9,6 +9,7 @@ use App\Models\Leave;
 use App\Models\OrderStatus;
 use App\Models\Structure;
 use App\Modules\Leaves\Exports\LeaveExport;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
@@ -16,7 +17,6 @@ use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
-use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -38,6 +38,7 @@ class Leaves extends Component
     public $status;
 
     protected ?array $statsCache = null;
+
     protected array $structurePathCache = [];
 
     public function applyFilter(?array $payload = null): void
@@ -149,7 +150,6 @@ class Leaves extends Component
     public function getTableHeaders(): array
     {
         return [
-            '#',
             __('leaves::common.labels.fullname'),
             __('leaves::common.labels.type'),
             __('leaves::common.labels.dates'),
@@ -157,8 +157,6 @@ class Leaves extends Component
             __('leaves::common.labels.status'),
             __('leaves::common.labels.file'),
             __('personnel::common.labels.action'),
-            __('personnel::common.labels.action'),
-            // 'action'
         ];
     }
 
@@ -188,12 +186,21 @@ class Leaves extends Component
         $this->search = LeaveFilterData::make();
     }
 
+    /**
+     * The filtered query WITHOUT the status bucket — what the panel's status counts sit on.
+     *
+     * @return Builder<Leave>
+     */
+    protected function baseQuery(): Builder
+    {
+        return Leave::query()->filter($this->search);
+    }
+
     protected function returnData($type = 'normal')
     {
-        $base = Leave::query()
+        $base = $this->baseQuery()
             ->when(is_numeric($this->status), fn ($q) => $q->where('status_id', $this->status))
-            ->when($this->status === 'deleted', fn ($q) => $q->onlyTrashed())
-            ->filter($this->search);
+            ->when($this->status === 'deleted', fn ($q) => $q->onlyTrashed());
 
         // Liste (eager load + paginate)
         $result = $base->clone()
@@ -244,6 +251,37 @@ class Leaves extends Component
                 ? Cache::remember($this->listCacheKey(), now()->addSeconds(10), fn () => $this->finalizePagination($result, $type))
                 : $this->finalizePagination($result, $type),
         };
+    }
+
+    /**
+     * Panel status counts plus the header's day-equivalent total. The counts ignore the
+     * status bucket (otherwise the facet could not be navigated) but follow every other
+     * filter, so they always describe the same set the list is drawn from.
+     *
+     * @return array{all: int, deleted: int, day_equivalent: float, by_status: array<int, int>}
+     */
+    #[Computed]
+    public function statusCounts(): array
+    {
+        $row = $this->baseQuery()
+            ->toBase()
+            ->selectRaw('count(*) as total, '.$this->totalDaysAggregateExpression().' as total_days')
+            ->first();
+
+        $byStatus = $this->baseQuery()
+            ->toBase()
+            ->selectRaw('status_id, count(*) as aggregate')
+            ->groupBy('status_id')
+            ->pluck('aggregate', 'status_id')
+            ->mapWithKeys(fn ($total, $statusId): array => [(int) $statusId => (int) $total])
+            ->all();
+
+        return [
+            'all' => (int) ($row->total ?? 0),
+            'deleted' => $this->baseQuery()->onlyTrashed()->count(),
+            'day_equivalent' => round((float) ($row->total_days ?? 0), 1),
+            'by_status' => $byStatus,
+        ];
     }
 
     protected function computeStats($base): array
@@ -315,11 +353,8 @@ class Leaves extends Component
 
     protected function decoratePagination(LengthAwarePaginator $paginated): LengthAwarePaginator
     {
-        $start = ($paginated->currentPage() - 1) * $paginated->perPage();
-
         $paginated->setCollection(
-            $paginated->getCollection()->values()->map(function (Leave $leave, int $index) use ($start) {
-                $leave->row_no = $start + $index + 1;
+            $paginated->getCollection()->values()->map(function (Leave $leave) {
                 $leave->personnel_structure_path = $this->resolveStructurePath($leave->personnel?->structure);
 
                 return $leave;

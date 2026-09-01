@@ -1,22 +1,4 @@
 <div class="flex flex-col space-y-4 z-1" x-data="{ openPermissionModal: @entangle('showPermissionModal').live }" wire:key="permissions">
-    <div class="flex items-center justify-between gap-4 px-2">
-        <div class="w-full max-w-sm">
-            <x-livewire-input
-                mode="gray"
-                id="permission_search"
-                name="permission_search"
-                type="text"
-                wire:model.live.debounce.300ms="search"
-                :placeholder="__('services::roles.actions.search_permission')"
-            />
-        </div>
-        <div class="shrink-0">
-            <x-button mode="primary" class="space-x-2" wire:click="createPermission" type="button">
-                <x-icons.permission-icon color="text-white" hover="text-gray-50"></x-icons.permission-icon>
-                <span>{{ __('services::roles.actions.add_permission') }}</span>
-            </x-button>
-        </div>
-    </div>
 
     <div
         x-cloak
@@ -27,7 +9,7 @@
     >
         <div class="flex min-h-screen items-center justify-center px-4 pb-6 pt-8 md:pt-10">
             <div class="absolute inset-0 bg-zinc-900/50" @click="openPermissionModal = false; $wire.closePermissionModal()"></div>
-            <div class="relative z-10 w-full max-w-3xl rounded-3xl border border-zinc-200 bg-white shadow-2xl">
+            <div class="relative z-10 w-full max-w-3xl rounded-2xl border border-zinc-200 bg-white shadow-2xl">
                 <div class="flex items-center justify-between border-b border-zinc-200 px-6 py-3">
                     <div>
                         <h3 class="text-xl font-semibold text-zinc-800">
@@ -71,7 +53,7 @@
                                 name="permission_description"
                                 wire:model.defer="permission_description"
                                 rows="5"
-                                class="mt-2 block w-full rounded-3xl border border-zinc-200 bg-white px-4 py-3 text-sm font-medium text-zinc-700 outline-none transition focus:border-zinc-400"
+                                class="mt-2 block w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm font-medium text-zinc-700 outline-none transition focus:border-zinc-400"
                             ></textarea>
                             @error('permission_description')
                                 <x-validation>{{ $message }}</x-validation>
@@ -97,11 +79,23 @@
         </div>
     </div>
 
-    <div class="relative min-h-[300px] overflow-x-auto px-2">
-        <div class="inline-block min-w-full py-2 align-middle">
-            <div class="overflow-visible">
+    <section class="overflow-hidden rounded-xl border border-hairline bg-white">
+        <div class="flex flex-col gap-3 border-b border-hairline-subtle px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+            <h2 class="text-[13.5px] font-semibold tracking-[-0.02em] text-ink">{{ __('services::common.labels.permissions') }}</h2>
 
-                <x-table.tbl :headers="[__('services::common.labels.name'), __('services::common.labels.description'), __('services::common.labels.action'), __('services::common.labels.action')]">
+            <div class="flex flex-wrap items-center gap-2">
+                <div class="w-full sm:w-[260px]">
+                    <x-ui.input icon="search" id="permission_search" name="permission_search" wire:model.live.debounce.300ms="search" placeholder="{{ __('services::roles.actions.search_permission') }}" />
+                </div>
+
+                <x-pill-button variant="primary" wire:click="createPermission">
+                    <x-icons.permission-icon color="text-current" hover="text-current" size="w-4 h-4"></x-icons.permission-icon>
+                    {{ __('services::roles.actions.add_permission') }}
+                </x-pill-button>
+            </div>
+        </div>
+
+                <x-table.tbl :headers="[__('services::common.labels.name'), __('services::common.labels.description'), __('services::common.labels.action')]">
                     @foreach ($permissions as $permission)
                         <tr wire:key="permission-row-{{ $permission->id }}">
                             <x-table.td>
@@ -112,7 +106,7 @@
                                 @endphp
 
                                 <div class="flex flex-col gap-2">
-                                    <span class="text-sm font-semibold text-zinc-800">
+                                    <span class="text-[13px] font-medium text-ink">
                                         {!! $this->highlightText($permission->name) !!}
                                     </span>
 
@@ -126,42 +120,30 @@
                                 </div>
                             </x-table.td>
 
-                            <x-table.td>
-                                <p class="max-w-3xl text-sm leading-6 text-zinc-600">
+                            <x-table.td standart-width>
+                                <p class="max-w-2xl text-[12.5px] leading-5 text-ink-muted">
                                     {!! $this->highlightText($permission->description) !!}
                                 </p>
                             </x-table.td>
 
-
-                            <x-table.td>
-                                {{-- @can('manage-settings')  --}}
-                                <button
-                                    class="flex flex-row items-center space-x-1 text-blue-500 dark:text-blue-300 hover:text-blue-600 dark:hover:text-blue-400 focus:outline-none"
-                                    wire:click="editPermission({{ $permission->id }})">
-                                    <x-icons.edit-icon color="text-blue-500" hover="text-blue-600"></x-icons.edit-icon>
-                                </button>
-                                {{-- @endcan --}}
-                            </x-table.td>
-
                             <x-table.td :isButton="true">
-                                {{-- @can('manage-settings') --}}
-                                <button wire:click.prevent = "setDeletePermission({{ $permission->id }})"
-                                    class="flex items-center justify-center w-8 h-8 text-xs font-semibold text-red-500 uppercase transition duration-300 rounded-lg hover:bg-red-100">
-                                    <x-icons.delete-icon color="text-rose-400"
-                                        hover="text-rose-300"></x-icons.delete-icon>
-                                </button>
-                                {{-- @endcan --}}
+                                <div class="flex items-center justify-end gap-1">
+                                    <button type="button" wire:click="editPermission({{ $permission->id }})" title="{{ __('services::common.actions.edit') }}" class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-[#f4f4f5] hover:text-ink">
+                                        <x-icons.edit-icon color="text-current" hover="text-current" size="w-[17px] h-[17px]"></x-icons.edit-icon>
+                                    </button>
+
+                                    <button type="button" wire:click.prevent="setDeletePermission({{ $permission->id }})" title="{{ __('services::common.actions.delete') }}" class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-rose-50 hover:text-rose-600">
+                                        <x-icons.delete-icon color="text-current" hover="text-current" size="w-[17px] h-[17px]"></x-icons.delete-icon>
+                                    </button>
+                                </div>
                             </x-table.td>
 
                         </tr>
                     @endforeach
                 </x-table.tbl>
-            </div>
-            <div class="mt-3">
-                {{ $permissions->links() }}
-            </div>
-        </div>
-    </div>
+
+        <x-pagination :paginator="$permissions" :unit="__('services::common.labels.permissions')" />
+    </section>
 
     {{-- @can('manage-settings') --}}
     <div>

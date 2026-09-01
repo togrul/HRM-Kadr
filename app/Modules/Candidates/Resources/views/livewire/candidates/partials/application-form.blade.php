@@ -1,6 +1,6 @@
 <div class="space-y-6">
     <div class="space-y-2">
-        <h2 class="text-2xl font-semibold tracking-tight text-slate-900">
+        <h2 class="text-[18px] font-semibold tracking-tight text-slate-900">
             {{ $title }}
         </h2>
         <p class="text-sm leading-6 text-slate-500">
@@ -37,7 +37,7 @@
     </div>
 
     @if ($this->selectedOpening)
-        <div class="rounded-[24px] border border-slate-200 bg-slate-50 p-4">
+        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
             <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">{{ __('candidates::recruitment.labels.opening') }}</div>
             <div class="mt-2 text-lg font-semibold tracking-tight text-slate-900">{{ $this->selectedOpening->title }}</div>
             <div class="mt-2 text-sm text-slate-500">{{ $this->selectedOpening->structure?->name ?? '—' }} / {{ $this->selectedOpening->position?->name ?? '—' }}</div>

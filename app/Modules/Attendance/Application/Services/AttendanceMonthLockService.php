@@ -3,8 +3,11 @@
 namespace App\Modules\Attendance\Application\Services;
 
 use App\Models\AttendanceDailyLedger;
+use App\Models\AttendanceExportMark;
 use App\Models\AttendanceMonthlySummary;
+use App\Models\FinancePeriodState;
 use Carbon\Carbon;
+use DomainException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -157,8 +160,33 @@ class AttendanceMonthLockService
     /**
      * @return array<string,int>
      */
-    public function unlockMonth(int $year, int $month): array
+    public function unlockMonth(int $year, int $month, bool $force = false): array
     {
+        // A month already handed to the finance system must not be reopened by
+        // accident. Over there it has produced payroll, journal entries and very
+        // likely a closed accounting period; changing it here would put the two
+        // permanently out of step with nothing to signal it.
+        //
+        // Corrections are still possible — they are real — but they become a
+        // deliberate act rather than a side effect of a button.
+        if (! $force && FinancePeriodState::isClosed($year, $month)) {
+            throw new DomainException(
+                "The finance system has closed its accounting period for {$month}/{$year}. ".
+                'Payroll has been computed and posted from this month; reopening it here would '
+                .'put the two systems permanently out of step. Coordinate with payroll first.'
+            );
+        }
+
+        // Fallback when the period state has not been pulled yet: a month we
+        // handed over is very likely already paid from, so it is treated the
+        // same way. Failing closed is the point.
+        if (! $force && AttendanceExportMark::exported($year, $month)) {
+            throw new DomainException(
+                "Attendance for {$month}/{$year} has already been handed to the finance system. ".
+                'Reopening it there is a deliberate correction: coordinate with payroll first.'
+            );
+        }
+
         [$from, $to] = $this->periodBounds($year, $month);
 
         $unlockedSummaries = AttendanceMonthlySummary::query()

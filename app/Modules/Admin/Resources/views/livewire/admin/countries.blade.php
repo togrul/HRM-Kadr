@@ -107,7 +107,7 @@
                                             <x-icons.edit-icon color="text-slate-400" hover="text-slate-500"></x-icons.edit-icon>
                                         </x-action-button>
                                         <x-action-button
-                                            wire:click.prevent = "deleteModel({{ $country->id }})"
+                                            wire:click.prevent="deleteModel({{ $country->id }})"
                                             class="h-9 w-9 hover:bg-red-100"
                                             :title="__('admin::references.actions.delete')"
                                         >

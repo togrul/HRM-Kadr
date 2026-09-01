@@ -23,6 +23,7 @@ return [
         'employee_lifecycle' => 'Əməkdaş həyat dövrü',
         'compensation' => 'Kompensasiya',
         'payroll' => 'Əmək haqqı',
+        'settings' => 'Tənzimləmələr',
     ],
     'shortcuts' => [
         'review_queue' => 'Tez baxış',

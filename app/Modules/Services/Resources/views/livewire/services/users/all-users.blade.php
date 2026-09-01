@@ -1,167 +1,111 @@
-<div
-    class="flex flex-col"
-    x-data
-    x-init="
-        const root = $el;
-        const paintPaginator = () => {
-            const paginator = root.querySelector('span[aria-current=page]>span');
-            if (paginator) {
-                paginator.classList.add('bg-blue-50', 'text-blue-600');
-            }
-        };
-        paintPaginator();
-        if (typeof Livewire !== 'undefined') {
-            Livewire.hook('commit', ({ component, succeed }) => {
-                if (component.id !== $wire.__instance.id) return;
-                succeed(() => queueMicrotask(paintPaginator));
-            });
-        }
-    "
->
+@php
+    $iconBtn = 'flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition';
+    $editBtn = $iconBtn.' hover:bg-[#f4f4f5] hover:text-ink';
+    $delBtn = $iconBtn.' hover:bg-rose-50 hover:text-rose-600';
+    $restoreBtn = $iconBtn.' hover:bg-emerald-50 hover:text-emerald-600';
+@endphp
 
-    <div class="flex flex-col items-center justify-between sm:flex-row filter bg-white py-2 px-2 rounded-xl">
-        <x-filter.nav>
-            <x-filter.item wire:click.prevent="setStatus(1)" :active="$status === 1">
-                {{ __('services::common.labels.active') }}
-            </x-filter.item>
-            <x-filter.item wire:click.prevent="setStatus(0)" :active="$status === 0">
-                {{ __('services::common.labels.inactive') }}
-            </x-filter.item>
-            <x-filter.item wire:click.prevent="setStatus(2)" :active="$status === 2">
-                {{ __('services::common.labels.deleted') }}
-            </x-filter.item>
-        </x-filter.nav>
+<div class="flex flex-col" x-data>
+    <section class="overflow-hidden rounded-xl border border-hairline bg-white">
+        <div class="flex flex-col gap-3 border-b border-hairline-subtle px-4 py-3 lg:flex-row lg:items-center lg:justify-between">
+            <x-filter.nav>
+                <x-filter.item wire:click.prevent="setStatus(1)" :active="$status === 1">
+                    {{ __('services::common.labels.active') }}
+                </x-filter.item>
+                <x-filter.item wire:click.prevent="setStatus(0)" :active="$status === 0">
+                    {{ __('services::common.labels.inactive') }}
+                </x-filter.item>
+                <x-filter.item wire:click.prevent="setStatus(2)" :active="$status === 2">
+                    {{ __('services::common.labels.deleted') }}
+                </x-filter.item>
+            </x-filter.nav>
 
-
-        <div class="flex items-center justify-center space-x-2 action-section">
-            <x-button class="space-x-2" mode="gray" wire:click.prevent="resetFilter">
-                <x-icons.refresh-icon color="text-gray-400" hover="text-gray-200"></x-icons.refresh-icon>
-                <span>{{ __('services::common.actions.reset_filter') }}</span>
-            </x-button>
-            {{-- @can('manage-settings') --}}
-            <x-button class="space-x-2" mode="primary" wire:click.prevent="openSideMenu('add-user')">
-                <x-icons.add-user color="text-white" hover="text-gray-50"></x-icons.add-user>
-                <span>{{ __('services::users.actions.add_user') }}</span>
-            </x-button>
-            {{-- @endcan --}}
-        </div>
-    </div>
-
-    <div class="grid grid-cols-1 gap-4 my-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        <div>
-            <x-label for="q">{{ __('services::users.fields.user_name_or_email') }}</x-label>
-            <x-livewire-input id="q" name="q" mode="gray" wire:model.live="q"
-                autocomplete="off"></x-livewire-input>
-        </div>
-    </div>
-
-    <div class="flex flex-col space-y-2 mt-2">
-        <div class="relative min-h-[300px] -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-            <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-                <div class="overflow-visible">
-                    <x-table.tbl :headers="[__('services::common.labels.user'), __('services::common.labels.role'), __('services::common.labels.email'), __('services::common.labels.active_question'), __('services::common.labels.action'), __('services::common.labels.action')]">
-                        @forelse ($_users as $user)
-                            <tr wire:key="user-row-{{ $user->id }}">
-                                <x-table.td>
-                                    <span class="text-sm font-medium">
-                                        {{ $user->row_no }}. {{ $user->name }}
-                                    </span>
-                                </x-table.td>
-
-                                <x-table.td>
-                                    @if ($user->primary_role)
-                                        <span
-                                            class="bg-blue-100 text-blue-500 rounded-lg px-2 py-1 text-xs font-medium uppercase font-mono whitespace-no-wrap">
-                                            {{ $user->primary_role }}
-                                        </span>
-                                    @endif
-                                </x-table.td>
-
-                                <x-table.td>
-                                    <span class="text-sm font-normal text-gray-700">
-                                        {{ $user->email }}
-                                    </span>
-                                </x-table.td>
-
-                                <x-table.td>
-                                    <div class="flex items-center justify-start">
-                                        <x-icons.check-icon size="w-8 h-8" :color="$user->is_active ? 'text-green-400' : 'text-gray-300'"
-                                            :hover="$user->is_active ? 'text-green-500' : 'text-gray-400'"></x-icons.check-icon>
-                                    </div>
-                                </x-table.td>
-
-                                <x-table.td :isButton="true">
-                                    @if ($status == 2)
-                                        <div class="flex flex-col text-xs font-medium">
-                                            <div class="flex items-center space-x-1">
-                                                <span class="text-gray-500">{{ __('services::common.labels.deleted_date') }}:</span>
-                                                <span class="text-black">{{ $user->deleted_at_label }}</span>
-                                            </div>
-                                            <div class="flex items-center space-x-1">
-                                                <span class="text-gray-500">{{ __('services::common.labels.deleted_by') }}:</span>
-                                                <span class="text-black">{{ $user->deleted_by_name }}</span>
-                                            </div>
-                                        </div>
-                                    @else
-                                        {{-- @can('manage-settings') --}}
-                                        <x-action-button
-                                            wire:click.prevent="openSideMenu('edit-user',{{ $user->id }})"
-                                            class="h-9 w-9 bg-zinc-100 hover:bg-zinc-200"
-                                            :title="__('services::users.titles.edit')">
-                                            <x-icons.edit-icon color="text-slate-400"
-                                                hover="text-slate-500"></x-icons.edit-icon>
-                                        </x-action-button>
-                                        {{-- @endcan --}}
-                                    @endif
-                                </x-table.td>
-
-                                <x-table.td :isButton="true">
-                                    @if ($status == 2)
-                                        <x-action-button wire:click="restoreData({{ $user->id }})"
-                                            class="h-9 w-9 hover:bg-teal-50"
-                                            :title="__('services::common.actions.restore')">
-                                            <x-icons.recover color="text-teal-500"
-                                                hover="text-teal-600"></x-icons.recover>
-                                        </x-action-button>
-                                        {{-- @role('admin') --}}
-                                        <x-action-button
-                                            x-on:click="$dispatch('confirm-action', { tone: 'rose', message: @js(__('services::users.messages.force_delete_confirm')), confirmText: @js(__('services::common.actions.force_delete')), run: () => $wire.forceDeleteData({{ $user->id }}) })"
-                                            class="h-9 w-9 hover:bg-red-50"
-                                            :title="__('services::common.actions.force_delete')">
-                                            <x-icons.force-delete color="text-rose-400"
-                                                hover="text-rose-500"></x-icons.force-delete>
-                                        </x-action-button>
-                                        {{-- @endrole --}}
-                                    @else
-                                        {{-- @can('manage-settings') --}}
-                                        <x-action-button wire:click.prevent = "setDeleteUser({{ $user->id }})"
-                                            class="h-9 w-9 bg-rose-50 hover:bg-red-100"
-                                            :title="__('services::users.titles.delete')">
-                                            <x-icons.delete-icon color="text-rose-500"
-                                                hover="text-rose-600"></x-icons.delete-icon>
-                                        </x-action-button>
-                                        {{-- @endcan --}}
-                                    @endif
-                                </x-table.td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="9">
-                                </td>
-                            </tr>
-                        @endforelse
-                    </x-table.tbl>
-
+            <div class="flex flex-wrap items-center gap-2">
+                <div class="w-full sm:w-[240px]">
+                    <x-ui.input icon="search" id="q" name="q" wire:model.live.debounce.300ms="q" autocomplete="off" placeholder="{{ __('services::users.fields.user_name_or_email') }}" />
                 </div>
+
+                <x-pill-button variant="secondary" wire:click.prevent="resetFilter">{{ __('services::common.actions.reset_filter') }}</x-pill-button>
+
+                <x-pill-button variant="primary" wire:click.prevent="openSideMenu('add-user')">
+                    <x-icons.add-user color="text-current" hover="text-current" size="w-4 h-4"></x-icons.add-user>
+                    {{ __('services::users.actions.add_user') }}
+                </x-pill-button>
             </div>
         </div>
 
-        <div>
-            {{ $_users->links() }}
-        </div>
-    </div>
+        <x-table.tbl :headers="[
+            __('services::common.labels.user'),
+            __('services::common.labels.role'),
+            __('services::common.labels.email'),
+            __('services::common.labels.active_question'),
+            __('services::common.labels.action'),
+        ]">
+            @forelse ($_users as $user)
+                <tr wire:key="user-row-{{ $user->id }}">
+                    <x-table.td standart-width>
+                        <p class="truncate text-[13px] font-medium text-ink"><span class="hrm-num text-ink-faint">{{ $user->row_no }}.</span> {{ $user->name }}</p>
+                        @if ($status == 2)
+                            <p class="mt-0.5 truncate text-[11px] text-ink-faint">
+                                {{ __('services::common.labels.deleted_date') }}: <span class="hrm-num">{{ $user->deleted_at_label }}</span>
+                                <span class="px-0.5">·</span> {{ __('services::common.labels.deleted_by') }}: {{ $user->deleted_by_name }}
+                            </p>
+                        @endif
+                    </x-table.td>
 
-    {{-- @can('manage-settings') --}}
+                    <x-table.td>
+                        @if ($user->primary_role)
+                            <span class="inline-flex items-center rounded-md bg-[#f4f4f5] px-2 py-0.5 text-[11px] font-medium uppercase text-ink-muted">{{ $user->primary_role }}</span>
+                        @endif
+                    </x-table.td>
+
+                    <x-table.td><span class="text-[13px] text-ink-muted">{{ $user->email }}</span></x-table.td>
+
+                    <x-table.td>
+                        <span @class([
+                            'inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium',
+                            'bg-emerald-50 text-emerald-700' => $user->is_active,
+                            'bg-[#f4f4f5] text-ink-muted' => ! $user->is_active,
+                        ])>{{ $user->is_active ? __('services::common.labels.active') : __('services::common.labels.inactive') }}</span>
+                    </x-table.td>
+
+                    <x-table.td :isButton="true">
+                        <div class="flex items-center justify-end gap-1">
+                            @if ($status == 2)
+                                <button type="button" wire:click="restoreData({{ $user->id }})" title="{{ __('services::common.actions.restore') }}" class="{{ $restoreBtn }}">
+                                    <x-icons.recover color="text-current" hover="text-current" size="w-[17px] h-[17px]"></x-icons.recover>
+                                </button>
+
+                                {{-- a Blade directive is not compiled inside a component tag; Js::from through the echo tag is --}}
+                                <button type="button"
+                                    x-on:click="$dispatch('confirm-action', { tone: 'rose', message: {{ \Illuminate\Support\Js::from(__('services::users.messages.force_delete_confirm')) }}, confirmText: {{ \Illuminate\Support\Js::from(__('services::common.actions.force_delete')) }}, run: () => $wire.forceDeleteData({{ $user->id }}) })"
+                                    title="{{ __('services::common.actions.force_delete') }}" class="{{ $delBtn }}">
+                                    <x-icons.force-delete color="text-current" hover="text-current" size="w-[17px] h-[17px]"></x-icons.force-delete>
+                                </button>
+                            @else
+                                <button type="button" wire:click.prevent="openSideMenu('edit-user',{{ $user->id }})" title="{{ __('services::users.titles.edit') }}" class="{{ $editBtn }}">
+                                    <x-icons.edit-icon color="text-current" hover="text-current" size="w-[17px] h-[17px]"></x-icons.edit-icon>
+                                </button>
+
+                                <button type="button" wire:click.prevent="setDeleteUser({{ $user->id }})" title="{{ __('services::users.titles.delete') }}" class="{{ $delBtn }}">
+                                    <x-icons.delete-icon color="text-current" hover="text-current" size="w-[17px] h-[17px]"></x-icons.delete-icon>
+                                </button>
+                            @endif
+                        </div>
+                    </x-table.td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="5" class="px-4 py-4">
+                        <x-ui.empty-state icon="icons.users-icon" :title="__('services::common.labels.users')" />
+                    </td>
+                </tr>
+            @endforelse
+        </x-table.tbl>
+
+        <x-pagination :paginator="$_users" :unit="__('services::common.labels.users')" />
+    </section>
+
     <x-side-modal>
         @if ($showSideMenu == 'add-user')
             <livewire:services.users.add-user wire:key="services-user-add-modal" />
@@ -171,11 +115,8 @@
             <livewire:services.users.edit-user :userModel="$modelName" :key="'services-user-edit-modal-' . ($modelName ?? 'none')" />
         @endif
     </x-side-modal>
-    {{-- @endcan --}}
 
-    <div class="">
-        @auth
-            <livewire:services.users.delete-user wire:key="services-user-delete-modal" />
-        @endauth
-    </div>
+    @auth
+        <livewire:services.users.delete-user wire:key="services-user-delete-modal" />
+    @endauth
 </div>

@@ -6,11 +6,16 @@ use App\Livewire\Traits\SideModalAction;
 use App\Models\Order;
 use App\Models\OrderLog;
 use App\Modules\Orders\Domain\Contracts\OrderTypeStatusLookupReadRepository;
+use App\Modules\Orders\Exports\OrderExport;
+use App\Services\Orders\Document\OrderTemplateProvider;
 use App\Services\StructureService;
+use Carbon\Carbon;
 use DomainException;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Isolate;
 use Livewire\Attributes\Locked;
@@ -19,6 +24,8 @@ use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 #[On(['orderAdded', 'orderWasDeleted'])]
 class AllOrders extends Component
@@ -36,10 +43,10 @@ class AllOrders extends Component
     #[Locked]
     public array $accessibleStructureIds = [];
 
-    #[On('selectOrder')]
     public function selectOrder($id): void
     {
-        $this->selectedOrder = $id;
+        $this->selectedOrder = $id === '' ? null : $id;
+        $this->resetPage();
     }
 
     public function setStatus($newStatus): void
@@ -62,7 +69,6 @@ class AllOrders extends Component
     public function getTableHeaders(): array
     {
         return [
-            __('orders::order_list.table.row_no'),
             __('orders::order_list.table.order_no'),
             __('orders::order_list.table.type'),
             __('orders::order_list.table.given_date'),
@@ -175,17 +181,17 @@ class AllOrders extends Component
         $this->dispatch('orderAdded', __("orders::order_composer.messages.{$successKey}"));
     }
 
-    protected function returnData($type = 'normal')
+    /**
+     * The visibility-scoped, search-filtered order query every list read shares:
+     * the paginated table, the panel status counts and the panel type counts.
+     *
+     * @return Builder<OrderLog>
+     */
+    protected function baseQuery(): Builder
     {
         $globalOrderIds = Order::globalVisibilityOrderIds();
 
-        $result = OrderLog::query()
-            ->with([
-                'order:id,name',
-                'status:id,name',
-                'orderType:id,name',
-            ])
-            ->when($this->status === 'deleted', fn ($query) => $query->with('personDidDelete:id,name'))
+        return OrderLog::query()
             ->where(function ($query) use ($globalOrderIds) {
                 // Globally-visible legacy orders OR orders whose personnel sit in an
                 // accessible structure. orWhereHas (not whereNotIn) so block-engine
@@ -202,8 +208,35 @@ class AllOrders extends Component
                         ->where('template_render_mode', \App\Services\Orders\Document\OrderIssueService::RENDER_MODE_DOCX)
                         ->whereIn('template_snapshot->hire_structure_id', $this->accessibleStructureIds));
             })
-            ->filter($this->search ?? [])
-            ->when($this->selectedOrder, fn ($q) => $q->where('order_id', $this->selectedOrder))
+            ->filter($this->search ?? []);
+    }
+
+    /**
+     * The base query narrowed to the selected order type, which the list and the
+     * status counts both sit inside.
+     *
+     * @return Builder<OrderLog>
+     */
+    protected function scopedQuery(): Builder
+    {
+        return $this->baseQuery()->when($this->selectedOrder, function ($q) {
+            // Legacy block orders are addressed by order id; Word-engine orders have
+            // no order_id and are addressed by the template code in their snapshot.
+            return Str::startsWith((string) $this->selectedOrder, 'tpl:')
+                ? $q->where('template_snapshot->template_code', Str::after((string) $this->selectedOrder, 'tpl:'))
+                : $q->where('order_id', $this->selectedOrder);
+        });
+    }
+
+    protected function returnData($type = 'normal')
+    {
+        $result = $this->scopedQuery()
+            ->with([
+                'order:id,name',
+                'status:id,name',
+                'orderType:id,name',
+            ])
+            ->when($this->status === 'deleted', fn ($query) => $query->with('personDidDelete:id,name'))
             ->when(is_numeric($this->status), fn ($q) => $q->where('status_id', $this->status))
             ->when($this->status === 'deleted', fn ($q) => $q->onlyTrashed())
             ->orderByDesc('given_date');
@@ -215,11 +248,8 @@ class AllOrders extends Component
 
     protected function decoratePagination(LengthAwarePaginator $paginated): LengthAwarePaginator
     {
-        $start = ($paginated->currentPage() - 1) * $paginated->perPage();
-
         $paginated->setCollection(
-            $paginated->getCollection()->values()->map(function (OrderLog $order, int $index) use ($start) {
-                $order->row_no = $start + $index + 1;
+            $paginated->getCollection()->values()->map(function (OrderLog $order) {
                 $order->status_color_id = match ((int) $order->status_id) {
                     20 => 70,
                     30 => 90,
@@ -237,6 +267,89 @@ class AllOrders extends Component
     public function orders(): LengthAwarePaginator
     {
         return $this->returnData();
+    }
+
+    /**
+     * Order counts per status for the contextual panel, keyed by status id plus
+     * the two synthetic buckets the panel also offers ("all" and "deleted").
+     *
+     * @return array<array-key, int>
+     */
+    #[Computed]
+    public function statusCounts(): array
+    {
+        // The selected type is the outer scope, so the status counts sit inside it;
+        // the type counts (typeFilters) stay independent of the status filter.
+        $perStatus = $this->scopedQuery()
+            ->toBase()
+            ->selectRaw('status_id, count(*) as aggregate')
+            ->groupBy('status_id')
+            ->pluck('aggregate', 'status_id');
+
+        $counts = ['all' => (int) $perStatus->sum()];
+
+        foreach ($perStatus as $statusId => $total) {
+            $counts[(int) $statusId] = (int) $total;
+        }
+
+        if (auth()->user()?->hasRole('Admin')) {
+            $counts['deleted'] = $this->scopedQuery()->onlyTrashed()->count();
+        }
+
+        return $counts;
+    }
+
+    /**
+     * The panel's order-type filters: every Word-engine template (the current engine)
+     * plus any legacy block type that still holds orders, each counted inside the
+     * current visibility + search scope.
+     *
+     * @return list<array{key: string, label: string, count: int}>
+     */
+    #[Computed]
+    public function typeFilters(): array
+    {
+        $byTemplate = $this->baseQuery()
+            ->toBase()
+            ->selectRaw('count(*) as aggregate')
+            ->addSelect('template_snapshot->template_code as code')
+            ->groupBy('template_snapshot->template_code')
+            ->pluck('aggregate', 'code')
+            // MySQL's json_extract keeps the JSON quoting, SQLite's does not.
+            ->mapWithKeys(fn ($total, $code): array => [trim((string) $code, '"') => (int) $total])
+            ->all();
+
+        $filters = [];
+
+        foreach (app(OrderTemplateProvider::class)->available() as $code => $label) {
+            $filters[] = ['key' => 'tpl:'.$code, 'label' => $label, 'count' => $byTemplate[$code] ?? 0];
+        }
+
+        $byLegacy = $this->baseQuery()
+            ->toBase()
+            ->whereNotNull('order_id')
+            ->selectRaw('order_id, count(*) as aggregate')
+            ->groupBy('order_id')
+            ->pluck('aggregate', 'order_id');
+
+        if ($byLegacy->isNotEmpty()) {
+            foreach (Order::query()->whereIn('id', $byLegacy->keys())->orderBy('name')->pluck('name', 'id') as $id => $label) {
+                $filters[] = ['key' => (string) $id, 'label' => (string) $label, 'count' => (int) $byLegacy[$id]];
+            }
+        }
+
+        return $filters;
+    }
+
+    public function exportExcel(): BinaryFileResponse
+    {
+        $this->authorize('viewAny', Order::class);
+        abort_unless((bool) auth()->user()?->can('export-orders'), 403);
+
+        return Excel::download(
+            new OrderExport($this->returnData('excel')),
+            'orders-'.Carbon::now()->format('d.m.Y H:i').'.xlsx'
+        );
     }
 
     #[Isolate]

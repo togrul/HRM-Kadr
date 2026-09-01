@@ -1,25 +1,39 @@
-<div class="flex flex-col">
-    <div class="flex space-x-4">
-        @can('add-personnels')
-            <x-action-button wire:click="openSideMenu('add-personnel')" wire:loading.attr="disabled" wire:target="openSideMenu" class="hover:bg-blue-50" title="{{ __('personnel::common.titles.new_personnel') }}" aria-label="{{ __('personnel::common.titles.new_personnel') }}">
-                <x-icons.add-file />
-            </x-action-button>
-        @endcan
+<x-filter-button :filters="$this->filters" wire:click="openFilter" wire:loading.attr="disabled" wire:target="openFilter" />
 
-        @can('export-personnels')
-            <x-action-button wire:click.prevent="exportExcel" wire:loading.class="opacity-75 pointer-events-none" wire:target="exportExcel" class="hover:bg-green-50" title="{{ __('personnel::common.actions.export_excel') }}" aria-label="{{ __('personnel::common.actions.export_excel') }}">
-                <x-icons.excel-icon />
-            </x-action-button>
-        @endcan
+@if (count($this->filters) > 0)
+    <x-pill-button
+        variant="danger"
+        wire:click="resetSelectedFilter"
+        wire:loading.attr="disabled"
+        wire:target="resetSelectedFilter"
+    >
+        <x-icons.remove-icon size="w-4 h-4" color="text-current" hover="text-current" />
+        <span>{{ __('personnel::common.actions.reset_filter') }}</span>
+    </x-pill-button>
+@endif
 
-        <x-filter-button :filters="$this->filters" wire:click="openFilter" wire:loading.attr="disabled" wire:target="openFilter" />
-    </div>
+@can('export-personnels')
+    <x-pill-button
+        variant="emerald"
+        icon
+        wire:click.prevent="exportExcel"
+        wire:loading.class="opacity-75 pointer-events-none"
+        wire:target="exportExcel"
+        :title="__('personnel::common.actions.export_excel')"
+        :aria-label="__('personnel::common.actions.export_excel')"
+    >
+        <x-icons.excel-icon size="w-[18px] h-[18px]" />
+    </x-pill-button>
+@endcan
 
-    @if (count($this->filters) > 0)
-        <button wire:click="resetSelectedFilter" wire:loading.attr="disabled" wire:target="resetSelectedFilter"
-            class="appearance-none text-rose-500 text-sm font-medium flex items-center space-x-2 justify-end">
-            <x-icons.remove-icon />
-            <span>{{ __('personnel::common.actions.reset_filter') }}</span>
-        </button>
-    @endif
-</div>
+@can('add-personnels')
+    <x-pill-button
+        variant="primary"
+        wire:click="openSideMenu('add-personnel')"
+        wire:loading.attr="disabled"
+        wire:target="openSideMenu"
+    >
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        <span>{{ __('personnel::common.titles.new_personnel') }}</span>
+    </x-pill-button>
+@endcan

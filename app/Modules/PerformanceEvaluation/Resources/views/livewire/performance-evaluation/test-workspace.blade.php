@@ -1,9 +1,9 @@
 <div class="flex flex-col space-y-4 px-4 py-4 lg:px-6" wire:poll.5s="heartbeat">
     <div class="flex items-center justify-between gap-3">
-        <a href="{{ $this->backUrl }}" class="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-700 shadow-sm transition hover:bg-zinc-50">
+        <x-pill-button :href="$this->backUrl">
             <span aria-hidden="true">←</span>
             <span>{{ __('performance_evaluation::dashboard.actions.back_to_performance_dashboard') }}</span>
-        </a>
+        </x-pill-button>
     </div>
 
     <x-surface-card :title="__('performance_evaluation::dashboard.cards.test_taking_workspace')" icon="icons.performance-icon" contentClass="overflow-visible p-5">
@@ -98,7 +98,7 @@
         <x-surface-card :title="__('performance_evaluation::dashboard.cards.test_session_runner')" icon="icons.training-icon" bodyClass="overflow-visible" contentClass="overflow-visible p-4">
             @if ($this->selectedSession)
                 <div class="space-y-4" wire:key="test-runner-{{ $selectedSessionId }}-{{ $runnerVersion }}">
-                    <div class="rounded-[28px] border border-zinc-200 bg-gradient-to-r from-zinc-50 to-white px-4 py-4">
+                    <div class="rounded-2xl border border-zinc-200 bg-gradient-to-r from-zinc-50 to-white px-4 py-4">
                         <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                             <div class="space-y-2">
                                 <p class="text-lg font-semibold text-zinc-900">{{ $this->selectedSession->bank?->name ?? '—' }}</p>
@@ -141,7 +141,7 @@
                         </div>
                     </div>
 
-                    <div class="rounded-3xl border border-zinc-200 bg-white p-4">
+                    <div class="rounded-2xl border border-zinc-200 bg-white p-4">
                         <div class="space-y-4">
                             <div class="flex flex-wrap gap-2">
                                 @foreach ($this->questionNavigation as $questionNav)
@@ -189,9 +189,9 @@
                                         </div>
                                         <div class="mt-4 flex flex-wrap gap-2">
                                             @if ($this->selectedAttemptAnalytics['attempt'])
-                                                <a href="{{ route('performance-evaluation.test-transcript', $this->selectedAttemptAnalytics['attempt']) }}" target="_blank" class="inline-flex h-11 items-center justify-center rounded-2xl bg-white px-4 text-sm font-medium text-zinc-900 shadow-sm ring-1 ring-zinc-200">
+                                                <x-button type="link" href="{{ route('performance-evaluation.test-transcript', $this->selectedAttemptAnalytics['attempt']) }}" target="_blank">
                                                     {{ __('performance_evaluation::dashboard.actions.open_test_transcript') }}
-                                                </a>
+                                                </x-button>
                                             @endif
                                             @if ($this->hasNextActionableSession)
                                                 <x-button mode="black" wire:click="openNextActionableSession">{{ __('performance_evaluation::dashboard.actions.open_next_test_session') }}</x-button>

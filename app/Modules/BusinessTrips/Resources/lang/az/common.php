@@ -15,6 +15,11 @@ return [
         'deleted' => 'Silinmiş',
         'search' => 'Axtar',
         'reset' => 'Sıfırla',
+        'show_all' => 'Hamısını göstər',
+        'locations' => 'Məkanlar',
+        'search_placeholder' => 'Soyad, ad və ya məkan',
+        'date_start' => 'başlama',
+        'date_end' => 'bitmə',
     ],
     'table' => [
         'title' => 'Ezamiyyətlər',
@@ -32,6 +37,10 @@ return [
         'given_date' => 'Verilmə tarixi',
         'order_type' => 'Əmr növü',
         'extra_info' => 'Əlavə məlumat',
+        'unit' => 'ezamiyyət',
+        'in_trip_summary' => ':count nəfər ezamiyyətdədir',
+        'print_document' => 'Ezamiyyət kağızı',
+        'open_order' => 'Əmrə keç',
     ],
     'fields' => [
         'structure' => 'Struktur',
@@ -52,6 +61,9 @@ return [
     'boolean' => [
         'yes' => 'var',
         'no' => 'yoxdur',
+    ],
+    'actions' => [
+        'export_excel' => 'Excel-ə çıxar',
     ],
     'messages' => [
         'order_not_ready' => 'Bu ezamiyyət müraciəti hələ təsdiqlənmiş əmrlə bağlanmayıb.',

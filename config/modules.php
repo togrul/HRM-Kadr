@@ -57,6 +57,15 @@ return [
             'enabled' => true,
             'migrations' => app_path('Modules/Vacation/Database/Migrations'),
         ],
+        // API-only: it exposes what this system owns so a finance system can
+        // read it. Disabling it removes the routes, which is how a standalone
+        // installation runs.
+        'integration' => [
+            'provider' => \App\Modules\Integration\Providers\IntegrationServiceProvider::class,
+            'enabled' => true,
+            'migrations' => app_path('Modules/Integration/Database/Migrations'),
+        ],
+
         'admin' => [
             'provider' => \App\Modules\Admin\Providers\AdminServiceProvider::class,
             'enabled' => true,

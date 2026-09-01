@@ -121,7 +121,7 @@
                     wire:key="kinships-{{ $rowKey }}"
                     @class([
                         'transition-all duration-300 hover:border-zinc-300 hover:bg-zinc-100/80' => ! $isEditing,
-                        '!border-sky-300 !bg-sky-50/70 shadow-[0_18px_40px_-28px_rgba(14,165,233,0.45)] ring-1 ring-sky-200' => $isEditing,
+                        '!border-sky-300 !bg-sky-50/70 shadow-card ring-1 ring-sky-200' => $isEditing,
                     ])
                 >
                     <x-slot name="title">
@@ -144,12 +144,12 @@
                             <div class="flex items-center gap-2">
                                 <button
                                     wire:click="editKinship('{{ $rowKey }}')"
-                                    class="flex h-10 w-10 items-center justify-center rounded-full border border-white/80 bg-white text-slate-300 shadow-[0_12px_28px_-18px_rgba(15,23,42,0.22)] transition hover:text-sky-500">
+                                    class="flex h-10 w-10 items-center justify-center rounded-full border border-white/80 bg-white text-slate-300 shadow-card transition hover:text-sky-500">
                                     <x-icons.edit-icon color="{{ $isEditing ? 'text-sky-500' : 'text-slate-300' }}" hover="{{ $isEditing ? 'text-sky-600' : 'text-sky-500' }}"></x-icons.edit-icon>
                                 </button>
                                 <button
                                     x-on:click="$dispatch('confirm-action', { tone: 'rose', message: @js(__('personnel::common.messages.remove_data_confirm')), confirmText: @js(__('ui::common.actions.delete')), run: () => $wire.forceDeleteKinship('{{ $rowKey }}') })"
-                                    class="flex h-10 w-10 items-center justify-center rounded-full border border-white/80 bg-white text-rose-300 shadow-[0_12px_28px_-18px_rgba(15,23,42,0.22)] transition hover:text-rose-500">
+                                    class="flex h-10 w-10 items-center justify-center rounded-full border border-white/80 bg-white text-rose-300 shadow-card transition hover:text-rose-500">
                                     <x-icons.force-delete color="text-rose-300" hover="text-rose-500"></x-icons.force-delete>
                                 </button>
                             </div>

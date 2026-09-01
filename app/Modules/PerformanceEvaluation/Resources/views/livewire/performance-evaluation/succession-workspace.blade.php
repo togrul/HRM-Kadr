@@ -42,11 +42,10 @@
                         default => ['openAssess', __('performance_evaluation::succession.actions.assess')],
                     };
                 @endphp
-                <button type="button" wire:click="{{ $headerAction[0] }}"
-                    class="inline-flex h-12 items-center gap-2 rounded-2xl bg-zinc-900 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-zinc-800 active:scale-[0.98]">
-                    <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                <x-pill-button variant="primary" class="shrink-0" wire:click="{{ $headerAction[0] }}">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
                     {{ $headerAction[1] }}
-                </button>
+                </x-pill-button>
             @endcan
         </div>
     </div>
@@ -78,7 +77,7 @@
 
     @if ($section === 'grid')
         {{-- ───────────── 9-box grid ───────────── --}}
-        <div class="rounded-3xl border border-zinc-200/70 bg-white p-5 shadow-sm">
+        <div class="rounded-2xl border border-zinc-200/70 bg-white p-5 shadow-sm">
             <div class="flex gap-3">
                 {{-- y axis --}}
                 <div class="flex w-6 items-center justify-center">
@@ -119,7 +118,7 @@
         {{-- ───────────── succession plans ───────────── --}}
         <div class="flex flex-col gap-3">
             @forelse ($this->plans as $plan)
-                <div wire:key="succ-plan-{{ $plan->id }}" class="rounded-3xl border border-zinc-200/70 bg-white p-5 shadow-sm">
+                <div wire:key="succ-plan-{{ $plan->id }}" class="rounded-2xl border border-zinc-200/70 bg-white p-5 shadow-sm">
                     <div class="flex flex-wrap items-start justify-between gap-3">
                         <div class="min-w-0">
                             <div class="flex items-center gap-2">
@@ -193,7 +192,7 @@
                     </div>
                 </div>
             @empty
-                <div class="rounded-3xl border border-zinc-200/70 bg-white px-6 py-16 text-center shadow-sm">
+                <div class="rounded-2xl border border-zinc-200/70 bg-white px-6 py-16 text-center shadow-sm">
                     <p class="text-sm font-medium text-zinc-700">{{ __('performance_evaluation::succession.empty_plans') }}</p>
                     <p class="mt-1 text-[13px] text-zinc-400">{{ __('performance_evaluation::succession.empty_plans_subtitle') }}</p>
                 </div>
@@ -203,7 +202,7 @@
         {{-- ───────────── talent pools ───────────── --}}
         <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
             @forelse ($this->pools as $pool)
-                <div wire:key="succ-pool-{{ $pool->id }}" class="rounded-3xl border border-zinc-200/70 bg-white p-5 shadow-sm">
+                <div wire:key="succ-pool-{{ $pool->id }}" class="rounded-2xl border border-zinc-200/70 bg-white p-5 shadow-sm">
                     <div class="flex items-start justify-between gap-3">
                         <div class="min-w-0">
                             <div class="flex items-center gap-2">
@@ -251,7 +250,7 @@
                     @endcan
                 </div>
             @empty
-                <div class="rounded-3xl border border-zinc-200/70 bg-white px-6 py-16 text-center shadow-sm md:col-span-2">
+                <div class="rounded-2xl border border-zinc-200/70 bg-white px-6 py-16 text-center shadow-sm md:col-span-2">
                     <p class="text-sm font-medium text-zinc-700">{{ __('performance_evaluation::succession.empty_pools') }}</p>
                     <p class="mt-1 text-[13px] text-zinc-400">{{ __('performance_evaluation::succession.empty_pools_subtitle') }}</p>
                 </div>
@@ -266,7 +265,7 @@
                 <div class="flex h-full flex-col">
                     <div class="mb-7">
                         <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-zinc-400">{{ __('performance_evaluation::succession.eyebrow') }}</p>
-                        <h2 class="mt-1.5 text-2xl font-semibold tracking-tight text-zinc-950">{{ __('performance_evaluation::succession.actions.assess') }}</h2>
+                        <h2 class="mt-1.5 text-[18px] font-semibold tracking-tight text-zinc-950">{{ __('performance_evaluation::succession.actions.assess') }}</h2>
                     </div>
                     <div class="grid grid-cols-1 gap-5">
                         <div>
@@ -321,7 +320,7 @@
                 <div class="flex h-full flex-col">
                     <div class="mb-7">
                         <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-zinc-400">{{ __('performance_evaluation::succession.eyebrow') }}</p>
-                        <h2 class="mt-1.5 text-2xl font-semibold tracking-tight text-zinc-950">{{ __('performance_evaluation::succession.actions.add_plan') }}</h2>
+                        <h2 class="mt-1.5 text-[18px] font-semibold tracking-tight text-zinc-950">{{ __('performance_evaluation::succession.actions.add_plan') }}</h2>
                     </div>
                     <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
                         <div class="sm:col-span-2">
@@ -387,7 +386,7 @@
                 <div class="flex h-full flex-col">
                     <div class="mb-7">
                         <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-zinc-400">{{ __('performance_evaluation::succession.eyebrow') }}</p>
-                        <h2 class="mt-1.5 text-2xl font-semibold tracking-tight text-zinc-950">{{ __('performance_evaluation::succession.actions.add_pool') }}</h2>
+                        <h2 class="mt-1.5 text-[18px] font-semibold tracking-tight text-zinc-950">{{ __('performance_evaluation::succession.actions.add_pool') }}</h2>
                     </div>
                     <div class="grid grid-cols-1 gap-5">
                         <div>
@@ -418,4 +417,5 @@
             @endif
         </x-side-modal>
     @endcan
+
 </div>

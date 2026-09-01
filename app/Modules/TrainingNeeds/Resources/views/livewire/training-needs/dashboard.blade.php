@@ -1,109 +1,132 @@
-<div class="flex flex-col space-y-4 px-6 py-4">
-    <x-surface-card :title="__('training_needs::dashboard.title')" icon="icons.folder-plus-icon">
-        <div class="space-y-4">
-            <div class="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
-                <div class="space-y-1">
-                    <p class="text-[11px] font-semibold uppercase text-zinc-400">{{ __('training_needs::dashboard.workspace.title') }}</p>
-                    <p class="max-w-3xl text-sm text-zinc-500">{{ __('training_needs::dashboard.workspace.description') }}</p>
-                    <div class="pt-2">
-                        <a
-                            href="{{ route('docs.guide', ['focus' => 'training']) }}#training-module"
-                            class="inline-flex items-center justify-center rounded-2xl border border-sky-200 bg-sky-50 px-4 py-2.5 text-sm font-semibold text-sky-800 transition hover:border-sky-300 hover:bg-sky-100"
-                        >
-                            {{ __('training_needs::dashboard.actions.open_user_guide') }}
-                        </a>
+@php
+    $contextTabs = ['overview', 'catalogs', 'matrix', 'profiles', 'planning', 'calendar', 'results', 'analytics', 'reports', 'lists'];
+    $stats = $this->stats;
+    $plan = $this->annualPlan;
+
+    // Only the tabs whose row count is unambiguous carry a number, and only once there is
+    // something to count — a column of zeros reads as broken, not as information.
+    $tabCounts = array_filter([
+        'planning' => (int) $stats['plan_items'],
+        'calendar' => (int) $stats['sessions'],
+        'results' => (int) $stats['deliveries'],
+    ]);
+@endphp
+
+<div class="flex flex-col">
+    {{-- ===================== contextual panel ===================== --}}
+    <x-slot name="sidebar"><div id="hrm-context-panel"></div></x-slot>
+
+    @teleport('#hrm-context-panel')
+        <x-context-panel
+            :title="__('training_needs::dashboard.panel.title')"
+            :subtitle="$plan['title'] ?? null"
+        >
+            <x-context-panel.section :title="__('training_needs::dashboard.panel.sections')">
+                @foreach ($contextTabs as $tab)
+                    <x-context-panel.item
+                        wire:key="training-panel-tab-{{ $tab }}"
+                        wire:click.prevent="switchTab('{{ $tab }}')"
+                        wire:loading.attr="disabled"
+                        wire:target="switchTab"
+                        :active="$activeTab === $tab"
+                        :count="$tabCounts[$tab] ?? null"
+                    >{{ __('training_needs::dashboard.tabs.'.$tab) }}</x-context-panel.item>
+                @endforeach
+            </x-context-panel.section>
+
+            @if ($plan)
+                <x-context-panel.section :title="__('training_needs::dashboard.panel.annual_plan')" :padded="false">
+                    <div class="px-3.5 pb-3.5 pt-1">
+                        <p class="truncate text-[13px] font-semibold tracking-[-0.02em] text-ink">{{ $plan['title'] }}</p>
+                        <p class="mt-0.5 text-[11px] text-ink-faint">
+                            {{ __('training_needs::dashboard.plan_statuses.'.$plan['status']) }}
+                            <span class="px-0.5">·</span>
+                            <span class="hrm-num">{{ $plan['items'] }}</span> {{ __('training_needs::dashboard.panel.plan_items_unit') }}
+                        </p>
+                        <div class="mt-2 flex items-center gap-2">
+                            <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-[#f4f4f5]">
+                                <div class="h-full rounded-full bg-ink" style="width: {{ $plan['percent'] }}%"></div>
+                            </div>
+                            <span class="hrm-num shrink-0 text-[11px] font-semibold text-ink">{{ $plan['percent'] }}%</span>
+                        </div>
                     </div>
-                </div>
+                </x-context-panel.section>
+            @endif
+        </x-context-panel>
+    @endteleport
 
-                <div class="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
-                    <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
-                        <p class="text-[11px] font-semibold uppercase text-emerald-700">{{ __('training_needs::dashboard.stats.groups') }}</p>
-                        <p class="mt-1 text-2xl font-semibold text-emerald-900">{{ $this->stats['groups'] }}</p>
-                    </div>
-                    <div class="rounded-xl border border-sky-200 bg-sky-50 px-4 py-3">
-                        <p class="text-[11px] font-semibold uppercase text-sky-700">{{ __('training_needs::dashboard.stats.competencies') }}</p>
-                        <p class="mt-1 text-2xl font-semibold text-sky-900">{{ $this->stats['competencies'] }}</p>
-                    </div>
-                    <div class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
-                        <p class="text-[11px] font-semibold uppercase text-amber-700">{{ __('training_needs::dashboard.stats.programs') }}</p>
-                        <p class="mt-1 text-2xl font-semibold text-amber-900">{{ $this->stats['programs'] }}</p>
-                    </div>
-                    <div class="rounded-xl border border-violet-200 bg-violet-50 px-4 py-3">
-                        <p class="text-[11px] font-semibold uppercase text-violet-700">{{ __('training_needs::dashboard.stats.requirements') }}</p>
-                        <p class="mt-1 text-2xl font-semibold text-violet-900">{{ $this->stats['requirements'] }}</p>
-                    </div>
-                </div>
-            </div>
+    {{-- ===================== header ===================== --}}
+    <x-page-header
+        :title="__('training_needs::dashboard.title')"
+        :breadcrumb="__('training_needs::dashboard.panel.title')"
+    >
+        <x-slot:icon>
+            <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5"/></svg>
+        </x-slot:icon>
 
-            <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-3">
-                <div class="mb-2 flex items-center justify-between gap-2">
-                    <p class="text-[11px] font-semibold uppercase text-zinc-400">{{ __('training_needs::dashboard.sections.title') }}</p>
-                    <span class="text-xs text-zinc-500">{{ __('training_needs::dashboard.sections.description') }}</span>
-                </div>
+        <x-slot:stats>
+            <x-page-header.stat :value="$stats['needs']" :label="__('training_needs::dashboard.stats.needs')" />
+            <x-page-header.stat :value="$stats['plan_items']" :label="__('training_needs::dashboard.stats.plan_items')" />
+            <x-page-header.stat :value="$stats['sessions']" :label="__('training_needs::dashboard.stats.sessions')" />
+        </x-slot:stats>
 
-                <x-filter.nav class="min-w-0">
-                    <x-filter.item wire:click.prevent="switchTab('overview')" :active="$activeTab === 'overview'">
-                        {{ __('training_needs::dashboard.tabs.overview') }}
-                    </x-filter.item>
-                    <x-filter.item wire:click.prevent="switchTab('catalogs')" :active="$activeTab === 'catalogs'">
-                        {{ __('training_needs::dashboard.tabs.catalogs') }}
-                    </x-filter.item>
-                    <x-filter.item wire:click.prevent="switchTab('matrix')" :active="$activeTab === 'matrix'">
-                        {{ __('training_needs::dashboard.tabs.matrix') }}
-                    </x-filter.item>
-                    <x-filter.item wire:click.prevent="switchTab('profiles')" :active="$activeTab === 'profiles'">
-                        {{ __('training_needs::dashboard.tabs.profiles') }}
-                    </x-filter.item>
-                    <x-filter.item wire:click.prevent="switchTab('planning')" :active="$activeTab === 'planning'">
-                        {{ __('training_needs::dashboard.tabs.planning') }}
-                    </x-filter.item>
-                    <x-filter.item wire:click.prevent="switchTab('calendar')" :active="$activeTab === 'calendar'">
-                        {{ __('training_needs::dashboard.tabs.calendar') }}
-                    </x-filter.item>
-                    <x-filter.item wire:click.prevent="switchTab('results')" :active="$activeTab === 'results'">
-                        {{ __('training_needs::dashboard.tabs.results') }}
-                    </x-filter.item>
-                    <x-filter.item wire:click.prevent="switchTab('analytics')" :active="$activeTab === 'analytics'">
-                        {{ __('training_needs::dashboard.tabs.analytics') }}
-                    </x-filter.item>
-                    <x-filter.item wire:click.prevent="switchTab('reports')" :active="$activeTab === 'reports'">
-                        {{ __('training_needs::dashboard.tabs.reports') }}
-                    </x-filter.item>
-                    <x-filter.item wire:click.prevent="switchTab('lists')" :active="$activeTab === 'lists'">
-                        {{ __('training_needs::dashboard.tabs.lists') }}
-                    </x-filter.item>
-                </x-filter.nav>
-            </div>
-        </div>
-    </x-surface-card>
+        <x-slot:actions>
+            <x-pill-button wire:click.prevent="switchTab('calendar')" wire:loading.attr="disabled" wire:target="switchTab">
+                {{ __('training_needs::dashboard.tabs.calendar') }}
+            </x-pill-button>
 
-    @if ($activeTab === 'overview')
-        <livewire:training-needs.overview lazy />
-    @endif
+            <x-pill-button :href="route('training-needs.print-summary')" target="_blank" :icon="true"
+                title="{{ __('training_needs::dashboard.actions.open_print_summary') }}">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
+            </x-pill-button>
 
-    @if (in_array($activeTab, ['catalogs', 'matrix', 'profiles'], true))
-        <livewire:training-needs.foundation-workspace :tab="$activeTab" :key="'training-needs-foundation-'.$activeTab" lazy />
-    @endif
+            <x-pill-button variant="primary" wire:click.prevent="switchTab('profiles')" wire:loading.attr="disabled" wire:target="switchTab">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                {{ __('training_needs::dashboard.title') }}
+            </x-pill-button>
+        </x-slot:actions>
 
-    @if (in_array($activeTab, ['planning', 'calendar'], true))
-        <livewire:training-needs.operations-workspace :tab="$activeTab" :key="'training-needs-operations-'.$activeTab" lazy />
-    @endif
+        {{-- small-screen fallback for the panel's section list --}}
+        <x-filter.nav wrap class="min-w-0 lg:hidden">
+            @foreach ($contextTabs as $tab)
+                <x-filter.item
+                    wire:key="training-chip-{{ $tab }}"
+                    wire:click.prevent="switchTab('{{ $tab }}')"
+                    :active="$activeTab === $tab"
+                >{{ __('training_needs::dashboard.tabs.'.$tab) }}</x-filter.item>
+            @endforeach
+        </x-filter.nav>
+    </x-page-header>
 
-    @if ($activeTab === 'results')
-        <livewire:training-needs.results-workspace :tab="$activeTab" :key="'training-needs-results-'.$activeTab" lazy />
-    @endif
+    {{-- ===================== body ===================== --}}
+    <div class="px-4 py-4 sm:px-5">
+        @if ($activeTab === 'overview')
+            <livewire:training-needs.overview lazy />
+        @endif
 
-    @if ($activeTab === 'analytics')
-        <livewire:training-needs.analytics lazy />
-    @endif
+        @if (in_array($activeTab, ['catalogs', 'matrix', 'profiles'], true))
+            <livewire:training-needs.foundation-workspace :tab="$activeTab" :key="'training-needs-foundation-'.$activeTab" lazy />
+        @endif
 
-    @if ($activeTab === 'reports')
-        <livewire:training-needs.reports :key="'training-needs-reports-'.$reportsVersion" lazy />
-    @endif
+        @if (in_array($activeTab, ['planning', 'calendar'], true))
+            <livewire:training-needs.operations-workspace :tab="$activeTab" :key="'training-needs-operations-'.$activeTab" lazy />
+        @endif
 
-    @if ($activeTab === 'lists')
-        <livewire:training-needs.lists lazy />
-    @endif
+        @if ($activeTab === 'results')
+            <livewire:training-needs.results-workspace :tab="$activeTab" :key="'training-needs-results-'.$activeTab" lazy />
+        @endif
 
-    <x-ui.delete-confirmation-modal />
+        @if ($activeTab === 'analytics')
+            <livewire:training-needs.analytics lazy />
+        @endif
+
+        @if ($activeTab === 'reports')
+            <livewire:training-needs.reports :key="'training-needs-reports-'.$reportsVersion" lazy />
+        @endif
+
+        @if ($activeTab === 'lists')
+            <livewire:training-needs.lists lazy />
+        @endif
+    </div>
+
 </div>

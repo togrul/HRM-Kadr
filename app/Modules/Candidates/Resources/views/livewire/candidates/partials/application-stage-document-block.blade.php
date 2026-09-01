@@ -1,5 +1,5 @@
 @if ($this->documentChecklist)
-    <div class="mt-4 rounded-[24px] border border-slate-200 bg-white p-4">
+    <div class="mt-4 rounded-2xl border border-slate-200 bg-white p-4">
         <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">
             {{ __('candidates::recruitment.titles.document_requirements') }}
         </div>

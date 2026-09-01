@@ -372,6 +372,10 @@ class ShiftManagement extends Component
                         'structure_path',
                         $structurePathService->resolve((int) $assignment->personnel->structure_id)
                     );
+                    $assignment->personnel->setAttribute(
+                        'structure_name',
+                        $structurePathService->current((int) $assignment->personnel->structure_id)
+                    );
                 }
 
                 return $assignment;
@@ -415,6 +419,11 @@ class ShiftManagement extends Component
                 ->get()
                 ->map(function (Personnel $personnel) use ($structurePathService) {
                     $personnel->setAttribute('structure_path', $structurePathService->resolve((int) $personnel->structure_id));
+                    $personnel->setAttribute('structure_name', $structurePathService->current((int) $personnel->structure_id));
+                    $personnel->setAttribute(
+                        'structure_name',
+                        $structurePathService->current((int) $personnel->structure_id)
+                    );
 
                     return $personnel;
                 });
@@ -490,6 +499,10 @@ class ShiftManagement extends Component
             $selectedPersonnelRecord->setAttribute(
                 'structure_path',
                 $structurePathService->resolve((int) $selectedPersonnelRecord->structure_id)
+            );
+            $selectedPersonnelRecord->setAttribute(
+                'structure_name',
+                $structurePathService->current((int) $selectedPersonnelRecord->structure_id)
             );
         }
 

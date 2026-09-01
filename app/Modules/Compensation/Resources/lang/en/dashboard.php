@@ -26,6 +26,8 @@ return [
         'rate' => 'Rate (%)',
         'brackets' => 'Brackets',
         'default_regime' => 'All regimes (default)',
+        'bracket_count' => ':count brackets',
+        'top_rate' => '(top rate)',
         'components' => [
             'income_tax' => 'Income tax',
             'dsmf' => 'DSMF',
@@ -53,6 +55,8 @@ return [
         'title' => 'Pay scales',
         'list' => 'Scales',
         'empty' => 'No scales yet',
+        'subtitle' => 'Minimum, midpoint and maximum by grade',
+        'meta' => ':scales scales · :grades grades',
     ],
 
     'grades' => [
@@ -117,6 +121,23 @@ return [
         'gl_code' => 'GL code',
     ],
 
+    'columns' => [
+        'scale' => 'Scale',
+        'grade_range' => 'Grades',
+        'min' => 'Minimum',
+        'midpoint' => 'Midpoint',
+        'max' => 'Maximum',
+        'regime' => 'Regime',
+        'grade' => 'Grade',
+        'amount' => 'Amount',
+        'position' => 'Position',
+        'component' => 'Component',
+        'type' => 'Type',
+        'calc_type' => 'Calculation',
+        'flags' => 'Flags',
+        'actions' => 'Actions',
+    ],
+
     'types' => [
         'earning' => 'Earning',
         'deduction' => 'Deduction',
@@ -145,6 +166,14 @@ return [
         'search_personnel' => 'Search by name or staff number',
         'add_line' => 'Add line',
         'assign' => 'Assign pay',
+        'add_scale' => 'Add scale',
+        'add_grade' => 'Add grade',
+        'add_component' => 'Add component',
+        'add_bank' => 'Add bank account',
+        'add_rate' => 'Add rate',
+        'open_catalog' => 'Catalog',
+        'edit' => 'Edit',
+        'close' => 'Close',
     ],
 
     'confirm' => [

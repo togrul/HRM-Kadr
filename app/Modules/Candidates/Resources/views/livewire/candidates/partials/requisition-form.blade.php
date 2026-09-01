@@ -1,6 +1,6 @@
 <div class="space-y-6">
     <div class="space-y-2">
-        <h2 class="text-2xl font-semibold tracking-tight text-slate-900">
+        <h2 class="text-[18px] font-semibold tracking-tight text-slate-900">
             {{ $title }}
         </h2>
         <p class="text-sm leading-6 text-slate-500">

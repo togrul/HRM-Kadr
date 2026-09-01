@@ -1,63 +1,97 @@
-@include('layouts.navigation')
-
-@include('includes.header')
-
 @php
     $hasSidebar = isset($sidebar);
-    // Default collapsed state: no sidebar => collapsed (content full-width)
-    $defaultCollapsed = $hasSidebar ? 'false' : 'true';
 @endphp
 
 @once
-    <style>
-        body.side-modal-open .sidebar-collapse-toggle {
-            display: none !important;
-        }
-    </style>
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.store('hrmShell', {
+                railOpen: false,
+                paletteOpen: false,
+                panelCollapsed: localStorage.getItem('hrm.panelCollapsed') === '1',
+                togglePanel() {
+                    this.panelCollapsed = ! this.panelCollapsed;
+                    localStorage.setItem('hrm.panelCollapsed', this.panelCollapsed ? '1' : '0');
+                },
+                openPalette() {
+                    this.paletteOpen = true;
+                    this.railOpen = false;
+                },
+            });
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+                event.preventDefault();
+                window.Alpine?.store('hrmShell')?.openPalette();
+            }
+        });
+
+        // A rail drawer / palette opened on one screen must never survive a navigation.
+        document.addEventListener('livewire:navigating', () => {
+            const shell = window.Alpine?.store('hrmShell');
+            if (shell) {
+                shell.railOpen = false;
+                shell.paletteOpen = false;
+            }
+        });
+    </script>
 @endonce
 
-<!-- Page Content -->
-<main
-    x-data="{
-        collapsed: {{ $defaultCollapsed }},
-        toggle() { this.collapsed = !this.collapsed }
-    }"
-    @ui:sidebar-toggle.window="toggle()"
-    :class="collapsed ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-[320px_minmax(0,1fr)]'"
-    x-cloak
-    class="mx-auto my-4 grid w-full max-w-7xl gap-5 px-4 lg:px-0"
->
-    @if ($hasSidebar)
-        <aside
-            x-show="!collapsed"
-            @include('partials.transition')
-            id="sidebar"
-            class="z-1 min-h-[72vh]"
-            role="complementary"
-            aria-label="Sidebar"
-        >
-            {{ $sidebar }}
-        </aside>
-    @endif
-    <section
-            class="relative min-w-0 overflow-hidden rounded-[18px] border border-zinc-200 bg-white shadow-sm"
-            aria-live="polite"
-        >
-            {{ $slot }}
+{{-- full-bleed up to a 24" monitor, centred beyond it --}}
+<div class="mx-auto flex w-full max-w-shell items-start">
+    @include('includes.header')
 
+    <div class="min-w-0 flex-1">
+        @include('layouts.navigation')
+
+        <main class="flex w-full flex-col items-stretch gap-2 px-2 pb-4 pt-2 lg:flex-row lg:items-start">
             @if ($hasSidebar)
-                <button
-                    type="button"
-                    @click="toggle()"
-                    x-show="collapsed"
-                    x-transition.opacity
-                    class="sidebar-collapse-toggle absolute left-3 top-3 inline-flex items-center justify-center rounded-md border border-zinc-200 bg-white p-1.5 text-zinc-600 shadow-sm hover:bg-zinc-50 hover:text-zinc-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:border-gray-600 dark:bg-gray-700/90 dark:text-gray-200 dark:hover:bg-gray-700 dark:focus-visible:ring-offset-gray-800"
-                    :aria-expanded="(!collapsed).toString()"
-                    aria-controls="sidebar"
+                <aside
+                    id="sidebar"
+                    x-cloak
+                    :class="$store.hrmShell.panelCollapsed ? 'lg:w-0 lg:opacity-0 lg:pointer-events-none' : 'lg:w-panel lg:opacity-100'"
+                    class="hrm-panel-shell w-full shrink-0 overflow-x-hidden lg:sticky lg:top-2"
+                    role="complementary"
+                    aria-label="{{ __('ui::common.labels.module_navigation') }}"
                 >
-                    <x-icons.sidebar-toggle-icon size="w-5 h-5" color="text-zinc-700" hover="text-zinc-900" />
-                    <span class="sr-only">Open sidebar</span>
-                </button>
+                    <div class="relative w-full lg:w-panel">
+                        <button
+                            type="button"
+                            @click="$store.hrmShell.togglePanel()"
+                            class="absolute right-2.5 top-2.5 z-10 hidden h-6 w-6 items-center justify-center rounded-md text-ink-faint transition hover:bg-[#f4f4f5] hover:text-ink lg:inline-flex"
+                            aria-controls="sidebar"
+                            :aria-expanded="(! $store.hrmShell.panelCollapsed).toString()"
+                            title="{{ __('ui::common.labels.collapse_panel') }}"
+                        >
+                            <x-icons.sidebar-toggle-icon size="w-4 h-4" color="text-current" hover="text-current" />
+                            <span class="sr-only">{{ __('ui::common.labels.collapse_panel') }}</span>
+                        </button>
+
+                        {{ $sidebar }}
+                    </div>
+                </aside>
             @endif
-    </section>
-</main>
+
+            <section class="relative min-w-0 flex-1 overflow-hidden rounded-2xl border border-hairline bg-white shadow-card" aria-live="polite">
+                @if ($hasSidebar)
+                    <button
+                        type="button"
+                        @click="$store.hrmShell.togglePanel()"
+                        x-cloak
+                        x-show="$store.hrmShell.panelCollapsed"
+                        x-transition.opacity
+                        class="sidebar-collapse-toggle absolute left-3 top-3 z-10 hidden h-7 w-7 items-center justify-center rounded-lg border border-hairline bg-white text-ink-muted transition hover:bg-[#fafafa] hover:text-ink lg:inline-flex"
+                        aria-controls="sidebar"
+                        title="{{ __('ui::common.labels.expand_panel') }}"
+                    >
+                        <x-icons.sidebar-toggle-icon size="w-4 h-4" color="text-current" hover="text-current" />
+                        <span class="sr-only">{{ __('ui::common.labels.expand_panel') }}</span>
+                    </button>
+                @endif
+
+                {{ $slot }}
+            </section>
+        </main>
+    </div>
+</div>

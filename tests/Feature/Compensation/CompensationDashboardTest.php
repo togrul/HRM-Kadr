@@ -181,6 +181,72 @@ class CompensationDashboardTest extends TestCase
             ->assertDontSee('scale form.name');
     }
 
+    public function test_scale_band_is_derived_from_its_grades_and_obeys_the_amounts_permission(): void
+    {
+        $this->actingAsManager();
+        $scale = \App\Models\PayScale::create([
+            'name' => 'Band şkalası',
+            'regime_id' => CompensationRegime::where('code', 'private')->value('id'),
+            'currency' => 'AZN',
+            'effective_from' => '2026-01-01',
+            'is_active' => true,
+        ]);
+
+        foreach ([['A1', 900], ['A2', 1200], ['A5', 2000]] as $index => [$code, $amount]) {
+            \App\Models\PayGrade::create([
+                'pay_scale_id' => $scale->id,
+                'code' => $code,
+                'name' => $code.' pilləsi',
+                'base_amount' => $amount,
+                'sort' => $index,
+            ]);
+        }
+
+        $component = Livewire::test(Dashboard::class);
+        $band = $component->instance()->scaleRange($component->instance()->scales->first());
+
+        $this->assertSame(3, $band['grades']);
+        $this->assertSame('A1–A5', $band['range']);
+        $this->assertSame('900', $band['min']);
+        $this->assertSame('1 450', $band['midpoint']);
+        $this->assertSame('2 000', $band['max']);
+
+        // A viewer without the amounts permission sees the mask, never the figures.
+        $viewer = \App\Models\User::factory()->create();
+        $viewer->givePermissionTo(Permission::findOrCreate('show-compensation', 'web'));
+        $this->actingAs($viewer);
+
+        $masked = Livewire::test(Dashboard::class);
+        $band = $masked->instance()->scaleRange($masked->instance()->scales->first());
+
+        $this->assertSame('•••', $band['min']);
+        $this->assertSame('•••', $band['midpoint']);
+        $this->assertSame('A1–A5', $band['range']);
+    }
+
+    public function test_editor_panel_opens_for_each_catalog_form(): void
+    {
+        $this->actingAsManager();
+
+        Livewire::test(Dashboard::class)
+            ->assertSet('panel', '')
+            ->call('openPanel', 'scale')
+            ->assertSet('panel', 'scale')
+            ->call('openPanel', 'component')
+            ->assertSet('panel', 'component')
+            ->call('closePanel')
+            ->assertSet('panel', '')
+            // Saving closes the panel through the form's own cancel path.
+            ->call('openPanel', 'scale')
+            ->set('scaleForm.name', 'Panel şkalası')
+            ->set('scaleForm.regime_id', CompensationRegime::where('code', 'private')->value('id'))
+            ->set('scaleForm.currency', 'AZN')
+            ->set('scaleForm.effective_from', '2026-01-01')
+            ->call('saveScale')
+            ->assertHasNoErrors()
+            ->assertSet('panel', '');
+    }
+
     public function test_seed_catalog_is_available(): void
     {
         $this->assertSame(3, CompensationRegime::count());

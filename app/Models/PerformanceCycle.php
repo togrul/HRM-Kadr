@@ -8,6 +8,16 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property string $cycle_type
+ * @property \Illuminate\Support\Carbon|null $period_start
+ * @property \Illuminate\Support\Carbon|null $period_end
+ * @property string $status
+ * @property bool $auto_generate_forms
+ * @property string|null $description
+ */
 class PerformanceCycle extends Model
 {
     use HasFactory;

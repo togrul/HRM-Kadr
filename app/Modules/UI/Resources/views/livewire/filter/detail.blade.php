@@ -28,7 +28,7 @@
             class="w-full max-w-6xl overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl">
             <header class="flex items-start justify-between border-b border-slate-200 px-6 py-4">
                 <div>
-                    <h2 class="text-2xl font-semibold tracking-tight text-slate-900">{{ __('ui::filters.titles.advanced_filters') }}</h2>
+                    <h2 class="text-[18px] font-semibold tracking-tight text-slate-900">{{ __('ui::filters.titles.advanced_filters') }}</h2>
                     <p class="mt-1 text-sm text-slate-500">{{ __('ui::filters.descriptions.refine_results') }}</p>
                 </div>
 

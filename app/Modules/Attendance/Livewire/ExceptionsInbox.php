@@ -177,6 +177,10 @@ class ExceptionsInbox extends Component
                         'structure_path',
                         $structurePathService->resolve((int) $item->personnel->structure_id)
                     );
+                    $item->personnel->setAttribute(
+                        'structure_name',
+                        $structurePathService->current((int) $item->personnel->structure_id)
+                    );
                 }
 
                 return $item;

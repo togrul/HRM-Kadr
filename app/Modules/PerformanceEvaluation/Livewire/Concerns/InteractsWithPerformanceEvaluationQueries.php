@@ -41,7 +41,7 @@ trait InteractsWithPerformanceEvaluationQueries
     public function templateOptions(): array
     {
         $base = PerformanceFormTemplate::query()
-            ->select('id', DB::raw("COALESCE(code, name) as label"))
+            ->select('id', DB::raw('COALESCE(code, name) as label'))
             ->orderBy('name');
 
         return $this->optionsWithSelected(
@@ -166,7 +166,7 @@ trait InteractsWithPerformanceEvaluationQueries
     public function testBankOptions(): array
     {
         $base = PerformanceTestBank::query()
-            ->select('id', DB::raw("COALESCE(code, name) as label"))
+            ->select('id', DB::raw('COALESCE(code, name) as label'))
             ->orderBy('name');
 
         return $this->optionsWithSelected(
@@ -185,7 +185,7 @@ trait InteractsWithPerformanceEvaluationQueries
         $bankId = $sessionId ? PerformanceTestSession::query()->whereKey($sessionId)->value('performance_test_bank_id') : null;
 
         $base = PerformanceTestQuestion::query()
-            ->select('id', DB::raw("SUBSTR(prompt, 1, 120) as label"))
+            ->select('id', DB::raw('SUBSTR(prompt, 1, 120) as label'))
             ->when($bankId, fn ($query) => $query->where('performance_test_bank_id', $bankId))
             ->orderBy('sort_order')
             ->orderBy('id');
@@ -294,6 +294,47 @@ trait InteractsWithPerformanceEvaluationQueries
                 (select count(*) from performance_test_attempts) as `test_attempts`,
                 (select count(*) from performance_test_training_need_links) as `test_need_links`'
         );
+    }
+
+    /**
+     * Final-score spread over every scored form, using the same thresholds the scoring
+     * service writes (>=85 high, >=60 medium, else weak) so the chart cannot drift from
+     * the categories stored on the rows.
+     *
+     * @return array{total:int, average:float, buckets:array<int, array{key:string, count:int, percent:int}>}
+     */
+    public function getScoreDistributionProperty(): array
+    {
+        $row = DB::selectOne(
+            'select
+                count(final_score) as scored,
+                avg(final_score) as average,
+                sum(final_category = ?) as high,
+                sum(final_category = ?) as medium,
+                sum(final_category = ?) as weak
+             from performance_forms',
+            ['high', 'medium', 'weak']
+        );
+
+        $scored = (int) ($row->scored ?? 0);
+
+        $buckets = collect(['high', 'medium', 'weak'])
+            ->map(function (string $key) use ($row, $scored): array {
+                $count = (int) ($row->{$key} ?? 0);
+
+                return [
+                    'key' => $key,
+                    'count' => $count,
+                    'percent' => $scored > 0 ? (int) round($count / $scored * 100) : 0,
+                ];
+            })
+            ->all();
+
+        return [
+            'total' => $scored,
+            'average' => round((float) ($row->average ?? 0), 1),
+            'buckets' => $buckets,
+        ];
     }
 
     public function getRecentCyclesProperty()

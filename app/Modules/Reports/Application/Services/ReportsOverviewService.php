@@ -8,6 +8,7 @@ use App\Models\Personnel;
 use App\Models\Structure;
 use App\Models\TrainingDeliveryRecord;
 use Carbon\CarbonImmutable;
+use DateTimeInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
@@ -15,8 +16,7 @@ class ReportsOverviewService
 {
     public function __construct(
         protected ReportsStructureScopeService $structureScope
-    ) {
-    }
+    ) {}
 
     /**
      * @return array<string,mixed>
@@ -26,11 +26,13 @@ class ReportsOverviewService
         $reportDate = CarbonImmutable::create($year, $month, 1)->endOfMonth();
         $yearStart = $reportDate->startOfYear();
         $structureIds = $this->structureScope->resolveIds($structureId);
-        $personnelSnapshot = $this->personnelSnapshot($yearStart->toDateString(), $reportDate->toDateString(), $structureIds);
-        $activePersonnelCount = (int) ($personnelSnapshot?->active_personnel_count ?? 0);
-        $structuresCovered = (int) ($personnelSnapshot?->structures_covered ?? 0);
-        $newHires = (int) ($personnelSnapshot?->new_hires ?? 0);
-        $exits = (int) ($personnelSnapshot?->exits ?? 0);
+        $personnelSnapshot = $this->personnelSnapshot($yearStart, $reportDate, $structureIds);
+        $activePersonnelCount = (int) ($personnelSnapshot->active_personnel_count ?? 0);
+        $structuresCovered = (int) ($personnelSnapshot->structures_covered ?? 0);
+        $newHires = (int) ($personnelSnapshot->new_hires ?? 0);
+        $exits = (int) ($personnelSnapshot->exits ?? 0);
+        $previousNewHires = (int) ($personnelSnapshot->previous_new_hires ?? 0);
+        $previousExits = (int) ($personnelSnapshot->previous_exits ?? 0);
 
         $attendance = $this->attendanceReportKpis($year, $month, $structureIds);
         $training = $this->trainingKpis($year, $structureIds);
@@ -71,6 +73,29 @@ class ReportsOverviewService
                 'training_attended_hours' => (float) ($training['attended_hours'] ?? 0),
                 'performance_forms_count' => (int) ($performance->forms_count ?? 0),
                 'performance_weak_links_count' => (int) ($performance->weak_links_count ?? 0),
+                // Month-of-report attendance volume, per active head, so the tile reads as
+                // "hours a person worked this month" rather than an unanchored total.
+                'worked_hours' => round((float) data_get($attendance, 'worked_minutes', 0) / 60, 1),
+                'avg_worked_hours' => $activePersonnelCount > 0
+                    ? round(((float) data_get($attendance, 'worked_minutes', 0) / 60) / $activePersonnelCount, 1)
+                    : 0.0,
+                'overtime_hours' => round((float) data_get($attendance, 'overtime_minutes', 0) / 60, 1),
+                'new_hires_delta_pct' => $this->deltaPercent($newHires, $previousNewHires),
+                'exits_delta_pct' => $this->deltaPercent($exits, $previousExits),
+                'overtime_delta_pct' => $this->deltaPercent(
+                    (float) data_get($attendance, 'overtime_minutes', 0),
+                    (float) data_get($attendance, 'previous_overtime_minutes', 0)
+                ),
+            ],
+            'gender_split' => [
+                ['key' => 'male', 'label' => __('reports::dashboard.labels.male'), 'value' => (int) ($personnelSnapshot->male_count ?? 0)],
+                ['key' => 'female', 'label' => __('reports::dashboard.labels.female'), 'value' => (int) ($personnelSnapshot->female_count ?? 0)],
+            ],
+            'age_split' => [
+                ['key' => 'under_30', 'value' => (int) ($personnelSnapshot->age_under_30 ?? 0)],
+                ['key' => '30_39', 'value' => (int) ($personnelSnapshot->age_30_39 ?? 0)],
+                ['key' => '40_49', 'value' => (int) ($personnelSnapshot->age_40_49 ?? 0)],
+                ['key' => '50_plus', 'value' => (int) ($personnelSnapshot->age_50_plus ?? 0)],
             ],
             'headcount_trend' => $this->headcountTrend($reportDate, $trendWindow, $structureIds),
             'top_structures' => $topStructures,
@@ -81,7 +106,7 @@ class ReportsOverviewService
         ];
     }
 
-    protected function activePersonnelQueryAt(\DateTimeInterface|string $date, array $structureIds = []): Builder
+    protected function activePersonnelQueryAt(DateTimeInterface|string $date, array $structureIds = []): Builder
     {
         return Personnel::query()
             ->where('is_pending', false)
@@ -94,23 +119,52 @@ class ReportsOverviewService
             ->when($structureIds !== [], fn (Builder $query) => $query->whereIn('structure_id', $structureIds));
     }
 
-    protected function personnelSnapshot(string $yearStart, string $reportDate, array $structureIds = []): object
+    /**
+     * Headcount, movement, gender and age spread in one pass over `personnels` — every
+     * figure is a conditional SUM over the same scan, so the panel costs one query no
+     * matter how many tiles it grows. Age buckets compare `birthdate` against boundaries
+     * computed in PHP, which keeps the SQL portable (no date maths in the query).
+     */
+    protected function personnelSnapshot(CarbonImmutable $yearStart, CarbonImmutable $reportDate, array $structureIds = []): object
     {
         $activeCondition = 'join_work_date <= ? AND (leave_work_date IS NULL OR leave_work_date >= ?)';
+        $reportDateString = $reportDate->toDateString();
+        $yearStartString = $yearStart->toDateString();
+        $previousYearStart = $yearStart->subYear()->toDateString();
+        $previousReportDate = $reportDate->subYear()->toDateString();
+        $born = fn (int $age): string => $reportDate->subYears($age)->toDateString();
 
         return Personnel::query()
             ->where('is_pending', false)
             ->whereNull('deleted_at')
             ->when($structureIds !== [], fn (Builder $query) => $query->whereIn('structure_id', $structureIds))
-            ->selectRaw("SUM(CASE WHEN {$activeCondition} THEN 1 ELSE 0 END) as active_personnel_count", [$reportDate, $reportDate])
-            ->selectRaw("COUNT(DISTINCT CASE WHEN {$activeCondition} THEN structure_id END) as structures_covered", [$reportDate, $reportDate])
-            ->selectRaw('SUM(CASE WHEN join_work_date BETWEEN ? AND ? THEN 1 ELSE 0 END) as new_hires', [$yearStart, $reportDate])
-            ->selectRaw('SUM(CASE WHEN leave_work_date IS NOT NULL AND leave_work_date BETWEEN ? AND ? THEN 1 ELSE 0 END) as exits', [$yearStart, $reportDate])
+            ->selectRaw("SUM(CASE WHEN {$activeCondition} THEN 1 ELSE 0 END) as active_personnel_count", [$reportDateString, $reportDateString])
+            ->selectRaw("COUNT(DISTINCT CASE WHEN {$activeCondition} THEN structure_id END) as structures_covered", [$reportDateString, $reportDateString])
+            ->selectRaw('SUM(CASE WHEN join_work_date BETWEEN ? AND ? THEN 1 ELSE 0 END) as new_hires', [$yearStartString, $reportDateString])
+            ->selectRaw('SUM(CASE WHEN leave_work_date IS NOT NULL AND leave_work_date BETWEEN ? AND ? THEN 1 ELSE 0 END) as exits', [$yearStartString, $reportDateString])
+            ->selectRaw('SUM(CASE WHEN join_work_date BETWEEN ? AND ? THEN 1 ELSE 0 END) as previous_new_hires', [$previousYearStart, $previousReportDate])
+            ->selectRaw('SUM(CASE WHEN leave_work_date IS NOT NULL AND leave_work_date BETWEEN ? AND ? THEN 1 ELSE 0 END) as previous_exits', [$previousYearStart, $previousReportDate])
+            ->selectRaw("SUM(CASE WHEN gender = 1 AND {$activeCondition} THEN 1 ELSE 0 END) as male_count", [$reportDateString, $reportDateString])
+            ->selectRaw("SUM(CASE WHEN gender = 2 AND {$activeCondition} THEN 1 ELSE 0 END) as female_count", [$reportDateString, $reportDateString])
+            ->selectRaw("SUM(CASE WHEN birthdate > ? AND {$activeCondition} THEN 1 ELSE 0 END) as age_under_30", [$born(30), $reportDateString, $reportDateString])
+            ->selectRaw("SUM(CASE WHEN birthdate <= ? AND birthdate > ? AND {$activeCondition} THEN 1 ELSE 0 END) as age_30_39", [$born(30), $born(40), $reportDateString, $reportDateString])
+            ->selectRaw("SUM(CASE WHEN birthdate <= ? AND birthdate > ? AND {$activeCondition} THEN 1 ELSE 0 END) as age_40_49", [$born(40), $born(50), $reportDateString, $reportDateString])
+            ->selectRaw("SUM(CASE WHEN birthdate <= ? AND {$activeCondition} THEN 1 ELSE 0 END) as age_50_plus", [$born(50), $reportDateString, $reportDateString])
             ->first();
     }
 
+    /** Percentage change against the same window a year (or a month) earlier. */
+    protected function deltaPercent(float $current, float $previous): ?float
+    {
+        if ($previous <= 0.0) {
+            return null;
+        }
+
+        return round((($current - $previous) / $previous) * 100, 1);
+    }
+
     /**
-     * @return array<int,array{label:string,value:int}>
+     * @return array<int,array{label:string,value:int,joins:int,exits:int}>
      */
     protected function headcountTrend(CarbonImmutable $reportDate, int $window, array $structureIds = []): array
     {
@@ -173,69 +227,81 @@ class ReportsOverviewService
                 return [
                     'label' => $this->shortMonthLabel((int) $date->month),
                     'value' => max(0, $running),
+                    'joins' => (int) ($joinsByMonth[$key] ?? 0),
+                    'exits' => (int) ($exitsByMonth[$key] ?? 0),
                 ];
             })
             ->all();
     }
 
     /**
-     * @return array{coverage_pct:float,absence_rate_pct:float}
+     * The report month plus the one before it, in a single scan: the previous month is only
+     * needed for the overtime delta, and a second query for one number is not worth it.
+     *
+     * @return array{kpi:array{coverage_pct:float,absence_rate_pct:float},worked_minutes:int,overtime_minutes:int,previous_overtime_minutes:int}
      */
     protected function attendanceReportKpis(int $year, int $month, array $structureIds = []): array
     {
         $start = CarbonImmutable::create($year, $month, 1)->startOfMonth();
         $end = $start->endOfMonth();
+        $previousStart = $start->subMonthNoOverflow()->startOfMonth();
+        $window = [$previousStart->toDateString(), $end->toDateString()];
+        $current = [$start->toDateString(), $end->toDateString()];
 
         $summary = DB::table('attendance_daily_structure_summaries')
-            ->whereBetween('date', [$start->toDateString(), $end->toDateString()])
+            ->whereBetween('date', $window)
             ->when($structureIds !== [], fn ($query) => $query->whereIn('structure_id', $structureIds))
             ->selectRaw('COUNT(*) as summary_rows')
-            ->selectRaw('COALESCE(SUM(scheduled_minutes_sum),0) as scheduled_sum')
-            ->selectRaw('COALESCE(SUM(worked_minutes_sum),0) as worked_sum')
-            ->selectRaw('COALESCE(SUM(scheduled_days),0) as scheduled_days')
-            ->selectRaw('COALESCE(SUM(absence_days),0) as absence_days')
+            ->selectRaw('COALESCE(SUM(CASE WHEN date BETWEEN ? AND ? THEN scheduled_minutes_sum ELSE 0 END),0) as scheduled_sum', $current)
+            ->selectRaw('COALESCE(SUM(CASE WHEN date BETWEEN ? AND ? THEN worked_minutes_sum ELSE 0 END),0) as worked_sum', $current)
+            ->selectRaw('COALESCE(SUM(CASE WHEN date BETWEEN ? AND ? THEN overtime_minutes_sum ELSE 0 END),0) as overtime_sum', $current)
+            ->selectRaw('COALESCE(SUM(CASE WHEN date < ? THEN overtime_minutes_sum ELSE 0 END),0) as previous_overtime_sum', [$start->toDateString()])
+            ->selectRaw('COALESCE(SUM(CASE WHEN date BETWEEN ? AND ? THEN scheduled_days ELSE 0 END),0) as scheduled_days', $current)
+            ->selectRaw('COALESCE(SUM(CASE WHEN date BETWEEN ? AND ? THEN absence_days ELSE 0 END),0) as absence_days', $current)
             ->first();
 
-        if ((int) ($summary?->summary_rows ?? 0) > 0) {
-            return $this->attendanceKpiPayload(
-                (int) ($summary?->scheduled_sum ?? 0),
-                (int) ($summary?->worked_sum ?? 0),
-                (int) ($summary?->scheduled_days ?? 0),
-                (int) ($summary?->absence_days ?? 0)
-            );
+        if ((int) ($summary->summary_rows ?? 0) > 0) {
+            return $this->attendanceKpiPayload($summary);
         }
 
         $ledger = DB::table('attendance_daily_ledgers')
-            ->whereBetween('date', [$start->toDateString(), $end->toDateString()])
+            ->whereBetween('date', $window)
             ->when($structureIds !== [], function ($query) use ($structureIds): void {
                 $query->whereIn('tabel_no', DB::table('personnels')->select('tabel_no')->whereIn('structure_id', $structureIds));
             })
-            ->selectRaw('COALESCE(SUM(scheduled_minutes),0) as scheduled_sum')
-            ->selectRaw('COALESCE(SUM(worked_minutes),0) as worked_sum')
-            ->selectRaw('COALESCE(SUM(CASE WHEN scheduled_minutes > 0 THEN 1 ELSE 0 END),0) as scheduled_days')
-            ->selectRaw('COALESCE(SUM(CASE WHEN attendance_status IN ("absent","manual_absence") THEN 1 ELSE 0 END),0) as absence_days')
+            ->selectRaw('COALESCE(SUM(CASE WHEN date BETWEEN ? AND ? THEN scheduled_minutes ELSE 0 END),0) as scheduled_sum', $current)
+            ->selectRaw('COALESCE(SUM(CASE WHEN date BETWEEN ? AND ? THEN worked_minutes ELSE 0 END),0) as worked_sum', $current)
+            ->selectRaw('COALESCE(SUM(CASE WHEN date BETWEEN ? AND ? THEN overtime_minutes ELSE 0 END),0) as overtime_sum', $current)
+            ->selectRaw('COALESCE(SUM(CASE WHEN date < ? THEN overtime_minutes ELSE 0 END),0) as previous_overtime_sum', [$start->toDateString()])
+            ->selectRaw('COALESCE(SUM(CASE WHEN date BETWEEN ? AND ? AND scheduled_minutes > 0 THEN 1 ELSE 0 END),0) as scheduled_days', $current)
+            ->selectRaw("COALESCE(SUM(CASE WHEN date BETWEEN ? AND ? AND attendance_status IN ('absent','manual_absence') THEN 1 ELSE 0 END),0) as absence_days", $current)
             ->first();
 
-        return $this->attendanceKpiPayload(
-            (int) ($ledger?->scheduled_sum ?? 0),
-            (int) ($ledger?->worked_sum ?? 0),
-            (int) ($ledger?->scheduled_days ?? 0),
-            (int) ($ledger?->absence_days ?? 0)
-        );
+        return $this->attendanceKpiPayload($ledger);
     }
 
     /**
-     * @return array{coverage_pct:float,absence_rate_pct:float}
+     * @return array{kpi:array{coverage_pct:float,absence_rate_pct:float},worked_minutes:int,overtime_minutes:int,previous_overtime_minutes:int}
      */
-    protected function attendanceKpiPayload(int $scheduledMinutes, int $workedMinutes, int $scheduledDays, int $absenceDays): array
+    protected function attendanceKpiPayload(object $row): array
     {
+        $scheduledMinutes = (int) ($row->scheduled_sum ?? 0);
+        $workedMinutes = (int) ($row->worked_sum ?? 0);
+        $scheduledDays = (int) ($row->scheduled_days ?? 0);
+        $absenceDays = (int) ($row->absence_days ?? 0);
+
         return [
-            'coverage_pct' => $scheduledMinutes > 0
-                ? round(min(100, ($workedMinutes / $scheduledMinutes) * 100), 1)
-                : 0.0,
-            'absence_rate_pct' => $scheduledDays > 0
-                ? round(min(100, ($absenceDays / $scheduledDays) * 100), 1)
-                : 0.0,
+            'kpi' => [
+                'coverage_pct' => $scheduledMinutes > 0
+                    ? round(min(100, ($workedMinutes / $scheduledMinutes) * 100), 1)
+                    : 0.0,
+                'absence_rate_pct' => $scheduledDays > 0
+                    ? round(min(100, ($absenceDays / $scheduledDays) * 100), 1)
+                    : 0.0,
+            ],
+            'worked_minutes' => $workedMinutes,
+            'overtime_minutes' => (int) ($row->overtime_sum ?? 0),
+            'previous_overtime_minutes' => (int) ($row->previous_overtime_sum ?? 0),
         ];
     }
 
@@ -268,8 +334,8 @@ class ReportsOverviewService
             ->first();
 
         return [
-            'delivered_trainings_count' => (int) ($row?->delivered_trainings_count ?? 0),
-            'attended_hours' => round((float) ($row?->attended_hours ?? 0), 1),
+            'delivered_trainings_count' => (int) ($row->delivered_trainings_count ?? 0),
+            'attended_hours' => round((float) ($row->attended_hours ?? 0), 1),
         ];
     }
 

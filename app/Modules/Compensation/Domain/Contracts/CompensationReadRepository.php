@@ -12,6 +12,18 @@ interface CompensationReadRepository
     public function currentCompensation(string $tabelNo, ?string $date = null): ?EmployeeCompensation;
 
     /**
+     * Current base pay for many staff numbers at once, keyed by tabel_no.
+     *
+     * The per-employee lookup above is fine inside a payslip, but a consumer
+     * walking a whole roster (an export, an integration feed) would issue one
+     * query per person and blow the module's query budget.
+     *
+     * @param  list<string>  $tabelNos
+     * @return Collection<string, float>
+     */
+    public function baseAmountsFor(array $tabelNos, ?string $date = null): Collection;
+
+    /**
      * Staff numbers (tabel_no) with an active compensation, optionally filtered by regime.
      *
      * @return Collection<int,string>

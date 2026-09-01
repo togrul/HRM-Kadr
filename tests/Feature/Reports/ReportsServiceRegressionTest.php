@@ -286,6 +286,47 @@ class ReportsServiceRegressionTest extends TestCase
         $this->assertSame(2, data_get($payload, 'kpis.exits'));
     }
 
+    public function test_overview_splits_active_headcount_by_gender_and_age_band(): void
+    {
+        $this->seedPersonnelSupportTables();
+
+        // Ages at 31.03.2026: 26, 36, 46 and 56.
+        $this->createPersonnelRecord('AG-001', 1, ['gender' => 1, 'birthdate' => '2000-01-01']);
+        $this->createPersonnelRecord('AG-002', 1, ['gender' => 2, 'birthdate' => '1990-01-01']);
+        $this->createPersonnelRecord('AG-003', 1, ['gender' => 2, 'birthdate' => '1980-01-01']);
+        $this->createPersonnelRecord('AG-004', 1, ['gender' => 1, 'birthdate' => '1970-01-01']);
+        // Left before the report date — must not land in either split.
+        $this->createPersonnelRecord('AG-005', 1, ['gender' => 2, 'birthdate' => '1990-01-01', 'leave_work_date' => '2026-01-31']);
+
+        $payload = app(ReportsOverviewService::class)->build(2026, 3);
+
+        $this->assertSame(
+            ['male' => 2, 'female' => 2],
+            collect($payload['gender_split'])->pluck('value', 'key')->all()
+        );
+
+        $this->assertSame(
+            ['under_30' => 1, '30_39' => 1, '40_49' => 1, '50_plus' => 1],
+            collect($payload['age_split'])->pluck('value', 'key')->all()
+        );
+    }
+
+    public function test_overview_movement_trend_carries_monthly_hires_and_exits(): void
+    {
+        $this->seedPersonnelSupportTables();
+
+        $this->createPersonnelRecord('MV-001', 1, ['join_work_date' => '2026-02-10']);
+        $this->createPersonnelRecord('MV-002', 1, ['join_work_date' => '2026-02-20']);
+        $this->createPersonnelRecord('MV-003', 1, ['join_work_date' => '2025-06-01', 'leave_work_date' => '2026-03-05']);
+
+        $trend = collect(app(ReportsOverviewService::class)->build(2026, 3)['headcount_trend'])
+            ->keyBy('label');
+
+        $this->assertSame(2, $trend[__('reports::dashboard.months_short.2')]['joins']);
+        $this->assertSame(0, $trend[__('reports::dashboard.months_short.2')]['exits']);
+        $this->assertSame(1, $trend[__('reports::dashboard.months_short.3')]['exits']);
+    }
+
     private function seedPersonnelSupportTables(): void
     {
         Role::findOrCreate('admin', 'web');

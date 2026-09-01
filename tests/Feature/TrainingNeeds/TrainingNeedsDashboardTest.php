@@ -13,7 +13,6 @@ use App\Models\TrainingLevel;
 use App\Models\TrainingNeedItem;
 use App\Models\TrainingProgram;
 use App\Models\TrainingSession;
-use App\Modules\TrainingNeeds\Livewire\Dashboard;
 use App\Modules\TrainingNeeds\Livewire\Analytics as TrainingNeedsAnalytics;
 use App\Modules\TrainingNeeds\Livewire\CertificateViewer as TrainingNeedsCertificateViewer;
 use App\Modules\TrainingNeeds\Livewire\FoundationWorkspace as TrainingNeedsFoundationWorkspace;
@@ -21,10 +20,10 @@ use App\Modules\TrainingNeeds\Livewire\Lists as TrainingNeedsLists;
 use App\Modules\TrainingNeeds\Livewire\OperationsWorkspace as TrainingNeedsOperationsWorkspace;
 use App\Modules\TrainingNeeds\Livewire\Overview as TrainingNeedsOverview;
 use App\Modules\TrainingNeeds\Livewire\Reports as TrainingNeedsReports;
-use App\Modules\TrainingNeeds\Livewire\ResultsWorkspace as TrainingNeedsResultsWorkspace;
 use App\Modules\TrainingNeeds\Livewire\ResultsSummary as TrainingNeedsResultsSummary;
-use Illuminate\Support\Facades\DB;
+use App\Modules\TrainingNeeds\Livewire\ResultsWorkspace as TrainingNeedsResultsWorkspace;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
@@ -54,9 +53,9 @@ class TrainingNeedsDashboardTest extends TestCase
         $this->actingAs($user);
 
         Livewire::test(TrainingNeedsOverview::class)
-            ->assertSee(__('training_needs::dashboard.cards.foundation_scope'))
-            ->assertSee(__('training_needs::dashboard.cards.recent_competencies'))
-            ->assertSee(__('training_needs::dashboard.cards.coverage_snapshot'));
+            ->assertSee(__('training_needs::dashboard.panel.needs_title'))
+            ->assertSee(__('training_needs::dashboard.stats.competencies'))
+            ->assertSee(__('training_needs::dashboard.cards.recent_competencies'));
     }
 
     public function test_analytics_component_renders_reporting_cards(): void

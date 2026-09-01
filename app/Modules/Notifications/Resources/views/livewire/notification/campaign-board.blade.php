@@ -54,7 +54,7 @@
 
         <div class="space-y-3">
             @forelse ($campaigns as $campaign)
-                <div class="rounded-[1.6rem] border border-zinc-200 bg-white px-4 py-4 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
+                <div class="rounded-[1.6rem] border border-zinc-200 bg-white px-4 py-4 shadow-card">
                     <div class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_auto]">
                         <div class="space-y-3">
                             <div class="flex flex-wrap items-center gap-2">

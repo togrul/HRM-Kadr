@@ -1,10 +1,10 @@
-<section class="rounded-[32px] border border-slate-200 bg-white p-6 shadow-[0_28px_60px_-45px_rgba(15,23,42,0.35)]">
+<section class="rounded-[32px] border border-slate-200 bg-white p-6 shadow-overlay">
     <div class="flex flex-col gap-3 border-b border-slate-200 pb-5 sm:flex-row sm:items-start sm:justify-between">
         <div>
             <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">
                 {{ __('candidates::recruitment.titles.ats_completion') }}
             </div>
-            <h2 class="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
+            <h2 class="mt-2 text-[18px] font-semibold tracking-tight text-slate-950">
                 {{ __('candidates::recruitment.titles.interviews_offers_pool') }}
             </h2>
             <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
@@ -14,7 +14,7 @@
     </div>
 
     <div class="mt-6 grid gap-5 2xl:grid-cols-2">
-        <div class="rounded-[24px] border border-slate-200 bg-slate-50/80 p-5">
+        <div class="rounded-2xl border border-slate-200 bg-slate-50/80 p-5">
             <div class="flex items-start justify-between gap-4">
                 <div>
                     <h3 class="text-base font-semibold text-slate-950">{{ __('candidates::recruitment.titles.interviews') }}</h3>
@@ -60,7 +60,7 @@
                 </label>
 
                 <div class="sm:col-span-2">
-                    <button type="submit" class="inline-flex h-12 items-center justify-center rounded-2xl bg-slate-950 px-5 text-sm font-semibold text-white shadow-[0_18px_35px_-20px_rgba(15,23,42,0.8)] transition hover:bg-slate-800">
+                    <button type="submit" class="inline-flex h-12 items-center justify-center rounded-2xl bg-slate-950 px-5 text-sm font-semibold text-white shadow-card transition hover:bg-slate-800">
                         {{ __('candidates::recruitment.actions.schedule_interview') }}
                     </button>
                 </div>
@@ -95,7 +95,7 @@
             </div>
         </div>
 
-        <div class="rounded-[24px] border border-slate-200 bg-slate-50/80 p-5">
+        <div class="rounded-2xl border border-slate-200 bg-slate-50/80 p-5">
             <h3 class="text-base font-semibold text-slate-950">{{ __('candidates::recruitment.titles.scorecard') }}</h3>
             <p class="mt-1 text-sm text-slate-500">{{ __('candidates::recruitment.labels.scorecard_note') }}</p>
 
@@ -126,14 +126,14 @@
                 </label>
 
                 <div class="sm:col-span-3">
-                    <button type="submit" class="inline-flex h-12 items-center justify-center rounded-2xl bg-slate-950 px-5 text-sm font-semibold text-white shadow-[0_18px_35px_-20px_rgba(15,23,42,0.8)] transition hover:bg-slate-800">
+                    <button type="submit" class="inline-flex h-12 items-center justify-center rounded-2xl bg-slate-950 px-5 text-sm font-semibold text-white shadow-card transition hover:bg-slate-800">
                         {{ __('candidates::recruitment.actions.submit_scorecard') }}
                     </button>
                 </div>
             </form>
         </div>
 
-        <div class="rounded-[24px] border border-slate-200 bg-slate-50/80 p-5">
+        <div class="rounded-2xl border border-slate-200 bg-slate-50/80 p-5">
             <h3 class="text-base font-semibold text-slate-950">{{ __('candidates::recruitment.titles.offer_management') }}</h3>
             <p class="mt-1 text-sm text-slate-500">{{ __('candidates::recruitment.labels.offer_note') }}</p>
 
@@ -164,7 +164,7 @@
                     @error('offerForm.terms') <x-validation>{{ $message }}</x-validation> @enderror
                 </label>
                 <div class="sm:col-span-2">
-                    <button type="submit" class="inline-flex h-12 items-center justify-center rounded-2xl bg-slate-950 px-5 text-sm font-semibold text-white shadow-[0_18px_35px_-20px_rgba(15,23,42,0.8)] transition hover:bg-slate-800">
+                    <button type="submit" class="inline-flex h-12 items-center justify-center rounded-2xl bg-slate-950 px-5 text-sm font-semibold text-white shadow-card transition hover:bg-slate-800">
                         {{ __('candidates::recruitment.actions.send_offer') }}
                     </button>
                 </div>
@@ -198,7 +198,7 @@
             </div>
         </div>
 
-        <div class="rounded-[24px] border border-slate-200 bg-slate-50/80 p-5">
+        <div class="rounded-2xl border border-slate-200 bg-slate-50/80 p-5">
             <h3 class="text-base font-semibold text-slate-950">{{ __('candidates::recruitment.titles.talent_pool') }}</h3>
             <p class="mt-1 text-sm text-slate-500">{{ __('candidates::recruitment.labels.talent_pool_note') }}</p>
 
@@ -219,7 +219,7 @@
                     @error('poolForm.notes') <x-validation>{{ $message }}</x-validation> @enderror
                 </label>
                 <div class="sm:col-span-2">
-                    <button type="submit" class="inline-flex h-12 items-center justify-center rounded-2xl bg-slate-950 px-5 text-sm font-semibold text-white shadow-[0_18px_35px_-20px_rgba(15,23,42,0.8)] transition hover:bg-slate-800">
+                    <button type="submit" class="inline-flex h-12 items-center justify-center rounded-2xl bg-slate-950 px-5 text-sm font-semibold text-white shadow-card transition hover:bg-slate-800">
                         {{ __('candidates::recruitment.actions.add_to_talent_pool') }}
                     </button>
                 </div>

@@ -9,7 +9,7 @@
     </div>
 
     @if($isAdded)
-        <div wire:transition class="relative my-3 rounded-3xl border border-zinc-200 bg-zinc-50 p-5 shadow-sm">
+        <div wire:transition class="relative my-3 rounded-2xl border border-zinc-200 bg-zinc-50 p-5 shadow-sm">
             <button class="absolute right-4 top-4 appearance-none" wire:click="closeCrud()">
                 <x-icons.close-icon></x-icons.close-icon>
             </button>
@@ -86,10 +86,10 @@
         </div>
     @endif
 
-    <div class="mt-3 rounded-3xl border border-zinc-200 bg-white p-5 shadow-sm">
+    <div class="mt-3 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
         <div class="grid gap-4 lg:grid-cols-3">
             @foreach ($routes as $route)
-                <div class="rounded-[24px] border border-zinc-200 bg-zinc-50/70 p-5">
+                <div class="rounded-2xl border border-zinc-200 bg-zinc-50/70 p-5">
                     <div class="flex items-start justify-between gap-4">
                         <div>
                             <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __('admin::references.fields.request_type') }}</x-ui.field-label>

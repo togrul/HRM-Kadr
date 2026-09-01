@@ -1,8 +1,33 @@
 <?php
 
 return [
+    'marketing' => [
+        'eyebrow' => 'One HR platform',
+        'headline' => 'From the personnel file to payroll — every HR process in one place',
+        'description' => 'One structure tree and a full audit trail. Orders, attendance, leave and performance all work off the same data.',
+        'highlights' => [
+            'personnel' => 'Personnel records and structure',
+            'personnel_note' => 'Fully in sync with the staff table',
+            'orders' => 'Order workflow',
+            'orders_note' => 'Templates, approvals and DOCX export',
+            'attendance' => 'Attendance and timesheets',
+            'attendance_note' => 'Daily monitor and month close',
+            'payroll' => 'Payroll and compensation',
+            'payroll_note' => 'Calculation runs and payslips',
+        ],
+    ],
+    'labels' => [
+        'sign_in_subtitle' => 'Sign in to your account to continue',
+        'show_password' => 'Show password',
+        'hide_password' => 'Hide password',
+        'footer_note' => 'For internal use only.',
+    ],
     'titles' => [
         'app_name' => 'Human Resources Management System',
+        'forgot_password' => 'Forgot your password?',
+        'reset_password' => 'Set a new password',
+        'confirm_password' => 'Confirm your password',
+        'verify_email' => 'Verify your email',
     ],
     'fields' => [
         'name' => 'Name',
@@ -13,6 +38,7 @@ return [
         'new_password' => 'New password',
         'confirm_password' => 'Confirm password',
         'remember_me' => 'Remember me',
+        'email_placeholder' => 'name.surname@example.com',
     ],
     'actions' => [
         'log_in' => 'Log in',
@@ -25,12 +51,14 @@ return [
     ],
     'links' => [
         'forgot_password' => 'Forgot your password?',
+        'back_to_login' => 'Back to sign in',
         'already_registered' => 'Already registered?',
     ],
     'messages' => [
         'verification_pending' => 'Before getting started, please verify your email address by clicking the link we just emailed to you. If you did not receive the email, we will gladly send you another.',
         'verification_link_sent' => 'A new verification link has been sent to the email address you provided during registration.',
         'secure_area_confirmation' => 'This is a secure area of the application. Please confirm your password before continuing.',
+        'reset_password_help' => 'Choose a new password. It must be at least 8 characters long.',
         'forgot_password_help' => 'No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.',
         'email_unverified' => 'Your email address is unverified.',
         'resend_verification_prompt' => 'Click here to re-send the verification email.',

@@ -35,6 +35,9 @@ class AllPersonnel extends Component
     #[Url]
     public array $filters = [];
 
+    #[Url(as: 'q')]
+    public string $search = '';
+
     #[Url(as: 'structure')]
     public array $structure = [];
 
@@ -350,12 +353,22 @@ class AllPersonnel extends Component
         }
 
         match ($actionType) {
+            'quick-view' => $this->openQuickView($value),
             'open' => $this->openPersonnelProfileSideMenu((string) data_get($payload, 'menu'), $value),
             'restore' => $this->restoreData($value),
             'delete' => $this->setDeletePersonnel($value),
             'force-delete' => $this->forceDeleteData($value),
             default => null,
         };
+    }
+
+    protected function openQuickView(string $tabelNo): void
+    {
+        if ($tabelNo === '' || ! auth()->user()?->can('show-personnels')) {
+            return;
+        }
+
+        $this->openSideMenu('quick-view', $tabelNo);
     }
 
     protected function openPersonnelProfileSideMenu(string $menu, string $value): void
@@ -422,6 +435,24 @@ class AllPersonnel extends Component
         return $this->accessibleStructureCache = resolve(StructureService::class)->getAccessibleStructures();
     }
 
+    /**
+     * Status tallies for the context panel and the header strip. Computed so the
+     * single query behind them runs once per render, not once per consumer.
+     *
+     * @return array<string,int>
+     */
+    #[Computed]
+    public function statusCounts(): array
+    {
+        return app(PersonnelQueryService::class)->statusCounts(
+            filters: $this->filters,
+            selectedStructureIds: $this->selectedStructureIds(),
+            accessibleStructureIds: $this->accessibleStructureIds(),
+            selectedPosition: $this->selectedPosition,
+            search: $this->search,
+        );
+    }
+
     protected function personnelQuery(bool $withStructureTree = true): Builder
     {
         return app(PersonnelQueryService::class)->build(
@@ -431,6 +462,7 @@ class AllPersonnel extends Component
             accessibleStructureIds: $this->accessibleStructureIds(),
             selectedPosition: $this->selectedPosition,
             withStructureTree: $withStructureTree,
+            search: $this->search,
         );
     }
 

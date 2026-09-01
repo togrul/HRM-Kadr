@@ -23,6 +23,30 @@ class EloquentCompensationReadRepository implements CompensationReadRepository
         return $this->compensationService->currentFor($tabelNo, $date ? Carbon::parse($date) : null);
     }
 
+    public function baseAmountsFor(array $tabelNos, ?string $date = null): Collection
+    {
+        $tabelNos = array_values(array_filter(array_map('trim', $tabelNos), static fn (string $v): bool => $v !== ''));
+
+        if ($tabelNos === []) {
+            return collect();
+        }
+
+        $on = ($date ? Carbon::parse($date) : now())->toDateString();
+
+        // Newest effective row wins per employee; `keyBy` on an ascending sort
+        // therefore leaves the latest one in place.
+        return EmployeeCompensation::query()
+            ->whereIn('tabel_no', $tabelNos)
+            ->where('status', 'active')
+            ->whereDate('effective_from', '<=', $on)
+            ->where(fn ($q) => $q->whereNull('effective_to')->orWhereDate('effective_to', '>=', $on))
+            ->orderBy('effective_from')
+            ->orderBy('id')
+            ->get(['tabel_no', 'base_amount'])
+            ->keyBy('tabel_no')
+            ->map(fn (EmployeeCompensation $row): float => (float) $row->base_amount);
+    }
+
     public function activeAssignees(?int $regimeId = null, ?string $date = null): Collection
     {
         $on = ($date ? Carbon::parse($date) : now())->toDateString();

@@ -29,7 +29,7 @@
                     @foreach ($testsTabs as $testsView => $tabMeta)
                         <button type="button"
                             wire:click.prevent="switchTestsSubTab('{{ $testsView }}')"
-                            class="{{ $testsSubTab === $testsView ? 'bg-zinc-900 text-white shadow-lg shadow-zinc-900/10' : 'bg-zinc-50 text-zinc-600 hover:bg-zinc-100' }} flex min-w-0 flex-col items-start rounded-[24px] px-4 py-3 text-left transition">
+                            class="{{ $testsSubTab === $testsView ? 'bg-zinc-900 text-white shadow-lg shadow-zinc-900/10' : 'bg-zinc-50 text-zinc-600 hover:bg-zinc-100' }} flex min-w-0 flex-col items-start rounded-2xl px-4 py-3 text-left transition">
                             <span class="text-base font-semibold">{{ $tabMeta['label'] }}</span>
                             <span class="mt-1 text-xs leading-5 {{ $testsSubTab === $testsView ? 'text-white/70' : 'text-zinc-400' }}">{{ $tabMeta['hint'] }}</span>
                         </button>
@@ -75,7 +75,7 @@
                                 <textarea id="test-bank-description" wire:model.defer="bankForm.description" class="min-h-28 w-full rounded-lg border-none bg-neutral-100 px-3 py-2 text-sm shadow-sm focus:ring-blue-500"></textarea>
                                 @error('bankForm.description') <x-validation>{{ $message }}</x-validation> @enderror
                             </div>
-                            <div class="flex flex-col gap-3 rounded-[24px] border border-zinc-200 bg-zinc-50 px-4 py-4 md:flex-row md:items-center md:justify-between">
+                            <div class="flex flex-col gap-3 rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-4 md:flex-row md:items-center md:justify-between">
                                 <label class="inline-flex items-center gap-2 text-sm text-zinc-700">
                                     <input type="checkbox" wire:model.defer="bankForm.is_active" class="rounded border-zinc-300 text-blue-600 focus:ring-blue-500">
                                     {{ __('performance_evaluation::dashboard.fields.is_active') }}
@@ -86,7 +86,7 @@
                     </x-surface-card>
 
                     <div class="space-y-4">
-                        <div class="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
+                        <div class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
                             <p class="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-400">{{ __('performance_evaluation::dashboard.tests_subtabs.banks') }}</p>
                             <h3 class="mt-3 text-lg font-semibold text-zinc-900">{{ __('performance_evaluation::dashboard.cards.test_bank_setup') }}</h3>
                             <p class="mt-2 text-sm leading-6 text-zinc-500">Bank testin qaydasını yığır: keçid balı, vaxt limiti və cəhd sayı burada müəyyən olunur.</p>
@@ -154,7 +154,7 @@
                                 <p class="mt-1 text-xs text-zinc-500">{{ __('performance_evaluation::dashboard.hints.options_text') }}</p>
                                 @error('questionForm.options_text') <x-validation>{{ $message }}</x-validation> @enderror
                             </div>
-                            <div class="flex flex-col gap-3 rounded-[24px] border border-zinc-200 bg-zinc-50 px-4 py-4 md:flex-row md:items-center md:justify-between">
+                            <div class="flex flex-col gap-3 rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-4 md:flex-row md:items-center md:justify-between">
                                 <label class="inline-flex items-center gap-2 text-sm text-zinc-700">
                                     <input type="checkbox" wire:model.defer="questionForm.is_active" class="rounded border-zinc-300 text-blue-600 focus:ring-blue-500">
                                     {{ __('performance_evaluation::dashboard.fields.is_active') }}
@@ -165,7 +165,7 @@
                     </x-surface-card>
 
                     <div class="space-y-4">
-                        <div class="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
+                        <div class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
                             <p class="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-400">{{ __('performance_evaluation::dashboard.tests_subtabs.questions') }}</p>
                             <h3 class="mt-3 text-lg font-semibold text-zinc-900">{{ __('performance_evaluation::dashboard.cards.test_question_setup') }}</h3>
                             <div class="mt-4 space-y-3">
@@ -189,7 +189,7 @@
             @if ($testsSubTab === 'import')
                 <x-surface-card :title="__('performance_evaluation::dashboard.cards.test_question_import')" icon="icons.training-icon" bodyClass="overflow-visible" contentClass="overflow-visible p-4">
                     <div class="grid gap-4 md:grid-cols-2">
-                        <div class="space-y-4 rounded-[28px] border border-zinc-200 bg-gradient-to-b from-zinc-50 to-white p-5">
+                        <div class="space-y-4 rounded-2xl border border-zinc-200 bg-gradient-to-b from-zinc-50 to-white p-5">
                             <div class="space-y-2">
                                 <p class="text-sm font-semibold text-zinc-900">{{ __('performance_evaluation::dashboard.labels.import_workflow_title') }}</p>
                                 <p class="text-xs leading-6 text-zinc-500">{{ __('performance_evaluation::dashboard.labels.import_workflow_hint') }}</p>
@@ -231,7 +231,7 @@
                             </div>
                         </div>
 
-                        <div class="space-y-4 rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
+                        <div class="space-y-4 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
                             <div class="grid gap-4 xl:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
                                 <div class="space-y-2">
                                     <p class="text-sm font-semibold text-zinc-900">{{ __('performance_evaluation::dashboard.labels.import_upload_title') }}</p>
@@ -337,22 +337,22 @@
                     </x-surface-card>
 
                     <div class="space-y-4">
-                        <div class="rounded-[28px] border border-zinc-200 bg-zinc-50 px-4 py-4">
+                        <div class="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-4">
                             <div class="space-y-1">
                                 <p class="text-sm font-semibold text-zinc-900">{{ __('performance_evaluation::dashboard.cards.test_taking_workspace') }}</p>
                                 <p class="text-xs leading-6 text-zinc-500">{{ __('performance_evaluation::dashboard.labels.test_taking_workspace_hint') }}</p>
                             </div>
                             <div class="mt-4 grid gap-2">
-                                <a href="{{ route('performance-evaluation.user-personnel-links', ['return' => url()->current()]) }}" class="inline-flex min-h-11 items-center justify-center rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-center text-sm font-medium leading-tight text-zinc-700 shadow-sm">
+                                <a href="{{ route('performance-evaluation.user-personnel-links', ['return' => route('performance-evaluation', ['tab' => 'tests'])]) }}" class="inline-flex min-h-11 items-center justify-center rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-center text-sm font-medium leading-tight text-zinc-700 shadow-sm">
                                     {{ __('performance_evaluation::dashboard.actions.open_user_personnel_links') }}
                                 </a>
-                                <a href="{{ route('performance-evaluation.test-workspace', ['return' => url()->current()]) }}" target="_blank" class="inline-flex min-h-11 items-center justify-center rounded-2xl bg-zinc-900 px-4 py-3 text-center text-sm font-medium leading-tight text-white">
+                                <a href="{{ route('performance-evaluation.test-workspace', ['return' => route('performance-evaluation', ['tab' => 'tests'])]) }}" target="_blank" class="inline-flex min-h-11 items-center justify-center rounded-2xl bg-zinc-900 px-4 py-3 text-center text-sm font-medium leading-tight text-white">
                                     {{ __('performance_evaluation::dashboard.actions.open_test_workspace') }}
                                 </a>
                             </div>
                         </div>
 
-                        <div class="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
+                        <div class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
                             <p class="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-400">{{ __('performance_evaluation::dashboard.tests_subtabs.sessions') }}</p>
                             <div class="mt-4 grid gap-3">
                                 <div class="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3">
@@ -372,16 +372,16 @@
             @if ($testsSubTab === 'review')
                 <div class="grid gap-4 xl:grid-cols-[300px_minmax(0,1fr)]">
                     <div class="space-y-4">
-                        <div class="rounded-[28px] border border-zinc-200 bg-zinc-50 px-4 py-4">
+                        <div class="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-4">
                             <div class="space-y-1">
                                 <p class="text-sm font-semibold text-zinc-900">{{ __('performance_evaluation::dashboard.cards.test_taking_workspace') }}</p>
                                 <p class="text-xs leading-6 text-zinc-500">{{ __('performance_evaluation::dashboard.labels.test_taking_workspace_hint') }}</p>
                             </div>
                             <div class="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-1">
-                                <a href="{{ route('performance-evaluation.user-personnel-links', ['return' => url()->current()]) }}" class="inline-flex min-h-11 items-center justify-center rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-center text-sm font-medium leading-tight text-zinc-700 shadow-sm">
+                                <a href="{{ route('performance-evaluation.user-personnel-links', ['return' => route('performance-evaluation', ['tab' => 'tests'])]) }}" class="inline-flex min-h-11 items-center justify-center rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-center text-sm font-medium leading-tight text-zinc-700 shadow-sm">
                                     {{ __('performance_evaluation::dashboard.actions.open_user_personnel_links') }}
                                 </a>
-                                <a href="{{ route('performance-evaluation.test-workspace', ['return' => url()->current()]) }}" target="_blank" class="inline-flex min-h-11 items-center justify-center rounded-2xl bg-zinc-900 px-4 py-3 text-center text-sm font-medium leading-tight text-white">
+                                <a href="{{ route('performance-evaluation.test-workspace', ['return' => route('performance-evaluation', ['tab' => 'tests'])]) }}" target="_blank" class="inline-flex min-h-11 items-center justify-center rounded-2xl bg-zinc-900 px-4 py-3 text-center text-sm font-medium leading-tight text-white">
                                     {{ __('performance_evaluation::dashboard.actions.open_test_workspace') }}
                                 </a>
                             </div>
@@ -449,17 +449,15 @@
                                             wire:model.live="reviewForm.performance_test_attempt_answer_id" :model="$this->reviewAnswerOptions()" search-model="searchReviewAnswer"></x-ui.select-dropdown>
                                         @error('reviewForm.performance_test_attempt_answer_id') <x-validation>{{ $message }}</x-validation> @enderror
                                     </div>
-                                    <div class="grid gap-3 md:grid-cols-[180px_minmax(0,1fr)]">
-                                        <div>
-                                            <x-label for="review-score">{{ __('performance_evaluation::dashboard.fields.review_score') }}</x-label>
-                                            <x-livewire-input mode="gray" id="review-score" type="number" step="0.01" wire:model.defer="reviewForm.score" />
-                                            @error('reviewForm.score') <x-validation>{{ $message }}</x-validation> @enderror
-                                        </div>
-                                        <div>
-                                            <x-label for="review-feedback">{{ __('performance_evaluation::dashboard.fields.feedback') }}</x-label>
-                                            <textarea id="review-feedback" wire:model.defer="reviewForm.feedback" class="min-h-24 w-full rounded-lg border-none bg-neutral-100 px-3 py-2 text-sm shadow-sm focus:ring-blue-500"></textarea>
-                                            @error('reviewForm.feedback') <x-validation>{{ $message }}</x-validation> @enderror
-                                        </div>
+                                    <div class="sm:max-w-[220px]">
+                                        <x-label for="review-score">{{ __('performance_evaluation::dashboard.fields.review_score') }}</x-label>
+                                        <x-livewire-input mode="gray" id="review-score" type="number" step="0.01" wire:model.defer="reviewForm.score" />
+                                        @error('reviewForm.score') <x-validation>{{ $message }}</x-validation> @enderror
+                                    </div>
+                                    <div>
+                                        <x-label for="review-feedback">{{ __('performance_evaluation::dashboard.fields.feedback') }}</x-label>
+                                        <x-ui.textarea id="review-feedback" wire:model.defer="reviewForm.feedback" :rows="4" />
+                                        @error('reviewForm.feedback') <x-validation>{{ $message }}</x-validation> @enderror
                                     </div>
                                     <div class="flex justify-end">
                                         <x-button mode="black" wire:click="reviewAttemptAnswer">{{ __('performance_evaluation::dashboard.actions.review_answer') }}</x-button>

@@ -6,6 +6,7 @@ use App\Models\PayrollPeriod;
 use App\Models\PayrollRun;
 use App\Models\Payslip;
 use App\Modules\Compensation\Domain\Contracts\CompensationReadRepository;
+use App\Modules\Integration\Domain\Contracts\PayrollOwnership;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
@@ -16,7 +17,36 @@ class PayrollRunService
         private readonly CompensationReadRepository $compensation,
         private readonly LoanService $loans,
         private readonly RetroService $retro,
+        private readonly PayrollOwnership $ownership,
     ) {}
+
+    /**
+     * Refuse to compute when the finance system owns payroll.
+     *
+     * HR does not hold what a payroll calculation needs. It knows the
+     * conditions — who is employed, on what base pay, with which allowances,
+     * for how many days — but not the progressive tax brackets, the
+     * social-insurance rates by sector, the average-earnings rules, the
+     * garnishment ceilings, or the accounting periods the result must post
+     * into. The finance system holds all of that.
+     *
+     * Letting both sides compute would produce two answers to the same
+     * question, and the only way anyone would find out they disagreed is an
+     * employee noticing their payslip. So this refuses loudly instead.
+     *
+     * Reading stays open: existing runs and payslips remain visible.
+     */
+    private function guardOwnership(string $action): void
+    {
+        if ($this->ownership->isOurs()) {
+            return;
+        }
+
+        throw new RuntimeException(
+            "Payroll is computed by the finance system; {$action} is not available here. ".
+            'This side supplies the conditions (employment, base pay, allowances, attendance).'
+        );
+    }
 
     public function createRun(PayrollPeriod $period, ?int $regimeId = null, ?int $userId = null, string $runType = 'regular'): PayrollRun
     {
@@ -34,6 +64,8 @@ class PayrollRunService
      */
     public function calculate(PayrollRun $run): PayrollRun
     {
+        $this->guardOwnership('calculation');
+
         if ($run->isLocked()) {
             throw new RuntimeException('A locked payroll run cannot be recalculated.');
         }
@@ -116,6 +148,8 @@ class PayrollRunService
 
     public function approve(PayrollRun $run): PayrollRun
     {
+        $this->guardOwnership('approval');
+
         if ($run->status !== 'calculated') {
             throw new RuntimeException('Only a calculated run can be approved.');
         }
@@ -130,6 +164,8 @@ class PayrollRunService
      */
     public function lock(PayrollRun $run): PayrollRun
     {
+        $this->guardOwnership('locking');
+
         if (! in_array($run->status, ['calculated', 'approved'], true)) {
             throw new RuntimeException('Only a calculated or approved run can be locked.');
         }

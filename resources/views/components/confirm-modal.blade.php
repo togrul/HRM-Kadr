@@ -73,7 +73,7 @@
                      x-transition:leave="ease-in duration-150"
                      x-transition:leave-start="opacity-100 scale-100 translate-y-0"
                      x-transition:leave-end="opacity-0 scale-95 translate-y-1"
-                     class="relative w-full max-w-[420px] overflow-hidden rounded-[22px] bg-white shadow-[0_24px_70px_-16px_rgba(15,23,42,0.45)] ring-1 ring-zinc-950/[0.06]">
+                     class="relative w-full max-w-[420px] overflow-hidden rounded-2xl bg-white shadow-card ring-1 ring-zinc-950/[0.06]">
 
                     {{-- Close --}}
                     <button type="button" x-on:click="closeModal()"

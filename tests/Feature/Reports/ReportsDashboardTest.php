@@ -4,6 +4,7 @@ namespace Tests\Feature\Reports;
 
 use App\Models\User;
 use App\Modules\Reports\Livewire\Comparisons;
+use App\Modules\Reports\Livewire\Dashboard;
 use App\Modules\Reports\Livewire\DynamicBuilder;
 use App\Modules\Reports\Livewire\Overview;
 use App\Modules\Reports\Livewire\StandardReports;
@@ -104,6 +105,32 @@ class ReportsDashboardTest extends TestCase
 
         $this->actingAs($user)
             ->get(route('reports'))
+            ->assertForbidden();
+    }
+
+    public function test_header_export_downloads_the_report_behind_the_active_tab(): void
+    {
+        $user = User::factory()->create();
+        $this->grantReportsPermissions($user);
+
+        $this->actingAs($user);
+
+        Livewire::test(Dashboard::class)
+            ->call('exportExcel')
+            ->assertFileDownloaded();
+    }
+
+    public function test_header_export_requires_export_permission(): void
+    {
+        $user = User::factory()->create();
+        Permission::findOrCreate('show-reports', 'web');
+        Permission::findOrCreate('export-reports', 'web');
+        $user->givePermissionTo('show-reports');
+
+        $this->actingAs($user);
+
+        Livewire::test(Dashboard::class)
+            ->call('exportExcel')
             ->assertForbidden();
     }
 

@@ -7,6 +7,7 @@ use App\Models\EmployeeLoan;
 use App\Models\PayrollPeriod;
 use App\Models\PayrollRun;
 use App\Models\Payslip;
+use App\Models\PayslipLine;
 use App\Models\Personnel;
 use App\Modules\Payroll\Application\Services\LoanService;
 use App\Modules\Payroll\Application\Services\PayrollExportService;
@@ -16,6 +17,7 @@ use App\Support\Livewire\DownloadsReportsTable;
 use App\Support\Livewire\InteractsWithTabbedWorkspace;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -27,6 +29,12 @@ class Dashboard extends Component
     use InteractsWithTabbedWorkspace;
 
     public string $activeTab = 'runs';
+
+    public ?int $periodFilter = null;
+
+    public ?int $regimeFilter = null;
+
+    public ?string $panel = null;
 
     public array $periodForm = [
         'year' => null,
@@ -65,6 +73,25 @@ class Dashboard extends Component
         $this->bootActiveTabFromRequest();
         $this->periodForm['year'] = (int) now()->format('Y');
         $this->periodForm['month'] = (int) now()->format('m');
+        $this->periodFilter = PayrollPeriod::query()->orderByDesc('year')->orderByDesc('month')->value('id');
+    }
+
+    public function openPanel(string $panel): void
+    {
+        abort_unless($this->canManage(), 403);
+
+        $this->resetValidation();
+        $this->panel = $panel;
+
+        if ($panel === 'run') {
+            $this->runForm['payroll_period_id'] = $this->runForm['payroll_period_id'] ?: $this->periodFilter;
+        }
+    }
+
+    public function closePanel(): void
+    {
+        $this->panel = null;
+        $this->resetValidation();
     }
 
     protected function allowedTabs(): array
@@ -216,6 +243,103 @@ class Dashboard extends Component
         ];
     }
 
+    /**
+     * @return array<int,array{id:int,label:string}>
+     */
+    #[Computed]
+    public function periodOptions(): array
+    {
+        return $this->periods
+            ->map(fn (PayrollPeriod $period): array => ['id' => $period->id, 'label' => $this->periodLabel($period)])
+            ->all();
+    }
+
+    #[Computed]
+    public function activePeriod(): ?PayrollPeriod
+    {
+        return $this->periods->firstWhere('id', $this->periodFilter) ?? $this->periods->first();
+    }
+
+    public function periodLabel(?PayrollPeriod $period): string
+    {
+        return $period?->starts_on?->translatedFormat('F Y') ?? ($period?->code ?? '—');
+    }
+
+    /**
+     * @return array<string,int>
+     */
+    #[Computed]
+    public function tabCounts(): array
+    {
+        return [
+            'runs' => $this->runs->count(),
+            'payslips' => Payslip::query()->count(),
+            'loans' => EmployeeLoan::query()->where('status', 'active')->count(),
+        ];
+    }
+
+    /**
+     * Statutory deductions of the selected period, biggest first — the legal split the
+     * finance team reconciles before a run is locked.
+     *
+     * @return array<int,array{label:string,amount:float,pct:float}>
+     */
+    #[Computed]
+    public function statutoryTotals(): array
+    {
+        $period = $this->activePeriod;
+
+        if (! $period) {
+            return [];
+        }
+
+        $rows = PayslipLine::query()
+            ->join('payslips', 'payslips.id', '=', 'payslip_lines.payslip_id')
+            ->join('payroll_runs', 'payroll_runs.id', '=', 'payslips.payroll_run_id')
+            ->where('payroll_runs.payroll_period_id', $period->id)
+            ->where('payslip_lines.is_statutory', true)
+            ->where('payslip_lines.kind', 'deduction')
+            ->groupBy('payslip_lines.code')
+            ->orderByDesc('total')
+            ->limit(6)
+            ->get([DB::raw('payslip_lines.code as code'), DB::raw('sum(payslip_lines.amount) as total')]);
+
+        $max = (float) $rows->max('total');
+
+        return $rows->map(fn (PayslipLine $row): array => [
+            'label' => __('payroll::dashboard.statutory.'.preg_replace('/_(ee|er)$/', '', (string) $row->code)),
+            'amount' => (float) $row->total,
+            'pct' => $max > 0 ? round((float) $row->total / $max * 100, 1) : 0.0,
+        ])->all();
+    }
+
+    #[Computed]
+    public function activeLoans(): Collection
+    {
+        return EmployeeLoan::query()
+            ->where('status', 'active')
+            ->with('personnel:tabel_no,surname,name')
+            ->orderByDesc('id')
+            ->limit(8)
+            ->get();
+    }
+
+    /**
+     * Exports always target the run being looked at, falling back to the newest run of the
+     * selected period so the toolbar is usable straight from the overview.
+     */
+    #[Computed]
+    public function exportRunId(): ?int
+    {
+        return $this->selectedRunId ?? $this->runs->first()?->id;
+    }
+
+    public function manageLoans(string $tabelNo, string $label): void
+    {
+        $this->selectPersonnel($tabelNo, $label);
+        $this->activeTab = 'loans';
+    }
+
     #[Computed]
     public function regimeOptions(): array
     {
@@ -238,6 +362,8 @@ class Dashboard extends Component
     {
         return PayrollRun::query()
             ->with(['period', 'regime'])
+            ->when($this->periodFilter, fn ($query) => $query->where('payroll_period_id', $this->periodFilter))
+            ->when($this->regimeFilter, fn ($query) => $query->where('regime_id', $this->regimeFilter))
             ->orderByDesc('id')
             ->limit(40)
             ->get();
@@ -304,8 +430,10 @@ class Dashboard extends Component
             'periodForm.month' => 'month',
         ]))['periodForm'];
 
-        $service->createPeriod((int) $data['year'], (int) $data['month']);
+        $period = $service->createPeriod((int) $data['year'], (int) $data['month']);
 
+        $this->periodFilter = $period->id;
+        $this->closePanel();
         $this->dispatch('notify', type: 'success', message: __('payroll::dashboard.messages.period_created'));
     }
 
@@ -330,6 +458,8 @@ class Dashboard extends Component
         );
 
         $this->selectedRunId = $run->id;
+        $this->periodFilter = $run->payroll_period_id;
+        $this->closePanel();
         $this->dispatch('notify', type: 'success', message: __('payroll::dashboard.messages.run_created'));
     }
 

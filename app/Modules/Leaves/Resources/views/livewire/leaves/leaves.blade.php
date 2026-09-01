@@ -1,408 +1,343 @@
-<div
-    x-data="leavesIndex()"
-    x-init="init()"
-    class="flex flex-col"
->
-    {{-- ===================== Premium header ===================== --}}
-    <div class="px-4 pt-4 sm:px-6">
-        <x-page-header :title="__('leaves::common.titles.leaves')" :count="$permits->total()" :count-label="__('leaves::common.labels.all')">
-            <x-slot:icon>
-                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="m9 16 2 2 4-4"/></svg>
-            </x-slot:icon>
-            <x-slot:actions>
-                @can('create', App\Models\Leave::class)
-                    <x-pill-button variant="primary" wire:click="openAddLeaveModal" wire:loading.attr="disabled" wire:target="openAddLeaveModal">
-                        <x-icons.add-file color="text-white" hover="text-white" size="w-5 h-5" />
-                        {{ __('leaves::common.actions.add_leave') }}
-                    </x-pill-button>
-                @endcan
-                @can('export', App\Models\Leave::class)
-                    <x-pill-button variant="emerald" :icon="true" wire:click.prevent="exportExcel" wire:loading.attr="disabled" wire:target="exportExcel"
-                        title="{{ __('leaves::common.actions.export_excel') }}" aria-label="{{ __('leaves::common.actions.export_excel') }}">
-                        <x-icons.excel-icon />
-                    </x-pill-button>
-                @endcan
-            </x-slot:actions>
-        </x-page-header>
-    </div>
+@php
+    $num = fn ($value): string => number_format((int) $value, 0, ',', ' ');
+    $counts = $this->statusCounts;
+    $statusDot = fn ($id): string => match ((int) $id) {
+        10 => 'bg-[#f59e0b]',
+        20 => 'bg-[#10b981]',
+        30 => 'bg-[#f43f5e]',
+        default => 'bg-[#a1a1aa]',
+    };
+    $dayEquivalent = rtrim(rtrim(number_format($counts['day_equivalent'], 1, '.', ''), '0'), '.');
+    $selectedLeaveType = data_get($search, 'leave_type_id');
+@endphp
 
-    {{-- filter --}}
-       <div class="grid grid-cols-1 gap-2 px-6 py-4 sm:grid-cols-2 lg:grid-cols-4">
-       <x-ui.select-dropdown
-                label="{{ __('leaves::common.labels.leave_type') }}"
-                placeholder="---"
-                mode="gray"
-                class="w-full"
-                wire:model.defer="filter.leave_type_id"
-                :model="$this->leaveTypes"
-        />
-        <div class="flex flex-col">
-            <x-label for="filter.fullname">{{ __('leaves::common.labels.fullname') }}</x-label>
-            <x-livewire-input
-                    mode="gray"
-                    name="filter.fullname"
-                    wire:model="filter.fullname"
-            ></x-livewire-input>
-        </div>
-        <div class="flex flex-col w-full space-y-1">
-            <x-label for="filter.gender">{{ __('leaves::common.labels.gender') }}</x-label>
-            <div class="flex space-x-2">
-                @foreach (\App\Enums\GenderEnum::genderOptions() as $value => $label)
-                    <label class="inline-flex items-center w-full px-2 py-2 bg-gray-100 rounded shadow-sm">
-                        <input type="radio" class="form-radio" name="filter.gender" wire:model="filter.gender"
-                               value="{{ $value }}">
-                        <span class="ml-2 text-sm font-normal">{{ $label }}</span>
-                    </label>
+<div class="flex flex-col">
+    {{-- ===================== contextual panel ===================== --}}
+    <x-slot name="sidebar"><div id="hrm-context-panel"></div></x-slot>
+
+    @teleport('#hrm-context-panel')
+        <x-context-panel
+            :title="__('leaves::common.titles.leaves')"
+            :subtitle="$num($counts['all']).' '.__('leaves::common.labels.unit')"
+        >
+            <x-context-panel.section>
+                <x-context-panel.item
+                    wire:click.prevent="setStatus('all')"
+                    wire:loading.attr="disabled"
+                    wire:target="setStatus"
+                    :active="$status === 'all'"
+                    :dot="$statusDot(null)"
+                    :count="$num($counts['all'])"
+                >{{ __('leaves::common.labels.all') }}</x-context-panel.item>
+
+                @foreach ($_appeal_statuses as $_status)
+                    <x-context-panel.item
+                        wire:key="leave-panel-status-{{ $_status->id }}"
+                        wire:click.prevent="setStatus({{ $_status->id }})"
+                        wire:loading.attr="disabled"
+                        wire:target="setStatus"
+                        :active="$status === $_status->id"
+                        :dot="$statusDot($_status->id)"
+                        :count="$num($counts['by_status'][(int) $_status->id] ?? 0)"
+                    >{{ $_status->name }}</x-context-panel.item>
                 @endforeach
-            </div>
-        </div>
-       <div class="flex flex-col">
-            <x-label for="filter.reason">{{ __('leaves::common.labels.reason') }}</x-label>
-            <x-livewire-input mode="gray" type="text" name="filter.reason"
-                    wire:model="filter.reason"></x-livewire-input>
-      </div>
 
-        <div class="flex flex-col">
-            <x-label for="filter.appeal_date">{{ __('leaves::common.labels.dates') }}</x-label>
-            <div class="flex items-center space-x-1">
-                <x-pikaday-input mode="gray" name="filter.starts_at" format="Y-MM-DD"
-                    wire:model="filter.starts_at">
-                    <x-slot name="script">
-                        $el.onchange = function () {
-                        @this.set('filter.starts_at', $el.value);
-                        }
-                    </x-slot>
-                </x-pikaday-input>
-                <span>-</span>
-                <x-pikaday-input mode="gray" name="filter.ends_at" format="Y-MM-DD"
-                    wire:model="filter.ends_at">
-                    <x-slot name="script">
-                        $el.onchange = function () {
-                        @this.set('filter.ends_at', $el.value);
-                        }
-                    </x-slot>
-                </x-pikaday-input>
-            </div>
-        </div>
-        <div class="flex items-end space-x-2">
-            <x-button
-                    mode="primary"
-                    wire:click="searchFilter"
-                    wire:loading.attr="disabled"
-                    wire:target="searchFilter"
-            >{{ __('leaves::common.labels.search') }}</x-button>
-            <x-button
-                    mode="black"
-                    wire:click="resetFilter"
-                    wire:loading.attr="disabled"
-                    wire:target="resetFilter"
-            >{{ __('leaves::common.labels.reset') }}</x-button>
-        </div>
-    </div>
-    {{-- end filter --}}
+                @can('delete', App\Models\Leave::class)
+                    <x-context-panel.item
+                        wire:click.prevent="setStatus('deleted')"
+                        wire:loading.attr="disabled"
+                        wire:target="setStatus"
+                        :active="$status === 'deleted'"
+                        :dot="$statusDot(null)"
+                        :count="$num($counts['deleted'])"
+                    >{{ __('leaves::common.labels.deleted') }}</x-context-panel.item>
+                @endcan
+            </x-context-panel.section>
 
-    {{-- start --}}
-    <div class="flex flex-col px-6 py-4 space-y-4">
-        @if (!empty($stats))
-            <div class="grid w-full gap-2 md:grid-cols-3 lg:grid-cols-4">
-                @foreach ($stats as $type => $row)
-                    <x-surface-card :title="$type" class="" icon="icons.calendar-icon">
-                      @php
-                          $equivalentDays = rtrim(rtrim(number_format((float) $row['total_days'], 1, '.', ''), '0'), '.');
-                      @endphp
-                      <div class="flex items-center justify-between text-slate-800">
-                        <div class="flex items-baseline space-x-1">
-                            <span class="text-lg font-bold font-title">{{ $equivalentDays }}</span>
-                            <span class="text-[12px] font-medium font-mono text-gray-500 uppercase">{{ __('leaves::common.labels.day_equivalent') }}</span>
-                        </div>
-                        <div class="flex items-baseline space-x-1 text-emerald-700">
-                            <span class="text-lg font-bold font-title">{{ $row['count'] }}</span>
-                            <span class="text-[12px] font-medium font-mono text-emerald-600 uppercase">{{ __('leaves::common.labels.request') }}</span>
+            <x-context-panel.section :title="__('leaves::common.labels.leave_type')">
+                @if ($selectedLeaveType)
+                    <x-context-panel.item wire:click.prevent="applyFilter({ leave_type_id: null })">
+                        &larr; {{ __('leaves::common.labels.show_all') }}
+                    </x-context-panel.item>
+                @endif
+
+                @foreach ($this->leaveTypes() as $leaveType)
+                    @php $leaveTypeLabel = data_get($leaveType, 'label'); @endphp
+                    <x-context-panel.item
+                        wire:key="leave-panel-type-{{ data_get($leaveType, 'id') }}"
+                        wire:click.prevent="applyFilter({ leave_type_id: {{ (int) data_get($leaveType, 'id') }} })"
+                        :active="(string) $selectedLeaveType === (string) data_get($leaveType, 'id')"
+                        :count="$num(data_get($stats, $leaveTypeLabel.'.count', 0))"
+                    >{{ $leaveTypeLabel }}</x-context-panel.item>
+                @endforeach
+            </x-context-panel.section>
+
+            <x-slot name="footer">
+                <button type="button" wire:click="resetFilter" class="text-[12px] font-medium text-ink-muted transition hover:text-ink">
+                    {{ __('leaves::common.labels.reset') }}
+                </button>
+            </x-slot>
+        </x-context-panel>
+    @endteleport
+
+    {{-- ===================== header ===================== --}}
+    <x-page-header
+        :title="__('leaves::common.labels.requests_title')"
+        :breadcrumb="__('leaves::common.titles.leaves')"
+    >
+        <x-slot:icon>
+            <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="m9 16 2 2 4-4"/></svg>
+        </x-slot:icon>
+
+        <x-slot:stats>
+            <x-page-header.stat :value="$num($counts['all'])" :label="__('leaves::common.labels.unit')" />
+            <x-page-header.stat :value="$num($counts['by_status'][10] ?? 0)" :label="__('leaves::common.labels.pending_short')" tone="amber" />
+            <x-page-header.stat :value="$dayEquivalent" :label="__('leaves::common.labels.day_equivalent')" />
+        </x-slot:stats>
+
+        <x-slot:actions>
+            @can('export', App\Models\Leave::class)
+                <x-pill-button variant="emerald" :icon="true" wire:click.prevent="exportExcel" wire:loading.attr="disabled" wire:target="exportExcel"
+                    title="{{ __('leaves::common.actions.export_excel') }}">
+                    <x-icons.excel-icon />
+                </x-pill-button>
+            @endcan
+            @can('create', App\Models\Leave::class)
+                <x-pill-button variant="primary" wire:click="openAddLeaveModal" wire:loading.attr="disabled" wire:target="openAddLeaveModal">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                    {{ __('leaves::common.actions.add_leave') }}
+                </x-pill-button>
+            @endcan
+        </x-slot:actions>
+
+        {{-- toolbar --}}
+        <div class="flex flex-col gap-2.5">
+            <div class="flex flex-wrap items-end gap-3">
+                <label class="w-full flex-1 sm:max-w-[300px]">
+                    <span class="hrm-eyebrow block pb-1">{{ __('leaves::common.labels.fullname') }}</span>
+                    <x-livewire-input mode="gray" name="filter.fullname" wire:model="filter.fullname"
+                        placeholder="{{ __('leaves::common.labels.search_by_person') }}" />
+                </label>
+
+                <div class="shrink-0">
+                    <span class="hrm-eyebrow block pb-1">{{ __('leaves::common.labels.dates') }}</span>
+                    <div class="flex items-center gap-2">
+                        <input type="date" wire:model="filter.starts_at"
+                            aria-label="{{ __('leaves::common.labels.date_start') }}"
+                            class="hrm-num h-[34px] w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-[12.5px] text-ink focus:border-ink focus:bg-white focus:ring-0" />
+                        <span class="shrink-0 text-ink-faint">&ndash;</span>
+                        <input type="date" wire:model="filter.ends_at"
+                            aria-label="{{ __('leaves::common.labels.date_end') }}"
+                            class="hrm-num h-[34px] w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-[12.5px] text-ink focus:border-ink focus:bg-white focus:ring-0" />
+                    </div>
+                </div>
+
+                <label class="min-w-[170px] flex-1">
+                    <span class="hrm-eyebrow block pb-1">{{ __('leaves::common.labels.reason') }}</span>
+                    <x-livewire-input mode="gray" type="text" name="filter.reason" wire:model="filter.reason" />
+                </label>
+
+                <x-pill-button variant="primary" wire:click="searchFilter" wire:loading.attr="disabled" wire:target="searchFilter" class="!h-[34px]">
+                    {{ __('leaves::common.labels.search') }}
+                </x-pill-button>
+                <x-pill-button wire:click="resetFilter" wire:loading.attr="disabled" wire:target="resetFilter" class="!h-[34px]">
+                    {{ __('leaves::common.labels.reset') }}
+                </x-pill-button>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2">
+                <span class="hrm-eyebrow">{{ __('leaves::common.labels.gender') }}</span>
+                {{-- chips sit next to the instant status chips, so they must apply on click:
+                     $set would only touch $filter, and the list reads $search. --}}
+                <x-filter.nav wrap class="min-w-0">
+                    <x-filter.item
+                        wire:click.prevent="applyFilter({ gender: null })"
+                        wire:loading.attr="disabled"
+                        :active="blank(data_get($search, 'gender'))"
+                    >{{ __('leaves::common.labels.all') }}</x-filter.item>
+                    @foreach (\App\Enums\GenderEnum::genderOptions() as $value => $label)
+                        <x-filter.item
+                            wire:key="leave-gender-{{ $value }}"
+                            wire:click.prevent="applyFilter({ gender: '{{ $value }}' })"
+                            wire:loading.attr="disabled"
+                            :active="(string) data_get($search, 'gender') === (string) $value"
+                        >{{ $label }}</x-filter.item>
+                    @endforeach
+                </x-filter.nav>
+            </div>
+
+            <p class="text-[11.5px] text-ink-faint">{{ __('leaves::common.labels.approval_note') }}</p>
+
+            {{-- small-screen fallback for the panel's status list --}}
+            <x-filter.nav wrap class="min-w-0 lg:hidden">
+                <x-filter.item wire:click.prevent="setStatus('all')" :active="$status === 'all'">
+                    {{ __('leaves::common.labels.all') }}
+                </x-filter.item>
+                @foreach ($_appeal_statuses as $_status)
+                    <x-filter.item wire:click.prevent="setStatus({{ $_status->id }})" :active="$status === $_status->id">
+                        {{ $_status->name }}
+                    </x-filter.item>
+                @endforeach
+            </x-filter.nav>
+        </div>
+    </x-page-header>
+
+    <x-table.tbl :headers="$this->getTableHeaders()">
+        @php $authUser = auth()->user(); @endphp
+        @forelse ($permits as $leave)
+            @php
+                $statusTone = match ((int) $leave->status_id) {
+                    10 => 'amber',
+                    20 => 'green',
+                    30 => 'rose',
+                    default => 'secondary',
+                };
+            @endphp
+            <tr wire:key="leave-row-{{ $leave->id }}" @class(['bg-[#fffbeb]/60' => (int) $leave->status_id === 10])>
+                <x-table.td standart-width>
+                    <div class="flex items-center gap-2.5">
+                        <x-avatar :name="(string) $leave->personnel?->fullname" :tone="$statusTone === 'amber' ? 'amber' : 'neutral'" />
+                        <div class="min-w-0 max-w-[240px] leading-tight">
+                            <p class="truncate text-[13px] font-medium text-ink">{{ $leave->personnel?->fullname_max }}</p>
+                            <p class="truncate text-[11px] text-ink-faint">{{ $leave->personnel?->position_label }}</p>
+                            <p class="truncate text-[11px] text-ink-faint">{{ $leave->personnel_structure_path }}</p>
                         </div>
                     </div>
-                    </x-surface-card>
-                @endforeach
-            </div>
-        @endif
-        {{-- start  --}}
-        <div class="flex items-center">
-             <div class="px-2 py-2 bg-white filter rounded-xl">
-                <x-filter.nav>
-                    <x-filter.item wire:click.prevent="setStatus('all')" :active="$status === 'all'">
-                        {{ __('leaves::common.labels.all') }}
-                    </x-filter.item>
-                    @foreach ($_appeal_statuses as $_status)
-                        <x-filter.item wire:click.prevent="setStatus({{ $_status->id }})" :active="$status === $_status->id">
-                            {{ $_status->name }}
-                        </x-filter.item>
-                    @endforeach
-                    @can('delete', App\Models\Leave::class)
-                        <x-filter.item wire:click.prevent="setStatus('deleted')" :active="$status === 'deleted'">
-                            {{ __('leaves::common.labels.deleted') }}
-                        </x-filter.item>
-                    @endcan
-                </x-filter.nav>
-           </div>
-        </div>
-        {{-- end --}}
-    </div>
-    {{-- end --}}
+                </x-table.td>
 
-    <div class="flex flex-col">
-    {{-- start table --}}
-    <div class="relative min-h-[300px] overflow-x-auto">
-            <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-                <div class="overflow-visible">
-                    <x-table.tbl :headers="$this->getTableHeaders()" title="{{ __('leaves::common.titles.leaves') }}">
-                        @php
-                            $authUser = auth()->user();
-                        @endphp
-                        @forelse ($permits as $leave)
-                            @php
-                                $durationTone = $leave->normalizedDurationUnit() === 'day'
-                                    ? 'bg-gray-100 text-gray-900'
-                                    : 'bg-sky-100 text-sky-700';
-                                $statusTone = match ($leave->status_id) {
-                                    10 => 'bg-neutral-200/60 text-neutral-600 border-neutral-200',
-                                    20 => 'bg-emerald-50 border-emerald-200 text-emerald-600',
-                                    30 => 'bg-rose-50 border-rose-200 text-rose-600',
-                                    default => 'bg-slate-50 text-slate-600 border-slate-200',
-                                };
-                            @endphp
-                            <tr wire:key="leave-row-{{ $leave->id }}">
-                                <td class="px-5 py-3 align-middle text-sm text-zinc-700 whitespace-nowrap">
-                                    <span class="text-sm font-medium text-gray-700">
-                                        {{ $leave->row_no }}
-                                    </span>
-                                </td>
+                <x-table.td>
+                    <x-small-badge mode="secondary">{{ $leave->leaveType?->name }}</x-small-badge>
+                </x-table.td>
 
-                                <td class="px-5 py-3 align-middle text-sm text-zinc-700 whitespace-nowrap">
-                                    <div class="flex flex-col">
-                                        <span class="text-sm font-medium text-neutral-900">
-                                            {{ $leave->personnel->fullname_max }}
-                                        </span>
-                                        <span class="text-sm font-medium text-neutral-600/80">
-                                            {{ $leave->personnel_structure_path }}
-                                        </span>
-                                        <span class="text-sm font-medium text-emerald-600">
-                                            {{ $leave->personnel->position_label }}
-                                        </span>
+                <x-table.td standart-width>
+                    <div class="max-w-[220px] leading-tight">
+                        <p class="hrm-num text-[13px] font-medium text-ink">{{ $leave->periodLabel }}</p>
+                        <div class="mt-1 flex flex-wrap items-center gap-1.5">
+                            <x-small-badge mode="secondary">{{ $leave->durationSummary() }}</x-small-badge>
+                            @if ($leave->durationWindowLabel())
+                                <x-small-badge mode="blue">{{ $leave->durationWindowLabel() }}</x-small-badge>
+                            @endif
+                        </div>
+                        @if ($leave->deleted_at)
+                            <p class="mt-1 text-[11px] text-ink-faint">
+                                {{ __('leaves::common.labels.deleted_date') }}:
+                                <span class="hrm-num">{{ \Carbon\Carbon::parse($leave->deleted_at)->format('d.m.Y H:i') }}</span>
+                            </p>
+                        @endif
+                    </div>
+                </x-table.td>
+
+                <x-table.td standart-width>
+                    <p class="max-w-[200px] whitespace-normal text-[12.5px] leading-snug text-ink-muted">{{ $leave->reason }}</p>
+                </x-table.td>
+
+                <x-table.td standart-width>
+                    <div class="max-w-[190px] leading-tight">
+                        <div class="flex flex-wrap items-center gap-1.5">
+                            <x-small-badge :mode="$statusTone" dot>{{ $leave->status?->name }}</x-small-badge>
+                            @if ($leave?->latestLog?->comment)
+                                <div class="relative" x-data="{ showComment: false }" x-on:click.outside="showComment = false">
+                                    <button type="button" x-on:click="showComment = ! showComment"
+                                        title="{{ __('leaves::common.actions.show_comment') }}"
+                                        class="flex h-6 w-6 items-center justify-center rounded-lg text-ink-faint transition hover:bg-[#f4f4f5] hover:text-ink">
+                                        <x-icons.comment-icon color="text-current" hover="text-current" size="w-4 h-4" />
+                                    </button>
+                                    <div
+                                        @class([
+                                            'absolute z-10 w-[210px] rounded-xl border border-hairline bg-white px-3 py-2 shadow-overlay',
+                                            'bottom-8' => $loop->last,
+                                            'top-8' => ! $loop->last,
+                                        ])
+                                        x-show="showComment" x-cloak
+                                        x-on:keydown.window.escape.prevent="showComment = false"
+                                    >
+                                        <p class="text-[12px] leading-snug text-ink-muted">{{ $leave->latestLog->comment }}</p>
                                     </div>
-                                </td>
+                                </div>
+                            @endif
+                        </div>
 
-                                <td class="px-5 py-3 align-middle text-sm text-zinc-700 whitespace-nowrap">
-                                    <span class="inline-flex w-max items-center rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium uppercase tracking-tight text-slate-700">
-                                        {{ $leave->leaveType->name }}
-                                    </span>
-                                </td>
+                        @if ((int) $leave->status_id !== 10 && $leave->latestLog)
+                            <p class="mt-1 truncate text-[11px] text-ink-faint">{{ $leave->latestLog->changedBy?->fullname }}</p>
+                            <p class="hrm-num text-[11px] text-ink-faint">{{ \Carbon\Carbon::parse($leave->latestLog->changed_at)->format('d.m.Y H:i') }}</p>
+                        @endif
+                    </div>
+                </x-table.td>
 
-                                <td class="px-5 py-3 align-middle text-sm text-zinc-700 whitespace-nowrap">
-                                    <div class="flex flex-col space-y-1">
-                                      <span class="flex-wrap text-sm font-medium whitespace-normal">{{ $leave->periodLabel }}</span>
-                                      <div class="flex flex-wrap items-center gap-2">
-                                          <span class="inline-flex h-5 w-fit shrink-0 items-center justify-center rounded-4xl bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-900">
-                                              {{ $leave->durationSummary() }}
-                                          </span>
-                                          @if($leave->durationWindowLabel())
-                                              <span class="inline-flex h-5 w-fit shrink-0 items-center justify-center rounded-4xl bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-700">
-                                                  {{ $leave->durationWindowLabel() }}
-                                              </span>
-                                          @endif
-                                      </div>
-                                    </div>
-                                      @if ($leave->deleted_at)
-                                          <hr class="my-1" >
-                                           <div class="flex items-center mt-2 space-x-1 text-xs font-medium">
-                                                <span class="text-rose-500">{{ __('leaves::common.labels.deleted_date') }}:</span>
-                                                <span class="text-black">{{ \Carbon\Carbon::parse($leave->deleted_at)->format('d-m-Y H:i') }}</span>
-                                            </div>
-                                        @endif
-                                </td>
+                <x-table.td>
+                    @if ($leave->document_path)
+                        <a href="/{{ $leave->document_path }}" target="_blank" rel="noopener"
+                            title="{{ __('leaves::common.actions.download_document') }}"
+                            class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-[#f4f4f5] hover:text-[#0369a1]">
+                            <x-icons.link-icon size="w-4 h-4" color="text-current" hover="text-current" />
+                        </a>
+                    @else
+                        <span class="text-ink-faint">&mdash;</span>
+                    @endif
+                </x-table.td>
 
-                               <td class="px-5 py-3 align-middle text-sm text-zinc-700">
-                                    <span class="text-sm font-medium text-gray-700 whitespace-normal flex w-[160px] bg-zinc-100/70 rounded-xl shadow-sm border border-gray-200 px-3 py-2">
-                                        {{ $leave->reason }}
-                                    </span>
-                                </td>
+                <x-table.td :isButton="true">
+                    <div class="flex items-center justify-end gap-1">
+                        @if ($leave->canBeApprovedBy($authUser))
+                            <button type="button" wire:loading.attr="disabled"
+                                x-on:click="$dispatch('comment:open', { action: 'APPROVED', leaveId: {{ (int) $leave->id }} })"
+                                title="{{ __('leaves::common.actions.approve') }}"
+                                class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-emerald-50 hover:text-emerald-600">
+                                <x-icons.check-icon color="text-current" hover="text-current" size="w-5 h-5" />
+                            </button>
+                            <button type="button" wire:loading.attr="disabled"
+                                x-on:click="$dispatch('comment:open', { action: 'CANCELLED', leaveId: {{ (int) $leave->id }} })"
+                                title="{{ __('leaves::common.actions.reject') }}"
+                                class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-rose-50 hover:text-rose-600">
+                                <x-icons.x-circle-icon color="text-current" hover="text-current" size="w-5 h-5" />
+                            </button>
+                        @endif
 
-                                <td class="px-5 py-3 align-middle text-sm text-zinc-700 whitespace-nowrap">
-                                    <div class="flex flex-col space-y-1">
-                                        <div class="flex items-center gap-2">
-                                            <span class="inline-flex w-max items-center rounded-full border px-2.5 py-1 text-xs font-semibold uppercase tracking-tight {{ $statusTone }}">
-                                                {{ $leave->status->name }}
-                                            </span>
-                                            <span class="inline-flex h-5 w-fit shrink-0 items-center justify-center rounded-4xl px-2 py-0.5 text-xs font-medium {{ $durationTone }}">
-                                                {{ $leave->durationSummary() }}
-                                            </span>
-                                            @if($leave?->latestLog?->comment)
-                                            <div class="relative top-1" x-data="{showComment: false}">
-                                                <button @click="showComment = true" class="appearance-none" type="button" title="{{ __('leaves::common.actions.show_comment') }}" aria-label="{{ __('leaves::common.actions.show_comment') }}">
-                                                    <x-icons.comment-icon color="text-sky-500" hover="text-indigo-700" />
-                                                </button>
-                                                 <div @class([
-                                                    'absolute px-3 py-2 rounded-md shadow-2xl bg-white border border-neutral-200/80 w-[200px] z-10',
-                                                    'bottom-10' => $loop->last,
-                                                    'top-6' => !$loop->last,
-                                                ])
-                                                    x-show="showComment"
-                                                    x-transition.opacity
-                                                    x-cloak
-                                                    x-on:keydown.window.escape.prevent="showComment = false"
-                                                    x-on:click.outside = "showComment = false"
-                                                >
-                                                    <span class="text-sm text-neutral-600">
-                                                        {{ $leave->latestLog->comment }}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            @endif
-                                        </div>
+                        @if ($status != 'deleted')
+                            @can('update', $leave)
+                                <button type="button" wire:click="openEditLeaveModal({{ $leave->id }})"
+                                    wire:loading.attr="disabled" wire:target="openEditLeaveModal"
+                                    title="{{ __('leaves::common.actions.edit') }}"
+                                    class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-[#f4f4f5] hover:text-ink">
+                                    <x-icons.document-icon color="text-current" hover="text-current" />
+                                </button>
+                            @endcan
+                            @can('delete', $leave)
+                                <button type="button" wire:click="setDeleteLeave('{{ $leave->id }}')"
+                                    wire:loading.attr="disabled"
+                                    title="{{ __('leaves::common.actions.delete') }}"
+                                    class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-rose-50 hover:text-rose-600">
+                                    <x-icons.delete-icon color="text-current" hover="text-current" />
+                                </button>
+                            @endcan
+                        @else
+                            @can('restore', $leave)
+                                <button type="button" wire:click="restoreData('{{ $leave->id }}')"
+                                    wire:loading.attr="disabled"
+                                    title="{{ __('leaves::common.actions.restore') }}"
+                                    class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-teal-50 hover:text-teal-600">
+                                    <x-icons.recover color="text-current" hover="text-current" />
+                                </button>
+                            @endcan
+                            @can('forceDelete', $leave)
+                                <button type="button"
+                                    x-on:click="$dispatch('confirm-action', { title: {{ \Illuminate\Support\Js::from(__('leaves::common.actions.force_delete')) }}, message: {{ \Illuminate\Support\Js::from(__('leaves::common.messages.remove_confirm')) }}, confirmText: {{ \Illuminate\Support\Js::from(__('leaves::common.actions.force_delete')) }}, tone: 'rose', run: () => $wire.forceDeleteData('{{ $leave->id }}') })"
+                                    wire:loading.attr="disabled"
+                                    title="{{ __('leaves::common.actions.force_delete') }}"
+                                    class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-rose-50 hover:text-rose-600">
+                                    <x-icons.force-delete />
+                                </button>
+                            @endcan
+                        @endif
+                    </div>
+                </x-table.td>
+            </tr>
+        @empty
+            <x-table.empty :rows="count($this->getTableHeaders())" />
+        @endforelse
+    </x-table.tbl>
 
-                                        @if($leave->durationWindowLabel())
-                                            <div class="text-xs text-zinc-500">
-                                                {{ $leave->durationWindowLabel() }}
-                                            </div>
-                                        @endif
-
-                                        @if ($leave->status_id <> 10 && $leave->latestLog)
-                                        <div class="flex flex-col">
-                                             <div class="flex items-center space-x-1 text-sm">
-                                                <x-icons.user-simple-icon size="w-5 h-5" color="text-neutral-500"/>
-                                                <span class="text-black">{{ $leave->latestLog->changedBy->fullname }}</span>
-                                            </div>
-                                            <div class="flex items-center space-x-1 text-sm">
-                                                <x-icons.clock-icon size="w-5 h-5" color="text-neutral-500" />
-                                                <span class="text-black">
-                                                    {{ \Carbon\Carbon::parse($leave->latestLog->changed_at)->format('d.m.Y H:i') }}
-                                                </span>
-                                            </div>
-                                        </div>
-                                        @endif
-                                    </div>
-                                </td>
-
-                                <td class="px-5 py-3 align-middle text-sm text-zinc-700">
-                                    <div class="flex flex-col flex-wrap space-y-2 whitespace-normal">
-                                        @if($leave->document_path)
-                                        <a
-                                            href="/{{ $leave->document_path }}"
-                                            target="_blank"
-                                            class="flex flex-col gap-1 text-sm font-medium"
-                                            style="word-break: break-word;"
-                                            title="{{ __('leaves::common.actions.download_document') }}"
-                                            aria-label="{{ __('leaves::common.actions.download_document') }}"
-                                        >
-                                            <x-icons.link-icon size="w-6 h-6" color="text-blue-600" hover="text-sky-300" />
-                                        </a>
-                                        @endif
-                                        @if($leave->canBeApprovedBy($authUser))
-                                        <div class="flex items-center space-x-2">
-                                            <button
-                                                wire:loading.attr="disabled"
-                                                @click="$dispatch('comment:open', { action: 'APPROVED', leaveId: @js($leave->id) })"
-                                                type="button"
-                                                title="{{ __('leaves::common.actions.approve') }}"
-                                                aria-label="{{ __('leaves::common.actions.approve') }}"
-                                            >
-                                                <x-icons.check-icon
-                                                    color="text-green-500"
-                                                    hover="text-green-600"
-                                                    size="w-8 h-8"
-                                                />
-                                            </button>
-                                            <button
-                                                wire:loading.attr="disabled"
-                                                @click="$dispatch('comment:open', { action: 'CANCELLED', leaveId: @js($leave->id) })"
-                                                type="button"
-                                                title="{{ __('leaves::common.actions.reject') }}"
-                                                aria-label="{{ __('leaves::common.actions.reject') }}"
-                                            >
-                                                <x-icons.x-circle-icon
-                                                    color="text-rose-500"
-                                                    hover="text-rose-600"
-                                                    size="w-8 h-8"
-                                                />
-                                            </button>
-                                        </div>
-                                        @endif
-                                    </div>
-                                </td>
-
-                                <td class="px-4 py-3 align-middle text-sm text-zinc-700 text-right whitespace-nowrap">
-                                    @if ($status != 'deleted')
-                                        @can('update', $leave)
-                                            <button
-                                                wire:click="openEditLeaveModal({{ $leave->id }})"
-                                                wire:loading.attr="disabled"
-                                                wire:target="openEditLeaveModal"
-                                                class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase bg-gray-100 rounded-lg hover:bg-gray-200 hover:text-gray-700"
-                                                type="button"
-                                                title="{{ __('leaves::common.actions.edit') }}"
-                                                aria-label="{{ __('leaves::common.actions.edit') }}"
-                                            >
-                                                <x-icons.document-icon></x-icons.document-icon>
-                                            </button>
-                                        @endcan
-                                    @else
-                                        @can('restore', $leave)
-                                            <button wire:click="restoreData('{{ $leave->id }}')"
-                                                    wire:loading.attr="disabled"
-                                                    wire:target="restoreData('{{ $leave->id }}')"
-                                                    class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-teal-50 hover:text-gray-700"
-                                                    type="button"
-                                                    title="{{ __('leaves::common.actions.restore') }}"
-                                                    aria-label="{{ __('leaves::common.actions.restore') }}"
-                                            >
-                                                <x-icons.recover color="text-teal-500" hover="text-teal-600"></x-icons.recover>
-                                            </button>
-                                        @endcan
-                                    @endif
-                                </td>
-
-                                <td class="px-4 py-3 align-middle text-sm text-zinc-700 text-right whitespace-nowrap">
-                                    @if ($status != 'deleted')
-                                        @can('delete', $leave)
-                                            <button
-                                                wire:click="setDeleteLeave('{{ $leave->id }}')"
-                                                wire:loading.attr="disabled"
-                                                wire:target="setDeleteLeave('{{ $leave->id }}')"
-                                                class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-100 hover:text-gray-700"
-                                                type="button"
-                                                title="{{ __('leaves::common.actions.delete') }}"
-                                                aria-label="{{ __('leaves::common.actions.delete') }}"
-                                            >
-                                                <x-icons.delete-icon></x-icons.delete-icon>
-                                            </button>
-                                        @endcan
-                                    @else
-                                        @can('forceDelete', $leave)
-                                            <button
-                                                x-on:click="$dispatch('confirm-action', { title: @js(__('leaves::common.actions.force_delete')), message: @js(__('leaves::common.messages.remove_confirm')), confirmText: @js(__('leaves::common.actions.force_delete')), tone: 'rose', run: () => $wire.forceDeleteData('{{ $leave->id }}') })"
-                                                wire:loading.attr="disabled"
-                                                wire:target="forceDeleteData('{{ $leave->id }}')"
-                                                class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700"
-                                                type="button"
-                                                title="{{ __('leaves::common.actions.force_delete') }}"
-                                                aria-label="{{ __('leaves::common.actions.force_delete') }}"
-                                            >
-                                                <x-icons.force-delete></x-icons.force-delete>
-                                            </button>
-                                        @endcan
-                                    @endif
-                                </td>
-                            </tr>
-                        @empty
-                            <x-table.empty :rows="count($this->getTableHeaders())"></x-table.empty>
-                        @endforelse
-                    </x-table.tbl>
-                </div>
-            </div>
-        </div>
-        {{-- end table --}}
-        <div class="mt-2" x-ref="pager">
-            {{ $permits->links() }}
-        </div>
-    </div>
+    <x-pagination :paginator="$permits" :unit="__('leaves::common.labels.unit')" />
 
     <div class="" x-data>
         @livewire('ui.confirmation.add-comment')
@@ -434,32 +369,4 @@
         @endauth
     </div>
 
-    <x-datepicker :auto=false></x-datepicker>
 </div>
-
-@push('js')
-<script>
-    function leavesIndex() {
-        return {
-            componentId: null,
-            init() {
-                this.componentId = this.$root?.getAttribute('wire:id');
-                this.highlightPager();
-
-                if (typeof Livewire !== 'undefined') {
-                    Livewire.hook('commit', ({ component, succeed }) => {
-                        if (!this.componentId || component.id !== this.componentId) return;
-                        succeed(() => queueMicrotask(() => this.highlightPager(true)));
-                    });
-                }
-            },
-            highlightPager(isUpdate = false) {
-                const el = this.$root?.querySelector('span[aria-current=page]>span');
-                if (!el) return;
-                el.classList.remove('bg-blue-50','text-blue-600','bg-green-100','text-green-600');
-                el.classList.add(isUpdate ? 'bg-green-100' : 'bg-blue-50', isUpdate ? 'text-green-600' : 'text-blue-600');
-            }
-        }
-    }
-</script>
-@endpush

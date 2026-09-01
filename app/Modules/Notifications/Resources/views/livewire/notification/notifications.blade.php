@@ -1,9 +1,9 @@
-<div
-    class="relative flex items-center"
-    x-data="{ isOpen: false, loadingRequest: false }"
-    x-on:keydown.escape.window="isOpen = false"
-    x-on:livewire:navigating.window="isOpen = false"
->
+{{--
+    Open/close state deliberately lives in the surrounding x-data (see the icon rail in
+    includes/header.blade.php): a Livewire round-trip morphs this component and orphans any
+    Alpine effect declared on its own root, which used to leave the dropdown stuck.
+--}}
+<div class="relative flex items-center">
     <button
         type="button"
         @click="
@@ -30,17 +30,16 @@
         @endif
     </button>
 
+    {{--
+        No x-transition and no click.away here: the outside-click is handled once on the
+        wrapper (the trigger button is inside it, so it no longer closes what it just opened),
+        and a transition interrupted by a Livewire morph used to leave the panel stuck.
+    --}}
     <div
         x-cloak
-        style="display:none;"
         x-show="isOpen"
-        x-transition:enter="transition duration-200 transform ease-out"
-        x-transition:enter-start="scale-75"
-        x-transition:leave="transition duration-100 transform ease-in"
-        x-transition:leave-end="opacity-0 scale-90"
-        x-on:click.away="if (!loadingRequest) { isOpen = false }"
         x-on:click.stop
-        class="absolute right-0 z-50 mt-3 origin-top-right overflow-hidden border border-zinc-200 bg-white text-left text-neutral-700 shadow-[0_30px_80px_rgba(15,23,42,0.16)] top-full w-[34rem] max-w-[calc(100vw-2rem)] rounded-[1.4rem]"
+        class="absolute right-0 z-50 mt-3 origin-top-right overflow-hidden border border-zinc-200 bg-white text-left text-neutral-700 shadow-overlay top-full w-[34rem] max-w-[calc(100vw-2rem)] rounded-2xl"
     >
         <div class="border-b border-zinc-200 bg-zinc-50/80 px-5 py-4">
             <div class="flex items-center justify-between gap-3">

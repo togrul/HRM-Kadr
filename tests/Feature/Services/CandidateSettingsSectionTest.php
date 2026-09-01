@@ -24,9 +24,9 @@ class CandidateSettingsSectionTest extends TestCase
     public function test_general_section_renders_chief_governance_panel(): void
     {
         Livewire::test(\App\Modules\Services\Livewire\Settings\SettingsList::class, ['section' => 'general'])
-            ->assertSee('Rəhbər və Həvalə')
-            ->assertSee('Daimi rəhbər')
-            ->assertSee('Müvəqqəti həvalə');
+            ->assertSee(__('services::settings.labels.permanent_chief'))
+            ->assertSee(__('services::settings.labels.delegation'))
+            ->assertSee(__('services::settings.labels.chief_select'));
     }
 
     public function test_it_creates_chief_delegation_from_settings_panel(): void

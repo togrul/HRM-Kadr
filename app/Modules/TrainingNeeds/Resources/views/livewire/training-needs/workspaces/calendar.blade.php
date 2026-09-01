@@ -205,7 +205,7 @@
                         ></x-ui.select-dropdown>
                         @error('participantForm.training_need_item_id') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
-                    <div>
+                    <div class="md:col-span-2">
                         <x-label for="participant-status">{{ __('training_needs::dashboard.fields.attendance_status') }}</x-label>
                         <select id="participant-status" wire:model.defer="participantForm.attendance_status" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
                             <option value="planned">{{ __('training_needs::dashboard.attendance_statuses.planned') }}</option>
@@ -216,7 +216,7 @@
                         </select>
                         @error('participantForm.attendance_status') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
-                    <div class="flex items-end gap-2">
+                    <div class="flex flex-wrap justify-end gap-2 md:col-span-2">
                         <x-button mode="black" wire:click="storeSessionParticipant">{{ __('training_needs::dashboard.actions.add_participant') }}</x-button>
                         <x-button mode="success" wire:click="completeSession">{{ __('training_needs::dashboard.actions.complete_session') }}</x-button>
                     </div>

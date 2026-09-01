@@ -3,7 +3,7 @@
         <div class="space-y-5">
             <p class="text-sm text-zinc-500">{{ __('training_needs::dashboard.labels.full_lists_hint') }}</p>
 
-            <x-filter.nav class="min-w-0">
+            <x-filter.nav wrap class="min-w-0">
                 <x-filter.item wire:click.prevent="switchEntity('needs')" :active="$entity === 'needs'">
                     {{ __('training_needs::dashboard.cards.need_queue') }}
                 </x-filter.item>
@@ -115,7 +115,7 @@
                     </div>
                 </div>
 
-                <div class="rounded-3xl border border-zinc-200 bg-gradient-to-br from-zinc-50 via-white to-emerald-50 p-5">
+                <div class="rounded-2xl border border-zinc-200 bg-gradient-to-br from-zinc-50 via-white to-emerald-50 p-5">
                     @if ($this->selectedRow)
                         <div class="space-y-4">
                             <div>

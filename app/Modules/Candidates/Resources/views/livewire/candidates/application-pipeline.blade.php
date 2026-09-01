@@ -1,159 +1,178 @@
-<div class="flex flex-col gap-6 px-6 py-4">
-    @include('candidates::livewire.candidates.partials.recruitment-nav')
+@php
+    $num = fn ($value): string => number_format((int) $value, 0, ',', ' ');
+    $counts = $this->panelCounts;
+@endphp
 
-    <section class="grid gap-3 lg:grid-cols-3">
-        <div class="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_24px_45px_-38px_rgba(15,23,42,0.35)]">
-            <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">{{ __('candidates::recruitment.labels.applications_count') }}</div>
-            <div class="mt-3 text-3xl font-semibold tracking-tight text-slate-900">{{ $this->totalApplications }}</div>
-            <p class="mt-2 text-sm text-slate-500">{{ __('candidates::recruitment.labels.applications') }}</p>
-        </div>
-        <div class="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_24px_45px_-38px_rgba(15,23,42,0.35)]">
-            <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">{{ __('candidates::recruitment.labels.openings_count') }}</div>
-            <div class="mt-3 text-3xl font-semibold tracking-tight text-slate-900">{{ $this->totalOpenings }}</div>
-            <p class="mt-2 text-sm text-slate-500">{{ __('candidates::recruitment.titles.openings') }}</p>
-        </div>
-        <div class="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_24px_45px_-38px_rgba(15,23,42,0.35)]">
-            <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">{{ __('candidates::recruitment.labels.decision') }}</div>
-            <div class="mt-3 text-3xl font-semibold tracking-tight text-slate-900">{{ $this->hiredCount }}</div>
-            <p class="mt-2 text-sm text-slate-500">{{ __('candidates::recruitment.labels.hired_label') }}</p>
-        </div>
-    </section>
+<div class="flex flex-col">
+    {{-- ===================== contextual panel ===================== --}}
+    <x-slot name="sidebar"><div id="hrm-context-panel"></div></x-slot>
 
-    <section class="rounded-[32px] border border-slate-200 bg-white p-5 shadow-[0_28px_60px_-45px_rgba(15,23,42,0.35)]">
-        <div class="flex flex-col gap-4 border-b border-slate-200 pb-5 lg:flex-row lg:items-end lg:justify-between">
-            <div class="space-y-2">
-                <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">
-                    {{ __('candidates::recruitment.titles.applications') }}
-                </div>
-                <h1 class="text-3xl font-semibold tracking-tight text-slate-900">
-                    {{ __('candidates::recruitment.titles.pipeline') }}
-                </h1>
+    @teleport('#hrm-context-panel')
+        @include('candidates::livewire.candidates.partials.recruitment-panel', [
+            'panelTitle' => __('candidates::common.titles.candidates'),
+            'panelSubtitle' => $num($counts['active_candidates']).' '.__('candidates::recruitment.labels.active_candidates'),
+            'panelOpenings' => $this->openOpenings,
+            'panelCounts' => $counts,
+        ])
+    @endteleport
+
+    <div class="lg:hidden">@include('candidates::livewire.candidates.partials.recruitment-nav')</div>
+
+    {{-- ===================== header ===================== --}}
+    <x-page-header
+        :title="__('candidates::recruitment.titles.pipeline')"
+        :breadcrumb="__('candidates::common.titles.candidates')"
+    >
+        <x-slot:icon>
+            <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>
+        </x-slot:icon>
+
+        <x-slot:stats>
+            <x-page-header.stat :value="$num($this->totalApplications)" :label="__('candidates::recruitment.labels.applications')" />
+            <x-page-header.stat :value="$num($this->totalOpenings)" :label="__('candidates::recruitment.titles.openings')" tone="blue" />
+            <x-page-header.stat :value="$num($this->hiredCount)" :label="__('candidates::recruitment.labels.hired_label')" tone="green" />
+        </x-slot:stats>
+
+        <x-slot:actions>
+            <x-pill-button :href="route('candidates.openings')" wire:navigate>
+                {{ __('candidates::recruitment.actions.open_openings') }}
+            </x-pill-button>
+            <x-pill-button variant="primary" :href="route('candidates')" wire:navigate>
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                {{ __('candidates::common.titles.candidates') }}
+            </x-pill-button>
+        </x-slot:actions>
+
+        {{-- toolbar --}}
+        <div class="flex flex-col gap-2.5">
+            <div class="flex flex-wrap items-center gap-3">
+                <label class="relative w-full sm:max-w-[360px]">
+                    <span class="sr-only">{{ __('candidates::recruitment.labels.search_placeholder') }}</span>
+                    <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-faint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                    <input
+                        type="search"
+                        wire:model.live.debounce.300ms="search"
+                        placeholder="{{ __('candidates::recruitment.labels.search_placeholder') }}"
+                        class="h-[34px] w-full rounded-[10px] border border-hairline bg-[#f4f4f5] pl-9 pr-3 text-[12.5px] text-ink placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-0"
+                    />
+                </label>
+
+                <x-filter.nav wrap class="min-w-0">
+                    <x-filter.item wire:click.prevent="setStatus('all')" :active="$status === 'all'">
+                        {{ __('candidates::common.labels.all') }}
+                    </x-filter.item>
+                    @foreach (['active', 'closed', 'rejected', 'withdrawn'] as $statusOption)
+                        <x-filter.item wire:click.prevent="setStatus('{{ $statusOption }}')" :active="$status === $statusOption">
+                            {{ __('candidates::recruitment.statuses.'.$statusOption) }}
+                        </x-filter.item>
+                    @endforeach
+                </x-filter.nav>
             </div>
+
+            @if ($this->currentOpening || $this->currentCandidate || $this->recruitmentPackSelectorVisible())
+                <div class="flex flex-wrap items-center gap-2">
+                    @if ($this->currentOpening)
+                        <x-small-badge mode="blue" as="button" wire:click="setOpening('all')">
+                            {{ $this->currentOpening->title }} ✕
+                        </x-small-badge>
+                    @endif
+                    @if ($this->currentCandidate)
+                        <x-small-badge mode="green" as="button" wire:click="setCandidate('all')">
+                            {{ $this->currentCandidate->fullname }} ✕
+                        </x-small-badge>
+                    @endif
+                    @if ($this->recruitmentPackSelectorVisible())
+                        <x-filter.nav wrap class="min-w-0">
+                            <x-filter.item wire:click.prevent="setPack('all')" :active="$pack === 'all'">
+                                {{ __('candidates::common.labels.all') }}
+                            </x-filter.item>
+                            @foreach ($this->recruitmentAvailablePacks() as $packOption)
+                                <x-filter.item wire:click.prevent="setPack('{{ $packOption }}')" :active="$pack === $packOption">
+                                    {{ __('candidates::recruitment.packs.'.$packOption) }}
+                                </x-filter.item>
+                            @endforeach
+                        </x-filter.nav>
+                    @endif
+                </div>
+            @endif
 
             <div class="flex flex-wrap items-center gap-2">
-                <input
-                    type="text"
-                    wire:model.live.debounce.300ms="search"
-                    placeholder="{{ __('candidates::common.labels.search') }}"
-                    class="h-11 w-72 rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm text-slate-700 outline-none transition focus:border-slate-300"
-                >
+                @if ($stage !== 'all')
+                    <x-small-badge mode="secondary" as="button" wire:click="setStage('all')">
+                        {{ $this->recruitmentStageLabel($stage) }} &times;
+                    </x-small-badge>
+                @endif
+                <p class="text-[11.5px] text-ink-faint">{{ __('candidates::recruitment.labels.board_hint') }}</p>
             </div>
         </div>
+    </x-page-header>
 
-        <div class="mt-5 flex flex-wrap gap-2">
-            <button type="button" wire:click="setStatus('all')" class="{{ $status === 'all' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600' }} rounded-full px-4 py-2 text-sm font-semibold transition">
-                {{ __('candidates::common.labels.all') }}
-            </button>
-            @foreach (['active', 'closed', 'rejected', 'withdrawn'] as $statusOption)
-                <button type="button" wire:click="setStatus('{{ $statusOption }}')" class="{{ $status === $statusOption ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600' }} rounded-full px-4 py-2 text-sm font-semibold transition">
-                    {{ __('candidates::recruitment.statuses.'.$statusOption) }}
-                </button>
-            @endforeach
-        </div>
-
-        @if ($this->currentOpening || $this->currentCandidate || $this->recruitmentPackSelectorVisible())
-            <div class="mt-3 flex flex-wrap gap-2">
-                @if ($this->currentOpening)
-                    <button type="button" wire:click="setOpening('all')" class="rounded-full border border-sky-200 bg-sky-50 px-4 py-2 text-sm font-semibold text-sky-700 transition">
-                        {{ $this->currentOpening->title }}
-                    </button>
-                @endif
-                @if ($this->currentCandidate)
-                    <button type="button" wire:click="setCandidate('all')" class="rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 transition">
-                        {{ $this->currentCandidate->fullname }}
-                    </button>
-                @endif
-                @if ($this->recruitmentPackSelectorVisible())
-                    <button type="button" wire:click="setPack('all')" class="{{ $pack === 'all' ? 'border-slate-900 text-slate-900' : 'border-slate-200 text-slate-500' }} rounded-full border px-4 py-2 text-sm font-semibold transition">
-                        {{ __('candidates::common.labels.all') }}
-                    </button>
-                    @foreach ($this->recruitmentAvailablePacks() as $packOption)
-                        <button type="button" wire:click="setPack('{{ $packOption }}')" class="{{ $pack === $packOption ? 'border-slate-900 text-slate-900' : 'border-slate-200 text-slate-500' }} rounded-full border px-4 py-2 text-sm font-semibold transition">
-                            {{ __('candidates::recruitment.packs.'.$packOption) }}
+    {{-- ===================== stage board ===================== --}}
+    <div class="hrm-scroll overflow-x-auto px-4 py-4 sm:px-5">
+        <div class="flex min-w-max items-start gap-3">
+            @foreach ($this->stageBoard as $column)
+                <section wire:key="pipeline-column-{{ $column['key'] }}"
+                    class="flex w-[268px] shrink-0 flex-col rounded-2xl border border-hairline bg-[#fafafa]">
+                    <header class="flex items-center gap-2 px-3 py-2.5">
+                        <span @class([
+                            'h-1.5 w-1.5 shrink-0 rounded-full',
+                            'bg-[#f43f5e]' => $column['terminal'] ?? false,
+                            'bg-[#0ea5e9]' => ! ($column['terminal'] ?? false),
+                        ])></span>
+                        <button type="button" wire:click.prevent="setStage('{{ $column['key'] }}')"
+                            class="min-w-0 flex-1 truncate text-left text-[12.5px] font-semibold text-ink transition hover:underline">
+                            {{ $column['label'] }}
                         </button>
-                    @endforeach
-                @endif
-            </div>
-        @endif
+                        <span class="hrm-num shrink-0 rounded-full bg-white px-1.5 py-0.5 text-[10.5px] text-ink-muted">{{ $num($column['count']) }}</span>
+                    </header>
 
-        <div class="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            @foreach ($this->stageSummary as $stageSummary)
-                <button
-                    type="button"
-                    wire:click="setStage('{{ $stageSummary['key'] }}')"
-                    class="{{ $stage === $stageSummary['key'] ? 'border-slate-900 bg-slate-900 text-white' : ($stageSummary['terminal'] ? 'border-rose-200 bg-rose-50 text-rose-700' : 'border-slate-200 bg-slate-50 text-slate-900') }} rounded-[24px] border p-4 text-left transition"
-                >
-                    <div class="text-[11px] font-semibold uppercase tracking-tight {{ $stage === $stageSummary['key'] ? 'text-slate-300' : ($stageSummary['terminal'] ? 'text-rose-400' : 'text-slate-400') }}">
-                        {{ __('candidates::recruitment.labels.pipeline_stage') }}
+                    <div class="flex flex-col gap-2 px-2 pb-2">
+                        @forelse ($column['cards'] as $application)
+                            @php
+                                $candidate = $application->candidate;
+                                $fullname = (string) ($candidate?->fullname ?? '—');
+                                $age = $candidate?->birthdate ? \Carbon\Carbon::parse($candidate->birthdate)->age : null;
+                            @endphp
+                            <a
+                                wire:key="pipeline-card-{{ $application->id }}"
+                                href="{{ route('candidates.applications.show', $application) }}"
+                                wire:navigate
+                                class="block rounded-xl border border-hairline bg-white px-3 py-2.5 transition hover:border-zinc-300 hover:shadow-card"
+                            >
+                                <div class="flex items-start gap-2.5">
+                                    <x-avatar :name="$fullname" size="sm" />
+                                    <div class="min-w-0 flex-1 leading-tight">
+                                        <p class="truncate text-[13px] font-semibold text-ink">{{ $fullname }}</p>
+                                        @if ($age !== null)
+                                            <p class="hrm-num mt-0.5 text-[11px] text-ink-faint">{{ __('candidates::recruitment.labels.age_short', ['count' => $age]) }}</p>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                <p class="mt-2 truncate text-[11.5px] text-ink-muted">{{ $application->opening?->title ?? '—' }}</p>
+
+                                <div class="mt-2 flex flex-wrap items-center gap-1.5">
+                                    @if ($application->source?->name)
+                                        <x-small-badge mode="secondary">{{ $application->source->name }}</x-small-badge>
+                                    @endif
+                                    @if ($application->applied_at)
+                                        <span class="hrm-num text-[10.5px] text-ink-faint">{{ $application->applied_at->format('d.m.Y') }}</span>
+                                    @endif
+                                </div>
+                            </a>
+                        @empty
+                            <p class="px-1 py-3 text-center text-[11.5px] text-ink-faint">—</p>
+                        @endforelse
+
+                        @if ($column['hidden'] > 0)
+                            <button type="button" wire:click.prevent="setStage('{{ $column['key'] }}')"
+                                class="rounded-xl border border-dashed border-hairline px-3 py-2 text-[11.5px] font-medium text-ink-muted transition hover:border-zinc-300 hover:text-ink">
+                                {{ __('candidates::recruitment.labels.hidden_cards', ['count' => $column['hidden']]) }}
+                            </button>
+                        @endif
                     </div>
-                    <div class="mt-3 text-lg font-semibold tracking-tight">{{ $stageSummary['label'] }}</div>
-                    <div class="mt-2 text-3xl font-semibold tracking-tight">{{ $stageSummary['count'] }}</div>
-                </button>
+                </section>
             @endforeach
         </div>
-
-        <div class="mt-3">
-            <button type="button" wire:click="setStage('all')" class="{{ $stage === 'all' ? 'border-slate-900 text-slate-900' : 'border-slate-200 text-slate-500' }} rounded-full border px-4 py-2 text-sm font-semibold transition">
-                {{ __('candidates::recruitment.actions.show_all_stages') }}
-            </button>
-        </div>
-
-        <div class="mt-6 overflow-hidden rounded-[28px] border border-slate-200">
-            <x-table.tbl :headers="[
-                __('candidates::recruitment.labels.candidate'),
-                __('candidates::recruitment.labels.opening'),
-                __('candidates::recruitment.labels.current_stage'),
-                __('candidates::recruitment.labels.source'),
-                __('candidates::recruitment.labels.assigned_recruiter'),
-                __('candidates::recruitment.labels.timeline'),
-                __('personnel::common.labels.action'),
-            ]" :title="__('candidates::recruitment.titles.applications')">
-                @forelse ($this->applicationRows as $application)
-                    <tr wire:key="candidate-application-row-{{ $application->id }}">
-                        <x-table.td>
-                            <div class="space-y-1">
-                                <div class="text-sm font-semibold text-slate-900">{{ $application->candidate?->fullname ?? '—' }}</div>
-                                <div class="text-xs text-slate-500">{{ $application->candidate?->phone ?? '—' }}</div>
-                            </div>
-                        </x-table.td>
-                        <x-table.td>
-                            <div class="space-y-1 text-sm">
-                                <div class="font-medium text-slate-900">{{ $application->opening?->title ?? '—' }}</div>
-                                <div class="text-slate-500">{{ $application->opening?->structure?->name ?? '—' }} / {{ $application->opening?->position?->name ?? '—' }}</div>
-                            </div>
-                        </x-table.td>
-                        <x-table.td>
-                            <div class="flex flex-col gap-2">
-                                <span class="inline-flex w-fit rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">{{ $this->recruitmentStageLabel($application->current_stage) }}</span>
-                                <span class="inline-flex w-fit rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700">{{ $this->recruitmentStatusLabel($application->status) }}</span>
-                            </div>
-                        </x-table.td>
-                        <x-table.td>
-                            <div class="text-sm text-slate-700">{{ $application->source?->name ?? '—' }}</div>
-                        </x-table.td>
-                        <x-table.td>
-                            <div class="text-sm text-slate-700">{{ $application->assignedRecruiter?->name ?? '—' }}</div>
-                        </x-table.td>
-                        <x-table.td>
-                            <div class="space-y-1 text-sm">
-                                <div class="text-slate-900">{{ optional($application->applied_at)->format('d.m.Y H:i') ?? '—' }}</div>
-                                <div class="text-slate-500">{{ optional($application->moved_at)->format('d.m.Y H:i') ?? '—' }}</div>
-                            </div>
-                        </x-table.td>
-                        <x-table.td :isButton="true">
-                            <a href="{{ route('candidates.applications.show', $application) }}" class="inline-flex h-9 items-center rounded-xl border border-slate-200 px-3 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900">
-                                {{ __('candidates::recruitment.actions.open_application') }}
-                            </a>
-                        </x-table.td>
-                    </tr>
-                @empty
-                    <x-table.empty :rows="7">{{ __('candidates::recruitment.empty.pipeline') }}</x-table.empty>
-                @endforelse
-            </x-table.tbl>
-        </div>
-
-        <div class="mt-3">
-            {{ $this->applicationRows->links() }}
-        </div>
-    </section>
+    </div>
 </div>

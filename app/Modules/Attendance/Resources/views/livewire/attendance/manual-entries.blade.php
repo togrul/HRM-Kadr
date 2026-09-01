@@ -85,7 +85,7 @@
                                 <span class="text-xs font-mono text-zinc-500">{{ $personnel->tabel_no }}</span>
                                 @if($personnel->structure_path)
                                     <span class="max-w-[18rem] truncate text-[11px] text-zinc-400 md:max-w-[24rem]" title="{{ $personnel->structure_path }}">
-                                        {{ $personnel->structure_path }}
+                                        {{ $personnel->structure_name }}
                                     </span>
                                 @endif
                             </button>
@@ -172,7 +172,7 @@
                                             <p class="text-xs font-mono uppercase tracking-wide text-zinc-500">{{ $this->selectedPersonnelRecord->tabel_no }}</p>
                                             @if($this->selectedPersonnelRecord->structure_path)
                                                 <p class="mt-1 max-w-[18rem] truncate text-xs text-zinc-500 md:max-w-[24rem]" title="{{ $this->selectedPersonnelRecord->structure_path }}">
-                                                    {{ $this->selectedPersonnelRecord->structure_path }}
+                                                    {{ $this->selectedPersonnelRecord->structure_name }}
                                                 </p>
                                             @endif
                                         </div>
@@ -517,7 +517,7 @@
                                     <span class="text-xs font-mono uppercase text-zinc-500">{{ $entry->tabel_no }}</span>
                                     @if($entry->personnel?->structure_path)
                                         <span class="max-w-[18rem] truncate text-xs text-zinc-500 md:max-w-[24rem]" title="{{ $entry->personnel->structure_path }}">
-                                            {{ $entry->personnel->structure_path }}
+                                            {{ $entry->personnel->structure_name }}
                                         </span>
                                     @endif
                                 </div>

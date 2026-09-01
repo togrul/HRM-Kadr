@@ -20,6 +20,7 @@ return [
         'from' => 'From',
         'to' => 'To',
         'per_page' => 'Rows',
+        'period' => 'Period',
         'all' => 'All',
     ],
     'list' => [
@@ -36,6 +37,9 @@ return [
     ],
     'labels' => [
         'system_actor' => 'System',
+        'read_only_note' => 'This screen is read-only — entries cannot be modified.',
+        'read_only_short' => 'Read-only',
+        'results_unit' => 'results',
         'no_subject' => 'No subject',
         'no_event' => 'No event',
         'no_log_name' => 'No log name',

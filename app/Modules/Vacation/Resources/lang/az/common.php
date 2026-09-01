@@ -3,6 +3,7 @@
 return [
     'titles' => [
         'vacations' => 'Məzuniyyətlər',
+        'requests' => 'Məzuniyyət müraciətləri',
     ],
     'labels' => [
         'year' => 'İl',
@@ -28,6 +29,15 @@ return [
         'search' => 'Axtar',
         'reset' => 'Sıfırla',
         'day' => 'gün',
+        'type' => 'Növ',
+        'vacation_type' => 'Məzuniyyət növü',
+        'search_placeholder' => 'Personal axtar…',
+        'date_start' => 'başlama',
+        'date_end' => 'bitmə',
+        'show_all' => 'Hamısını göstər',
+        'unit' => 'məzuniyyət',
+        'days' => 'gün',
+        'remaining' => 'Qalıq',
     ],
     'messages' => [
         'order_not_ready' => 'Bu məzuniyyət müraciəti hələ təsdiqlənmiş əmrlə bağlanmayıb.',
@@ -35,5 +45,11 @@ return [
     ],
     'actions' => [
         'bind_order' => 'Əmr bağla',
+        'export_excel' => 'Excel-ə çıxar',
+        'print_document' => 'Məzuniyyət kağızı',
+        'open_order' => 'Əmrə keç',
+    ],
+    'hints' => [
+        'approval_note' => 'Təsdiq iyerarxiyaya görə təyin olunur',
     ],
 ];

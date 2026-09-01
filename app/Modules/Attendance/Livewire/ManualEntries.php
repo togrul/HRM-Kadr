@@ -327,6 +327,10 @@ class ManualEntries extends Component
                             'structure_path',
                             $structurePathService->resolve((int) $entry->personnel->structure_id)
                         );
+                        $entry->personnel->setAttribute(
+                            'structure_name',
+                            $structurePathService->current((int) $entry->personnel->structure_id)
+                        );
                     }
 
                     return $entry;
@@ -396,6 +400,11 @@ class ManualEntries extends Component
                 ->get()
                 ->map(function (Personnel $personnel) use ($structurePathService) {
                     $personnel->setAttribute('structure_path', $structurePathService->resolve((int) $personnel->structure_id));
+                    $personnel->setAttribute('structure_name', $structurePathService->current((int) $personnel->structure_id));
+                    $personnel->setAttribute(
+                        'structure_name',
+                        $structurePathService->current((int) $personnel->structure_id)
+                    );
 
                     return $personnel;
                 });
@@ -492,6 +501,10 @@ class ManualEntries extends Component
             $selectedPersonnelRecord->setAttribute(
                 'structure_path',
                 $structurePathService->resolve((int) $selectedPersonnelRecord->structure_id)
+            );
+            $selectedPersonnelRecord->setAttribute(
+                'structure_name',
+                $structurePathService->current((int) $selectedPersonnelRecord->structure_id)
             );
         }
 

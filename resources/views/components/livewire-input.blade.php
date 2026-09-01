@@ -6,20 +6,20 @@
 ])
 
 @php
-     $extraClass = match($mode)
-     {
-          'default' => 'bg-white',
-          'gray' => "bg-neutral-100",
-          'disabled' => "bg-neutral-200"
+     // `mode` only decides the resting fill; geometry and focus come from FieldStyles.
+     $extra = match ($mode) {
+          'default', 'gray' => '',
+          'disabled' => 'text-ink-faint',
+          default => '',
      };
-     $isError = $errors->has($name)?'bg-red-50':'';
+     $isError = $errors->has($name) ? 'border-rose-300 bg-[#ffe4e6] focus:bg-[#fff1f2]' : '';
 @endphp
 
 <input
      type="{{ $type }}"
      id="{{ $name }}"
      name="{{ $name }}"
-     {{ $disabled ? 'disabled' : '' }}
-     {!! $attributes->merge(['class' => "block border-none font-normal w-full mt-1 rounded-lg shadow-sm focus:ring-blue-500 px-3 py-2 focus:border-blue-500 sm:text-sm transition duration-100 ease-in-out transform {$extraClass} {$isError} "]) !!}
-
+     @disabled($disabled)
+     @if ($errors->has($name)) aria-invalid="true" @endif
+     {!! $attributes->merge(['class' => 'mt-1 '.\App\Support\Ui\FieldStyles::input(trim($extra.' '.$isError))]) !!}
 >

@@ -30,7 +30,7 @@
     };
 @endphp
 
-<div class="rounded-[24px] border border-zinc-200 bg-zinc-50/70 p-4">
+<div class="rounded-2xl border border-zinc-200 bg-zinc-50/70 p-4">
     <div class="space-y-4">
         <div class="space-y-1.5">
             <div class="flex flex-wrap items-center gap-2">

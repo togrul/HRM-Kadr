@@ -4,18 +4,18 @@
     'message' => null,
 ])
 
-<div {{ $attributes->merge(['class' => 'rounded-[28px] bg-[#f5f5f7] px-6 py-8 shadow-[inset_0_1px_0_rgba(255,255,255,0.75),0_10px_22px_rgba(0,0,0,0.035)]']) }}>
-    <div class="flex items-start gap-3">
-        <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-zinc-400 shadow-sm">
-            <x-dynamic-component :component="$icon" size="w-5 h-5" />
-        </span>
-        <div class="min-w-0">
-            @if (filled($title))
-                <p class="text-sm font-semibold text-zinc-800">{{ $title }}</p>
-            @endif
-            @if (filled($message))
-                <p class="mt-1 text-sm leading-6 text-zinc-500">{{ $message }}</p>
-            @endif
-        </div>
-    </div>
+{{-- Quiet, centered empty state: the surrounding card already draws a frame, so a second
+     bordered box inside it reads as a stray alert. --}}
+<div {{ $attributes->merge(['class' => 'flex flex-col items-center justify-center px-6 py-6 text-center']) }}>
+    <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-hairline bg-[#fafafa] text-ink-faint">
+        <x-dynamic-component :component="$icon" size="w-5 h-5" />
+    </span>
+
+    @if (filled($title))
+        <p class="mt-3 text-[13px] font-medium text-ink">{{ $title }}</p>
+    @endif
+
+    @if (filled($message))
+        <p class="mt-1 max-w-sm text-[12px] leading-5 text-ink-faint">{{ $message }}</p>
+    @endif
 </div>

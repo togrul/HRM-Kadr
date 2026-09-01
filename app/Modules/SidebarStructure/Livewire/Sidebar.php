@@ -9,7 +9,7 @@ use Livewire\Component;
 
 class Sidebar extends Component
 {
-    public $selectedStructure;
+    public ?int $selectedStructure = null;
 
     #[On('structureUpdated')]
     public function refreshStructureTree(): void
@@ -17,16 +17,33 @@ class Sidebar extends Component
         Cache::forget('structures');
     }
 
-    public function mount(): void
+    /**
+     * The highlight must be a function of the page's filter, not of state this component
+     * happens to be holding: the host page filters by the clicked unit PLUS every
+     * descendant, and if this component is ever re-mounted mid-request (a parent
+     * re-render, a teleported panel) there is no page query string to recover from, so a
+     * purely local selection silently disappears. Pages that own a structure filter pass
+     * the clicked id in; everything else still falls back to the URL.
+     */
+    public function mount(?int $selected = null): void
+    {
+        $this->selectedStructure = $selected ?? $this->selectedFromQueryString();
+    }
+
+    /**
+     * The host writes the clicked unit first, then its descendants.
+     */
+    private function selectedFromQueryString(): ?int
     {
         $selectedFromUrl = request()->query('structure');
 
-        if (is_array($selectedFromUrl) && ! empty($selectedFromUrl)) {
-            $first = reset($selectedFromUrl);
-            if (is_numeric($first)) {
-                $this->selectedStructure = (int) $first;
-            }
+        if (! is_array($selectedFromUrl) || $selectedFromUrl === []) {
+            return null;
         }
+
+        $first = reset($selectedFromUrl);
+
+        return is_numeric($first) ? (int) $first : null;
     }
 
     #[On('filterSelected')]
@@ -37,13 +54,13 @@ class Sidebar extends Component
 
     public function selectStructure($id): void
     {
-        $this->selectedStructure = $id;
+        $this->selectedStructure = (int) $id;
         $this->dispatch('selectStructure', (int) $id);
     }
 
     public function render()
     {
-      $structures = Cache::rememberForever('structures', function () {
+        $structures = Cache::rememberForever('structures', function () {
             return Structure::withRecursive('subs')->whereNull('parent_id')->orderBy('code')->get();
         });
 

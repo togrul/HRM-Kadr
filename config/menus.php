@@ -31,7 +31,7 @@ return [
             'color' => 'zinc',
             'order' => 3,
             'is_active' => 1,
-            'url' => 'home',
+            'url' => 'personnel.index',
             'permission_id' => 12,
             'types' => ['military', 'public', 'private'],
         ],

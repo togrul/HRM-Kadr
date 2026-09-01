@@ -106,7 +106,7 @@
                                         class="max-w-[18rem] truncate text-xs text-zinc-500 md:max-w-[22rem]"
                                         title="{{ $row['structure_path'] }}"
                                     >
-                                        {{ $row['structure_path'] }}
+                                        {{ $row['structure_name'] }}
                                     </div>
                                 @endif
                             </x-table.td>

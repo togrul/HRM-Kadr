@@ -26,6 +26,8 @@ return [
         'rate' => 'Faiz (%)',
         'brackets' => 'Pillələr',
         'default_regime' => 'Bütün rejimlər (default)',
+        'bracket_count' => ':count pillə',
+        'top_rate' => '(maksimum)',
         'components' => [
             'income_tax' => 'Gəlir vergisi',
             'dsmf' => 'DSMF',
@@ -53,6 +55,8 @@ return [
         'title' => 'Maaş şkalaları',
         'list' => 'Şkalalar',
         'empty' => 'Hələ şkala yoxdur',
+        'subtitle' => 'Pillə üzrə minimum, orta nöqtə və maksimum',
+        'meta' => ':scales şkala · :grades pillə',
     ],
 
     'grades' => [
@@ -117,6 +121,23 @@ return [
         'gl_code' => 'Mühasibat kodu',
     ],
 
+    'columns' => [
+        'scale' => 'Şkala',
+        'grade_range' => 'Pillə',
+        'min' => 'Minimum',
+        'midpoint' => 'Orta nöqtə',
+        'max' => 'Maksimum',
+        'regime' => 'Rejim',
+        'grade' => 'Pillə',
+        'amount' => 'Məbləğ',
+        'position' => 'Vəzifə',
+        'component' => 'Komponent',
+        'type' => 'Növ',
+        'calc_type' => 'Hesablama',
+        'flags' => 'Xüsusiyyətlər',
+        'actions' => 'Əməliyyat',
+    ],
+
     'types' => [
         'earning' => 'Əlavə',
         'deduction' => 'Tutulma',
@@ -145,6 +166,14 @@ return [
         'search_personnel' => 'Ad və ya tabel nömrəsi ilə axtar',
         'add_line' => 'Sətir əlavə et',
         'assign' => 'Maaşı təyin et',
+        'add_scale' => 'Şkala əlavə et',
+        'add_grade' => 'Pillə əlavə et',
+        'add_component' => 'Komponent əlavə et',
+        'add_bank' => 'Bank hesabı əlavə et',
+        'add_rate' => 'Dərəcə əlavə et',
+        'open_catalog' => 'Kataloq',
+        'edit' => 'Redaktə et',
+        'close' => 'Bağla',
     ],
 
     'confirm' => [

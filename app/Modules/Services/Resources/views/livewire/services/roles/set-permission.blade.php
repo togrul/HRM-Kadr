@@ -3,7 +3,7 @@
         <div class="flex items-start justify-between gap-4">
             <div class="min-w-0">
                 <p class="text-xs font-bold uppercase tracking-tight text-zinc-500">{{ __('services::roles.permission_panel.eyebrow') }}</p>
-                <h2 class="mt-2 text-2xl font-semibold tracking-tight text-zinc-950" id="slide-over-title">
+                <h2 class="mt-2 text-[18px] font-semibold tracking-tight text-zinc-950" id="slide-over-title">
                     {{ __('services::roles.permission_panel.title') }}
                 </h2>
                 <p class="mt-2 text-sm font-medium text-zinc-500">

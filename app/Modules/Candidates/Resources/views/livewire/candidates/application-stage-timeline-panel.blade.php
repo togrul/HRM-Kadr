@@ -1,8 +1,8 @@
-<section class="rounded-[32px] border border-slate-200 bg-white p-6 shadow-[0_28px_60px_-45px_rgba(15,23,42,0.35)]">
+<section class="rounded-[32px] border border-slate-200 bg-white p-6 shadow-overlay">
     <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">
         {{ __('candidates::recruitment.titles.stage_timeline') }}
     </div>
-    <h2 class="mt-2 text-2xl font-semibold tracking-tight text-slate-900">
+    <h2 class="mt-2 text-[18px] font-semibold tracking-tight text-slate-900">
         {{ __('candidates::recruitment.titles.stage_timeline') }}
     </h2>
 
@@ -12,7 +12,7 @@
                 $audit = is_array($event->payload['audit'] ?? null) ? $event->payload['audit'] : [];
                 $profileFieldKeys = collect($audit['profile_field_keys'] ?? [])->filter()->values();
             @endphp
-            <article class="rounded-[24px] border border-slate-200 bg-slate-50 p-4">
+            <article class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                 <div class="flex flex-wrap items-center gap-2">
                     <span class="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">{{ __('candidates::recruitment.stages.'.$event->stage_key) }}</span>
                     <span class="inline-flex rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-500">{{ $event->action }}</span>

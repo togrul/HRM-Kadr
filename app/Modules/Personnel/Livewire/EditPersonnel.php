@@ -8,17 +8,17 @@ use App\Livewire\Forms\Personnel\EducationForm;
 use App\Livewire\Forms\Personnel\KinshipForm;
 use App\Livewire\Forms\Personnel\LaborActivityForm;
 use App\Livewire\Forms\Personnel\MiscellaneousForm;
-use App\Livewire\Forms\Personnel\ServiceHistoryForm;
 use App\Livewire\Forms\Personnel\PersonalInformationForm;
+use App\Livewire\Forms\Personnel\ServiceHistoryForm;
+use App\Models\Personnel;
 use App\Modules\Personnel\Services\PersonnelFormAssembler;
+use App\Modules\Personnel\Services\PersonnelPersistenceService;
 use App\Modules\Personnel\Support\Traits\PersonnelCrud;
 use App\Modules\Personnel\Support\Traits\RelationCruds\RelationCrudTrait;
-use App\Modules\Personnel\Services\PersonnelPersistenceService;
-use App\Models\Personnel;
 use App\Services\PersonnelPendingApprovalService;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Isolate;
 use Livewire\Component;
 
@@ -30,12 +30,19 @@ class EditPersonnel extends Component
     use RelationCrudTrait;
 
     public PersonalInformationForm $personalForm;
+
     public DocumentForm $documentForm;
+
     public EducationForm $educationForm;
+
     public LaborActivityForm $laborActivityForm;
+
     public ServiceHistoryForm $historyForm;
+
     public AwardsPunishmentsForm $awardsPunishmentsForm;
+
     public KinshipForm $kinshipForm;
+
     public MiscellaneousForm $miscForm;
 
     public $updatePersonnel;
@@ -43,6 +50,9 @@ class EditPersonnel extends Component
     protected ?Personnel $personnelModelData = null;
 
     public $personnelModel;
+
+    /** Hide the built-in horizontal stepper when the host page supplies step navigation. */
+    public bool $chromeless = false;
 
     /** @var array<int> */
     public array $loadedSteps = [];
@@ -52,13 +62,13 @@ class EditPersonnel extends Component
     /** @var array<string> */
     protected array $relationGroupsLoaded = [];
 
-    public function mount()
+    public function mount(?int $step = null)
     {
         $personnel = $this->personnelModelDataInstance();
 
         $this->authorize('update', $personnel);
         $this->title = __('personnel::common.titles.edit_personnel');
-        $this->step = 1;
+        $this->step = $step !== null ? $this->stepNavigationService()->select($step) : 1;
         $this->resetStepTrackingFor($personnel->getKey());
         $this->loadStepData((int) $this->step);
     }

@@ -23,8 +23,11 @@ return [
         'gender' => 'Gender',
         'man' => 'Man',
         'woman' => 'Woman',
+        'staff_unit' => 'positions',
+        'vacant_lower' => 'vacant',
     ],
     'actions' => [
+        'show_all' => 'Show all',
         'add' => 'Add',
         'add_staff' => 'Add staff',
         'save' => 'Save',

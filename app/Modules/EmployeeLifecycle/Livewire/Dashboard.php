@@ -28,6 +28,12 @@ class Dashboard extends Component
 
     public bool $isTemplateEditorOpen = false;
 
+    /** '' | templates | launch | complete — which management side panel is open. */
+    public string $panel = '';
+
+    /** plan | probation | movement | offboarding — active form inside the launch panel. */
+    public string $startTab = 'plan';
+
     public array $editingTemplateForm = [
         'name' => '',
         'type' => 'onboarding',
@@ -91,6 +97,26 @@ class Dashboard extends Component
         $this->status = '';
     }
 
+    public function openPanel(string $panel): void
+    {
+        $this->authorizeManage();
+
+        $this->panel = in_array($panel, ['templates', 'launch', 'complete'], true) ? $panel : '';
+        $this->resetErrorBag();
+    }
+
+    public function closePanel(): void
+    {
+        $this->panel = '';
+        $this->resetErrorBag();
+    }
+
+    public function setStartTab(string $tab): void
+    {
+        $this->startTab = in_array($tab, ['plan', 'probation', 'movement', 'offboarding'], true) ? $tab : 'plan';
+        $this->resetErrorBag();
+    }
+
     public function createTemplate(LifecyclePlanTemplateService $service): void
     {
         $this->authorizeManage();
@@ -144,6 +170,7 @@ class Dashboard extends Component
             ->all();
 
         $this->selectedTemplateId = $templateId;
+        $this->panel = '';
         $this->editingTemplateForm = [
             'name' => (string) $template->name,
             'type' => (string) $template->type,
@@ -161,6 +188,7 @@ class Dashboard extends Component
     public function closeTemplateEditor(): void
     {
         $this->isTemplateEditorOpen = false;
+        $this->panel = 'templates';
         $this->resetErrorBag();
     }
 
@@ -246,6 +274,7 @@ class Dashboard extends Component
         if ($result === 'deleted') {
             $this->selectedTemplateId = null;
             $this->isTemplateEditorOpen = false;
+            $this->panel = 'templates';
             $this->editingTemplateForm = [
                 'name' => '',
                 'type' => 'onboarding',

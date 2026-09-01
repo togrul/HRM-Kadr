@@ -6,6 +6,7 @@ use App\Enums\OrderStatusEnum;
 use App\Models\OrderLog;
 use App\Models\OrderWordTemplate;
 use App\Models\Personnel;
+use App\Modules\Integration\Domain\Contracts\IntegrationOutbox;
 use App\Services\ImportCandidateToPersonnel;
 use App\Services\Orders\Document\Effects\OrderEffectCatalog;
 use App\Support\Language\AzerbaijaniDateFormatter;
@@ -45,6 +46,7 @@ class OrderStatusTransitionService
         private readonly ImportCandidateToPersonnel $candidateImport,
         private readonly AzerbaijaniDateFormatter $dates,
         private readonly \App\Modules\Compensation\Application\Services\CompensationService $compensation,
+        private readonly IntegrationOutbox $outbox,
     ) {}
 
     /** Approve a pending order (applies its HR side-effect). */
@@ -113,7 +115,64 @@ class OrderStatusTransitionService
             $order->update(['status_id' => $target]);
 
             $this->recordTransition($order, $from, $target, $effectDirection);
+            $this->publish($order, $effectDirection);
         });
+    }
+
+    /**
+     * Record the transition for the finance system.
+     *
+     * Inside the same transaction on purpose: if the effect throws after this
+     * point, the event disappears with it. Publishing afterwards — or over HTTP
+     * at the moment of approval — would hand the counterpart a fact that never
+     * happened, and nothing downstream would ever correct it.
+     *
+     * Only approvals and reversals are published. pending↔cancelled carries no
+     * side-effect, so it changes nothing the payroll side can see.
+     */
+    private function publish(OrderLog $order, string $effectDirection): void
+    {
+        if ($effectDirection === 'none') {
+            return;
+        }
+
+        $snapshot = (array) $order->template_snapshot;
+        $template = $this->templates->find((string) ($snapshot['template_code'] ?? ''));
+
+        if (! $template) {
+            return;
+        }
+
+        $fields = $this->effectFields($template, (array) ($snapshot['fields'] ?? []));
+        $personnel = $this->personnel($snapshot);
+
+        $this->outbox->record('orders', (string) $order->order_no, [
+            'external_id' => (string) $order->id,
+            'order_no' => (string) $order->order_no,
+            'effect' => (string) $template->effect,
+            'label' => (string) $template->label,
+            'date' => optional($order->given_date)->format('Y-m-d'),
+            // The counterpart correlates people by our internal key, never by
+            // staff number: that one is editable and cascades, leaving no trace.
+            'employee_external_id' => $personnel ? (string) $personnel->id : null,
+            'person_uid' => $personnel?->person_uid,
+            'status' => $effectDirection === 'applied' ? 'approved' : 'reversed',
+            // A hire cannot be undone here, so the counterpart must not offer an
+            // undo it would be unable to honour.
+            'reversible' => ! $template->isHire(),
+            'start_date' => $this->dateField($fields, 'start_date'),
+            'end_date' => $this->dateField($fields, 'end_date'),
+            'days' => isset($fields['days']) ? (int) $fields['days'] : null,
+        ]);
+
+    }
+
+    /**
+     * @param  array<string, mixed>  $fields
+     */
+    private function dateField(array $fields, string $role): ?string
+    {
+        return $this->dates->parse($fields[$role] ?? null)?->format('Y-m-d');
     }
 
     /**

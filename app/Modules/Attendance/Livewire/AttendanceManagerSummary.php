@@ -86,6 +86,7 @@ class AttendanceManagerSummary extends Component
         $rows->setCollection(
             $rows->getCollection()->map(function ($row) use ($structurePathService) {
                 $row->structure_path = $structurePathService->resolve((int) ($row->structure_id ?? 0));
+                $row->structure_name = $structurePathService->current((int) ($row->structure_id ?? 0));
 
                 return $row;
             })

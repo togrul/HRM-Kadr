@@ -38,7 +38,7 @@
     </div>
 
     @if ($searchModel)
-        <div class="rounded-[1.3rem] border border-zinc-200 bg-white px-3 py-3 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
+        <div class="rounded-[1.3rem] border border-zinc-200 bg-white px-3 py-3 shadow-card">
             <input
                 type="text"
                 wire:model.live.debounce.300ms="{{ $searchModel }}"
@@ -49,12 +49,12 @@
     @endif
 
     @if (! empty($selectedOptions))
-        <div class="grid max-h-56 gap-2 overflow-y-auto rounded-[1.35rem] border border-zinc-200 bg-white p-2.5 shadow-[0_10px_24px_rgba(15,23,42,0.03)] lg:grid-cols-2">
+        <div class="grid max-h-56 gap-2 overflow-y-auto rounded-2xl border border-zinc-200 bg-white p-2.5 shadow-card lg:grid-cols-2">
             @foreach ($selectedOptions as $option)
                 <button
                     type="button"
                     x-on:click="toggle(@js($option['id']))"
-                    class="group relative flex min-h-[4.9rem] items-start gap-3 rounded-[1.2rem] border border-zinc-200 bg-[linear-gradient(180deg,rgba(255,255,255,1),rgba(248,250,252,0.92))] px-3.5 py-3 text-left text-zinc-700 shadow-[0_8px_18px_rgba(15,23,42,0.04)] transition hover:border-zinc-300 hover:shadow-[0_12px_22px_rgba(15,23,42,0.06)]"
+                    class="group relative flex min-h-[4.9rem] items-start gap-3 rounded-[1.2rem] border border-zinc-200 bg-[linear-gradient(180deg,rgba(255,255,255,1),rgba(248,250,252,0.92))] px-3.5 py-3 text-left text-zinc-700 shadow-card transition hover:border-zinc-300 hover:shadow-card"
                 >
                     <span class="min-w-0 flex-1 pr-7">
                         <span class="block whitespace-normal break-words text-[15px] font-semibold leading-6 text-zinc-900">{{ $option['label'] }}</span>
@@ -68,7 +68,7 @@
         </div>
     @endif
 
-    <div class="max-h-64 overflow-y-auto rounded-[1.35rem] border border-zinc-200 bg-white p-2 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
+    <div class="max-h-64 overflow-y-auto rounded-2xl border border-zinc-200 bg-white p-2 shadow-card">
         @php $currentGroup = null; @endphp
         @forelse ($options as $option)
             @if (($option['group'] ?? null) !== $currentGroup)
@@ -94,7 +94,7 @@
                 </span>
             </label>
         @empty
-            <div class="rounded-2xl bg-[#f5f5f7] px-4 py-6 text-sm font-semibold text-zinc-500 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)]">
+            <div class="rounded-2xl bg-[#f5f5f7] px-4 py-6 text-sm font-semibold text-zinc-500 shadow-card">
                 {{ $emptyLabel }}
             </div>
         @endforelse

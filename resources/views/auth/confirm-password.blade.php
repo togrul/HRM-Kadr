@@ -1,27 +1,20 @@
-<x-guest-layout>
-    <div class="mb-4 text-sm text-gray-600 dark:text-gray-400">
-        {{ __('ui::auth.messages.secure_area_confirmation') }}
-    </div>
-
-    <form method="POST" action="{{ route('password.confirm') }}">
+<x-auth-shell
+    :title="__('ui::auth.titles.confirm_password')"
+    :subtitle="__('ui::auth.messages.secure_area_confirmation')"
+>
+    <form method="POST" action="{{ route('password.confirm') }}" class="mt-6 space-y-4">
         @csrf
 
-        <!-- Password -->
-        <div>
-            <x-input-label for="password" :value="__('ui::auth.fields.password')" />
+        <x-auth-input
+            id="password"
+            name="password"
+            type="password"
+            :label="__('ui::auth.fields.password')"
+            required
+            autofocus
+            autocomplete="current-password"
+        />
 
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
-
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
-
-        <div class="flex justify-end mt-4">
-            <x-primary-button>
-                {{ __('ui::auth.actions.confirm') }}
-            </x-primary-button>
-        </div>
+        <x-auth-submit>{{ __('ui::auth.actions.confirm') }}</x-auth-submit>
     </form>
-</x-guest-layout>
+</x-auth-shell>

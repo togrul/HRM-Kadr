@@ -5,6 +5,12 @@ return [
     'description' => 'A unified employee self-service entry point for personal HR summary, requests, onboarding documents, individual development plan, and hierarchy context.',
     'actions' => [
         'open_docs' => 'Open guide',
+        'new_request' => 'New request',
+    ],
+    'balance' => [
+        'title' => 'Vacation balance',
+        'remaining_note' => 'days left / :total days entitled',
+        'used' => ':count days used',
     ],
     'tabs' => [
         'overview' => 'Overview',

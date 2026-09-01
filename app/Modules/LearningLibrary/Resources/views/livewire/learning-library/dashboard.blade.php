@@ -1,8 +1,28 @@
 <div class="space-y-6 px-6 py-6">
-    <div class="rounded-[28px] border border-zinc-200 bg-zinc-50 p-6 shadow-sm">
+    {{-- ===================== contextual panel ===================== --}}
+    @php
+        $contextTabs = ['general', 'library', 'reports'];
+    @endphp
+
+    <x-slot name="sidebar"><div id="hrm-context-panel"></div></x-slot>
+
+    @teleport('#hrm-context-panel')
+        <x-context-panel>
+            <x-context-panel.section :title="__('learning-library::dashboard.title')">
+                @foreach ($contextTabs as $tab)
+                    <x-context-panel.item
+                        wire:click.prevent="switchTab('{{ $tab }}')"
+                        :active="$activeTab === $tab"
+                    >{{ __('learning-library::dashboard.tabs.'.$tab) }}</x-context-panel.item>
+                @endforeach
+            </x-context-panel.section>
+        </x-context-panel>
+    @endteleport
+
+    <div class="rounded-2xl border border-zinc-200 bg-zinc-50 p-6 shadow-sm">
         <div class="space-y-2">
             <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __('ui::menu.items.learning_library') }}</x-ui.field-label>
-            <h1 class="text-3xl font-semibold tracking-tight text-zinc-950">{{ __('learning-library::dashboard.title') }}</h1>
+            <h1 class="text-[19px] font-semibold tracking-tight text-zinc-950">{{ __('learning-library::dashboard.title') }}</h1>
             <p class="max-w-3xl text-sm leading-6 text-zinc-500">{{ __('learning-library::dashboard.description') }}</p>
         </div>
 
@@ -21,26 +41,22 @@
         </div>
     </div>
 
-    <div class="rounded-[28px] border border-zinc-200 bg-white p-4 shadow-sm">
-        <x-filter.nav class="min-w-0">
-            <x-filter.item wire:click.prevent="switchTab('general')" :active="$activeTab === 'general'">
-                {{ __('learning-library::dashboard.tabs.general') }}
-            </x-filter.item>
-            <x-filter.item wire:click.prevent="switchTab('library')" :active="$activeTab === 'library'">
-                {{ __('learning-library::dashboard.tabs.library') }}
-            </x-filter.item>
-            <x-filter.item wire:click.prevent="switchTab('reports')" :active="$activeTab === 'reports'">
-                {{ __('learning-library::dashboard.tabs.reports') }}
-            </x-filter.item>
+    <div class="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
+        <x-filter.nav class="min-w-0 lg:hidden">
+            @foreach ($contextTabs as $tab)
+                <x-filter.item wire:click.prevent="switchTab('{{ $tab }}')" :active="$activeTab === $tab">
+                    {{ __('learning-library::dashboard.tabs.'.$tab) }}
+                </x-filter.item>
+            @endforeach
         </x-filter.nav>
     </div>
 
-    <div wire:loading.flex wire:target="switchTab" class="rounded-[28px] border border-zinc-200 bg-white p-6 shadow-sm">
+    <div wire:loading.flex wire:target="switchTab" class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
         <div class="w-full animate-pulse space-y-4">
             <div class="h-5 w-40 rounded-full bg-zinc-200"></div>
             <div class="grid gap-4 md:grid-cols-2">
-                <div class="h-32 rounded-[28px] bg-zinc-100"></div>
-                <div class="h-48 rounded-[28px] bg-zinc-100"></div>
+                <div class="h-32 rounded-2xl bg-zinc-100"></div>
+                <div class="h-48 rounded-2xl bg-zinc-100"></div>
             </div>
             <p class="text-sm text-zinc-400">{{ __('learning-library::dashboard.messages.loading_tab') }}</p>
         </div>
@@ -53,7 +69,7 @@
             @endphp
             <div class="grid gap-6 xl:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
                 <div class="space-y-6">
-                    <div class="rounded-[28px] border border-zinc-200 bg-white p-6 shadow-sm">
+                    <div class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
                         <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __('learning-library::dashboard.sections.create_asset') }}</x-ui.field-label>
                         <div class="mt-4 grid gap-4 md:grid-cols-2">
                             <x-ui.input-shell :label="__('learning-library::dashboard.fields.asset_title')" :error="$errors->first('assetForm.title')" labelClass="tracking-tight text-zinc-500">
@@ -106,13 +122,13 @@
                             </label>
                         </div>
                         <div class="mt-5">
-                            <button type="button" wire:click="saveAsset" wire:loading.attr="disabled" wire:target="saveAsset" class="inline-flex items-center justify-center rounded-[22px] bg-zinc-950 px-5 py-3 text-sm font-semibold tracking-tight text-white transition hover:bg-zinc-800 disabled:opacity-60">
+                            <button type="button" wire:click="saveAsset" wire:loading.attr="disabled" wire:target="saveAsset" class="inline-flex items-center justify-center rounded-2xl bg-zinc-950 px-5 py-3 text-sm font-semibold tracking-tight text-white transition hover:bg-zinc-800 disabled:opacity-60">
                                 {{ __('learning-library::dashboard.actions.save_asset') }}
                             </button>
                         </div>
                     </div>
 
-                    <div class="rounded-[28px] border border-zinc-200 bg-white p-6 shadow-sm">
+                    <div class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
                         <div class="flex items-center justify-between gap-3">
                             <div>
                                 <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __('learning-library::dashboard.sections.recent_assignments') }}</x-ui.field-label>
@@ -125,7 +141,7 @@
                         @else
                             <div class="mt-4 space-y-3">
                                 @foreach ($payload['recent_assignments'] as $assignment)
-                                    <div class="rounded-[24px] border border-zinc-200 bg-zinc-50/70 px-4 py-4">
+                                    <div class="rounded-2xl border border-zinc-200 bg-zinc-50/70 px-4 py-4">
                                         <div class="space-y-4">
                                             <div class="space-y-2">
                                                 <h3 class="text-base font-semibold tracking-tight text-zinc-950">{{ $assignment['asset'] }}</h3>
@@ -159,7 +175,7 @@
                     </div>
                 </div>
 
-                <div class="rounded-[28px] border border-zinc-200 bg-white p-6 shadow-sm self-start">
+                <div class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm self-start">
                     <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __('learning-library::dashboard.sections.assign_asset') }}</x-ui.field-label>
                     <p class="mt-2 max-w-2xl text-sm leading-7 text-zinc-600">{{ __('learning-library::dashboard.messages.selection_hint') }}</p>
                     <p class="mt-2 max-w-2xl text-sm leading-7 text-zinc-500">{{ __('learning-library::dashboard.messages.rule_builder_hint') }}</p>
@@ -189,7 +205,7 @@
                     />
 
                     <div class="mt-5">
-                        <button type="button" wire:click="assignSelected" wire:loading.attr="disabled" wire:target="assignSelected" class="inline-flex items-center justify-center rounded-[22px] bg-zinc-950 px-5 py-3 text-sm font-semibold tracking-tight text-white transition hover:bg-zinc-800 disabled:opacity-60">
+                        <button type="button" wire:click="assignSelected" wire:loading.attr="disabled" wire:target="assignSelected" class="inline-flex items-center justify-center rounded-2xl bg-zinc-950 px-5 py-3 text-sm font-semibold tracking-tight text-white transition hover:bg-zinc-800 disabled:opacity-60">
                             {{ __('learning-library::dashboard.actions.assign_selected') }}
                         </button>
                     </div>
@@ -200,7 +216,7 @@
                 $payload = $this->libraryPayload;
             @endphp
             <div class="space-y-6">
-                <div class="rounded-[28px] border border-zinc-200 bg-white p-6 shadow-sm">
+                <div class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
                     <x-library.browser-toolbar
                         translation-ns="learning-library::dashboard"
                         section-key="assets"
@@ -214,7 +230,7 @@
 
                 <div class="space-y-4">
                     @forelse ($payload['assets'] as $asset)
-                        <div class="rounded-[28px] border border-zinc-200 bg-white p-6 shadow-sm">
+                        <div class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
                             <div class="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                                 <div class="space-y-3">
                                     <div class="flex flex-wrap items-center gap-2">
@@ -245,12 +261,12 @@
 
                                 <div class="flex flex-wrap gap-2">
                                     @if ($asset['content_url'])
-                                        <a href="{{ $asset['content_url'] }}" target="_blank" class="inline-flex items-center justify-center rounded-2xl bg-[#f5f5f7] px-4 py-2 text-sm font-semibold tracking-tight text-zinc-800 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] transition hover:bg-zinc-950 hover:text-white">{{ __('learning-library::dashboard.actions.open_asset') }}</a>
+                                        <a href="{{ $asset['content_url'] }}" target="_blank" class="inline-flex items-center justify-center rounded-2xl bg-[#f5f5f7] px-4 py-2 text-sm font-semibold tracking-tight text-zinc-800 shadow-card transition hover:bg-zinc-950 hover:text-white">{{ __('learning-library::dashboard.actions.open_asset') }}</a>
                                     @endif
                                     @can('manage-employee-content-library')
-                                        <button type="button" wire:click="prepareNextAssetVersion({{ $asset['id'] }})" class="inline-flex items-center justify-center rounded-2xl bg-[#f5f5f7] px-4 py-2 text-sm font-semibold tracking-tight text-zinc-800 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] transition hover:bg-zinc-950 hover:text-white">{{ __('learning-library::dashboard.actions.new_version') }}</button>
-                                        <button type="button" wire:click="toggleAssetActive({{ $asset['id'] }})" class="inline-flex items-center justify-center rounded-2xl bg-[#f5f5f7] px-4 py-2 text-sm font-semibold tracking-tight text-zinc-800 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] transition hover:bg-zinc-950 hover:text-white">{{ $asset['toggle_active_label'] }}</button>
-                                        <button type="button" wire:click="toggleAssetArchived({{ $asset['id'] }})" class="inline-flex items-center justify-center rounded-2xl bg-[#f5f5f7] px-4 py-2 text-sm font-semibold tracking-tight text-zinc-800 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] transition hover:bg-zinc-950 hover:text-white">{{ $asset['is_archived'] ? __('learning-library::dashboard.actions.restore_asset') : __('learning-library::dashboard.actions.archive_asset') }}</button>
+                                        <button type="button" wire:click="prepareNextAssetVersion({{ $asset['id'] }})" class="inline-flex items-center justify-center rounded-2xl bg-[#f5f5f7] px-4 py-2 text-sm font-semibold tracking-tight text-zinc-800 shadow-card transition hover:bg-zinc-950 hover:text-white">{{ __('learning-library::dashboard.actions.new_version') }}</button>
+                                        <button type="button" wire:click="toggleAssetActive({{ $asset['id'] }})" class="inline-flex items-center justify-center rounded-2xl bg-[#f5f5f7] px-4 py-2 text-sm font-semibold tracking-tight text-zinc-800 shadow-card transition hover:bg-zinc-950 hover:text-white">{{ $asset['toggle_active_label'] }}</button>
+                                        <button type="button" wire:click="toggleAssetArchived({{ $asset['id'] }})" class="inline-flex items-center justify-center rounded-2xl bg-[#f5f5f7] px-4 py-2 text-sm font-semibold tracking-tight text-zinc-800 shadow-card transition hover:bg-zinc-950 hover:text-white">{{ $asset['is_archived'] ? __('learning-library::dashboard.actions.restore_asset') : __('learning-library::dashboard.actions.archive_asset') }}</button>
                                     @endcan
                                 </div>
                             </div>
@@ -271,7 +287,7 @@
                             </div>
                         </div>
                     @empty
-                        <div class="rounded-[28px] border border-zinc-200 bg-white p-6 shadow-sm">
+                        <div class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
                             <p class="text-sm text-zinc-500">{{ __('learning-library::dashboard.messages.empty_assets') }}</p>
                         </div>
                     @endforelse
@@ -281,7 +297,7 @@
             @php
                 $payload = $this->reportsPayload;
             @endphp
-            <div class="rounded-[28px] border border-zinc-200 bg-white p-6 shadow-sm">
+            <div class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
                 <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __('learning-library::dashboard.sections.reports') }}</x-ui.field-label>
                 <p class="mt-2 max-w-2xl text-sm leading-7 text-zinc-500">{{ __('learning-library::dashboard.messages.report_hint') }}</p>
                 <div class="mt-5">

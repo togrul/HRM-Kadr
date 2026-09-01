@@ -71,7 +71,7 @@
                     min="0"
                     max="300"
                     wire:model.defer="form.late_grace_minutes"
-                    @disabled(! $canManage)
+                    :disabled="! $canManage"
                 />
                 @error('form.late_grace_minutes') <x-validation>{{ $message }}</x-validation> @enderror
             </div>
@@ -85,7 +85,7 @@
                     min="0"
                     max="300"
                     wire:model.defer="form.early_leave_grace_minutes"
-                    @disabled(! $canManage)
+                    :disabled="! $canManage"
                 />
                 @error('form.early_leave_grace_minutes') <x-validation>{{ $message }}</x-validation> @enderror
             </div>
@@ -115,7 +115,7 @@
                     min="1"
                     max="60"
                     wire:model.defer="form.rounding_step_minutes"
-                    @disabled(! $canManage)
+                    :disabled="! $canManage"
                 />
                 @error('form.rounding_step_minutes') <x-validation>{{ $message }}</x-validation> @enderror
             </div>

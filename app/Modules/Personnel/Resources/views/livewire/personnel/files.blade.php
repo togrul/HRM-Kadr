@@ -5,7 +5,7 @@
         </h2>
     </div>
 
-    <section class="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_18px_60px_-36px_rgba(15,23,42,0.35)]">
+    <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-overlay">
         <div class="border-b border-slate-200 bg-gradient-to-br from-slate-50 via-white to-slate-100 px-5 py-5">
             <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div class="flex items-start gap-4">
@@ -31,7 +31,7 @@
 
         <div class="space-y-6 px-5 py-5">
             <div class="grid grid-cols-1 gap-4 xl:grid-cols-[320px,1fr]">
-                <div class="rounded-[24px] border border-slate-200 bg-slate-50/80 p-4">
+                <div class="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
                     <div class="space-y-4">
                         <div class="space-y-2">
                             <h4 class="text-base font-semibold text-slate-900">{{ __('personnel::files.titles.new_file') }}</h4>
@@ -82,26 +82,26 @@
                                     };
                                 @endphp
 
-                                <article class="group relative overflow-hidden rounded-[34px] bg-[#f7f8fb] p-5 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.18)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_24px_56px_-30px_rgba(15,23,42,0.22)]">
+                                <article class="group relative overflow-hidden rounded-[34px] bg-[#f7f8fb] p-5 shadow-card transition duration-300 hover:-translate-y-0.5 hover:shadow-card">
                                     <div class="absolute right-4 top-4 flex flex-col gap-2">
                                         <a href="{{ $route }}"
                                             target="_blank"
                                             rel="noreferrer"
-                                            class="flex h-12 w-12 items-center justify-center rounded-full bg-white text-slate-300 shadow-[0_12px_28px_-18px_rgba(15,23,42,0.22)] transition hover:text-slate-600"
+                                            class="flex h-12 w-12 items-center justify-center rounded-full bg-white text-slate-300 shadow-card transition hover:text-slate-600"
                                             title="{{ __('personnel::files.labels.open_file') }}">
                                             <x-icons.arrow-icon size="w-5 h-5" color="text-slate-300" hover="text-slate-600"></x-icons.arrow-icon>
                                         </a>
 
                                         <button
                                             x-on:click="$dispatch('confirm-action', { tone: 'rose', message: @js(__('personnel::common.messages.remove_data_confirm')), confirmText: @js(__('ui::common.actions.delete')), run: () => $wire.deleteFile({{ $key }}) })"
-                                            class="flex h-12 w-12 items-center justify-center rounded-full bg-white text-rose-300 shadow-[0_12px_28px_-18px_rgba(15,23,42,0.22)] transition hover:text-rose-500"
+                                            class="flex h-12 w-12 items-center justify-center rounded-full bg-white text-rose-300 shadow-card transition hover:text-rose-500"
                                         >
                                             <x-icons.delete-icon size="w-5 h-5" color="text-rose-300" hover="text-rose-500"></x-icons.delete-icon>
                                         </button>
                                     </div>
 
                                     <div class="flex min-h-[250px] flex-col rounded-[30px] bg-white/55 px-6 py-6 pr-20">
-                                        <div class="flex h-16 w-16 items-center justify-center rounded-[18px] bg-white shadow-[0_12px_24px_-20px_rgba(15,23,42,0.25)]">
+                                        <div class="flex h-16 w-16 items-center justify-center rounded-[18px] bg-white shadow-card">
                                             <x-icons.document-icon size="w-9 h-9" color="{{ $iconTone }}" hover="{{ $iconTone }}"></x-icons.document-icon>
                                         </div>
 

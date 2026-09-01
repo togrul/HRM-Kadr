@@ -107,6 +107,7 @@ return [
         'disability_given_date' => 'Disability given date',
         'extra_information' => 'Extra information',
         'computer_knowledge' => 'Computer knowledge',
+        'work_norm' => 'Work schedule',
         'referenced_by' => 'Referenced by',
         'tabel_hash' => 'Tabel #',
         'tabel' => 'Tabel',
@@ -128,6 +129,8 @@ return [
         'used' => 'Used',
         'active' => 'Active',
         'resigned' => 'Resigned',
+        'employee' => 'employees',
+        'employee_count' => ':count employees',
         'all' => 'All',
         'deleted' => 'Deleted',
         'pending' => 'Pending',
@@ -231,6 +234,7 @@ return [
         'in_vacation' => 'In vacation',
         'in_business_trip' => 'In business trip',
         'waiting_for_approval' => 'Waiting for approval',
+        'at_work' => 'At work',
     ],
     'questions' => [
         'changed' => 'changed?',
@@ -249,6 +253,7 @@ return [
         'remove_data_confirm' => 'Are you sure you want to remove this data?',
     ],
     'placeholders' => [
+        'quick_search' => 'Name, tabel no, FIN...',
         'search' => 'Search...',
     ],
 ];

@@ -78,3 +78,7 @@ composer ci:blaze-safe-lint            # blade-ə toxunanda
 ## Sənədləşmə
 
 `docs/` qovluğunda modul plan/todo faylları var. Texniki borc auditi: [`TECH_DEBT_AUDIT.md`](TECH_DEBT_AUDIT.md).
+
+Maliyyə sistemi (ARBAY) ilə inteqrasiya: [`docs/integration-finance.md`](docs/integration-finance.md).
+Məftil müqaviləsinin özü ARBAY reposundadır (`docs/11_INTEQRASIYA.md`) — sahə və
+ya feed dəyişikliyi orada başlayır.

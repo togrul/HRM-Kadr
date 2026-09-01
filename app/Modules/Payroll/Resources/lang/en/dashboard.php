@@ -15,6 +15,8 @@ return [
         'title' => 'Loan / advance assignment',
         'list' => 'Loans',
         'empty' => 'No loans',
+        'active' => ':count active',
+        'select_personnel' => 'Select an employee to manage loans.',
         'types' => [
             'loan' => 'Loan',
             'advance' => 'Advance',
@@ -72,6 +74,12 @@ return [
         'start_on' => 'Start date',
         'remaining' => 'Remaining',
         'status' => 'Status',
+        'currency' => 'Currency',
+    ],
+
+    'columns' => [
+        'employee' => 'Employee',
+        'actions' => 'Actions',
     ],
 
     'actions' => [
@@ -83,6 +91,7 @@ return [
         'lock' => 'Lock',
         'reopen' => 'Reopen',
         'close' => 'Close',
+        'save' => 'Save',
         'delete' => 'Delete',
     ],
 
@@ -109,6 +118,8 @@ return [
     ],
 
     'statutory' => [
+        'title' => 'Statutory deductions',
+        'empty' => 'No deductions for this period',
         'income_tax' => 'Income tax',
         'dsmf' => 'DSMF',
         'unemployment' => 'Unemployment insurance',
