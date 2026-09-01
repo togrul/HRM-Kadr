@@ -31,8 +31,14 @@ return new class extends Migration
                 });
             }
 
-            // Then the index, which SQLite needs gone before the drop-column rebuild.
-            if (Schema::hasIndex('order_logs', 'order_logs_type_template_version_idx')) {
+            // The index is composite — (order_type_id, order_template_version_id) — and
+            // MySQL uses its leading column to back the order_type_id foreign key, so
+            // dropping it outright is refused with errno 1553. MySQL does not need the
+            // drop at all: it strips the column from the index itself and leaves a
+            // single-column index behind. Only SQLite, whose drop-column rebuilds the
+            // table, trips over an index that still names the column.
+            if (Schema::getConnection()->getDriverName() === 'sqlite'
+                && Schema::hasIndex('order_logs', 'order_logs_type_template_version_idx')) {
                 Schema::table('order_logs', function (Blueprint $table) {
                     $table->dropIndex('order_logs_type_template_version_idx');
                 });
