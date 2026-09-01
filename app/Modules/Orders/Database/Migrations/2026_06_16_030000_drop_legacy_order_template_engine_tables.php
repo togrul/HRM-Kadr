@@ -21,11 +21,15 @@ return new class extends Migration
         if (Schema::hasColumn('order_logs', 'order_template_version_id')) {
             // The foreign key goes first: MySQL refuses to drop an index a key still
             // depends on (errno 1553), and the composite index is the one backing it.
-            // Column-array form derives the conventional key name on MySQL and is
-            // handled via a table rebuild on SQLite (the test driver).
-            Schema::table('order_logs', function (Blueprint $table) {
-                $table->dropForeign(['order_template_version_id']);
-            });
+            // Names are discovered, never assumed — this cleanup meets databases built
+            // by different paths, and one absent name aborts the whole drop.
+            foreach ($this->foreignKeysOn('order_logs', 'order_template_version_id') as $key) {
+                Schema::table('order_logs', function (Blueprint $table) use ($key) {
+                    // SQLite reports its keys unnamed; there the column form is what
+                    // triggers the table rebuild that actually removes the constraint.
+                    $table->dropForeign($key['name'] ?: $key['columns']);
+                });
+            }
 
             // Then the index, which SQLite needs gone before the drop-column rebuild.
             if (Schema::hasIndex('order_logs', 'order_logs_type_template_version_idx')) {
@@ -47,6 +51,19 @@ return new class extends Migration
         Schema::dropIfExists('order_template_fields');
         Schema::dropIfExists('order_template_versions');
         Schema::dropIfExists('order_template_sets');
+    }
+
+    /**
+     * The foreign keys actually defined on a column, as the schema reports them.
+     *
+     * @return list<array{name: string|null, columns: list<string>}>
+     */
+    private function foreignKeysOn(string $table, string $column): array
+    {
+        return collect(Schema::getForeignKeys($table))
+            ->filter(fn (array $key): bool => in_array($column, $key['columns'], true))
+            ->values()
+            ->all();
     }
 
     public function down(): void
