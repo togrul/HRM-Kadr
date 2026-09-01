@@ -15,6 +15,11 @@ return [
         'deleted' => 'Deleted',
         'search' => 'Search',
         'reset' => 'Reset',
+        'show_all' => 'Show all',
+        'locations' => 'Destinations',
+        'search_placeholder' => 'Name or destination',
+        'date_start' => 'start',
+        'date_end' => 'end',
     ],
     'table' => [
         'title' => 'Business trips',
@@ -32,6 +37,10 @@ return [
         'given_date' => 'Given date',
         'order_type' => 'Order type',
         'extra_info' => 'Extra info',
+        'unit' => 'trips',
+        'in_trip_summary' => ':count people away',
+        'print_document' => 'Trip paper',
+        'open_order' => 'Open the order',
     ],
     'fields' => [
         'structure' => 'Structure',
@@ -52,6 +61,9 @@ return [
     'boolean' => [
         'yes' => 'yes',
         'no' => 'no',
+    ],
+    'actions' => [
+        'export_excel' => 'Export to Excel',
     ],
     'messages' => [
         'order_not_ready' => 'This business trip request is not yet linked to an approved order.',

@@ -12,6 +12,8 @@ use Illuminate\Support\Carbon;
  * @property bool $is_paid
  * @property string|null $scope_type
  * @property int|null $scope_id
+ * @property mixed $date
+ * @property string $day_type
  */
 class AttendanceCalendar extends Model
 {

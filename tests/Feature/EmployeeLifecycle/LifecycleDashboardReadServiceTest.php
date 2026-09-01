@@ -2,12 +2,6 @@
 
 namespace Tests\Feature\EmployeeLifecycle;
 
-use App\Enums\OrderStatusEnum;
-use App\Models\Order;
-use App\Models\OrderCategory;
-use App\Models\OrderLog;
-use App\Models\OrderStatus;
-use App\Models\OrderType;
 use App\Models\Personnel;
 use App\Models\User;
 use App\Modules\EmployeeLifecycle\Application\Services\LifecycleDashboardReadService;
@@ -452,6 +446,54 @@ class LifecycleDashboardReadServiceTest extends TestCase
         $this->assertDatabaseMissing('employee_lifecycle_task_templates', ['plan_template_id' => $templateId]);
     }
 
+    public function test_facet_counts_stay_clickable_while_a_type_is_selected(): void
+    {
+        $owner = User::factory()->create(['name' => 'Facet Owner']);
+        $personnel = $this->makePersonnel();
+
+        foreach ([['onboarding', 'in_progress'], ['onboarding', 'planned'], ['offboarding', 'planned']] as [$type, $status]) {
+            DB::table('employee_lifecycle_events')->insert([
+                'personnel_id' => $personnel->id,
+                'tabel_no' => $personnel->tabel_no,
+                'type' => $type,
+                'status' => $status,
+                'title' => 'Facet '.$type,
+                'effective_date' => '2026-05-01',
+                'owner_user_id' => $owner->id,
+                'created_by' => $owner->id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        $payload = app(LifecycleDashboardReadService::class)->dashboard(['type' => 'onboarding']);
+
+        // The type facet ignores the type filter, so every other type can still be reached.
+        $this->assertSame(3, $payload['typeCounts']['']);
+        $this->assertSame(2, $payload['typeCounts']['onboarding']);
+        $this->assertSame(1, $payload['typeCounts']['offboarding']);
+
+        // The status facet keeps the type filter, so its numbers match the list behind them.
+        $this->assertSame(2, $payload['statusCounts']['']);
+        $this->assertSame(1, $payload['statusCounts']['planned']);
+    }
+
+    public function test_context_panel_filters_survive_the_teleport(): void
+    {
+        Permission::findOrCreate('show-employee-lifecycle', 'web');
+
+        $user = User::factory()->create(['is_active' => true]);
+        $user->givePermissionTo('show-employee-lifecycle');
+
+        Livewire::actingAs($user);
+
+        Livewire::test(\App\Modules\EmployeeLifecycle\Livewire\Dashboard::class)
+            ->assertSee('$set(\'type\', \'onboarding\')', false)
+            ->assertSee('$set(\'status\', \'in_progress\')', false)
+            ->set('type', 'onboarding')
+            ->assertSet('type', 'onboarding');
+    }
+
     public function test_dashboard_validation_errors_use_localized_attribute_labels(): void
     {
         app()->setLocale('az');
@@ -466,6 +508,8 @@ class LifecycleDashboardReadServiceTest extends TestCase
         Livewire::actingAs($user);
 
         Livewire::test(\App\Modules\EmployeeLifecycle\Livewire\Dashboard::class)
+            ->call('openPanel', 'launch')
+            ->call('setStartTab', 'probation')
             ->call('scheduleProbation')
             ->assertHasErrors([
                 'probationForm.personnel_id' => ['required'],

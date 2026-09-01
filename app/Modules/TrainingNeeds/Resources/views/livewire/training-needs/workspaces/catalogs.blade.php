@@ -10,7 +10,7 @@
 @if ($activeTab === 'catalogs')
     <div class="grid gap-4 xl:grid-cols-2">
         {{-- ═════════════ COMPETENCY GROUPS ═════════════ --}}
-        @php ($groups = $this->catalogGroups)
+        @php $groups = $this->catalogGroups; @endphp
         <x-surface-card :title="__('training_needs::dashboard.cards.competency_groups')" icon="icons.folder-plus-icon" bodyClass="overflow-visible" contentClass="overflow-visible p-4">
             @if ($editingGroupId)
                 <div class="mb-3 flex items-center justify-between gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
@@ -86,7 +86,7 @@
         </x-surface-card>
 
         {{-- ═════════════ COMPETENCY LEVELS ═════════════ --}}
-        @php ($levels = $this->catalogLevels)
+        @php $levels = $this->catalogLevels; @endphp
         <x-surface-card :title="__('training_needs::dashboard.cards.competency_levels')" icon="icons.profile-outline-icon" bodyClass="overflow-visible" contentClass="overflow-visible p-4">
             @if ($editingLevelId)
                 <div class="mb-3 flex items-center justify-between gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
@@ -167,7 +167,7 @@
         </x-surface-card>
 
         {{-- ═════════════ COMPETENCIES ═════════════ --}}
-        @php ($competencies = $this->catalogCompetencies)
+        @php $competencies = $this->catalogCompetencies; @endphp
         <x-surface-card :title="__('training_needs::dashboard.cards.competencies')" icon="icons.profile-icon" bodyClass="overflow-visible" contentClass="overflow-visible p-4">
             @if ($editingCompetencyId)
                 <div class="mb-3 flex items-center justify-between gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
@@ -255,7 +255,7 @@
         </x-surface-card>
 
         {{-- ═════════════ PROGRAMS ═════════════ --}}
-        @php ($programs = $this->catalogPrograms)
+        @php $programs = $this->catalogPrograms; @endphp
         <x-surface-card :title="__('training_needs::dashboard.cards.programs')" icon="icons.clock-icon" bodyClass="overflow-visible" contentClass="overflow-visible p-4">
             @if ($editingProgramId)
                 <div class="mb-3 flex items-center justify-between gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">

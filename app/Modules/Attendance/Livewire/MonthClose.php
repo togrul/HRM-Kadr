@@ -9,9 +9,9 @@ use App\Modules\Attendance\Application\Services\AttendancePayrollExportService;
 use App\Modules\Attendance\Exports\AttendancePayrollCsvExport;
 use App\Modules\Attendance\Exports\AttendancePayrollExport;
 use App\Modules\Attendance\Jobs\GenerateAttendanceMonthlySnapshotJob;
-use Maatwebsite\Excel\Facades\Excel;
-use Maatwebsite\Excel\Excel as ExcelWriter;
 use Livewire\Component;
+use Maatwebsite\Excel\Excel as ExcelWriter;
+use Maatwebsite\Excel\Facades\Excel;
 
 class MonthClose extends Component
 {
@@ -40,8 +40,7 @@ class MonthClose extends Component
         int $month,
         AttendanceMonthLockService $lockService,
         AttendanceAuthorizationService $authorization
-    ): void
-    {
+    ): void {
         if (! $authorization->can('attendance.month.view')) {
             abort(403);
         }

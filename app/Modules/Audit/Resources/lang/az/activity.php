@@ -20,6 +20,7 @@ return [
         'from' => 'Başlanğıc',
         'to' => 'Son',
         'per_page' => 'Sətir',
+        'period' => 'Dövr',
         'all' => 'Hamısı',
     ],
     'list' => [
@@ -36,6 +37,9 @@ return [
     ],
     'labels' => [
         'system_actor' => 'Sistem',
+        'read_only_note' => 'Bu ekran yalnız baxış üçündür — qeydlər dəyişdirilə bilməz.',
+        'read_only_short' => 'Yalnız baxış',
+        'results_unit' => 'nəticə',
         'no_subject' => 'Obyekt yoxdur',
         'no_event' => 'Hadisə yoxdur',
         'no_log_name' => 'Log adı yoxdur',

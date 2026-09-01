@@ -12,27 +12,36 @@
 
 <div class="flex flex-col space-y-4 px-6 py-4">
     <div class="flex items-center justify-between gap-3">
-        <a href="{{ $this->backUrl }}" class="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-700 shadow-sm transition hover:bg-zinc-50">
+        <x-pill-button :href="$this->backUrl">
             <span aria-hidden="true">←</span>
             <span>{{ __('performance_evaluation::dashboard.actions.back_to_performance_dashboard') }}</span>
-        </a>
+        </x-pill-button>
     </div>
 
     <x-surface-card :title="__('performance_evaluation::dashboard.cards.user_personnel_links')" icon="icons.profile-icon">
         <div class="space-y-5">
             <div class="grid gap-3 md:grid-cols-3">
-                <div class="rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3">
-                    <p class="text-[11px] font-semibold uppercase text-sky-700">{{ __('performance_evaluation::dashboard.labels.total_links') }}</p>
-                    <p class="mt-1 text-2xl font-semibold text-sky-900">{{ $this->linkStats['total'] }}</p>
-                </div>
-                <div class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3">
-                    <p class="text-[11px] font-semibold uppercase text-emerald-700">{{ __('performance_evaluation::dashboard.labels.manual_links') }}</p>
-                    <p class="mt-1 text-2xl font-semibold text-emerald-900">{{ $this->linkStats['manual'] }}</p>
-                </div>
-                <div class="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
-                    <p class="text-[11px] font-semibold uppercase text-amber-700">{{ __('performance_evaluation::dashboard.labels.links_resolved_today') }}</p>
-                    <p class="mt-1 text-2xl font-semibold text-amber-900">{{ $this->linkStats['resolved_today'] }}</p>
-                </div>
+                <div class="rounded-xl border border-hairline bg-white px-4 py-3">
+                        <div class="flex items-center justify-between gap-2">
+                            <p class="hrm-eyebrow">{{ __('performance_evaluation::dashboard.labels.total_links') }}</p>
+                            <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-[#0ea5e9]"></span>
+                        </div>
+                        <p class="hrm-num mt-1.5 text-[21px] font-semibold tracking-[-0.03em] text-ink">{{ $this->linkStats['total'] }}</p>
+                    </div>
+                <div class="rounded-xl border border-hairline bg-white px-4 py-3">
+                        <div class="flex items-center justify-between gap-2">
+                            <p class="hrm-eyebrow">{{ __('performance_evaluation::dashboard.labels.manual_links') }}</p>
+                            <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-[#10b981]"></span>
+                        </div>
+                        <p class="hrm-num mt-1.5 text-[21px] font-semibold tracking-[-0.03em] text-ink">{{ $this->linkStats['manual'] }}</p>
+                    </div>
+                <div class="rounded-xl border border-hairline bg-white px-4 py-3">
+                        <div class="flex items-center justify-between gap-2">
+                            <p class="hrm-eyebrow">{{ __('performance_evaluation::dashboard.labels.links_resolved_today') }}</p>
+                            <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-[#f59e0b]"></span>
+                        </div>
+                        <p class="hrm-num mt-1.5 text-[21px] font-semibold tracking-[-0.03em] text-ink">{{ $this->linkStats['resolved_today'] }}</p>
+                    </div>
             </div>
 
             <div class="grid gap-4 xl:grid-cols-[380px_minmax(0,1fr)]">

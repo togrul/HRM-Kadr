@@ -45,6 +45,7 @@ return [
     'labels' => [
         'unassigned' => 'Təyin edilməyib',
         'result_count' => ':count nəticə',
+        'document_count' => ':count sənəd',
         'required_document' => 'Tələb olunan sənəd əlavə edilməyib',
         'not_available' => 'Yoxdur',
         'indefinite' => 'Müddətsiz',

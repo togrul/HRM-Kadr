@@ -107,6 +107,7 @@ return [
         'disability_given_date' => 'Əlilliyin verilmə tarixi',
         'extra_information' => 'Əlavə məlumat',
         'computer_knowledge' => 'Kompüter bilikləri',
+        'work_norm' => 'İş rejimi',
         'referenced_by' => 'Tövsiyə edən',
         'tabel_hash' => 'Tabel #',
         'tabel' => 'Tabel',
@@ -128,6 +129,8 @@ return [
         'used' => 'İstifadə olunub',
         'active' => 'Aktiv',
         'resigned' => 'İşdən ayrılan',
+        'employee' => 'əməkdaş',
+        'employee_count' => ':count əməkdaş',
         'all' => 'Hamısı',
         'deleted' => 'Silinmiş',
         'pending' => 'Gözləyən',
@@ -231,6 +234,7 @@ return [
         'in_vacation' => 'Məzuniyyətdə',
         'in_business_trip' => 'Ezamiyyətdə',
         'waiting_for_approval' => 'Təsdiq gözləyir',
+        'at_work' => 'İşdə',
     ],
     'questions' => [
         'changed' => 'dəyişib?',
@@ -250,5 +254,6 @@ return [
     ],
     'placeholders' => [
         'search' => 'Axtar...',
+        'quick_search' => 'Ad, tabel №, FİN...',
     ],
 ];

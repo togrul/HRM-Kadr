@@ -64,7 +64,7 @@
                                 <span class="text-xs font-mono text-zinc-500">{{ $personnel->tabel_no }}</span>
                                 @if($personnel->structure_path)
                                     <span class="max-w-[18rem] truncate text-[11px] text-zinc-400 md:max-w-[24rem]" title="{{ $personnel->structure_path }}">
-                                        {{ $personnel->structure_path }}
+                                        {{ $personnel->structure_name }}
                                     </span>
                                 @endif
                             </button>
@@ -146,7 +146,7 @@
                                 <span>{{ $item->personnel?->surname }} {{ $item->personnel?->name }} {{ $item->personnel?->patronymic }}</span>
                                 @if($item->personnel?->structure_path)
                                     <span class="max-w-[18rem] truncate text-xs text-zinc-500 md:max-w-[24rem]" title="{{ $item->personnel->structure_path }}">
-                                        {{ $item->personnel->structure_path }}
+                                        {{ $item->personnel->structure_name }}
                                     </span>
                                 @endif
                             </div>

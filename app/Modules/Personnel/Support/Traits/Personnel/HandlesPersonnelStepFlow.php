@@ -2,10 +2,11 @@
 
 namespace App\Modules\Personnel\Support\Traits\Personnel;
 
-use App\Enums\KnowledgeStatusEnum;
 use App\Modules\Personnel\Services\PersonnelStepNavigationService;
 use App\Modules\Personnel\Services\PersonnelStepState;
+use Error;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\On;
 
 trait HandlesPersonnelStepFlow
 {
@@ -269,6 +270,30 @@ trait HandlesPersonnelStepFlow
                 $this->onStepChanged($step);
             }
         });
+
+        $this->dispatch('personnel-crud:step-changed', step: (int) $this->step);
+    }
+
+    /**
+     * Navigation requested from outside the wizard (the personnel file's step panel).
+     * Steps backed by a child component must validate and save first, so the request is
+     * routed through the same handshake the internal stepper uses; the child answers with
+     * `personnel-crud:navigate-approved`.
+     */
+    #[On('personnel-profile:goto-step')]
+    public function gotoStepFromProfile(int $targetStep): void
+    {
+        if ((int) $this->step === $targetStep) {
+            return;
+        }
+
+        if ($this->activeStepUsesChildComponent()) {
+            $this->dispatch('personnel-crud:request-select', targetStep: $targetStep);
+
+            return;
+        }
+
+        $this->selectStep($targetStep);
     }
 
     public function isCurrentStepLoaded(): bool
@@ -296,7 +321,7 @@ trait HandlesPersonnelStepFlow
 
         try {
             return $this->{$property};
-        } catch (\Error) {
+        } catch (Error) {
             return $default;
         }
     }

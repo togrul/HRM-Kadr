@@ -28,264 +28,24 @@
   $uid = 'ui-select-'.substr(md5($identitySource.'|'.$searchModel.'|'.$label), 0, 12);
   $labelId = $uid.'-label';
   $bg = $mode === 'gray' ? 'bg-neutral-100' : 'bg-white';
+
+  // Without a key Livewire's morph may REPLACE this root on a parent re-render — and the
+  // panel lives in an x-teleport, so replacing the root tears the panel out and resets
+  // isOpen. That is why typing in the search box closed the dropdown. A stable key makes
+  // Livewire patch the element instead, so the Alpine state survives the round trip.
+  $rootKey = (string) ($attributes->get('wire:key') ?: $uid);
 @endphp
 
 <div
   x-data="{
-    uid: @js($uid),
-    currentValue: @if($wireModel) @entangle($wireModel).live @else null @endif,
-    lastValue: @if($wireModel) @js(null) @else null @endif,
-    localSearch: '',
-    cachedOptions: @js($model),
-    placeholder: @js($placeholder),
-    isOpen: false,
-    positioned: false,
-    openUp: false,
-    alignRight: false,
-    panelMaxHeight: 224,
-    panelStyles: {},
-    preferredDirection: @js($direction),
-    isDisabled: @js((bool) $disabled),
-    loadOnOpen: @js($loadOnOpen),
-    pendingReopen: false,
-    pendingSelectionClose: false,
-    selectedCache: { id: null, label: '' },
-    initialSelectedLabel: @js($selectedLabel),
-    toId(v){ return (v===null||v===undefined||v==='') ? null : String(v).trim(); },
-    toWireValue(v){
-      if (v===null || v===undefined || v==='') return null;
-      const s = String(v).trim();
-      return /^[0-9]+$/.test(s) ? Number(s) : s;
-    },
-    optionLabel(option){
-      if (!option) return '';
-      return option.label ?? option.name ?? option.title ?? option.text ?? '';
-    },
-    optionId(option){
-      if (!option) return null;
-      return option.id ?? option.value ?? null;
-    },
-    normalizeOptions(options){
-      return (Array.isArray(options) ? options : [])
-        .map((option) => {
-          const id = this.optionId(option);
-          const normalizedId = this.toId(id);
-          if (normalizedId === null) return null;
-
-          return {
-            ...option,
-            id: normalizedId,
-            label: String(this.optionLabel(option) ?? '').trim(),
-          };
-        })
-        .filter(Boolean);
-    },
-    normalizeSearchValue(value){
-      return String(value ?? '')
-        .toLocaleLowerCase('az')
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/ə/g, 'e')
-        .replace(/ı/g, 'i')
-        .replace(/ö/g, 'o')
-        .replace(/ü/g, 'u')
-        .replace(/ş/g, 's')
-        .replace(/ç/g, 'c')
-        .replace(/ğ/g, 'g');
-    },
-    matchesSearch(label){
-      const query = this.normalizeSearchValue(this.localSearch).trim();
-      if (query === '') return true;
-      return this.normalizeSearchValue(label).includes(query);
-    },
-    syncSelectedCache(currentId = this.toId(this.currentValue)){
-      const found = this.cachedOptions.find(o => this.toId(o.id) === currentId);
-      if (found) {
-        this.selectedCache = { id: this.toId(found.id), label: found.label };
-        return;
-      }
-      if (currentId === null) {
-        this.selectedCache = { id: null, label: '' };
-      }
-    },
-    syncOptionsFromDom(){
-      const optionRoot = this.$refs.panel ?? this.$root;
-      const optionNodes = Array.from(optionRoot.querySelectorAll('[data-option-id]'));
-      const domOptions = optionNodes.map((node) => ({
-        id: node.dataset.optionId,
-        label: node.dataset.optionLabel ?? '',
-      }));
-      this.cachedOptions = this.normalizeOptions(domOptions);
-      this.syncSelectedCache();
-    },
-    observeOptions(){
-      const target = this.$refs.panel ?? this.$root;
-      if (!target || typeof MutationObserver === 'undefined') return;
-
-      const observer = new MutationObserver(() => {
-        this.$nextTick(() => {
-          this.syncOptionsFromDom();
-          if (this.isOpen) {
-            requestAnimationFrame(() => this.repositionPanel());
-          }
-        });
-      });
-
-      observer.observe(target, {
-        childList: true,
-        subtree: true,
-      });
-
-      this.$root._uiSelectObserver = observer;
-    },
-
-    init(){
-      this.cachedOptions = this.normalizeOptions(this.cachedOptions);
-      this.lastValue = this.toId(this.currentValue);
-      const currentId = this.toId(this.currentValue);
-      if (this.initialSelectedLabel && currentId !== null) {
-        const found = this.cachedOptions.find(o => this.toId(o.id) === currentId);
-        if (!found) {
-          this.selectedCache = { id: currentId, label: this.initialSelectedLabel };
-        }
-      }
-      this.$nextTick(() => {
-        this.syncOptionsFromDom();
-        this.observeOptions();
-      });
-      this.$watch('currentValue', (next) => {
-        const normalizedNext = this.toId(next);
-        this.syncSelectedCache(normalizedNext);
-        if (this.pendingSelectionClose || normalizedNext !== this.lastValue) {
-          this.pendingSelectionClose = false;
-          this.isOpen = false;
-        }
-        this.lastValue = normalizedNext;
-        if (this.isOpen) {
-          this.scheduleReposition();
-        }
-      });
-      // Whenever the panel opens, position it reliably (covers every open path,
-      // not just toggle()). Hide it until positioned so it never flashes at the
-      // teleport origin, and re-run after layout settles (e.g. a Livewire morph
-      // reflow that shifts the trigger button) so it can't detach from the field.
-      this.$watch('isOpen', (open) => {
-        if (open) {
-          this.scheduleReposition();
-        } else {
-          this.positioned = false;
-        }
-      });
-    },
-
-    setOpen(next){
-      this.isOpen = !!next;
-    },
-
-    scheduleReposition(){
-      this.$nextTick(() => {
-        requestAnimationFrame(() => {
-          this.repositionPanel();
-          setTimeout(() => { if (this.isOpen) this.repositionPanel(); }, 60);
-          setTimeout(() => { if (this.isOpen) this.repositionPanel(); }, 180);
-        });
-      });
-    },
-
-    repositionPanel(){
-      const button = this.$refs.button;
-      const panel = this.$refs.panel;
-      if (!button || !panel) return;
-
-      const buttonRect = button.getBoundingClientRect();
-      const viewportHeight = window.visualViewport?.height || window.innerHeight;
-      const viewportWidth = window.visualViewport?.width || window.innerWidth;
-      const gap = 8;
-      const viewportPadding = 12;
-      const naturalHeight = Math.min(panel.scrollHeight || 224, 320);
-      const availableBelow = Math.max(140, viewportHeight - buttonRect.bottom - gap - viewportPadding);
-      const availableAbove = Math.max(140, buttonRect.top - gap - viewportPadding);
-
-      if (this.preferredDirection === 'up') {
-        this.openUp = true;
-      } else if (this.preferredDirection === 'down') {
-        this.openUp = false;
-      } else {
-        this.openUp = naturalHeight > availableBelow && availableAbove > availableBelow;
-      }
-      this.panelMaxHeight = this.openUp
-        ? Math.min(320, availableAbove)
-        : Math.min(320, availableBelow);
-
-      const desiredWidth = Math.max(buttonRect.width, 220);
-      const clampedWidth = Math.min(desiredWidth, viewportWidth - (viewportPadding * 2));
-      this.alignRight = buttonRect.left + clampedWidth > viewportWidth - viewportPadding;
-      const left = this.alignRight
-        ? Math.max(viewportPadding, buttonRect.right - clampedWidth)
-        : Math.min(Math.max(viewportPadding, buttonRect.left), viewportWidth - viewportPadding - clampedWidth);
-      const top = this.openUp
-        ? Math.max(viewportPadding, buttonRect.top - gap - this.panelMaxHeight)
-        : Math.min(buttonRect.bottom + gap, viewportHeight - viewportPadding - this.panelMaxHeight);
-
-      this.panelStyles = {
-        left: `${Math.round(left)}px`,
-        top: `${Math.round(top)}px`,
-        width: `${Math.round(clampedWidth)}px`,
-        maxHeight: `${Math.round(this.panelMaxHeight)}px`,
-      };
-      this.positioned = true;
-    },
-
-    selectedLabel(){
-      const currentId = this.toId(this.currentValue);
-      if (currentId == null || currentId === '') return this.placeholder;
-      const found = this.cachedOptions.find(o => this.toId(o.id) === currentId);
-      if (found) return found.label;
-      if (this.toId(this.selectedCache.id) === currentId && this.selectedCache.label) {
-        return this.selectedCache.label;
-      }
-      if (this.initialSelectedLabel && currentId !== null) {
-        return this.initialSelectedLabel;
-      }
-      return this.placeholder;
-    },
-
-    select(id, label = null){
-      const wireValue = this.toWireValue(id);
-      const val = this.toId(wireValue);
-      this.pendingReopen = false;
-      this.pendingSelectionClose = true;
-      if (label !== null && label !== undefined) {
-        this.selectedCache = { id: val, label: String(label) };
-      } else {
-        const found = this.cachedOptions.find(o => this.toId(o.id) === val);
-        this.selectedCache = found ? { id: this.toId(found.id), label: found.label } : { id: val, label: '' };
-      }
-      this.currentValue = wireValue;
-      this.initialSelectedLabel = null;
-      this.isOpen = false;
-      queueMicrotask(() => { this.isOpen = false; });
-      requestAnimationFrame(() => { this.isOpen = false; });
-      setTimeout(() => { this.isOpen = false; }, 0);
-    },
-
-    toggle(){
-      if (this.isDisabled) return;
-      if (this.isOpen) {
-        this.setOpen(false);
-        return;
-      }
-
-      this.setOpen(true);
-      window.dispatchEvent(new CustomEvent('ui-select-opened', { detail: { uid: this.uid } }));
-      this.$nextTick(() => {
-        requestAnimationFrame(() => this.repositionPanel());
-      });
-      if (this.isOpen && this.loadOnOpen && $wire && typeof $wire.loadOptionGroup === 'function') {
-        this.pendingReopen = true;
-        $wire.loadOptionGroup(this.loadOnOpen);
-      }
-    },
+    ...window.uiSelectDropdown({
+      uid: @js($uid),
+      placeholder: @js($placeholder),
+      preferredDirection: @js($direction),
+      isDisabled: @js((bool) $disabled),
+      loadOnOpen: @js($loadOnOpen),
+    }),
+    @if($wireModel) currentValue: @entangle($wireModel).live, @endif
   }"
   x-on:click.window="if (!$el.contains($event.target) && !($refs.panel && $refs.panel.contains($event.target))) setOpen(false)"
   x-on:keydown.escape.window="setOpen(false)"
@@ -298,7 +58,9 @@
   "
   x-on:resize.window.debounce.100ms="if (isOpen) repositionPanel()"
   x-on:scroll.window.debounce.50ms="if (isOpen) repositionPanel()"
-  {{ $attributes->except(['wire:model','wire:model.live','wire:model.defer','wire:model.lazy','wire:model.blur'])->class('relative isolate w-full') }}
+  wire:key="{{ $rootKey }}"
+  data-selected-label="{{ $selectedLabel }}"
+  {{ $attributes->except(['wire:key','wire:model','wire:model.live','wire:model.defer','wire:model.lazy','wire:model.blur'])->class('relative isolate w-full') }}
   x-bind:class="isOpen ? 'z-[900]' : 'z-10'"
 >
   @if($label)
@@ -309,17 +71,17 @@
     <button
       type="button" id="{{ $uid }}-button"
       x-ref="button"
-      class="relative w-full py-2 pl-3 pr-10 text-left rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm {{ $bg }} {{ $disabled ? 'opacity-60 cursor-not-allowed' : '' }}"
+      class="{{ \App\Support\Ui\FieldStyles::select('relative flex items-center text-left') }} {{ $disabled ? 'cursor-not-allowed opacity-60' : '' }}"
       :aria-expanded="isOpen" aria-labelledby="{{ $labelId }}"
       :disabled="isDisabled"
       x-on:click.prevent.stop="toggle()"
     >
       <span class="flex items-center">
-        <span class="block ml-3 font-normal truncate text-neutral-900" x-text="selectedLabel()">{{ $placeholder }}</span>
+        <span class="block truncate text-ink" x-text="selectedLabel()">{{ $placeholder }}</span>
       </span>
-      <span class="absolute inset-y-0 right-0 flex items-center pr-2 ml-3 pointer-events-none">
-        <svg class="w-5 h-5 text-neutral-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-          <path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"/>
+      <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+        <svg class="h-4 w-4 text-ink-faint" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.17l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z" clip-rule="evenodd"/>
         </svg>
       </span>
     </button>
@@ -330,11 +92,11 @@
         x-show="isOpen && positioned && !isDisabled" x-transition.opacity.duration.100ms x-cloak
         :class="openUp ? 'origin-bottom' : 'origin-top'"
         :style="panelStyles"
-        class="fixed z-[9999] px-3 py-2 space-y-2 overflow-auto text-base bg-white rounded-md shadow-xl focus:outline-none sm:text-sm"
+        class="hrm-scroll fixed z-[9999] space-y-0.5 overflow-auto rounded-xl border border-hairline bg-white p-1 text-[12.5px] shadow-overlay focus:outline-none"
       >
         {{-- slot: search input --}}
         @if ($searchModel)
-          <li class="sticky top-0 bg-white pt-1 pb-2 z-20">
+          <li class="sticky top-0 z-20 bg-white px-0.5 pb-1.5 pt-0.5">
             <div class="px-1">
               <x-livewire-input
                 mode="gray"
@@ -352,7 +114,7 @@
             </div>
           </li>
         @elseif (isset($slot) && ! $slot->isEmpty())
-          <li class="sticky top-0 bg-white pt-1 pb-2 z-20">
+          <li class="sticky top-0 z-20 bg-white px-0.5 pb-1.5 pt-0.5">
             <div class="px-1">
               {{ $slot }}
             </div>
@@ -360,14 +122,14 @@
         @endif
 
         {{-- null/placeholder option --}}
-        <li class="relative py-2 pl-3 rounded-lg cursor-pointer select-none group pr-9 hover:bg-blue-400 bg-neutral-50"
+        <li class="group hrm-select-option"
             x-show="matchesSearch(placeholder)"
             x-on:click.prevent.stop="select(null, placeholder)">
           <div class="flex items-center">
-            <span class="block ml-3 truncate"> {{ $placeholder }} </span>
+            <span class="block truncate">{{ $placeholder }}</span>
             <span
               x-show="toId(currentValue) === null"
-              class="absolute inset-y-0 right-0 flex items-center pr-4 text-blue-600"
+              class="hrm-select-check"
             >
               ✓
             </span>
@@ -377,17 +139,17 @@
         @foreach($model as $idx => $opt)
           <li
             wire:key="{{ $uid }}-{{ data_get($opt,'id') }}"
-            class="relative py-2 pl-3 rounded-lg cursor-pointer select-none group pr-9 hover:bg-blue-400 bg-neutral-50"
+            class="group hrm-select-option"
             data-option-id="{{ data_get($opt,'id') }}"
             data-option-label="{{ data_get($opt,'label', data_get($opt,'name', data_get($opt,'title', data_get($opt,'text')))) }}"
             x-show="matchesSearch($el.dataset.optionLabel)"
             x-on:click.prevent.stop="select($el.dataset.optionId, $el.dataset.optionLabel)"
           >
             <div class="flex items-center">
-              <span class="block ml-3 truncate">{{ data_get($opt,'label', data_get($opt,'name', data_get($opt,'title', data_get($opt,'text')))) }}</span>
+              <span class="block truncate">{{ data_get($opt,'label', data_get($opt,'name', data_get($opt,'title', data_get($opt,'text')))) }}</span>
               <span
                 x-show="toId(currentValue) === toId(@js(data_get($opt,'id')))"
-                class="absolute inset-y-0 right-0 flex items-center pr-4 text-blue-600"
+                class="hrm-select-check"
               >
                 ✓
               </span>

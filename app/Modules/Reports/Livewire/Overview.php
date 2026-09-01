@@ -24,14 +24,19 @@ class Overview extends Component
 
     public array $structureOptions = [];
 
-    public function mount(ReportsAccessService $access, ReportsStructureScopeService $structures): void
-    {
+    public function mount(
+        ReportsAccessService $access,
+        ReportsStructureScopeService $structures,
+        ?int $year = null,
+        ?int $month = null,
+        ?int $structureId = null,
+    ): void {
         $access->authorizeView();
 
         $this->trendWindow = in_array((int) request()->integer('trend_window', 6), [6, 12], true) ? (int) request()->integer('trend_window', 6) : 6;
-        $this->year = (int) request()->integer('year', now()->year);
-        $this->month = max(1, min(12, (int) request()->integer('month', now()->month)));
-        $this->structureId = request()->integer('structure_id') ?: null;
+        $this->year = $year ?: (int) request()->integer('year', now()->year);
+        $this->month = max(1, min(12, $month ?: (int) request()->integer('month', now()->month)));
+        $this->structureId = $structureId ?: request()->integer('structure_id') ?: null;
         $this->structureOptions = $structures->filterOptions()->all();
     }
 

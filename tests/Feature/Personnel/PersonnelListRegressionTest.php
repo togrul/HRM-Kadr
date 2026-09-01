@@ -93,7 +93,7 @@ class PersonnelListRegressionTest extends TestCase
     public function test_row_action_service_accepts_precomputed_capabilities(): void
     {
         $service = app(PersonnelRowActionService::class);
-        $personnel = (new \App\Models\Personnel())->forceFill([
+        $personnel = (new \App\Models\Personnel)->forceFill([
             'id' => 10,
             'tabel_no' => 'T-10',
         ]);
@@ -103,10 +103,29 @@ class PersonnelListRegressionTest extends TestCase
             'can_delete' => true,
         ]);
 
-        $this->assertNotEmpty($actions);
-        $this->assertSame(['edit', 'files', 'print', 'cv', 'information', 'vacations', 'delete'], array_map(
+        // The row opens the personnel file and handles list-level deletion; files,
+        // information, vacations, print and CV live on that page now, so they must not
+        // reappear here as a second copy.
+        $this->assertSame(['edit', 'delete'], array_map(
             fn ($action) => $action->id,
             $actions
         ));
+    }
+
+    public function test_the_row_edit_action_links_to_the_personnel_file(): void
+    {
+        $personnel = (new \App\Models\Personnel)->forceFill([
+            'id' => 10,
+            'tabel_no' => 'T-10',
+        ]);
+
+        $actions = app(PersonnelRowActionService::class)->build($personnel, 'current', [
+            'can_edit' => true,
+            'can_delete' => false,
+        ]);
+
+        $edit = collect($actions)->firstWhere('id', 'edit');
+
+        $this->assertSame(route('personnel.show', 10), $edit->href);
     }
 }

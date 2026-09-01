@@ -11,9 +11,9 @@
 <div class="flex flex-col gap-6 px-6 py-5">
     <div class="space-y-2">
         <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __('personnel::my_hr_account.labels.kicker') }}</x-ui.field-label>
-        <div class="flex flex-col gap-3 rounded-[28px] border border-zinc-200 bg-white p-6 shadow-sm">
+        <div class="flex flex-col gap-3 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
             <div class="flex flex-col gap-2">
-                <h2 class="text-2xl font-semibold tracking-tight text-zinc-950">{{ $personnel->fullname }}</h2>
+                <h2 class="text-[18px] font-semibold tracking-tight text-zinc-950">{{ $personnel->fullname }}</h2>
                 <p class="text-sm text-zinc-500">
                     {{ $personnel->email ?: __('personnel::my_hr_account.messages.email_missing_short') }}
                 </p>
@@ -40,7 +40,7 @@
     @enderror
 
     <div class="grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
-        <div class="rounded-[28px] border border-zinc-200 bg-white p-6 shadow-sm">
+        <div class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
             <div class="space-y-2">
                 <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __('personnel::my_hr_account.labels.account_status') }}</x-ui.field-label>
                 <div class="flex flex-wrap gap-2">
@@ -89,7 +89,7 @@
             </div>
         </div>
 
-        <div class="rounded-[28px] border border-zinc-200 bg-white p-6 shadow-sm">
+        <div class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
             <div class="space-y-2">
                 <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __('personnel::my_hr_account.labels.set_password_link') }}</x-ui.field-label>
                 <p class="text-sm text-zinc-500">{{ __('personnel::my_hr_account.messages.set_password_help') }}</p>
@@ -104,13 +104,13 @@
 
             <div class="mt-4 rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
                 @if ($resetUrl)
-                    <textarea readonly rows="6" class="w-full resize-none rounded-2xl border-0 bg-[#f5f5f7] px-4 py-3 text-sm font-semibold text-zinc-800 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] outline-none ring-0 transition focus:bg-white focus:outline-none focus:ring-0">{{ $resetUrl }}</textarea>
+                    <textarea readonly rows="6" class="w-full resize-none rounded-2xl border-0 bg-[#f5f5f7] px-4 py-3 text-sm font-semibold text-zinc-800 shadow-card outline-none ring-0 transition focus:bg-white focus:outline-none focus:ring-0">{{ $resetUrl }}</textarea>
                     <div class="mt-3 flex flex-wrap gap-3">
                         <button
                             type="button"
                             x-data
                             x-on:click="navigator.clipboard.writeText(@js($resetUrl)); window.dispatchEvent(new CustomEvent('notify', { detail: { type: 'success', message: @js(__('personnel::my_hr_account.messages.reset_link_copied')) } }))"
-                            class="inline-flex items-center justify-center rounded-2xl bg-[#f5f5f7] px-4 py-2 text-sm font-semibold tracking-tight text-zinc-800 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] transition hover:bg-zinc-950 hover:text-white"
+                            class="inline-flex items-center justify-center rounded-2xl bg-[#f5f5f7] px-4 py-2 text-sm font-semibold tracking-tight text-zinc-800 shadow-card transition hover:bg-zinc-950 hover:text-white"
                         >
                             {{ __('personnel::my_hr_account.actions.copy_link') }}
                         </button>
@@ -124,7 +124,7 @@
                         </a>
                     </div>
                 @else
-                    <div class="rounded-2xl bg-[#f5f5f7] px-4 py-8 text-center text-sm font-semibold text-zinc-500 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)]">
+                    <div class="rounded-2xl bg-[#f5f5f7] px-4 py-8 text-center text-sm font-semibold text-zinc-500 shadow-card">
                         {{ __('personnel::my_hr_account.messages.reset_link_placeholder') }}
                     </div>
                 @endif
@@ -132,7 +132,7 @@
         </div>
     </div>
 
-    <div class="rounded-[28px] border border-zinc-200 bg-white p-6 shadow-sm">
+    <div class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
         <div class="space-y-2">
             <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __('personnel::my_hr_account.labels.manual_link') }}</x-ui.field-label>
             <p class="text-sm text-zinc-500">{{ __('personnel::my_hr_account.messages.manual_link_help') }}</p>

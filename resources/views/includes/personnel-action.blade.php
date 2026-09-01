@@ -3,7 +3,7 @@
       {{ $title ?? ''}}
     </h2>
     @if(auth()->user()->can('confirmation-general') && isset($personnelModel) && ($personnelIsPending ?? false))
-    <div class="overflow-hidden rounded-[22px] border border-amber-200 bg-gradient-to-r from-amber-50 via-white to-rose-50/60 shadow-[0_16px_36px_rgba(15,23,42,0.08)]">
+    <div class="overflow-hidden rounded-2xl border border-amber-200 bg-gradient-to-r from-amber-50 via-white to-rose-50/60 shadow-card">
         <div class="flex flex-col gap-4 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
             <div class="flex min-w-0 items-start gap-4">
                 <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-amber-200 bg-white text-amber-600 shadow-sm">
@@ -86,7 +86,12 @@
 >
     @php
         $stepItems = $this->getSteps();
+        // The personnel file renders its own vertical stepper in the context panel;
+        // showing this one too would be two controls for one piece of state.
+        $showStepper = ! ($chromeless ?? false);
     @endphp
+
+    @if ($showStepper)
     <div class="space-y-4">
         <div class="flex items-center justify-between gap-4">
             <div class="space-y-1">
@@ -111,7 +116,7 @@
             </div>
         </div>
 
-        <div class="rounded-[24px] border border-slate-200 bg-white px-4 py-4 shadow-[0_12px_32px_rgba(15,23,42,0.04)]">
+        <div class="rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-card">
             <div class="relative mx-auto max-w-full">
                 <div class="absolute left-0 right-0 top-5 h-px bg-slate-200"></div>
                 <div
@@ -140,8 +145,8 @@
                     >
                         <span @class([
                             'relative flex h-10 w-10 items-center justify-center rounded-full border text-sm font-semibold transition-all duration-200',
-                            'border-emerald-500 bg-emerald-500 text-white shadow-[0_8px_18px_rgba(16,185,129,0.18)]' => $step > $key,
-                            'border-sky-500 bg-white text-sky-600 shadow-[0_10px_24px_rgba(14,165,233,0.16)] ring-4 ring-sky-50' => $step == $key,
+                            'border-emerald-500 bg-emerald-500 text-white shadow-card' => $step > $key,
+                            'border-sky-500 bg-white text-sky-600 shadow-card ring-4 ring-sky-50' => $step == $key,
                             'border-slate-200 bg-white text-slate-500' => $step < $key,
                         ])>
                             <span
@@ -186,7 +191,11 @@
             </div>
         </div>
     </div>
-    <hr class="py-2" />
+    @endif
+
+    @if ($showStepper)
+        <hr class="py-2" />
+    @endif
 
     <div
         wire:key="personnel-step-container-{{ (int) $step }}"

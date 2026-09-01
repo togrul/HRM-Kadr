@@ -16,6 +16,15 @@ use Illuminate\Support\Facades\DB;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
+/**
+ * @property string|null $order_no
+ * @property int|null $order_type_id
+ * @property mixed $given_date
+ * @property string|null $given_by
+ * @property int|null $status_id
+ * @property array<string, mixed>|null $template_snapshot
+ * @property string|null $template_render_mode
+ */
 class OrderLog extends Model
 {
     use CreateDeleteTrait;

@@ -162,3 +162,29 @@ Arxitektura: Livewire başqa modulun modelini birbaşa sorğulamır; translation
 - Maaş "aylıq brüt" (saatlıq yox); proporsiya Faza 2-də davamiyyətdən.
 - Bir işçidə eyni anda 1 aktiv kompensasiya; dəyişiklik = yeni effective yazı.
 - `gl_code` indi sərbəst mətn (Faza 4-də maliyyə planına bağlanır).
+
+---
+
+## EK A — AZ statutory tutulmalar & dərəcələr (2026, qeyri-neft özəl sektor) — Faza 3 `statutory_rates` üçün
+
+> Mənbə: muhasibat.az (2026 əməkhaqqıdan tutulmalar), caspianlegalcenter.az, vergiler.az, e-qanun (Tibbi sığorta haqqında 725-IQ). **Dərəcələr kodda hardcode EDİLMİR** — Faza 3-də `statutory_rates` (effective-dated, `regime_id` ilə) cədvəlinə yazılır. Rəqəmlər mühasibat/qanunla təsdiqlənməlidir.
+
+**İşçi tutulmaları (payslip-də deduction):**
+| Komponent | İşçi dərəcəsi (2026) | Qeyd |
+|---|---|---|
+| `income_tax` (gəlir vergisi) | ≤2500: 3% · 2500–8000: 75 + 10%×(məbləğ−2500) · >8000: 625 + 14%×(məbləğ−8000) | 2026-dan 7illik güzəşt bitdi (progressiv) |
+| `dsmf_ee` (sosial sığorta, işçi) | ≤200: 3% · >200: 6 + 10%×(məbləğ−200) | |
+| `unemployment_ee` (işsizlik, işçi) | 0.5% (brüt) | YENİ kataloqa əlavə olundu |
+| `medical_ee` (icbari tibbi, işçi) | ≤2500: 2% · >2500: 50 + 0.5%×(məbləğ−2500) | 2026-da hədd 8000→2500 endirildi; YENİ |
+| `union` (həmkarlar ittifaqı) | adətən 1% (könüllü/müqavilə) | statutory deyil |
+
+**İşəgötürən payları (employer cost — işçidən tutulmur; engine `Employer` cəmində):**
+| Komponent | İşəgötürən dərəcəsi (2026) |
+|---|---|
+| DSMF (er) | ≤200: 22% · >200: 44 + 15%×(məbləğ−200) (bəzi mənbələrdə >8000 üçün 11%) |
+| İşsizlik (er) | 0.5% |
+| İcbari tibbi (er) | ≤2500: 2% · >2500: 0.5% |
+
+**Digər (Faza 5 — sonra):** məhkəmə/icra tutulmaları (aliment, icra vərəqəsi), avans/bank krediti, maddi məsuliyyət tutulması.
+
+**⚠️ Rejim fərqi:** neft-qaz və dövlət/hərbi sektorlar üçün fərqli cədvəllər var → buna görə engine qayda-dəsti, `regime_id` ilə. Yuxarıdakılar qeyri-neft özəl sektor üçündür.

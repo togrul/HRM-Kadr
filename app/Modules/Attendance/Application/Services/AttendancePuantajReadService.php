@@ -18,8 +18,7 @@ class AttendancePuantajReadService
         array $structureIds = [],
         ?Carbon $from = null,
         ?Carbon $to = null
-    ): LengthAwarePaginator
-    {
+    ): LengthAwarePaginator {
         $fromDate = $from?->toDateString();
         $toDate = $to?->toDateString();
 

@@ -10,7 +10,7 @@
 ])
 
 <x-ui.input-shell :label="$fieldLabel">
-    <div class="rounded-[1.5rem] border border-zinc-200 bg-white p-5">
+    <div class="rounded-2xl border border-zinc-200 bg-white p-5">
         <div class="flex flex-wrap items-start justify-between gap-4 border-b border-zinc-200/80 pb-4">
             <div class="max-w-2xl">
                 <p class="text-sm font-semibold text-zinc-950">{{ $summaryTitle }}</p>
@@ -34,8 +34,8 @@
                     type="button"
                     wire:click="{{ $actionMethod }}('{{ $targetKey }}')"
                     @class([
-                        'relative w-full overflow-hidden rounded-[1.35rem] border px-5 py-5 text-left transition',
-                        'border-emerald-200 bg-emerald-50/80 shadow-[0_14px_28px_rgba(16,185,129,0.08)]' => $isSelected,
+                        'relative w-full overflow-hidden rounded-2xl border px-5 py-5 text-left transition',
+                        'border-emerald-200 bg-emerald-50/80 shadow-card' => $isSelected,
                         'border-zinc-200 bg-zinc-50/70 hover:border-zinc-300 hover:bg-white' => ! $isSelected,
                     ])
                 >

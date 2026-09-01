@@ -1,10 +1,10 @@
-<div class="space-y-7" x-data wire:key="roles">
+<div class="space-y-5" x-data wire:key="roles">
     <section class="space-y-2">
-        <h1 class="text-3xl font-semibold tracking-tight text-zinc-950">{{ __('services::roles.dashboard.title') }}</h1>
-        <p class="max-w-2xl text-sm font-medium leading-6 text-zinc-600">{{ __('services::roles.dashboard.subtitle') }}</p>
+        <h1 class="text-[15px] font-semibold tracking-[-0.02em] text-ink">{{ __('services::roles.dashboard.title') }}</h1>
+        <p class="max-w-2xl text-[12.5px] leading-5 text-ink-faint">{{ __('services::roles.dashboard.subtitle') }}</p>
     </section>
 
-    <section class="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+    <section class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
         @foreach ($roles as $role)
             @php
                 $isAdminRole = str_contains(Str::lower($role->name), 'admin');
@@ -28,10 +28,10 @@
 
             <article
                 wire:key="role-card-{{ $role->id }}"
-                class="group relative flex min-h-[220px] flex-col rounded-2xl border border-zinc-300 bg-white p-6 shadow-[0_18px_50px_-38px_rgba(24,24,27,0.45)] transition hover:-translate-y-0.5 hover:border-zinc-400 hover:shadow-[0_24px_70px_-42px_rgba(24,24,27,0.55)]"
+                class="group relative flex min-h-[200px] flex-col rounded-xl border border-hairline bg-white p-5 transition hover:border-zinc-300"
             >
                 @if ($isAdminRole)
-                    <span class="absolute left-0 top-0 z-20 inline-flex h-6 items-center rounded-br-md rounded-tl-2xl bg-zinc-100 px-2.5 text-[10px] font-bold uppercase tracking-tight text-zinc-700 ring-1 ring-zinc-200">
+                    <span class="absolute left-0 top-0 z-20 inline-flex h-6 items-center rounded-br-md rounded-tl-xl bg-[#f4f4f5] px-2.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-ink-muted">
                         {{ __('services::roles.badges.default') }}
                     </span>
                 @endif
@@ -40,14 +40,14 @@
                     <button
                         type="button"
                         wire:click.prevent="openSideMenu('set-permission', {{ $role->id }})"
-                        class="absolute inset-0 z-10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                        class="absolute inset-0 z-10 rounded-xl focus:outline-none focus:ring-2 focus:ring-ink/20"
                         aria-label="{{ __('services::roles.actions.manage_role_permissions', ['role' => $roleDisplayName]) }}"
                     ></button>
                 @endunless
 
-                <div class="relative grid h-14 grid-cols-[3.5rem_1fr_auto] items-start gap-3">
-                    <div class="inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-                        <x-icons.shield-icon size="h-8 w-8" color="text-blue-600" hover="text-blue-700" />
+                <div class="relative grid h-11 grid-cols-[2.75rem_1fr_auto] items-start gap-3">
+                    <div class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] border border-hairline bg-[#fafafa] text-ink-muted">
+                        <x-icons.shield-icon size="h-5 w-5" color="text-current" hover="text-current" />
                     </div>
 
                     <div></div>
@@ -56,21 +56,21 @@
                         <button
                             type="button"
                             wire:click.stop.prevent="editRole({{ $role->id }})"
-                            class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-zinc-50 text-zinc-500 shadow-sm ring-1 ring-zinc-100 transition hover:bg-zinc-100 hover:text-zinc-950 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-ink-faint transition hover:bg-[#f4f4f5] hover:text-ink"
                             title="{{ __('services::common.actions.edit') }}"
                             aria-label="{{ __('services::common.actions.edit') }}"
                         >
-                            <x-icons.edit-icon size="h-4 w-4" color="text-zinc-500" hover="text-zinc-950" />
+                            <x-icons.edit-icon size="h-[17px] w-[17px]" color="text-current" hover="text-current" />
                         </button>
 
                         <button
                             type="button"
                             wire:click.stop.prevent="setDeleteRole({{ $role->id }})"
-                            class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-50 text-rose-500 shadow-sm ring-1 ring-rose-100 transition hover:bg-rose-100 hover:text-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:ring-offset-2"
+                            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-ink-faint transition hover:bg-rose-50 hover:text-rose-600"
                             title="{{ __('services::common.actions.delete') }}"
                             aria-label="{{ __('services::common.actions.delete') }}"
                         >
-                            <x-icons.delete-icon size="h-4 w-4" color="text-rose-500" hover="text-rose-700" />
+                            <x-icons.delete-icon size="h-[17px] w-[17px]" color="text-current" hover="text-current" />
                         </button>
                     </div>
                 </div>
@@ -125,19 +125,19 @@
                             </div>
                         </div>
                     @else
-                        <h2 class="text-xl font-semibold tracking-tight text-zinc-950">{{ $roleDisplayName }}</h2>
-                        <p class="mt-2 max-w-[18rem] text-sm font-medium leading-5 text-zinc-600">
+                        <h2 class="text-[15px] font-semibold tracking-[-0.02em] text-ink">{{ $roleDisplayName }}</h2>
+                        <p class="mt-1.5 max-w-[18rem] text-[12px] leading-5 text-ink-faint">
                             {{ $isAdminRole ? __('services::roles.dashboard.admin_description') : __('services::roles.dashboard.role_description') }}
                         </p>
                     @endif
                 </div>
 
-                <div class="relative mt-7 border-t border-zinc-200 pt-5">
+                <div class="relative mt-6 border-t border-hairline-subtle pt-4">
                     <div class="flex items-center justify-between gap-3">
                         <button
                             type="button"
                             wire:click.prevent="openSideMenu('set-permission', {{ $role->id }})"
-                            class="relative z-20 text-sm font-bold tracking-tight text-blue-600 transition hover:text-blue-700"
+                            class="relative z-20 text-[12.5px] font-semibold tracking-[-0.01em] text-ink transition hover:text-ink-muted"
                         >
                             {{ trans_choice('services::roles.dashboard.permission_count', (int) $role->permissions_count, ['count' => (int) $role->permissions_count]) }}
                         </button>
@@ -157,7 +157,7 @@
                                     +{{ $role->users_count - $initials->count() }}
                                 </span>
                             @elseif ($role->users_count === 0)
-                                <span class="truncate text-xs font-semibold text-zinc-400">{{ __('services::roles.dashboard.no_users') }}</span>
+                                <span class="truncate text-[11.5px] text-ink-faint">{{ __('services::roles.dashboard.no_users') }}</span>
                             @endif
                         </div>
                     </div>
@@ -166,7 +166,7 @@
         @endforeach
 
         <article
-            class="flex min-h-[220px] flex-col justify-center rounded-2xl border-2 border-dashed border-zinc-300 bg-zinc-50/40 p-6 text-center transition hover:border-zinc-400 hover:bg-white"
+            class="flex min-h-[200px] flex-col justify-center rounded-xl border border-dashed border-hairline bg-[#fafafa] p-5 text-center transition hover:border-zinc-300 hover:bg-white"
             wire:key="role-create-card"
         >
             @if ($isCreating)
@@ -211,14 +211,14 @@
                 <button
                     type="button"
                     wire:click.prevent="startCreate"
-                    class="flex h-full min-h-[160px] flex-col items-center justify-center gap-3 rounded-xl text-zinc-600 transition hover:text-zinc-950 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                    class="flex h-full min-h-[150px] flex-col items-center justify-center gap-3 rounded-xl text-ink-muted transition hover:text-ink focus:outline-none focus:ring-2 focus:ring-ink/20"
                 >
-                    <span class="inline-flex h-10 w-10 items-center justify-center rounded-full border-2 border-zinc-600">
+                    <span class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-current">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m7-7H5" />
                         </svg>
                     </span>
-                    <span class="text-sm font-bold">{{ __('services::roles.actions.create_role') }}</span>
+                    <span class="text-[12.5px] font-semibold">{{ __('services::roles.actions.create_role') }}</span>
                 </button>
             @endif
         </article>

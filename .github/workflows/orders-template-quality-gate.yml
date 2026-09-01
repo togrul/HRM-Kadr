@@ -23,7 +23,7 @@ on:
       - '.github/workflows/orders-template-quality-gate.yml'
 
 jobs:
-  orders-template-gate:
+  orders-gate:
     runs-on: ubuntu-latest
 
     steps:
@@ -63,9 +63,9 @@ jobs:
       - name: Blaze-safe view lint
         run: php artisan views:blaze-safe-lint --strict
 
-      - name: Run Orders Template quality gate
+      - name: Run Orders quality gate
         env:
           DB_CONNECTION: sqlite
           DB_DATABASE: database/database.sqlite
           ORDERS_ENGINE_STRICT_MODE: true
-        run: composer ci:orders-template-gate
+        run: composer ci:orders-gate

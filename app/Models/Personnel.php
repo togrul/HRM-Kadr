@@ -22,8 +22,21 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
  * @property string|null $tabel_no
+ * @property string|null $person_uid
+ * @property string|null $surname
+ * @property string|null $name
+ * @property string|null $patronymic
  * @property mixed $birthdate
+ * @property int|null $gender
+ * @property string|null $pin
+ * @property string|null $phone
+ * @property string|null $mobile
+ * @property string|null $email
+ * @property int|null $structure_id
+ * @property int|null $position_id
+ * @property int|null $work_norm_id
  * @property mixed $join_work_date
+ * @property mixed $leave_work_date
  * @property-read Position|null $position
  * @property-read Structure|null $structure
  */
@@ -141,7 +154,22 @@ class Personnel extends Model
     protected static function boot()
     {
         parent::boot();
-        static::creating(fn ($model) => $model->added_by = auth()->id() ?? 1);
-        static::deleting(fn ($model) => $model->forceFill(['deleted_by' => auth()->id() ?? 1])->save());
+
+        // These MUST return nothing.
+        //
+        // `creating` and `deleting` are halting events: Eloquent dispatches them
+        // through `until()`, which stops at the first listener returning a
+        // non-null value. An arrow function returns the assignment it performs,
+        // so `fn ($model) => $model->added_by = ...` returned an id and silently
+        // swallowed every listener registered afterwards — including
+        // PersonnelObserver. Nothing depended on those listeners before, so the
+        // breakage stayed invisible.
+        static::creating(function ($model): void {
+            $model->added_by = auth()->id() ?? 1;
+        });
+
+        static::deleting(function ($model): void {
+            $model->forceFill(['deleted_by' => auth()->id() ?? 1])->save();
+        });
     }
 }

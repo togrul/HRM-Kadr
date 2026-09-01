@@ -8,6 +8,7 @@ return [
         'leaves' => 'Leaves',
     ],
     'labels' => [
+        'pending_short' => 'pending',
         'leave_type' => 'Leave type',
         'fullname' => 'Fullname',
         'personnel' => 'Personnel',
@@ -76,6 +77,13 @@ return [
             'hr_only_policy' => 'HR only',
             'manual_assignment' => 'Manual assignment',
         ],
+        'requests_title' => 'Leave requests',
+        'unit' => 'requests',
+        'show_all' => 'Show all',
+        'date_start' => 'start',
+        'date_end' => 'end',
+        'search_by_person' => 'Search personnel…',
+        'approval_note' => 'Approvers are resolved from the hierarchy',
     ],
     'messages' => [
         'leave_added' => 'Leave was added successfully!',

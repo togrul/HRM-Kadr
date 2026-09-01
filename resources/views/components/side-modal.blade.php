@@ -221,20 +221,20 @@
                 >
                     <div class="flex h-full flex-col overflow-hidden border-l border-zinc-200 bg-white shadow-2xl">
                         @if($showHeaderClose)
-                            <div class="absolute top-6 right-6 z-30">
+                            <div class="absolute top-4 right-4 z-30">
                                 <button
                                     x-ref="closeBtn"
                                     type="button"
                                     @click="close()"
-                                    class="inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-zinc-200 bg-white text-zinc-500 shadow-sm transition hover:bg-zinc-50 hover:text-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-300"
+                                    class="inline-flex h-9 w-9 items-center justify-center rounded-[10px] border border-hairline bg-white text-ink-muted transition hover:bg-[#f4f4f5] hover:text-ink focus:outline-none focus:ring-2 focus:ring-zinc-300"
                                 >
                                     <span class="sr-only">{{ __('ui::common.actions.close') }}</span>
-                                    <x-icons.default.close-icon size="w-6 h-6" color="text-zinc-500" hover="text-zinc-950"></x-icons.default.close-icon>
+                                    <x-icons.default.close-icon size="w-4 h-4" color="text-zinc-500" hover="text-zinc-950"></x-icons.default.close-icon>
                                 </button>
                             </div>
                         @endif
 
-                        <div class="relative flex-1 overflow-y-auto px-4 py-4 pr-16 sm:px-8 sm:py-8 sm:pr-24" wire:loading.remove>
+                        <div class="relative flex-1 overflow-y-auto px-4 py-4 pr-14 sm:px-8 sm:py-8 sm:pr-16" wire:loading.remove>
                             {{ $slot }}
                         </div>
 

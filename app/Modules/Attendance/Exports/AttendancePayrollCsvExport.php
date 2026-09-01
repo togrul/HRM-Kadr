@@ -10,7 +10,7 @@ use Maatwebsite\Excel\Concerns\WithCustomCsvSettings;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 
-class AttendancePayrollCsvExport implements FromCollection, WithHeadings, WithMapping, WithCustomCsvSettings
+class AttendancePayrollCsvExport implements FromCollection, WithCustomCsvSettings, WithHeadings, WithMapping
 {
     private int $rowNo = 0;
 
@@ -18,8 +18,7 @@ class AttendancePayrollCsvExport implements FromCollection, WithHeadings, WithMa
         public Collection $rows,
         public AttendancePayrollExportContract $contract,
         public array $csvSettings = []
-    ) {
-    }
+    ) {}
 
     public function collection(): Collection
     {

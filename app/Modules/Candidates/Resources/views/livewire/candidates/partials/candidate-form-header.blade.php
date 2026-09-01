@@ -10,7 +10,7 @@
 </div>
 
 @if (isset($this->candidateModelData) && $this->candidateModelData?->latestApplication)
-    <div class="rounded-[24px] border border-slate-200 bg-slate-50 p-4">
+    <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
         <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">
             {{ __('candidates::recruitment.titles.recruitment_context') }}
         </div>

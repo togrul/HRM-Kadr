@@ -80,6 +80,8 @@ class AttendanceDailyMonitorReadService
             ->orderBy('p.surname')
             ->orderBy('p.name')
             ->select([
+                // the list links each row to the personnel file, like the mockup's tabel column
+                'p.id as personnel_id',
                 'p.tabel_no',
                 'p.surname',
                 'p.name',

@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Orders;
 
+use App\Models\Order;
+use App\Models\OrderCategory;
 use App\Models\OrderLog;
 use App\Models\OrderStatus;
 use App\Models\User;
@@ -9,6 +11,7 @@ use App\Modules\Orders\Livewire\AllOrders;
 use App\Services\StructureService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Maatwebsite\Excel\Facades\Excel;
 use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
@@ -72,5 +75,53 @@ class AllOrdersInteractionTest extends TestCase
         Livewire::test(AllOrders::class)
             ->call('setStatus', 'all')
             ->assertSee('IQ-VIS-1');
+    }
+
+    public function test_contextual_panel_renders_inside_the_component_root(): void
+    {
+        foreach ([[10, 'Təsdiq gözləyən'], [20, 'Təsdiqlənmiş'], [30, 'Ləğv edilmiş']] as [$id, $name]) {
+            OrderStatus::query()->firstOrCreate(['id' => $id], ['locale' => 'az', 'name' => $name]);
+        }
+
+        $category = OrderCategory::query()->create(['id' => 1, 'name_az' => 'Kadr', 'name_en' => 'HR', 'name_ru' => 'HR']);
+        Order::query()->forceCreate(['id' => 1010, 'order_category_id' => $category->id, 'name' => 'İşə qəbul', 'content' => '', 'order_model' => '', 'blade' => Order::BLADE_DEFAULT]);
+
+        $user = User::factory()->create();
+        $user->givePermissionTo(Permission::findOrCreate('show-orders', 'web'));
+        $this->actingAs($user);
+
+        // Order::IG_EMR is globally visible, so this row needs no structure grant.
+        OrderLog::query()->create([
+            'order_id' => 1010,
+            'order_no' => 'LEGACY-1',
+            'given_date' => now(),
+            'given_by' => 'Test',
+            'given_by_rank' => '',
+            'status_id' => 20,
+            'creator_id' => $user->id,
+        ]);
+
+        // The panel is teleported from INSIDE the Livewire root; rendering it through a
+        // <x-slot name="sidebar"> would put it outside and every wire:click would be inert.
+        Livewire::test(AllOrders::class)
+            ->assertSee('setStatus')
+            ->assertSee('selectOrder')
+            ->assertSee('İşə qəbul')
+            ->assertSee('Təsdiq gözləyən');
+    }
+
+    public function test_excel_export_streams_a_file_for_a_permitted_user(): void
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo(Permission::findOrCreate('show-orders', 'web'));
+        $user->givePermissionTo(Permission::findOrCreate('export-orders', 'web'));
+        $this->actingAs($user);
+
+        $this->freezeTime();
+        Excel::fake();
+
+        Livewire::test(AllOrders::class)->call('exportExcel');
+
+        Excel::assertDownloaded('orders-'.now()->format('d.m.Y H:i').'.xlsx');
     }
 }

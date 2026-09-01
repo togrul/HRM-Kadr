@@ -34,7 +34,7 @@
             <div class="absolute inset-0 bg-zinc-950/45 backdrop-blur-[3px]" @click="$wire.call('{{ $cancelAction }}')" aria-hidden="true"></div>
 
             <div x-show="open" x-transition.scale.origin.center class="relative z-10 w-full max-w-xl">
-                <div class="overflow-hidden rounded-[22px] border border-zinc-200 bg-zinc-100/90 shadow-[0_24px_80px_rgba(15,23,42,0.18)]">
+                <div class="overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-100/90 shadow-overlay">
                     <div class="border-b border-zinc-200 px-1 pb-1 pt-1">
                         <div class="rounded-[18px] border border-zinc-200 bg-white px-6 py-5 sm:px-7">
                             <div class="flex items-start justify-between gap-4">
@@ -83,7 +83,7 @@
                                     <div class="inline-flex h-fit items-center rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-700">
                                         {{ __('ui::common.destructive.description') }}
                                     </div>
-                                    <div class="rounded-2xl border border-zinc-200 bg-zinc-50/90 px-4 py-3 text-sm leading-6 text-zinc-600 shadow-[0_1px_2px_rgba(16,24,40,0.04)]">
+                                    <div class="rounded-2xl border border-zinc-200 bg-zinc-50/90 px-4 py-3 text-sm leading-6 text-zinc-600 shadow-card">
                                         {{ $description }}
                                     </div>
                                 </div>

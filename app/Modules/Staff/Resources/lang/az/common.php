@@ -23,8 +23,11 @@ return [
         'gender' => 'Cins',
         'man' => 'Kişi',
         'woman' => 'Qadın',
+        'staff_unit' => 'ştat',
+        'vacant_lower' => 'vakant',
     ],
     'actions' => [
+        'show_all' => 'Hamısını göstər',
         'add' => 'Əlavə et',
         'add_staff' => 'Ştat əlavə et',
         'save' => 'Yadda saxla',

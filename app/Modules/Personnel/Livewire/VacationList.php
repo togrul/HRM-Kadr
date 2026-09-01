@@ -6,6 +6,7 @@ use App\Helpers\UsefulHelpers;
 use App\Models\Personnel;
 use App\Models\Vacation;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -54,6 +55,7 @@ class VacationList extends Component
             'fullname' => $this->personnelModelData->fullname,
         ];
         session()->flash('vacation-updated', $preparedQuery);
+
         return $this->redirect(route('vacations.list'));
     }
 
@@ -83,6 +85,7 @@ class VacationList extends Component
         return view('personnel::livewire.personnel.vacation-list');
     }
 
+    #[Computed]
     public function monthOptions(): array
     {
         return collect($this->months)

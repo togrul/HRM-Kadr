@@ -1,16 +1,16 @@
 <div class="space-y-5 animate-pulse px-4 py-3 lg:px-5">
-    <div class="overflow-hidden rounded-[2rem] border border-zinc-200/90 bg-white shadow-[0_10px_28px_rgba(15,23,42,0.05)]">
+    <div class="overflow-hidden rounded-[2rem] border border-zinc-200/90 bg-white shadow-card">
         <div class="border-b border-zinc-200 px-5 py-4 lg:px-6">
             <div class="h-3 w-32 rounded-full bg-zinc-100"></div>
             <div class="mt-3 h-7 w-64 rounded-full bg-zinc-100"></div>
         </div>
 
         <div class="grid gap-5 p-5 lg:grid-cols-[1.1fr,0.9fr]">
-            <div class="rounded-[1.8rem] border border-zinc-200/90 bg-zinc-50/70 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]">
+            <div class="rounded-[1.8rem] border border-zinc-200/90 bg-zinc-50/70 p-5 shadow-card">
                 <div class="h-4 w-24 rounded-full bg-zinc-100"></div>
                 <div class="mt-4 h-9 w-52 rounded-full bg-zinc-100"></div>
                 <div class="mt-3 h-4 w-64 rounded-full bg-zinc-100"></div>
-                <div class="mt-8 h-[220px] rounded-[1.6rem] border border-zinc-100 bg-white px-5 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.65)]">
+                <div class="mt-8 h-[220px] rounded-[1.6rem] border border-zinc-100 bg-white px-5 py-4 shadow-card">
                     <div class="flex h-full items-end gap-3">
                         @foreach ([45, 72, 58, 86, 64, 92] as $bar)
                             <div class="flex flex-1 flex-col justify-end gap-2">
@@ -36,14 +36,14 @@
     </div>
 
     <div class="grid gap-5 lg:grid-cols-3">
-        <div class="overflow-hidden rounded-[2rem] border border-zinc-200/90 bg-white shadow-[0_10px_28px_rgba(15,23,42,0.05)]">
+        <div class="overflow-hidden rounded-[2rem] border border-zinc-200/90 bg-white shadow-card">
             <div class="border-b border-zinc-200 px-5 py-4 lg:px-6">
                 <div class="h-3 w-36 rounded-full bg-zinc-100"></div>
                 <div class="mt-3 h-7 w-56 rounded-full bg-zinc-100"></div>
             </div>
             <div class="space-y-4 p-5">
                 @foreach ([82, 38] as $bar)
-                    <div class="rounded-[1.6rem] border border-zinc-200/90 bg-zinc-50/70 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.55)]">
+                    <div class="rounded-[1.6rem] border border-zinc-200/90 bg-zinc-50/70 p-4 shadow-card">
                         <div class="flex items-start justify-between gap-4">
                             <div class="space-y-2">
                                 <div class="h-5 w-52 rounded-full bg-zinc-100"></div>
@@ -59,14 +59,14 @@
             </div>
         </div>
 
-        <div class="lg:col-span-2 overflow-hidden rounded-[2rem] border border-zinc-200/90 bg-white shadow-[0_10px_28px_rgba(15,23,42,0.05)]">
+        <div class="lg:col-span-2 overflow-hidden rounded-[2rem] border border-zinc-200/90 bg-white shadow-card">
             <div class="border-b border-zinc-200 px-5 py-4 lg:px-6">
                 <div class="h-3 w-36 rounded-full bg-zinc-100"></div>
                 <div class="mt-3 h-7 w-56 rounded-full bg-zinc-100"></div>
             </div>
             <div class="grid gap-3 p-5 sm:grid-cols-2 md:grid-cols-3">
                 @foreach (range(1, 6) as $tile)
-                    <div class="rounded-[1.55rem] border border-zinc-200/90 bg-white p-5 shadow-[0_8px_18px_rgba(15,23,42,0.04)]">
+                    <div class="rounded-[1.55rem] border border-zinc-200/90 bg-white p-5 shadow-card">
                         <div class="flex items-start justify-between gap-3">
                             <div class="h-3 w-20 rounded-full bg-zinc-100"></div>
                             <div class="h-8 w-12 rounded-full bg-zinc-100"></div>

@@ -86,6 +86,38 @@ class AuditLogDashboardTest extends TestCase
             ->assertSee('127.0.0.1');
     }
 
+    public function test_event_facet_counts_keep_every_event_clickable(): void
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo(Permission::findOrCreate('show-audit-logs', 'web'));
+
+        foreach ([['login', 2], ['updated', 3]] as [$event, $times]) {
+            for ($i = 0; $i < $times; $i++) {
+                AuditActivity::query()->create([
+                    'log_name' => 'default',
+                    'description' => 'User logged in',
+                    'event' => $event,
+                    'causer_type' => User::class,
+                    'causer_id' => $user->id,
+                ]);
+            }
+        }
+
+        $component = Livewire::actingAs($user)->test(ActivityLogDashboard::class);
+
+        // The panel is teleported into the Livewire root, so its rows keep their wire:click.
+        $component->assertSee("\$set('event', 'login')", false);
+
+        // Selecting an event must not zero out the other rows, or the facet cannot be
+        // clicked back out of.
+        $counts = fn ($view): array => $view->viewData('eventCounts')->all();
+
+        $this->assertSame(['login' => 2, 'updated' => 3], $counts($component));
+
+        $component->set('event', 'login');
+        $this->assertSame(['login' => 2, 'updated' => 3], $counts($component));
+    }
+
     public function test_authorized_user_can_export_audit_logs(): void
     {
         $user = User::factory()->create();

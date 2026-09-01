@@ -46,7 +46,7 @@
 
         <div class="space-y-4">
             @forelse ($campaigns as $campaign)
-                <div class="rounded-[1.75rem] border border-zinc-200 bg-white p-5 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
+                <div class="rounded-[1.75rem] border border-zinc-200 bg-white p-5 shadow-card">
                     <div class="space-y-5">
                         <div class="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                             <div class="space-y-3">
@@ -94,7 +94,7 @@
 
                                 <div class="mt-4 space-y-3">
                                     @forelse ($campaign->approvals as $event)
-                                        <div class="rounded-[1.35rem] border border-zinc-200 bg-white px-4 py-3 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
+                                        <div class="rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-card">
                                             <div class="flex items-start justify-between gap-4">
                                                 <div class="min-w-0 space-y-1">
                                                     <p class="text-sm font-semibold text-zinc-900">{{ __('notifications::common.audit.'.$event->action, ['action' => $event->action]) }}</p>
@@ -125,11 +125,11 @@
                                 </div>
 
                                 <div class="mt-4 grid gap-3 sm:grid-cols-2">
-                                    <div class="rounded-[1.35rem] border border-zinc-200 bg-white px-4 py-3 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
+                                    <div class="rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-card">
                                         <p class="text-[12px] font-semibold uppercase tracking-tight text-zinc-400">{{ __('notifications::common.fields.status') }}</p>
                                         <p class="mt-2 text-sm uppercase tracking-tight font-semibold text-zinc-900">{{ __('notifications::common.statuses.'.$campaign->status) }}</p>
                                     </div>
-                                    <div class="rounded-[1.35rem] border border-zinc-200 bg-white px-4 py-3 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
+                                    <div class="rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-card">
                                         <p class="text-[12px] font-semibold uppercase tracking-tight text-zinc-400">{{ __('notifications::common.fields.approver') }}</p>
                                         <p class="mt-2 text-sm uppercase tracking-tight font-semibold text-zinc-900">{{ $campaign->approver?->name ?? '—' }}</p>
                                     </div>
@@ -138,7 +138,7 @@
                                 @if ($campaign->dispatches->isNotEmpty())
                                     <div class="mt-4 space-y-3">
                                         @foreach ($campaign->dispatches as $dispatch)
-                                            <div class="rounded-[1.35rem] border border-zinc-200 bg-white px-4 py-3 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
+                                            <div class="rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-card">
                                                 <div class="flex items-start justify-between gap-4">
                                                     <div class="min-w-0 space-y-1">
                                                         <p class="text-sm font-semibold text-zinc-900">{{ $dispatch->user?->name ?? __('notifications::common.helpers.dispatch_deleted_user') }}</p>
@@ -158,7 +158,7 @@
                                     </div>
                                 @else
                                     <div class="mt-4 space-y-3">
-                                        <div class="rounded-[1.35rem] border border-zinc-200 bg-white px-4 py-3 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
+                                        <div class="rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-card">
                                             <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.titles.failure_reason') }}</p>
                                             <p class="mt-2 text-sm leading-6 text-zinc-600">
                                                 @if ($campaign->status === 'failed')
@@ -168,7 +168,7 @@
                                                 @endif
                                             </p>
                                         </div>
-                                        <div class="rounded-[1.35rem] border border-zinc-200 bg-white px-4 py-3 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
+                                        <div class="rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-card">
                                             <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.titles.dispatch_history') }}</p>
                                             <p class="mt-2 text-sm leading-6 text-zinc-600">
                                                 @if ($campaign->status === 'failed')

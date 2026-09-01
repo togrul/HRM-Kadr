@@ -1,7 +1,7 @@
 <div class="space-y-5">
     <x-surface-card :title="__('notifications::common.titles.module')" icon="icons.notification-icon">
         <div class="space-y-4">
-            <div class="rounded-[1.7rem] border border-zinc-200 bg-[linear-gradient(180deg,rgba(250,250,250,0.96),rgba(244,244,245,0.78))] p-4 shadow-[0_20px_50px_rgba(15,23,42,0.06)]">
+            <div class="rounded-[1.7rem] border border-zinc-200 bg-[linear-gradient(180deg,rgba(250,250,250,0.96),rgba(244,244,245,0.78))] p-4 shadow-card">
                 <div class="space-y-4">
                     <div class="min-w-0">
                         <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400">{{ __('notifications::common.titles.module') }}</p>
@@ -23,7 +23,7 @@
                                 type="button"
                                 wire:click="selectTab('{{ $tabKey }}')"
                                 aria-current="{{ $activeTab === $tabKey ? 'page' : 'false' }}"
-                                class="{{ $activeTab === $tabKey ? 'border-zinc-950 bg-zinc-950 text-white shadow-[0_12px_28px_rgba(15,23,42,0.18)] ring-4 ring-zinc-950/5' : 'border-zinc-200 bg-white/90 text-zinc-600 hover:-translate-y-0.5 hover:border-zinc-300 hover:bg-white hover:text-zinc-900 hover:shadow-[0_10px_24px_rgba(15,23,42,0.07)]' }} inline-flex items-center gap-2 rounded-full border px-4 py-2.5 text-sm font-semibold transition duration-200"
+                                class="{{ $activeTab === $tabKey ? 'border-zinc-950 bg-zinc-950 text-white shadow-card ring-4 ring-zinc-950/5' : 'border-zinc-200 bg-white/90 text-zinc-600 hover:-translate-y-0.5 hover:border-zinc-300 hover:bg-white hover:text-zinc-900 hover:shadow-card' }} inline-flex items-center gap-2 rounded-full border px-4 py-2.5 text-sm font-semibold transition duration-200"
                             >
                                 <span>{{ $tab['label'] }}</span>
                                 @if (isset($tab['count']))
@@ -37,7 +37,7 @@
                 </div>
             </div>
 
-            <div class="rounded-[1.75rem] border border-zinc-200 bg-zinc-50/70 p-3 shadow-[0_18px_48px_rgba(15,23,42,0.05)]" wire:key="notification-settings-panel-{{ $activeTab }}">
+            <div class="rounded-[1.75rem] border border-zinc-200 bg-zinc-50/70 p-3 shadow-card" wire:key="notification-settings-panel-{{ $activeTab }}">
                 @if ($activeTab === 'overview')
                     <livewire:notification.overview-panel :key="'notification-overview-panel'" />
                 @elseif ($activeTab === 'analytics')

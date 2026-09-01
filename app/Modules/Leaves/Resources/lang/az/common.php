@@ -8,6 +8,7 @@ return [
         'leaves' => 'İcazələr',
     ],
     'labels' => [
+        'pending_short' => 'təsdiq gözləyir',
         'leave_type' => 'İcazə növü',
         'fullname' => 'Soyad, ad, ata adı',
         'personnel' => 'Personal',
@@ -76,6 +77,13 @@ return [
             'hr_only_policy' => 'Yalnız HR xətti',
             'manual_assignment' => 'Manual təyinat',
         ],
+        'requests_title' => 'İcazə müraciətləri',
+        'unit' => 'müraciət',
+        'show_all' => 'Hamısını göstər',
+        'date_start' => 'başlama',
+        'date_end' => 'bitmə',
+        'search_by_person' => 'Personal axtar…',
+        'approval_note' => 'Təsdiq iyerarxiyaya görə təyin olunur',
     ],
     'messages' => [
         'leave_added' => 'İcazə uğurla əlavə olundu!',

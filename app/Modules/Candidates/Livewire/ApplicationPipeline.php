@@ -5,12 +5,12 @@ namespace App\Modules\Candidates\Livewire;
 use App\Livewire\Traits\SideModalAction;
 use App\Models\Candidate;
 use App\Models\CandidateApplication;
+use App\Models\JobOpening;
 use App\Modules\Candidates\Application\Services\CandidateApplicationStageService;
 use App\Modules\Candidates\Support\Traits\BuildsRecruitmentOptions;
 use App\Modules\Candidates\Support\Traits\InteractsWithRecruitmentPresentation;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
@@ -114,7 +114,7 @@ class ApplicationPipeline extends Component
     {
         return $this->filteredApplicationQuery($withoutStageFilter)
             ->with([
-                'candidate:id,name,surname,patronymic,phone',
+                'candidate:id,name,surname,patronymic,phone,birthdate',
                 'opening:id,title,profile_pack,position_id,structure_id,job_requisition_id',
                 'opening.position:id,name',
                 'opening.structure:id,name',
@@ -124,12 +124,6 @@ class ApplicationPipeline extends Component
             ])
             ->latest('moved_at')
             ->latest('id');
-    }
-
-    #[Computed]
-    public function applicationRows(): LengthAwarePaginator
-    {
-        return $this->applicationQuery()->paginate(12);
     }
 
     #[Computed]
@@ -166,6 +160,74 @@ class ApplicationPipeline extends Component
     public function hiredCount(): int
     {
         return $this->pipelineMetrics['hired_count'];
+    }
+
+    /**
+     * The board reads at most this many applications in one go. A pipeline larger than
+     * this shows its newest cards per column while the column counts stay exact.
+     *
+     * ponytail: single capped read; switch to ROW_NUMBER() OVER (PARTITION BY current_stage)
+     * or per-column lazy loading if a real pipeline ever outgrows it.
+     */
+    private const BOARD_CARD_CAP = 300;
+
+    /**
+     * Stage columns for the board: the ordered stages with their exact counts, each
+     * carrying the cards the cap could fetch.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    #[Computed]
+    public function stageBoard(): array
+    {
+        $cardsByStage = $this->applicationQuery()
+            ->limit(self::BOARD_CARD_CAP)
+            ->get()
+            ->groupBy('current_stage');
+
+        return collect($this->stageSummary())
+            ->when($this->stage !== 'all', fn ($stages) => $stages->where('key', $this->stage))
+            ->values()
+            ->map(function (array $stage) use ($cardsByStage): array {
+                $cards = $cardsByStage->get($stage['key'], collect());
+
+                return $stage + [
+                    'cards' => $cards,
+                    'hidden' => max(0, (int) $stage['count'] - $cards->count()),
+                ];
+            })
+            ->all();
+    }
+
+    /**
+     * Panel counts, with the applications figure replaced by the filtered total this
+     * screen is actually showing.
+     *
+     * @return array{candidates: int, applications: int, requisitions: int, openings: int, active_candidates: int}
+     */
+    #[Computed]
+    public function panelCounts(): array
+    {
+        return array_merge($this->recruitmentPanelCounts(), [
+            'applications' => $this->totalApplications(),
+        ]);
+    }
+
+    /**
+     * Open vacancies for the panel, with their headcount and how many people applied.
+     *
+     * @return \Illuminate\Support\Collection<int, JobOpening>
+     */
+    #[Computed]
+    public function openOpenings()
+    {
+        return JobOpening::query()
+            ->select('id', 'title', 'headcount', 'status')
+            ->where('status', 'open')
+            ->withCount('applications')
+            ->orderByDesc('id')
+            ->limit(12)
+            ->get();
     }
 
     #[Computed]

@@ -6,4 +6,5 @@
     'h-36' => $size == 'lg',
     'h-24' => $size == 'sm',
     'h-12' => $size == 'xs',
+    'h-8 w-auto object-contain' => $size == 'wordmark',
 ]) />

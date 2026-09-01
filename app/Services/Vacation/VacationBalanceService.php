@@ -42,7 +42,31 @@ class VacationBalanceService
      */
     public function snapshot(Personnel $personnel, int $year): array
     {
-        $row = $this->balanceRow($personnel, $year);
+        return $this->mapBalance($this->balanceRow($personnel, $year));
+    }
+
+    /**
+     * The stored balance for the year, or null when the yearly allocation has not run for
+     * this employee yet. Read-only — unlike snapshot() it never creates the row, so it is
+     * safe on a render path.
+     *
+     * @return array{total:int,used:int,remaining:int}|null
+     */
+    public function storedSnapshot(Personnel $personnel, int $year): ?array
+    {
+        $row = Vacation::query()
+            ->where('tabel_no', $personnel->tabel_no)
+            ->where('year', $year)
+            ->first();
+
+        return $row ? $this->mapBalance($row) : null;
+    }
+
+    /**
+     * @return array{total:int,used:int,remaining:int}
+     */
+    private function mapBalance(Vacation $row): array
+    {
         $total = (int) $row->vacation_days_total;
         $remaining = max(0, (int) $row->remaining_days);
 

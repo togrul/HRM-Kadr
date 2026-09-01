@@ -1,127 +1,130 @@
-<div class="flex flex-col gap-6 px-6 py-4">
-    @include('candidates::livewire.candidates.partials.recruitment-nav')
+<div class="flex flex-col">
+    {{-- ===================== contextual panel ===================== --}}
+    <x-slot name="sidebar"><div id="hrm-context-panel"></div></x-slot>
 
-    <section class="rounded-[32px] border border-slate-200 bg-white p-6 shadow-[0_28px_60px_-45px_rgba(15,23,42,0.35)]">
-        <div class="flex flex-col gap-5 border-b border-slate-200 pb-6 lg:flex-row lg:items-start lg:justify-between">
-            <div class="space-y-3">
-                <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">
-                    {{ __('candidates::recruitment.titles.requisition_detail') }}
-                </div>
-                <h1 class="text-3xl font-semibold tracking-tight text-slate-900">{{ $requisition->title }}</h1>
-                <div class="flex flex-wrap gap-2">
-                    <span class="inline-flex rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700">{{ $this->recruitmentPackLabel($requisition->profile_pack) }}</span>
-                    <span class="inline-flex rounded-full bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700">{{ $this->recruitmentStatusLabel($requisition->status) }}</span>
-                    <span class="inline-flex rounded-full bg-sky-50 px-4 py-2 text-sm font-semibold text-sky-700">{{ $requisition->headcount }} {{ __('candidates::recruitment.labels.headcount_short') }}</span>
-                </div>
-            </div>
+    @teleport('#hrm-context-panel')
+        @include('candidates::livewire.candidates.partials.recruitment-panel', [
+            'panelTitle' => __('candidates::recruitment.titles.requisition_detail'),
+            'panelSubtitle' => $requisition->title,
+        ])
+    @endteleport
 
-            <div class="flex flex-wrap gap-2">
-                <a href="{{ route('candidates.openings') }}" class="inline-flex h-11 items-center rounded-2xl border border-slate-200 px-4 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900">
-                    {{ __('candidates::recruitment.actions.open_openings') }}
-                </a>
-            </div>
+    <div class="lg:hidden">@include('candidates::livewire.candidates.partials.recruitment-nav')</div>
+
+    {{-- ===================== header ===================== --}}
+    <x-page-header
+        :title="$requisition->title"
+        :breadcrumb="__('candidates::recruitment.titles.requisitions')"
+    >
+        <x-slot:icon>
+            <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15h6"/></svg>
+        </x-slot:icon>
+
+        <x-slot:actions>
+            <x-pill-button :href="route('candidates.openings')" wire:navigate>
+                {{ __('candidates::recruitment.actions.open_openings') }}
+            </x-pill-button>
+        </x-slot:actions>
+
+        <div class="flex flex-wrap items-center gap-2">
+            <x-small-badge mode="secondary">{{ $this->recruitmentPackLabel($requisition->profile_pack) }}</x-small-badge>
+            <x-small-badge :mode="$this->recruitmentStatusTone($requisition->status)" dot>{{ $this->recruitmentStatusLabel($requisition->status) }}</x-small-badge>
+            <x-small-badge mode="blue">{{ $requisition->headcount }} {{ __('candidates::recruitment.labels.headcount_short') }}</x-small-badge>
+        </div>
+    </x-page-header>
+
+    <div class="flex flex-col gap-4 px-4 py-4 sm:px-5">
+        <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <x-fact-tile
+                :label="__('candidates::recruitment.labels.structure')"
+                :value="$requisition->structure?->name ?? '—'"
+                :note="$requisition->position?->name ?? '—'"
+            />
+            <x-fact-tile
+                :label="__('candidates::recruitment.labels.owner_summary')"
+                :value="$requisition->owner?->name ?? '—'"
+                :note="$requisition->requester?->name ?? '—'"
+            />
+            <x-fact-tile
+                :label="__('candidates::recruitment.labels.timeline')"
+                :value="optional($requisition->opens_at)->format('d.m.Y') ?? '—'"
+                :note="optional($requisition->closes_at)->format('d.m.Y') ?? '—'"
+            />
+            <x-fact-tile
+                :label="__('candidates::recruitment.labels.approval_status')"
+                :value="__('candidates::recruitment.approval_statuses.'.($requisition->approval_status ?: 'draft'))"
+                :note="match ($requisition->approval_status) {
+                    'approved' => ($requisition->approver?->name ?? '—').' · '.(optional($requisition->approved_at)->format('d.m.Y H:i') ?? '—'),
+                    'rejected' => ($requisition->rejecter?->name ?? '—').' · '.(optional($requisition->rejected_at)->format('d.m.Y H:i') ?? '—'),
+                    default => __('candidates::recruitment.labels.awaiting_approval'),
+                }"
+                :tone="match ($requisition->approval_status) { 'approved' => 'green', 'rejected' => 'rose', default => 'amber' }"
+            />
         </div>
 
-        <div class="mt-6 grid gap-4 lg:grid-cols-4">
-            <div class="rounded-[24px] border border-slate-200 bg-slate-50 p-4">
-                <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">{{ __('candidates::recruitment.labels.structure') }}</div>
-                <div class="mt-3 text-base font-semibold text-slate-900">{{ $requisition->structure?->name ?? '—' }}</div>
-                <div class="mt-1 text-sm text-slate-500">{{ $requisition->position?->name ?? '—' }}</div>
+        <section class="overflow-hidden rounded-2xl border border-hairline bg-white shadow-card">
+            <div class="border-b border-hairline-subtle px-4 py-3">
+                <h2 class="text-[14px] font-semibold tracking-[-0.02em] text-ink">{{ __('candidates::recruitment.titles.requisition_approval') }}</h2>
             </div>
-            <div class="rounded-[24px] border border-slate-200 bg-slate-50 p-4">
-                <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">{{ __('candidates::recruitment.labels.owner_summary') }}</div>
-                <div class="mt-3 text-base font-semibold text-slate-900">{{ $requisition->owner?->name ?? '—' }}</div>
-                <div class="mt-1 text-sm text-slate-500">{{ $requisition->requester?->name ?? '—' }}</div>
-            </div>
-            <div class="rounded-[24px] border border-slate-200 bg-slate-50 p-4">
-                <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">{{ __('candidates::recruitment.labels.timeline') }}</div>
-                <div class="mt-3 text-base font-semibold text-slate-900">{{ optional($requisition->opens_at)->format('d.m.Y') ?? '—' }}</div>
-                <div class="mt-1 text-sm text-slate-500">{{ optional($requisition->closes_at)->format('d.m.Y') ?? '—' }}</div>
-            </div>
-            <div class="rounded-[24px] border border-slate-200 bg-slate-50 p-4">
-                <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">{{ __('candidates::recruitment.labels.approval_status') }}</div>
-                <div class="mt-3 text-base font-semibold text-slate-900">{{ __('candidates::recruitment.approval_statuses.'.($requisition->approval_status ?: 'draft')) }}</div>
-                <div class="mt-1 text-sm text-slate-500">
-                    @if ($requisition->approval_status === 'approved')
-                        {{ $requisition->approver?->name ?? '—' }} · {{ optional($requisition->approved_at)->format('d.m.Y H:i') ?? '—' }}
-                    @elseif ($requisition->approval_status === 'rejected')
-                        {{ $requisition->rejecter?->name ?? '—' }} · {{ optional($requisition->rejected_at)->format('d.m.Y H:i') ?? '—' }}
-                    @else
-                        {{ __('candidates::recruitment.labels.awaiting_approval') }}
-                    @endif
-                </div>
-            </div>
-        </div>
-
-        <div class="mt-6 rounded-[24px] border border-slate-200 bg-slate-50/80 p-5">
-            <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-                <div class="flex-1 space-y-2">
-                    <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">{{ __('candidates::recruitment.titles.requisition_approval') }}</div>
-                    <textarea wire:model="approvalNote" rows="2" class="w-full rounded-2xl border-0 bg-white px-4 py-3 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-slate-200 transition placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900" placeholder="{{ __('candidates::recruitment.labels.approval_note') }}"></textarea>
+            <div class="flex flex-col gap-3 p-4 lg:flex-row lg:items-end lg:justify-between">
+                <div class="min-w-0 flex-1">
+                    <x-label for="approvalNote">{{ __('candidates::recruitment.labels.approval_note') }}</x-label>
+                    <textarea wire:model="approvalNote" rows="2"
+                        class="mt-1 w-full rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 py-2 text-[12.5px] text-ink placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-0"
+                        placeholder="{{ __('candidates::recruitment.labels.approval_note') }}"></textarea>
                     @error('approvalNote') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
-                <div class="flex flex-wrap gap-2">
+                <div class="flex shrink-0 flex-wrap items-center gap-2">
                     @if (! in_array($requisition->approval_status, ['pending', 'approved'], true))
-                        <button type="button" wire:click="submitForApproval" class="inline-flex h-12 items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-950 hover:text-slate-950">
-                            {{ __('candidates::recruitment.actions.submit_for_approval') }}
-                        </button>
+                        <x-pill-button wire:click="submitForApproval">{{ __('candidates::recruitment.actions.submit_for_approval') }}</x-pill-button>
                     @endif
                     @if ($requisition->approval_status !== 'approved')
-                        <button type="button" wire:click="approve" class="inline-flex h-12 items-center justify-center rounded-2xl bg-slate-950 px-5 text-sm font-semibold text-white shadow-[0_18px_35px_-20px_rgba(15,23,42,0.8)] transition hover:bg-slate-800">
-                            {{ __('candidates::recruitment.actions.approve_requisition') }}
-                        </button>
+                        <x-pill-button variant="primary" wire:click="approve">{{ __('candidates::recruitment.actions.approve_requisition') }}</x-pill-button>
                     @endif
                     @if ($requisition->approval_status !== 'rejected')
-                        <button type="button" wire:click="reject" class="inline-flex h-12 items-center justify-center rounded-2xl border border-rose-200 bg-rose-50 px-5 text-sm font-semibold text-rose-700 transition hover:border-rose-300 hover:bg-rose-100">
-                            {{ __('candidates::recruitment.actions.reject_requisition') }}
-                        </button>
+                        <x-pill-button variant="danger" wire:click="reject">{{ __('candidates::recruitment.actions.reject_requisition') }}</x-pill-button>
                     @endif
                 </div>
             </div>
             @if ($requisition->approval_note)
-                <p class="mt-3 rounded-2xl bg-white px-4 py-3 text-sm leading-6 text-slate-600 shadow-sm ring-1 ring-slate-200">{{ $requisition->approval_note }}</p>
+                <p class="border-t border-hairline-subtle bg-[#fafafa] px-4 py-3 text-[12.5px] leading-relaxed text-ink-muted">{{ $requisition->approval_note }}</p>
             @endif
-        </div>
+        </section>
 
         @if ($requisition->note)
-            <div class="mt-6 rounded-[24px] border border-slate-200 bg-white p-5">
-                <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">{{ __('candidates::recruitment.labels.note') }}</div>
-                <p class="mt-3 text-sm leading-7 text-slate-600">{{ $requisition->note }}</p>
-            </div>
+            <section class="overflow-hidden rounded-2xl border border-hairline bg-white shadow-card">
+                <div class="border-b border-hairline-subtle px-4 py-3">
+                    <h2 class="hrm-eyebrow">{{ __('candidates::recruitment.labels.note') }}</h2>
+                </div>
+                <p class="px-4 py-3 text-[12.5px] leading-relaxed text-ink-muted">{{ $requisition->note }}</p>
+            </section>
         @endif
-    </section>
 
-    <section class="rounded-[32px] border border-slate-200 bg-white p-6 shadow-[0_28px_60px_-45px_rgba(15,23,42,0.35)]">
-        <div class="flex items-center justify-between">
-            <div>
-                <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">
-                    {{ __('candidates::recruitment.labels.openings_count') }}
-                </div>
-                <h2 class="mt-2 text-2xl font-semibold tracking-tight text-slate-900">
-                    {{ __('candidates::recruitment.titles.openings') }}
-                </h2>
+        <section class="overflow-hidden rounded-2xl border border-hairline bg-white shadow-card">
+            <div class="border-b border-hairline-subtle px-4 py-3">
+                <h2 class="text-[14px] font-semibold tracking-[-0.02em] text-ink">{{ __('candidates::recruitment.titles.openings') }}</h2>
             </div>
-        </div>
-
-        <div class="mt-6 grid gap-4 lg:grid-cols-2">
-            @forelse ($requisition->openings as $opening)
-                <a href="{{ route('candidates.openings.show', $opening) }}" class="rounded-[24px] border border-slate-200 bg-slate-50 p-5 transition hover:border-slate-300 hover:bg-white">
-                    <div class="flex flex-wrap items-center gap-2">
-                        <span class="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">{{ $this->recruitmentStatusLabel($opening->status) }}</span>
-                        <span class="inline-flex rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700">{{ (int) ($opening->getAttributes()['applications_count'] ?? 0) }} {{ __('candidates::recruitment.labels.applications') }}</span>
-                    </div>
-                    <h3 class="mt-4 text-xl font-semibold tracking-tight text-slate-900">{{ $opening->title }}</h3>
-                    <div class="mt-3 text-sm text-slate-500">{{ $opening->structure?->name ?? '—' }} · {{ $opening->position?->name ?? '—' }}</div>
-                    <div class="mt-4 flex items-center justify-between text-sm text-slate-500">
-                        <span>{{ optional($opening->published_at)->format('d.m.Y') ?? '—' }}</span>
-                        <span>{{ optional($opening->closes_at)->format('d.m.Y') ?? '—' }}</span>
-                    </div>
-                </a>
-            @empty
-                <div class="rounded-[24px] border border-dashed border-slate-200 bg-slate-50 p-6 text-sm text-slate-500">
-                    {{ __('candidates::recruitment.empty.openings') }}
-                </div>
-            @endforelse
-        </div>
-    </section>
+            <div class="grid gap-2 p-3 lg:grid-cols-2">
+                @forelse ($requisition->openings as $opening)
+                    <a href="{{ route('candidates.openings.show', $opening) }}" wire:navigate
+                        class="rounded-xl border border-hairline bg-[#fafafa] px-3.5 py-3 transition hover:border-zinc-300 hover:bg-white">
+                        <div class="flex flex-wrap items-center gap-1.5">
+                            <x-small-badge :mode="$this->recruitmentStatusTone($opening->status)" dot>{{ $this->recruitmentStatusLabel($opening->status) }}</x-small-badge>
+                            <x-small-badge mode="blue">{{ (int) ($opening->getAttributes()['applications_count'] ?? 0) }} {{ __('candidates::recruitment.labels.applications') }}</x-small-badge>
+                        </div>
+                        <h3 class="mt-2 truncate text-[14px] font-semibold tracking-[-0.02em] text-ink">{{ $opening->title }}</h3>
+                        <p class="mt-0.5 truncate text-[11.5px] text-ink-faint">{{ $opening->structure?->name ?? '—' }} · {{ $opening->position?->name ?? '—' }}</p>
+                        <div class="hrm-num mt-2 flex items-center justify-between text-[11px] text-ink-faint">
+                            <span>{{ optional($opening->published_at)->format('d.m.Y') ?? '—' }}</span>
+                            <span>{{ optional($opening->closes_at)->format('d.m.Y') ?? '—' }}</span>
+                        </div>
+                    </a>
+                @empty
+                    <p class="rounded-xl border border-dashed border-hairline bg-[#fafafa] px-4 py-6 text-center text-[12.5px] text-ink-faint lg:col-span-2">
+                        {{ __('candidates::recruitment.empty.openings') }}
+                    </p>
+                @endforelse
+            </div>
+        </section>
+    </div>
 </div>

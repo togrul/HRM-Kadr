@@ -4,6 +4,7 @@ namespace App\Modules\Personnel\Support\MyHr;
 
 use App\Models\Personnel;
 use App\Models\User;
+use App\Modules\Personnel\Livewire\MyHr\MyHrRequests;
 use App\Services\UserPersonnelLinkResolver;
 use Spatie\Permission\PermissionRegistrar;
 
@@ -24,6 +25,15 @@ class MyHrAccess
         'view-own-hierarchy',
     ];
 
+    /**
+     * User ids whose baseline has already been reconciled in this request. Without it the
+     * sync re-checks ten permissions on every canAccess() call, and a single page render
+     * asks that question a dozen times.
+     *
+     * @var array<int, true>
+     */
+    private array $syncedUserIds = [];
+
     public function __construct(
         private readonly UserPersonnelLinkResolver $resolver,
         private readonly PermissionRegistrar $permissionRegistrar,
@@ -38,6 +48,7 @@ class MyHrAccess
     public function canView(?User $user): bool
     {
         $user = $this->syncBaselinePermissions($user);
+
         return (bool) $user?->can('show-my-hr');
     }
 
@@ -46,6 +57,19 @@ class MyHrAccess
         $user = $this->syncBaselinePermissions($user);
 
         return (bool) $user?->can($permission);
+    }
+
+    /**
+     * The self-service request forms this user may start, in menu order.
+     *
+     * @return array<int, string>
+     */
+    public function allowedRequestForms(?User $user): array
+    {
+        return array_values(array_filter(
+            array_keys(MyHrRequests::CREATE_PERMISSIONS),
+            fn (string $form): bool => $this->canAccess($user, MyHrRequests::CREATE_PERMISSIONS[$form])
+        ));
     }
 
     public function resolvePersonnelId(?User $user): ?int
@@ -95,6 +119,12 @@ class MyHrAccess
         if (! $user) {
             return null;
         }
+
+        if (isset($this->syncedUserIds[$user->id])) {
+            return $user;
+        }
+
+        $this->syncedUserIds[$user->id] = true;
 
         $isSelfService = $user->hasRole(self::SELF_SERVICE_ROLE) || $user->can('show-my-hr');
         if (! $isSelfService) {

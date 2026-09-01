@@ -20,11 +20,10 @@
                 </div>
 
                 @can('manage-performance-evaluation')
-                    <button type="button" wire:click="openGoalForm"
-                        class="inline-flex h-12 items-center gap-2 rounded-2xl bg-zinc-900 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-zinc-800 active:scale-[0.98]">
-                        <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                    <x-pill-button variant="primary" class="shrink-0" wire:click="openGoalForm">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
                         {{ __('performance_evaluation::goals.actions.add') }}
-                    </button>
+                    </x-pill-button>
                 @endcan
             </div>
         @endif
@@ -32,7 +31,7 @@
 
     @if (! $hasCycles)
         {{-- ───────────── empty: no performance cycle ───────────── --}}
-        <div class="rounded-[28px] border border-zinc-200/70 bg-gradient-to-b from-white to-zinc-50/60 px-6 py-14 text-center shadow-sm">
+        <div class="rounded-2xl border border-zinc-200/70 bg-gradient-to-b from-white to-zinc-50/60 px-6 py-14 text-center shadow-sm">
             <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-zinc-900 text-white shadow-lg">
                 <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
             </div>
@@ -105,7 +104,7 @@
         </div>
 
         {{-- ───────────── goal tree ───────────── --}}
-        <div class="overflow-hidden rounded-3xl border border-zinc-200/70 bg-white shadow-sm">
+        <div class="overflow-hidden rounded-2xl border border-zinc-200/70 bg-white shadow-sm">
             @forelse ($this->tree as $node)
                 @include('performance-evaluation::livewire.performance-evaluation.partials.goal-node', ['node' => $node, 'depth' => 0])
             @empty
@@ -127,7 +126,7 @@
                 <div class="flex h-full flex-col">
                     <div class="mb-7">
                         <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-zinc-400">{{ __('performance_evaluation::goals.eyebrow') }}</p>
-                        <h2 class="mt-1.5 text-2xl font-semibold tracking-tight text-zinc-950">{{ __('performance_evaluation::goals.actions.add') }}</h2>
+                        <h2 class="mt-1.5 text-[18px] font-semibold tracking-tight text-zinc-950">{{ __('performance_evaluation::goals.actions.add') }}</h2>
                         <p class="mt-1.5 text-[13px] leading-6 text-zinc-500">{{ __('performance_evaluation::goals.subtitle') }}</p>
                     </div>
 
@@ -202,4 +201,5 @@
             @endif
         </x-side-modal>
     @endcan
+
 </div>

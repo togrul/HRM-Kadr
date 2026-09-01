@@ -130,13 +130,13 @@
         <div
             x-show="stackCount() > 0"
             x-cloak
-            class="absolute inset-x-1 top-2 h-[58px] rounded-xl border border-zinc-200 bg-white shadow-[0_8px_16px_rgba(15,23,42,0.08)]"
+            class="absolute inset-x-1 top-2 h-[58px] rounded-xl border border-zinc-200 bg-white shadow-card"
             style="opacity:.85"
         ></div>
         <div
             x-show="stackCount() > 1"
             x-cloak
-            class="absolute inset-x-2 top-3 h-[58px] rounded-xl border border-zinc-200 bg-white shadow-[0_8px_14px_rgba(15,23,42,0.06)]"
+            class="absolute inset-x-2 top-3 h-[58px] rounded-xl border border-zinc-200 bg-white shadow-card"
             style="opacity:.65"
         ></div>
 
@@ -151,7 +151,7 @@
             x-transition:leave-end="opacity-0 -translate-y-1 scale-[.99]"
             class="relative pointer-events-auto"
         >
-            <div class="rounded-xl border border-zinc-200 bg-white shadow-[0_10px_20px_rgba(15,23,42,0.10)] px-4 py-3">
+            <div class="rounded-xl border border-zinc-200 bg-white shadow-card px-4 py-3">
                 <div class="flex items-center gap-2.5">
                     <span class="inline-flex items-center justify-center shrink-0">
                         <svg x-show="topToast()?.variant === 'success'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-emerald-600">

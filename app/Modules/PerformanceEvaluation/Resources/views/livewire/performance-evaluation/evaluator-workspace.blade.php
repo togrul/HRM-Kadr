@@ -1,26 +1,35 @@
 <div class="flex flex-col space-y-4 px-6 py-4">
     <div class="flex items-center justify-between gap-3">
-        <a href="{{ $this->backUrl }}" class="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-700 shadow-sm transition hover:bg-zinc-50">
+        <x-pill-button :href="$this->backUrl">
             <span aria-hidden="true">←</span>
             <span>{{ __('performance_evaluation::dashboard.actions.back_to_performance_dashboard') }}</span>
-        </a>
+        </x-pill-button>
     </div>
 
     <x-surface-card :title="__('performance_evaluation::dashboard.cards.evaluator_workspace')" icon="icons.performance-icon">
         <div class="space-y-4">
             <div class="grid gap-3 md:grid-cols-3">
-                <div class="rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3">
-                    <p class="text-[11px] font-semibold uppercase text-sky-700">{{ __('performance_evaluation::dashboard.labels.evaluator_summary_total') }}</p>
-                    <p class="mt-1 text-2xl font-semibold text-sky-900">{{ $this->assignedFormsSummary['total'] }}</p>
-                </div>
-                <div class="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
-                    <p class="text-[11px] font-semibold uppercase text-amber-700">{{ __('performance_evaluation::dashboard.labels.evaluator_summary_pending') }}</p>
-                    <p class="mt-1 text-2xl font-semibold text-amber-900">{{ $this->assignedFormsSummary['pending'] }}</p>
-                </div>
-                <div class="rounded-2xl border border-violet-200 bg-violet-50 px-4 py-3">
-                    <p class="text-[11px] font-semibold uppercase text-violet-700">{{ __('performance_evaluation::dashboard.labels.evaluator_summary_reviews') }}</p>
-                    <p class="mt-1 text-2xl font-semibold text-violet-900">{{ $this->assignedFormsSummary['reviews'] }}</p>
-                </div>
+                <div class="rounded-xl border border-hairline bg-white px-4 py-3">
+                        <div class="flex items-center justify-between gap-2">
+                            <p class="hrm-eyebrow">{{ __('performance_evaluation::dashboard.labels.evaluator_summary_total') }}</p>
+                            <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-[#0ea5e9]"></span>
+                        </div>
+                        <p class="hrm-num mt-1.5 text-[21px] font-semibold tracking-[-0.03em] text-ink">{{ $this->assignedFormsSummary['total'] }}</p>
+                    </div>
+                <div class="rounded-xl border border-hairline bg-white px-4 py-3">
+                        <div class="flex items-center justify-between gap-2">
+                            <p class="hrm-eyebrow">{{ __('performance_evaluation::dashboard.labels.evaluator_summary_pending') }}</p>
+                            <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-[#f59e0b]"></span>
+                        </div>
+                        <p class="hrm-num mt-1.5 text-[21px] font-semibold tracking-[-0.03em] text-ink">{{ $this->assignedFormsSummary['pending'] }}</p>
+                    </div>
+                <div class="rounded-xl border border-hairline bg-white px-4 py-3">
+                        <div class="flex items-center justify-between gap-2">
+                            <p class="hrm-eyebrow">{{ __('performance_evaluation::dashboard.labels.evaluator_summary_reviews') }}</p>
+                            <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-[#8b5cf6]"></span>
+                        </div>
+                        <p class="hrm-num mt-1.5 text-[21px] font-semibold tracking-[-0.03em] text-ink">{{ $this->assignedFormsSummary['reviews'] }}</p>
+                    </div>
             </div>
         </div>
     </x-surface-card>
@@ -29,7 +38,7 @@
         <div class="space-y-4">
             <x-surface-card :title="__('performance_evaluation::dashboard.cards.assigned_forms')" icon="icons.profile-icon" bodyClass="overflow-visible" contentClass="overflow-visible p-4">
                 <div class="space-y-4">
-                    <div class="rounded-3xl border border-zinc-200 bg-gradient-to-b from-zinc-50 to-white p-4">
+                    <div class="rounded-2xl border border-zinc-200 bg-gradient-to-b from-zinc-50 to-white p-4">
                         <div class="space-y-4">
                             <div>
                                 <x-label for="assigned-form-search">{{ __('performance_evaluation::dashboard.fields.search') }}</x-label>
@@ -107,7 +116,7 @@
         <div class="space-y-4">
             <x-surface-card :title="__('performance_evaluation::dashboard.cards.assigned_reviews')" icon="icons.comment-icon" bodyClass="overflow-visible" contentClass="overflow-visible p-4">
                 <div class="space-y-4">
-                    <div class="rounded-3xl border border-zinc-200 bg-gradient-to-b from-zinc-50 to-white p-4">
+                    <div class="rounded-2xl border border-zinc-200 bg-gradient-to-b from-zinc-50 to-white p-4">
                         <div class="space-y-4">
                             <div>
                                 <x-label for="pending-answer-search">{{ __('performance_evaluation::dashboard.fields.search') }}</x-label>
@@ -159,7 +168,7 @@
 
                     <div>
                         <x-label for="assigned-review-feedback">{{ __('performance_evaluation::dashboard.fields.feedback') }}</x-label>
-                        <textarea id="assigned-review-feedback" wire:model.defer="reviewForm.feedback" class="min-h-24 w-full rounded-lg border-none bg-neutral-100 px-3 py-2 text-sm shadow-sm focus:ring-blue-500"></textarea>
+                        <x-ui.textarea id="assigned-review-feedback" wire:model.defer="reviewForm.feedback" :rows="4" />
                         @error('reviewForm.feedback') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
 

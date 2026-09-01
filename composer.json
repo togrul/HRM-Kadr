@@ -69,11 +69,11 @@
         "ci:ui-icon-smoke": [
             "@php artisan test tests/Unit/Architecture/CriticalActionIconsSmokeTest.php"
         ],
-        "ci:orders-template-gate": [
+        "ci:orders-gate": [
             "@ci:blaze-safe-lint",
             "@ci:ui-icon-smoke",
-            "@php artisan orders:templates:metrics --json --min-total=1",
-            "@php artisan orders:templates:query-budget --json --allow-empty"
+            "@php artisan orders:list-query-budget --json --allow-empty",
+            "@php artisan test tests/Feature/Console/OrdersListQueryBudgetCommandTest.php"
         ],
         "ci:attendance-gate": [
             "@ci:blaze-safe-lint",

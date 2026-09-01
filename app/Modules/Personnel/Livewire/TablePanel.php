@@ -30,11 +30,13 @@ class TablePanel extends Component
 
     public ?int $selectedPosition = null;
 
+    public string $search = '';
+
     protected ?array $accessibleStructureCache = null;
 
     protected ?array $rowActionCapabilities = null;
 
-    public function mount(string $status = 'current', array $filters = [], array $structure = [], ?int $selectedPosition = null): void
+    public function mount(string $status = 'current', array $filters = [], array $structure = [], ?int $selectedPosition = null, string $search = ''): void
     {
         $this->authorize('viewAny', Personnel::class);
         $normalizer = app(PersonnelListStateNormalizer::class);
@@ -43,6 +45,7 @@ class TablePanel extends Component
         $this->filters = $normalizer->normalizeFilters($filters);
         $this->structure = $normalizer->normalizeStructure($structure);
         $this->selectedPosition = $normalizer->normalizePosition($selectedPosition);
+        $this->search = trim($search);
     }
 
     public function placeholder()
@@ -67,11 +70,10 @@ class TablePanel extends Component
     public function getTableHeaders(): array
     {
         return [
-            __('personnel::common.labels.number'),
-            __('personnel::common.labels.tabel'),
             __('personnel::common.labels.fullname'),
-            __('personnel::common.labels.structure'),
-            __('personnel::common.labels.date'),
+            __('personnel::common.labels.position'),
+            __('ui::common.labels.status'),
+            __('personnel::common.labels.join_date'),
             __('services::common.labels.action'),
         ];
     }
@@ -91,7 +93,10 @@ class TablePanel extends Component
             selectedStructureIds: $this->structure,
             accessibleStructureIds: $this->accessibleStructureIds(),
             selectedPosition: $this->selectedPosition,
-            withStructureTree: true
+            // The row decorator resolves ancestor labels from one flat org-chart read,
+            // so preloading the parent chain would just re-fetch it a level at a time.
+            withStructureTree: false,
+            search: $this->search,
         );
     }
 

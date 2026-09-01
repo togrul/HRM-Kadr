@@ -270,7 +270,7 @@
                     <input type="file" wire:model="uploadedDocx" accept=".docx,.doc"
                         class="text-sm text-zinc-600 file:mr-3 file:rounded-lg file:border-0 file:bg-zinc-900 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-zinc-700">
                     <x-button mode="black" wire:click="uploadDocx" wire:loading.attr="disabled" wire:target="uploadDocx,uploadedDocx"
-                        @disabled(! $uploadedDocx)>
+                        :disabled="! $uploadedDocx">
                         <span wire:loading.remove wire:target="uploadDocx,uploadedDocx">{{ __('orders::order_composer.actions.upload_replace') }}</span>
                         <span wire:loading wire:target="uploadDocx,uploadedDocx">…</span>
                     </x-button>

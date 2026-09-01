@@ -10,11 +10,12 @@ class AttendanceCalendarManagementService
 {
     /**
      * @param  array<string,mixed>  $payload
+     *
      * @throws ValidationException
      */
     public function upsert(array $payload, int $userId, ?AttendanceCalendar $calendar = null): AttendanceCalendar
     {
-        $calendar ??= new AttendanceCalendar();
+        $calendar ??= new AttendanceCalendar;
 
         $scopeType = (string) ($payload['scope_type'] ?? 'global');
         $scopeId = $scopeType === 'structure' && is_numeric($payload['scope_id'] ?? null)

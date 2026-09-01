@@ -4,15 +4,19 @@ namespace App\Services\Orders\Document\Effects;
 
 use App\Models\OrderLog;
 use App\Models\Personnel;
+use App\Modules\Compensation\Application\Services\CompensationService;
 
 /**
  * Moves the employee: updates structure and/or position to the new ones chosen on the
  * order (list-bound fields submit the target record id). Before moving, the employee's
  * current structure/position are recorded in the order snapshot so the move can be
- * rolled back if the order is later cancelled.
+ * rolled back if the order is later cancelled. A pay-grade match for the new position
+ * also seeds a draft regrade compensation for HR review.
  */
 class TransferEffect implements OrderEffect
 {
+    public function __construct(private readonly CompensationService $compensation) {}
+
     public function apply(OrderLog $order, array $fields, Personnel $personnel): void
     {
         $update = [];
@@ -34,6 +38,10 @@ class TransferEffect implements OrderEffect
         ]);
 
         $personnel->forceFill($update)->save();
+
+        if (! empty($fields['new_position'])) {
+            $this->compensation->suggestRegradeFromTransfer($personnel->tabel_no, (int) $fields['new_position'], $order->order_no);
+        }
     }
 
     public function reverse(OrderLog $order, array $fields, Personnel $personnel): void
@@ -51,6 +59,8 @@ class TransferEffect implements OrderEffect
         if ($restore !== []) {
             $personnel->forceFill($restore)->save();
         }
+
+        $this->compensation->removeTransferSuggestion($order->order_no);
     }
 
     /**

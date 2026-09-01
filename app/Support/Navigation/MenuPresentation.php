@@ -45,6 +45,7 @@ class MenuPresentation
     {
         return [
             'home' => 'personnel',
+            'personnel.index' => 'personnel',
             'my-hr' => 'personnel',
             'self-service-reviews' => 'personnel',
             'onboarding-library' => 'onboarding-library',

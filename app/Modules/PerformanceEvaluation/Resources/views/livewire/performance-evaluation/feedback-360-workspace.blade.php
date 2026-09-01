@@ -14,18 +14,27 @@
             <p class="text-[11px] font-semibold uppercase text-zinc-500">{{ __('performance_evaluation::feedback.stats.requests') }}</p>
             <p class="mt-1 text-2xl font-semibold text-zinc-900">{{ $this->summary['requests'] }}</p>
         </div>
-        <div class="rounded-xl border border-sky-200 bg-sky-50 px-4 py-3">
-            <p class="text-[11px] font-semibold uppercase text-sky-700">{{ __('performance_evaluation::feedback.stats.collecting') }}</p>
-            <p class="mt-1 text-2xl font-semibold text-sky-900">{{ $this->summary['collecting'] }}</p>
-        </div>
-        <div class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
-            <p class="text-[11px] font-semibold uppercase text-amber-700">{{ __('performance_evaluation::feedback.stats.calibrating') }}</p>
-            <p class="mt-1 text-2xl font-semibold text-amber-900">{{ $this->summary['calibrating'] }}</p>
-        </div>
-        <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
-            <p class="text-[11px] font-semibold uppercase text-emerald-700">{{ __('performance_evaluation::feedback.stats.closed') }}</p>
-            <p class="mt-1 text-2xl font-semibold text-emerald-900">{{ $this->summary['closed'] }}</p>
-        </div>
+        <div class="rounded-xl border border-hairline bg-white px-4 py-3">
+                        <div class="flex items-center justify-between gap-2">
+                            <p class="hrm-eyebrow">{{ __('performance_evaluation::feedback.stats.collecting') }}</p>
+                            <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-[#0ea5e9]"></span>
+                        </div>
+                        <p class="hrm-num mt-1.5 text-[21px] font-semibold tracking-[-0.03em] text-ink">{{ $this->summary['collecting'] }}</p>
+                    </div>
+        <div class="rounded-xl border border-hairline bg-white px-4 py-3">
+                        <div class="flex items-center justify-between gap-2">
+                            <p class="hrm-eyebrow">{{ __('performance_evaluation::feedback.stats.calibrating') }}</p>
+                            <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-[#f59e0b]"></span>
+                        </div>
+                        <p class="hrm-num mt-1.5 text-[21px] font-semibold tracking-[-0.03em] text-ink">{{ $this->summary['calibrating'] }}</p>
+                    </div>
+        <div class="rounded-xl border border-hairline bg-white px-4 py-3">
+                        <div class="flex items-center justify-between gap-2">
+                            <p class="hrm-eyebrow">{{ __('performance_evaluation::feedback.stats.closed') }}</p>
+                            <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-[#10b981]"></span>
+                        </div>
+                        <p class="hrm-num mt-1.5 text-[21px] font-semibold tracking-[-0.03em] text-ink">{{ $this->summary['closed'] }}</p>
+                    </div>
     </div>
 
     {{-- ═════════════ LIST ═════════════ --}}
@@ -114,7 +123,7 @@
 
     {{-- ═════════════ DETAIL ═════════════ --}}
     @if ($section === 'detail' && $this->activeRequest)
-        @php($request = $this->activeRequest)
+        @php $request = $this->activeRequest; @endphp
         <div class="rounded-xl border border-zinc-200 bg-white px-4 py-4">
             <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
                 <div>
@@ -217,8 +226,8 @@
 
     {{-- ═════════════ CALIBRATE ═════════════ --}}
     @if ($section === 'calibrate' && $this->activeRequest)
-        @php($request = $this->activeRequest)
-        @php($aggregate = $this->aggregate)
+        @php $request = $this->activeRequest; @endphp
+        @php $aggregate = $this->aggregate; @endphp
         <div class="rounded-xl border border-zinc-200 bg-white px-4 py-4">
             <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
                 <div>
@@ -276,7 +285,7 @@
 
             <div class="mt-4">
                 <x-label value="{{ __('performance_evaluation::feedback.calibrate.note') }}" />
-                <x-textarea mode="gray" name="calibrationNote" wire:model="calibrationNote" @disabled($request->status === 'closed')></x-textarea>
+                <x-textarea mode="gray" name="calibrationNote" wire:model="calibrationNote" :disabled="$request->status === 'closed'"></x-textarea>
             </div>
 
             @can('manage-performance-evaluation')
@@ -300,7 +309,7 @@
                 <div class="flex h-full flex-col">
                     <div class="mb-7">
                         <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-zinc-400">{{ __('performance_evaluation::feedback.eyebrow') }}</p>
-                        <h2 class="mt-1.5 text-2xl font-semibold tracking-tight text-zinc-950">{{ __('performance_evaluation::feedback.actions.new_request') }}</h2>
+                        <h2 class="mt-1.5 text-[18px] font-semibold tracking-tight text-zinc-950">{{ __('performance_evaluation::feedback.actions.new_request') }}</h2>
                     </div>
                     <div class="grid grid-cols-1 gap-5">
                         <div>
@@ -357,7 +366,7 @@
                 <div class="flex h-full flex-col">
                     <div class="mb-7">
                         <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-zinc-400">{{ __('performance_evaluation::feedback.eyebrow') }}</p>
-                        <h2 class="mt-1.5 text-2xl font-semibold tracking-tight text-zinc-950">{{ __('performance_evaluation::feedback.actions.enter_scores') }}</h2>
+                        <h2 class="mt-1.5 text-[18px] font-semibold tracking-tight text-zinc-950">{{ __('performance_evaluation::feedback.actions.enter_scores') }}</h2>
                     </div>
                     <div class="flex-1 space-y-4 overflow-y-auto">
                         @forelse ($this->templateItems as $item)
@@ -387,4 +396,5 @@
             @endif
         </x-side-modal>
     @endcan
+
 </div>

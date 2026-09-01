@@ -2,29 +2,44 @@
     <x-surface-card :title="__('performance_evaluation::dashboard.cards.reports')" icon="icons.pending-icon">
         <div class="space-y-5">
             <div class="grid gap-3 md:grid-cols-5">
-                <div class="rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3">
-                    <p class="text-[11px] font-semibold uppercase text-sky-700">{{ __('performance_evaluation::dashboard.fields.forms_count') }}</p>
-                    <p class="mt-1 text-2xl font-semibold text-sky-900">{{ $this->reportStats['forms'] }}</p>
-                </div>
-                <div class="rounded-2xl border border-violet-200 bg-violet-50 px-4 py-3">
-                    <p class="text-[11px] font-semibold uppercase text-violet-700">{{ __('performance_evaluation::dashboard.fields.links_count') }}</p>
-                    <p class="mt-1 text-2xl font-semibold text-violet-900">{{ $this->reportStats['weak_links'] }}</p>
-                </div>
-                <div class="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
-                    <p class="text-[11px] font-semibold uppercase text-amber-700">{{ __('performance_evaluation::dashboard.fields.test_sessions_count') }}</p>
-                    <p class="mt-1 text-2xl font-semibold text-amber-900">{{ $this->reportStats['test_sessions'] }}</p>
-                </div>
-                <div class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3">
-                    <p class="text-[11px] font-semibold uppercase text-emerald-700">{{ __('performance_evaluation::dashboard.fields.test_attempts_count') }}</p>
-                    <p class="mt-1 text-2xl font-semibold text-emerald-900">{{ $this->reportStats['test_attempts'] }}</p>
-                </div>
-                <div class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3">
-                    <p class="text-[11px] font-semibold uppercase text-rose-700">{{ __('performance_evaluation::dashboard.fields.test_answers_count') }}</p>
-                    <p class="mt-1 text-2xl font-semibold text-rose-900">{{ $this->reportStats['test_answers'] }}</p>
-                </div>
+                <div class="rounded-xl border border-hairline bg-white px-4 py-3">
+                        <div class="flex items-center justify-between gap-2">
+                            <p class="hrm-eyebrow">{{ __('performance_evaluation::dashboard.fields.forms_count') }}</p>
+                            <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-[#0ea5e9]"></span>
+                        </div>
+                        <p class="hrm-num mt-1.5 text-[21px] font-semibold tracking-[-0.03em] text-ink">{{ $this->reportStats['forms'] }}</p>
+                    </div>
+                <div class="rounded-xl border border-hairline bg-white px-4 py-3">
+                        <div class="flex items-center justify-between gap-2">
+                            <p class="hrm-eyebrow">{{ __('performance_evaluation::dashboard.fields.links_count') }}</p>
+                            <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-[#8b5cf6]"></span>
+                        </div>
+                        <p class="hrm-num mt-1.5 text-[21px] font-semibold tracking-[-0.03em] text-ink">{{ $this->reportStats['weak_links'] }}</p>
+                    </div>
+                <div class="rounded-xl border border-hairline bg-white px-4 py-3">
+                        <div class="flex items-center justify-between gap-2">
+                            <p class="hrm-eyebrow">{{ __('performance_evaluation::dashboard.fields.test_sessions_count') }}</p>
+                            <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-[#f59e0b]"></span>
+                        </div>
+                        <p class="hrm-num mt-1.5 text-[21px] font-semibold tracking-[-0.03em] text-ink">{{ $this->reportStats['test_sessions'] }}</p>
+                    </div>
+                <div class="rounded-xl border border-hairline bg-white px-4 py-3">
+                        <div class="flex items-center justify-between gap-2">
+                            <p class="hrm-eyebrow">{{ __('performance_evaluation::dashboard.fields.test_attempts_count') }}</p>
+                            <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-[#10b981]"></span>
+                        </div>
+                        <p class="hrm-num mt-1.5 text-[21px] font-semibold tracking-[-0.03em] text-ink">{{ $this->reportStats['test_attempts'] }}</p>
+                    </div>
+                <div class="rounded-xl border border-hairline bg-white px-4 py-3">
+                        <div class="flex items-center justify-between gap-2">
+                            <p class="hrm-eyebrow">{{ __('performance_evaluation::dashboard.fields.test_answers_count') }}</p>
+                            <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-[#f43f5e]"></span>
+                        </div>
+                        <p class="hrm-num mt-1.5 text-[21px] font-semibold tracking-[-0.03em] text-ink">{{ $this->reportStats['test_answers'] }}</p>
+                    </div>
             </div>
 
-            <div class="rounded-3xl border border-zinc-200 bg-zinc-50 p-4">
+            <div class="rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
                 <div class="grid gap-3 lg:grid-cols-3">
                     <div class="space-y-2">
                         <p class="text-sm font-semibold text-zinc-900">{{ __('performance_evaluation::dashboard.cards.reporting_summary') }}</p>
@@ -50,9 +65,9 @@
                         <p class="text-sm font-semibold text-zinc-900">{{ __('performance_evaluation::dashboard.cards.print_reports') }}</p>
                         <p class="text-xs leading-6 text-zinc-500">{{ __('performance_evaluation::dashboard.labels.print_report_hint') }}</p>
                         <div class="flex flex-wrap gap-2">
-                            <a href="{{ route('performance-evaluation.print-summary') }}" target="_blank" class="inline-flex h-11 items-center justify-center rounded-2xl bg-zinc-900 px-4 text-sm font-medium text-white">
+                            <x-button type="link" mode="black" href="{{ route('performance-evaluation.print-summary') }}" target="_blank">
                                 {{ __('performance_evaluation::dashboard.actions.open_print_summary') }}
-                            </a>
+                            </x-button>
                         </div>
                     </div>
                 </div>

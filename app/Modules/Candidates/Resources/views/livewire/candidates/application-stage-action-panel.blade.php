@@ -1,10 +1,10 @@
-<section class="rounded-[32px] border border-slate-200 bg-white p-6 shadow-[0_28px_60px_-45px_rgba(15,23,42,0.35)]">
+<section class="rounded-[32px] border border-slate-200 bg-white p-6 shadow-overlay">
     <div class="flex items-center justify-between">
         <div>
             <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">
                 {{ __('candidates::recruitment.titles.stage_actions') }}
             </div>
-            <h2 class="mt-2 text-2xl font-semibold tracking-tight text-slate-900">
+            <h2 class="mt-2 text-[18px] font-semibold tracking-tight text-slate-900">
                 {{ __('candidates::recruitment.titles.stage_actions') }}
             </h2>
         </div>

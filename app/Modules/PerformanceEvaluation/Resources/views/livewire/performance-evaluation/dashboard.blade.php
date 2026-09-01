@@ -1,113 +1,133 @@
-<div class="flex flex-col space-y-4 px-6 py-4">
-    <x-surface-card :title="__('performance_evaluation::dashboard.title')" icon="icons.performance-icon">
-        <div class="space-y-4">
-            <div class="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
-                <div class="space-y-1">
-                    <p class="text-[11px] font-semibold uppercase text-zinc-400">{{ __('performance_evaluation::dashboard.workspace.title') }}</p>
-                    <p class="max-w-3xl text-sm text-zinc-500">{{ __('performance_evaluation::dashboard.workspace.description') }}</p>
-                    <div class="pt-2">
-                        <a
-                            href="{{ route('docs.guide', ['focus' => 'performance']) }}#performance-module"
-                            class="inline-flex items-center justify-center rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-800 transition hover:border-emerald-300 hover:bg-emerald-100"
-                        >
-                            {{ __('performance_evaluation::dashboard.actions.open_user_guide') }}
-                        </a>
+@php
+    $contextTabs = ['overview', 'goals', 'succession', 'feedback', 'cycles', 'templates', 'evaluations', 'tests', 'reports', 'lists'];
+    $stats = $this->stats;
+    $cycle = $this->activeCycle;
+
+    // A number only where it is unambiguously that tab's row count, and only when non-zero.
+    $tabCounts = array_filter([
+        'cycles' => (int) $stats['cycles'],
+        'templates' => (int) $stats['templates'],
+        'evaluations' => (int) $stats['forms'],
+    ]);
+@endphp
+
+<div class="flex flex-col">
+    {{-- ===================== contextual panel ===================== --}}
+    <x-slot name="sidebar"><div id="hrm-context-panel"></div></x-slot>
+
+    @teleport('#hrm-context-panel')
+        <x-context-panel
+            :title="__('performance_evaluation::dashboard.panel.title')"
+            :subtitle="$cycle['name'] ?? null"
+        >
+            <x-context-panel.section :title="__('performance_evaluation::dashboard.sections.title')">
+                @foreach ($contextTabs as $tab)
+                    <x-context-panel.item
+                        wire:key="performance-panel-tab-{{ $tab }}"
+                        wire:click.prevent="switchTab('{{ $tab }}')"
+                        wire:loading.attr="disabled"
+                        wire:target="switchTab"
+                        :active="$activeTab === $tab"
+                        :count="$tabCounts[$tab] ?? null"
+                    >{{ __('performance_evaluation::dashboard.tabs.'.$tab) }}</x-context-panel.item>
+                @endforeach
+            </x-context-panel.section>
+
+            @if ($cycle)
+                <x-context-panel.section :title="__('performance_evaluation::dashboard.panel.active_cycle')" :padded="false">
+                    <div class="px-3.5 pb-3.5 pt-1">
+                        <p class="truncate text-[13px] font-semibold tracking-[-0.02em] text-ink">{{ $cycle['name'] }}</p>
+                        <p class="hrm-num mt-0.5 text-[11px] text-ink-faint">{{ $cycle['period'] }}</p>
+                        <div class="mt-2 flex items-center gap-2">
+                            <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-[#f4f4f5]">
+                                <div class="h-full rounded-full bg-ink" style="width: {{ $cycle['percent'] }}%"></div>
+                            </div>
+                            <span class="hrm-num shrink-0 text-[11px] font-semibold text-ink">{{ $cycle['percent'] }}%</span>
+                        </div>
+                        <p class="mt-1.5 text-[11px] text-ink-faint">
+                            {{ __('performance_evaluation::dashboard.panel.cycle_progress_note', ['scored' => $cycle['scored'], 'total' => $cycle['forms']]) }}
+                        </p>
                     </div>
-                </div>
+                </x-context-panel.section>
+            @endif
+        </x-context-panel>
+    @endteleport
 
-                <div class="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
-                    <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
-                        <p class="text-[11px] font-semibold uppercase text-emerald-700">{{ __('performance_evaluation::dashboard.stats.cycles') }}</p>
-                        <p class="mt-1 text-2xl font-semibold text-emerald-900">{{ $this->stats['cycles'] }}</p>
-                    </div>
-                    <div class="rounded-xl border border-sky-200 bg-sky-50 px-4 py-3">
-                        <p class="text-[11px] font-semibold uppercase text-sky-700">{{ __('performance_evaluation::dashboard.stats.templates') }}</p>
-                        <p class="mt-1 text-2xl font-semibold text-sky-900">{{ $this->stats['templates'] }}</p>
-                    </div>
-                    <div class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
-                        <p class="text-[11px] font-semibold uppercase text-amber-700">{{ __('performance_evaluation::dashboard.stats.forms') }}</p>
-                        <p class="mt-1 text-2xl font-semibold text-amber-900">{{ $this->stats['forms'] }}</p>
-                    </div>
-                    <div class="rounded-xl border border-violet-200 bg-violet-50 px-4 py-3">
-                        <p class="text-[11px] font-semibold uppercase text-violet-700">{{ __('performance_evaluation::dashboard.stats.links') }}</p>
-                        <p class="mt-1 text-2xl font-semibold text-violet-900">{{ $this->stats['links'] }}</p>
-                    </div>
-                </div>
-            </div>
+    {{-- ===================== header ===================== --}}
+    <x-page-header
+        :title="__('performance_evaluation::dashboard.title')"
+        :breadcrumb="__('performance_evaluation::dashboard.panel.title')"
+    >
+        <x-slot:icon>
+            <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+        </x-slot:icon>
 
-            <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-3">
-                <div class="mb-2 flex items-center justify-between gap-2">
-                    <p class="text-[11px] font-semibold uppercase text-zinc-400">{{ __('performance_evaluation::dashboard.sections.title') }}</p>
-                    <span class="text-xs text-zinc-500">{{ __('performance_evaluation::dashboard.sections.description') }}</span>
-                </div>
+        <x-slot:stats>
+            <x-page-header.stat :value="$stats['forms']" :label="__('performance_evaluation::dashboard.stats.forms')" />
+            <x-page-header.stat :value="$this->scoreDistribution['average']" :label="__('performance_evaluation::dashboard.stats.scores')" />
+            <x-page-header.stat :value="$stats['links']" :label="__('performance_evaluation::dashboard.stats.links')" tone="amber" />
+        </x-slot:stats>
 
-                <x-filter.nav class="min-w-0">
-                    <x-filter.item wire:click.prevent="switchTab('overview')" :active="$activeTab === 'overview'">
-                        {{ __('performance_evaluation::dashboard.tabs.overview') }}
-                    </x-filter.item>
-                    <x-filter.item wire:click.prevent="switchTab('goals')" :active="$activeTab === 'goals'">
-                        {{ __('performance_evaluation::dashboard.tabs.goals') }}
-                    </x-filter.item>
-                    <x-filter.item wire:click.prevent="switchTab('succession')" :active="$activeTab === 'succession'">
-                        {{ __('performance_evaluation::dashboard.tabs.succession') }}
-                    </x-filter.item>
-                    <x-filter.item wire:click.prevent="switchTab('feedback')" :active="$activeTab === 'feedback'">
-                        {{ __('performance_evaluation::dashboard.tabs.feedback') }}
-                    </x-filter.item>
-                    <x-filter.item wire:click.prevent="switchTab('cycles')" :active="$activeTab === 'cycles'">
-                        {{ __('performance_evaluation::dashboard.tabs.cycles') }}
-                    </x-filter.item>
-                    <x-filter.item wire:click.prevent="switchTab('templates')" :active="$activeTab === 'templates'">
-                        {{ __('performance_evaluation::dashboard.tabs.templates') }}
-                    </x-filter.item>
-                    <x-filter.item wire:click.prevent="switchTab('evaluations')" :active="$activeTab === 'evaluations'">
-                        {{ __('performance_evaluation::dashboard.tabs.evaluations') }}
-                    </x-filter.item>
-                    <x-filter.item wire:click.prevent="switchTab('tests')" :active="$activeTab === 'tests'">
-                        {{ __('performance_evaluation::dashboard.tabs.tests') }}
-                    </x-filter.item>
-                    <x-filter.item wire:click.prevent="switchTab('reports')" :active="$activeTab === 'reports'">
-                        {{ __('performance_evaluation::dashboard.tabs.reports') }}
-                    </x-filter.item>
-                    <x-filter.item wire:click.prevent="switchTab('lists')" :active="$activeTab === 'lists'">
-                        {{ __('performance_evaluation::dashboard.tabs.lists') }}
-                    </x-filter.item>
-                </x-filter.nav>
-            </div>
-        </div>
-    </x-surface-card>
+        <x-slot:actions>
+            <x-pill-button wire:click.prevent="switchTab('templates')" wire:loading.attr="disabled" wire:target="switchTab">
+                {{ __('performance_evaluation::dashboard.panel.new_template') }}
+            </x-pill-button>
 
-    @if ($activeTab === 'overview')
-        <livewire:performance-evaluation.overview lazy />
-    @endif
+            <x-pill-button :href="route('performance-evaluation.print-summary')" target="_blank" :icon="true"
+                title="{{ __('performance_evaluation::dashboard.actions.open_print_summary') }}">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
+            </x-pill-button>
 
-    @if ($activeTab === 'goals')
-        <livewire:performance-evaluation.goals-workspace lazy />
-    @endif
+            <x-pill-button variant="primary" wire:click.prevent="switchTab('evaluations')" wire:loading.attr="disabled" wire:target="switchTab">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                {{ __('performance_evaluation::dashboard.panel.assign_form') }}
+            </x-pill-button>
+        </x-slot:actions>
 
-    @if ($activeTab === 'succession')
-        <livewire:performance-evaluation.succession-workspace lazy />
-    @endif
+        {{-- small-screen fallback for the panel's section list --}}
+        <x-filter.nav wrap class="min-w-0 lg:hidden">
+            @foreach ($contextTabs as $tab)
+                <x-filter.item
+                    wire:key="performance-chip-{{ $tab }}"
+                    wire:click.prevent="switchTab('{{ $tab }}')"
+                    :active="$activeTab === $tab"
+                >{{ __('performance_evaluation::dashboard.tabs.'.$tab) }}</x-filter.item>
+            @endforeach
+        </x-filter.nav>
+    </x-page-header>
 
-    @if ($activeTab === 'feedback')
-        <livewire:performance-evaluation.feedback-360-workspace lazy />
-    @endif
+    {{-- ===================== body ===================== --}}
+    <div class="px-4 py-4 sm:px-5">
+        @if ($activeTab === 'overview')
+            <livewire:performance-evaluation.overview lazy />
+        @endif
 
-    @if (in_array($activeTab, ['cycles', 'templates'], true))
-        <livewire:performance-evaluation.foundation-workspace :tab="$activeTab" :key="'performance-evaluation-foundation-'.$activeTab" lazy />
-    @endif
+        @if ($activeTab === 'goals')
+            <livewire:performance-evaluation.goals-workspace lazy />
+        @endif
 
-    @if (in_array($activeTab, ['evaluations', 'tests'], true))
-        <livewire:performance-evaluation.operations-workspace :tab="$activeTab" :tests-view="request()->query('tests_view')" :key="'performance-evaluation-operations-'.$activeTab.'-'.request()->query('tests_view', 'banks')" lazy />
-    @endif
+        @if ($activeTab === 'succession')
+            <livewire:performance-evaluation.succession-workspace lazy />
+        @endif
 
-    @if ($activeTab === 'reports')
-        <livewire:performance-evaluation.reports lazy />
-    @endif
+        @if ($activeTab === 'feedback')
+            <livewire:performance-evaluation.feedback-360-workspace lazy />
+        @endif
 
-    @if ($activeTab === 'lists')
-        <livewire:performance-evaluation.lists lazy />
-    @endif
+        @if (in_array($activeTab, ['cycles', 'templates'], true))
+            <livewire:performance-evaluation.foundation-workspace :tab="$activeTab" :key="'performance-evaluation-foundation-'.$activeTab" lazy />
+        @endif
 
-    <x-ui.delete-confirmation-modal />
+        @if (in_array($activeTab, ['evaluations', 'tests'], true))
+            <livewire:performance-evaluation.operations-workspace :tab="$activeTab" :tests-view="request()->query('tests_view')" :key="'performance-evaluation-operations-'.$activeTab.'-'.request()->query('tests_view', 'banks')" lazy />
+        @endif
+
+        @if ($activeTab === 'reports')
+            <livewire:performance-evaluation.reports lazy />
+        @endif
+
+        @if ($activeTab === 'lists')
+            <livewire:performance-evaluation.lists lazy />
+        @endif
+    </div>
 </div>

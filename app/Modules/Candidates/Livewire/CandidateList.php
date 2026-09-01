@@ -3,24 +3,24 @@
 namespace App\Modules\Candidates\Livewire;
 
 use App\Concerns\LoadsAppealStatuses;
-use App\Modules\Candidates\Exports\CandidateExport;
-use App\Modules\Candidates\Support\CandidateModeResolver;
-use App\Modules\Candidates\Support\Traits\InteractsWithRecruitmentPresentation;
 use App\Livewire\Traits\SideModalAction;
-use App\Models\Setting;
 use App\Models\Candidate;
 use App\Models\CandidateApplication;
 use App\Models\CandidateDocument;
 use App\Models\JobOpening;
 use App\Models\JobRequisition;
+use App\Models\Setting;
+use App\Modules\Candidates\Exports\CandidateExport;
+use App\Modules\Candidates\Support\CandidateModeResolver;
+use App\Modules\Candidates\Support\Traits\InteractsWithRecruitmentPresentation;
 use App\Services\StructureService;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
@@ -32,8 +32,8 @@ use Maatwebsite\Excel\Facades\Excel;
 class CandidateList extends Component
 {
     use AuthorizesRequests;
-    use LoadsAppealStatuses;
     use InteractsWithRecruitmentPresentation;
+    use LoadsAppealStatuses;
     use SideModalAction;
     use WithPagination;
 
@@ -112,7 +112,6 @@ class CandidateList extends Component
             __('candidates::common.labels.dates'),
             __('candidates::common.labels.status'),
             __('candidates::common.labels.files'),
-            __('personnel::common.labels.action'),
             __('personnel::common.labels.action'),
         ];
 

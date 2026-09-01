@@ -45,7 +45,7 @@ class UserPersonnelLinks extends Component
     {
         $returnUrl = request()->query('return');
 
-        if (is_string($returnUrl) && str_starts_with($returnUrl, url('/'))) {
+        if (is_string($returnUrl) && str_starts_with($returnUrl, url('/').'/')) {
             return $returnUrl;
         }
 

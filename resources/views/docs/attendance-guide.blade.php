@@ -189,7 +189,7 @@
         }"
         class="px-6 py-5 lg:px-8"
     >
-        <div class="rounded-[28px] border border-zinc-200 bg-[radial-gradient(circle_at_top,_rgba(14,165,233,0.08),_transparent_38%),radial-gradient(circle_at_bottom_right,_rgba(245,158,11,0.08),_transparent_30%),linear-gradient(180deg,_#ffffff,_#fafafa)] p-4 shadow-sm lg:p-6">
+        <div class="rounded-2xl border border-zinc-200 bg-[radial-gradient(circle_at_top,_rgba(14,165,233,0.08),_transparent_38%),radial-gradient(circle_at_bottom_right,_rgba(245,158,11,0.08),_transparent_30%),linear-gradient(180deg,_#ffffff,_#fafafa)] p-4 shadow-sm lg:p-6">
             <div class="mb-4 xl:hidden">
                 <button
                     type="button"
@@ -200,7 +200,7 @@
                     <span class="text-zinc-400" x-text="mobileNavOpen ? '−' : '+'"></span>
                 </button>
 
-                <div x-show="mobileNavOpen" x-transition class="mt-3 rounded-[24px] border border-zinc-200 bg-white p-3 shadow-sm">
+                <div x-show="mobileNavOpen" x-transition class="mt-3 rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm">
                     <div class="space-y-1">
                         <a href="#attendance-overview" @click="activeSection = 'attendance-overview'; mobileNavOpen = false" class="block rounded-xl px-3 py-2 text-sm text-zinc-700 hover:bg-zinc-100">Modulun məqsədi</a>
                         <a href="#attendance-tabs" @click="activeSection = 'attendance-tabs'; mobileNavOpen = false" class="block rounded-xl px-3 py-2 text-sm text-zinc-700 hover:bg-zinc-100">Tablar və iş axını</a>
@@ -216,7 +216,7 @@
                 <div class="grid h-full gap-6 xl:grid-cols-[290px_minmax(0,1fr)]">
                     <aside class="hidden xl:block">
                         <div class="sticky top-0 h-[calc(100vh-8rem)]">
-                            <div class="guide-panel flex h-full flex-col rounded-[28px] border border-zinc-200 p-3 backdrop-blur">
+                            <div class="guide-panel flex h-full flex-col rounded-2xl border border-zinc-200 p-3 backdrop-blur">
                                 <div class="border-b border-zinc-200 px-1 pb-3">
                                     <p class="text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-400">Attendance bələdçisi</p>
                                     <p class="mt-2 text-[13px] leading-6 text-zinc-500">
@@ -246,7 +246,7 @@
                     </aside>
 
                     <div x-ref="contentPane" class="space-y-5 xl:h-full xl:overflow-y-auto xl:pr-2 scroll-smooth">
-                        <section id="attendance-overview" data-guide-section="attendance-overview" class="guide-panel guide-shell rounded-[28px] border border-zinc-200 p-5 backdrop-blur lg:p-6">
+                        <section id="attendance-overview" data-guide-section="attendance-overview" class="guide-panel guide-shell rounded-2xl border border-zinc-200 p-5 backdrop-blur lg:p-6">
                             <div class="mb-5 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                                 <div>
                                     <p class="text-[11px] font-semibold uppercase tracking-[0.24em] text-sky-700">Attendance modulu</p>
@@ -258,82 +258,82 @@
                             </div>
 
                             <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                                <div class="rounded-[22px] border border-zinc-200 bg-zinc-50 px-4 py-4">
+                                <div class="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-4">
                                     <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-zinc-400">Əsas məntiq</p>
                                     <p class="mt-2 text-sm leading-7 text-zinc-600">Punch, shift, calendar və override nəticədə gündəlik ledger yaradır.</p>
                                 </div>
-                                <div class="rounded-[22px] border border-zinc-200 bg-zinc-50 px-4 py-4">
+                                <div class="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-4">
                                     <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-zinc-400">Əsas nəticə</p>
                                     <p class="mt-2 text-sm leading-7 text-zinc-600">Puantaj, monitor, overtime və month close eyni ledger-dən qidalanır.</p>
                                 </div>
-                                <div class="rounded-[22px] border border-zinc-200 bg-zinc-50 px-4 py-4">
+                                <div class="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-4">
                                     <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-zinc-400">Kim üçündür</p>
                                     <p class="mt-2 text-sm leading-7 text-zinc-600">HR operator, approver, admin və ops komandası üçün.</p>
                                 </div>
-                                <div class="rounded-[22px] border border-zinc-200 bg-zinc-50 px-4 py-4">
+                                <div class="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-4">
                                     <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-zinc-400">Oxu sırası</p>
                                     <p class="mt-2 text-sm leading-7 text-zinc-600">Əvvəl ümumi hissə, sonra tablar, sonda rol üzrə bələdçilər.</p>
                                 </div>
                             </div>
                         </section>
 
-                        <section id="attendance-tabs" data-guide-section="attendance-tabs" class="guide-panel rounded-[28px] border border-sky-200 bg-white/95 p-5 backdrop-blur lg:p-6">
+                        <section id="attendance-tabs" data-guide-section="attendance-tabs" class="guide-panel rounded-2xl border border-sky-200 bg-white/95 p-5 backdrop-blur lg:p-6">
                             <div class="mb-5">
                                 <p class="text-[11px] font-semibold uppercase tracking-[0.24em] text-sky-700">Tablar və iş axını</p>
                                 <h2 class="mt-2 text-3xl font-semibold tracking-tight text-zinc-950">Attendance workspace necə oxunur</h2>
                             </div>
 
                             <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
-                                <div class="rounded-[24px] border border-sky-200 bg-sky-50/70 p-4">
+                                <div class="rounded-2xl border border-sky-200 bg-sky-50/70 p-4">
                                     <p class="text-sm font-semibold tracking-tight text-zinc-950">Xülasə</p>
                                     <p class="mt-2 text-sm leading-7 text-zinc-600">Aylıq mənzərə, coverage, absence, compliance və pending queue göstəriciləri.</p>
                                 </div>
-                                <div class="rounded-[24px] border border-sky-200 bg-sky-50/70 p-4">
+                                <div class="rounded-2xl border border-sky-200 bg-sky-50/70 p-4">
                                     <p class="text-sm font-semibold tracking-tight text-zinc-950">Günlük monitor</p>
                                     <p class="mt-2 text-sm leading-7 text-zinc-600">Bir gün üzrə kim işdədir, kim absent görünür və kimdə punch problemi var.</p>
                                 </div>
-                                <div class="rounded-[24px] border border-sky-200 bg-sky-50/70 p-4">
+                                <div class="rounded-2xl border border-sky-200 bg-sky-50/70 p-4">
                                     <p class="text-sm font-semibold tracking-tight text-zinc-950">Puantaj cədvəli</p>
                                     <p class="mt-2 text-sm leading-7 text-zinc-600">Ay üzrə tam matrisa; rənglər, override-lar və leave marker-ları burada görünür.</p>
                                 </div>
-                                <div class="rounded-[24px] border border-sky-200 bg-sky-50/70 p-4">
+                                <div class="rounded-2xl border border-sky-200 bg-sky-50/70 p-4">
                                     <p class="text-sm font-semibold tracking-tight text-zinc-950">Manual girişlər</p>
                                     <p class="mt-2 text-sm leading-7 text-zinc-600">Punch olmayan və ya düzəliş tələb edən günlər üçün manual qərar axını.</p>
                                 </div>
-                                <div class="rounded-[24px] border border-sky-200 bg-sky-50/70 p-4">
+                                <div class="rounded-2xl border border-sky-200 bg-sky-50/70 p-4">
                                     <p class="text-sm font-semibold tracking-tight text-zinc-950">Növbələr və təqvim</p>
                                     <p class="mt-2 text-sm leading-7 text-zinc-600">Shift definition, assignment və iş rejimi qaydaları buradan idarə olunur.</p>
                                 </div>
-                                <div class="rounded-[24px] border border-sky-200 bg-sky-50/70 p-4">
+                                <div class="rounded-2xl border border-sky-200 bg-sky-50/70 p-4">
                                     <p class="text-sm font-semibold tracking-tight text-zinc-950">Ay bağlanışı</p>
                                     <p class="mt-2 text-sm leading-7 text-zinc-600">Aylıq yekunlar kilidlənir və payroll/export üçün sabit nəticə çıxarılır.</p>
                                 </div>
                             </div>
                         </section>
 
-                        <section id="attendance-workflow" data-guide-section="attendance-workflow" class="guide-panel rounded-[28px] border border-sky-200 bg-white/95 p-5 backdrop-blur lg:p-6">
+                        <section id="attendance-workflow" data-guide-section="attendance-workflow" class="guide-panel rounded-2xl border border-sky-200 bg-white/95 p-5 backdrop-blur lg:p-6">
                             <div class="mb-4">
                                 <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-sky-700">Ekran xəritəsi</p>
                                 <h2 class="mt-2 text-2xl font-semibold tracking-tight text-zinc-950">Attendance proses xəritəsi</h2>
                             </div>
 
                             <div class="grid gap-4 xl:grid-cols-4">
-                                <div class="rounded-[24px] border border-zinc-200 bg-zinc-50 p-4">
+                                <div class="rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
                                     <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-sky-700">01</p>
                                     <p class="mt-3 text-base font-semibold tracking-tight text-zinc-950">Mənbə məlumat</p>
                                     <p class="mt-2 text-sm leading-7 text-zinc-500">Punch, manual entry, leave, vacation, business trip və calendar override daxil olur.</p>
                                 </div>
-                                <div class="rounded-[24px] border border-zinc-200 bg-zinc-50 p-4">
+                                <div class="rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
                                     <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-sky-700">02</p>
                                     <p class="mt-3 text-base font-semibold tracking-tight text-zinc-950">Context seçimi</p>
                                     <p class="mt-2 text-sm leading-7 text-zinc-500">Shift və calendar qaydası günə uyğun hesablamanı formalaşdırır.</p>
                                 </div>
-                                <div class="rounded-[24px] border border-zinc-200 bg-zinc-50 p-4">
+                                <div class="rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
                                     <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-sky-700">03</p>
                                     <p class="mt-3 text-base font-semibold tracking-tight text-zinc-950">Ledger və queue</p>
                                     <p class="mt-2 text-sm leading-7 text-zinc-500">Gündəlik ledger, exceptions, overtime və pending queue-lar yaranır.</p>
                                 </div>
-                                <div class="rounded-[24px] border border-zinc-200 bg-zinc-50 p-4">
+                                <div class="rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
                                     <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-sky-700">04</p>
                                     <p class="mt-3 text-base font-semibold tracking-tight text-zinc-950">Yekun və bağlanış</p>
                                     <p class="mt-2 text-sm leading-7 text-zinc-500">Puantaj, monitor və month close ekranları nəticəni göstərir və sabitləyir.</p>
@@ -341,14 +341,14 @@
                             </div>
                         </section>
 
-                        <section id="attendance-scenarios" data-guide-section="attendance-scenarios" class="guide-panel rounded-[28px] border border-sky-200 bg-white/95 p-5 backdrop-blur lg:p-6">
+                        <section id="attendance-scenarios" data-guide-section="attendance-scenarios" class="guide-panel rounded-2xl border border-sky-200 bg-white/95 p-5 backdrop-blur lg:p-6">
                             <div class="mb-4">
                                 <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-sky-700">Ssenari kartları</p>
                                 <h2 class="mt-2 text-2xl font-semibold tracking-tight text-zinc-950">Tipik gündəlik iş ssenariləri</h2>
                             </div>
 
                             <div class="grid gap-4 xl:grid-cols-2">
-                                <div class="rounded-[24px] border border-zinc-200 bg-zinc-50 p-5">
+                                <div class="rounded-2xl border border-zinc-200 bg-zinc-50 p-5">
                                     <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-zinc-400">Ssenari A</p>
                                     <p class="mt-3 text-base font-semibold tracking-tight text-zinc-950">Absent görünən, amma işdə olan əməkdaş</p>
                                     <ol class="mt-4 space-y-2 text-sm leading-7 text-zinc-600">
@@ -358,7 +358,7 @@
                                         <li>4. Monitor və puantaj yenilənsin.</li>
                                     </ol>
                                 </div>
-                                <div class="rounded-[24px] border border-zinc-200 bg-zinc-50 p-5">
+                                <div class="rounded-2xl border border-zinc-200 bg-zinc-50 p-5">
                                     <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-zinc-400">Ssenari B</p>
                                     <p class="mt-3 text-base font-semibold tracking-tight text-zinc-950">Shift və calendar konfliktini tapmaq</p>
                                     <ol class="mt-4 space-y-2 text-sm leading-7 text-zinc-600">
@@ -371,7 +371,7 @@
                             </div>
                         </section>
 
-                        <section id="attendance-doc" data-guide-section="attendance-doc" class="guide-panel rounded-[28px] border border-sky-200 bg-white/95 p-5 backdrop-blur lg:p-6">
+                        <section id="attendance-doc" data-guide-section="attendance-doc" class="guide-panel rounded-2xl border border-sky-200 bg-white/95 p-5 backdrop-blur lg:p-6">
                             <div class="mb-4">
                                 <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-sky-700">Tam bələdçi mətni</p>
                                 <h2 class="mt-2 text-2xl font-semibold tracking-tight text-zinc-950">Attendance istifadəçi bələdçisinin tam məzmunu</h2>
@@ -382,26 +382,26 @@
                             </div>
                         </section>
 
-                        <section id="attendance-role-guides" data-guide-section="attendance-role-guides" class="guide-panel rounded-[28px] border border-sky-200 bg-white/95 p-5 backdrop-blur lg:p-6">
+                        <section id="attendance-role-guides" data-guide-section="attendance-role-guides" class="guide-panel rounded-2xl border border-sky-200 bg-white/95 p-5 backdrop-blur lg:p-6">
                             <div class="mb-4">
                                 <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-sky-700">Rol üzrə bələdçilər</p>
                                 <h2 class="mt-2 text-2xl font-semibold tracking-tight text-zinc-950">Operator, admin və approver üçün ayrı axınlar</h2>
                             </div>
 
                             <div class="grid gap-5 xl:grid-cols-3">
-                                <div class="rounded-[24px] border border-zinc-200 bg-zinc-50 p-5">
+                                <div class="rounded-2xl border border-zinc-200 bg-zinc-50 p-5">
                                     <p class="text-sm font-semibold tracking-tight text-zinc-950">Operator</p>
                                     <div class="guide-content mt-3 max-w-none text-sm">
                                         {!! $operatorHtml !!}
                                     </div>
                                 </div>
-                                <div class="rounded-[24px] border border-zinc-200 bg-zinc-50 p-5">
+                                <div class="rounded-2xl border border-zinc-200 bg-zinc-50 p-5">
                                     <p class="text-sm font-semibold tracking-tight text-zinc-950">Admin</p>
                                     <div class="guide-content mt-3 max-w-none text-sm">
                                         {!! $adminHtml !!}
                                     </div>
                                 </div>
-                                <div class="rounded-[24px] border border-zinc-200 bg-zinc-50 p-5">
+                                <div class="rounded-2xl border border-zinc-200 bg-zinc-50 p-5">
                                     <p class="text-sm font-semibold tracking-tight text-zinc-950">Təsdiq verən şəxs</p>
                                     <div class="guide-content mt-3 max-w-none text-sm">
                                         {!! $approvalHtml !!}

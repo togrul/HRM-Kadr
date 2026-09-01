@@ -1,107 +1,144 @@
-<div class="space-y-4">
-    <div class="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
-        <x-surface-card :title="__('training_needs::dashboard.cards.foundation_scope')" icon="icons.profile-outline-icon">
-            <div class="grid gap-3 md:grid-cols-2">
-                <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-                    <p class="text-sm font-semibold text-zinc-800">{{ __('training_needs::dashboard.cards.catalog_scope_title') }}</p>
-                    <p class="mt-1 text-sm text-zinc-500">{{ __('training_needs::dashboard.cards.catalog_scope_description') }}</p>
-                </div>
-                <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-                    <p class="text-sm font-semibold text-zinc-800">{{ __('training_needs::dashboard.cards.matrix_scope_title') }}</p>
-                    <p class="mt-1 text-sm text-zinc-500">{{ __('training_needs::dashboard.cards.matrix_scope_description') }}</p>
-                </div>
-                <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-                    <p class="text-sm font-semibold text-zinc-800">{{ __('training_needs::dashboard.cards.profile_scope_title') }}</p>
-                    <p class="mt-1 text-sm text-zinc-500">{{ __('training_needs::dashboard.cards.profile_scope_description') }}</p>
-                </div>
-                <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-                    <p class="text-sm font-semibold text-zinc-800">{{ __('training_needs::dashboard.cards.integration_scope_title') }}</p>
-                    <p class="mt-1 text-sm text-zinc-500">{{ __('training_needs::dashboard.cards.integration_scope_description') }}</p>
-                </div>
-            </div>
-        </x-surface-card>
+@php
+    $stats = $this->stats;
 
-        <x-surface-card :title="__('training_needs::dashboard.cards.next_sprints')" icon="icons.pending-icon">
-            <div class="space-y-3">
-                <div class="rounded-xl border border-sky-200 bg-sky-50 px-4 py-3">
-                    <p class="text-sm font-semibold text-sky-900">{{ __('training_needs::dashboard.cards.sprint_two_title') }}</p>
-                    <p class="mt-1 text-sm text-sky-700">{{ __('training_needs::dashboard.cards.sprint_two_description') }}</p>
-                </div>
-                <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
-                    <p class="text-sm font-semibold text-emerald-900">{{ __('training_needs::dashboard.cards.sprint_three_title') }}</p>
-                    <p class="mt-1 text-sm text-emerald-700">{{ __('training_needs::dashboard.cards.sprint_three_description') }}</p>
-                </div>
-                <div class="rounded-xl border border-violet-200 bg-violet-50 px-4 py-3">
-                    <p class="text-sm font-semibold text-violet-900">{{ __('training_needs::dashboard.cards.sprint_five_title') }}</p>
-                    <p class="mt-1 text-sm text-violet-700">{{ __('training_needs::dashboard.cards.sprint_five_description') }}</p>
-                </div>
-            </div>
-        </x-surface-card>
-    </div>
+    $metrics = [
+        ['label' => __('training_needs::dashboard.stats.competencies'), 'value' => $stats['competencies'], 'dot' => 'bg-[#0284c7]'],
+        ['label' => __('training_needs::dashboard.stats.programs'), 'value' => $stats['programs'], 'dot' => 'bg-[#f59e0b]'],
+        ['label' => __('training_needs::dashboard.stats.requirements'), 'value' => $stats['requirements'], 'dot' => 'bg-[#7c3aed]'],
+        ['label' => __('training_needs::dashboard.stats.needs'), 'value' => $stats['needs'], 'dot' => 'bg-[#e11d48]'],
+        ['label' => __('training_needs::dashboard.stats.plan_items'), 'value' => $stats['plan_items'], 'dot' => 'bg-[#059669]'],
+        ['label' => __('training_needs::dashboard.stats.sessions'), 'value' => $stats['sessions'], 'dot' => 'bg-[#a1a1aa]'],
+    ];
 
-    <div class="grid gap-4 xl:grid-cols-3">
-        <x-surface-card :title="__('training_needs::dashboard.cards.recent_competencies')" icon="icons.folder-plus-icon">
-            <div class="space-y-3">
-                @forelse ($this->recentCompetencies as $competency)
-                    <x-ui.list-card>
-                        <div class="flex items-center justify-between gap-2">
-                            <span class="text-sm font-semibold text-zinc-900">{{ $competency->name }}</span>
-                            @if ($competency->is_mandatory)
-                                <x-small-badge mode="red">{{ __('training_needs::dashboard.labels.mandatory') }}</x-small-badge>
-                            @endif
+    $priorityTone = fn (?string $priority): string => match ($priority) {
+        'high' => 'rose',
+        'medium' => 'amber',
+        default => 'secondary',
+    };
+@endphp
+
+<div class="flex flex-col gap-4">
+    <section class="rounded-xl border border-hairline bg-white">
+        <div class="grid gap-3 p-3 sm:grid-cols-2 xl:grid-cols-3">
+            @foreach ($metrics as $metric)
+                <div class="rounded-xl border border-hairline bg-[#fafafa] px-3.5 py-3">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="hrm-eyebrow">{{ $metric['label'] }}</span>
+                        <span class="h-1.5 w-1.5 shrink-0 rounded-full {{ $metric['dot'] }}"></span>
+                    </div>
+                    <p class="hrm-num mt-1.5 text-[22px] font-semibold tracking-[-0.03em] text-ink">{{ $metric['value'] }}</p>
+                </div>
+            @endforeach
+        </div>
+    </section>
+
+    {{-- ===================== training needs ===================== --}}
+    <section class="overflow-hidden rounded-xl border border-hairline bg-white">
+        <div class="border-b border-hairline-subtle px-4 py-3">
+            <h2 class="text-[13.5px] font-semibold tracking-[-0.02em] text-ink">{{ __('training_needs::dashboard.panel.needs_title') }}</h2>
+            <p class="mt-0.5 text-[12px] text-ink-faint">{{ __('training_needs::dashboard.panel.needs_description') }}</p>
+        </div>
+
+        <x-table.tbl :headers="[
+            __('training_needs::dashboard.fields.personnel'),
+            __('training_needs::dashboard.fields.competency'),
+            __('training_needs::dashboard.fields.priority'),
+            __('training_needs::dashboard.fields.recommended_program'),
+            __('training_needs::dashboard.fields.status'),
+        ]">
+            @forelse ($this->recentNeeds as $need)
+                <tr wire:key="training-need-{{ $need->id }}">
+                    <x-table.td standart-width>
+                        <div class="flex items-center gap-2.5">
+                            <x-avatar :name="(string) $need->personnel?->fullname" :tone="$need->priority === 'high' ? 'rose' : 'neutral'" />
+                            <div class="min-w-0 max-w-[220px] leading-tight">
+                                <p class="truncate text-[13px] font-medium text-ink">{{ $need->personnel?->fullname ?? '—' }}</p>
+                                <p class="hrm-num truncate text-[11px] text-ink-faint">{{ $need->personnel?->tabel_no }}</p>
+                            </div>
                         </div>
-                        <p class="mt-1 text-xs text-zinc-500">{{ $competency->group?->name ?? __('training_needs::dashboard.labels.no_group') }}</p>
-                    </x-ui.list-card>
-                @empty
-                    <x-ui.empty-state icon="icons.profile-icon" :message="__('training_needs::dashboard.empty.recent_competencies')" />
-                @endforelse
-            </div>
-        </x-surface-card>
+                    </x-table.td>
 
-        <x-surface-card :title="__('training_needs::dashboard.cards.recent_programs')" icon="icons.clock-icon">
-            <div class="space-y-3">
-                @forelse ($this->recentPrograms as $program)
-                    <x-ui.list-card>
-                        <div class="flex items-center justify-between gap-2">
-                            <span class="text-sm font-semibold text-zinc-900">{{ $program->title }}</span>
-                            <x-small-badge mode="green">{{ __('training_needs::dashboard.delivery_types.'.$program->delivery_type) }}</x-small-badge>
-                        </div>
-                        <p class="mt-1 text-xs text-zinc-500">
-                            {{ __('training_needs::dashboard.labels.program_meta', [
-                                'code' => $program->code ?: __('training_needs::dashboard.labels.no_code'),
-                                'hours' => $program->duration_hours ?: 0,
-                            ]) }}
+                    <x-table.td standart-width>
+                        <p class="max-w-[200px] truncate text-[13px] text-ink-soft">{{ $need->competency?->name ?? '—' }}</p>
+                    </x-table.td>
+
+                    <x-table.td>
+                        <x-small-badge :mode="$priorityTone($need->priority)">
+                            {{ __('training_needs::dashboard.priorities.'.($need->priority ?: 'low')) }}
+                        </x-small-badge>
+                    </x-table.td>
+
+                    <x-table.td standart-width>
+                        <p class="max-w-[220px] truncate text-[13px] text-ink-soft">
+                            {{ $need->recommendedProgram?->title ?: __('training_needs::dashboard.labels.no_program') }}
                         </p>
-                    </x-ui.list-card>
+                    </x-table.td>
+
+                    <x-table.td>
+                        <x-small-badge mode="secondary" dot>
+                            {{ __('training_needs::dashboard.need_statuses.'.($need->status ?: 'draft')) }}
+                        </x-small-badge>
+                    </x-table.td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="5" class="px-4 py-6">
+                        <x-ui.empty-state icon="icons.training-icon" :message="__('training_needs::dashboard.empty.recent_needs')" />
+                    </td>
+                </tr>
+            @endforelse
+        </x-table.tbl>
+    </section>
+
+    {{-- ===================== catalog freshness ===================== --}}
+    <div class="grid gap-4 xl:grid-cols-2">
+        <section class="rounded-xl border border-hairline bg-white">
+            <div class="border-b border-hairline-subtle px-4 py-3">
+                <p class="hrm-eyebrow">{{ __('training_needs::dashboard.cards.recent_competencies') }}</p>
+            </div>
+            <div class="divide-y divide-hairline-subtle">
+                @forelse ($this->recentCompetencies as $competency)
+                    <div wire:key="training-competency-{{ $competency->id }}" class="flex items-center justify-between gap-3 px-4 py-2.5">
+                        <div class="min-w-0 leading-tight">
+                            <p class="truncate text-[13px] font-medium text-ink">{{ $competency->name }}</p>
+                            <p class="truncate text-[11.5px] text-ink-faint">{{ $competency->group?->name ?? __('training_needs::dashboard.labels.no_group') }}</p>
+                        </div>
+                        @if ($competency->is_mandatory)
+                            <x-small-badge mode="rose">{{ __('training_needs::dashboard.labels.mandatory') }}</x-small-badge>
+                        @endif
+                    </div>
                 @empty
-                    <x-ui.empty-state icon="icons.training-icon" :message="__('training_needs::dashboard.empty.recent_programs')" />
+                    <div class="p-3">
+                        <x-ui.empty-state icon="icons.profile-icon" :message="__('training_needs::dashboard.empty.recent_competencies')" />
+                    </div>
                 @endforelse
             </div>
-        </x-surface-card>
+        </section>
 
-        <x-surface-card :title="__('training_needs::dashboard.cards.coverage_snapshot')" icon="icons.profile-icon">
-            <div class="grid gap-3">
-                <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-                    <p class="text-[11px] font-semibold uppercase text-zinc-400">{{ __('training_needs::dashboard.stats.program_maps') }}</p>
-                    <p class="mt-1 text-2xl font-semibold text-zinc-900">{{ $this->stats['program_maps'] }}</p>
-                </div>
-                <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-                    <p class="text-[11px] font-semibold uppercase text-zinc-400">{{ __('training_needs::dashboard.stats.profiles') }}</p>
-                    <p class="mt-1 text-2xl font-semibold text-zinc-900">{{ $this->stats['profiles'] }}</p>
-                </div>
-                <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-                    <p class="text-[11px] font-semibold uppercase text-zinc-400">{{ __('training_needs::dashboard.stats.needs') }}</p>
-                    <p class="mt-1 text-2xl font-semibold text-zinc-900">{{ $this->stats['needs'] }}</p>
-                </div>
-                <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-                    <p class="text-[11px] font-semibold uppercase text-zinc-400">{{ __('training_needs::dashboard.stats.plans') }}</p>
-                    <p class="mt-1 text-2xl font-semibold text-zinc-900">{{ $this->stats['plans'] }}</p>
-                </div>
-                <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-                    <p class="text-[11px] font-semibold uppercase text-zinc-400">{{ __('training_needs::dashboard.stats.plan_items') }}</p>
-                    <p class="mt-1 text-2xl font-semibold text-zinc-900">{{ $this->stats['plan_items'] }}</p>
-                </div>
+        <section class="rounded-xl border border-hairline bg-white">
+            <div class="border-b border-hairline-subtle px-4 py-3">
+                <p class="hrm-eyebrow">{{ __('training_needs::dashboard.cards.recent_programs') }}</p>
             </div>
-        </x-surface-card>
+            <div class="divide-y divide-hairline-subtle">
+                @forelse ($this->recentPrograms as $program)
+                    <div wire:key="training-program-{{ $program->id }}" class="flex items-center justify-between gap-3 px-4 py-2.5">
+                        <div class="min-w-0 leading-tight">
+                            <p class="truncate text-[13px] font-medium text-ink">{{ $program->title }}</p>
+                            <p class="truncate text-[11.5px] text-ink-faint">
+                                {{ __('training_needs::dashboard.labels.program_meta', [
+                                    'code' => $program->code ?: __('training_needs::dashboard.labels.no_code'),
+                                    'hours' => $program->duration_hours ?: 0,
+                                ]) }}
+                            </p>
+                        </div>
+                        <x-small-badge mode="green">{{ __('training_needs::dashboard.delivery_types.'.$program->delivery_type) }}</x-small-badge>
+                    </div>
+                @empty
+                    <div class="p-3">
+                        <x-ui.empty-state icon="icons.training-icon" :message="__('training_needs::dashboard.empty.recent_programs')" />
+                    </div>
+                @endforelse
+            </div>
+        </section>
     </div>
 </div>

@@ -4,9 +4,13 @@ namespace Tests\Feature\Personnel;
 
 use App\Models\Personnel;
 use App\Models\User;
+use App\Models\Vacation;
+use App\Modules\Personnel\Livewire\MyHr\MyHrDashboard;
+use App\Modules\Personnel\Livewire\MyHr\MyHrRequests;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
@@ -47,6 +51,91 @@ class MyHrDashboardTest extends TestCase
             ->assertSee('Officer')
             ->assertSee('HQ')
             ->assertSee($employee->email);
+    }
+
+    public function test_my_hr_panel_and_balance_render_inside_the_livewire_root(): void
+    {
+        $user = $this->makeUserWithPermission('show-my-hr', 'employee@example.test');
+        $employee = $this->makePersonnel($user->email, 'Doe', 'Jane', 'Smith');
+        $this->actingAs($user);
+
+        Vacation::query()->create([
+            'tabel_no' => $employee->tabel_no,
+            'year' => (int) now()->year,
+            'vacation_days_total' => 30,
+            'remaining_days' => 9,
+        ]);
+
+        Livewire::test(MyHrDashboard::class)
+            // the panel is teleported into the Livewire root, so its items keep working
+            ->assertSee('setActiveTab')
+            ->assertSee('Məzuniyyət balansı')
+            ->assertSee('21 gün istifadə olunub');
+    }
+
+    public function test_header_new_request_menu_lists_every_form_the_employee_may_submit(): void
+    {
+        $user = $this->makeUserWithPermission('show-my-hr', 'employee@example.test');
+        $this->makePersonnel($user->email, 'Doe', 'Jane', 'Smith');
+        $this->actingAs($user);
+
+        // "Yeni ərizə" has to pick a type — the button alone did nothing visible.
+        Livewire::test(MyHrDashboard::class)
+            ->assertSee("goto('requests', 'leave')", escape: false)
+            ->assertSee("goto('requests', 'vacation')", escape: false)
+            ->assertSee("goto('requests', 'business_trip')", escape: false);
+    }
+
+    public function test_overview_quick_link_switches_tab_and_preopens_the_request_form(): void
+    {
+        $user = $this->makeUserWithPermission('show-my-hr', 'employee@example.test');
+        $user->givePermissionTo(Permission::findOrCreate('submit-self-service-vacations', 'web'));
+        $employee = $this->makePersonnel($user->email, 'Doe', 'Jane', 'Smith');
+        $this->actingAs($user);
+
+        Livewire::test(MyHrDashboard::class)
+            ->call('goto', 'requests', 'vacation')
+            ->assertSet('activeTab', 'requests')
+            ->assertSet('pendingRequestForm', 'vacation');
+
+        Livewire::test(MyHrRequests::class, ['personnelId' => $employee->id, 'openForm' => 'vacation'])
+            ->assertSet('activeCreateForm', 'vacation');
+    }
+
+    public function test_quick_link_ignores_an_unknown_form_key(): void
+    {
+        $user = $this->makeUserWithPermission('show-my-hr', 'employee@example.test');
+        $employee = $this->makePersonnel($user->email, 'Doe', 'Jane', 'Smith');
+        $this->actingAs($user);
+
+        Livewire::test(MyHrRequests::class, ['personnelId' => $employee->id, 'openForm' => 'nonsense'])
+            ->assertSet('activeCreateForm', '');
+    }
+
+    public function test_my_hr_render_runs_every_query_once(): void
+    {
+        // #[Computed] only caches when the value is read as a PROPERTY. Calling the method
+        // ($this->personnel()) re-runs the query, which is how this page ended up loading the
+        // same personnel row three times per render.
+        $user = $this->makeUserWithPermission('show-my-hr', 'employee@example.test');
+        $this->makePersonnel($user->email, 'Doe', 'Jane', 'Smith');
+        $this->actingAs($user);
+
+        // First visit writes the baseline permissions and the personnel link; measure the
+        // steady state that every later render actually pays for.
+        $this->get(route('my-hr'))->assertOk();
+
+        DB::flushQueryLog();
+        DB::enableQueryLog();
+        $this->get(route('my-hr'))->assertOk();
+
+        $duplicates = collect(DB::getQueryLog())
+            ->countBy('query')
+            ->filter(fn (int $count): bool => $count > 1)
+            ->keys()
+            ->all();
+
+        $this->assertSame([], $duplicates, 'The my-hr render repeats a query: '.implode(' | ', $duplicates));
     }
 
     private function makeUserWithPermission(string $permission, ?string $email = null): User

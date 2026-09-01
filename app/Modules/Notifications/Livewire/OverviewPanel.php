@@ -7,11 +7,11 @@ use App\Models\NotificationDispatch;
 use App\Models\NotificationRule;
 use App\Models\NotificationTemplate;
 use App\Modules\Notifications\Livewire\Concerns\InteractsWithNotificationAuthorization;
-use App\Modules\Notifications\Support\NotificationTriggerRegistry;
 use App\Modules\Notifications\Support\NotificationTemplateRenderer;
+use App\Modules\Notifications\Support\NotificationTriggerRegistry;
+use App\Support\Database\InstalledTables;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -338,7 +338,7 @@ class OverviewPanel extends Component
             'notification_campaigns',
             'notification_dispatches',
         ] as $table) {
-            if (! Schema::hasTable($table)) {
+            if (! InstalledTables::has($table)) {
                 return $this->managementTablesReadyCache = false;
             }
         }

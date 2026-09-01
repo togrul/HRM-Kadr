@@ -1,39 +1,42 @@
-<x-guest-layout>
-    <form method="POST" action="{{ route('password.store') }}">
+<x-auth-shell
+    :title="__('ui::auth.titles.reset_password')"
+    :subtitle="__('ui::auth.messages.reset_password_help')"
+    :back-to-login="true"
+>
+    <form method="POST" action="{{ route('password.store') }}" class="mt-6 space-y-4">
         @csrf
 
-        <!-- Password Reset Token -->
         <input type="hidden" name="token" value="{{ $request->route('token') }}">
 
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('ui::auth.fields.email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email', $request->email)" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
+        <x-auth-input
+            id="email"
+            name="email"
+            type="email"
+            :label="__('ui::auth.fields.email')"
+            value="{{ old('email', $request->email) }}"
+            required
+            autofocus
+            autocomplete="username"
+        />
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('ui::auth.fields.password')" />
-            <x-text-input id="password" class="block mt-1 w-full" type="password" name="password" required autocomplete="new-password" />
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
+        <x-auth-input
+            id="password"
+            name="password"
+            type="password"
+            :label="__('ui::auth.fields.new_password')"
+            required
+            autocomplete="new-password"
+        />
 
-        <!-- Confirm Password -->
-        <div class="mt-4">
-            <x-input-label for="password_confirmation" :value="__('ui::auth.fields.confirm_password')" />
+        <x-auth-input
+            id="password_confirmation"
+            name="password_confirmation"
+            type="password"
+            :label="__('ui::auth.fields.password_confirmation')"
+            required
+            autocomplete="new-password"
+        />
 
-            <x-text-input id="password_confirmation" class="block mt-1 w-full"
-                                type="password"
-                                name="password_confirmation" required autocomplete="new-password" />
-
-            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
-        </div>
-
-        <div class="flex items-center justify-end mt-4">
-            <x-primary-button>
-                {{ __('ui::auth.actions.reset_password') }}
-            </x-primary-button>
-        </div>
+        <x-auth-submit>{{ __('ui::auth.actions.reset_password') }}</x-auth-submit>
     </form>
-</x-guest-layout>
+</x-auth-shell>

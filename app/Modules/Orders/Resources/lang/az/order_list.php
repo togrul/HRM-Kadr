@@ -7,6 +7,11 @@ return [
         'search' => 'Axtar',
         'given_date' => 'Verilmə tarixi',
         'reset' => 'Sıfırla',
+        'order_type' => 'Əmrin növü',
+        'search_placeholder' => 'Əmr # və ya başlıq',
+        'date_start' => 'başlanğıc',
+        'date_end' => 'bitmə',
+        'show_all' => 'Hamısını göstər',
     ],
     'table' => [
         'title' => 'Əmrlər',
@@ -19,6 +24,7 @@ return [
         'action' => 'Əməliyyat',
         'deleted_date' => 'Silinmə tarixi',
         'deleted_by' => 'Silən',
+        'unit' => 'əmr',
     ],
     'messages' => [
         'force_delete_confirm' => 'Bu məlumatı silmək istədiyinizə əminsiniz?',
@@ -27,6 +33,13 @@ return [
     'actions' => [
         'open_user_guide' => 'İstifadəçi bələdçisi',
         'download_now' => 'DOCX faylını indi yüklə',
+        'force_delete' => 'Tamamilə sil',
+        'restore' => 'Bərpa et',
+        'delete' => 'Sil',
+        'export_excel' => 'Excel-ə çıxar',
+    ],
+    'hints' => [
+        'docx_only' => 'Yalnız DOCX əmrləri redaktə oluna bilər',
     ],
     'guide' => [
         'title' => 'Əmrlərlə ilk dəfə işləyirsiniz?',

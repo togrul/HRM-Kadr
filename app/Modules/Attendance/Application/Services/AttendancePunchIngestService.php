@@ -4,9 +4,9 @@ namespace App\Modules\Attendance\Application\Services;
 
 use App\Models\AttendanceRawPunch;
 use App\Models\Personnel;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
-use Illuminate\Database\QueryException;
 
 class AttendancePunchIngestService
 {
@@ -31,6 +31,7 @@ class AttendancePunchIngestService
             $tabelNo = (string) Arr::get($row, 'tabel_no', '');
             if ($tabelNo === '' || ! isset($knownMap[$tabelNo])) {
                 $invalidPersonnel++;
+
                 continue;
             }
 
@@ -42,6 +43,7 @@ class AttendancePunchIngestService
             } catch (QueryException $e) {
                 if ($this->isDuplicateError($e)) {
                     $duplicates++;
+
                     continue;
                 }
 
@@ -98,4 +100,3 @@ class AttendancePunchIngestService
         return $sqlState === '23000' || $driverCode === 1062;
     }
 }
-

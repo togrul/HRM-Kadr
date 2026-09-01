@@ -6,8 +6,8 @@ use App\Modules\Attendance\Application\Services\AttendanceAuthorizationService;
 use App\Modules\Attendance\Application\Services\AttendanceOverviewService;
 use App\Modules\Attendance\Application\Services\AttendanceStructureScopeReadService;
 use App\Support\Livewire\InteractsWithTabbedWorkspace;
-use Livewire\Attributes\On;
 use Carbon\Carbon;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class Dashboard extends Component
@@ -39,8 +39,7 @@ class Dashboard extends Component
         AttendanceOverviewService $overviewService,
         AttendanceAuthorizationService $authorization,
         AttendanceStructureScopeReadService $structureScopeRead
-    ): void
-    {
+    ): void {
         $authorization->authorize('attendance.view');
 
         $now = Carbon::now();

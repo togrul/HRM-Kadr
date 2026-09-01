@@ -1,131 +1,77 @@
-<nav x-data="{ open: false }" class="hidden bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
-    <div class="max-w-7xl mx-auto px-4 lg:px-0">
-        <div class="flex justify-between h-24">
-            <div class="flex">
-                <!-- Logo -->
-                <div class="shrink-0 flex items-center">
-                    <a href="{{ route('home') }}">
-                        <x-application-logo size="sm" class="block w-auto fill-current text-gray-800 dark:text-gray-200" />
-                    </a>
-                </div>
+{{--
+    Admin back-office shell. Keeps its own dedicated navigation (it is not part of the
+    module rail) but shares the premium design tokens with the rest of the app.
+--}}
+<main class="mx-auto flex min-h-screen w-full max-w-shell items-stretch gap-2 p-2">
+    <aside class="hrm-scroll sticky top-2 hidden max-h-[calc(100vh-1rem)] w-panel shrink-0 flex-col overflow-y-auto rounded-2xl bg-ink px-3 py-4 text-white lg:flex">
+        <a href="{{ route('admin') }}" wire:navigate class="mb-6 flex items-center gap-2.5 px-2">
+            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] bg-white/10 text-[12px] font-bold tracking-tight text-white">HR</span>
+            <span class="hrm-eyebrow !text-white/50">{{ __('ui::common.labels.admin_panel') }}</span>
+        </a>
+
+        <nav class="flex flex-1 flex-col gap-0.5">
+            @foreach (config('admin.menu_items') as $menuItem)
+                @continue($menuItem['route'] !== '#' && ! \App\Support\Navigation\MenuPresentation::hasRoute($menuItem['route']))
+                @php
+                    $name = "icons.{$menuItem['icon']}";
+                    $route = \App\Support\Navigation\MenuPresentation::route($menuItem['route']);
+                    $active = request()->routeIs($menuItem['route']);
+                @endphp
+                <a
+                    href="{{ $route }}"
+                    wire:navigate
+                    @class([
+                        'hrm-icon flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-[13px] transition',
+                        'bg-white text-ink font-semibold' => $active,
+                        'text-white/60 hover:bg-white/10 hover:text-white' => ! $active,
+                    ])
+                >
+                    <x-dynamic-component :component="$name" color="text-current" hover="text-current" size="w-[17px] h-[17px]" />
+                    <span class="truncate">{{ __($menuItem['label']) }}</span>
+                </a>
+            @endforeach
+        </nav>
+
+        <div class="mt-4 space-y-2 border-t border-white/10 pt-4">
+            <a href="{{ route('home') }}" wire:navigate class="hrm-icon flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-[13px] text-white/60 transition hover:bg-white/10 hover:text-white">
+                <x-icons.shutdown-icon size="w-[17px] h-[17px]" color="text-current" hover="text-current" />
+                <span>{{ __('ui::common.labels.return_to_dashboard') }}</span>
+            </a>
+
+            <div class="rounded-xl bg-white/5 px-3 py-2.5">
+                <p class="truncate text-[12.5px] font-medium text-white">{{ Auth::user()?->name }}</p>
+                <p class="truncate text-[11px] text-white/40">{{ Auth::user()?->email }}</p>
             </div>
-
-            <div class="flex">
-                <div class="flex items-center justify-center">
-                    <a href="{{ route('home') }}" class="group flex justify-center items-center w-10 h-10 transition-all duration-300 sm:flex sm:items-center hover:bg-slate-50 rounded-md">
-                        <x-icons.layout-icon color="text-emerald-500" size="w-7 h-7"></x-icons.layout-icon>
-                    </a>
-                </div>
-                <!-- Settings Dropdown -->
-                <div class="hidden sm:flex sm:items-center sm:ml-6">
-                    <x-dropdown align="right">
-                        <x-slot name="trigger">
-                            <button class="bg-gray-100 border border-gray-200 inline-flex items-center px-3 py-2 text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
-                                <div class="flex flex-col items-start">
-                                    <span class="text-sm text-gray-900">{{ Auth::user()->name }}</span>
-                                    <span class="text-xs">{{ Auth::user()->email }}</span>
-                                </div>
-
-                                <div class="ml-4">
-                                    <x-icons.arrow-icon size="w-5 h-5"></x-icons.arrow-icon>
-                                </div>
-                            </button>
-                        </x-slot>
-
-                        <x-slot name="content">
-                            <x-dropdown-link :href="route('profile.edit')">
-                                {{ __('ui::profile.titles.profile') }}
-                            </x-dropdown-link>
-
-                            <!-- Authentication -->
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-
-                                <x-dropdown-link :href="route('logout')"
-                                                 onclick="event.preventDefault();
-                                                this.closest('form').submit();">
-                                    {{ __('ui::auth.actions.log_out') }}
-                                </x-dropdown-link>
-                            </form>
-                        </x-slot>
-                    </x-dropdown>
-                </div>
-
-                <!-- Hamburger -->
-                <div class="-mr-2 flex items-center sm:hidden">
-                    <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-900 focus:text-gray-500 dark:focus:text-gray-400 transition duration-150 ease-in-out">
-                        <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                            <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                            <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-            </div>
-
         </div>
+    </aside>
+
+    {{-- compact admin bar for small screens: the sidebar above is desktop-only --}}
+    <div class="flex min-w-0 flex-1 flex-col gap-2">
+        <nav class="hrm-scroll flex items-center gap-1.5 overflow-x-auto rounded-2xl border border-hairline bg-white px-2 py-2 lg:hidden">
+            <a href="{{ route('home') }}" wire:navigate class="shrink-0 rounded-[10px] border border-hairline px-2.5 py-1.5 text-[12px] text-ink-muted">
+                {{ __('ui::common.labels.return_to_dashboard') }}
+            </a>
+            @foreach (config('admin.menu_items') as $menuItem)
+                @continue($menuItem['route'] !== '#' && ! \App\Support\Navigation\MenuPresentation::hasRoute($menuItem['route']))
+                @php $active = request()->routeIs($menuItem['route']); @endphp
+                <a
+                    href="{{ \App\Support\Navigation\MenuPresentation::route($menuItem['route']) }}"
+                    wire:navigate
+                    @class([
+                        'shrink-0 rounded-[10px] px-2.5 py-1.5 text-[12px] transition',
+                        'bg-ink text-white' => $active,
+                        'text-ink-muted hover:bg-[#fafafa]' => ! $active,
+                    ])
+                >{{ __($menuItem['label']) }}</a>
+            @endforeach
+        </nav>
+
+        <section class="min-w-0 flex-1 overflow-hidden rounded-2xl border border-hairline bg-white p-4 shadow-card">
+            {{ $slot }}
+        </section>
     </div>
-</nav>
-
-<!-- Page Content -->
-<main x-data="" class="px-1 max-w-7xl mx-auto lg:px-0 overflow-inherit">
-    <div class="grid grid-cols-1 md:grid-cols-5 lg:grid-cols-4 space-y-2 space-x-0 sm:space-y-0 sm:space-x-3 w-full">
-
-        <div class="md:col-span-2 lg:col-span-1 bg-gray-900 shadow-sm px-6 py-4 text-white h-screen sticky top-0">
-            <div class="flex flex-col justify-between h-full">
-                <div class="flex justify-center">
-                    <!-- Logo -->
-                    <div class="shrink-0 flex items-center">
-                        <a href="{{ route('admin') }}">
-                            <x-application-logo size="sm" class="block w-auto fill-current text-gray-800 dark:text-gray-200" />
-                        </a>
-                    </div>
-                </div>
-
-                <div class="flex flex-col space-y-4 h-full max-h-[calc(100vh-300px)] overflow-y-auto">
-                    @foreach(config('admin.menu_items') as $menuItem)
-                        @continue($menuItem['route'] !== '#' && ! \App\Support\Navigation\MenuPresentation::hasRoute($menuItem['route']))
-                        @php
-                            $iconClass = $menuItem['icon'];
-                            $name = "icons.{$iconClass}";
-                            $route = \App\Support\Navigation\MenuPresentation::route($menuItem['route']);
-                            $active = request()->routeIs($menuItem['route']);
-                        @endphp
-                        <a href="{{ $route }}" wire:navigate class="flex space-x-3 items-center px-2 group">
-                            <x-dynamic-component :component="$name" color="{{ $active ? 'text-yellow-500' : 'text-gray-300' }}" hover="text-yellow-500" />
-                            <span @class([
-                                'transition-all duration-300 group-hover:text-yellow-500 text-sm',
-                                'text-yellow-500' => $active,
-                                'text-gray-200' => ! $active
-                            ])>{{ __($menuItem['label']) }}</span>
-                        </a>
-                    @endforeach
-                </div>
-
-                <div class="flex flex-col space-y-2 py-4">
-                    <div class="flex items-center justify-start">
-                        <a href="{{ route('home') }}" class="group flex justify-center items-center space-x-3 text-sm transition-all duration-300 sm:flex sm:items-center">
-                            <x-icons.shutdown-icon size="w-6 h-6" color="text-gray-100" hover="text-yellow-500"></x-icons.shutdown-icon>
-                            <span>{{ __('ui::common.labels.return_to_dashboard') }}</span>
-                        </a>
-                    </div>
-                    <!-- Settings Dropdown -->
-                    <div class="flex items-center">
-                        <button class="bg-gray-800 w-full border border-gray-700 inline-flex items-center px-3 py-2 text-sm leading-4 font-medium rounded-md text-gray-100 hover:text-gray-200  focus:outline-none transition ease-in-out duration-150">
-                            <div class="flex flex-col items-start">
-                                <span class="text-sm text-gray-100">{{ Auth::user()->name }}</span>
-                                <span class="text-xs text-gray-400">{{ Auth::user()->email }}</span>
-                            </div>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-        <div class="md:col-span-3 lg:col-span-3 bg-white shadow-md rounded-md px-3 py-4">{{ $slot }}</div>
-    </div>
-
 </main>
+
 @push('js')
     <script src="{{ asset('assets/js/sweetalert2.min.js') }}"></script>
 @endpush

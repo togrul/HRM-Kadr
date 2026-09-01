@@ -142,20 +142,20 @@
                 <div class="space-y-3">
                     @forelse ($this->recentTemplateSections as $section)
                         <x-ui.list-card>
-                            <div class="flex items-center justify-between gap-2">
-                                <div>
-                                    <p class="text-sm font-semibold text-zinc-900">{{ $section->name }}</p>
-                                    <p class="text-xs text-zinc-500">{{ $section->template_name ?: $section->template_code ?: '—' }}</p>
-                                </div>
-                                <div class="flex flex-col items-end gap-2">
-                                    <div class="flex items-center gap-2">
+                            <div class="space-y-4">
+                                <div class="space-y-3">
+                                    <div class="min-w-0 space-y-1">
+                                        <p class="text-sm font-semibold leading-6 text-zinc-900">{{ $section->name }}</p>
+                                        <p class="text-xs leading-5 text-zinc-500">{{ $section->template_name ?: $section->template_code ?: '—' }}</p>
+                                    </div>
+                                    <div class="flex flex-wrap gap-2">
                                         <x-small-badge mode="sky">{{ __('performance_evaluation::dashboard.labels.weight_percent_value', ['value' => number_format((float) $section->weight_percent, 2)]) }}</x-small-badge>
                                         <x-small-badge mode="secondary">{{ __('performance_evaluation::dashboard.labels.sort_order_value', ['value' => $section->sort_order]) }}</x-small-badge>
                                     </div>
-                                    <div class="flex items-center gap-2">
-                                        <x-ui.action-pill wire:click="editSection({{ $section->id }})" icon="icons.edit-icon">{{ __('performance_evaluation::dashboard.actions.edit') }}</x-ui.action-pill>
-                                        <x-ui.action-pill mode="delete" wire:click="confirmDeleteSection({{ $section->id }})" icon="icons.delete-icon">{{ __('performance_evaluation::dashboard.actions.delete') }}</x-ui.action-pill>
-                                    </div>
+                                </div>
+                                <div class="flex flex-wrap gap-2 border-t border-zinc-200/80 pt-3">
+                                    <x-ui.action-pill wire:click="editSection({{ $section->id }})" icon="icons.edit-icon">{{ __('performance_evaluation::dashboard.actions.edit') }}</x-ui.action-pill>
+                                    <x-ui.action-pill mode="delete" wire:click="confirmDeleteSection({{ $section->id }})" icon="icons.delete-icon">{{ __('performance_evaluation::dashboard.actions.delete') }}</x-ui.action-pill>
                                 </div>
                             </div>
                         </x-ui.list-card>
@@ -176,7 +176,7 @@
                                         <p class="text-xs leading-5 text-zinc-500">{{ $item->template_name ?? '—' }} • {{ $item->section_name ?? '—' }}</p>
                                         <p class="text-xs leading-5 text-zinc-500">{{ $item->competency_name ?? __('performance_evaluation::dashboard.labels.no_competency') }}</p>
                                     </div>
-                                    <div class="grid gap-2 sm:grid-cols-2">
+                                    <div class="flex flex-wrap gap-2">
                                         <x-small-badge mode="sky">{{ __('performance_evaluation::dashboard.labels.weight_percent_value', ['value' => number_format((float) $item->weight_percent, 2)]) }}</x-small-badge>
                                         <x-small-badge mode="amber">{{ __('performance_evaluation::dashboard.labels.threshold_value', ['value' => number_format((float) $item->low_score_threshold, 2)]) }}</x-small-badge>
                                     </div>

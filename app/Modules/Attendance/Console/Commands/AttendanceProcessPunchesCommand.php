@@ -78,4 +78,3 @@ class AttendanceProcessPunchesCommand extends Command
         return true;
     }
 }
-

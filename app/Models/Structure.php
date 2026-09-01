@@ -4,12 +4,18 @@ namespace App\Models;
 
 use App\Observers\StructureObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int|null $parent_id
+ * @property string|null $code
+ * @property string|null $name
+ * @property string|null $shortname
+ * @property int|null $level
+ */
 #[ObservedBy(StructureObserver::class)]
 class Structure extends Model
 {
@@ -92,7 +98,7 @@ class Structure extends Model
 
     public function getAllNestedIds(): array
     {
-        return $this->subs->reduce(fn($ids, $child) => array_merge($ids, $child->getAllNestedIds()), [$this->id]);
+        return $this->subs->reduce(fn ($ids, $child) => array_merge($ids, $child->getAllNestedIds()), [$this->id]);
     }
 
     public function getAllParentIds(): array

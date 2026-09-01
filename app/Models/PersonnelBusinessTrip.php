@@ -58,6 +58,7 @@ class PersonnelBusinessTrip extends Model
     ];
 
     const INTERNAL_BUSINESS_TRIP = 6;
+
     const FOREIGN_BUSINESS_TRIP = 7;
 
     public function personDidDelete(): BelongsTo
@@ -181,12 +182,26 @@ class PersonnelBusinessTrip extends Model
     protected static function boot()
     {
         parent::boot();
-        static::creating(function ($model) {
-            $model->added_by = auth()->user()->id;
+
+        // Two things to be careful about here.
+        //
+        // 1. `auth()->user()->id` assumed a signed-in user. A trip recorded from
+        //    the console — the finance import runs on a schedule — has none, and
+        //    the write died on a null. `auth()->id()` with a fallback is honest:
+        //    the record was made by the system, not by nobody.
+        //
+        // 2. These closures MUST return nothing. `creating` and `deleting` are
+        //    halting events: Eloquent dispatches them through `until()`, which
+        //    stops at the first listener returning a non-null value. An arrow
+        //    body returning the assignment silently swallowed every listener
+        //    registered afterwards.
+        static::creating(function ($model): void {
+            $model->added_by = auth()->id() ?? 1;
         });
-        static::deleting(function ($model) {
+
+        static::deleting(function ($model): void {
             if (! $model->isForceDeleting()) {
-                $model->deleted_by = auth()->user()->id;
+                $model->deleted_by = auth()->id() ?? 1;
                 $model->save();
             }
         });

@@ -5,7 +5,7 @@
 This repo provides a dedicated quality gate workflow:
 
 - File: `.github/workflows/orders-template-quality-gate.yml`
-- Local equivalent: `composer ci:orders-template-gate`
+- Local equivalent: `composer ci:orders-gate`
 
 Gate commands:
 

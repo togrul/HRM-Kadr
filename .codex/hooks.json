@@ -1,0 +1,23 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash '/Users/togruljalalli/Desktop/projects/HRM/.codex/hooks/pint-format.sh'"
+          },
+          {
+            "type": "command",
+            "command": "bash '/Users/togruljalalli/Desktop/projects/HRM/.codex/hooks/blaze-safe-lint.sh'"
+          },
+          {
+            "type": "command",
+            "command": "bash '/Users/togruljalalli/Desktop/projects/HRM/.codex/hooks/translations-lint.sh'"
+          }
+        ]
+      }
+    ]
+  }
+}

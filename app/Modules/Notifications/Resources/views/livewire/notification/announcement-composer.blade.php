@@ -43,7 +43,7 @@
                 </div>
             </div>
 
-            <div class="rounded-[1.4rem] border border-zinc-200 bg-white px-4 py-4 shadow-[0_10px_26px_rgba(15,23,42,0.04)]">
+            <div class="rounded-2xl border border-zinc-200 bg-white px-4 py-4 shadow-card">
                 <div class="flex flex-wrap items-center justify-between gap-3">
                     <div>
                         <p class="text-sm font-semibold text-zinc-950">{{ __('notifications::common.titles.schedule_experience') }}</p>

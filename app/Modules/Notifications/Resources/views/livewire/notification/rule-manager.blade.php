@@ -148,7 +148,7 @@
 
             <div class="space-y-3">
                 @forelse ($rules as $rule)
-                    <div class="rounded-2xl border border-zinc-200 bg-white px-4 py-4 shadow-[0_12px_24px_rgba(15,23,42,0.03)]">
+                    <div class="rounded-2xl border border-zinc-200 bg-white px-4 py-4 shadow-card">
                         <div class="flex items-start justify-between gap-3">
                             <div class="space-y-1">
                                 <p class="text-sm font-semibold text-zinc-950">{{ $categoryLabels[$rule->category] ?? $rule->category }} / {{ $displayTrigger($rule->trigger) }}</p>

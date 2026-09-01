@@ -5,6 +5,12 @@ return [
     'description' => 'A unified employee self-service entry point for personal HR summary, requests, onboarding documents, individual development plan, and hierarchy context.',
     'actions' => [
         'open_docs' => 'Open guide',
+        'new_request' => 'New request',
+    ],
+    'balance' => [
+        'title' => 'Vacation balance',
+        'remaining_note' => 'days left / :total days entitled',
+        'used' => ':count days used',
     ],
     'tabs' => [
         'overview' => 'Overview',
@@ -14,7 +20,20 @@ return [
         'development_plan' => 'My development plan',
         'learning' => 'Learning materials',
         'documents' => 'My documents',
+        'payslips' => 'My payslips',
         'hierarchy' => 'My structure',
+    ],
+
+    'payslips' => [
+        'kicker' => 'Self-service',
+        'title' => 'My payslips',
+        'description' => 'Your locked (finalised) payroll calculations are shown here.',
+        'list' => 'Payslips',
+        'empty' => 'No payslips yet',
+        'detail' => 'Payslip detail',
+        'close' => 'Close',
+        'gross' => 'Gross',
+        'net' => 'Net',
     ],
     'summary' => [
         'profile_kicker' => 'Employee profile',

@@ -1,123 +1,89 @@
 @php
     $personnels = $this->personnels;
     $status = $this->status;
-    $rowStart = ($personnels->currentPage() - 1) * $personnels->perPage();
+
+    // One presence state per row drives both the chip and the avatar tint.
+    $stateOf = function ($personnel): array {
+        if (filled($personnel->leave_work_date)) {
+            return ['key' => 'resigned', 'tone' => 'rose', 'label' => __('personnel::common.labels.resigned')];
+        }
+
+        if ($personnel->is_pending) {
+            return ['key' => 'pending', 'tone' => 'amber', 'label' => __('personnel::common.states.waiting_for_approval')];
+        }
+
+        if ($personnel->active_vacation) {
+            return ['key' => 'vacation', 'tone' => 'green', 'label' => __('personnel::common.states.in_vacation')];
+        }
+
+        if ($personnel->active_business_trip) {
+            return ['key' => 'trip', 'tone' => 'blue', 'label' => __('personnel::common.states.in_business_trip')];
+        }
+
+        return ['key' => 'at_work', 'tone' => 'neutral', 'label' => __('personnel::common.states.at_work')];
+    };
 @endphp
 
 <div class="contents">
-    <div class="relative min-h-[300px] overflow-x-auto mt-4">
-        <div class="inline-block min-w-full align-middle sm:px-1">
-            <x-table.tbl :headers="$this->getTableHeaders()" title="{{ __('personnel::common.titles.personnels') }}">
-                @forelse ($personnels as $personnel)
-                    @php
-                        $rowNumber = $rowStart + $loop->iteration;
-                        $rowActions = $this->rowActions($personnel);
-                    @endphp
-                    <tr wire:key="personnel-row-{{ $personnel->id }}-{{ $status ?? 'all' }}"
-                        @class([
-                            'relative bg-white',
-                            'bg-rose-50/70' => !empty($personnel->leave_work_date),
-                        ])>
-                        <x-table.td>
-                            <div class="absolute top-0 left-[-7px] flex flex-col justify-between h-full">
-                                @if ($personnel->active_vacation)
-                                    <x-progress :startDate="$personnel->active_vacation_start" :endDate="$personnel->active_vacation_end" color="emerald">
-                                        {{ __('personnel::common.states.in_vacation') }}
-                                    </x-progress>
-                                @endif
-                                @if ($personnel->active_business_trip)
-                                    <x-progress :startDate="$personnel->active_business_trip_start" :endDate="$personnel->active_business_trip_end" color="rose">
-                                        {{ __('personnel::common.states.in_business_trip') }}
-                                    </x-progress>
-                                @endif
-                            </div>
+    <x-table.tbl :headers="$this->getTableHeaders()">
+        @forelse ($personnels as $personnel)
+            @php
+                $rowActions = $this->rowActions($personnel);
+                $state = $stateOf($personnel);
+            @endphp
 
-                            <span class="text-sm font-mono font-medium text-zinc-600">
-                                {{ $rowNumber }}
-                            </span>
-                        </x-table.td>
+            <tr
+                wire:key="personnel-row-{{ $personnel->id }}-{{ $status ?? 'all' }}"
+                @class([
+                    'group/row transition',
+                    'bg-[#fffbf5]' => $state['key'] === 'pending',
+                    'bg-[#fff7f8]' => $state['key'] === 'resigned',
+                    'hover:bg-[#fafafa]' => ! in_array($state['key'], ['pending', 'resigned'], true),
+                ])
+            >
+                <x-table.td>
+                    <a href="{{ route('personnel.show', $personnel->id) }}" wire:navigate class="flex items-center gap-3">
+                        <x-avatar :name="$personnel->fullname" :tone="$state['tone']" />
+                        <div class="min-w-0 max-w-[240px] leading-tight">
+                            <p class="truncate text-[13px] font-medium text-ink group-hover/row:underline">{{ $personnel->fullname }}</p>
+                            <p class="hrm-num mt-0.5 text-[11.5px] text-ink-faint">#{{ $personnel->tabel_no }}</p>
+                        </div>
+                    </a>
+                </x-table.td>
 
-                        <x-table.td>
-                            <div class="flex flex-col space-y-1">
-                                <span class="text-sm font-mono font-medium text-blue-500 w-max">
-                                    {{ $personnel->tabel_no }}
-                                </span>
+                <x-table.td standart-width wire:click="handleRowAction('quick-view', { type: 'quick-view', value: '{{ $personnel->tabel_no }}' })" class="cursor-pointer">
+                    <div class="max-w-[280px] leading-tight">
+                        <p class="truncate text-[13px] text-ink-soft">{{ $personnel->position_label }}</p>
+                        {{-- the column shows the current unit only; the full chain stays on hover --}}
+                        <p class="mt-0.5 truncate text-[11.5px] text-ink-faint" title="{{ $personnel->structure_path }}">{{ $personnel->structure_name }}</p>
+                    </div>
+                </x-table.td>
 
-                                @if ($personnel->is_pending)
-                                    <div class="flex items-center px-2 py-0 space-x-2 text-xs font-medium text-amber-500 border border-amber-200 rounded-lg shadow-sm bg-amber-50">
-                                        <x-icons.pending-icon size="w-5 h-5" color="text-amber-600"></x-icons.pending-icon>
-                                        <span class="uppercase tracking-tight">{{ __('personnel::common.states.waiting_for_approval') }}</span>
-                                    </div>
-                                @endif
+                <x-table.td wire:click="handleRowAction('quick-view', { type: 'quick-view', value: '{{ $personnel->tabel_no }}' })" class="cursor-pointer">
+                    <x-small-badge :mode="$state['tone'] === 'neutral' ? 'secondary' : $state['tone']" dot>
+                        {{ $state['label'] }}
+                    </x-small-badge>
 
-                                @if ($status == 'deleted')
-                                    <div class="flex flex-col text-xs font-medium">
-                                        <div class="flex items-center space-x-1">
-                                            <span class="text-gray-500">{{ __('personnel::common.labels.deleted_date') }}:</span>
-                                            <span class="text-black">{{ $personnel->deleted_at_fmt }}</span>
-                                        </div>
-                                        <div class="flex items-center space-x-1">
-                                            <span class="text-gray-500">{{ __('personnel::common.labels.deleted_by') }}:</span>
-                                            <span class="text-black">{{ $personnel->deleted_by_name }}</span>
-                                        </div>
-                                    </div>
-                                @endif
-                            </div>
-                        </x-table.td>
+                    @if ($status === 'deleted')
+                        <p class="mt-1 text-[11px] text-ink-faint">
+                            {{ $personnel->deleted_at_fmt }}{{ $personnel->deleted_by_name ? ' · '.$personnel->deleted_by_name : '' }}
+                        </p>
+                    @endif
+                </x-table.td>
 
-                        <x-table.td>
-                            <div class="flex items-center space-x-2">
-                                <img src="{{ $personnel->photo_url }}" alt="" class="flex-none object-cover border shadow-sm rounded-md w-12 h-12 border-zinc-200">
-                                <div class="flex flex-col space-y-1">
-                                    <span class="text-sm font-medium text-zinc-900">
-                                        {{ $personnel->fullname }}
-                                    </span>
-                                    <div class="flex items-center space-x-1">
-                                        <x-small-badge>{{ $personnel->gender_label }}</x-small-badge>
-                                        @if ($personnel->rank_label !== '')
-                                            <x-small-badge mode="green">{{ $personnel->rank_label }}</x-small-badge>
-                                        @endif
-                                        @if ($personnel->active_shift_name)
-                                            <x-small-badge mode="sky">{{ __('personnel::common.labels.shift') }}: {{ $personnel->active_shift_name }}</x-small-badge>
-                                        @endif
-                                    </div>
-                                    @if ($personnel->active_shift_window)
-                                        <span class="text-xs text-zinc-500">{{ $personnel->active_shift_window }}</span>
-                                    @endif
-                                </div>
-                            </div>
-                        </x-table.td>
+                <x-table.td wire:click="handleRowAction('quick-view', { type: 'quick-view', value: '{{ $personnel->tabel_no }}' })" class="cursor-pointer">
+                    <span class="hrm-num text-[13px] text-ink-soft">{{ $personnel->join_work_date_fmt }}</span>
+                    @if (filled($personnel->leave_work_date))
+                        <span class="hrm-num mt-0.5 block text-[11.5px] text-[#be123c]">{{ $personnel->leave_work_date_fmt }}</span>
+                    @endif
+                </x-table.td>
 
-                        <x-table.td>
-                            <div class="flex flex-col space-y-1">
-                                <span class="text-sm font-medium text-zinc-900">
-                                    {{ $personnel->structure_path }}
-                                </span>
-                                <span class="text-sm font-medium text-zinc-600">{{ $personnel->position_label }}</span>
-                            </div>
-                        </x-table.td>
+                <x-personnel.row-actions :actions="$rowActions" :force-up="$loop->last" />
+            </tr>
+        @empty
+            <x-table.empty :rows="count($this->getTableHeaders())"></x-table.empty>
+        @endforelse
+    </x-table.tbl>
 
-                        <x-table.td>
-                            <x-table.cell-vertical :title="__('personnel::common.labels.join_date')">
-                                {{ $personnel->join_work_date_fmt }}
-                            </x-table.cell-vertical>
-                            @if (!empty($personnel->leave_work_date))
-                                <x-table.cell-vertical :title="__('personnel::common.labels.leave_date')" text-color="text-rose-500">
-                                    {{ $personnel->leave_work_date_fmt }}
-                                </x-table.cell-vertical>
-                            @endif
-                        </x-table.td>
-
-                        <x-personnel.row-actions :actions="$rowActions" :force-up="$loop->last" />
-                    </tr>
-                @empty
-                    <x-table.empty :rows="count($this->getTableHeaders())"></x-table.empty>
-                @endforelse
-            </x-table.tbl>
-        </div>
-    </div>
-
-    <div class="border-t border-zinc-200 px-6 py-3">
-        {{ $personnels->links() }}
-    </div>
+    <x-pagination :paginator="$personnels" :unit="__('ui::common.labels.results')" />
 </div>

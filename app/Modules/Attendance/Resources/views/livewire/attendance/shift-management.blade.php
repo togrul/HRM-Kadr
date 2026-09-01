@@ -140,7 +140,7 @@
                                 <span>{{ $personnel->fullname }}</span>
                                 <span class="text-xs font-mono text-zinc-500">{{ $personnel->tabel_no }}</span>
                                 <span class="max-w-[18rem] truncate text-[11px] text-zinc-400 md:max-w-[24rem]" title="{{ $personnel->structure_path }}">
-                                    {{ $personnel->structure_path ?: '-' }}
+                                    {{ $personnel->structure_name ?: '-' }}
                                     @if($personnel->position?->name)
                                         • {{ $personnel->position->name }}
                                     @endif
@@ -194,7 +194,7 @@
                             <p class="text-xs font-mono uppercase tracking-wide text-zinc-500">{{ $selectedPersonnel['tabel_no'] }}</p>
                             @if($this->selectedPersonnelRecord?->structure_path)
                                 <p class="mt-1 max-w-[18rem] truncate text-xs text-zinc-500 md:max-w-[24rem]" title="{{ $this->selectedPersonnelRecord->structure_path }}">
-                                    {{ $this->selectedPersonnelRecord->structure_path }}
+                                    {{ $this->selectedPersonnelRecord->structure_name }}
                                     @if($this->selectedPersonnelRecord?->position?->name)
                                         • {{ $this->selectedPersonnelRecord->position->name }}
                                     @endif
@@ -243,7 +243,7 @@
                                     <x-table.td>
                                         <div class="flex flex-col">
                                             <span class="max-w-[18rem] truncate md:max-w-[24rem]" title="{{ $assignment->personnel?->structure_path ?? '' }}">
-                                                {{ $assignment->personnel?->structure_path ?? '-' }}
+                                                {{ $assignment->personnel?->structure_name ?? '-' }}
                                             </span>
                                             @if($assignment->personnel?->position?->name)
                                                 <span class="text-xs text-zinc-500">{{ $assignment->personnel->position->name }}</span>

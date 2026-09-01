@@ -27,31 +27,31 @@
         </div>
 
         <div class="grid gap-4 xl:grid-cols-4">
-            <div class="rounded-[1.6rem] border border-zinc-200 bg-white p-4 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
+            <div class="rounded-[1.6rem] border border-zinc-200 bg-white p-4 shadow-card">
                 <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.stats.sent') }}</p>
                 <p class="mt-3 text-3xl font-semibold text-emerald-700">{{ $stats['sent'] }}</p>
             </div>
-            <div class="rounded-[1.6rem] border border-zinc-200 bg-white p-4 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
+            <div class="rounded-[1.6rem] border border-zinc-200 bg-white p-4 shadow-card">
                 <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.stats.failed') }}</p>
                 <p class="mt-3 text-3xl font-semibold text-rose-700">{{ $stats['failed'] }}</p>
             </div>
-            <div class="rounded-[1.6rem] border border-zinc-200 bg-white p-4 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
+            <div class="rounded-[1.6rem] border border-zinc-200 bg-white p-4 shadow-card">
                 <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.stats.approval_turnaround') }}</p>
                 <p class="mt-3 text-3xl font-semibold text-zinc-900">{{ $stats['approval_turnaround_minutes'] !== null ? $stats['approval_turnaround_minutes'].' dəq' : '—' }}</p>
             </div>
-            <div class="rounded-[1.6rem] border border-zinc-200 bg-white p-4 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
+            <div class="rounded-[1.6rem] border border-zinc-200 bg-white p-4 shadow-card">
                 <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.stats.scheduled') }}</p>
                 <p class="mt-3 text-3xl font-semibold text-amber-700">{{ $stats['scheduled'] }}</p>
             </div>
         </div>
 
         <div class="space-y-4">
-            <div class="rounded-[1.6rem] border border-zinc-200 bg-white p-4 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
+            <div class="rounded-[1.6rem] border border-zinc-200 bg-white p-4 shadow-card">
                 <p class="text-sm font-semibold text-zinc-950">{{ __('notifications::common.titles.channel_health') }}</p>
                 <div class="mt-4 space-y-3">
                     @forelse ($statusByChannel as $channelRow)
                         <div class="overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-50/70 px-4 py-4">
-                            <div class="rounded-[1.35rem] border border-zinc-200 bg-white px-4 py-4">
+                            <div class="rounded-2xl border border-zinc-200 bg-white px-4 py-4">
                                 <div class="max-w-xl">
                                     <p class="text-lg font-semibold tracking-tight text-zinc-950">{{ __('notifications::common.channels.'.$channelRow['channel']) }}</p>
                                     <p class="mt-1 text-sm leading-6 text-zinc-500">{{ __('notifications::common.helpers.channel_health_hint') }}</p>
@@ -82,7 +82,7 @@
             </div>
 
             <div class="grid gap-4 min-[1500px]:grid-cols-2">
-                <div class="rounded-[1.6rem] border border-zinc-200 bg-white p-4 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
+                <div class="rounded-[1.6rem] border border-zinc-200 bg-white p-4 shadow-card">
                     <p class="text-sm font-semibold text-zinc-950">{{ __('notifications::common.titles.failure_reasons') }}</p>
                     <div class="mt-4 space-y-3">
                         @forelse ($failureReasons as $failure)
@@ -106,7 +106,7 @@
                     </div>
                 </div>
 
-                <div class="rounded-[1.6rem] border border-zinc-200 bg-white p-4 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
+                <div class="rounded-[1.6rem] border border-zinc-200 bg-white p-4 shadow-card">
                     <p class="text-sm font-semibold text-zinc-950">{{ __('notifications::common.titles.provider_delivery') }}</p>
                     <div class="mt-4 space-y-3">
                         @forelse ($providerStats as $provider)

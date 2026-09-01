@@ -3,14 +3,35 @@
 use Symfony\Component\Finder\Finder;
 
 /**
- * Blade's component-tag compiler does not accept whitespace around `=` inside an
- * `<x-…>` tag. `wire:click = "delete(1)"` is parsed as a value-less `wire:click`
- * plus junk attributes, so the button renders with `wire:click=""` and silently
- * does nothing. Plain HTML tags tolerate it, component tags never do.
+ * Two things a component tag's attribute list silently swallows, both verified against
+ * Blade::render:
+ *
+ * 1. Whitespace around `=`. `wire:click = "delete(1)"` is parsed as a value-less
+ *    `wire:click` plus junk attributes, so the button renders with `wire:click=""` and
+ *    does nothing at all.
+ * 2. Blade directives other than @class / @style. `@disabled(...)` / `@js(...)` are left
+ *    uncompiled, emitting literal `@disabled="@disabled"` — Alpine then throws on the
+ *    expression, and a long one can even blow up Livewire's morph-marker regex.
+ *
+ * Plain HTML tags tolerate both; component tags never do.
  */
-function componentTagsWithSpacedAttributes(string $source): array
+
+/**
+ * The text of every `<x-…>` opening tag in the given source.
+ *
+ * @return array<int, array{line: int, tag: string}>
+ */
+function componentTags(string $source): array
 {
-    $found = [];
+    $tags = [];
+
+    // Blade comments are stripped before compilation, so they cannot break a tag. Their
+    // newlines are kept so the reported line numbers still point at the real source.
+    $source = preg_replace_callback(
+        '/\{\{--.*?--\}\}/s',
+        fn (array $match): string => str_repeat("\n", substr_count($match[0], "\n")),
+        $source
+    ) ?? $source;
 
     preg_match_all('/<x-[A-Za-z0-9._:-]+/', $source, $matches, PREG_OFFSET_CAPTURE);
 
@@ -34,13 +55,38 @@ function componentTagsWithSpacedAttributes(string $source): array
             $i++;
         }
 
-        $tag = substr($source, $offset, $i - $offset + 1);
+        $tags[] = [
+            'line' => substr_count(substr($source, 0, $offset), "\n") + 1,
+            'tag' => substr($source, $offset, $i - $offset + 1),
+        ];
+    }
 
-        if (preg_match('/(?<![\w:.\-])([@:]?[A-Za-z][\w:.\-]*)\s+=\s*"/', $tag, $attribute)) {
-            $found[] = [
-                'line' => substr_count(substr($source, 0, $offset), "\n") + 1,
-                'attribute' => $attribute[1],
-            ];
+    return $tags;
+}
+function componentTagsWithSpacedAttributes(string $source): array
+{
+    $found = [];
+
+    foreach (componentTags($source) as $tag) {
+        if (preg_match('/(?<![\w:.\-])([@:]?[A-Za-z][\w:.\-]*)\s+=\s*"/', $tag['tag'], $attribute)) {
+            $found[] = ['line' => $tag['line'], 'attribute' => $attribute[1]];
+        }
+    }
+
+    return $found;
+}
+
+/**
+ * @return array<int, array{line: int, attribute: string}>
+ */
+function componentTagsWithBladeDirectives(string $source): array
+{
+    $found = [];
+
+    foreach (componentTags($source) as $tag) {
+        // @class and @style ARE compiled inside a component tag; nothing else is.
+        if (preg_match('/(?<![\w:@])@(?!class\b|style\b)([a-z]+)\s*\(/', $tag['tag'], $directive)) {
+            $found[] = ['line' => $tag['line'], 'attribute' => '@'.$directive[1]];
         }
     }
 
@@ -56,9 +102,15 @@ it('never writes a component-tag attribute with whitespace around the equals sig
     $offenders = [];
 
     foreach ($files as $file) {
-        foreach (componentTagsWithSpacedAttributes($file->getContents()) as $hit) {
-            $offenders[] = str_replace(base_path().'/', '', $file->getPathname())
-                .':'.$hit['line'].' ('.$hit['attribute'].')';
+        $path = str_replace(base_path().'/', '', $file->getPathname());
+        $source = $file->getContents();
+
+        foreach (componentTagsWithSpacedAttributes($source) as $hit) {
+            $offenders[] = $path.':'.$hit['line'].' ('.$hit['attribute'].' — whitespace around =)';
+        }
+
+        foreach (componentTagsWithBladeDirectives($source) as $hit) {
+            $offenders[] = $path.':'.$hit['line'].' ('.$hit['attribute'].' — directive is not compiled here)';
         }
     }
 

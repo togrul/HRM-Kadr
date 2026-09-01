@@ -4,7 +4,7 @@ namespace App\Modules\Personnel\Services;
 
 use App\Models\AttendanceShiftAssignment;
 use App\Models\Personnel;
-use App\Models\Structure;
+use App\Services\StructurePathService;
 use Carbon\Carbon;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
@@ -12,9 +12,6 @@ use Illuminate\Support\Facades\Storage;
 
 class PersonnelRowViewModelService
 {
-    /** @var array<int, string> */
-    protected array $structurePathCache = [];
-
     public function decoratePaginator(LengthAwarePaginator $paginator): LengthAwarePaginator
     {
         $paginator->setCollection(
@@ -30,8 +27,6 @@ class PersonnelRowViewModelService
      */
     public function decorateCollection(Collection $collection): Collection
     {
-        $this->ensureStructureTreeLoaded($collection);
-
         $activeShiftAssignments = $this->resolveActiveShiftAssignments($collection);
 
         return $collection->map(function (Personnel $personnel, int $index) use ($activeShiftAssignments) {
@@ -39,7 +34,9 @@ class PersonnelRowViewModelService
             $businessTrip = $personnel->activeBusinessTrip;
             $activeShiftAssignment = $activeShiftAssignments->get((string) $personnel->tabel_no);
 
-            $personnel->setAttribute('structure_path', $this->resolveStructurePath($personnel->structure));
+            $structurePath = app(StructurePathService::class);
+            $personnel->setAttribute('structure_path', implode(' / ', $structurePath->segments($personnel->structure_id)));
+            $personnel->setAttribute('structure_name', $structurePath->current($personnel->structure_id));
             $personnel->setAttribute('join_work_date_fmt', $this->formatDate($personnel->join_work_date));
             $personnel->setAttribute('leave_work_date_fmt', $this->formatDate($personnel->leave_work_date));
             $personnel->setAttribute('deleted_at_fmt', $this->formatDateTime($personnel->deleted_at));
@@ -63,25 +60,6 @@ class PersonnelRowViewModelService
 
             return $personnel;
         });
-    }
-
-    /**
-     * The row decorator depends on structure -> parent chains to build labels.
-     * Load them here so callers do not need to remember that contract.
-     *
-     * @param  Collection<int, Personnel>  $collection
-     */
-    protected function ensureStructureTreeLoaded(Collection $collection): void
-    {
-        if ($collection->isEmpty()) {
-            return;
-        }
-
-        $collection->loadMissing([
-            'structure' => fn ($query) => $query
-                ->select('id', 'parent_id', 'name')
-                ->withRecursive('parent', false),
-        ]);
     }
 
     /**
@@ -141,36 +119,5 @@ class PersonnelRowViewModelService
         }
 
         return Carbon::parse($value)->format('d.m.Y H:i');
-    }
-
-    protected function resolveStructurePath(?Structure $structure): string
-    {
-        if (! $structure) {
-            return '';
-        }
-
-        $cacheKey = (int) $structure->id;
-
-        if (isset($this->structurePathCache[$cacheKey])) {
-            return $this->structurePathCache[$cacheKey];
-        }
-
-        $segments = [];
-        $cursor = $structure;
-
-        while ($cursor) {
-            $segments[] = (string) $cursor->name;
-
-            $parent = $cursor->parent;
-
-            // Stop at the organizational root and do not include its label.
-            if (! $parent || is_null($parent->parent_id)) {
-                break;
-            }
-
-            $cursor = $parent;
-        }
-
-        return $this->structurePathCache[$cacheKey] = implode(' ', array_reverse($segments));
     }
 }

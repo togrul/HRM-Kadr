@@ -4,6 +4,7 @@ namespace App\Modules\Vacation\Livewire;
 
 use App\Livewire\Traits\DropdownConstructTrait;
 use App\Livewire\Traits\SideModalAction;
+use App\Models\OrderType;
 use App\Models\PersonnelVacation;
 use App\Models\Structure;
 use App\Modules\Personnel\Contracts\MyHrRequestReview;
@@ -13,8 +14,10 @@ use App\Services\NumberToWordsService;
 use App\Services\StructureService;
 use App\Services\WordSuffixService;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Computed;
@@ -46,6 +49,9 @@ class Vacations extends Component
     #[Url(as: 'year', keep: true)]
     public $selectedYear;
 
+    #[Url(as: 'type')]
+    public $selectedType;
+
     protected array $runtimeStructureOptionsCache = [];
 
     public function exportExcel()
@@ -67,16 +73,18 @@ class Vacations extends Component
     {
         $this->fillFilter();
         $this->search = $this->filter;
+        $this->selectedType = null;
+        $this->resetPage();
     }
 
     public function getTableHeaders(): array
     {
         return [
-            __('personnel::common.labels.number'),
             __('vacation::common.labels.fullname'),
             __('vacation::common.labels.structure'),
+            __('vacation::common.labels.type'),
             __('vacation::common.labels.dates'),
-            __('vacation::common.labels.locations'),
+            __('vacation::common.labels.duration'),
             __('vacation::common.labels.order'),
             __('personnel::common.labels.action'),
         ];
@@ -181,17 +189,20 @@ class Vacations extends Component
         ];
     }
 
-    protected function returnData($type = 'normal')
+    /**
+     * The visibility-scoped, filtered vacation query every read shares — the table,
+     * the panel status counts and the panel type counts. It deliberately leaves the
+     * status bucket out so the counts can be computed per bucket.
+     *
+     * @return Builder<PersonnelVacation>
+     */
+    protected function baseQuery(): Builder
     {
-        $result = PersonnelVacation::with([
-            'personnel' => fn ($q) => $q->with([
-                'structure',
-                'position',
-                'latestRank.rank',
-            ]),
-        ])
+        return PersonnelVacation::query()
             ->whereHas('personnel', fn ($query) => $query->whereIn('structure_id', $this->accessibleStructureIds))
             ->where(function ($query) {
+                // A self-service request only joins the register once it is approved;
+                // pending ones live in the review inbox (MyHrOperationalRequestVisibilityTest).
                 $query->whereNull('submission_source')
                     ->orWhere(function ($selfService) {
                         $selfService->where('submission_source', '!=', 'employee_self_service')
@@ -201,8 +212,43 @@ class Vacations extends Component
                             });
                     });
             })
-            ->filter($this->search)
-            ->when((empty($this->search['date']['min'] ?? null) && empty($this->search['date']['max'] ?? null)), fn ($qq) => $qq->whereDateInYear($this->selectedYear))
+            ->filter(Arr::except($this->search, ['vacation_status']))
+            ->when(
+                empty($this->search['date']['min'] ?? null) && empty($this->search['date']['max'] ?? null),
+                fn ($query) => $query->whereDateInYear($this->selectedYear)
+            );
+    }
+
+    /**
+     * The base query narrowed to the selected status bucket and vacation type — what
+     * the table actually lists.
+     *
+     * @return Builder<PersonnelVacation>
+     */
+    protected function scopedQuery(): Builder
+    {
+        return $this->baseQuery()
+            ->filter(Arr::only($this->search, ['vacation_status']))
+            ->when($this->selectedType, fn ($query) => $query->whereHas(
+                'order',
+                fn ($order) => Str::startsWith((string) $this->selectedType, 'tpl:')
+                    ? $order->where('template_snapshot->template_code', Str::after((string) $this->selectedType, 'tpl:'))
+                    : $order->where('order_type_id', (int) $this->selectedType)
+            ));
+    }
+
+    protected function returnData($type = 'normal')
+    {
+        $result = $this->scopedQuery()
+            ->with([
+                'personnel' => fn ($q) => $q->with([
+                    'structure',
+                    'position',
+                    'latestRank.rank',
+                ]),
+                'order:id,order_no,order_id,order_type_id,template_snapshot',
+                'order.orderType:id,name',
+            ])
             ->orderByDesc('end_date')
             ->orderByDesc('return_work_date');
 
@@ -243,6 +289,102 @@ class Vacations extends Component
     public function vacations()
     {
         return $this->returnData();
+    }
+
+    /**
+     * Status bucket counts plus the total vacation days, in one pass — the panel and
+     * the header stat strip read the same numbers.
+     *
+     * @return array{all: int, at_work: int, in_vacation: int, days: int}
+     */
+    #[Computed]
+    public function summary(): array
+    {
+        $now = Carbon::now();
+
+        $row = $this->baseQuery()
+            ->toBase()
+            ->selectRaw(
+                'count(*) as total,'
+                .' sum(case when return_work_date < ? then 1 else 0 end) as at_work,'
+                .' sum(case when return_work_date > ? then 1 else 0 end) as in_vacation,'
+                .' coalesce(sum(duration), 0) as days',
+                [$now, $now]
+            )
+            ->first();
+
+        return [
+            'all' => (int) ($row->total ?? 0),
+            'at_work' => (int) ($row->at_work ?? 0),
+            'in_vacation' => (int) ($row->in_vacation ?? 0),
+            'days' => (int) ($row->days ?? 0),
+        ];
+    }
+
+    /**
+     * Vacation types for the panel. A vacation has no type of its own — it inherits it
+     * from the order it was issued under, so the buckets are the linked order's type
+     * (legacy block orders) or its frozen Word-template label.
+     *
+     * @return list<array{key: string, label: string, count: int}>
+     */
+    #[Computed]
+    public function typeFilters(): array
+    {
+        $rows = $this->baseQuery()
+            ->toBase()
+            ->join('order_logs', 'order_logs.order_no', '=', 'personnel_vacations.order_no')
+            ->selectRaw('count(*) as aggregate')
+            ->addSelect([
+                'order_logs.order_type_id',
+                'order_logs.template_snapshot->template_code as template_code',
+                'order_logs.template_snapshot->label as template_label',
+            ])
+            ->groupBy('order_logs.order_type_id', 'order_logs.template_snapshot->template_code', 'order_logs.template_snapshot->label')
+            ->get();
+
+        $orderTypeNames = $rows->pluck('order_type_id')->filter()->unique()->isEmpty()
+            ? collect()
+            : OrderType::query()->whereIn('id', $rows->pluck('order_type_id')->filter()->unique())->pluck('name', 'id');
+
+        // MySQL's json_extract keeps the JSON quoting, SQLite's does not.
+        $unquote = fn (?string $value): string => trim((string) $value, '"');
+
+        return $rows
+            ->map(function ($row) use ($orderTypeNames, $unquote): ?array {
+                if ($row->order_type_id) {
+                    return [
+                        'key' => (string) $row->order_type_id,
+                        'label' => (string) ($orderTypeNames[$row->order_type_id] ?? $row->order_type_id),
+                        'count' => (int) $row->aggregate,
+                    ];
+                }
+
+                $code = $unquote($row->template_code);
+
+                return $code === '' ? null : [
+                    'key' => 'tpl:'.$code,
+                    'label' => $unquote($row->template_label) ?: $code,
+                    'count' => (int) $row->aggregate,
+                ];
+            })
+            ->filter()
+            ->sortBy('label', SORT_NATURAL | SORT_FLAG_CASE)
+            ->values()
+            ->all();
+    }
+
+    public function setStatus(string $value): void
+    {
+        $this->filter['vacation_status'] = $value;
+        $this->searchFilter();
+        $this->resetPage();
+    }
+
+    public function selectType(string $key): void
+    {
+        $this->selectedType = $key === '' ? null : $key;
+        $this->resetPage();
     }
 
     protected function fillYear(): void

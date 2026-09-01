@@ -162,7 +162,7 @@
     </div>
 
     @if($this->leaveDurationNotice)
-        <div class="rounded-3xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 shadow-sm">
+        <div class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 shadow-sm">
             <div class="flex items-start gap-3">
                 <div class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-rose-100 text-rose-600">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -184,7 +184,9 @@
     @endif
 
     <div class="grid grid-cols-1 items-start gap-4 xl:grid-cols-[minmax(0,0.72fr)_minmax(0,1.28fr)]">
-        <div class="grid gap-4">
+        {{-- min-w-0: a grid item defaults to min-width:auto, so a long uploaded filename
+             would widen this column past its track and slide under the panel beside it. --}}
+        <div class="grid min-w-0 gap-4">
             <div class="flex flex-col">
                 <x-ui.select-dropdown
                     label="{{ __('leaves::common.labels.status') }}"
@@ -200,7 +202,7 @@
                 @enderror
             </div>
 
-            <div class="flex flex-col">
+            <div class="flex min-w-0 flex-col">
                 <x-ui.file-upload
                     model="leave.document_path"
                     :data="$leave->document_path"
@@ -214,7 +216,7 @@
 
         <div class="flex min-w-0 flex-col">
             <x-label>{{ __('leaves::common.labels.assigned_person') }}</x-label>
-            <div class="mt-1 rounded-3xl border border-zinc-200 bg-zinc-50/70 p-4 shadow-sm">
+            <div class="mt-1 rounded-2xl border border-zinc-200 bg-zinc-50/70 p-4 shadow-sm">
                 <div class="flex flex-wrap items-center gap-2">
                     <button
                         type="button"

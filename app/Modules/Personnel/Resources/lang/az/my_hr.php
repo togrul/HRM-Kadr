@@ -5,6 +5,12 @@ return [
     'description' => 'Əməkdaş üçün vahid şəxsi kabinet giriş nöqtəsi: öz HR xülasəsi, müraciətlər, uyğunlaşma sənədləri, fərdi inkişaf planı və struktur konteksti buradan idarə olunur.',
     'actions' => [
         'open_docs' => 'Bələdçini aç',
+        'new_request' => 'Yeni ərizə',
+    ],
+    'balance' => [
+        'title' => 'Məzuniyyət balansı',
+        'remaining_note' => 'gün qalıb / :total gün haqq',
+        'used' => ':count gün istifadə olunub',
     ],
     'tabs' => [
         'overview' => 'Xülasə',
@@ -14,7 +20,20 @@ return [
         'development_plan' => 'Fərdi inkişaf planım',
         'learning' => 'Öyrənmə materialları',
         'documents' => 'Sənədlərim',
+        'payslips' => 'Maaş vərəqələrim',
         'hierarchy' => 'Mənim strukturum',
+    ],
+
+    'payslips' => [
+        'kicker' => 'Şəxsi kabinet',
+        'title' => 'Maaş vərəqələrim',
+        'description' => 'Kilidlənmiş (rəsmiləşmiş) maaş hesablamalarınız burada göstərilir.',
+        'list' => 'Vərəqələr',
+        'empty' => 'Hələ maaş vərəqəsi yoxdur',
+        'detail' => 'Vərəqə detalı',
+        'close' => 'Bağla',
+        'gross' => 'Brüt',
+        'net' => 'Net',
     ],
     'summary' => [
         'profile_kicker' => 'Əməkdaş profili',

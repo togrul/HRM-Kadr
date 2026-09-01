@@ -82,6 +82,8 @@ return [
     ],
     'labels' => [
         'unassigned' => 'Təyin edilməyib',
+        'active_process_count' => ':count aktiv proses',
+        'no_template' => 'Şablonsuz',
         'result_count' => ':count proses',
         'overdue' => 'Gecikir',
         'event_mix' => 'Proses bölgüsü',
@@ -129,6 +131,8 @@ return [
         'deadline' => 'Son tarix',
         'status' => 'Status',
         'task' => 'Tapşırıq',
+        'template' => 'Şablon',
+        'start' => 'Başlanğıc',
     ],
     'actions' => [
         'reset_filters' => 'Filterləri sıfırla',
@@ -150,6 +154,9 @@ return [
         'delete_template' => 'Şablonu sil',
         'archive_template' => 'Arxivlə',
         'close_editor' => 'Bağla',
+        'manage_templates' => 'Şablonlar',
+        'start_process' => 'Proses başlat',
+        'complete_processes' => 'Tamamla',
     ],
     'messages' => [
         'template_created' => 'Həyat dövrü şablonu yaradıldı.',

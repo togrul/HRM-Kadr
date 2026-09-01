@@ -4,10 +4,48 @@
 @endphp
 
 <div class="space-y-6 px-6 py-6">
-    <div class="rounded-[28px] border border-zinc-200 bg-zinc-50 p-6 shadow-sm">
+    {{-- ===================== contextual panel ===================== --}}
+    @php
+        $reviewTypes = [
+            'all' => __('personnel::my_hr.requests.filters.all'),
+            'leave' => __('personnel::my_hr.requests.types.leave'),
+            'vacation' => __('personnel::my_hr.requests.types.vacation'),
+            'business_trip' => __('personnel::my_hr.requests.types.business_trip'),
+            'correction' => __('personnel::my_hr.review.types.correction'),
+        ];
+    @endphp
+
+    <x-slot name="sidebar"><div id="hrm-context-panel"></div></x-slot>
+
+    @teleport('#hrm-context-panel')
+        <x-context-panel>
+            <x-context-panel.section :title="__('personnel::my_hr.requests.fields.type')">
+                @foreach ($reviewTypes as $value => $label)
+                    <x-context-panel.item
+                        wire:click.prevent="$set('typeFilter', '{{ $value }}')"
+                        :active="$typeFilter === $value"
+                        :count="$value === 'all' ? $summary['total'] : ($summary[$value] ?? 0)"
+                    >{{ $label }}</x-context-panel.item>
+                @endforeach
+            </x-context-panel.section>
+
+            @if (auth()->user()?->can('review-all-self-service-requests'))
+                <x-context-panel.section :title="__('personnel::my_hr.review.labels.scope')">
+                    <x-context-panel.item wire:click.prevent="$set('scopeFilter', 'mine')" :active="$scopeFilter === 'mine'">
+                        {{ __('personnel::my_hr.review.scope.mine') }}
+                    </x-context-panel.item>
+                    <x-context-panel.item wire:click.prevent="$set('scopeFilter', 'all')" :active="$scopeFilter === 'all'">
+                        {{ __('personnel::my_hr.review.scope.all') }}
+                    </x-context-panel.item>
+                </x-context-panel.section>
+            @endif
+        </x-context-panel>
+    @endteleport
+
+    <div class="rounded-2xl border border-zinc-200 bg-zinc-50 p-6 shadow-sm">
         <div class="space-y-2">
             <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __('personnel::my_hr.review.kicker') }}</x-ui.field-label>
-            <h1 class="text-3xl font-semibold tracking-tight text-zinc-950">{{ __('personnel::my_hr.review.title') }}</h1>
+            <h1 class="text-[19px] font-semibold tracking-tight text-zinc-950">{{ __('personnel::my_hr.review.title') }}</h1>
             <p class="max-w-3xl text-sm leading-6 text-zinc-500">{{ __('personnel::my_hr.review.description') }}</p>
         </div>
 
@@ -52,10 +90,10 @@
 
     <div class="space-y-4">
         @forelse ($payload['rows'] as $row)
-            <div class="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
+            <div class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
                 <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                     <div class="min-w-0 flex-1 space-y-3">
-                        <div class="inline-flex max-w-full rounded-[24px] border border-zinc-200 bg-zinc-50 px-5 py-3">
+                        <div class="inline-flex max-w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-5 py-3">
                             <h3 class="max-w-[40rem] text-lg font-semibold tracking-tight text-zinc-950">{{ $row['title'] }}</h3>
                         </div>
 
@@ -71,7 +109,7 @@
                     </div>
                 </div>
 
-                <div class="mt-4 rounded-[24px] border border-zinc-200 bg-zinc-50/80 px-5 py-4 text-base leading-7 text-zinc-700">
+                <div class="mt-4 rounded-2xl border border-zinc-200 bg-zinc-50/80 px-5 py-4 text-base leading-7 text-zinc-700">
                     {{ $row['summary'] }}
                 </div>
 
@@ -84,7 +122,7 @@
                     @endforeach
                 </div>
 
-                <div class="mt-4 rounded-[24px] border border-zinc-200 bg-zinc-50/70 px-4 py-4">
+                <div class="mt-4 rounded-2xl border border-zinc-200 bg-zinc-50/70 px-4 py-4">
                     <div class="flex items-center justify-between gap-3">
                         <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __('personnel::my_hr.review.labels.audit_timeline') }}</x-ui.field-label>
                         <span class="inline-flex items-center rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-xs font-semibold tracking-tight text-zinc-600">{{ $row['request_type_label'] }}</span>

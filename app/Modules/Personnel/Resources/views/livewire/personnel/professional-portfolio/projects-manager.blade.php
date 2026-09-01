@@ -32,9 +32,9 @@
 
             <div class="space-y-3">
                 @forelse ($this->records as $record)
-                    <div class="rounded-[24px] border {{ $record->verification_status === 'pending' ? 'border-amber-200 bg-amber-50/40 shadow-sm shadow-amber-100/40' : 'border-zinc-200 bg-white' }} p-4">
+                    <div class="rounded-2xl border {{ $record->verification_status === 'pending' ? 'border-amber-200 bg-amber-50/40 shadow-sm shadow-amber-100/40' : 'border-zinc-200 bg-white' }} p-4">
                         <div class="space-y-3">
-                            <div class="rounded-[22px] border border-zinc-200 bg-zinc-50/80 px-4 py-3.5">
+                            <div class="rounded-2xl border border-zinc-200 bg-zinc-50/80 px-4 py-3.5">
                                 <h3 class="max-w-[38rem] text-lg font-semibold tracking-tight text-zinc-950">{{ $record->project_name }}</h3>
                             </div>
 
@@ -75,7 +75,7 @@
                             <div class="mt-4 space-y-4 border-t border-zinc-100 pt-4">
                                 <x-professional-portfolio.verification-panel :status="$this->selectedRecord->verification_status" :verifier="$this->selectedRecord->verifier?->name" :verified-at="optional($this->selectedRecord->verified_at)?->format('d.m.Y H:i')" />
                                 <div class="space-y-4">
-                                    <div class="rounded-[24px] border border-zinc-200 bg-zinc-50/70 p-4">
+                                    <div class="rounded-2xl border border-zinc-200 bg-zinc-50/70 p-4">
                                         <div class="space-y-4">
                                             <div class="rounded-2xl border border-zinc-200 bg-white px-4 py-3">
                                                 <p class="text-[11px] font-semibold uppercase tracking-tight text-zinc-400">{{ __('personnel::portfolio.fields.responsibility_summary') }}</p>
@@ -131,7 +131,7 @@
         </div>
 
         @if ($showForm)
-            <div class="rounded-[24px] border border-zinc-200 bg-zinc-50 p-4">
+            <div class="rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
                 <div class="flex items-center justify-between">
                     <h3 class="text-lg font-semibold tracking-tight text-zinc-950">{{ $editingId ? __('personnel::portfolio.actions.edit') : __('personnel::portfolio.actions.add_project') }}</h3>
                     <x-ui.async-button variant="secondary" size="sm" wire:click="cancelForm" wire:target="cancelForm" wire:loading.attr="disabled">{{ __('personnel::portfolio.actions.cancel') }}</x-ui.async-button>

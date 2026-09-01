@@ -7,26 +7,27 @@ use App\Models\AttendanceManualEntry;
 use App\Models\AttendanceShift;
 use App\Models\AttendanceShiftAssignment;
 use App\Models\Personnel;
-use App\Services\StructurePathService;
 use App\Modules\Attendance\Application\Services\AttendanceAuthorizationService;
 use App\Modules\Attendance\Application\Services\AttendanceManualEntryService;
 use App\Modules\Attendance\Application\Services\AttendanceManualMetricsResolverService;
 use App\Modules\Attendance\Application\Services\AttendanceStructureScopeReadService;
+use App\Services\StructurePathService;
 use App\Traits\NestedStructureTrait;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Throwable;
 
 class ManualEntries extends Component
 {
-    use WithRuntimeMemo;
-    use WithPagination;
     use NestedStructureTrait;
+    use WithPagination;
+    use WithRuntimeMemo;
 
     public bool $embedded = false;
 
@@ -148,6 +149,7 @@ class ManualEntries extends Component
     {
         if ($property === 'manualMetricOverride') {
             $this->updatedManualMetricOverride((bool) $value);
+
             return;
         }
 
@@ -185,6 +187,7 @@ class ManualEntries extends Component
 
         if (! $value) {
             $this->refreshCalculatedFields();
+
             return;
         }
 
@@ -324,6 +327,10 @@ class ManualEntries extends Component
                             'structure_path',
                             $structurePathService->resolve((int) $entry->personnel->structure_id)
                         );
+                        $entry->personnel->setAttribute(
+                            'structure_name',
+                            $structurePathService->current((int) $entry->personnel->structure_id)
+                        );
                     }
 
                     return $entry;
@@ -393,6 +400,11 @@ class ManualEntries extends Component
                 ->get()
                 ->map(function (Personnel $personnel) use ($structurePathService) {
                     $personnel->setAttribute('structure_path', $structurePathService->resolve((int) $personnel->structure_id));
+                    $personnel->setAttribute('structure_name', $structurePathService->current((int) $personnel->structure_id));
+                    $personnel->setAttribute(
+                        'structure_name',
+                        $structurePathService->current((int) $personnel->structure_id)
+                    );
 
                     return $personnel;
                 });
@@ -490,6 +502,10 @@ class ManualEntries extends Component
                 'structure_path',
                 $structurePathService->resolve((int) $selectedPersonnelRecord->structure_id)
             );
+            $selectedPersonnelRecord->setAttribute(
+                'structure_name',
+                $structurePathService->current((int) $selectedPersonnelRecord->structure_id)
+            );
         }
 
         return $selectedPersonnelRecord;
@@ -545,28 +561,33 @@ class ManualEntries extends Component
             $this->preview['late_minutes'] = (int) ($this->form['late_minutes'] ?? 0);
             $this->preview['early_leave_minutes'] = (int) ($this->form['early_leave_minutes'] ?? 0);
             $this->preview['baseline_source'] = 'manual_override';
+
             return;
         }
 
         if ($date === '') {
             $this->resetPreview();
+
             return;
         }
 
         if ($checkInAt === '' || $checkOutAt === '') {
             $this->resetPreview();
+
             return;
         }
 
         if (! preg_match('/^\d{2}:\d{2}$/', $checkInAt) || ! preg_match('/^\d{2}:\d{2}$/', $checkOutAt)) {
             $this->resetPreview();
+
             return;
         }
 
         try {
             $computed = app(AttendanceManualMetricsResolverService::class)->resolve($tabelNo !== '' ? $tabelNo : null, $date, $this->form);
-        } catch (\Throwable) {
+        } catch (Throwable) {
             $this->resetPreview();
+
             return;
         }
 

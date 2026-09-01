@@ -55,7 +55,7 @@
 <div class="mx-auto flex max-w-6xl flex-col gap-6">
 
     {{-- ───────────────────────── Hero ───────────────────────── --}}
-    <section class="relative overflow-hidden rounded-[28px] bg-white ring-1 ring-zinc-200/70 shadow-[0_2px_8px_-2px_rgba(15,23,42,0.06)]">
+    <section class="relative overflow-hidden rounded-2xl bg-white ring-1 ring-zinc-200/70 shadow-card">
         <div class="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-gradient-to-br from-emerald-100/60 via-sky-100/40 to-transparent blur-2xl"></div>
 
         <div class="relative grid gap-8 p-7 sm:p-9 lg:grid-cols-[1fr_auto] lg:items-center">
@@ -102,7 +102,7 @@
             <div class="flex items-center justify-center lg:pl-4">
                 <div class="relative grid h-40 w-40 place-items-center rounded-full"
                      style="background: conic-gradient(#10b981 {{ $overallPct * 3.6 }}deg, #eef0f2 {{ $overallPct * 3.6 }}deg);">
-                    <div class="grid h-[7.6rem] w-[7.6rem] place-items-center rounded-full bg-white shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)]">
+                    <div class="grid h-[7.6rem] w-[7.6rem] place-items-center rounded-full bg-white shadow-card">
                         <span class="text-3xl font-semibold tracking-tight text-zinc-900 tabular-nums">{{ $overallPct }}<span class="text-lg text-zinc-400">%</span></span>
                         <span class="mt-0.5 text-[11px] font-medium text-zinc-400">{{ $enabledAll }} / {{ $totalAll }}</span>
                     </div>
@@ -115,7 +115,7 @@
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         @foreach ($kpis as $kpi)
             @php $pct = $kpi['total'] > 0 ? (int) round($kpi['value'] / $kpi['total'] * 100) : 0; @endphp
-            <div class="group rounded-3xl bg-white p-5 ring-1 ring-zinc-200/70 shadow-[0_1px_3px_rgba(15,23,42,0.04)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_-8px_rgba(15,23,42,0.12)]">
+            <div class="group rounded-2xl bg-white p-5 ring-1 ring-zinc-200/70 shadow-card transition duration-200 hover:-translate-y-0.5 hover:shadow-card">
                 <div class="flex items-center justify-between">
                     <span class="inline-flex h-10 w-10 items-center justify-center rounded-2xl ring-1 ring-inset {{ $accentMap[$kpi['accent']] }}">
                         <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">{!! $kpi['icon'] !!}</svg>
@@ -137,7 +137,7 @@
     {{-- ───────────────────────── Active pack + Available packs ───────────────────────── --}}
     <div class="grid gap-5 xl:grid-cols-[1fr_1fr]">
         {{-- Active pack --}}
-        <section class="rounded-3xl bg-white p-6 ring-1 ring-zinc-200/70 shadow-[0_1px_3px_rgba(15,23,42,0.04)] lg:p-7">
+        <section class="rounded-2xl bg-white p-6 ring-1 ring-zinc-200/70 shadow-card lg:p-7">
             <div class="flex items-start justify-between gap-4">
                 <div class="space-y-1.5">
                     <p class="text-[12px] font-medium text-zinc-400">{{ __('admin::references.diagnostics.pack_summary') }}</p>
@@ -174,7 +174,7 @@
         </section>
 
         {{-- Available packs --}}
-        <section class="rounded-3xl bg-white p-6 ring-1 ring-zinc-200/70 shadow-[0_1px_3px_rgba(15,23,42,0.04)] lg:p-7">
+        <section class="rounded-2xl bg-white p-6 ring-1 ring-zinc-200/70 shadow-card lg:p-7">
             <div class="space-y-1.5">
                 <p class="text-[12px] font-medium text-zinc-400">{{ __('admin::references.diagnostics.available_packs') }}</p>
                 <h2 class="text-[22px] font-semibold tracking-tight text-zinc-900">{{ __('admin::references.diagnostics.available_packs') }}</h2>
@@ -220,7 +220,7 @@
     {{-- ───────────────────────── Workflow + Approval defaults ───────────────────────── --}}
     <div class="grid gap-5 xl:grid-cols-2">
         {{-- Workflow defaults --}}
-        <section class="rounded-3xl bg-white p-6 ring-1 ring-zinc-200/70 shadow-[0_1px_3px_rgba(15,23,42,0.04)] lg:p-7">
+        <section class="rounded-2xl bg-white p-6 ring-1 ring-zinc-200/70 shadow-card lg:p-7">
             <div class="space-y-1.5">
                 <p class="text-[12px] font-medium text-zinc-400">{{ __('admin::references.diagnostics.workflow_defaults') }}</p>
                 <h2 class="text-[22px] font-semibold tracking-tight text-zinc-900">{{ __('admin::references.diagnostics.workflow_defaults') }}</h2>
@@ -246,7 +246,7 @@
         </section>
 
         {{-- Approval defaults --}}
-        <section class="rounded-3xl bg-white p-6 ring-1 ring-zinc-200/70 shadow-[0_1px_3px_rgba(15,23,42,0.04)] lg:p-7">
+        <section class="rounded-2xl bg-white p-6 ring-1 ring-zinc-200/70 shadow-card lg:p-7">
             <div class="space-y-1.5">
                 <p class="text-[12px] font-medium text-zinc-400">{{ __('admin::references.diagnostics.approval_defaults') }}</p>
                 <h2 class="text-[22px] font-semibold tracking-tight text-zinc-900">{{ __('admin::references.diagnostics.approval_defaults') }}</h2>
@@ -293,7 +293,7 @@
     </div>
 
     {{-- ───────────────────────── Stored overrides ───────────────────────── --}}
-    <section class="rounded-3xl bg-white p-6 ring-1 ring-zinc-200/70 shadow-[0_1px_3px_rgba(15,23,42,0.04)] lg:p-7">
+    <section class="rounded-2xl bg-white p-6 ring-1 ring-zinc-200/70 shadow-card lg:p-7">
         <div class="flex items-center justify-between gap-4">
             <div class="space-y-1.5">
                 <p class="text-[12px] font-medium text-zinc-400">{{ __('admin::references.diagnostics.stored_overrides') }}</p>

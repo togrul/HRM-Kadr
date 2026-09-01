@@ -2,7 +2,7 @@
     $record = $this->record;
 @endphp
 
-<div class="overflow-hidden rounded-3xl border border-zinc-200 bg-white shadow-sm">
+<div class="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
     <div class="border-b border-zinc-200 bg-gradient-to-r from-sky-50 via-white to-emerald-50 px-5 py-5">
         <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div class="space-y-1">
@@ -70,7 +70,7 @@
                     </div>
                 </div>
 
-                <div class="overflow-hidden rounded-[28px] border border-zinc-200 bg-zinc-50/70">
+                <div class="overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-50/70">
                     <div class="border-b border-zinc-200 bg-white/90 px-5 py-4">
                         <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                             <div class="min-w-0">
@@ -106,8 +106,8 @@
                         @elseif (($hasCertificateFile || $hasPendingUpload) && $isPdf && $certificateUrl)
                             <iframe src="{{ $certificateUrl }}" class="h-[34rem] w-full rounded-2xl border border-zinc-200 bg-white"></iframe>
                         @elseif ($hasCertificateFile || $hasPendingUpload)
-                            <div class="flex w-full max-w-xl flex-col items-center gap-4 rounded-3xl border border-dashed border-zinc-300 bg-white px-8 py-10 text-center shadow-sm">
-                                <span class="inline-flex h-16 w-16 items-center justify-center rounded-3xl bg-zinc-100 text-zinc-500">
+                            <div class="flex w-full max-w-xl flex-col items-center gap-4 rounded-2xl border border-dashed border-zinc-300 bg-white px-8 py-10 text-center shadow-sm">
+                                <span class="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-500">
                                     <x-icons.document-icon size="w-8 h-8" color="text-zinc-500" />
                                 </span>
                                 <div class="space-y-2">
@@ -128,7 +128,7 @@
                 </div>
 
                 <div class="grid">
-                    <div class="rounded-[28px] border border-zinc-200 bg-zinc-50/70 px-5 py-5">
+                    <div class="rounded-2xl border border-zinc-200 bg-zinc-50/70 px-5 py-5">
                         <p class="text-sm font-semibold tracking-tight text-zinc-500">{{ __('training_needs::dashboard.labels.certificate_metadata_title') }}</p>
                         <dl class="mt-3 overflow-hidden rounded-2xl border border-zinc-200 bg-white">
                             <div class="grid gap-2 border-b border-zinc-200 px-4 py-4 sm:grid-cols-[10rem_minmax(0,1fr)] sm:items-start">

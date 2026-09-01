@@ -106,6 +106,7 @@ class PuantajGrid extends Component
             return [
                 'personnel' => $personnel,
                 'structure_path' => $structurePathService->resolve((int) $personnel->structure_id),
+                'structure_name' => $structurePathService->current((int) $personnel->structure_id),
                 'cells' => $rowCells,
                 'total_hours' => $this->formatHours($totalWorkedMinutes),
                 'total_days' => $totalPresentDays,

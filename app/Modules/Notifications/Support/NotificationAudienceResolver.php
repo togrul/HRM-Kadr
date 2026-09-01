@@ -6,8 +6,8 @@ use App\Models\Personnel;
 use App\Models\User;
 use App\Models\UserPersonnelLink;
 use App\Modules\Personnel\Contracts\ApprovalRouteResolver;
+use App\Support\Database\InstalledTables;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 class NotificationAudienceResolver
@@ -311,6 +311,6 @@ class NotificationAudienceResolver
             return $this->performanceFormsTableReady;
         }
 
-        return $this->performanceFormsTableReady = Schema::hasTable('performance_forms');
+        return $this->performanceFormsTableReady = InstalledTables::has('performance_forms');
     }
 }

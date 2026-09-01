@@ -45,6 +45,7 @@ return [
     'labels' => [
         'unassigned' => 'Unassigned',
         'result_count' => ':count results',
+        'document_count' => ':count documents',
         'required_document' => 'Required document has not been added',
         'not_available' => 'Not available',
         'indefinite' => 'Indefinite',

@@ -1,6 +1,6 @@
 <x-surface-card :title="__('performance_evaluation::dashboard.cards.score_capture')" icon="icons.profile-icon" bodyClass="overflow-visible" contentClass="overflow-visible p-4">
     <div class="grid gap-3 content-start">
-        <div class="rounded-3xl border border-zinc-200 bg-gradient-to-br from-white to-sky-50 px-4 py-3">
+        <div class="rounded-2xl border border-zinc-200 bg-gradient-to-br from-white to-sky-50 px-4 py-3">
             <p class="text-xs leading-6 text-zinc-500">{{ __('performance_evaluation::dashboard.labels.assigned_score_form_hint') }}</p>
         </div>
 

@@ -1,136 +1,144 @@
-<div class="flex flex-col gap-6 px-6 py-4">
-    @include('candidates::livewire.candidates.partials.recruitment-nav')
+@php
+    $cardShell = 'overflow-hidden rounded-2xl border border-hairline bg-white shadow-card';
+    $tile = 'rounded-xl border border-hairline bg-[#fafafa] px-3.5 py-3';
+@endphp
 
-    <section class="rounded-[32px] border border-slate-200 bg-white p-6 shadow-[0_28px_60px_-45px_rgba(15,23,42,0.35)]">
-        <div class="flex flex-col gap-5 border-b border-slate-200 pb-6 lg:flex-row lg:items-start lg:justify-between">
-            <div class="space-y-3">
-                <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">
-                    {{ __('candidates::recruitment.titles.opening_detail') }}
-                </div>
-                <h1 class="text-3xl font-semibold tracking-tight text-slate-900">{{ $opening->title }}</h1>
-                <div class="flex flex-wrap gap-2">
-                    <span class="inline-flex rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700">{{ $this->recruitmentPackLabel($opening->profile_pack) }}</span>
-                    <span class="inline-flex rounded-full bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700">{{ $this->recruitmentStatusLabel($opening->status) }}</span>
-                    <span class="inline-flex rounded-full bg-sky-50 px-4 py-2 text-sm font-semibold text-sky-700">{{ $opening->headcount }} {{ __('candidates::recruitment.labels.headcount_short') }}</span>
-                </div>
-            </div>
+<div class="flex flex-col">
+    {{-- ===================== contextual panel ===================== --}}
+    <x-slot name="sidebar"><div id="hrm-context-panel"></div></x-slot>
 
-            <div class="flex flex-wrap items-center gap-2">
-                <a href="{{ route('candidates.applications', ['opening' => $opening->id]) }}" class="inline-flex h-11 items-center rounded-2xl border border-slate-200 px-4 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900">
-                    {{ __('candidates::recruitment.actions.open_pipeline') }}
-                </a>
-                @can('create', App\Models\CandidateApplication::class)
-                    <button type="button" wire:click="openSideMenu('add-application', {{ $opening->id }})" class="inline-flex h-11 items-center rounded-2xl bg-slate-900 px-4 text-sm font-semibold text-white transition hover:bg-slate-800">
-                        {{ __('candidates::recruitment.actions.add_application') }}
-                    </button>
-                @endcan
-                @if ($opening->requisition)
-                    <a href="{{ route('candidates.requisitions.show', $opening->requisition) }}" class="inline-flex h-11 items-center rounded-2xl border border-slate-200 px-4 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900">
-                        {{ __('candidates::recruitment.actions.open_requisitions') }}
-                    </a>
-                @endif
-            </div>
+    @teleport('#hrm-context-panel')
+        @include('candidates::livewire.candidates.partials.recruitment-panel', [
+            'panelTitle' => __('candidates::recruitment.titles.opening_detail'),
+            'panelSubtitle' => $opening->title,
+        ])
+    @endteleport
+
+    <div class="lg:hidden">@include('candidates::livewire.candidates.partials.recruitment-nav')</div>
+
+    {{-- ===================== header ===================== --}}
+    <x-page-header
+        :title="$opening->title"
+        :breadcrumb="__('candidates::recruitment.titles.openings')"
+    >
+        <x-slot:icon>
+            <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+        </x-slot:icon>
+
+        <x-slot:actions>
+            <x-pill-button :href="route('candidates.applications', ['opening' => $opening->id])" wire:navigate>
+                {{ __('candidates::recruitment.actions.open_pipeline') }}
+            </x-pill-button>
+            @if ($opening->requisition)
+                <x-pill-button :href="route('candidates.requisitions.show', $opening->requisition)" wire:navigate>
+                    {{ __('candidates::recruitment.actions.open_requisitions') }}
+                </x-pill-button>
+            @endif
+            @can('create', App\Models\CandidateApplication::class)
+                <x-pill-button variant="primary" wire:click="openSideMenu('add-application', {{ $opening->id }})">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                    {{ __('candidates::recruitment.actions.add_application') }}
+                </x-pill-button>
+            @endcan
+        </x-slot:actions>
+
+        <div class="flex flex-wrap items-center gap-2">
+            <x-small-badge mode="secondary">{{ $this->recruitmentPackLabel($opening->profile_pack) }}</x-small-badge>
+            <x-small-badge :mode="$this->recruitmentStatusTone($opening->status)" dot>{{ $this->recruitmentStatusLabel($opening->status) }}</x-small-badge>
+            <x-small-badge mode="blue">{{ $opening->headcount }} {{ __('candidates::recruitment.labels.headcount_short') }}</x-small-badge>
+        </div>
+    </x-page-header>
+
+    <div class="flex flex-col gap-4 px-4 py-4 sm:px-5">
+        <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <x-fact-tile
+                :label="__('candidates::recruitment.labels.structure')"
+                :value="$opening->structure?->name ?? '—'"
+                :note="$opening->position?->name ?? '—'"
+            />
+            <x-fact-tile
+                :label="__('candidates::recruitment.labels.owner_summary')"
+                :value="$opening->owner?->name ?? '—'"
+                :note="$opening->creator?->name ?? '—'"
+            />
+            <x-fact-tile
+                :label="__('candidates::recruitment.labels.requisition_link')"
+                :value="$opening->requisition?->title ?? '—'"
+                :note="$this->recruitmentStatusLabel($opening->requisition?->status)"
+            />
+            <x-fact-tile
+                :label="__('candidates::recruitment.labels.timeline')"
+                :value="optional($opening->published_at)->format('d.m.Y') ?? '—'"
+                :note="optional($opening->closes_at)->format('d.m.Y') ?? '—'"
+            />
         </div>
 
-        <div class="mt-6 grid gap-4 lg:grid-cols-4">
-            <div class="rounded-[24px] border border-slate-200 bg-slate-50 p-4">
-                <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">{{ __('candidates::recruitment.labels.structure') }}</div>
-                <div class="mt-3 text-base font-semibold text-slate-900">{{ $opening->structure?->name ?? '—' }}</div>
-                <div class="mt-1 text-sm text-slate-500">{{ $opening->position?->name ?? '—' }}</div>
+        {{-- stage summary --}}
+        <section class="{{ $cardShell }}">
+            <div class="flex items-center justify-between gap-3 border-b border-hairline-subtle px-4 py-3">
+                <h2 class="text-[14px] font-semibold tracking-[-0.02em] text-ink">{{ __('candidates::recruitment.titles.pipeline_summary') }}</h2>
+                <x-small-badge mode="secondary">{{ $opening->applications->count() }} {{ __('candidates::recruitment.labels.applications') }}</x-small-badge>
             </div>
-            <div class="rounded-[24px] border border-slate-200 bg-slate-50 p-4">
-                <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">{{ __('candidates::recruitment.labels.owner_summary') }}</div>
-                <div class="mt-3 text-base font-semibold text-slate-900">{{ $opening->owner?->name ?? '—' }}</div>
-                <div class="mt-1 text-sm text-slate-500">{{ $opening->creator?->name ?? '—' }}</div>
-            </div>
-            <div class="rounded-[24px] border border-slate-200 bg-slate-50 p-4">
-                <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">{{ __('candidates::recruitment.labels.requisition_link') }}</div>
-                <div class="mt-3 text-base font-semibold text-slate-900">{{ $opening->requisition?->title ?? '—' }}</div>
-                <div class="mt-1 text-sm text-slate-500">{{ $this->recruitmentStatusLabel($opening->requisition?->status) }}</div>
-            </div>
-            <div class="rounded-[24px] border border-slate-200 bg-slate-50 p-4">
-                <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">{{ __('candidates::recruitment.labels.timeline') }}</div>
-                <div class="mt-3 text-base font-semibold text-slate-900">{{ optional($opening->published_at)->format('d.m.Y') ?? '—' }}</div>
-                <div class="mt-1 text-sm text-slate-500">{{ optional($opening->closes_at)->format('d.m.Y') ?? '—' }}</div>
-            </div>
-        </div>
-    </section>
-
-    <section class="rounded-[32px] border border-slate-200 bg-white p-6 shadow-[0_28px_60px_-45px_rgba(15,23,42,0.35)]">
-        <div class="flex items-center justify-between">
-            <div>
-                <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">
-                    {{ __('candidates::recruitment.titles.pipeline_summary') }}
-                </div>
-                <h2 class="mt-2 text-2xl font-semibold tracking-tight text-slate-900">
-                    {{ __('candidates::recruitment.titles.pipeline_summary') }}
-                </h2>
-            </div>
-            <div class="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700">
-                {{ $opening->applications->count() }} {{ __('candidates::recruitment.labels.applications') }}
-            </div>
-        </div>
-
-        <div class="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            @foreach ($this->stageSummary as $stage)
-                <div class="rounded-[24px] border {{ $stage['terminal'] ? 'border-rose-200 bg-rose-50' : 'border-slate-200 bg-slate-50' }} p-4">
-                    <div class="text-[11px] font-semibold uppercase tracking-tight {{ $stage['terminal'] ? 'text-rose-400' : 'text-slate-400' }}">
-                        {{ __('candidates::recruitment.labels.pipeline_stage') }}
+            <div class="grid gap-2 p-3 sm:grid-cols-2 xl:grid-cols-4">
+                @foreach ($this->stageSummary as $stage)
+                    <div @class([$tile, 'border-rose-200 bg-[#fff1f2]/60' => $stage['terminal']])>
+                        <p class="truncate text-[12px] font-medium text-ink-soft">{{ $stage['label'] }}</p>
+                        <p class="hrm-num mt-1 text-[19px] font-semibold tracking-[-0.03em] text-ink">{{ $stage['count'] }}</p>
                     </div>
-                    <div class="mt-3 text-lg font-semibold tracking-tight text-slate-900">{{ $stage['label'] }}</div>
-                    <div class="mt-3 text-3xl font-semibold tracking-tight text-slate-900">{{ $stage['count'] }}</div>
-                </div>
-            @endforeach
-        </div>
-    </section>
+                @endforeach
+            </div>
+        </section>
 
-    <section class="rounded-[32px] border border-slate-200 bg-white p-6 shadow-[0_28px_60px_-45px_rgba(15,23,42,0.35)]">
-        <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">
-            {{ __('candidates::recruitment.titles.recent_applications') }}
-        </div>
-        <h2 class="mt-2 text-2xl font-semibold tracking-tight text-slate-900">
-            {{ __('candidates::recruitment.titles.recent_applications') }}
-        </h2>
+        {{-- recent applications --}}
+        <section class="{{ $cardShell }}">
+            <div class="border-b border-hairline-subtle px-4 py-3">
+                <h2 class="text-[14px] font-semibold tracking-[-0.02em] text-ink">{{ __('candidates::recruitment.titles.recent_applications') }}</h2>
+            </div>
+            <div class="grid gap-2 p-3 lg:grid-cols-2">
+                @forelse ($opening->applications as $application)
+                    <article class="{{ $tile }}">
+                        <div class="flex flex-wrap items-center gap-1.5">
+                            <x-small-badge mode="blue" dot>{{ $this->recruitmentStageLabel($application->current_stage) }}</x-small-badge>
+                            <x-small-badge :mode="$this->recruitmentStatusTone($application->status)">{{ $this->recruitmentStatusLabel($application->status) }}</x-small-badge>
+                        </div>
 
-        <div class="mt-6 grid gap-4 lg:grid-cols-2">
-            @forelse ($opening->applications as $application)
-                <article class="rounded-[24px] border border-slate-200 bg-slate-50 p-5">
-                    <div class="flex flex-wrap items-center gap-2">
-                        <span class="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">{{ $this->recruitmentStageLabel($application->current_stage) }}</span>
-                        <span class="inline-flex rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700">{{ $application->status }}</span>
-                    </div>
-                    <h3 class="mt-4 text-xl font-semibold tracking-tight text-slate-900">{{ $application->candidate?->fullname ?? '—' }}</h3>
-                    <div class="mt-4 grid gap-3 text-sm text-slate-500 md:grid-cols-2">
-                        <div>
-                            <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">{{ __('candidates::recruitment.labels.source') }}</div>
-                            <div class="mt-1 text-slate-700">{{ $application->source?->name ?? '—' }}</div>
+                        <div class="mt-2.5 flex items-center gap-2.5">
+                            <x-avatar :name="(string) ($application->candidate?->fullname ?? '')" size="sm" />
+                            <p class="min-w-0 flex-1 truncate text-[14px] font-semibold tracking-[-0.02em] text-ink">{{ $application->candidate?->fullname ?? '—' }}</p>
+                            <a href="{{ route('candidates.applications.show', $application) }}" wire:navigate
+                                title="{{ __('candidates::recruitment.actions.open_application') }}"
+                                class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-ink-faint transition hover:bg-white hover:text-ink">
+                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
+                            </a>
                         </div>
-                        <div>
-                            <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">{{ __('candidates::recruitment.labels.assigned_recruiter') }}</div>
-                            <div class="mt-1 text-slate-700">{{ $application->assignedRecruiter?->name ?? '—' }}</div>
+
+                        <div class="mt-2.5 grid gap-2 sm:grid-cols-2">
+                            <div>
+                                <p class="hrm-eyebrow">{{ __('candidates::recruitment.labels.source') }}</p>
+                                <p class="truncate text-[12px] text-ink-soft">{{ $application->source?->name ?? '—' }}</p>
+                            </div>
+                            <div>
+                                <p class="hrm-eyebrow">{{ __('candidates::recruitment.labels.assigned_recruiter') }}</p>
+                                <p class="truncate text-[12px] text-ink-soft">{{ $application->assignedRecruiter?->name ?? '—' }}</p>
+                            </div>
+                            <div>
+                                <p class="hrm-eyebrow">{{ __('candidates::recruitment.labels.timeline') }}</p>
+                                <p class="hrm-num truncate text-[12px] text-ink-soft">{{ optional($application->applied_at)->format('d.m.Y H:i') ?? '—' }}</p>
+                            </div>
+                            <div>
+                                <p class="hrm-eyebrow">{{ __('candidates::recruitment.labels.decision') }}</p>
+                                <p class="truncate text-[12px] text-ink-soft">{{ $application->final_decision ?? '—' }}</p>
+                            </div>
                         </div>
-                        <div>
-                            <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">{{ __('candidates::recruitment.labels.timeline') }}</div>
-                            <div class="mt-1 text-slate-700">{{ optional($application->applied_at)->format('d.m.Y H:i') ?? '—' }}</div>
-                        </div>
-                        <div>
-                            <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">{{ __('candidates::recruitment.labels.decision') }}</div>
-                            <div class="mt-1 text-slate-700">{{ $application->final_decision ?? '—' }}</div>
-                        </div>
-                    </div>
-                    <div class="mt-4">
-                        <a href="{{ route('candidates.applications.show', $application) }}" class="inline-flex h-9 items-center rounded-xl border border-slate-200 px-3 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900">
-                            {{ __('candidates::recruitment.actions.open_application') }}
-                        </a>
-                    </div>
-                </article>
-            @empty
-                <div class="rounded-[24px] border border-dashed border-slate-200 bg-slate-50 p-6 text-sm text-slate-500">
-                    {{ __('candidates::recruitment.empty.applications') }}
-                </div>
-            @endforelse
-        </div>
-    </section>
+                    </article>
+                @empty
+                    <p class="rounded-xl border border-dashed border-hairline bg-[#fafafa] px-4 py-6 text-center text-[12.5px] text-ink-faint lg:col-span-2">
+                        {{ __('candidates::recruitment.empty.applications') }}
+                    </p>
+                @endforelse
+            </div>
+        </section>
+    </div>
 
     <x-side-modal>
         @can('create', App\Models\CandidateApplication::class)

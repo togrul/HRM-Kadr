@@ -82,6 +82,8 @@ return [
     ],
     'labels' => [
         'unassigned' => 'Unassigned',
+        'active_process_count' => ':count active processes',
+        'no_template' => 'No template',
         'result_count' => ':count processes',
         'overdue' => 'Overdue',
         'event_mix' => 'Process mix',
@@ -129,6 +131,8 @@ return [
         'deadline' => 'Deadline',
         'status' => 'Status',
         'task' => 'Task',
+        'template' => 'Template',
+        'start' => 'Start',
     ],
     'actions' => [
         'reset_filters' => 'Reset filters',
@@ -150,6 +154,9 @@ return [
         'delete_template' => 'Delete template',
         'archive_template' => 'Archive',
         'close_editor' => 'Close',
+        'manage_templates' => 'Templates',
+        'start_process' => 'Start process',
+        'complete_processes' => 'Complete',
     ],
     'messages' => [
         'template_created' => 'Lifecycle template was created.',

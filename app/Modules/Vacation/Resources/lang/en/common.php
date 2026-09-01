@@ -3,6 +3,7 @@
 return [
     'titles' => [
         'vacations' => 'Vacations',
+        'requests' => 'Vacation requests',
     ],
     'labels' => [
         'year' => 'Year',
@@ -28,6 +29,15 @@ return [
         'search' => 'Search',
         'reset' => 'Reset',
         'day' => 'day',
+        'type' => 'Type',
+        'vacation_type' => 'Vacation type',
+        'search_placeholder' => 'Search personnel…',
+        'date_start' => 'start',
+        'date_end' => 'end',
+        'show_all' => 'Show all',
+        'unit' => 'vacations',
+        'days' => 'days',
+        'remaining' => 'Remaining',
     ],
     'messages' => [
         'order_not_ready' => 'This vacation request is not yet linked to an approved order.',
@@ -35,5 +45,11 @@ return [
     ],
     'actions' => [
         'bind_order' => 'Bind order',
+        'export_excel' => 'Export to Excel',
+        'print_document' => 'Vacation paper',
+        'open_order' => 'Open the order',
+    ],
+    'hints' => [
+        'approval_note' => 'Approvers are resolved from the hierarchy',
     ],
 ];
