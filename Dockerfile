@@ -44,11 +44,12 @@ COPY . .
 
 COPY --from=frontend /app/public/build /var/www/html/public/build
 
+# Livewire compiles island views into a nested directory of its own. Creating it here
+# means the web user never has to create it at runtime — an artisan command run as root
+# through `docker exec` would otherwise leave it root-owned and every island 500s.
 RUN mkdir -p /var/www/html/storage/framework/cache/data \
- && chown -R unit:unit /var/www/html/storage \
- && chmod -R ug+rwX /var/www/html/storage
-
-RUN chown -R unit:unit /var/www/html/storage /var/www/html/bootstrap/cache \
+             /var/www/html/storage/framework/views/livewire/islands \
+ && chown -R unit:unit /var/www/html/storage /var/www/html/bootstrap/cache \
  && chmod -R ug+rwX /var/www/html/storage /var/www/html/bootstrap/cache
 
 RUN composer install --prefer-dist --optimize-autoloader --no-interaction
