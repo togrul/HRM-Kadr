@@ -19,13 +19,22 @@ return new class extends Migration
         // The block engine never populates order_logs.order_template_version_id;
         // drop its foreign key + the now-dead column so the parent table can go.
         if (Schema::hasColumn('order_logs', 'order_template_version_id')) {
+            // The foreign key goes first: MySQL refuses to drop an index a key still
+            // depends on (errno 1553), and the composite index is the one backing it.
+            // Column-array form derives the conventional key name on MySQL and is
+            // handled via a table rebuild on SQLite (the test driver).
             Schema::table('order_logs', function (Blueprint $table) {
-                // Drop the composite index that includes the column first, otherwise
-                // SQLite's drop-column table rebuild fails on the dangling index.
-                $table->dropIndex('order_logs_type_template_version_idx');
-                // Column-array form: derives the conventional FK name on MySQL and
-                // is handled via table rebuild on SQLite (test driver).
                 $table->dropForeign(['order_template_version_id']);
+            });
+
+            // Then the index, which SQLite needs gone before the drop-column rebuild.
+            if (Schema::hasIndex('order_logs', 'order_logs_type_template_version_idx')) {
+                Schema::table('order_logs', function (Blueprint $table) {
+                    $table->dropIndex('order_logs_type_template_version_idx');
+                });
+            }
+
+            Schema::table('order_logs', function (Blueprint $table) {
                 $table->dropColumn('order_template_version_id');
             });
         }
