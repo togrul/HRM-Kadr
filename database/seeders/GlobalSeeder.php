@@ -54,7 +54,7 @@ class GlobalSeeder extends Seeder
         foreach ($menus as $menu) {
             $types = $menu['types'] ?? [];
             if (! empty($types) && ! in_array(strtolower($appType), $types, true)) {
-              continue;
+                continue;
             }
 
             $payload = Arr::only($menu, ['icon', 'color', 'order', 'is_active', 'url', 'permission_id']);
@@ -64,6 +64,12 @@ class GlobalSeeder extends Seeder
                     ->where('name', $menu['permission_name'])
                     ->where('guard_name', 'web')
                     ->value('id');
+            }
+
+            // config/menus.php carries literal permission ids; on a database whose permissions
+            // were never seeded those point at nothing, so drop them instead of breaking the FK.
+            if (! empty($payload['permission_id']) && ! Permission::whereKey($payload['permission_id'])->exists()) {
+                $payload['permission_id'] = null;
             }
 
             Menu::updateOrCreate(
