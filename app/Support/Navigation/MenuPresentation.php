@@ -105,6 +105,22 @@ class MenuPresentation
         return self::label((string) ($menu->name ?? ''));
     }
 
+    /**
+     * The name printed under the rail icon. The rail column is narrow, so a module may
+     * publish a shorter form under `ui::menu.rail.*`; everything else keeps its full
+     * menu label, which the hover tooltip and the command palette still show.
+     */
+    public static function railShortLabel(object $menu): string
+    {
+        $definition = self::definition($menu);
+        $name = is_array($definition) ? (string) ($definition['name'] ?? '') : '';
+        $short = str_replace('.items.', '.rail.', $name);
+
+        return $name !== '' && $short !== $name && Lang::has($short)
+            ? __($short)
+            : self::railLabel($menu);
+    }
+
     public static function visibleInRail(object $menu): bool
     {
         $definition = self::definition($menu);

@@ -25,6 +25,17 @@ return [
         'payroll' => 'Əmək haqqı',
         'settings' => 'Tənzimləmələr',
     ],
+    'rail' => [
+        'self_service_reviews' => 'Müraciətlər',
+        'vacations' => 'Məzuniyyət',
+        'my_hr' => 'Kabinet',
+        'settings' => 'Tənzimləmə',
+        'admin' => 'Admin',
+        'onboarding_library' => 'Uyğunlaşma',
+        'learning_library' => 'Öyrənmə',
+        'employee_lifecycle' => 'Həyat dövrü',
+        'document_compliance' => 'Uyğunluq',
+    ],
     'shortcuts' => [
         'review_queue' => 'Tez baxış',
     ],

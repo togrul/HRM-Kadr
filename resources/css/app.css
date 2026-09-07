@@ -251,7 +251,7 @@
   --hrm-line-subtle: #f4f4f5;
   --hrm-surface: #ffffff;
   --hrm-surface-muted: #fafafa;
-  --hrm-rail: 60px;
+  --hrm-rail: 82px;
   --hrm-panel: 300px;
 }
 
@@ -344,6 +344,22 @@ body {
 .hrm-rail-link svg {
   width: 1.3rem;
   height: 1.3rem;
+}
+
+/*
+ * Rail items: icon with its short name underneath. The column is deliberately narrow,
+ * so the label stays on one line and truncates — the full name is in the hover tooltip
+ * and in the command palette, so nothing is lost.
+ */
+.hrm-rail-item {
+  @apply relative flex w-[72px] shrink-0 flex-col items-center gap-0.5 rounded-xl px-1 py-1 transition;
+}
+.hrm-rail-item svg {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+.hrm-rail-label {
+  @apply w-full truncate text-center text-[9.5px] font-medium leading-[1.15] tracking-[-0.01em];
 }
 
 /* active-indicator bar next to a pinned rail icon */
