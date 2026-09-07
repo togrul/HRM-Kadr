@@ -46,7 +46,7 @@ export default {
                 card: '0 1px 2px rgba(16,24,40,0.04)',
             },
             spacing: {
-                rail: '60px',
+                rail: '82px',
                 panel: '300px',
             },
             maxWidth: {

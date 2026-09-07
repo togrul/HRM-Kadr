@@ -25,6 +25,17 @@ return [
         'payroll' => 'Payroll',
         'settings' => 'Settings',
     ],
+    'rail' => [
+        'self_service_reviews' => 'Requests',
+        'vacations' => 'Vacations',
+        'my_hr' => 'My HR',
+        'settings' => 'Settings',
+        'admin' => 'Admin',
+        'onboarding_library' => 'Onboarding',
+        'learning_library' => 'Learning',
+        'employee_lifecycle' => 'Lifecycle',
+        'document_compliance' => 'Compliance',
+    ],
     'shortcuts' => [
         'review_queue' => 'Quick access',
     ],

@@ -40,9 +40,9 @@
 
             window.__hrmRailTip = true;
 
-            // The rail is 60px wide against the left edge. Comparing one number lets every
+            // The rail is 78px wide against the left edge. Comparing one number lets every
             // pointer event elsewhere in the app bail out before any DOM tree walk.
-            const RAIL_EDGE = 76;
+            const RAIL_EDGE = 96;
 
             let tip = null;
             let shown = false;
@@ -161,6 +161,7 @@
                 'isActive' => request()->routeIs($routeBase) || request()->routeIs($routeBase . '.*'),
                 'iconComponent' => MenuPresentation::iconComponent($menuItem),
                 'label' => MenuPresentation::railLabel($menuItem),
+                'shortLabel' => MenuPresentation::railShortLabel($menuItem),
                 'visibleInRail' => MenuPresentation::visibleInRail($menuItem),
             ];
         })
@@ -229,14 +230,14 @@
                         data-rail-tip="{{ $menu->label }}"
                         @click="$store.hrmShell.railOpen = false"
                         @class([
-                            'hrm-rail-link relative flex h-10 w-11 shrink-0 items-center justify-center rounded-xl transition',
+                            'hrm-rail-item hrm-rail-link',
                             'hrm-rail-link--active bg-ink text-[#fafafa]' => $menu->isActive,
                             'text-ink-muted hover:bg-[#fafafa] hover:text-ink' => ! $menu->isActive,
                         ])
                         @if ($menu->isActive) aria-current="page" @endif
                     >
                         <x-dynamic-component :component="$menu->iconComponent" color="text-current" hover="text-current" size="w-[18px] h-[18px]" />
-                        <span class="sr-only">{{ $menu->label }}</span>
+                        <span class="hrm-rail-label">{{ $menu->shortLabel }}</span>
                     </a>
                 @endcan
             @endmodule
@@ -256,14 +257,14 @@
                             data-rail-tip="{{ $menu->label }}"
                             @click="$store.hrmShell.railOpen = false"
                             @class([
-                                'hrm-rail-link relative flex h-[38px] w-11 shrink-0 items-center justify-center rounded-xl transition',
+                                'hrm-rail-item hrm-rail-link',
                                 'hrm-rail-link--active bg-ink text-[#fafafa]' => $menu->isActive,
                                 'text-ink-faint hover:bg-[#fafafa] hover:text-ink' => ! $menu->isActive,
                             ])
                             @if ($menu->isActive) aria-current="page" @endif
                         >
                             <x-dynamic-component :component="$menu->iconComponent" color="text-current" hover="text-current" size="w-[18px] h-[18px]" />
-                            <span class="sr-only">{{ $menu->label }}</span>
+                            <span class="hrm-rail-label">{{ $menu->shortLabel }}</span>
                         </a>
                     @endcan
                 @endmodule
@@ -285,13 +286,13 @@
                     wire:navigate
                     data-rail-tip="{{ __('ui::menu.items.settings') }}"
                     @class([
-                        'hrm-rail-link relative flex h-[34px] w-10 shrink-0 items-center justify-center rounded-[10px] transition',
+                        'hrm-rail-item hrm-rail-link',
                         'bg-ink text-[#fafafa]' => $settingsActive,
                         'text-ink-muted hover:bg-[#fafafa] hover:text-ink' => ! $settingsActive,
                     ])
                 >
                     <x-icons.line-settings-icon color="text-current" hover="text-current" size="w-[18px] h-[18px]" />
-                    <span class="sr-only">{{ __('ui::menu.items.settings') }}</span>
+                    <span class="hrm-rail-label">{{ __('ui::menu.rail.settings') }}</span>
                 </a>
             @endcan
         @endmodule
@@ -301,10 +302,10 @@
                 href="{{ route('admin') }}"
                 wire:navigate
                 data-rail-tip="{{ __('ui::common.labels.admin_panel') }}"
-                class="hrm-rail-link relative flex h-[34px] w-10 shrink-0 items-center justify-center rounded-[10px] text-amber-500 transition hover:bg-[#fafafa]"
+                class="hrm-rail-item hrm-rail-link text-amber-500 hover:bg-[#fafafa]"
             >
                 <x-icons.admin-icon color="text-current" hover="text-current" size="w-[18px] h-[18px]" />
-                <span class="sr-only">{{ __('ui::common.labels.admin_panel') }}</span>
+                <span class="hrm-rail-label">{{ __('ui::menu.rail.admin') }}</span>
             </a>
         @endcan
 
