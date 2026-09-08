@@ -17,6 +17,8 @@ ssh toor@172.31.31.38 << 'EOF'
 cd /home/toor/hr-crm
 git pull origin main --force
 php artisan migrate --force
+# The activity log has its own database and its own ledger.
+php artisan audit:activity-migrate --force
 php artisan config:clear
 php artisan cache:clear
 php artisan view:clear

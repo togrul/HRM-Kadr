@@ -51,6 +51,7 @@ npm install
 cp .env.example .env
 php artisan key:generate
 php artisan migrate --seed
+php artisan audit:activity-migrate   # audit/log bazası ayrıdır — öz bağlantısı, öz ledger-i
 npm run dev          # və ya: npm run build
 ```
 
