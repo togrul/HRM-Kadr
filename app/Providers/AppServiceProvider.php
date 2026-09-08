@@ -76,6 +76,23 @@ class AppServiceProvider extends ServiceProvider
         $this->registerMacros();
         $this->registerBladeDirectives();
         $this->configureBlazeOptimization();
+        $this->loadLogDatabaseMigrationsInTests();
+    }
+
+    /**
+     * The activity log lives in its own database — a separate MySQL schema today and
+     * PostgreSQL under `docs/log-db-ayirma-postgresql-plan.md` — so its migrations sit
+     * outside the default path and deployments run them as their own step, against
+     * their own connection and their own ledger.
+     *
+     * Tests point every connection at the same sqlite database, so there the schema
+     * comes along with the ordinary migration run instead.
+     */
+    private function loadLogDatabaseMigrationsInTests(): void
+    {
+        if ($this->app->runningUnitTests()) {
+            $this->loadMigrationsFrom(database_path('migrations_logs'));
+        }
     }
 
     /**

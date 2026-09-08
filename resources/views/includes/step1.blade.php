@@ -1,7 +1,22 @@
 @php
+    use App\Modules\Personnel\Support\EmploymentTerms;
+
     $personal = $personalForm->personnel ?? [];
     $personalExtra = $personalForm->personnelExtra ?? [];
     $hasDisability = $personalForm->hasDisability ?? false;
+
+    $contractTypeOptions = EmploymentTerms::options(EmploymentTerms::CONTRACT_TYPES, 'contract_type');
+    $probationUnitOptions = EmploymentTerms::options(EmploymentTerms::PROBATION_UNITS, 'probation_unit');
+    $workplaceTypeOptions = EmploymentTerms::options(EmploymentTerms::WORKPLACE_TYPES, 'workplace_type');
+    $workingTimeTypeOptions = EmploymentTerms::options(EmploymentTerms::WORKING_TIME_TYPES, 'working_time_type');
+    $workScheduleOptions = EmploymentTerms::options(EmploymentTerms::WORK_SCHEDULES, 'work_schedule');
+    $restDayOptions = EmploymentTerms::options(EmploymentTerms::REST_DAYS, 'rest_day');
+
+    $probationUnit = $personal['probation_unit'] ?? null;
+    $probationUnitLabel = $probationUnit ? __('personnel::common.employment.probation_unit.'.$probationUnit) : '';
+    $workSchedule = $personal['work_schedule'] ?? null;
+    $isWeeklySchedule = EmploymentTerms::isWeekly($workSchedule);
+    $shiftCount = EmploymentTerms::shiftCount($workSchedule);
 @endphp
 
 <div class="flex items-start justify-between w-full space-x-4">
@@ -195,24 +210,7 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-3 gap-2">
-            <div class="flex flex-col">
-                <x-label for="personnel.social_origin_id">{{ __('personnel::common.labels.social_origin') }}</x-label>
-                <x-ui.select-dropdown
-                    label=""
-                    placeholder="---"
-                    mode="gray"
-                    class="w-full"
-                    wire:model.live="personalForm.personnel.social_origin_id"
-                    :model="$this->socialOriginOptions"
-                    :search-model="data_get($stepSearchModels, 'searchSocialOrigin', 'searchSocialOrigin')"
-                    :search-placeholder="data_get($stepSearchPlaceholders, 'searchSocialOrigin', __('personnel::common.placeholders.search'))"
-                >
-                </x-ui.select-dropdown>
-                @error('personalForm.personnel.social_origin_id')
-                <x-validation> {{ $message }} </x-validation>
-                @enderror
-            </div>
+        <div class="grid grid-cols-2 gap-2">
             <div class="flex flex-col">
                 <x-label for="personnel.residental_address">{{ __('personnel::common.labels.residental_address') }}</x-label>
                 <x-livewire-input mode="gray" name="personnel.residental_address" wire:model="personalForm.personnel.residental_address"></x-livewire-input>
@@ -283,7 +281,7 @@
                 @enderror
             </div>
         </div>
-        <div class="grid grid-cols-3 gap-2">
+        <div class="grid grid-cols-2 gap-2">
             <div class="flex flex-col">
                 <x-label for="personnel.work_norm_id">{{ __('personnel::common.labels.work_norms') }}</x-label>
                 <x-ui.select-dropdown
@@ -301,8 +299,37 @@
                 <x-validation> {{ $message }} </x-validation>
                 @enderror
             </div>
-
-              <div class="flex flex-col">
+            <div class="flex flex-col">
+                <x-label for="personnel.contract_type">{{ __('personnel::common.labels.contract_type') }}</x-label>
+                <x-ui.select-dropdown
+                    label=""
+                    placeholder="---"
+                    mode="gray"
+                    class="w-full"
+                    wire:model.live="personalForm.personnel.contract_type"
+                    :model="$contractTypeOptions"
+                >
+                </x-ui.select-dropdown>
+                @error('personalForm.personnel.contract_type')
+                <x-validation> {{ $message }} </x-validation>
+                @enderror
+            </div>
+        </div>
+        <div class="grid grid-cols-3 gap-2">
+            <div class="flex flex-col">
+                <x-label for="personnel.contract_date">{{ __('personnel::common.labels.contract_date') }}</x-label>
+                <x-pikaday-input mode="gray" name="personnel.contract_date" format="Y-MM-DD" wire:model.live="personalForm.personnel.contract_date">
+                    <x-slot name="script">
+                      $el.onchange = function () {
+                      @this.set('personalForm.personnel.contract_date', $el.value);
+                      }
+                    </x-slot>
+                </x-pikaday-input>
+                @error('personalForm.personnel.contract_date')
+                <x-validation> {{ $message }} </x-validation>
+                @enderror
+            </div>
+            <div class="flex flex-col">
                 <x-label for="personnel.join_work_date">{{ __('personnel::common.labels.join_work_date') }}</x-label>
                 <x-pikaday-input mode="gray" name="personnel.join_work_date" format="Y-MM-DD" wire:model.live="personalForm.personnel.join_work_date">
                     <x-slot name="script">
@@ -326,6 +353,125 @@
                 </x-pikaday-input>
             </div>
         </div>
+        <div class="grid grid-cols-3 gap-2">
+            <div class="flex flex-col">
+                <x-label for="personnel.probation_unit">{{ __('personnel::common.labels.probation_period') }}</x-label>
+                <x-ui.select-dropdown
+                    label=""
+                    placeholder="---"
+                    mode="gray"
+                    class="w-full"
+                    wire:model.live="personalForm.personnel.probation_unit"
+                    :model="$probationUnitOptions"
+                >
+                </x-ui.select-dropdown>
+                @error('personalForm.personnel.probation_unit')
+                <x-validation> {{ $message }} </x-validation>
+                @enderror
+            </div>
+            {{-- The length only means something once a unit is chosen, so the field appears with it. --}}
+            @if ($probationUnit)
+                <div class="flex flex-col">
+                    <x-label for="personnel.probation_amount">{{ __('personnel::common.labels.probation_amount') }} ({{ $probationUnitLabel }})</x-label>
+                    <x-livewire-input type="number" min="1" mode="gray" name="personnel.probation_amount" wire:model="personalForm.personnel.probation_amount"></x-livewire-input>
+                    @error('personalForm.personnel.probation_amount')
+                    <x-validation> {{ $message }} </x-validation>
+                    @enderror
+                </div>
+            @endif
+        </div>
+        <div class="grid grid-cols-3 gap-2">
+            <div class="flex flex-col">
+                <x-label for="personnel.workplace_type">{{ __('personnel::common.labels.workplace_type') }}</x-label>
+                <x-ui.select-dropdown
+                    label=""
+                    placeholder="---"
+                    mode="gray"
+                    class="w-full"
+                    wire:model.live="personalForm.personnel.workplace_type"
+                    :model="$workplaceTypeOptions"
+                >
+                </x-ui.select-dropdown>
+                @error('personalForm.personnel.workplace_type')
+                <x-validation> {{ $message }} </x-validation>
+                @enderror
+            </div>
+            <div class="flex flex-col">
+                <x-label for="personnel.working_time_type">{{ __('personnel::common.labels.working_time_type') }}</x-label>
+                <x-ui.select-dropdown
+                    label=""
+                    placeholder="---"
+                    mode="gray"
+                    class="w-full"
+                    wire:model.live="personalForm.personnel.working_time_type"
+                    :model="$workingTimeTypeOptions"
+                >
+                </x-ui.select-dropdown>
+                @error('personalForm.personnel.working_time_type')
+                <x-validation> {{ $message }} </x-validation>
+                @enderror
+            </div>
+            <div class="flex flex-col">
+                <x-label for="personnel.work_schedule">{{ __('personnel::common.labels.work_schedule') }}</x-label>
+                <x-ui.select-dropdown
+                    label=""
+                    placeholder="---"
+                    mode="gray"
+                    class="w-full"
+                    wire:model.live="personalForm.personnel.work_schedule"
+                    :model="$workScheduleOptions"
+                >
+                </x-ui.select-dropdown>
+                @error('personalForm.personnel.work_schedule')
+                <x-validation> {{ $message }} </x-validation>
+                @enderror
+            </div>
+        </div>
+        {{-- A working week has fixed daily hours, a lunch break and rest days; a shift rota has neither. --}}
+        @if ($isWeeklySchedule)
+            <div class="grid grid-cols-4 gap-2">
+                @foreach ([
+                    'work_start' => 'work_start_time',
+                    'work_end' => 'work_end_time',
+                    'lunch_start' => 'lunch_start_time',
+                    'lunch_end' => 'lunch_end_time',
+                ] as $hourKey => $hourLabel)
+                    <div class="flex flex-col">
+                        <x-label for="personnel.work_hours.{{ $hourKey }}">{{ __('personnel::common.labels.'.$hourLabel) }}</x-label>
+                        <x-livewire-input type="time" mode="gray" name="personnel.work_hours.{{ $hourKey }}" wire:model="personalForm.personnel.work_hours.{{ $hourKey }}"></x-livewire-input>
+                        @error('personalForm.personnel.work_hours.'.$hourKey)
+                        <x-validation> {{ $message }} </x-validation>
+                        @enderror
+                    </div>
+                @endforeach
+            </div>
+            <div class="flex flex-col">
+                <x-label for="personnel.rest_days">{{ __('personnel::common.labels.rest_days') }}</x-label>
+                <div class="flex flex-wrap gap-4 mt-1">
+                    @foreach ($restDayOptions as $restDay)
+                        <x-checkbox name="personnel.rest_days" model="personalForm.personnel.rest_days" :value="$restDay['id']">{{ $restDay['label'] }}</x-checkbox>
+                    @endforeach
+                </div>
+                @error('personalForm.personnel.rest_days')
+                <x-validation> {{ $message }} </x-validation>
+                @enderror
+            </div>
+        @endif
+        @if ($shiftCount > 0)
+            <div class="grid grid-cols-4 gap-2">
+                @for ($shift = 1; $shift <= $shiftCount; $shift++)
+                    @foreach (['start' => 'shift_start_time', 'end' => 'shift_end_time'] as $edge => $shiftLabel)
+                        <div class="flex flex-col">
+                            <x-label for="personnel.work_hours.shift_{{ $shift }}_{{ $edge }}">{{ __('personnel::common.labels.'.$shiftLabel, ['shift' => __('personnel::common.employment.shift.'.$shift)]) }}</x-label>
+                            <x-livewire-input type="time" mode="gray" name="personnel.work_hours.shift_{{ $shift }}_{{ $edge }}" wire:model="personalForm.personnel.work_hours.shift_{{ $shift }}_{{ $edge }}"></x-livewire-input>
+                            @error('personalForm.personnel.work_hours.shift_'.$shift.'_'.$edge)
+                            <x-validation> {{ $message }} </x-validation>
+                            @enderror
+                        </div>
+                    @endforeach
+                @endfor
+            </div>
+        @endif
 
         <div class="grid grid-cols-2 gap-2">
             <div class="flex flex-col space-y-2">
