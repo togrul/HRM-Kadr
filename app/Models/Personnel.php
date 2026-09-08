@@ -87,8 +87,17 @@ class Personnel extends Model
         'parent_id',
         'position_id',
         'work_norm_id',
+        'contract_type',
+        'contract_date',
         'join_work_date',
         'leave_work_date',
+        'probation_unit',
+        'probation_amount',
+        'workplace_type',
+        'working_time_type',
+        'work_schedule',
+        'work_hours',
+        'rest_days',
         'social_origin_id',
         'disability_id',
         'disability_given_date',
@@ -108,6 +117,7 @@ class Personnel extends Model
     ];
 
     protected $dates = [
+        'contract_date',
         'join_work_date',
         'leave_work_date',
         'birthdate',
@@ -117,6 +127,9 @@ class Personnel extends Model
 
     protected $casts = [
         'birthdate' => self::FORMAT_CAST,
+        'contract_date' => self::FORMAT_CAST,
+        'work_hours' => 'array',
+        'rest_days' => 'array',
         'join_work_date' => self::FORMAT_CAST,
         'leave_work_date' => self::FORMAT_CAST,
         'special_inspection_date' => self::FORMAT_CAST,
