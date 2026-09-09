@@ -69,6 +69,10 @@
         </x-slot:stats>
 
         <x-slot:actions>
+            <x-pill-button variant="secondary" :href="route('docs.guide', ['focus' => 'performance']).'#performance-module'">
+                {{ __('performance_evaluation::dashboard.actions.open_user_guide') }}
+            </x-pill-button>
+
             <x-pill-button wire:click.prevent="switchTab('templates')" wire:loading.attr="disabled" wire:target="switchTab">
                 {{ __('performance_evaluation::dashboard.panel.new_template') }}
             </x-pill-button>
