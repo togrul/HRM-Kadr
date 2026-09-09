@@ -71,6 +71,10 @@
         </x-slot:stats>
 
         <x-slot:actions>
+            <x-pill-button variant="secondary" :href="route('docs.guide', ['focus' => 'training']).'#training-module'">
+                {{ __('training_needs::dashboard.actions.open_user_guide') }}
+            </x-pill-button>
+
             <x-pill-button wire:click.prevent="switchTab('calendar')" wire:loading.attr="disabled" wire:target="switchTab">
                 {{ __('training_needs::dashboard.tabs.calendar') }}
             </x-pill-button>
