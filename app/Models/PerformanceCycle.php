@@ -39,6 +39,15 @@ class PerformanceCycle extends Model
         'auto_generate_forms' => 'boolean',
     ];
 
+    /**
+     * A closed cycle is read-only: its forms and scores can no longer change.
+     */
+    public static function isClosed(int|string|null $cycleId): bool
+    {
+        return $cycleId !== null
+            && static::query()->whereKey($cycleId)->where('status', 'closed')->exists();
+    }
+
     public function forms(): HasMany
     {
         return $this->hasMany(PerformanceForm::class);

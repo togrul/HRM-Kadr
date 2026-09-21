@@ -245,6 +245,7 @@ return [
         'open_user_guide' => 'User guide',
     ],
     'messages' => [
+        'cycle_closed' => 'The cycle is closed — its results are read-only. Reopen the cycle to make changes.',
         'cycle_saved' => 'Performance cycle saved.',
         'cycle_deleted' => 'Performance cycle deleted.',
         'template_saved' => 'Template saved.',

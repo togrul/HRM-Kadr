@@ -2,6 +2,7 @@
 
 namespace App\Modules\PerformanceEvaluation\Livewire\Concerns;
 
+use App\Models\PerformanceCycle;
 use App\Models\PerformanceForm;
 use App\Models\PerformanceFormScore;
 use App\Models\User;
@@ -28,6 +29,11 @@ trait HandlesPerformanceEvaluationFlowMutations
         ]);
 
         $this->guardEvaluatorUsersExist($validated);
+        $this->guardCycleOpen(
+            'evaluationForm.performance_cycle_id',
+            data_get($validated, 'evaluationForm.performance_cycle_id'),
+            $this->editingEvaluationFormId ? PerformanceForm::query()->whereKey($this->editingEvaluationFormId)->value('performance_cycle_id') : null,
+        );
 
         $payload = [
             'performance_cycle_id' => (int) data_get($validated, 'evaluationForm.performance_cycle_id'),
@@ -130,6 +136,11 @@ trait HandlesPerformanceEvaluationFlowMutations
             'scoreForm.comment' => __('performance_evaluation::dashboard.fields.comment'),
         ]);
 
+        $this->guardCycleOpen(
+            'scoreForm.score',
+            PerformanceForm::query()->whereKey((int) data_get($validated, 'scoreForm.performance_form_id'))->value('performance_cycle_id'),
+        );
+
         $score = PerformanceFormScore::query()->updateOrCreate(
             [
                 'performance_form_id' => (int) data_get($validated, 'scoreForm.performance_form_id'),
@@ -163,6 +174,20 @@ trait HandlesPerformanceEvaluationFlowMutations
         }
     }
 
+    /**
+     * @throws ValidationException
+     */
+    protected function guardCycleOpen(string $field, int|string|null ...$cycleIds): void
+    {
+        foreach ($cycleIds as $cycleId) {
+            if (PerformanceCycle::isClosed($cycleId)) {
+                throw ValidationException::withMessages([
+                    $field => __('performance_evaluation::dashboard.messages.cycle_closed'),
+                ]);
+            }
+        }
+    }
+
     public function editEvaluationForm(int $id): void
     {
         $this->authorizePerformanceEvaluationManage();
@@ -182,7 +207,9 @@ trait HandlesPerformanceEvaluationFlowMutations
     public function deleteEvaluationForm(int $id): void
     {
         $this->authorizePerformanceEvaluationManage();
-        PerformanceForm::query()->findOrFail($id)->delete();
+        $form = PerformanceForm::query()->findOrFail($id);
+        $this->guardCycleOpen('evaluationForm.performance_cycle_id', $form->performance_cycle_id);
+        $form->delete();
         if ($this->editingEvaluationFormId === $id) {
             $this->cancelEvaluationEdit();
         }

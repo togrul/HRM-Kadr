@@ -3,11 +3,13 @@
 namespace App\Modules\PerformanceEvaluation\Livewire;
 
 use App\Livewire\Concerns\WithRuntimeMemo;
+use App\Models\PerformanceCycle;
 use App\Models\PerformanceForm;
 use App\Models\PerformanceFormScore;
 use App\Modules\PerformanceEvaluation\Application\Services\PerformanceWeakAreaTrainingNeedService;
 use App\Modules\PerformanceEvaluation\Livewire\Concerns\InteractsWithEvaluatorScoreCaptureQueries;
 use App\Modules\PerformanceEvaluation\Livewire\Concerns\InteractsWithEvaluatorWorkspaceScoreForm;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Isolate;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Reactive;
@@ -71,6 +73,12 @@ class EvaluatorScoreCapture extends Component
             auth()->user()?->can('manage-performance-evaluation'),
             403
         );
+
+        if (PerformanceCycle::isClosed($form->performance_cycle_id)) {
+            throw ValidationException::withMessages([
+                'scoreForm.score' => __('performance_evaluation::dashboard.messages.cycle_closed'),
+            ]);
+        }
 
         $score = PerformanceFormScore::query()->updateOrCreate(
             [

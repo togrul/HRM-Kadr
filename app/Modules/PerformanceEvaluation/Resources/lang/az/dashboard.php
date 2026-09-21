@@ -245,6 +245,7 @@ return [
         'open_user_guide' => 'İstifadəçi bələdçisi',
     ],
     'messages' => [
+        'cycle_closed' => 'Dövr bağlanıb — nəticələr yalnız oxunur. Dəyişiklik üçün əvvəlcə dövrü yenidən açın.',
         'cycle_saved' => 'Qiymətləndirmə dövrü yadda saxlanıldı.',
         'cycle_deleted' => 'Qiymətləndirmə dövrü silindi.',
         'template_saved' => 'Şablon yadda saxlanıldı.',
