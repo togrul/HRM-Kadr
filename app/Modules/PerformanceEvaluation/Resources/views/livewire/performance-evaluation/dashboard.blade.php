@@ -1,5 +1,5 @@
 @php
-    $contextTabs = ['overview', 'goals', 'succession', 'feedback', 'cycles', 'templates', 'evaluations', 'tests', 'reports', 'lists'];
+    $contextTabs = ['overview', 'kpi_scorecards', 'kpi_library', 'goals', 'succession', 'feedback', 'cycles', 'templates', 'evaluations', 'tests', 'reports', 'lists'];
     $stats = $this->stats;
     $cycle = $this->activeCycle;
 
@@ -104,6 +104,14 @@
     <div class="px-4 py-4 sm:px-5">
         @if ($activeTab === 'overview')
             <livewire:performance-evaluation.overview lazy />
+        @endif
+
+        @if ($activeTab === 'kpi_scorecards')
+            <livewire:performance-evaluation.kpi-scorecards lazy />
+        @endif
+
+        @if ($activeTab === 'kpi_library')
+            <livewire:performance-evaluation.kpi-library lazy />
         @endif
 
         @if ($activeTab === 'goals')

@@ -12,6 +12,8 @@ return [
     ],
     'tabs' => [
         'overview' => 'Xülasə',
+        'kpi_scorecards' => 'KPI kartları',
+        'kpi_library' => 'KPI kitabxanası',
         'goals' => 'Məqsədlər',
         'succession' => 'Varislik',
         'feedback' => '360° rəy',

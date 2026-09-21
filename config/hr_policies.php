@@ -16,7 +16,7 @@ $allMenuVisibility = [
 ];
 
 $trainingNeedsTabs = ['overview', 'catalogs', 'matrix', 'profiles', 'planning', 'calendar', 'results', 'analytics', 'reports', 'lists'];
-$performanceTabs = ['overview', 'goals', 'succession', 'feedback', 'cycles', 'templates', 'evaluations', 'tests', 'reports', 'lists'];
+$performanceTabs = ['overview', 'kpi_scorecards', 'kpi_library', 'goals', 'succession', 'feedback', 'cycles', 'templates', 'evaluations', 'tests', 'reports', 'lists'];
 $performanceTestTabs = ['banks', 'questions', 'import', 'sessions', 'review'];
 
 return [

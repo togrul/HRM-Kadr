@@ -62,6 +62,9 @@ kimi məlumatlar görünə bilər.
 
 Bu bölmə daha çox ümumi nəzarət üçündür.
 
+### KPI kartları və KPI kitabxanası
+Hər əməkdaşın ölçülə bilən göstəricilərini (KPI) qoymaq, faktiki nəticəni yazmaq və balı avtomatik hesablamaq üçündür. Ətraflı izah aşağıda, **«KPI sistemi»** bölməsindədir.
+
 ### Məqsədlər və OKR
 Bu bölmə əməkdaşların və komandaların məqsədlərini (OKR) qoymaq və irəliləyişi izləmək üçündür. Burada böyük məqsəd ölçülə bilən nəticələrə (KPI) bölünür və faiz avtomatik hesablanır.
 
@@ -161,6 +164,211 @@ görünə bilər.
 Bu hissə daha geniş axtarış və tam görünüş üçündür.
 
 Əgər sizə qısa xülasə yox, bütün qeydlər lazımdırsa, bu hissə daha uyğundur.
+
+## KPI sistemi: hər əməkdaşın ölçülə bilən nəticəsi
+
+### KPI nədir və nə üçün lazımdır?
+KPI əməkdaşın işini **rəqəmlə ölçən göstəricidir**. Məsələn:
+- satış planı neçə faiz yerinə yetirilib?
+- müraciətlər neçə gündə cavablandırılıb?
+- tapşırıqların neçə faizi vaxtında bitib?
+
+Adi qiymətləndirmədə rəhbər "fikrini" bal kimi yazır. KPI-da isə əvvəlcədən **hədəf** qoyulur, dövr ərzində **faktiki nəticə** yazılır, sistem də balı **özü hesablayır**. Beləliklə nəticə hamı üçün aydın və ədalətli olur.
+
+Sadə dildə KPI sistemi bu suala cavab verir: **"Əməkdaş ona qoyulan hədəfə nə qədər çatıb?"**
+
+### KPI sistemi hansı hissələrdən ibarətdir?
+Performans modulunda KPI üçün iki bölmə var:
+
+| Bölmə | Nə üçündür | Kim işləyir |
+| --- | --- | --- |
+| `KPI kitabxanası` | Bütün göstəricilərin siyahısı və vəzifə şablonları | HR |
+| `KPI kartları` | Hər əməkdaşın dövr üzrə şəxsi KPI kartı | HR, rəhbər, əməkdaş |
+
+İş həmişə bu ardıcıllıqla gedir:
+
+`KPI yarat -> şablona yığ -> vəzifəyə bağla -> kartları yarat -> hədəfləri razılaşdır -> faktiki dəyəri yaz -> qiymətləndir -> bağla`
+
+### Addım 1. KPI kitabxanasına göstərici əlavə etmək
+KPI kitabxanası bütün göstəricilərin bir yerdə saxlandığı "kataloqdur". Bir KPI bir dəfə yaradılır və sonra istənilən qədər vəzifədə istifadə olunur.
+
+1. `Performans qiymətləndirməsi` → `KPI kitabxanası` bölməsini açın.
+2. Yuxarıdakı `KPI kitabxanası` düyməsi seçili olsun.
+3. `Yeni KPI` düyməsini basın.
+4. Sağda açılan pəncərədə sahələri doldurun (izahı aşağıdadır).
+5. `Yadda saxla` düyməsini basın.
+
+**Sahələr nə deməkdir?**
+
+| Sahə | Nə yazmalı | Nümunə |
+| --- | --- | --- |
+| Kod | Qısa, təkrarlanmayan ad. Yalnız böyük latın hərfləri, rəqəm və `_` | `SALES_PLAN` |
+| Ad | Hamının başa düşəcəyi ad | Satış planının icrası |
+| Tip | `Kəmiyyət` — rəqəmlə ölçülür; `Keyfiyyət` — 1–5 bal; `Binar` — oldu/olmadı | Kəmiyyət |
+| İstiqamət | `Çox olması yaxşıdır` (satış), `Az olması yaxşıdır` (xəta sayı), `Diapazon` (müəyyən aralıqda olmalıdır) | Çox olması yaxşıdır |
+| Ölçü vahidi | Faiz, məbləğ, say, gün, saat, bal | Məbləğ |
+| Tezlik | Nə qədər tez-tez ölçülür | Rüblük |
+| Dövr üzrə toplama | Dövrdə bir neçə dəyər yazılsa hansı götürülsün: cəm, orta, sonuncu, minimum, maksimum | Sonuncu dəyər |
+| Perspektiv | Maliyyə, müştəri, daxili proses, inkişaf | Maliyyə |
+| Sübut faylı məcburidir | İşarələsəniz, əməkdaş faktiki dəyər yazanda fayl (akt, hesabat) əlavə etməlidir | — |
+| Status | `Aktiv` — istifadə olunur; `Qaralama` — hazırlanır; `Arxiv` — daha istifadə olunmur | Aktiv |
+
+**Siyahıda nə görürsünüz?**
+- Hər sətirdə KPI-ın adı, kodu, istiqaməti (yaşıl ox — artım yaxşıdır, göy ox — azalma yaxşıdır), vahidi və tezliyi görünür.
+- `v1`, `v2` — KPI-ın versiyasıdır (aşağıya bax).
+- Sətrin üstünə gələndə sağda üç düymə çıxır: **qələm** — redaktə, **qutu** — arxivləşdir, **zibil qutusu** — sil.
+- Sancaq işarəsi olan KPI-da sübut faylı məcburidir.
+
+**Versiya nədir?**
+KPI-ın tipini, istiqamətini, vahidini və ya toplama qaydasını dəyişsəniz, sistem **yeni versiya** yaradır (`v1` → `v2`). Artıq açılmış kartlar köhnə qaydada hesablanmağa davam edir. Bu, dövrün ortasında qaydanın dəyişməsi ilə kiminsə nəticəsinin gözlənilmədən dəyişməsinin qarşısını alır. Adı və ya təsviri dəyişmək yeni versiya yaratmır.
+
+**KPI-ı silmək olmursa**
+Əgər KPI hansısa şablonda və ya kartda istifadə olunubsa, sistem onu silməyə icazə vermir — keçmiş nəticələr itməsin deyə. Belə KPI-ı `Arxivləşdir` edin: siyahıda solğun görünəcək və yeni şablonlarda seçilməyəcək.
+
+### Addım 2. Vəzifə şablonu yaratmaq
+Şablon — **bir vəzifə üçün KPI dəstidir**. Məsələn, "Satış meneceri" şablonuna 4 KPI daxildir və hər birinin çəkisi var. Eyni vəzifədə işləyən bütün əməkdaşlar eyni şablonla qiymətləndirilir.
+
+1. `KPI kitabxanası` bölməsində `Vəzifə şablonları` düyməsini seçin.
+2. `Yeni şablon` düyməsini basın.
+3. Şablonun adını yazın və dövr tipini seçin (aylıq, rüblük, illik).
+4. **KPI payı** və **kompetensiya payı** yazın. Cəmi 100% olmalıdır. Hələlik yalnız KPI istifadə olunursa: KPI 100, kompetensiya 0.
+5. **Vəzifələr** hissəsində bu şablonun aid olduğu vəzifələri seçin:
+   - axtarış sahəsinə vəzifənin adını yazın;
+   - lazım olan vəzifənin qarşısındakı kvadrata basın — işarələnəcək və yuxarıda qara çip kimi görünəcək;
+   - səhv seçdinizsə, çipdəki `×` işarəsinə basın və ya `Təmizlə` ilə hamısını silin;
+   - solğun görünən vəzifələr artıq başqa şablona bağlıdır — altında hansı şablonda olduğu yazılır. Bir vəzifə yalnız bir şablonda ola bilər.
+6. **KPI bəndləri** hissəsində `Bənd əlavə et` ilə KPI-ları əlavə edin və hər biri üçün doldurun:
+
+| Sahə | Mənası | Nümunə |
+| --- | --- | --- |
+| Çəki, % | Bu KPI yekun nəticədə nə qədər əhəmiyyətlidir. Bütün çəkilərin cəmi **100%** olmalıdır | 40 |
+| Hədəf | Çatılmalı olan dəyər, KPI-ın öz vahidində | 100 000 (AZN) |
+| Diapazon: alt / üst | Yalnız "Diapazon" istiqamətli KPI üçün | 90 və 110 |
+| Threshold, % | Minimum hədd. Nəticə bundan aşağıdırsa, bu KPI üzrə bal **0** olur | 80 |
+| Stretch, % | Maksimum sayılan nəticə | 110 |
+| Cap, % | Balın yuxarı sərhədi. Nəticə nə qədər yüksək olsa da, bal bundan çox olmur | 120 |
+| Rəhbər hədəfi dəyişə bilər | İşarələnsə, rəhbər kartda bu KPI-ın hədəfini əməkdaş üçün dəyişə bilər | — |
+
+7. `Yadda saxla` düyməsini basın.
+
+**Sistem nəyi yoxlayır?**
+- Çəkilərin cəmi 100% deyilsə, şablon yadda saxlanmır.
+- KPI payı + kompetensiya payı 100% deyilsə, şablon yadda saxlanmır.
+- Threshold 100%-dən kiçik, stretch və cap 100%-dən az olmamalıdır.
+- Şablonda 3-dən az və ya 7-dən çox KPI varsa, yaxud bir KPI-ın çəkisi 10–40% aralığında deyilsə, sistem **xəbərdarlıq** verir, amma yadda saxlamağa icazə verir.
+
+**Şablon kartında nə görürsünüz?**
+- Qara/boz zolaq — KPI və kompetensiya payı.
+- KPI-ların siyahısı və hər birinin çəkisi.
+- Yaşıl `Çəkilər balanslıdır` yazısı — hər şey qaydasındadır. Qırmızı yazı çıxırsa, çəkilərin cəmi 100% deyil.
+- Altda şablonun bağlı olduğu vəzifələr.
+
+### Addım 3. Əməkdaşlar üçün KPI kartlarını yaratmaq
+KPI kartı — **bir əməkdaşın bir dövr üzrə şəxsi KPI vərəqidir**.
+
+1. `Dövrlər` bölməsində qiymətləndirmə dövrünün yaradıldığına əmin olun (məsələn, "2026 I rüb").
+2. `KPI kartları` bölməsini açın və yuxarıda dövrü seçin.
+3. `Kartları yarat` düyməsini basın.
+
+Sistem şablonu olan vəzifələrdə işləyən **bütün aktiv əməkdaşlara** kart açır:
+- KPI-lar, çəkilər və hədəflər şablondan kartın içinə köçürülür;
+- əməkdaşın rəhbəri struktur üzrə avtomatik tapılır;
+- əməkdaş dövrün ortasında işə başlayıbsa, kartda **pro-rata** əmsalı göstərilir (işlədiyi günlərin payı).
+
+Düyməni təkrar bassanız, artıq kartı olan əməkdaşa ikinci kart açılmır — yalnız yeni gələnlərə açılır.
+
+### Addım 4. Kartın həyat dövrü (statuslar)
+
+| Status | Nə deməkdir | Nə etmək olar | Kim keçirir |
+| --- | --- | --- | --- |
+| **Qaralama** | Kart yenicə yaradılıb | Hədəfləri dəqiqləşdirmək | Rəhbər və ya HR `Kartı aktivləşdir` basır |
+| **Aktiv** | Dövr gedir, hədəflər kilidlənib | Faktiki dəyərləri yazmaq və təsdiqləmək | Rəhbər və ya HR `Qiymətləndirməyə göndər` basır |
+| **Rəhbər qiymətləndirməsi** | Dövr bitib, nəticə yoxlanılır | Nəticəyə baxmaq; lazım olsa HR `Geri qaytar` edə bilər | HR `Təsdiqlə və bağla` basır |
+| **Bağlanıb** | Nəticə yekunlaşıb | Yalnız baxmaq. Heç nə dəyişmir | — |
+
+Status düyməsini basanda sistem təsdiq soruşur — təsadüfən basılmasın deyə.
+
+### Addım 5. Faktiki dəyəri yazmaq
+Faktiki dəyər — əməkdaşın həqiqətən əldə etdiyi nəticədir (məsələn, rüb ərzində 110 000 AZN satış).
+
+1. `KPI kartları` bölməsində əməkdaşın sətrinə basın — kart açılacaq.
+2. Lazım olan KPI-ın qarşısında `Faktiki dəyər` düyməsini basın.
+3. Rəqəmi yazın. İstəsəniz qeyd əlavə edin.
+4. KPI sübut tələb edirsə (qırmızı ulduz `*`), faylı əlavə edin: PDF, şəkil, Excel və ya Word, 10 MB-a qədər.
+5. `Yadda saxla` basın.
+
+**Kim yaza bilər və nə baş verir?**
+- **HR və rəhbər** yazanda dəyər dərhal hesablamaya düşür.
+- **Əməkdaş** özü yazanda dəyər `təsdiq gözləyir` kimi görünür və rəhbər `Təsdiqlə` basana qədər bala təsir etmir.
+- Hər KPI-ın altında son yazılan dəyərlərin tarixçəsi görünür: kim yazıb, nə vaxt, qeyd və fayl.
+- Faktiki dəyər yalnız **Aktiv** kartda yazılır.
+
+### Bal necə hesablanır? (sadə izah)
+Hər faktiki dəyər yazılanda sistem kartı dərhal yenidən hesablayır.
+
+**1. Nəticə faizi.** Faktiki dəyər hədəflə müqayisə olunur:
+- "Çox olması yaxşıdır": 110 000 / 100 000 = **110%**
+- "Az olması yaxşıdır": hədəf 5 xəta, faktiki 4 xəta → nəticə 100%-dən yuxarı olur. Faktiki 0 olsa belə hesablama xətasız işləyir.
+- "Diapazon": dəyər aralıqdadırsa 100%, kənara çıxdıqca bal azalır.
+- "Binar": oldu — 100%, olmadı — 0%.
+- "Keyfiyyət": 1→0%, 2→60%, 3→100%, 4→110%, 5→120%.
+
+**2. Həddlər.**
+- Nəticə threshold-dan aşağıdırsa → bu KPI üzrə bal **0**.
+- Nəticə stretch-dən və ya cap-dan yuxarıdırsa → bal ən kiçik sərhəddə kəsilir.
+
+**3. KPI balı** = hər KPI-ın balı × onun çəkisi, sonra hamısı toplanır.
+
+**Nümunə (satış meneceri, threshold 80%, cap 120%):**
+
+| KPI | Çəki | Hədəf | Faktiki | Nəticə | Bal |
+| --- | --- | --- | --- | --- | --- |
+| Satış planı | 40% | 100 000 | 110 000 | 110% | 44.0 |
+| Yeni müştəri | 25% | 20 | 18 | 90% | 22.5 |
+| Debitor borc yığımı | 20% | 95% | 71% | 75% — threshold-dan aşağı | 0 |
+| CRM məlumat keyfiyyəti | 15% | 100% | 100% | 100% | 15.0 |
+
+KPI balı = 44 + 22.5 + 0 + 15 = **81.5%**.
+
+**4. Yekun bal** = KPI balı × KPI payı + kompetensiya balı × kompetensiya payı. KPI payı 100% olan şablonda yekun bal KPI balına bərabərdir.
+
+**5. Rənglər.** Yaşıl — hədəfə çatılıb (100% və yuxarı), sarı — threshold ilə hədəf arasında, qırmızı — threshold-dan aşağı.
+
+**6. Reytinq.** Yekun bala görə:
+
+| Yekun bal | Reytinq |
+| --- | --- |
+| 70%-dən aşağı | Gözləntilərə cavab vermir |
+| 70–89% | Qismən cavab verir |
+| 90–105% | Cavab verir |
+| 106–115% | Aşır |
+| 115%-dən yuxarı | Əhəmiyyətli dərəcədə aşır |
+
+### Kim nəyi görür?
+- **HR** bütün kartları görür və hər əməliyyatı edə bilər.
+- **Rəhbər** yalnız özünün və tabeliyindəki əməkdaşların kartlarını görür.
+- **Əməkdaş** yalnız öz kartını görür.
+
+Qeyd: sistemin istifadəçini əməkdaşla tanıması üçün istifadəçi hesabı əməkdaş kartına bağlı olmalıdır (e-poçt eyni olanda avtomatik bağlanır, əks halda HR `İstifadəçi–əməkdaş əlaqələri` səhifəsində bağlayır).
+
+### Tez-tez verilən suallar
+**Kartları yarat düyməsini basdım, amma heç bir kart yaranmadı.**
+Yoxlayın: şablon `Aktiv` statusundadırmı, şablona vəzifə bağlanıbmı, həmin vəzifədə aktiv əməkdaş varmı, bu əməkdaşların bu dövrdə artıq kartı yoxdurmu?
+
+**Hədəfi dəyişə bilmirəm.**
+Hədəf yalnız kart **Qaralama** statusunda olanda dəyişir. Rəhbər isə yalnız şablonda "Rəhbər hədəfi dəyişə bilər" işarələnmiş KPI-ların hədəfini dəyişə bilər.
+
+**Faktiki dəyər yazılmır.**
+Kart **Aktiv** olmalıdır. KPI sübut tələb edirsə, fayl əlavə edin.
+
+**Əməkdaşın yazdığı dəyər bala təsir etmir.**
+Rəhbər onu hələ təsdiqləməyib — dəyərin yanında `təsdiq gözləyir` yazılır.
+
+**Yekun bal boşdur.**
+Şablonda kompetensiya payı 0-dan böyükdürsə, kompetensiya qiyməti daxil olunana qədər yekun bal hesablanmır. KPI balı isə görünür.
+
+**Şablonda vəzifəni seçə bilmirəm.**
+Vəzifə solğundursa, o artıq başqa şablona bağlıdır. Əvvəl həmin şablondan çıxarın.
 
 ## Yeni istifadəçi üçün ən rahat iş sırası
 1. `Dövrlər` bölməsində dövr yaradın.
@@ -264,6 +472,14 @@ Yoxlayın:
 Yoxlayın:
 - nəticə daxil edilibmi?
 - doğru dövr seçilibmi?
+
+## Qiymətləndirmə formasının yekun balı necə hesablanır?
+- Yekun bala **rəhbərin** qiyməti düşür. Rəhbər bir bəndi qiymətləndirməyibsə, həmin bənd üçün HR-ın qiyməti götürülür.
+- Əməkdaşın **öz-qiyməti** yekun bala təsir etmir — yalnız müqayisə üçün görünür. Formada yalnız öz-qiymət varsa, yekun bal boş qalır.
+- Şablonda bölmələrə çəki verilibsə (məsələn, "Nəticələr" 70%, "Davranış" 30%), əvvəl hər bölmə ayrıca hesablanır, sonra bölmələr çəkiyə görə birləşir.
+
+## Bağlanmış dövr
+Dövrün statusu `Bağlanıb` olanda onun bütün nəticələri **yalnız oxunur**: bal yazmaq, formanı dəyişmək və ya silmək, dövrün özünü silmək mümkün olmur. Düzəliş lazımdırsa, HR əvvəlcə dövrün statusunu yenidən `Aktiv` edir.
 
 ## Nəyə diqqət etmək lazımdır?
 - Əvvəl dövr yaradılmalıdır.

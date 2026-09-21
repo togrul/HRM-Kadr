@@ -21,7 +21,7 @@ class Dashboard extends Component
     /**
      * @var array<int, string>
      */
-    public array $tabs = ['overview', 'goals', 'succession', 'feedback', 'cycles', 'templates', 'evaluations', 'tests', 'reports', 'lists'];
+    public array $tabs = ['overview', 'kpi_scorecards', 'kpi_library', 'goals', 'succession', 'feedback', 'cycles', 'templates', 'evaluations', 'tests', 'reports', 'lists'];
 
     public function mount(): void
     {

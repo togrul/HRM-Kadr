@@ -54,6 +54,8 @@ class PerformanceEvaluationServiceProvider extends ServiceProvider
             'succession-workspace' => \App\Modules\PerformanceEvaluation\Livewire\SuccessionWorkspace::class,
             'feedback-360-workspace' => \App\Modules\PerformanceEvaluation\Livewire\Feedback360Workspace::class,
             'personnel-picker' => \App\Modules\PerformanceEvaluation\Livewire\PersonnelPicker::class,
+            'kpi-library' => \App\Modules\PerformanceEvaluation\Livewire\Kpi\KpiLibraryWorkspace::class,
+            'kpi-scorecards' => \App\Modules\PerformanceEvaluation\Livewire\Kpi\ScorecardsWorkspace::class,
         ];
     }
 }

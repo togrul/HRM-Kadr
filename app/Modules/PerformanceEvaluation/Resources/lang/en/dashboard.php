@@ -12,6 +12,8 @@ return [
     ],
     'tabs' => [
         'overview' => 'Overview',
+        'kpi_scorecards' => 'KPI scorecards',
+        'kpi_library' => 'KPI library',
         'goals' => 'Goals',
         'succession' => 'Succession',
         'feedback' => '360° feedback',
