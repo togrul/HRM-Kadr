@@ -73,7 +73,7 @@
                         <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __('onboarding-library::dashboard.sections.create_template') }}</x-ui.field-label>
                         <div class="mt-4 grid gap-4 md:grid-cols-2">
                             <x-ui.input-shell :label="__('onboarding-library::dashboard.fields.template_title')" :error="$errors->first('templateForm.title')" labelClass="tracking-tight text-zinc-500">
-                                <x-ui.filter-input wire:model.live="templateForm.title" type="text" />
+                                <x-ui.filter-input wire:model="templateForm.title" type="text" />
                             </x-ui.input-shell>
                             <x-ui.input-shell :label="__('onboarding-library::dashboard.fields.document_type')" :error="$errors->first('templateForm.document_type')" labelClass="tracking-tight text-zinc-500">
                                 <x-ui.filter-native-select wire:model.live="templateForm.document_type">
@@ -83,14 +83,14 @@
                                 </x-ui.filter-native-select>
                             </x-ui.input-shell>
                             <x-ui.input-shell :label="__('onboarding-library::dashboard.fields.version')" :error="$errors->first('templateForm.version')" labelClass="tracking-tight text-zinc-500">
-                                <x-ui.filter-input wire:model.live="templateForm.version" type="text" />
+                                <x-ui.filter-input wire:model="templateForm.version" type="text" />
                             </x-ui.input-shell>
                             <x-ui.file-upload-shell wire:model="templateUpload" :label="__('onboarding-library::dashboard.fields.file')" :error="$errors->first('templateUpload')" :upload="$templateUpload" />
                             <x-ui.input-shell :label="__('onboarding-library::dashboard.fields.effective_from')" :error="$errors->first('templateForm.effective_from')" labelClass="tracking-tight text-zinc-500">
-                                <x-ui.filter-input wire:model.live="templateForm.effective_from" type="date" />
+                                <x-ui.filter-input wire:model="templateForm.effective_from" type="date" />
                             </x-ui.input-shell>
                             <x-ui.input-shell :label="__('onboarding-library::dashboard.fields.effective_to')" :error="$errors->first('templateForm.effective_to')" labelClass="tracking-tight text-zinc-500">
-                                <x-ui.filter-input wire:model.live="templateForm.effective_to" type="date" />
+                                <x-ui.filter-input wire:model="templateForm.effective_to" type="date" />
                             </x-ui.input-shell>
                         </div>
                         <div class="mt-4 flex flex-wrap gap-4">
@@ -181,7 +181,7 @@
                         </x-ui.input-shell>
 
                         <x-ui.input-shell :label="__('onboarding-library::dashboard.fields.due_at')" :error="$errors->first('assignmentForm.due_at')" labelClass="tracking-tight text-zinc-500">
-                            <x-ui.filter-input wire:model.live="assignmentForm.due_at" type="date" />
+                            <x-ui.filter-input wire:model="assignmentForm.due_at" type="date" />
                         </x-ui.input-shell>
                     </div>
 

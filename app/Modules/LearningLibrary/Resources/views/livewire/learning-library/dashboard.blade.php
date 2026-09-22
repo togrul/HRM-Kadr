@@ -73,7 +73,7 @@
                         <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __('learning-library::dashboard.sections.create_asset') }}</x-ui.field-label>
                         <div class="mt-4 grid gap-4 md:grid-cols-2">
                             <x-ui.input-shell :label="__('learning-library::dashboard.fields.asset_title')" :error="$errors->first('assetForm.title')" labelClass="tracking-tight text-zinc-500">
-                                <x-ui.filter-input wire:model.live="assetForm.title" type="text" />
+                                <x-ui.filter-input wire:model="assetForm.title" type="text" />
                             </x-ui.input-shell>
                             <x-ui.input-shell :label="__('learning-library::dashboard.fields.content_type')" :error="$errors->first('assetForm.content_type')" labelClass="tracking-tight text-zinc-500">
                                 <x-ui.filter-native-select wire:model.live="assetForm.content_type">
@@ -83,7 +83,7 @@
                                 </x-ui.filter-native-select>
                             </x-ui.input-shell>
                             <x-ui.input-shell :label="__('learning-library::dashboard.fields.version')" :error="$errors->first('assetForm.version')" labelClass="tracking-tight text-zinc-500">
-                                <x-ui.filter-input wire:model.live="assetForm.version" type="text" />
+                                <x-ui.filter-input wire:model="assetForm.version" type="text" />
                             </x-ui.input-shell>
                             <x-ui.input-shell :label="__('learning-library::dashboard.fields.visibility')" :error="$errors->first('assetForm.visibility')" labelClass="tracking-tight text-zinc-500">
                                 <x-ui.filter-native-select wire:model.live="assetForm.visibility">
@@ -94,16 +94,16 @@
                             </x-ui.input-shell>
                             <div class="md:col-span-2">
                                 <x-ui.input-shell :label="__('learning-library::dashboard.fields.description')" :error="$errors->first('assetForm.description')" labelClass="tracking-tight text-zinc-500">
-                                    <x-ui.filter-textarea wire:model.live="assetForm.description" rows="4" />
+                                    <x-ui.filter-textarea wire:model="assetForm.description" rows="4" />
                                 </x-ui.input-shell>
                             </div>
                             <x-ui.file-upload-shell wire:model="assetUpload" :label="__('learning-library::dashboard.fields.file')" :error="$errors->first('assetUpload')" :upload="$assetUpload" />
                             <div class="space-y-4">
                                 <x-ui.input-shell :label="__('learning-library::dashboard.fields.estimated_minutes')" :error="$errors->first('assetForm.estimated_minutes')" labelClass="tracking-tight text-zinc-500">
-                                    <x-ui.filter-input wire:model.live="assetForm.estimated_minutes" type="number" min="1" max="600" />
+                                    <x-ui.filter-input wire:model="assetForm.estimated_minutes" type="number" min="1" max="600" />
                                 </x-ui.input-shell>
                                 <x-ui.input-shell :label="__('learning-library::dashboard.fields.external_url')" :error="$errors->first('assetForm.external_url')" labelClass="tracking-tight text-zinc-500">
-                                    <x-ui.filter-input wire:model.live="assetForm.external_url" type="url" />
+                                    <x-ui.filter-input wire:model="assetForm.external_url" type="url" />
                                 </x-ui.input-shell>
                             </div>
                         </div>
@@ -191,7 +191,7 @@
                         </x-ui.input-shell>
 
                         <x-ui.input-shell :label="__('learning-library::dashboard.fields.due_at')" :error="$errors->first('assignmentForm.due_at')" labelClass="tracking-tight text-zinc-500">
-                            <x-ui.filter-input wire:model.live="assignmentForm.due_at" type="date" />
+                            <x-ui.filter-input wire:model="assignmentForm.due_at" type="date" />
                         </x-ui.input-shell>
                     </div>
 

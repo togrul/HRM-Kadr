@@ -32,11 +32,6 @@ class CalendarRegimes extends Component
     public int $perPage = 20;
 
     /**
-     * @var array<int,array{id:int,name:string}>
-     */
-    public array $structures = [];
-
-    /**
      * @var array<string,mixed>
      */
     public array $form = [
@@ -77,7 +72,6 @@ class CalendarRegimes extends Component
         $this->canManage = $authorization->can('attendance.calendars.manage');
         $this->year = $year ?: (int) now()->year;
         $this->month = $month ?: (int) now()->month;
-        $this->structures = $this->resolveStructures();
         $this->resetForm();
     }
 
@@ -171,7 +165,7 @@ class CalendarRegimes extends Component
 
     public function render()
     {
-        $structures = collect($this->structures);
+        $structures = collect($this->resolveStructures());
         $structureNames = $structures
             ->pluck('name', 'id')
             ->all();

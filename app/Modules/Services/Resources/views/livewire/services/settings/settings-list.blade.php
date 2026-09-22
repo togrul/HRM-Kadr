@@ -141,11 +141,11 @@
                                     <x-ui.toggle wire:model.live="setting.{{ $key }}.value" />
                                 @elseif ($settingValue->type === 'string')
                                     <div class="w-[220px]">
-                                        <x-ui.input wire:model.live="setting.{{ $key }}.value" />
+                                        <x-ui.input wire:model.blur="setting.{{ $key }}.value" />
                                     </div>
                                 @else
                                     <div class="w-[110px]">
-                                        <x-ui.input type="number" step="0.01" class="text-right" wire:model.live="setting.{{ $key }}.value" />
+                                        <x-ui.input type="number" step="0.01" class="text-right" wire:model.blur="setting.{{ $key }}.value" />
                                     </div>
                                 @endif
 
@@ -177,7 +177,7 @@
                             <div class="flex shrink-0 items-center gap-2">
                                 @if ($coefficientIndex !== null)
                                     <div class="w-[110px]">
-                                        <x-ui.input type="number" step="0.01" class="text-right" wire:model.live="setting.{{ $coefficientIndex }}.value" />
+                                        <x-ui.input type="number" step="0.01" class="text-right" wire:model.blur="setting.{{ $coefficientIndex }}.value" />
                                     </div>
                                 @endif
 

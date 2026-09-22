@@ -14,7 +14,12 @@
     $progressPct = $progress['total'] > 0 ? (int) round($progress['answered'] / $progress['total'] * 100) : 0;
 @endphp
 
-<div class="mx-auto flex max-w-shell flex-col gap-4 px-4 py-4 lg:px-6" wire:poll.5s="heartbeat">
+@php
+    // Autosave and expiry only matter while an attempt is running; idle viewers never poll.
+    $attemptRunning = $this->sessionTimer['started'] && ! $this->sessionTimer['finished'];
+@endphp
+
+<div class="mx-auto flex max-w-shell flex-col gap-4 px-4 py-4 lg:px-6" @if ($attemptRunning) wire:poll.5s="heartbeat" @endif>
     <div class="flex items-center justify-between gap-3">
         <x-pill-button :href="$this->backUrl">
             <span aria-hidden="true">←</span>

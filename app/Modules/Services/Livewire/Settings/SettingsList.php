@@ -82,6 +82,11 @@ class SettingsList extends Component
 
     public function updatedSetting($value, $name)
     {
+        // Only the value is editable; a crafted update to `setting.N.id` must not write.
+        if (! str_ends_with((string) $name, '.value')) {
+            return;
+        }
+
         $_key = explode('.', $name)[0];
         $_setting = Setting::where('id', $this->setting[$_key]['id'])->firstOrFail();
         $_setting->update([

@@ -57,7 +57,7 @@
 
             <div>
                 <x-label for="attendance-calendar-name">{{ __('attendance::calendar_regimes.fields.name') }}</x-label>
-                <x-livewire-input id="attendance-calendar-name" mode="gray" name="form.name" wire:model.live="form.name" />
+                <x-livewire-input id="attendance-calendar-name" mode="gray" name="form.name" wire:model="form.name" />
                 @error('form.name') <x-validation>{{ $message }}</x-validation> @enderror
             </div>
 
