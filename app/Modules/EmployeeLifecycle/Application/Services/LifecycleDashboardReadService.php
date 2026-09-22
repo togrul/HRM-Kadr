@@ -3,44 +3,58 @@
 namespace App\Modules\EmployeeLifecycle\Application\Services;
 
 use App\Support\Database\InstalledTables;
+use Illuminate\Contracts\Database\Query\Expression;
+use Illuminate\Database\Query\Builder;
+use Illuminate\Database\Query\JoinClause;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class LifecycleDashboardReadService
 {
-    public function dashboard(array $filters = []): array
+    public const PER_PAGE = 15;
+
+    /** The overdue-task queue is a scrolling side list; its header shows the full count. */
+    private const OVERDUE_TASK_LIMIT = 50;
+
+    private const CLOSED_STATUSES = ['completed', 'cancelled'];
+
+    /**
+     * Localized event titles: key => [legacy stored title, source_type, event type].
+     *
+     * @var array<string, array{0: string, 1: string, 2: string}>
+     */
+    private const EVENT_TITLE_KEYS = [
+        'probation_review' => ['Probation review', 'employee_lifecycle_probation_review', 'probation'],
+        'internal_movement' => ['Internal movement', 'employee_lifecycle_movement', 'movement'],
+        'offboarding_case' => ['Offboarding case', 'employee_lifecycle_offboarding_case', 'offboarding'],
+    ];
+
+    public function dashboard(array $filters = [], int $perPage = self::PER_PAGE): array
     {
-        $allEvents = $this->allEvents();
-        $events = $this->applyEventFilters($allEvents, $filters);
-        $tasks = $this->tasks();
         $templates = $this->planTemplates();
         $probationReviews = $this->probationReviews();
         $movements = $this->movements();
         $offboardingCases = $this->offboardingCases();
-        $reviewEventIds = $probationReviews->pluck('event_id')->filter()->unique();
-        $probationQueue = $probationReviews->where('status', 'pending')->count()
-            + $allEvents
-                ->where('type', 'probation')
-                ->whereNotIn('status', ['completed', 'cancelled'])
-                ->reject(fn (array $event): bool => $reviewEventIds->contains($event['id']))
-                ->count();
+        $totals = $this->eventTotals();
+        $overdueTasks = $this->overdueTasks();
 
         return [
             'summary' => [
                 'active_templates' => $templates->where('is_active', true)->count(),
-                'active_events' => $allEvents->whereNotIn('status', ['completed', 'cancelled'])->count(),
-                'overdue_tasks' => $tasks->where('is_overdue', true)->count(),
-                'probation_queue' => $probationQueue,
-                'movement_queue' => $movements->whereNotIn('status', ['completed', 'cancelled'])->count(),
-                'offboarding_queue' => $offboardingCases->whereNotIn('status', ['completed', 'cancelled'])->count()
-                    ?: $allEvents->where('type', 'offboarding')->whereNotIn('status', ['completed', 'cancelled'])->count(),
+                'active_events' => $totals['active'],
+                'overdue_tasks' => $overdueTasks['total'],
+                'probation_queue' => $probationReviews->where('status', 'pending')->count() + $totals['probation_unreviewed'],
+                'movement_queue' => $movements->whereNotIn('status', self::CLOSED_STATUSES)->count(),
+                'offboarding_queue' => $offboardingCases->whereNotIn('status', self::CLOSED_STATUSES)->count()
+                    ?: $totals['offboarding'],
             ],
-            'events' => $events,
-            'overdueTasks' => $tasks->where('is_overdue', true)->values(),
+            'events' => $this->events($filters, $perPage),
+            'overdueTasks' => $overdueTasks['rows'],
             // Facet counts drop their own filter and keep the others, so a selected facet
             // can always be clicked back out of.
-            'typeCounts' => $this->facetCounts($allEvents, ['search' => $filters['search'] ?? '', 'status' => $filters['status'] ?? ''], 'type'),
-            'statusCounts' => $this->facetCounts($allEvents, ['search' => $filters['search'] ?? '', 'type' => $filters['type'] ?? ''], 'status'),
+            'typeCounts' => $this->facetCounts(['search' => $filters['search'] ?? '', 'status' => $filters['status'] ?? ''], 'type'),
+            'statusCounts' => $this->facetCounts(['search' => $filters['search'] ?? '', 'type' => $filters['type'] ?? ''], 'status'),
             'planTemplates' => $templates,
             'probationReviews' => $probationReviews,
             'movements' => $movements,
@@ -48,26 +62,16 @@ class LifecycleDashboardReadService
         ];
     }
 
-    public function events(array $filters = []): Collection
-    {
-        return $this->applyEventFilters($this->allEvents(), $filters);
-    }
-
-    private function allEvents(): Collection
+    /**
+     * One page of events, filtered and sorted in SQL: no deadline last, then deadline asc, then newest.
+     */
+    public function events(array $filters = [], int $perPage = self::PER_PAGE): LengthAwarePaginator
     {
         if (! InstalledTables::has('employee_lifecycle_events')) {
-            return collect();
+            return new LengthAwarePaginator([], 0, $perPage);
         }
 
-        return DB::table('employee_lifecycle_events')
-            ->leftJoin('personnels', function ($join): void {
-                $join->on('personnels.id', '=', 'employee_lifecycle_events.personnel_id')
-                    ->orOn('personnels.tabel_no', '=', 'employee_lifecycle_events.tabel_no');
-            })
-            ->leftJoin('structures', 'structures.id', '=', 'personnels.structure_id')
-            ->leftJoin('positions', 'positions.id', '=', 'personnels.position_id')
-            ->leftJoin('users as owners', 'owners.id', '=', 'employee_lifecycle_events.owner_user_id')
-            ->leftJoin('employee_lifecycle_plan_templates as plan_templates', 'plan_templates.id', '=', 'employee_lifecycle_events.plan_template_id')
+        return $this->filteredEvents($filters, true)
             ->select([
                 'employee_lifecycle_events.id',
                 'employee_lifecycle_events.type',
@@ -80,10 +84,7 @@ class LifecycleDashboardReadService
                 'employee_lifecycle_events.source_type',
                 'employee_lifecycle_events.source_id',
                 'employee_lifecycle_events.meta',
-                'personnels.tabel_no',
-                'personnels.surname',
-                'personnels.name',
-                'personnels.patronymic',
+                ...$this->personnelColumns(),
                 'structures.name as structure_name',
                 'positions.name as position_name',
                 'owners.name as owner_name',
@@ -92,9 +93,8 @@ class LifecycleDashboardReadService
             ->orderByRaw('case when employee_lifecycle_events.deadline_at is null then 1 else 0 end')
             ->orderBy('employee_lifecycle_events.deadline_at')
             ->orderByDesc('employee_lifecycle_events.id')
-            ->get()
-            ->map(fn ($row): array => $this->eventRow($row))
-            ->values();
+            ->paginate($perPage)
+            ->through(fn ($row): array => $this->eventRow($row));
     }
 
     public function planTemplates(): Collection
@@ -147,11 +147,7 @@ class LifecycleDashboardReadService
             return collect();
         }
 
-        return DB::table('employee_lifecycle_probation_reviews')
-            ->leftJoin('personnels', function ($join): void {
-                $join->on('personnels.id', '=', 'employee_lifecycle_probation_reviews.personnel_id')
-                    ->orOn('personnels.tabel_no', '=', 'employee_lifecycle_probation_reviews.tabel_no');
-            })
+        return $this->joinPersonnel(DB::table('employee_lifecycle_probation_reviews'), 'employee_lifecycle_probation_reviews')
             ->leftJoin('users as managers', 'managers.id', '=', 'employee_lifecycle_probation_reviews.manager_user_id')
             ->leftJoin('users as reviewers', 'reviewers.id', '=', 'employee_lifecycle_probation_reviews.hr_reviewer_user_id')
             ->select([
@@ -161,10 +157,7 @@ class LifecycleDashboardReadService
                 'employee_lifecycle_probation_reviews.decision',
                 'employee_lifecycle_probation_reviews.score',
                 'employee_lifecycle_probation_reviews.review_due_at',
-                'personnels.tabel_no',
-                'personnels.surname',
-                'personnels.name',
-                'personnels.patronymic',
+                ...$this->personnelColumns(),
                 'managers.name as manager_name',
                 'reviewers.name as reviewer_name',
             ])
@@ -193,11 +186,7 @@ class LifecycleDashboardReadService
             return collect();
         }
 
-        return DB::table('employee_lifecycle_movements')
-            ->leftJoin('personnels', function ($join): void {
-                $join->on('personnels.id', '=', 'employee_lifecycle_movements.personnel_id')
-                    ->orOn('personnels.tabel_no', '=', 'employee_lifecycle_movements.tabel_no');
-            })
+        return $this->joinPersonnel(DB::table('employee_lifecycle_movements'), 'employee_lifecycle_movements')
             ->leftJoin('structures as current_structures', 'current_structures.id', '=', 'employee_lifecycle_movements.current_structure_id')
             ->leftJoin('positions as current_positions', 'current_positions.id', '=', 'employee_lifecycle_movements.current_position_id')
             ->leftJoin('structures as target_structures', 'target_structures.id', '=', 'employee_lifecycle_movements.target_structure_id')
@@ -210,10 +199,7 @@ class LifecycleDashboardReadService
                 'employee_lifecycle_movements.effective_date',
                 'employee_lifecycle_movements.status',
                 'employee_lifecycle_movements.reason',
-                'personnels.tabel_no',
-                'personnels.surname',
-                'personnels.name',
-                'personnels.patronymic',
+                ...$this->personnelColumns(),
                 'current_structures.name as current_structure_name',
                 'current_positions.name as current_position_name',
                 'target_structures.name as target_structure_name',
@@ -249,13 +235,9 @@ class LifecycleDashboardReadService
             return collect();
         }
 
-        return DB::table('employee_lifecycle_offboarding_cases')
-            ->leftJoin('personnels', function ($join): void {
-                $join->on('personnels.id', '=', 'employee_lifecycle_offboarding_cases.personnel_id')
-                    ->orOn('personnels.tabel_no', '=', 'employee_lifecycle_offboarding_cases.tabel_no');
-            })
-            ->leftJoin('structures', 'structures.id', '=', 'personnels.structure_id')
-            ->leftJoin('positions', 'positions.id', '=', 'personnels.position_id')
+        return $this->joinPersonnel(DB::table('employee_lifecycle_offboarding_cases'), 'employee_lifecycle_offboarding_cases')
+            ->leftJoin('structures', 'structures.id', '=', DB::raw('COALESCE(lp.structure_id, lpt.structure_id)'))
+            ->leftJoin('positions', 'positions.id', '=', DB::raw('COALESCE(lp.position_id, lpt.position_id)'))
             ->leftJoin('users as owners', 'owners.id', '=', 'employee_lifecycle_offboarding_cases.owner_user_id')
             ->select([
                 'employee_lifecycle_offboarding_cases.id',
@@ -264,10 +246,7 @@ class LifecycleDashboardReadService
                 'employee_lifecycle_offboarding_cases.status',
                 'employee_lifecycle_offboarding_cases.reason',
                 'employee_lifecycle_offboarding_cases.exit_interview_completed_at',
-                'personnels.tabel_no',
-                'personnels.surname',
-                'personnels.name',
-                'personnels.patronymic',
+                ...$this->personnelColumns(),
                 'structures.name as structure_name',
                 'positions.name as position_name',
                 'owners.name as owner_name',
@@ -292,42 +271,145 @@ class LifecycleDashboardReadService
             ]);
     }
 
-    private function applyEventFilters(Collection $events, array $filters = []): Collection
+    /**
+     * Events matching the search/type/status filters. The personnel/structure/owner joins are
+     * only added when a caller selects from them or the search has to look into them.
+     */
+    private function filteredEvents(array $filters, bool $withContext = false): Builder
     {
         $search = mb_strtolower(trim((string) ($filters['search'] ?? '')));
         $type = trim((string) ($filters['type'] ?? ''));
         $status = trim((string) ($filters['status'] ?? ''));
 
-        return $events
-            ->when($search !== '', fn (Collection $rows) => $rows->filter(fn (array $row): bool => str_contains(mb_strtolower(implode(' ', [
-                $row['title'],
-                $row['employee_name'],
-                $row['tabel_no'],
-                $row['structure_name'],
-                $row['position_name'],
-                $row['owner_name'],
-                $row['template_name'] ?? '',
-                $row['source_label'] ?? '',
-            ])), $search)))
-            ->when($type !== '', fn (Collection $rows) => $rows->where('type', $type))
-            ->when($status !== '', fn (Collection $rows) => $rows->where('status', $status))
-            ->values();
-    }
+        $query = DB::table('employee_lifecycle_events');
 
-    private function tasks(): Collection
-    {
-        if (! InstalledTables::has('employee_lifecycle_tasks')) {
-            return collect();
+        if ($withContext || $search !== '') {
+            $this->joinPersonnel($query, 'employee_lifecycle_events')
+                ->leftJoin('structures', 'structures.id', '=', DB::raw('COALESCE(lp.structure_id, lpt.structure_id)'))
+                ->leftJoin('positions', 'positions.id', '=', DB::raw('COALESCE(lp.position_id, lpt.position_id)'))
+                ->leftJoin('users as owners', 'owners.id', '=', 'employee_lifecycle_events.owner_user_id')
+                ->leftJoin('employee_lifecycle_plan_templates as plan_templates', 'plan_templates.id', '=', 'employee_lifecycle_events.plan_template_id');
         }
 
-        return DB::table('employee_lifecycle_tasks')
+        return $query
+            ->when($search !== '', fn (Builder $query) => $this->applySearch($query, $search))
+            ->when($type !== '', fn (Builder $query) => $query->where('employee_lifecycle_events.type', $type))
+            ->when($status !== '', fn (Builder $query) => $query->where('employee_lifecycle_events.status', $status));
+    }
+
+    /**
+     * Mirrors the row's visible text: title, employee, tabel no, structure, position, owner,
+     * template, plus the localized titles and the order-source label built in eventRow().
+     */
+    private function applySearch(Builder $query, string $search): Builder
+    {
+        $like = '%'.$search.'%';
+
+        return $query->where(function (Builder $query) use ($search, $like): void {
+            $query->whereRaw(
+                "concat_ws(' ', employee_lifecycle_events.title, COALESCE(lp.surname, lpt.surname), COALESCE(lp.name, lpt.name), COALESCE(lp.patronymic, lpt.patronymic), COALESCE(lp.tabel_no, lpt.tabel_no), structures.name, positions.name, owners.name, plan_templates.name) like ?",
+                [$like]
+            );
+
+            foreach (self::EVENT_TITLE_KEYS as $key => [$legacyTitle, $sourceType, $type]) {
+                if (! str_contains(mb_strtolower(__('employee-lifecycle::dashboard.event_titles.'.$key)), $search)) {
+                    continue;
+                }
+
+                $query->orWhere('employee_lifecycle_events.title', $legacyTitle)
+                    ->orWhere('employee_lifecycle_events.source_type', $sourceType)
+                    ->orWhere(fn (Builder $query) => $query->where('employee_lifecycle_events.title', '')->where('employee_lifecycle_events.type', $type));
+            }
+
+            $labelMatches = str_contains(mb_strtolower(__('employee-lifecycle::dashboard.labels.order_source_with_no', ['order' => ''])), $search);
+
+            $query->orWhere(fn (Builder $query) => $query
+                ->where('employee_lifecycle_events.source_type', 'like', '%order%')
+                ->when(! $labelMatches, fn (Builder $query) => $query->where(fn (Builder $query) => $query
+                    ->where('employee_lifecycle_events.meta->order_no', 'like', $like)
+                    ->orWhereRaw("concat_ws('', '#', employee_lifecycle_events.source_id) like ?", [$like]))));
+        });
+    }
+
+    /**
+     * Replaces `personnels.id = personnel_id OR personnels.tabel_no = tabel_no`, which no index
+     * can serve: join by id, and by tabel_no only when the id finds nobody.
+     */
+    private function joinPersonnel(Builder $query, string $table): Builder
+    {
+        return $query
+            ->leftJoin('personnels as lp', 'lp.id', '=', $table.'.personnel_id')
+            ->leftJoin('personnels as lpt', function (JoinClause $join) use ($table): void {
+                $join->on('lpt.tabel_no', '=', $table.'.tabel_no')->whereNull('lp.id');
+            });
+    }
+
+    /**
+     * @return array<int, Expression>
+     */
+    private function personnelColumns(): array
+    {
+        return [
+            DB::raw('COALESCE(lp.tabel_no, lpt.tabel_no) as tabel_no'),
+            DB::raw('COALESCE(lp.surname, lpt.surname) as surname'),
+            DB::raw('COALESCE(lp.name, lpt.name) as name'),
+            DB::raw('COALESCE(lp.patronymic, lpt.patronymic) as patronymic'),
+        ];
+    }
+
+    /**
+     * Header counters in one aggregate query instead of loading every event.
+     *
+     * @return array{active: int, offboarding: int, probation_unreviewed: int}
+     */
+    private function eventTotals(): array
+    {
+        if (! InstalledTables::has('employee_lifecycle_events')) {
+            return ['active' => 0, 'offboarding' => 0, 'probation_unreviewed' => 0];
+        }
+
+        $open = "e.status not in ('completed', 'cancelled')";
+        $unreviewed = InstalledTables::has('employee_lifecycle_probation_reviews')
+            ? ' and not exists (select 1 from employee_lifecycle_probation_reviews r where r.event_id = e.id)'
+            : '';
+
+        $row = DB::table('employee_lifecycle_events as e')
+            ->selectRaw("coalesce(sum(case when {$open} then 1 else 0 end), 0) as active")
+            ->selectRaw("coalesce(sum(case when e.type = 'offboarding' and {$open} then 1 else 0 end), 0) as offboarding")
+            ->selectRaw("coalesce(sum(case when e.type = 'probation' and {$open}{$unreviewed} then 1 else 0 end), 0) as probation_unreviewed")
+            ->first();
+
+        return [
+            'active' => (int) ($row->active ?? 0),
+            'offboarding' => (int) ($row->offboarding ?? 0),
+            'probation_unreviewed' => (int) ($row->probation_unreviewed ?? 0),
+        ];
+    }
+
+    /**
+     * Open tasks past their due date: the full count, and the first rows for the side list.
+     *
+     * @return array{total: int, rows: Collection}
+     */
+    private function overdueTasks(): array
+    {
+        if (! InstalledTables::has('employee_lifecycle_tasks')) {
+            return ['total' => 0, 'rows' => collect()];
+        }
+
+        $query = DB::table('employee_lifecycle_tasks')
             ->join('employee_lifecycle_events', 'employee_lifecycle_events.id', '=', 'employee_lifecycle_tasks.event_id')
-            ->leftJoin('personnels', function ($join): void {
-                $join->on('personnels.id', '=', 'employee_lifecycle_events.personnel_id')
-                    ->orOn('personnels.tabel_no', '=', 'employee_lifecycle_events.tabel_no');
-            })
+            ->whereNotIn('employee_lifecycle_tasks.status', self::CLOSED_STATUSES)
+            ->where('employee_lifecycle_tasks.due_at', '<', today()->toDateString());
+
+        $total = (clone $query)->count();
+
+        if ($total === 0) {
+            return ['total' => 0, 'rows' => collect()];
+        }
+
+        $rows = $this->joinPersonnel($query, 'employee_lifecycle_events')
             ->leftJoin('users as owners', 'owners.id', '=', 'employee_lifecycle_tasks.owner_user_id')
-            ->whereNotIn('employee_lifecycle_tasks.status', ['completed', 'cancelled'])
             ->select([
                 'employee_lifecycle_tasks.id',
                 'employee_lifecycle_tasks.title',
@@ -336,14 +418,12 @@ class LifecycleDashboardReadService
                 'employee_lifecycle_tasks.due_at',
                 'employee_lifecycle_events.type as event_type',
                 'employee_lifecycle_events.title as event_title',
-                'personnels.tabel_no',
-                'personnels.surname',
-                'personnels.name',
-                'personnels.patronymic',
+                ...$this->personnelColumns(),
                 'owners.name as owner_name',
             ])
-            ->orderByRaw('case when employee_lifecycle_tasks.due_at is null then 1 else 0 end')
             ->orderBy('employee_lifecycle_tasks.due_at')
+            ->orderBy('employee_lifecycle_tasks.id')
+            ->limit(self::OVERDUE_TASK_LIMIT)
             ->get()
             ->map(fn ($row): array => [
                 'id' => (int) $row->id,
@@ -352,27 +432,36 @@ class LifecycleDashboardReadService
                 'owner_label' => __('employee-lifecycle::dashboard.owner_types.'.($row->owner_type ?: 'hr')),
                 'status' => (string) $row->status,
                 'due_at' => $row->due_at,
-                'is_overdue' => $row->due_at !== null && $row->due_at < today()->toDateString(),
+                'is_overdue' => true,
                 'event_type' => (string) $row->event_type,
                 'event_title' => $this->localizedEventTitle((string) $row->event_title, (string) $row->event_type),
                 'employee_name' => $this->personnelName($row),
                 'tabel_no' => (string) $row->tabel_no,
                 'owner_name' => $row->owner_name ?: __('employee-lifecycle::dashboard.labels.unassigned'),
             ]);
+
+        return ['total' => $total, 'rows' => $rows];
     }
 
     /**
+     * Counts per facet value, plus the total under '' — one GROUP BY query.
+     *
      * @param  array<string, mixed>  $filters
-     * @return Collection<array-key, int<0, max>>
+     * @return Collection<string, int>
      */
-    private function facetCounts(Collection $events, array $filters, string $key): Collection
+    private function facetCounts(array $filters, string $column): Collection
     {
-        $scoped = $this->applyEventFilters($events, $filters);
+        if (! InstalledTables::has('employee_lifecycle_events')) {
+            return collect(['' => 0]);
+        }
 
-        return $scoped
-            ->groupBy($key)
-            ->map(fn (Collection $rows): int => $rows->count())
-            ->put('', $scoped->count());
+        $counts = $this->filteredEvents($filters)
+            ->selectRaw("employee_lifecycle_events.{$column} as facet, count(*) as aggregate")
+            ->groupBy('employee_lifecycle_events.'.$column)
+            ->pluck('aggregate', 'facet')
+            ->map(fn ($count): int => (int) $count);
+
+        return $counts->put('', $counts->sum());
     }
 
     private function eventRow(object $row): array
@@ -411,34 +500,20 @@ class LifecycleDashboardReadService
 
     private function localizedEventTitle(string $title, string $type, string $sourceType = ''): string
     {
-        $legacyTitles = [
-            'Probation review' => 'probation_review',
-            'Internal movement' => 'internal_movement',
-            'Offboarding case' => 'offboarding_case',
-        ];
-
-        if (isset($legacyTitles[$title])) {
-            return __('employee-lifecycle::dashboard.event_titles.'.$legacyTitles[$title]);
+        foreach ([0 => $title, 1 => $sourceType] as $position => $value) {
+            foreach (self::EVENT_TITLE_KEYS as $key => $match) {
+                if ($value !== '' && $match[$position] === $value) {
+                    return __('employee-lifecycle::dashboard.event_titles.'.$key);
+                }
+            }
         }
 
-        $sourceKeys = [
-            'employee_lifecycle_probation_review' => 'probation_review',
-            'employee_lifecycle_movement' => 'internal_movement',
-            'employee_lifecycle_offboarding_case' => 'offboarding_case',
-        ];
-
-        if ($sourceType !== '' && isset($sourceKeys[$sourceType])) {
-            return __('employee-lifecycle::dashboard.event_titles.'.$sourceKeys[$sourceType]);
-        }
-
-        $typeKeys = [
-            'probation' => 'probation_review',
-            'movement' => 'internal_movement',
-            'offboarding' => 'offboarding_case',
-        ];
-
-        if ($title === '' && isset($typeKeys[$type])) {
-            return __('employee-lifecycle::dashboard.event_titles.'.$typeKeys[$type]);
+        if ($title === '') {
+            foreach (self::EVENT_TITLE_KEYS as $key => $match) {
+                if ($match[2] === $type) {
+                    return __('employee-lifecycle::dashboard.event_titles.'.$key);
+                }
+            }
         }
 
         return $title;

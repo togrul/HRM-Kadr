@@ -155,7 +155,7 @@
                     />
                 </div>
                 <p class="hrm-num shrink-0 text-[11.5px] text-ink-faint">
-                    {{ __('employee-lifecycle::dashboard.labels.result_count', ['count' => $num($events->count())]) }}
+                    {{ __('employee-lifecycle::dashboard.labels.result_count', ['count' => $num($events->total())]) }}
                 </p>
             </div>
 
@@ -231,6 +231,8 @@
                     </tr>
                 @endforelse
             </x-table.tbl>
+
+            <x-pagination :paginator="$events" :unit="__('employee-lifecycle::dashboard.labels.process_unit')" />
         </section>
 
         {{-- ===================== queues ===================== --}}
@@ -426,7 +428,7 @@
                             <x-ui.input-shell :label="__('employee-lifecycle::dashboard.fields.personnel')" :error="$errors->first('launchForm.personnel_id')">
                                 <x-ui.select wire:model="launchForm.personnel_id">
                                     <option value="">---</option>
-                                    @foreach ($personnelOptions as $personnel)
+                                    @foreach ($this->personnelOptions as $personnel)
                                         <option value="{{ $personnel['id'] }}">{{ $personnel['label'] }}</option>
                                     @endforeach
                                 </x-ui.select>
@@ -437,7 +439,7 @@
                             <x-ui.input-shell :label="__('employee-lifecycle::dashboard.fields.owner')" :error="$errors->first('launchForm.owner_user_id')">
                                 <x-ui.select wire:model="launchForm.owner_user_id">
                                     <option value="">---</option>
-                                    @foreach ($userOptions as $user)
+                                    @foreach ($this->userOptions as $user)
                                         <option value="{{ $user['id'] }}">{{ $user['label'] }}</option>
                                     @endforeach
                                 </x-ui.select>
@@ -451,7 +453,7 @@
                             <x-ui.input-shell :label="__('employee-lifecycle::dashboard.fields.personnel')" :error="$errors->first('probationForm.personnel_id')">
                                 <x-ui.select wire:model="probationForm.personnel_id">
                                     <option value="">---</option>
-                                    @foreach ($personnelOptions as $personnel)
+                                    @foreach ($this->personnelOptions as $personnel)
                                         <option value="{{ $personnel['id'] }}">{{ $personnel['label'] }}</option>
                                     @endforeach
                                 </x-ui.select>
@@ -462,7 +464,7 @@
                             <x-ui.input-shell :label="__('employee-lifecycle::dashboard.fields.manager')" :error="$errors->first('probationForm.manager_user_id')">
                                 <x-ui.select wire:model="probationForm.manager_user_id">
                                     <option value="">---</option>
-                                    @foreach ($userOptions as $user)
+                                    @foreach ($this->userOptions as $user)
                                         <option value="{{ $user['id'] }}">{{ $user['label'] }}</option>
                                     @endforeach
                                 </x-ui.select>
@@ -470,7 +472,7 @@
                             <x-ui.input-shell :label="__('employee-lifecycle::dashboard.fields.hr_reviewer')" :error="$errors->first('probationForm.hr_reviewer_user_id')">
                                 <x-ui.select wire:model="probationForm.hr_reviewer_user_id">
                                     <option value="">---</option>
-                                    @foreach ($userOptions as $user)
+                                    @foreach ($this->userOptions as $user)
                                         <option value="{{ $user['id'] }}">{{ $user['label'] }}</option>
                                     @endforeach
                                 </x-ui.select>
@@ -484,7 +486,7 @@
                             <x-ui.input-shell :label="__('employee-lifecycle::dashboard.fields.personnel')" :error="$errors->first('movementForm.personnel_id')">
                                 <x-ui.select wire:model="movementForm.personnel_id">
                                     <option value="">---</option>
-                                    @foreach ($personnelOptions as $personnel)
+                                    @foreach ($this->personnelOptions as $personnel)
                                         <option value="{{ $personnel['id'] }}">{{ $personnel['label'] }}</option>
                                     @endforeach
                                 </x-ui.select>
@@ -499,7 +501,7 @@
                             <x-ui.input-shell :label="__('employee-lifecycle::dashboard.fields.target_structure')" :error="$errors->first('movementForm.target_structure_id')">
                                 <x-ui.select wire:model="movementForm.target_structure_id">
                                     <option value="">---</option>
-                                    @foreach ($structureOptions as $structure)
+                                    @foreach ($this->structureOptions as $structure)
                                         <option value="{{ $structure['id'] }}">{{ $structure['label'] }}</option>
                                     @endforeach
                                 </x-ui.select>
@@ -507,7 +509,7 @@
                             <x-ui.input-shell :label="__('employee-lifecycle::dashboard.fields.target_position')" :error="$errors->first('movementForm.target_position_id')">
                                 <x-ui.select wire:model="movementForm.target_position_id">
                                     <option value="">---</option>
-                                    @foreach ($positionOptions as $position)
+                                    @foreach ($this->positionOptions as $position)
                                         <option value="{{ $position['id'] }}">{{ $position['label'] }}</option>
                                     @endforeach
                                 </x-ui.select>
@@ -518,7 +520,7 @@
                             <x-ui.input-shell :label="__('employee-lifecycle::dashboard.fields.owner')" :error="$errors->first('movementForm.owner_user_id')">
                                 <x-ui.select wire:model="movementForm.owner_user_id">
                                     <option value="">---</option>
-                                    @foreach ($userOptions as $user)
+                                    @foreach ($this->userOptions as $user)
                                         <option value="{{ $user['id'] }}">{{ $user['label'] }}</option>
                                     @endforeach
                                 </x-ui.select>
@@ -535,7 +537,7 @@
                             <x-ui.input-shell :label="__('employee-lifecycle::dashboard.fields.personnel')" :error="$errors->first('offboardingForm.personnel_id')">
                                 <x-ui.select wire:model="offboardingForm.personnel_id">
                                     <option value="">---</option>
-                                    @foreach ($personnelOptions as $personnel)
+                                    @foreach ($this->personnelOptions as $personnel)
                                         <option value="{{ $personnel['id'] }}">{{ $personnel['label'] }}</option>
                                     @endforeach
                                 </x-ui.select>
@@ -546,7 +548,7 @@
                             <x-ui.input-shell :label="__('employee-lifecycle::dashboard.fields.owner')" :error="$errors->first('offboardingForm.owner_user_id')">
                                 <x-ui.select wire:model="offboardingForm.owner_user_id">
                                     <option value="">---</option>
-                                    @foreach ($userOptions as $user)
+                                    @foreach ($this->userOptions as $user)
                                         <option value="{{ $user['id'] }}">{{ $user['label'] }}</option>
                                     @endforeach
                                 </x-ui.select>

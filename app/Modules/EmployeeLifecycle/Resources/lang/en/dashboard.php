@@ -85,6 +85,7 @@ return [
         'active_process_count' => ':count active processes',
         'no_template' => 'No template',
         'result_count' => ':count processes',
+        'process_unit' => 'processes',
         'overdue' => 'Overdue',
         'event_mix' => 'Process mix',
         'overdue_tasks' => 'Overdue lifecycle tasks',
