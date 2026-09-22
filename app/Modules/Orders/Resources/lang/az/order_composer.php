@@ -74,6 +74,7 @@ return [
         'field_required' => 'Bu sahə doldurulmalıdır.',
         'invalid_transition' => 'Bu status keçidi mümkün deyil.',
         'hire_irreversible' => 'İşə qəbul əmrini geri qaytarmaq olmaz — işçi artıq sistemə əlavə olunub.',
+        'award_amount_invalid' => 'Mükafat məbləği rəqəm kimi oxunmadı: :amount',
     ],
     'messages' => [
         'template_saved' => 'Şablon yadda saxlanıldı.',

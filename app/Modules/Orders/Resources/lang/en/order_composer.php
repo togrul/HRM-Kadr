@@ -74,6 +74,7 @@ return [
         'field_required' => 'This field is required.',
         'invalid_transition' => 'This status change is not allowed.',
         'hire_irreversible' => 'A hire order cannot be reversed — the employee has already been added.',
+        'award_amount_invalid' => 'The award amount is not a number: :amount',
     ],
     'messages' => [
         'template_saved' => 'Template saved.',

@@ -7,6 +7,7 @@ use App\Models\OrderLog;
 use App\Models\Personnel;
 use App\Models\PersonnelAward;
 use App\Modules\Payroll\Domain\Contracts\PayrollOneOffEarnings;
+use DomainException;
 
 /**
  * Records a monetary award (pul mükafatı) in the employee's file, keyed by the order
@@ -30,9 +31,7 @@ class AwardEffect implements OrderEffect
             return;
         }
 
-        $amount = str_replace([' ', ','], ['', '.'], (string) ($fields['amount'] ?? ''));
-
-        $amount = is_numeric($amount) ? (float) $amount : null;
+        $amount = self::parseAmount((string) ($fields['amount'] ?? ''));
 
         PersonnelAward::query()->create([
             'tabel_no' => $personnel->tabel_no,
@@ -51,6 +50,32 @@ class AwardEffect implements OrderEffect
                 (int) now()->year, (int) now()->month, 'order_award:'.$order->id,
             );
         }
+    }
+
+    /**
+     * "1 234,50", "1,234.50", "1.234,50" and "1234.5" all read as 1234.5: whichever of
+     * `.`/`,` comes last is the decimal mark. A typed amount that still is not a number
+     * stops the approval — recording the award without its money would lose it silently.
+     *
+     * @throws DomainException
+     */
+    public static function parseAmount(string $raw): ?float
+    {
+        $value = preg_replace('/[\s\x{00A0}]+/u', '', $raw) ?? '';
+
+        if ($value === '') {
+            return null;
+        }
+
+        $decimal = strrpos($value, ',') > strrpos($value, '.') ? ',' : '.';
+        $value = str_replace($decimal === ',' ? '.' : ',', '', $value);
+        $value = str_replace(',', '.', $value);
+
+        if (! is_numeric($value)) {
+            throw new DomainException(__('orders::order_composer.errors.award_amount_invalid', ['amount' => $raw]));
+        }
+
+        return (float) $value;
     }
 
     public function reverse(OrderLog $order, array $fields, Personnel $personnel): void
