@@ -293,6 +293,24 @@ body {
 .hrm-tree-toggle {
   @apply flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-zinc-400 transition-colors hover:bg-zinc-200/60 hover:text-zinc-600;
 }
+/* Structure sidebar (x-tree.item): one per org unit, so hundreds per render. The
+ * selected state keys off aria-current, which Alpine toggles client-side. */
+.hrm-structure-node {
+  @apply relative flex min-w-0 flex-1 items-start gap-1.5 rounded-lg py-1 pl-2 pr-2 text-left text-[14px] leading-snug transition-colors duration-150 hover:bg-[#fafafa] focus:outline-none;
+}
+.hrm-structure-node[aria-current='true'] {
+  @apply bg-[#f4f4f5] pl-3 font-semibold text-ink;
+}
+.hrm-structure-node[aria-current='true']::before {
+  content: '';
+  @apply absolute left-0 top-1/2 h-[18px] w-[3px] -translate-y-1/2 rounded-full bg-ink;
+}
+.hrm-structure-toggle {
+  @apply flex h-5 w-4 flex-none items-center justify-center rounded text-ink-faint transition-colors hover:text-ink-muted focus:outline-none;
+}
+.hrm-structure-subs {
+  @apply relative ml-[.55rem] flex flex-col border-l border-hairline pl-1;
+}
 
 .hrm-eyebrow {
   font-size: 10.5px;

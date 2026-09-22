@@ -108,7 +108,6 @@ class Structures extends Component
         app(\App\Services\Structures\StructureDeletionService::class)->cascadeDelete((int) $this->model->id);
 
         $this->resetForm();
-        $this->dispatch('deleted');
         $this->callSuccessSwal();
     }
 

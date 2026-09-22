@@ -5,6 +5,7 @@ namespace App\Modules\SidebarStructure\Livewire;
 use App\Models\Structure;
 use App\Services\StructureService;
 use App\Support\OrderLookupCache;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -48,16 +49,15 @@ class Sidebar extends Component
         return is_numeric($first) ? (int) $first : null;
     }
 
+    /**
+     * The highlight is drawn by Alpine from $wire.selectedStructure, so clearing it needs
+     * the new snapshot only, not a re-render of the whole tree.
+     */
     #[On('filterSelected')]
-    public function filterSelected()
+    public function filterSelected(): void
     {
         $this->selectedStructure = null;
-    }
-
-    public function selectStructure($id): void
-    {
-        $this->selectedStructure = (int) $id;
-        $this->dispatch('selectStructure', (int) $id);
+        $this->skipRender();
     }
 
     public function render()
@@ -71,7 +71,39 @@ class Sidebar extends Component
             return Structure::withRecursive('subs')->whereNull('parent_id')->orderBy('code')->get();
         });
 
-        return view('structure::livewire.structure.sidebar', compact('structures'));
+        return view('structure::livewire.structure.sidebar', [
+            'structures' => $structures,
+            'openIds' => (object) array_fill_keys($this->initiallyOpenIds($structures), true),
+        ]);
+    }
+
+    /**
+     * Roots start open (their direct children show), every deeper level folded, except
+     * the ancestors of the selected unit so the highlight is never hidden in a fold.
+     *
+     * @param  Collection<int, Structure>  $roots
+     * @return list<int>
+     */
+    private function initiallyOpenIds(Collection $roots): array
+    {
+        $parents = [];
+        $walk = function (Collection $nodes) use (&$walk, &$parents): void {
+            foreach ($nodes as $node) {
+                $parents[$node->id] = $node->parent_id;
+                $walk($node->subs);
+            }
+        };
+        $walk($roots);
+
+        $open = $roots->pluck('id')->all();
+        $id = $parents[$this->selectedStructure] ?? null;
+
+        while ($id !== null && ! in_array($id, $open, true)) {
+            $open[] = $id;
+            $id = $parents[$id] ?? null;
+        }
+
+        return $open;
     }
 
     public function placeholder()

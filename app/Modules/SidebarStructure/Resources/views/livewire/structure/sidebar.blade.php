@@ -1,5 +1,22 @@
 {{-- Renders as a plain section of the contextual panel card, not as its own card. --}}
-<div class="flex min-h-0 flex-col bg-white">
+{{--
+    Selection is client-side: a click moves the highlight here and hands the id to the host
+    (`selectStructure`, same payload the server dispatch used to send), with no sidebar
+    round-trip. $wire.selectedStructure is set deferred, so it rides along on the next real
+    request and the host-driven reset (filterSelected) still clears it.
+    Folding: roots open, deeper levels collapsed, except the path down to the selection.
+--}}
+<div class="flex min-h-0 flex-col bg-white"
+    x-data="{
+        open: @js($openIds),
+        isOpen(id) { return this.open[id] === true },
+        toggle(id) { this.open[id] = ! this.isOpen(id) },
+        sel(id) { return this.$wire.selectedStructure === id },
+        pick(id) {
+            this.$wire.selectedStructure = id;
+            Livewire.dispatch('selectStructure', [id]);
+        },
+    }">
     <p class="hrm-eyebrow border-t border-hairline-subtle px-3.5 pb-1 pt-3">
         {{ __('structure::common.titles.structure') }}
     </p>

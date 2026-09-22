@@ -71,7 +71,3 @@
         </section>
     </div>
 </main>
-
-@push('js')
-    <script src="{{ asset('assets/js/sweetalert2.min.js') }}"></script>
-@endpush

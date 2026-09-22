@@ -20,21 +20,26 @@
             });
         });
 
-        document.addEventListener('keydown', (event) => {
-            if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
-                event.preventDefault();
-                window.Alpine?.store('hrmShell')?.openPalette();
-            }
-        });
+        // Body scripts re-run on every wire:navigate while document persists — register once.
+        if (! window.__hrmShellKeys) {
+            window.__hrmShellKeys = true;
 
-        // A rail drawer / palette opened on one screen must never survive a navigation.
-        document.addEventListener('livewire:navigating', () => {
-            const shell = window.Alpine?.store('hrmShell');
-            if (shell) {
-                shell.railOpen = false;
-                shell.paletteOpen = false;
-            }
-        });
+            document.addEventListener('keydown', (event) => {
+                if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+                    event.preventDefault();
+                    window.Alpine?.store('hrmShell')?.openPalette();
+                }
+            });
+
+            // A rail drawer / palette opened on one screen must never survive a navigation.
+            document.addEventListener('livewire:navigating', () => {
+                const shell = window.Alpine?.store('hrmShell');
+                if (shell) {
+                    shell.railOpen = false;
+                    shell.paletteOpen = false;
+                }
+            });
+        }
     </script>
 @endonce
 

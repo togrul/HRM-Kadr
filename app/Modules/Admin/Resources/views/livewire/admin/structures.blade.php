@@ -107,4 +107,3 @@
             @endforeach
         </x-nested.list>
 </div>
-@include('includes.sweetalert-push')

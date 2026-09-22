@@ -51,6 +51,11 @@
         pendingAction: null,
         pendingStep: null,
         pendingTimer: null,
+        offCommit: null,
+        destroy() {
+            if (this.offCommit) this.offCommit();
+            this.offCommit = null;
+        },
         setPending(action, step = null) {
             if (this.pendingTimer) clearTimeout(this.pendingTimer);
             this.pendingAction = action;
@@ -74,7 +79,7 @@
     }"
     x-init="
         if (typeof Livewire !== 'undefined') {
-            Livewire.hook('commit', ({ succeed, fail }) => {
+            offCommit = Livewire.hook('commit', ({ succeed, fail }) => {
                 succeed(() => queueMicrotask(() => clearPending()));
                 fail(() => queueMicrotask(() => clearPending()));
             });
