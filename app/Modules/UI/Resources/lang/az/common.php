@@ -7,6 +7,7 @@ return [
         'delete' => 'Sil',
         'edit' => 'Düzəliş et',
         'loading' => 'Yüklənir',
+        'search' => 'Axtar',
     ],
     'destructive' => [
         'title' => 'Əməliyyatı təsdiqlə',
@@ -50,9 +51,15 @@ return [
     ],
     'messages' => [
         'record_deleted' => 'Məlumatınız silindi',
+        'generic_error' => 'Xəta baş verdi',
     ],
     'swal' => [
         'yes_delete_it' => 'Bəli, sil!',
         'deleted' => 'Silindi',
+    ],
+    'comment' => [
+        'title' => 'Şərh əlavə et',
+        'save' => 'Yadda saxla',
+        'label' => 'Şərh',
     ],
 ];

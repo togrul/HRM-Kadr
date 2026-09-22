@@ -39,7 +39,7 @@
         await $wire.call('{{ $confirmAction }}', this.action, this.leaveId);
       } catch (e) {
         console.error(e);
-        this.$dispatch('toast', { type: 'error', message: 'Xəta baş verdi' });
+        this.$dispatch('toast', { type: 'error', message: @js(__('ui::common.messages.generic_error')) });
       } finally {
         this.busy = false;
         this.comment = ''; // entangle sayəsində Livewire-da da sıfırlanır

@@ -44,6 +44,8 @@ return [
         'statuses' => 'Statuses',
         'selected_count' => 'selected',
         'active_filters_count' => 'filters',
+        'work_coefficient' => 'Work coefficient',
+        'education_coefficient' => 'Education coefficient',
     ],
     'messages' => [
         'general_description' => 'System-wide parameters and values.',
@@ -60,5 +62,11 @@ return [
         'pick_statuses_help' => 'Pick statuses directly by name. Empty selection means all statuses are visible.',
         'candidate_presets_description' => 'Manage visible statuses, default tab behavior, and active filters separately for military and civilian candidate modes.',
         'mode_hint' => 'This panel controls how the candidate list behaves for the selected mode.',
+        'invalid_starts_at' => 'The start date is invalid.',
+        'invalid_ends_at' => 'The end date is invalid.',
+        'ends_before_starts' => 'The end date cannot be before the start date.',
+        'permanent_chief_missing' => 'No permanent chief is assigned.',
+        'delegation_created' => 'Chief delegation created.',
+        'delegation_revoked' => 'Chief delegation stopped.',
     ],
 ];

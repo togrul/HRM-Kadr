@@ -60,7 +60,7 @@ class NotificationPayloadFactory
             'new_position' => $personnel->position?->name,
             'old_structure' => $oldStructure?->fullStructureName(),
             'new_structure' => $personnel->structure?->fullStructureName(),
-            'change_reason' => $changes['reason'] ?? 'Vəzifə yenilənməsi',
+            'change_reason' => $changes['reason'] ?? __('notifications::common.payload_defaults.position_update'),
             'effective_date' => now()->format('d.m.Y'),
             'category' => __('notifications::common.categories.position_change'),
             'message' => __('notifications::common.messages.position_changed'),
@@ -74,11 +74,11 @@ class NotificationPayloadFactory
             'action' => 'holiday',
             'holiday_name' => $calendar->name ?: __('notifications::common.categories.holiday'),
             'holiday_date' => optional($calendar->date)->format('d.m.Y'),
-            'duration' => '1 gün',
-            'scope' => $calendar->scope_type === 'structure' ? 'Struktur üzrə' : 'Bütün əməkdaşlar',
+            'duration' => __('notifications::common.payload_defaults.one_day'),
+            'scope' => $calendar->scope_type === 'structure' ? __('notifications::common.payload_defaults.structure_scope') : __('notifications::common.helpers.all_employees_scope'),
             'scope_type' => $calendar->scope_type,
             'structure_id' => $calendar->scope_type === 'structure' ? (int) $calendar->scope_id : null,
-            'holiday_rules' => $calendar->is_paid ? 'Ödənişli qeyri-iş günü' : 'Qeyri-iş günü',
+            'holiday_rules' => $calendar->is_paid ? __('notifications::common.payload_defaults.paid_non_working_day') : __('notifications::common.payload_defaults.non_working_day'),
             'category' => __('notifications::common.categories.holiday'),
             'message' => __('notifications::common.messages.holiday_due'),
         ];
@@ -139,7 +139,7 @@ class NotificationPayloadFactory
             'holiday_date' => filled($data['holiday_date'] ?? null)
                 ? Carbon::parse((string) $data['holiday_date'])->format('d.m.Y')
                 : null,
-            'duration' => trim((string) ($data['duration'] ?? '1 gün')),
+            'duration' => trim((string) ($data['duration'] ?? __('notifications::common.payload_defaults.one_day'))),
             'scope' => trim((string) ($data['scope'] ?? __('notifications::common.helpers.all_employees_scope'))),
             'holiday_rules' => trim((string) ($data['holiday_rules'] ?? '')),
             'structure_id' => ($structureIds = $this->parseIntegerList($data['structure_ids'] ?? '')) !== [] ? $structureIds[0] : null,

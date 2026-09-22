@@ -251,5 +251,6 @@ return [
     'empty' => [
         'no_report_data' => 'No report data found for the selected filters.',
         'no_chart_data' => 'No data available for visualization.',
+        'awaiting_data' => 'Awaiting data',
     ],
 ];

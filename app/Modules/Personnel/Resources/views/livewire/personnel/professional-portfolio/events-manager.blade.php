@@ -11,7 +11,7 @@
                 </x-ui.input-shell>
                 <x-ui.input-shell :label="__('personnel::portfolio.fields.status')" labelClass="tracking-tight text-zinc-500">
                     <select wire:model.live="statusFilter" class="w-full rounded-2xl border border-zinc-200 bg-white px-2 py-2 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none">
-                        <option value="all">Hamısı</option>
+                        <option value="all">{{ __('personnel::common.labels.all') }}</option>
                         @foreach (\App\Modules\Personnel\Support\ProfessionalPortfolio\ProfessionalPortfolioOptions::verificationStatuses() as $status)
                             <option value="{{ $status }}">{{ __('personnel::portfolio.status.'.$status) }}</option>
                         @endforeach

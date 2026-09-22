@@ -98,18 +98,18 @@
                             <p class="hrm-eyebrow">{{ __($d.'.tests_subtabs.banks') }}</p>
                         </div>
                         <div class="grid gap-2 p-4">
-                            <p class="text-[12.5px] leading-6 text-ink-muted">Bank testin qaydasını yığır: keçid balı, vaxt limiti və cəhd sayı burada müəyyən olunur.</p>
+                            <p class="text-[12.5px] leading-6 text-ink-muted">{{ __($d.'.hints.test_bank_rules') }}</p>
                             <div class="{{ $note }}">
                                 <p class="text-[12.5px] font-semibold text-ink">{{ __($d.'.fields.pass_score') }}</p>
-                                <p class="mt-0.5 text-[12px] leading-5 text-ink-muted">Keçid həddi testin keçmiş sayılıb-sayılmayacağını, həm də analitik hesabatlarda risk səviyyəsini formalaşdırır.</p>
+                                <p class="mt-0.5 text-[12px] leading-5 text-ink-muted">{{ __($d.'.hints.pass_score') }}</p>
                             </div>
                             <div class="{{ $note }}">
                                 <p class="text-[12.5px] font-semibold text-ink">{{ __($d.'.fields.duration_minutes') }}</p>
-                                <p class="mt-0.5 text-[12px] leading-5 text-ink-muted">Müddət test workspace-də geri sayım kimi görünür və vaxt bitəndə cəhd avtomatik yekunlaşır.</p>
+                                <p class="mt-0.5 text-[12px] leading-5 text-ink-muted">{{ __($d.'.hints.duration_minutes') }}</p>
                             </div>
                             <div class="{{ $note }}">
                                 <p class="text-[12.5px] font-semibold text-ink">{{ __($d.'.fields.max_attempts') }}</p>
-                                <p class="mt-0.5 text-[12px] leading-5 text-ink-muted">Təkrar cəhd siyasətini burada sabitləyirsən; session yaradılarkən istəsən ayrıca override edə bilərsən.</p>
+                                <p class="mt-0.5 text-[12px] leading-5 text-ink-muted">{{ __($d.'.hints.max_attempts') }}</p>
                             </div>
                         </div>
                     </aside>
@@ -181,10 +181,10 @@
                         </div>
                         <div class="grid gap-2 p-4">
                             @foreach ([
-                                __($d.'.question_types.multiple_choice') => 'Variantlardan biri və ya bir neçəsi düzgün cavabdır; score option üzrə verilir.',
-                                __($d.'.question_types.open_answer') => 'Sərbəst cavab toplanır, yekun bal yoxlayan tərəfindən sonradan yazılır.',
-                                __($d.'.question_types.case_study') => 'Ssenariyə cavab kimi işləyir; əsasən açıq cavab kimi review mərhələsində qiymətləndirilir.',
-                                __($d.'.question_types.behavioral') => 'Davranış və yanaşma tipli cavablar üçündür; manual review ilə yaxşı işləyir.',
+                                __($d.'.question_types.multiple_choice') => __($d.'.hints.question_type_multiple_choice'),
+                                __($d.'.question_types.open_answer') => __($d.'.hints.question_type_open_answer'),
+                                __($d.'.question_types.case_study') => __($d.'.hints.question_type_case_study'),
+                                __($d.'.question_types.behavioral') => __($d.'.hints.question_type_behavioral'),
                             ] as $title => $copy)
                                 <div class="{{ $note }}">
                                     <p class="text-[12.5px] font-semibold text-ink">{{ $title }}</p>
@@ -357,11 +357,11 @@
                             <div class="grid gap-2 p-4">
                                 <div class="{{ $note }}">
                                     <p class="text-[12.5px] font-semibold text-ink">{{ __($d.'.fields.available_until') }}</p>
-                                    <p class="mt-0.5 text-[12px] leading-5 text-ink-muted">Son tarix bitəndən sonra test workspace yeni cəhd başlatmağa imkan verməz.</p>
+                                    <p class="mt-0.5 text-[12px] leading-5 text-ink-muted">{{ __($d.'.hints.available_until') }}</p>
                                 </div>
                                 <div class="{{ $note }}">
                                     <p class="text-[12.5px] font-semibold text-ink">{{ __($d.'.fields.reviewer') }}</p>
-                                    <p class="mt-0.5 text-[12px] leading-5 text-ink-muted">Açıq cavab, case və davranış tipli suallar bu yoxlayan tərəfindən sonradan yoxlanır.</p>
+                                    <p class="mt-0.5 text-[12px] leading-5 text-ink-muted">{{ __($d.'.hints.reviewer') }}</p>
                                 </div>
                             </div>
                         </aside>

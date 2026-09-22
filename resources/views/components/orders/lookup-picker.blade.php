@@ -37,13 +37,13 @@
     <div x-show="open" x-cloak x-transition.origin.top
         class="absolute z-30 mt-1 w-full overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-lg">
         <div class="border-b border-zinc-100 p-2">
-            <input x-ref="search" x-model="search" type="text" placeholder="Axtar…"
+            <input x-ref="search" x-model="search" type="text" placeholder="{{ __('orders::order_composer.lookup.search') }}"
                 class="w-full rounded-lg border border-zinc-200 px-2.5 py-1.5 text-sm focus:border-zinc-400 focus:ring-0">
         </div>
         <ul class="max-h-64 overflow-auto py-1">
             <template x-if="value">
                 <li><button type="button" @click="clear()"
-                    class="block w-full px-3 py-1.5 text-left text-xs text-zinc-400 hover:bg-zinc-50">— Təmizlə —</button></li>
+                    class="block w-full px-3 py-1.5 text-left text-xs text-zinc-400 hover:bg-zinc-50">{{ __('orders::order_composer.lookup.clear') }}</button></li>
             </template>
             <template x-for="o in filtered" :key="o.id">
                 <li>
@@ -56,7 +56,7 @@
                 </li>
             </template>
             <template x-if="filtered.length === 0">
-                <li class="px-3 py-3 text-center text-xs text-zinc-400">Tapılmadı</li>
+                <li class="px-3 py-3 text-center text-xs text-zinc-400">{{ __('orders::order_composer.lookup.not_found') }}</li>
             </template>
         </ul>
     </div>

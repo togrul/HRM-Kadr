@@ -18,15 +18,6 @@ class RecruitmentAnalytics extends Component
     use AuthorizesRequests;
     use InteractsWithRecruitmentPresentation;
 
-    protected const ANALYTICS_LABEL_DEFAULTS = [
-        'requisitions' => ['az' => 'Tələbnamələr', 'en' => 'Requisitions'],
-        'openings' => ['az' => 'Vakansiyalar', 'en' => 'Openings'],
-        'applications' => ['az' => 'Müraciətlər', 'en' => 'Applications'],
-        'active_applications' => ['az' => 'Aktiv müraciətlər', 'en' => 'Active applications'],
-        'rejected_applications' => ['az' => 'Rədd edilən müraciətlər', 'en' => 'Rejected applications'],
-        'successful_applications' => ['az' => 'Uğurlu yekun müraciətlər', 'en' => 'Successful applications'],
-    ];
-
     public function mount(): void
     {
         $this->authorize('viewAny', CandidateApplication::class);
@@ -285,17 +276,7 @@ class RecruitmentAnalytics extends Component
 
     protected function analyticsLabel(string $key): string
     {
-        $translated = __('candidates::recruitment.labels.'.$key);
-
-        if ($translated !== 'candidates::recruitment.labels.'.$key) {
-            return $translated;
-        }
-
-        $locale = app()->getLocale();
-
-        return self::ANALYTICS_LABEL_DEFAULTS[$key][$locale]
-            ?? self::ANALYTICS_LABEL_DEFAULTS[$key]['en']
-            ?? ucfirst(str_replace('_', ' ', $key));
+        return __('candidates::recruitment.labels.'.$key);
     }
 
     /**

@@ -72,7 +72,7 @@ class NotificationCampaignDispatcher
                 'category' => 'birthday',
                 'trigger' => $trigger,
                 'template_id' => $rule->template_id,
-                'title' => 'Ad günü bildirişi: '.$personnel->fullname,
+                'title' => __('notifications::common.campaign_titles.birthday', ['name' => $personnel->fullname]),
                 'channel' => $rule->channel,
                 'audience_config' => $rule->audience_config,
                 'payload' => $this->payloads->birthday($personnel),
@@ -117,7 +117,7 @@ class NotificationCampaignDispatcher
                 'category' => 'position_change',
                 'trigger' => $trigger,
                 'template_id' => $rule->template_id,
-                'title' => 'Vəzifə dəyişikliyi: '.$personnel->fullname,
+                'title' => __('notifications::common.campaign_titles.position_change', ['name' => $personnel->fullname]),
                 'channel' => $rule->channel,
                 'audience_config' => $rule->audience_config,
                 'payload' => $payload,
@@ -164,7 +164,7 @@ class NotificationCampaignDispatcher
                 'category' => 'employment_started',
                 'trigger' => $trigger,
                 'template_id' => null,
-                'title' => 'İşə başlayan əməkdaş: '.$personnel->fullname,
+                'title' => __('notifications::common.campaign_titles.new_employee', ['name' => $personnel->fullname]),
                 'channel' => 'database',
                 'audience_config' => [
                     'targets' => ['specific_users'],
@@ -191,7 +191,7 @@ class NotificationCampaignDispatcher
                 'category' => 'employment_started',
                 'trigger' => $trigger,
                 'template_id' => $rule->template_id,
-                'title' => 'İşə başlayan əməkdaş: '.$personnel->fullname,
+                'title' => __('notifications::common.campaign_titles.new_employee', ['name' => $personnel->fullname]),
                 'channel' => $rule->channel,
                 'audience_config' => $rule->audience_config,
                 'payload' => $payload,
@@ -237,7 +237,7 @@ class NotificationCampaignDispatcher
                 'category' => 'holiday',
                 'trigger' => $trigger,
                 'template_id' => $rule->template_id,
-                'title' => 'Bayram / tətil bildirişi: '.($calendar->name ?: $calendar->date?->format('d.m.Y')),
+                'title' => __('notifications::common.campaign_titles.holiday', ['name' => $calendar->name ?: $calendar->date?->format('d.m.Y')]),
                 'channel' => $rule->channel,
                 'audience_config' => $rule->audience_config,
                 'payload' => $payload,
@@ -640,7 +640,7 @@ class NotificationCampaignDispatcher
 
         if ($channel === 'mail') {
             if (blank($recipient->email)) {
-                throw new RuntimeException('Recipient e-poçt ünvanı yoxdur.');
+                throw new RuntimeException(__('notifications::common.messages.recipient_email_missing'));
             }
 
             Mail::to($recipient->email)->send(new NotificationCampaignMail(

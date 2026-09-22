@@ -230,6 +230,7 @@ return [
         'sent' => 'Göndərildi',
         'approval_turnaround' => 'Təsdiq müddəti',
         'scheduled' => 'Planlanan',
+        'minutes_value' => ':value dəq',
     ],
     'phases' => [
         'p1_code' => 'Phase 1',
@@ -455,6 +456,7 @@ return [
         'employment_started' => 'işə başlayan əməkdaş bildirimi',
         'manual_announcement' => 'elan yayımlandı',
         'holiday_due' => 'bayram / tətil bildirişi',
+        'recipient_email_missing' => 'Recipient e-poçt ünvanı yoxdur.',
     ],
     'validation' => [
         'required' => ':attribute mütləqdir.',
@@ -485,5 +487,18 @@ return [
         'approved' => 'təsdiqləndi',
         'rejected' => 'rədd edildi',
         'updated' => 'yeniləndi',
+    ],
+    'campaign_titles' => [
+        'birthday' => 'Ad günü bildirişi: :name',
+        'position_change' => 'Vəzifə dəyişikliyi: :name',
+        'new_employee' => 'İşə başlayan əməkdaş: :name',
+        'holiday' => 'Bayram / tətil bildirişi: :name',
+    ],
+    'payload_defaults' => [
+        'position_update' => 'Vəzifə yenilənməsi',
+        'one_day' => '1 gün',
+        'structure_scope' => 'Struktur üzrə',
+        'paid_non_working_day' => 'Ödənişli qeyri-iş günü',
+        'non_working_day' => 'Qeyri-iş günü',
     ],
 ];

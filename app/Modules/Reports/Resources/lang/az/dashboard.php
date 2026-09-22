@@ -251,5 +251,6 @@ return [
     'empty' => [
         'no_report_data' => 'Seçilmiş filtr üçün hesabat məlumatı tapılmadı.',
         'no_chart_data' => 'Vizualizasiya üçün məlumat yoxdur.',
+        'awaiting_data' => 'Məlumat gözlənilir',
     ],
 ];

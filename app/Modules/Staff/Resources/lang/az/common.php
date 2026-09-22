@@ -46,4 +46,10 @@ return [
         'staff_deleted' => 'Ştat silindi!',
         'delete_confirm' => 'Bu məlumatı silmək istədiyinizə əminsiniz?',
     ],
+    'structure_levels' => [
+        'enterprise' => 'MÜƏSSİSƏ',
+        'department' => 'DEPARTAMENT',
+        'division' => 'ŞÖBƏ',
+        'unit' => 'VAHİD',
+    ],
 ];

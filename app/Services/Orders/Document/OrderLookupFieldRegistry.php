@@ -5,6 +5,7 @@ namespace App\Services\Orders\Document;
 use App\Models\Position;
 use App\Models\Rank;
 use App\Models\Structure;
+use Closure;
 use Illuminate\Support\Collection;
 
 /**
@@ -19,24 +20,24 @@ class OrderLookupFieldRegistry
     private array $optionCache = [];
 
     /**
-     * @return array<string,array{label:string,options:\Closure,resolve:\Closure}>
+     * @return array<string,array{label:string,options:Closure,resolve:Closure}>
      */
     private function definitions(): array
     {
         return [
             'structure' => [
-                'label' => 'Struktur (siyahıdan)',
+                'label' => __('orders::order_composer.field_types.structure'),
                 // Hierarchical: parents before children, each with a depth for indentation.
                 'options' => fn () => $this->structureTree(),
                 'resolve' => fn ($id) => optional(Structure::find((int) $id))->name,
             ],
             'position' => [
-                'label' => 'Vəzifə (siyahıdan)',
+                'label' => __('orders::order_composer.field_types.position'),
                 'options' => fn () => $this->flat(Position::query()->orderBy('name')->pluck('name', 'id')->all()),
                 'resolve' => fn ($id) => optional(Position::find((int) $id))->name,
             ],
             'rank' => [
-                'label' => 'Rütbə (siyahıdan)',
+                'label' => __('orders::order_composer.field_types.rank'),
                 'options' => fn () => $this->flat(Rank::query()->where('is_active', true)->get()->pluck('name', 'id')->all()),
                 'resolve' => fn ($id) => optional(Rank::find((int) $id))->name,
             ],
