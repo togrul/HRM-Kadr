@@ -39,6 +39,7 @@ class ScorecardService
         private readonly ApprovalRouteResolver $routes,
         private readonly UserPersonnelLinkResolver $links,
         private readonly SuccessionService $succession,
+        private readonly WorkingDays $workingDays,
     ) {}
 
     /**
@@ -262,6 +263,59 @@ class ScorecardService
         if ($score !== null) {
             $this->succession->syncPerformanceFromScore($card->personnel_id, $card->performance_cycle_id, $score);
         }
+    }
+
+    /**
+     * Long leave (spec §5.1): once the leave inside a card's period passes the threshold,
+     * the card is judged on the days actually worked — additive targets (KPIs summed
+     * over the period) and the pro-rata shrink by the worked share. Dropping back under
+     * the threshold (leave cancelled) restores both. Returns whether anything changed.
+     */
+    public function applyLeave(PerformanceScorecard $card, int $leaveDays): bool
+    {
+        $threshold = (int) config('performance_evaluation.kpi.long_leave_days', 30);
+        $leaveDays = $leaveDays > $threshold ? $leaveDays : 0;
+
+        if ($leaveDays === (int) $card->leave_days) {
+            return false;
+        }
+
+        $cycle = $card->cycle;
+        $from = Carbon::parse($card->valid_from);
+        $to = Carbon::parse($card->valid_to);
+        $covered = $from->diffInDays($to) + 1;
+        $worked = max(0, $covered - $leaveDays) / max(1, $covered);
+
+        DB::transaction(function () use ($card, $leaveDays, $worked, $from, $to, $cycle): void {
+            $card->load('items.kpi', 'items.kpiVersion');
+            foreach ($card->items as $item) {
+                $definition = $item->kpiVersion?->snapshot ?? $item->kpi->only(['type', 'direction', 'aggregation']);
+                $additive = ($definition['aggregation'] ?? null) === 'sum' && ($definition['type'] ?? null) === 'quantitative' && ($definition['direction'] ?? null) !== 'range';
+
+                if (! $additive || ($item->target === null && $item->original_target === null)) {
+                    continue;
+                }
+
+                $original = (float) ($item->original_target ?? $item->target);
+                $item->update($leaveDays > 0
+                    ? ['original_target' => $original, 'target' => round($original * $worked, 4)]
+                    : ['original_target' => null, 'target' => $original]);
+            }
+
+            $card->prorata_factor = round($this->prorata($from, $to, Carbon::parse($cycle->period_start), Carbon::parse($cycle->period_end)) * $worked, 4);
+            $card->leave_days = $leaveDays;
+            $card->save();
+            $card->events()->create([
+                'action' => 'leave_adjusted',
+                'from_status' => $card->status,
+                'to_status' => $card->status,
+                'reason' => __('performance_evaluation::kpi.leave.event', ['days' => $leaveDays]),
+            ]);
+        });
+
+        $this->recalculate($card);
+
+        return true;
     }
 
     /**
@@ -509,13 +563,13 @@ class ScorecardService
     }
 
     /**
-     * ponytail: weekends only; public holidays are not skipped yet.
+     * Working days on the attendance calendar: holidays and weekends are skipped.
      */
     private function stageDueDate(string $status): ?Carbon
     {
         $days = PerformanceScorecard::STAGE_WORKING_DAYS[$status] ?? null;
 
-        return $days === null ? null : today()->addWeekdays($days);
+        return $days === null ? null : $this->workingDays->add(today(), $days);
     }
 
     private function prorata(Carbon $from, Carbon $to, Carbon $cycleStart, Carbon $cycleEnd): float

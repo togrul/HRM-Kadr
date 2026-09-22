@@ -2,6 +2,7 @@
 
 namespace App\Modules\PerformanceEvaluation\Application\Services\Kpi;
 
+use App\Models\PerformanceKpi;
 use App\Models\PerformanceScorecard;
 use App\Models\Personnel;
 use App\Models\User;
@@ -89,6 +90,30 @@ class ScorecardNotifier
         $superiorId = $manager ? ($this->routes->manager($manager)['id'] ?? null) : null;
 
         return $this->scorecards->userIdsForPersonnel($superiorId);
+    }
+
+    /**
+     * Tells HR once that a KPI's external source stopped answering; its cards keep the
+     * last value and show it as stale.
+     */
+    public function connectorFailed(PerformanceKpi $kpi, string $error): int
+    {
+        $userIds = $this->hrUserIds();
+        $payload = [
+            'action' => 'performanceKpiConnector',
+            'category' => __('performance_evaluation::kpi.notifications.category'),
+            'message' => __('performance_evaluation::kpi.connector.notification.subject', ['kpi' => $kpi->name]),
+            'name' => $kpi->name,
+            'body' => __('performance_evaluation::kpi.connector.notification.body', ['kpi' => $kpi->name, 'error' => $error]),
+            'kpi_id' => $kpi->id,
+        ];
+
+        $users = User::query()->whereIn('id', $userIds)->get();
+        foreach ($users as $user) {
+            $user->notify(new PlatformNotification('database', $payload, $payload['message'], $payload['body']));
+        }
+
+        return $users->count();
     }
 
     /**

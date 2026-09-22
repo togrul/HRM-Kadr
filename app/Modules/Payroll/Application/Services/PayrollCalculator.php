@@ -2,7 +2,9 @@
 
 namespace App\Modules\Payroll\Application\Services;
 
+use App\Models\PayrollOneOffEarning;
 use App\Modules\Compensation\Domain\Contracts\CompensationReadRepository;
+use App\Support\Database\InstalledTables;
 
 class PayrollCalculator
 {
@@ -18,10 +20,12 @@ class PayrollCalculator
      * Earnings + voluntary deductions come from the employee's compensation lines;
      * statutory deductions (income tax / DSMF / unemployment / medical) and employer
      * contributions are computed from effective statutory_rates for the regime.
+     * One-off earnings handed over for the pay month (bonus, award) join before the tax
+     * bases are summed; off-cycle runs leave them out so they are paid once.
      *
      * @return array{gross:float,total_deductions:float,net:float,employer_cost:float,proration_factor:float,currency:string,lines:array<int,array<string,mixed>>}|null
      */
-    public function calculate(string $tabelNo, ?string $onDate = null, ?int $year = null, ?int $month = null): ?array
+    public function calculate(string $tabelNo, ?string $onDate = null, ?int $year = null, ?int $month = null, bool $withOneOffs = true): ?array
     {
         $current = $this->compensation->currentCompensation($tabelNo, $onDate);
 
@@ -68,6 +72,22 @@ class PayrollCalculator
                 'is_statutory' => (bool) ($component['is_statutory'] ?? false),
                 'sort' => $sort++,
             ];
+        }
+
+        if ($withOneOffs && $year && $month && InstalledTables::has('payroll_one_off_earnings')) {
+            foreach (PayrollOneOffEarning::query()->where('tabel_no', $tabelNo)->where('pay_year', $year)->where('pay_month', $month)->orderBy('id')->get() as $oneOff) {
+                $lines[] = [
+                    'component_id' => null,
+                    'code' => $oneOff->code,
+                    'name' => $oneOff->name,
+                    'kind' => 'earning',
+                    'amount' => round($oneOff->amount, 2),
+                    'taxable' => $oneOff->taxable,
+                    'affects_social' => $oneOff->affects_social,
+                    'is_statutory' => false,
+                    'sort' => 100 + $sort++,
+                ];
+            }
         }
 
         // Bases derive from the earning lines and their flags.

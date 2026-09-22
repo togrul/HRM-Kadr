@@ -58,6 +58,9 @@
                             @if ($kpi->source_metric)
                                 <span class="shrink-0 rounded-md bg-sky-50 px-1.5 py-px text-[11px] font-medium text-sky-700" title="{{ __($t.'.metrics.'.$kpi->source_metric) }}">{{ __($t.'.metrics.auto_badge') }}</span>
                             @endif
+                            @if ($kpi->integration_error)
+                                <span class="shrink-0 rounded-md bg-rose-50 px-1.5 py-px text-[11px] font-medium text-rose-700" title="{{ $kpi->integration_error }}">{{ __($t.'.connector.stale') }}</span>
+                            @endif
                             @if ($kpi->evidence_required)
                                 <span class="shrink-0" title="{{ __($t.'.fields.evidence_required') }}">
                                     <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.4 11.1-9.2 9.2a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/></svg>
@@ -275,7 +278,7 @@
                         <div class="sm:col-span-2">
                             <x-label value="{{ __($t.'.fields.source_metric') }}" />
                             <div class="mt-1">
-                                <x-ui.filter-native-select wire:model="kpiForm.source_metric">
+                                <x-ui.filter-native-select wire:model.live="kpiForm.source_metric">
                                     <option value="">{{ __($t.'.metrics.manual') }}</option>
                                     @foreach (array_keys(\App\Modules\PerformanceEvaluation\Application\Services\Kpi\InternalKpiMetrics::METRICS) as $metric)
                                         <option value="{{ $metric }}">{{ __($t.'.metrics.'.$metric) }}</option>
@@ -285,6 +288,57 @@
                             <p class="mt-1.5 text-[12px] leading-5 text-ink-faint">{{ __($t.'.metrics.hint') }}</p>
                             @error('kpiForm.source_metric') <x-validation>{{ $message }}</x-validation> @enderror
                         </div>
+
+                        @if (($kpiForm['source_metric'] ?? '') === 'rest')
+                            @php $c = $t.'.connector'; @endphp
+                            <div class="flex flex-col gap-3 rounded-xl border border-hairline bg-[#fafafa] p-4 sm:col-span-2">
+                                <div>
+                                    <p class="text-[13px] font-semibold text-ink">{{ __($c.'.title') }}</p>
+                                    <p class="mt-0.5 text-[12px] leading-5 text-ink-muted">{{ __($c.'.hint') }}</p>
+                                </div>
+                                <div>
+                                    <x-label value="{{ __($c.'.fields.url') }}" />
+                                    <x-livewire-input mode="gray" name="connectorForm.url" wire:model="connectorForm.url" placeholder="https://1c.example.az/odata/sales?tabel={tabel_no}&from={from}&to={to}" />
+                                    @error('connectorForm.url') <x-validation>{{ $message }}</x-validation> @enderror
+                                </div>
+                                <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                                    <div>
+                                        <x-label value="{{ __($c.'.fields.auth') }}" />
+                                        <div class="mt-1">
+                                            <x-ui.filter-native-select wire:model.live="connectorForm.auth">
+                                                @foreach (\App\Modules\PerformanceEvaluation\Application\Services\Kpi\RestKpiConnector::AUTH_TYPES as $auth)
+                                                    <option value="{{ $auth }}">{{ __($c.'.auth.'.$auth) }}</option>
+                                                @endforeach
+                                            </x-ui.filter-native-select>
+                                        </div>
+                                    </div>
+                                    @if (($connectorForm['auth'] ?? 'none') === 'basic')
+                                        <div>
+                                            <x-label value="{{ __($c.'.fields.username') }}" />
+                                            <x-livewire-input mode="gray" name="connectorForm.username" wire:model="connectorForm.username" />
+                                        </div>
+                                    @endif
+                                    @if (($connectorForm['auth'] ?? 'none') !== 'none')
+                                        <div>
+                                            <x-label value="{{ __($c.'.fields.'.(($connectorForm['auth'] ?? '') === 'basic' ? 'password' : 'token')) }}" />
+                                            <x-livewire-input mode="gray" type="password" name="connectorForm.secret" wire:model="connectorForm.secret" placeholder="{{ $editingKpiId ? __($c.'.keep_secret') : '' }}" autocomplete="new-password" />
+                                        </div>
+                                    @endif
+                                </div>
+                                <div>
+                                    <x-label value="{{ __($c.'.fields.value_path') }}" />
+                                    <x-livewire-input mode="gray" name="connectorForm.value_path" wire:model="connectorForm.value_path" placeholder="data.0.total" />
+                                    <p class="mt-1 text-[11.5px] leading-5 text-ink-faint">{{ __($c.'.value_path_hint') }}</p>
+                                    @error('connectorForm.value_path') <x-validation>{{ $message }}</x-validation> @enderror
+                                </div>
+                                <div>
+                                    <button type="button" wire:click="testConnector" wire:loading.attr="disabled" wire:target="testConnector" class="inline-flex h-9 items-center gap-1.5 rounded-lg border border-hairline bg-white px-3 text-[12.5px] font-semibold text-ink-soft hover:border-zinc-300 hover:text-ink">
+                                        <svg class="h-4 w-4" wire:loading.class="animate-spin" wire:target="testConnector" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.2-8.6"/><path d="m21 4-9 9-3-3"/></svg>
+                                        {{ __($c.'.test') }}
+                                    </button>
+                                </div>
+                            </div>
+                        @endif
 
                         <label class="flex items-center gap-2.5 text-[13px] text-zinc-700 sm:col-span-2">
                             <input type="checkbox" wire:model="kpiForm.evidence_required" class="h-4 w-4 rounded border-zinc-300">

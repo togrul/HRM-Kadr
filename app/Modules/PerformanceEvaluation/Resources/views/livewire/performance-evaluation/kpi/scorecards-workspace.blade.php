@@ -145,6 +145,9 @@
                                     {{ __($t.'.stage_due') }} <span class="hrm-num">{{ $card->stage_due_at->format('d.m.Y') }}</span>
                                 </span>
                             @endif
+                            @if ((int) $card->leave_days > 0)
+                                <span class="rounded-md bg-amber-50 px-2 py-0.5 text-amber-700" title="{{ __($t.'.leave.chip_hint', ['threshold' => config('performance_evaluation.kpi.long_leave_days', 30)]) }}">{{ __($t.'.leave.chip', ['days' => $card->leave_days]) }}</span>
+                            @endif
                             @if ($card->closure_reason)
                                 <span class="rounded-md bg-amber-50 px-2 py-0.5 text-amber-700">{{ __($t.'.closure_reasons.'.$card->closure_reason) }}</span>
                             @endif
@@ -192,6 +195,7 @@
                             'target_pct' => $fmt($bonus->target_pct).'%',
                             'payout_pct' => $fmt($bonus->payout_pct).'%',
                             'company_mult' => '×'.$fmt($bonus->company_mult, 4),
+                            'unit_mult' => '×'.$fmt($bonus->unit_mult, 4),
                             'prorata' => $fmt($bonus->prorata * 100).'%',
                         ];
                     if ((float) $bonus->scale_factor < 1) {
@@ -324,7 +328,15 @@
                         @foreach ($card->items as $item)
                             <tr wire:key="card-item-{{ $item->id }}" class="align-top text-ink-soft">
                                 <td class="px-5 py-3">
-                                    <p class="font-semibold text-ink">{{ $item->kpi?->name }}</p>
+                                    <p class="font-semibold text-ink">
+                                        {{ $item->kpi?->name }}
+                                        @if ($item->kpi?->source_metric)
+                                            <span class="ml-1 rounded-md bg-sky-50 px-1.5 py-px text-[10.5px] font-medium text-sky-700">{{ __($t.'.metrics.auto_badge') }}</span>
+                                        @endif
+                                        @if ($item->kpi?->integration_error)
+                                            <span class="ml-1 rounded-md bg-rose-50 px-1.5 py-px text-[10.5px] font-medium text-rose-700" title="{{ $item->kpi->integration_error }}">{{ __($t.'.connector.stale') }}</span>
+                                        @endif
+                                    </p>
                                     <p class="mt-0.5 text-[11.5px] text-ink-faint"><span class="hrm-num">{{ $item->kpi?->code }}</span> · {{ __($t.'.directions_short.'.$item->kpi?->direction) }} · {{ __($t.'.units.'.$item->kpi?->unit) }}</p>
                                     @if ($card->status === 'draft' && in_array($role, ['hr', 'manager'], true) && $this->goalOptions !== [])
                                         <select wire:change="linkGoal({{ $item->id }}, $event.target.value)" class="mt-1.5 h-8 max-w-[260px] rounded-lg border border-hairline bg-white px-2 text-[12px] text-ink-muted focus:outline-none">
@@ -356,6 +368,9 @@
                                         <span class="hrm-num">{{ $fmt($item->range_min) }} – {{ $fmt($item->range_max) }}</span>
                                     @else
                                         <span class="hrm-num">{{ $fmt($item->target) }}</span>
+                                        @if ($item->original_target !== null)
+                                            <span class="block text-[11px] text-ink-faint line-through decoration-ink-faint/60" title="{{ __($t.'.leave.original', ['value' => $fmt($item->original_target)]) }}">{{ $fmt($item->original_target) }}</span>
+                                        @endif
                                     @endif
                                 </td>
                                 <td class="hrm-num whitespace-nowrap px-3 py-3 text-right text-[12px] text-ink-faint" title="{{ __($t.'.band_title') }}">{{ $fmt($item->threshold) }} · {{ $fmt($item->stretch) }} · {{ $fmt($item->cap) }}</td>

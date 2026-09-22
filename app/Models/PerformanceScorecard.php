@@ -66,6 +66,7 @@ class PerformanceScorecard extends Model
         'valid_from',
         'valid_to',
         'prorata_factor',
+        'leave_days',
         'kpi_weight_share',
         'competency_weight_share',
         'kpi_score',

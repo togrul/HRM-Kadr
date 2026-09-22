@@ -6,9 +6,11 @@ use App\Models\PerformanceBonusCalculation;
 use App\Models\PerformanceBonusRule;
 use App\Models\PerformanceCycle;
 use App\Models\PerformanceScorecard;
+use App\Models\Structure;
 use App\Models\User;
 use App\Modules\Compensation\Domain\Contracts\CompensationReadRepository;
 use App\Modules\Integration\Domain\Contracts\IntegrationOutbox;
+use App\Modules\Payroll\Domain\Contracts\PayrollOneOffEarnings;
 use App\Services\Orders\Document\OrderDraftService;
 use App\Services\Profiles\ProfileState;
 use Illuminate\Support\Carbon;
@@ -19,9 +21,10 @@ use Illuminate\Validation\ValidationException;
 
 /**
  * Bonus engine (spec §7), chosen by the service area:
- *  - `company` (civil profiles): base salary × months × target % × payout(score) ×
- *    company multiplier × pro-rata, capped, optionally scaled down to the fund, then
- *    exported to payroll (Excel + an integration event).
+ *  - `company` (civil profiles): base salary × months × target % (per position, else
+ *    the rule's) × payout(score) × company multiplier × unit multiplier × pro-rata,
+ *    capped, optionally scaled down to the fund, then handed to payroll (one-off
+ *    earnings when payroll runs here, an integration event, and an Excel sheet).
  *  - `order` (military profile): payout(score) × monthly salary × reward months ×
  *    pro-rata, paid as a monetary award through a pending order (əmr) per person.
  *
@@ -52,6 +55,8 @@ class BonusService
             'company_gate' => 85,
             'gate_floor_pct' => 0,
             'company_multipliers' => PerformanceBonusRule::DEFAULT_COMPANY_MULTIPLIERS,
+            'unit_results' => [],
+            'position_targets' => [],
             'cap_pct' => 150,
             'scale_to_fund' => false,
             'currency' => 'AZN',
@@ -86,26 +91,30 @@ class BonusService
         $cards = PerformanceScorecard::query()
             ->where('performance_cycle_id', $cycle->id)
             ->whereIn('status', ['approved', 'closed'])
-            ->with(['personnel:id,surname,name,patronymic,tabel_no', 'bonus'])
+            ->with(['personnel:id,surname,name,patronymic,tabel_no,structure_id', 'bonus'])
             ->orderBy('id')
             ->get();
 
         $months = $this->periodMonths($cycle);
         $bases = $this->baseSalaries($cards, $cycle);
         $companyMult = $rule->mode === 'order' ? 1.0 : $this->companyMultiplier($rule);
+        $positionTargets = collect($rule->position_targets ?? [])->mapWithKeys(fn (array $pair): array => [(int) $pair[0] => (float) $pair[1]]);
+        $unitResult = $this->unitResultResolver($rule);
 
-        $rows = $cards->map(function (PerformanceScorecard $card) use ($rule, $months, $bases, $companyMult): array {
+        $rows = $cards->map(function (PerformanceScorecard $card) use ($rule, $months, $bases, $companyMult, $positionTargets, $unitResult): array {
             if ($card->bonus?->isFinal()) {
                 return $this->storedRow($card);
             }
 
             $score = $card->effectiveScore();
             $base = $bases->get((string) $card->personnel?->tabel_no);
+            $targetPct = (float) $positionTargets->get((int) $card->position_id, $rule->target_pct);
+            $unitMult = $rule->mode === 'order' ? 1.0 : $this->multiplierFor($unitResult($card->personnel?->structure_id), $rule);
             $target = $base === null ? 0.0 : ($rule->mode === 'order'
                 ? $base * $rule->reward_months
-                : $base * $months * $rule->target_pct / 100);
+                : $base * $months * $targetPct / 100);
             $payout = $this->payoutPct($score, $rule->payout_bands);
-            $amount = min($target * $payout / 100 * $companyMult * (float) $card->prorata_factor, $target * $rule->cap_pct / 100);
+            $amount = min($target * $payout / 100 * $companyMult * $unitMult * (float) $card->prorata_factor, $target * $rule->cap_pct / 100);
 
             return [
                 'scorecard_id' => $card->id,
@@ -114,9 +123,10 @@ class BonusService
                 'score' => $score,
                 'base_salary' => $base,
                 'period_months' => $rule->mode === 'order' ? $rule->reward_months : $months,
-                'target_pct' => $rule->mode === 'order' ? 100.0 : $rule->target_pct,
+                'target_pct' => $rule->mode === 'order' ? 100.0 : $targetPct,
                 'payout_pct' => $payout,
                 'company_mult' => $companyMult,
+                'unit_mult' => $unitMult,
                 'prorata' => (float) $card->prorata_factor,
                 'scale_factor' => 1.0,
                 'amount' => round($amount, 2),
@@ -176,6 +186,7 @@ class BonusService
                         'target_pct' => $row['target_pct'],
                         'payout_pct' => $row['payout_pct'],
                         'company_mult' => $row['company_mult'],
+                        'unit_mult' => $row['unit_mult'],
                         'prorata' => $row['prorata'],
                         'scale_factor' => $row['scale_factor'],
                         'amount' => $row['amount'],
@@ -202,6 +213,7 @@ class BonusService
         $batch = (string) Str::ulid();
         $payMonth = now()->format('Y-m');
         $outbox = app()->bound(IntegrationOutbox::class) ? app(IntegrationOutbox::class) : null;
+        $payroll = app()->bound(PayrollOneOffEarnings::class) ? app(PayrollOneOffEarnings::class) : null;
 
         $fresh = PerformanceBonusCalculation::query()
             ->where('performance_cycle_id', $cycle->id)
@@ -210,9 +222,13 @@ class BonusService
             ->with('personnel:id,tabel_no')
             ->get();
 
-        DB::transaction(function () use ($fresh, $batch, $payMonth, $cycle, $outbox): void {
+        DB::transaction(function () use ($fresh, $batch, $payMonth, $cycle, $outbox, $payroll): void {
             foreach ($fresh as $line) {
                 $line->update(['status' => 'exported', 'exported_at' => now(), 'export_batch' => $batch]);
+                $payroll?->record(
+                    (string) $line->personnel?->tabel_no, 'kpi_bonus', __('performance_evaluation::kpi.bonus.payroll_line', ['cycle' => $cycle->name]),
+                    $line->amount, (int) now()->year, (int) now()->month, 'performance_bonus:'.$line->id,
+                );
                 $outbox?->record('performance_bonus', 'performance_bonus:'.$line->id, [
                     'tabel_no' => $line->personnel?->tabel_no,
                     'cycle' => $cycle->name,
@@ -305,22 +321,59 @@ class BonusService
      */
     public function companyMultiplier(PerformanceBonusRule $rule): float
     {
-        if ($rule->company_result === null) {
+        return $this->multiplierFor($rule->company_result, $rule);
+    }
+
+    /**
+     * The same gate and multiplier table turn a company or a unit result into its
+     * multiplier. No result entered → 1.
+     */
+    public function multiplierFor(?float $result, PerformanceBonusRule $rule): float
+    {
+        if ($result === null) {
             return 1.0;
         }
 
-        if ($rule->company_result < $rule->company_gate) {
+        if ($result < $rule->company_gate) {
             return round($rule->gate_floor_pct / 100, 4);
         }
 
         $multiplier = 1.0;
         foreach (collect($rule->company_multipliers)->sortBy(0) as [$from, $value]) {
-            if ($rule->company_result + 1e-9 >= (float) $from) {
+            if ($result + 1e-9 >= (float) $from) {
                 $multiplier = (float) $value;
             }
         }
 
         return $multiplier;
+    }
+
+    /**
+     * A unit's result applies to everyone below it: a person takes the result of their
+     * own unit, else of the nearest parent unit that has one.
+     *
+     * @return callable(?int): ?float
+     */
+    private function unitResultResolver(PerformanceBonusRule $rule): callable
+    {
+        $results = collect($rule->unit_results ?? [])->mapWithKeys(fn (array $pair): array => [(int) $pair[0] => (float) $pair[1]]);
+
+        if ($results->isEmpty()) {
+            return fn (?int $structureId): ?float => null;
+        }
+
+        // ponytail: one flat read of the org chart per preview; the chart is small.
+        $parents = Structure::query()->pluck('parent_id', 'id');
+
+        return function (?int $structureId) use ($results, $parents): ?float {
+            for ($id = $structureId, $guard = 0; $id !== null && $guard < 50; $id = $parents->get($id), $guard++) {
+                if ($results->has((int) $id)) {
+                    return $results->get((int) $id);
+                }
+            }
+
+            return null;
+        };
     }
 
     /**
@@ -333,6 +386,8 @@ class BonusService
     {
         $bands = $this->pairs($data['payout_bands'] ?? []);
         $multipliers = $this->pairs($data['company_multipliers'] ?? []);
+        $units = $this->pairs($data['unit_results'] ?? []);
+        $positions = $this->pairs($data['position_targets'] ?? []);
         $number = fn (string $key): ?float => is_numeric($data[$key] ?? null) ? (float) $data[$key] : null;
         $errors = [];
 
@@ -342,6 +397,14 @@ class BonusService
 
         if (collect($multipliers)->contains(fn (array $pair): bool => $pair[1] < 0)) {
             $errors['company_multipliers'] = __('performance_evaluation::kpi.bonus.errors.bands_invalid');
+        }
+
+        if (collect($units)->contains(fn (array $pair): bool => $pair[1] < 0) || count(array_unique(array_column($units, 0))) !== count($units)) {
+            $errors['unit_results'] = __('performance_evaluation::kpi.bonus.errors.pairs_invalid');
+        }
+
+        if (collect($positions)->contains(fn (array $pair): bool => $pair[1] < 0 || $pair[1] > 100) || count(array_unique(array_column($positions, 0))) !== count($positions)) {
+            $errors['position_targets'] = __('performance_evaluation::kpi.bonus.errors.pairs_invalid');
         }
 
         foreach (['target_pct' => [0, 100], 'reward_months' => [0.01, 24], 'company_gate' => [0, 200], 'gate_floor_pct' => [0, 100], 'cap_pct' => [100, 500]] as $key => [$min, $max]) {
@@ -369,6 +432,8 @@ class BonusService
             'company_gate' => $number('company_gate'),
             'gate_floor_pct' => $number('gate_floor_pct'),
             'company_multipliers' => $multipliers,
+            'unit_results' => $units,
+            'position_targets' => $positions,
             'cap_pct' => $number('cap_pct'),
             'fund' => $number('fund'),
             'scale_to_fund' => (bool) ($data['scale_to_fund'] ?? false),
@@ -399,7 +464,7 @@ class BonusService
         $line = $card->bonus;
 
         return [
-            ...$line->only(['personnel_id', 'score', 'base_salary', 'period_months', 'target_pct', 'payout_pct', 'company_mult', 'prorata', 'scale_factor', 'amount', 'status', 'order_log_id']),
+            ...$line->only(['personnel_id', 'score', 'base_salary', 'period_months', 'target_pct', 'payout_pct', 'company_mult', 'unit_mult', 'prorata', 'scale_factor', 'amount', 'status', 'order_log_id']),
             'scorecard_id' => $card->id,
             'personnel' => $card->personnel,
             'final' => true,

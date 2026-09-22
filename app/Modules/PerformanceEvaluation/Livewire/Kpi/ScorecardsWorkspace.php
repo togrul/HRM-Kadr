@@ -125,7 +125,7 @@ class ScorecardsWorkspace extends Component
                 'personnel:id,surname,name,patronymic',
                 'position:id,name',
                 'manager:id,surname,name',
-                'items.kpi:id,code,name,type,direction,unit,evidence_required',
+                'items.kpi:id,code,name,type,direction,unit,evidence_required,source_metric,integration_error',
                 'items.actuals.enteredBy:id,name',
                 'items.goal:id,title',
                 'checkins.author:id,name',

@@ -140,6 +140,31 @@
                                 <input type="number" step="0.5" min="0" wire:model.live.debounce.400ms="ruleForm.target_pct" class="{{ $input }} mt-1">
                                 <p class="mt-1 text-[11.5px] text-ink-faint">{{ __($b.'.fields.target_pct_hint') }}</p>
                                 @error('target_pct') <x-validation>{{ $message }}</x-validation> @enderror
+                            <div class="mt-3 flex items-center justify-between">
+                                <p class="text-[12px] font-medium text-ink-soft">{{ __($b.'.fields.position_targets') }}</p>
+                                @if ($this->positionOptions !== [])
+                                    <button type="button" wire:click="addBand('position_targets')" class="text-[12px] font-medium text-ink-faint hover:text-ink">+ {{ __($b.'.actions.add_row') }}</button>
+                                @endif
+                            </div>
+                            @if (($ruleForm['position_targets'] ?? []) !== [])
+                                <div class="mt-1.5 overflow-hidden rounded-xl border border-hairline-subtle">
+                                    @foreach ($ruleForm['position_targets'] as $index => $pair)
+                                        <div wire:key="position_targets-{{ $index }}" class="grid grid-cols-[minmax(0,1fr)_96px_32px] items-center gap-2 px-3 py-1.5 {{ $loop->first ? '' : 'border-t border-hairline-subtle' }}">
+                                            <select wire:model.live="ruleForm.position_targets.{{ $index }}.from" class="h-9 w-full min-w-0 truncate rounded-lg border border-hairline bg-white px-2 text-[12.5px] text-ink focus:border-zinc-400 focus:outline-none focus:ring-0">
+                                                <option value="">—</option>
+                                                @foreach ($this->positionOptions as $optionId => $optionName)
+                                                    <option value="{{ $optionId }}">{{ $optionName }}</option>
+                                                @endforeach
+                                            </select>
+                                            <div class="relative"><input type="number" step="0.5" wire:model.live.debounce.400ms="ruleForm.position_targets.{{ $index }}.value" class="{{ $input }} pr-6"><span class="pointer-events-none absolute right-2.5 top-2 text-[12px] text-ink-faint">%</span></div>
+                                            <button type="button" wire:click="removeBand('position_targets', {{ $index }})" class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint hover:bg-rose-50 hover:text-rose-600" aria-label="{{ __($t.'.actions.delete') }}">
+                                                <x-icons.delete-icon size="h-4 w-4" />
+                                            </button>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
+                            @error('position_targets') <x-validation>{{ $message }}</x-validation> @enderror
                             </div>
                         @endif
                     </div>
@@ -199,6 +224,32 @@
                                 @endforeach
                             </div>
                             @error('company_multipliers') <x-validation>{{ $message }}</x-validation> @enderror
+                            <p class="mt-3 text-[11.5px] leading-5 text-ink-faint">{{ __($b.'.fields.unit_hint') }}</p>
+                            <div class="mt-1.5 flex items-center justify-between">
+                                <p class="text-[12px] font-medium text-ink-soft">{{ __($b.'.fields.unit_results') }}</p>
+                                @if ($this->unitOptions !== [])
+                                    <button type="button" wire:click="addBand('unit_results')" class="text-[12px] font-medium text-ink-faint hover:text-ink">+ {{ __($b.'.actions.add_row') }}</button>
+                                @endif
+                            </div>
+                            @if (($ruleForm['unit_results'] ?? []) !== [])
+                                <div class="mt-1.5 overflow-hidden rounded-xl border border-hairline-subtle">
+                                    @foreach ($ruleForm['unit_results'] as $index => $pair)
+                                        <div wire:key="unit_results-{{ $index }}" class="grid grid-cols-[minmax(0,1fr)_96px_32px] items-center gap-2 px-3 py-1.5 {{ $loop->first ? '' : 'border-t border-hairline-subtle' }}">
+                                            <select wire:model.live="ruleForm.unit_results.{{ $index }}.from" class="h-9 w-full min-w-0 truncate rounded-lg border border-hairline bg-white px-2 text-[12.5px] text-ink focus:border-zinc-400 focus:outline-none focus:ring-0">
+                                                <option value="">—</option>
+                                                @foreach ($this->unitOptions as $optionId => $optionName)
+                                                    <option value="{{ $optionId }}">{{ $optionName }}</option>
+                                                @endforeach
+                                            </select>
+                                            <div class="relative"><input type="number" step="0.5" wire:model.live.debounce.400ms="ruleForm.unit_results.{{ $index }}.value" class="{{ $input }} pr-6"><span class="pointer-events-none absolute right-2.5 top-2 text-[12px] text-ink-faint">%</span></div>
+                                            <button type="button" wire:click="removeBand('unit_results', {{ $index }})" class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint hover:bg-rose-50 hover:text-rose-600" aria-label="{{ __($t.'.actions.delete') }}">
+                                                <x-icons.delete-icon size="h-4 w-4" />
+                                            </button>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
+                            @error('unit_results') <x-validation>{{ $message }}</x-validation> @enderror
                         </div>
                     @endif
 

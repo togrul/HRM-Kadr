@@ -2,9 +2,11 @@
 
 namespace Tests\Feature\PerformanceEvaluation;
 
+use App\Models\AttendanceCalendar;
 use App\Models\Award;
 use App\Models\AwardType;
 use App\Models\OrderLog;
+use App\Models\PayrollOneOffEarning;
 use App\Models\PerformanceBonusCalculation;
 use App\Models\PerformanceCycle;
 use App\Models\PerformanceFormTemplate;
@@ -38,8 +40,10 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Sleep;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
@@ -476,6 +480,159 @@ class KpiScorecardTest extends TestCase
             ->assertSet('importErrors', []);
 
         $this->assertSame('81.5000', $card->refresh()->kpi_score);
+    }
+
+    public function test_position_target_and_the_parent_unit_result_shape_the_company_bonus(): void
+    {
+        $card = $this->approvedSpecCard();
+        $this->mock(CompensationReadRepository::class, fn ($mock) => $mock->shouldReceive('baseAmountsFor')->andReturn(collect([$card->personnel->tabel_no => 1000.0])));
+        $parent = Structure::query()->create(['name' => 'Departament', 'shortname' => 'DEP']);
+        Structure::query()->whereKey($card->personnel->structure_id)->update(['parent_id' => $parent->id]);
+        $bonus = app(BonusService::class);
+        $cycle = $card->cycle;
+
+        $bonus->saveRule($cycle, [
+            ...$this->ruleData($bonus, $cycle),
+            'position_targets' => [[$this->position->id, 30]],
+            'unit_results' => [[$parent->id, 90]],
+        ], $this->hr);
+        $bonus->calculate($cycle);
+
+        // 1000 × 3 months × 30% (position) × 50% payout × 0.8 (parent unit at 90%) = 360
+        $line = PerformanceBonusCalculation::query()->firstOrFail();
+        $this->assertSame(0.8, $line->unit_mult);
+        $this->assertSame(360.0, $line->amount);
+
+        $this->assertValidationKeys(['position_targets'], fn () => $bonus->saveRule($cycle, [...$this->ruleData($bonus, $cycle), 'position_targets' => [[$this->position->id, 30], [$this->position->id, 20]]], $this->hr));
+    }
+
+    public function test_bonus_export_and_award_orders_reach_payroll(): void
+    {
+        $card = $this->approvedSpecCard();
+        $this->mock(CompensationReadRepository::class, fn ($mock) => $mock->shouldReceive('baseAmountsFor')->andReturn(collect([$card->personnel->tabel_no => 1000.0])));
+        $bonus = app(BonusService::class);
+        $bonus->calculate($card->cycle);
+        $bonus->exportToPayroll($card->cycle);
+
+        $this->assertDatabaseHas('payroll_one_off_earnings', ['tabel_no' => $card->personnel->tabel_no, 'code' => 'kpi_bonus', 'amount' => 225, 'pay_month' => now()->month]);
+
+        Storage::fake('local');
+        AwardType::query()->create(['id' => 20, 'name' => 'mükafatlar']);
+        Award::query()->create(['id' => 2026, 'award_type_id' => 20, 'name' => 'Xidmətdə fərqləndiyinə görə']);
+        $this->artisan('orders:seed-word-templates', ['--only' => 'pul_mukafati'])->assertSuccessful();
+        $order = app(\App\Services\Orders\Document\OrderDraftService::class)->draft('pul_mukafati', $card->personnel, ['Məbləğ' => '300', 'Mükafatın səbəbi' => 'test'], 'M-1');
+
+        app(OrderStatusTransitionService::class)->approve($order);
+        $this->assertSame(300.0, PayrollOneOffEarning::query()->where('source_key', 'order_award:'.$order->id)->value('amount'));
+        app(OrderStatusTransitionService::class)->cancel($order->refresh());
+        $this->assertDatabaseMissing('payroll_one_off_earnings', ['source_key' => 'order_award:'.$order->id]);
+    }
+
+    public function test_rest_connector_fills_actuals_and_flags_a_failing_source_once(): void
+    {
+        Notification::fake();
+        Sleep::fake();
+        $card = $this->specExampleCard();
+        app(ScorecardService::class)->transition($card, 'activate', $this->hr);
+        $kpi = $card->items->first()->kpi;
+        $kpi->update([
+            'source_metric' => 'rest',
+            'integration_config' => ['url' => 'https://erp.test/sales/{tabel_no}?from={from}', 'auth' => 'bearer', 'token' => 's3cret', 'value_path' => 'data.total'],
+        ]);
+        $this->assertStringNotContainsString('s3cret', (string) \Illuminate\Support\Facades\DB::table('performance_kpis')->where('id', $kpi->id)->value('integration_config'));
+
+        Http::fake(['erp.test/*' => Http::sequence()->push(['data' => ['total' => 120000]])->whenEmpty(Http::response('down', 500))]);
+        Carbon::setTestNow('2026-02-15');
+        app(InternalKpiMetrics::class)->sync();
+        Http::assertSent(fn ($request) => $request->hasHeader('Authorization', 'Bearer s3cret')
+            && str_contains($request->url(), $card->personnel->tabel_no) && str_contains($request->url(), 'from=2026-01-01'));
+        $this->assertSame('120000.0000', $card->items->first()->actuals()->where('source', 'integration')->value('value'));
+        $this->assertNull($kpi->fresh()->integration_error);
+
+        app(InternalKpiMetrics::class)->sync();
+        app(InternalKpiMetrics::class)->sync();
+        Carbon::setTestNow();
+
+        $this->assertNotNull($kpi->fresh()->integration_error);
+        $this->assertSame('120000.0000', $card->items->first()->actuals()->where('source', 'integration')->value('value'), 'The last value stays.');
+        Notification::assertSentToTimes($this->hr, PlatformNotification::class, 1);
+    }
+
+    public function test_kpi_form_keeps_connector_secrets_on_the_server(): void
+    {
+        $this->hr->givePermissionTo(Permission::findOrCreate('show-performance-evaluation', 'web'));
+        $this->person('Test');
+        Http::fake(['erp.test/*' => Http::response(['total' => 42])]);
+
+        $screen = Livewire::test(KpiLibraryWorkspace::class)
+            ->call('openKpiForm')
+            ->set('kpiForm.code', 'ERP_SALES')
+            ->set('kpiForm.name', 'ERP satış')
+            ->set('kpiForm.source_metric', 'rest')
+            ->assertSee(__('performance_evaluation::kpi.connector.title'))
+            ->set('connectorForm.url', 'https://erp.test/{tabel_no}')
+            ->set('connectorForm.auth', 'bearer')
+            ->set('connectorForm.secret', 'tok-1')
+            ->set('connectorForm.value_path', 'total')
+            ->call('testConnector')
+            ->assertDispatched('notify', type: 'success')
+            ->call('saveKpi')
+            ->assertHasNoErrors();
+
+        $kpi = PerformanceKpi::query()->where('code', 'ERP_SALES')->firstOrFail();
+        $this->assertSame('tok-1', $kpi->integration_config['token']);
+        $this->assertSame('integration', $kpi->data_source);
+
+        $screen->call('openKpiForm', $kpi->id)
+            ->assertSet('connectorForm.secret', '')
+            ->assertDontSee('tok-1')
+            ->set('connectorForm.value_path', 'data.total')
+            ->call('saveKpi');
+        $this->assertSame('tok-1', $kpi->fresh()->integration_config['token'], 'A blank secret keeps the stored one.');
+    }
+
+    public function test_stage_deadlines_skip_holidays_and_count_moved_working_days(): void
+    {
+        $card = $this->specExampleCard();
+        Carbon::setTestNow('2026-03-16'); // Monday
+        AttendanceCalendar::query()->create(['date' => '2026-03-17', 'day_type' => 'holiday', 'name' => 'Novruz', 'scope_type' => 'global']);
+        AttendanceCalendar::query()->create(['date' => '2026-03-18', 'day_type' => 'holiday', 'name' => 'Novruz', 'scope_type' => 'global']);
+        AttendanceCalendar::query()->create(['date' => '2026-03-21', 'day_type' => 'workday', 'name' => 'Köçürülmüş iş günü', 'scope_type' => 'global']);
+
+        app(ScorecardService::class)->transition($card, 'send_for_agreement', $this->hr);
+        Carbon::setTestNow();
+
+        // 3 working days after Mon 16: Thu 19, Fri 20, Sat 21 (moved working day).
+        $this->assertSame('2026-03-21', $card->fresh()->stage_due_at->toDateString());
+    }
+
+    public function test_long_leave_scales_additive_targets_and_prorata_then_restores_them(): void
+    {
+        $card = $this->specExampleCard();
+        app(ScorecardService::class)->transition($card, 'activate', $this->hr);
+        $sales = $card->items->first();
+        $sales->kpiVersion->update(['snapshot' => [...$sales->kpiVersion->snapshot, 'aggregation' => 'sum']]);
+        $leave = \App\Models\Leave::withoutEvents(fn () => \App\Models\Leave::query()->forceCreate([
+            'tabel_no' => $card->personnel->tabel_no, 'leave_type_id' => 1, 'starts_at' => '2026-02-01', 'ends_at' => '2026-03-17',
+            'total_days' => 45, 'status_id' => \App\Enums\OrderStatusEnum::APPROVED->value,
+        ]));
+        $lifecycle = app(ScorecardLifecycleService::class);
+
+        $this->assertSame(1, $lifecycle->syncLongLeave());
+        $this->assertSame(0, $lifecycle->syncLongLeave());
+        $card->refresh();
+        $this->assertSame(45, (int) $card->leave_days);
+        $this->assertSame('0.5000', $card->prorata_factor); // 45 of 90 days worked
+        $this->assertSame('50000.0000', $sales->fresh()->target);
+        $this->assertSame('100000.0000', $sales->fresh()->original_target);
+        $this->assertSame('20.0000', $card->items[1]->fresh()->target, 'Non-additive KPIs keep their target.');
+
+        $leave->forceFill(['ends_at' => '2026-02-20', 'total_days' => 20])->save();
+        $lifecycle->syncLongLeave();
+        $this->assertSame('100000.0000', $sales->fresh()->target);
+        $this->assertNull($sales->fresh()->original_target);
+        $this->assertSame('1.0000', $card->fresh()->prorata_factor);
+        $this->assertSame(2, $card->events()->where('action', 'leave_adjusted')->count());
     }
 
     public function test_internal_metric_refills_one_system_actual_per_item(): void

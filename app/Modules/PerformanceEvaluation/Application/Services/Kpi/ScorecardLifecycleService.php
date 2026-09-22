@@ -2,7 +2,10 @@
 
 namespace App\Modules\PerformanceEvaluation\Application\Services\Kpi;
 
+use App\Enums\OrderStatusEnum;
+use App\Models\Leave;
 use App\Models\PerformanceScorecard;
+use App\Support\Database\InstalledTables;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 
@@ -12,7 +15,12 @@ use Illuminate\Support\Carbon;
  *    owners are reminded two working days before their deadline and the stage is
  *    escalated one working day after it;
  *  - people: a card closes early when its owner leaves or changes position, and a new
- *    card opens for the new position so the cycle result becomes a day-weighted average.
+ *    card opens for the new position so the cycle result becomes a day-weighted average;
+ *  - long leave: approved leave (sick, maternity, unpaid…) inside a card's period above
+ *    the threshold scales the card to the days worked. Annual paid vacation is a normal
+ *    entitlement and does not count.
+ *
+ * Deadlines count working days on the attendance calendar (holidays skipped).
  */
 class ScorecardLifecycleService
 {
@@ -23,6 +31,7 @@ class ScorecardLifecycleService
     public function __construct(
         private readonly ScorecardService $scorecards,
         private readonly ScorecardNotifier $notifier,
+        private readonly WorkingDays $workingDays,
     ) {}
 
     /**
@@ -46,7 +55,7 @@ class ScorecardLifecycleService
             ->whereNull('reminded_at')
             ->whereNotNull('stage_due_at')
             ->whereDate('stage_due_at', '>=', $today)
-            ->whereDate('stage_due_at', '<=', $today->copy()->addWeekdays(self::REMIND_WORKING_DAYS_BEFORE))
+            ->whereDate('stage_due_at', '<=', $this->workingDays->add($today, self::REMIND_WORKING_DAYS_BEFORE))
             ->get()
             ->each(function (PerformanceScorecard $card) use (&$result): void {
                 $this->notifier->remind($card);
@@ -57,7 +66,7 @@ class ScorecardLifecycleService
         $this->openCards()
             ->whereNull('escalated_at')
             ->whereNotNull('stage_due_at')
-            ->whereDate('stage_due_at', '<=', $today->copy()->subWeekdays(self::ESCALATE_WORKING_DAYS_AFTER))
+            ->whereDate('stage_due_at', '<=', $this->workingDays->sub($today, self::ESCALATE_WORKING_DAYS_AFTER))
             ->get()
             ->each(function (PerformanceScorecard $card) use (&$result): void {
                 $this->notifier->escalate($card);
@@ -107,6 +116,40 @@ class ScorecardLifecycleService
             });
 
         return $result;
+    }
+
+    /**
+     * Returns the number of cards whose leave adjustment changed.
+     */
+    public function syncLongLeave(): int
+    {
+        if (! InstalledTables::has('leaves')) {
+            return 0;
+        }
+
+        $cards = $this->openCards()
+            ->whereIn('status', ['draft', 'pending_agreement', 'active', 'self_review', 'manager_review'])
+            ->with(['personnel:id,tabel_no', 'cycle'])
+            ->get();
+
+        $leaves = Leave::query()
+            ->whereIn('tabel_no', $cards->pluck('personnel.tabel_no')->filter()->unique())
+            ->where('status_id', OrderStatusEnum::APPROVED->value)
+            ->get(['tabel_no', 'starts_at', 'ends_at', 'total_days'])
+            ->groupBy('tabel_no');
+
+        return $cards->filter(function (PerformanceScorecard $card) use ($leaves): bool {
+            $from = Carbon::parse($card->valid_from);
+            $to = Carbon::parse($card->valid_to);
+            $days = $leaves->get((string) $card->personnel?->tabel_no, collect())->sum(function (Leave $leave) use ($from, $to): int {
+                $start = max($from, Carbon::parse($leave->starts_at)->startOfDay());
+                $end = min($to, $leave->ends_at ? Carbon::parse($leave->ends_at)->startOfDay() : Carbon::parse($leave->starts_at)->addDays(max(1, (int) $leave->total_days) - 1));
+
+                return $start->lte($end) ? (int) $start->diffInDays($end) + 1 : 0;
+            });
+
+            return $this->scorecards->applyLeave($card, $days);
+        })->count();
     }
 
     private function openCards(): Builder

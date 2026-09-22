@@ -39,6 +39,9 @@ class PerformanceKpi extends Model
         'unit',
         'data_source',
         'source_metric',
+        'integration_config',
+        'integration_synced_at',
+        'integration_error',
         'frequency',
         'aggregation',
         'perspective',
@@ -50,7 +53,12 @@ class PerformanceKpi extends Model
         'created_by',
     ];
 
+    /** Connector credentials never leave the server. */
+    protected $hidden = ['integration_config'];
+
     protected $casts = [
+        'integration_config' => 'encrypted:array',
+        'integration_synced_at' => 'datetime',
         'qualitative_scale' => 'array',
         'evidence_required' => 'boolean',
         'current_version' => 'integer',

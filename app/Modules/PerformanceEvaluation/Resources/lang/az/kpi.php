@@ -281,6 +281,7 @@ return [
         'approve' => 'Nəticə təsdiqləndi',
         'return' => 'Geri qaytarıldı',
         'close' => 'Kart bağlandı',
+        'leave_adjusted' => 'Uzun məzuniyyətə görə hədəflər dəyişdi',
         'closed_early' => 'Kart vaxtından əvvəl bağlandı',
     ],
 
@@ -368,6 +369,7 @@ return [
     'band_title' => 'Threshold (minimum) · Stretch (maksimum) · Cap (yuxarı sərhəd), nəticə faizi ilə',
 
     'metrics' => [
+        'rest' => 'Xarici sistemdən (1C, CRM, REST API)',
         'manual' => 'Əl ilə daxil edilir',
         'attendance_rate' => 'Sistemdən: davamiyyət faizi',
         'absence_days' => 'Sistemdən: səbəbsiz qalınan günlər',
@@ -414,6 +416,7 @@ return [
     ],
 
     'bonus' => [
+        'payroll_line' => 'KPI bonusu (:cycle)',
         'title' => 'Bonus',
         'rule_title' => 'Bonus qaydası',
         'result_title' => 'Əməkdaşlar üzrə nəticə',
@@ -431,7 +434,7 @@ return [
             'company' => [
                 'label' => 'Şirkət modeli',
                 'hint' => 'Mülki bölmələr üçün: bonus maaşdan faizlə hesablanır və əmək haqqına ötürülür.',
-                'formula' => 'Bonus = aylıq maaş × dövrün ay sayı × hədəf bonus % × ödəniş faizi × şirkət əmsalı × pro-rata. Nəticə hədəf bonusun məhdudiyyət faizini keçmir.',
+                'formula' => 'Bonus = aylıq maaş × dövrün ay sayı × hədəf bonus % × ödəniş faizi × şirkət əmsalı × bölmə əmsalı × pro-rata. Nəticə hədəf bonusun məhdudiyyət faizini keçmir.',
             ],
             'order' => [
                 'label' => 'Hərbi rejim: əmr əsaslı',
@@ -440,6 +443,9 @@ return [
             ],
         ],
         'fields' => [
+            'unit_hint' => 'Bölmə əmsalı: bölmənin nəticəsi eyni gate və əmsal cədvəli ilə əmsala çevrilir və həmin bölmədə, eləcə də onun alt bölmələrində işləyənlərə tətbiq olunur. Nəticəsi yazılmayan bölmədə əmsal 1-dir.',
+            'unit_results' => 'Bölmələrin nəticəsi (bölmə → hədəfin yerinə yetirilməsi %)',
+            'position_targets' => 'Vəzifəyə görə fərqli hədəf % (məs. rəhbər 20%, mütəxəssis 10%)',
             'target_pct' => 'Hədəf bonus, maaşın %-i',
             'target_pct_hint' => 'KPI nəticəsi 100% olanda əməkdaşın alacağı bonus: dövr maaşının bu faizi.',
             'reward_months' => 'Mükafat, maaş sayı ilə',
@@ -480,6 +486,7 @@ return [
             'status' => 'Vəziyyət',
         ],
         'factors' => [
+            'unit_mult' => 'Bölmə əmsalı',
             'base_salary' => 'Maaş',
             'period_months' => 'Ay sayı',
             'reward_months' => 'Maaş sayı',
@@ -517,11 +524,52 @@ return [
             'orders_issued' => ':count "Pul mükafatı" əmri hazırlandı. Onları "Əmrlər" bölməsində yoxlayıb təsdiqləyin.',
         ],
         'errors' => [
+            'pairs_invalid' => 'Hər sətirdə seçim və rəqəm olmalıdır, eyni seçim iki dəfə olmaz, faiz mənfi ola bilməz.',
             'bands_invalid' => 'Hər sətirdə hər iki rəqəm olmalıdır, ödəniş mənfi ola bilməz.',
             'out_of_range' => ':min ilə :max arasında rəqəm olmalıdır.',
             'not_a_number' => 'Müsbət rəqəm olmalıdır.',
             'wrong_mode' => 'Bu əməliyyat cari xidmət növü üçün nəzərdə tutulmayıb.',
             'order_template_missing' => '"Pul mükafatı" əmr şablonu tapılmadı. Administrator onu əlavə etməlidir (php artisan orders:seed-word-templates --only=pul_mukafati).',
         ],
+    ],
+
+    'connector' => [
+        'title' => 'Xarici sistemə qoşulma',
+        'hint' => 'Sistem hər gecə bu ünvana sorğu göndərir və cavabdakı rəqəmi faktiki dəyər kimi yazır. Ünvanda {tabel_no}, {email}, {pin}, {from}, {to} yazsanız, hər əməkdaş və dövr üçün avtomatik əvəz olunur.',
+        'fields' => [
+            'url' => 'Ünvan (URL)',
+            'auth' => 'Giriş üsulu',
+            'username' => 'İstifadəçi adı',
+            'password' => 'Parol',
+            'token' => 'Token',
+            'value_path' => 'Cavabda rəqəmin yeri',
+        ],
+        'auth' => [
+            'none' => 'Girişsiz',
+            'bearer' => 'Token (Bearer)',
+            'basic' => 'İstifadəçi adı və parol',
+        ],
+        'keep_secret' => 'Dəyişmirsinizsə boş saxlayın',
+        'value_path_hint' => 'Nöqtə ilə yazılır. Məsələn cavab {"data":[{"total":125}]} olarsa, data.0.total yazın.',
+        'test' => 'Bağlantını yoxla',
+        'test_ok' => 'Bağlantı işləyir: :employee üçün dəyər :value.',
+        'stale' => 'Məlumat köhnədir',
+        'errors' => [
+            'bad_url' => 'Ünvan düzgün deyil. http:// və ya https:// ilə başlamalıdır.',
+            'unreachable' => 'Xarici sistem cavab vermədi (:error).',
+            'no_number' => 'Cavabda ":path" yerində rəqəm tapılmadı.',
+            'no_person' => 'Yoxlamaq üçün sistemdə əməkdaş yoxdur.',
+        ],
+        'notification' => [
+            'subject' => '":kpi" KPI-ı xarici sistemdən yenilənmir',
+            'body' => ':error Kartlarda son alınan dəyər qalır. Bağlantı ayarlarını KPI kitabxanasında yoxlayın.',
+        ],
+    ],
+
+    'leave' => [
+        'chip' => 'Uzun məzuniyyət: :days gün',
+        'chip_hint' => 'Məzuniyyət :threshold gündən çox olduğu üçün cəm yığılan KPI-ların hədəfləri və bonus pro-rata-sı işlənmiş günlərə görə azaldılıb.',
+        'event' => 'Dövrdə :days gün məzuniyyət (xəstəlik, dekret, ödənişsiz və s.). Hədəflər işlənmiş günlərə uyğunlaşdırıldı.',
+        'original' => 'İlkin hədəf: :value',
     ],
 ];

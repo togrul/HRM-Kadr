@@ -4,6 +4,9 @@ namespace App\Modules\PerformanceEvaluation\Livewire\Kpi;
 
 use App\Models\PerformanceBonusRule;
 use App\Models\PerformanceCycle;
+use App\Models\PerformanceScorecard;
+use App\Models\Position;
+use App\Models\Structure;
 use App\Modules\PerformanceEvaluation\Application\Services\Kpi\BonusService;
 use App\Support\Livewire\DownloadsReportsTable;
 use Illuminate\Contracts\View\View;
@@ -27,6 +30,8 @@ class BonusWorkspace extends Component
 
     /** @var array<string, mixed> */
     public array $ruleForm = [];
+
+    private const PAIR_LISTS = ['payout_bands', 'company_multipliers', 'unit_results', 'position_targets'];
 
     public function mount(): void
     {
@@ -53,6 +58,46 @@ class BonusWorkspace extends Component
     public function mode(): string
     {
         return app(BonusService::class)->mode();
+    }
+
+    /**
+     * Positions of the cycle's cards, for per-position target %.
+     *
+     * @return array<int, string>
+     */
+    #[Computed]
+    public function positionOptions(): array
+    {
+        $ids = PerformanceScorecard::query()->where('performance_cycle_id', $this->cycleId)->whereNotNull('position_id')->distinct()->pluck('position_id');
+
+        return Position::query()->whereIn('id', $ids)->orderBy('name')->pluck('name', 'id')->all();
+    }
+
+    /**
+     * Units of the cycle's people and every unit above them, labelled by their path.
+     *
+     * @return array<int, string>
+     */
+    #[Computed]
+    public function unitOptions(): array
+    {
+        $own = PerformanceScorecard::query()
+            ->where('performance_cycle_id', $this->cycleId)
+            ->join('personnels', 'personnels.id', '=', 'performance_scorecards.personnel_id')
+            ->distinct()
+            ->pluck('personnels.structure_id')
+            ->filter();
+        $chart = Structure::query()->get(['id', 'name', 'parent_id'])->keyBy('id');
+
+        $options = [];
+        foreach ($own as $id) {
+            for ($node = $chart->get($id), $guard = 0; $node !== null && $guard < 50; $node = $chart->get($node->parent_id), $guard++) {
+                $options[$node->id] ??= $node->name;
+            }
+        }
+        asort($options);
+
+        return $options;
     }
 
     /**
@@ -83,13 +128,13 @@ class BonusWorkspace extends Component
 
     public function addBand(string $list): void
     {
-        abort_unless(in_array($list, ['payout_bands', 'company_multipliers'], true), 404);
+        abort_unless(in_array($list, self::PAIR_LISTS, true), 404);
         $this->ruleForm[$list][] = ['from' => null, 'value' => null];
     }
 
     public function removeBand(string $list, int $index): void
     {
-        abort_unless(in_array($list, ['payout_bands', 'company_multipliers'], true), 404);
+        abort_unless(in_array($list, self::PAIR_LISTS, true), 404);
         unset($this->ruleForm[$list][$index]);
         $this->ruleForm[$list] = array_values($this->ruleForm[$list]);
     }
@@ -161,7 +206,7 @@ class BonusWorkspace extends Component
         $cycle = $this->cycle();
         $this->ruleForm = $cycle ? $this->ruleToForm(app(BonusService::class)->rule($cycle)) : [];
         $this->resetValidation();
-        unset($this->preview);
+        unset($this->preview, $this->positionOptions, $this->unitOptions);
     }
 
     /**
@@ -179,6 +224,8 @@ class BonusWorkspace extends Component
             'company_gate' => $rule->company_gate,
             'gate_floor_pct' => $rule->gate_floor_pct,
             'company_multipliers' => $pairs($rule->company_multipliers),
+            'unit_results' => $pairs($rule->unit_results),
+            'position_targets' => $pairs($rule->position_targets),
             'cap_pct' => $rule->cap_pct,
             'fund' => $rule->fund,
             'scale_to_fund' => (bool) $rule->scale_to_fund,
@@ -206,6 +253,8 @@ class BonusWorkspace extends Component
             'company_gate' => $number('company_gate'),
             'gate_floor_pct' => $number('gate_floor_pct'),
             'company_multipliers' => $pairs('company_multipliers'),
+            'unit_results' => $pairs('unit_results'),
+            'position_targets' => $pairs('position_targets'),
             'cap_pct' => $number('cap_pct'),
             'fund' => $number('fund'),
             'scale_to_fund' => (bool) ($this->ruleForm['scale_to_fund'] ?? false),

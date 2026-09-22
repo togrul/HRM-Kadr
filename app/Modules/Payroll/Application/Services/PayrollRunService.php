@@ -2,11 +2,13 @@
 
 namespace App\Modules\Payroll\Application\Services;
 
+use App\Models\PayrollOneOffEarning;
 use App\Models\PayrollPeriod;
 use App\Models\PayrollRun;
 use App\Models\Payslip;
 use App\Modules\Compensation\Domain\Contracts\CompensationReadRepository;
 use App\Modules\Integration\Domain\Contracts\PayrollOwnership;
+use App\Support\Database\InstalledTables;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
@@ -80,7 +82,7 @@ class PayrollRunService
             $totals = ['gross' => 0.0, 'deductions' => 0.0, 'net' => 0.0, 'employer' => 0.0, 'count' => 0];
 
             foreach ($this->compensation->activeAssignees($run->regime_id, $onDate) as $tabelNo) {
-                $calc = $this->calculator->calculate($tabelNo, $onDate, $year, $month);
+                $calc = $this->calculator->calculate($tabelNo, $onDate, $year, $month, $run->run_type === 'regular');
 
                 if (! $calc) {
                     continue;
@@ -193,6 +195,15 @@ class PayrollRunService
             $this->loans->recordRepaymentsForRun($run);
             $this->retro->recordRetroPayments($run);
 
+            if ($run->run_type === 'regular' && InstalledTables::has('payroll_one_off_earnings')) {
+                PayrollOneOffEarning::query()
+                    ->whereIn('tabel_no', $run->payslips()->pluck('tabel_no'))
+                    ->where('pay_year', (int) $run->period->year)
+                    ->where('pay_month', (int) $run->period->month)
+                    ->whereNull('paid_payroll_run_id')
+                    ->update(['paid_payroll_run_id' => $run->id]);
+            }
+
             $run->update(['status' => 'locked', 'locked_at' => now()]);
 
             return $run->refresh();
@@ -203,6 +214,10 @@ class PayrollRunService
     {
         $this->loans->reverseRepaymentsForRun($run);
         $this->retro->reverseRetroPayments($run);
+
+        if (InstalledTables::has('payroll_one_off_earnings')) {
+            PayrollOneOffEarning::query()->where('paid_payroll_run_id', $run->id)->update(['paid_payroll_run_id' => null]);
+        }
 
         $run->update(['status' => 'calculated', 'approved_at' => null, 'locked_at' => null]);
         $run->payslips()->update(['status' => 'calculated']);

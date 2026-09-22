@@ -6,9 +6,11 @@ use App\Livewire\Traits\SideModalAction;
 use App\Models\PerformanceFormTemplate;
 use App\Models\PerformanceKpi;
 use App\Models\PerformanceKpiTemplate;
+use App\Models\Personnel;
 use App\Models\Position;
 use App\Modules\PerformanceEvaluation\Application\Services\Kpi\InternalKpiMetrics;
 use App\Modules\PerformanceEvaluation\Application\Services\Kpi\KpiLibraryService;
+use App\Modules\PerformanceEvaluation\Application\Services\Kpi\RestKpiConnector;
 use App\Modules\PerformanceEvaluation\Application\Services\Kpi\KpiTemplateService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
@@ -17,6 +19,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
+use RuntimeException;
 
 /**
  * KPI library and position templates (spec §4.1–4.2). Scoring rules live in the
@@ -47,6 +50,14 @@ class KpiLibraryWorkspace extends Component
 
     /** @var array<int, string> */
     public array $warnings = [];
+
+    /**
+     * External source of the KPI being edited. Secrets are never sent back: a blank
+     * token or password keeps the stored one.
+     *
+     * @var array<string, string>
+     */
+    public array $connectorForm = [];
 
     public function mount(): void
     {
@@ -118,9 +129,15 @@ class KpiLibraryWorkspace extends Component
         $this->authorize('manage-performance-evaluation');
         $this->resetValidation();
         $this->editingKpiId = $id;
-        $this->kpiForm = $id
-            ? [...$this->kpiDefaults(), ...PerformanceKpi::query()->findOrFail($id)->only(array_keys($this->kpiDefaults()))]
+        $kpi = $id ? PerformanceKpi::query()->findOrFail($id) : null;
+        $this->kpiForm = $kpi
+            ? [...$this->kpiDefaults(), ...$kpi->only(array_keys($this->kpiDefaults()))]
             : $this->kpiDefaults();
+        $this->kpiForm['source_metric'] ??= '';
+        $this->connectorForm = [
+            ...$this->connectorDefaults(),
+            ...collect($kpi?->integration_config ?? [])->only(['url', 'auth', 'username', 'value_path'])->all(),
+        ];
         $this->openSideMenu('kpi-form');
     }
 
@@ -142,18 +159,47 @@ class KpiLibraryWorkspace extends Component
             'kpiForm.evidence_required' => ['boolean'],
             'kpiForm.source_metric' => ['nullable', Rule::in(array_keys(InternalKpiMetrics::METRICS))],
             'kpiForm.status' => ['required', Rule::in(PerformanceKpi::STATUSES)],
+            ...$this->connectorRules(),
         ])['kpiForm'];
 
         app(KpiLibraryService::class)->save([
+            'integration_config' => $data['source_metric'] === 'rest' ? $this->connectorConfig() : null,
             ...$data,
             'indicator_kind' => $data['indicator_kind'] ?: null,
             'source_metric' => $data['source_metric'] ?: null,
-            'data_source' => $data['source_metric'] ? 'hrm' : 'manual',
+            'data_source' => match ($data['source_metric'] ?: null) {
+                null => 'manual',
+                'rest' => 'integration',
+                default => 'hrm',
+            },
         ], $this->editingKpiId ? PerformanceKpi::query()->findOrFail($this->editingKpiId) : null);
 
         $this->closeSideMenu();
         unset($this->kpis);
         $this->dispatch('notify', type: 'success', message: __('performance_evaluation::kpi.messages.kpi_saved'));
+    }
+
+    /**
+     * Tries the source for one employee over the current quarter and reports the value.
+     */
+    public function testConnector(): void
+    {
+        $this->authorize('manage-performance-evaluation');
+        $this->validate($this->connectorRules(true));
+
+        $personnel = Personnel::query()->whereNotNull('tabel_no')->where('is_pending', false)->orderBy('id')->first();
+        if ($personnel === null) {
+            $this->dispatch('notify', type: 'error', message: __('performance_evaluation::kpi.connector.errors.no_person'));
+
+            return;
+        }
+
+        try {
+            $value = app(RestKpiConnector::class)->fetch($this->connectorConfig(), $personnel, now()->firstOfQuarter(), today());
+            $this->dispatch('notify', type: 'success', message: __('performance_evaluation::kpi.connector.test_ok', ['value' => $value, 'employee' => $personnel->fullname]));
+        } catch (RuntimeException $exception) {
+            $this->dispatch('notify', type: 'error', message: $exception->getMessage());
+        }
     }
 
     public function archiveKpi(int $id): void
@@ -263,6 +309,51 @@ class KpiLibraryWorkspace extends Component
     public function render(): View
     {
         return view('performance-evaluation::livewire.performance-evaluation.kpi.library-workspace');
+    }
+
+    /**
+     * @return array<string, array<int, mixed>>
+     */
+    private function connectorRules(bool $always = false): array
+    {
+        $required = $always ? 'required' : 'required_if:kpiForm.source_metric,rest';
+
+        return [
+            'connectorForm.url' => [$required, 'nullable', 'string', 'max:1000', 'regex:#^https?://#i'],
+            'connectorForm.auth' => [$required, 'nullable', Rule::in(RestKpiConnector::AUTH_TYPES)],
+            'connectorForm.username' => ['nullable', 'string', 'max:255'],
+            'connectorForm.secret' => ['nullable', 'string', 'max:2000'],
+            'connectorForm.value_path' => [$required, 'nullable', 'string', 'max:255'],
+        ];
+    }
+
+    /**
+     * The form's connector with the stored secret kept when none was typed.
+     *
+     * @return array<string, string>
+     */
+    private function connectorConfig(): array
+    {
+        $stored = $this->editingKpiId ? (PerformanceKpi::query()->find($this->editingKpiId)?->integration_config ?? []) : [];
+        $secret = trim((string) ($this->connectorForm['secret'] ?? ''));
+        $auth = (string) ($this->connectorForm['auth'] ?? 'none');
+
+        return [
+            'url' => trim((string) ($this->connectorForm['url'] ?? '')),
+            'auth' => $auth,
+            'username' => trim((string) ($this->connectorForm['username'] ?? '')),
+            'token' => $auth === 'bearer' ? ($secret !== '' ? $secret : (string) ($stored['token'] ?? '')) : '',
+            'password' => $auth === 'basic' ? ($secret !== '' ? $secret : (string) ($stored['password'] ?? '')) : '',
+            'value_path' => trim((string) ($this->connectorForm['value_path'] ?? '')),
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function connectorDefaults(): array
+    {
+        return ['url' => '', 'auth' => 'none', 'username' => '', 'secret' => '', 'value_path' => ''];
     }
 
     /**

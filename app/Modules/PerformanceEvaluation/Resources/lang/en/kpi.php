@@ -281,6 +281,7 @@ return [
         'approve' => 'Result approved',
         'return' => 'Returned',
         'close' => 'Card closed',
+        'leave_adjusted' => 'Targets adjusted for long leave',
         'closed_early' => 'Card closed early',
     ],
 
@@ -368,6 +369,7 @@ return [
     'band_title' => 'Threshold (minimum) · Stretch (maximum) · Cap (upper limit), as achievement %',
 
     'metrics' => [
+        'rest' => 'From an external system (1C, CRM, REST API)',
         'manual' => 'Entered by hand',
         'attendance_rate' => 'From the system: attendance rate',
         'absence_days' => 'From the system: days absent without reason',
@@ -414,6 +416,7 @@ return [
     ],
 
     'bonus' => [
+        'payroll_line' => 'KPI bonus (:cycle)',
         'title' => 'Bonus',
         'rule_title' => 'Bonus rule',
         'result_title' => 'Result by employee',
@@ -431,7 +434,7 @@ return [
             'company' => [
                 'label' => 'Company model',
                 'hint' => 'Civil units: the bonus is a share of salary and goes to payroll.',
-                'formula' => 'Bonus = monthly salary × months in the cycle × target bonus % × payout % × company multiplier × pro-rata, capped at the maximum % of the target bonus.',
+                'formula' => 'Bonus = monthly salary × months in the cycle × target bonus % × payout % × company multiplier × unit multiplier × pro-rata, capped at the maximum % of the target bonus.',
             ],
             'order' => [
                 'label' => 'Military regime: by order',
@@ -440,6 +443,9 @@ return [
             ],
         ],
         'fields' => [
+            'unit_hint' => 'Unit multiplier: a unit\'s result goes through the same gate and multiplier table and applies to everyone in that unit and its sub-units. Units without a result get 1.',
+            'unit_results' => 'Unit results (unit → target achieved %)',
+            'position_targets' => 'Target % by position (e.g. manager 20%, specialist 10%)',
             'target_pct' => 'Target bonus, % of salary',
             'target_pct_hint' => 'What an employee gets at a 100% KPI result: this share of the cycle salary.',
             'reward_months' => 'Award, in monthly salaries',
@@ -480,6 +486,7 @@ return [
             'status' => 'Status',
         ],
         'factors' => [
+            'unit_mult' => 'Unit multiplier',
             'base_salary' => 'Salary',
             'period_months' => 'Months',
             'reward_months' => 'Salaries',
@@ -517,11 +524,52 @@ return [
             'orders_issued' => ':count "Monetary award" orders drafted. Review and approve them in Orders.',
         ],
         'errors' => [
+            'pairs_invalid' => 'Every row needs a choice and a number, no choice twice, and the % cannot be negative.',
             'bands_invalid' => 'Every row needs both numbers and the payout cannot be negative.',
             'out_of_range' => 'Must be a number between :min and :max.',
             'not_a_number' => 'Must be a positive number.',
             'wrong_mode' => 'This action does not apply to the current service area.',
             'order_template_missing' => 'The "Monetary award" order template is missing. An administrator must add it (php artisan orders:seed-word-templates --only=pul_mukafati).',
         ],
+    ],
+
+    'connector' => [
+        'title' => 'External system connection',
+        'hint' => 'Every night the system calls this address and records the number in the answer as the actual. {tabel_no}, {email}, {pin}, {from}, {to} in the address are filled in per employee and period.',
+        'fields' => [
+            'url' => 'Address (URL)',
+            'auth' => 'Sign-in',
+            'username' => 'User name',
+            'password' => 'Password',
+            'token' => 'Token',
+            'value_path' => 'Where the number is in the answer',
+        ],
+        'auth' => [
+            'none' => 'None',
+            'bearer' => 'Token (Bearer)',
+            'basic' => 'User name and password',
+        ],
+        'keep_secret' => 'Leave empty to keep the current one',
+        'value_path_hint' => 'Dot notation. For an answer {"data":[{"total":125}]} write data.0.total.',
+        'test' => 'Test connection',
+        'test_ok' => 'Connection works: value :value for :employee.',
+        'stale' => 'Data is stale',
+        'errors' => [
+            'bad_url' => 'The address is not valid; it must start with http:// or https://.',
+            'unreachable' => 'The external system did not answer (:error).',
+            'no_number' => 'No number found at ":path" in the answer.',
+            'no_person' => 'There is no employee to test with.',
+        ],
+        'notification' => [
+            'subject' => 'KPI ":kpi" is not updating from its external system',
+            'body' => ':error Cards keep the last value received. Check the connection settings in the KPI library.',
+        ],
+    ],
+
+    'leave' => [
+        'chip' => 'Long leave: :days days',
+        'chip_hint' => 'Leave exceeded :threshold days, so additive KPI targets and the bonus pro-rata were scaled to the days worked.',
+        'event' => ':days days of leave in the period (sick, maternity, unpaid, etc.). Targets were scaled to the days worked.',
+        'original' => 'Original target: :value',
     ],
 ];

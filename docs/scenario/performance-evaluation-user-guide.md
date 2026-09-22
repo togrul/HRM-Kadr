@@ -343,6 +343,19 @@ Bəzi göstəriciləri sistem artıq bilir. Onları heç kim yazmır:
 
 **Qeyd:** davamiyyət faizi yalnız ay davamiyyət bölməsində bağlandıqdan (aylıq yekun hazırlandıqdan) sonra görünür.
 
+### Xarici sistemdən KPI (1C, CRM, digər proqramlar)
+Satış, xərc, debitor borc, müştəri sayı kimi rəqəmlər çox vaxt başqa proqramda (1C, CRM, helpdesk) olur. Onları əl ilə köçürmək lazım deyil.
+
+1. `KPI kitabxanası` bölməsində KPI-ı açın. **Məlumat mənbəyi** sahəsində "Xarici sistemdən" seçin.
+2. Açılan hissəni doldurun (bunu adətən IT əməkdaşı edir):
+   - **Ünvan (URL):** proqramın API ünvanı. Ünvanın içində `{tabel_no}`, `{email}`, `{pin}`, `{from}` (dövrün başlanğıcı), `{to}` (bu günə qədər) yazsanız, sistem hər əməkdaş və dövr üçün onları özü əvəz edir. Nümunə: `https://1c.sirket.az/api/satis?tabel={tabel_no}&from={from}&to={to}`.
+   - **Giriş üsulu:** girişsiz, token və ya istifadəçi adı ilə parol. Parol və token şifrələnərək saxlanılır və bir daha ekranda göstərilmir. Dəyişmək istəmirsinizsə, sahəni boş saxlayın.
+   - **Cavabda rəqəmin yeri:** proqramın cavabında lazım olan rəqəm harada yerləşir. Məsələn, cavab `{"data":{"total":125000}}` olarsa, `data.total` yazın.
+3. `Bağlantını yoxla` basın. Sistem bir əməkdaş üçün sorğu göndərir və alınan rəqəmi göstərir.
+4. Yadda saxlayın.
+
+Bundan sonra dəyər hər səhər avtomatik yenilənir (`Sistemdən yenilə` düyməsi ilə dərhal da yeniləmək olar). Proqram cavab verməsə, sistem 3 dəfə yenidən cəhd edir. Yenə alınmasa, kartda **son alınan dəyər qalır**, KPI-ın yanında qırmızı `Məlumat köhnədir` nişanı çıxır və HR bildiriş alır. Bağlantı düzələndə nişan özü itir.
+
 ### Addım 6. Check-in (aralıq görüş) qeydləri
 Check-in — rəhbərlə əməkdaşın dövr ərzində işin gedişatını qısa müzakirə etməsidir. Tövsiyə olunur: **ayda bir dəfə**, rüblük dövrdə **ən azı 2 dəfə**.
 
@@ -397,7 +410,7 @@ Kart təsdiqləndikdən sonra HR `Bonus` bölməsində əməkdaşların bonusunu
 
 **Bonus necə hesablanır?**
 
-*Şirkət modeli:* bonus = aylıq maaş × dövrün ay sayı × hədəf bonus faizi × ödəniş faizi × şirkət əmsalı × pro-rata.
+*Şirkət modeli:* bonus = aylıq maaş × dövrün ay sayı × hədəf bonus faizi × ödəniş faizi × şirkət əmsalı × bölmə əmsalı × pro-rata.
 
 *Hərbi rejim:* mükafat = aylıq maaş × maaş sayı × ödəniş faizi × pro-rata.
 
@@ -413,6 +426,8 @@ Kart təsdiqləndikdən sonra HR `Bonus` bölməsində əməkdaşların bonusunu
 | 110% və yuxarı | 120% |
 
 - **Şirkət əmsalı** (yalnız şirkət modelində): şirkətin öz hədəfini neçə faiz yerinə yetirdiyi. Nəticə "gate"dən (standart 85%) aşağıdırsa, bonuslar "gate altında ödəniş" faizinə endirilir (standart 0%). Gate keçiləndə əmsal cədvəldən götürülür (85%-dən ×0.8, 95%-dən ×1.0, 105%-dən ×1.1). Şirkətin nəticəsi yazılmayıbsa, əmsal 1-dir.
+- **Vəzifəyə görə hədəf faizi** (şirkət modeli): hədəf bonus hamı üçün eyni olmaya bilər. Məsələn, rəhbər üçün 20%, mütəxəssis üçün 10%. `Vəzifəyə görə fərqli hədəf %` siyahısına vəzifəni və faizi əlavə edin. Siyahıda olmayan vəzifələrə ümumi hədəf faizi tətbiq olunur.
+- **Bölmə əmsalı** (şirkət modeli): şirkətin nəticəsi kimi bölmənin də nəticəsi yazıla bilər (`Bölmələrin nəticəsi`). Eyni gate və əmsal cədvəli işləyir. Bölmənin nəticəsi onun **bütün alt bölmələrinə** də aiddir: departamentə 90% yazsanız, departamentin bütün şöbələrində əmsal 0.8 olur. Nəticəsi yazılmayan bölmədə əmsal 1-dir.
 - **Pro-rata:** əməkdaş dövrün yalnız bir hissəsində işləyibsə (dövrün ortasında gəlib, vəzifəsi dəyişib), bonus işlədiyi günlərə uyğun azalır.
 - **Maksimum:** bonus hədəf bonusun 150%-ni keçmir.
 - **Bonus fondu:** HR dövr üçün fond yaza bilər. Cəm fondu keçərsə, ekranda qırmızı xəbərdarlıq çıxır. "Mütənasib azalt" işarələnsə, bütün bonuslar eyni nisbətdə azaldılır ki, cəm fonda sığsın.
@@ -422,8 +437,10 @@ Kart təsdiqləndikdən sonra HR `Bonus` bölməsində əməkdaşların bonusunu
 2. Soldakı **Bonus qaydası** hissəsində rəqəmləri dəyişin. Sağdakı cədvəl dərhal yenilənir: bu **simulyasiyadır**, yəni "belə etsək nə olar?" sualına cavabdır və heç nə yadda saxlanmır. Bənövşəyi yazı bunu xatırladır.
 3. Nəticə uyğundursa, `Hesabla` basın. Qayda saxlanılır və hər əməkdaşın bonusu yazılır. Əməkdaş bonusun izahını öz kartında görür: maaş, ödəniş faizi, əmsal, pro-rata və məbləğ.
 4. Ötürün:
-   - **Şirkət modeli:** `Əmək haqqına ötür (Excel)` basın. Fayl yüklənir (tabel №, əməkdaş, məbləğ, ödəniş ayı). Düyməni ikinci dəfə bassanız, **eyni fayl** yenidən yüklənir, bonus təkrar ödənilmir.
-   - **Hərbi rejim:** `Əmrləri hazırla` basın. Hər əməkdaş üçün "Pul mükafatı" əmri layihəsi yaranır. Onları `Əmrlər` bölməsində yoxlayın (əmr nömrəsini düzəldə bilərsiniz) və təsdiqləyin. Əmr ləğv edilsə, mükafat şəxsi işdən silinir.
+   - **Şirkət modeli:** `Əmək haqqına ötür (Excel)` basın. Bonuslar **avtomatik olaraq cari ayın əmək haqqı hesablamasına** "KPI bonusu" sətri kimi düşür (vergi və sosial ayırmalar tutulur). Eyni zamanda Excel faylı yüklənir (tabel №, əməkdaş, məbləğ, ödəniş ayı). Düyməni ikinci dəfə bassanız, **eyni fayl** yenidən yüklənir, bonus təkrar ödənilmir.
+   - **Hərbi rejim:** `Əmrləri hazırla` basın. Hər əməkdaş üçün "Pul mükafatı" əmri layihəsi yaranır. Onları `Əmrlər` bölməsində yoxlayın (əmr nömrəsini düzəldə bilərsiniz) və təsdiqləyin. Təsdiqlənən mükafat şəxsi işə yazılır və **cari ayın əmək haqqına** "Pul mükafatı" sətri kimi düşür. Əmr ləğv edilsə, mükafat şəxsi işdən və hələ ödənilməmiş əmək haqqından silinir.
+
+Qeyd: həmin ayın əmək haqqı artıq bağlanıbsa (kilidlənib), bonus avtomatik olaraq növbəti aya keçir. Əmək haqqını maliyyə sistemi hesablayırsa, bonus oraya Excel faylı və inteqrasiya ilə ötürülür.
 
 Əmək haqqına ötürülmüş və ya əmri hazırlanmış bonus **dəyişməz olur**: qaydanı sonradan dəyişib `Hesabla` bassanız belə, onlara toxunulmur.
 
@@ -439,6 +456,8 @@ HR siyahının yuxarısında **"Hədəfə bağlanmamış KPI"** sayını görür
 ### Son tarixlər, xatırlatmalar və bildirişlər
 Sistem hər mərhələnin son tarixini özü hesablayır (iş günləri ilə) və kartın başlığında göstərir. Son tarix keçibsə, qırmızı görünür.
 
+**İş günləri necə sayılır?** Sistem `Davamiyyət → Təqvim rejimləri` bölməsindəki ümumi təqvimdən istifadə edir: **bayram** və **həftəsonu** günləri sayılmır, **iş gününə köçürülmüş** şənbə və ya bazar isə iş günü sayılır. Təqvimdə qeyd olunmayan günlərdə adi qayda işləyir: bazar ertəsi–cümə iş günüdür. Buna görə bayramları təqvimə vaxtında daxil etmək vacibdir, əks halda son tarixlər bayram gününə düşə bilər.
+
 Hər səhər sistem avtomatik yoxlama aparır:
 - **Xatırlatma** — son tarixə 2 iş günü qalanda növbəsi olan şəxs (əməkdaş, rəhbər və ya HR) bildiriş alır.
 - **Avtomatik qəbul** — əməkdaş razılaşdırmaya 3 iş günü ərzində cavab verməsə, kart avtomatik qəbul olunur.
@@ -452,6 +471,7 @@ Bundan əlavə, hər addımda növbəti şəxs dərhal bildiriş alır: kart raz
 | Dövrün ortasında işə qəbul | Kart işə başlama tarixindən açılır, **pro-rata** əmsalı göstərilir |
 | Vəzifə dəyişikliyi | Köhnə kart dəyişiklikdən bir gün əvvəl avtomatik bağlanır ("Vəzifə dəyişikliyi" nişanı ilə), yeni vəzifənin şablonu varsa yeni kart açılır. Dövr üzrə yekun nəticə hər kartın **günlərə görə çəkili ortası** kimi hesablanır |
 | İşdən çıxma | Kart işdən çıxma tarixində avtomatik bağlanır ("İşdən çıxma" nişanı ilə) |
+| Uzun məzuniyyət (xəstəlik, dekret, ödənişsiz və s.) | Kartın dövründə təsdiqlənmiş məzuniyyət **30 gündən çox** olarsa, əməkdaş işlədiyi günlərə görə qiymətləndirilir: dövr ərzində **cəm yığılan** KPI-ların hədəfləri (məsələn, satış məbləği) və bonusun pro-rata-sı işlənmiş günlərin payına qədər azalır. Kartın başlığında "Uzun məzuniyyət: N gün" nişanı çıxır, ilkin hədəf yanında üstündən xətt çəkilmiş halda görünür. Faiz və ya orta göstəricilərin (məsələn, davamiyyət faizi) hədəfi dəyişmir. Məzuniyyət ləğv edilsə və ya qısaldılsa, hədəflər özü əvvəlki halına qayıdır. **İllik əmək məzuniyyəti nəzərə alınmır**, çünki o hər kəsin normal hüququdur. |
 
 Bu yoxlamalar da hər səhər avtomatik aparılır. Bağlanmış kartın tarixçəsində səbəb görünür.
 
@@ -538,7 +558,13 @@ Vəzifə solğundursa, o artıq başqa şablona bağlıdır. Əvvəl həmin şab
 Bonus yalnız **Təsdiqlənib** və ya **Bağlanıb** statusundakı kartlar üçün hesablanır.
 
 **Bonus 0 çıxır.**
-Yoxlayın: yekun bal 80%-dən aşağıdırmı (ödəniş 0%), şirkətin nəticəsi gate-dən aşağıdırmı, əməkdaşın maaşı `Kompensasiya` bölməsində yazılıbmı?
+Yoxlayın: yekun bal 80%-dən aşağıdırmı (ödəniş 0%), şirkətin və ya bölmənin nəticəsi gate-dən aşağıdırmı, əməkdaşın maaşı `Kompensasiya` bölməsində yazılıbmı?
+
+**KPI-ın yanında "Məlumat köhnədir" yazılıb.**
+Xarici proqram cavab vermir. Bildirişdə səbəb yazılır. KPI-ı açıb ünvanı və giriş məlumatlarını yoxlayın, sonra `Bağlantını yoxla` basın.
+
+**Bonus əmək haqqında görünmür.**
+Bonus düyməni basdığınız ayın əmək haqqına düşür. Əmək haqqı yenidən hesablanmalıdır (`Hesabla`). Həmin ay artıq bağlanıbsa, bonus növbəti ayda görünəcək.
 
 **"Əmrləri hazırla" düyməsi xəta verir.**
 "Pul mükafatı" əmr şablonu sistemə əlavə edilməyib. Administratora müraciət edin.

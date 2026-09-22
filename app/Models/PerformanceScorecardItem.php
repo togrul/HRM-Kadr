@@ -19,6 +19,7 @@ class PerformanceScorecardItem extends Model
         'performance_goal_id',
         'weight',
         'target',
+        'original_target',
         'range_min',
         'range_max',
         'threshold',
@@ -36,6 +37,7 @@ class PerformanceScorecardItem extends Model
     protected $casts = [
         'weight' => 'decimal:2',
         'target' => 'decimal:4',
+        'original_target' => 'decimal:4',
         'range_min' => 'decimal:4',
         'range_max' => 'decimal:4',
         'threshold' => 'decimal:4',
