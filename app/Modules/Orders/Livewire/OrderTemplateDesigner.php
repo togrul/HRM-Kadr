@@ -140,11 +140,11 @@ class OrderTemplateDesigner extends Component
     public function getFieldTypesProperty(OrderLookupFieldRegistry $lookups): array
     {
         return array_merge([
-            ['type' => 'text', 'label' => 'Mətn'],
-            ['type' => 'number', 'label' => 'Rəqəm'],
-            ['type' => 'number_words', 'label' => 'Rəqəm (sözlə)'],
-            ['type' => 'date', 'label' => 'Tarix'],
-            ['type' => 'work_year', 'label' => 'İş ili (tarixdən aralıq)'],
+            ['type' => 'text', 'label' => __('orders::order_composer.field_types.text')],
+            ['type' => 'number', 'label' => __('orders::order_composer.field_types.number')],
+            ['type' => 'number_words', 'label' => __('orders::order_composer.field_types.number_words')],
+            ['type' => 'date', 'label' => __('orders::order_composer.field_types.date')],
+            ['type' => 'work_year', 'label' => __('orders::order_composer.field_types.work_year')],
         ], $lookups->types());
     }
 

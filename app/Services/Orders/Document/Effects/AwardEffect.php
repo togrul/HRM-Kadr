@@ -19,6 +19,7 @@ class AwardEffect implements OrderEffect
     /** Award type "mükafatlar" in the personnel catalogue. */
     private const REWARD_TYPE_ID = 20;
 
+    /** Data key: looked up by name in the awards catalogue, so it must match the stored row byte for byte. */
     private const DEFAULT_AWARD = 'Xidmətdə fərqləndiyinə görə';
 
     public function apply(OrderLog $order, array $fields, Personnel $personnel): void
@@ -46,7 +47,7 @@ class AwardEffect implements OrderEffect
 
         if ($amount > 0 && app()->bound(PayrollOneOffEarnings::class)) {
             app(PayrollOneOffEarnings::class)->record(
-                (string) $personnel->tabel_no, 'award', 'Pul mükafatı ('.$order->order_no.')', $amount,
+                (string) $personnel->tabel_no, 'award', __('orders::order_composer.effects.award_payroll_line', ['number' => $order->order_no], config('app.locale')), $amount,
                 (int) now()->year, (int) now()->month, 'order_award:'.$order->id,
             );
         }

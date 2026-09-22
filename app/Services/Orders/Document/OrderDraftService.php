@@ -16,6 +16,12 @@ use RuntimeException;
  */
 class OrderDraftService
 {
+    /**
+     * The city line printed in the order document header. Document content, not UI text:
+     * orders are issued in Azerbaijani regardless of the author's UI locale.
+     */
+    public const ORGANIZATION_CITY = 'Bakı şəhəri';
+
     public function __construct(
         private readonly OrderWordTemplateRepository $templates,
         private readonly DocxVariableResolver $resolver,
@@ -49,7 +55,7 @@ class OrderDraftService
         $values = $this->resolver->resolve($template, $personnel, $fields, [
             'system.order_number' => $orderNumber,
             'system.order_date' => $orderDate,
-            'system.organization_city' => 'Bakı şəhəri',
+            'system.organization_city' => self::ORGANIZATION_CITY,
             'system.signatory_full_name' => (string) ($signatory['fullname'] ?? ''),
             'system.signatory_title' => (string) ($signatory['title'] ?? ''),
         ]);

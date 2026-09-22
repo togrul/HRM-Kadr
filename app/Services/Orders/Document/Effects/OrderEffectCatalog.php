@@ -25,54 +25,54 @@ class OrderEffectCatalog
     {
         return [
             'vacation' => [
-                'label' => 'Məzuniyyət (işçi məzuniyyətə düşür)',
+                'label' => __('orders::order_composer.effects.vacation'),
                 'roles' => [
-                    ['key' => 'start_date', 'label' => 'Başlama tarixi', 'type' => 'date'],
-                    ['key' => 'end_date', 'label' => 'Bitmə tarixi', 'type' => 'date'],
-                    ['key' => 'return_date', 'label' => 'İşə qayıtma tarixi', 'type' => 'date'],
-                    ['key' => 'days', 'label' => 'Gün sayı', 'type' => 'number'],
-                    ['key' => 'location', 'label' => 'Məzuniyyət yeri', 'type' => 'text'],
+                    ['key' => 'start_date', 'label' => __('orders::order_composer.effect_roles.vacation_start_date'), 'type' => 'date'],
+                    ['key' => 'end_date', 'label' => __('orders::order_composer.effect_roles.vacation_end_date'), 'type' => 'date'],
+                    ['key' => 'return_date', 'label' => __('orders::order_composer.effect_roles.vacation_return_date'), 'type' => 'date'],
+                    ['key' => 'days', 'label' => __('orders::order_composer.effect_roles.vacation_days'), 'type' => 'number'],
+                    ['key' => 'location', 'label' => __('orders::order_composer.effect_roles.vacation_location'), 'type' => 'text'],
                 ],
                 'handler' => VacationEffect::class,
             ],
             'termination' => [
-                'label' => 'Xitam (əmək müqaviləsi bitir)',
+                'label' => __('orders::order_composer.effects.termination'),
                 'roles' => [
-                    ['key' => 'date', 'label' => 'Xitam tarixi', 'type' => 'date'],
+                    ['key' => 'date', 'label' => __('orders::order_composer.effect_roles.termination_date'), 'type' => 'date'],
                 ],
                 'handler' => TerminationEffect::class,
             ],
             'transfer' => [
-                'label' => 'Köçürmə (struktur/vəzifə dəyişir)',
+                'label' => __('orders::order_composer.effects.transfer'),
                 'roles' => [
-                    ['key' => 'new_structure', 'label' => 'Yeni struktur', 'type' => 'structure'],
-                    ['key' => 'new_position', 'label' => 'Yeni vəzifə', 'type' => 'position'],
+                    ['key' => 'new_structure', 'label' => __('orders::order_composer.effect_roles.transfer_new_structure'), 'type' => 'structure'],
+                    ['key' => 'new_position', 'label' => __('orders::order_composer.effect_roles.transfer_new_position'), 'type' => 'position'],
                 ],
                 'handler' => TransferEffect::class,
             ],
             'surname_change' => [
-                'label' => 'Soyad dəyişikliyi',
+                'label' => __('orders::order_composer.effects.surname_change'),
                 'roles' => [
-                    ['key' => 'new_surname', 'label' => 'Yeni soyad', 'type' => 'text'],
+                    ['key' => 'new_surname', 'label' => __('orders::order_composer.effect_roles.surname_change_new_surname'), 'type' => 'text'],
                 ],
                 'handler' => SurnameChangeEffect::class,
             ],
             'award' => [
-                'label' => 'Pul mükafatı (şəxsi işə yazılır)',
+                'label' => __('orders::order_composer.effects.award'),
                 'roles' => [
-                    ['key' => 'amount', 'label' => 'Məbləğ', 'type' => 'number'],
-                    ['key' => 'reason', 'label' => 'Səbəb', 'type' => 'text'],
+                    ['key' => 'amount', 'label' => __('orders::order_composer.effect_roles.award_amount'), 'type' => 'number'],
+                    ['key' => 'reason', 'label' => __('orders::order_composer.effect_roles.award_reason'), 'type' => 'text'],
                 ],
                 'handler' => AwardEffect::class,
             ],
             'hire' => [
-                'label' => 'İşə qəbul (namizəd işçi olur)',
+                'label' => __('orders::order_composer.effects.hire'),
                 // Structure & position are dedicated hire inputs (they also drive the
                 // document's employee.* variables); only the join date is a role here.
                 // Hire has no OrderEffect handler — OrderStatusTransitionService converts
                 // the candidate into an employee directly.
                 'roles' => [
-                    ['key' => 'start_date', 'label' => 'İşə qəbul tarixi', 'type' => 'date'],
+                    ['key' => 'start_date', 'label' => __('orders::order_composer.effect_roles.hire_start_date'), 'type' => 'date'],
                 ],
                 'handler' => null,
             ],
@@ -108,7 +108,7 @@ class OrderEffectCatalog
      */
     public function options(): array
     {
-        $options = [['kind' => 'none', 'label' => 'Yoxdur (yalnız sənəd)']];
+        $options = [['kind' => 'none', 'label' => __('orders::order_composer.effects.none')]];
         foreach ($this->definitions() as $kind => $def) {
             $options[] = ['kind' => $kind, 'label' => $def['label']];
         }

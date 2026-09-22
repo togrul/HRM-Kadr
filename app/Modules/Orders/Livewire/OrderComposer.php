@@ -8,13 +8,14 @@ use App\Models\OrderWordTemplate;
 use App\Models\Personnel;
 use App\Models\Position;
 use App\Models\Structure;
+use App\Services\Chief\ChiefResolver;
 use App\Services\Orders\Document\DocxTemplateRenderer;
 use App\Services\Orders\Document\DocxToPdfConverter;
 use App\Services\Orders\Document\DocxVariableResolver;
-use App\Services\Orders\Document\OrderLookupFieldRegistry;
+use App\Services\Orders\Document\OrderDraftService;
 use App\Services\Orders\Document\OrderIssueService;
+use App\Services\Orders\Document\OrderLookupFieldRegistry;
 use App\Services\Orders\Document\OrderTemplateProvider;
-use App\Services\Chief\ChiefResolver;
 use App\Support\Language\AzerbaijaniDateFormatter;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Storage;
@@ -59,7 +60,7 @@ class OrderComposer extends Component
 
     public string $orderDate = '';
 
-    public string $organizationCity = 'Bakı şəhəri';
+    public string $organizationCity = OrderDraftService::ORGANIZATION_CITY;
 
     /** Set when editing an existing pending docx order (its order_logs id). */
     public ?int $editOrderId = null;
