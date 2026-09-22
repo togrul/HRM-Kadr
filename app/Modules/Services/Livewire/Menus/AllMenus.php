@@ -4,6 +4,7 @@ namespace App\Modules\Services\Livewire\Menus;
 
 use App\Livewire\Traits\SideModalAction;
 use App\Models\Menu;
+use App\Modules\Services\Livewire\Concerns\AuthorizesSettingsAccess;
 use App\Support\Navigation\MenuPresentation;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\On;
@@ -13,6 +14,7 @@ use Livewire\Component;
 class AllMenus extends Component
 {
     use AuthorizesRequests,SideModalAction;
+    use AuthorizesSettingsAccess;
 
     public function displayMenuName(Menu $menu): string
     {

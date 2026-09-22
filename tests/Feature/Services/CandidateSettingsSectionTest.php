@@ -8,11 +8,21 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
+use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
 class CandidateSettingsSectionTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $admin = User::factory()->create();
+        $admin->givePermissionTo(Permission::findOrCreate('access-settings', 'web'));
+        $this->actingAs($admin);
+    }
 
     public function test_general_section_does_not_render_candidate_presets_panel(): void
     {

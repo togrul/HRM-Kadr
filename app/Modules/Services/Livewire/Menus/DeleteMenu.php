@@ -1,7 +1,9 @@
 <?php
 
 namespace App\Modules\Services\Livewire\Menus;
+
 use App\Models\Menu;
+use App\Modules\Services\Livewire\Concerns\AuthorizesSettingsAccess;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
@@ -10,6 +12,7 @@ use Livewire\Component;
 class DeleteMenu extends Component
 {
     use AuthorizesRequests;
+    use AuthorizesSettingsAccess;
 
     #[Locked]
     public ?int $menuId = null;

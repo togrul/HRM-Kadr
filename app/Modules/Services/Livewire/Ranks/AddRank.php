@@ -5,6 +5,7 @@ namespace App\Modules\Services\Livewire\Ranks;
 use App\Livewire\Forms\RankForm;
 use App\Livewire\Traits\DropdownConstructTrait;
 use App\Models\RankCategory;
+use App\Modules\Services\Livewire\Concerns\AuthorizesSettingsAccess;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -12,6 +13,7 @@ use Livewire\Component;
 class AddRank extends Component
 {
     use AuthorizesRequests;
+    use AuthorizesSettingsAccess;
     use DropdownConstructTrait;
 
     public string $title;

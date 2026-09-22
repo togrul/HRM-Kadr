@@ -4,6 +4,7 @@ namespace App\Modules\Services\Livewire\Users;
 
 use App\Livewire\Traits\DropdownConstructTrait;
 use App\Models\User;
+use App\Modules\Services\Livewire\Concerns\AuthorizesSettingsAccess;
 use DB;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -16,6 +17,7 @@ use Spatie\Permission\Models\Role;
 class EditUser extends Component
 {
     use AuthorizesRequests;
+    use AuthorizesSettingsAccess;
     use DropdownConstructTrait;
 
     public $userModel;

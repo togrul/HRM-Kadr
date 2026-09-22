@@ -2,7 +2,9 @@
 
 namespace App\Modules\Services\Livewire\Roles;
 
+use App\Models\Role;
 use App\Models\Structure;
+use App\Modules\Services\Livewire\Concerns\AuthorizesSettingsAccess;
 use App\Support\Permissions\PermissionDescriptionCatalog;
 use App\Support\Permissions\PermissionTranslationKey;
 use App\Support\Permissions\RoleTranslation;
@@ -13,10 +15,11 @@ use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
-use App\Models\Role;
 
 class SetPermission extends Component
 {
+    use AuthorizesSettingsAccess;
+
     public $title;
 
     public $roleModel;
@@ -92,7 +95,7 @@ class SetPermission extends Component
     private function clearCacheAndSelections(): void
     {
         Cache::forget('structures');
-        Cache::forget("structure-accessible-".auth()->user()->id);
+        Cache::forget('structure-accessible-'.auth()->user()->id);
         app(PermissionRegistrar::class)->forgetCachedPermissions();
         $this->initializeProperties();
     }

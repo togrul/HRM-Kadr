@@ -2,16 +2,18 @@
 
 namespace App\Modules\Services\Livewire\Menus;
 
-use App\Models\Menu;
-use Livewire\Component;
-use Illuminate\Support\Facades\DB;
-use Spatie\Permission\Models\Permission;
 use App\Livewire\Traits\DropdownConstructTrait;
+use App\Models\Menu;
+use App\Modules\Services\Livewire\Concerns\AuthorizesSettingsAccess;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\DB;
+use Livewire\Component;
+use Spatie\Permission\Models\Permission;
 
 class EditMenu extends Component
 {
     use AuthorizesRequests;
+    use AuthorizesSettingsAccess;
     use DropdownConstructTrait;
 
     public $menuModel;
@@ -30,7 +32,7 @@ class EditMenu extends Component
             'menu.order' => 'required|integer',
             'menu.url' => 'required|string|min:1',
             'menu.icon' => 'required|string|min:1',
-            'menu.permission_id' => 'required|integer|exists:permissions,id'
+            'menu.permission_id' => 'required|integer|exists:permissions,id',
         ];
     }
 

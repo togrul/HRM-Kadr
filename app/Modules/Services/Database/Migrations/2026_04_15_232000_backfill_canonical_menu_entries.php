@@ -85,6 +85,7 @@ return new class extends Migration
 
             if ($menu) {
                 $menu->update($payload);
+
                 continue;
             }
 

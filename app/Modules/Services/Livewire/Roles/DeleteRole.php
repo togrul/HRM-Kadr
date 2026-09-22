@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Modules\Services\Livewire\Roles;
+
+use App\Modules\Services\Livewire\Concerns\AuthorizesSettingsAccess;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
@@ -10,6 +12,7 @@ use Spatie\Permission\Models\Role;
 class DeleteRole extends Component
 {
     use AuthorizesRequests;
+    use AuthorizesSettingsAccess;
 
     #[Locked]
     public ?int $roleId = null;

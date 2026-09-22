@@ -12,8 +12,8 @@ use App\Observers\RoleStructureObserver;
 use App\Observers\SettingsObserver;
 use App\Providers\Concerns\RegistersLivewireAliases;
 use App\Services\Modules\ModuleState;
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\ServiceProvider;
 
 class ServicesServiceProvider extends ServiceProvider
 {

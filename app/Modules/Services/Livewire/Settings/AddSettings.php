@@ -3,10 +3,13 @@
 namespace App\Modules\Services\Livewire\Settings;
 
 use App\Models\Setting;
+use App\Modules\Services\Livewire\Concerns\AuthorizesSettingsAccess;
 use Livewire\Component;
 
 class AddSettings extends Component
 {
+    use AuthorizesSettingsAccess;
+
     public $settings = [];
 
     protected function rules()

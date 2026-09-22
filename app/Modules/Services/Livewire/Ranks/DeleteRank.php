@@ -3,6 +3,7 @@
 namespace App\Modules\Services\Livewire\Ranks;
 
 use App\Models\Rank;
+use App\Modules\Services\Livewire\Concerns\AuthorizesSettingsAccess;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
@@ -11,6 +12,7 @@ use Livewire\Component;
 class DeleteRank extends Component
 {
     use AuthorizesRequests;
+    use AuthorizesSettingsAccess;
 
     #[Locked]
     public ?int $rankId = null;

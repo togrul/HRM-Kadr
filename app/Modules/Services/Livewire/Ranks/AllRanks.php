@@ -4,7 +4,7 @@ namespace App\Modules\Services\Livewire\Ranks;
 
 use App\Livewire\Traits\SideModalAction;
 use App\Models\Rank;
-use App\Models\RankCategory;
+use App\Modules\Services\Livewire\Concerns\AuthorizesSettingsAccess;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\On;
@@ -16,6 +16,7 @@ use Livewire\WithPagination;
 class AllRanks extends Component
 {
     use AuthorizesRequests,SideModalAction,WithPagination;
+    use AuthorizesSettingsAccess;
 
     #[Url]
     public $status;
@@ -30,7 +31,6 @@ class AllRanks extends Component
         $this->status = $newStatus;
         $this->resetPage();
     }
-
 
     public function mount()
     {

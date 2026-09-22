@@ -2,12 +2,15 @@
 
 namespace App\Modules\Services\Livewire;
 
+use App\Modules\Services\Livewire\Concerns\AuthorizesSettingsAccess;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 
 class Service extends Component
 {
+    use AuthorizesSettingsAccess;
+
     #[Url]
     public $selectedService;
 

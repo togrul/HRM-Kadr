@@ -6,6 +6,7 @@ use App\Models\AppealStatus;
 use App\Models\ChiefDelegation;
 use App\Models\Personnel;
 use App\Models\Setting;
+use App\Modules\Services\Livewire\Concerns\AuthorizesSettingsAccess;
 use App\Services\Chief\ChiefResolver;
 use App\Support\Language\AzerbaijaniDateFormatter;
 use App\Support\Translations\ModuleTranslation;
@@ -17,16 +18,19 @@ use Livewire\Component;
 class SettingsList extends Component
 {
     use AuthorizesRequests;
+    use AuthorizesSettingsAccess;
 
     private const CANDIDATE_FILTER_KEYS = ['fullname', 'gender', 'results', 'age', 'appeal_date'];
 
     public string $section = 'general';
 
     public $setting = [];
+
     public array $candidateStatusWhitelist = [
         'military' => [],
         'civilian' => [],
     ];
+
     public array $candidatePresetSettings = [
         'military' => [
             'default_status' => 'all',
@@ -37,13 +41,18 @@ class SettingsList extends Component
             'show_deleted_tab' => true,
         ],
     ];
+
     public array $candidateEnabledFilters = [
         'military' => [],
         'civilian' => [],
     ];
+
     public array $candidateStatuses = [];
+
     public ?int $chiefPersonnelId = null;
+
     public array $chiefSnapshot = [];
+
     public array $chiefDelegationForm = [
         'delegate_personnel_id' => null,
         'starts_at' => null,

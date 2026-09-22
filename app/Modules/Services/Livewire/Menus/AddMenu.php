@@ -4,6 +4,7 @@ namespace App\Modules\Services\Livewire\Menus;
 
 use App\Livewire\Traits\DropdownConstructTrait;
 use App\Models\Menu;
+use App\Modules\Services\Livewire\Concerns\AuthorizesSettingsAccess;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
@@ -13,6 +14,7 @@ use Spatie\Permission\Models\Permission;
 class AddMenu extends Component
 {
     use AuthorizesRequests;
+    use AuthorizesSettingsAccess;
     use DropdownConstructTrait;
 
     public $title;

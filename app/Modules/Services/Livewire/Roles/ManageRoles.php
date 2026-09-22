@@ -3,17 +3,19 @@
 namespace App\Modules\Services\Livewire\Roles;
 
 use App\Livewire\Traits\SideModalAction;
+use App\Models\Role;
+use App\Modules\Services\Livewire\Concerns\AuthorizesSettingsAccess;
 use App\Support\Permissions\RoleTranslation;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\On;
 use Livewire\Component;
-use App\Models\Role;
 
 #[On(['permissionSet', 'roleWasDeleted'])]
 class ManageRoles extends Component
 {
     use AuthorizesRequests, SideModalAction;
+    use AuthorizesSettingsAccess;
 
     public $role_name;
 

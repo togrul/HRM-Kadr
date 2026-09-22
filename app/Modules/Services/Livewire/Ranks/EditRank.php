@@ -6,13 +6,15 @@ use App\Livewire\Forms\RankForm;
 use App\Livewire\Traits\DropdownConstructTrait;
 use App\Models\Rank;
 use App\Models\RankCategory;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use App\Modules\Services\Livewire\Concerns\AuthorizesSettingsAccess;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 
 class EditRank extends Component
 {
+    use AuthorizesSettingsAccess;
     use DropdownConstructTrait;
+
     public string $title;
 
     public RankForm $form;
