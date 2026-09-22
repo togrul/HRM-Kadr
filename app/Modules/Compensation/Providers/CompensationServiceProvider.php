@@ -52,6 +52,12 @@ class CompensationServiceProvider extends ServiceProvider
     {
         return [
             'dashboard' => \App\Modules\Compensation\Livewire\Dashboard::class,
+            'tabs.scales' => \App\Modules\Compensation\Livewire\Tabs\ScalesTab::class,
+            'tabs.components' => \App\Modules\Compensation\Livewire\Tabs\ComponentsTab::class,
+            'tabs.assignments' => \App\Modules\Compensation\Livewire\Tabs\AssignmentsTab::class,
+            'tabs.bank' => \App\Modules\Compensation\Livewire\Tabs\BankTab::class,
+            'tabs.history' => \App\Modules\Compensation\Livewire\Tabs\HistoryTab::class,
+            'tabs.statutory' => \App\Modules\Compensation\Livewire\Tabs\StatutoryTab::class,
         ];
     }
 }
