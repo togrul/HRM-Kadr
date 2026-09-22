@@ -352,23 +352,23 @@
                         <p class="hrm-eyebrow">{{ __('employee-lifecycle::dashboard.forms.template') }}</p>
                         <div class="mt-3 grid gap-3 sm:grid-cols-2">
                             <x-ui.input-shell :label="__('employee-lifecycle::dashboard.fields.template_name')" :error="$errors->first('templateForm.name')">
-                                <x-ui.input wire:model.defer="templateForm.name" />
+                                <x-ui.input wire:model="templateForm.name" />
                             </x-ui.input-shell>
                             <x-ui.input-shell :label="__('employee-lifecycle::dashboard.fields.type')" :error="$errors->first('templateForm.type')">
-                                <x-ui.select wire:model.defer="templateForm.type">
+                                <x-ui.select wire:model="templateForm.type">
                                     @foreach (['onboarding', 'probation', 'movement', 'offboarding'] as $option)
                                         <option value="{{ $option }}">{{ __('employee-lifecycle::dashboard.types.'.$option) }}</option>
                                     @endforeach
                                 </x-ui.select>
                             </x-ui.input-shell>
                             <x-ui.input-shell :label="__('employee-lifecycle::dashboard.fields.default_duration_days')" :error="$errors->first('templateForm.default_duration_days')">
-                                <x-ui.input type="number" min="1" max="365" wire:model.defer="templateForm.default_duration_days" />
+                                <x-ui.input type="number" min="1" max="365" wire:model="templateForm.default_duration_days" />
                             </x-ui.input-shell>
                             <x-ui.input-shell :label="__('employee-lifecycle::dashboard.fields.description')" :error="$errors->first('templateForm.description')">
-                                <x-ui.input wire:model.defer="templateForm.description" />
+                                <x-ui.input wire:model="templateForm.description" />
                             </x-ui.input-shell>
                             <x-ui.input-shell class="sm:col-span-2" :label="__('employee-lifecycle::dashboard.fields.task_lines')" :error="$errors->first('templateForm.tasks')">
-                                <x-ui.textarea wire:model.defer="templateForm.tasks" rows="4" />
+                                <x-ui.textarea wire:model="templateForm.tasks" rows="4" />
                             </x-ui.input-shell>
                         </div>
                         <div class="mt-3 flex justify-end">
@@ -416,7 +416,7 @@
                     @if ($startTab === 'plan')
                         <form wire:submit="launchTemplate" class="grid gap-3 sm:grid-cols-2">
                             <x-ui.input-shell :label="__('employee-lifecycle::dashboard.fields.template')" :error="$errors->first('launchForm.template_id')">
-                                <x-ui.select wire:model.defer="launchForm.template_id">
+                                <x-ui.select wire:model="launchForm.template_id">
                                     <option value="">---</option>
                                     @foreach ($planTemplates as $template)
                                         <option value="{{ $template['id'] }}">{{ $template['name'] }}</option>
@@ -424,7 +424,7 @@
                                 </x-ui.select>
                             </x-ui.input-shell>
                             <x-ui.input-shell :label="__('employee-lifecycle::dashboard.fields.personnel')" :error="$errors->first('launchForm.personnel_id')">
-                                <x-ui.select wire:model.defer="launchForm.personnel_id">
+                                <x-ui.select wire:model="launchForm.personnel_id">
                                     <option value="">---</option>
                                     @foreach ($personnelOptions as $personnel)
                                         <option value="{{ $personnel['id'] }}">{{ $personnel['label'] }}</option>
@@ -432,10 +432,10 @@
                                 </x-ui.select>
                             </x-ui.input-shell>
                             <x-ui.input-shell :label="__('employee-lifecycle::dashboard.fields.start_date')" :error="$errors->first('launchForm.start_date')">
-                                <x-ui.input type="date" wire:model.defer="launchForm.start_date" />
+                                <x-ui.input type="date" wire:model="launchForm.start_date" />
                             </x-ui.input-shell>
                             <x-ui.input-shell :label="__('employee-lifecycle::dashboard.fields.owner')" :error="$errors->first('launchForm.owner_user_id')">
-                                <x-ui.select wire:model.defer="launchForm.owner_user_id">
+                                <x-ui.select wire:model="launchForm.owner_user_id">
                                     <option value="">---</option>
                                     @foreach ($userOptions as $user)
                                         <option value="{{ $user['id'] }}">{{ $user['label'] }}</option>
@@ -449,7 +449,7 @@
                     @elseif ($startTab === 'probation')
                         <form wire:submit="scheduleProbation" class="grid gap-3 sm:grid-cols-2">
                             <x-ui.input-shell :label="__('employee-lifecycle::dashboard.fields.personnel')" :error="$errors->first('probationForm.personnel_id')">
-                                <x-ui.select wire:model.defer="probationForm.personnel_id">
+                                <x-ui.select wire:model="probationForm.personnel_id">
                                     <option value="">---</option>
                                     @foreach ($personnelOptions as $personnel)
                                         <option value="{{ $personnel['id'] }}">{{ $personnel['label'] }}</option>
@@ -457,10 +457,10 @@
                                 </x-ui.select>
                             </x-ui.input-shell>
                             <x-ui.input-shell :label="__('employee-lifecycle::dashboard.fields.review_due_at')" :error="$errors->first('probationForm.review_due_at')">
-                                <x-ui.input type="date" wire:model.defer="probationForm.review_due_at" />
+                                <x-ui.input type="date" wire:model="probationForm.review_due_at" />
                             </x-ui.input-shell>
                             <x-ui.input-shell :label="__('employee-lifecycle::dashboard.fields.manager')" :error="$errors->first('probationForm.manager_user_id')">
-                                <x-ui.select wire:model.defer="probationForm.manager_user_id">
+                                <x-ui.select wire:model="probationForm.manager_user_id">
                                     <option value="">---</option>
                                     @foreach ($userOptions as $user)
                                         <option value="{{ $user['id'] }}">{{ $user['label'] }}</option>
@@ -468,7 +468,7 @@
                                 </x-ui.select>
                             </x-ui.input-shell>
                             <x-ui.input-shell :label="__('employee-lifecycle::dashboard.fields.hr_reviewer')" :error="$errors->first('probationForm.hr_reviewer_user_id')">
-                                <x-ui.select wire:model.defer="probationForm.hr_reviewer_user_id">
+                                <x-ui.select wire:model="probationForm.hr_reviewer_user_id">
                                     <option value="">---</option>
                                     @foreach ($userOptions as $user)
                                         <option value="{{ $user['id'] }}">{{ $user['label'] }}</option>
@@ -482,7 +482,7 @@
                     @elseif ($startTab === 'movement')
                         <form wire:submit="scheduleMovement" class="grid gap-3 sm:grid-cols-2">
                             <x-ui.input-shell :label="__('employee-lifecycle::dashboard.fields.personnel')" :error="$errors->first('movementForm.personnel_id')">
-                                <x-ui.select wire:model.defer="movementForm.personnel_id">
+                                <x-ui.select wire:model="movementForm.personnel_id">
                                     <option value="">---</option>
                                     @foreach ($personnelOptions as $personnel)
                                         <option value="{{ $personnel['id'] }}">{{ $personnel['label'] }}</option>
@@ -490,14 +490,14 @@
                                 </x-ui.select>
                             </x-ui.input-shell>
                             <x-ui.input-shell :label="__('employee-lifecycle::dashboard.fields.movement_type')" :error="$errors->first('movementForm.movement_type')">
-                                <x-ui.select wire:model.defer="movementForm.movement_type">
+                                <x-ui.select wire:model="movementForm.movement_type">
                                     @foreach (['transfer', 'promotion', 'role_change'] as $option)
                                         <option value="{{ $option }}">{{ __('employee-lifecycle::dashboard.movement_types.'.$option) }}</option>
                                     @endforeach
                                 </x-ui.select>
                             </x-ui.input-shell>
                             <x-ui.input-shell :label="__('employee-lifecycle::dashboard.fields.target_structure')" :error="$errors->first('movementForm.target_structure_id')">
-                                <x-ui.select wire:model.defer="movementForm.target_structure_id">
+                                <x-ui.select wire:model="movementForm.target_structure_id">
                                     <option value="">---</option>
                                     @foreach ($structureOptions as $structure)
                                         <option value="{{ $structure['id'] }}">{{ $structure['label'] }}</option>
@@ -505,7 +505,7 @@
                                 </x-ui.select>
                             </x-ui.input-shell>
                             <x-ui.input-shell :label="__('employee-lifecycle::dashboard.fields.target_position')" :error="$errors->first('movementForm.target_position_id')">
-                                <x-ui.select wire:model.defer="movementForm.target_position_id">
+                                <x-ui.select wire:model="movementForm.target_position_id">
                                     <option value="">---</option>
                                     @foreach ($positionOptions as $position)
                                         <option value="{{ $position['id'] }}">{{ $position['label'] }}</option>
@@ -513,10 +513,10 @@
                                 </x-ui.select>
                             </x-ui.input-shell>
                             <x-ui.input-shell :label="__('employee-lifecycle::dashboard.fields.effective_date')" :error="$errors->first('movementForm.effective_date')">
-                                <x-ui.input type="date" wire:model.defer="movementForm.effective_date" />
+                                <x-ui.input type="date" wire:model="movementForm.effective_date" />
                             </x-ui.input-shell>
                             <x-ui.input-shell :label="__('employee-lifecycle::dashboard.fields.owner')" :error="$errors->first('movementForm.owner_user_id')">
-                                <x-ui.select wire:model.defer="movementForm.owner_user_id">
+                                <x-ui.select wire:model="movementForm.owner_user_id">
                                     <option value="">---</option>
                                     @foreach ($userOptions as $user)
                                         <option value="{{ $user['id'] }}">{{ $user['label'] }}</option>
@@ -524,7 +524,7 @@
                                 </x-ui.select>
                             </x-ui.input-shell>
                             <x-ui.input-shell class="sm:col-span-2" :label="__('employee-lifecycle::dashboard.fields.reason')" :error="$errors->first('movementForm.reason')">
-                                <x-ui.textarea wire:model.defer="movementForm.reason" rows="2" />
+                                <x-ui.textarea wire:model="movementForm.reason" rows="2" />
                             </x-ui.input-shell>
                             <div class="flex justify-end sm:col-span-2">
                                 <x-pill-button type="submit" variant="primary">{{ __('employee-lifecycle::dashboard.actions.schedule_movement') }}</x-pill-button>
@@ -533,7 +533,7 @@
                     @else
                         <form wire:submit="openOffboarding" class="grid gap-3 sm:grid-cols-2">
                             <x-ui.input-shell :label="__('employee-lifecycle::dashboard.fields.personnel')" :error="$errors->first('offboardingForm.personnel_id')">
-                                <x-ui.select wire:model.defer="offboardingForm.personnel_id">
+                                <x-ui.select wire:model="offboardingForm.personnel_id">
                                     <option value="">---</option>
                                     @foreach ($personnelOptions as $personnel)
                                         <option value="{{ $personnel['id'] }}">{{ $personnel['label'] }}</option>
@@ -541,10 +541,10 @@
                                 </x-ui.select>
                             </x-ui.input-shell>
                             <x-ui.input-shell :label="__('employee-lifecycle::dashboard.fields.last_working_date')" :error="$errors->first('offboardingForm.last_working_date')">
-                                <x-ui.input type="date" wire:model.defer="offboardingForm.last_working_date" />
+                                <x-ui.input type="date" wire:model="offboardingForm.last_working_date" />
                             </x-ui.input-shell>
                             <x-ui.input-shell :label="__('employee-lifecycle::dashboard.fields.owner')" :error="$errors->first('offboardingForm.owner_user_id')">
-                                <x-ui.select wire:model.defer="offboardingForm.owner_user_id">
+                                <x-ui.select wire:model="offboardingForm.owner_user_id">
                                     <option value="">---</option>
                                     @foreach ($userOptions as $user)
                                         <option value="{{ $user['id'] }}">{{ $user['label'] }}</option>
@@ -552,7 +552,7 @@
                                 </x-ui.select>
                             </x-ui.input-shell>
                             <x-ui.input-shell :label="__('employee-lifecycle::dashboard.fields.reason')" :error="$errors->first('offboardingForm.reason')">
-                                <x-ui.input wire:model.defer="offboardingForm.reason" />
+                                <x-ui.input wire:model="offboardingForm.reason" />
                             </x-ui.input-shell>
                             <div class="flex justify-end sm:col-span-2">
                                 <x-pill-button type="submit" variant="primary">{{ __('employee-lifecycle::dashboard.actions.open_offboarding') }}</x-pill-button>
@@ -564,7 +564,7 @@
                         <p class="hrm-eyebrow">{{ __('employee-lifecycle::dashboard.forms.probation') }}</p>
                         <div class="mt-3 grid gap-3 sm:grid-cols-2">
                             <x-ui.input-shell class="sm:col-span-2" :error="$errors->first('completionForm.probation_review_id')">
-                                <x-ui.select wire:model.defer="completionForm.probation_review_id">
+                                <x-ui.select wire:model="completionForm.probation_review_id">
                                     <option value="">---</option>
                                     @foreach ($probationReviews as $review)
                                         <option value="{{ $review['id'] }}">{{ $review['employee_name'] }} · {{ $review['review_due_at'] }}</option>
@@ -572,17 +572,17 @@
                                 </x-ui.select>
                             </x-ui.input-shell>
                             <x-ui.input-shell :error="$errors->first('completionForm.probation_decision')">
-                                <x-ui.select wire:model.defer="completionForm.probation_decision">
+                                <x-ui.select wire:model="completionForm.probation_decision">
                                     @foreach (['confirm', 'extend', 'terminate'] as $decision)
                                         <option value="{{ $decision }}">{{ __('employee-lifecycle::dashboard.probation_decisions.'.$decision) }}</option>
                                     @endforeach
                                 </x-ui.select>
                             </x-ui.input-shell>
                             <x-ui.input-shell :label="__('employee-lifecycle::dashboard.fields.probation_score')" :error="$errors->first('completionForm.probation_score')">
-                                <x-ui.input type="number" min="0" max="100" placeholder="0-100" wire:model.defer="completionForm.probation_score" />
+                                <x-ui.input type="number" min="0" max="100" placeholder="0-100" wire:model="completionForm.probation_score" />
                             </x-ui.input-shell>
                             <x-ui.input-shell class="sm:col-span-2" :label="__('employee-lifecycle::dashboard.fields.probation_note')" :error="$errors->first('completionForm.probation_note')">
-                                <x-ui.textarea wire:model.defer="completionForm.probation_note" rows="2" />
+                                <x-ui.textarea wire:model="completionForm.probation_note" rows="2" />
                             </x-ui.input-shell>
                         </div>
                         <div class="mt-3 flex justify-end">
@@ -594,7 +594,7 @@
                         <p class="hrm-eyebrow">{{ __('employee-lifecycle::dashboard.forms.movement') }}</p>
                         <div class="mt-3">
                             <x-ui.input-shell :error="$errors->first('completionForm.movement_id')">
-                                <x-ui.select wire:model.defer="completionForm.movement_id">
+                                <x-ui.select wire:model="completionForm.movement_id">
                                     <option value="">---</option>
                                     @foreach ($movements as $movement)
                                         <option value="{{ $movement['id'] }}">{{ $movement['employee_name'] }} · {{ $movement['movement_type_label'] }}</option>
@@ -611,7 +611,7 @@
                         <p class="hrm-eyebrow">{{ __('employee-lifecycle::dashboard.forms.offboarding') }}</p>
                         <div class="mt-3 space-y-3">
                             <x-ui.input-shell :error="$errors->first('completionForm.offboarding_case_id')">
-                                <x-ui.select wire:model.defer="completionForm.offboarding_case_id">
+                                <x-ui.select wire:model="completionForm.offboarding_case_id">
                                     <option value="">---</option>
                                     @foreach ($offboardingCases as $case)
                                         <option value="{{ $case['id'] }}">{{ $case['employee_name'] }} · {{ $case['last_working_date'] }}</option>
@@ -619,7 +619,7 @@
                                 </x-ui.select>
                             </x-ui.input-shell>
                             <x-ui.input-shell :label="__('employee-lifecycle::dashboard.fields.exit_summary')" :error="$errors->first('completionForm.exit_summary')">
-                                <x-ui.textarea wire:model.defer="completionForm.exit_summary" rows="3" />
+                                <x-ui.textarea wire:model="completionForm.exit_summary" rows="3" />
                             </x-ui.input-shell>
                         </div>
                         <div class="mt-3 flex justify-end">
@@ -658,20 +658,20 @@
             <div class="min-h-0 flex-1 space-y-4 overflow-y-auto px-5 py-4">
                 <div class="grid gap-3 sm:grid-cols-2">
                     <x-ui.input-shell class="sm:col-span-2" :label="__('employee-lifecycle::dashboard.fields.template_name')" :error="$errors->first('editingTemplateForm.name')">
-                        <x-ui.input wire:model.defer="editingTemplateForm.name" />
+                        <x-ui.input wire:model="editingTemplateForm.name" />
                     </x-ui.input-shell>
                     <x-ui.input-shell :label="__('employee-lifecycle::dashboard.fields.type')" :error="$errors->first('editingTemplateForm.type')">
-                        <x-ui.select wire:model.defer="editingTemplateForm.type">
+                        <x-ui.select wire:model="editingTemplateForm.type">
                             @foreach (['onboarding', 'probation', 'movement', 'offboarding'] as $option)
                                 <option value="{{ $option }}">{{ __('employee-lifecycle::dashboard.types.'.$option) }}</option>
                             @endforeach
                         </x-ui.select>
                     </x-ui.input-shell>
                     <x-ui.input-shell :label="__('employee-lifecycle::dashboard.fields.default_duration_days')" :error="$errors->first('editingTemplateForm.default_duration_days')">
-                        <x-ui.input type="number" min="1" max="365" wire:model.defer="editingTemplateForm.default_duration_days" />
+                        <x-ui.input type="number" min="1" max="365" wire:model="editingTemplateForm.default_duration_days" />
                     </x-ui.input-shell>
                     <x-ui.input-shell class="sm:col-span-2" :label="__('employee-lifecycle::dashboard.fields.description')" :error="$errors->first('editingTemplateForm.description')">
-                        <x-ui.textarea wire:model.defer="editingTemplateForm.description" rows="2" />
+                        <x-ui.textarea wire:model="editingTemplateForm.description" rows="2" />
                     </x-ui.input-shell>
                 </div>
 
@@ -686,17 +686,17 @@
                             <div wire:key="lifecycle-template-task-{{ $index }}" class="rounded-xl border border-hairline bg-white px-3 py-3">
                                 <div class="grid gap-3 sm:grid-cols-[minmax(0,1fr)_10rem_7rem_auto]">
                                     <x-ui.input-shell :label="__('employee-lifecycle::dashboard.fields.task_title')" :error="$errors->first('editingTemplateForm.tasks.'.$index.'.title')">
-                                        <x-ui.input wire:model.defer="editingTemplateForm.tasks.{{ $index }}.title" />
+                                        <x-ui.input wire:model="editingTemplateForm.tasks.{{ $index }}.title" />
                                     </x-ui.input-shell>
                                     <x-ui.input-shell :label="__('employee-lifecycle::dashboard.fields.task_owner_type')" :error="$errors->first('editingTemplateForm.tasks.'.$index.'.owner_type')">
-                                        <x-ui.select wire:model.defer="editingTemplateForm.tasks.{{ $index }}.owner_type">
+                                        <x-ui.select wire:model="editingTemplateForm.tasks.{{ $index }}.owner_type">
                                             @foreach (['hr', 'manager', 'it', 'employee'] as $option)
                                                 <option value="{{ $option }}">{{ __('employee-lifecycle::dashboard.owner_types.'.$option) }}</option>
                                             @endforeach
                                         </x-ui.select>
                                     </x-ui.input-shell>
                                     <x-ui.input-shell :label="__('employee-lifecycle::dashboard.fields.task_due_offset_days')" :error="$errors->first('editingTemplateForm.tasks.'.$index.'.due_offset_days')">
-                                        <x-ui.input type="number" min="0" max="365" wire:model.defer="editingTemplateForm.tasks.{{ $index }}.due_offset_days" />
+                                        <x-ui.input type="number" min="0" max="365" wire:model="editingTemplateForm.tasks.{{ $index }}.due_offset_days" />
                                     </x-ui.input-shell>
                                     <div class="flex items-end">
                                         <x-pill-button variant="danger" wire:click="removeTemplateTaskRow({{ $index }})">
@@ -705,7 +705,7 @@
                                     </div>
                                 </div>
                                 <label class="mt-2.5 inline-flex items-center gap-2 text-[12px] font-medium text-ink-muted">
-                                    <input wire:model.defer="editingTemplateForm.tasks.{{ $index }}.is_required" type="checkbox" class="rounded border-hairline text-ink focus:ring-[#e4e4e7]" />
+                                    <input wire:model="editingTemplateForm.tasks.{{ $index }}.is_required" type="checkbox" class="rounded border-hairline text-ink focus:ring-[#e4e4e7]" />
                                     {{ __('employee-lifecycle::dashboard.fields.task_required') }}
                                 </label>
                             </div>

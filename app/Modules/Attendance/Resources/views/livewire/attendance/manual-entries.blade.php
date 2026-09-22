@@ -339,27 +339,27 @@
                                 <div class="grid grid-cols-1 gap-3">
                                     <div>
                                         <x-label for="manual-form-worked">{{ __('attendance::manual_entries.labels.worked_minutes') }}</x-label>
-                                        <x-livewire-input id="manual-form-worked" mode="gray" type="number" min="0" name="form.worked_minutes" wire:model.defer="form.worked_minutes" :readonly="!$manualMetricOverride" />
+                                        <x-livewire-input id="manual-form-worked" mode="gray" type="number" min="0" name="form.worked_minutes" wire:model="form.worked_minutes" :readonly="!$manualMetricOverride" />
                                         @error('form.worked_minutes') <x-validation>{{ $message }}</x-validation> @enderror
                                     </div>
                                     <div>
                                         <x-label for="manual-form-overtime">{{ __('attendance::manual_entries.labels.overtime_minutes') }}</x-label>
-                                        <x-livewire-input id="manual-form-overtime" mode="gray" type="number" min="0" name="form.overtime_minutes" wire:model.defer="form.overtime_minutes" :readonly="!$manualMetricOverride" />
+                                        <x-livewire-input id="manual-form-overtime" mode="gray" type="number" min="0" name="form.overtime_minutes" wire:model="form.overtime_minutes" :readonly="!$manualMetricOverride" />
                                         @error('form.overtime_minutes') <x-validation>{{ $message }}</x-validation> @enderror
                                     </div>
                                     <div>
                                         <x-label for="manual-form-late">{{ __('attendance::manual_entries.labels.late_minutes') }}</x-label>
-                                        <x-livewire-input id="manual-form-late" mode="gray" type="number" min="0" name="form.late_minutes" wire:model.defer="form.late_minutes" :readonly="!$manualMetricOverride" />
+                                        <x-livewire-input id="manual-form-late" mode="gray" type="number" min="0" name="form.late_minutes" wire:model="form.late_minutes" :readonly="!$manualMetricOverride" />
                                         @error('form.late_minutes') <x-validation>{{ $message }}</x-validation> @enderror
                                     </div>
                                     <div>
                                         <x-label for="manual-form-early-leave">{{ __('attendance::manual_entries.labels.early_leave_minutes') }}</x-label>
-                                        <x-livewire-input id="manual-form-early-leave" mode="gray" type="number" min="0" name="form.early_leave_minutes" wire:model.defer="form.early_leave_minutes" :readonly="!$manualMetricOverride" />
+                                        <x-livewire-input id="manual-form-early-leave" mode="gray" type="number" min="0" name="form.early_leave_minutes" wire:model="form.early_leave_minutes" :readonly="!$manualMetricOverride" />
                                         @error('form.early_leave_minutes') <x-validation>{{ $message }}</x-validation> @enderror
                                     </div>
                                     <div>
                                         <x-label for="manual-form-absence">{{ __('attendance::manual_entries.labels.absence_code') }}</x-label>
-                                        <x-livewire-input id="manual-form-absence" mode="gray" name="form.absence_code" wire:model.defer="form.absence_code" />
+                                        <x-livewire-input id="manual-form-absence" mode="gray" name="form.absence_code" wire:model="form.absence_code" />
                                     </div>
                                 </div>
                             </div>
@@ -440,7 +440,7 @@
                     <x-label for="manual-form-reason">{{ __('attendance::manual_entries.labels.reason') }}</x-label>
                     <textarea
                         id="manual-form-reason"
-                        wire:model.defer="form.reason"
+                        wire:model="form.reason"
                         rows="3"
                         class="w-full rounded-lg border-none bg-neutral-100 px-3 py-2 text-sm shadow-sm focus:ring-blue-500"
                     ></textarea>
@@ -540,7 +540,7 @@
                                     @if($canApprove && $entry->approval_status === 'pending')
                                         <div class="inline-flex items-center gap-2">
                                             <input
-                                                wire:model.defer="rejectNotes.{{ $entry->id }}"
+                                                wire:model="rejectNotes.{{ $entry->id }}"
                                                 type="text"
                                                 placeholder="{{ __('attendance::manual_entries.placeholders.reject_note') }}"
                                                 class="h-8 w-36 rounded-md border border-zinc-200 bg-zinc-100 px-2 text-xs"

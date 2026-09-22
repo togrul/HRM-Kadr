@@ -22,12 +22,12 @@
                     </div>
                     <div class="md:col-span-2">
                         <x-label for="feedback-title">{{ __('training_needs::dashboard.fields.feedback_title') }}</x-label>
-                        <x-livewire-input mode="gray" id="feedback-title" wire:model.defer="feedbackForm.title" />
+                        <x-livewire-input mode="gray" id="feedback-title" wire:model="feedbackForm.title" />
                         @error('feedbackForm.title') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div class="md:col-span-2">
                         <x-label for="feedback-status">{{ __('training_needs::dashboard.fields.status') }}</x-label>
-                        <select id="feedback-status" wire:model.defer="feedbackForm.status" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                        <select id="feedback-status" wire:model="feedbackForm.status" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
                             <option value="draft">{{ __('training_needs::dashboard.feedback_statuses.draft') }}</option>
                             <option value="open">{{ __('training_needs::dashboard.feedback_statuses.open') }}</option>
                             <option value="closed">{{ __('training_needs::dashboard.feedback_statuses.closed') }}</option>
@@ -36,7 +36,7 @@
                     </div>
                     <div class="md:col-span-2">
                         <x-label for="feedback-question-type">{{ __('training_needs::dashboard.fields.default_question_type') }}</x-label>
-                        <select id="feedback-question-type" wire:model.defer="feedbackForm.default_question_type" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                        <select id="feedback-question-type" wire:model="feedbackForm.default_question_type" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
                             <option value="rating">{{ __('training_needs::dashboard.question_types.rating') }}</option>
                             <option value="text">{{ __('training_needs::dashboard.question_types.text') }}</option>
                             <option value="multiple_choice">{{ __('training_needs::dashboard.question_types.multiple_choice') }}</option>
@@ -45,7 +45,7 @@
                     </div>
                     <div class="md:col-span-2">
                         <x-label for="feedback-questions">{{ __('training_needs::dashboard.fields.feedback_questions') }}</x-label>
-                        <textarea id="feedback-questions" wire:model.defer="feedbackForm.questions_text" class="min-h-24 w-full rounded-lg border-none bg-neutral-100 px-3 py-2 text-sm shadow-sm focus:ring-blue-500"></textarea>
+                        <textarea id="feedback-questions" wire:model="feedbackForm.questions_text" class="min-h-24 w-full rounded-lg border-none bg-neutral-100 px-3 py-2 text-sm shadow-sm focus:ring-blue-500"></textarea>
                         @error('feedbackForm.questions_text') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div class="md:col-span-2">
@@ -91,17 +91,17 @@
                     </div>
                     <div>
                         <x-label for="feedback-score">{{ __('training_needs::dashboard.fields.overall_score') }}</x-label>
-                        <x-livewire-input mode="gray" id="feedback-score" type="number" min="1" max="5" wire:model.defer="feedbackResponseForm.overall_score" />
+                        <x-livewire-input mode="gray" id="feedback-score" type="number" min="1" max="5" wire:model="feedbackResponseForm.overall_score" />
                         @error('feedbackResponseForm.overall_score') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div class="md:col-span-2">
                         <x-label for="feedback-comments">{{ __('training_needs::dashboard.fields.comments') }}</x-label>
-                        <textarea id="feedback-comments" wire:model.defer="feedbackResponseForm.comments" class="min-h-20 w-full rounded-lg border-none bg-neutral-100 px-3 py-2 text-sm shadow-sm focus:ring-blue-500"></textarea>
+                        <textarea id="feedback-comments" wire:model="feedbackResponseForm.comments" class="min-h-20 w-full rounded-lg border-none bg-neutral-100 px-3 py-2 text-sm shadow-sm focus:ring-blue-500"></textarea>
                         @error('feedbackResponseForm.comments') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div class="md:col-span-2">
                         <x-label for="feedback-answers">{{ __('training_needs::dashboard.fields.feedback_answers') }}</x-label>
-                        <textarea id="feedback-answers" wire:model.defer="feedbackResponseForm.answers_text" class="min-h-24 w-full rounded-lg border-none bg-neutral-100 px-3 py-2 text-sm shadow-sm focus:ring-blue-500"></textarea>
+                        <textarea id="feedback-answers" wire:model="feedbackResponseForm.answers_text" class="min-h-24 w-full rounded-lg border-none bg-neutral-100 px-3 py-2 text-sm shadow-sm focus:ring-blue-500"></textarea>
                         @error('feedbackResponseForm.answers_text') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div class="md:col-span-2">

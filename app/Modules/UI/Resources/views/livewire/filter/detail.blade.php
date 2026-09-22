@@ -64,7 +64,7 @@
                                 searchModel="searchPosition"
                                 load-on-open="position"
                                 load-on-focus="position"
-                                wire:model.defer="filter.position_id"
+                                wire:model="filter.position_id"
                             />
                         </div>
                         <div class="lg:col-span-2 xl:col-span-4">
@@ -74,7 +74,7 @@
                                 searchModel="searchNationality"
                                 load-on-open="nationality"
                                 load-on-focus="nationality"
-                                wire:model.defer="filter.nationality_id"
+                                wire:model="filter.nationality_id"
                             />
                         </div>
                         <div class="lg:col-span-2 xl:col-span-6">
@@ -84,7 +84,7 @@
                                 searchModel="searchPreviousNationality"
                                 load-on-open="bornCountry"
                                 load-on-focus="bornCountry"
-                                wire:model.defer="filter.born_country_id"
+                                wire:model="filter.born_country_id"
                             />
                         </div>
                         <div class="lg:col-span-2 xl:col-span-6">
@@ -94,7 +94,7 @@
                                 searchModel="searchCity"
                                 load-on-open="city"
                                 load-on-focus="city"
-                                wire:model.defer="filter.born_city_id"
+                                wire:model="filter.born_city_id"
                             />
                         </div>
                     </div>
@@ -111,23 +111,23 @@
                     <div class="grid grid-cols-1 gap-3 lg:grid-cols-8 xl:grid-cols-12">
                         <div class="flex flex-col lg:col-span-2 xl:col-span-2">
                             <x-label for="filter.surname">{{ __('personnel::common.labels.surname') }}</x-label>
-                            <x-livewire-input mode="gray" name="filter.surname" wire:model.defer="filter.surname" />
+                            <x-livewire-input mode="gray" name="filter.surname" wire:model="filter.surname" />
                         </div>
                         <div class="flex flex-col lg:col-span-2 xl:col-span-2">
                             <x-label for="filter.name">{{ __('personnel::common.labels.name') }}</x-label>
-                            <x-livewire-input mode="gray" name="filter.name" wire:model.defer="filter.name" />
+                            <x-livewire-input mode="gray" name="filter.name" wire:model="filter.name" />
                         </div>
                         <div class="flex flex-col lg:col-span-2 xl:col-span-2">
                             <x-label for="filter.patronymic">{{ __('personnel::common.labels.patronymic') }}</x-label>
-                            <x-livewire-input mode="gray" name="filter.patronymic" wire:model.defer="filter.patronymic" />
+                            <x-livewire-input mode="gray" name="filter.patronymic" wire:model="filter.patronymic" />
                         </div>
                         <div class="flex flex-col lg:col-span-2 xl:col-span-2">
                             <x-label for="filter.tabel_no">{{ __('personnel::common.labels.tabel_hash') }}</x-label>
-                            <x-livewire-input mode="gray" name="filter.tabel_no" wire:model.defer="filter.tabel_no" />
+                            <x-livewire-input mode="gray" name="filter.tabel_no" wire:model="filter.tabel_no" />
                         </div>
                         <div class="flex flex-col lg:col-span-2 xl:col-span-2">
                             <x-label for="filter.pin">{{ __('personnel::common.labels.pin') }}</x-label>
-                            <x-livewire-input mode="gray" name="filter.pin" wire:model.defer="filter.pin" />
+                            <x-livewire-input mode="gray" name="filter.pin" wire:model="filter.pin" />
                         </div>
                         <div class="flex flex-col gap-1 lg:col-span-4 xl:col-span-2">
                             <x-label for="filter.is_married">{{ __('personnel::common.labels.family_status') }}</x-label>
@@ -167,9 +167,9 @@
                         <div class="flex flex-col lg:col-span-4 xl:col-span-3">
                             <x-label for="filter.age">{{ __('candidates::common.labels.age') }}</x-label>
                             <div class="flex items-center space-x-1">
-                                <x-livewire-input mode="gray" name="filter.age.min" wire:model.defer="filter.age.min" />
+                                <x-livewire-input mode="gray" name="filter.age.min" wire:model="filter.age.min" />
                                 <span>-</span>
-                                <x-livewire-input mode="gray" name="filter.age.max" wire:model.defer="filter.age.max" />
+                                <x-livewire-input mode="gray" name="filter.age.max" wire:model="filter.age.max" />
                             </div>
                         </div>
                     </div>
@@ -211,12 +211,12 @@
                                 searchModel="searchRank"
                                 load-on-open="rank"
                                 load-on-focus="rank"
-                                wire:model.defer="filter.rank_id"
+                                wire:model="filter.rank_id"
                             />
                         </div>
                         <div class="flex flex-col lg:col-span-2 xl:col-span-2">
                             <x-label for="filter.rank_name">{{ __('personnel::common.labels.rank') }} {{ __('personnel::common.labels.name') }}</x-label>
-                            <x-livewire-input mode="gray" name="filter.rank_name" wire:model.defer="filter.rank_name" />
+                            <x-livewire-input mode="gray" name="filter.rank_name" wire:model="filter.rank_name" />
                         </div>
                         <div class="lg:col-span-2 xl:col-span-2">
                             <x-ui.filter-select
@@ -225,12 +225,12 @@
                                 searchModel="searchEducationDegree"
                                 load-on-open="educationDegree"
                                 load-on-focus="educationDegree"
-                                wire:model.defer="filter.education_degree_id"
+                                wire:model="filter.education_degree_id"
                             />
                         </div>
                         <div class="flex flex-col lg:col-span-2 xl:col-span-2">
                             <x-label for="filter.specialty">{{ __('personnel::common.labels.specialty') }}</x-label>
-                            <x-livewire-input mode="gray" name="filter.specialty" wire:model.defer="filter.specialty" />
+                            <x-livewire-input mode="gray" name="filter.specialty" wire:model="filter.specialty" />
                         </div>
                         <div class="lg:col-span-4 xl:col-span-4">
                             <x-ui.filter-select
@@ -239,7 +239,7 @@
                                 searchModel="searchInstitution"
                                 load-on-open="institution"
                                 load-on-focus="institution"
-                                wire:model.defer="filter.educational_institution_id"
+                                wire:model="filter.educational_institution_id"
                             />
                         </div>
                         <div class="lg:col-span-4 xl:col-span-3">
@@ -249,7 +249,7 @@
                                 searchModel="searchAward"
                                 load-on-open="award"
                                 load-on-focus="award"
-                                wire:model.defer="filter.award_id"
+                                wire:model="filter.award_id"
                             />
                         </div>
                         <div class="lg:col-span-2 xl:col-span-2">
@@ -259,12 +259,12 @@
                                 searchModel="searchPunishment"
                                 load-on-open="punishment"
                                 load-on-focus="punishment"
-                                wire:model.defer="filter.punishment_id"
+                                wire:model="filter.punishment_id"
                             />
                         </div>
                         <div class="flex flex-col lg:col-span-6 xl:col-span-3">
                             <x-label for="filter.punishment_reason">{{ __('personnel::common.labels.punishment') }} {{ __('personnel::common.labels.reason') }}</x-label>
-                            <x-livewire-input mode="gray" name="filter.punishment_reason" wire:model.defer="filter.punishment_reason" />
+                            <x-livewire-input mode="gray" name="filter.punishment_reason" wire:model="filter.punishment_reason" />
                         </div>
                         <div class="flex flex-col lg:col-span-4 xl:col-span-3">
                             <x-label for="filter.join_work_date">{{ __('personnel::common.labels.join_work_date') }}</x-label>

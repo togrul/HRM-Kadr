@@ -81,11 +81,11 @@
                 </div>
                 <div>
                     <x-label for="attendance-ot-create-minutes">{{ __('attendance::overtime.create.requested_minutes') }}</x-label>
-                    <input id="attendance-ot-create-minutes" wire:model.defer="manualRequest.requested_minutes" type="number" min="1" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
+                    <input id="attendance-ot-create-minutes" wire:model="manualRequest.requested_minutes" type="number" min="1" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
                 </div>
                 <div class="md:col-span-2 xl:col-span-3">
                     <x-label for="attendance-ot-create-reason">{{ __('attendance::overtime.create.reason') }}</x-label>
-                    <input id="attendance-ot-create-reason" wire:model.defer="manualRequest.reason" type="text" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
+                    <input id="attendance-ot-create-reason" wire:model="manualRequest.reason" type="text" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
                 </div>
                 <div class="flex items-end">
                     <x-button mode="success" class="w-full !h-10" wire:click="createManualRequest">

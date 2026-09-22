@@ -52,40 +52,40 @@
                             <div class="grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,1.3fr)_minmax(200px,0.7fr)]">
                                 <div>
                                     <x-label for="test-bank-name">{{ __($d.'.fields.test_bank_name') }}</x-label>
-                                    <x-livewire-input mode="gray" id="test-bank-name" wire:model.defer="bankForm.name" />
+                                    <x-livewire-input mode="gray" id="test-bank-name" wire:model="bankForm.name" />
                                     @error('bankForm.name') <x-validation>{{ $message }}</x-validation> @enderror
                                 </div>
                                 <div>
                                     <x-label for="test-bank-code">{{ __($d.'.fields.test_bank_code') }}</x-label>
-                                    <x-livewire-input mode="gray" id="test-bank-code" wire:model.defer="bankForm.code" />
+                                    <x-livewire-input mode="gray" id="test-bank-code" wire:model="bankForm.code" />
                                     @error('bankForm.code') <x-validation>{{ $message }}</x-validation> @enderror
                                 </div>
                             </div>
                             <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
                                 <div>
                                     <x-label for="test-bank-pass-score">{{ __($d.'.fields.pass_score') }}</x-label>
-                                    <x-livewire-input mode="gray" id="test-bank-pass-score" type="number" step="0.01" wire:model.defer="bankForm.pass_score" />
+                                    <x-livewire-input mode="gray" id="test-bank-pass-score" type="number" step="0.01" wire:model="bankForm.pass_score" />
                                     @error('bankForm.pass_score') <x-validation>{{ $message }}</x-validation> @enderror
                                 </div>
                                 <div>
                                     <x-label for="test-bank-duration">{{ __($d.'.fields.duration_minutes') }}</x-label>
-                                    <x-livewire-input mode="gray" id="test-bank-duration" type="number" wire:model.defer="bankForm.duration_minutes" />
+                                    <x-livewire-input mode="gray" id="test-bank-duration" type="number" wire:model="bankForm.duration_minutes" />
                                     @error('bankForm.duration_minutes') <x-validation>{{ $message }}</x-validation> @enderror
                                 </div>
                                 <div>
                                     <x-label for="test-bank-max-attempts">{{ __($d.'.fields.max_attempts') }}</x-label>
-                                    <x-livewire-input mode="gray" id="test-bank-max-attempts" type="number" wire:model.defer="bankForm.max_attempts" />
+                                    <x-livewire-input mode="gray" id="test-bank-max-attempts" type="number" wire:model="bankForm.max_attempts" />
                                     @error('bankForm.max_attempts') <x-validation>{{ $message }}</x-validation> @enderror
                                 </div>
                             </div>
                             <div>
                                 <x-label for="test-bank-description">{{ __($d.'.fields.description') }}</x-label>
-                                <textarea id="test-bank-description" wire:model.defer="bankForm.description" rows="4" class="{{ $textarea }}"></textarea>
+                                <textarea id="test-bank-description" wire:model="bankForm.description" rows="4" class="{{ $textarea }}"></textarea>
                                 @error('bankForm.description') <x-validation>{{ $message }}</x-validation> @enderror
                             </div>
                             <div class="flex flex-col gap-3 border-t border-hairline-subtle pt-4 sm:flex-row sm:items-center sm:justify-between">
                                 <label class="inline-flex items-center gap-2.5 text-[13px] text-ink-soft">
-                                    <input type="checkbox" wire:model.defer="bankForm.is_active" class="{{ $checkbox }}">
+                                    <input type="checkbox" wire:model="bankForm.is_active" class="{{ $checkbox }}">
                                     {{ __($d.'.fields.is_active') }}
                                 </label>
                                 <button type="button" wire:click="storeTestBank" class="{{ $primary }}">{{ __($d.'.actions.save_test_bank') }}</button>
@@ -144,30 +144,30 @@
                             </div>
                             <div>
                                 <x-label for="test-question-prompt">{{ __($d.'.fields.prompt') }}</x-label>
-                                <textarea id="test-question-prompt" wire:model.defer="questionForm.prompt" rows="3" class="{{ $textarea }}"></textarea>
+                                <textarea id="test-question-prompt" wire:model="questionForm.prompt" rows="3" class="{{ $textarea }}"></textarea>
                                 @error('questionForm.prompt') <x-validation>{{ $message }}</x-validation> @enderror
                             </div>
                             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <div>
                                     <x-label for="test-question-max-score">{{ __($d.'.fields.max_score') }}</x-label>
-                                    <x-livewire-input mode="gray" id="test-question-max-score" type="number" step="0.01" wire:model.defer="questionForm.max_score" />
+                                    <x-livewire-input mode="gray" id="test-question-max-score" type="number" step="0.01" wire:model="questionForm.max_score" />
                                     @error('questionForm.max_score') <x-validation>{{ $message }}</x-validation> @enderror
                                 </div>
                                 <div>
                                     <x-label for="test-question-sort-order">{{ __($d.'.fields.sort_order') }}</x-label>
-                                    <x-livewire-input mode="gray" id="test-question-sort-order" type="number" wire:model.defer="questionForm.sort_order" />
+                                    <x-livewire-input mode="gray" id="test-question-sort-order" type="number" wire:model="questionForm.sort_order" />
                                     @error('questionForm.sort_order') <x-validation>{{ $message }}</x-validation> @enderror
                                 </div>
                             </div>
                             <div>
                                 <x-label for="test-question-options">{{ __($d.'.fields.options_text') }}</x-label>
-                                <textarea id="test-question-options" wire:model.defer="questionForm.options_text" rows="4" class="{{ $textarea }}" placeholder="{{ __($d.'.placeholders.options_text') }}"></textarea>
+                                <textarea id="test-question-options" wire:model="questionForm.options_text" rows="4" class="{{ $textarea }}" placeholder="{{ __($d.'.placeholders.options_text') }}"></textarea>
                                 <p class="mt-1 text-[11.5px] leading-5 text-ink-faint">{{ __($d.'.hints.options_text') }}</p>
                                 @error('questionForm.options_text') <x-validation>{{ $message }}</x-validation> @enderror
                             </div>
                             <div class="flex flex-col gap-3 border-t border-hairline-subtle pt-4 sm:flex-row sm:items-center sm:justify-between">
                                 <label class="inline-flex items-center gap-2.5 text-[13px] text-ink-soft">
-                                    <input type="checkbox" wire:model.defer="questionForm.is_active" class="{{ $checkbox }}">
+                                    <input type="checkbox" wire:model="questionForm.is_active" class="{{ $checkbox }}">
                                     {{ __($d.'.fields.is_active') }}
                                 </label>
                                 <button type="button" wire:click="storeTestQuestion" class="{{ $primary }}">{{ __($d.'.actions.save_test_question') }}</button>
@@ -300,12 +300,12 @@
                                 </div>
                                 <div>
                                     <x-label for="test-session-scheduled-at">{{ __($d.'.fields.scheduled_at') }}</x-label>
-                                    <x-livewire-input mode="gray" id="test-session-scheduled-at" type="date" wire:model.defer="sessionForm.scheduled_at" />
+                                    <x-livewire-input mode="gray" id="test-session-scheduled-at" type="date" wire:model="sessionForm.scheduled_at" />
                                     @error('sessionForm.scheduled_at') <x-validation>{{ $message }}</x-validation> @enderror
                                 </div>
                                 <div>
                                     <x-label for="test-session-available-until">{{ __($d.'.fields.available_until') }}</x-label>
-                                    <x-livewire-input mode="gray" id="test-session-available-until" type="date" wire:model.defer="sessionForm.available_until" />
+                                    <x-livewire-input mode="gray" id="test-session-available-until" type="date" wire:model="sessionForm.available_until" />
                                     @error('sessionForm.available_until') <x-validation>{{ $message }}</x-validation> @enderror
                                 </div>
                             </div>
@@ -313,15 +313,15 @@
                             <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
                                 <div>
                                     <x-label for="test-session-pass-score">{{ __($d.'.fields.pass_score') }}</x-label>
-                                    <x-livewire-input mode="gray" id="test-session-pass-score" type="number" step="0.01" wire:model.defer="sessionForm.pass_score" />
+                                    <x-livewire-input mode="gray" id="test-session-pass-score" type="number" step="0.01" wire:model="sessionForm.pass_score" />
                                 </div>
                                 <div>
                                     <x-label for="test-session-duration">{{ __($d.'.fields.duration_minutes') }}</x-label>
-                                    <x-livewire-input mode="gray" id="test-session-duration" type="number" wire:model.defer="sessionForm.duration_minutes" />
+                                    <x-livewire-input mode="gray" id="test-session-duration" type="number" wire:model="sessionForm.duration_minutes" />
                                 </div>
                                 <div>
                                     <x-label for="test-session-max-attempts">{{ __($d.'.fields.max_attempts') }}</x-label>
-                                    <x-livewire-input mode="gray" id="test-session-max-attempts" type="number" wire:model.defer="sessionForm.max_attempts" />
+                                    <x-livewire-input mode="gray" id="test-session-max-attempts" type="number" wire:model="sessionForm.max_attempts" />
                                 </div>
                                 <div>
                                     <x-ui.select-dropdown :label="__($d.'.fields.status')" placeholder="---" mode="gray" class="w-full" instance="perf-test-session-status" wire:model.live="sessionForm.status"
@@ -424,7 +424,7 @@
                                         </div>
                                         <div>
                                             <x-label for="attempt-no">{{ __($d.'.fields.attempt_no') }}</x-label>
-                                            <x-livewire-input mode="gray" id="attempt-no" type="number" wire:model.defer="attemptAnswerForm.attempt_no" />
+                                            <x-livewire-input mode="gray" id="attempt-no" type="number" wire:model="attemptAnswerForm.attempt_no" />
                                             @error('attemptAnswerForm.attempt_no') <x-validation>{{ $message }}</x-validation> @enderror
                                         </div>
                                     </div>
@@ -438,7 +438,7 @@
                                     @endif
                                     <div>
                                         <x-label for="attempt-answer-text">{{ __($d.'.fields.answer_text') }}</x-label>
-                                        <textarea id="attempt-answer-text" wire:model.defer="attemptAnswerForm.answer_text" rows="3" class="{{ $textarea }}"></textarea>
+                                        <textarea id="attempt-answer-text" wire:model="attemptAnswerForm.answer_text" rows="3" class="{{ $textarea }}"></textarea>
                                         @error('attemptAnswerForm.answer_text') <x-validation>{{ $message }}</x-validation> @enderror
                                     </div>
                                     <div class="flex justify-end border-t border-hairline-subtle pt-4">
@@ -460,12 +460,12 @@
                                     </div>
                                     <div class="sm:max-w-[220px]">
                                         <x-label for="review-score">{{ __($d.'.fields.review_score') }}</x-label>
-                                        <x-livewire-input mode="gray" id="review-score" type="number" step="0.01" wire:model.defer="reviewForm.score" />
+                                        <x-livewire-input mode="gray" id="review-score" type="number" step="0.01" wire:model="reviewForm.score" />
                                         @error('reviewForm.score') <x-validation>{{ $message }}</x-validation> @enderror
                                     </div>
                                     <div>
                                         <x-label for="review-feedback">{{ __($d.'.fields.feedback') }}</x-label>
-                                        <x-ui.textarea id="review-feedback" wire:model.defer="reviewForm.feedback" :rows="4" />
+                                        <x-ui.textarea id="review-feedback" wire:model="reviewForm.feedback" :rows="4" />
                                         @error('reviewForm.feedback') <x-validation>{{ $message }}</x-validation> @enderror
                                     </div>
                                     <div class="flex justify-end border-t border-hairline-subtle pt-4">

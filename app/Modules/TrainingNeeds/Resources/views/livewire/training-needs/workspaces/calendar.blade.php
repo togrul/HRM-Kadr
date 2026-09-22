@@ -94,51 +94,51 @@
                     </div>
                     <div class="md:col-span-2">
                         <x-label for="session-title">{{ __('training_needs::dashboard.fields.session_title') }}</x-label>
-                        <x-livewire-input mode="gray" id="session-title" wire:model.defer="sessionForm.title" />
+                        <x-livewire-input mode="gray" id="session-title" wire:model="sessionForm.title" />
                         @error('sessionForm.title') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div>
                         <x-label for="session-start">{{ __('training_needs::dashboard.fields.scheduled_start_at') }}</x-label>
-                        <input id="session-start" type="datetime-local" wire:model.defer="sessionForm.scheduled_start_at" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
+                        <input id="session-start" type="datetime-local" wire:model="sessionForm.scheduled_start_at" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
                         @error('sessionForm.scheduled_start_at') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div>
                         <x-label for="session-end">{{ __('training_needs::dashboard.fields.scheduled_end_at') }}</x-label>
-                        <input id="session-end" type="datetime-local" wire:model.defer="sessionForm.scheduled_end_at" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
+                        <input id="session-end" type="datetime-local" wire:model="sessionForm.scheduled_end_at" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
                         @error('sessionForm.scheduled_end_at') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div>
                         <x-label for="session-location">{{ __('training_needs::dashboard.fields.location') }}</x-label>
-                        <x-livewire-input mode="gray" id="session-location" wire:model.defer="sessionForm.location" />
+                        <x-livewire-input mode="gray" id="session-location" wire:model="sessionForm.location" />
                         @error('sessionForm.location') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div>
                         <x-label for="session-trainer">{{ __('training_needs::dashboard.fields.trainer_name') }}</x-label>
-                        <x-livewire-input mode="gray" id="session-trainer" wire:model.defer="sessionForm.trainer_name" />
+                        <x-livewire-input mode="gray" id="session-trainer" wire:model="sessionForm.trainer_name" />
                         @error('sessionForm.trainer_name') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div>
                         <x-label for="session-capacity">{{ __('training_needs::dashboard.fields.capacity') }}</x-label>
-                        <x-livewire-input mode="gray" id="session-capacity" type="number" wire:model.defer="sessionForm.capacity" />
+                        <x-livewire-input mode="gray" id="session-capacity" type="number" wire:model="sessionForm.capacity" />
                         @error('sessionForm.capacity') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div>
                         <x-label for="session-budget">{{ __('training_needs::dashboard.fields.planned_budget') }}</x-label>
-                        <x-livewire-input mode="gray" id="session-budget" type="number" step="0.01" wire:model.defer="sessionForm.planned_budget" />
+                        <x-livewire-input mode="gray" id="session-budget" type="number" step="0.01" wire:model="sessionForm.planned_budget" />
                         @error('sessionForm.planned_budget') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div>
                         <x-label for="session-actual-budget">{{ __('training_needs::dashboard.fields.actual_budget') }}</x-label>
-                        <x-livewire-input mode="gray" id="session-actual-budget" type="number" step="0.01" wire:model.defer="sessionForm.actual_budget" />
+                        <x-livewire-input mode="gray" id="session-actual-budget" type="number" step="0.01" wire:model="sessionForm.actual_budget" />
                         @error('sessionForm.actual_budget') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <label class="inline-flex items-center gap-2 rounded-lg bg-zinc-50 px-3 py-2 text-sm text-zinc-700">
-                        <input type="checkbox" wire:model.defer="sessionForm.auto_fill_participants" class="rounded border-zinc-300 text-blue-600 focus:ring-blue-500">
+                        <input type="checkbox" wire:model="sessionForm.auto_fill_participants" class="rounded border-zinc-300 text-blue-600 focus:ring-blue-500">
                         {{ __('training_needs::dashboard.fields.auto_fill_participants') }}
                     </label>
                     <div>
                         <x-label for="session-status">{{ __('training_needs::dashboard.fields.status') }}</x-label>
-                        <select id="session-status" wire:model.defer="sessionForm.status" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                        <select id="session-status" wire:model="sessionForm.status" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
                             <option value="draft">{{ __('training_needs::dashboard.session_statuses.draft') }}</option>
                             <option value="scheduled">{{ __('training_needs::dashboard.session_statuses.scheduled') }}</option>
                             <option value="in_progress">{{ __('training_needs::dashboard.session_statuses.in_progress') }}</option>
@@ -149,7 +149,7 @@
                     </div>
                     <div class="md:col-span-2">
                         <x-label for="session-notes">{{ __('training_needs::dashboard.fields.notes') }}</x-label>
-                        <textarea id="session-notes" wire:model.defer="sessionForm.notes" class="min-h-20 w-full rounded-lg border-none bg-neutral-100 px-3 py-2 text-sm shadow-sm focus:ring-blue-500"></textarea>
+                        <textarea id="session-notes" wire:model="sessionForm.notes" class="min-h-20 w-full rounded-lg border-none bg-neutral-100 px-3 py-2 text-sm shadow-sm focus:ring-blue-500"></textarea>
                         @error('sessionForm.notes') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div class="md:col-span-2">
@@ -207,7 +207,7 @@
                     </div>
                     <div class="md:col-span-2">
                         <x-label for="participant-status">{{ __('training_needs::dashboard.fields.attendance_status') }}</x-label>
-                        <select id="participant-status" wire:model.defer="participantForm.attendance_status" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                        <select id="participant-status" wire:model="participantForm.attendance_status" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
                             <option value="planned">{{ __('training_needs::dashboard.attendance_statuses.planned') }}</option>
                             <option value="confirmed">{{ __('training_needs::dashboard.attendance_statuses.confirmed') }}</option>
                             <option value="attended">{{ __('training_needs::dashboard.attendance_statuses.attended') }}</option>

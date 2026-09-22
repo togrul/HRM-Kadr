@@ -41,14 +41,14 @@
                 </x-ui.input-shell>
 
                 <x-ui.input-shell class="space-y-2" :label="__('notifications::common.fields.channel')">
-                    <select wire:model.defer="form.channel" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
+                    <select wire:model="form.channel" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
                         <option value="database">{{ __('notifications::common.channels.database') }}</option>
                         <option value="mail">{{ __('notifications::common.channels.mail') }}</option>
                     </select>
                 </x-ui.input-shell>
 
                 <x-ui.input-shell class="space-y-2" :label="__('notifications::common.fields.trigger')" :error="$errors->first('form.trigger')">
-                    <select wire:key="notification-trigger-{{ $form['category'] }}" wire:model.defer="form.trigger" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
+                    <select wire:key="notification-trigger-{{ $form['category'] }}" wire:model="form.trigger" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
                         @foreach ($triggerOptions as $triggerValue => $triggerLabel)
                             <option value="{{ $triggerValue }}">{{ $triggerLabel }}</option>
                         @endforeach
@@ -56,7 +56,7 @@
                 </x-ui.input-shell>
 
                 <x-ui.input-shell class="space-y-2" :label="__('notifications::common.fields.template')">
-                    <select wire:model.defer="form.template_id" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
+                    <select wire:model="form.template_id" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
                         <option value="">{{ __('notifications::common.badges.untemplated') }}</option>
                         @foreach ($templates as $template)
                             <option value="{{ $template->id }}">{{ $displayTemplateKey($template->key) }}</option>
@@ -113,7 +113,7 @@
 
                 <div class="space-y-2">
                     <label class="flex items-center gap-3 rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-700">
-                        <input type="checkbox" wire:model.defer="form.approval_required" class="rounded border-zinc-300 text-emerald-600 focus:ring-emerald-500">
+                        <input type="checkbox" wire:model="form.approval_required" class="rounded border-zinc-300 text-emerald-600 focus:ring-emerald-500">
                         <span>{{ __('notifications::common.badges.approval_required') }}</span>
                     </label>
                     <div class="flex flex-wrap items-center justify-between gap-2 px-1">
@@ -125,7 +125,7 @@
                 </div>
 
                 <label class="flex items-center gap-3 rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-700">
-                    <input type="checkbox" wire:model.defer="form.is_active" class="rounded border-zinc-300 text-emerald-600 focus:ring-emerald-500">
+                    <input type="checkbox" wire:model="form.is_active" class="rounded border-zinc-300 text-emerald-600 focus:ring-emerald-500">
                     <span>{{ __('notifications::common.helpers.rule_active') }}</span>
                 </label>
             </div>

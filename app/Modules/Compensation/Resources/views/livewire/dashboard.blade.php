@@ -360,16 +360,16 @@
                                 @error('assignmentForm.regime_id') <x-validation>{{ $message }}</x-validation> @enderror
                             </div>
                             <x-ui.input-shell :label="__('compensation::dashboard.fields.base_amount')" :error="$errors->first('assignmentForm.base_amount')">
-                                <x-ui.input type="number" step="0.01" wire:model.defer="assignmentForm.base_amount" />
+                                <x-ui.input type="number" step="0.01" wire:model="assignmentForm.base_amount" />
                             </x-ui.input-shell>
                             <x-ui.input-shell :label="__('compensation::dashboard.fields.effective_from')" :error="$errors->first('assignmentForm.effective_from')">
-                                <x-ui.input type="date" wire:model.defer="assignmentForm.effective_from" />
+                                <x-ui.input type="date" wire:model="assignmentForm.effective_from" />
                             </x-ui.input-shell>
                             <x-ui.input-shell :label="__('compensation::dashboard.fields.order_no')">
-                                <x-ui.input wire:model.defer="assignmentForm.order_no" />
+                                <x-ui.input wire:model="assignmentForm.order_no" />
                             </x-ui.input-shell>
                             <x-ui.input-shell class="lg:col-span-2" :label="__('compensation::dashboard.fields.note')">
-                                <x-ui.input wire:model.defer="assignmentForm.note" />
+                                <x-ui.input wire:model="assignmentForm.note" />
                             </x-ui.input-shell>
                         </div>
 
@@ -386,10 +386,10 @@
                                             <x-ui.select-dropdown :label="__('compensation::dashboard.fields.component')" mode="gray" direction="auto" wire:model.live="assignmentLines.{{ $i }}.component_id" :model="$this->componentOptions" :instance="'line-'.$i" />
                                         </div>
                                         <x-ui.input-shell class="min-w-0 sm:col-span-3" :label="__('compensation::dashboard.fields.amount')">
-                                            <x-ui.input type="number" step="0.01" wire:model.defer="assignmentLines.{{ $i }}.amount" />
+                                            <x-ui.input type="number" step="0.01" wire:model="assignmentLines.{{ $i }}.amount" />
                                         </x-ui.input-shell>
                                         <x-ui.input-shell class="min-w-0 sm:col-span-3" :label="__('compensation::dashboard.fields.percent')">
-                                            <x-ui.input type="number" step="0.01" wire:model.defer="assignmentLines.{{ $i }}.percent" />
+                                            <x-ui.input type="number" step="0.01" wire:model="assignmentLines.{{ $i }}.percent" />
                                         </x-ui.input-shell>
                                         <div class="flex justify-end sm:col-span-1">
                                             <button type="button" wire:click="removeAssignmentLine({{ $i }})" title="{{ __('compensation::dashboard.actions.delete') }}" class="{{ $delBtn }}">{!! $delIcon !!}</button>
@@ -538,35 +538,35 @@
                 @if ($panel === 'scale')
                     <div class="grid gap-3 sm:grid-cols-2">
                         <x-ui.input-shell class="sm:col-span-2" :label="__('compensation::dashboard.fields.name')" :error="$errors->first('scaleForm.name')">
-                            <x-ui.input wire:model.defer="scaleForm.name" />
+                            <x-ui.input wire:model="scaleForm.name" />
                         </x-ui.input-shell>
                         <div class="min-w-0">
                             <x-ui.select-dropdown :label="__('compensation::dashboard.fields.regime')" mode="gray" direction="auto" wire:model.live="scaleForm.regime_id" :model="$this->regimeOptions" />
                             @error('scaleForm.regime_id') <x-validation>{{ $message }}</x-validation> @enderror
                         </div>
                         <x-ui.input-shell :label="__('compensation::dashboard.fields.currency')">
-                            <x-ui.input maxlength="3" class="uppercase" wire:model.defer="scaleForm.currency" />
+                            <x-ui.input maxlength="3" class="uppercase" wire:model="scaleForm.currency" />
                         </x-ui.input-shell>
                         <x-ui.input-shell :label="__('compensation::dashboard.fields.effective_from')" :error="$errors->first('scaleForm.effective_from')">
-                            <x-ui.input type="date" wire:model.defer="scaleForm.effective_from" />
+                            <x-ui.input type="date" wire:model="scaleForm.effective_from" />
                         </x-ui.input-shell>
                         <x-ui.input-shell :label="__('compensation::dashboard.fields.effective_to')" :error="$errors->first('scaleForm.effective_to')">
-                            <x-ui.input type="date" wire:model.defer="scaleForm.effective_to" />
+                            <x-ui.input type="date" wire:model="scaleForm.effective_to" />
                         </x-ui.input-shell>
                         <x-ui.input-shell class="sm:col-span-2" :label="__('compensation::dashboard.fields.description')" :error="$errors->first('scaleForm.description')">
-                            <x-ui.textarea wire:model.defer="scaleForm.description" rows="2" />
+                            <x-ui.textarea wire:model="scaleForm.description" rows="2" />
                         </x-ui.input-shell>
                     </div>
                 @elseif ($panel === 'grade')
                     <div class="grid gap-3 sm:grid-cols-2">
                         <x-ui.input-shell :label="__('compensation::dashboard.fields.code')" :error="$errors->first('gradeForm.code')">
-                            <x-ui.input wire:model.defer="gradeForm.code" />
+                            <x-ui.input wire:model="gradeForm.code" />
                         </x-ui.input-shell>
                         <x-ui.input-shell :label="__('compensation::dashboard.fields.base_amount')" :error="$errors->first('gradeForm.base_amount')">
-                            <x-ui.input type="number" step="0.01" wire:model.defer="gradeForm.base_amount" />
+                            <x-ui.input type="number" step="0.01" wire:model="gradeForm.base_amount" />
                         </x-ui.input-shell>
                         <x-ui.input-shell class="sm:col-span-2" :label="__('compensation::dashboard.fields.name')" :error="$errors->first('gradeForm.name')">
-                            <x-ui.input wire:model.defer="gradeForm.name" />
+                            <x-ui.input wire:model="gradeForm.name" />
                         </x-ui.input-shell>
                         <div class="min-w-0">
                             <x-ui.select-dropdown :label="__('compensation::dashboard.fields.rank_category')" mode="gray" direction="auto" wire:model.live="gradeForm.rank_category_id" :model="$this->rankCategoryOptions" search-model="searchRankCategory" />
@@ -578,10 +578,10 @@
                 @elseif ($panel === 'component')
                     <div class="grid gap-3 sm:grid-cols-2">
                         <x-ui.input-shell :label="__('compensation::dashboard.fields.code')" :error="$errors->first('componentForm.code')">
-                            <x-ui.input wire:model.defer="componentForm.code" />
+                            <x-ui.input wire:model="componentForm.code" />
                         </x-ui.input-shell>
                         <x-ui.input-shell :label="__('compensation::dashboard.fields.name')" :error="$errors->first('componentForm.name')">
-                            <x-ui.input wire:model.defer="componentForm.name" />
+                            <x-ui.input wire:model="componentForm.name" />
                         </x-ui.input-shell>
                         <x-ui.input-shell :label="__('compensation::dashboard.fields.type')">
                             <x-ui.select wire:model.live="componentForm.type">
@@ -597,15 +597,15 @@
                             </x-ui.select>
                         </x-ui.input-shell>
                         <x-ui.input-shell :label="__('compensation::dashboard.fields.gl_code')">
-                            <x-ui.input wire:model.defer="componentForm.gl_code" />
+                            <x-ui.input wire:model="componentForm.gl_code" />
                         </x-ui.input-shell>
                         <x-ui.input-shell :label="__('compensation::dashboard.fields.sort')">
-                            <x-ui.input type="number" wire:model.defer="componentForm.sort" />
+                            <x-ui.input type="number" wire:model="componentForm.sort" />
                         </x-ui.input-shell>
                         <div class="flex flex-wrap gap-4 pt-1 sm:col-span-2">
                             @foreach (['taxable', 'affects_social', 'is_statutory', 'is_active'] as $flag)
                                 <label class="inline-flex items-center gap-2 text-[12.5px] font-medium text-ink-muted">
-                                    <input type="checkbox" wire:model.defer="componentForm.{{ $flag }}" class="rounded border-hairline text-ink focus:ring-[#e4e4e7]" />
+                                    <input type="checkbox" wire:model="componentForm.{{ $flag }}" class="rounded border-hairline text-ink focus:ring-[#e4e4e7]" />
                                     {{ __('compensation::dashboard.fields.'.$flag) }}
                                 </label>
                             @endforeach
@@ -614,18 +614,18 @@
                 @elseif ($panel === 'bank')
                     <div class="grid gap-3 sm:grid-cols-2">
                         <x-ui.input-shell class="sm:col-span-2" :label="__('compensation::dashboard.fields.iban')" :error="$errors->first('bankForm.iban')">
-                            <x-ui.input class="uppercase" wire:model.defer="bankForm.iban" />
+                            <x-ui.input class="uppercase" wire:model="bankForm.iban" />
                         </x-ui.input-shell>
                         <x-ui.input-shell :label="__('compensation::dashboard.fields.bank_name')">
-                            <x-ui.input wire:model.defer="bankForm.bank_name" />
+                            <x-ui.input wire:model="bankForm.bank_name" />
                         </x-ui.input-shell>
                         <x-ui.input-shell :label="__('compensation::dashboard.fields.account_no')">
-                            <x-ui.input wire:model.defer="bankForm.account_no" />
+                            <x-ui.input wire:model="bankForm.account_no" />
                         </x-ui.input-shell>
                         <div class="flex flex-wrap gap-4 pt-1 sm:col-span-2">
                             @foreach (['is_primary', 'is_active'] as $flag)
                                 <label class="inline-flex items-center gap-2 text-[12.5px] font-medium text-ink-muted">
-                                    <input type="checkbox" wire:model.defer="bankForm.{{ $flag }}" class="rounded border-hairline text-ink focus:ring-[#e4e4e7]" />
+                                    <input type="checkbox" wire:model="bankForm.{{ $flag }}" class="rounded border-hairline text-ink focus:ring-[#e4e4e7]" />
                                     {{ __('compensation::dashboard.fields.'.$flag) }}
                                 </label>
                             @endforeach
@@ -661,7 +661,7 @@
                             </x-ui.select>
                         </x-ui.input-shell>
                         <x-ui.input-shell class="sm:col-span-2" :label="__('compensation::dashboard.fields.effective_from')" :error="$errors->first('statutoryForm.effective_from')">
-                            <x-ui.input type="date" wire:model.defer="statutoryForm.effective_from" />
+                            <x-ui.input type="date" wire:model="statutoryForm.effective_from" />
                         </x-ui.input-shell>
                     </div>
 
@@ -676,10 +676,10 @@
                             @foreach ($statutoryBrackets as $i => $bracket)
                                 <div wire:key="compensation-bracket-{{ $i }}" class="grid items-end gap-2 rounded-xl border border-hairline bg-white p-3 sm:grid-cols-12">
                                     <x-ui.input-shell class="min-w-0 sm:col-span-5" :label="__('compensation::dashboard.statutory.up_to')">
-                                        <x-ui.input type="number" step="0.01" wire:model.defer="statutoryBrackets.{{ $i }}.up_to" />
+                                        <x-ui.input type="number" step="0.01" wire:model="statutoryBrackets.{{ $i }}.up_to" />
                                     </x-ui.input-shell>
                                     <x-ui.input-shell class="min-w-0 sm:col-span-5" :label="__('compensation::dashboard.statutory.rate')" :error="$errors->first('statutoryBrackets.'.$i.'.rate')">
-                                        <x-ui.input type="number" step="0.01" wire:model.defer="statutoryBrackets.{{ $i }}.rate" />
+                                        <x-ui.input type="number" step="0.01" wire:model="statutoryBrackets.{{ $i }}.rate" />
                                     </x-ui.input-shell>
                                     <div class="flex justify-end sm:col-span-2">
                                         <button type="button" wire:click="removeStatutoryBracket({{ $i }})" title="{{ __('compensation::dashboard.actions.delete') }}" class="{{ $delBtn }}">{!! $delIcon !!}</button>

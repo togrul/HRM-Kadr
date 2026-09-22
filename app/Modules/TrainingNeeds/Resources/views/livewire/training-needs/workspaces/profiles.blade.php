@@ -41,7 +41,7 @@
                     </div>
                     <div>
                         <x-label for="profile-source">{{ __('training_needs::dashboard.fields.source') }}</x-label>
-                        <select id="profile-source" wire:model.defer="profileForm.source" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                        <select id="profile-source" wire:model="profileForm.source" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
                             <option value="manual">{{ __('training_needs::dashboard.sources.manual') }}</option>
                             <option value="manager_review">{{ __('training_needs::dashboard.sources.manager_review') }}</option>
                             <option value="hr_review">{{ __('training_needs::dashboard.sources.hr_review') }}</option>
@@ -51,7 +51,7 @@
                     </div>
                     <div class="md:col-span-2">
                         <x-label for="profile-assessed-at">{{ __('training_needs::dashboard.fields.last_assessed_at') }}</x-label>
-                        <input id="profile-assessed-at" type="date" wire:model.defer="profileForm.last_assessed_at" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
+                        <input id="profile-assessed-at" type="date" wire:model="profileForm.last_assessed_at" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
                         @error('profileForm.last_assessed_at') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div class="md:col-span-2">
@@ -112,7 +112,7 @@
                     </div>
                     <div>
                         <x-label for="need-priority">{{ __('training_needs::dashboard.fields.priority') }}</x-label>
-                        <select id="need-priority" wire:model.defer="needForm.priority" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                        <select id="need-priority" wire:model="needForm.priority" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
                             <option value="low">{{ __('training_needs::dashboard.priorities.low') }}</option>
                             <option value="medium">{{ __('training_needs::dashboard.priorities.medium') }}</option>
                             <option value="high">{{ __('training_needs::dashboard.priorities.high') }}</option>
@@ -121,7 +121,7 @@
                     </div>
                     <div>
                         <x-label for="need-status">{{ __('training_needs::dashboard.fields.status') }}</x-label>
-                        <select id="need-status" wire:model.defer="needForm.status" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                        <select id="need-status" wire:model="needForm.status" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
                             <option value="draft">{{ __('training_needs::dashboard.statuses.draft') }}</option>
                             <option value="review">{{ __('training_needs::dashboard.statuses.review') }}</option>
                             <option value="approved">{{ __('training_needs::dashboard.statuses.approved') }}</option>
@@ -131,7 +131,7 @@
                     </div>
                     <div>
                         <x-label for="need-source">{{ __('training_needs::dashboard.fields.source') }}</x-label>
-                        <select id="need-source" wire:model.defer="needForm.source" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                        <select id="need-source" wire:model="needForm.source" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
                             <option value="manual">{{ __('training_needs::dashboard.sources.manual') }}</option>
                             <option value="manager_request">{{ __('training_needs::dashboard.sources.manager_request') }}</option>
                             <option value="employee_request">{{ __('training_needs::dashboard.sources.employee_request') }}</option>
@@ -141,17 +141,17 @@
                     </div>
                     <div>
                         <x-label for="need-target-date">{{ __('training_needs::dashboard.fields.target_completion_date') }}</x-label>
-                        <input id="need-target-date" type="date" wire:model.defer="needForm.target_completion_date" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
+                        <input id="need-target-date" type="date" wire:model="needForm.target_completion_date" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
                         @error('needForm.target_completion_date') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div class="md:col-span-2">
                         <x-label for="need-reason">{{ __('training_needs::dashboard.fields.reason') }}</x-label>
-                        <textarea id="need-reason" wire:model.defer="needForm.reason" class="min-h-20 w-full rounded-lg border-none bg-neutral-100 px-3 py-2 text-sm shadow-sm focus:ring-blue-500"></textarea>
+                        <textarea id="need-reason" wire:model="needForm.reason" class="min-h-20 w-full rounded-lg border-none bg-neutral-100 px-3 py-2 text-sm shadow-sm focus:ring-blue-500"></textarea>
                         @error('needForm.reason') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div class="md:col-span-2">
                         <x-label for="need-plan-note">{{ __('training_needs::dashboard.fields.plan_note') }}</x-label>
-                        <textarea id="need-plan-note" wire:model.defer="needForm.plan_note" class="min-h-24 w-full rounded-lg border-none bg-neutral-100 px-3 py-2 text-sm shadow-sm focus:ring-blue-500"></textarea>
+                        <textarea id="need-plan-note" wire:model="needForm.plan_note" class="min-h-24 w-full rounded-lg border-none bg-neutral-100 px-3 py-2 text-sm shadow-sm focus:ring-blue-500"></textarea>
                         @error('needForm.plan_note') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div class="md:col-span-2">

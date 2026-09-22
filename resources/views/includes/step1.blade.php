@@ -573,7 +573,7 @@
         <div class="flex flex-col space-y-2">
             <div class="flex flex-col">
                 <x-label for="personnel.tabel_no">{{ __('personnel::common.labels.tabel_hash') }}</x-label>
-                <x-livewire-input mode="gray" name="personnel.tabel_no" wire:model.defer="personalForm.personnel.tabel_no"></x-livewire-input>
+                <x-livewire-input mode="gray" name="personnel.tabel_no" wire:model="personalForm.personnel.tabel_no"></x-livewire-input>
                 @error('personalForm.personnel.tabel_no')
                 <x-validation> {{ $message }} </x-validation>
                 @enderror

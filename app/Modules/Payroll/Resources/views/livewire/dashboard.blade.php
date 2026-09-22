@@ -461,13 +461,13 @@
                                 />
                             </div>
                             <x-ui.input-shell :label="__('payroll::dashboard.fields.principal')" :error="$errors->first('loanForm.principal')">
-                                <x-ui.input type="number" step="0.01" wire:model.defer="loanForm.principal" />
+                                <x-ui.input type="number" step="0.01" wire:model="loanForm.principal" />
                             </x-ui.input-shell>
                             <x-ui.input-shell :label="__('payroll::dashboard.fields.monthly_installment')" :error="$errors->first('loanForm.monthly_installment')">
-                                <x-ui.input type="number" step="0.01" wire:model.defer="loanForm.monthly_installment" />
+                                <x-ui.input type="number" step="0.01" wire:model="loanForm.monthly_installment" />
                             </x-ui.input-shell>
                             <x-ui.input-shell :label="__('payroll::dashboard.fields.start_on')" :error="$errors->first('loanForm.start_on')">
-                                <x-ui.input type="date" wire:model.defer="loanForm.start_on" />
+                                <x-ui.input type="date" wire:model="loanForm.start_on" />
                             </x-ui.input-shell>
                             <div class="flex items-end">
                                 <x-pill-button variant="primary" class="w-full justify-center" wire:click="saveLoan">{{ __('payroll::dashboard.actions.save') }}</x-pill-button>
@@ -534,10 +534,10 @@
                 @if ($panel === 'period')
                     <div class="grid gap-3 sm:grid-cols-2">
                         <x-ui.input-shell :label="__('payroll::dashboard.fields.year')" :error="$errors->first('periodForm.year')">
-                            <x-ui.input type="number" wire:model.defer="periodForm.year" />
+                            <x-ui.input type="number" wire:model="periodForm.year" />
                         </x-ui.input-shell>
                         <x-ui.input-shell :label="__('payroll::dashboard.fields.month')" :error="$errors->first('periodForm.month')">
-                            <x-ui.input type="number" min="1" max="12" wire:model.defer="periodForm.month" />
+                            <x-ui.input type="number" min="1" max="12" wire:model="periodForm.month" />
                         </x-ui.input-shell>
                     </div>
 

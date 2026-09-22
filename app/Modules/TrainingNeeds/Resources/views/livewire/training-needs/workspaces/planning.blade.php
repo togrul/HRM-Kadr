@@ -9,17 +9,17 @@
                 <div class="grid gap-3 md:grid-cols-2">
                     <div class="md:col-span-2">
                         <x-label for="plan-title">{{ __('training_needs::dashboard.fields.plan_title') }}</x-label>
-                        <x-livewire-input mode="gray" id="plan-title" wire:model.defer="planForm.title" />
+                        <x-livewire-input mode="gray" id="plan-title" wire:model="planForm.title" />
                         @error('planForm.title') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div>
                         <x-label for="plan-year">{{ __('training_needs::dashboard.fields.plan_year') }}</x-label>
-                        <x-livewire-input mode="gray" id="plan-year" type="number" wire:model.defer="planForm.plan_year" />
+                        <x-livewire-input mode="gray" id="plan-year" type="number" wire:model="planForm.plan_year" />
                         @error('planForm.plan_year') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div>
                         <x-label for="plan-quarter">{{ __('training_needs::dashboard.fields.plan_quarter') }}</x-label>
-                        <select id="plan-quarter" wire:model.defer="planForm.plan_quarter" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                        <select id="plan-quarter" wire:model="planForm.plan_quarter" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
                             <option value="">{{ __('training_needs::dashboard.labels.all_year') }}</option>
                             <option value="1">Q1</option>
                             <option value="2">Q2</option>
@@ -30,7 +30,7 @@
                     </div>
                     <div>
                         <x-label for="plan-status">{{ __('training_needs::dashboard.fields.status') }}</x-label>
-                        <select id="plan-status" wire:model.defer="planForm.status" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                        <select id="plan-status" wire:model="planForm.status" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
                             <option value="draft">{{ __('training_needs::dashboard.plan_statuses.draft') }}</option>
                             <option value="review">{{ __('training_needs::dashboard.plan_statuses.review') }}</option>
                             <option value="approved">{{ __('training_needs::dashboard.plan_statuses.approved') }}</option>
@@ -39,12 +39,12 @@
                         @error('planForm.status') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <label class="mt-6 inline-flex items-center gap-2 rounded-lg bg-zinc-50 px-3 py-2 text-sm text-zinc-700">
-                        <input type="checkbox" wire:model.defer="planForm.auto_generate" class="rounded border-zinc-300 text-blue-600 focus:ring-blue-500">
+                        <input type="checkbox" wire:model="planForm.auto_generate" class="rounded border-zinc-300 text-blue-600 focus:ring-blue-500">
                         {{ __('training_needs::dashboard.fields.auto_generate_plan_items') }}
                     </label>
                     <div class="md:col-span-2">
                         <x-label for="plan-notes">{{ __('training_needs::dashboard.fields.notes') }}</x-label>
-                        <textarea id="plan-notes" wire:model.defer="planForm.notes" class="min-h-24 w-full rounded-lg border-none bg-neutral-100 px-3 py-2 text-sm shadow-sm focus:ring-blue-500"></textarea>
+                        <textarea id="plan-notes" wire:model="planForm.notes" class="min-h-24 w-full rounded-lg border-none bg-neutral-100 px-3 py-2 text-sm shadow-sm focus:ring-blue-500"></textarea>
                         @error('planForm.notes') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div class="md:col-span-2">
@@ -143,17 +143,17 @@
                     </div>
                     <div>
                         <x-label for="review-participant-count">{{ __('training_needs::dashboard.fields.participant_count') }}</x-label>
-                        <x-livewire-input mode="gray" id="review-participant-count" type="number" wire:model.defer="planItemReviewForm.participant_count" />
+                        <x-livewire-input mode="gray" id="review-participant-count" type="number" wire:model="planItemReviewForm.participant_count" />
                         @error('planItemReviewForm.participant_count') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div>
                         <x-label for="review-budget">{{ __('training_needs::dashboard.fields.planned_budget') }}</x-label>
-                        <x-livewire-input mode="gray" id="review-budget" type="number" step="0.01" wire:model.defer="planItemReviewForm.estimated_budget" />
+                        <x-livewire-input mode="gray" id="review-budget" type="number" step="0.01" wire:model="planItemReviewForm.estimated_budget" />
                         @error('planItemReviewForm.estimated_budget') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div>
                         <x-label for="review-priority">{{ __('training_needs::dashboard.fields.priority') }}</x-label>
-                        <select id="review-priority" wire:model.defer="planItemReviewForm.priority" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                        <select id="review-priority" wire:model="planItemReviewForm.priority" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
                             <option value="low">{{ __('training_needs::dashboard.priorities.low') }}</option>
                             <option value="medium">{{ __('training_needs::dashboard.priorities.medium') }}</option>
                             <option value="high">{{ __('training_needs::dashboard.priorities.high') }}</option>
@@ -162,7 +162,7 @@
                     </div>
                     <div class="md:col-span-2">
                         <x-label for="review-note">{{ __('training_needs::dashboard.fields.review_note') }}</x-label>
-                        <textarea id="review-note" wire:model.defer="planItemReviewForm.review_note" class="min-h-24 w-full rounded-lg border-none bg-neutral-100 px-3 py-2 text-sm shadow-sm focus:ring-blue-500"></textarea>
+                        <textarea id="review-note" wire:model="planItemReviewForm.review_note" class="min-h-24 w-full rounded-lg border-none bg-neutral-100 px-3 py-2 text-sm shadow-sm focus:ring-blue-500"></textarea>
                         @error('planItemReviewForm.review_note') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div class="md:col-span-2 flex flex-wrap gap-2">

@@ -23,13 +23,13 @@
 
         <div>
             <x-label for="evaluator-score">{{ __('performance_evaluation::dashboard.fields.score') }}</x-label>
-            <x-livewire-input mode="gray" id="evaluator-score" type="number" step="0.01" wire:model.defer="scoreForm.score" />
+            <x-livewire-input mode="gray" id="evaluator-score" type="number" step="0.01" wire:model="scoreForm.score" />
             @error('scoreForm.score') <x-validation>{{ $message }}</x-validation> @enderror
         </div>
 
         <div>
             <x-label for="evaluator-comment">{{ __('performance_evaluation::dashboard.fields.comment') }}</x-label>
-            <textarea id="evaluator-comment" wire:model.defer="scoreForm.comment" rows="3" class="w-full rounded-xl border border-hairline bg-[#fafafa] px-3 py-2 text-[13px] text-ink focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-0"></textarea>
+            <textarea id="evaluator-comment" wire:model="scoreForm.comment" rows="3" class="w-full rounded-xl border border-hairline bg-[#fafafa] px-3 py-2 text-[13px] text-ink focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-0"></textarea>
             @error('scoreForm.comment') <x-validation>{{ $message }}</x-validation> @enderror
         </div>
 

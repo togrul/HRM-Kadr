@@ -41,7 +41,7 @@
                 placeholder="---"
                 mode="gray"
                 class="w-full"
-                wire:model.defer="leave.leave_type_id"
+                wire:model="leave.leave_type_id"
                 :model="$this->leaveTypes"
             />
             
@@ -193,7 +193,7 @@
                     placeholder="---"
                     mode="gray"
                     class="w-full"
-                    wire:model.defer="leave.status_id"
+                    wire:model="leave.status_id"
                     :model="$this->statuses"
                 />
 

@@ -35,7 +35,7 @@
                 <x-label for="attendance-settings-timezone">{{ __('attendance::settings.fields.timezone') }}</x-label>
                 <select
                     id="attendance-settings-timezone"
-                    wire:model.defer="form.timezone"
+                    wire:model="form.timezone"
                     class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500"
                     @disabled(! $canManage)
                 >
@@ -50,7 +50,7 @@
                 <x-label for="attendance-settings-default-shift">{{ __('attendance::settings.fields.default_shift') }}</x-label>
                 <select
                     id="attendance-settings-default-shift"
-                    wire:model.defer="form.default_shift_id"
+                    wire:model="form.default_shift_id"
                     class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500"
                     @disabled(! $canManage)
                 >
@@ -70,7 +70,7 @@
                     type="number"
                     min="0"
                     max="300"
-                    wire:model.defer="form.late_grace_minutes"
+                    wire:model="form.late_grace_minutes"
                     :disabled="! $canManage"
                 />
                 @error('form.late_grace_minutes') <x-validation>{{ $message }}</x-validation> @enderror
@@ -84,7 +84,7 @@
                     type="number"
                     min="0"
                     max="300"
-                    wire:model.defer="form.early_leave_grace_minutes"
+                    wire:model="form.early_leave_grace_minutes"
                     :disabled="! $canManage"
                 />
                 @error('form.early_leave_grace_minutes') <x-validation>{{ $message }}</x-validation> @enderror
@@ -94,7 +94,7 @@
                 <x-label for="attendance-settings-rounding-policy">{{ __('attendance::settings.fields.rounding_policy') }}</x-label>
                 <select
                     id="attendance-settings-rounding-policy"
-                    wire:model.defer="form.rounding_policy"
+                    wire:model="form.rounding_policy"
                     class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500"
                     @disabled(! $canManage)
                 >
@@ -114,7 +114,7 @@
                     type="number"
                     min="1"
                     max="60"
-                    wire:model.defer="form.rounding_step_minutes"
+                    wire:model="form.rounding_step_minutes"
                     :disabled="! $canManage"
                 />
                 @error('form.rounding_step_minutes') <x-validation>{{ $message }}</x-validation> @enderror
@@ -124,7 +124,7 @@
                 <x-label for="attendance-settings-overtime-policy">{{ __('attendance::settings.fields.overtime_policy') }}</x-label>
                 <select
                     id="attendance-settings-overtime-policy"
-                    wire:model.defer="form.overtime_policy"
+                    wire:model="form.overtime_policy"
                     class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500"
                     @disabled(! $canManage)
                 >

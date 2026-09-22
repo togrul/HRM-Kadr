@@ -27,7 +27,7 @@
                 <div class="mt-4 space-y-4">
                     <div class="grid gap-4 xl:grid-cols-2">
                 <x-ui.input-shell class="space-y-2 xl:col-span-2" :label="__('notifications::common.fields.key')" :error="$errors->first('form.key')">
-                    <input type="text" wire:model.defer="form.key" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
+                    <input type="text" wire:model="form.key" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
                 </x-ui.input-shell>
 
                 <x-ui.input-shell class="space-y-2" :label="__('notifications::common.fields.category')">
@@ -53,7 +53,7 @@
                 </x-ui.input-shell>
 
                 <label class="flex items-center gap-3 rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-700">
-                    <input type="checkbox" wire:model.defer="form.is_active" class="rounded border-zinc-300 text-emerald-600 focus:ring-emerald-500">
+                    <input type="checkbox" wire:model="form.is_active" class="rounded border-zinc-300 text-emerald-600 focus:ring-emerald-500">
                     <span>{{ __('notifications::common.helpers.template_active') }}</span>
                 </label>
 
@@ -99,7 +99,7 @@
 
                     <div class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_12rem] xl:items-end">
                         <x-ui.input-shell class="space-y-2" :label="__('notifications::common.fields.test_email')" :error="$errors->first('testEmail')">
-                            <input type="email" wire:model.defer="testEmail" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800" placeholder="{{ __('notifications::common.helpers.demo_email') }}">
+                            <input type="email" wire:model="testEmail" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800" placeholder="{{ __('notifications::common.helpers.demo_email') }}">
                         </x-ui.input-shell>
                         <x-ui.async-button type="button" variant="secondary" fullWidth="true" size="lg" wire:click="sendTest" wire:loading.attr="disabled" wire:target="sendTest">
                             {{ __('notifications::common.buttons.send_test') }}

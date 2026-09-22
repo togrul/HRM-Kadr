@@ -243,7 +243,7 @@
 
                     <div class="grid flex-1 content-start gap-3 px-4 py-4 sm:grid-cols-2">
                         <x-ui.input-shell class="sm:col-span-2" :label="__('services::settings.labels.delegate')" :error="$errors->first('chiefDelegationForm.delegate_personnel_id')">
-                            <x-ui.select wire:model.defer="chiefDelegationForm.delegate_personnel_id">
+                            <x-ui.select wire:model="chiefDelegationForm.delegate_personnel_id">
                                 <option value="">{{ __('services::settings.labels.delegate_placeholder') }}</option>
                                 @foreach ($chiefOptions as $option)
                                     <option value="{{ $option['id'] }}">{{ $option['label'] }}@if ($option['position']) — {{ $option['position'] }}@endif</option>
@@ -260,11 +260,11 @@
                         </x-ui.input-shell>
 
                         <x-ui.input-shell :label="__('services::settings.labels.reason')" :error="$errors->first('chiefDelegationForm.reason')">
-                            <x-ui.input wire:model.defer="chiefDelegationForm.reason" placeholder="{{ __('services::settings.labels.reason_placeholder') }}" />
+                            <x-ui.input wire:model="chiefDelegationForm.reason" placeholder="{{ __('services::settings.labels.reason_placeholder') }}" />
                         </x-ui.input-shell>
 
                         <x-ui.input-shell :label="__('services::settings.labels.basis_document')" :error="$errors->first('chiefDelegationForm.basis_document')">
-                            <x-ui.input wire:model.defer="chiefDelegationForm.basis_document" placeholder="{{ __('services::settings.labels.basis_placeholder') }}" />
+                            <x-ui.input wire:model="chiefDelegationForm.basis_document" placeholder="{{ __('services::settings.labels.basis_placeholder') }}" />
                         </x-ui.input-shell>
                     </div>
 

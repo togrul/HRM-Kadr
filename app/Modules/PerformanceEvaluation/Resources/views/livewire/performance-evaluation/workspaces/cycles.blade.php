@@ -124,7 +124,7 @@
                         <div class="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
                             <div class="md:col-span-2">
                                 <x-label for="cycle-name">{{ __($d.'.fields.cycle_name') }}</x-label>
-                                <x-livewire-input mode="gray" id="cycle-name" wire:model.defer="cycleForm.name" />
+                                <x-livewire-input mode="gray" id="cycle-name" wire:model="cycleForm.name" />
                                 @error('cycleForm.name') <x-validation>{{ $message }}</x-validation> @enderror
                             </div>
                             <div>
@@ -139,21 +139,21 @@
                             </div>
                             <div>
                                 <x-label for="cycle-period-start">{{ __($d.'.fields.period_start') }}</x-label>
-                                <x-livewire-input mode="gray" id="cycle-period-start" type="date" wire:model.defer="cycleForm.period_start" />
+                                <x-livewire-input mode="gray" id="cycle-period-start" type="date" wire:model="cycleForm.period_start" />
                                 @error('cycleForm.period_start') <x-validation>{{ $message }}</x-validation> @enderror
                             </div>
                             <div>
                                 <x-label for="cycle-period-end">{{ __($d.'.fields.period_end') }}</x-label>
-                                <x-livewire-input mode="gray" id="cycle-period-end" type="date" wire:model.defer="cycleForm.period_end" />
+                                <x-livewire-input mode="gray" id="cycle-period-end" type="date" wire:model="cycleForm.period_end" />
                                 @error('cycleForm.period_end') <x-validation>{{ $message }}</x-validation> @enderror
                             </div>
                             <div class="md:col-span-2">
                                 <x-label for="cycle-description">{{ __($d.'.fields.description') }}</x-label>
-                                <textarea id="cycle-description" wire:model.defer="cycleForm.description" rows="3" class="w-full rounded-xl border border-hairline bg-[#fafafa] px-3 py-2 text-[13px] text-ink focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-0"></textarea>
+                                <textarea id="cycle-description" wire:model="cycleForm.description" rows="3" class="w-full rounded-xl border border-hairline bg-[#fafafa] px-3 py-2 text-[13px] text-ink focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-0"></textarea>
                                 @error('cycleForm.description') <x-validation>{{ $message }}</x-validation> @enderror
                             </div>
                             <label class="flex items-center gap-2.5 text-[13px] text-ink-soft md:col-span-2">
-                                <input type="checkbox" wire:model.defer="cycleForm.auto_generate_forms" class="h-4 w-4 rounded border-zinc-300 text-ink focus:ring-zinc-400">
+                                <input type="checkbox" wire:model="cycleForm.auto_generate_forms" class="h-4 w-4 rounded border-zinc-300 text-ink focus:ring-zinc-400">
                                 {{ __($d.'.fields.auto_generate_forms') }}
                             </label>
                         </div>

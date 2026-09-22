@@ -69,7 +69,7 @@
                         </div>
                         <div class="min-w-56 flex-1">
                             <x-label for="bulk-attendance-status">{{ __('training_needs::dashboard.fields.bulk_attendance_status') }}</x-label>
-                            <select id="bulk-attendance-status" wire:model.defer="bulkAttendanceStatus" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                            <select id="bulk-attendance-status" wire:model="bulkAttendanceStatus" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
                                 <option value="planned">{{ __('training_needs::dashboard.attendance_statuses.planned') }}</option>
                                 <option value="confirmed">{{ __('training_needs::dashboard.attendance_statuses.confirmed') }}</option>
                                 <option value="attended">{{ __('training_needs::dashboard.attendance_statuses.attended') }}</option>

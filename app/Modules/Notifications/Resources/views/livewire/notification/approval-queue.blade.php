@@ -61,7 +61,7 @@
                 <div class="mt-4 rounded-2xl border border-zinc-200/80 bg-white/80 p-3.5">
                     <label class="text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.fields.note') }}</label>
                     <textarea
-                        wire:model.defer="notes.{{ $campaign->id }}"
+                        wire:model="notes.{{ $campaign->id }}"
                         rows="3"
                         class="mt-2 w-full rounded-2xl border border-zinc-200 bg-zinc-50/70 px-4 py-3 text-sm leading-6 text-zinc-800"
                     ></textarea>

@@ -188,13 +188,13 @@
 
                     <div>
                         <x-label for="assigned-review-score">{{ __($d.'.fields.review_score') }}</x-label>
-                        <x-livewire-input mode="gray" id="assigned-review-score" type="number" step="0.01" wire:model.defer="reviewForm.score" />
+                        <x-livewire-input mode="gray" id="assigned-review-score" type="number" step="0.01" wire:model="reviewForm.score" />
                         @error('reviewForm.score') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
 
                     <div>
                         <x-label for="assigned-review-feedback">{{ __($d.'.fields.feedback') }}</x-label>
-                        <x-ui.textarea id="assigned-review-feedback" wire:model.defer="reviewForm.feedback" :rows="4" />
+                        <x-ui.textarea id="assigned-review-feedback" wire:model="reviewForm.feedback" :rows="4" />
                         @error('reviewForm.feedback') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
 

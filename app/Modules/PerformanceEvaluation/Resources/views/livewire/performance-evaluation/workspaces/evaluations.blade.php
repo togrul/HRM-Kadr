@@ -105,12 +105,12 @@
                             </div>
                             <div>
                                 <x-label for="score-value">{{ __($d.'.fields.score') }}</x-label>
-                                <x-livewire-input mode="gray" id="score-value" type="number" step="0.01" min="0" max="100" wire:model.defer="scoreForm.score" />
+                                <x-livewire-input mode="gray" id="score-value" type="number" step="0.01" min="0" max="100" wire:model="scoreForm.score" />
                                 @error('scoreForm.score') <x-validation>{{ $message }}</x-validation> @enderror
                             </div>
                             <div class="md:col-span-2">
                                 <x-label for="score-comment">{{ __($d.'.fields.comment') }}</x-label>
-                                <textarea id="score-comment" wire:model.defer="scoreForm.comment" rows="3" class="{{ $textarea }}"></textarea>
+                                <textarea id="score-comment" wire:model="scoreForm.comment" rows="3" class="{{ $textarea }}"></textarea>
                                 @error('scoreForm.comment') <x-validation>{{ $message }}</x-validation> @enderror
                             </div>
                         </div>
