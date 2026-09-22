@@ -2,6 +2,10 @@
 
 namespace Tests\Feature\PerformanceEvaluation;
 
+use App\Models\Award;
+use App\Models\AwardType;
+use App\Models\OrderLog;
+use App\Models\PerformanceBonusCalculation;
 use App\Models\PerformanceCycle;
 use App\Models\PerformanceFormTemplate;
 use App\Models\PerformanceFormTemplateItem;
@@ -14,14 +18,22 @@ use App\Models\Position;
 use App\Models\Structure;
 use App\Models\User;
 use App\Models\UserPersonnelLink;
+use App\Modules\Attendance\Domain\Contracts\PayrollAttendanceReadRepository;
+use App\Modules\Compensation\Domain\Contracts\CompensationReadRepository;
+use App\Modules\PerformanceEvaluation\Application\Services\Kpi\BonusService;
+use App\Modules\PerformanceEvaluation\Application\Services\Kpi\InternalKpiMetrics;
+use App\Modules\PerformanceEvaluation\Application\Services\Kpi\KpiActualsImportService;
 use App\Modules\PerformanceEvaluation\Application\Services\Kpi\KpiLibraryService;
 use App\Modules\PerformanceEvaluation\Application\Services\Kpi\KpiTemplateService;
 use App\Modules\PerformanceEvaluation\Application\Services\Kpi\ScorecardLifecycleService;
 use App\Modules\PerformanceEvaluation\Application\Services\Kpi\ScorecardReviewService;
 use App\Modules\PerformanceEvaluation\Application\Services\Kpi\ScorecardService;
+use App\Modules\PerformanceEvaluation\Livewire\Kpi\BonusWorkspace;
 use App\Modules\PerformanceEvaluation\Livewire\Kpi\KpiLibraryWorkspace;
 use App\Modules\PerformanceEvaluation\Livewire\Kpi\ScorecardsWorkspace;
 use App\Notifications\PlatformNotification;
+use App\Services\Orders\Document\OrderStatusTransitionService;
+use App\Services\Profiles\ProfileState;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -101,6 +113,12 @@ class KpiScorecardTest extends TestCase
         $card->refresh();
         $this->assertSame('closed', $card->status);
         $this->assertNotNull($card->locked_at);
+        $this->assertDatabaseHas('talent_assessments', [
+            'personnel_id' => $card->personnel_id,
+            'performance_cycle_id' => $card->performance_cycle_id,
+            'performance_level' => 1,
+            'potential_level' => 2,
+        ]);
         $this->assertCount(4, $card->snapshot['items']);
         $this->assertValidationKeys(['actual'], fn () => $service->recordActual($card->items->first(), 1, $this->hr));
     }
@@ -410,6 +428,187 @@ class KpiScorecardTest extends TestCase
     /**
      * @return array{0: User, 1: User}
      */
+    public function test_excel_import_checks_the_whole_file_before_recording_anything(): void
+    {
+        $card = $this->specExampleCard();
+        $scorecards = app(ScorecardService::class);
+        $import = app(KpiActualsImportService::class);
+        $scorecards->transition($card, 'activate', $this->hr);
+
+        $template = $import->templateRows($card->cycle);
+        $this->assertCount(4, $template);
+        $valueAt = array_search('value', KpiActualsImportService::COLUMNS, true);
+        $sheet = [array_column($import->columns(), 'label')];
+        foreach ($template as $index => $row) {
+            $line = array_values($row);
+            $line[$valueAt] = [110000, 18, 71, 100][$index];
+            $sheet[] = $line;
+        }
+
+        $broken = $sheet;
+        $broken[2][$valueAt] = 'abc';
+        $broken[] = [999999, null, null, null, null, null, null, null, 5, null];
+        $result = $import->import($card->cycle, $broken, $this->hr);
+        $this->assertSame(0, $result['imported']);
+        $this->assertSame([3, 6], array_keys($result['errors']));
+        $this->assertSame(0, $card->items()->withCount('actuals')->get()->sum('actuals_count'));
+
+        $this->assertSame(4, $import->import($card->cycle, $sheet, $this->hr)['imported']);
+        $card->refresh();
+        $this->assertSame('81.5000', $card->kpi_score);
+        $this->assertDatabaseHas('performance_kpi_actuals', ['source' => 'import']);
+    }
+
+    public function test_scorecards_screen_uploads_actuals_from_a_file(): void
+    {
+        $card = $this->specExampleCard();
+        app(ScorecardService::class)->transition($card, 'activate', $this->hr);
+        $csv = "item_id,tabel_no,personnel,kpi_code,kpi,unit,target,actual,value,note\n"
+            .$card->items->map(fn ($item, $index): string => $item->id.',,,,,,,,'.[110000, 18, 71, 100][$index].',')->implode("\n");
+
+        Storage::fake('local');
+        $this->hr->givePermissionTo(Permission::findOrCreate('show-performance-evaluation', 'web'));
+        $screen = Livewire::test(ScorecardsWorkspace::class);
+        $screen->call('toggleImport')->assertSee(__('performance_evaluation::kpi.import.title'));
+        $screen->set('importFile', UploadedFile::fake()->createWithContent('actuals.csv', $csv))
+            ->call('importActuals')
+            ->assertHasNoErrors()
+            ->assertSet('importErrors', []);
+
+        $this->assertSame('81.5000', $card->refresh()->kpi_score);
+    }
+
+    public function test_internal_metric_refills_one_system_actual_per_item(): void
+    {
+        $card = $this->specExampleCard();
+        app(ScorecardService::class)->transition($card, 'activate', $this->hr);
+        $card->items->first()->kpi->update(['source_metric' => 'attendance_rate']);
+
+        $this->app->instance(PayrollAttendanceReadRepository::class, new class implements PayrollAttendanceReadRepository
+        {
+            public function monthlyAbsence(string $tabelNo, int $year, int $month): ?array
+            {
+                return ['working_days' => 20, 'absence_days' => $month === 1 ? 2 : 0];
+            }
+        });
+
+        Carbon::setTestNow('2026-02-15');
+        $metrics = app(InternalKpiMetrics::class);
+        $this->assertSame(1, $metrics->sync());
+        $this->assertSame(1, $metrics->sync());
+        Carbon::setTestNow();
+
+        $actuals = $card->items->first()->actuals()->get();
+        $this->assertCount(1, $actuals);
+        $this->assertSame('hrm', $actuals->first()->source);
+        $this->assertSame('95.0000', $actuals->first()->value);
+    }
+
+    public function test_company_bonus_pays_by_the_matrix_and_exports_once(): void
+    {
+        $card = $this->approvedSpecCard();
+        $this->mock(CompensationReadRepository::class, fn ($mock) => $mock->shouldReceive('baseAmountsFor')->andReturn(collect([$card->personnel->tabel_no => 1000.0])));
+        $bonus = app(BonusService::class);
+        $cycle = $card->cycle;
+
+        $this->assertSame('company', $bonus->mode());
+        $preview = $bonus->preview($cycle, $bonus->rule($cycle));
+        // 1000 × 3 months × 15% × 50% payout (score 81.5) = 225
+        $this->assertSame(225.0, $preview['rows']->first()['amount']);
+        $this->assertDatabaseCount('performance_bonus_calculations', 0);
+
+        $bonus->saveRule($cycle, [...$this->ruleData($bonus, $cycle), 'fund' => 100, 'scale_to_fund' => true], $this->hr);
+        $this->assertSame(1, $bonus->calculate($cycle));
+        $this->assertSame(100.0, PerformanceBonusCalculation::query()->value('amount'));
+
+        $this->assertCount(1, $bonus->exportToPayroll($cycle));
+        $exportedAt = PerformanceBonusCalculation::query()->value('exported_at');
+        $this->assertCount(1, $bonus->exportToPayroll($cycle));
+        $this->assertEquals($exportedAt, PerformanceBonusCalculation::query()->value('exported_at'));
+
+        $bonus->saveRule($cycle, [...$this->ruleData($bonus, $cycle), 'target_pct' => 50], $this->hr);
+        $bonus->calculate($cycle);
+        $this->assertSame(100.0, PerformanceBonusCalculation::query()->value('amount'), 'An exported line never changes.');
+
+        $this->assertValidationKeys(['bonus'], fn () => $bonus->issueOrders($cycle));
+        $this->assertValidationKeys(['cap_pct'], fn () => $bonus->saveRule($cycle, [...$this->ruleData($bonus, $cycle), 'cap_pct' => 50], $this->hr));
+    }
+
+    public function test_military_regime_pays_the_bonus_as_an_award_order(): void
+    {
+        Storage::fake('local');
+        $this->app->instance(ProfileState::class, new ProfileState([], 'military'));
+        AwardType::query()->create(['id' => 20, 'name' => 'mükafatlar']);
+        Award::query()->create(['id' => 2026, 'award_type_id' => 20, 'name' => 'Xidmətdə fərqləndiyinə görə']);
+        $this->artisan('orders:seed-word-templates', ['--only' => 'pul_mukafati'])->assertSuccessful();
+
+        $card = $this->approvedSpecCard();
+        $this->mock(CompensationReadRepository::class, fn ($mock) => $mock->shouldReceive('baseAmountsFor')->andReturn(collect([$card->personnel->tabel_no => 1000.0])));
+        $bonus = app(BonusService::class);
+        $cycle = $card->cycle;
+
+        $this->assertSame('order', $bonus->mode());
+        $bonus->calculate($cycle);
+        // 1000 × 1 salary × 50% payout = 500
+        $this->assertSame(500.0, PerformanceBonusCalculation::query()->value('amount'));
+        $this->assertSame(1, $bonus->issueOrders($cycle));
+        $this->assertSame(0, $bonus->issueOrders($cycle));
+
+        $line = PerformanceBonusCalculation::query()->firstOrFail();
+        $order = OrderLog::query()->findOrFail($line->order_log_id);
+        $this->assertSame('ordered', $line->status);
+        $this->assertSame(10, (int) $order->status_id);
+        Storage::disk('local')->assertExists($order->template_snapshot['docx_path']);
+
+        app(OrderStatusTransitionService::class)->approve($order);
+        $this->assertDatabaseHas('personnel_awards', ['tabel_no' => $card->personnel->tabel_no, 'award_id' => 2026, 'amount' => 500, 'order_no' => $order->order_no]);
+
+        app(OrderStatusTransitionService::class)->cancel($order->refresh());
+        $this->assertDatabaseMissing('personnel_awards', ['order_no' => $order->order_no]);
+    }
+
+    public function test_bonus_screen_simulates_saves_and_calculates(): void
+    {
+        $card = $this->approvedSpecCard();
+        $this->mock(CompensationReadRepository::class, fn ($mock) => $mock->shouldReceive('baseAmountsFor')->andReturn(collect([$card->personnel->tabel_no => 1000.0])));
+
+        Livewire::test(BonusWorkspace::class)
+            ->assertSee(__('performance_evaluation::kpi.bonus.modes.company.label'))
+            ->assertSee('225.00')
+            ->set('ruleForm.target_pct', 30)
+            ->assertSee('450.00')
+            ->assertSee(__('performance_evaluation::kpi.bonus.simulation_notice'))
+            ->call('calculate')
+            ->assertHasNoErrors()
+            ->assertSee(__('performance_evaluation::kpi.bonus.statuses.calculated'));
+
+        $this->assertSame(450.0, PerformanceBonusCalculation::query()->value('amount'));
+        $this->get(route('performance-evaluation', ['tab' => 'kpi_bonus']))->assertOk();
+    }
+
+    private function approvedSpecCard(): PerformanceScorecard
+    {
+        $card = $this->specExampleCard();
+        $scorecards = app(ScorecardService::class);
+        $scorecards->transition($card, 'activate', $this->hr);
+        foreach ([110000, 18, 71, 100] as $index => $value) {
+            $scorecards->recordActual($card->items[$index], $value, $this->hr);
+        }
+        foreach (['start_self_review', 'submit_self_review', 'submit_manager_review', 'approve'] as $action) {
+            $scorecards->transition($card->refresh(), $action, $this->hr);
+        }
+
+        return $card->refresh()->load('personnel', 'cycle');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function ruleData(BonusService $bonus, PerformanceCycle $cycle): array
+    {
+        return $bonus->rule($cycle)->only(['target_pct', 'reward_months', 'payout_bands', 'company_result', 'company_gate', 'gate_floor_pct', 'company_multipliers', 'cap_pct', 'fund', 'scale_to_fund']);
+    }
+
     private function employeeAndManager(PerformanceScorecard $card): array
     {
         $employee = $this->userFor($card->personnel);

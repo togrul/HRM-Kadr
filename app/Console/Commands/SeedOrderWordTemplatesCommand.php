@@ -276,6 +276,27 @@ class SeedOrderWordTemplatesCommand extends Command
                 ],
             ],
 
+            // ───────────────────────────── Pul mükafatı (KPI) ───────────────────────────
+            'pul_mukafati' => [
+                'label' => 'Pul mükafatı',
+                'effect' => 'award',
+                'spec' => [
+                    'city' => 'Bakı şəhəri',
+                    'subject' => 'Pul mükafatı verilməsi haqqında',
+                    'preamble' => 'Xidməti fəaliyyətin qiymətləndirilməsinin (KPI) yekunlarını rəhbər tutaraq',
+                    'clauses' => [
+                        '[İş yeri] [Vəzifə] [İşçi] [Mükafatın səbəbi] [Məbləğ] manat məbləğində pul mükafatı ilə mükafatlandırılsın.',
+                        'Mühasibatlıq və Hesabatlıq şöbəsinin rəisi Səbuhi Bağırov bu əmrdən irəli gələn məsələləri həll etsin.',
+                    ],
+                    'basis' => '[Əsas mətni]',
+                ],
+                'manual' => [
+                    'Mükafatın səbəbi' => ['type' => 'text', 'role' => 'reason'],
+                    'Məbləğ' => ['type' => 'number', 'role' => 'amount'],
+                    'Əsas mətni' => ['type' => 'text'],
+                ],
+            ],
+
             // ───────────────────────────────── İşə qəbul ───────────────────────────────
             'ise_qebul' => [
                 'label' => 'İşə qəbul (Əmək müqaviləsi)',

@@ -55,6 +55,9 @@
                         <div class="mt-1 flex min-w-0 items-center gap-2 text-[12px] text-ink-faint">
                             <span class="hrm-num shrink-0 rounded-md bg-[#f4f4f5] px-1.5 py-px text-[11px] text-ink-muted">{{ $kpi->code }}</span>
                             <span class="truncate">{{ __($t.'.types.'.$kpi->type) }} · {{ __($t.'.perspectives.'.$kpi->perspective) }}</span>
+                            @if ($kpi->source_metric)
+                                <span class="shrink-0 rounded-md bg-sky-50 px-1.5 py-px text-[11px] font-medium text-sky-700" title="{{ __($t.'.metrics.'.$kpi->source_metric) }}">{{ __($t.'.metrics.auto_badge') }}</span>
+                            @endif
                             @if ($kpi->evidence_required)
                                 <span class="shrink-0" title="{{ __($t.'.fields.evidence_required') }}">
                                     <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.4 11.1-9.2 9.2a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/></svg>
@@ -267,6 +270,20 @@
                                     <option value="lag">{{ __($t.'.indicator_kinds.lag') }}</option>
                                 </x-ui.filter-native-select>
                             </div>
+                        </div>
+
+                        <div class="sm:col-span-2">
+                            <x-label value="{{ __($t.'.fields.source_metric') }}" />
+                            <div class="mt-1">
+                                <x-ui.filter-native-select wire:model="kpiForm.source_metric">
+                                    <option value="">{{ __($t.'.metrics.manual') }}</option>
+                                    @foreach (array_keys(\App\Modules\PerformanceEvaluation\Application\Services\Kpi\InternalKpiMetrics::METRICS) as $metric)
+                                        <option value="{{ $metric }}">{{ __($t.'.metrics.'.$metric) }}</option>
+                                    @endforeach
+                                </x-ui.filter-native-select>
+                            </div>
+                            <p class="mt-1.5 text-[12px] leading-5 text-ink-faint">{{ __($t.'.metrics.hint') }}</p>
+                            @error('kpiForm.source_metric') <x-validation>{{ $message }}</x-validation> @enderror
                         </div>
 
                         <label class="flex items-center gap-2.5 text-[13px] text-zinc-700 sm:col-span-2">

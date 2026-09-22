@@ -57,6 +57,21 @@
             <p class="docs-card-strong">Avtomatik bal</p>
             <p class="docs-card-body">Sistem balı özü hesablayır; HR kartı təsdiqləyib bağlayanda nəticə dəyişməz olur.</p>
         </div>
+        <div class="docs-card">
+            <p class="docs-card-title">KPI · addım 4</p>
+            <p class="docs-card-strong">Bonus</p>
+            <p class="docs-card-body">Hərbi rejimdə bonus pul mükafatı əmri ilə, mülki bölmələrdə maaşdan faizlə verilir və əmək haqqına ötürülür.</p>
+        </div>
+        <div class="docs-card">
+            <p class="docs-card-title">KPI · avtomatik</p>
+            <p class="docs-card-strong">Excel və sistem məlumatı</p>
+            <p class="docs-card-body">Faktiki dəyərlər Excel ilə toplu yüklənir; davamiyyət və təlim göstəricilərini sistem özü doldurur.</p>
+        </div>
+        <div class="docs-card">
+            <p class="docs-card-title">KPI · 9-Box</p>
+            <p class="docs-card-strong">İstedad xəritəsi</p>
+            <p class="docs-card-body">Təsdiqlənmiş nəticə əməkdaşı 9-Box cədvəlində performans oxuna avtomatik yerləşdirir.</p>
+        </div>
     </div>
 
     <div id="performance-scenarios" class="docs-grid docs-grid-2">

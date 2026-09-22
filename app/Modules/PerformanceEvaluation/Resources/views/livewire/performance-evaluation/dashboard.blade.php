@@ -1,9 +1,9 @@
 @php
-    $contextTabs = ['overview', 'kpi_scorecards', 'kpi_library', 'goals', 'succession', 'feedback', 'cycles', 'templates', 'evaluations', 'tests', 'reports', 'lists'];
+    $contextTabs = ['overview', 'kpi_scorecards', 'kpi_bonus', 'kpi_library', 'goals', 'succession', 'feedback', 'cycles', 'templates', 'evaluations', 'tests', 'reports', 'lists'];
     // The panel groups the module's twelve screens by job, so the list reads as a map, not a wall.
     $navGroups = [
         'home' => ['overview'],
-        'kpi' => ['kpi_scorecards', 'kpi_library'],
+        'kpi' => ['kpi_scorecards', 'kpi_bonus', 'kpi_library'],
         'evaluation' => ['cycles', 'templates', 'evaluations', 'tests'],
         'talent' => ['goals', 'succession', 'feedback'],
         'insight' => ['reports', 'lists'],
@@ -11,6 +11,7 @@
     $navIcons = [
         'overview' => '<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>',
         'kpi_scorecards' => '<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 15l2.5-3 2.5 2 3-4"/>',
+        'kpi_bonus' => '<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/>',
         'kpi_library' => '<path d="M4 5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5M9 7h6"/>',
         'cycles' => '<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
         'templates' => '<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/>',
@@ -138,6 +139,10 @@
 
         @if ($activeTab === 'kpi_scorecards')
             <livewire:performance-evaluation.kpi-scorecards lazy />
+        @endif
+
+        @if ($activeTab === 'kpi_bonus')
+            <livewire:performance-evaluation.kpi-bonus lazy />
         @endif
 
         @if ($activeTab === 'kpi_library')

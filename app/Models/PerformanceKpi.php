@@ -38,6 +38,7 @@ class PerformanceKpi extends Model
         'direction',
         'unit',
         'data_source',
+        'source_metric',
         'frequency',
         'aggregation',
         'perspective',

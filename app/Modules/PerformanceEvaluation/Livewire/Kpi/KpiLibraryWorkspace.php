@@ -7,6 +7,7 @@ use App\Models\PerformanceFormTemplate;
 use App\Models\PerformanceKpi;
 use App\Models\PerformanceKpiTemplate;
 use App\Models\Position;
+use App\Modules\PerformanceEvaluation\Application\Services\Kpi\InternalKpiMetrics;
 use App\Modules\PerformanceEvaluation\Application\Services\Kpi\KpiLibraryService;
 use App\Modules\PerformanceEvaluation\Application\Services\Kpi\KpiTemplateService;
 use Illuminate\Contracts\View\View;
@@ -139,10 +140,16 @@ class KpiLibraryWorkspace extends Component
             'kpiForm.perspective' => ['required', Rule::in(PerformanceKpi::PERSPECTIVES)],
             'kpiForm.indicator_kind' => ['nullable', 'in:lead,lag'],
             'kpiForm.evidence_required' => ['boolean'],
+            'kpiForm.source_metric' => ['nullable', Rule::in(array_keys(InternalKpiMetrics::METRICS))],
             'kpiForm.status' => ['required', Rule::in(PerformanceKpi::STATUSES)],
         ])['kpiForm'];
 
-        app(KpiLibraryService::class)->save([...$data, 'indicator_kind' => $data['indicator_kind'] ?: null], $this->editingKpiId ? PerformanceKpi::query()->findOrFail($this->editingKpiId) : null);
+        app(KpiLibraryService::class)->save([
+            ...$data,
+            'indicator_kind' => $data['indicator_kind'] ?: null,
+            'source_metric' => $data['source_metric'] ?: null,
+            'data_source' => $data['source_metric'] ? 'hrm' : 'manual',
+        ], $this->editingKpiId ? PerformanceKpi::query()->findOrFail($this->editingKpiId) : null);
 
         $this->closeSideMenu();
         unset($this->kpis);
@@ -266,7 +273,7 @@ class KpiLibraryWorkspace extends Component
         return [
             'code' => '', 'name' => '', 'description' => '', 'type' => 'quantitative', 'direction' => 'higher_better',
             'unit' => 'percent', 'frequency' => 'quarterly', 'aggregation' => 'last', 'perspective' => 'process',
-            'indicator_kind' => '', 'evidence_required' => false, 'status' => 'active',
+            'indicator_kind' => '', 'evidence_required' => false, 'source_metric' => '', 'status' => 'active',
         ];
     }
 

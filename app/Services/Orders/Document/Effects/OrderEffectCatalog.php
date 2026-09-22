@@ -57,6 +57,14 @@ class OrderEffectCatalog
                 ],
                 'handler' => SurnameChangeEffect::class,
             ],
+            'award' => [
+                'label' => 'Pul mükafatı (şəxsi işə yazılır)',
+                'roles' => [
+                    ['key' => 'amount', 'label' => 'Məbləğ', 'type' => 'number'],
+                    ['key' => 'reason', 'label' => 'Səbəb', 'type' => 'text'],
+                ],
+                'handler' => AwardEffect::class,
+            ],
             'hire' => [
                 'label' => 'İşə qəbul (namizəd işçi olur)',
                 // Structure & position are dedicated hire inputs (they also drive the

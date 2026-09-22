@@ -11,6 +11,7 @@ use App\Models\PerformanceScorecardItem;
 use App\Models\Personnel;
 use App\Models\User;
 use App\Models\UserPersonnelLink;
+use App\Modules\PerformanceEvaluation\Application\Services\SuccessionService;
 use App\Modules\Personnel\Contracts\ApprovalRouteResolver;
 use App\Services\UserPersonnelLinkResolver;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -37,6 +38,7 @@ class ScorecardService
         private readonly KpiScoringEngine $engine,
         private readonly ApprovalRouteResolver $routes,
         private readonly UserPersonnelLinkResolver $links,
+        private readonly SuccessionService $succession,
     ) {}
 
     /**
@@ -216,6 +218,10 @@ class ScorecardService
             ]);
         });
 
+        if ($rule['to'] === 'approved') {
+            $this->syncNineBox($card);
+        }
+
         app(ScorecardNotifier::class)->transitioned($card, $action, $reason);
     }
 
@@ -242,6 +248,20 @@ class ScorecardService
             $card->fill(['status' => 'closed', 'closure_reason' => $reason, 'stage_due_at' => null])->save();
             $card->events()->create(['action' => 'closed_early', 'from_status' => $from, 'to_status' => 'closed', 'reason' => $reason]);
         });
+
+        $this->syncNineBox($card);
+    }
+
+    /**
+     * An approved result places the person on the 9-box performance axis for the cycle.
+     */
+    private function syncNineBox(PerformanceScorecard $card): void
+    {
+        $score = $this->personCycleScore($card->personnel_id, $card->performance_cycle_id);
+
+        if ($score !== null) {
+            $this->succession->syncPerformanceFromScore($card->personnel_id, $card->performance_cycle_id, $score);
+        }
     }
 
     /**
@@ -268,7 +288,7 @@ class ScorecardService
      *
      * @throws AuthorizationException|ValidationException
      */
-    public function recordActual(PerformanceScorecardItem $item, float $value, User $user, ?UploadedFile $evidence = null, ?string $note = null): PerformanceKpiActual
+    public function recordActual(PerformanceScorecardItem $item, float $value, User $user, ?UploadedFile $evidence = null, ?string $note = null, string $source = 'manual'): PerformanceKpiActual
     {
         $card = $item->scorecard;
         $role = $this->authorizeRole($user, $card, ['hr', 'manager', 'employee']);
@@ -285,7 +305,7 @@ class ScorecardService
 
         $actual = $item->actuals()->create([
             'value' => $value,
-            'source' => 'manual',
+            'source' => $source,
             'evidence_path' => $evidence?->store('performance/kpi-evidence/'.$card->id, 'local'),
             'evidence_name' => $evidence?->getClientOriginalName(),
             'note' => $note,

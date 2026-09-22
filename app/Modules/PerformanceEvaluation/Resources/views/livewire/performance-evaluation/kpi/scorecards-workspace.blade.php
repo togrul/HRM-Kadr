@@ -46,13 +46,69 @@
 
         @can('manage-performance-evaluation')
             @if ($cycleId && ! $card)
-                <x-pill-button variant="primary" wire:click="generate" wire:loading.attr="disabled" wire:target="generate">
-                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-                    {{ __($t.'.actions.generate_cards') }}
-                </x-pill-button>
+                <div class="flex flex-wrap items-center gap-2">
+                    <x-pill-button variant="secondary" wire:click="syncMetrics" wire:loading.attr="disabled" wire:target="syncMetrics" title="{{ __($t.'.metrics.sync_hint') }}">
+                        <svg class="h-4 w-4" wire:loading.class="animate-spin" wire:target="syncMetrics" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-15.5 6.2L3 16"/><path d="M3 12a9 9 0 0 1 15.5-6.2L21 8"/><path d="M21 3v5h-5M3 21v-5h5"/></svg>
+                        {{ __($t.'.metrics.sync') }}
+                    </x-pill-button>
+                    <x-pill-button variant="secondary" wire:click="toggleImport" class="{{ $showImport ? '!border-zinc-400 !bg-white !text-ink' : '' }}">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2Z"/><path d="m9 13 2 2 4-4"/></svg>
+                        {{ __($t.'.import.open') }}
+                    </x-pill-button>
+                    <x-pill-button variant="primary" wire:click="generate" wire:loading.attr="disabled" wire:target="generate">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                        {{ __($t.'.actions.generate_cards') }}
+                    </x-pill-button>
+                </div>
             @endif
         @endcan
     </div>
+
+    @if ($showImport && ! $card)
+        {{-- ───────────── Excel import ───────────── --}}
+        <div class="{{ $section }}">
+            <div class="{{ $sectionHead }}">
+                <p class="text-[13px] font-semibold text-ink">{{ __($t.'.import.title') }}</p>
+                <button type="button" wire:click="toggleImport" class="text-[12px] font-medium text-ink-faint hover:text-ink">{{ __($t.'.actions.cancel') }}</button>
+            </div>
+            <div class="grid gap-4 p-5 md:grid-cols-3">
+                @foreach ([1, 2, 3] as $step)
+                    <div class="flex gap-3">
+                        <span class="hrm-num flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-ink text-[12px] font-semibold text-white">{{ $step }}</span>
+                        <div class="min-w-0">
+                            <p class="text-[13px] font-semibold text-ink">{{ __($t.'.import.steps.'.$step.'.title') }}</p>
+                            <p class="mt-0.5 text-[12px] leading-5 text-ink-muted">{{ __($t.'.import.steps.'.$step.'.body') }}</p>
+                            @if ($step === 1)
+                                <button type="button" wire:click="downloadActualsTemplate" class="mt-2 inline-flex h-8 items-center gap-1.5 rounded-lg border border-hairline bg-white px-3 text-[12px] font-semibold text-ink-soft hover:border-zinc-300 hover:text-ink">
+                                    <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-4-4m4 4 4-4M5 21h14"/></svg>
+                                    {{ __($t.'.import.download') }}
+                                </button>
+                            @elseif ($step === 3)
+                                <div class="mt-2 flex flex-wrap items-center gap-2">
+                                    <label class="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-lg border border-dashed border-zinc-300 bg-[#fafafa] px-3 text-[12px] font-medium text-ink-soft hover:border-zinc-400">
+                                        <input type="file" wire:model="importFile" accept=".xlsx,.xls,.csv" class="hidden">
+                                        <span class="max-w-[10rem] truncate">{{ $importFile ? $importFile->getClientOriginalName() : __($t.'.import.choose') }}</span>
+                                    </label>
+                                    <button type="button" wire:click="importActuals" wire:loading.attr="disabled" wire:target="importActuals,importFile" @disabled(! $importFile) class="inline-flex h-8 items-center rounded-lg bg-ink px-3 text-[12px] font-semibold text-white hover:bg-ink-hover disabled:opacity-40">{{ __($t.'.import.submit') }}</button>
+                                </div>
+                                @error('importFile') <x-validation>{{ $message }}</x-validation> @enderror
+                            @endif
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+            @if ($importErrors !== [])
+                <div class="border-t border-hairline-subtle bg-rose-50/50 px-5 py-3">
+                    <p class="text-[12.5px] font-semibold text-rose-700">{{ __($t.'.import.failed', ['count' => count($importErrors)]) }}</p>
+                    <ul class="mt-1.5 max-h-40 space-y-0.5 overflow-y-auto text-[12px] text-rose-700">
+                        @foreach ($importErrors as $line => $message)
+                            <li><span class="hrm-num font-semibold">{{ __($t.'.import.row', ['row' => $line]) }}</span> — {{ $message }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+        </div>
+    @endif
 
     @if ($card)
         @php
@@ -116,6 +172,43 @@
             @if ($card->rating_category)
                 <div class="border-t border-hairline-subtle px-5 py-2 text-[12px] text-ink-muted">
                     {{ __($t.'.fields.rating') }}: <span class="font-semibold text-ink">{{ __($t.'.ratings.'.$card->rating_category) }}</span>
+                </div>
+            @endif
+
+            @if ($card->bonus)
+                @php
+                    $bonus = $card->bonus;
+                    $b = $t.'.bonus';
+                    $factors = $bonus->mode === 'order'
+                        ? [
+                            'base_salary' => $fmt($bonus->base_salary).' '.$bonus->currency,
+                            'reward_months' => $fmt($bonus->period_months),
+                            'payout_pct' => $fmt($bonus->payout_pct).'%',
+                            'prorata' => $fmt($bonus->prorata * 100).'%',
+                        ]
+                        : [
+                            'base_salary' => $fmt($bonus->base_salary).' '.$bonus->currency,
+                            'period_months' => $fmt($bonus->period_months),
+                            'target_pct' => $fmt($bonus->target_pct).'%',
+                            'payout_pct' => $fmt($bonus->payout_pct).'%',
+                            'company_mult' => '×'.$fmt($bonus->company_mult, 4),
+                            'prorata' => $fmt($bonus->prorata * 100).'%',
+                        ];
+                    if ((float) $bonus->scale_factor < 1) {
+                        $factors['scale_factor'] = '×'.$fmt($bonus->scale_factor, 4);
+                    }
+                @endphp
+                <div class="flex flex-col gap-3 border-t border-hairline-subtle px-5 py-3 lg:flex-row lg:items-center lg:justify-between">
+                    <div class="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[12px] text-ink-muted">
+                        <span class="hrm-eyebrow">{{ __($b.'.title') }}</span>
+                        @foreach ($factors as $factor => $value)
+                            <span>{{ __($b.'.factors.'.$factor) }} <span class="hrm-num font-semibold text-ink-soft">{{ $value }}</span></span>
+                        @endforeach
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="rounded-md bg-[#f4f4f5] px-2 py-0.5 text-[11.5px] text-ink-muted">{{ __($b.'.statuses.'.$bonus->status) }}</span>
+                        <span class="hrm-num text-[17px] font-semibold text-ink">{{ $fmt($bonus->amount) }} {{ $bonus->currency }}</span>
+                    </div>
                 </div>
             @endif
 

@@ -316,6 +316,33 @@ Faktiki dəyər — əməkdaşın həqiqətən əldə etdiyi nəticədir (məsə
 - Hər KPI-ın altında son yazılan dəyərlərin tarixçəsi görünür: kim yazıb, nə vaxt, qeyd və fayl.
 - Faktiki dəyər yalnız **Aktiv** kartda yazılır.
 
+### Faktiki dəyərləri Excel ilə toplu yükləmək
+Çox əməkdaşın nəticəsini bir-bir yazmaq əvəzinə HR hamısını bir Excel faylı ilə yükləyə bilər.
+
+1. `KPI kartları` bölməsində dövrü seçin və `Excel ilə yüklə` düyməsini basın.
+2. `Şablonu yüklə` basın. Faylda dövrün bütün **Aktiv** kartları var: hər KPI ayrıca sətirdir (əməkdaş, KPI, hədəf, hazırkı faktiki).
+3. Yalnız **"Dəyər"** sütununu doldurun. Nəticəsi hələ bəlli olmayan sətri boş saxlayın, sistem onu nəzərə almır. "Sətir ID" sütununu dəyişməyin.
+4. Faylı geri yükləyib `Yüklə` basın.
+
+**Səhv olsa nə olur?** Sistem əvvəl bütün faylı yoxlayır. Bir sətirdə belə səhv varsa (rəqəm əvəzinə mətn, kartı bağlanmış əməkdaş), **heç bir dəyər yazılmır** və səhv sətirlər nömrəsi ilə göstərilir. Düzəldib faylı yenidən yükləyin.
+
+**Sübut tələb edən KPI-lar** Excel ilə yüklənmir, çünki onlara fayl əlavə etmək lazımdır. Onların dəyərini kartın özündən daxil edin.
+
+### Avtomatik KPI-lar: dəyəri sistem özü doldurur
+Bəzi göstəriciləri sistem artıq bilir. Onları heç kim yazmır:
+
+| Mənbə | Nəyi ölçür |
+| --- | --- |
+| Davamiyyət faizi | Dövr ərzində iş günlərinin neçə faizində əməkdaş işdə olub (davamiyyət tabelindən) |
+| Səbəbsiz qalınan günlər | Dövr ərzində səbəbsiz qalınan və ödənişsiz məzuniyyət günləri |
+| Təlim tamamlanma faizi | Dövrdə son tarixi olan təlim tapşırıqlarının neçə faizi tamamlanıb |
+
+**Necə qurulur?** `KPI kitabxanası` bölməsində KPI-ı açın. **Məlumat mənbəyi** sahəsində "Sistemdən: …" seçimini edin. Belə KPI-ın yanında `Avtomatik` nişanı görünür.
+
+**Nə vaxt yenilənir?** Hər səhər avtomatik. HR istədiyi an `KPI kartları` bölməsində `Sistemdən yenilə` düyməsini basa bilər. Sistem hər KPI üçün bir dəyər saxlayır və onu yeniləyir, köhnə dəyərlər üst-üstə yığılmır. Əl ilə yazılmış dəyərlərə toxunulmur.
+
+**Qeyd:** davamiyyət faizi yalnız ay davamiyyət bölməsində bağlandıqdan (aylıq yekun hazırlandıqdan) sonra görünür.
+
 ### Addım 6. Check-in (aralıq görüş) qeydləri
 Check-in — rəhbərlə əməkdaşın dövr ərzində işin gedişatını qısa müzakirə etməsidir. Tövsiyə olunur: **ayda bir dəfə**, rüblük dövrdə **ən azı 2 dəfə**.
 
@@ -353,11 +380,52 @@ Kalibrasiya — müxtəlif rəhbərlərin fərqli sərtliklə verdiyi balları �
 3. `Kalibrasiya` bölməsində düzəlişi yazın: məsələn `+3` və ya `-5`. Maksimum **±15 bal**.
 4. Səbəbi mütləq yazın və `Düzəlişi tətbiq et` basın.
 
-İlkin yekun bal silinmir: kartda həm "Yekun bal", həm "Kalibrasiyalı" bal görünür. Reytinq və gələcəkdə bonus **kalibrasiyalı** baldan hesablanır. Bütün düzəlişlər səbəbi ilə birlikdə tarixçədə qalır.
+İlkin yekun bal silinmir: kartda həm "Yekun bal", həm "Kalibrasiyalı" bal görünür. Reytinq və bonus **kalibrasiyalı** baldan hesablanır. Bütün düzəlişlər səbəbi ilə birlikdə tarixçədə qalır.
 
 ### Addım 9. Təsdiq və bağlama
 - HR `Təsdiqlə` basanda nəticə əməkdaşa açılır və əməkdaş bildiriş alır.
 - HR `Bağla` basanda kart dondurulur: bütün ballar, hədəflər və KPI versiyaları dəyişməz nüsxə kimi saxlanılır. Sonradan kitabxanada KPI dəyişsə belə, bağlanmış nəticə dəyişmir.
+- Kart təsdiqlənəndə əməkdaş **9-Box cədvəlində** (`Varislik və istedad`) avtomatik yerləşdirilir. Yekun bal performans oxunu müəyyən edir: 90%-dən aşağı **aşağı**, 90–105% **orta**, 105%-dən yuxarı **yüksək**. Potensial oxunu isə HR özü seçir. Əməkdaş yeni yerləşdirilirsə, potensial "orta" kimi başlayır.
+
+### Addım 10. Bonus
+Kart təsdiqləndikdən sonra HR `Bonus` bölməsində əməkdaşların bonusunu hesablayır. Bonusun necə verilməsi **xidmət növündən** asılıdır. Sistem bunu özü müəyyən edir, ekranın yuxarısında görünür:
+
+| Xidmət növü | Bonus necə verilir? |
+| --- | --- |
+| **Hərbi rejim: əmr əsaslı** | Bonus **pul mükafatı** kimi **əmrlə** verilir. Hər əməkdaş üçün "Pul mükafatı" əmri hazırlanır. Əmr təsdiqlənəndə mükafat şəxsi işin "Mükafatlar" hissəsinə məbləği ilə yazılır. |
+| **Şirkət modeli** (mülki bölmələr) | Bonus maaşdan faizlə hesablanır və **əmək haqqına ötürülür** (Excel faylı). |
+
+**Bonus necə hesablanır?**
+
+*Şirkət modeli:* bonus = aylıq maaş × dövrün ay sayı × hədəf bonus faizi × ödəniş faizi × şirkət əmsalı × pro-rata.
+
+*Hərbi rejim:* mükafat = aylıq maaş × maaş sayı × ödəniş faizi × pro-rata.
+
+- **Aylıq maaş** `Kompensasiya` bölməsindən götürülür. Maaşı yazılmayan əməkdaşın bonusu 0 olur və ekranda xəbərdarlıq çıxır.
+- **Ödəniş faizi** yekun baldan asılıdır (ödəniş matrisi). Standart matris:
+
+| Yekun bal | Ödəniş |
+| --- | --- |
+| 80%-dən aşağı | 0% |
+| 80–89.99% | 50% |
+| 90–99.99% | 80% |
+| 100–109.99% | 100% |
+| 110% və yuxarı | 120% |
+
+- **Şirkət əmsalı** (yalnız şirkət modelində): şirkətin öz hədəfini neçə faiz yerinə yetirdiyi. Nəticə "gate"dən (standart 85%) aşağıdırsa, bonuslar "gate altında ödəniş" faizinə endirilir (standart 0%). Gate keçiləndə əmsal cədvəldən götürülür (85%-dən ×0.8, 95%-dən ×1.0, 105%-dən ×1.1). Şirkətin nəticəsi yazılmayıbsa, əmsal 1-dir.
+- **Pro-rata:** əməkdaş dövrün yalnız bir hissəsində işləyibsə (dövrün ortasında gəlib, vəzifəsi dəyişib), bonus işlədiyi günlərə uyğun azalır.
+- **Maksimum:** bonus hədəf bonusun 150%-ni keçmir.
+- **Bonus fondu:** HR dövr üçün fond yaza bilər. Cəm fondu keçərsə, ekranda qırmızı xəbərdarlıq çıxır. "Mütənasib azalt" işarələnsə, bütün bonuslar eyni nisbətdə azaldılır ki, cəm fonda sığsın.
+
+**İş qaydası:**
+1. `Bonus` bölməsində dövrü seçin.
+2. Soldakı **Bonus qaydası** hissəsində rəqəmləri dəyişin. Sağdakı cədvəl dərhal yenilənir: bu **simulyasiyadır**, yəni "belə etsək nə olar?" sualına cavabdır və heç nə yadda saxlanmır. Bənövşəyi yazı bunu xatırladır.
+3. Nəticə uyğundursa, `Hesabla` basın. Qayda saxlanılır və hər əməkdaşın bonusu yazılır. Əməkdaş bonusun izahını öz kartında görür: maaş, ödəniş faizi, əmsal, pro-rata və məbləğ.
+4. Ötürün:
+   - **Şirkət modeli:** `Əmək haqqına ötür (Excel)` basın. Fayl yüklənir (tabel №, əməkdaş, məbləğ, ödəniş ayı). Düyməni ikinci dəfə bassanız, **eyni fayl** yenidən yüklənir, bonus təkrar ödənilmir.
+   - **Hərbi rejim:** `Əmrləri hazırla` basın. Hər əməkdaş üçün "Pul mükafatı" əmri layihəsi yaranır. Onları `Əmrlər` bölməsində yoxlayın (əmr nömrəsini düzəldə bilərsiniz) və təsdiqləyin. Əmr ləğv edilsə, mükafat şəxsi işdən silinir.
+
+Əmək haqqına ötürülmüş və ya əmri hazırlanmış bonus **dəyişməz olur**: qaydanı sonradan dəyişib `Hesabla` bassanız belə, onlara toxunulmur.
 
 ### KPI-ı strateji hədəfə bağlamaq (kaskadlama)
 Şirkətin böyük hədəfləri `Məqsədlər və OKR` bölməsində qurulur (məsələn, "Gəlir +20%"). Əməkdaşın KPI-ı bu hədəfə bağlananda hər kəs öz işinin ümumi hədəfə necə təsir etdiyini görür.
@@ -465,6 +533,18 @@ Yoxlama hər səhər aparılır — ertəsi gün köhnə kart bağlanacaq və ye
 
 **Şablonda vəzifəni seçə bilmirəm.**
 Vəzifə solğundursa, o artıq başqa şablona bağlıdır. Əvvəl həmin şablondan çıxarın.
+
+**Bonus bölməsində əməkdaş görünmür.**
+Bonus yalnız **Təsdiqlənib** və ya **Bağlanıb** statusundakı kartlar üçün hesablanır.
+
+**Bonus 0 çıxır.**
+Yoxlayın: yekun bal 80%-dən aşağıdırmı (ödəniş 0%), şirkətin nəticəsi gate-dən aşağıdırmı, əməkdaşın maaşı `Kompensasiya` bölməsində yazılıbmı?
+
+**"Əmrləri hazırla" düyməsi xəta verir.**
+"Pul mükafatı" əmr şablonu sistemə əlavə edilməyib. Administratora müraciət edin.
+
+**Excel faylı yüklənmir, "heç bir dəyər yüklənmədi" yazılır.**
+Faylda səhv sətir var, siyahıda nömrəsi göstərilir. Onu düzəldib faylı yenidən yükləyin. Kartı bağlanmış əməkdaşın sətri də səhv sayılır: köhnə faylı deyil, hər dəfə yeni şablon yükləyin.
 
 ## Yeni istifadəçi üçün ən rahat iş sırası
 1. `Dövrlər` bölməsində dövr yaradın.

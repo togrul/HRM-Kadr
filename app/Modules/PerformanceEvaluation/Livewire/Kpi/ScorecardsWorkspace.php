@@ -7,8 +7,11 @@ use App\Models\PerformanceGoal;
 use App\Models\PerformanceKpiActual;
 use App\Models\PerformanceScorecard;
 use App\Models\PerformanceScorecardItem;
+use App\Modules\PerformanceEvaluation\Application\Services\Kpi\InternalKpiMetrics;
+use App\Modules\PerformanceEvaluation\Application\Services\Kpi\KpiActualsImportService;
 use App\Modules\PerformanceEvaluation\Application\Services\Kpi\ScorecardReviewService;
 use App\Modules\PerformanceEvaluation\Application\Services\Kpi\ScorecardService;
+use App\Support\Livewire\DownloadsReportsTable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -17,6 +20,8 @@ use Illuminate\Support\Collection as SupportCollection;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /**
  * KPI scorecards of a cycle: HR opens them in bulk; the owner, their manager and HR
@@ -26,6 +31,7 @@ use Livewire\WithFileUploads;
 class ScorecardsWorkspace extends Component
 {
     use AuthorizesRequests;
+    use DownloadsReportsTable;
     use WithFileUploads;
 
     public ?int $cycleId = null;
@@ -56,6 +62,13 @@ class ScorecardsWorkspace extends Component
     public string $checkinProgress = '';
 
     public string $checkinRisks = '';
+
+    public bool $showImport = false;
+
+    public $importFile = null;
+
+    /** @var array<int, string> sheet row → problem */
+    public array $importErrors = [];
 
     public function mount(): void
     {
@@ -118,6 +131,7 @@ class ScorecardsWorkspace extends Component
                 'checkins.author:id,name',
                 'calibrations.adjustedBy:id,name',
                 'events.user:id,name',
+                'bonus',
             ])
             ->find($this->openCardId);
     }
@@ -182,6 +196,52 @@ class ScorecardsWorkspace extends Component
 
         unset($this->cards);
         $this->dispatch('notify', type: $created > 0 ? 'success' : 'info', message: __('performance_evaluation::kpi.messages.cards_generated', ['count' => $created]));
+    }
+
+    public function toggleImport(): void
+    {
+        $this->authorize('manage-performance-evaluation');
+        $this->showImport = ! $this->showImport;
+        $this->importFile = null;
+        $this->importErrors = [];
+        $this->resetValidation();
+    }
+
+    public function downloadActualsTemplate(): BinaryFileResponse
+    {
+        $this->authorize('manage-performance-evaluation');
+        $service = app(KpiActualsImportService::class);
+        $cycle = PerformanceCycle::query()->findOrFail($this->cycleId);
+
+        return $this->downloadReportTable($service->templateRows($cycle), $service->columns(), 'kpi-actuals-'.$cycle->id.'.xlsx');
+    }
+
+    public function importActuals(): void
+    {
+        $this->authorize('manage-performance-evaluation');
+        $this->validate(['importFile' => ['required', 'file', 'max:10240', 'mimes:xlsx,xls,csv,txt']]);
+
+        $rows = Excel::toArray(new \stdClass, $this->importFile->getRealPath(), null, $this->readerType())[0] ?? [];
+        $result = app(KpiActualsImportService::class)->import(PerformanceCycle::query()->findOrFail($this->cycleId), $rows, auth()->user());
+
+        $this->importErrors = $result['errors'];
+        if ($result['errors'] !== []) {
+            return;
+        }
+
+        $this->importFile = null;
+        $this->showImport = $result['imported'] === 0;
+        unset($this->cards);
+        $this->dispatch('notify', type: $result['imported'] > 0 ? 'success' : 'info', message: __('performance_evaluation::kpi.import.done', ['count' => $result['imported']]));
+    }
+
+    public function syncMetrics(): void
+    {
+        $this->authorize('manage-performance-evaluation');
+        $count = app(InternalKpiMetrics::class)->sync($this->cycleId);
+
+        unset($this->cards);
+        $this->dispatch('notify', type: $count > 0 ? 'success' : 'info', message: __('performance_evaluation::kpi.metrics.synced', ['count' => $count]));
     }
 
     public function openCard(int $id): void
@@ -311,6 +371,19 @@ class ScorecardsWorkspace extends Component
     public function render(): View
     {
         return view('performance-evaluation::livewire.performance-evaluation.kpi.scorecards-workspace');
+    }
+
+    /**
+     * Livewire keeps uploads under a .tmp name, so the reader is picked from the client
+     * extension.
+     */
+    private function readerType(): string
+    {
+        return match (strtolower($this->importFile->getClientOriginalExtension())) {
+            'csv', 'txt' => \Maatwebsite\Excel\Excel::CSV,
+            'xls' => \Maatwebsite\Excel\Excel::XLS,
+            default => \Maatwebsite\Excel\Excel::XLSX,
+        };
     }
 
     private function requireCard(): PerformanceScorecard

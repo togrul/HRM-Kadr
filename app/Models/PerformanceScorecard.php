@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -143,6 +144,11 @@ class PerformanceScorecard extends Model
     public function calibrations(): HasMany
     {
         return $this->hasMany(PerformanceCalibrationAdjustment::class)->latest('id');
+    }
+
+    public function bonus(): HasOne
+    {
+        return $this->hasOne(PerformanceBonusCalculation::class);
     }
 
     /** The score everything downstream uses: calibrated when HR adjusted it, otherwise final. */
