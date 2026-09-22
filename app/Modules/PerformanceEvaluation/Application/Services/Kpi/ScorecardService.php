@@ -21,6 +21,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use InvalidArgumentException;
 
 /**
  * Individual KPI scorecards (spec §5): built per cycle from each person's position
@@ -44,7 +45,8 @@ class ScorecardService
 
     /**
      * Opens a card for every active person whose position has a template and who has
-     * no card in the cycle yet. Returns the number of cards created.
+     * no card in the cycle yet, then tells each manager how many cards wait for them.
+     * Returns the number of cards created.
      */
     public function generateForCycle(PerformanceCycle $cycle): int
     {
@@ -54,22 +56,30 @@ class ScorecardService
         }
 
         // ponytail: synchronous, one manager lookup per person; move to a queued job when cycles reach thousands of people.
-        return Personnel::query()
+        $cards = Personnel::query()
             ->active()
             ->whereIn('position_id', $templateIdsByPosition->keys())
             ->whereNotIn('id', PerformanceScorecard::query()->where('performance_cycle_id', $cycle->id)->select('personnel_id'))
             ->get()
-            ->each(fn (Personnel $personnel) => $this->openCardFor($cycle, $personnel))
-            ->count();
+            ->map(fn (Personnel $personnel) => $this->openCardFor($cycle, $personnel))
+            ->filter();
+
+        app(ScorecardNotifier::class)->cycleOpened($cycle, $cards);
+
+        return $cards->count();
     }
 
     /**
-     * Opens one card for the person's current position, starting on `$validFrom` (or the
-     * later of cycle start and hire date). Null when the position has no active template.
+     * Opens one card for the person's current position — or, for a second job / part-time
+     * post, for `$positionId` with its FTE share (spec §5.1) — starting on `$validFrom`
+     * (or the later of cycle start and hire date). Null when the position has no active
+     * template.
      */
-    public function openCardFor(PerformanceCycle $cycle, Personnel $personnel, ?Carbon $validFrom = null): ?PerformanceScorecard
+    public function openCardFor(PerformanceCycle $cycle, Personnel $personnel, ?Carbon $validFrom = null, ?int $positionId = null, float $fte = 1.0): ?PerformanceScorecard
     {
-        $templateId = $this->templateIdsByPosition()->get($personnel->position_id);
+        $positionId ??= $personnel->position_id;
+        $additional = (int) $positionId !== (int) $personnel->position_id;
+        $templateId = $this->templateIdsByPosition()->get($positionId);
         $template = $templateId ? PerformanceKpiTemplate::query()->with('items')->find($templateId) : null;
         if ($template === null) {
             return null;
@@ -89,11 +99,13 @@ class ScorecardService
 
         $managerPersonnelId = $this->routes->manager($personnel)['id'] ?? null;
 
-        return DB::transaction(function () use ($cycle, $personnel, $template, $validFrom, $cycleStart, $cycleEnd, $versionIdsByKpi, $managerPersonnelId): PerformanceScorecard {
+        return DB::transaction(function () use ($cycle, $personnel, $template, $validFrom, $cycleStart, $cycleEnd, $versionIdsByKpi, $managerPersonnelId, $positionId, $fte, $additional): PerformanceScorecard {
             $card = PerformanceScorecard::query()->create([
                 'performance_cycle_id' => $cycle->id,
                 'personnel_id' => $personnel->id,
-                'position_id' => $personnel->position_id,
+                'position_id' => $positionId,
+                'fte' => max(0.05, min(1.0, $fte)),
+                'is_additional' => $additional,
                 'performance_kpi_template_id' => $template->id,
                 'performance_form_id' => $this->competencyFormFor($cycle, $personnel, $template, $managerPersonnelId)?->id,
                 'manager_personnel_id' => $managerPersonnelId,
@@ -266,6 +278,40 @@ class ScorecardService
     }
 
     /**
+     * Manager change (spec §5.1): the card stays, the right to evaluate moves to whoever
+     * the org chart now names as the person's manager, together with the competency
+     * form. Returns whether the manager changed.
+     */
+    public function reassignManager(PerformanceScorecard $card): bool
+    {
+        $personnel = $card->personnel;
+        $managerId = $personnel ? ($this->routes->manager($personnel)['id'] ?? null) : null;
+
+        if ($managerId === null || (int) $managerId === (int) $card->manager_personnel_id) {
+            return false;
+        }
+
+        $previous = $card->manager;
+        DB::transaction(function () use ($card, $managerId, $previous): void {
+            $card->update(['manager_personnel_id' => $managerId]);
+            $card->form?->update(['manager_id' => $this->userIdsForPersonnel((int) $managerId)[0] ?? null]);
+            $card->events()->create([
+                'action' => 'manager_changed',
+                'from_status' => $card->status,
+                'to_status' => $card->status,
+                'reason' => __('performance_evaluation::kpi.manager_changed_note', [
+                    'from' => $previous ? trim($previous->surname.' '.$previous->name) : '—',
+                    'to' => trim(($card->refresh()->manager?->surname ?? '').' '.($card->manager?->name ?? '')),
+                ]),
+            ]);
+        });
+
+        app(ScorecardNotifier::class)->managerChanged($card, $previous?->id);
+
+        return true;
+    }
+
+    /**
      * Long leave (spec §5.1): once the leave inside a card's period passes the threshold,
      * the card is judged on the days actually worked — additive targets (KPIs summed
      * over the period) and the pro-rata shrink by the worked share. Dropping back under
@@ -351,6 +397,10 @@ class ScorecardService
             throw ValidationException::withMessages(['actual' => __('performance_evaluation::kpi.errors.scorecard_not_active')]);
         }
 
+        if ($item->kpi->data_source === 'calculated') {
+            throw ValidationException::withMessages(['actual' => __('performance_evaluation::kpi.formula.errors.no_manual')]);
+        }
+
         if ($item->kpi->evidence_required && $evidence === null) {
             throw ValidationException::withMessages(['evidence' => __('performance_evaluation::kpi.errors.evidence_required')]);
         }
@@ -400,9 +450,14 @@ class ScorecardService
         // ponytail: inline on each change; queue it if a card ever takes long enough to notice.
         $card->load(['items.kpi', 'items.kpiVersion', 'items.actuals', 'form:id,final_score', 'calibrations']);
 
-        $scored = $card->items->map(function (PerformanceScorecardItem $item): array {
-            $definition = $item->kpiVersion?->snapshot ?? $item->kpi->only(['type', 'direction', 'aggregation', 'qualitative_scale']);
-            $actual = $this->aggregate($item->actuals->whereNotNull('approved_at'), (string) ($definition['aggregation'] ?? 'last'));
+        $definitions = $card->items->mapWithKeys(fn (PerformanceScorecardItem $item): array => [
+            $item->id => $item->kpiVersion?->snapshot ?? $item->kpi->only(['type', 'direction', 'aggregation', 'qualitative_scale', 'formula']),
+        ]);
+        $actuals = $this->itemActuals($card, $definitions->all());
+
+        $scored = $card->items->map(function (PerformanceScorecardItem $item) use ($card, $definitions, $actuals): array {
+            $definition = $definitions->get($item->id);
+            $actual = $actuals[$item->id] ?? null;
 
             $achievement = $actual === null ? null : $this->engine->achievement([
                 'type' => $definition['type'],
@@ -420,7 +475,23 @@ class ScorecardService
                 $item->cap === null ? null : (float) $item->cap,
             );
 
-            $item->update(['actual' => $actual, 'achievement' => $achievement, 'score' => $score]);
+            $forecast = $this->forecast($card, $definition, $actual);
+            $forecastAchievement = $forecast === null ? null : $this->engine->achievement([
+                'type' => $definition['type'],
+                'direction' => $definition['direction'],
+                'target' => $item->target,
+                'range_min' => $item->range_min,
+                'range_max' => $item->range_max,
+                'scale' => $definition['qualitative_scale'] ?? null,
+            ], $forecast);
+
+            $item->update([
+                'actual' => $actual,
+                'achievement' => $achievement,
+                'score' => $score,
+                'forecast' => $forecast,
+                'forecast_achievement' => $forecastAchievement,
+            ]);
 
             return ['weight' => $item->weight, 'score' => $score];
         });
@@ -441,6 +512,70 @@ class ScorecardService
     }
 
     /**
+     * End-of-period forecast (spec §9): an additive KPI is extrapolated linearly from the
+     * pace so far; any other quantitative KPI is expected to stay where it is.
+     *
+     * @param  array<string, mixed>  $definition
+     */
+    private function forecast(PerformanceScorecard $card, array $definition, ?float $actual): ?float
+    {
+        if ($actual === null || ($definition['type'] ?? null) !== 'quantitative') {
+            return null;
+        }
+
+        if (($definition['aggregation'] ?? null) !== 'sum') {
+            return $actual;
+        }
+
+        $from = Carbon::parse($card->valid_from)->startOfDay();
+        $to = Carbon::parse($card->valid_to)->startOfDay();
+        $total = $from->diffInDays($to) + 1;
+        $elapsed = min($total, max(1, $from->diffInDays(today(), false) + 1));
+
+        return round($actual * $total / $elapsed, 4);
+    }
+
+    /**
+     * Each item's actual: entered/imported/synced items aggregate their approved values;
+     * calculated items evaluate their formula over the other items' actuals by KPI code,
+     * pass after pass so a formula may build on another formula.
+     *
+     * @param  array<int, array<string, mixed>>  $definitions  item id → KPI definition
+     * @return array<int, float|null> item id → actual
+     */
+    private function itemActuals(PerformanceScorecard $card, array $definitions): array
+    {
+        $formula = app(KpiFormula::class);
+        $actuals = [];
+        $calculated = [];
+
+        foreach ($card->items as $item) {
+            if (filled($definitions[$item->id]['formula'] ?? null)) {
+                $calculated[$item->id] = (string) $definitions[$item->id]['formula'];
+                $actuals[$item->id] = null;
+
+                continue;
+            }
+
+            $actuals[$item->id] = $this->aggregate($item->actuals->whereNotNull('approved_at'), (string) ($definitions[$item->id]['aggregation'] ?? 'last'));
+        }
+
+        $codes = $card->items->mapWithKeys(fn (PerformanceScorecardItem $item): array => [$item->id => $item->kpi->code]);
+        for ($pass = 0; $pass < count($calculated); $pass++) {
+            $values = collect($actuals)->mapWithKeys(fn ($value, int $itemId): array => [$codes[$itemId] => $value])->all();
+            foreach ($calculated as $itemId => $expression) {
+                try {
+                    $actuals[$itemId] = $formula->evaluate($expression, $values);
+                } catch (InvalidArgumentException) {
+                    $actuals[$itemId] = null;
+                }
+            }
+        }
+
+        return $actuals;
+    }
+
+    /**
      * The person's result for a cycle when position changes split it over several cards:
      * each card's score weighted by the days it covered (spec §5.1).
      */
@@ -452,10 +587,11 @@ class ScorecardService
             ->get()
             ->filter(fn (PerformanceScorecard $card): bool => $card->effectiveScore() !== null);
 
-        $days = fn (PerformanceScorecard $card): int => (int) $card->valid_from->diffInDays($card->valid_to) + 1;
+        // Days covered × FTE share, so a half-time second post weighs half.
+        $days = fn (PerformanceScorecard $card): float => ((int) $card->valid_from->diffInDays($card->valid_to) + 1) * (float) $card->fte;
         $totalDays = $cards->sum($days);
 
-        if ($totalDays === 0) {
+        if ($totalDays <= 0) {
             return null;
         }
 
@@ -582,7 +718,7 @@ class ScorecardService
     /**
      * @return Collection<int, int> position id → active template id
      */
-    private function templateIdsByPosition(): Collection
+    public function templateIdsByPosition(): Collection
     {
         return DB::table('performance_kpi_template_positions')
             ->join('performance_kpi_templates', 'performance_kpi_templates.id', '=', 'performance_kpi_template_positions.performance_kpi_template_id')

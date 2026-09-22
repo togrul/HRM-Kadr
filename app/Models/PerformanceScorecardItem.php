@@ -20,6 +20,9 @@ class PerformanceScorecardItem extends Model
         'weight',
         'target',
         'original_target',
+        'forecast',
+        'forecast_achievement',
+        'red_notified_at',
         'range_min',
         'range_max',
         'threshold',
@@ -38,6 +41,9 @@ class PerformanceScorecardItem extends Model
         'weight' => 'decimal:2',
         'target' => 'decimal:4',
         'original_target' => 'decimal:4',
+        'forecast' => 'decimal:4',
+        'forecast_achievement' => 'decimal:4',
+        'red_notified_at' => 'datetime',
         'range_min' => 'decimal:4',
         'range_max' => 'decimal:4',
         'threshold' => 'decimal:4',
@@ -80,5 +86,10 @@ class PerformanceScorecardItem extends Model
             ->useLogName('performance_scorecard')
             ->logFillable()
             ->logOnlyDirty();
+    }
+
+    public function changeRequests(): HasMany
+    {
+        return $this->hasMany(PerformanceScorecardChangeRequest::class)->latest('id');
     }
 }

@@ -28,7 +28,7 @@ class PerformanceKpi extends Model
     public const STATUSES = ['draft', 'active', 'archived'];
 
     /** Changing any of these creates a new version; open scorecards keep the old one. */
-    public const VERSIONED_FIELDS = ['type', 'direction', 'unit', 'aggregation', 'qualitative_scale'];
+    public const VERSIONED_FIELDS = ['type', 'direction', 'unit', 'aggregation', 'qualitative_scale', 'formula'];
 
     protected $fillable = [
         'code',
@@ -39,6 +39,7 @@ class PerformanceKpi extends Model
         'unit',
         'data_source',
         'source_metric',
+        'formula',
         'integration_config',
         'integration_synced_at',
         'integration_error',

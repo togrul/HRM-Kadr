@@ -113,7 +113,8 @@ class KpiActualsImportService
     {
         return PerformanceScorecardItem::query()
             ->whereHas('scorecard', fn ($query) => $query->where('performance_cycle_id', $cycle->id)->where('status', 'active'))
-            ->with(['kpi:id,code,name,unit,evidence_required', 'scorecard', 'scorecard.personnel:id,surname,name,tabel_no'])
+            ->whereHas('kpi', fn ($query) => $query->where('data_source', '!=', 'calculated'))
+            ->with(['kpi:id,code,name,unit,evidence_required,data_source', 'scorecard', 'scorecard.personnel:id,surname,name,tabel_no'])
             ->orderBy('performance_scorecard_id')
             ->orderBy('sort_order')
             ->get();

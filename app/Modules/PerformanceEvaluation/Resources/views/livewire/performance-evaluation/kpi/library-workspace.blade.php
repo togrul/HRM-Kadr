@@ -23,17 +23,61 @@
                 {{ __($t.'.sections.templates') }}
                 <span class="hrm-num ml-1 opacity-60">{{ $this->templates->count() }}</span>
             </x-filter.item>
+            @can('manage-performance-evaluation')
+                <x-filter.item wire:click="$set('section', 'notifications')" :active="$section === 'notifications'">
+                    {{ __($t.'.sections.notifications') }}
+                </x-filter.item>
+            @endcan
         </x-filter.nav>
 
+        @if ($section === 'notifications')
+            <div class="min-w-[9rem]">
+                <x-ui.filter-native-select wire:model.live="templateLocale">
+                    @foreach (config('app.locales', ['az']) as $locale)
+                        <option value="{{ $locale }}">{{ strtoupper($locale) }}</option>
+                    @endforeach
+                </x-ui.filter-native-select>
+            </div>
+        @endif
+
         @can('manage-performance-evaluation')
+            @if ($section !== 'notifications')
             <x-pill-button variant="primary" wire:click="{{ $section === 'kpis' ? 'openKpiForm' : 'openTemplateForm' }}">
                 <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
                 {{ $section === 'kpis' ? __($t.'.actions.add_kpi') : __($t.'.actions.add_template') }}
             </x-pill-button>
+            @endif
         @endcan
     </div>
 
     @error('kpi') <x-validation>{{ $message }}</x-validation> @enderror
+
+    @if ($section === 'notifications')
+        @can('manage-performance-evaluation')
+            @php $customised = $this->notificationTemplates; @endphp
+            <div class="overflow-hidden rounded-2xl border border-hairline bg-white shadow-card">
+                <div class="border-b border-hairline-subtle bg-[#fafafa] px-5 py-3">
+                    <p class="text-[13px] font-semibold text-ink">{{ __($t.'.notification_templates.title') }}</p>
+                    <p class="mt-0.5 max-w-3xl text-[12px] leading-5 text-ink-muted">{{ __($t.'.notification_templates.hint') }}</p>
+                </div>
+                @foreach (\App\Modules\PerformanceEvaluation\Application\Services\Kpi\KpiNotificationDelivery::EVENTS as $event)
+                    @php $own = $customised->get($event); @endphp
+                    <button type="button" wire:key="notification-{{ $event }}" wire:click="openNotificationTemplate('{{ $event }}')" class="flex w-full items-center gap-4 border-b border-hairline-subtle px-5 py-3 text-left transition last:border-b-0 hover:bg-[#fafafa]">
+                        <div class="min-w-0 flex-1">
+                            <p class="flex items-center gap-2 text-[13px] font-semibold text-ink">
+                                {{ __($t.'.notification_templates.events.'.$event) }}
+                                @if (in_array($event, \App\Modules\PerformanceEvaluation\Application\Services\Kpi\KpiNotificationDelivery::MANDATORY, true))
+                                    <span class="rounded-md bg-amber-50 px-1.5 py-px text-[10.5px] font-medium text-amber-700" title="{{ __($t.'.notification_templates.mandatory_hint') }}">{{ __($t.'.notification_templates.mandatory') }}</span>
+                                @endif
+                            </p>
+                            <p class="mt-0.5 truncate text-[12px] text-ink-muted">{{ $own?->subject ?? app(\App\Modules\PerformanceEvaluation\Application\Services\Kpi\KpiNotificationDelivery::class)->defaultTemplate($event, $templateLocale)['subject'] }}</p>
+                        </div>
+                        <span class="shrink-0 rounded-md px-2 py-0.5 text-[11px] font-medium {{ $own ? 'bg-violet-50 text-violet-700' : 'bg-[#f4f4f5] text-ink-faint' }}">{{ $own ? __($t.'.notification_templates.custom') : __($t.'.notification_templates.default') }}</span>
+                    </button>
+                @endforeach
+            </div>
+        @endcan
+    @endif
 
     @if ($section === 'kpis')
         {{-- ───────────── KPI library ───────────── --}}
@@ -55,6 +99,9 @@
                         <div class="mt-1 flex min-w-0 items-center gap-2 text-[12px] text-ink-faint">
                             <span class="hrm-num shrink-0 rounded-md bg-[#f4f4f5] px-1.5 py-px text-[11px] text-ink-muted">{{ $kpi->code }}</span>
                             <span class="truncate">{{ __($t.'.types.'.$kpi->type) }} · {{ __($t.'.perspectives.'.$kpi->perspective) }}</span>
+                            @if ($kpi->data_source === 'calculated')
+                                <span class="shrink-0 rounded-md bg-violet-50 px-1.5 py-px text-[11px] font-medium text-violet-700" title="{{ $kpi->formula }}">{{ __($t.'.formula.badge') }}</span>
+                            @endif
                             @if ($kpi->source_metric)
                                 <span class="shrink-0 rounded-md bg-sky-50 px-1.5 py-px text-[11px] font-medium text-sky-700" title="{{ __($t.'.metrics.'.$kpi->source_metric) }}">{{ __($t.'.metrics.auto_badge') }}</span>
                             @endif
@@ -280,6 +327,7 @@
                             <div class="mt-1">
                                 <x-ui.filter-native-select wire:model.live="kpiForm.source_metric">
                                     <option value="">{{ __($t.'.metrics.manual') }}</option>
+                                    <option value="formula">{{ __($t.'.formula.option') }}</option>
                                     @foreach (array_keys(\App\Modules\PerformanceEvaluation\Application\Services\Kpi\InternalKpiMetrics::METRICS) as $metric)
                                         <option value="{{ $metric }}">{{ __($t.'.metrics.'.$metric) }}</option>
                                     @endforeach
@@ -288,6 +336,21 @@
                             <p class="mt-1.5 text-[12px] leading-5 text-ink-faint">{{ __($t.'.metrics.hint') }}</p>
                             @error('kpiForm.source_metric') <x-validation>{{ $message }}</x-validation> @enderror
                         </div>
+
+                        @if (($kpiForm['source_metric'] ?? '') === 'formula')
+                            <div class="flex flex-col gap-3 rounded-xl border border-hairline bg-[#fafafa] p-4 sm:col-span-2">
+                                <div>
+                                    <p class="text-[13px] font-semibold text-ink">{{ __($t.'.formula.title') }}</p>
+                                    <p class="mt-0.5 text-[12px] leading-5 text-ink-muted">{{ __($t.'.formula.hint') }}</p>
+                                </div>
+                                <textarea wire:model="kpiForm.formula" rows="3" spellcheck="false" placeholder="ROUND({SALES_FACT} / {SALES_PLAN} * 100, 1)" class="hrm-num w-full rounded-xl border border-hairline bg-white px-3 py-2 font-mono text-[13px] text-ink focus:border-zinc-400 focus:outline-none"></textarea>
+                                @error('kpiForm.formula') <x-validation>{{ $message }}</x-validation> @enderror
+                                <p class="text-[11.5px] leading-5 text-ink-faint">{{ __($t.'.formula.syntax') }}</p>
+                                <div>
+                                    <button type="button" wire:click="testFormula" class="inline-flex h-9 items-center gap-1.5 rounded-lg border border-hairline bg-white px-3 text-[12.5px] font-semibold text-ink-soft hover:border-zinc-300 hover:text-ink">{{ __($t.'.formula.test') }}</button>
+                                </div>
+                            </div>
+                        @endif
 
                         @if (($kpiForm['source_metric'] ?? '') === 'rest')
                             @php $c = $t.'.connector'; @endphp
@@ -353,6 +416,42 @@
                     <div class="mt-auto flex items-center justify-end gap-2.5 border-t border-zinc-100 pt-5">
                         <button type="button" wire:click="closeSideMenu" class="h-11 rounded-xl border border-zinc-200 px-5 text-sm font-medium text-zinc-600 hover:bg-zinc-50">{{ __($t.'.actions.cancel') }}</button>
                         <button type="button" wire:click="saveKpi" class="h-11 rounded-xl bg-emerald-600 px-6 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500 active:scale-[0.98]">{{ __($t.'.actions.save') }}</button>
+                    </div>
+                </div>
+            @endif
+
+            @if ($showSideMenu === 'notification-template' && $notificationKey)
+                <div class="flex h-full flex-col">
+                    <p class="hrm-eyebrow">{{ __($t.'.sections.notifications') }} · {{ strtoupper($templateLocale) }}</p>
+                    <h2 class="mt-1 text-[18px] font-semibold tracking-[-0.02em] text-ink">{{ __($t.'.notification_templates.events.'.$notificationKey) }}</h2>
+                    <p class="mt-3 rounded-xl bg-[#fafafa] px-3 py-2 text-[12px] leading-5 text-ink-muted">{{ __($t.'.notification_templates.placeholders_hint') }}</p>
+                    <div class="mt-2 flex flex-wrap gap-1.5">
+                        @foreach (array_keys(\App\Modules\PerformanceEvaluation\Application\Services\Kpi\KpiNotificationDelivery::PLACEHOLDERS) as $placeholder)
+                            <code class="rounded-md bg-[#f4f4f5] px-1.5 py-0.5 text-[11.5px] text-ink-soft">{{ '{'.$placeholder.'}' }}</code>
+                        @endforeach
+                    </div>
+                    <div class="mt-5 flex flex-col gap-4">
+                        <div>
+                            <x-label value="{{ __($t.'.notification_templates.subject') }}" />
+                            <x-livewire-input mode="gray" name="notificationForm.subject" wire:model="notificationForm.subject" />
+                            @error('notificationForm.subject') <x-validation>{{ $message }}</x-validation> @enderror
+                        </div>
+                        <div>
+                            <x-label value="{{ __($t.'.notification_templates.body') }}" />
+                            <textarea wire:model="notificationForm.body" rows="6" class="w-full rounded-xl border border-hairline bg-[#fafafa] px-3 py-2 text-[13px] text-ink focus:border-zinc-400 focus:bg-white focus:outline-none"></textarea>
+                            @error('notificationForm.body') <x-validation>{{ $message }}</x-validation> @enderror
+                        </div>
+                    </div>
+                    <div class="mt-auto flex items-center justify-between gap-2.5 border-t border-hairline-subtle pt-5">
+                        @if ($this->notificationTemplates->has($notificationKey))
+                            <button type="button" wire:click="resetNotificationTemplate('{{ $notificationKey }}')" class="h-11 rounded-xl px-4 text-sm font-medium text-ink-muted hover:bg-[#fafafa] hover:text-ink">{{ __($t.'.notification_templates.reset') }}</button>
+                        @else
+                            <span></span>
+                        @endif
+                        <div class="flex items-center gap-2.5">
+                            <button type="button" wire:click="closeSideMenu" class="h-11 rounded-xl border border-hairline px-5 text-sm font-medium text-ink-soft hover:bg-[#fafafa]">{{ __($t.'.actions.cancel') }}</button>
+                            <button type="button" wire:click="saveNotificationTemplate" class="h-11 rounded-xl bg-ink px-6 text-sm font-semibold text-white hover:bg-ink-hover">{{ __($t.'.actions.save') }}</button>
+                        </div>
                     </div>
                 </div>
             @endif

@@ -12,6 +12,7 @@ use App\Support\Livewire\DownloadsReportsTable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Collection as SupportCollection;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -51,13 +52,44 @@ class BonusWorkspace extends Component
     #[Computed]
     public function cycles(): Collection
     {
-        return PerformanceCycle::query()->orderByDesc('period_start')->get(['id', 'name', 'status']);
+        return PerformanceCycle::query()->orderByDesc('period_start')->get();
     }
 
     #[Computed]
     public function mode(): string
     {
         return app(BonusService::class)->mode();
+    }
+
+    #[Computed]
+    public function cycle(): ?PerformanceCycle
+    {
+        return $this->cycleId ? $this->cycles->firstWhere('id', $this->cycleId) : null;
+    }
+
+    /**
+     * The rule as stored — read once per request; the preview works on a copy.
+     */
+    #[Computed]
+    public function savedRule(): ?PerformanceBonusRule
+    {
+        return $this->cycle ? app(BonusService::class)->rule($this->cycle) : null;
+    }
+
+    /**
+     * Positions and units of the cycle's people, from one query.
+     *
+     * @return SupportCollection<int, object{position_id: ?int, structure_id: ?int}>
+     */
+    #[Computed]
+    public function scope(): SupportCollection
+    {
+        return PerformanceScorecard::query()
+            ->where('performance_cycle_id', $this->cycleId)
+            ->join('personnels', 'personnels.id', '=', 'performance_scorecards.personnel_id')
+            ->distinct()
+            ->toBase()
+            ->get(['performance_scorecards.position_id', 'personnels.structure_id']);
     }
 
     /**
@@ -68,9 +100,7 @@ class BonusWorkspace extends Component
     #[Computed]
     public function positionOptions(): array
     {
-        $ids = PerformanceScorecard::query()->where('performance_cycle_id', $this->cycleId)->whereNotNull('position_id')->distinct()->pluck('position_id');
-
-        return Position::query()->whereIn('id', $ids)->orderBy('name')->pluck('name', 'id')->all();
+        return Position::query()->whereIn('id', $this->scope->pluck('position_id')->filter()->unique())->orderBy('name')->pluck('name', 'id')->all();
     }
 
     /**
@@ -81,12 +111,7 @@ class BonusWorkspace extends Component
     #[Computed]
     public function unitOptions(): array
     {
-        $own = PerformanceScorecard::query()
-            ->where('performance_cycle_id', $this->cycleId)
-            ->join('personnels', 'personnels.id', '=', 'performance_scorecards.personnel_id')
-            ->distinct()
-            ->pluck('personnels.structure_id')
-            ->filter();
+        $own = $this->scope->pluck('structure_id')->filter()->unique();
         $chart = Structure::query()->get(['id', 'name', 'parent_id'])->keyBy('id');
 
         $options = [];
@@ -108,22 +133,16 @@ class BonusWorkspace extends Component
     #[Computed]
     public function preview(): ?array
     {
-        $cycle = $this->cycle();
-        if ($cycle === null) {
+        if ($this->cycle === null) {
             return null;
         }
 
-        $rule = app(BonusService::class)->rule($cycle);
-        $rule->fill($this->formToRule());
-
-        return app(BonusService::class)->preview($cycle, $rule);
+        return app(BonusService::class)->preview($this->cycle, (clone $this->savedRule)->fill($this->formToRule()));
     }
 
     public function isDirty(): bool
     {
-        $cycle = $this->cycle();
-
-        return $cycle !== null && $this->ruleToForm(app(BonusService::class)->rule($cycle)) != $this->ruleForm;
+        return $this->savedRule !== null && $this->ruleToForm($this->savedRule) != $this->ruleForm;
     }
 
     public function addBand(string $list): void
@@ -191,22 +210,16 @@ class BonusWorkspace extends Component
         return view('performance-evaluation::livewire.performance-evaluation.kpi.bonus-workspace');
     }
 
-    private function cycle(): ?PerformanceCycle
-    {
-        return $this->cycleId ? PerformanceCycle::query()->find($this->cycleId) : null;
-    }
-
     private function requireCycle(): PerformanceCycle
     {
-        return $this->cycle() ?? abort(404);
+        return $this->cycle ?? abort(404);
     }
 
     private function loadRule(): void
     {
-        $cycle = $this->cycle();
-        $this->ruleForm = $cycle ? $this->ruleToForm(app(BonusService::class)->rule($cycle)) : [];
+        unset($this->cycle, $this->savedRule, $this->scope, $this->preview, $this->positionOptions, $this->unitOptions);
+        $this->ruleForm = $this->savedRule ? $this->ruleToForm($this->savedRule) : [];
         $this->resetValidation();
-        unset($this->preview, $this->positionOptions, $this->unitOptions);
     }
 
     /**
@@ -229,6 +242,7 @@ class BonusWorkspace extends Component
             'cap_pct' => $rule->cap_pct,
             'fund' => $rule->fund,
             'scale_to_fund' => (bool) $rule->scale_to_fund,
+            'pay_in_probation' => (bool) $rule->pay_in_probation,
         ];
     }
 
@@ -258,6 +272,7 @@ class BonusWorkspace extends Component
             'cap_pct' => $number('cap_pct'),
             'fund' => $number('fund'),
             'scale_to_fund' => (bool) ($this->ruleForm['scale_to_fund'] ?? false),
+            'pay_in_probation' => (bool) ($this->ruleForm['pay_in_probation'] ?? false),
         ];
     }
 }

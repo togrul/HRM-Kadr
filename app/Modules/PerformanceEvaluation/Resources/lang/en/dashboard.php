@@ -13,6 +13,7 @@ return [
     'tabs' => [
         'overview' => 'Overview',
         'kpi_scorecards' => 'KPI scorecards',
+        'kpi_analytics' => 'KPI analytics',
         'kpi_bonus' => 'Bonus',
         'kpi_library' => 'KPI library',
         'goals' => 'Goals',

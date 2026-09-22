@@ -272,6 +272,10 @@
                             <input type="checkbox" wire:model.live="ruleForm.scale_to_fund" class="mt-0.5 h-4 w-4 rounded border-zinc-300 text-ink focus:ring-zinc-400">
                             <span>{{ __($b.'.fields.scale_to_fund') }}</span>
                         </label>
+                        <label class="mt-2 flex items-start gap-2.5 text-[12.5px] text-ink-soft">
+                            <input type="checkbox" wire:model.live="ruleForm.pay_in_probation" class="mt-0.5 h-4 w-4 rounded border-zinc-300 text-ink focus:ring-zinc-400">
+                            <span>{{ __($b.'.fields.pay_in_probation') }}</span>
+                        </label>
                     </div>
                 </div>
                 <div class="flex items-center justify-end gap-2 border-t border-hairline-subtle px-5 py-3">
@@ -303,6 +307,12 @@
                             <x-avatar :name="$row['personnel']?->fullname ?? '—'" size="sm" />
                             <div class="min-w-0">
                                 <p class="truncate text-[13px] font-medium text-ink">{{ $row['personnel']?->fullname ?? '—' }}</p>
+                                @if ($row['probation'] ?? false)
+                                    <p class="text-[11px] text-amber-600">{{ __($b.'.probation') }}</p>
+                                @endif
+                                @if ((float) ($row['fte'] ?? 1) < 1)
+                                    <p class="text-[11px] text-ink-faint">{{ __($b.'.factors.fte') }} <span class="hrm-num">{{ $fmt($row['fte']) }}</span></p>
+                                @endif
                                 @if ((float) $row['prorata'] < 1)
                                     <p class="text-[11px] text-ink-faint">{{ __($b.'.factors.prorata') }} <span class="hrm-num">{{ $fmt($row['prorata'] * 100) }}%</span></p>
                                 @endif

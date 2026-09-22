@@ -8,14 +8,12 @@ use App\Models\AwardType;
 use App\Models\OrderLog;
 use App\Models\PayrollOneOffEarning;
 use App\Models\PerformanceBonusCalculation;
-use App\Models\PerformanceCycle;
 use App\Models\PerformanceFormTemplate;
 use App\Models\PerformanceFormTemplateItem;
 use App\Models\PerformanceFormTemplateSection;
 use App\Models\PerformanceGoal;
 use App\Models\PerformanceKpi;
 use App\Models\PerformanceScorecard;
-use App\Models\Personnel;
 use App\Models\Position;
 use App\Models\Structure;
 use App\Models\User;
@@ -44,14 +42,14 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Sleep;
-use Illuminate\Support\Str;
-use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
+use Tests\Feature\PerformanceEvaluation\Concerns\BuildsKpiCards;
 use Tests\TestCase;
 
 class KpiScorecardTest extends TestCase
 {
+    use BuildsKpiCards;
     use RefreshDatabase;
 
     private Position $position;
@@ -350,7 +348,7 @@ class KpiScorecardTest extends TestCase
         $card->personnel->forceFill(['position_id' => $newPosition->id])->saveQuietly();
 
         $result = app(ScorecardLifecycleService::class)->syncPersonnel(Carbon::parse('2026-02-15'));
-        $this->assertSame(['terminated' => 0, 'position_changed' => 1, 'reopened' => 1], $result);
+        $this->assertSame(['terminated' => 0, 'position_changed' => 1, 'reopened' => 1, 'manager_changed' => 0], $result);
 
         $card->refresh();
         $this->assertSame('closed', $card->status);
@@ -676,7 +674,8 @@ class KpiScorecardTest extends TestCase
 
         $bonus->saveRule($cycle, [...$this->ruleData($bonus, $cycle), 'fund' => 100, 'scale_to_fund' => true], $this->hr);
         $this->assertSame(1, $bonus->calculate($cycle));
-        $this->assertSame(100.0, PerformanceBonusCalculation::query()->value('amount'));
+        $this->assertFalse(is_numeric(\Illuminate\Support\Facades\DB::table('performance_bonus_calculations')->value('amount')), 'Stored encrypted.');
+        $this->assertSame(100.0, PerformanceBonusCalculation::query()->first()?->amount);
 
         $this->assertCount(1, $bonus->exportToPayroll($cycle));
         $exportedAt = PerformanceBonusCalculation::query()->value('exported_at');
@@ -685,7 +684,7 @@ class KpiScorecardTest extends TestCase
 
         $bonus->saveRule($cycle, [...$this->ruleData($bonus, $cycle), 'target_pct' => 50], $this->hr);
         $bonus->calculate($cycle);
-        $this->assertSame(100.0, PerformanceBonusCalculation::query()->value('amount'), 'An exported line never changes.');
+        $this->assertSame(100.0, PerformanceBonusCalculation::query()->first()?->amount, 'An exported line never changes.');
 
         $this->assertValidationKeys(['bonus'], fn () => $bonus->issueOrders($cycle));
         $this->assertValidationKeys(['cap_pct'], fn () => $bonus->saveRule($cycle, [...$this->ruleData($bonus, $cycle), 'cap_pct' => 50], $this->hr));
@@ -707,7 +706,7 @@ class KpiScorecardTest extends TestCase
         $this->assertSame('order', $bonus->mode());
         $bonus->calculate($cycle);
         // 1000 × 1 salary × 50% payout = 500
-        $this->assertSame(500.0, PerformanceBonusCalculation::query()->value('amount'));
+        $this->assertSame(500.0, PerformanceBonusCalculation::query()->first()?->amount);
         $this->assertSame(1, $bonus->issueOrders($cycle));
         $this->assertSame(0, $bonus->issueOrders($cycle));
 
@@ -739,125 +738,7 @@ class KpiScorecardTest extends TestCase
             ->assertHasNoErrors()
             ->assertSee(__('performance_evaluation::kpi.bonus.statuses.calculated'));
 
-        $this->assertSame(450.0, PerformanceBonusCalculation::query()->value('amount'));
+        $this->assertSame(450.0, PerformanceBonusCalculation::query()->first()?->amount);
         $this->get(route('performance-evaluation', ['tab' => 'kpi_bonus']))->assertOk();
-    }
-
-    private function approvedSpecCard(): PerformanceScorecard
-    {
-        $card = $this->specExampleCard();
-        $scorecards = app(ScorecardService::class);
-        $scorecards->transition($card, 'activate', $this->hr);
-        foreach ([110000, 18, 71, 100] as $index => $value) {
-            $scorecards->recordActual($card->items[$index], $value, $this->hr);
-        }
-        foreach (['start_self_review', 'submit_self_review', 'submit_manager_review', 'approve'] as $action) {
-            $scorecards->transition($card->refresh(), $action, $this->hr);
-        }
-
-        return $card->refresh()->load('personnel', 'cycle');
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function ruleData(BonusService $bonus, PerformanceCycle $cycle): array
-    {
-        return $bonus->rule($cycle)->only(['target_pct', 'reward_months', 'payout_bands', 'company_result', 'company_gate', 'gate_floor_pct', 'company_multipliers', 'cap_pct', 'fund', 'scale_to_fund']);
-    }
-
-    private function employeeAndManager(PerformanceScorecard $card): array
-    {
-        $employee = $this->userFor($card->personnel);
-        $manager = $this->userFor($this->person('Rəhbər'));
-        $card->update(['manager_personnel_id' => UserPersonnelLink::query()->where('user_id', $manager->id)->value('personnel_id')]);
-        $card->refresh();
-
-        return [$employee, $manager];
-    }
-
-    private function specExampleCard(?int $competencyFormTemplateId = null): PerformanceScorecard
-    {
-        $rows = [['SALES', 40, 100000], ['CLIENTS', 25, 20], ['DEBT', 20, 95], ['CRM', 15, 100]];
-        $items = array_map(fn (array $row): array => $this->item($this->kpi($row[0]), $row[1], target: $row[2]), $rows);
-
-        $data = $competencyFormTemplateId === null
-            ? $this->templateData()
-            : [...$this->templateData(70, 30), 'performance_form_template_id' => $competencyFormTemplateId];
-        app(KpiTemplateService::class)->save($data, $items, [$this->position->id]);
-
-        $person = $this->person('Əliyev');
-        $cycle = PerformanceCycle::query()->create([
-            'name' => '2026 Q1', 'cycle_type' => 'quarterly', 'period_start' => '2026-01-01', 'period_end' => '2026-03-31', 'status' => 'active',
-        ]);
-
-        $this->assertSame(1, app(ScorecardService::class)->generateForCycle($cycle));
-        $this->assertSame(0, app(ScorecardService::class)->generateForCycle($cycle));
-
-        return PerformanceScorecard::query()->where('personnel_id', $person->id)->with('items.kpi')->firstOrFail();
-    }
-
-    private function kpi(string $code): PerformanceKpi
-    {
-        return app(KpiLibraryService::class)->save([
-            'code' => $code, 'name' => $code, 'type' => 'quantitative', 'direction' => 'higher_better',
-            'unit' => 'count', 'frequency' => 'quarterly', 'aggregation' => 'last', 'perspective' => 'financial', 'status' => 'active',
-        ]);
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function templateData(float $kpiShare = 100, float $competencyShare = 0): array
-    {
-        return ['name' => 'Satış', 'period_type' => 'quarterly', 'kpi_weight_share' => $kpiShare, 'competency_weight_share' => $competencyShare, 'status' => 'active'];
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function item(PerformanceKpi $kpi, float $weight, float $target = 100, float $threshold = 80): array
-    {
-        return ['performance_kpi_id' => $kpi->id, 'weight' => $weight, 'target' => $target, 'threshold' => $threshold, 'cap' => 120, 'target_editable' => false];
-    }
-
-    private function person(string $surname): Personnel
-    {
-        $structure = Structure::query()->create(['name' => 'Şöbə '.Str::random(4), 'shortname' => 'S'.Str::upper(Str::random(3))]);
-
-        return Personnel::withoutEvents(fn () => Personnel::query()->create([
-            'tabel_no' => 'TB'.Str::upper(Str::random(6)),
-            'surname' => $surname, 'name' => 'Ad', 'patronymic' => 'Ata',
-            'birthdate' => '1985-01-01', 'gender' => 1,
-            'email' => Str::lower(Str::random(8)).'@example.com', 'mobile' => '994500000000', 'nationality_id' => 1,
-            'pin' => 'P'.str_pad((string) random_int(1, 9999999), 7, '0', STR_PAD_LEFT),
-            'residental_address' => 'X', 'education_degree_id' => 1, 'work_norm_id' => 1,
-            'structure_id' => $structure->id, 'position_id' => $this->position->id,
-            'join_work_date' => '2015-01-01', 'added_by' => 1, 'is_pending' => false,
-        ]));
-    }
-
-    private function userFor(Personnel $personnel): User
-    {
-        $user = User::factory()->create();
-        UserPersonnelLink::query()->create(['user_id' => $user->id, 'personnel_id' => $personnel->id]);
-
-        return $user;
-    }
-
-    /**
-     * @param  array<int, string>  $keys
-     */
-    private function assertValidationKeys(array $keys, callable $callback): void
-    {
-        try {
-            $callback();
-        } catch (ValidationException $exception) {
-            $this->assertSame($keys, array_keys($exception->errors()));
-
-            return;
-        }
-
-        $this->fail('Expected a validation error on '.implode(', ', $keys));
     }
 }

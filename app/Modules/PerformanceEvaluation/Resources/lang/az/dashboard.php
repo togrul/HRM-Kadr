@@ -13,6 +13,7 @@ return [
     'tabs' => [
         'overview' => 'Xülasə',
         'kpi_scorecards' => 'KPI kartları',
+        'kpi_analytics' => 'KPI analitikası',
         'kpi_bonus' => 'Bonus',
         'kpi_library' => 'KPI kitabxanası',
         'goals' => 'Məqsədlər',

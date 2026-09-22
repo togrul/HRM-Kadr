@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Database\EncryptedFloat;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\Activitylog\LogOptions;
@@ -39,6 +40,7 @@ class PerformanceBonusRule extends Model
         'cap_pct',
         'fund',
         'scale_to_fund',
+        'pay_in_probation',
         'currency',
         'updated_by',
     ];
@@ -54,8 +56,9 @@ class PerformanceBonusRule extends Model
         'unit_results' => 'array',
         'position_targets' => 'array',
         'cap_pct' => 'float',
-        'fund' => 'float',
+        'fund' => EncryptedFloat::class,
         'scale_to_fund' => 'boolean',
+        'pay_in_probation' => 'boolean',
     ];
 
     public function cycle(): BelongsTo

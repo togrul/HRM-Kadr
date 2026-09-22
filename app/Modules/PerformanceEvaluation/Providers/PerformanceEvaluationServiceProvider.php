@@ -58,6 +58,7 @@ class PerformanceEvaluationServiceProvider extends ServiceProvider
             'personnel-picker' => \App\Modules\PerformanceEvaluation\Livewire\PersonnelPicker::class,
             'kpi-library' => \App\Modules\PerformanceEvaluation\Livewire\Kpi\KpiLibraryWorkspace::class,
             'kpi-bonus' => \App\Modules\PerformanceEvaluation\Livewire\Kpi\BonusWorkspace::class,
+            'kpi-analytics' => \App\Modules\PerformanceEvaluation\Livewire\Kpi\AnalyticsWorkspace::class,
             'kpi-scorecards' => \App\Modules\PerformanceEvaluation\Livewire\Kpi\ScorecardsWorkspace::class,
         ];
     }

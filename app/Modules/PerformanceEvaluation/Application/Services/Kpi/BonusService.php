@@ -6,6 +6,7 @@ use App\Models\PerformanceBonusCalculation;
 use App\Models\PerformanceBonusRule;
 use App\Models\PerformanceCycle;
 use App\Models\PerformanceScorecard;
+use App\Models\Personnel;
 use App\Models\Structure;
 use App\Models\User;
 use App\Modules\Compensation\Domain\Contracts\CompensationReadRepository;
@@ -91,7 +92,7 @@ class BonusService
         $cards = PerformanceScorecard::query()
             ->where('performance_cycle_id', $cycle->id)
             ->whereIn('status', ['approved', 'closed'])
-            ->with(['personnel:id,surname,name,patronymic,tabel_no,structure_id', 'bonus'])
+            ->with(['personnel:id,surname,name,patronymic,tabel_no,structure_id,join_work_date,probation_unit,probation_amount', 'bonus'])
             ->orderBy('id')
             ->get();
 
@@ -101,7 +102,9 @@ class BonusService
         $positionTargets = collect($rule->position_targets ?? [])->mapWithKeys(fn (array $pair): array => [(int) $pair[0] => (float) $pair[1]]);
         $unitResult = $this->unitResultResolver($rule);
 
-        $rows = $cards->map(function (PerformanceScorecard $card) use ($rule, $months, $bases, $companyMult, $positionTargets, $unitResult): array {
+        $cycleEnd = Carbon::parse($cycle->period_end)->endOfDay();
+
+        $rows = $cards->map(function (PerformanceScorecard $card) use ($rule, $months, $bases, $companyMult, $positionTargets, $unitResult, $cycleEnd): array {
             if ($card->bonus?->isFinal()) {
                 return $this->storedRow($card);
             }
@@ -114,7 +117,8 @@ class BonusService
                 ? $base * $rule->reward_months
                 : $base * $months * $targetPct / 100);
             $payout = $this->payoutPct($score, $rule->payout_bands);
-            $amount = min($target * $payout / 100 * $companyMult * $unitMult * (float) $card->prorata_factor, $target * $rule->cap_pct / 100);
+            $inProbation = ! $rule->pay_in_probation && $this->inProbationOn($card->personnel, $cycleEnd);
+            $amount = $inProbation ? 0.0 : min($target * $payout / 100 * $companyMult * $unitMult * (float) $card->prorata_factor * (float) $card->fte, $target * $rule->cap_pct / 100);
 
             return [
                 'scorecard_id' => $card->id,
@@ -132,6 +136,8 @@ class BonusService
                 'amount' => round($amount, 2),
                 'status' => $card->bonus?->status,
                 'order_log_id' => null,
+                'probation' => $inProbation,
+                'fte' => (float) $card->fte,
                 'final' => false,
             ];
         });
@@ -162,6 +168,33 @@ class BonusService
             'mode' => $rule->mode,
             'currency' => $rule->currency ?: 'AZN',
         ];
+    }
+
+    /**
+     * What one card would pay at a given score under the cycle's rule — the employee's
+     * "expected bonus" (spec §9). Fund scale-down is left out: it is only known once
+     * everyone is calculated.
+     */
+    public function estimate(PerformanceScorecard $card, ?float $score): ?float
+    {
+        $cycle = $card->cycle;
+        $card->loadMissing('personnel:id,tabel_no,structure_id,join_work_date,probation_unit,probation_amount');
+        $rule = $this->rule($cycle);
+        $base = $this->baseSalaries(collect([$card]), $cycle)->get((string) $card->personnel?->tabel_no);
+
+        if ($base === null || $score === null) {
+            return null;
+        }
+
+        if (! $rule->pay_in_probation && $this->inProbationOn($card->personnel, Carbon::parse($cycle->period_end)->endOfDay())) {
+            return 0.0;
+        }
+
+        $targetPct = (float) collect($rule->position_targets ?? [])->first(fn (array $pair): bool => (int) $pair[0] === (int) $card->position_id)[1] ?? $rule->target_pct;
+        $target = $rule->mode === 'order' ? $base * $rule->reward_months : $base * $this->periodMonths($cycle) * $targetPct / 100;
+        $multipliers = $rule->mode === 'order' ? 1.0 : $this->companyMultiplier($rule) * $this->multiplierFor(($this->unitResultResolver($rule))($card->personnel?->structure_id), $rule);
+
+        return round(min($target * $this->payoutPct($score, $rule->payout_bands) / 100 * $multipliers * (float) $card->prorata_factor * (float) $card->fte, $target * $rule->cap_pct / 100), 2);
     }
 
     /**
@@ -197,6 +230,10 @@ class BonusService
             }
         });
 
+        if ($preview['over_fund']) {
+            app(ScorecardNotifier::class)->fundExceeded($cycle, $preview['total'], (float) $preview['fund'], $preview['currency']);
+        }
+
         return $preview['rows']->where('final', false)->count();
     }
 
@@ -218,9 +255,9 @@ class BonusService
         $fresh = PerformanceBonusCalculation::query()
             ->where('performance_cycle_id', $cycle->id)
             ->where('status', 'calculated')
-            ->where('amount', '>', 0)
             ->with('personnel:id,tabel_no')
-            ->get();
+            ->get()
+            ->filter(fn (PerformanceBonusCalculation $line): bool => $line->amount > 0); // encrypted: filtered after decrypting
 
         DB::transaction(function () use ($fresh, $batch, $payMonth, $cycle, $outbox, $payroll): void {
             foreach ($fresh as $line) {
@@ -272,9 +309,9 @@ class BonusService
         $lines = PerformanceBonusCalculation::query()
             ->where('performance_cycle_id', $cycle->id)
             ->where('status', 'calculated')
-            ->where('amount', '>', 0)
             ->with('personnel')
-            ->get();
+            ->get()
+            ->filter(fn (PerformanceBonusCalculation $line): bool => $line->amount > 0);
 
         foreach ($lines as $line) {
             DB::transaction(function () use ($line, $cycle): void {
@@ -437,6 +474,7 @@ class BonusService
             'cap_pct' => $number('cap_pct'),
             'fund' => $number('fund'),
             'scale_to_fund' => (bool) ($data['scale_to_fund'] ?? false),
+            'pay_in_probation' => (bool) ($data['pay_in_probation'] ?? false),
         ];
     }
 
@@ -469,6 +507,27 @@ class BonusService
             'personnel' => $card->personnel,
             'final' => true,
         ];
+    }
+
+    /**
+     * Spec §5.1: no bonus while the person is still on probation when the cycle ends.
+     */
+    private function inProbationOn(?Personnel $personnel, Carbon $date): bool
+    {
+        $joined = $personnel?->getRawOriginal('join_work_date');
+        $amount = (int) ($personnel?->probation_amount ?? 0);
+
+        if ($joined === null || $amount <= 0) {
+            return false;
+        }
+
+        $end = match ($personnel->probation_unit) {
+            'day' => Carbon::parse($joined)->addDays($amount),
+            'week' => Carbon::parse($joined)->addWeeks($amount),
+            default => Carbon::parse($joined)->addMonths($amount),
+        };
+
+        return $end->gt($date);
     }
 
     /**

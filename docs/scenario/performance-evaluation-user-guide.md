@@ -316,6 +316,16 @@ Faktiki dəyər — əməkdaşın həqiqətən əldə etdiyi nəticədir (məsə
 - Hər KPI-ın altında son yazılan dəyərlərin tarixçəsi görünür: kim yazıb, nə vaxt, qeyd və fayl.
 - Faktiki dəyər yalnız **Aktiv** kartda yazılır.
 
+### Aktiv kartda hədəfi dəyişmək (dəyişiklik sorğusu)
+Kart **Aktiv** olandan sonra hədəflər kilidlənir: heç kim onları birbaşa dəyişə bilməz. Dövr ərzində vəziyyət həqiqətən dəyişibsə (məsələn, bazar daralıb), hədəf **sorğu ilə** dəyişdirilir:
+
+1. Rəhbər və ya əməkdaş kartda KPI-ın hədəfinin altındakı `Dəyişiklik istə` linkinə basır.
+2. Yeni hədəfi və səbəbi yazıb `Sorğunu göndər` basır. HR bildiriş alır.
+3. HR kartı açanda yuxarıda bənövşəyi **"Hədəf dəyişikliyi sorğuları"** bloku görünür. HR `Təsdiqlə` və ya `Rədd et` basır. Rədd edəndə qeyd yazmaq məcburidir.
+4. Təsdiqlənsə, hədəf dəyişir və bal dərhal yenidən hesablanır. Sorğunu göndərən cavab barədə bildiriş alır.
+
+Bir KPI üçün eyni anda yalnız bir sorğu gözləyə bilər. Hər sorğu və cavab kartın tarixçəsində qalır.
+
 ### Faktiki dəyərləri Excel ilə toplu yükləmək
 Çox əməkdaşın nəticəsini bir-bir yazmaq əvəzinə HR hamısını bir Excel faylı ilə yükləyə bilər.
 
@@ -343,6 +353,20 @@ Bəzi göstəriciləri sistem artıq bilir. Onları heç kim yazmır:
 
 **Qeyd:** davamiyyət faizi yalnız ay davamiyyət bölməsində bağlandıqdan (aylıq yekun hazırlandıqdan) sonra görünür.
 
+### Formula ilə hesablanan KPI
+Bəzi göstəricilər başqa göstəricilərdən hesablanır. Məsələn, "Satış planının icrası %" = faktiki satış / plan × 100. Belə KPI-ın dəyərini heç kim yazmır, sistem özü hesablayır.
+
+1. `KPI kitabxanası`nda KPI-ı açın və **Məlumat mənbəyi** sahəsində "Formula ilə hesablanır" seçin.
+2. Formulu yazın. Başqa KPI-a onun kodu ilə, fiqurlu mötərizədə istinad edin: `ROUND({SALES_FACT} / {SALES_PLAN} * 100, 1)`.
+3. İcazə verilənlər: rəqəmlər, `+ - * /`, mötərizə, müqayisə (`> < >= <= == !=`), `IF(şərt, bəli, xeyr)`, `MIN(...)`, `MAX(...)`, `ROUND(x, onluq)`, `ABS(x)`.
+4. `Formulu yoxla` basın. Sistem formulun düzgün olduğunu yoxlayır və bütün istinadlar 100 olarsa nəticəni göstərir.
+
+**Qaydalar:**
+- Formulda adı çəkilən KPI-lar həmin kartda da olmalıdır (şablona onları da əlavə edin; çəkisi kiçik ola bilər).
+- Formula özünə birbaşa və ya başqa KPI-lar vasitəsilə istinad edə bilməz. Belə dairəvi asılılıq saxlanarkən bloklanır.
+- Formula dəyişəndə KPI-ın yeni versiyası yaranır. Açıq və bağlanmış kartlar köhnə formulla qalır.
+- Kartda formula KPI-ının qarşısında `Faktiki dəyər` düyməsi olmur. Dəyər lazım olan göstəricilər daxil ediləndə özü yaranır.
+
 ### Xarici sistemdən KPI (1C, CRM, digər proqramlar)
 Satış, xərc, debitor borc, müştəri sayı kimi rəqəmlər çox vaxt başqa proqramda (1C, CRM, helpdesk) olur. Onları əl ilə köçürmək lazım deyil.
 
@@ -355,6 +379,13 @@ Satış, xərc, debitor borc, müştəri sayı kimi rəqəmlər çox vaxt başqa
 4. Yadda saxlayın.
 
 Bundan sonra dəyər hər səhər avtomatik yenilənir (`Sistemdən yenilə` düyməsi ilə dərhal da yeniləmək olar). Proqram cavab verməsə, sistem 3 dəfə yenidən cəhd edir. Yenə alınmasa, kartda **son alınan dəyər qalır**, KPI-ın yanında qırmızı `Məlumat köhnədir` nişanı çıxır və HR bildiriş alır. Bağlantı düzələndə nişan özü itir.
+
+### Proqnoz və "qırmızı zona"
+Kart aktiv olduqca sistem hər KPI üçün **dövrün sonuna proqnoz** göstərir (nəticə faizinin altında kiçik "proqnoz N%" yazısı):
+- Dövr ərzində **cəm yığılan** göstəricilərdə (satış məbləği, müştəri sayı) proqnoz indiki templə hesablanır. Məsələn, dövrün yarısında 30 000 satış varsa, proqnoz 60 000-dir.
+- Digər göstəricilərdə (faiz, orta dəyər) proqnoz cari dəyərdir.
+
+Proqnoz KPI-ın **minimum həddindən** (threshold) aşağı düşəndə yazı qırmızı olur və əməkdaşla rəhbər **bir dəfə** bildiriş alır: "KPI qırmızı zonaya düşür". Beləliklə, dövr bitməmiş tədbir görməyə vaxt qalır. Proqnoz yaxşılaşıb yenidən pisləşsə, bildiriş yenə gəlir.
 
 ### Addım 6. Check-in (aralıq görüş) qeydləri
 Check-in — rəhbərlə əməkdaşın dövr ərzində işin gedişatını qısa müzakirə etməsidir. Tövsiyə olunur: **ayda bir dəfə**, rüblük dövrdə **ən azı 2 dəfə**.
@@ -430,6 +461,8 @@ Kart təsdiqləndikdən sonra HR `Bonus` bölməsində əməkdaşların bonusunu
 - **Bölmə əmsalı** (şirkət modeli): şirkətin nəticəsi kimi bölmənin də nəticəsi yazıla bilər (`Bölmələrin nəticəsi`). Eyni gate və əmsal cədvəli işləyir. Bölmənin nəticəsi onun **bütün alt bölmələrinə** də aiddir: departamentə 90% yazsanız, departamentin bütün şöbələrində əmsal 0.8 olur. Nəticəsi yazılmayan bölmədə əmsal 1-dir.
 - **Pro-rata:** əməkdaş dövrün yalnız bir hissəsində işləyibsə (dövrün ortasında gəlib, vəzifəsi dəyişib), bonus işlədiyi günlərə uyğun azalır.
 - **Maksimum:** bonus hədəf bonusun 150%-ni keçmir.
+- **Sınaq müddəti:** dövr bitəndə əməkdaş hələ sınaq müddətindədirsə (işə qəbul tarixi + əməkdaşın kartındakı sınaq müddəti), bonus verilmir. Cədvəldə "Sınaq müddətindədir" yazılır. HR istəsə, qaydada "Sınaq müddətində olanlara da bonus ver" seçimini işarələyə bilər.
+- **Məxfilik:** bonus məbləğləri, maaş və fond bazada **şifrələnmiş** saxlanılır. Bazaya birbaşa baxan kəs rəqəmləri görmür.
 - **Bonus fondu:** HR dövr üçün fond yaza bilər. Cəm fondu keçərsə, ekranda qırmızı xəbərdarlıq çıxır. "Mütənasib azalt" işarələnsə, bütün bonuslar eyni nisbətdə azaldılır ki, cəm fonda sığsın.
 
 **İş qaydası:**
@@ -465,12 +498,36 @@ Hər səhər sistem avtomatik yoxlama aparır:
 
 Bundan əlavə, hər addımda növbəti şəxs dərhal bildiriş alır: kart razılaşdırmaya göndəriləndə — əməkdaş, etiraz ediləndə — rəhbər, öz-qiymətləndirmə təqdim ediləndə — rəhbər, kalibrasiyaya çatanda — HR, nəticə təsdiqlənəndə — əməkdaş. Bildirişlər sağ yuxarıdakı zəng ikonunda görünür.
 
+Digər avtomatik bildirişlər:
+
+| Hadisə | Kim alır | Nə vaxt |
+| --- | --- | --- |
+| Dövr açıldı, kartları doldurun | Rəhbərlər (hər rəhbər bir bildiriş, kart sayı ilə) | `Kartları yarat` basılanda |
+| Faktiki dəyər daxil edilməyib | Əməkdaş və rəhbər | Kartın bitməsinə 3 gün qalmış, dəyəri olmayan KPI varsa |
+| Check-in vaxtıdır | Əməkdaş və rəhbər | Son check-in-dən (və ya kartın başlanğıcından) 1 ay keçəndə |
+| KPI qırmızı zonaya düşür | Əməkdaş və rəhbər | Proqnoz minimum həddən aşağı düşəndə |
+| Hədəf dəyişikliyi istənildi / cavablandı | HR / sorğunu göndərən | Dərhal |
+| Kart yeni rəhbərə keçdi | Yeni və köhnə rəhbər | Rəhbər dəyişəndə |
+| İnteqrasiya xətası | HR | Xarici sistem cavab vermədikdə |
+| Bonus fondu aşılır | HR | `Hesabla` basılanda cəm fondu keçirsə |
+
+**Bildirişlər necə gəlir?**
+- Hamısı həmişə sistemin içində, zəng ikonunda görünür.
+- Əlavə olaraq e-poçtla da gəlir. Hər kəs bunu özü seçir: `KPI kartları` bölməsində zəng düyməsi → **Bildiriş ayarları**:
+  - **E-poçtla da göndər**: işarəni götürsəniz, e-poçt gəlməz;
+  - **Gündə bir xülasə məktubu**: hər hadisə üçün ayrıca məktub əvəzinə gün ərzindəkilər səhər bir məktubda gəlir.
+- **Məcburi bildirişlər** (razılaşdırma, öz-qiymətləndirmə, xatırlatma, eskalasiya) son tarixlərlə bağlıdır. Onlar e-poçtla həmişə gəlir, söndürülə bilməz.
+
+**Bildiriş mətnlərini dəyişmək (HR):** `KPI kitabxanası` → **Bildiriş şablonları**. Hadisəni seçin, başlığı və mətni öz sözlərinizlə yazın; hər dil (AZ, EN, RU) üçün ayrıca. Mətndə `{employee_name}` (əməkdaşın adı), `{deadline}` (son tarix), `{cycle}` (dövr), `{kpi}`, `{link}` (KPI bölməsinin linki) və s. yazın, göndəriləndə real məlumatla əvəz olunur. `Standarta qaytar` düyməsi dəyişikliyi silir.
+
 ### Xüsusi hallar
 | Hal | Sistem nə edir |
 | --- | --- |
 | Dövrün ortasında işə qəbul | Kart işə başlama tarixindən açılır, **pro-rata** əmsalı göstərilir |
 | Vəzifə dəyişikliyi | Köhnə kart dəyişiklikdən bir gün əvvəl avtomatik bağlanır ("Vəzifə dəyişikliyi" nişanı ilə), yeni vəzifənin şablonu varsa yeni kart açılır. Dövr üzrə yekun nəticə hər kartın **günlərə görə çəkili ortası** kimi hesablanır |
 | İşdən çıxma | Kart işdən çıxma tarixində avtomatik bağlanır ("İşdən çıxma" nişanı ilə) |
+| Rəhbər dəyişikliyi | Kart bağlanmır, qalır. Qiymətləndirmə hüququ təşkilati strukturda göstərilən **yeni rəhbərə** keçir (kompetensiya forması da). Yeni rəhbər "Kart sizə keçdi" bildirişi alır. Köhnə rəhbərə xəbər verilir; istəsə, əməkdaşın işi barədə check-in qeydi ilə şərh yaza bilər. Tarixçədə "Rəhbər dəyişdi" qeydi qalır |
+| İkinci vəzifə və ya yarım ştat | HR `KPI kartları` → `Əlavə vəzifə` düyməsi ilə əməkdaşa həmin vəzifənin şablonu üzrə **ayrıca kart** açır və **ştat payını** yazır (məs. 0.5). Hər vəzifə ayrıca qiymətləndirilir. Bonus ştat payına vurulur, dövr üzrə ümumi nəticədə kartlar günlər × ştat payı ilə çəkilir. Kartda "Əlavə vəzifə · ştat 0.5" nişanı görünür |
 | Uzun məzuniyyət (xəstəlik, dekret, ödənişsiz və s.) | Kartın dövründə təsdiqlənmiş məzuniyyət **30 gündən çox** olarsa, əməkdaş işlədiyi günlərə görə qiymətləndirilir: dövr ərzində **cəm yığılan** KPI-ların hədəfləri (məsələn, satış məbləği) və bonusun pro-rata-sı işlənmiş günlərin payına qədər azalır. Kartın başlığında "Uzun məzuniyyət: N gün" nişanı çıxır, ilkin hədəf yanında üstündən xətt çəkilmiş halda görünür. Faiz və ya orta göstəricilərin (məsələn, davamiyyət faizi) hədəfi dəyişmir. Məzuniyyət ləğv edilsə və ya qısaldılsa, hədəflər özü əvvəlki halına qayıdır. **İllik əmək məzuniyyəti nəzərə alınmır**, çünki o hər kəsin normal hüququdur. |
 
 Bu yoxlamalar da hər səhər avtomatik aparılır. Bağlanmış kartın tarixçəsində səbəb görünür.
@@ -515,6 +572,31 @@ KPI balı = 44 + 22.5 + 0 + 15 = **81.5%**.
 | 90–105% | Cavab verir |
 | 106–115% | Aşır |
 | 115%-dən yuxarı | Əhəmiyyətli dərəcədə aşır |
+
+### KPI analitikası
+`KPI analitikası` bölməsində hər kəs **öz rolu üzrə** məlumatı görür. Dövrü yuxarıdan seçin; HR bölmə də seçə bilər (alt bölmələr daxildir).
+
+**Əməkdaş — "Mənim KPI-larım":**
+- indiki bal və dövrün sonuna **proqnoz bal**;
+- **gözlənilən bonus diapazonu**: indiki nəticəyə və proqnoza görə;
+- hər KPI üzrə zolaq: rəngi (yaşıl / sarı / qırmızı) nəticəni göstərir, oxdan sonra proqnoz yazılır;
+- son dövrlər üzrə **trend**.
+
+**Rəhbər — "Komanda paneli":** əməkdaşlar × KPI cədvəli. Hər xana nəticə faizini rənglə göstərir: yaşıl hədəfə çatıb, sarı minimumla hədəf arasıdır, qırmızı minimumdan aşağıdır. Əməkdaşın adı altında "gecikir" (addımın son tarixi keçib) və "risk altında" (bir KPI-ın proqnozu qırmızıdır) nişanları çıxır.
+
+**HR:**
+- **Dövrün gedişatı:** hansı statusda neçə kart var.
+- **Gecikmələr rəhbər üzrə:** kimdə neçə kart gecikir.
+- **Rəhbər sərtliyi indeksi:** rəhbərin komandasının orta balı ilə şirkət ortası arasındakı fərq. Mənfi rəqəm sərt, müsbət yumşaq qiymətləndirən rəhbəri göstərir. Kalibrasiyada faydalıdır.
+- **Çıxma riski:** yüksək nəticə göstərən (106%+), amma maaşı eyni vəzifədəkilərin median maaşından aşağı olan əməkdaşlar.
+- **Ardıcıl iki dövr qırmızı:** həm bu, həm əvvəlki dövrdə "gözləntilərə cavab vermir" nəticəsi alanlar.
+- **Bonus hesabatı:** bölmələr və vəzifələr üzrə bonus cəmi, fondla müqayisə.
+- **Orta nəticə dövrlər üzrə** (trend).
+
+Hər HR cədvəlinin yanında `Excel` düyməsi var.
+
+### Kartı çap etmək və PDF
+Kartı açın və başlıqdakı `Çap / PDF` linkinə basın. Yeni pəncərədə A4 formatında səliqəli kart açılır: əməkdaş, vəzifə, rəhbər, bütün KPI-lar, kompetensiyalar, ballar, kalibrasiya, bonusun izahı və aşağıda **əməkdaş, rəhbər və HR üçün imza sahələri**. `Çap et / PDF saxla` düyməsi ilə çap edin. PDF lazımdırsa, çap pəncərəsində printer yerinə "PDF kimi saxla" seçin. Kartı yalnız onu görmək hüququ olanlar çap edə bilər.
 
 ### Kim nəyi görür?
 - **HR** bütün kartları görür və hər əməliyyatı edə bilər.
@@ -571,6 +653,15 @@ Bonus düyməni basdığınız ayın əmək haqqına düşür. Əmək haqqı yen
 
 **Excel faylı yüklənmir, "heç bir dəyər yüklənmədi" yazılır.**
 Faylda səhv sətir var, siyahıda nömrəsi göstərilir. Onu düzəldib faylı yenidən yükləyin. Kartı bağlanmış əməkdaşın sətri də səhv sayılır: köhnə faylı deyil, hər dəfə yeni şablon yükləyin.
+
+**Aktiv kartda hədəfi dəyişə bilmirəm.**
+Aktiv kartda hədəf yalnız dəyişiklik sorğusu ilə dəyişir: hədəfin altındakı `Dəyişiklik istə` linkinə basın, HR təsdiqləsin.
+
+**Formula KPI-ın dəyəri boşdur.**
+Formulda adı çəkilən bütün KPI-ların faktiki dəyəri daxil edilməlidir. Onlardan biri boşdursa və ya sıfıra bölmə alınırsa, nəticə hesablanmır.
+
+**E-poçt gəlmir.**
+`KPI kartları` → zəng düyməsi → "E-poçtla da göndər" işarələnibmi? "Gündə bir xülasə" seçilibsə, məktub gündə bir dəfə gəlir. İstifadəçi hesabında e-poçt ünvanı olmalıdır.
 
 ## Yeni istifadəçi üçün ən rahat iş sırası
 1. `Dövrlər` bölməsində dövr yaradın.

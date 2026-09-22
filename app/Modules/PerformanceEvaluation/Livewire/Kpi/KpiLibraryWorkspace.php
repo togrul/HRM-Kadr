@@ -6,17 +6,23 @@ use App\Livewire\Traits\SideModalAction;
 use App\Models\PerformanceFormTemplate;
 use App\Models\PerformanceKpi;
 use App\Models\PerformanceKpiTemplate;
+use App\Models\PerformanceNotificationTemplate;
 use App\Models\Personnel;
 use App\Models\Position;
 use App\Modules\PerformanceEvaluation\Application\Services\Kpi\InternalKpiMetrics;
+use App\Modules\PerformanceEvaluation\Application\Services\Kpi\KpiFormula;
 use App\Modules\PerformanceEvaluation\Application\Services\Kpi\KpiLibraryService;
+use App\Modules\PerformanceEvaluation\Application\Services\Kpi\KpiNotificationDelivery;
 use App\Modules\PerformanceEvaluation\Application\Services\Kpi\RestKpiConnector;
 use App\Modules\PerformanceEvaluation\Application\Services\Kpi\KpiTemplateService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
+use InvalidArgumentException;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use RuntimeException;
@@ -50,6 +56,13 @@ class KpiLibraryWorkspace extends Component
 
     /** @var array<int, string> */
     public array $warnings = [];
+
+    public string $templateLocale = 'az';
+
+    public ?string $notificationKey = null;
+
+    /** @var array{subject: string, body: string} */
+    public array $notificationForm = ['subject' => '', 'body' => ''];
 
     /**
      * External source of the KPI being edited. Secrets are never sent back: a blank
@@ -133,7 +146,8 @@ class KpiLibraryWorkspace extends Component
         $this->kpiForm = $kpi
             ? [...$this->kpiDefaults(), ...$kpi->only(array_keys($this->kpiDefaults()))]
             : $this->kpiDefaults();
-        $this->kpiForm['source_metric'] ??= '';
+        $this->kpiForm['source_metric'] = $kpi?->data_source === 'calculated' ? 'formula' : ($this->kpiForm['source_metric'] ?? '');
+        $this->kpiForm['formula'] ??= '';
         $this->connectorForm = [
             ...$this->connectorDefaults(),
             ...collect($kpi?->integration_config ?? [])->only(['url', 'auth', 'username', 'value_path'])->all(),
@@ -157,18 +171,26 @@ class KpiLibraryWorkspace extends Component
             'kpiForm.perspective' => ['required', Rule::in(PerformanceKpi::PERSPECTIVES)],
             'kpiForm.indicator_kind' => ['nullable', 'in:lead,lag'],
             'kpiForm.evidence_required' => ['boolean'],
-            'kpiForm.source_metric' => ['nullable', Rule::in(array_keys(InternalKpiMetrics::METRICS))],
+            'kpiForm.source_metric' => ['nullable', Rule::in([...array_keys(InternalKpiMetrics::METRICS), 'formula'])],
+            'kpiForm.formula' => ['required_if:kpiForm.source_metric,formula', 'nullable', 'string', 'max:2000'],
             'kpiForm.status' => ['required', Rule::in(PerformanceKpi::STATUSES)],
             ...$this->connectorRules(),
         ])['kpiForm'];
+
+        $isFormula = $data['source_metric'] === 'formula';
+        if ($isFormula) {
+            $this->checkFormula($data['code'], (string) $data['formula'], $data['type']);
+        }
 
         app(KpiLibraryService::class)->save([
             'integration_config' => $data['source_metric'] === 'rest' ? $this->connectorConfig() : null,
             ...$data,
             'indicator_kind' => $data['indicator_kind'] ?: null,
-            'source_metric' => $data['source_metric'] ?: null,
+            'formula' => $isFormula ? trim((string) $data['formula']) : null,
+            'source_metric' => $isFormula ? null : ($data['source_metric'] ?: null),
             'data_source' => match ($data['source_metric'] ?: null) {
                 null => 'manual',
+                'formula' => 'calculated',
                 'rest' => 'integration',
                 default => 'hrm',
             },
@@ -177,6 +199,127 @@ class KpiLibraryWorkspace extends Component
         $this->closeSideMenu();
         unset($this->kpis);
         $this->dispatch('notify', type: 'success', message: __('performance_evaluation::kpi.messages.kpi_saved'));
+    }
+
+    /**
+     * HR's rewordings for the chosen language, by event.
+     *
+     * @return SupportCollection<string, PerformanceNotificationTemplate>
+     */
+    #[Computed]
+    public function notificationTemplates(): SupportCollection
+    {
+        return app(KpiNotificationDelivery::class)->templates($this->templateLocale);
+    }
+
+    public function updatedTemplateLocale(): void
+    {
+        abort_unless(in_array($this->templateLocale, config('app.locales', ['az']), true), 404);
+        unset($this->notificationTemplates);
+    }
+
+    public function openNotificationTemplate(string $key): void
+    {
+        $this->authorize('manage-performance-evaluation');
+        abort_unless(in_array($key, KpiNotificationDelivery::EVENTS, true), 404);
+
+        $template = $this->notificationTemplates->get($key);
+        $this->notificationKey = $key;
+        $this->notificationForm = $template
+            ? ['subject' => $template->subject, 'body' => $template->body]
+            : app(KpiNotificationDelivery::class)->defaultTemplate($key, $this->templateLocale);
+        $this->resetValidation();
+        $this->openSideMenu('notification-template');
+    }
+
+    public function saveNotificationTemplate(): void
+    {
+        $this->authorize('manage-performance-evaluation');
+        abort_unless(in_array($this->notificationKey, KpiNotificationDelivery::EVENTS, true), 404);
+        $data = $this->validate([
+            'notificationForm.subject' => ['required', 'string', 'max:255'],
+            'notificationForm.body' => ['required', 'string', 'max:2000'],
+        ])['notificationForm'];
+
+        PerformanceNotificationTemplate::query()->updateOrCreate(
+            ['key' => $this->notificationKey, 'locale' => $this->templateLocale],
+            [...$data, 'updated_by' => auth()->id()],
+        );
+
+        unset($this->notificationTemplates);
+        $this->closeSideMenu();
+        $this->dispatch('notify', type: 'success', message: __('performance_evaluation::kpi.notification_templates.saved'));
+    }
+
+    public function resetNotificationTemplate(string $key): void
+    {
+        $this->authorize('manage-performance-evaluation');
+        PerformanceNotificationTemplate::query()->where('key', $key)->where('locale', $this->templateLocale)->delete();
+
+        unset($this->notificationTemplates);
+        $this->closeSideMenu();
+        $this->dispatch('notify', type: 'success', message: __('performance_evaluation::kpi.notification_templates.reset_done'));
+    }
+
+    /**
+     * Checks the formula and shows a test result with every referenced KPI set to 100.
+     */
+    public function testFormula(): void
+    {
+        $this->authorize('manage-performance-evaluation');
+        $this->checkFormula((string) ($this->kpiForm['code'] ?? ''), (string) ($this->kpiForm['formula'] ?? ''), (string) ($this->kpiForm['type'] ?? 'quantitative'));
+
+        $formula = app(KpiFormula::class);
+        $refs = $formula->references((string) $this->kpiForm['formula']);
+        $value = $formula->evaluate((string) $this->kpiForm['formula'], array_fill_keys($refs, 100.0));
+
+        $this->dispatch('notify', type: 'success', message: __('performance_evaluation::kpi.formula.test_ok', [
+            'refs' => $refs === [] ? '—' : implode(', ', $refs),
+            'value' => $value ?? '—',
+        ]));
+    }
+
+    /**
+     * Syntax, known KPI codes and no circular reference (spec §4.1).
+     *
+     * @throws ValidationException
+     */
+    private function checkFormula(string $code, string $expression, string $type): void
+    {
+        $formula = app(KpiFormula::class);
+        $fail = fn (string $message) => throw ValidationException::withMessages(['kpiForm.formula' => $message]);
+
+        if ($type !== 'quantitative') {
+            $fail(__('performance_evaluation::kpi.formula.errors.quantitative_only'));
+        }
+
+        try {
+            $refs = $formula->references($expression);
+        } catch (InvalidArgumentException $exception) {
+            $fail($exception->getMessage());
+        }
+
+        $library = PerformanceKpi::query()->where('code', '!=', $code)->pluck('formula', 'code');
+        $unknown = collect($refs)->reject(fn (string $ref): bool => $library->has($ref) || $ref === $code);
+        if ($unknown->isNotEmpty()) {
+            $fail(__('performance_evaluation::kpi.formula.errors.unknown_kpi', ['codes' => $unknown->implode(', ')]));
+        }
+
+        // Walk the references: reaching this KPI again means a cycle.
+        $graph = $library->map(fn (?string $expression): array => filled($expression) ? rescue(fn () => $formula->references($expression), [], false) : [])->all();
+        $graph[$code] = $refs;
+        $stack = $refs;
+        $seen = [];
+        while ($stack !== []) {
+            $next = array_pop($stack);
+            if ($next === $code) {
+                $fail(__('performance_evaluation::kpi.formula.errors.circular'));
+            }
+            if (! isset($seen[$next])) {
+                $seen[$next] = true;
+                array_push($stack, ...($graph[$next] ?? []));
+            }
+        }
     }
 
     /**
@@ -364,7 +507,7 @@ class KpiLibraryWorkspace extends Component
         return [
             'code' => '', 'name' => '', 'description' => '', 'type' => 'quantitative', 'direction' => 'higher_better',
             'unit' => 'percent', 'frequency' => 'quarterly', 'aggregation' => 'last', 'perspective' => 'process',
-            'indicator_kind' => '', 'evidence_required' => false, 'source_metric' => '', 'status' => 'active',
+            'indicator_kind' => '', 'evidence_required' => false, 'source_metric' => '', 'formula' => '', 'status' => 'active',
         ];
     }
 

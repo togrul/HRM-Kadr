@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Database\EncryptedFloat;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -35,7 +36,7 @@ class PerformanceBonusCalculation extends Model
 
     protected $casts = [
         'score' => 'float',
-        'base_salary' => 'float',
+        'base_salary' => EncryptedFloat::class,
         'period_months' => 'float',
         'target_pct' => 'float',
         'payout_pct' => 'float',
@@ -43,7 +44,7 @@ class PerformanceBonusCalculation extends Model
         'unit_mult' => 'float',
         'prorata' => 'float',
         'scale_factor' => 'float',
-        'amount' => 'float',
+        'amount' => EncryptedFloat::class,
         'exported_at' => 'datetime',
     ];
 

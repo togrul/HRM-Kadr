@@ -2,18 +2,23 @@
 
 namespace App\Modules\PerformanceEvaluation\Application\Services\Kpi;
 
+use App\Models\PerformanceCycle;
 use App\Models\PerformanceKpi;
 use App\Models\PerformanceScorecard;
+use App\Models\PerformanceScorecardChangeRequest;
+use App\Models\PerformanceScorecardItem;
 use App\Models\Personnel;
 use App\Models\User;
 use App\Modules\Personnel\Contracts\ApprovalRouteResolver;
-use App\Notifications\PlatformNotification;
+use Illuminate\Support\Collection;
 use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 
 /**
- * In-app notifications for the scorecard workflow (spec §10): the next person to act
- * hears about every step, the stage owner gets a reminder before the deadline, and the
- * owner's superior plus HR hear about it one working day after.
+ * Who hears about what in the KPI workflow (spec §10): the next person to act hears
+ * about every step, the stage owner gets a reminder before the deadline and the owner's
+ * superior plus HR one working day after; plus cycle opening, missing actuals, check-ins,
+ * red-zone forecasts, target changes, manager changes, connector outages and the bonus
+ * fund. KpiNotificationDelivery decides the channels and the wording.
  */
 class ScorecardNotifier
 {
@@ -32,6 +37,7 @@ class ScorecardNotifier
     public function __construct(
         private readonly ScorecardService $scorecards,
         private readonly ApprovalRouteResolver $routes,
+        private readonly KpiNotificationDelivery $delivery,
     ) {}
 
     public function transitioned(PerformanceScorecard $card, string $action, ?string $reason = null): void
@@ -93,27 +99,94 @@ class ScorecardNotifier
     }
 
     /**
+     * The new manager takes the card over; the previous one hears that they may still
+     * leave a comment (spec §5.1).
+     */
+    public function managerChanged(PerformanceScorecard $card, ?int $previousManagerPersonnelId): int
+    {
+        return $this->send($this->recipients($card, 'manager'), $card, 'manager_assigned')
+            + $this->send($this->scorecards->userIdsForPersonnel($previousManagerPersonnelId), $card, 'manager_released');
+    }
+
+    /**
+     * "The cycle is open, fill in the cards" — one message per manager (spec §10).
+     *
+     * @param  Collection<int, PerformanceScorecard>  $cards
+     */
+    public function cycleOpened(PerformanceCycle $cycle, Collection $cards): int
+    {
+        $sent = 0;
+        foreach ($cards->groupBy('manager_personnel_id') as $managerPersonnelId => $managed) {
+            $sent += $this->send($this->scorecards->userIdsForPersonnel((int) $managerPersonnelId ?: null), $managed->first(), 'cycle_opened', [
+                'count' => (string) $managed->count(),
+            ]);
+        }
+
+        return $sent;
+    }
+
+    /**
+     * Actuals still missing close to the end of the period: the employee and the manager.
+     */
+    public function actualsMissing(PerformanceScorecard $card, int $missing): int
+    {
+        return $this->send([...$this->recipients($card, 'employee'), ...$this->recipients($card, 'manager')], $card, 'actuals_missing', ['count' => (string) $missing]);
+    }
+
+    public function checkinDue(PerformanceScorecard $card): int
+    {
+        return $this->send([...$this->recipients($card, 'employee'), ...$this->recipients($card, 'manager')], $card, 'checkin_due');
+    }
+
+    public function fundExceeded(PerformanceCycle $cycle, float $total, float $fund, string $currency): int
+    {
+        return $this->delivery->deliver($this->hrUserIds(), 'fund_exceeded', [
+            'cycle' => $cycle->name,
+            'total' => number_format($total, 2, '.', ' '),
+            'fund' => number_format($fund, 2, '.', ' '),
+            'currency' => $currency,
+        ], ['cycle_id' => $cycle->id]);
+    }
+
+    public function redZone(PerformanceScorecardItem $item): int
+    {
+        $card = $item->scorecard;
+        $extra = [
+            'kpi' => (string) $item->kpi?->name,
+            'forecast' => (string) round((float) $item->forecast_achievement, 1),
+            'threshold' => (string) (float) $item->threshold,
+        ];
+
+        return $this->send($this->recipients($card, 'employee'), $card, 'red_zone', $extra)
+            + $this->send($this->recipients($card, 'manager'), $card, 'red_zone', $extra);
+    }
+
+    public function changeRequested(PerformanceScorecardChangeRequest $request): int
+    {
+        return $this->send($this->hrUserIds(), $request->item->scorecard, 'change_requested', [
+            'kpi' => (string) $request->item->kpi?->name,
+            'from' => (string) (float) $request->current_target,
+            'to' => (string) (float) $request->proposed_target,
+            'reason' => $request->reason,
+        ]);
+    }
+
+    public function changeDecided(PerformanceScorecardChangeRequest $request): int
+    {
+        return $this->send(array_filter([(int) $request->requested_by]), $request->item->scorecard, 'change_'.$request->status, [
+            'kpi' => (string) $request->item->kpi?->name,
+            'to' => (string) (float) $request->proposed_target,
+            'reason' => (string) $request->decision_note,
+        ]);
+    }
+
+    /**
      * Tells HR once that a KPI's external source stopped answering; its cards keep the
      * last value and show it as stale.
      */
     public function connectorFailed(PerformanceKpi $kpi, string $error): int
     {
-        $userIds = $this->hrUserIds();
-        $payload = [
-            'action' => 'performanceKpiConnector',
-            'category' => __('performance_evaluation::kpi.notifications.category'),
-            'message' => __('performance_evaluation::kpi.connector.notification.subject', ['kpi' => $kpi->name]),
-            'name' => $kpi->name,
-            'body' => __('performance_evaluation::kpi.connector.notification.body', ['kpi' => $kpi->name, 'error' => $error]),
-            'kpi_id' => $kpi->id,
-        ];
-
-        $users = User::query()->whereIn('id', $userIds)->get();
-        foreach ($users as $user) {
-            $user->notify(new PlatformNotification('database', $payload, $payload['message'], $payload['body']));
-        }
-
-        return $users->count();
+        return $this->delivery->deliver($this->hrUserIds(), 'connector_failed', ['kpi' => $kpi->name, 'error' => $error], ['kpi_id' => $kpi->id]);
     }
 
     /**
@@ -147,21 +220,6 @@ class ScorecardNotifier
             ...$extra,
         ];
 
-        $payload = [
-            'action' => 'performanceScorecard',
-            'category' => __('performance_evaluation::kpi.notifications.category'),
-            'message' => __('performance_evaluation::kpi.notifications.'.$key.'.subject', $replace),
-            'name' => $replace['employee'],
-            'body' => __('performance_evaluation::kpi.notifications.'.$key.'.body', $replace),
-            'scorecard_id' => $card->id,
-            'status' => $card->status,
-        ];
-
-        $users = User::query()->whereIn('id', $userIds)->get();
-        foreach ($users as $user) {
-            $user->notify(new PlatformNotification('database', $payload, $payload['message'], $payload['body']));
-        }
-
-        return $users->count();
+        return $this->delivery->deliver($userIds, $key, $replace, ['scorecard_id' => $card->id, 'status' => $card->status]);
     }
 }

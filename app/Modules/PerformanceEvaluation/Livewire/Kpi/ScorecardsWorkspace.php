@@ -5,12 +5,19 @@ namespace App\Modules\PerformanceEvaluation\Livewire\Kpi;
 use App\Models\PerformanceCycle;
 use App\Models\PerformanceGoal;
 use App\Models\PerformanceKpiActual;
+use App\Models\PerformanceNotificationSetting;
 use App\Models\PerformanceScorecard;
+use App\Models\PerformanceScorecardChangeRequest;
 use App\Models\PerformanceScorecardItem;
+use App\Models\Personnel;
+use App\Models\Position;
+use App\Models\User;
+use App\Livewire\Traits\SideModalAction;
 use App\Modules\PerformanceEvaluation\Application\Services\Kpi\InternalKpiMetrics;
 use App\Modules\PerformanceEvaluation\Application\Services\Kpi\KpiActualsImportService;
 use App\Modules\PerformanceEvaluation\Application\Services\Kpi\ScorecardReviewService;
 use App\Modules\PerformanceEvaluation\Application\Services\Kpi\ScorecardService;
+use App\Modules\PerformanceEvaluation\Application\Services\Kpi\TargetChangeService;
 use App\Support\Livewire\DownloadsReportsTable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
@@ -32,6 +39,7 @@ class ScorecardsWorkspace extends Component
 {
     use AuthorizesRequests;
     use DownloadsReportsTable;
+    use SideModalAction;
     use WithFileUploads;
 
     public ?int $cycleId = null;
@@ -63,6 +71,28 @@ class ScorecardsWorkspace extends Component
 
     public string $checkinRisks = '';
 
+    public ?int $changeItemId = null;
+
+    public $changeTarget = null;
+
+    public string $changeReason = '';
+
+    public string $decisionNote = '';
+
+    public bool $showNotificationSettings = false;
+
+    public bool $notifyByEmail = true;
+
+    public bool $notifyDigest = false;
+
+    public string $extraSearch = '';
+
+    public ?int $extraPersonnelId = null;
+
+    public ?int $extraPositionId = null;
+
+    public $extraFte = 0.5;
+
     public bool $showImport = false;
 
     public $importFile = null;
@@ -77,6 +107,29 @@ class ScorecardsWorkspace extends Component
             ->orderByRaw("case status when 'active' then 0 when 'draft' then 1 else 2 end")
             ->orderByDesc('period_start')
             ->value('id');
+
+        $settings = PerformanceNotificationSetting::query()->where('user_id', auth()->id())->first();
+        $this->notifyByEmail = $settings?->email ?? true;
+        $this->notifyDigest = $settings?->digest ?? false;
+    }
+
+    public function updatedNotifyByEmail(): void
+    {
+        $this->saveNotificationSettings();
+    }
+
+    public function updatedNotifyDigest(): void
+    {
+        $this->saveNotificationSettings();
+    }
+
+    private function saveNotificationSettings(): void
+    {
+        PerformanceNotificationSetting::query()->updateOrCreate(
+            ['user_id' => auth()->id()],
+            ['email' => $this->notifyByEmail, 'digest' => $this->notifyDigest],
+        );
+        $this->dispatch('notify', type: 'success', message: __('performance_evaluation::kpi.notification_settings.saved'));
     }
 
     public function updatedCycleId(): void
@@ -120,20 +173,47 @@ class ScorecardsWorkspace extends Component
             return null;
         }
 
-        return app(ScorecardService::class)->visibleQuery(auth()->user())
+        $card = app(ScorecardService::class)->visibleQuery(auth()->user())
             ->with([
                 'personnel:id,surname,name,patronymic',
                 'position:id,name',
                 'manager:id,surname,name',
-                'items.kpi:id,code,name,type,direction,unit,evidence_required,source_metric,integration_error',
-                'items.actuals.enteredBy:id,name',
+                'items.kpi:id,code,name,type,direction,unit,evidence_required,source_metric,integration_error,data_source',
+                'items.actuals',
                 'items.goal:id,title',
-                'checkins.author:id,name',
-                'calibrations.adjustedBy:id,name',
-                'events.user:id,name',
+                'items.changeRequests',
+                'checkins',
+                'calibrations',
+                'events',
                 'bonus',
             ])
             ->find($this->openCardId);
+
+        return $card ? $this->attachUsers($card) : null;
+    }
+
+    /**
+     * The card names users in five places (actuals, requests, check-ins, calibrations,
+     * history); they are read in one query and handed out, not once per relation.
+     */
+    private function attachUsers(PerformanceScorecard $card): PerformanceScorecard
+    {
+        $places = [
+            [$card->items->flatMap->actuals, 'entered_by', 'enteredBy'],
+            [$card->items->flatMap->changeRequests, 'requested_by', 'requester'],
+            [$card->checkins, 'created_by', 'author'],
+            [$card->calibrations, 'adjusted_by', 'adjustedBy'],
+            [$card->events, 'user_id', 'user'],
+        ];
+
+        $ids = collect($places)->flatMap(fn (array $place) => $place[0]->pluck($place[1]))->filter()->unique();
+        $users = $ids->isEmpty() ? collect() : User::query()->whereIn('id', $ids)->get(['id', 'name'])->keyBy('id');
+
+        foreach ($places as [$models, $column, $relation]) {
+            $models->each(fn ($model) => $model->setRelation($relation, $users->get($model->{$column})));
+        }
+
+        return $card;
     }
 
     #[Computed]
@@ -198,6 +278,89 @@ class ScorecardsWorkspace extends Component
         $this->dispatch('notify', type: $created > 0 ? 'success' : 'info', message: __('performance_evaluation::kpi.messages.cards_generated', ['count' => $created]));
     }
 
+    /**
+     * Active people matching the search, for a second-post card.
+     *
+     * @return array<int, array{id: int, label: string}>
+     */
+    #[Computed]
+    public function extraPersonnelOptions(): array
+    {
+        $term = trim($this->extraSearch);
+
+        return Personnel::query()
+            ->active()
+            ->when($term !== '', fn ($query) => $query->where(fn ($inner) => $inner->where('surname', 'like', "%{$term}%")->orWhere('name', 'like', "%{$term}%")->orWhere('tabel_no', 'like', "%{$term}%")))
+            ->when($this->extraPersonnelId, fn ($query) => $query->orWhere('id', $this->extraPersonnelId))
+            ->orderBy('surname')
+            ->limit(30)
+            ->get(['id', 'surname', 'name', 'patronymic', 'tabel_no'])
+            ->map(fn (Personnel $person): array => ['id' => $person->id, 'label' => trim($person->surname.' '.$person->name.' '.$person->patronymic).' · '.$person->tabel_no])
+            ->all();
+    }
+
+    /**
+     * Positions that have an active KPI template.
+     *
+     * @return array<int, array{id: int, label: string}>
+     */
+    #[Computed]
+    public function extraPositionOptions(): array
+    {
+        return Position::query()
+            ->whereIn('id', app(ScorecardService::class)->templateIdsByPosition()->keys())
+            ->orderBy('name')
+            ->get(['id', 'name'])
+            ->map(fn (Position $position): array => ['id' => $position->id, 'label' => $position->name])
+            ->all();
+    }
+
+    public function openExtra(): void
+    {
+        $this->authorize('manage-performance-evaluation');
+        $this->reset(['extraSearch', 'extraPersonnelId', 'extraPositionId']);
+        $this->extraFte = 0.5;
+        $this->resetValidation();
+        $this->openSideMenu('extra-card');
+    }
+
+    public function openExtraCard(): void
+    {
+        $this->authorize('manage-performance-evaluation');
+        $this->validate([
+            'extraPersonnelId' => ['required', 'integer'],
+            'extraPositionId' => ['required', 'integer'],
+            'extraFte' => ['required', 'numeric', 'min:0.05', 'max:1'],
+        ]);
+
+        $personnel = Personnel::query()->findOrFail($this->extraPersonnelId);
+        $cycle = PerformanceCycle::query()->findOrFail($this->cycleId);
+
+        if ((int) $this->extraPositionId === (int) $personnel->position_id) {
+            $this->addError('extraPositionId', __('performance_evaluation::kpi.extra.errors.main_position'));
+
+            return;
+        }
+
+        $taken = PerformanceScorecard::query()
+            ->where('performance_cycle_id', $cycle->id)
+            ->where('personnel_id', $personnel->id)
+            ->where('position_id', $this->extraPositionId)
+            ->where('status', '!=', 'closed')
+            ->exists();
+        $card = $taken ? null : app(ScorecardService::class)->openCardFor($cycle, $personnel, null, (int) $this->extraPositionId, (float) $this->extraFte);
+
+        if ($card === null) {
+            $this->addError('extraPositionId', __('performance_evaluation::kpi.extra.errors.'.($taken ? 'exists' : 'no_template')));
+
+            return;
+        }
+
+        $this->closeSideMenu();
+        unset($this->cards);
+        $this->dispatch('notify', type: 'success', message: __('performance_evaluation::kpi.extra.created'));
+    }
+
     public function toggleImport(): void
     {
         $this->authorize('manage-performance-evaluation');
@@ -242,6 +405,55 @@ class ScorecardsWorkspace extends Component
 
         unset($this->cards);
         $this->dispatch('notify', type: $count > 0 ? 'success' : 'info', message: __('performance_evaluation::kpi.metrics.synced', ['count' => $count]));
+    }
+
+    public function startChange(int $itemId): void
+    {
+        $this->cancelChange();
+        $item = $this->cardItem($itemId);
+        $this->changeItemId = $item->id;
+        $this->changeTarget = $item->target === null ? null : (float) $item->target;
+    }
+
+    public function cancelChange(): void
+    {
+        $this->changeItemId = null;
+        $this->changeTarget = null;
+        $this->changeReason = '';
+        $this->resetValidation(['changeTarget', 'change', 'reason']);
+    }
+
+    public function submitChange(): void
+    {
+        $this->validate(['changeTarget' => ['required', 'numeric']]);
+        app(TargetChangeService::class)->request($this->cardItem($this->changeItemId), (float) $this->changeTarget, $this->changeReason, auth()->user());
+
+        $this->cancelChange();
+        $this->refreshCard();
+        $this->dispatch('notify', type: 'success', message: __('performance_evaluation::kpi.change_requests.sent'));
+    }
+
+    public function approveChange(int $requestId): void
+    {
+        $this->decideChange($requestId, true);
+    }
+
+    public function rejectChange(int $requestId): void
+    {
+        $this->decideChange($requestId, false);
+    }
+
+    private function decideChange(int $requestId, bool $approve): void
+    {
+        $request = PerformanceScorecardChangeRequest::query()
+            ->whereIn('performance_scorecard_item_id', $this->requireCard()->items->pluck('id'))
+            ->findOrFail($requestId);
+
+        app(TargetChangeService::class)->decide($request, $approve, $this->decisionNote, auth()->user());
+
+        $this->decisionNote = '';
+        $this->refreshCard();
+        $this->dispatch('notify', type: 'success', message: __('performance_evaluation::kpi.change_requests.'.($approve ? 'approved_message' : 'rejected_message')));
     }
 
     public function openCard(int $id): void
