@@ -317,7 +317,7 @@
                 <span class="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-zinc-300 ring-1 ring-inset ring-zinc-200">
                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6M12 9v6"/><circle cx="12" cy="12" r="9"/></svg>
                 </span>
-                <p class="max-w-sm text-sm leading-6 text-zinc-500">Bu deployment üçün ayrıca saxlanmış təsdiq siyasəti yoxdur — sistem standart paket qaydaları ilə işləyir.</p>
+                <p class="max-w-sm text-sm leading-6 text-zinc-500">{{ __('admin::references.diagnostics.no_stored_overrides') }}</p>
                 <a href="{{ route('admin.self-service-approval-routes', ['edit' => 'leave']) }}" wire:navigate
                    class="mt-1 inline-flex items-center gap-1.5 rounded-xl bg-zinc-900 px-4 py-2 text-[13px] font-semibold text-white shadow-sm transition hover:bg-zinc-800">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
@@ -340,7 +340,7 @@
                                         </a>
                                     @endif
                                 </div>
-                                <p class="mt-0.5 text-[13px] text-zinc-500">Bu müraciət növü üçün fərdi qayda.</p>
+                                <p class="mt-0.5 text-[13px] text-zinc-500">{{ __('admin::references.diagnostics.override_subtitle') }}</p>
                             </div>
                             <span @class([
                                 'inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ring-inset',

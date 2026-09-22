@@ -179,6 +179,8 @@ return [
             'sessions' => 'Sessiyalar',
             'review' => 'Yoxlama',
         ],
+        'no_stored_overrides' => 'Bu deployment üçün ayrıca saxlanmış təsdiq siyasəti yoxdur — sistem standart paket qaydaları ilə işləyir.',
+        'override_subtitle' => 'Bu müraciət növü üçün fərdi qayda.',
     ],
     'labels' => [
         'scope_personnel' => 'Əməkdaş',

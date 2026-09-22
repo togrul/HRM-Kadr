@@ -179,6 +179,8 @@ return [
             'sessions' => 'Sessions',
             'review' => 'Review',
         ],
+        'no_stored_overrides' => 'No approval policy is stored separately for this deployment — the system runs on the standard pack rules.',
+        'override_subtitle' => 'Custom rule for this request type.',
     ],
     'labels' => [
         'scope_personnel' => 'Personnel',
