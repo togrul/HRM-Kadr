@@ -11,7 +11,7 @@
     <x-ui.filter-panel inner-class="grid grid-cols-1 gap-4 md:grid-cols-3 xl:grid-cols-[minmax(14rem,1fr)_minmax(11rem,.75fr)_minmax(11rem,.75fr)_auto]">
         <x-ui.filter-field :label="__('personnel::portfolio.fields.status')">
             <x-ui.filter-native-select wire:model.live="statusFilter">
-                <option value="all">Hamısı</option>
+                <option value="all">{{ __('personnel::common.labels.all') }}</option>
                 @foreach (\App\Modules\Personnel\Support\ProfessionalPortfolio\ProfessionalPortfolioOptions::mediaStatuses() as $status)
                     <option value="{{ $status }}">{{ __('personnel::portfolio.status.'.$status) }}</option>
                 @endforeach
