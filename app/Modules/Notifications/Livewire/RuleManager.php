@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Modules\Notifications\Livewire\Concerns\InteractsWithNotificationAuthorization;
 use App\Modules\Notifications\Support\NotificationAudienceTargetRegistry;
 use App\Modules\Notifications\Support\NotificationTriggerRegistry;
+use App\Services\StructurePathService;
 use Illuminate\Support\Arr;
 use Livewire\Component;
 
@@ -310,7 +311,6 @@ class RuleManager extends Component
     {
         return Structure::query()
             ->select('id', 'parent_id', 'name', 'level', 'code')
-            ->withRecursive('parent', false)
             ->when($this->structureSearch !== '', function ($query) {
                 $query->where('name', 'like', '%'.$this->structureSearch.'%');
             })
@@ -330,7 +330,6 @@ class RuleManager extends Component
 
         return Structure::query()
             ->select('id', 'parent_id', 'name')
-            ->withRecursive('parent', false)
             ->whereIn('id', $selectedStructureIds)
             ->orderBy('name')
             ->get()
@@ -393,8 +392,8 @@ class RuleManager extends Component
 
     protected function buildStructureOption(Structure $structure): array
     {
-        $path = $structure->fullStructurePath(false);
-        $segments = array_values(array_filter(array_map('trim', explode(' / ', $path))));
+        // One flat read of the chart for every option, not a query per ancestor.
+        $segments = app(StructurePathService::class)->segments((int) $structure->id);
         $label = array_pop($segments) ?: $structure->name;
         $meta = count($segments) ? implode(' / ', $segments) : null;
 
