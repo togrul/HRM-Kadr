@@ -77,9 +77,9 @@ class AuditQueryBudgetCommand extends Command
                 $seededFixture = true;
             }
 
+            // No Auth::login(): its login event writes a real audit row that the probe would
+            // both count and leave behind on a non-empty log.
             $result = $this->probe('dashboard_render', (int) $this->option('render-budget'), function () use ($user): void {
-                Auth::login($user);
-
                 Livewire::actingAs($user)
                     ->test(ActivityLogDashboard::class)
                     ->assertOk();
