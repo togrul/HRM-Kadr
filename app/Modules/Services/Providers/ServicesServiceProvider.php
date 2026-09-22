@@ -63,12 +63,6 @@ class ServicesServiceProvider extends ServiceProvider
 
             $view->with('menus', $menus);
         });
-
-        // Share settings globally across all views
-        view()->composer('*', function ($view) {
-            $settings = Cache::rememberForever('settings', fn () => Setting::pluck('value', 'name')->toArray());
-            $view->with('_settings', $settings);
-        });
     }
 
     protected function componentMap(): array

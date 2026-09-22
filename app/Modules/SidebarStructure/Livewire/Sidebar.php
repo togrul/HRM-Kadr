@@ -3,6 +3,8 @@
 namespace App\Modules\SidebarStructure\Livewire;
 
 use App\Models\Structure;
+use App\Services\StructureService;
+use App\Support\OrderLookupCache;
 use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -14,7 +16,7 @@ class Sidebar extends Component
     #[On('structureUpdated')]
     public function refreshStructureTree(): void
     {
-        Cache::forget('structures');
+        OrderLookupCache::bump('structures');
     }
 
     /**
@@ -60,7 +62,12 @@ class Sidebar extends Component
 
     public function render()
     {
-        $structures = Cache::rememberForever('structures', function () {
+        // The tree is trimmed to what the user may see, so it is cached per accessible set
+        // (never under one shared key) and versioned so a structure edit invalidates it.
+        $accessible = resolve(StructureService::class)->getAccessibleStructures();
+        $key = OrderLookupCache::key('structures', 'sidebar:'.md5(implode(',', $accessible)));
+
+        $structures = Cache::rememberForever($key, function () {
             return Structure::withRecursive('subs')->whereNull('parent_id')->orderBy('code')->get();
         });
 

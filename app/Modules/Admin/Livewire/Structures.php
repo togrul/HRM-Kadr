@@ -2,10 +2,10 @@
 
 namespace App\Modules\Admin\Livewire;
 
-use App\Modules\Admin\Support\Traits\Admin\AdminCrudTrait;
-use App\Modules\Admin\Support\Traits\Admin\CallSwalTrait;
 use App\Livewire\Traits\DropdownConstructTrait;
 use App\Models\Structure;
+use App\Modules\Admin\Support\Traits\Admin\AdminCrudTrait;
+use App\Modules\Admin\Support\Traits\Admin\CallSwalTrait;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\On;
@@ -138,7 +138,7 @@ class Structures extends Component
 
     public function render()
     {
-        $structureList = Cache::rememberForever('structures', function () {
+        $structureList = Cache::rememberForever(\App\Support\OrderLookupCache::key('structures', 'admin-tree'), function () {
             return Structure::withRecursive('subs', false)
                 ->whereNull('parent_id')
                 ->orderBy('code')
