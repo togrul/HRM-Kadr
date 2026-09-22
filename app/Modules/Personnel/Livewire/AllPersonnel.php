@@ -12,7 +12,6 @@ use App\Modules\Personnel\Support\ProfessionalPortfolio\ProfessionalPortfolioPer
 use App\Services\StructureService;
 use App\Traits\NestedStructureTrait;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
@@ -449,19 +448,6 @@ class AllPersonnel extends Component
             selectedStructureIds: $this->selectedStructureIds(),
             accessibleStructureIds: $this->accessibleStructureIds(),
             selectedPosition: $this->selectedPosition,
-            search: $this->search,
-        );
-    }
-
-    protected function personnelQuery(bool $withStructureTree = true): Builder
-    {
-        return app(PersonnelQueryService::class)->build(
-            status: $this->status,
-            filters: $this->filters,
-            selectedStructureIds: $this->selectedStructureIds(),
-            accessibleStructureIds: $this->accessibleStructureIds(),
-            selectedPosition: $this->selectedPosition,
-            withStructureTree: $withStructureTree,
             search: $this->search,
         );
     }

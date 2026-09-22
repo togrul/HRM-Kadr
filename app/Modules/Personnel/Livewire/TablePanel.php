@@ -93,9 +93,6 @@ class TablePanel extends Component
             selectedStructureIds: $this->structure,
             accessibleStructureIds: $this->accessibleStructureIds(),
             selectedPosition: $this->selectedPosition,
-            // The row decorator resolves ancestor labels from one flat org-chart read,
-            // so preloading the parent chain would just re-fetch it a level at a time.
-            withStructureTree: false,
             search: $this->search,
         );
     }

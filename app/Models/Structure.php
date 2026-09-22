@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Observers\StructureObserver;
+use App\Services\StructurePathService;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -58,16 +59,6 @@ class Structure extends Model
         return $this->orderBy('level')->orderBy('code');
     }
 
-    public function topLevelParent()
-    {
-        $parent = ! empty($this->parent->parent_id) ? $this->parent : $this;
-        while ($parent && $parent->parent_id > 2 && $parent->level > 1) {
-            $parent = $parent->parent;
-        }
-
-        return $parent->parent_id == 1 ? $parent->code : $parent->name;
-    }
-
     public function scopeWithRecursive($query, $relationship, bool $enforceAccessible = true)
     {
         return $query->with([
@@ -81,78 +72,38 @@ class Structure extends Model
         ]);
     }
 
+    /**
+     * The unit's path without the root; a root unit is just its own name.
+     */
     public function getNameWithParentAttribute(): string
     {
-        return implode(' / ', $this->getAllParentName());
+        return implode(' / ', app(StructurePathService::class)->segments((int) $this->id) ?: [(string) $this->name]);
     }
 
     public function fullStructurePath(bool $includeRoot = true, bool $rootAsShortname = false): string
     {
-        return implode(' / ', $this->fullStructureSegments($includeRoot, $rootAsShortname));
+        $paths = app(StructurePathService::class);
+        $segments = $paths->segments((int) $this->id, $includeRoot);
+
+        if ($includeRoot && $rootAsShortname && $segments !== []) {
+            $lineIds = $paths->lineIds((int) $this->id);
+            $root = static::query()->whereKey(end($lineIds))->first(['name', 'shortname']);
+            $segments[0] = (string) ($root?->shortname ?: $root?->name ?: $segments[0]);
+        }
+
+        return implode(' / ', $segments);
     }
 
+    /**
+     * Ancestor path from the request's flat chart map, not a query per level.
+     */
     public function fullStructureName(bool $includeRoot = false): string
     {
-        return implode(' / ', $this->fullStructureSegments($includeRoot));
+        return implode(' / ', app(StructurePathService::class)->segments((int) $this->id, $includeRoot));
     }
 
     public function getAllNestedIds(): array
     {
         return $this->subs->reduce(fn ($ids, $child) => array_merge($ids, $child->getAllNestedIds()), [$this->id]);
-    }
-
-    public function getAllParentIds(): array
-    {
-        $parentIds = [$this->id];
-        $parent = $this->parent;
-
-        while ($parent && $parent->code > 0) {
-            $parentIds[] = $parent->id;
-            $parent = $parent->parent;
-        }
-
-        return array_reverse($parentIds);
-    }
-
-    public function getAllParentName($isCoded = false): array
-    {
-        $parent = $this->parent;
-
-        $parentNames = (is_null($parent?->parent_id) && $isCoded) ? [$this->code] : [$this->name];
-
-        while ($parent && ! is_null($parent->parent_id)) {
-            $parentNames[] = ($isCoded && $parent->level === 1) ? $parent->code : $parent->name;
-            $parent = $parent->parent;
-        }
-
-        return array_reverse($parentNames);
-    }
-
-    protected function fullStructureSegments(bool $includeRoot = true, bool $rootAsShortname = false): array
-    {
-        $segments = [];
-        $cursor = $this;
-
-        while ($cursor) {
-            if (! $cursor->relationLoaded('parent') && ! is_null($cursor->parent_id)) {
-                $cursor->loadMissing('parent');
-            }
-
-            $isRoot = is_null($cursor->parent_id);
-
-            if (! $isRoot || $includeRoot) {
-                $segments[] = ($isRoot && $rootAsShortname)
-                    ? (string) ($cursor->shortname ?: $cursor->name)
-                    : (string) $cursor->name;
-            }
-
-            if (! $cursor->relationLoaded('parent')) {
-                break;
-            }
-
-            $cursor = $cursor->parent;
-        }
-
-        return array_reverse(array_filter($segments));
     }
 }

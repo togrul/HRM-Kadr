@@ -20,7 +20,6 @@ class PersonnelQueryService
         array $selectedStructureIds,
         array $accessibleStructureIds,
         ?int $selectedPosition = null,
-        bool $withStructureTree = true,
         ?string $search = null
     ): Builder {
         $query = Personnel::query()
@@ -42,8 +41,7 @@ class PersonnelQueryService
             ])
             ->leftJoin('positions as position_sort', 'position_sort.id', '=', 'personnels.position_id')
             ->leftJoin('structures as structure_sort', 'structure_sort.id', '=', 'personnels.structure_id')
-            ->with($this->listingRelations($status))
-            ->when($withStructureTree, fn (Builder $builder) => $builder->withStructureTree());
+            ->with($this->listingRelations($status));
 
         $this->applySharedScopes(
             query: $query,
