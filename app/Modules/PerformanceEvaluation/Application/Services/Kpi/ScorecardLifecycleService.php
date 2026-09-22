@@ -96,8 +96,9 @@ class ScorecardLifecycleService
                     return;
                 }
 
+                // A leave date in the future is a notice, not a departure: the card runs on.
                 $leftOn = $personnel->getRawOriginal('leave_work_date');
-                if ($leftOn !== null) {
+                if ($leftOn !== null && Carbon::parse($leftOn)->startOfDay()->lte($today)) {
                     $this->scorecards->closeEarly($card, 'terminated', Carbon::parse($leftOn));
                     $result['terminated']++;
 

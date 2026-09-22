@@ -364,6 +364,9 @@ class KpiScorecardTest extends TestCase
         $this->assertSame(20.0, $scorecards->personCycleScore($card->personnel_id, $card->performance_cycle_id));
 
         $next->personnel->forceFill(['leave_work_date' => '2026-03-10'])->saveQuietly();
+        // Notice given, not yet gone: the card keeps running until the leave date passes.
+        $this->assertSame(0, app(ScorecardLifecycleService::class)->syncPersonnel(Carbon::parse('2026-03-01'))['terminated']);
+        $this->assertNull($next->fresh()->closure_reason);
         $this->assertSame(1, app(ScorecardLifecycleService::class)->syncPersonnel(Carbon::parse('2026-03-11'))['terminated']);
         $this->assertSame('terminated', $next->fresh()->closure_reason);
     }

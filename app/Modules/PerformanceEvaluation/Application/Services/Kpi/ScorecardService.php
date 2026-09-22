@@ -245,7 +245,9 @@ class ScorecardService
     public function closeEarly(PerformanceScorecard $card, string $reason, Carbon $lastDay): void
     {
         $cycle = $card->cycle;
-        $validTo = max(Carbon::parse($card->valid_from)->startOfDay(), $lastDay->copy()->startOfDay());
+        // Never before the card started, never past where it (or its cycle) would have ended.
+        $end = Carbon::parse($card->valid_to ?? $cycle->period_end)->startOfDay();
+        $validTo = max(Carbon::parse($card->valid_from)->startOfDay(), min($lastDay->copy()->startOfDay(), $end));
 
         DB::transaction(function () use ($card, $reason, $cycle, $validTo): void {
             $card->valid_to = $validTo;
