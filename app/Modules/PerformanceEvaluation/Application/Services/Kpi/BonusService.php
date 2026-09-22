@@ -36,6 +36,17 @@ class BonusService
 {
     public const ORDER_TEMPLATE = 'pul_mukafati';
 
+    /**
+     * Manual fields of the award order template, keyed by their Azerbaijani label.
+     * Data keys, not UI text: OrderDraftService matches them against the template's
+     * variable labels, so they must stay byte-identical to the Word template.
+     */
+    private const FIELD_REASON = 'Mükafatın səbəbi';
+
+    private const FIELD_AMOUNT = 'Məbləğ';
+
+    private const FIELD_BASIS = 'Əsas mətni';
+
     public function __construct(
         private readonly ProfileState $profile,
         private readonly OrderDraftService $orders,
@@ -311,12 +322,12 @@ class BonusService
 
             foreach ($lines as $line) {
                 $order = $this->orders->draft(self::ORDER_TEMPLATE, $line->personnel, [
-                    'Mükafatın səbəbi' => __('performance_evaluation::kpi.bonus.order_reason', [
+                    self::FIELD_REASON => __('performance_evaluation::kpi.bonus.order_reason', [
                         'cycle' => $cycle->name,
                         'score' => number_format((float) $line->score, 1, ',', ''),
                     ]),
-                    'Məbləğ' => number_format($line->amount, 2, '.', ''),
-                    'Əsas mətni' => __('performance_evaluation::kpi.bonus.order_basis', ['cycle' => $cycle->name]),
+                    self::FIELD_AMOUNT => number_format($line->amount, 2, '.', ''),
+                    self::FIELD_BASIS => __('performance_evaluation::kpi.bonus.order_basis', ['cycle' => $cycle->name]),
                 ], 'KPI-'.$cycle->id.'-'.$line->id);
 
                 $line->update(['status' => 'ordered', 'order_log_id' => $order->id]);
