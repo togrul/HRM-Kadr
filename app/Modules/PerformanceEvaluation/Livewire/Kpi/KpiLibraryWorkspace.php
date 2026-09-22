@@ -13,17 +13,18 @@ use App\Modules\PerformanceEvaluation\Application\Services\Kpi\InternalKpiMetric
 use App\Modules\PerformanceEvaluation\Application\Services\Kpi\KpiFormula;
 use App\Modules\PerformanceEvaluation\Application\Services\Kpi\KpiLibraryService;
 use App\Modules\PerformanceEvaluation\Application\Services\Kpi\KpiNotificationDelivery;
-use App\Modules\PerformanceEvaluation\Application\Services\Kpi\RestKpiConnector;
 use App\Modules\PerformanceEvaluation\Application\Services\Kpi\KpiTemplateService;
+use App\Modules\PerformanceEvaluation\Application\Services\Kpi\RestKpiConnector;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use InvalidArgumentException;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use RuntimeException;
 
@@ -38,11 +39,13 @@ class KpiLibraryWorkspace extends Component
 
     public string $section = 'kpis';
 
+    #[Locked]
     public ?int $editingKpiId = null;
 
     /** @var array<string, mixed> */
     public array $kpiForm = [];
 
+    #[Locked]
     public ?int $editingTemplateId = null;
 
     /** @var array<string, mixed> */
@@ -480,9 +483,15 @@ class KpiLibraryWorkspace extends Component
         $stored = $this->editingKpiId ? (PerformanceKpi::query()->find($this->editingKpiId)?->integration_config ?? []) : [];
         $secret = trim((string) ($this->connectorForm['secret'] ?? ''));
         $auth = (string) ($this->connectorForm['auth'] ?? 'none');
+        $url = trim((string) ($this->connectorForm['url'] ?? ''));
+
+        // A saved credential only ever goes back to the host it was saved for.
+        if (parse_url($url, PHP_URL_HOST) !== parse_url((string) ($stored['url'] ?? ''), PHP_URL_HOST)) {
+            $stored = [];
+        }
 
         return [
-            'url' => trim((string) ($this->connectorForm['url'] ?? '')),
+            'url' => $url,
             'auth' => $auth,
             'username' => trim((string) ($this->connectorForm['username'] ?? '')),
             'token' => $auth === 'bearer' ? ($secret !== '' ? $secret : (string) ($stored['token'] ?? '')) : '',

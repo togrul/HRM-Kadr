@@ -587,6 +587,11 @@ class KpiScorecardTest extends TestCase
             ->set('connectorForm.value_path', 'data.total')
             ->call('saveKpi');
         $this->assertSame('tok-1', $kpi->fresh()->integration_config['token'], 'A blank secret keeps the stored one.');
+
+        $screen->call('openKpiForm', $kpi->id)
+            ->set('connectorForm.url', 'https://elsewhere.test/{tabel_no}')
+            ->call('saveKpi');
+        $this->assertSame('', $kpi->fresh()->integration_config['token'], 'The stored secret never follows the URL to a new host.');
     }
 
     public function test_stage_deadlines_skip_holidays_and_count_moved_working_days(): void
