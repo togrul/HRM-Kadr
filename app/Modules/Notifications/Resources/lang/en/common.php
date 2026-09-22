@@ -230,6 +230,7 @@ return [
         'sent' => 'Sent',
         'approval_turnaround' => 'Approval turnaround',
         'scheduled' => 'Scheduled',
+        'minutes_value' => ':value min',
     ],
     'phases' => [
         'p1_code' => 'Phase 1',
@@ -455,6 +456,7 @@ return [
         'employment_started' => 'employment started notification',
         'manual_announcement' => 'announcement published',
         'holiday_due' => 'holiday notification',
+        'recipient_email_missing' => 'The recipient has no e-mail address.',
     ],
     'validation' => [
         'required' => ':attribute is required.',
@@ -485,5 +487,18 @@ return [
         'approved' => 'approved',
         'rejected' => 'rejected',
         'updated' => 'updated',
+    ],
+    'campaign_titles' => [
+        'birthday' => 'Birthday notification: :name',
+        'position_change' => 'Position change: :name',
+        'new_employee' => 'New employee: :name',
+        'holiday' => 'Holiday / day-off notification: :name',
+    ],
+    'payload_defaults' => [
+        'position_update' => 'Position update',
+        'one_day' => '1 day',
+        'structure_scope' => 'By structure',
+        'paid_non_working_day' => 'Paid non-working day',
+        'non_working_day' => 'Non-working day',
     ],
 ];

@@ -31,7 +31,7 @@ class AnnouncementComposer extends Component
         'body' => '',
         'holiday_name' => '',
         'holiday_date' => '',
-        'duration' => '1 gün',
+        'duration' => '',
         'scope' => '',
         'holiday_rules' => '',
         'channel' => 'database',
@@ -48,6 +48,7 @@ class AnnouncementComposer extends Component
     public function mount(): void
     {
         $this->authorizeNotificationSettingsView();
+        $this->form['duration'] = __('notifications::common.payload_defaults.one_day');
         $this->applyRuleDefaults();
     }
 
@@ -192,7 +193,7 @@ class AnnouncementComposer extends Component
             'body' => '',
             'holiday_name' => '',
             'holiday_date' => '',
-            'duration' => '1 gün',
+            'duration' => __('notifications::common.payload_defaults.one_day'),
             'scope' => '',
             'holiday_rules' => '',
             'channel' => 'database',

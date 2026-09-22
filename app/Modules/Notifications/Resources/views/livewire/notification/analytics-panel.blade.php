@@ -37,7 +37,7 @@
             </div>
             <div class="rounded-[1.6rem] border border-zinc-200 bg-white p-4 shadow-card">
                 <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.stats.approval_turnaround') }}</p>
-                <p class="mt-3 text-3xl font-semibold text-zinc-900">{{ $stats['approval_turnaround_minutes'] !== null ? $stats['approval_turnaround_minutes'].' dəq' : '—' }}</p>
+                <p class="mt-3 text-3xl font-semibold text-zinc-900">{{ $stats['approval_turnaround_minutes'] !== null ? __('notifications::common.stats.minutes_value', ['value' => $stats['approval_turnaround_minutes']]) : '—' }}</p>
             </div>
             <div class="rounded-[1.6rem] border border-zinc-200 bg-white p-4 shadow-card">
                 <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.stats.scheduled') }}</p>
