@@ -2,17 +2,15 @@
 
 namespace App\Models;
 
+use App\Services\StructurePathService;
 use App\Traits\DateCastTrait;
 use App\Traits\PersonnelTrait;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\HasOneThrough;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class PersonnelVacation extends Model
 {
@@ -124,10 +122,9 @@ class PersonnelVacation extends Model
                 case 'structure_id':
                     $structureId = is_array($value) ? ($value['id'] ?? null) : $value;
                     if ($structureId) {
-                        $structureModel = Structure::with('subs')->find($structureId);
-                        if ($structureModel) {
-                            $structure = $structureModel->getAllNestedIds();
-                            $query->whereHas('personnel.structure', function ($qq) use ($structure) {
+                        $structure = app(StructurePathService::class)->descendantIds((int) $structureId);
+                        if ($structure !== []) {
+                            $query->whereHas('personnel', function ($qq) use ($structure) {
                                 $qq->whereIn('structure_id', $structure);
                             });
                         }

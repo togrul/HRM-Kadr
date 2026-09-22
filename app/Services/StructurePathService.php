@@ -98,6 +98,50 @@ class StructurePathService
     }
 
     /**
+     * The unit and every unit below it, from the same flat read — walking `->subs`
+     * lazily costs a query per node. With `$within`, the walk only descends through
+     * those units (the user's accessible set); the unit itself is always included.
+     *
+     * @param  list<int>|null  $within
+     * @return list<int>
+     */
+    public function descendantIds(int $structureId, ?array $within = null): array
+    {
+        if (! isset($this->structureMap()[$structureId])) {
+            return [];
+        }
+
+        $children = [];
+        foreach ($this->structureMap() as $id => $node) {
+            if ($node['parent_id'] !== null) {
+                $children[$node['parent_id']][] = $id;
+            }
+        }
+
+        $allowed = $within === null ? null : array_flip($within);
+        $ids = [];
+        $stack = [$structureId];
+
+        while ($stack !== []) {
+            $id = array_pop($stack);
+
+            if (isset($ids[$id])) {
+                continue;
+            }
+
+            $ids[$id] = true;
+
+            foreach ($children[$id] ?? [] as $child) {
+                if ($allowed === null || isset($allowed[$child])) {
+                    $stack[] = $child;
+                }
+            }
+        }
+
+        return array_keys($ids);
+    }
+
+    /**
      * @return array<int, array{name:string, parent_id:int|null}>
      */
     protected function structureMap(): array

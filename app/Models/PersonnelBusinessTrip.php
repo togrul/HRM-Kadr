@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\StructurePathService;
 use App\Traits\DateCastTrait;
 use App\Traits\PersonnelTrait;
 use Carbon\Carbon;
@@ -123,10 +124,9 @@ class PersonnelBusinessTrip extends Model
             switch ($field) {
                 case 'structure_id':
                     if (! empty($value)) {
-                        $structureModel = Structure::with('subs')->find($value);
-                        if ($structureModel) {
-                            $structure = $structureModel->getAllNestedIds();
-                            $query->whereHas('personnel.structure', function ($qq) use ($structure) {
+                        $structure = app(StructurePathService::class)->descendantIds((int) (is_array($value) ? ($value['id'] ?? 0) : $value));
+                        if ($structure !== []) {
+                            $query->whereHas('personnel', function ($qq) use ($structure) {
                                 $qq->whereIn('structure_id', $structure);
                             });
                         }
