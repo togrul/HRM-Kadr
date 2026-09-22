@@ -10,10 +10,10 @@
 
     // Type chip derived from structure depth (level): müəssisə → departament → şöbə → vahid.
     [$typeLabel, $typeChip] = match (true) {
-        $node['level'] <= 1 => ['MÜƏSSİSƏ', 'bg-indigo-50 text-indigo-600'],
-        $node['level'] === 2 => ['DEPARTAMENT', 'bg-blue-50 text-blue-600'],
-        $node['level'] === 3 => ['ŞÖBƏ', 'bg-zinc-100 text-zinc-500'],
-        default => ['VAHİD', 'bg-zinc-50 text-zinc-400 ring-1 ring-inset ring-zinc-200/70'],
+        $node['level'] <= 1 => [__('staff::common.structure_levels.enterprise'), 'bg-indigo-50 text-indigo-600'],
+        $node['level'] === 2 => [__('staff::common.structure_levels.department'), 'bg-blue-50 text-blue-600'],
+        $node['level'] === 3 => [__('staff::common.structure_levels.division'), 'bg-zinc-100 text-zinc-500'],
+        default => [__('staff::common.structure_levels.unit'), 'bg-zinc-50 text-zinc-400 ring-1 ring-inset ring-zinc-200/70'],
     };
 
     $hasChildren = count($node['children']) > 0 || count($node['positions']) > 0;
