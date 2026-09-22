@@ -49,7 +49,7 @@ class PerformanceWeakAreaTrainingNeedService
             return null;
         }
 
-        $threshold = (float) ($score->item?->low_score_threshold ?? 60);
+        $threshold = (float) $score->item->low_score_threshold;
         if ((float) $score->score >= $threshold) {
             $this->deleteExistingLink($score);
 

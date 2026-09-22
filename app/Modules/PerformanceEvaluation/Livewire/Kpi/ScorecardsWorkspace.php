@@ -2,6 +2,7 @@
 
 namespace App\Modules\PerformanceEvaluation\Livewire\Kpi;
 
+use App\Livewire\Traits\SideModalAction;
 use App\Models\PerformanceCycle;
 use App\Models\PerformanceGoal;
 use App\Models\PerformanceKpiActual;
@@ -12,7 +13,6 @@ use App\Models\PerformanceScorecardItem;
 use App\Models\Personnel;
 use App\Models\Position;
 use App\Models\User;
-use App\Livewire\Traits\SideModalAction;
 use App\Modules\PerformanceEvaluation\Application\Services\Kpi\InternalKpiMetrics;
 use App\Modules\PerformanceEvaluation\Application\Services\Kpi\KpiActualsImportService;
 use App\Modules\PerformanceEvaluation\Application\Services\Kpi\ScorecardReviewService;
@@ -28,12 +28,15 @@ use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Maatwebsite\Excel\Facades\Excel;
+use stdClass;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /**
  * KPI scorecards of a cycle: HR opens them in bulk; the owner, their manager and HR
  * work a card through actuals, approvals and the status workflow. The service decides
  * who may do what.
+ *
+ * @property-read PerformanceScorecard|null $card
  */
 class ScorecardsWorkspace extends Component
 {
@@ -109,8 +112,8 @@ class ScorecardsWorkspace extends Component
             ->value('id');
 
         $settings = PerformanceNotificationSetting::query()->where('user_id', auth()->id())->first();
-        $this->notifyByEmail = $settings?->email ?? true;
-        $this->notifyDigest = $settings?->digest ?? false;
+        $this->notifyByEmail = $settings->email ?? true;
+        $this->notifyDigest = $settings->digest ?? false;
     }
 
     public function updatedNotifyByEmail(): void
@@ -384,7 +387,7 @@ class ScorecardsWorkspace extends Component
         $this->authorize('manage-performance-evaluation');
         $this->validate(['importFile' => ['required', 'file', 'max:10240', 'mimes:xlsx,xls,csv,txt']]);
 
-        $rows = Excel::toArray(new \stdClass, $this->importFile->getRealPath(), null, $this->readerType())[0] ?? [];
+        $rows = Excel::toArray(new stdClass, $this->importFile->getRealPath(), null, $this->readerType())[0] ?? [];
         $result = app(KpiActualsImportService::class)->import(PerformanceCycle::query()->findOrFail($this->cycleId), $rows, auth()->user());
 
         $this->importErrors = $result['errors'];

@@ -55,6 +55,7 @@ class ScorecardReviewService
 
         $scores = $form->scores->groupBy('performance_form_template_item_id');
 
+        // @phpstan-ignore return.type, return.type, argument.type (PHPStan below level 8 drops null inside invariant Collection generics)
         return $form->template->sections->sortBy('sort_order')->flatMap(fn ($section) => $section->items->sortBy('sort_order')->map(function (PerformanceFormTemplateItem $item) use ($section, $scores): array {
             $byType = ($scores->get($item->id) ?? collect())->keyBy('evaluator_type');
 

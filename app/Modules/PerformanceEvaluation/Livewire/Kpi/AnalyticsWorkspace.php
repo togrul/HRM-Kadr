@@ -20,6 +20,11 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 /**
  * KPI analytics (spec §9): each person sees their own section — "My KPIs" for an
  * employee with a card, the team panel for a manager, and the cycle views for HR.
+ *
+ * @property-read Collection<int, PerformanceCycle> $cycles
+ * @property-read bool $isHr
+ * @property-read bool $isManager
+ * @property-read array<string, mixed>|null $hr
  */
 class AnalyticsWorkspace extends Component
 {
@@ -132,6 +137,7 @@ class AnalyticsWorkspace extends Component
 
         $columns = array_map(fn (string $key): array => ['key' => $key, 'label' => __('performance_evaluation::kpi.analytics.columns.'.$key)], $keys);
 
+        /** @var SupportCollection<int, mixed> $rows */
         return $this->downloadReportTable(collect($rows)->all(), $columns, 'kpi-'.$report.'-'.$this->cycleId.'.xlsx');
     }
 

@@ -15,7 +15,7 @@ class KpiScoringEngine
     /** A = target/actual. */
     public const LOWER_BETTER_RATIO = 'ratio';
 
-    /** @var array<int, float> qualitative rating → achievement % */
+    /** @var array<int, float|int> qualitative rating → achievement % */
     public const DEFAULT_QUALITATIVE_SCALE = [1 => 0, 2 => 60, 3 => 100, 4 => 110, 5 => 120];
 
     /** Points lost per 1% the actual strays outside a range KPI's bounds. */

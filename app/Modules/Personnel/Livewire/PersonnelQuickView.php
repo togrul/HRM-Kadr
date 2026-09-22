@@ -13,6 +13,8 @@ use Livewire\Component;
 /**
  * The row-level peek: enough of a personnel file to decide whether to open it.
  * Follows the module convention of addressing personnel by tabel number.
+ *
+ * @property-read Personnel $personnel
  */
 class PersonnelQuickView extends Component
 {

@@ -356,7 +356,7 @@ class BonusService
         }
 
         $pct = 0.0;
-        foreach (collect($bands)->sortBy(0) as [$from, $payout]) {
+        foreach (collect($bands)->sortBy('0') as [$from, $payout]) {
             if ($score + 1e-9 >= (float) $from) {
                 $pct = (float) $payout;
             }
@@ -389,7 +389,7 @@ class BonusService
         }
 
         $multiplier = 1.0;
-        foreach (collect($rule->company_multipliers)->sortBy(0) as [$from, $value]) {
+        foreach (collect($rule->company_multipliers)->sortBy('0') as [$from, $value]) {
             if ($result + 1e-9 >= (float) $from) {
                 $multiplier = (float) $value;
             }
@@ -502,7 +502,7 @@ class BonusService
         return collect($rows)
             ->filter(fn ($row): bool => is_array($row) && is_numeric($row[0] ?? null) && is_numeric($row[1] ?? null))
             ->map(fn (array $row): array => [(float) $row[0], (float) $row[1]])
-            ->sortBy(0)
+            ->sortBy('0')
             ->values()
             ->all();
     }
@@ -528,7 +528,7 @@ class BonusService
     private function inProbationOn(?Personnel $personnel, Carbon $date): bool
     {
         $joined = $personnel?->getRawOriginal('join_work_date');
-        $amount = (int) ($personnel?->probation_amount ?? 0);
+        $amount = (int) ($personnel->probation_amount ?? 0);
 
         if ($joined === null || $amount <= 0) {
             return false;

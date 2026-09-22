@@ -13,6 +13,10 @@ use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Isolate;
 
+/**
+ * @property-read Collection<int, PerformanceFormTemplate> $builderTemplates
+ * @property-read PerformanceFormTemplate|null $builderTemplate
+ */
 #[Isolate]
 class FoundationWorkspace extends AbstractPerformanceWorkspace
 {

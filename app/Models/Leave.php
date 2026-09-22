@@ -15,6 +15,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\{BelongsTo, HasMany, HasOne};
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
+/**
+ * @property mixed $starts_at
+ * @property mixed $ends_at
+ * @property int|null $total_days
+ */
 class Leave extends Model
 {
     use HasFactory, PersonnelTrait, SoftDeletes;

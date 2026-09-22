@@ -9,6 +9,40 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
+/**
+ * @property int $id
+ * @property int $performance_cycle_id
+ * @property int $personnel_id
+ * @property int|null $position_id
+ * @property float|string $fte
+ * @property bool $is_additional
+ * @property int|null $performance_kpi_template_id
+ * @property int|null $performance_form_id
+ * @property int|null $manager_personnel_id
+ * @property string $status
+ * @property \Illuminate\Support\Carbon|null $stage_due_at
+ * @property \Illuminate\Support\Carbon|null $reminded_at
+ * @property \Illuminate\Support\Carbon|null $escalated_at
+ * @property \Illuminate\Support\Carbon|null $checkin_reminded_at
+ * @property \Illuminate\Support\Carbon|null $actuals_reminded_at
+ * @property \Illuminate\Support\Carbon $valid_from
+ * @property \Illuminate\Support\Carbon $valid_to
+ * @property float|string $prorata_factor
+ * @property int $leave_days
+ * @property float|string $kpi_weight_share
+ * @property float|string $competency_weight_share
+ * @property float|string|null $kpi_score
+ * @property float|string|null $competency_score
+ * @property float|string|null $final_score
+ * @property float|string|null $calibrated_score
+ * @property string|null $rating_category
+ * @property array|null $snapshot
+ * @property \Illuminate\Support\Carbon|null $locked_at
+ * @property string|null $closure_reason
+ * @property int|null $created_by
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ */
 class PerformanceScorecard extends Model
 {
     use LogsActivity;
@@ -105,56 +139,67 @@ class PerformanceScorecard extends Model
         'escalated_at' => 'datetime',
     ];
 
+    /** @return BelongsTo<PerformanceCycle, $this> */
     public function cycle(): BelongsTo
     {
         return $this->belongsTo(PerformanceCycle::class, 'performance_cycle_id');
     }
 
+    /** @return BelongsTo<Personnel, $this> */
     public function personnel(): BelongsTo
     {
         return $this->belongsTo(Personnel::class);
     }
 
+    /** @return BelongsTo<Personnel, $this> */
     public function manager(): BelongsTo
     {
         return $this->belongsTo(Personnel::class, 'manager_personnel_id');
     }
 
+    /** @return BelongsTo<Position, $this> */
     public function position(): BelongsTo
     {
         return $this->belongsTo(Position::class);
     }
 
+    /** @return BelongsTo<PerformanceKpiTemplate, $this> */
     public function template(): BelongsTo
     {
         return $this->belongsTo(PerformanceKpiTemplate::class, 'performance_kpi_template_id');
     }
 
+    /** @return HasMany<PerformanceScorecardItem, $this> */
     public function items(): HasMany
     {
         return $this->hasMany(PerformanceScorecardItem::class)->orderBy('sort_order')->orderBy('id');
     }
 
+    /** @return BelongsTo<PerformanceForm, $this> */
     public function form(): BelongsTo
     {
         return $this->belongsTo(PerformanceForm::class, 'performance_form_id');
     }
 
+    /** @return HasMany<PerformanceScorecardEvent, $this> */
     public function events(): HasMany
     {
         return $this->hasMany(PerformanceScorecardEvent::class)->latest('id');
     }
 
+    /** @return HasMany<PerformanceScorecardCheckin, $this> */
     public function checkins(): HasMany
     {
         return $this->hasMany(PerformanceScorecardCheckin::class)->latest('checkin_date')->latest('id');
     }
 
+    /** @return HasMany<PerformanceCalibrationAdjustment, $this> */
     public function calibrations(): HasMany
     {
         return $this->hasMany(PerformanceCalibrationAdjustment::class)->latest('id');
     }
 
+    /** @return HasOne<PerformanceBonusCalculation, $this> */
     public function bonus(): HasOne
     {
         return $this->hasOne(PerformanceBonusCalculation::class);

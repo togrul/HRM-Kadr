@@ -31,6 +31,8 @@ use RuntimeException;
 /**
  * KPI library and position templates (spec §4.1–4.2). Scoring rules live in the
  * services; this component only collects input.
+ *
+ * @property-read SupportCollection<string, PerformanceNotificationTemplate> $notificationTemplates
  */
 class KpiLibraryWorkspace extends Component
 {
@@ -153,7 +155,7 @@ class KpiLibraryWorkspace extends Component
         $this->kpiForm['formula'] ??= '';
         $this->connectorForm = [
             ...$this->connectorDefaults(),
-            ...collect($kpi?->integration_config ?? [])->only(['url', 'auth', 'username', 'value_path'])->all(),
+            ...collect($kpi->integration_config ?? [])->only(['url', 'auth', 'username', 'value_path'])->all(),
         ];
         $this->openSideMenu('kpi-form');
     }
@@ -480,7 +482,7 @@ class KpiLibraryWorkspace extends Component
      */
     private function connectorConfig(): array
     {
-        $stored = $this->editingKpiId ? (PerformanceKpi::query()->find($this->editingKpiId)?->integration_config ?? []) : [];
+        $stored = $this->editingKpiId ? (PerformanceKpi::query()->find($this->editingKpiId)->integration_config ?? []) : [];
         $secret = trim((string) ($this->connectorForm['secret'] ?? ''));
         $auth = (string) ($this->connectorForm['auth'] ?? 'none');
         $url = trim((string) ($this->connectorForm['url'] ?? ''));

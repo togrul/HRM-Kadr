@@ -41,7 +41,7 @@ class KpiActualsImportService
             ->map(fn (PerformanceScorecardItem $item): array => [
                 'item_id' => $item->id,
                 'tabel_no' => $item->scorecard->personnel?->tabel_no,
-                'personnel' => trim(($item->scorecard->personnel?->surname ?? '').' '.($item->scorecard->personnel?->name ?? '')),
+                'personnel' => trim(($item->scorecard->personnel->surname ?? '').' '.($item->scorecard->personnel->name ?? '')),
                 'kpi_code' => $item->kpi->code,
                 'kpi' => $item->kpi->name,
                 'unit' => __('performance_evaluation::kpi.units.'.$item->kpi->unit),

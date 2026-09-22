@@ -40,7 +40,7 @@ class OrderDraftService
         $template = $this->templates->find($templateCode) ?? throw new RuntimeException("Order template [{$templateCode}] is not registered.");
 
         $fields = collect($template->variables ?? [])
-            ->filter(fn (array $variable): bool => ($variable['source'] ?? null) === 'manual')
+            ->filter(fn (array $variable): bool => $variable['source'] === 'manual')
             ->mapWithKeys(fn (array $variable): array => [$variable['token'] => (string) ($fieldsByLabel[$variable['label']] ?? '')])
             ->all();
 

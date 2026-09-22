@@ -12,6 +12,27 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * How a cycle's bonus is worked out. `company` pays base × target % × payout ×
  * company multiplier; `order` (military regime) turns the payout into months of salary
  * awarded by an order (əmr).
+ *
+ * @property int $id
+ * @property int $performance_cycle_id
+ * @property string $mode
+ * @property float $target_pct
+ * @property array|null $position_targets
+ * @property float $reward_months
+ * @property array $payout_bands
+ * @property float|null $company_result
+ * @property float $company_gate
+ * @property float $gate_floor_pct
+ * @property array $company_multipliers
+ * @property array|null $unit_results
+ * @property float $cap_pct
+ * @property float|null $fund
+ * @property bool $scale_to_fund
+ * @property bool $pay_in_probation
+ * @property string $currency
+ * @property int|null $updated_by
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
  */
 class PerformanceBonusRule extends Model
 {
@@ -61,6 +82,7 @@ class PerformanceBonusRule extends Model
         'pay_in_probation' => 'boolean',
     ];
 
+    /** @return BelongsTo<PerformanceCycle, $this> */
     public function cycle(): BelongsTo
     {
         return $this->belongsTo(PerformanceCycle::class, 'performance_cycle_id');

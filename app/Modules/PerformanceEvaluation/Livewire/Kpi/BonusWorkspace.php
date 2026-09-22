@@ -15,12 +15,18 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Collection as SupportCollection;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
+use stdClass;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /**
  * The cycle's bonus: HR tunes the rule, sees what it would pay while editing (the
  * what-if simulation), stores the lines and hands them over — to payroll in the
  * company model, as award orders in the military regime.
+ *
+ * @property-read Collection<int, PerformanceCycle> $cycles
+ * @property-read PerformanceCycle|null $cycle
+ * @property-read PerformanceBonusRule|null $savedRule
+ * @property-read SupportCollection<int, stdClass> $scope
  */
 class BonusWorkspace extends Component
 {
@@ -79,7 +85,7 @@ class BonusWorkspace extends Component
     /**
      * Positions and units of the cycle's people, from one query.
      *
-     * @return SupportCollection<int, object{position_id: ?int, structure_id: ?int}>
+     * @return SupportCollection<int, stdClass> rows of position_id and structure_id
      */
     #[Computed]
     public function scope(): SupportCollection
@@ -251,10 +257,10 @@ class BonusWorkspace extends Component
      */
     private function formToRule(): array
     {
-        $pairs = fn (string $list): array => collect($this->ruleForm[$list] ?? [])
+        $pairs = fn (string $list): array => collect((array) ($this->ruleForm[$list] ?? []))
             ->filter(fn ($row): bool => is_numeric($row['from'] ?? null) && is_numeric($row['value'] ?? null))
             ->map(fn (array $row): array => [(float) $row['from'], (float) $row['value']])
-            ->sortBy(0)
+            ->sortBy('0')
             ->values()
             ->all();
         $number = fn (string $key): ?float => is_numeric($this->ruleForm[$key] ?? null) ? (float) $this->ruleForm[$key] : null;

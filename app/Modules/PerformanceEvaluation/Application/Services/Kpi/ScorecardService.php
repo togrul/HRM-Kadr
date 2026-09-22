@@ -162,6 +162,8 @@ class ScorecardService
 
     /**
      * Cards the user may see: all for HR, otherwise their own and the ones they manage.
+     *
+     * @return Builder<PerformanceScorecard>
      */
     public function visibleQuery(User $user): Builder
     {
@@ -299,7 +301,7 @@ class ScorecardService
                 'to_status' => $card->status,
                 'reason' => __('performance_evaluation::kpi.manager_changed_note', [
                     'from' => $previous ? trim($previous->surname.' '.$previous->name) : '—',
-                    'to' => trim(($card->refresh()->manager?->surname ?? '').' '.($card->manager?->name ?? '')),
+                    'to' => trim(($card->refresh()->manager->surname ?? '').' '.($card->manager->name ?? '')),
                 ]),
             ]);
         });
@@ -333,7 +335,7 @@ class ScorecardService
         DB::transaction(function () use ($card, $leaveDays, $worked, $from, $to, $cycle): void {
             $card->load('items.kpi', 'items.kpiVersion');
             foreach ($card->items as $item) {
-                $definition = $item->kpiVersion?->snapshot ?? $item->kpi->only(['type', 'direction', 'aggregation']);
+                $definition = $item->kpiVersion->snapshot ?? $item->kpi->only(['type', 'direction', 'aggregation']);
                 $additive = ($definition['aggregation'] ?? null) === 'sum' && ($definition['type'] ?? null) === 'quantitative' && ($definition['direction'] ?? null) !== 'range';
 
                 if (! $additive || ($item->target === null && $item->original_target === null)) {
@@ -454,7 +456,7 @@ class ScorecardService
         $card->load(['items.kpi', 'items.kpiVersion', 'items.actuals', 'form:id,final_score', 'calibrations']);
 
         $definitions = $card->items->mapWithKeys(fn (PerformanceScorecardItem $item): array => [
-            $item->id => $item->kpiVersion?->snapshot ?? $item->kpi->only(['type', 'direction', 'aggregation', 'qualitative_scale', 'formula']),
+            $item->id => $item->kpiVersion->snapshot ?? $item->kpi->only(['type', 'direction', 'aggregation', 'qualitative_scale', 'formula']),
         ]);
         $actuals = $this->itemActuals($card, $definitions->all());
 

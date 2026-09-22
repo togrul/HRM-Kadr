@@ -7,6 +7,22 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
+/**
+ * @property int $id
+ * @property int $performance_kpi_template_id
+ * @property int $performance_kpi_id
+ * @property float|string $weight
+ * @property float|string|null $target
+ * @property float|string|null $range_min
+ * @property float|string|null $range_max
+ * @property float|string|null $threshold
+ * @property float|string|null $stretch
+ * @property float|string|null $cap
+ * @property bool $target_editable
+ * @property int $sort_order
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ */
 class PerformanceKpiTemplateItem extends Model
 {
     use LogsActivity;
@@ -36,11 +52,13 @@ class PerformanceKpiTemplateItem extends Model
         'target_editable' => 'boolean',
     ];
 
+    /** @return BelongsTo<PerformanceKpiTemplate, $this> */
     public function template(): BelongsTo
     {
         return $this->belongsTo(PerformanceKpiTemplate::class, 'performance_kpi_template_id');
     }
 
+    /** @return BelongsTo<PerformanceKpi, $this> */
     public function kpi(): BelongsTo
     {
         return $this->belongsTo(PerformanceKpi::class, 'performance_kpi_id');

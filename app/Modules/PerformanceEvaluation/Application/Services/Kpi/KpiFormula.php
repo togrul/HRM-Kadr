@@ -36,7 +36,7 @@ class KpiFormula
     {
         $this->parse($formula, []);
 
-        return collect($this->tokens)->where(0, 'ref')->pluck(1)->unique()->values()->all();
+        return collect($this->tokens)->where('0', 'ref')->pluck(1)->unique()->values()->all();
     }
 
     /**
@@ -90,9 +90,9 @@ class KpiFormula
 
             $offset += strlen($match[0]);
             $tokens[] = match (true) {
-                ($match['num'] ?? '') !== '' => ['num', $match['num']],
-                ($match['ref'] ?? '') !== '' => ['ref', $match['ref']],
-                ($match['name'] ?? '') !== '' => ['fn', strtoupper($match['name'])],
+                $match['num'] !== '' => ['num', $match['num']],
+                $match['ref'] !== '' => ['ref', $match['ref']],
+                $match['name'] !== '' => ['fn', strtoupper($match['name'])],
                 default => ['op', $match['op']],
             };
         }
@@ -100,6 +100,11 @@ class KpiFormula
         return $tokens;
     }
 
+    /**
+     * Advances the token cursor.
+     *
+     * @phpstan-impure
+     */
     private function comparison(): ?float
     {
         $left = $this->additive();
@@ -220,7 +225,7 @@ class KpiFormula
             'IF' => count($args) === 3,
             'ABS' => count($args) === 1,
             'ROUND' => in_array(count($args), [1, 2], true),
-            default => count($args) >= 1,
+            default => true,
         };
         if (! $arity) {
             throw new InvalidArgumentException(__('performance_evaluation::kpi.formula.errors.arguments', ['name' => $name]));

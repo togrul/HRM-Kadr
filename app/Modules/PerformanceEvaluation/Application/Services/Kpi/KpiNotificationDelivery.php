@@ -68,8 +68,8 @@ class KpiNotificationDelivery
             ], $subject, $body));
 
             $setting = $settings->get($user->id);
-            $wantsMail = $setting?->email ?? true;
-            $digest = (bool) ($setting?->digest ?? false);
+            $wantsMail = $setting->email ?? true;
+            $digest = (bool) ($setting->digest ?? false);
 
             if (filled($user->email) && ($mandatory || ($wantsMail && ! $digest))) {
                 $user->notify(new KpiMail($subject, [$body], $replace['link']));
@@ -100,7 +100,7 @@ class KpiNotificationDelivery
                     ->where('created_at', '>=', now()->subDay())
                     ->get()
                     ->filter(fn ($notification): bool => ($notification->data['module'] ?? null) === 'kpi' && ! in_array($notification->data['event'] ?? '', self::MANDATORY, true))
-                    ->map(fn ($notification): string => $notification->data['message'].' — '.$notification->data['body'])
+                    ->map(fn ($notification): string => $notification->getAttribute('data')['message'].' — '.$notification->getAttribute('data')['body'])
                     ->values();
 
                 if ($lines->isNotEmpty()) {

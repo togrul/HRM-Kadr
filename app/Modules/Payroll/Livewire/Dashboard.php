@@ -24,6 +24,11 @@ use Livewire\Component;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
+/**
+ * @property-read \App\Models\PayrollPeriod|null $activePeriod
+ * @property-read \Illuminate\Support\Collection<int, \App\Models\PayrollPeriod> $periods
+ * @property-read \Illuminate\Support\Collection<int, \App\Models\PayrollRun> $runs
+ */
 class Dashboard extends Component
 {
     use DownloadsReportsTable;
@@ -263,7 +268,7 @@ class Dashboard extends Component
 
     public function periodLabel(?PayrollPeriod $period): string
     {
-        return $period?->starts_on?->translatedFormat('F Y') ?? ($period?->code ?? '—');
+        return $period?->starts_on?->translatedFormat('F Y') ?? ($period->code ?? '—');
     }
 
     /**
@@ -309,8 +314,8 @@ class Dashboard extends Component
 
         return $rows->map(fn (PayslipLine $row): array => [
             'label' => __('payroll::dashboard.statutory.'.preg_replace('/_(ee|er)$/', '', (string) $row->code)),
-            'amount' => (float) $row->total,
-            'pct' => $max > 0 ? round((float) $row->total / $max * 100, 1) : 0.0,
+            'amount' => (float) $row->getAttribute('total'),
+            'pct' => $max > 0 ? round((float) $row->getAttribute('total') / $max * 100, 1) : 0.0,
         ])->all();
     }
 

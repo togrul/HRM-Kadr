@@ -8,6 +8,33 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
+/**
+ * @property int $id
+ * @property int $performance_scorecard_id
+ * @property int $performance_kpi_id
+ * @property int|null $performance_kpi_version_id
+ * @property int|null $performance_goal_id
+ * @property float|string $weight
+ * @property float|string|null $target
+ * @property float|string|null $original_target
+ * @property float|string|null $forecast
+ * @property float|string|null $forecast_achievement
+ * @property \Illuminate\Support\Carbon|null $red_notified_at
+ * @property float|string|null $range_min
+ * @property float|string|null $range_max
+ * @property float|string|null $threshold
+ * @property float|string|null $stretch
+ * @property float|string|null $cap
+ * @property bool $target_editable
+ * @property int $sort_order
+ * @property float|string|null $actual
+ * @property float|string|null $achievement
+ * @property float|string|null $score
+ * @property string|null $comment_employee
+ * @property string|null $comment_manager
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ */
 class PerformanceScorecardItem extends Model
 {
     use LogsActivity;
@@ -55,26 +82,31 @@ class PerformanceScorecardItem extends Model
         'score' => 'decimal:4',
     ];
 
+    /** @return BelongsTo<PerformanceScorecard, $this> */
     public function scorecard(): BelongsTo
     {
         return $this->belongsTo(PerformanceScorecard::class, 'performance_scorecard_id');
     }
 
+    /** @return BelongsTo<PerformanceKpi, $this> */
     public function kpi(): BelongsTo
     {
         return $this->belongsTo(PerformanceKpi::class, 'performance_kpi_id')->withTrashed();
     }
 
+    /** @return BelongsTo<PerformanceKpiVersion, $this> */
     public function kpiVersion(): BelongsTo
     {
         return $this->belongsTo(PerformanceKpiVersion::class, 'performance_kpi_version_id');
     }
 
+    /** @return BelongsTo<PerformanceGoal, $this> */
     public function goal(): BelongsTo
     {
         return $this->belongsTo(PerformanceGoal::class, 'performance_goal_id');
     }
 
+    /** @return HasMany<PerformanceKpiActual, $this> */
     public function actuals(): HasMany
     {
         return $this->hasMany(PerformanceKpiActual::class)->latest('id');
@@ -88,6 +120,7 @@ class PerformanceScorecardItem extends Model
             ->logOnlyDirty();
     }
 
+    /** @return HasMany<PerformanceScorecardChangeRequest, $this> */
     public function changeRequests(): HasMany
     {
         return $this->hasMany(PerformanceScorecardChangeRequest::class)->latest('id');

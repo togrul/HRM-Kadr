@@ -235,6 +235,9 @@ class ScorecardLifecycleService
         return $sent;
     }
 
+    /**
+     * @return Builder<PerformanceScorecard>
+     */
     private function openCards(): Builder
     {
         return PerformanceScorecard::query()->where('status', '!=', 'closed');

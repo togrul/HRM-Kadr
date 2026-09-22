@@ -387,6 +387,8 @@ trait InteractsWithPerformanceEvaluationQueries
 
     public function getRecentFormsProperty()
     {
+        $formSearch = property_exists($this, 'formSearch') ? trim($this->formSearch) : '';
+
         return PerformanceForm::query()
             ->leftJoin('performance_cycles', 'performance_cycles.id', '=', 'performance_forms.performance_cycle_id')
             ->leftJoin('performance_form_templates', 'performance_form_templates.id', '=', 'performance_forms.performance_form_template_id')
@@ -402,10 +404,10 @@ trait InteractsWithPerformanceEvaluationQueries
                 DB::raw('hr_users.name as hr_reviewer_name'),
             ])
             ->when(
-                property_exists($this, 'formSearch') && trim($this->formSearch) !== '',
+                $formSearch !== '',
                 fn ($query) => $query->where(fn ($inner) => $inner
-                    ->where('personnels.surname', 'like', '%'.trim($this->formSearch).'%')
-                    ->orWhere('personnels.name', 'like', '%'.trim($this->formSearch).'%'))
+                    ->where('personnels.surname', 'like', '%'.$formSearch.'%')
+                    ->orWhere('personnels.name', 'like', '%'.$formSearch.'%'))
             )
             ->latest('performance_forms.id')
             ->limit(50)

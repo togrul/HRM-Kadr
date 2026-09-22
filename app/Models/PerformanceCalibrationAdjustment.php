@@ -7,6 +7,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
+/**
+ * @property int $id
+ * @property int $performance_scorecard_id
+ * @property float|string $delta
+ * @property string $reason
+ * @property int|null $adjusted_by
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ */
 class PerformanceCalibrationAdjustment extends Model
 {
     use LogsActivity;
@@ -22,11 +31,13 @@ class PerformanceCalibrationAdjustment extends Model
         'delta' => 'decimal:4',
     ];
 
+    /** @return BelongsTo<PerformanceScorecard, $this> */
     public function scorecard(): BelongsTo
     {
         return $this->belongsTo(PerformanceScorecard::class, 'performance_scorecard_id');
     }
 
+    /** @return BelongsTo<User, $this> */
     public function adjustedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'adjusted_by');

@@ -8,6 +8,33 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
+/**
+ * @property int $id
+ * @property string $code
+ * @property string $name
+ * @property string|null $description
+ * @property string $type
+ * @property string $direction
+ * @property string $unit
+ * @property string $data_source
+ * @property string|null $source_metric
+ * @property string|null $formula
+ * @property array|null $integration_config
+ * @property \Illuminate\Support\Carbon|null $integration_synced_at
+ * @property string|null $integration_error
+ * @property string $frequency
+ * @property string $aggregation
+ * @property string $perspective
+ * @property string|null $indicator_kind
+ * @property array|null $qualitative_scale
+ * @property bool $evidence_required
+ * @property string $status
+ * @property int $current_version
+ * @property int|null $created_by
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ */
 class PerformanceKpi extends Model
 {
     use LogsActivity;
@@ -65,6 +92,7 @@ class PerformanceKpi extends Model
         'current_version' => 'integer',
     ];
 
+    /** @return HasMany<PerformanceKpiVersion, $this> */
     public function versions(): HasMany
     {
         return $this->hasMany(PerformanceKpiVersion::class)->orderByDesc('version');

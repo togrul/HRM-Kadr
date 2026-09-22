@@ -38,6 +38,7 @@ class KpiAnalyticsService
      */
     public function myCards(int $personnelId, int $cycleId): Collection
     {
+        // @phpstan-ignore return.type (PHPStan below level 8 drops null inside invariant Collection generics)
         return PerformanceScorecard::query()
             ->where('personnel_id', $personnelId)
             ->where('performance_cycle_id', $cycleId)
@@ -103,6 +104,7 @@ class KpiAnalyticsService
             ->get(['id', 'performance_cycle_id', 'valid_from', 'valid_to', 'fte', 'final_score', 'calibrated_score'])
             ->groupBy('performance_cycle_id');
 
+        // @phpstan-ignore return.type (PHPStan below level 8 drops null inside invariant Collection generics)
         return $cycles->map(fn (PerformanceCycle $cycle): array => [
             'cycle' => $cycle->name,
             'score' => $this->weightedScore($cards->get($cycle->id, collect())),
@@ -126,7 +128,7 @@ class KpiAnalyticsService
             ->values();
 
         $kpis = $cards->flatMap(fn (PerformanceScorecard $card) => $card->items->map(fn (PerformanceScorecardItem $item): array => [$item->kpi->code, $item->kpi->name]))
-            ->unique(0)
+            ->unique('0')
             ->mapWithKeys(fn (array $pair): array => [$pair[0] => $pair[1]]);
 
         return ['cards' => $cards, 'kpis' => $kpis];
@@ -263,7 +265,7 @@ class KpiAnalyticsService
             ->with(['personnel:id,structure_id', 'personnel.structure:id,name', 'scorecard:id,position_id', 'scorecard.position:id,name'])
             ->get();
 
-        $group = fn (callable $key, callable $label): Collection => $lines->groupBy($key)->map(fn (Collection $group): array => [
+        $group = fn (callable $key, callable $label): Collection => $lines->groupBy(fn (PerformanceBonusCalculation $line): string => (string) $key($line))->map(fn (Collection $group): array => [
             'name' => $label($group->first()) ?? '—',
             'people' => $group->count(),
             'total' => round($group->sum('amount'), 2),
@@ -275,7 +277,7 @@ class KpiAnalyticsService
             'positions' => $group(fn (PerformanceBonusCalculation $line) => $line->scorecard?->position_id, fn (PerformanceBonusCalculation $line) => $line->scorecard?->position?->name),
             'total' => round($lines->sum('amount'), 2),
             'fund' => PerformanceBonusRule::query()->where('performance_cycle_id', $cycle->id)->first()?->fund,
-            'currency' => (string) ($lines->first()?->currency ?? 'AZN'),
+            'currency' => (string) ($lines->first()->currency ?? 'AZN'),
         ];
     }
 
@@ -356,6 +358,9 @@ class KpiAnalyticsService
         return $ids;
     }
 
+    /**
+     * @return Builder<PerformanceScorecard>
+     */
     private function cards(int $cycleId, ?array $units): Builder
     {
         return PerformanceScorecard::query()
