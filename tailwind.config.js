@@ -13,7 +13,7 @@ export default {
     ],
     safelist: [
         {
-            pattern: /(bg|text|border)-(cyan|orange|rose|amber|indigo|lime|blue|emerald|yellow|slate|neutral|gray|zinc)-(50|100|200|300|400|500|600|700)(\/(50|60|70))?/,
+            pattern: /^(bg|text|border)-(cyan|orange|rose|amber|indigo|lime|blue|emerald|yellow|slate|neutral|gray|zinc)-(50|100|200|300|400|500|600|700)(\/(50|60|70))?$/,
             variants: ['hover'],
         },
     ],
