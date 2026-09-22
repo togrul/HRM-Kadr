@@ -9,6 +9,7 @@ use App\Models\Leave;
 use App\Models\OrderStatus;
 use App\Models\Structure;
 use App\Modules\Leaves\Exports\LeaveExport;
+use App\Services\StructurePathService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -38,8 +39,6 @@ class Leaves extends Component
     public $status;
 
     protected ?array $statsCache = null;
-
-    protected array $structurePathCache = [];
 
     public function applyFilter(?array $payload = null): void
     {
@@ -217,7 +216,8 @@ class Leaves extends Component
                         'structure_id',
                         'position_id',
                     ])
-                    ->withStructureTree()   // burada parent zincirini preload eder
+                    // Unit names only; the path comes from StructurePathService's flat map.
+                    ->with('structure:id,name')
                     ->with([
                         'position:id,name',
                         'latestDisposal' => fn ($q) => $q->select(
@@ -366,34 +366,7 @@ class Leaves extends Component
 
     protected function resolveStructurePath(?Structure $structure): string
     {
-        if (! $structure) {
-            return '';
-        }
-
-        $cacheKey = (int) $structure->id;
-
-        if (array_key_exists($cacheKey, $this->structurePathCache)) {
-            return $this->structurePathCache[$cacheKey];
-        }
-
-        $segments = [];
-        $cursor = $structure;
-
-        while ($cursor) {
-            if (is_null($cursor->parent_id)) {
-                break;
-            }
-
-            $segments[] = (string) $cursor->name;
-
-            if (! $cursor->relationLoaded('parent')) {
-                break;
-            }
-
-            $cursor = $cursor->parent;
-        }
-
-        return $this->structurePathCache[$cacheKey] = implode(' ', array_reverse($segments));
+        return $structure ? implode(' ', app(StructurePathService::class)->segments((int) $structure->id)) : '';
     }
 
     public function render()

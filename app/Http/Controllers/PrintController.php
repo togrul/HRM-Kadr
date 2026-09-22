@@ -6,6 +6,7 @@ use App\Helpers\UsefulHelpers;
 use App\Models\Personnel;
 use App\Services\CvWordExportService;
 use App\Services\PersonnelServiceBookWordExportService;
+use App\Services\StructurePathService;
 use App\Services\WordSuffixService;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
@@ -98,7 +99,9 @@ class PrintController extends Controller
         $suffixService = app(WordSuffixService::class);
         $birthdate = $personnel->birthdate;
         $birthDateYear = optional($birthdate)?->year;
-        $structureNames = $personnel->structure?->getAllParentName(isCoded: false) ?? [];
+        $structureNames = $personnel->structure
+            ? (app(StructurePathService::class)->segments((int) $personnel->structure_id) ?: [$personnel->structure->name])
+            : [];
         $structureLabel = collect($structureNames)
             ->map(fn ($structure, $idx) => $suffixService->getStructureSuffix($structure, false, $idx < 1, true).' ')
             ->implode('');
