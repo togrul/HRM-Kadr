@@ -18,6 +18,7 @@ use App\Support\Livewire\InteractsWithTabbedWorkspace;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -484,7 +485,14 @@ class Dashboard extends Component
     {
         abort_unless($this->canLock(), 403);
 
-        $service->lock(PayrollRun::findOrFail($runId));
+        try {
+            $service->lock(PayrollRun::findOrFail($runId));
+        } catch (ValidationException $exception) {
+            $this->dispatch('notify', type: 'error', message: collect($exception->errors())->flatten()->first());
+
+            return;
+        }
+
         $this->dispatch('notify', type: 'success', message: __('payroll::dashboard.messages.locked'));
     }
 

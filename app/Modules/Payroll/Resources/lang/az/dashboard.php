@@ -164,5 +164,6 @@ return [
         'reopened' => 'Yenidən açıldı',
         'deleted' => 'Silindi',
         'saved' => 'Yadda saxlanıldı',
+        'recalculate_first' => 'Run hesablanandan sonra birdəfəlik ödənişlər dəyişib — kilidləmədən əvvəl yenidən hesablayın',
     ],
 ];

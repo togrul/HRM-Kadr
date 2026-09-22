@@ -10,6 +10,7 @@ use App\Modules\Compensation\Domain\Contracts\CompensationReadRepository;
 use App\Modules\Integration\Domain\Contracts\PayrollOwnership;
 use App\Support\Database\InstalledTables;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use RuntimeException;
 
 class PayrollRunService
@@ -164,6 +165,32 @@ class PayrollRunService
     /**
      * Lock the run and freeze each payslip's inputs into an immutable snapshot.
      */
+    /**
+     * Locking marks the month's one-off earnings paid, so each of them must be on the
+     * payslips being locked: one handed over or changed after the calculation is not.
+     *
+     * @throws ValidationException
+     */
+    private function guardOneOffsUnchangedSinceCalculation(PayrollRun $run): void
+    {
+        if ($run->run_type !== 'regular' || $run->calculated_at === null || ! InstalledTables::has('payroll_one_off_earnings')) {
+            return;
+        }
+
+        // ponytail: second-precision timestamps; a hand-off in the calculation's own second slips through.
+        $changed = PayrollOneOffEarning::query()
+            ->whereIn('tabel_no', $run->payslips()->select('tabel_no'))
+            ->where('pay_year', (int) $run->period->year)
+            ->where('pay_month', (int) $run->period->month)
+            ->whereNull('paid_payroll_run_id')
+            ->where('updated_at', '>', $run->calculated_at)
+            ->exists();
+
+        if ($changed) {
+            throw ValidationException::withMessages(['run' => __('payroll::dashboard.messages.recalculate_first')]);
+        }
+    }
+
     public function lock(PayrollRun $run): PayrollRun
     {
         $this->guardOwnership('locking');
@@ -171,6 +198,8 @@ class PayrollRunService
         if (! in_array($run->status, ['calculated', 'approved'], true)) {
             throw new RuntimeException('Only a calculated or approved run can be locked.');
         }
+
+        $this->guardOneOffsUnchangedSinceCalculation($run);
 
         return DB::transaction(function () use ($run): PayrollRun {
             $run->payslips()->with('lines')->get()->each(function (Payslip $payslip): void {

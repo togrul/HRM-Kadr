@@ -12,6 +12,7 @@ use App\Modules\Payroll\Domain\Contracts\PayrollOneOffEarnings;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
 
 class PayrollOneOffEarningsTest extends TestCase
@@ -52,6 +53,29 @@ class PayrollOneOffEarningsTest extends TestCase
 
         $earnings->withdraw('order_award:7');
         $this->assertDatabaseMissing('payroll_one_off_earnings', ['source_key' => 'order_award:7']);
+    }
+
+    public function test_a_run_cannot_lock_when_a_bonus_arrived_after_its_calculation(): void
+    {
+        $personnel = $this->makePersonnel('late@example.test');
+        $regimeId = CompensationRegime::where('code', 'private')->value('id');
+        app(CompensationService::class)->assignCompensation($personnel->tabel_no, ['regime_id' => $regimeId, 'base_amount' => 3000, 'effective_from' => '2026-01-01']);
+        $runs = app(PayrollRunService::class);
+        $run = $runs->calculate($runs->createRun(app(PayrollPeriodService::class)->createPeriod(2026, 6), $regimeId));
+
+        $this->travel(1)->minutes();
+        app(PayrollOneOffEarnings::class)->record($personnel->tabel_no, 'kpi_bonus', 'KPI bonusu', 450, 2026, 6, 'performance_bonus:2');
+
+        try {
+            $runs->lock($run->fresh());
+            $this->fail('A run missing a hand-off must not lock.');
+        } catch (ValidationException $exception) {
+            $this->assertArrayHasKey('run', $exception->errors());
+        }
+        $this->assertNull(PayrollOneOffEarning::query()->value('paid_payroll_run_id'));
+
+        $runs->lock($runs->calculate($run->fresh()));
+        $this->assertSame($run->id, PayrollOneOffEarning::query()->value('paid_payroll_run_id'));
     }
 
     private function makePersonnel(string $email): Personnel

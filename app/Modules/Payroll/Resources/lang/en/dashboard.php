@@ -164,5 +164,6 @@ return [
         'reopened' => 'Reopened',
         'deleted' => 'Deleted',
         'saved' => 'Saved',
+        'recalculate_first' => 'One-off earnings changed after this run was calculated — recalculate before locking',
     ],
 ];
