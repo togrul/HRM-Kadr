@@ -7,6 +7,7 @@ return [
         'delete' => 'Delete',
         'edit' => 'Edit',
         'loading' => 'Loading',
+        'search' => 'Search',
     ],
     'destructive' => [
         'title' => 'Confirm action',
@@ -50,9 +51,15 @@ return [
     ],
     'messages' => [
         'record_deleted' => 'Your record has been deleted',
+        'generic_error' => 'An error occurred',
     ],
     'swal' => [
         'yes_delete_it' => 'Yes, Delete it!',
         'deleted' => 'Deleted',
+    ],
+    'comment' => [
+        'title' => 'Add comment',
+        'save' => 'Save',
+        'label' => 'Comment',
     ],
 ];

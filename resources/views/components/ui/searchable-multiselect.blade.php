@@ -4,9 +4,9 @@
     'options' => [],
     'selectedOptions' => [],
     'searchModel' => null,
-    'searchPlaceholder' => 'Axtar',
+    'searchPlaceholder' => null,
     'help' => null,
-    'emptyLabel' => 'Nəticə tapılmadı',
+    'emptyLabel' => null,
     'selectedSuffix' => null,
 ])
 
@@ -43,7 +43,7 @@
                 type="text"
                 wire:model.live.debounce.300ms="{{ $searchModel }}"
                 class="w-full border-none bg-transparent px-1 py-0 text-sm text-zinc-800 outline-none ring-0 placeholder:text-zinc-400 focus:ring-0"
-                placeholder="{{ $searchPlaceholder }}"
+                placeholder="{{ $searchPlaceholder ?? __('ui::common.actions.search') }}"
             >
         </div>
     @endif
@@ -95,7 +95,7 @@
             </label>
         @empty
             <div class="rounded-2xl bg-[#f5f5f7] px-4 py-6 text-sm font-semibold text-zinc-500 shadow-card">
-                {{ $emptyLabel }}
+                {{ $emptyLabel ?? __('ui::common.labels.no_results') }}
             </div>
         @endforelse
     </div>
