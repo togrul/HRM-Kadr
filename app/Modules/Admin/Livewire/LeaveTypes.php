@@ -2,23 +2,23 @@
 
 namespace App\Modules\Admin\Livewire;
 
-use Livewire\Component;
 use App\Models\LeaveType;
-use Illuminate\Support\Arr;
-use Illuminate\Pagination\LengthAwarePaginator;
-use Livewire\Attributes\On;
-use Livewire\WithPagination as LivewireWithPagination;
-use App\Modules\Admin\Support\Traits\Admin\CallSwalTrait as AdminCallSwalTrait;
 use App\Modules\Admin\Support\Traits\Admin\AdminCrudTrait as AdminAdminCrudTrait;
+use App\Modules\Admin\Support\Traits\Admin\CallSwalTrait as AdminCallSwalTrait;
+use App\Support\Database\InstalledTables;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests as AccessAuthorizesRequests;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\On;
+use Livewire\Component;
+use Livewire\WithPagination as LivewireWithPagination;
 
 #[On(['leaveTypeUpdated', 'deleted'])]
 class LeaveTypes extends Component
 {
-    use AdminAdminCrudTrait;
     use AccessAuthorizesRequests;
+    use AdminAdminCrudTrait;
     use AdminCallSwalTrait;
     use LivewireWithPagination;
 
@@ -119,7 +119,7 @@ class LeaveTypes extends Component
 
     public function mount()
     {
-        $this->supportsAttendanceCode = Schema::hasColumn('leave_types', 'attendance_code');
+        $this->supportsAttendanceCode = InstalledTables::hasColumn('leave_types', 'attendance_code');
         $this->isAdded = false;
     }
 

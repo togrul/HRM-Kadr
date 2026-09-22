@@ -48,7 +48,7 @@ class StructureDeletionService
     /**
      * Delete the structure, its descendants and all dependent rows in one transaction.
      *
-     * @return array<string,int>  rows removed per dependent table (the deletion impact)
+     * @return array<string,int> rows removed per dependent table (the deletion impact)
      */
     public function cascadeDelete(int $structureId): array
     {

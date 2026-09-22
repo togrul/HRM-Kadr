@@ -22,6 +22,9 @@ class InstalledTables
     /** @var array<string,array<string,true>> */
     private array $listings = [];
 
+    /** @var array<string,array<string,true>> */
+    private array $columns = [];
+
     public static function has(string $table, ?string $connection = null): bool
     {
         return app(self::class)->installed($table, $connection);
@@ -32,9 +35,30 @@ class InstalledTables
         return isset($this->listing($connection)[$table]);
     }
 
+    /**
+     * Same idea for `Schema::hasColumn()`: one column listing per table, per request.
+     */
+    public static function hasColumn(string $table, string $column, ?string $connection = null): bool
+    {
+        return app(self::class)->columnInstalled($table, $column, $connection);
+    }
+
+    public function columnInstalled(string $table, string $column, ?string $connection = null): bool
+    {
+        if (! $this->installed($table, $connection)) {
+            return false;
+        }
+
+        $key = DB::connection($connection)->getName().'.'.$table;
+        $this->columns[$key] ??= array_fill_keys(Schema::connection($connection)->getColumnListing($table), true);
+
+        return isset($this->columns[$key][$column]);
+    }
+
     public function flush(): void
     {
         $this->listings = [];
+        $this->columns = [];
     }
 
     /**
