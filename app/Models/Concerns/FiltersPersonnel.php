@@ -16,15 +16,6 @@ trait FiltersPersonnel
         'surname', 'name', 'patronymic', 'tabel_no', 'pin',
     ];
 
-    public function scopeWithStructureTree($query): void
-    {
-        $query->with([
-            'structure' => fn ($q) => $q
-                ->select('id', 'parent_id', 'name')
-                ->withRecursive('parent', false),
-        ]);
-    }
-
     public function scopeActive($query)
     {
         return $query->where('is_pending', false)

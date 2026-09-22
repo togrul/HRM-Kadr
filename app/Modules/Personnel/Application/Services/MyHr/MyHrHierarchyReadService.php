@@ -14,7 +14,7 @@ class MyHrHierarchyReadService
     {
         $personnel->loadMissing([
             'position:id,name',
-            'structure' => fn ($query) => $query->select('id', 'parent_id', 'name')->withRecursive('parent', false),
+            'structure:id,parent_id,name',
         ]);
 
         $manager = $this->approvalRouteResolver->manager($personnel);
@@ -55,7 +55,7 @@ class MyHrHierarchyReadService
         $people = Personnel::query()
             ->with([
                 'position:id,name',
-                'structure' => fn ($query) => $query->select('id', 'parent_id', 'name')->withRecursive('parent', false),
+                'structure:id,parent_id,name',
             ])
             ->whereKey($personnelIds)
             ->get()

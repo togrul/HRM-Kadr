@@ -243,7 +243,7 @@ class EditPersonnel extends Component
                 'laborActivities',
                 'latestDisposal',
                 'currentWork',
-                'structure' => fn ($query) => $query->withRecursive('parent', false),
+                'structure',
                 'ranks',
             ],
             loader: function (): void {

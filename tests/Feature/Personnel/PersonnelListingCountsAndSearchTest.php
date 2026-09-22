@@ -113,7 +113,6 @@ class PersonnelListingCountsAndSearchTest extends TestCase
             filters: [],
             selectedStructureIds: [],
             accessibleStructureIds: [self::STRUCTURE_ID],
-            withStructureTree: false,
             search: $search,
         )->pluck('personnels.tabel_no')->sort()->values()->all();
     }

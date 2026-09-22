@@ -6,7 +6,7 @@ use App\Models\Personnel;
 use App\Models\SelfServiceApprovalRoute;
 use App\Modules\Personnel\Contracts\ApprovalRouteResolver;
 use App\Services\HrPolicies\HrPolicyPackService;
-use Illuminate\Database\Eloquent\Builder;
+use App\Services\StructurePathService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
@@ -45,21 +45,6 @@ class ApprovalRouteResolverService implements ApprovalRouteResolver
      * @var array<string, array<int, Personnel>>
      */
     private array $approversCache = [];
-
-    /**
-     * @var array<int, array<int, int>>
-     */
-    private array $structureLineCache = [];
-
-    /**
-     * @var array<int, array{id:int,parent_id:int|null,name:string}|null>
-     */
-    private array $structureMetaCache = [];
-
-    /**
-     * @var array<int, string>
-     */
-    private array $structurePathCache = [];
 
     public function resolve(Personnel $personnel, string $requestType): array
     {
@@ -200,78 +185,49 @@ class ApprovalRouteResolverService implements ApprovalRouteResolver
     {
         $this->hydratePersonnelContext($personnel, withStructure: false);
 
+        $line = [];
+
+        foreach ($this->paths()->lineIds((int) $personnel->structure_id) as $structureId) {
+            $line[] = $structureId;
+
+            if ($structureId === $stopStructureId) {
+                break;
+            }
+        }
+
+        return $this->pickApprovers($personnel, $line, $byStructure, 1)[0] ?? null;
+    }
+
+    /**
+     * Nearest unit first; within a unit, the lowest approval_rank above the requester's, then id.
+     *
+     * @param  list<int>  $line
+     * @param  Collection<array-key, Collection<int, mixed>>  $byStructure
+     * @return array<int, Personnel>
+     */
+    private function pickApprovers(Personnel $personnel, array $line, Collection $byStructure, int $limit): array
+    {
         $currentRank = (int) ($personnel->position?->approval_rank ?? 0);
+        $resolved = [];
 
-        foreach ($this->structureLineUntilId((int) $personnel->structure_id, $stopStructureId) as $structureId) {
-            /** @var Collection<int, Personnel> $candidates */
-            $candidates = $byStructure->get($structureId, collect());
+        foreach ($line as $structureId) {
+            $candidates = $byStructure->get($structureId, collect())
+                ->filter(fn (Personnel $candidate): bool => $candidate->id !== $personnel->id
+                    // `??` also covers a position loaded without these columns.
+                    && (bool) ($candidate->position->is_approval_target ?? false)
+                    && (int) ($candidate->position->approval_rank ?? 0) > $currentRank)
+                ->sortBy(fn (Personnel $candidate): array => [(int) ($candidate->position?->approval_rank ?? 0), (int) $candidate->id]);
 
-            $approver = $candidates
-                ->filter(fn (Personnel $candidate): bool => $candidate->id !== $personnel->id)
-                ->filter(fn (Personnel $candidate): bool => (bool) ($candidate->position?->is_approval_target ?? false))
-                ->filter(fn (Personnel $candidate): bool => (int) ($candidate->position?->approval_rank ?? 0) > $currentRank)
-                ->sortBy([
-                    fn (Personnel $candidate): int => (int) ($candidate->position?->approval_rank ?? 0),
-                    fn (Personnel $candidate): int => (int) $candidate->id,
-                ])
-                ->first();
+            foreach ($candidates as $candidate) {
+                $resolved[] = $candidate;
 
-            if ($approver) {
-                return $approver;
+                if (count($resolved) >= $limit) {
+                    return $resolved;
+                }
             }
         }
 
-        return null;
-    }
-
-    /**
-     * @return array<int, int>
-     */
-    private function structureLineFromId(?int $structureId): array
-    {
-        if (! $structureId) {
-            return [];
-        }
-
-        $cacheKey = (int) $structureId;
-
-        if (array_key_exists($cacheKey, $this->structureLineCache)) {
-            return $this->structureLineCache[$cacheKey];
-        }
-
-        $line = [];
-        $cursorId = $structureId;
-
-        while ($cursorId) {
-            $meta = $this->loadStructureMeta($cursorId);
-
-            if (! $meta) {
-                break;
-            }
-
-            $line[] = (int) $meta['id'];
-            $cursorId = $meta['parent_id'];
-        }
-
-        return $this->structureLineCache[$cacheKey] = $line;
-    }
-
-    /**
-     * @return array<int, int>
-     */
-    private function structureLineUntilId(int $structureId, int $stopStructureId): array
-    {
-        $line = [];
-
-        foreach ($this->structureLineFromId($structureId) as $currentStructureId) {
-            $line[] = $currentStructureId;
-
-            if ($currentStructureId === $stopStructureId) {
-                break;
-            }
-        }
-
-        return $line;
+        return $resolved;
     }
 
     private function policy(string $requestType): array
@@ -332,42 +288,23 @@ class ApprovalRouteResolverService implements ApprovalRouteResolver
 
         $this->hydratePersonnelContext($personnel, withStructure: false);
 
-        $currentRank = (int) ($personnel->position?->approval_rank ?? 0);
-        $resolved = [];
-        $seen = [];
+        $line = $this->paths()->lineIds((int) $personnel->structure_id);
 
-        foreach ($this->structureLineFromId((int) $personnel->structure_id) as $structureId) {
-            $candidates = Personnel::query()
-                ->active()
-                ->whereKeyNot($personnel->id)
-                ->where('structure_id', $structureId)
-                ->whereHas('position', fn (Builder $query) => $query
-                    ->where('is_approval_target', true)
-                    ->where('approval_rank', '>', $currentRank))
-                ->with([
-                    'position:id,name,approval_rank,is_approval_target',
-                ])
-                ->join('positions', 'positions.id', '=', 'personnels.position_id')
-                ->orderBy('positions.approval_rank')
-                ->orderBy('personnels.id')
-                ->select('personnels.*')
-                ->get();
+        // One read for the whole line; pickApprovers walks it nearest unit first.
+        $pool = $line === [] ? collect() : Personnel::query()
+            ->active()
+            ->whereKeyNot($personnel->id)
+            ->whereIn('personnels.structure_id', $line)
+            ->join('positions', 'positions.id', '=', 'personnels.position_id')
+            ->where('positions.is_approval_target', true)
+            ->where('positions.approval_rank', '>', (int) ($personnel->position?->approval_rank ?? 0))
+            ->with([
+                'position:id,name,approval_rank,is_approval_target',
+            ])
+            ->select('personnels.*')
+            ->get();
 
-            foreach ($candidates as $candidate) {
-                if (isset($seen[$candidate->id])) {
-                    continue;
-                }
-
-                $seen[$candidate->id] = true;
-                $resolved[] = $candidate;
-
-                if (count($resolved) >= $limit) {
-                    return $this->approversCache[$cacheKey] = $resolved;
-                }
-            }
-        }
-
-        return $this->approversCache[$cacheKey] = $resolved;
+        return $this->approversCache[$cacheKey] = $this->pickApprovers($personnel, $line, $pool->groupBy('structure_id'), $limit);
     }
 
     /**
@@ -396,54 +333,9 @@ class ApprovalRouteResolverService implements ApprovalRouteResolver
         }
     }
 
-    private function loadStructureMeta(int $structureId): ?array
-    {
-        if (array_key_exists($structureId, $this->structureMetaCache)) {
-            return $this->structureMetaCache[$structureId];
-        }
-
-        $row = \App\Models\Structure::query()
-            ->select('id', 'parent_id', 'name')
-            ->find($structureId);
-
-        return $this->structureMetaCache[$structureId] = $row
-            ? [
-                'id' => (int) $row->id,
-                'parent_id' => $row->parent_id ? (int) $row->parent_id : null,
-                'name' => (string) $row->name,
-            ]
-            : null;
-    }
-
     private function structurePathLabel(Personnel $personnel): string
     {
-        $structureId = (int) ($personnel->structure_id ?? 0);
-
-        if (! $structureId) {
-            return '—';
-        }
-
-        if (array_key_exists($structureId, $this->structurePathCache)) {
-            return $this->structurePathCache[$structureId];
-        }
-
-        $segments = [];
-        $cursorId = $structureId;
-
-        while ($cursorId) {
-            $meta = $this->loadStructureMeta($cursorId);
-
-            if (! $meta) {
-                break;
-            }
-
-            $segments[] = $meta['name'];
-            $cursorId = $meta['parent_id'];
-        }
-
-        return $this->structurePathCache[$structureId] = $segments === []
-            ? '—'
-            : implode(' / ', array_reverse($segments));
+        return implode(' / ', $this->paths()->segments((int) $personnel->structure_id, includeRoot: true)) ?: '—';
     }
 
     /**
@@ -451,32 +343,11 @@ class ApprovalRouteResolverService implements ApprovalRouteResolver
      */
     private function nestedStructureIds(int $rootStructureId): array
     {
-        $pending = [$rootStructureId];
-        $resolved = [];
+        return $this->paths()->descendantIds($rootStructureId) ?: [$rootStructureId];
+    }
 
-        while ($pending !== []) {
-            $batch = array_values(array_diff($pending, $resolved));
-            $pending = [];
-
-            if ($batch === []) {
-                continue;
-            }
-
-            $resolved = array_merge($resolved, $batch);
-
-            $children = \App\Models\Structure::query()
-                ->whereIn('parent_id', $batch)
-                ->pluck('id')
-                ->map(fn ($id) => (int) $id)
-                ->all();
-
-            foreach ($children as $childId) {
-                if (! in_array($childId, $resolved, true)) {
-                    $pending[] = $childId;
-                }
-            }
-        }
-
-        return $resolved;
+    private function paths(): StructurePathService
+    {
+        return app(StructurePathService::class);
     }
 }

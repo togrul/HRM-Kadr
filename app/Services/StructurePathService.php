@@ -98,6 +98,25 @@ class StructurePathService
     }
 
     /**
+     * The unit, then each ancestor up to and including the root — nearest first.
+     *
+     * @return list<int>
+     */
+    public function lineIds(?int $structureId): array
+    {
+        $map = $this->structureMap();
+        $ids = [];
+        $cursor = (int) $structureId;
+
+        while (isset($map[$cursor]) && ! isset($ids[$cursor])) {
+            $ids[$cursor] = true;
+            $cursor = (int) $map[$cursor]['parent_id'];
+        }
+
+        return array_keys($ids);
+    }
+
+    /**
      * The unit and every unit below it, from the same flat read — walking `->subs`
      * lazily costs a query per node. With `$within`, the walk only descends through
      * those units (the user's accessible set); the unit itself is always included.

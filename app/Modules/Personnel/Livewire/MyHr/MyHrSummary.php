@@ -45,9 +45,7 @@ class MyHrSummary extends Component
             ])
             ->with([
                 'position:id,name',
-                'structure' => fn ($query) => $query
-                    ->select('id', 'parent_id', 'name')
-                    ->withRecursive('parent', false),
+                'structure:id,parent_id,name',
             ])
             ->findOrFail($this->personnelId);
     }
