@@ -323,6 +323,18 @@
                                 </x-ui.filter-native-select>
                             </div>
                         </div>
+                        <div class="sm:col-span-3">
+                            <x-label value="{{ __($t.'.fields.competency_form') }}" />
+                            <div class="mt-1">
+                                <x-ui.filter-native-select wire:model="templateForm.performance_form_template_id">
+                                    <option value="">{{ __($t.'.no_competency_form') }}</option>
+                                    @foreach ($this->formTemplateOptions as $formTemplateId => $formTemplateName)
+                                        <option value="{{ $formTemplateId }}">{{ $formTemplateName }}</option>
+                                    @endforeach
+                                </x-ui.filter-native-select>
+                            </div>
+                            <p class="mt-1 text-[11px] text-ink-faint">{{ __($t.'.competency_form_hint') }}</p>
+                        </div>
                         @error('shares') <div class="sm:col-span-3"><x-validation>{{ $message }}</x-validation></div> @enderror
 
                         {{-- positions: searchable checklist; positions owned by another template show but cannot be picked --}}

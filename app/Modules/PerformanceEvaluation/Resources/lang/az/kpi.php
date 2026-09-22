@@ -4,6 +4,13 @@ return [
     'sections' => [
         'kpis' => 'KPI kitabxanası',
         'templates' => 'Vəzifə şablonları',
+        'card_kpis' => 'KPI göstəriciləri',
+        'competencies' => 'Kompetensiyalar',
+        'checkins' => 'Check-in qeydləri',
+        'calibration' => 'Kalibrasiya',
+        'history' => 'Tarixçə',
+        'distribution' => 'Balların paylanması',
+        'cascade_gaps' => 'Hədəfə bağlanmamış KPI',
     ],
 
     'fields' => [
@@ -33,7 +40,7 @@ return [
         'threshold' => 'Threshold, %',
         'stretch' => 'Stretch, %',
         'cap' => 'Cap, %',
-        'band' => 'Threshold / Stretch / Cap',
+        'band' => 'Hədlər',
         'target_editable' => 'Rəhbər hədəfi dəyişə bilər',
         'kpi' => 'KPI',
         'actual' => 'Faktiki',
@@ -47,6 +54,10 @@ return [
         'prorata' => 'Pro-rata',
         'note' => 'Qeyd',
         'evidence' => 'Sübut faylı',
+        'competency_form' => 'Kompetensiya forması',
+        'competency_score' => 'Kompetensiya',
+        'calibrated_score' => 'Kalibrasiyalı',
+        'rating' => 'Reytinq',
     ],
 
     'columns' => [
@@ -119,20 +130,34 @@ return [
         'active' => 'Aktiv',
         'manager_review' => 'Rəhbər qiymətləndirməsi',
         'closed' => 'Bağlanıb',
+        'pending_agreement' => 'Razılaşdırmada',
+        'self_review' => 'Öz-qiymətləndirmə',
+        'calibration' => 'Kalibrasiya',
+        'approved' => 'Təsdiqlənib',
     ],
 
     'transitions' => [
-        'activate' => 'Kartı aktivləşdir',
-        'submit' => 'Qiymətləndirməyə göndər',
+        'activate' => 'Birbaşa aktivləşdir',
         'return' => 'Geri qaytar',
-        'close' => 'Təsdiqlə və bağla',
+        'close' => 'Bağla',
+        'send_for_agreement' => 'Razılaşdırmaya göndər',
+        'accept' => 'Qəbul edirəm',
+        'reject' => 'Etiraz et',
+        'start_self_review' => 'Öz-qiymətləndirməni başlat',
+        'submit_self_review' => 'Öz-qiymətləndirməni təqdim et',
+        'submit_manager_review' => 'Qiymətləndirməni təqdim et',
+        'approve' => 'Təsdiqlə',
     ],
 
     'confirm_transition' => [
-        'activate' => 'Kart aktivləşəcək və hədəflər kilidlənəcək. Davam edilsin?',
-        'submit' => 'Kart rəhbər qiymətləndirməsinə göndəriləcək; faktiki dəyər daxil etmək bağlanacaq. Davam edilsin?',
-        'return' => 'Kart yenidən aktiv vəziyyətə qaytarılacaq. Davam edilsin?',
-        'close' => 'Kart yekun hesablanıb bağlanacaq və yalnız oxunacaq. Davam edilsin?',
+        'activate' => 'Razılaşdırma mərhələsi keçiləcək və kart dərhal aktivləşəcək. Davam edilsin?',
+        'close' => 'Kart bağlanacaq və yalnız oxunacaq. Davam edilsin?',
+        'send_for_agreement' => 'Kart əməkdaşa razılaşdırma üçün göndəriləcək. 3 iş günü ərzində cavab verilməsə, avtomatik qəbul olunacaq. Davam edilsin?',
+        'accept' => 'Hədəfləri qəbul edirsiniz. Bundan sonra hədəflər kilidlənəcək. Davam edilsin?',
+        'start_self_review' => 'Dövr bitir: faktiki dəyər daxil etmək bağlanacaq və əməkdaş öz-qiymətləndirməyə başlayacaq. Davam edilsin?',
+        'submit_self_review' => 'Öz-qiymətləndirmə rəhbərə göndəriləcək. Davam edilsin?',
+        'submit_manager_review' => 'Qiymətləndirmə HR-a kalibrasiyaya göndəriləcək. Davam edilsin?',
+        'approve' => 'Nəticə təsdiqlənəcək və əməkdaşa açılacaq. Davam edilsin?',
     ],
 
     'ratings' => [
@@ -160,6 +185,9 @@ return [
         'clear' => 'Təmizlə',
         'remove' => 'Çıxar',
         'cancel' => 'Ləğv et',
+        'add_checkin' => 'Check-in əlavə et',
+        'calibrate' => 'Düzəlişi tətbiq et',
+        'confirm' => 'Təsdiqlə',
     ],
 
     'messages' => [
@@ -170,6 +198,8 @@ return [
         'cards_generated' => ':count yeni KPI kartı yaradıldı.',
         'status_changed' => 'Kartın statusu dəyişdi.',
         'actual_saved' => 'Faktiki dəyər qeydə alındı.',
+        'calibrated' => 'Kalibrasiya düzəlişi tətbiq olundu.',
+        'checkin_saved' => 'Check-in qeydə alındı.',
     ],
 
     'errors' => [
@@ -187,6 +217,14 @@ return [
         'scorecard_locked' => 'Kart kilidlidir: hədəf yalnız qaralama mərhələsində dəyişdirilə bilər.',
         'scorecard_not_active' => 'Faktiki dəyər yalnız aktiv kartda daxil edilir.',
         'evidence_required' => 'Bu KPI üçün sübut faylı məcburidir.',
+        'reason_required' => 'Səbəb yazmaq məcburidir.',
+        'competencies_incomplete' => 'Əvvəlcə bütün kompetensiyaları qiymətləndirin.',
+        'competency_form_required' => 'Kompetensiya payı varsa, kompetensiya formasını seçin.',
+        'competency_stage' => 'Bu mərhələdə bu qiyməti vermək olmaz.',
+        'competency_invalid' => 'Qiymət 1-dən 5-ə qədər olmalıdır.',
+        'calibration_stage' => 'Kalibrasiya yalnız kart «Kalibrasiya» mərhələsində olanda edilir.',
+        'calibration_too_large' => 'Düzəliş ±:max baldan çox ola bilməz.',
+        'goal_invalid' => 'Seçilmiş hədəf bu dövrə aid deyil.',
     ],
 
     'warnings' => [
@@ -219,4 +257,112 @@ return [
     'search_positions' => 'Vəzifə axtar…',
     'position_taken_by' => '«:template» şablonuna bağlıdır',
     'no_results' => 'Heç nə tapılmadı',
+
+    'evaluators' => [
+        'self' => 'Öz-qiyməti',
+        'manager' => 'Rəhbər qiyməti',
+    ],
+
+    'closure_reasons' => [
+        'terminated' => 'İşdən çıxma',
+        'position_changed' => 'Vəzifə dəyişikliyi',
+    ],
+
+    'events' => [
+        'created' => 'Kart yaradıldı',
+        'send_for_agreement' => 'Razılaşdırmaya göndərildi',
+        'accept' => 'Əməkdaş qəbul etdi',
+        'reject' => 'Əməkdaş etiraz etdi',
+        'activate' => 'Kart aktivləşdirildi',
+        'start_self_review' => 'Öz-qiymətləndirmə başladı',
+        'submit_self_review' => 'Öz-qiymətləndirmə təqdim edildi',
+        'submit_manager_review' => 'Rəhbər qiymətləndirməsi təqdim edildi',
+        'approve' => 'Nəticə təsdiqləndi',
+        'return' => 'Geri qaytarıldı',
+        'close' => 'Kart bağlandı',
+        'closed_early' => 'Kart vaxtından əvvəl bağlandı',
+    ],
+
+    'notifications' => [
+        'category' => 'KPI',
+        'agreement_requested' => [
+            'subject' => 'KPI kartınız razılaşdırmanı gözləyir',
+            'body' => ':cycle dövrü üzrə KPI kartınıza baxın və qəbul edin və ya etiraz edin. Son tarix: :due.',
+        ],
+        'accepted' => [
+            'subject' => ':employee KPI kartını qəbul etdi',
+            'body' => ':cycle dövrü üzrə kart aktivdir.',
+        ],
+        'rejected' => [
+            'subject' => ':employee KPI kartına etiraz etdi',
+            'body' => 'Səbəb: :reason',
+        ],
+        'self_review_started' => [
+            'subject' => 'Öz-qiymətləndirmə vaxtıdır',
+            'body' => ':cycle dövrü bitdi. Kompetensiyalarınızı qiymətləndirin. Son tarix: :due.',
+        ],
+        'self_review_submitted' => [
+            'subject' => ':employee öz-qiymətləndirməni təqdim etdi',
+            'body' => 'Rəhbər qiymətləndirməsini tamamlayın. Son tarix: :due.',
+        ],
+        'calibration_ready' => [
+            'subject' => ':employee kartı kalibrasiyaya hazırdır',
+            'body' => ':cycle dövrü üzrə rəhbər qiymətləndirməsi tamamlandı.',
+        ],
+        'approved' => [
+            'subject' => 'KPI nəticəniz təsdiqləndi',
+            'body' => ':cycle dövrü üzrə nəticənizə KPI kartınızda baxa bilərsiniz.',
+        ],
+        'returned' => [
+            'subject' => ':employee kartı geri qaytarıldı',
+            'body' => 'Səbəb: :reason',
+        ],
+        'reminder' => [
+            'subject' => 'KPI kartı üzrə son tarix yaxınlaşır',
+            'body' => ':employee — «:status» mərhələsinin son tarixi: :due.',
+        ],
+        'escalation' => [
+            'subject' => 'KPI kartı üzrə son tarix keçib',
+            'body' => ':employee — «:status» mərhələsi :due tarixində bitməli idi.',
+        ],
+    ],
+
+    'auto_accept_reason' => 'Son tarix keçdi — avtomatik qəbul edildi',
+    'calibration_entry' => 'Kalibrasiya: :delta bal',
+    'cascade_gaps_hint' => 'KPI bəndi heç bir strateji hədəfə bağlanmayıb. Kartlar qaralama mərhələsində olanda hədəf seçmək olar.',
+    'checkin_progress_placeholder' => 'Görülən iş və cari vəziyyət',
+    'checkin_risks_placeholder' => 'Risklər (istəyə görə)',
+    'competency_form_hint' => 'Kompetensiya bloku üçün «Şablonlar» bölməsindəki qiymətləndirmə formalarından biri seçilir. Kompetensiya payı 0-dırsa, boş qoyun.',
+    'competency_hint' => 'Hər kompetensiya 1–5 ilə qiymətləndirilir: 1 — çox zəif, 3 — gözləntiyə uyğun, 5 — çox yüksək. Yekun bala yalnız rəhbər qiyməti düşür; öz-qiymət müqayisə üçündür.',
+    'distribution_hint' => 'Qara sütun — faktiki pay, narıncı xətt — hədəf paylanma.',
+    'hidden_until_self_review' => 'Öz-qiymətləndirmə mərhələsində açılır',
+    'no_checkins' => 'Hələ check-in yoxdur.',
+    'no_competency_form' => 'Kompetensiya bloku yoxdur',
+    'no_goal' => 'Hədəfə bağlanmayıb',
+    'reason_placeholder' => 'Səbəbi yazın…',
+    'risks' => 'Risklər',
+    'stage_due' => 'Son tarix',
+    'system' => 'Sistem',
+
+    'roles' => [
+        'employee' => 'əməkdaş',
+        'manager' => 'rəhbər',
+        'hr' => 'HR',
+    ],
+
+    'next_step' => [
+        'draft' => 'Rəhbər hədəfləri yoxlayır, lazım olsa dəyişir və kartı əməkdaşa razılaşdırmaya göndərir.',
+        'pending_agreement' => 'Əməkdaş hədəflərlə tanış olur: qəbul edir və ya səbəb yazaraq etiraz edir. Cavab verilməsə, son tarixdə kart avtomatik qəbul olunur.',
+        'active' => 'Dövr gedir: faktiki dəyərləri yazın və ayda bir check-in edin. Dövr bitəndə rəhbər öz-qiymətləndirməni başladır.',
+        'self_review' => 'Əməkdaş kompetensiyalarını 1–5 ilə qiymətləndirir və öz-qiymətləndirməni təqdim edir.',
+        'manager_review' => 'Rəhbər hər kompetensiyanı qiymətləndirir və qiymətləndirməni HR-a təqdim edir.',
+        'calibration' => 'HR balları bölmələr üzrə uyğunlaşdırır (lazım olsa ±15 bal) və nəticəni təsdiqləyir.',
+        'approved' => 'Nəticə əməkdaşa açılıb. HR kartı bağlayır — bundan sonra heç nə dəyişmir.',
+        'closed' => 'Kart bağlanıb. Nəticə dondurulub, yalnız baxmaq mümkündür.',
+    ],
+
+    'next_step_title' => 'Növbəti addım',
+    'your_turn' => 'Sizin növbənizdir',
+    'waiting_for' => 'Gözlənilir: :who',
+    'band_title' => 'Threshold (minimum) · Stretch (maksimum) · Cap (yuxarı sərhəd), nəticə faizi ilə',
 ];

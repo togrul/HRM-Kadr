@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -22,6 +23,7 @@ class PerformanceKpiTemplate extends Model
         'period_type',
         'kpi_weight_share',
         'competency_weight_share',
+        'performance_form_template_id',
         'status',
         'created_by',
     ];
@@ -34,6 +36,11 @@ class PerformanceKpiTemplate extends Model
     public function items(): HasMany
     {
         return $this->hasMany(PerformanceKpiTemplateItem::class)->orderBy('sort_order')->orderBy('id');
+    }
+
+    public function formTemplate(): BelongsTo
+    {
+        return $this->belongsTo(PerformanceFormTemplate::class, 'performance_form_template_id');
     }
 
     public function positions(): BelongsToMany

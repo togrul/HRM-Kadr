@@ -88,6 +88,8 @@ class KpiTemplateService
 
         if (abs((float) $data['kpi_weight_share'] + (float) $data['competency_weight_share'] - 100) > 0.001) {
             $errors['shares'] = __('performance_evaluation::kpi.errors.shares_sum_invalid');
+        } elseif ((float) $data['competency_weight_share'] > 0 && empty($data['performance_form_template_id'])) {
+            $errors['shares'] = __('performance_evaluation::kpi.errors.competency_form_required');
         }
 
         if ($items === []) {

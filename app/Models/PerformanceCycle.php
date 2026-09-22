@@ -53,6 +53,11 @@ class PerformanceCycle extends Model
         return $this->hasMany(PerformanceForm::class);
     }
 
+    public function scorecards(): HasMany
+    {
+        return $this->hasMany(PerformanceScorecard::class);
+    }
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()

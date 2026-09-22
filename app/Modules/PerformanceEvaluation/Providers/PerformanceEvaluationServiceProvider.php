@@ -2,6 +2,7 @@
 
 namespace App\Modules\PerformanceEvaluation\Providers;
 
+use App\Modules\PerformanceEvaluation\Console\Commands\KpiDailyCommand;
 use App\Modules\PerformanceEvaluation\Console\Commands\PerformanceEvaluationQueryBudgetCommand;
 use App\Modules\PerformanceEvaluation\Console\Commands\PerformanceEvaluationRenderBenchmarkCommand;
 use App\Providers\Concerns\RegistersLivewireAliases;
@@ -26,6 +27,7 @@ class PerformanceEvaluationServiceProvider extends ServiceProvider
             $this->commands([
                 PerformanceEvaluationQueryBudgetCommand::class,
                 PerformanceEvaluationRenderBenchmarkCommand::class,
+                KpiDailyCommand::class,
             ]);
         }
     }

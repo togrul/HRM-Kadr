@@ -3,12 +3,14 @@
 namespace App\Modules\PerformanceEvaluation\Application\Services\Kpi;
 
 use App\Models\PerformanceCycle;
+use App\Models\PerformanceForm;
 use App\Models\PerformanceKpiActual;
 use App\Models\PerformanceKpiTemplate;
 use App\Models\PerformanceScorecard;
 use App\Models\PerformanceScorecardItem;
 use App\Models\Personnel;
 use App\Models\User;
+use App\Models\UserPersonnelLink;
 use App\Modules\Personnel\Contracts\ApprovalRouteResolver;
 use App\Services\UserPersonnelLinkResolver;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -20,13 +22,14 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 /**
- * Individual KPI scorecards (spec §5, phase-1 workflow): built per cycle from each
- * person's position template, moved through draft → active → manager_review → closed,
- * fed with manual actuals and re-scored on every approved actual. Closing freezes the
- * card into a snapshot.
+ * Individual KPI scorecards (spec §5): built per cycle from each person's position
+ * template, moved through the workflow in PerformanceScorecard::TRANSITIONS, fed with
+ * manual actuals and re-scored on every approved actual, competency rating or
+ * calibration. Closing freezes the card into a snapshot.
  *
  * Roles on a card: `hr` (manage permission), `manager` (the person the card names as
- * manager, resolved from the org hierarchy) and `employee` (the card's owner).
+ * manager, resolved from the org hierarchy) and `employee` (the card's owner). A null
+ * user means the system (scheduler) acts.
  */
 class ScorecardService
 {
@@ -42,27 +45,10 @@ class ScorecardService
      */
     public function generateForCycle(PerformanceCycle $cycle): int
     {
-        $templateIdsByPosition = DB::table('performance_kpi_template_positions')
-            ->join('performance_kpi_templates', 'performance_kpi_templates.id', '=', 'performance_kpi_template_positions.performance_kpi_template_id')
-            ->where('performance_kpi_templates.status', 'active')
-            ->whereNull('performance_kpi_templates.deleted_at')
-            ->pluck('performance_kpi_template_positions.performance_kpi_template_id', 'performance_kpi_template_positions.position_id');
-
+        $templateIdsByPosition = $this->templateIdsByPosition();
         if ($templateIdsByPosition->isEmpty()) {
             return 0;
         }
-
-        $templates = PerformanceKpiTemplate::query()
-            ->whereIn('id', $templateIdsByPosition->unique()->values())
-            ->with('items')
-            ->get()
-            ->keyBy('id');
-
-        $versionIdsByKpi = DB::table('performance_kpi_versions')
-            ->join('performance_kpis', fn ($join) => $join
-                ->on('performance_kpis.id', '=', 'performance_kpi_versions.performance_kpi_id')
-                ->on('performance_kpis.current_version', '=', 'performance_kpi_versions.version'))
-            ->pluck('performance_kpi_versions.id', 'performance_kpi_versions.performance_kpi_id');
 
         // ponytail: synchronous, one manager lookup per person; move to a queued job when cycles reach thousands of people.
         return Personnel::query()
@@ -70,8 +56,64 @@ class ScorecardService
             ->whereIn('position_id', $templateIdsByPosition->keys())
             ->whereNotIn('id', PerformanceScorecard::query()->where('performance_cycle_id', $cycle->id)->select('personnel_id'))
             ->get()
-            ->each(fn (Personnel $personnel) => $this->openCard($cycle, $personnel, $templates->get($templateIdsByPosition->get($personnel->position_id)), $versionIdsByKpi))
+            ->each(fn (Personnel $personnel) => $this->openCardFor($cycle, $personnel))
             ->count();
+    }
+
+    /**
+     * Opens one card for the person's current position, starting on `$validFrom` (or the
+     * later of cycle start and hire date). Null when the position has no active template.
+     */
+    public function openCardFor(PerformanceCycle $cycle, Personnel $personnel, ?Carbon $validFrom = null): ?PerformanceScorecard
+    {
+        $templateId = $this->templateIdsByPosition()->get($personnel->position_id);
+        $template = $templateId ? PerformanceKpiTemplate::query()->with('items')->find($templateId) : null;
+        if ($template === null) {
+            return null;
+        }
+
+        $cycleStart = Carbon::parse($cycle->period_start)->startOfDay();
+        $cycleEnd = Carbon::parse($cycle->period_end)->startOfDay();
+        $joined = $personnel->getRawOriginal('join_work_date');
+        $validFrom ??= $joined !== null ? max($cycleStart, Carbon::parse($joined)->startOfDay()) : $cycleStart;
+
+        $versionIdsByKpi = DB::table('performance_kpi_versions')
+            ->join('performance_kpis', fn ($join) => $join
+                ->on('performance_kpis.id', '=', 'performance_kpi_versions.performance_kpi_id')
+                ->on('performance_kpis.current_version', '=', 'performance_kpi_versions.version'))
+            ->whereIn('performance_kpis.id', $template->items->pluck('performance_kpi_id'))
+            ->pluck('performance_kpi_versions.id', 'performance_kpi_versions.performance_kpi_id');
+
+        $managerPersonnelId = $this->routes->manager($personnel)['id'] ?? null;
+
+        return DB::transaction(function () use ($cycle, $personnel, $template, $validFrom, $cycleStart, $cycleEnd, $versionIdsByKpi, $managerPersonnelId): PerformanceScorecard {
+            $card = PerformanceScorecard::query()->create([
+                'performance_cycle_id' => $cycle->id,
+                'personnel_id' => $personnel->id,
+                'position_id' => $personnel->position_id,
+                'performance_kpi_template_id' => $template->id,
+                'performance_form_id' => $this->competencyFormFor($cycle, $personnel, $template, $managerPersonnelId)?->id,
+                'manager_personnel_id' => $managerPersonnelId,
+                'status' => 'draft',
+                'valid_from' => $validFrom,
+                'valid_to' => $cycleEnd,
+                'prorata_factor' => $this->prorata($validFrom, $cycleEnd, $cycleStart, $cycleEnd),
+                'kpi_weight_share' => $template->kpi_weight_share,
+                'competency_weight_share' => $template->competency_weight_share,
+                'created_by' => auth()->id(),
+            ]);
+
+            foreach ($template->items as $item) {
+                $card->items()->create([
+                    ...$item->only(['performance_kpi_id', 'weight', 'target', 'range_min', 'range_max', 'threshold', 'stretch', 'cap', 'target_editable', 'sort_order']),
+                    'performance_kpi_version_id' => $versionIdsByKpi->get($item->performance_kpi_id),
+                ]);
+            }
+
+            $card->events()->create(['action' => 'created', 'to_status' => 'draft', 'user_id' => auth()->id()]);
+
+            return $card;
+        });
     }
 
     public function roleFor(User $user, PerformanceScorecard $card): ?string
@@ -88,6 +130,21 @@ class ScorecardService
             $personnelId === (int) $card->personnel_id => 'employee',
             default => null,
         };
+    }
+
+    /**
+     * Actions the user may take on the card right now.
+     *
+     * @return array<int, string>
+     */
+    public function availableActions(PerformanceScorecard $card, User $user): array
+    {
+        $role = $this->roleFor($user, $card);
+
+        return collect(PerformanceScorecard::TRANSITIONS)
+            ->filter(fn (array $rule): bool => in_array($card->status, $rule['from'], true) && in_array($role, $rule['roles'], true))
+            ->keys()
+            ->all();
     }
 
     /**
@@ -112,37 +169,78 @@ class ScorecardService
     }
 
     /**
+     * Moves the card along the workflow, records the step and tells whoever acts next.
+     *
      * @throws AuthorizationException|ValidationException
      */
-    public function transition(PerformanceScorecard $card, string $action, User $user): void
+    public function transition(PerformanceScorecard $card, string $action, ?User $user, ?string $reason = null): void
     {
         $rule = PerformanceScorecard::TRANSITIONS[$action] ?? null;
-        $allowedRoles = in_array($action, ['return', 'close'], true) ? ['hr'] : ['hr', 'manager'];
 
-        $this->authorizeRole($user, $card, $allowedRoles);
+        if ($user !== null) {
+            $this->authorizeRole($user, $card, $rule['roles'] ?? []);
+        }
 
-        if ($rule === null || $card->status !== $rule['from']) {
+        if ($rule === null || ! in_array($card->status, $rule['from'], true)) {
             throw ValidationException::withMessages(['scorecard' => __('performance_evaluation::kpi.errors.invalid_transition')]);
         }
 
-        DB::transaction(function () use ($card, $rule, $action): void {
+        $reason = trim((string) $reason) ?: null;
+        if (($rule['reason'] ?? false) && $reason === null) {
+            throw ValidationException::withMessages(['reason' => __('performance_evaluation::kpi.errors.reason_required')]);
+        }
+
+        if ($action === 'submit_manager_review') {
+            $this->ensureCompetenciesRated($card);
+        }
+
+        DB::transaction(function () use ($card, $rule, $action, $user, $reason): void {
             if ($action === 'close') {
-                $this->recalculate($card);
-                $card->refresh()->load('items');
-                $card->snapshot = [
-                    'closed_at' => now()->toIso8601String(),
-                    'kpi_weight_share' => (float) $card->kpi_weight_share,
-                    'competency_weight_share' => (float) $card->competency_weight_share,
-                    'items' => $card->items->map(fn (PerformanceScorecardItem $item): array => $item->only([
-                        'performance_kpi_id', 'performance_kpi_version_id', 'weight', 'target', 'range_min', 'range_max',
-                        'threshold', 'stretch', 'cap', 'actual', 'achievement', 'score',
-                    ]))->all(),
-                ];
-                $card->locked_at = now();
+                $this->freeze($card);
             }
 
-            $card->status = $rule['to'];
-            $card->save();
+            $from = $card->status;
+            $card->fill([
+                'status' => $rule['to'],
+                'stage_due_at' => $this->stageDueDate($rule['to']),
+                'reminded_at' => null,
+                'escalated_at' => null,
+            ])->save();
+
+            $card->events()->create([
+                'action' => $action,
+                'from_status' => $from,
+                'to_status' => $rule['to'],
+                'reason' => $reason,
+                'user_id' => $user?->id,
+            ]);
+        });
+
+        app(ScorecardNotifier::class)->transitioned($card, $action, $reason);
+    }
+
+    /**
+     * Ends a card early (position change, termination): scores it, freezes it and trims
+     * its validity and pro-rata to the last day it covered.
+     */
+    public function closeEarly(PerformanceScorecard $card, string $reason, Carbon $lastDay): void
+    {
+        $cycle = $card->cycle;
+        $validTo = max(Carbon::parse($card->valid_from)->startOfDay(), $lastDay->copy()->startOfDay());
+
+        DB::transaction(function () use ($card, $reason, $cycle, $validTo): void {
+            $card->valid_to = $validTo;
+            $card->prorata_factor = $this->prorata(
+                Carbon::parse($card->valid_from),
+                $validTo,
+                Carbon::parse($cycle->period_start),
+                Carbon::parse($cycle->period_end),
+            );
+            $this->freeze($card);
+
+            $from = $card->status;
+            $card->fill(['status' => 'closed', 'closure_reason' => $reason, 'stage_due_at' => null])->save();
+            $card->events()->create(['action' => 'closed_early', 'from_status' => $from, 'to_status' => 'closed', 'reason' => $reason]);
         });
     }
 
@@ -221,12 +319,12 @@ class ScorecardService
 
     /**
      * Re-scores every item from its approved actuals (aggregated per the KPI version the
-     * item was built from), then the card's KPI, final score and rating.
+     * item was built from), then the card's KPI, competency, final and calibrated score.
      */
     public function recalculate(PerformanceScorecard $card): void
     {
-        // ponytail: inline on each actual; queue it if a card ever takes long enough to notice.
-        $card->load(['items.kpi', 'items.kpiVersion', 'items.actuals']);
+        // ponytail: inline on each change; queue it if a card ever takes long enough to notice.
+        $card->load(['items.kpi', 'items.kpiVersion', 'items.actuals', 'form:id,final_score', 'calibrations']);
 
         $scored = $card->items->map(function (PerformanceScorecardItem $item): array {
             $definition = $item->kpiVersion?->snapshot ?? $item->kpi->only(['type', 'direction', 'aggregation', 'qualitative_scale']);
@@ -254,56 +352,169 @@ class ScorecardService
         });
 
         $kpiScore = $this->engine->kpiScore($scored);
-        $finalScore = $this->engine->finalScore(
-            $kpiScore,
-            $card->competency_score === null ? null : (float) $card->competency_score,
-            (float) $card->kpi_weight_share,
-            (float) $card->competency_weight_share,
-        );
+        $competencyScore = $card->form?->final_score === null ? null : (float) $card->form->final_score;
+        $finalScore = $this->engine->finalScore($kpiScore, $competencyScore, (float) $card->kpi_weight_share, (float) $card->competency_weight_share);
+        $delta = $card->calibrations->first()?->delta;
+        $calibrated = $finalScore !== null && $delta !== null ? round(max(0.0, $finalScore + (float) $delta), 4) : null;
 
         $card->update([
             'kpi_score' => $kpiScore,
+            'competency_score' => $competencyScore,
             'final_score' => $finalScore,
-            'rating_category' => $this->engine->ratingCategory($finalScore),
+            'calibrated_score' => $calibrated,
+            'rating_category' => $this->engine->ratingCategory($calibrated ?? $finalScore),
         ]);
     }
 
     /**
-     * @param  Collection<int, int>  $versionIdsByKpi
+     * The person's result for a cycle when position changes split it over several cards:
+     * each card's score weighted by the days it covered (spec §5.1).
      */
-    private function openCard(PerformanceCycle $cycle, Personnel $personnel, PerformanceKpiTemplate $template, Collection $versionIdsByKpi): PerformanceScorecard
+    public function personCycleScore(int $personnelId, int $cycleId): ?float
     {
-        $cycleStart = Carbon::parse($cycle->period_start)->startOfDay();
-        $cycleEnd = Carbon::parse($cycle->period_end)->startOfDay();
-        $joined = $personnel->getRawOriginal('join_work_date');
-        $validFrom = $joined !== null ? max($cycleStart, Carbon::parse($joined)->startOfDay()) : $cycleStart;
+        $cards = PerformanceScorecard::query()
+            ->where('personnel_id', $personnelId)
+            ->where('performance_cycle_id', $cycleId)
+            ->get()
+            ->filter(fn (PerformanceScorecard $card): bool => $card->effectiveScore() !== null);
+
+        $days = fn (PerformanceScorecard $card): int => (int) $card->valid_from->diffInDays($card->valid_to) + 1;
+        $totalDays = $cards->sum($days);
+
+        if ($totalDays === 0) {
+            return null;
+        }
+
+        return round($cards->sum(fn (PerformanceScorecard $card): float => $card->effectiveScore() * $days($card)) / $totalDays, 4);
+    }
+
+    /**
+     * The users behind a person: the explicit user link, else a user with the same e-mail.
+     *
+     * @return array<int, int>
+     */
+    public function userIdsForPersonnel(?int $personnelId): array
+    {
+        if ($personnelId === null) {
+            return [];
+        }
+
+        $linked = UserPersonnelLink::query()->where('personnel_id', $personnelId)->pluck('user_id');
+        if ($linked->isNotEmpty()) {
+            return $linked->map(fn ($id): int => (int) $id)->all();
+        }
+
+        $email = Personnel::query()->whereKey($personnelId)->value('email');
+
+        return $email
+            ? User::query()->whereRaw('LOWER(TRIM(email)) = ?', [mb_strtolower(trim($email))])->pluck('id')->map(fn ($id): int => (int) $id)->all()
+            : [];
+    }
+
+    /**
+     * @param  array<int, string>  $roles
+     *
+     * @throws AuthorizationException
+     */
+    public function authorizeRole(User $user, PerformanceScorecard $card, array $roles): string
+    {
+        $role = $this->roleFor($user, $card);
+
+        if ($role === null || ! in_array($role, $roles, true)) {
+            throw new AuthorizationException;
+        }
+
+        return $role;
+    }
+
+    /**
+     * The competency block: the template's evaluation form, opened (or reused) for this
+     * person and cycle with the card's manager as evaluator.
+     */
+    private function competencyFormFor(PerformanceCycle $cycle, Personnel $personnel, PerformanceKpiTemplate $template, ?int $managerPersonnelId): ?PerformanceForm
+    {
+        if (! $template->performance_form_template_id || (float) $template->competency_weight_share <= 0) {
+            return null;
+        }
+
+        $form = PerformanceForm::query()->firstOrCreate(
+            [
+                'performance_cycle_id' => $cycle->id,
+                'performance_form_template_id' => $template->performance_form_template_id,
+                'personnel_id' => $personnel->id,
+            ],
+            ['manager_id' => $this->userIdsForPersonnel($managerPersonnelId)[0] ?? null],
+        );
+
+        return $form;
+    }
+
+    /**
+     * @throws ValidationException when the manager has not rated every competency yet
+     */
+    private function ensureCompetenciesRated(PerformanceScorecard $card): void
+    {
+        if (! $card->performance_form_id || (float) $card->competency_weight_share <= 0) {
+            return;
+        }
+
+        $form = $card->form()->with('template.sections.items:id,performance_form_template_section_id')->first();
+        $itemIds = $form?->template?->sections->flatMap->items->pluck('id') ?? collect();
+        $rated = $form?->scores()->where('evaluator_type', 'manager')->pluck('performance_form_template_item_id') ?? collect();
+
+        if ($itemIds->diff($rated)->isNotEmpty()) {
+            throw ValidationException::withMessages(['scorecard' => __('performance_evaluation::kpi.errors.competencies_incomplete')]);
+        }
+    }
+
+    private function freeze(PerformanceScorecard $card): void
+    {
+        $this->recalculate($card);
+        $card->refresh()->load('items');
+        $card->snapshot = [
+            'closed_at' => now()->toIso8601String(),
+            'kpi_weight_share' => (float) $card->kpi_weight_share,
+            'competency_weight_share' => (float) $card->competency_weight_share,
+            'kpi_score' => $card->kpi_score,
+            'competency_score' => $card->competency_score,
+            'final_score' => $card->final_score,
+            'calibrated_score' => $card->calibrated_score,
+            'rating_category' => $card->rating_category,
+            'items' => $card->items->map(fn (PerformanceScorecardItem $item): array => $item->only([
+                'performance_kpi_id', 'performance_kpi_version_id', 'performance_goal_id', 'weight', 'target', 'range_min', 'range_max',
+                'threshold', 'stretch', 'cap', 'actual', 'achievement', 'score',
+            ]))->all(),
+        ];
+        $card->locked_at = now();
+    }
+
+    /**
+     * ponytail: weekends only; public holidays are not skipped yet.
+     */
+    private function stageDueDate(string $status): ?Carbon
+    {
+        $days = PerformanceScorecard::STAGE_WORKING_DAYS[$status] ?? null;
+
+        return $days === null ? null : today()->addWeekdays($days);
+    }
+
+    private function prorata(Carbon $from, Carbon $to, Carbon $cycleStart, Carbon $cycleEnd): float
+    {
         $cycleDays = $cycleStart->diffInDays($cycleEnd) + 1;
 
-        return DB::transaction(function () use ($cycle, $personnel, $template, $versionIdsByKpi, $validFrom, $cycleEnd, $cycleDays): PerformanceScorecard {
-            $card = PerformanceScorecard::query()->create([
-                'performance_cycle_id' => $cycle->id,
-                'personnel_id' => $personnel->id,
-                'position_id' => $personnel->position_id,
-                'performance_kpi_template_id' => $template->id,
-                'manager_personnel_id' => $this->routes->manager($personnel)['id'] ?? null,
-                'status' => 'draft',
-                'valid_from' => $validFrom,
-                'valid_to' => $cycleEnd,
-                'prorata_factor' => round(($validFrom->diffInDays($cycleEnd) + 1) / $cycleDays, 4),
-                'kpi_weight_share' => $template->kpi_weight_share,
-                'competency_weight_share' => $template->competency_weight_share,
-                'created_by' => auth()->id(),
-            ]);
+        return round(min(1.0, ($from->diffInDays($to) + 1) / max(1, $cycleDays)), 4);
+    }
 
-            foreach ($template->items as $item) {
-                $card->items()->create([
-                    ...$item->only(['performance_kpi_id', 'weight', 'target', 'range_min', 'range_max', 'threshold', 'stretch', 'cap', 'target_editable', 'sort_order']),
-                    'performance_kpi_version_id' => $versionIdsByKpi->get($item->performance_kpi_id),
-                ]);
-            }
-
-            return $card;
-        });
+    /**
+     * @return Collection<int, int> position id → active template id
+     */
+    private function templateIdsByPosition(): Collection
+    {
+        return DB::table('performance_kpi_template_positions')
+            ->join('performance_kpi_templates', 'performance_kpi_templates.id', '=', 'performance_kpi_template_positions.performance_kpi_template_id')
+            ->where('performance_kpi_templates.status', 'active')
+            ->whereNull('performance_kpi_templates.deleted_at')
+            ->pluck('performance_kpi_template_positions.performance_kpi_template_id', 'performance_kpi_template_positions.position_id');
     }
 
     /**
@@ -324,21 +535,5 @@ class ScorecardService
             'max' => $values->max(),
             default => $values->first(),
         }, 4);
-    }
-
-    /**
-     * @param  array<int, string>  $roles
-     *
-     * @throws AuthorizationException
-     */
-    private function authorizeRole(User $user, PerformanceScorecard $card, array $roles): string
-    {
-        $role = $this->roleFor($user, $card);
-
-        if ($role === null || ! in_array($role, $roles, true)) {
-            throw new AuthorizationException;
-        }
-
-        return $role;
     }
 }

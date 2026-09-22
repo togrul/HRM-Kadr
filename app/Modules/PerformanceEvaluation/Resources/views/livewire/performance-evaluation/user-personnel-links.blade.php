@@ -1,4 +1,5 @@
 @php
+    $d = 'performance_evaluation::dashboard';
     $resolutionSourceLabel = static function (?string $source): string {
         return match ($source) {
             'manual' => __('performance_evaluation::dashboard.resolution_sources.manual'),
@@ -8,113 +9,126 @@
             default => __('performance_evaluation::dashboard.resolution_sources.unknown'),
         };
     };
+    $section = 'overflow-hidden rounded-2xl border border-hairline bg-white shadow-card';
+    $sectionHead = 'flex items-center justify-between gap-3 border-b border-hairline-subtle bg-[#fafafa] px-5 py-2.5';
+    $iconButton = 'flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-[#f4f4f5] hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300';
+    $stats = [
+        ['total_links', $this->linkStats['total'], 'bg-sky-500'],
+        ['manual_links', $this->linkStats['manual'], 'bg-emerald-500'],
+        ['links_resolved_today', $this->linkStats['resolved_today'], 'bg-amber-500'],
+    ];
 @endphp
 
-<div class="flex flex-col space-y-4 px-6 py-4">
-    <div class="flex items-center justify-between gap-3">
+<div class="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-4 sm:px-6">
+    <div class="flex flex-wrap items-center justify-between gap-3">
         <x-pill-button :href="$this->backUrl">
             <span aria-hidden="true">←</span>
-            <span>{{ __('performance_evaluation::dashboard.actions.back_to_performance_dashboard') }}</span>
+            <span>{{ __($d.'.actions.back_to_performance_dashboard') }}</span>
         </x-pill-button>
+        <p class="text-[15px] font-semibold tracking-[-0.01em] text-ink">{{ __($d.'.cards.user_personnel_links') }}</p>
     </div>
 
-    <x-surface-card :title="__('performance_evaluation::dashboard.cards.user_personnel_links')" icon="icons.profile-icon">
-        <div class="space-y-5">
-            <div class="grid gap-3 md:grid-cols-3">
-                <div class="rounded-xl border border-hairline bg-white px-4 py-3">
-                        <div class="flex items-center justify-between gap-2">
-                            <p class="hrm-eyebrow">{{ __('performance_evaluation::dashboard.labels.total_links') }}</p>
-                            <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-[#0ea5e9]"></span>
-                        </div>
-                        <p class="hrm-num mt-1.5 text-[21px] font-semibold tracking-[-0.03em] text-ink">{{ $this->linkStats['total'] }}</p>
-                    </div>
-                <div class="rounded-xl border border-hairline bg-white px-4 py-3">
-                        <div class="flex items-center justify-between gap-2">
-                            <p class="hrm-eyebrow">{{ __('performance_evaluation::dashboard.labels.manual_links') }}</p>
-                            <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-[#10b981]"></span>
-                        </div>
-                        <p class="hrm-num mt-1.5 text-[21px] font-semibold tracking-[-0.03em] text-ink">{{ $this->linkStats['manual'] }}</p>
-                    </div>
-                <div class="rounded-xl border border-hairline bg-white px-4 py-3">
-                        <div class="flex items-center justify-between gap-2">
-                            <p class="hrm-eyebrow">{{ __('performance_evaluation::dashboard.labels.links_resolved_today') }}</p>
-                            <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-[#f59e0b]"></span>
-                        </div>
-                        <p class="hrm-num mt-1.5 text-[21px] font-semibold tracking-[-0.03em] text-ink">{{ $this->linkStats['resolved_today'] }}</p>
-                    </div>
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        @foreach ($stats as [$label, $value, $dot])
+            <div class="rounded-2xl border border-hairline bg-white px-4 py-3 shadow-card">
+                <div class="flex items-center gap-2">
+                    <span class="h-1.5 w-1.5 shrink-0 rounded-full {{ $dot }}"></span>
+                    <p class="hrm-eyebrow truncate">{{ __($d.'.labels.'.$label) }}</p>
+                </div>
+                <p class="hrm-num mt-1.5 text-[22px] font-semibold leading-none tracking-[-0.03em] text-ink">{{ $value }}</p>
             </div>
+        @endforeach
+    </div>
 
-            <div class="grid gap-4 xl:grid-cols-[380px_minmax(0,1fr)]">
-                <x-surface-card :title="__('performance_evaluation::dashboard.cards.user_personnel_link_editor')" icon="icons.edit-icon" bodyClass="overflow-visible" contentClass="overflow-visible p-4">
-                    <div class="space-y-4">
-                        <div class="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-xs leading-6 text-zinc-600">
-                            {{ __('performance_evaluation::dashboard.hints.user_personnel_links') }}
-                        </div>
+    <div class="grid grid-cols-1 gap-4 xl:grid-cols-[360px_minmax(0,1fr)]">
+        {{-- editor --}}
+        <div class="self-start overflow-visible rounded-2xl border border-hairline bg-white shadow-card">
+            <div class="{{ $sectionHead }} rounded-t-2xl"><p class="text-[13px] font-semibold text-ink">{{ __($d.'.cards.user_personnel_link_editor') }}</p></div>
+            <div class="flex flex-col gap-4 p-5">
+                <p class="rounded-xl bg-[#fafafa] px-3.5 py-2.5 text-[12px] leading-5 text-ink-muted">{{ __($d.'.hints.user_personnel_links') }}</p>
 
-                        <x-ui.select-dropdown
-                            :label="__('performance_evaluation::dashboard.fields.user')"
-                            placeholder="---"
-                            mode="gray"
-                            class="w-full"
-                            instance="perf-user-personnel-link-user"
-                            wire:model.live="linkForm.user_id"
-                            :model="$this->userOptions()"
-                            search-model="searchLinkedUser"
-                        ></x-ui.select-dropdown>
-                        @error('linkForm.user_id') <x-validation>{{ $message }}</x-validation> @enderror
+                <div>
+                    <x-ui.select-dropdown
+                        :label="__($d.'.fields.user')"
+                        placeholder="---"
+                        mode="gray"
+                        class="w-full"
+                        instance="perf-user-personnel-link-user"
+                        wire:model.live="linkForm.user_id"
+                        :model="$this->userOptions()"
+                        search-model="searchLinkedUser"
+                    ></x-ui.select-dropdown>
+                    @error('linkForm.user_id') <x-validation>{{ $message }}</x-validation> @enderror
+                </div>
 
-                        <x-ui.select-dropdown
-                            :label="__('performance_evaluation::dashboard.fields.personnel')"
-                            placeholder="---"
-                            mode="gray"
-                            class="w-full"
-                            instance="perf-user-personnel-link-personnel"
-                            wire:model.live="linkForm.personnel_id"
-                            :model="$this->personnelOptions()"
-                            search-model="searchLinkedPersonnel"
-                        ></x-ui.select-dropdown>
-                        @error('linkForm.personnel_id') <x-validation>{{ $message }}</x-validation> @enderror
+                <div>
+                    <x-ui.select-dropdown
+                        :label="__($d.'.fields.personnel')"
+                        placeholder="---"
+                        mode="gray"
+                        class="w-full"
+                        instance="perf-user-personnel-link-personnel"
+                        wire:model.live="linkForm.personnel_id"
+                        :model="$this->personnelOptions()"
+                        search-model="searchLinkedPersonnel"
+                    ></x-ui.select-dropdown>
+                    @error('linkForm.personnel_id') <x-validation>{{ $message }}</x-validation> @enderror
+                </div>
 
-                        <div class="flex flex-wrap gap-2">
-                            <x-button mode="black" wire:click="saveLink">{{ __('performance_evaluation::dashboard.actions.save_user_personnel_link') }}</x-button>
-                        </div>
-                    </div>
-                </x-surface-card>
-
-                <x-surface-card :title="__('performance_evaluation::dashboard.cards.current_user_personnel_links')" icon="icons.profile-outline-icon" bodyClass="overflow-visible" contentClass="overflow-visible p-4">
-                    <div class="space-y-4">
-                        <div>
-                            <x-label for="user-personnel-link-search">{{ __('performance_evaluation::dashboard.fields.search') }}</x-label>
-                            <x-livewire-input mode="gray" id="user-personnel-link-search" wire:model.live.debounce.300ms="searchLinks" />
-                        </div>
-
-                        @forelse ($this->links as $link)
-                            <x-ui.list-card>
-                                <div class="space-y-3">
-                                    <div class="space-y-1">
-                                        <p class="text-sm font-semibold text-zinc-900">{{ $link->user_name ?: '—' }}</p>
-                                        <p class="text-xs text-zinc-500">{{ $link->user_email ?: '—' }}</p>
-                                        <p class="text-sm text-zinc-700">{{ $link->personnel_fullname ?: '—' }}</p>
-                                        <p class="text-xs text-zinc-500">#{{ $link->personnel_tabel_no ?: '—' }}</p>
-                                    </div>
-                                    <div class="flex flex-wrap gap-2">
-                                        <x-small-badge mode="secondary">{{ __('performance_evaluation::dashboard.fields.resolution_source') }}: {{ $resolutionSourceLabel($link->resolution_source) }}</x-small-badge>
-                                        <x-small-badge mode="sky">{{ optional($link->resolved_at)->format('d.m.Y H:i') ?: '—' }}</x-small-badge>
-                                    </div>
-                                    <div class="flex flex-wrap gap-2">
-                                        <x-ui.action-pill wire:click="editLink({{ $link->id }})" icon="icons.edit-icon">{{ __('performance_evaluation::dashboard.actions.edit') }}</x-ui.action-pill>
-                                        <x-ui.action-pill wire:click="requestDeleteLink({{ $link->id }})" icon="icons.delete-icon">{{ __('performance_evaluation::dashboard.actions.delete') }}</x-ui.action-pill>
-                                    </div>
-                                </div>
-                            </x-ui.list-card>
-                        @empty
-                            <x-ui.empty-state icon="icons.profile-icon" :message="__('performance_evaluation::dashboard.empty.user_personnel_links')" />
-                        @endforelse
-                    </div>
-                </x-surface-card>
+                <div class="flex justify-end border-t border-hairline-subtle pt-4">
+                    <button type="button" wire:click="saveLink" class="h-10 rounded-xl bg-ink px-4 text-[13px] font-semibold text-white hover:bg-ink-hover">{{ __($d.'.actions.save_user_personnel_link') }}</button>
+                </div>
             </div>
         </div>
-    </x-surface-card>
+
+        {{-- current links --}}
+        <div class="{{ $section }}">
+            <div class="{{ $sectionHead }}">
+                <p class="text-[13px] font-semibold text-ink">{{ __($d.'.cards.current_user_personnel_links') }}</p>
+            </div>
+            <div class="border-b border-hairline-subtle px-5 py-3">
+                <div class="flex h-10 items-center gap-2 rounded-xl border border-hairline bg-[#fafafa] px-3 focus-within:border-zinc-400 focus-within:bg-white">
+                    <svg class="h-4 w-4 shrink-0 text-ink-faint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                    <label for="user-personnel-link-search" class="sr-only">{{ __($d.'.fields.search') }}</label>
+                    <input id="user-personnel-link-search" type="text" wire:model.live.debounce.300ms="searchLinks" placeholder="{{ __($d.'.fields.search') }}"
+                        class="h-full w-full border-0 bg-transparent px-0 text-[13px] text-ink placeholder:text-ink-faint focus:outline-none focus:ring-0">
+                </div>
+            </div>
+
+            <div class="divide-y divide-hairline-subtle">
+                @forelse ($this->links as $link)
+                    <div wire:key="user-personnel-link-{{ $link->id }}" class="group flex flex-col gap-3 px-5 py-3 transition-colors hover:bg-[#fafafa] md:flex-row md:items-center">
+                        <div class="flex min-w-0 flex-1 items-center gap-3">
+                            <x-avatar size="sm" :name="$link->user_name ?: '—'" />
+                            <div class="min-w-0">
+                                <p class="truncate text-[13px] font-semibold text-ink">{{ $link->user_name ?: '—' }}</p>
+                                <p class="truncate text-[11.5px] text-ink-faint">{{ $link->user_email ?: '—' }}</p>
+                            </div>
+                        </div>
+                        <svg class="hidden h-4 w-4 shrink-0 text-ink-faint md:block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                        <div class="min-w-0 flex-1">
+                            <p class="truncate text-[13px] text-ink-soft">{{ $link->personnel_fullname ?: '—' }}</p>
+                            <p class="hrm-num text-[11.5px] text-ink-faint">#{{ $link->personnel_tabel_no ?: '—' }}</p>
+                        </div>
+                        <div class="flex shrink-0 flex-wrap items-center gap-1.5">
+                            <span class="rounded-md bg-[#f4f4f5] px-1.5 py-0.5 text-[11px] text-ink-muted" title="{{ __($d.'.fields.resolution_source') }}">{{ $resolutionSourceLabel($link->resolution_source) }}</span>
+                            <span class="hrm-num rounded-md bg-[#f4f4f5] px-1.5 py-0.5 text-[11px] text-ink-muted">{{ optional($link->resolved_at)->format('d.m.Y H:i') ?: '—' }}</span>
+                            <div class="flex items-center gap-0.5 md:opacity-0 md:transition-opacity md:group-hover:opacity-100 md:focus-within:opacity-100">
+                                <button type="button" wire:click="editLink({{ $link->id }})" class="{{ $iconButton }}" title="{{ __($d.'.actions.edit') }}" aria-label="{{ __($d.'.actions.edit') }}">
+                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                                </button>
+                                <button type="button" wire:click="requestDeleteLink({{ $link->id }})" class="{{ $iconButton }} hover:!bg-rose-50" title="{{ __($d.'.actions.delete') }}" aria-label="{{ __($d.'.actions.delete') }}">
+                                    <x-icons.delete-icon size="h-4 w-4" />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <p class="px-5 py-12 text-center text-[12.5px] text-ink-faint">{{ __($d.'.empty.user_personnel_links') }}</p>
+                @endforelse
+            </div>
+        </div>
+    </div>
 
     <x-ui.delete-confirmation-modal />
 </div>

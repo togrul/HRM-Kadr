@@ -115,6 +115,76 @@ class PerformanceFormResultTest extends TestCase
         $this->assertSame('cascade', strtolower((string) ($foreignKey['on_delete'] ?? '')));
     }
 
+    public function test_form_builder_creates_a_form_its_sections_and_criteria_in_place(): void
+    {
+        $this->actingAs($this->manager());
+        $group = \App\Models\TrainingCompetencyGroup::query()->create(['name' => 'Core', 'slug' => 'core']);
+        $competency = \App\Models\TrainingCompetency::query()->create(['training_competency_group_id' => $group->id, 'name' => 'Komanda işi', 'slug' => 'komanda-isi', 'is_active' => true]);
+
+        $builder = Livewire::test(FoundationWorkspace::class, ['tab' => 'templates'])
+            ->call('newTemplate')
+            ->set('templateForm.name', 'Davranış forması')
+            ->call('saveBuilderTemplate')
+            ->assertHasNoErrors()
+            ->assertSet('showSideMenu', '');
+
+        $template = PerformanceFormTemplate::query()->where('name', 'Davranış forması')->firstOrFail();
+        $builder->assertSet('builderTemplateId', $template->id)
+            ->call('newSection', $template->id)
+            ->set('sectionForm.name', 'Əməkdaşlıq')
+            ->set('sectionForm.weight_percent', 100)
+            ->call('saveBuilderSection')
+            ->assertHasNoErrors();
+
+        $section = $template->sections()->firstOrFail();
+        $builder->call('newItem', $section->id)
+            ->assertSet('itemForm.performance_form_template_section_id', $section->id)
+            ->set('itemForm.name', 'Komandada işləyir')
+            ->set('itemForm.training_competency_id', $competency->id)
+            ->call('saveBuilderItem')
+            ->assertHasNoErrors()
+            ->assertSee('Əməkdaşlıq')
+            ->assertSee('Komandada işləyir');
+
+        $this->assertDatabaseHas('performance_form_template_items', ['performance_form_template_section_id' => $section->id, 'name' => 'Komandada işləyir']);
+    }
+
+    public function test_cycles_and_evaluations_work_from_side_panels(): void
+    {
+        $this->actingAs($this->manager());
+
+        Livewire::test(FoundationWorkspace::class, ['tab' => 'cycles'])
+            ->call('newCycle')
+            ->assertSet('showSideMenu', 'form-cycle')
+            ->set('cycleForm.name', '2027 illik')
+            ->set('cycleForm.period_start', '2027-01-01')
+            ->set('cycleForm.period_end', '2027-12-31')
+            ->call('saveBuilderCycle')
+            ->assertHasNoErrors()
+            ->assertSet('showSideMenu', '')
+            ->assertSee('2027 illik');
+
+        [$form, $itemA] = $this->formWithItems();
+
+        Livewire::test(OperationsWorkspace::class, ['tab' => 'evaluations'])
+            ->dispatch('performance-evaluation:score-form', formId: $form->id)
+            ->assertSet('showSideMenu', 'form-score')
+            ->assertSet('scoreForm.performance_form_id', $form->id)
+            ->set('scoreForm.performance_form_template_item_id', $itemA->id)
+            ->set('scoreForm.evaluator_type', 'manager')
+            ->set('scoreForm.score', 70)
+            ->call('saveScore')
+            ->assertHasNoErrors()
+            ->assertSet('showSideMenu', '');
+
+        $this->assertSame('70.00', (string) $form->fresh()->final_score);
+
+        Livewire::test(\App\Modules\PerformanceEvaluation\Livewire\EvaluationsSummary::class)
+            ->assertSee('Soyad')
+            ->set('formSearch', 'Yoxdur')
+            ->assertDontSee('Soyad');
+    }
+
     /**
      * @param  array<int, float>  $sectionWeights
      * @return array{0: PerformanceForm, 1: PerformanceFormTemplateItem, 2: PerformanceFormTemplateItem, 3: PerformanceFormTemplateItem}

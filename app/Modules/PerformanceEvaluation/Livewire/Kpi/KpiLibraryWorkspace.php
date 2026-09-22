@@ -3,6 +3,7 @@
 namespace App\Modules\PerformanceEvaluation\Livewire\Kpi;
 
 use App\Livewire\Traits\SideModalAction;
+use App\Models\PerformanceFormTemplate;
 use App\Models\PerformanceKpi;
 use App\Models\PerformanceKpiTemplate;
 use App\Models\Position;
@@ -102,6 +103,15 @@ class KpiLibraryWorkspace extends Component
             ->all();
     }
 
+    /**
+     * @return array<int, string> active evaluation form templates that can serve as the competency block
+     */
+    #[Computed]
+    public function formTemplateOptions(): array
+    {
+        return PerformanceFormTemplate::query()->where('is_active', true)->orderBy('name')->pluck('name', 'id')->all();
+    }
+
     public function openKpiForm(?int $id = null): void
     {
         $this->authorize('manage-performance-evaluation');
@@ -199,6 +209,7 @@ class KpiLibraryWorkspace extends Component
             'templateForm.period_type' => ['required', Rule::in(PerformanceKpiTemplate::PERIOD_TYPES)],
             'templateForm.kpi_weight_share' => ['required', 'numeric', 'min:0', 'max:100'],
             'templateForm.competency_weight_share' => ['required', 'numeric', 'min:0', 'max:100'],
+            'templateForm.performance_form_template_id' => ['nullable', 'integer', 'exists:performance_form_templates,id'],
             'templateForm.status' => ['required', 'in:active,archived'],
             'templateItems.*.performance_kpi_id' => ['required', 'integer', 'exists:performance_kpis,id'],
             'templateItems.*.weight' => ['required', 'numeric', 'min:0', 'max:100'],
@@ -218,7 +229,7 @@ class KpiLibraryWorkspace extends Component
         );
 
         $result = app(KpiTemplateService::class)->save(
-            $validated['templateForm'],
+            [...$validated['templateForm'], 'performance_form_template_id' => ($validated['templateForm']['performance_form_template_id'] ?? null) ?: null],
             $items,
             array_map('intval', $this->templatePositionIds),
             $this->editingTemplateId ? PerformanceKpiTemplate::query()->findOrFail($this->editingTemplateId) : null,
@@ -264,7 +275,7 @@ class KpiLibraryWorkspace extends Component
      */
     private function templateDefaults(): array
     {
-        return ['name' => '', 'code' => '', 'period_type' => 'quarterly', 'kpi_weight_share' => 100, 'competency_weight_share' => 0, 'status' => 'active'];
+        return ['name' => '', 'code' => '', 'period_type' => 'quarterly', 'kpi_weight_share' => 100, 'competency_weight_share' => 0, 'performance_form_template_id' => null, 'status' => 'active'];
     }
 
     /**

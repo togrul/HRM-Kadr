@@ -4,10 +4,12 @@ namespace App\Modules\PerformanceEvaluation\Application\Services;
 
 use App\Models\PerformanceForm;
 use App\Models\PerformanceFormScore;
+use App\Models\PerformanceScorecard;
 use App\Models\PerformanceTrainingNeedLink;
 use App\Models\RoleCompetencyRequirement;
 use App\Models\TrainingNeedItem;
 use App\Models\TrainingProgramCompetency;
+use App\Modules\PerformanceEvaluation\Application\Services\Kpi\ScorecardService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -138,6 +140,13 @@ class PerformanceWeakAreaTrainingNeedService
             'final_category' => $category,
             'result_status' => $scores->count() > 0 ? 'in_progress' : 'draft',
         ]);
+
+        // A form serving as a KPI card's competency block feeds the card's final score.
+        PerformanceScorecard::query()
+            ->where('performance_form_id', $form->id)
+            ->where('status', '!=', 'closed')
+            ->get()
+            ->each(fn (PerformanceScorecard $card) => app(ScorecardService::class)->recalculate($card));
     }
 
     /**

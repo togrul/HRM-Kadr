@@ -187,7 +187,7 @@ Performans modulunda KPI üçün iki bölmə var:
 
 İş həmişə bu ardıcıllıqla gedir:
 
-`KPI yarat -> şablona yığ -> vəzifəyə bağla -> kartları yarat -> hədəfləri razılaşdır -> faktiki dəyəri yaz -> qiymətləndir -> bağla`
+`KPI yarat -> şablona yığ -> vəzifəyə bağla -> kartları yarat -> hədəfləri razılaşdır -> faktiki dəyəri yaz -> öz-qiymətləndirmə -> rəhbər qiyməti -> kalibrasiya -> təsdiq -> bağla`
 
 ### Addım 1. KPI kitabxanasına göstərici əlavə etmək
 KPI kitabxanası bütün göstəricilərin bir yerdə saxlandığı "kataloqdur". Bir KPI bir dəfə yaradılır və sonra istənilən qədər vəzifədə istifadə olunur.
@@ -237,7 +237,8 @@ KPI-ın tipini, istiqamətini, vahidini və ya toplama qaydasını dəyişsəniz
    - lazım olan vəzifənin qarşısındakı kvadrata basın — işarələnəcək və yuxarıda qara çip kimi görünəcək;
    - səhv seçdinizsə, çipdəki `×` işarəsinə basın və ya `Təmizlə` ilə hamısını silin;
    - solğun görünən vəzifələr artıq başqa şablona bağlıdır — altında hansı şablonda olduğu yazılır. Bir vəzifə yalnız bir şablonda ola bilər.
-6. **KPI bəndləri** hissəsində `Bənd əlavə et` ilə KPI-ları əlavə edin və hər biri üçün doldurun:
+6. **Kompetensiya forması**: kompetensiya payı 0-dan böyükdürsə, `Şablonlar` bölməsində hazırlanmış qiymətləndirmə formalarından birini seçin (məsələn, "Davranış kompetensiyaları"). Bu forma kartın kompetensiya bloku olacaq. Kompetensiya payı 0-dırsa, boş qoyun.
+7. **KPI bəndləri** hissəsində `Bənd əlavə et` ilə KPI-ları əlavə edin və hər biri üçün doldurun:
 
 | Sahə | Mənası | Nümunə |
 | --- | --- | --- |
@@ -249,11 +250,12 @@ KPI-ın tipini, istiqamətini, vahidini və ya toplama qaydasını dəyişsəniz
 | Cap, % | Balın yuxarı sərhədi. Nəticə nə qədər yüksək olsa da, bal bundan çox olmur | 120 |
 | Rəhbər hədəfi dəyişə bilər | İşarələnsə, rəhbər kartda bu KPI-ın hədəfini əməkdaş üçün dəyişə bilər | — |
 
-7. `Yadda saxla` düyməsini basın.
+8. `Yadda saxla` düyməsini basın.
 
 **Sistem nəyi yoxlayır?**
 - Çəkilərin cəmi 100% deyilsə, şablon yadda saxlanmır.
 - KPI payı + kompetensiya payı 100% deyilsə, şablon yadda saxlanmır.
+- Kompetensiya payı varsa, amma kompetensiya forması seçilməyibsə, şablon yadda saxlanmır.
 - Threshold 100%-dən kiçik, stretch və cap 100%-dən az olmamalıdır.
 - Şablonda 3-dən az və ya 7-dən çox KPI varsa, yaxud bir KPI-ın çəkisi 10–40% aralığında deyilsə, sistem **xəbərdarlıq** verir, amma yadda saxlamağa icazə verir.
 
@@ -278,15 +280,26 @@ Sistem şablonu olan vəzifələrdə işləyən **bütün aktiv əməkdaşlara**
 Düyməni təkrar bassanız, artıq kartı olan əməkdaşa ikinci kart açılmır — yalnız yeni gələnlərə açılır.
 
 ### Addım 4. Kartın həyat dövrü (statuslar)
+Kart dövr ərzində 8 mərhələdən keçir. Kartın yuxarısındakı **mərhələ zolağı** kartın hazırda harada olduğunu göstərir: keçilmiş mərhələlər ✓ ilə, cari mərhələ qara fonla işarələnir.
 
-| Status | Nə deməkdir | Nə etmək olar | Kim keçirir |
+| Mərhələ | Nə deməkdir | Kim nə edir | Son tarix |
 | --- | --- | --- | --- |
-| **Qaralama** | Kart yenicə yaradılıb | Hədəfləri dəqiqləşdirmək | Rəhbər və ya HR `Kartı aktivləşdir` basır |
-| **Aktiv** | Dövr gedir, hədəflər kilidlənib | Faktiki dəyərləri yazmaq və təsdiqləmək | Rəhbər və ya HR `Qiymətləndirməyə göndər` basır |
-| **Rəhbər qiymətləndirməsi** | Dövr bitib, nəticə yoxlanılır | Nəticəyə baxmaq; lazım olsa HR `Geri qaytar` edə bilər | HR `Təsdiqlə və bağla` basır |
+| **Qaralama** | Kart yenicə yaradılıb | Rəhbər hədəfləri dəqiqləşdirir, KPI-ları strateji hədəfə bağlayır, sonra `Razılaşdırmaya göndər` basır | — |
+| **Razılaşdırmada** | Əməkdaş hədəflərlə tanış olur | Əməkdaş `Qəbul edirəm` və ya `Etiraz et` basır (etirazda səbəb yazmaq məcburidir) | 3 iş günü. Cavab olmasa, **avtomatik qəbul** olunur |
+| **Aktiv** | Dövr gedir, hədəflər kilidlənib | Faktiki dəyərlər yazılır, check-in qeydləri aparılır. Dövr bitəndə rəhbər `Öz-qiymətləndirməni başlat` basır | Dövrün sonuna qədər |
+| **Öz-qiymətləndirmə** | Əməkdaş özünü qiymətləndirir | Əməkdaş kompetensiyalarını 1–5 ilə qiymətləndirir və `Öz-qiymətləndirməni təqdim et` basır | 5 iş günü |
+| **Rəhbər qiymətləndirməsi** | Rəhbər yekun qiyməti verir | Rəhbər hər kompetensiyanı 1–5 ilə qiymətləndirir və `Qiymətləndirməni təqdim et` basır | 5 iş günü |
+| **Kalibrasiya** | HR bölmələr üzrə balları uyğunlaşdırır | HR lazım olsa balı düzəldir, sonra `Təsdiqlə` basır | 5 iş günü |
+| **Təsdiqlənib** | Nəticə əməkdaşa açılıb | HR `Bağla` basır (lazım olsa `Geri qaytar`) | — |
 | **Bağlanıb** | Nəticə yekunlaşıb | Yalnız baxmaq. Heç nə dəyişmir | — |
 
-Status düyməsini basanda sistem təsdiq soruşur — təsadüfən basılmasın deyə.
+**Kim hansı düyməni görür?** Hər kəs kartda yalnız öz növbəsində basa biləcəyi düymələri görür. Məsələn, əməkdaş `Qəbul edirəm` düyməsini yalnız kart razılaşdırmada olanda görür.
+
+**Razılaşdırmanı keçmək.** Kart qaralamada olanda HR `Birbaşa aktivləşdir` düyməsi ilə razılaşdırma mərhələsini keçə bilər (məsələn, hədəflər əvvəlcədən yazılı razılaşdırılıbsa).
+
+**Geri qaytarmaq.** HR kartı `Kalibrasiya` və ya `Təsdiqlənib` mərhələsindən rəhbərə qaytara bilər. Səbəb yazmaq məcburidir, səbəb kartın tarixçəsində qalır.
+
+Status düyməsini basanda sistem təsdiq soruşur — təsadüfən basılmasın deyə. Səbəb tələb edən düymələrdə (`Etiraz et`, `Geri qaytar`) əvvəl səbəb sahəsi açılır.
 
 ### Addım 5. Faktiki dəyəri yazmaq
 Faktiki dəyər — əməkdaşın həqiqətən əldə etdiyi nəticədir (məsələn, rüb ərzində 110 000 AZN satış).
@@ -302,6 +315,77 @@ Faktiki dəyər — əməkdaşın həqiqətən əldə etdiyi nəticədir (məsə
 - **Əməkdaş** özü yazanda dəyər `təsdiq gözləyir` kimi görünür və rəhbər `Təsdiqlə` basana qədər bala təsir etmir.
 - Hər KPI-ın altında son yazılan dəyərlərin tarixçəsi görünür: kim yazıb, nə vaxt, qeyd və fayl.
 - Faktiki dəyər yalnız **Aktiv** kartda yazılır.
+
+### Addım 6. Check-in (aralıq görüş) qeydləri
+Check-in — rəhbərlə əməkdaşın dövr ərzində işin gedişatını qısa müzakirə etməsidir. Tövsiyə olunur: **ayda bir dəfə**, rüblük dövrdə **ən azı 2 dəfə**.
+
+1. Kart **Aktiv** mərhələdə olmalıdır.
+2. Kartın aşağısında `Check-in qeydləri` bölməsində tarixi seçin.
+3. Görülən işi və cari vəziyyəti yazın. Risk varsa, ikinci sahəyə yazın.
+4. `Check-in əlavə et` basın.
+
+Bölmənin başlığında `1 / 3` kimi say görünür: neçə check-in edilib və dövr üçün neçə gözlənilir. Say tamamlananda yaşıl olur.
+
+### Addım 7. Öz-qiymətləndirmə və kompetensiya qiyməti
+Şablonda kompetensiya forması seçilibsə, kartda `Kompetensiyalar` bölməsi görünür. Burada davranış meyarları (məsələn, "Komanda işi", "Məsuliyyət") **1-dən 5-ə qədər** qiymətləndirilir:
+
+| Qiymət | Mənası | Bala çevrilməsi |
+| --- | --- | --- |
+| 1 | Çox zəif | 0% |
+| 2 | Gözləntidən aşağı | 60% |
+| 3 | Gözləntiyə uyğun | 100% |
+| 4 | Gözləntini aşır | 110% |
+| 5 | Çox yüksək | 120% |
+
+- **Əməkdaş** öz-qiymətləndirmə mərhələsində "Öz-qiyməti" sütununda rəqəmə basır.
+- **Rəhbər** rəhbər qiymətləndirməsi mərhələsində "Rəhbər qiyməti" sütununda rəqəmə basır.
+- Yekun bala **yalnız rəhbər qiyməti** düşür. Öz-qiymət müqayisə üçündür: rəhbər hər iki qiyməti yan-yana görür.
+- Rəhbər bütün kompetensiyaları qiymətləndirmədən `Qiymətləndirməni təqdim et` düyməsi işləmir.
+- Kompetensiya üzrə aşağı qiymət avtomatik olaraq **təlim ehtiyacı** kimi qeyd olunur (Təlim ehtiyacları modulunda görünür).
+
+**Yekun bal** = KPI balı × KPI payı + kompetensiya balı × kompetensiya payı. Nümunə: KPI 81.5%, kompetensiya 100%, paylar 70/30 → 81.5 × 0.7 + 100 × 0.3 = **87.05%**.
+
+### Addım 8. Kalibrasiya (HR)
+Kalibrasiya — müxtəlif rəhbərlərin fərqli sərtliklə verdiyi balları ədalətli hala gətirmək üçündür. Məsələn, bir rəhbər hamıya yüksək, digəri hamıya aşağı qiymət veribsə.
+
+1. `KPI kartları` siyahısının yuxarısında **Balların paylanması** qrafikinə baxın: qara sütun — faktiki pay, narıncı xətt — hədəf pay (10% / 20% / 50% / 15% / 5%).
+2. Kalibrasiya mərhələsindəki kartı açın.
+3. `Kalibrasiya` bölməsində düzəlişi yazın: məsələn `+3` və ya `-5`. Maksimum **±15 bal**.
+4. Səbəbi mütləq yazın və `Düzəlişi tətbiq et` basın.
+
+İlkin yekun bal silinmir: kartda həm "Yekun bal", həm "Kalibrasiyalı" bal görünür. Reytinq və gələcəkdə bonus **kalibrasiyalı** baldan hesablanır. Bütün düzəlişlər səbəbi ilə birlikdə tarixçədə qalır.
+
+### Addım 9. Təsdiq və bağlama
+- HR `Təsdiqlə` basanda nəticə əməkdaşa açılır və əməkdaş bildiriş alır.
+- HR `Bağla` basanda kart dondurulur: bütün ballar, hədəflər və KPI versiyaları dəyişməz nüsxə kimi saxlanılır. Sonradan kitabxanada KPI dəyişsə belə, bağlanmış nəticə dəyişmir.
+
+### KPI-ı strateji hədəfə bağlamaq (kaskadlama)
+Şirkətin böyük hədəfləri `Məqsədlər və OKR` bölməsində qurulur (məsələn, "Gəlir +20%"). Əməkdaşın KPI-ı bu hədəfə bağlananda hər kəs öz işinin ümumi hədəfə necə təsir etdiyini görür.
+
+1. Kart **Qaralama** mərhələsində olmalıdır.
+2. KPI adının altındakı siyahıdan uyğun hədəfi seçin. Seçim dərhal yadda saxlanılır.
+3. Kart aktivləşəndən sonra hədəf KPI-ın altında kiçik nişan kimi görünür.
+
+HR siyahının yuxarısında **"Hədəfə bağlanmamış KPI"** sayını görür. Bu, kaskadlamada boşluqları tapmağa kömək edir.
+
+### Son tarixlər, xatırlatmalar və bildirişlər
+Sistem hər mərhələnin son tarixini özü hesablayır (iş günləri ilə) və kartın başlığında göstərir. Son tarix keçibsə, qırmızı görünür.
+
+Hər səhər sistem avtomatik yoxlama aparır:
+- **Xatırlatma** — son tarixə 2 iş günü qalanda növbəsi olan şəxs (əməkdaş, rəhbər və ya HR) bildiriş alır.
+- **Avtomatik qəbul** — əməkdaş razılaşdırmaya 3 iş günü ərzində cavab verməsə, kart avtomatik qəbul olunur.
+- **Eskalasiya** — son tarixdən 1 iş günü keçibsə, gecikən şəxsin rəhbəri və HR bildiriş alır.
+
+Bundan əlavə, hər addımda növbəti şəxs dərhal bildiriş alır: kart razılaşdırmaya göndəriləndə — əməkdaş, etiraz ediləndə — rəhbər, öz-qiymətləndirmə təqdim ediləndə — rəhbər, kalibrasiyaya çatanda — HR, nəticə təsdiqlənəndə — əməkdaş. Bildirişlər sağ yuxarıdakı zəng ikonunda görünür.
+
+### Xüsusi hallar
+| Hal | Sistem nə edir |
+| --- | --- |
+| Dövrün ortasında işə qəbul | Kart işə başlama tarixindən açılır, **pro-rata** əmsalı göstərilir |
+| Vəzifə dəyişikliyi | Köhnə kart dəyişiklikdən bir gün əvvəl avtomatik bağlanır ("Vəzifə dəyişikliyi" nişanı ilə), yeni vəzifənin şablonu varsa yeni kart açılır. Dövr üzrə yekun nəticə hər kartın **günlərə görə çəkili ortası** kimi hesablanır |
+| İşdən çıxma | Kart işdən çıxma tarixində avtomatik bağlanır ("İşdən çıxma" nişanı ilə) |
+
+Bu yoxlamalar da hər səhər avtomatik aparılır. Bağlanmış kartın tarixçəsində səbəb görünür.
 
 ### Bal necə hesablanır? (sadə izah)
 Hər faktiki dəyər yazılanda sistem kartı dərhal yenidən hesablayır.
@@ -366,6 +450,18 @@ Rəhbər onu hələ təsdiqləməyib — dəyərin yanında `təsdiq gözləyir`
 
 **Yekun bal boşdur.**
 Şablonda kompetensiya payı 0-dan böyükdürsə, kompetensiya qiyməti daxil olunana qədər yekun bal hesablanmır. KPI balı isə görünür.
+
+**Etiraz etdim, indi nə olur?**
+Kart qaralamaya qayıdır, rəhbər etirazınızı və səbəbini bildiriş kimi alır. Rəhbər hədəfləri düzəldib kartı yenidən razılaşdırmaya göndərir.
+
+**Rəhbər qiymətləndirməni təqdim edə bilmir.**
+Bütün kompetensiyalar rəhbər tərəfindən qiymətləndirilməlidir. Qiymətləndirilməmiş sətirdə rəqəmlərdən heç biri qara deyil.
+
+**Kalibrasiya bölməsi görünmür.**
+Kalibrasiyanı yalnız HR edə bilər və yalnız kart `Kalibrasiya` mərhələsində olanda.
+
+**Əməkdaş vəzifəsini dəyişdi, amma köhnə kart hələ açıqdır.**
+Yoxlama hər səhər aparılır — ertəsi gün köhnə kart bağlanacaq və yeni kart açılacaq. Yeni vəzifənin şablonu yoxdursa, yeni kart açılmır.
 
 **Şablonda vəzifəni seçə bilmirəm.**
 Vəzifə solğundursa, o artıq başqa şablona bağlıdır. Əvvəl həmin şablondan çıxarın.

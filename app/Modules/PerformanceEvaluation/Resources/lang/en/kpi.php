@@ -4,6 +4,13 @@ return [
     'sections' => [
         'kpis' => 'KPI library',
         'templates' => 'Position templates',
+        'card_kpis' => 'KPIs',
+        'competencies' => 'Competencies',
+        'checkins' => 'Check-ins',
+        'calibration' => 'Calibration',
+        'history' => 'History',
+        'distribution' => 'Score distribution',
+        'cascade_gaps' => 'KPIs not linked to a goal',
     ],
 
     'fields' => [
@@ -33,7 +40,7 @@ return [
         'threshold' => 'Threshold, %',
         'stretch' => 'Stretch, %',
         'cap' => 'Cap, %',
-        'band' => 'Threshold / Stretch / Cap',
+        'band' => 'Bands',
         'target_editable' => 'Manager may change the target',
         'kpi' => 'KPI',
         'actual' => 'Actual',
@@ -47,6 +54,10 @@ return [
         'prorata' => 'Pro-rata',
         'note' => 'Note',
         'evidence' => 'Evidence file',
+        'competency_form' => 'Competency form',
+        'competency_score' => 'Competency',
+        'calibrated_score' => 'Calibrated',
+        'rating' => 'Rating',
     ],
 
     'columns' => [
@@ -119,20 +130,34 @@ return [
         'active' => 'Active',
         'manager_review' => 'Manager review',
         'closed' => 'Closed',
+        'pending_agreement' => 'In agreement',
+        'self_review' => 'Self review',
+        'calibration' => 'Calibration',
+        'approved' => 'Approved',
     ],
 
     'transitions' => [
-        'activate' => 'Activate card',
-        'submit' => 'Send for review',
+        'activate' => 'Activate directly',
         'return' => 'Return',
-        'close' => 'Approve and close',
+        'close' => 'Close',
+        'send_for_agreement' => 'Send for agreement',
+        'accept' => 'I accept',
+        'reject' => 'Object',
+        'start_self_review' => 'Start self review',
+        'submit_self_review' => 'Submit self review',
+        'submit_manager_review' => 'Submit review',
+        'approve' => 'Approve',
     ],
 
     'confirm_transition' => [
-        'activate' => 'The card becomes active and its targets lock. Continue?',
-        'submit' => 'The card goes to manager review and stops taking actuals. Continue?',
-        'return' => 'The card goes back to active. Continue?',
-        'close' => 'The card is scored, closed and becomes read-only. Continue?',
+        'activate' => 'The agreement step is skipped and the card becomes active now. Continue?',
+        'close' => 'The card closes and becomes read-only. Continue?',
+        'send_for_agreement' => 'The card goes to the employee for agreement. Without an answer in 3 working days it is accepted automatically. Continue?',
+        'accept' => 'You accept the targets; they lock from now on. Continue?',
+        'start_self_review' => 'The period ends: actuals close and the employee starts the self review. Continue?',
+        'submit_self_review' => 'The self review goes to the manager. Continue?',
+        'submit_manager_review' => 'The review goes to HR for calibration. Continue?',
+        'approve' => 'The result is approved and shown to the employee. Continue?',
     ],
 
     'ratings' => [
@@ -160,6 +185,9 @@ return [
         'clear' => 'Clear',
         'remove' => 'Remove',
         'cancel' => 'Cancel',
+        'add_checkin' => 'Add check-in',
+        'calibrate' => 'Apply adjustment',
+        'confirm' => 'Confirm',
     ],
 
     'messages' => [
@@ -170,6 +198,8 @@ return [
         'cards_generated' => ':count new KPI cards created.',
         'status_changed' => 'Card status changed.',
         'actual_saved' => 'Actual value recorded.',
+        'calibrated' => 'Calibration adjustment applied.',
+        'checkin_saved' => 'Check-in recorded.',
     ],
 
     'errors' => [
@@ -187,6 +217,14 @@ return [
         'scorecard_locked' => 'The card is locked: targets change only while it is a draft.',
         'scorecard_not_active' => 'Actuals can be entered only on an active card.',
         'evidence_required' => 'This KPI requires an evidence file.',
+        'reason_required' => 'A reason is required.',
+        'competencies_incomplete' => 'Rate every competency first.',
+        'competency_form_required' => 'Choose a competency form when the competency share is above zero.',
+        'competency_stage' => 'This rating cannot be given at this stage.',
+        'competency_invalid' => 'A rating must be between 1 and 5.',
+        'calibration_stage' => 'Calibration is possible only while the card is in the Calibration stage.',
+        'calibration_too_large' => 'An adjustment cannot exceed ±:max points.',
+        'goal_invalid' => 'The chosen goal does not belong to this cycle.',
     ],
 
     'warnings' => [
@@ -219,4 +257,112 @@ return [
     'search_positions' => 'Search positions…',
     'position_taken_by' => 'Belongs to the “:template” template',
     'no_results' => 'Nothing found',
+
+    'evaluators' => [
+        'self' => 'Self rating',
+        'manager' => 'Manager rating',
+    ],
+
+    'closure_reasons' => [
+        'terminated' => 'Left the organisation',
+        'position_changed' => 'Position change',
+    ],
+
+    'events' => [
+        'created' => 'Card created',
+        'send_for_agreement' => 'Sent for agreement',
+        'accept' => 'Employee accepted',
+        'reject' => 'Employee objected',
+        'activate' => 'Card activated',
+        'start_self_review' => 'Self review started',
+        'submit_self_review' => 'Self review submitted',
+        'submit_manager_review' => 'Manager review submitted',
+        'approve' => 'Result approved',
+        'return' => 'Returned',
+        'close' => 'Card closed',
+        'closed_early' => 'Card closed early',
+    ],
+
+    'notifications' => [
+        'category' => 'KPI',
+        'agreement_requested' => [
+            'subject' => 'Your KPI card awaits agreement',
+            'body' => 'Review your KPI card for :cycle and accept it or object. Due: :due.',
+        ],
+        'accepted' => [
+            'subject' => ':employee accepted the KPI card',
+            'body' => 'The :cycle card is active.',
+        ],
+        'rejected' => [
+            'subject' => ':employee objected to the KPI card',
+            'body' => 'Reason: :reason',
+        ],
+        'self_review_started' => [
+            'subject' => 'Time for your self review',
+            'body' => 'The :cycle period is over. Rate your competencies. Due: :due.',
+        ],
+        'self_review_submitted' => [
+            'subject' => ':employee submitted the self review',
+            'body' => 'Complete the manager review. Due: :due.',
+        ],
+        'calibration_ready' => [
+            'subject' => ':employee\'s card is ready for calibration',
+            'body' => 'The manager review for :cycle is complete.',
+        ],
+        'approved' => [
+            'subject' => 'Your KPI result is approved',
+            'body' => 'See your :cycle result on your KPI card.',
+        ],
+        'returned' => [
+            'subject' => ':employee\'s card was returned',
+            'body' => 'Reason: :reason',
+        ],
+        'reminder' => [
+            'subject' => 'A KPI card deadline is near',
+            'body' => ':employee — the “:status” stage is due on :due.',
+        ],
+        'escalation' => [
+            'subject' => 'A KPI card deadline has passed',
+            'body' => ':employee — the “:status” stage was due on :due.',
+        ],
+    ],
+
+    'auto_accept_reason' => 'Deadline passed — accepted automatically',
+    'calibration_entry' => 'Calibration: :delta points',
+    'cascade_gaps_hint' => 'KPI items are not linked to any strategic goal. A goal can be chosen while cards are drafts.',
+    'checkin_progress_placeholder' => 'Work done and current status',
+    'checkin_risks_placeholder' => 'Risks (optional)',
+    'competency_form_hint' => 'Pick one of the evaluation forms from the Templates section for the competency block. Leave empty when the competency share is 0.',
+    'competency_hint' => 'Each competency is rated 1–5: 1 — very weak, 3 — meets expectations, 5 — outstanding. Only the manager\'s rating counts; the self rating is for comparison.',
+    'distribution_hint' => 'Dark bar — actual share, orange line — target distribution.',
+    'hidden_until_self_review' => 'Opens at the self-review stage',
+    'no_checkins' => 'No check-ins yet.',
+    'no_competency_form' => 'No competency block',
+    'no_goal' => 'Not linked to a goal',
+    'reason_placeholder' => 'Write the reason…',
+    'risks' => 'Risks',
+    'stage_due' => 'Due',
+    'system' => 'System',
+
+    'roles' => [
+        'employee' => 'employee',
+        'manager' => 'manager',
+        'hr' => 'HR',
+    ],
+
+    'next_step' => [
+        'draft' => 'The manager reviews the targets, adjusts them if needed and sends the card to the employee for agreement.',
+        'pending_agreement' => 'The employee reviews the targets and accepts or objects with a reason. Without an answer the card is accepted automatically on the due date.',
+        'active' => 'The period is running: record actuals and hold a monthly check-in. When it ends, the manager starts the self review.',
+        'self_review' => 'The employee rates their competencies 1–5 and submits the self review.',
+        'manager_review' => 'The manager rates every competency and submits the review to HR.',
+        'calibration' => 'HR aligns scores across units (±15 points if needed) and approves the result.',
+        'approved' => 'The result is visible to the employee. HR closes the card — nothing changes after that.',
+        'closed' => 'The card is closed. The result is frozen and read-only.',
+    ],
+
+    'next_step_title' => 'Next step',
+    'your_turn' => 'Your turn',
+    'waiting_for' => 'Waiting for: :who',
+    'band_title' => 'Threshold (minimum) · Stretch (maximum) · Cap (upper limit), as achievement %',
 ];

@@ -3,13 +3,17 @@
 namespace App\Modules\PerformanceEvaluation\Livewire\Kpi;
 
 use App\Models\PerformanceCycle;
+use App\Models\PerformanceGoal;
 use App\Models\PerformanceKpiActual;
 use App\Models\PerformanceScorecard;
 use App\Models\PerformanceScorecardItem;
+use App\Modules\PerformanceEvaluation\Application\Services\Kpi\ScorecardReviewService;
 use App\Modules\PerformanceEvaluation\Application\Services\Kpi\ScorecardService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection as SupportCollection;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -40,6 +44,18 @@ class ScorecardsWorkspace extends Component
 
     /** @var array<int, mixed> item id → draft target */
     public array $targets = [];
+
+    public string $transitionReason = '';
+
+    public $calibrationDelta = null;
+
+    public string $calibrationReason = '';
+
+    public ?string $checkinDate = null;
+
+    public string $checkinProgress = '';
+
+    public string $checkinRisks = '';
 
     public function mount(): void
     {
@@ -98,6 +114,10 @@ class ScorecardsWorkspace extends Component
                 'manager:id,surname,name',
                 'items.kpi:id,code,name,type,direction,unit,evidence_required',
                 'items.actuals.enteredBy:id,name',
+                'items.goal:id,title',
+                'checkins.author:id,name',
+                'calibrations.adjustedBy:id,name',
+                'events.user:id,name',
             ])
             ->find($this->openCardId);
     }
@@ -106,6 +126,51 @@ class ScorecardsWorkspace extends Component
     public function role(): ?string
     {
         return $this->card ? app(ScorecardService::class)->roleFor(auth()->user(), $this->card) : null;
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    #[Computed]
+    public function actions(): array
+    {
+        return $this->card ? app(ScorecardService::class)->availableActions($this->card, auth()->user()) : [];
+    }
+
+    #[Computed]
+    public function competencies(): SupportCollection
+    {
+        return $this->card ? app(ScorecardReviewService::class)->competencies($this->card) : collect();
+    }
+
+    /**
+     * @return array<int, string> goal id → title, for tying draft KPI items to goals
+     */
+    #[Computed]
+    public function goalOptions(): array
+    {
+        return $this->card?->status === 'draft'
+            ? PerformanceGoal::query()->where('performance_cycle_id', $this->card->performance_cycle_id)->orderBy('title')->pluck('title', 'id')->all()
+            : [];
+    }
+
+    /**
+     * @return array<string, array{count: int, share: float, target: int}>
+     */
+    #[Computed]
+    public function distribution(): array
+    {
+        return $this->cycleId && auth()->user()->can('manage-performance-evaluation')
+            ? app(ScorecardReviewService::class)->distribution($this->cycleId)
+            : [];
+    }
+
+    #[Computed]
+    public function unlinkedItems(): int
+    {
+        return $this->cycleId && auth()->user()->can('manage-performance-evaluation')
+            ? app(ScorecardReviewService::class)->unlinkedItemCount($this->cycleId)
+            : 0;
     }
 
     public function generate(): void
@@ -123,6 +188,8 @@ class ScorecardsWorkspace extends Component
     {
         $this->openCardId = $id;
         $this->cancelActual();
+        $this->transitionReason = '';
+        $this->checkinDate = today()->toDateString();
         $this->targets = $this->card?->items->mapWithKeys(fn (PerformanceScorecardItem $item): array => [$item->id => $item->target === null ? null : (float) $item->target])->all() ?? [];
         abort_if($this->card === null, 404);
     }
@@ -132,12 +199,14 @@ class ScorecardsWorkspace extends Component
         $this->openCardId = null;
         $this->targets = [];
         $this->cancelActual();
-        unset($this->card, $this->role);
+        $this->transitionReason = '';
+        $this->refreshCard();
     }
 
     public function moveCard(string $action): void
     {
-        app(ScorecardService::class)->transition($this->requireCard(), $action, auth()->user());
+        app(ScorecardService::class)->transition($this->requireCard(), $action, auth()->user(), $this->transitionReason);
+        $this->transitionReason = '';
         $this->refreshCard();
         $this->dispatch('notify', type: 'success', message: __('performance_evaluation::kpi.messages.status_changed'));
     }
@@ -198,6 +267,47 @@ class ScorecardsWorkspace extends Component
         $this->refreshCard();
     }
 
+    public function rate(int $itemId, string $evaluator, int $rating): void
+    {
+        app(ScorecardReviewService::class)->rateCompetency($this->requireCard(), $itemId, $evaluator === 'self' ? 'self' : 'manager', $rating, null, auth()->user());
+        $this->refreshCard();
+    }
+
+    public function saveCalibration(): void
+    {
+        $this->validate([
+            'calibrationDelta' => ['required', 'numeric'],
+            'calibrationReason' => ['required', 'string', 'max:1000'],
+        ]);
+
+        app(ScorecardReviewService::class)->calibrate($this->requireCard(), (float) $this->calibrationDelta, $this->calibrationReason, auth()->user());
+        $this->calibrationDelta = null;
+        $this->calibrationReason = '';
+        $this->refreshCard();
+        $this->dispatch('notify', type: 'success', message: __('performance_evaluation::kpi.messages.calibrated'));
+    }
+
+    public function saveCheckin(): void
+    {
+        $this->validate([
+            'checkinDate' => ['required', 'date'],
+            'checkinProgress' => ['required', 'string', 'max:2000'],
+            'checkinRisks' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        app(ScorecardReviewService::class)->addCheckin($this->requireCard(), Carbon::parse($this->checkinDate), $this->checkinProgress, $this->checkinRisks, auth()->user());
+        $this->reset('checkinProgress', 'checkinRisks');
+        $this->checkinDate = today()->toDateString();
+        $this->refreshCard();
+        $this->dispatch('notify', type: 'success', message: __('performance_evaluation::kpi.messages.checkin_saved'));
+    }
+
+    public function linkGoal(int $itemId, mixed $goalId): void
+    {
+        app(ScorecardReviewService::class)->linkGoal($this->cardItem($itemId), filled($goalId) ? (int) $goalId : null, auth()->user());
+        $this->refreshCard();
+    }
+
     public function render(): View
     {
         return view('performance-evaluation::livewire.performance-evaluation.kpi.scorecards-workspace');
@@ -215,6 +325,6 @@ class ScorecardsWorkspace extends Component
 
     private function refreshCard(): void
     {
-        unset($this->card, $this->cards, $this->role);
+        unset($this->card, $this->cards, $this->role, $this->actions, $this->competencies, $this->goalOptions, $this->distribution, $this->unlinkedItems);
     }
 }

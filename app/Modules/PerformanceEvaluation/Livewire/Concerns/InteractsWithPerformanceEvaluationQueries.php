@@ -401,8 +401,14 @@ trait InteractsWithPerformanceEvaluationQueries
                 DB::raw('manager_users.name as manager_name'),
                 DB::raw('hr_users.name as hr_reviewer_name'),
             ])
-            ->latest('id')
-            ->limit(6)
+            ->when(
+                property_exists($this, 'formSearch') && trim($this->formSearch) !== '',
+                fn ($query) => $query->where(fn ($inner) => $inner
+                    ->where('personnels.surname', 'like', '%'.trim($this->formSearch).'%')
+                    ->orWhere('personnels.name', 'like', '%'.trim($this->formSearch).'%'))
+            )
+            ->latest('performance_forms.id')
+            ->limit(50)
             ->get();
     }
 

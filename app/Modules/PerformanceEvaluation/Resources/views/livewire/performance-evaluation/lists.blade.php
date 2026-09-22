@@ -1,379 +1,375 @@
-<div class="space-y-4">
-    <x-surface-card :title="__('performance_evaluation::dashboard.cards.full_lists')" icon="icons.performance-icon">
-        <div class="space-y-5">
-            <p class="text-sm text-zinc-500">{{ __('performance_evaluation::dashboard.labels.full_lists_hint') }}</p>
+@php
+    $d = 'performance_evaluation::dashboard';
+    $th = 'px-4 py-2.5';
+    $td = 'px-4 py-3 text-ink-soft';
+    $tdMain = 'px-4 py-3 font-medium text-ink';
+    $chip = 'inline-flex max-w-full items-center gap-1 truncate rounded-md bg-[#f4f4f5] px-2 py-1 text-[11.5px] text-ink-muted';
+    $detailBox = 'rounded-xl border border-hairline-subtle bg-[#fafafa] px-3.5 py-3';
+    $detailLabel = 'hrm-eyebrow';
+    $entities = [
+        'forms' => 'cards.recent_forms',
+        'templates' => 'cards.recent_templates',
+        'items' => 'cards.recent_template_items',
+        'test_banks' => 'cards.recent_test_banks',
+        'test_questions' => 'cards.test_question_setup',
+        'test_sessions' => 'cards.test_session_setup',
+        'attempts' => 'cards.recent_test_attempts',
+        'test_answers' => 'cards.answer_audit',
+        'weak_links' => 'cards.weak_links',
+    ];
+    $selected = $this->selectedRow;
+    $activePill = fn (bool $on) => $on ? 'bg-emerald-50 text-emerald-700' : 'bg-[#f4f4f5] text-ink-muted';
+@endphp
 
-            <x-filter.nav wrap class="min-w-0">
-                <x-filter.item wire:click.prevent="switchEntity('forms')" :active="$entity === 'forms'">
-                    {{ __('performance_evaluation::dashboard.cards.recent_forms') }}
-                </x-filter.item>
-                <x-filter.item wire:click.prevent="switchEntity('templates')" :active="$entity === 'templates'">
-                    {{ __('performance_evaluation::dashboard.cards.recent_templates') }}
-                </x-filter.item>
-                <x-filter.item wire:click.prevent="switchEntity('items')" :active="$entity === 'items'">
-                    {{ __('performance_evaluation::dashboard.cards.recent_template_items') }}
-                </x-filter.item>
-                <x-filter.item wire:click.prevent="switchEntity('test_banks')" :active="$entity === 'test_banks'">
-                    {{ __('performance_evaluation::dashboard.cards.recent_test_banks') }}
-                </x-filter.item>
-                <x-filter.item wire:click.prevent="switchEntity('test_questions')" :active="$entity === 'test_questions'">
-                    {{ __('performance_evaluation::dashboard.cards.test_question_setup') }}
-                </x-filter.item>
-                <x-filter.item wire:click.prevent="switchEntity('test_sessions')" :active="$entity === 'test_sessions'">
-                    {{ __('performance_evaluation::dashboard.cards.test_session_setup') }}
-                </x-filter.item>
-                <x-filter.item wire:click.prevent="switchEntity('attempts')" :active="$entity === 'attempts'">
-                    {{ __('performance_evaluation::dashboard.cards.recent_test_attempts') }}
-                </x-filter.item>
-                <x-filter.item wire:click.prevent="switchEntity('test_answers')" :active="$entity === 'test_answers'">
-                    {{ __('performance_evaluation::dashboard.cards.answer_audit') }}
-                </x-filter.item>
-                <x-filter.item wire:click.prevent="switchEntity('weak_links')" :active="$entity === 'weak_links'">
-                    {{ __('performance_evaluation::dashboard.cards.weak_links') }}
-                </x-filter.item>
-            </x-filter.nav>
+<div class="mx-auto flex max-w-6xl flex-col gap-4">
+    <div class="flex flex-col gap-3">
+        <div>
+            <p class="text-[15px] font-semibold tracking-[-0.01em] text-ink">{{ __($d.'.cards.full_lists') }}</p>
+            <p class="mt-0.5 text-[12.5px] text-ink-muted">{{ __($d.'.labels.full_lists_hint') }}</p>
+        </div>
 
-            <div class="grid gap-4 xl:grid-cols-[minmax(0,1.5fr)_minmax(320px,0.85fr)]">
-                <div class="space-y-4">
-                    <div class="grid gap-3 lg:grid-cols-[minmax(0,1.5fr)_minmax(220px,0.8fr)_160px]">
-                        <div class="rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
-                            <x-label for="performance-lists-search">{{ __('performance_evaluation::dashboard.fields.search') }}</x-label>
-                            <x-livewire-input mode="gray" id="performance-lists-search" wire:model.live.debounce.300ms="search" />
-                        </div>
-                        <div class="rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
-                            <x-label for="performance-lists-filter">{{ __('performance_evaluation::dashboard.fields.status_filter') }}</x-label>
-                            <select id="performance-lists-filter" wire:model.live="filter" class="mt-2 h-11 w-full rounded-xl border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
-                                @foreach ($this->filterOptions as $value => $label)
-                                    <option value="{{ $value }}">{{ $label }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="rounded-2xl border border-zinc-200 bg-white p-4">
-                            <p class="text-[11px] font-semibold uppercase tracking-[0.12em] text-zinc-400">{{ __('performance_evaluation::dashboard.labels.visible_records') }}</p>
-                            <p class="mt-2 text-2xl font-semibold text-zinc-900">{{ $this->summary['visible'] }}</p>
-                            <p class="text-xs text-zinc-500">{{ __('performance_evaluation::dashboard.labels.total_records_value', ['count' => $this->summary['total']]) }}</p>
-                        </div>
-                    </div>
+        <x-filter.nav wrap class="min-w-0">
+            @foreach ($entities as $key => $label)
+                <x-filter.item wire:key="lists-entity-{{ $key }}" wire:click.prevent="switchEntity('{{ $key }}')" :active="$entity === $key">
+                    {{ __($d.'.'.$label) }}
+                </x-filter.item>
+            @endforeach
+        </x-filter.nav>
+    </div>
 
-                    <div class="overflow-hidden rounded-2xl border border-zinc-200 bg-white">
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-zinc-200 text-sm">
-                        <thead class="bg-zinc-50">
-                            <tr class="text-left text-xs font-semibold uppercase tracking-wide text-zinc-500">
+    <div class="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.5fr)_minmax(320px,0.85fr)]">
+        <div class="flex min-w-0 flex-col gap-3">
+            {{-- filters --}}
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_auto]">
+                <div class="flex h-11 items-center gap-2 rounded-xl border border-hairline bg-white px-3 shadow-card focus-within:border-zinc-400">
+                    <svg class="h-4 w-4 shrink-0 text-ink-faint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                    <label for="performance-lists-search" class="sr-only">{{ __($d.'.fields.search') }}</label>
+                    <input id="performance-lists-search" type="text" wire:model.live.debounce.300ms="search" placeholder="{{ __($d.'.fields.search') }}"
+                        class="h-full w-full border-0 bg-transparent px-0 text-[13px] text-ink placeholder:text-ink-faint focus:outline-none focus:ring-0">
+                </div>
+                <div>
+                    <label for="performance-lists-filter" class="sr-only">{{ __($d.'.fields.status_filter') }}</label>
+                    <select id="performance-lists-filter" wire:model.live="filter" class="h-11 w-full rounded-xl border border-hairline bg-white px-3 text-[13px] text-ink shadow-card focus:border-zinc-400 focus:outline-none focus:ring-0">
+                        @foreach ($this->filterOptions as $value => $label)
+                            <option value="{{ $value }}">{{ $label }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="flex h-11 items-center gap-2 rounded-xl border border-hairline bg-white px-3.5 shadow-card">
+                    <span class="hrm-num text-[18px] font-semibold text-ink">{{ $this->summary['visible'] }}</span>
+                    <span class="text-[11.5px] leading-tight text-ink-faint">{{ __($d.'.labels.visible_records') }}<br>{{ __($d.'.labels.total_records_value', ['count' => $this->summary['total']]) }}</span>
+                </div>
+            </div>
+
+            {{-- table --}}
+            <div class="overflow-hidden rounded-2xl border border-hairline bg-white shadow-card">
+                <div class="hrm-scroll overflow-x-auto">
+                    <table class="w-full min-w-[640px] text-left text-[13px]">
+                        <thead class="hrm-eyebrow whitespace-nowrap border-b border-hairline-subtle bg-[#fafafa]">
+                            <tr>
                                 @if ($entity === 'forms')
-                                    <th class="px-4 py-3">{{ __('performance_evaluation::dashboard.fields.personnel') }}</th>
-                                    <th class="px-4 py-3">{{ __('performance_evaluation::dashboard.fields.cycle') }}</th>
-                                    <th class="px-4 py-3">{{ __('performance_evaluation::dashboard.fields.template') }}</th>
-                                    <th class="px-4 py-3">{{ __('performance_evaluation::dashboard.fields.final_category') }}</th>
-                                    <th class="px-4 py-3">{{ __('performance_evaluation::dashboard.fields.score') }}</th>
+                                    <th class="{{ $th }}">{{ __($d.'.fields.personnel') }}</th>
+                                    <th class="{{ $th }}">{{ __($d.'.fields.cycle') }}</th>
+                                    <th class="{{ $th }}">{{ __($d.'.fields.template') }}</th>
+                                    <th class="{{ $th }}">{{ __($d.'.fields.final_category') }}</th>
+                                    <th class="{{ $th }} text-right">{{ __($d.'.fields.score') }}</th>
                                 @elseif ($entity === 'templates')
-                                    <th class="px-4 py-3">{{ __('performance_evaluation::dashboard.fields.template_name') }}</th>
-                                    <th class="px-4 py-3">{{ __('performance_evaluation::dashboard.fields.template_code') }}</th>
-                                    <th class="px-4 py-3">{{ __('performance_evaluation::dashboard.fields.status') }}</th>
-                                    <th class="px-4 py-3">{{ __('performance_evaluation::dashboard.labels.sections_count', ['count' => '']) }}</th>
-                                    <th class="px-4 py-3">{{ __('performance_evaluation::dashboard.fields.description') }}</th>
+                                    <th class="{{ $th }}">{{ __($d.'.fields.template_name') }}</th>
+                                    <th class="{{ $th }}">{{ __($d.'.fields.template_code') }}</th>
+                                    <th class="{{ $th }}">{{ __($d.'.fields.status') }}</th>
+                                    <th class="{{ $th }} text-right">{{ __($d.'.labels.sections_count', ['count' => '']) }}</th>
+                                    <th class="{{ $th }}">{{ __($d.'.fields.description') }}</th>
                                 @elseif ($entity === 'items')
-                                    <th class="px-4 py-3">{{ __('performance_evaluation::dashboard.fields.item') }}</th>
-                                    <th class="px-4 py-3">{{ __('performance_evaluation::dashboard.fields.section') }}</th>
-                                    <th class="px-4 py-3">{{ __('performance_evaluation::dashboard.fields.template') }}</th>
-                                    <th class="px-4 py-3">{{ __('performance_evaluation::dashboard.fields.competency') }}</th>
-                                    <th class="px-4 py-3">{{ __('performance_evaluation::dashboard.fields.low_score_threshold') }}</th>
+                                    <th class="{{ $th }}">{{ __($d.'.fields.item') }}</th>
+                                    <th class="{{ $th }}">{{ __($d.'.fields.section') }}</th>
+                                    <th class="{{ $th }}">{{ __($d.'.fields.template') }}</th>
+                                    <th class="{{ $th }}">{{ __($d.'.fields.competency') }}</th>
+                                    <th class="{{ $th }} text-right">{{ __($d.'.fields.low_score_threshold') }}</th>
                                 @elseif ($entity === 'test_banks')
-                                    <th class="px-4 py-3">{{ __('performance_evaluation::dashboard.fields.test_bank') }}</th>
-                                    <th class="px-4 py-3">{{ __('performance_evaluation::dashboard.fields.template_code') }}</th>
-                                    <th class="px-4 py-3">{{ __('performance_evaluation::dashboard.fields.status') }}</th>
-                                    <th class="px-4 py-3">{{ __('performance_evaluation::dashboard.fields.question_count') }}</th>
-                                    <th class="px-4 py-3">{{ __('performance_evaluation::dashboard.fields.session_count') }}</th>
+                                    <th class="{{ $th }}">{{ __($d.'.fields.test_bank') }}</th>
+                                    <th class="{{ $th }}">{{ __($d.'.fields.template_code') }}</th>
+                                    <th class="{{ $th }}">{{ __($d.'.fields.status') }}</th>
+                                    <th class="{{ $th }} text-right">{{ __($d.'.fields.question_count') }}</th>
+                                    <th class="{{ $th }} text-right">{{ __($d.'.fields.session_count') }}</th>
                                 @elseif ($entity === 'test_questions')
-                                    <th class="px-4 py-3">{{ __('performance_evaluation::dashboard.fields.prompt') }}</th>
-                                    <th class="px-4 py-3">{{ __('performance_evaluation::dashboard.fields.test_bank') }}</th>
-                                    <th class="px-4 py-3">{{ __('performance_evaluation::dashboard.fields.question_type') }}</th>
-                                    <th class="px-4 py-3">{{ __('performance_evaluation::dashboard.fields.competency') }}</th>
-                                    <th class="px-4 py-3">{{ __('performance_evaluation::dashboard.fields.answers_count') }}</th>
+                                    <th class="{{ $th }}">{{ __($d.'.fields.prompt') }}</th>
+                                    <th class="{{ $th }}">{{ __($d.'.fields.test_bank') }}</th>
+                                    <th class="{{ $th }}">{{ __($d.'.fields.question_type') }}</th>
+                                    <th class="{{ $th }}">{{ __($d.'.fields.competency') }}</th>
+                                    <th class="{{ $th }} text-right">{{ __($d.'.fields.answers_count') }}</th>
                                 @elseif ($entity === 'test_sessions')
-                                    <th class="px-4 py-3">#</th>
-                                    <th class="px-4 py-3">{{ __('performance_evaluation::dashboard.fields.personnel') }}</th>
-                                    <th class="px-4 py-3">{{ __('performance_evaluation::dashboard.fields.test_bank') }}</th>
-                                    <th class="px-4 py-3">{{ __('performance_evaluation::dashboard.fields.reviewer') }}</th>
-                                    <th class="px-4 py-3">{{ __('performance_evaluation::dashboard.fields.status') }}</th>
+                                    <th class="{{ $th }}">#</th>
+                                    <th class="{{ $th }}">{{ __($d.'.fields.personnel') }}</th>
+                                    <th class="{{ $th }}">{{ __($d.'.fields.test_bank') }}</th>
+                                    <th class="{{ $th }}">{{ __($d.'.fields.reviewer') }}</th>
+                                    <th class="{{ $th }}">{{ __($d.'.fields.status') }}</th>
                                 @elseif ($entity === 'attempts')
-                                    <th class="px-4 py-3">#</th>
-                                    <th class="px-4 py-3">{{ __('performance_evaluation::dashboard.fields.personnel') }}</th>
-                                    <th class="px-4 py-3">{{ __('performance_evaluation::dashboard.fields.test_bank') }}</th>
-                                    <th class="px-4 py-3">{{ __('performance_evaluation::dashboard.fields.status') }}</th>
-                                    <th class="px-4 py-3">{{ __('performance_evaluation::dashboard.fields.score') }}</th>
+                                    <th class="{{ $th }}">#</th>
+                                    <th class="{{ $th }}">{{ __($d.'.fields.personnel') }}</th>
+                                    <th class="{{ $th }}">{{ __($d.'.fields.test_bank') }}</th>
+                                    <th class="{{ $th }}">{{ __($d.'.fields.status') }}</th>
+                                    <th class="{{ $th }} text-right">{{ __($d.'.fields.score') }}</th>
                                 @elseif ($entity === 'test_answers')
-                                    <th class="px-4 py-3">#</th>
-                                    <th class="px-4 py-3">{{ __('performance_evaluation::dashboard.fields.personnel') }}</th>
-                                    <th class="px-4 py-3">{{ __('performance_evaluation::dashboard.fields.question_type') }}</th>
-                                    <th class="px-4 py-3">{{ __('performance_evaluation::dashboard.fields.review_status') }}</th>
-                                    <th class="px-4 py-3">{{ __('performance_evaluation::dashboard.fields.final_score') }}</th>
+                                    <th class="{{ $th }}">#</th>
+                                    <th class="{{ $th }}">{{ __($d.'.fields.personnel') }}</th>
+                                    <th class="{{ $th }}">{{ __($d.'.fields.question_type') }}</th>
+                                    <th class="{{ $th }}">{{ __($d.'.fields.review_status') }}</th>
+                                    <th class="{{ $th }} text-right">{{ __($d.'.fields.final_score') }}</th>
                                 @else
-                                    <th class="px-4 py-3">{{ __('performance_evaluation::dashboard.fields.competency') }}</th>
-                                    <th class="px-4 py-3">{{ __('performance_evaluation::dashboard.fields.personnel') }}</th>
-                                    <th class="px-4 py-3">{{ __('performance_evaluation::dashboard.fields.priority') }}</th>
-                                    <th class="px-4 py-3">{{ __('performance_evaluation::dashboard.fields.status') }}</th>
-                                    <th class="px-4 py-3">{{ __('performance_evaluation::dashboard.fields.links_count') }}</th>
+                                    <th class="{{ $th }}">{{ __($d.'.fields.competency') }}</th>
+                                    <th class="{{ $th }}">{{ __($d.'.fields.personnel') }}</th>
+                                    <th class="{{ $th }}">{{ __($d.'.fields.priority') }}</th>
+                                    <th class="{{ $th }}">{{ __($d.'.fields.status') }}</th>
+                                    <th class="{{ $th }} text-right">{{ __($d.'.fields.links_count') }}</th>
                                 @endif
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-zinc-200 bg-white">
+                        <tbody class="divide-y divide-hairline-subtle">
                             @forelse ($this->rows as $row)
-                                <tr class="align-top transition hover:bg-zinc-50/80 cursor-pointer {{ $selectedRowId === $row->id ? 'bg-sky-50/60' : '' }}" wire:click="selectRow({{ $row->id }})">
+                                <tr wire:key="lists-row-{{ $entity }}-{{ $row->id }}" wire:click="selectRow({{ $row->id }})"
+                                    class="cursor-pointer align-top transition-colors {{ $selectedRowId === $row->id ? 'bg-[#f4f4f5] shadow-[inset_3px_0_0_#18181b]' : 'hover:bg-[#fafafa]' }}">
                                     @if ($entity === 'forms')
-                                        <td class="px-4 py-3 text-zinc-800">{{ $row->personnel?->fullname ?? '—' }}</td>
-                                        <td class="px-4 py-3 text-zinc-600">{{ $row->cycle?->name ?? '—' }}</td>
-                                        <td class="px-4 py-3 text-zinc-600">{{ $row->template?->name ?: $row->template?->code ?: '—' }}</td>
-                                        <td class="px-4 py-3 text-zinc-600">{{ $row->final_category ? __('performance_evaluation::dashboard.categories.'.$row->final_category) : '—' }}</td>
-                                        <td class="px-4 py-3 text-zinc-600">{{ $row->final_score ?? '—' }}</td>
+                                        <td class="{{ $tdMain }}">{{ $row->personnel?->fullname ?? '—' }}</td>
+                                        <td class="{{ $td }}">{{ $row->cycle?->name ?? '—' }}</td>
+                                        <td class="{{ $td }}">{{ $row->template?->name ?: $row->template?->code ?: '—' }}</td>
+                                        <td class="{{ $td }}">{{ $row->final_category ? __($d.'.categories.'.$row->final_category) : '—' }}</td>
+                                        <td class="{{ $td }} hrm-num text-right">{{ $row->final_score ?? '—' }}</td>
                                     @elseif ($entity === 'templates')
-                                        <td class="px-4 py-3 text-zinc-800">{{ $row->name }}</td>
-                                        <td class="px-4 py-3 text-zinc-600">{{ $row->code ?: '—' }}</td>
-                                        <td class="px-4 py-3 text-zinc-600">{{ $row->is_active ? __('performance_evaluation::dashboard.labels.active') : __('performance_evaluation::dashboard.labels.inactive') }}</td>
-                                        <td class="px-4 py-3 text-zinc-600">{{ $row->sections_count }}</td>
-                                        <td class="px-4 py-3 text-zinc-600">{{ \Illuminate\Support\Str::limit((string) $row->description, 80) ?: '—' }}</td>
+                                        <td class="{{ $tdMain }}">{{ $row->name }}</td>
+                                        <td class="{{ $td }} hrm-num">{{ $row->code ?: '—' }}</td>
+                                        <td class="{{ $td }}"><span class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2 py-0.5 text-[11.5px] font-medium {{ $activePill((bool) $row->is_active) }}"><span class="h-1.5 w-1.5 rounded-full {{ $row->is_active ? 'bg-emerald-500' : 'bg-zinc-400' }}"></span>{{ $row->is_active ? __($d.'.labels.active') : __($d.'.labels.inactive') }}</span></td>
+                                        <td class="{{ $td }} hrm-num text-right">{{ $row->sections_count }}</td>
+                                        <td class="{{ $td }} text-ink-muted">{{ \Illuminate\Support\Str::limit((string) $row->description, 80) ?: '—' }}</td>
                                     @elseif ($entity === 'items')
-                                        <td class="px-4 py-3 text-zinc-800">{{ $row->name }}</td>
-                                        <td class="px-4 py-3 text-zinc-600">{{ $row->section?->name ?? '—' }}</td>
-                                        <td class="px-4 py-3 text-zinc-600">{{ $row->section?->template?->name ?: $row->section?->template?->code ?: '—' }}</td>
-                                        <td class="px-4 py-3 text-zinc-600">{{ $row->competency?->name ?? '—' }}</td>
-                                        <td class="px-4 py-3 text-zinc-600">{{ $row->low_score_threshold }}</td>
+                                        <td class="{{ $tdMain }}">{{ $row->name }}</td>
+                                        <td class="{{ $td }}">{{ $row->section?->name ?? '—' }}</td>
+                                        <td class="{{ $td }}">{{ $row->section?->template?->name ?: $row->section?->template?->code ?: '—' }}</td>
+                                        <td class="{{ $td }}">{{ $row->competency?->name ?? '—' }}</td>
+                                        <td class="{{ $td }} hrm-num text-right">{{ $row->low_score_threshold }}</td>
                                     @elseif ($entity === 'test_banks')
-                                        <td class="px-4 py-3 text-zinc-800">{{ $row->name }}</td>
-                                        <td class="px-4 py-3 text-zinc-600">{{ $row->code ?: '—' }}</td>
-                                        <td class="px-4 py-3 text-zinc-600">{{ $row->is_active ? __('performance_evaluation::dashboard.labels.active') : __('performance_evaluation::dashboard.labels.inactive') }}</td>
-                                        <td class="px-4 py-3 text-zinc-600">{{ $row->questions_count }}</td>
-                                        <td class="px-4 py-3 text-zinc-600">{{ $row->sessions_count }}</td>
+                                        <td class="{{ $tdMain }}">{{ $row->name }}</td>
+                                        <td class="{{ $td }} hrm-num">{{ $row->code ?: '—' }}</td>
+                                        <td class="{{ $td }}"><span class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2 py-0.5 text-[11.5px] font-medium {{ $activePill((bool) $row->is_active) }}"><span class="h-1.5 w-1.5 rounded-full {{ $row->is_active ? 'bg-emerald-500' : 'bg-zinc-400' }}"></span>{{ $row->is_active ? __($d.'.labels.active') : __($d.'.labels.inactive') }}</span></td>
+                                        <td class="{{ $td }} hrm-num text-right">{{ $row->questions_count }}</td>
+                                        <td class="{{ $td }} hrm-num text-right">{{ $row->sessions_count }}</td>
                                     @elseif ($entity === 'test_questions')
-                                        <td class="px-4 py-3 text-zinc-800">{{ \Illuminate\Support\Str::limit((string) $row->prompt, 80) }}</td>
-                                        <td class="px-4 py-3 text-zinc-600">{{ $row->bank?->name ?: $row->bank?->code ?: '—' }}</td>
-                                        <td class="px-4 py-3 text-zinc-600">{{ __('performance_evaluation::dashboard.question_types.'.$row->question_type) }}</td>
-                                        <td class="px-4 py-3 text-zinc-600">{{ $row->competency?->name ?? '—' }}</td>
-                                        <td class="px-4 py-3 text-zinc-600">{{ $row->answers_count }}</td>
+                                        <td class="{{ $tdMain }}">{{ \Illuminate\Support\Str::limit((string) $row->prompt, 80) }}</td>
+                                        <td class="{{ $td }}">{{ $row->bank?->name ?: $row->bank?->code ?: '—' }}</td>
+                                        <td class="{{ $td }}">{{ __($d.'.question_types.'.$row->question_type) }}</td>
+                                        <td class="{{ $td }}">{{ $row->competency?->name ?? '—' }}</td>
+                                        <td class="{{ $td }} hrm-num text-right">{{ $row->answers_count }}</td>
                                     @elseif ($entity === 'test_sessions')
-                                        <td class="px-4 py-3 text-zinc-800">#{{ $row->id }}</td>
-                                        <td class="px-4 py-3 text-zinc-600">{{ $row->personnel?->fullname ?? '—' }}</td>
-                                        <td class="px-4 py-3 text-zinc-600">{{ $row->bank?->name ?? '—' }}</td>
-                                        <td class="px-4 py-3 text-zinc-600">{{ $row->reviewer?->name ?: $row->reviewer?->email ?: '—' }}</td>
-                                        <td class="px-4 py-3 text-zinc-600">{{ __('performance_evaluation::dashboard.test_statuses.'.$row->status) }}</td>
+                                        <td class="{{ $td }} hrm-num text-ink-faint">#{{ $row->id }}</td>
+                                        <td class="{{ $tdMain }}">{{ $row->personnel?->fullname ?? '—' }}</td>
+                                        <td class="{{ $td }}">{{ $row->bank?->name ?? '—' }}</td>
+                                        <td class="{{ $td }}">{{ $row->reviewer?->name ?: $row->reviewer?->email ?: '—' }}</td>
+                                        <td class="{{ $td }}">{{ __($d.'.test_statuses.'.$row->status) }}</td>
                                     @elseif ($entity === 'attempts')
-                                        <td class="px-4 py-3 text-zinc-800">#{{ $row->id }}</td>
-                                        <td class="px-4 py-3 text-zinc-600">{{ $row->session?->personnel?->fullname ?? '—' }}</td>
-                                        <td class="px-4 py-3 text-zinc-600">{{ $row->session?->bank?->name ?? '—' }}</td>
-                                        <td class="px-4 py-3 text-zinc-600">{{ __('performance_evaluation::dashboard.test_statuses.'.$row->status) }}</td>
-                                        <td class="px-4 py-3 text-zinc-600">{{ $row->score ?? '—' }}</td>
+                                        <td class="{{ $td }} hrm-num text-ink-faint">#{{ $row->id }}</td>
+                                        <td class="{{ $tdMain }}">{{ $row->session?->personnel?->fullname ?? '—' }}</td>
+                                        <td class="{{ $td }}">{{ $row->session?->bank?->name ?? '—' }}</td>
+                                        <td class="{{ $td }}">{{ __($d.'.test_statuses.'.$row->status) }}</td>
+                                        <td class="{{ $td }} hrm-num text-right">{{ $row->score ?? '—' }}</td>
                                     @elseif ($entity === 'test_answers')
-                                        <td class="px-4 py-3 text-zinc-800">#{{ $row->id }}</td>
-                                        <td class="px-4 py-3 text-zinc-600">{{ $row->attempt?->session?->personnel?->fullname ?? '—' }}</td>
-                                        <td class="px-4 py-3 text-zinc-600">{{ __('performance_evaluation::dashboard.question_types.'.$row->question?->question_type) }}</td>
-                                        <td class="px-4 py-3 text-zinc-600">{{ $row->review_status ? __('performance_evaluation::dashboard.review_statuses.'.$row->review_status) : '—' }}</td>
-                                        <td class="px-4 py-3 text-zinc-600">{{ $row->final_score ?? $row->review_score ?? $row->auto_score ?? '—' }}</td>
+                                        <td class="{{ $td }} hrm-num text-ink-faint">#{{ $row->id }}</td>
+                                        <td class="{{ $tdMain }}">{{ $row->attempt?->session?->personnel?->fullname ?? '—' }}</td>
+                                        <td class="{{ $td }}">{{ __($d.'.question_types.'.$row->question?->question_type) }}</td>
+                                        <td class="{{ $td }}">{{ $row->review_status ? __($d.'.review_statuses.'.$row->review_status) : '—' }}</td>
+                                        <td class="{{ $td }} hrm-num text-right">{{ $row->final_score ?? $row->review_score ?? $row->auto_score ?? '—' }}</td>
                                     @else
-                                        <td class="px-4 py-3 text-zinc-800">{{ $row->competency?->name ?? '—' }}</td>
-                                        <td class="px-4 py-3 text-zinc-600">{{ $row->form?->personnel?->fullname ?? '—' }}</td>
-                                        <td class="px-4 py-3 text-zinc-600">{{ __('training_needs::dashboard.priorities.'.($row->trainingNeed?->priority ?? 'medium')) }}</td>
-                                        <td class="px-4 py-3 text-zinc-600">{{ __('training_needs::dashboard.need_statuses.'.($row->trainingNeed?->status ?? 'draft')) }}</td>
-                                        <td class="px-4 py-3 text-zinc-600">1</td>
+                                        <td class="{{ $tdMain }}">{{ $row->competency?->name ?? '—' }}</td>
+                                        <td class="{{ $td }}">{{ $row->form?->personnel?->fullname ?? '—' }}</td>
+                                        <td class="{{ $td }}">{{ __('training_needs::dashboard.priorities.'.($row->trainingNeed?->priority ?? 'medium')) }}</td>
+                                        <td class="{{ $td }}">{{ __('training_needs::dashboard.need_statuses.'.($row->trainingNeed?->status ?? 'draft')) }}</td>
+                                        <td class="{{ $td }} hrm-num text-right">1</td>
                                     @endif
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="px-4 py-8 text-center text-sm text-zinc-500">{{ __('performance_evaluation::dashboard.empty.full_lists') }}</td>
+                                    <td colspan="5" class="px-4 py-14 text-center text-[12.5px] text-ink-faint">{{ __($d.'.empty.full_lists') }}</td>
                                 </tr>
                             @endforelse
                         </tbody>
-                            </table>
-                        </div>
-                        <div class="border-t border-zinc-200 px-4 py-3">
-                            {{ $this->rows->links() }}
-                        </div>
-                    </div>
+                    </table>
                 </div>
-
-                <div class="rounded-2xl border border-zinc-200 bg-gradient-to-br from-zinc-50 via-white to-sky-50 p-5">
-                    @if ($this->selectedRow)
-                        <div class="space-y-4">
-                            <div>
-                                <p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-400">{{ __('performance_evaluation::dashboard.labels.detail_panel') }}</p>
-                                <p class="mt-2 text-xl font-semibold text-zinc-900">
-                                    @if ($entity === 'forms')
-                                        {{ $this->selectedRow->personnel?->fullname ?? '—' }}
-                                    @elseif ($entity === 'templates')
-                                        {{ $this->selectedRow->name ?: '—' }}
-                                    @elseif ($entity === 'items')
-                                        {{ $this->selectedRow->name ?: '—' }}
-                                    @elseif ($entity === 'test_banks')
-                                        {{ $this->selectedRow->name ?: '—' }}
-                                    @elseif ($entity === 'test_questions')
-                                        {{ \Illuminate\Support\Str::limit((string) $this->selectedRow->prompt, 80) }}
-                                    @elseif ($entity === 'test_sessions')
-                                        #{{ $this->selectedRow->id }}
-                                    @elseif ($entity === 'attempts')
-                                        #{{ $this->selectedRow->id }}
-                                    @elseif ($entity === 'test_answers')
-                                        #{{ $this->selectedRow->id }}
-                                    @else
-                                        {{ $this->selectedRow->competency?->name ?? '—' }}
-                                    @endif
-                                </p>
-                            </div>
-
-                            <div class="{{ $entity === 'test_answers' ? 'w-full' : '' }} flex flex-wrap gap-2">
-                                @if ($entity === 'forms')
-                                    <x-small-badge mode="secondary">{{ __('performance_evaluation::dashboard.fields.cycle') }}: {{ $this->selectedRow->cycle?->name ?? '—' }}</x-small-badge>
-                                    <x-small-badge mode="secondary">{{ __('performance_evaluation::dashboard.fields.template') }}: {{ $this->selectedRow->template?->name ?: $this->selectedRow->template?->code ?: '—' }}</x-small-badge>
-                                    <x-small-badge :mode="$this->selectedRow->final_category === 'weak' ? 'red' : ($this->selectedRow->final_category === 'high' ? 'green' : 'amber')">
-                                        {{ __('performance_evaluation::dashboard.fields.final_category') }}: {{ $this->selectedRow->final_category ? __('performance_evaluation::dashboard.categories.'.$this->selectedRow->final_category) : '—' }}
-                                    </x-small-badge>
-                                    <x-small-badge mode="sky">{{ __('performance_evaluation::dashboard.fields.score') }}: {{ $this->selectedRow->final_score ?? '—' }}</x-small-badge>
-                                @elseif ($entity === 'templates')
-                                    <x-small-badge mode="secondary">{{ __('performance_evaluation::dashboard.fields.template_code') }}: {{ $this->selectedRow->code ?: '—' }}</x-small-badge>
-                                    <x-small-badge :mode="$this->selectedRow->is_active ? 'green' : 'secondary'">{{ $this->selectedRow->is_active ? __('performance_evaluation::dashboard.labels.active') : __('performance_evaluation::dashboard.labels.inactive') }}</x-small-badge>
-                                    <x-small-badge mode="sky">{{ __('performance_evaluation::dashboard.labels.sections_count', ['count' => $this->selectedRow->sections_count]) }}</x-small-badge>
-                                @elseif ($entity === 'items')
-                                    <x-small-badge mode="secondary">{{ __('performance_evaluation::dashboard.fields.section') }}: {{ $this->selectedRow->section?->name ?? '—' }}</x-small-badge>
-                                    <x-small-badge mode="secondary">{{ __('performance_evaluation::dashboard.fields.template') }}: {{ $this->selectedRow->section?->template?->name ?: $this->selectedRow->section?->template?->code ?: '—' }}</x-small-badge>
-                                    <x-small-badge mode="sky">{{ __('performance_evaluation::dashboard.fields.weight_percent') }}: {{ number_format((float) $this->selectedRow->weight_percent, 2) }}%</x-small-badge>
-                                    <x-small-badge mode="amber">{{ __('performance_evaluation::dashboard.fields.low_score_threshold') }}: {{ number_format((float) $this->selectedRow->low_score_threshold, 2) }}</x-small-badge>
-                                @elseif ($entity === 'test_banks')
-                                    <x-small-badge mode="secondary">{{ __('performance_evaluation::dashboard.fields.template_code') }}: {{ $this->selectedRow->code ?: '—' }}</x-small-badge>
-                                    <x-small-badge :mode="$this->selectedRow->is_active ? 'green' : 'secondary'">{{ $this->selectedRow->is_active ? __('performance_evaluation::dashboard.labels.active') : __('performance_evaluation::dashboard.labels.inactive') }}</x-small-badge>
-                                    <x-small-badge mode="sky">{{ __('performance_evaluation::dashboard.fields.question_count') }}: {{ $this->selectedRow->questions_count }}</x-small-badge>
-                                    <x-small-badge mode="amber">{{ __('performance_evaluation::dashboard.fields.session_count') }}: {{ $this->selectedRow->sessions_count }}</x-small-badge>
-                                @elseif ($entity === 'test_questions')
-                                    <x-small-badge mode="secondary">{{ __('performance_evaluation::dashboard.fields.test_bank') }}: {{ $this->selectedRow->bank?->name ?: $this->selectedRow->bank?->code ?: '—' }}</x-small-badge>
-                                    <x-small-badge mode="secondary">{{ __('performance_evaluation::dashboard.fields.competency') }}: {{ $this->selectedRow->competency?->name ?? '—' }}</x-small-badge>
-                                    <x-small-badge mode="sky">{{ __('performance_evaluation::dashboard.fields.question_type') }}: {{ __('performance_evaluation::dashboard.question_types.'.$this->selectedRow->question_type) }}</x-small-badge>
-                                    <x-small-badge mode="amber">{{ __('performance_evaluation::dashboard.fields.answers_count') }}: {{ $this->selectedRow->answers_count }}</x-small-badge>
-                                @elseif ($entity === 'test_sessions')
-                                    <x-small-badge mode="secondary">{{ __('performance_evaluation::dashboard.fields.personnel') }}: {{ $this->selectedRow->personnel?->fullname ?? '—' }}</x-small-badge>
-                                    <x-small-badge mode="secondary">{{ __('performance_evaluation::dashboard.fields.test_bank') }}: {{ $this->selectedRow->bank?->name ?? '—' }}</x-small-badge>
-                                    <x-small-badge mode="sky">{{ __('performance_evaluation::dashboard.fields.status') }}: {{ __('performance_evaluation::dashboard.test_statuses.'.$this->selectedRow->status) }}</x-small-badge>
-                                    <x-small-badge mode="amber">{{ __('performance_evaluation::dashboard.fields.attempts_count') }}: {{ $this->selectedRow->attempts_count }}</x-small-badge>
-                                @elseif ($entity === 'attempts')
-                                    <x-small-badge mode="secondary">{{ __('performance_evaluation::dashboard.fields.personnel') }}: {{ $this->selectedRow->session?->personnel?->fullname ?? '—' }}</x-small-badge>
-                                    <x-small-badge mode="secondary">{{ __('performance_evaluation::dashboard.fields.test_bank') }}: {{ $this->selectedRow->session?->bank?->name ?? '—' }}</x-small-badge>
-                                    <x-small-badge mode="sky">{{ __('performance_evaluation::dashboard.fields.status') }}: {{ __('performance_evaluation::dashboard.test_statuses.'.$this->selectedRow->status) }}</x-small-badge>
-                                    <x-small-badge mode="amber">{{ __('performance_evaluation::dashboard.fields.score') }}: {{ $this->selectedRow->score ?? '—' }}</x-small-badge>
-                                @elseif ($entity === 'test_answers')
-                                    <div class="w-full space-y-3 sm:col-span-2">
-                                        <div class="grid w-full grid-cols-2 gap-3">
-                                            <div class="min-w-0 rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-4">
-                                                <p class="text-[9px] font-semibold uppercase tracking-[0.12em] text-zinc-400">{{ __('performance_evaluation::dashboard.fields.personnel') }}</p>
-                                                <p class="mt-2 text-base font-semibold tracking-tight leading-snug text-zinc-950" title="{{ $this->selectedRow->attempt?->session?->personnel?->fullname ?? '—' }}">
-                                                    {{ $this->selectedRow->attempt?->session?->personnel?->fullname ?? '—' }}
-                                                </p>
-                                            </div>
-                                            <div class="min-w-0 rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-4">
-                                                <p class="text-[9px] font-semibold uppercase tracking-[0.12em] text-zinc-400">{{ __('performance_evaluation::dashboard.fields.test_bank') }}</p>
-                                                <p class="mt-2 text-base font-semibold tracking-tight leading-snug text-zinc-950" title="{{ $this->selectedRow->attempt?->session?->bank?->name ?? '—' }}">
-                                                    {{ $this->selectedRow->attempt?->session?->bank?->name ?? '—' }}
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div class="grid w-full grid-cols-2 gap-3">
-                                            <div class="rounded-2xl border border-sky-200 bg-sky-50 px-4 py-4">
-                                                <p class="text-[9px] font-semibold uppercase tracking-[0.12em] text-sky-700">{{ __('performance_evaluation::dashboard.fields.review_status') }}</p>
-                                                <p class="mt-2 text-base font-semibold tracking-tight leading-snug text-sky-950">{{ $this->selectedRow->review_status ? __('performance_evaluation::dashboard.review_statuses.'.$this->selectedRow->review_status) : '—' }}</p>
-                                            </div>
-                                            <div class="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4">
-                                                <p class="text-[9px] font-semibold uppercase tracking-[0.12em] text-amber-700">{{ __('performance_evaluation::dashboard.fields.final_score') }}</p>
-                                                <p class="mt-2 text-[2rem] font-semibold tracking-tight leading-none text-amber-950">{{ $this->selectedRow->final_score ?? $this->selectedRow->review_score ?? $this->selectedRow->auto_score ?? '—' }}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @else
-                                    <x-small-badge mode="secondary">{{ __('performance_evaluation::dashboard.fields.personnel') }}: {{ $this->selectedRow->form?->personnel?->fullname ?? '—' }}</x-small-badge>
-                                    <x-small-badge mode="secondary">{{ __('performance_evaluation::dashboard.fields.priority') }}: {{ __('training_needs::dashboard.priorities.'.($this->selectedRow->trainingNeed?->priority ?? 'medium')) }}</x-small-badge>
-                                    <x-small-badge mode="sky">{{ __('performance_evaluation::dashboard.fields.status') }}: {{ __('training_needs::dashboard.need_statuses.'.($this->selectedRow->trainingNeed?->status ?? 'draft')) }}</x-small-badge>
-                                @endif
-                            </div>
-
-                            @if ($entity === 'templates')
-                                <div class="rounded-2xl border border-zinc-200 bg-white p-4 text-sm leading-7 text-zinc-600">
-                                    {{ $this->selectedRow->description ?: '—' }}
-                                </div>
-                            @elseif ($entity === 'weak_links')
-                                <div class="rounded-2xl border border-zinc-200 bg-white p-4 text-sm leading-7 text-zinc-600">
-                                    {{ $this->selectedRow->trainingNeed?->presentedReason() ?? '—' }}
-                                </div>
-                            @elseif ($entity === 'items')
-                                <div class="rounded-2xl border border-zinc-200 bg-white p-4 text-sm leading-7 text-zinc-600">
-                                    {{ $this->selectedRow->competency?->name ?? __('performance_evaluation::dashboard.labels.no_competency') }}
-                                </div>
-                            @elseif ($entity === 'test_banks')
-                                <div class="rounded-2xl border border-zinc-200 bg-white p-4 text-sm leading-7 text-zinc-600">
-                                    <p class="font-semibold text-zinc-900">{{ __('performance_evaluation::dashboard.fields.description') }}</p>
-                                    <p class="mt-2">{{ $this->selectedRow->description ?: '—' }}</p>
-                                    <div class="mt-4 border-t border-zinc-200 pt-4">
-                                        <p class="font-semibold text-zinc-900">{{ __('performance_evaluation::dashboard.cards.test_bank_contents') }}</p>
-                                        <div class="mt-3 space-y-2">
-                                            @forelse ($this->selectedRow->questions as $question)
-                                                <div class="rounded-xl border border-zinc-100 bg-zinc-50 px-3 py-2">
-                                                    <p class="text-sm font-medium text-zinc-800">{{ \Illuminate\Support\Str::limit((string) $question->prompt, 90) }}</p>
-                                                    <p class="text-xs text-zinc-500">{{ __('performance_evaluation::dashboard.question_types.'.$question->question_type) }} • {{ $question->competency?->name ?? __('performance_evaluation::dashboard.labels.no_competency') }}</p>
-                                                </div>
-                                            @empty
-                                                <p class="text-sm text-zinc-500">{{ __('performance_evaluation::dashboard.empty.test_questions') }}</p>
-                                            @endforelse
-                                        </div>
-                                    </div>
-                                </div>
-                            @elseif ($entity === 'test_questions')
-                                <div class="rounded-2xl border border-zinc-200 bg-white p-4 text-sm leading-7 text-zinc-600 space-y-4">
-                                    <div>
-                                        <p class="font-semibold text-zinc-900">{{ __('performance_evaluation::dashboard.fields.prompt') }}</p>
-                                        <p class="mt-2">{{ $this->selectedRow->prompt ?: '—' }}</p>
-                                    </div>
-                                    <div>
-                                        <p class="font-semibold text-zinc-900">{{ __('performance_evaluation::dashboard.fields.options_text') }}</p>
-                                        <div class="mt-2 space-y-2">
-                                            @forelse ($this->selectedRow->options as $option)
-                                                <div class="rounded-xl border border-zinc-100 bg-zinc-50 px-3 py-2">
-                                                    <p class="text-sm font-medium text-zinc-800">{{ $option->label }}</p>
-                                                    <p class="text-xs text-zinc-500">{{ __('performance_evaluation::dashboard.fields.score') }}: {{ $option->score_value }} • {{ __('performance_evaluation::dashboard.fields.is_correct') }}: {{ $option->is_correct ? __('performance_evaluation::dashboard.labels.yes') : __('performance_evaluation::dashboard.labels.no') }}</p>
-                                                </div>
-                                            @empty
-                                                <p class="text-sm text-zinc-500">—</p>
-                                            @endforelse
-                                        </div>
-                                    </div>
-                                </div>
-                            @elseif ($entity === 'test_sessions')
-                                <div class="rounded-2xl border border-zinc-200 bg-white p-4 text-sm leading-7 text-zinc-600">
-                                    <p>{{ __('performance_evaluation::dashboard.fields.cycle') }}: {{ $this->selectedRow->cycle?->name ?? '—' }}</p>
-                                    <p>{{ __('performance_evaluation::dashboard.fields.reviewer') }}: {{ $this->selectedRow->reviewer?->name ?: $this->selectedRow->reviewer?->email ?: '—' }}</p>
-                                    <p>{{ __('performance_evaluation::dashboard.fields.scheduled_at') }}: {{ $this->selectedRow->scheduled_at?->format('d.m.Y') ?? '—' }}</p>
-                                    <p>{{ __('performance_evaluation::dashboard.fields.available_until') }}: {{ $this->selectedRow->available_until?->format('d.m.Y') ?? '—' }}</p>
-                                </div>
-                            @elseif ($entity === 'test_answers')
-                                <div class="w-full space-y-3 text-sm text-zinc-700">
-                                    <div class="rounded-2xl border border-zinc-200 bg-white px-5 py-4">
-                                        <p class="text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-400">{{ __('performance_evaluation::dashboard.fields.prompt') }}</p>
-                                        <p class="mt-2 text-base font-medium leading-7 text-zinc-900">{{ $this->selectedRow->question?->prompt ?? '—' }}</p>
-                                    </div>
-                                    <div class="grid w-full grid-cols-2 gap-3">
-                                        <div class="rounded-2xl border border-zinc-200 bg-zinc-50 px-5 py-4">
-                                            <p class="text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-400">{{ __('performance_evaluation::dashboard.fields.option') }}</p>
-                                            <p class="mt-2 text-sm leading-6 text-zinc-900">{{ $this->selectedRow->selectedOption?->label ?? '—' }}</p>
-                                        </div>
-                                        <div class="rounded-2xl border border-zinc-200 bg-zinc-50 px-5 py-4">
-                                            <p class="text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-400">{{ __('performance_evaluation::dashboard.fields.answer_text') }}</p>
-                                            <p class="mt-2 text-sm leading-6 text-zinc-900">{{ $this->selectedRow->answer_text ?: '—' }}</p>
-                                        </div>
-                                    </div>
-                                    <div class="rounded-2xl border border-zinc-200 bg-zinc-50 px-5 py-4">
-                                        <p class="text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-400">{{ __('performance_evaluation::dashboard.fields.feedback') }}</p>
-                                        <p class="mt-2 text-sm leading-6 text-zinc-900">{{ $this->selectedRow->feedback ?: '—' }}</p>
-                                    </div>
-                                </div>
-                            @endif
-                        </div>
-                    @else
-                        <x-ui.empty-state icon="icons.performance-icon" :message="__('performance_evaluation::dashboard.empty.select_list_row')" />
-                    @endif
+                <div class="border-t border-hairline-subtle px-4 py-3">
+                    {{ $this->rows->links() }}
                 </div>
             </div>
         </div>
-    </x-surface-card>
+
+        {{-- detail panel --}}
+        <aside class="self-start overflow-hidden rounded-2xl border border-hairline bg-white shadow-card xl:sticky xl:top-4">
+            @if ($selected)
+                <div class="border-b border-hairline-subtle bg-[#fafafa] px-5 py-3">
+                    <p class="{{ $detailLabel }}">{{ __($d.'.labels.detail_panel') }}</p>
+                    <p class="mt-1 text-[16px] font-semibold leading-snug tracking-[-0.02em] text-ink">
+                        @if ($entity === 'forms')
+                            {{ $selected->personnel?->fullname ?? '—' }}
+                        @elseif (in_array($entity, ['templates', 'items', 'test_banks'], true))
+                            {{ $selected->name ?: '—' }}
+                        @elseif ($entity === 'test_questions')
+                            {{ \Illuminate\Support\Str::limit((string) $selected->prompt, 80) }}
+                        @elseif (in_array($entity, ['test_sessions', 'attempts', 'test_answers'], true))
+                            <span class="hrm-num">#{{ $selected->id }}</span>
+                        @else
+                            {{ $selected->competency?->name ?? '—' }}
+                        @endif
+                    </p>
+                </div>
+
+                <div class="flex flex-col gap-3 px-5 py-4">
+                    @if ($entity !== 'test_answers')
+                        <div class="flex flex-wrap gap-1.5">
+                            @if ($entity === 'forms')
+                                @php $category = $selected->final_category; @endphp
+                                <span class="{{ $chip }}">{{ __($d.'.fields.cycle') }}: {{ $selected->cycle?->name ?? '—' }}</span>
+                                <span class="{{ $chip }}">{{ __($d.'.fields.template') }}: {{ $selected->template?->name ?: $selected->template?->code ?: '—' }}</span>
+                                <span class="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[11.5px] {{ $category === 'weak' ? 'bg-rose-50 text-rose-700' : ($category === 'high' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700') }}">{{ __($d.'.fields.final_category') }}: {{ $category ? __($d.'.categories.'.$category) : '—' }}</span>
+                                <span class="{{ $chip }}">{{ __($d.'.fields.score') }}: <span class="hrm-num text-ink">{{ $selected->final_score ?? '—' }}</span></span>
+                            @elseif ($entity === 'templates')
+                                <span class="{{ $chip }}">{{ __($d.'.fields.template_code') }}: <span class="hrm-num">{{ $selected->code ?: '—' }}</span></span>
+                                <span class="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[11.5px] {{ $activePill((bool) $selected->is_active) }}">{{ $selected->is_active ? __($d.'.labels.active') : __($d.'.labels.inactive') }}</span>
+                                <span class="{{ $chip }}">{{ __($d.'.labels.sections_count', ['count' => $selected->sections_count]) }}</span>
+                            @elseif ($entity === 'items')
+                                <span class="{{ $chip }}">{{ __($d.'.fields.section') }}: {{ $selected->section?->name ?? '—' }}</span>
+                                <span class="{{ $chip }}">{{ __($d.'.fields.template') }}: {{ $selected->section?->template?->name ?: $selected->section?->template?->code ?: '—' }}</span>
+                                <span class="{{ $chip }}">{{ __($d.'.fields.weight_percent') }}: <span class="hrm-num text-ink">{{ number_format((float) $selected->weight_percent, 2) }}%</span></span>
+                                <span class="inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-1 text-[11.5px] text-amber-700">{{ __($d.'.fields.low_score_threshold') }}: <span class="hrm-num">{{ number_format((float) $selected->low_score_threshold, 2) }}</span></span>
+                            @elseif ($entity === 'test_banks')
+                                <span class="{{ $chip }}">{{ __($d.'.fields.template_code') }}: <span class="hrm-num">{{ $selected->code ?: '—' }}</span></span>
+                                <span class="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[11.5px] {{ $activePill((bool) $selected->is_active) }}">{{ $selected->is_active ? __($d.'.labels.active') : __($d.'.labels.inactive') }}</span>
+                                <span class="{{ $chip }}">{{ __($d.'.fields.question_count') }}: <span class="hrm-num text-ink">{{ $selected->questions_count }}</span></span>
+                                <span class="{{ $chip }}">{{ __($d.'.fields.session_count') }}: <span class="hrm-num text-ink">{{ $selected->sessions_count }}</span></span>
+                            @elseif ($entity === 'test_questions')
+                                <span class="{{ $chip }}">{{ __($d.'.fields.test_bank') }}: {{ $selected->bank?->name ?: $selected->bank?->code ?: '—' }}</span>
+                                <span class="{{ $chip }}">{{ __($d.'.fields.competency') }}: {{ $selected->competency?->name ?? '—' }}</span>
+                                <span class="{{ $chip }}">{{ __($d.'.fields.question_type') }}: {{ __($d.'.question_types.'.$selected->question_type) }}</span>
+                                <span class="{{ $chip }}">{{ __($d.'.fields.answers_count') }}: <span class="hrm-num text-ink">{{ $selected->answers_count }}</span></span>
+                            @elseif ($entity === 'test_sessions')
+                                <span class="{{ $chip }}">{{ __($d.'.fields.personnel') }}: {{ $selected->personnel?->fullname ?? '—' }}</span>
+                                <span class="{{ $chip }}">{{ __($d.'.fields.test_bank') }}: {{ $selected->bank?->name ?? '—' }}</span>
+                                <span class="{{ $chip }}">{{ __($d.'.fields.status') }}: {{ __($d.'.test_statuses.'.$selected->status) }}</span>
+                                <span class="{{ $chip }}">{{ __($d.'.fields.attempts_count') }}: <span class="hrm-num text-ink">{{ $selected->attempts_count }}</span></span>
+                            @elseif ($entity === 'attempts')
+                                <span class="{{ $chip }}">{{ __($d.'.fields.personnel') }}: {{ $selected->session?->personnel?->fullname ?? '—' }}</span>
+                                <span class="{{ $chip }}">{{ __($d.'.fields.test_bank') }}: {{ $selected->session?->bank?->name ?? '—' }}</span>
+                                <span class="{{ $chip }}">{{ __($d.'.fields.status') }}: {{ __($d.'.test_statuses.'.$selected->status) }}</span>
+                                <span class="{{ $chip }}">{{ __($d.'.fields.score') }}: <span class="hrm-num text-ink">{{ $selected->score ?? '—' }}</span></span>
+                            @else
+                                <span class="{{ $chip }}">{{ __($d.'.fields.personnel') }}: {{ $selected->form?->personnel?->fullname ?? '—' }}</span>
+                                <span class="{{ $chip }}">{{ __($d.'.fields.priority') }}: {{ __('training_needs::dashboard.priorities.'.($selected->trainingNeed?->priority ?? 'medium')) }}</span>
+                                <span class="{{ $chip }}">{{ __($d.'.fields.status') }}: {{ __('training_needs::dashboard.need_statuses.'.($selected->trainingNeed?->status ?? 'draft')) }}</span>
+                            @endif
+                        </div>
+                    @endif
+
+                    @if ($entity === 'templates')
+                        <div class="{{ $detailBox }} text-[13px] leading-6 text-ink-soft">{{ $selected->description ?: '—' }}</div>
+                    @elseif ($entity === 'weak_links')
+                        <div class="{{ $detailBox }} text-[13px] leading-6 text-ink-soft">{{ $selected->trainingNeed?->presentedReason() ?? '—' }}</div>
+                    @elseif ($entity === 'items')
+                        <div class="{{ $detailBox }} text-[13px] leading-6 text-ink-soft">{{ $selected->competency?->name ?? __($d.'.labels.no_competency') }}</div>
+                    @elseif ($entity === 'test_banks')
+                        <div class="{{ $detailBox }}">
+                            <p class="{{ $detailLabel }}">{{ __($d.'.fields.description') }}</p>
+                            <p class="mt-1 text-[13px] leading-6 text-ink-soft">{{ $selected->description ?: '—' }}</p>
+                        </div>
+                        <div>
+                            <p class="{{ $detailLabel }} mb-2">{{ __($d.'.cards.test_bank_contents') }}</p>
+                            <div class="flex flex-col divide-y divide-hairline-subtle rounded-xl border border-hairline-subtle">
+                                @forelse ($selected->questions as $question)
+                                    <div wire:key="lists-bank-question-{{ $question->id }}" class="px-3.5 py-2.5">
+                                        <p class="text-[13px] font-medium text-ink">{{ \Illuminate\Support\Str::limit((string) $question->prompt, 90) }}</p>
+                                        <p class="mt-0.5 text-[11.5px] text-ink-faint">{{ __($d.'.question_types.'.$question->question_type) }} · {{ $question->competency?->name ?? __($d.'.labels.no_competency') }}</p>
+                                    </div>
+                                @empty
+                                    <p class="px-3.5 py-4 text-[12.5px] text-ink-faint">{{ __($d.'.empty.test_questions') }}</p>
+                                @endforelse
+                            </div>
+                        </div>
+                    @elseif ($entity === 'test_questions')
+                        <div class="{{ $detailBox }}">
+                            <p class="{{ $detailLabel }}">{{ __($d.'.fields.prompt') }}</p>
+                            <p class="mt-1 text-[13px] leading-6 text-ink">{{ $selected->prompt ?: '—' }}</p>
+                        </div>
+                        <div>
+                            <p class="{{ $detailLabel }} mb-2">{{ __($d.'.fields.options_text') }}</p>
+                            <div class="flex flex-col divide-y divide-hairline-subtle rounded-xl border border-hairline-subtle">
+                                @forelse ($selected->options as $option)
+                                    <div wire:key="lists-option-{{ $option->id }}" class="flex items-center justify-between gap-3 px-3.5 py-2.5">
+                                        <p class="min-w-0 text-[13px] font-medium text-ink">{{ $option->label }}</p>
+                                        <div class="flex shrink-0 items-center gap-2 text-[11.5px] text-ink-faint">
+                                            <span>{{ __($d.'.fields.score') }}: <span class="hrm-num text-ink">{{ $option->score_value }}</span></span>
+                                            <span class="rounded-md px-1.5 py-0.5 {{ $option->is_correct ? 'bg-emerald-50 text-emerald-700' : 'bg-[#f4f4f5] text-ink-muted' }}">{{ __($d.'.fields.is_correct') }}: {{ $option->is_correct ? __($d.'.labels.yes') : __($d.'.labels.no') }}</span>
+                                        </div>
+                                    </div>
+                                @empty
+                                    <p class="px-3.5 py-4 text-[12.5px] text-ink-faint">—</p>
+                                @endforelse
+                            </div>
+                        </div>
+                    @elseif ($entity === 'test_sessions')
+                        <dl class="grid grid-cols-2 gap-2">
+                            @foreach ([
+                                'cycle' => $selected->cycle?->name ?? '—',
+                                'reviewer' => $selected->reviewer?->name ?: $selected->reviewer?->email ?: '—',
+                                'scheduled_at' => $selected->scheduled_at?->format('d.m.Y') ?? '—',
+                                'available_until' => $selected->available_until?->format('d.m.Y') ?? '—',
+                            ] as $field => $value)
+                                <div class="{{ $detailBox }}">
+                                    <dt class="{{ $detailLabel }}">{{ __($d.'.fields.'.$field) }}</dt>
+                                    <dd class="mt-1 truncate text-[13px] font-medium text-ink {{ in_array($field, ['scheduled_at', 'available_until'], true) ? 'hrm-num' : '' }}">{{ $value }}</dd>
+                                </div>
+                            @endforeach
+                        </dl>
+                    @elseif ($entity === 'test_answers')
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="{{ $detailBox }} min-w-0">
+                                <p class="{{ $detailLabel }}">{{ __($d.'.fields.personnel') }}</p>
+                                <p class="mt-1 text-[13px] font-semibold leading-snug text-ink" title="{{ $selected->attempt?->session?->personnel?->fullname ?? '—' }}">{{ $selected->attempt?->session?->personnel?->fullname ?? '—' }}</p>
+                            </div>
+                            <div class="{{ $detailBox }} min-w-0">
+                                <p class="{{ $detailLabel }}">{{ __($d.'.fields.test_bank') }}</p>
+                                <p class="mt-1 text-[13px] font-semibold leading-snug text-ink" title="{{ $selected->attempt?->session?->bank?->name ?? '—' }}">{{ $selected->attempt?->session?->bank?->name ?? '—' }}</p>
+                            </div>
+                            <div class="{{ $detailBox }}">
+                                <p class="{{ $detailLabel }}">{{ __($d.'.fields.review_status') }}</p>
+                                <p class="mt-1 text-[13px] font-semibold text-ink">{{ $selected->review_status ? __($d.'.review_statuses.'.$selected->review_status) : '—' }}</p>
+                            </div>
+                            <div class="{{ $detailBox }}">
+                                <p class="{{ $detailLabel }}">{{ __($d.'.fields.final_score') }}</p>
+                                <p class="hrm-num mt-1 text-[22px] font-semibold leading-none text-ink">{{ $selected->final_score ?? $selected->review_score ?? $selected->auto_score ?? '—' }}</p>
+                            </div>
+                        </div>
+                        <div class="{{ $detailBox }}">
+                            <p class="{{ $detailLabel }}">{{ __($d.'.fields.prompt') }}</p>
+                            <p class="mt-1 text-[13.5px] font-medium leading-6 text-ink">{{ $selected->question?->prompt ?? '—' }}</p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="{{ $detailBox }}">
+                                <p class="{{ $detailLabel }}">{{ __($d.'.fields.option') }}</p>
+                                <p class="mt-1 text-[13px] leading-6 text-ink">{{ $selected->selectedOption?->label ?? '—' }}</p>
+                            </div>
+                            <div class="{{ $detailBox }}">
+                                <p class="{{ $detailLabel }}">{{ __($d.'.fields.answer_text') }}</p>
+                                <p class="mt-1 text-[13px] leading-6 text-ink">{{ $selected->answer_text ?: '—' }}</p>
+                            </div>
+                        </div>
+                        <div class="{{ $detailBox }}">
+                            <p class="{{ $detailLabel }}">{{ __($d.'.fields.feedback') }}</p>
+                            <p class="mt-1 text-[13px] leading-6 text-ink">{{ $selected->feedback ?: '—' }}</p>
+                        </div>
+                    @endif
+                </div>
+            @else
+                <div class="px-6 py-16 text-center">
+                    <div class="mx-auto flex h-11 w-11 items-center justify-center rounded-2xl bg-[#f4f4f5] text-ink-faint">
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+                    </div>
+                    <p class="mx-auto mt-3 max-w-xs text-[12.5px] leading-5 text-ink-faint">{{ __($d.'.empty.select_list_row') }}</p>
+                </div>
+            @endif
+        </aside>
+    </div>
 </div>

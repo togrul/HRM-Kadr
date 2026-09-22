@@ -13,6 +13,9 @@ class EvaluationsSummary extends Component
     use InteractsWithPerformanceEvaluationAccess;
     use InteractsWithPerformanceEvaluationQueries;
 
+    /** Filters the list by employee name. */
+    public string $formSearch = '';
+
     public function mount(): void
     {
         $this->authorizePerformanceEvaluationView();
@@ -21,6 +24,11 @@ class EvaluationsSummary extends Component
     public function relayEditEvaluationForm(int $formId): void
     {
         $this->dispatch('performance-evaluation:edit-form', formId: $formId);
+    }
+
+    public function relayScoreEvaluationForm(int $formId): void
+    {
+        $this->dispatch('performance-evaluation:score-form', formId: $formId);
     }
 
     public function relayDeleteEvaluationForm(int $formId): void

@@ -6,7 +6,7 @@
 
     $typeChip = [
         'kpi' => ['KPI', 'bg-indigo-50 text-indigo-600'],
-        'goal' => [__('performance_evaluation::goals.types.goal'), 'bg-zinc-100 text-zinc-500'],
+        'goal' => [__('performance_evaluation::goals.types.goal'), 'bg-[#f4f4f5] text-ink-muted'],
         'objective' => [__('performance_evaluation::goals.types.objective'), 'bg-blue-50 text-blue-600'],
     ][$node['goal_type']] ?? ['•', 'bg-zinc-100 text-zinc-500'];
 
@@ -30,26 +30,26 @@
     $pad = $depth * 22;
 @endphp
 
-<div class="border-b border-zinc-100">
-    <div class="flex items-center gap-3 px-3 py-3 transition-colors hover:bg-zinc-50/60">
+<div class="border-b border-hairline-subtle last:border-b-0">
+    <div class="group flex items-center gap-3 px-4 py-3 transition-colors hover:bg-[#fafafa]">
         <div class="flex min-w-0 flex-1 items-center gap-2" style="padding-left: {{ $pad }}px">
             <span class="shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide {{ $typeChip[1] }}">{{ $typeChip[0] }}</span>
             <div class="min-w-0">
-                <p class="truncate text-[14px] font-semibold text-zinc-900">{{ $node['title'] }}</p>
-                <p class="truncate text-[12px] text-zinc-400">
+                <p class="truncate text-[13.5px] font-semibold tracking-[-0.01em] text-ink">{{ $node['title'] }}</p>
+                <p class="truncate text-[12px] text-ink-faint">
                     @if ($node['personnel_name']){{ $node['personnel_name'] }}@else{{ __('performance_evaluation::goals.org_level') }}@endif
-                    @if ($node['target'] > 0) · {{ rtrim(rtrim(number_format($node['current'], 2), '0'), '.') }}/{{ rtrim(rtrim(number_format($node['target'], 2), '0'), '.') }} {{ $node['unit'] }}@endif
+                    @if ($node['target'] > 0) · <span class="hrm-num">{{ rtrim(rtrim(number_format($node['current'], 2), '0'), '.') }}/{{ rtrim(rtrim(number_format($node['target'], 2), '0'), '.') }}</span> {{ $node['unit'] }}@endif
                     @if ($node['due_date']) · {{ $node['due_date'] }}@endif
-                    @if ($node['weight'] > 0) · {{ rtrim(rtrim(number_format($node['weight'], 2), '0'), '.') }}%@endif
+                    @if ($node['weight'] > 0) · <span class="hrm-num">{{ rtrim(rtrim(number_format($node['weight'], 2), '0'), '.') }}%</span>@endif
                 </p>
             </div>
         </div>
 
         <div class="hidden w-40 shrink-0 items-center gap-2 sm:flex">
-            <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-zinc-100">
+            <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-[#f4f4f5]">
                 <div class="h-full rounded-full {{ $barClass }} transition-all" style="width: {{ max(2, $rollup) }}%"></div>
             </div>
-            <span class="w-9 text-right text-[13px] font-semibold tabular-nums {{ $pctClass }}">{{ $rollup }}%</span>
+            <span class="hrm-num w-10 text-right text-[12.5px] font-semibold {{ $pctClass }}">{{ $rollup }}%</span>
         </div>
 
         @can('manage-performance-evaluation')
@@ -68,24 +68,24 @@
 
             <div class="flex shrink-0 items-center gap-1">
                 <button type="button" wire:click="startCheckin({{ $node['id'] }})" title="{{ __('performance_evaluation::goals.actions.checkin') }}"
-                    class="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-500 transition-colors hover:bg-emerald-50 hover:text-emerald-600">
-                    <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+                    class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition-colors hover:bg-emerald-50 hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
                 </button>
                 <button type="button"
                     x-on:click="$dispatch('confirm-action', { tone: 'rose', message: @js(__('performance_evaluation::goals.confirm_delete')), run: () => $wire.deleteGoal({{ $node['id'] }}) })"
                     title="{{ __('performance_evaluation::goals.actions.delete') }}"
-                    class="flex h-8 w-8 items-center justify-center rounded-lg text-rose-400 transition-colors hover:bg-rose-50 hover:text-rose-500">
-                    <svg class="h-[17px] w-[17px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
+                    class="flex h-8 w-8 items-center justify-center rounded-lg transition-colors hover:bg-rose-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300">
+                    <x-icons.delete-icon size="h-4 w-4" />
                 </button>
             </div>
         @else
-            <span class="hidden shrink-0 rounded-md px-2.5 py-1 text-[11px] font-semibold sm:inline-block {{ $statusChip }}">{{ __('performance_evaluation::goals.statuses.'.$node['status']) }}</span>
+            <span class="hidden shrink-0 items-center gap-1.5 rounded-full px-2 py-0.5 text-[11.5px] font-medium sm:inline-flex {{ $statusChip }}"><span class="h-1.5 w-1.5 rounded-full {{ $statusDots[$node['status']] ?? 'bg-zinc-300' }}"></span>{{ __('performance_evaluation::goals.statuses.'.$node['status']) }}</span>
         @endcan
     </div>
 
     {{-- inline check-in --}}
     @if ($checkinGoalId === $node['id'])
-        <div class="flex flex-wrap items-end gap-2.5 border-t border-zinc-100 bg-zinc-50/70 px-3 py-3.5" style="padding-left: {{ $pad + 24 }}px">
+        <div class="flex flex-wrap items-end gap-2.5 border-t border-hairline-subtle bg-[#fafafa] px-4 py-3.5" style="padding-left: {{ $pad + 24 }}px">
             <div class="w-36">
                 <x-label value="{{ __('performance_evaluation::goals.fields.checkin_value') }}" />
                 <x-livewire-input mode="default" type="number" step="0.01" name="checkinValue" wire:model="checkinValue" />
@@ -95,8 +95,8 @@
                 <x-label value="{{ __('performance_evaluation::goals.fields.checkin_note') }}" />
                 <x-livewire-input mode="default" name="checkinNote" wire:model="checkinNote" />
             </div>
-            <button type="button" wire:click="saveCheckin" class="h-[42px] rounded-lg bg-emerald-600 px-4 text-sm font-semibold text-white hover:bg-emerald-500">{{ __('performance_evaluation::goals.actions.save') }}</button>
-            <button type="button" wire:click="cancelCheckin" class="h-[42px] rounded-lg border border-zinc-200 px-4 text-sm font-medium text-zinc-600 hover:bg-white">{{ __('performance_evaluation::goals.actions.cancel') }}</button>
+            <button type="button" wire:click="saveCheckin" class="h-[42px] rounded-xl bg-ink px-4 text-[13px] font-semibold text-white hover:bg-ink-hover">{{ __('performance_evaluation::goals.actions.save') }}</button>
+            <button type="button" wire:click="cancelCheckin" class="h-[42px] rounded-xl border border-hairline bg-white px-4 text-[13px] font-medium text-ink-soft hover:border-zinc-300">{{ __('performance_evaluation::goals.actions.cancel') }}</button>
         </div>
     @endif
 </div>

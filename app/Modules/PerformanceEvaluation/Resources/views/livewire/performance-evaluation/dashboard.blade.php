@@ -1,5 +1,27 @@
 @php
     $contextTabs = ['overview', 'kpi_scorecards', 'kpi_library', 'goals', 'succession', 'feedback', 'cycles', 'templates', 'evaluations', 'tests', 'reports', 'lists'];
+    // The panel groups the module's twelve screens by job, so the list reads as a map, not a wall.
+    $navGroups = [
+        'home' => ['overview'],
+        'kpi' => ['kpi_scorecards', 'kpi_library'],
+        'evaluation' => ['cycles', 'templates', 'evaluations', 'tests'],
+        'talent' => ['goals', 'succession', 'feedback'],
+        'insight' => ['reports', 'lists'],
+    ];
+    $navIcons = [
+        'overview' => '<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>',
+        'kpi_scorecards' => '<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 15l2.5-3 2.5 2 3-4"/>',
+        'kpi_library' => '<path d="M4 5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5M9 7h6"/>',
+        'cycles' => '<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+        'templates' => '<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/>',
+        'evaluations' => '<path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/>',
+        'tests' => '<path d="M9 3h6M10 3v6L5 19a1.5 1.5 0 0 0 1.3 2h11.4a1.5 1.5 0 0 0 1.3-2l-5-10V3"/>',
+        'goals' => '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
+        'succession' => '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/>',
+        'feedback' => '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+        'reports' => '<path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/>',
+        'lists' => '<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
+    ];
     $stats = $this->stats;
     $cycle = $this->activeCycle;
 
@@ -20,18 +42,26 @@
             :title="__('performance_evaluation::dashboard.panel.title')"
             :subtitle="$cycle['name'] ?? null"
         >
-            <x-context-panel.section :title="__('performance_evaluation::dashboard.sections.title')">
-                @foreach ($contextTabs as $tab)
-                    <x-context-panel.item
-                        wire:key="performance-panel-tab-{{ $tab }}"
-                        wire:click.prevent="switchTab('{{ $tab }}')"
-                        wire:loading.attr="disabled"
-                        wire:target="switchTab"
-                        :active="$activeTab === $tab"
-                        :count="$tabCounts[$tab] ?? null"
-                    >{{ __('performance_evaluation::dashboard.tabs.'.$tab) }}</x-context-panel.item>
-                @endforeach
-            </x-context-panel.section>
+            @foreach ($navGroups as $group => $groupTabs)
+                @continue(array_intersect($groupTabs, $tabs) === [])
+                <x-context-panel.section :title="$group === 'home' ? null : __('performance_evaluation::dashboard.nav_groups.'.$group)">
+                    @foreach (array_intersect($groupTabs, $tabs) as $tab)
+                        <x-context-panel.item
+                            wire:key="performance-panel-tab-{{ $tab }}"
+                            wire:click.prevent="switchTab('{{ $tab }}')"
+                            wire:loading.attr="disabled"
+                            wire:target="switchTab"
+                            :active="$activeTab === $tab"
+                            :count="$tabCounts[$tab] ?? null"
+                        >
+                            <x-slot:icon>
+                                <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">{!! $navIcons[$tab] ?? '<circle cx="12" cy="12" r="3"/>' !!}</svg>
+                            </x-slot:icon>
+                            {{ __('performance_evaluation::dashboard.tabs.'.$tab) }}
+                        </x-context-panel.item>
+                    @endforeach
+                </x-context-panel.section>
+            @endforeach
 
             @if ($cycle)
                 <x-context-panel.section :title="__('performance_evaluation::dashboard.panel.active_cycle')" :padded="false">
