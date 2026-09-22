@@ -1,5 +1,5 @@
 @props([
-    'title' => 'Məlumat gözlənilir',
+    'title' => null,
     'message' => null,
     'compact' => false,
 ])
@@ -12,7 +12,7 @@
     <div class="flex items-start justify-between gap-4 border-b border-zinc-100 pb-4">
         <div class="space-y-1">
             <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-zinc-400">{{ __('reports::dashboard.labels.report_preview') }}</p>
-            <h4 class="text-base font-semibold tracking-tight text-zinc-950">{{ $title }}</h4>
+            <h4 class="text-base font-semibold tracking-tight text-zinc-950">{{ $title ?? __('reports::dashboard.empty.awaiting_data') }}</h4>
             @if ($message)
                 <p class="text-sm leading-6 text-zinc-500">{{ $message }}</p>
             @endif
