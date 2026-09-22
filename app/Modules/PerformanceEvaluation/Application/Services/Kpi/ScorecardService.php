@@ -133,16 +133,14 @@ class ScorecardService
 
     public function roleFor(User $user, PerformanceScorecard $card): ?string
     {
-        if ($user->can('manage-performance-evaluation')) {
-            return 'hr';
-        }
-
         $personnelId = $this->links->resolve($user);
 
+        // Nobody reviews, calibrates or approves their own card — not even HR.
         return match (true) {
+            $personnelId !== null && $personnelId === (int) $card->personnel_id => 'employee',
+            $user->can('manage-performance-evaluation') => 'hr',
             $personnelId === null => null,
             $personnelId === (int) $card->manager_personnel_id => 'manager',
-            $personnelId === (int) $card->personnel_id => 'employee',
             default => null,
         };
     }
@@ -446,6 +444,11 @@ class ScorecardService
      * item was built from), then the card's KPI, competency, final and calibrated score.
      */
     public function recalculate(PerformanceScorecard $card): void
+    {
+        DB::transaction(fn () => $this->rescore($card));
+    }
+
+    private function rescore(PerformanceScorecard $card): void
     {
         // ponytail: inline on each change; queue it if a card ever takes long enough to notice.
         $card->load(['items.kpi', 'items.kpiVersion', 'items.actuals', 'form:id,final_score', 'calibrations']);

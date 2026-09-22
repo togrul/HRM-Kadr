@@ -190,7 +190,7 @@ class BonusService
             return 0.0;
         }
 
-        $targetPct = (float) collect($rule->position_targets ?? [])->first(fn (array $pair): bool => (int) $pair[0] === (int) $card->position_id)[1] ?? $rule->target_pct;
+        $targetPct = (float) (collect($rule->position_targets ?? [])->first(fn (array $pair): bool => (int) $pair[0] === (int) $card->position_id)[1] ?? $rule->target_pct);
         $target = $rule->mode === 'order' ? $base * $rule->reward_months : $base * $this->periodMonths($cycle) * $targetPct / 100;
         $multipliers = $rule->mode === 'order' ? 1.0 : $this->companyMultiplier($rule) * $this->multiplierFor(($this->unitResultResolver($rule))($card->personnel?->structure_id), $rule);
 
@@ -206,7 +206,14 @@ class BonusService
         $preview = $this->preview($cycle, $rule);
 
         DB::transaction(function () use ($cycle, $preview): void {
-            foreach ($preview['rows']->where('final', false) as $row) {
+            $finalIds = PerformanceBonusCalculation::query()
+                ->where('performance_cycle_id', $cycle->id)
+                ->whereIn('status', ['exported', 'ordered'])
+                ->lockForUpdate()
+                ->pluck('performance_scorecard_id')
+                ->all();
+
+            foreach ($preview['rows']->where('final', false)->whereNotIn('scorecard_id', $finalIds) as $row) {
                 PerformanceBonusCalculation::query()->updateOrCreate(
                     ['performance_scorecard_id' => $row['scorecard_id']],
                     [
@@ -252,15 +259,8 @@ class BonusService
         $outbox = app()->bound(IntegrationOutbox::class) ? app(IntegrationOutbox::class) : null;
         $payroll = app()->bound(PayrollOneOffEarnings::class) ? app(PayrollOneOffEarnings::class) : null;
 
-        $fresh = PerformanceBonusCalculation::query()
-            ->where('performance_cycle_id', $cycle->id)
-            ->where('status', 'calculated')
-            ->with('personnel:id,tabel_no')
-            ->get()
-            ->filter(fn (PerformanceBonusCalculation $line): bool => $line->amount > 0); // encrypted: filtered after decrypting
-
-        DB::transaction(function () use ($fresh, $batch, $payMonth, $cycle, $outbox, $payroll): void {
-            foreach ($fresh as $line) {
+        DB::transaction(function () use ($batch, $payMonth, $cycle, $outbox, $payroll): void {
+            foreach ($this->payableLines($cycle, 'personnel:id,tabel_no') as $line) {
                 $line->update(['status' => 'exported', 'exported_at' => now(), 'export_batch' => $batch]);
                 $payroll?->record(
                     (string) $line->personnel?->tabel_no, 'kpi_bonus', __('performance_evaluation::kpi.bonus.payroll_line', ['cycle' => $cycle->name]),
@@ -306,15 +306,10 @@ class BonusService
             throw ValidationException::withMessages(['bonus' => __('performance_evaluation::kpi.bonus.errors.order_template_missing')]);
         }
 
-        $lines = PerformanceBonusCalculation::query()
-            ->where('performance_cycle_id', $cycle->id)
-            ->where('status', 'calculated')
-            ->with('personnel')
-            ->get()
-            ->filter(fn (PerformanceBonusCalculation $line): bool => $line->amount > 0);
+        return DB::transaction(function () use ($cycle): int {
+            $lines = $this->payableLines($cycle, 'personnel');
 
-        foreach ($lines as $line) {
-            DB::transaction(function () use ($line, $cycle): void {
+            foreach ($lines as $line) {
                 $order = $this->orders->draft(self::ORDER_TEMPLATE, $line->personnel, [
                     'Mükafatın səbəbi' => __('performance_evaluation::kpi.bonus.order_reason', [
                         'cycle' => $cycle->name,
@@ -325,10 +320,28 @@ class BonusService
                 ], 'KPI-'.$cycle->id.'-'.$line->id);
 
                 $line->update(['status' => 'ordered', 'order_log_id' => $order->id]);
-            });
-        }
+            }
 
-        return $lines->count();
+            return $lines->count();
+        });
+    }
+
+    /**
+     * Calculated, non-zero lines whose card is still approved or closed, row-locked so a
+     * double click cannot pay or order the same line twice. Call inside a transaction.
+     *
+     * @return Collection<int, PerformanceBonusCalculation>
+     */
+    private function payableLines(PerformanceCycle $cycle, string $personnel): Collection
+    {
+        return PerformanceBonusCalculation::query()
+            ->where('performance_cycle_id', $cycle->id)
+            ->where('status', 'calculated')
+            ->whereHas('scorecard', fn ($query) => $query->whereIn('status', ['approved', 'closed']))
+            ->with($personnel)
+            ->lockForUpdate()
+            ->get()
+            ->filter(fn (PerformanceBonusCalculation $line): bool => $line->amount > 0); // encrypted: filtered after decrypting
     }
 
     /**

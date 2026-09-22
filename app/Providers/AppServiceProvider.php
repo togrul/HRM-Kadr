@@ -13,6 +13,7 @@ use App\Services\NumberToWordsService;
 use App\Services\Profiles\ProfileState;
 use App\Services\StructurePathService;
 use App\Services\StructureService;
+use App\Services\UserPersonnelLinkResolver;
 use App\Support\Database\InstalledTables;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -55,6 +56,7 @@ class AppServiceProvider extends ServiceProvider
         // answered from that map. A fresh instance per caller re-reads it — on a table
         // that means once per row.
         $this->app->scoped(StructurePathService::class);
+        $this->app->scoped(UserPersonnelLinkResolver::class);
         $this->app->singleton(FeatureState::class, fn () => new FeatureState($this->app->make(ProfileState::class)->features()));
         $this->app->singleton(HrPolicyPackService::class, fn () => new HrPolicyPackService(
             $this->app->make(ProfileState::class),

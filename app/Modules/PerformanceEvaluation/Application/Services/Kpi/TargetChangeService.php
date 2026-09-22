@@ -76,6 +76,10 @@ class TargetChangeService
             throw ValidationException::withMessages(['change' => __('performance_evaluation::kpi.change_requests.errors.already_decided')]);
         }
 
+        if ($approve && $card->status !== 'active') {
+            throw ValidationException::withMessages(['change' => __('performance_evaluation::kpi.errors.scorecard_not_active')]);
+        }
+
         if (! $approve && trim((string) $note) === '') {
             throw ValidationException::withMessages(['reason' => __('performance_evaluation::kpi.errors.reason_required')]);
         }

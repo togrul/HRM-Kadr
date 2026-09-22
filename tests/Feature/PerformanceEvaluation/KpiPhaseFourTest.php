@@ -283,6 +283,41 @@ class KpiPhaseFourTest extends TestCase
         Notification::assertSentTo($user, KpiMail::class, fn (KpiMail $mail) => count($mail->lines) === 1 && str_contains($mail->lines[0], 'Əliyev'));
     }
 
+    public function test_the_expected_bonus_matches_the_preview_without_a_position_target(): void
+    {
+        $card = $this->approvedSpecCard();
+        $this->mock(CompensationReadRepository::class, fn ($mock) => $mock->shouldReceive('baseAmountsFor')->andReturn(collect([$card->personnel->tabel_no => 1000.0])));
+        $bonus = app(BonusService::class);
+
+        $previewed = $bonus->preview($card->cycle, $bonus->rule($card->cycle))['rows']->first()['amount'];
+
+        $this->assertSame(225.0, $bonus->estimate($card, $card->effectiveScore()));
+        $this->assertSame($previewed, $bonus->estimate($card, $card->effectiveScore()));
+    }
+
+    public function test_hr_acts_on_their_own_card_only_as_the_employee(): void
+    {
+        $card = $this->specExampleCard();
+        $ownCardHr = $this->userFor($card->personnel);
+        $ownCardHr->givePermissionTo('manage-performance-evaluation');
+
+        $this->assertSame('employee', app(ScorecardService::class)->roleFor($ownCardHr, $card));
+        $this->assertSame('hr', app(ScorecardService::class)->roleFor($this->hr, $card));
+    }
+
+    public function test_a_line_whose_card_was_sent_back_is_not_exported(): void
+    {
+        $card = $this->approvedSpecCard();
+        $this->mock(CompensationReadRepository::class, fn ($mock) => $mock->shouldReceive('baseAmountsFor')->andReturn(collect([$card->personnel->tabel_no => 1000.0])));
+        $bonus = app(BonusService::class);
+        $bonus->calculate($card->cycle);
+
+        $card->forceFill(['status' => 'manager_review'])->saveQuietly();
+
+        $this->assertSame([], $bonus->exportToPayroll($card->cycle));
+        $this->assertSame('calculated', PerformanceBonusCalculation::query()->value('status'));
+    }
+
     public function test_bonus_over_the_fund_warns_hr(): void
     {
         Notification::fake();
