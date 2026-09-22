@@ -388,7 +388,7 @@ class ScorecardService
      *
      * @throws AuthorizationException|ValidationException
      */
-    public function recordActual(PerformanceScorecardItem $item, float $value, User $user, ?UploadedFile $evidence = null, ?string $note = null, string $source = 'manual'): PerformanceKpiActual
+    public function recordActual(PerformanceScorecardItem $item, float $value, User $user, ?UploadedFile $evidence = null, ?string $note = null, string $source = 'manual', bool $recalculate = true): PerformanceKpiActual
     {
         $card = $item->scorecard;
         $role = $this->authorizeRole($user, $card, ['hr', 'manager', 'employee']);
@@ -418,7 +418,7 @@ class ScorecardService
             'approved_at' => $approved ? now() : null,
         ]);
 
-        if ($approved) {
+        if ($approved && $recalculate) {
             $this->recalculate($card);
         }
 

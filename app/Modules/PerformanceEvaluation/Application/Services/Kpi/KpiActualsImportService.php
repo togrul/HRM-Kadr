@@ -98,8 +98,16 @@ class KpiActualsImportService
         }
 
         DB::transaction(function () use ($accepted, $user): void {
+            $cards = [];
+
             foreach ($accepted as [$item, $value, $note]) {
-                $this->scorecards->recordActual($item, $value, $user, null, $note, 'import');
+                $this->scorecards->recordActual($item, $value, $user, null, $note, 'import', recalculate: false);
+                $cards[$item->performance_scorecard_id] = $item->scorecard;
+            }
+
+            // One rescore per card, not one per imported row.
+            foreach ($cards as $card) {
+                $this->scorecards->recalculate($card);
             }
         });
 

@@ -140,6 +140,10 @@ class KpiPhaseFourTest extends TestCase
         $service->recordActual($card->items[1], 190, $this->hr);
 
         $this->assertSame('95.0000', $card->items[2]->fresh()->actual);
+
+        // FACT is read by RATE's formula, so its code is frozen; its name is not.
+        $this->assertValidationKeys(['kpiForm.code'], fn () => app(KpiLibraryService::class)->save(['code' => 'FACT_NEW'], $fact->fresh()));
+        $this->assertSame('Yeni ad', app(KpiLibraryService::class)->save(['name' => 'Yeni ad'], $fact->fresh())->name);
     }
 
     public function test_formula_check_rejects_unknown_codes_and_cycles(): void

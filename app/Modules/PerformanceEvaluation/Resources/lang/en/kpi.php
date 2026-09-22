@@ -215,6 +215,7 @@ return [
         'duplicate_kpi' => 'A KPI can appear only once in a template.',
         'position_taken' => 'One of the selected positions already belongs to another template.',
         'kpi_in_use' => 'This KPI is used by a template or a card — archive it instead of deleting.',
+        'code_referenced' => 'Other KPI formulas use {:code} — the code cannot be changed.',
         'invalid_transition' => 'This transition is not allowed from the card\'s current status.',
         'scorecard_locked' => 'The card is locked: targets change only while it is a draft.',
         'scorecard_not_active' => 'Actuals can be entered only on an active card.',

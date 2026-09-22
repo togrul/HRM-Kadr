@@ -215,6 +215,7 @@ return [
         'duplicate_kpi' => 'Eyni KPI şablonda bir dəfədən çox ola bilməz.',
         'position_taken' => 'Seçilmiş vəzifələrdən biri artıq başqa şablona bağlıdır.',
         'kpi_in_use' => 'Bu KPI şablonda və ya kartda istifadə olunur — silmək olmaz, arxivləşdirin.',
+        'code_referenced' => 'Başqa KPI-ların düsturları {:code} kodunu istifadə edir — kodu dəyişmək olmaz.',
         'invalid_transition' => 'Kartın cari statusundan bu keçid mümkün deyil.',
         'scorecard_locked' => 'Kart kilidlidir: hədəf yalnız qaralama mərhələsində dəyişdirilə bilər.',
         'scorecard_not_active' => 'Faktiki dəyər yalnız aktiv kartda daxil edilir.',

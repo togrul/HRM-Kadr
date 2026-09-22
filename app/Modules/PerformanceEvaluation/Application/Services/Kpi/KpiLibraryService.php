@@ -4,6 +4,7 @@ namespace App\Modules\PerformanceEvaluation\Application\Services\Kpi;
 
 use App\Models\PerformanceKpi;
 use App\Models\PerformanceKpiTemplateItem;
+use App\Models\PerformanceKpiVersion;
 use App\Models\PerformanceScorecardItem;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -29,6 +30,11 @@ class KpiLibraryService
             }
 
             $kpi->fill($data);
+
+            if ($kpi->isDirty('code')) {
+                $this->guardCodeNotReferenced($kpi);
+            }
+
             $versionChanged = $kpi->isDirty(PerformanceKpi::VERSIONED_FIELDS);
             if ($versionChanged) {
                 $kpi->current_version++;
@@ -41,6 +47,27 @@ class KpiLibraryService
 
             return $kpi;
         });
+    }
+
+    /**
+     * Formulas read other KPIs by code (`{SALES}`), in the library and in the versions
+     * frozen onto cards; renaming a referenced code would quietly null those actuals.
+     *
+     * @throws ValidationException
+     */
+    private function guardCodeNotReferenced(PerformanceKpi $kpi): void
+    {
+        // Codes are [A-Z0-9_]; an unescaped `_` can at worst over-match, never miss.
+        $token = '%{'.$kpi->getOriginal('code').'}%';
+
+        $referenced = PerformanceKpi::query()->whereKeyNot($kpi->id)->where('formula', 'like', $token)->exists()
+            || PerformanceKpiVersion::query()->where('performance_kpi_id', '!=', $kpi->id)->where('snapshot', 'like', $token)->exists();
+
+        if ($referenced) {
+            throw ValidationException::withMessages([
+                'kpiForm.code' => __('performance_evaluation::kpi.errors.code_referenced', ['code' => $kpi->getOriginal('code')]),
+            ]);
+        }
     }
 
     public function archive(PerformanceKpi $kpi): void
