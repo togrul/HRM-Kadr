@@ -14,6 +14,9 @@
                 tone: 'rose',                       // rose | emerald | amber | teal | zinc
                 run: () => $wire.cancelOrder('123'),
             })">…</button>
+
+    From PHP (no closure over the wire), pass the component id (`wireId`; `component` is reserved by Livewire) + method instead of `run`:
+        $this->dispatch('confirm-action', title: …, wireId: $this->getId(), method: 'delete');
 --}}
 <div
     x-data="{
@@ -39,7 +42,9 @@
             this.confirmText = detail.confirmText || 'OK';
             this.cancelText = detail.cancelText || this.defaultCancelText;
             this.tone = detail.tone || 'rose';
-            this.run = typeof detail.run === 'function' ? detail.run : null;
+            this.run = typeof detail.run === 'function'
+                ? detail.run
+                : (detail.wireId && detail.method ? () => Livewire.find(detail.wireId)?.$call(detail.method) : null);
             this.show = true;
             this.$nextTick(() => this.$refs.confirmBtn && this.$refs.confirmBtn.focus());
         },

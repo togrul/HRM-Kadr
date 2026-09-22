@@ -21,7 +21,6 @@
             <x-modal-button style="width: auto !important;" mode="black">{{ __('admin::references.actions.save') }}</x-modal-button>
             <button
                 wire:click.prevent = "deleteModel()"
-                {{--                                            wire:click="$dispatch('delete-prompt')"--}}
                 class="appearance-none flex flex-none items-center justify-center w-9 h-9 bg-rose-50 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-100 hover:text-gray-700"
             >
                 <x-icons.delete-icon color="text-rose-500" hover="text-rose-600"></x-icons.delete-icon>

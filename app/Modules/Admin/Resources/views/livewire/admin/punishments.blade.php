@@ -134,7 +134,6 @@
                                         </button>
                                         <button
                                             wire:click.prevent = "deleteModel({{ $punishment->id }})"
-                                            {{--                                            wire:click="$dispatch('delete-prompt')"--}}
                                             class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-100 hover:text-gray-700"
                                         >
                                             <x-icons.delete-icon color="text-rose-500" hover="text-rose-600"></x-icons.delete-icon>
@@ -156,4 +155,3 @@
         </div>
     </div>
 </div>
-@include('includes.sweetalert-push')

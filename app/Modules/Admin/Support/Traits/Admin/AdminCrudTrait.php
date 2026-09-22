@@ -13,7 +13,6 @@ trait AdminCrudTrait
 
     public $model;
 
-    #[On('goOn-Delete')]
     public function delete(): void
     {
         // Defense-in-depth: the /admin route group already gates on `can:access-admin`
@@ -23,7 +22,7 @@ trait AdminCrudTrait
 
         if ($this->model) {
             $this->model->delete();
-            $this->dispatch('deleted');
+            $this->callDeletedSwal();
             $this->resetForm();
         }
     }

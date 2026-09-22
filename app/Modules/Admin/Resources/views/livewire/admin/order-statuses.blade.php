@@ -109,4 +109,3 @@
         </div>
     </div>
 </div>
-@include('includes.sweetalert-push')

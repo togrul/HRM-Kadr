@@ -114,7 +114,7 @@ class StructureDeletionTest extends TestCase
             ->call('deleteModel', $structure->id)
             ->assertDispatched('confirm-structure-delete') // routed into the global confirm modal
             ->call('performDelete')
-            ->assertDispatched('deleted');
+            ->assertDispatched('notify', type: 'success');
 
         $this->assertDatabaseMissing('structures', ['id' => $structure->id]);
     }

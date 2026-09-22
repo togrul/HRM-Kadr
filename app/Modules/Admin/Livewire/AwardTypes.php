@@ -2,9 +2,8 @@
 
 namespace App\Modules\Admin\Livewire;
 
-use App\Modules\Admin\Support\Traits\Admin\CallSwalTrait;
 use App\Models\AwardType;
-use Livewire\Attributes\On;
+use App\Modules\Admin\Support\Traits\Admin\CallSwalTrait;
 use Livewire\Component;
 
 class AwardTypes extends Component
@@ -60,13 +59,12 @@ class AwardTypes extends Component
         }
     }
 
-    #[On('goOn-Delete')]
     public function delete(): void
     {
         if ($this->model) {
             $this->model->delete();
             $this->dispatch('awardTypeUpdated');
-            $this->dispatch('deleted');
+            $this->callDeletedSwal();
             $this->dispatch('close-child');
         }
     }
