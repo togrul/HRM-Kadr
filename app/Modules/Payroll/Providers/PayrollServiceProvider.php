@@ -58,6 +58,9 @@ class PayrollServiceProvider extends ServiceProvider
     {
         return [
             'dashboard' => \App\Modules\Payroll\Livewire\Dashboard::class,
+            'tabs.runs' => \App\Modules\Payroll\Livewire\Tabs\RunsTab::class,
+            'tabs.payslips' => \App\Modules\Payroll\Livewire\Tabs\PayslipsTab::class,
+            'tabs.loans' => \App\Modules\Payroll\Livewire\Tabs\LoansTab::class,
         ];
     }
 }

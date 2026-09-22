@@ -5941,208 +5941,202 @@ parameters:
 			path: app/Modules/Compensation/Infrastructure/Persistence/Eloquent/EloquentCompensationReadRepository.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\CompensationComponent\:\:\$affects_social\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Compensation/Livewire/Dashboard.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\CompensationComponent\:\:\$calc_type\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Compensation/Livewire/Dashboard.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\CompensationComponent\:\:\$code\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Compensation/Livewire/Dashboard.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\CompensationComponent\:\:\$is_active\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Compensation/Livewire/Dashboard.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\CompensationComponent\:\:\$is_statutory\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Compensation/Livewire/Dashboard.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\CompensationComponent\:\:\$name\.$#'
 			identifier: property.notFound
-			count: 2
-			path: app/Modules/Compensation/Livewire/Dashboard.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\CompensationComponent\:\:\$sort\.$#'
-			identifier: property.notFound
 			count: 1
-			path: app/Modules/Compensation/Livewire/Dashboard.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\CompensationComponent\:\:\$taxable\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Compensation/Livewire/Dashboard.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\CompensationComponent\:\:\$type\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Compensation/Livewire/Dashboard.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\CompensationRegime\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Compensation/Livewire/Dashboard.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\EmployeeBankAccount\:\:\$iban\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Compensation/Livewire/Dashboard.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\EmployeeBankAccount\:\:\$is_active\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Compensation/Livewire/Dashboard.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\EmployeeBankAccount\:\:\$is_primary\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Compensation/Livewire/Dashboard.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\EmployeeBankAccount\:\:\$tabel_no\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Compensation/Livewire/Dashboard.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PayGrade\:\:\$base_amount\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Compensation/Livewire/Dashboard.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PayGrade\:\:\$code\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Compensation/Livewire/Dashboard.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PayGrade\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Compensation/Livewire/Dashboard.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PayGrade\:\:\$pay_scale_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Compensation/Livewire/Dashboard.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PayGrade\:\:\$position_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Compensation/Livewire/Dashboard.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PayGrade\:\:\$rank_category_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Compensation/Livewire/Dashboard.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PayGrade\:\:\$sort\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Compensation/Livewire/Dashboard.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PayScale\:\:\$currency\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Compensation/Livewire/Dashboard.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PayScale\:\:\$effective_from\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Compensation/Livewire/Dashboard.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PayScale\:\:\$effective_to\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Compensation/Livewire/Dashboard.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PayScale\:\:\$is_active\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Compensation/Livewire/Dashboard.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PayScale\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Compensation/Livewire/Dashboard.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PayScale\:\:\$regime_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Compensation/Livewire/Dashboard.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Compensation/Livewire/Dashboard.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$surname\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Compensation/Livewire/Dashboard.php
+			path: app/Modules/Compensation/Livewire/Tabs/AssignmentsTab.php
 
 		-
 			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\CompensationComponent\>\:\:map\(\) contains unresolvable type\.$#'
 			identifier: argument.unresolvableType
 			count: 1
-			path: app/Modules/Compensation/Livewire/Dashboard.php
-
-		-
-			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\CompensationRegime\>\:\:map\(\) contains unresolvable type\.$#'
-			identifier: argument.unresolvableType
-			count: 1
-			path: app/Modules/Compensation/Livewire/Dashboard.php
+			path: app/Modules/Compensation/Livewire/Tabs/AssignmentsTab.php
 
 		-
 			message: '#^Return type of call to method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\CompensationComponent\>\:\:map\(\) contains unresolvable type\.$#'
 			identifier: method.unresolvableReturnType
 			count: 1
-			path: app/Modules/Compensation/Livewire/Dashboard.php
+			path: app/Modules/Compensation/Livewire/Tabs/AssignmentsTab.php
+
+		-
+			message: '#^Return type of call to method Illuminate\\Support\\Collection\<int,array\<string, mixed\>\>\:\:all\(\) contains unresolvable type\.$#'
+			identifier: method.unresolvableReturnType
+			count: 1
+			path: app/Modules/Compensation/Livewire/Tabs/AssignmentsTab.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\EmployeeBankAccount\:\:\$iban\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Tabs/BankTab.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\EmployeeBankAccount\:\:\$is_active\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Tabs/BankTab.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\EmployeeBankAccount\:\:\$is_primary\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Tabs/BankTab.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\CompensationRegime\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Tabs/CompensationTab.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\CompensationRegime\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Modules/Compensation/Livewire/Tabs/CompensationTab.php
 
 		-
 			message: '#^Return type of call to method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\CompensationRegime\>\:\:map\(\) contains unresolvable type\.$#'
 			identifier: method.unresolvableReturnType
 			count: 1
-			path: app/Modules/Compensation/Livewire/Dashboard.php
+			path: app/Modules/Compensation/Livewire/Tabs/CompensationTab.php
 
 		-
 			message: '#^Return type of call to method Illuminate\\Support\\Collection\<int,array\<string, mixed\>\>\:\:all\(\) contains unresolvable type\.$#'
 			identifier: method.unresolvableReturnType
-			count: 2
-			path: app/Modules/Compensation/Livewire/Dashboard.php
+			count: 1
+			path: app/Modules/Compensation/Livewire/Tabs/CompensationTab.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\CompensationComponent\:\:\$affects_social\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Tabs/ComponentsTab.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\CompensationComponent\:\:\$calc_type\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Tabs/ComponentsTab.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\CompensationComponent\:\:\$code\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Tabs/ComponentsTab.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\CompensationComponent\:\:\$is_active\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Tabs/ComponentsTab.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\CompensationComponent\:\:\$is_statutory\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Tabs/ComponentsTab.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\CompensationComponent\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Tabs/ComponentsTab.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\CompensationComponent\:\:\$sort\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Tabs/ComponentsTab.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\CompensationComponent\:\:\$taxable\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Tabs/ComponentsTab.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\CompensationComponent\:\:\$type\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Tabs/ComponentsTab.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\PayGrade\:\:\$base_amount\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Tabs/ScalesTab.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\PayGrade\:\:\$code\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Tabs/ScalesTab.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\PayGrade\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Tabs/ScalesTab.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\PayGrade\:\:\$pay_scale_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Tabs/ScalesTab.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\PayGrade\:\:\$position_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Tabs/ScalesTab.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\PayGrade\:\:\$rank_category_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Tabs/ScalesTab.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\PayGrade\:\:\$sort\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Tabs/ScalesTab.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\PayScale\:\:\$currency\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Tabs/ScalesTab.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\PayScale\:\:\$effective_from\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Tabs/ScalesTab.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\PayScale\:\:\$effective_to\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Tabs/ScalesTab.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\PayScale\:\:\$is_active\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Tabs/ScalesTab.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\PayScale\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Tabs/ScalesTab.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\PayScale\:\:\$regime_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Compensation/Livewire/Tabs/ScalesTab.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$email\.$#'
@@ -9031,24 +9025,6 @@ parameters:
 			path: app/Modules/Payroll/Livewire/Dashboard.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Payroll/Livewire/Dashboard.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$surname\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Payroll/Livewire/Dashboard.php
-
-		-
-			message: '#^Access to an undefined property App\\Modules\\Payroll\\Livewire\\Dashboard\:\:\$selectedPayslip\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Payroll/Livewire/Dashboard.php
-
-		-
 			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\CompensationRegime\>\:\:map\(\) contains unresolvable type\.$#'
 			identifier: argument.unresolvableType
 			count: 1
@@ -9066,6 +9042,11 @@ parameters:
 			count: 1
 			path: app/Modules/Payroll/Livewire/Dashboard.php
 
+		-
+			message: '#^Access to an undefined property App\\Models\\Payslip\:\:\$tabel_no\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Modules/Payroll/Livewire/Tabs/PayslipsTab.php
 		-
 			message: '#^Access to an undefined property App\\Models\\PerformanceFeedbackRequest\:\:\$performance_form_template_id\.$#'
 			identifier: property.notFound

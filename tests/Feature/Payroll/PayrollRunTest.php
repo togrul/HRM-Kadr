@@ -11,6 +11,9 @@ use App\Modules\Compensation\Application\Services\CompensationService;
 use App\Modules\Payroll\Application\Services\PayrollPeriodService;
 use App\Modules\Payroll\Application\Services\PayrollRunService;
 use App\Modules\Payroll\Livewire\Dashboard;
+use App\Modules\Payroll\Livewire\Tabs\LoansTab;
+use App\Modules\Payroll\Livewire\Tabs\PayslipsTab;
+use App\Modules\Payroll\Livewire\Tabs\RunsTab;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -148,7 +151,13 @@ class PayrollRunTest extends TestCase
 
         $runId = PayrollRun::query()->latest('id')->value('id');
 
-        $component->call('calculateRun', $runId)->call('lockRun', $runId);
+        $component->assertSet('selectedRunId', $runId);
+
+        Livewire::test(RunsTab::class, ['periodFilter' => $periodId])
+            ->call('calculateRun', $runId)
+            ->assertDispatched('payroll-run-focused', runId: $runId)
+            ->assertDispatched('payroll-updated')
+            ->call('lockRun', $runId);
 
         $this->assertSame('locked', PayrollRun::find($runId)->status);
         $this->assertSame(1, Payslip::where('payroll_run_id', $runId)->count());
@@ -171,14 +180,61 @@ class PayrollRunTest extends TestCase
         }
         $this->actingAs($user);
 
-        $component = Livewire::test(Dashboard::class)->call('deletePayslip', $payslipId);
+        Livewire::test(PayslipsTab::class, ['runId' => $run->id])->call('deletePayslip', $payslipId);
         $this->assertDatabaseMissing('payslips', ['id' => $payslipId]);
 
-        $component->call('deleteRun', $run->id);
+        Livewire::test(RunsTab::class)->call('deleteRun', $run->id)->assertDispatched('payroll-run-deleted', runId: $run->id);
         $this->assertDatabaseMissing('payroll_runs', ['id' => $run->id]);
 
-        $component->call('deletePeriod', $period->id);
+        Livewire::test(Dashboard::class)->call('deletePeriod', $period->id);
         $this->assertDatabaseMissing('payroll_periods', ['id' => $period->id]);
+    }
+
+    public function test_tabs_check_permissions_on_their_own(): void
+    {
+        $this->actingAs(\App\Models\User::factory()->create());
+        foreach ([RunsTab::class, PayslipsTab::class, LoansTab::class] as $tab) {
+            Livewire::test($tab)->assertForbidden();
+        }
+
+        $viewer = \App\Models\User::factory()->create();
+        $viewer->givePermissionTo(Permission::findOrCreate('show-payroll', 'web'));
+        $this->actingAs($viewer);
+
+        Livewire::test(RunsTab::class)->call('calculateRun', 1)->assertForbidden();
+        Livewire::test(RunsTab::class)->call('approveRun', 1)->assertForbidden();
+        Livewire::test(RunsTab::class)->call('lockRun', 1)->assertForbidden();
+        Livewire::test(RunsTab::class)->call('reopenRun', 1)->assertForbidden();
+        Livewire::test(RunsTab::class)->call('deleteRun', 1)->assertForbidden();
+        Livewire::test(PayslipsTab::class, ['runId' => 1])->call('deletePayslip', 1)->assertForbidden();
+        Livewire::test(LoansTab::class, ['tabelNo' => 'X1', 'label' => 'X'])->call('saveLoan')->assertForbidden();
+        Livewire::test(LoansTab::class)->call('deleteLoan', 1)->assertForbidden();
+        Livewire::test(Dashboard::class)->call('exportBankFile', 1)->assertForbidden();
+    }
+
+    public function test_shell_routes_run_selection_and_loan_shortcut_to_the_right_tab(): void
+    {
+        $personnel = $this->makePersonnel('nav@example.test');
+        $regimeId = CompensationRegime::where('code', 'private')->value('id');
+        $this->assignCompensation($personnel->tabel_no, $regimeId, 1000, 0);
+        $period = app(PayrollPeriodService::class)->createPeriod(2026, 3);
+        $runService = app(PayrollRunService::class);
+        $run = $runService->calculate($runService->createRun($period, $regimeId));
+
+        $user = \App\Models\User::factory()->create();
+        $user->givePermissionTo(Permission::findOrCreate('show-payroll', 'web'));
+        $this->actingAs($user);
+
+        Livewire::test(Dashboard::class)
+            ->assertSeeLivewire(RunsTab::class)
+            ->call('selectRun', $run->id)
+            ->assertSet('activeTab', 'payslips')
+            ->assertSeeLivewire(PayslipsTab::class)
+            ->assertSee($personnel->tabel_no)
+            ->call('manageLoans', $personnel->tabel_no, 'Doe Jane')
+            ->assertSet('activeTab', 'loans')
+            ->assertSeeLivewire(LoansTab::class)
+            ->assertSee('Doe Jane');
     }
 
     private function assignCompensation(string $tabelNo, int $regimeId, float $base, float $percent): void
@@ -211,7 +267,7 @@ class PayrollRunTest extends TestCase
         }
         $this->actingAs($user);
 
-        $component = Livewire::test(Dashboard::class)
+        $component = Livewire::test(LoansTab::class)
             ->set('personnelSearch', $personnel->tabel_no);
 
         $results = $component->get('personnelResults');
