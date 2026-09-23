@@ -3,7 +3,7 @@
      'type' => 'text',
      'name',
      'mode' => 'default',
-     'format',
+     'format' => 'Y-MM-DD',
      'script'
 ])
 
@@ -13,7 +13,9 @@
      $hasError = $errors->has($name) || (is_string($wireModel) && $errors->has($wireModel));
      $isError = $hasError ? 'border-rose-300 bg-rose-50' : '';
 
-     $format = "Y-MM-DD" ? 'DD.MM.Y' : $format;
+     // Livewire keeps dates as Y-MM-DD; people read and type them as DD.MM.YYYY. Any other
+     // format a caller passes is used as given.
+     $format = $format === 'Y-MM-DD' ? 'DD.MM.Y' : $format;
      $currentYear = \Carbon\Carbon::now()->format('Y');
 @endphp
 
@@ -21,10 +23,10 @@
     type="{{ $type }}"
     id="{{ $name }}"
     name="{{ $name }}"
-    x-data
+    x-data="{ picker: null, destroy() { if (this.picker) this.picker.destroy(); this.picker = null; } }"
     x-ref="input"
     x-on:change="$dispatch('input', $el.value)"
-    x-init="(function (pikaday, $el) {
+    x-init="picker = (function (pikaday, $el) {
           pikaday.defaultDate = $el.value;
           {{ $script ?? '' }} ;
           return pikaday;

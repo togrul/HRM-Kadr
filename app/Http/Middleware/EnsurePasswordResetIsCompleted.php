@@ -12,10 +12,13 @@ class EnsurePasswordResetIsCompleted
     public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user();
-        $mustResetPassword = (bool) ($user?->getAttributes()['must_reset_password'] ?? false);
-        $isEmployeeSelfService = $user?->hasRole(MyHrAccountProvisioningService::EMPLOYEE_ROLE) ?? false;
 
-        if (! $user || ! $mustResetPassword || ! $isEmployeeSelfService) {
+        // The flag is on the already-loaded user; only when it is set is the role worth a lookup.
+        if (! $user || ! ($user->getAttributes()['must_reset_password'] ?? false)) {
+            return $next($request);
+        }
+
+        if (! $user->hasRole(MyHrAccountProvisioningService::EMPLOYEE_ROLE)) {
             return $next($request);
         }
 
