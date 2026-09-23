@@ -2,11 +2,11 @@
 
 namespace App\Modules\Admin\Livewire;
 
+use App\Models\OrderStatus;
 use App\Modules\Admin\Support\Traits\Admin\AdminCrudTrait;
 use App\Modules\Admin\Support\Traits\Admin\CallSwalTrait;
-use App\Models\AppealStatus as AppealStatusAlias;
-use App\Models\OrderStatus;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -70,6 +70,8 @@ class OrderStatuses extends Component
 
     public function store(): void
     {
+        Gate::authorize('access-admin');
+
         $this->validate();
 
         $data = array_merge($this->form, ['locale' => $this->selectedLocale]);

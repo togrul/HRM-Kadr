@@ -2,12 +2,13 @@
 
 namespace App\Modules\Admin\Livewire;
 
-use App\Modules\Admin\Support\Traits\Admin\AdminCrudTrait;
-use App\Modules\Admin\Support\Traits\Admin\CallSwalTrait;
 use App\Livewire\Traits\DropdownConstructTrait;
 use App\Models\Position;
 use App\Models\RankCategory;
+use App\Modules\Admin\Support\Traits\Admin\AdminCrudTrait;
+use App\Modules\Admin\Support\Traits\Admin\CallSwalTrait;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -85,6 +86,8 @@ class Positions extends Component
 
     public function store(): void
     {
+        Gate::authorize('access-admin');
+
         $this->validate();
 
         $this->model
@@ -100,6 +103,7 @@ class Positions extends Component
     public function render()
     {
         $positions = Position::all();
+
         return view('admin::livewire.admin.positions', compact('positions'));
     }
 

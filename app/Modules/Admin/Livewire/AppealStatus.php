@@ -2,20 +2,22 @@
 
 namespace App\Modules\Admin\Livewire;
 
+use App\Models\AppealStatus as AppealStatusAlias;
 use App\Modules\Admin\Support\Traits\Admin\AdminCrudTrait;
 use App\Modules\Admin\Support\Traits\Admin\CallSwalTrait;
-use App\Models\AppealStatus as AppealStatusAlias;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
 #[On(['appealStatusUpdated', 'deleted'])]
 class AppealStatus extends Component
 {
-    use AuthorizesRequests;
     use AdminCrudTrait;
+    use AuthorizesRequests;
     use CallSwalTrait;
 
     public string $selectedLocale;
@@ -34,7 +36,6 @@ class AppealStatus extends Component
             'form.name' => 'required|string|min:2',
         ];
     }
-
 
     protected function validationAttributes(): array
     {
@@ -56,7 +57,7 @@ class AppealStatus extends Component
         if ($id) {
             $this->model = $this->findByIdAndLocale($id);
 
-            if (!$this->model) {
+            if (! $this->model) {
                 return;
             }
 
@@ -88,24 +89,23 @@ class AppealStatus extends Component
 
     public function store(): void
     {
+        Gate::authorize('access-admin');
+
         $this->validate();
 
         $data = array_merge($this->form, ['locale' => $this->selectedLocale]);
 
-        DB::transaction(function () use ($data){
-            DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-
+        DB::transaction(fn () => Schema::withoutForeignKeyConstraints(function () use ($data): void {
             $this->model
                 ? AppealStatusAlias::where([
-                ['id', '=', $this->model->id],
-                ['locale', '=', $this->selectedLocale],
-            ])->update([
-                'id' => $this->form['id'],
-                'name' => $this->form['name'],
-            ])
+                    ['id', '=', $this->model->id],
+                    ['locale', '=', $this->selectedLocale],
+                ])->update([
+                    'id' => $this->form['id'],
+                    'name' => $this->form['name'],
+                ])
                 : AppealStatusAlias::create($data);
-            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
-        });
+        }));
 
         $this->callSuccessSwal();
 

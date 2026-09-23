@@ -8,6 +8,7 @@ use App\Modules\Admin\Support\Traits\Admin\AdminCrudTrait;
 use App\Modules\Admin\Support\Traits\Admin\CallSwalTrait;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -99,6 +100,8 @@ class Structures extends Component
 
     public function performDelete(): void
     {
+        Gate::authorize('access-admin');
+
         if (! $this->model) {
             return;
         }
@@ -113,6 +116,8 @@ class Structures extends Component
 
     public function store(): void
     {
+        Gate::authorize('access-admin');
+
         $this->form['code'] = blank($this->form['code'] ?? null) ? 1 : (int) $this->form['code'];
         $this->form['level'] = blank($this->form['level'] ?? null) ? 1 : (int) $this->form['level'];
         $this->form['coefficient'] = blank($this->form['coefficient'] ?? null) ? 1 : (int) $this->form['coefficient'];
