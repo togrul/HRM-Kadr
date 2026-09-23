@@ -17,7 +17,7 @@
 
 {{-- Label + fact + optional note. The detail screens' standard read-only cell. --}}
 <div {{ $attributes->merge(['class' => 'rounded-xl border border-hairline bg-[#fafafa] px-3.5 py-3']) }}>
-    <p class="hrm-eyebrow">{{ $label }}</p>
+    <p class="text-[12.5px] font-medium text-ink-muted">{{ $label }}</p>
     <p class="mt-1.5 text-[14px] font-semibold tracking-[-0.02em] {{ $valueTone }}">{{ $value ?? $slot }}</p>
     @if ($note !== null)
         <p class="mt-0.5 text-[11.5px] text-ink-faint">{{ $note }}</p>
