@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Services\Orders\Document\Effects;
+namespace App\Modules\Orders\Infrastructure\Document\Effects;
 
 use App\Models\OrderLog;
 use App\Models\Personnel;
-use App\Modules\Compensation\Application\Services\CompensationService;
+use App\Modules\Compensation\Contracts\OrderCompensationSync;
 
 /**
  * Moves the employee: updates structure and/or position to the new ones chosen on the
@@ -15,7 +15,7 @@ use App\Modules\Compensation\Application\Services\CompensationService;
  */
 class TransferEffect implements OrderEffect
 {
-    public function __construct(private readonly CompensationService $compensation) {}
+    public function __construct(private readonly OrderCompensationSync $compensation) {}
 
     public function apply(OrderLog $order, array $fields, Personnel $personnel): void
     {

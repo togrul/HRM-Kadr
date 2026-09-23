@@ -5,9 +5,9 @@ namespace App\Modules\Orders\Livewire;
 use App\Livewire\Traits\SideModalAction;
 use App\Models\Order;
 use App\Models\OrderLog;
+use App\Modules\Orders\Application\Document\OrderTemplateProvider;
 use App\Modules\Orders\Domain\Contracts\OrderTypeStatusLookupReadRepository;
 use App\Modules\Orders\Exports\OrderExport;
-use App\Services\Orders\Document\OrderTemplateProvider;
 use App\Services\StructureService;
 use Carbon\Carbon;
 use DomainException;
@@ -124,7 +124,7 @@ class AllOrders extends Component
         }
 
         // Only Word-engine orders are printable: they carry their filled .docx.
-        abort_unless((string) $order->template_render_mode === \App\Services\Orders\Document\OrderIssueService::RENDER_MODE_DOCX, 404);
+        abort_unless((string) $order->template_render_mode === \App\Modules\Orders\Infrastructure\Document\OrderIssueService::RENDER_MODE_DOCX, 404);
         abort_unless((bool) auth()->user()?->can('add-orders'), 403);
 
         // Order numbers may contain "/" (e.g. 2026/ƏM-145), which is illegal in a
@@ -171,7 +171,7 @@ class AllOrders extends Component
         abort_unless((bool) auth()->user()?->can('add-orders'), 403);
 
         try {
-            app(\App\Services\Orders\Document\OrderStatusTransitionService::class)->{$action}($order);
+            app(\App\Modules\Orders\Infrastructure\Document\OrderStatusTransitionService::class)->{$action}($order);
         } catch (DomainException $e) {
             $this->dispatch('orderError', $e->getMessage());
 
@@ -205,7 +205,7 @@ class AllOrders extends Component
                     // approval, so they would otherwise be invisible. Scope them by the
                     // target structure frozen in the order snapshot.
                     ->orWhere(fn ($q) => $q
-                        ->where('template_render_mode', \App\Services\Orders\Document\OrderIssueService::RENDER_MODE_DOCX)
+                        ->where('template_render_mode', \App\Modules\Orders\Infrastructure\Document\OrderIssueService::RENDER_MODE_DOCX)
                         ->whereIn('template_snapshot->hire_structure_id', $this->accessibleStructureIds));
             })
             ->filter($this->search ?? []);

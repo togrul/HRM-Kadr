@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Services\Orders\Document;
+namespace App\Modules\Orders\Infrastructure\Document;
 
 use App\Models\OrderWordTemplate;
 use App\Models\Personnel;
+use App\Modules\Orders\Infrastructure\Variables\OrderEmployeeVariableResolver;
 use App\Services\NumberToWordsService;
-use App\Services\Orders\Variables\OrderEmployeeVariableResolver;
 use App\Support\Language\AzerbaijaniDateFormatter;
 
 /**
@@ -27,7 +27,7 @@ class DocxVariableResolver
     /**
      * @param  array<string,mixed>  $manualInputs  field.key => value entered by the author
      * @param  array<string,string>  $system  system.* key => value for this order
-     * @return array<string,string>  token => value
+     * @return array<string,string> token => value
      */
     public function resolve(OrderWordTemplate $template, ?Personnel $personnel, array $manualInputs, array $system): array
     {

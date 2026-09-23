@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Orders\Document\Effects;
+namespace App\Modules\Orders\Infrastructure\Document\Effects;
 
 use App\Models\OrderLog;
 use App\Models\Personnel;

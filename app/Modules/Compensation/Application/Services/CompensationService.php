@@ -3,11 +3,12 @@
 namespace App\Modules\Compensation\Application\Services;
 
 use App\Models\EmployeeCompensation;
+use App\Modules\Compensation\Contracts\OrderCompensationSync;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
-class CompensationService
+class CompensationService implements OrderCompensationSync
 {
     /**
      * Assign a new effective-dated compensation, closing any currently active one.

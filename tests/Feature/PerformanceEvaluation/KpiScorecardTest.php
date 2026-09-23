@@ -20,6 +20,7 @@ use App\Models\User;
 use App\Models\UserPersonnelLink;
 use App\Modules\Attendance\Domain\Contracts\PayrollAttendanceReadRepository;
 use App\Modules\Compensation\Domain\Contracts\CompensationReadRepository;
+use App\Modules\Orders\Infrastructure\Document\OrderStatusTransitionService;
 use App\Modules\PerformanceEvaluation\Application\Services\Kpi\BonusService;
 use App\Modules\PerformanceEvaluation\Application\Services\Kpi\InternalKpiMetrics;
 use App\Modules\PerformanceEvaluation\Application\Services\Kpi\KpiActualsImportService;
@@ -32,7 +33,6 @@ use App\Modules\PerformanceEvaluation\Livewire\Kpi\BonusWorkspace;
 use App\Modules\PerformanceEvaluation\Livewire\Kpi\KpiLibraryWorkspace;
 use App\Modules\PerformanceEvaluation\Livewire\Kpi\ScorecardsWorkspace;
 use App\Notifications\PlatformNotification;
-use App\Services\Orders\Document\OrderStatusTransitionService;
 use App\Services\Profiles\ProfileState;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -521,7 +521,7 @@ class KpiScorecardTest extends TestCase
         AwardType::query()->create(['id' => 20, 'name' => 'mükafatlar']);
         Award::query()->create(['id' => 2026, 'award_type_id' => 20, 'name' => 'Xidmətdə fərqləndiyinə görə']);
         $this->artisan('orders:seed-word-templates', ['--only' => 'pul_mukafati'])->assertSuccessful();
-        $order = app(\App\Services\Orders\Document\OrderDraftService::class)->draft('pul_mukafati', $card->personnel, ['Məbləğ' => '300', 'Mükafatın səbəbi' => 'test'], 'M-1');
+        $order = app(\App\Modules\Orders\Infrastructure\Document\OrderDraftService::class)->draft('pul_mukafati', $card->personnel, ['Məbləğ' => '300', 'Mükafatın səbəbi' => 'test'], 'M-1');
 
         app(OrderStatusTransitionService::class)->approve($order);
         $this->assertSame(300.0, PayrollOneOffEarning::query()->where('source_key', 'order_award:'.$order->id)->value('amount'));

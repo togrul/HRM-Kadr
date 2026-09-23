@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Orders\Variables;
+namespace App\Modules\Orders\Infrastructure\Variables;
 
 use App\Models\Personnel;
 use App\Models\Structure;

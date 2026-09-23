@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Models\User;
+use App\Modules\Compensation\Application\Services\CompensationService;
+use App\Modules\Compensation\Contracts\OrderCompensationSync;
 use App\Modules\Integration\Domain\Contracts\IntegrationOutbox;
 use App\Modules\Integration\Domain\Contracts\PayrollOwnership;
 use App\Modules\Integration\Infrastructure\NullIntegrationOutbox;
@@ -48,6 +50,10 @@ class AppServiceProvider extends ServiceProvider
         // is not loaded when the module is off, and the Payroll module must be
         // able to resolve this either way.
         $this->app->bind(PayrollOwnership::class, ConfiguredPayrollOwnership::class);
+
+        // Same reason: order effects (hire/transfer/termination) resolve this whether or
+        // not the compensation module's provider is loaded.
+        $this->app->bind(OrderCompensationSync::class, CompensationService::class);
 
         $this->app->singleton(NumberToWordsService::class, fn () => new NumberToWordsService);
         $this->app->singleton(StructureService::class, fn () => new StructureService);

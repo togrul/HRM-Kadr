@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Services\Orders\Document\Effects;
+namespace App\Modules\Orders\Infrastructure\Document\Effects;
 
 use App\Models\OrderLog;
 use App\Models\Personnel;
-use App\Modules\Compensation\Application\Services\CompensationService;
+use App\Modules\Compensation\Contracts\OrderCompensationSync;
 use App\Support\Language\AzerbaijaniDateFormatter;
 use Illuminate\Support\Carbon;
 
@@ -16,7 +16,7 @@ class TerminationEffect implements OrderEffect
 {
     public function __construct(
         private readonly AzerbaijaniDateFormatter $dates,
-        private readonly CompensationService $compensation,
+        private readonly OrderCompensationSync $compensation,
     ) {}
 
     public function apply(OrderLog $order, array $fields, Personnel $personnel): void

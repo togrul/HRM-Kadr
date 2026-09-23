@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands;
 
-use App\Services\Orders\Document\DocxPlaceholderParser;
-use App\Services\Orders\Document\OrderTemplateDocxBuilder;
-use App\Services\Orders\Document\OrderWordTemplateRepository;
+use App\Modules\Orders\Application\Document\DocxPlaceholderParser;
+use App\Modules\Orders\Application\Document\OrderTemplateDocxBuilder;
+use App\Modules\Orders\Application\Document\OrderWordTemplateRepository;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;

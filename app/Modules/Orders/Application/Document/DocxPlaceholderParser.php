@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Services\Orders\Document;
+namespace App\Modules\Orders\Application\Document;
 
+use Closure;
 use RuntimeException;
 use ZipArchive;
 
@@ -211,9 +212,9 @@ class DocxPlaceholderParser
      * just past the matched span. Text and elements (tabs, run properties) around the
      * matches are kept byte-for-byte.
      *
-     * @param  \Closure(string):array<int,array{token:string,end:int}>  $finder
+     * @param  Closure(string):array<int,array{token:string,end:int}>  $finder
      */
-    private function rewriteParagraph(string $paragraph, \Closure $finder): string
+    private function rewriteParagraph(string $paragraph, Closure $finder): string
     {
         if (! preg_match_all('/(<w:t\b[^>]*>)(.*?)(<\/w:t>)/su', $paragraph, $runs, PREG_OFFSET_CAPTURE)) {
             return $paragraph;

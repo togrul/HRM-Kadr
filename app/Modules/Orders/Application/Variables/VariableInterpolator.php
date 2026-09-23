@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Orders\Variables;
+namespace App\Modules\Orders\Application\Variables;
 
 /**
  * Substitutes `{{ variable }}` placeholders in template text with resolved values,

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Orders\Document\Effects;
+namespace App\Modules\Orders\Infrastructure\Document\Effects;
 
 /**
  * The single source of truth for the HR side-effects an order type can perform on

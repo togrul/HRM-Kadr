@@ -175,7 +175,7 @@
     <x-table.tbl :headers="$this->getTableHeaders()">
         @forelse ($this->orders as $_order)
             @php
-                $isDocx = $_order->template_render_mode === \App\Services\Orders\Document\OrderIssueService::RENDER_MODE_DOCX;
+                $isDocx = $_order->template_render_mode === \App\Modules\Orders\Infrastructure\Document\OrderIssueService::RENDER_MODE_DOCX;
             @endphp
             <tr wire:key="order-row-{{ $_order->id }}" @class([
                 'bg-[#fffbeb]/60' => (int) $_order->status_id === 10,

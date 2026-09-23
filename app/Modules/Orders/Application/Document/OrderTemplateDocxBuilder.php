@@ -1,9 +1,8 @@
 <?php
 
-namespace App\Services\Orders\Document;
+namespace App\Modules\Orders\Application\Document;
 
 use PhpOffice\PhpWord\PhpWord;
-use PhpOffice\PhpWord\Shared\Converter;
 use PhpOffice\PhpWord\SimpleType\Jc;
 use PhpOffice\PhpWord\Style\Tab;
 

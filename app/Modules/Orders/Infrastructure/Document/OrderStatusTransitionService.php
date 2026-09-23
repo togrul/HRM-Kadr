@@ -1,14 +1,16 @@
 <?php
 
-namespace App\Services\Orders\Document;
+namespace App\Modules\Orders\Infrastructure\Document;
 
 use App\Enums\OrderStatusEnum;
 use App\Models\OrderLog;
 use App\Models\OrderWordTemplate;
 use App\Models\Personnel;
+use App\Modules\Compensation\Contracts\OrderCompensationSync;
 use App\Modules\Integration\Domain\Contracts\IntegrationOutbox;
+use App\Modules\Orders\Application\Document\OrderWordTemplateRepository;
+use App\Modules\Orders\Infrastructure\Document\Effects\OrderEffectCatalog;
 use App\Services\ImportCandidateToPersonnel;
-use App\Services\Orders\Document\Effects\OrderEffectCatalog;
 use App\Support\Language\AzerbaijaniDateFormatter;
 use DomainException;
 use Illuminate\Support\Facades\DB;
@@ -45,7 +47,7 @@ class OrderStatusTransitionService
         private readonly OrderEffectCatalog $effects,
         private readonly ImportCandidateToPersonnel $candidateImport,
         private readonly AzerbaijaniDateFormatter $dates,
-        private readonly \App\Modules\Compensation\Application\Services\CompensationService $compensation,
+        private readonly OrderCompensationSync $compensation,
         private readonly IntegrationOutbox $outbox,
     ) {}
 

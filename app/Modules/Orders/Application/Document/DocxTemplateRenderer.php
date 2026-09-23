@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Orders\Document;
+namespace App\Modules\Orders\Application\Document;
 
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
@@ -17,7 +17,7 @@ class DocxTemplateRenderer
 {
     /**
      * @param  array<string,string>  $tokenValues  bare token => value (no ${} braces)
-     * @return string  absolute path to the generated temp .docx
+     * @return string absolute path to the generated temp .docx
      */
     public function renderToFile(string $masterDocxPath, array $tokenValues): string
     {

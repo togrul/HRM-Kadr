@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Orders\Document;
+namespace App\Modules\Orders\Infrastructure\Document;
 
 use App\Enums\OrderStatusEnum;
 use App\Models\OrderLog;

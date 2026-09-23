@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Orders\Document;
+namespace App\Modules\Orders\Application\Document;
 
 use App\Models\OrderWordTemplate;
 use Illuminate\Support\Facades\Storage;

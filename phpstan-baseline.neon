@@ -19347,235 +19347,235 @@ parameters:
 			message: '#^Offset ''source'' on array\{token\: string, label\: string, source\: string, auto_key\: string\|null, field\: array\{key\: string, type\: string\}\|null, effect_role\: string\|null\} on left side of \?\? always exists and is not nullable\.$#'
 			identifier: nullCoalesce.offset
 			count: 1
-			path: app/Services/Orders/Document/DocxVariableResolver.php
+			path: app/Modules/Orders/Infrastructure/Document/DocxVariableResolver.php
 
 		-
 			message: '#^Offset ''token'' on array\{token\: string, label\: string, source\: string, auto_key\: string\|null, field\: array\{key\: string, type\: string\}\|null, effect_role\: string\|null\} on left side of \?\? always exists and is not nullable\.$#'
 			identifier: nullCoalesce.offset
 			count: 1
-			path: app/Services/Orders/Document/DocxVariableResolver.php
+			path: app/Modules/Orders/Infrastructure/Document/DocxVariableResolver.php
 
 		-
 			message: '#^Offset ''type'' on array\{key\: non\-falsy\-string, type\: string\} on left side of \?\? always exists and is not nullable\.$#'
 			identifier: nullCoalesce.offset
 			count: 1
-			path: app/Services/Orders/Document/DocxVariableResolver.php
+			path: app/Modules/Orders/Infrastructure/Document/DocxVariableResolver.php
 
 		-
 			message: '#^Strict comparison using \=\=\= between mixed and null will always evaluate to false\.$#'
 			identifier: identical.alwaysFalse
 			count: 1
-			path: app/Services/Orders/Document/DocxVariableResolver.php
+			path: app/Modules/Orders/Infrastructure/Document/DocxVariableResolver.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\OrderLog\:\:\$given_date\.$#'
 			identifier: property.notFound
 			count: 1
-			path: app/Services/Orders/Document/Effects/SurnameChangeEffect.php
+			path: app/Modules/Orders/Infrastructure/Document/Effects/SurnameChangeEffect.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$previous_surname\.$#'
 			identifier: property.notFound
 			count: 1
-			path: app/Services/Orders/Document/Effects/SurnameChangeEffect.php
+			path: app/Modules/Orders/Infrastructure/Document/Effects/SurnameChangeEffect.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$surname\.$#'
 			identifier: property.notFound
 			count: 3
-			path: app/Services/Orders/Document/Effects/SurnameChangeEffect.php
+			path: app/Modules/Orders/Infrastructure/Document/Effects/SurnameChangeEffect.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\OrderLog\:\:\$order_no\.$#'
 			identifier: property.notFound
 			count: 2
-			path: app/Services/Orders/Document/Effects/TransferEffect.php
+			path: app/Modules/Orders/Infrastructure/Document/Effects/TransferEffect.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\OrderLog\:\:\$template_snapshot\.$#'
 			identifier: property.notFound
 			count: 2
-			path: app/Services/Orders/Document/Effects/TransferEffect.php
+			path: app/Modules/Orders/Infrastructure/Document/Effects/TransferEffect.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$position_id\.$#'
 			identifier: property.notFound
 			count: 1
-			path: app/Services/Orders/Document/Effects/TransferEffect.php
+			path: app/Modules/Orders/Infrastructure/Document/Effects/TransferEffect.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$structure_id\.$#'
 			identifier: property.notFound
 			count: 1
-			path: app/Services/Orders/Document/Effects/TransferEffect.php
+			path: app/Modules/Orders/Infrastructure/Document/Effects/TransferEffect.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\OrderLog\:\:\$given_date\.$#'
 			identifier: property.notFound
 			count: 1
-			path: app/Services/Orders/Document/Effects/VacationEffect.php
+			path: app/Modules/Orders/Infrastructure/Document/Effects/VacationEffect.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\OrderLog\:\:\$order_no\.$#'
 			identifier: property.notFound
 			count: 2
-			path: app/Services/Orders/Document/Effects/VacationEffect.php
+			path: app/Modules/Orders/Infrastructure/Document/Effects/VacationEffect.php
 
 		-
 			message: '#^Using nullsafe property access "\?\-\>year" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
-			path: app/Services/Orders/Document/Effects/VacationEffect.php
+			path: app/Modules/Orders/Infrastructure/Document/Effects/VacationEffect.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\OrderLog\:\:\$signatory_snapshot\.$#'
 			identifier: property.notFound
 			count: 1
-			path: app/Services/Orders/Document/OrderIssueService.php
+			path: app/Modules/Orders/Infrastructure/Document/OrderIssueService.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\OrderLog\:\:\$status_id\.$#'
 			identifier: property.notFound
 			count: 2
-			path: app/Services/Orders/Document/OrderIssueService.php
+			path: app/Modules/Orders/Infrastructure/Document/OrderIssueService.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\OrderLog\:\:\$template_render_mode\.$#'
 			identifier: property.notFound
 			count: 1
-			path: app/Services/Orders/Document/OrderIssueService.php
+			path: app/Modules/Orders/Infrastructure/Document/OrderIssueService.php
 
 		-
 			message: '#^Offset ''candidate_id'' on array\{template_code\: string, label\?\: string, personnel_id\?\: int\|null, fields\?\: array\<string, mixed\>, order_number\: string, order_date\?\: string, given_by\?\: string, given_by_rank\?\: string, \.\.\.\} on left side of \?\? does not exist\.$#'
 			identifier: nullCoalesce.offset
 			count: 1
-			path: app/Services/Orders/Document/OrderIssueService.php
+			path: app/Modules/Orders/Infrastructure/Document/OrderIssueService.php
 
 		-
 			message: '#^Offset ''candidate_id'' on array\{template_code\?\: string, label\?\: string, personnel_id\?\: int\|null, fields\?\: array\<string, mixed\>, order_number\: string, order_date\?\: string, signatory\?\: array\<string, mixed\>\} on left side of \?\? does not exist\.$#'
 			identifier: nullCoalesce.offset
 			count: 1
-			path: app/Services/Orders/Document/OrderIssueService.php
+			path: app/Modules/Orders/Infrastructure/Document/OrderIssueService.php
 
 		-
 			message: '#^Offset ''hire_position_id'' on array\{template_code\: string, label\?\: string, personnel_id\?\: int\|null, fields\?\: array\<string, mixed\>, order_number\: string, order_date\?\: string, given_by\?\: string, given_by_rank\?\: string, \.\.\.\} on left side of \?\? does not exist\.$#'
 			identifier: nullCoalesce.offset
 			count: 1
-			path: app/Services/Orders/Document/OrderIssueService.php
+			path: app/Modules/Orders/Infrastructure/Document/OrderIssueService.php
 
 		-
 			message: '#^Offset ''hire_position_id'' on array\{template_code\?\: string, label\?\: string, personnel_id\?\: int\|null, fields\?\: array\<string, mixed\>, order_number\: string, order_date\?\: string, signatory\?\: array\<string, mixed\>\} on left side of \?\? does not exist\.$#'
 			identifier: nullCoalesce.offset
 			count: 1
-			path: app/Services/Orders/Document/OrderIssueService.php
+			path: app/Modules/Orders/Infrastructure/Document/OrderIssueService.php
 
 		-
 			message: '#^Offset ''hire_structure_id'' on array\{template_code\: string, label\?\: string, personnel_id\?\: int\|null, fields\?\: array\<string, mixed\>, order_number\: string, order_date\?\: string, given_by\?\: string, given_by_rank\?\: string, \.\.\.\} on left side of \?\? does not exist\.$#'
 			identifier: nullCoalesce.offset
 			count: 1
-			path: app/Services/Orders/Document/OrderIssueService.php
+			path: app/Modules/Orders/Infrastructure/Document/OrderIssueService.php
 
 		-
 			message: '#^Offset ''hire_structure_id'' on array\{template_code\?\: string, label\?\: string, personnel_id\?\: int\|null, fields\?\: array\<string, mixed\>, order_number\: string, order_date\?\: string, signatory\?\: array\<string, mixed\>\} on left side of \?\? does not exist\.$#'
 			identifier: nullCoalesce.offset
 			count: 1
-			path: app/Services/Orders/Document/OrderIssueService.php
+			path: app/Modules/Orders/Infrastructure/Document/OrderIssueService.php
 
 		-
 			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
-			path: app/Services/Orders/Document/OrderIssueService.php
+			path: app/Modules/Orders/Infrastructure/Document/OrderIssueService.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\Structure\:\:\$parent_id\.$#'
 			identifier: property.notFound
 			count: 1
-			path: app/Services/Orders/Document/OrderLookupFieldRegistry.php
+			path: app/Modules/Orders/Infrastructure/Document/OrderLookupFieldRegistry.php
 
 		-
 			message: '#^Unable to resolve the template type TGroupKey in call to method Illuminate\\Support\\Collection\<int,App\\Models\\Structure\>\:\:groupBy\(\)$#'
 			identifier: argument.templateType
 			count: 1
-			path: app/Services/Orders/Document/OrderLookupFieldRegistry.php
+			path: app/Modules/Orders/Infrastructure/Document/OrderLookupFieldRegistry.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\OrderLog\:\:\$order_no\.$#'
 			identifier: property.notFound
 			count: 2
-			path: app/Services/Orders/Document/OrderStatusTransitionService.php
+			path: app/Modules/Orders/Infrastructure/Document/OrderStatusTransitionService.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\OrderLog\:\:\$order_type_id\.$#'
 			identifier: property.notFound
 			count: 1
-			path: app/Services/Orders/Document/OrderStatusTransitionService.php
+			path: app/Modules/Orders/Infrastructure/Document/OrderStatusTransitionService.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\OrderLog\:\:\$status_id\.$#'
 			identifier: property.notFound
 			count: 2
-			path: app/Services/Orders/Document/OrderStatusTransitionService.php
+			path: app/Modules/Orders/Infrastructure/Document/OrderStatusTransitionService.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\OrderLog\:\:\$template_render_mode\.$#'
 			identifier: property.notFound
 			count: 1
-			path: app/Services/Orders/Document/OrderStatusTransitionService.php
+			path: app/Modules/Orders/Infrastructure/Document/OrderStatusTransitionService.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\OrderLog\:\:\$template_snapshot\.$#'
 			identifier: property.notFound
 			count: 2
-			path: app/Services/Orders/Document/OrderStatusTransitionService.php
+			path: app/Modules/Orders/Infrastructure/Document/OrderStatusTransitionService.php
 
 		-
 			message: '#^Offset ''token'' on array\{token\: string, label\: string, source\: string, auto_key\: string\|null, field\: array\{key\: string, type\: string\}\|null, effect_role\: string\|null\} on left side of \?\? always exists and is not nullable\.$#'
 			identifier: nullCoalesce.offset
 			count: 1
-			path: app/Services/Orders/Document/OrderStatusTransitionService.php
+			path: app/Modules/Orders/Infrastructure/Document/OrderStatusTransitionService.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$name\.$#'
 			identifier: property.notFound
 			count: 1
-			path: app/Services/Orders/Variables/OrderEmployeeVariableResolver.php
+			path: app/Modules/Orders/Infrastructure/Variables/OrderEmployeeVariableResolver.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$patronymic\.$#'
 			identifier: property.notFound
 			count: 1
-			path: app/Services/Orders/Variables/OrderEmployeeVariableResolver.php
+			path: app/Modules/Orders/Infrastructure/Variables/OrderEmployeeVariableResolver.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$structure_id\.$#'
 			identifier: property.notFound
 			count: 1
-			path: app/Services/Orders/Variables/OrderEmployeeVariableResolver.php
+			path: app/Modules/Orders/Infrastructure/Variables/OrderEmployeeVariableResolver.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$surname\.$#'
 			identifier: property.notFound
 			count: 1
-			path: app/Services/Orders/Variables/OrderEmployeeVariableResolver.php
+			path: app/Modules/Orders/Infrastructure/Variables/OrderEmployeeVariableResolver.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\Structure\:\:\$parent_id\.$#'
 			identifier: property.notFound
 			count: 1
-			path: app/Services/Orders/Variables/OrderEmployeeVariableResolver.php
+			path: app/Modules/Orders/Infrastructure/Variables/OrderEmployeeVariableResolver.php
 
 		-
 			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
-			path: app/Services/Orders/Variables/OrderEmployeeVariableResolver.php
+			path: app/Modules/Orders/Infrastructure/Variables/OrderEmployeeVariableResolver.php
 
 		-
 			message: '#^Offset 1 on array\{list\<string\>, list\<non\-empty\-string\>\} on left side of \?\? always exists and is not nullable\.$#'
 			identifier: nullCoalesce.offset
 			count: 1
-			path: app/Services/Orders/Variables/VariableInterpolator.php
+			path: app/Modules/Orders/Application/Variables/VariableInterpolator.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$is_pending\.$#'

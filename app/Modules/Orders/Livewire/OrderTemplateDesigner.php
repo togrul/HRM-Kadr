@@ -2,12 +2,12 @@
 
 namespace App\Modules\Orders\Livewire;
 
-use App\Services\Orders\Document\DocxPlaceholderParser;
-use App\Services\Orders\Document\DocxTemplateRenderer;
-use App\Services\Orders\Document\DocxToPdfConverter;
-use App\Services\Orders\Document\OrderLookupFieldRegistry;
-use App\Services\Orders\Document\OrderWordTemplateRepository;
-use App\Services\Orders\Variables\OrderVariableRegistry;
+use App\Modules\Orders\Application\Document\DocxPlaceholderParser;
+use App\Modules\Orders\Application\Document\DocxTemplateRenderer;
+use App\Modules\Orders\Application\Document\DocxToPdfConverter;
+use App\Modules\Orders\Application\Document\OrderWordTemplateRepository;
+use App\Modules\Orders\Application\Variables\OrderVariableRegistry;
+use App\Modules\Orders\Infrastructure\Document\OrderLookupFieldRegistry;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
@@ -80,7 +80,7 @@ class OrderTemplateDesigner extends Component
      * Effect options for the order-type selector + the roles of the current effect (for
      * the per-variable role dropdown).
      */
-    public function getEffectOptionsProperty(\App\Services\Orders\Document\Effects\OrderEffectCatalog $catalog): array
+    public function getEffectOptionsProperty(\App\Modules\Orders\Infrastructure\Document\Effects\OrderEffectCatalog $catalog): array
     {
         return $catalog->options();
     }
@@ -88,7 +88,7 @@ class OrderTemplateDesigner extends Component
     /**
      * @return array<int,array{key:string,label:string,type:string}>
      */
-    public function getEffectRolesProperty(\App\Services\Orders\Document\Effects\OrderEffectCatalog $catalog): array
+    public function getEffectRolesProperty(\App\Modules\Orders\Infrastructure\Document\Effects\OrderEffectCatalog $catalog): array
     {
         return $catalog->roles($this->effect);
     }
@@ -214,7 +214,7 @@ class OrderTemplateDesigner extends Component
             if (! $this->isNew) {
                 $existing = $repository->find($this->code);
                 if ($existing) {
-                    app(\App\Services\Orders\Document\OrderWordTemplateVersioner::class)->archive($existing);
+                    app(\App\Modules\Orders\Application\Document\OrderWordTemplateVersioner::class)->archive($existing);
                 }
             }
 

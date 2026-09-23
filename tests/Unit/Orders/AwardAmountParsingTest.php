@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Orders;
 
-use App\Services\Orders\Document\Effects\AwardEffect;
+use App\Modules\Orders\Infrastructure\Document\Effects\AwardEffect;
 use DomainException;
 use Tests\TestCase;
 

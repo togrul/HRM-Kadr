@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Orders\Document;
+namespace App\Modules\Orders\Application\Document;
 
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
@@ -20,7 +20,7 @@ class DocxToPdfConverter
     }
 
     /**
-     * @return string|null  absolute path to the generated PDF, or null on failure
+     * @return string|null absolute path to the generated PDF, or null on failure
      */
     public function convert(string $docxPath): ?string
     {

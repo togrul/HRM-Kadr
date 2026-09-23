@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Orders\Variables;
+namespace App\Modules\Orders\Application\Variables;
 
 /**
  * The single catalog of variables a template author may insert — the source of

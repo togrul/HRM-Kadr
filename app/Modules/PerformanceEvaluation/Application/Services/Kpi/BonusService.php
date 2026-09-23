@@ -11,8 +11,8 @@ use App\Models\Structure;
 use App\Models\User;
 use App\Modules\Compensation\Domain\Contracts\CompensationReadRepository;
 use App\Modules\Integration\Domain\Contracts\IntegrationOutbox;
+use App\Modules\Orders\Contracts\OrderDrafter;
 use App\Modules\Payroll\Domain\Contracts\PayrollOneOffEarnings;
-use App\Services\Orders\Document\OrderDraftService;
 use App\Services\Profiles\ProfileState;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -38,7 +38,7 @@ class BonusService
 
     /**
      * Manual fields of the award order template, keyed by their Azerbaijani label.
-     * Data keys, not UI text: OrderDraftService matches them against the template's
+     * Data keys, not UI text: the OrderDrafter matches them against the template's
      * variable labels, so they must stay byte-identical to the Word template.
      */
     private const FIELD_REASON = 'Mükafatın səbəbi';
@@ -49,7 +49,7 @@ class BonusService
 
     public function __construct(
         private readonly ProfileState $profile,
-        private readonly OrderDraftService $orders,
+        private readonly OrderDrafter $orders,
     ) {}
 
     /** Military regime pays by order; every other service area uses the company model. */

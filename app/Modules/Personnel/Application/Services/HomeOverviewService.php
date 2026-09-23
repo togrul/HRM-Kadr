@@ -2,12 +2,12 @@
 
 namespace App\Modules\Personnel\Application\Services;
 
+use App\Enums\OrderStatusEnum;
 use App\Models\AttendanceManualEntry;
 use App\Models\AuditActivity;
 use App\Models\OrderLog;
 use App\Models\PersonnelVacation;
 use App\Models\User;
-use App\Services\Orders\Document\OrderIssueService;
 use App\Support\Database\InstalledTables;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\Auth\Access\Authorizable;
@@ -144,7 +144,7 @@ class HomeOverviewService
             return self::EMPTY_QUEUE;
         }
 
-        return $this->queueStats(OrderLog::query()->where('status_id', OrderIssueService::STATUS_PENDING));
+        return $this->queueStats(OrderLog::query()->where('status_id', OrderStatusEnum::PENDING->value));
     }
 
     /**

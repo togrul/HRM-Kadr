@@ -7,7 +7,7 @@ use App\Models\EmployeeCompensation;
 use App\Models\OrderLog;
 use App\Models\Personnel;
 use App\Modules\Compensation\Application\Services\CompensationService;
-use App\Services\Orders\Document\Effects\TerminationEffect;
+use App\Modules\Orders\Infrastructure\Document\Effects\TerminationEffect;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;

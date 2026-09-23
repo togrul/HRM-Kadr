@@ -1,9 +1,12 @@
 <?php
 
-namespace App\Services\Orders\Document;
+namespace App\Modules\Orders\Infrastructure\Document;
 
 use App\Models\OrderLog;
 use App\Models\Personnel;
+use App\Modules\Orders\Application\Document\DocxTemplateRenderer;
+use App\Modules\Orders\Application\Document\OrderWordTemplateRepository;
+use App\Modules\Orders\Contracts\OrderDrafter;
 use App\Services\Chief\ChiefResolver;
 use App\Support\Language\AzerbaijaniDateFormatter;
 use Illuminate\Support\Facades\Storage;
@@ -14,7 +17,7 @@ use RuntimeException;
  * manual fields are given by their placeholder label, the document is rendered and
  * attached, and the order then waits in /orders for review and approval like any other.
  */
-class OrderDraftService
+class OrderDraftService implements OrderDrafter
 {
     /**
      * The city line printed in the order document header. Document content, not UI text:
