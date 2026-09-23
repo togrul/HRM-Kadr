@@ -96,9 +96,7 @@
         </x-slot:icon>
 
         <x-slot:actions>
-            <x-pill-button wire:click="resetFilters" wire:loading.attr="disabled" wire:target="resetFilters">
-                {{ __('compliance::documents.actions.reset_filters') }}
-            </x-pill-button>
+            <x-filter.reset :active="$search !== '' || $status !== '' || $type !== ''" action="resetFilters" />
 
             <x-pill-button variant="emerald" wire:click="exportCsv" wire:loading.attr="disabled" wire:target="exportCsv">
                 {{ __('compliance::documents.actions.export_csv') }}

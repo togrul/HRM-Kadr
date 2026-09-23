@@ -1,4 +1,4 @@
-<div class="space-y-6 px-6 py-6">
+<div class="flex flex-col">
     {{-- ===================== contextual panel ===================== --}}
     @php
         $contextTabs = ['general', 'library', 'reports'];
@@ -19,30 +19,26 @@
         </x-context-panel>
     @endteleport
 
-    <div class="rounded-2xl border border-zinc-200 bg-zinc-50 p-6 shadow-sm">
-        <div class="space-y-2">
-            <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __('ui::menu.items.learning_library') }}</x-ui.field-label>
-            <h1 class="text-[19px] font-semibold tracking-tight text-zinc-950">{{ __('learning-library::dashboard.title') }}</h1>
-            <p class="max-w-3xl text-sm leading-6 text-zinc-500">{{ __('learning-library::dashboard.description') }}</p>
-        </div>
+    <x-page-header :title="__('learning-library::dashboard.title')" :breadcrumb="__('ui::menu.items.learning_library')">
+        <x-slot:icon>
+            <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m16 6 4 14"/><path d="M12 6v14"/><path d="M8 8v12"/><path d="M4 4v16"/></svg>
+        </x-slot:icon>
 
+        <p class="max-w-3xl text-[12.5px] leading-relaxed text-ink-muted">{{ __('learning-library::dashboard.description') }}</p>
+    </x-page-header>
+
+    <div class="space-y-6 px-4 py-4 sm:px-5">
         @php
-
             $summary = $activeTab === 'general' ? $this->generalPayload['summary'] : $this->summaryPayload['summary'];
-
         @endphp
-        <div class="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-7">
+        <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-7">
             @foreach (['asset_total', 'required_assets', 'active_assets', 'auto_assign_assets', 'active_assignments', 'completed_assignments', 'overdue_assignments'] as $metric)
-                <div class="rounded-2xl border border-zinc-200 bg-white px-4 py-4">
-                    <x-ui.field-label as="div" class="tracking-tight">{{ __('learning-library::dashboard.summary.'.$metric) }}</x-ui.field-label>
-                    <p class="mt-2 text-2xl font-semibold tracking-tight text-zinc-950">{{ $summary[$metric] }}</p>
-                </div>
+                <x-ui.metric-tile :label="__('learning-library::dashboard.summary.'.$metric)" :value="$summary[$metric]" />
             @endforeach
         </div>
-    </div>
 
-    <div class="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-        <x-filter.nav class="min-w-0 lg:hidden">
+    <div class="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm lg:hidden">
+        <x-filter.nav class="min-w-0">
             @foreach ($contextTabs as $tab)
                 <x-filter.item wire:click.prevent="switchTab('{{ $tab }}')" :active="$activeTab === $tab">
                     {{ __('learning-library::dashboard.tabs.'.$tab) }}
@@ -306,4 +302,5 @@
             </div>
         @endif
     </div>
+</div>
 </div>

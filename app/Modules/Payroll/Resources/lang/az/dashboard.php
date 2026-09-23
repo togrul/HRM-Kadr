@@ -2,7 +2,7 @@
 
 return [
     'kicker' => 'Əmək haqqı',
-    'title' => 'Əmək haqqı (Payroll)',
+    'title' => 'Əmək haqqı',
     'description' => 'Dövrlər yaradın, hesablamalar aparın, maaş vərəqələrini nəzərdən keçirin, təsdiqləyin və kilidləyin.',
 
     'tabs' => [
@@ -46,7 +46,7 @@ return [
         'employees' => 'Əməkdaş',
         'empty' => 'Hələ hesablama yoxdur',
         'type' => 'Hesablama növü',
-        'forecast' => 'Proqnoz aylıq baza payroll',
+        'forecast' => 'Proqnoz aylıq əmək haqqı fondu',
     ],
 
     'payslips' => [

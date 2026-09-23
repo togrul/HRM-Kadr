@@ -118,10 +118,7 @@
                         @endforeach
                     </x-ui.select>
 
-                    <x-pill-button wire:click="resetFilters" wire:loading.attr="disabled"
-                        title="{{ __('audit::activity.actions.reset_filters') }}">
-                        {{ __('audit::activity.actions.reset_short') }}
-                    </x-pill-button>
+                    <x-filter.reset :active="$search !== '' || $logName !== '' || $event !== '' || $dateFrom !== '' || $dateTo !== ''" action="resetFilters" />
                 </div>
             </div>
 

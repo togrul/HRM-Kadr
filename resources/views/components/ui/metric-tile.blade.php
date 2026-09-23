@@ -11,14 +11,22 @@
     // Design-system stat tile: white card, eyebrow label, mono number. A tone colours the
     // number and adds the status dot, so a problem count reads as one at a glance without
     // tinting the whole card.
+    // A zero is nothing to act on: the number stays ink (the dot still names the category).
+    $isZero = is_numeric(trim((string) ($value ?? ''), " %")) && (float) trim((string) $value, " %") === 0.0;
+
     [$numberClass, $dotClass] = match ($tone) {
         'green', 'emerald' => ['text-[#047857]', 'bg-[#059669]'],
         'amber', 'warning' => ['text-[#b45309]', 'bg-[#d97706]'],
         'rose', 'red', 'danger' => ['text-[#be123c]', 'bg-[#e11d48]'],
-        'blue', 'sky', 'info' => ['text-[#0369a1]', 'bg-[#0284c7]'],
-        'violet', 'purple' => ['text-[#6d28d9]', 'bg-[#7c3aed]'],
+        // category colours: the dot names the category, the number stays ink
+        'blue', 'sky', 'info' => ['text-ink', 'bg-[#0284c7]'],
+        'violet', 'purple' => ['text-ink', 'bg-[#7c3aed]'],
         default => ['text-ink', ''],
     };
+
+    if ($isZero) {
+        $numberClass = 'text-ink';
+    }
 
     $tag = $href ? 'a' : 'div';
 @endphp

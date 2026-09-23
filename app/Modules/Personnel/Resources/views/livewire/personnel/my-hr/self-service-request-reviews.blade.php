@@ -3,7 +3,7 @@
     $summary = $payload['summary'];
 @endphp
 
-<div class="space-y-6 px-6 py-6">
+<div class="flex flex-col">
     {{-- ===================== contextual panel ===================== --}}
     @php
         $reviewTypes = [
@@ -42,29 +42,23 @@
         </x-context-panel>
     @endteleport
 
-    <div class="rounded-2xl border border-zinc-200 bg-zinc-50 p-6 shadow-sm">
-        <div class="space-y-2">
-            <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __('personnel::my_hr.review.kicker') }}</x-ui.field-label>
-            <h1 class="text-[19px] font-semibold tracking-tight text-zinc-950">{{ __('personnel::my_hr.review.title') }}</h1>
-            <p class="max-w-3xl text-sm leading-6 text-zinc-500">{{ __('personnel::my_hr.review.description') }}</p>
-        </div>
+    <x-page-header :title="__('personnel::my_hr.review.title')" :breadcrumb="__('personnel::my_hr.review.kicker')">
+        <x-slot:icon>
+            <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="m9 10 2 2 4-4"/></svg>
+        </x-slot:icon>
 
-        <div class="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
-            @foreach ([
-                ['label' => __('personnel::my_hr.review.summary.total'), 'value' => $summary['total']],
-                ['label' => __('personnel::my_hr.requests.types.leave'), 'value' => $summary['leave']],
-                ['label' => __('personnel::my_hr.requests.types.vacation'), 'value' => $summary['vacation']],
-                ['label' => __('personnel::my_hr.requests.types.business_trip'), 'value' => $summary['business_trip']],
-                ['label' => __('personnel::my_hr.review.types.correction'), 'value' => $summary['correction']],
-            ] as $card)
-                <div class="rounded-2xl border border-zinc-200 bg-white px-4 py-4">
-                    <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ $card['label'] }}</x-ui.field-label>
-                    <p class="mt-2 text-2xl font-semibold tracking-tight text-zinc-950">{{ $card['value'] }}</p>
-                </div>
-            @endforeach
-        </div>
-    </div>
+        <x-slot:stats>
+            <x-page-header.stat :value="$summary['total']" :label="__('personnel::my_hr.review.summary.total')" tone="amber" />
+            <x-page-header.stat :value="$summary['leave']" :label="__('personnel::my_hr.requests.types.leave')" />
+            <x-page-header.stat :value="$summary['vacation']" :label="__('personnel::my_hr.requests.types.vacation')" />
+            <x-page-header.stat :value="$summary['business_trip']" :label="__('personnel::my_hr.requests.types.business_trip')" />
+            <x-page-header.stat :value="$summary['correction']" :label="__('personnel::my_hr.review.types.correction')" />
+        </x-slot:stats>
 
+        <p class="max-w-3xl text-[12.5px] leading-relaxed text-ink-muted">{{ __('personnel::my_hr.review.description') }}</p>
+    </x-page-header>
+
+    <div class="space-y-6 px-4 py-4 sm:px-5">
     <x-ui.filter-panel>
             <x-ui.input-shell :label="__('personnel::my_hr.requests.fields.search')" labelClass="tracking-tight text-zinc-500">
                 <x-ui.filter-input wire:model.live.debounce.300ms="search" type="text" placeholder="{{ __('personnel::my_hr.review.messages.search_placeholder') }}" />
@@ -143,10 +137,10 @@
                     </x-ui.input-shell>
 
                     <div class="mt-4 flex flex-wrap gap-2">
-                        <button type="button" wire:click="approve('{{ $row['request_type'] }}', {{ $row['record_id'] }})" class="inline-flex items-center justify-center rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold tracking-tight text-emerald-700 transition hover:bg-emerald-100">
+                        <button type="button" wire:click="approve('{{ $row['request_type'] }}', {{ $row['record_id'] }})" class="inline-flex h-9 items-center justify-center rounded-[10px] bg-ink px-4 text-[13px] font-semibold text-white transition hover:bg-ink-hover">
                             {{ __('personnel::my_hr.review.actions.approve') }}
                         </button>
-                        <button type="button" wire:click="reject('{{ $row['request_type'] }}', {{ $row['record_id'] }})" class="inline-flex items-center justify-center rounded-2xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm font-semibold tracking-tight text-rose-700 transition hover:bg-rose-100">
+                        <button type="button" wire:click="reject('{{ $row['request_type'] }}', {{ $row['record_id'] }})" class="inline-flex h-9 items-center justify-center rounded-[10px] px-4 text-[13px] font-semibold text-ink-muted transition hover:bg-[#ffe4e6] hover:text-[#be123c]">
                             {{ __('personnel::my_hr.review.actions.reject') }}
                         </button>
                     </div>
@@ -161,4 +155,5 @@
             />
         @endforelse
     </div>
+</div>
 </div>

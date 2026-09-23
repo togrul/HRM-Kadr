@@ -120,9 +120,7 @@
         </x-slot:stats>
 
         <x-slot:actions>
-            <x-pill-button wire:click="resetFilters" wire:loading.attr="disabled" wire:target="resetFilters">
-                {{ __('employee-lifecycle::dashboard.actions.reset_filters') }}
-            </x-pill-button>
+            <x-filter.reset :active="$search !== '' || $type !== '' || $status !== ''" action="resetFilters" />
 
             @if ($canManage)
                 <x-pill-button wire:click="openPanel('templates')">
