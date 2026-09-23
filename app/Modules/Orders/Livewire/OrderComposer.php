@@ -10,11 +10,13 @@ use App\Models\Position;
 use App\Models\Structure;
 use App\Modules\Orders\Application\Document\OrderComposition;
 use App\Modules\Orders\Application\Document\OrderTemplateProvider;
+use App\Modules\Orders\Application\Document\OrderVacationRules;
 use App\Modules\Orders\Infrastructure\Document\OrderDocumentBuilder;
 use App\Modules\Orders\Infrastructure\Document\OrderDraftService;
 use App\Modules\Orders\Infrastructure\Document\OrderIssueService;
 use App\Modules\Orders\Infrastructure\Document\OrderLookupFieldRegistry;
 use App\Modules\Orders\Infrastructure\Document\OrderSubjectResolver;
+use App\Services\Vacation\VacationBalanceService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Storage;
@@ -274,7 +276,7 @@ class OrderComposer extends Component
     {
         $template = $this->template();
 
-        return ($template && $template->effect === 'vacation') ? $this->vacationBalanceFor($template) : null;
+        return $template ? $this->vacationBalanceFor($template) : null;
     }
 
     /**
@@ -282,41 +284,19 @@ class OrderComposer extends Component
      */
     private function vacationBalanceFor(OrderWordTemplate $template): ?array
     {
+        $rules = app(OrderVacationRules::class);
+        if (! $rules->isDayCounted($template)) {
+            return null;
+        }
+
         $personnel = app(OrderSubjectResolver::class)->personnel($this->personnelId);
         if (! $personnel) {
             return null;
         }
 
-        // Only day-counted paid leave has a balance to check/deduct. Date-range leaves
-        // without a day count (e.g. unpaid leave) are not gated and show no balance.
-        $hasDaysRole = collect($template->variables ?? [])
-            ->contains(fn ($v) => ($v['effect_role'] ?? null) === 'days');
-        if (! $hasDaysRole) {
-            return null;
-        }
+        $request = $rules->request($template, $this->fields);
 
-        $start = app(\App\Support\Language\AzerbaijaniDateFormatter::class)->parse($this->effectFieldValue($template, 'start_date'));
-        $year = (int) ($start?->year ?? now()->year);
-
-        $snapshot = app(\App\Services\Vacation\VacationBalanceService::class)->snapshot($personnel, $year);
-        $snapshot['year'] = $year;
-        $snapshot['requested'] = (int) ($this->effectFieldValue($template, 'days') ?? 0);
-
-        return $snapshot;
-    }
-
-    /** The value the author entered for the template variable carrying $role. */
-    private function effectFieldValue(OrderWordTemplate $template, string $role): ?string
-    {
-        foreach ($template->variables ?? [] as $variable) {
-            if (($variable['effect_role'] ?? null) === $role && ! empty($variable['token'])) {
-                $value = $this->fields[$variable['token']] ?? null;
-
-                return $value === null ? null : (string) $value;
-            }
-        }
-
-        return null;
+        return [...app(VacationBalanceService::class)->snapshot($personnel, $request['year']), ...$request];
     }
 
     /** Clear a field's "required" error the moment the author fills it in. */
@@ -453,19 +433,9 @@ class OrderComposer extends Component
         // annual balance. Block with a clear notification otherwise.
         if ($template->effect === 'vacation' && $this->personnelId) {
             $balance = $this->vacationBalanceFor($template);
-            if ($balance && $balance['requested'] < 1) {
-                $this->dispatch('orderError', __('orders::order_composer.vacation.min_days'));
-
-                return null;
-            }
-            if ($balance && $balance['requested'] > $balance['remaining']) {
-                $this->dispatch('orderError', __('orders::order_composer.vacation.exceeded', [
-                    'year' => $balance['year'],
-                    'total' => $balance['total'],
-                    'used' => $balance['used'],
-                    'remaining' => $balance['remaining'],
-                    'requested' => $balance['requested'],
-                ]));
+            $violation = $balance ? app(OrderVacationRules::class)->violation($balance) : null;
+            if ($violation !== null) {
+                $this->dispatch('orderError', $violation);
 
                 return null;
             }
