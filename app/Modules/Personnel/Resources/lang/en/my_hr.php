@@ -47,18 +47,6 @@ return [
         'quick_actions_kicker' => 'Quick actions',
         'quick_actions_title' => 'Start work from here',
         'quick_actions_body' => 'In the next sprint these buttons will open employee self-service forms and assignment inboxes.',
-        'foundation_kicker' => 'Sprint 1 foundation',
-        'foundation_title' => 'The My HR shell is ready',
-        'foundation_body' => 'This stage establishes the route, employee-safe access, personnel bootstrap, and the primary tab skeleton. The next sprints will fill each tab with functional workflows.',
-        'foundation_states' => [
-            'requests' => 'Leave, vacation, and business trip self-service façades will connect in the next sprint.',
-            'notifications' => 'An employee inbox will be added on top of the existing notification flow.',
-            'onboarding' => 'Assigned documents and acknowledgement tracking will appear here.',
-            'development_plan' => 'Training Needs will expose an employee-facing individual development plan here.',
-            'learning' => 'Welcome videos and targeted learning content will use a dedicated storage-backed library.',
-            'documents' => 'Employee-safe document visibility will be grouped here.',
-            'hierarchy' => 'Manager, structure, and approval lines will use the same hierarchy source of truth.',
-        ],
     ],
     'empty_state' => [
         'kicker' => 'Account not linked',
@@ -69,8 +57,6 @@ return [
         'admin_action' => 'Employee list',
     ],
     'messages' => [
-        'foundation_title' => 'This section is in the foundation phase',
-        'foundation_body' => 'The route and shell for :tab are ready. The next sprint will add the employee-facing data contract and the workflow layer.',
         'contact_not_available' => 'No contact information available',
     ],
     'requests' => [

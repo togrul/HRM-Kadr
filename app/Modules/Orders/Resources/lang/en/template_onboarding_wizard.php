@@ -10,7 +10,6 @@ return [
         'step_metadata_coverage' => 'Step 3: Metadata + Coverage',
         'step_publish_readiness' => 'Step 4: Publish readiness',
         'step_preview_publish' => 'Step 5: Preview + Publish',
-        'roadmap_source' => 'Roadmap source',
     ],
     'checklist' => [
         'ensure_template_set' => 'Create or select template set',
@@ -85,7 +84,6 @@ return [
         'coverage_docx_scalar_hint' => 'Coverage checks DOCX scalar placeholders. Row mappings are not counted as orphan.',
         'orphan_note' => 'Note: orphan mappings do not block publish but should be cleaned up for maintainability.',
         'publish_requires_preview' => 'Publish is enabled after a successful preview render.',
-        'roadmap_source' => 'Master execution list is tracked in docs/orders-template-master-todo.md',
     ],
     'audit' => [
         'actions' => [

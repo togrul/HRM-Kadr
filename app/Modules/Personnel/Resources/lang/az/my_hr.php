@@ -47,18 +47,6 @@ return [
         'quick_actions_kicker' => 'Qısa keçidlər',
         'quick_actions_title' => 'İşlərinizi buradan başlayın',
         'quick_actions_body' => 'Bu düymələr şəxsi kabinet form-larını və təyin edilmiş iş axınlarını açır.',
-        'foundation_kicker' => 'Başlanğıc mərhələsi',
-        'foundation_title' => 'Şəxsi kabinet əsas xətti hazırdır',
-        'foundation_body' => 'Bu mərhələdə route, əməkdaş üçün təhlükəsiz giriş, personnel bootstrap və əsas tab skeleti qurulur. Sonrakı sprint-lər hər tabı ayrıca funksional hissə ilə dolduracaq.',
-        'foundation_states' => [
-            'requests' => 'İcazə, məzuniyyət və ezamiyyət müraciətləri burada idarə olunacaq.',
-            'notifications' => 'Şəxsi kabinet bildiriş qutusu mövcud bildiriş axını üzərindən ayrıca görünüş kimi işləyəcək.',
-            'onboarding' => 'Oxunmalı sənədlər üçün təyinat və tanışlıq paneli burada görünəcək.',
-            'development_plan' => 'Təlim ehtiyacları üzərindən fərdi inkişaf planı əməkdaş görünüşü ilə açılacaq.',
-            'learning' => 'Xoş gəldin videoları və hədəfli material kitabxanası ayrıca storage disk ilə idarə olunacaq.',
-            'documents' => 'Öz sənədlərim və self-service visibility qaydaları burada toplanacaq.',
-            'hierarchy' => 'Rəhbər, struktur və təsdiq xətti eyni ierarxik mənbədən göstəriləcək.',
-        ],
     ],
     'empty_state' => [
         'kicker' => 'Hesab əlaqələndirilməyib',
@@ -69,8 +57,6 @@ return [
         'admin_action' => 'Əməkdaşlar siyahısı',
     ],
     'messages' => [
-        'foundation_title' => 'Bu bölmə başlanğıc mərhələsindədir',
-        'foundation_body' => ':tab tabı üçün route və əsas qabıq hazırdır. Növbəti sprint-də əməkdaş görünüşü, data contract və form/workflow hissəsi qoşulacaq.',
         'contact_not_available' => 'Əlaqə məlumatı göstərilməyib',
     ],
     'requests' => [

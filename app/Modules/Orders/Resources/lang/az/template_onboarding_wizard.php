@@ -10,7 +10,6 @@ return [
         'step_metadata_coverage' => 'Addım 3: Metadata + Coverage',
         'step_publish_readiness' => 'Addım 4: Dərc hazırlığı',
         'step_preview_publish' => 'Addım 5: Preview + Dərc',
-        'roadmap_source' => 'Roadmap mənbəyi',
     ],
     'checklist' => [
         'ensure_template_set' => 'Şablon setini yarat və ya seç',
@@ -85,7 +84,6 @@ return [
         'coverage_docx_scalar_hint' => 'Coverage DOCX scalar placeholder-larını yoxlayır. Row mapping-lər orphan sayılmır.',
         'orphan_note' => 'Qeyd: yetim mapping-lər dərc etməyə mane olmur, amma dəstək rahatlığı üçün təmizlənməlidir.',
         'publish_requires_preview' => 'Dərc yalnız uğurlu preview render-dən sonra aktiv olur.',
-        'roadmap_source' => 'Əsas icra siyahısı docs/orders-template-master-todo.md daxilində izlənir',
     ],
     'audit' => [
         'actions' => [

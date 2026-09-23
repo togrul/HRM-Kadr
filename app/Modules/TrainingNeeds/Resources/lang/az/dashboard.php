@@ -6,10 +6,6 @@ return [
         'title' => 'İş sahəsi',
         'description' => 'Səlahiyyət, kompetensiya, təlim proqramı və rol tələblərinin təməl qatını burada idarə edin.',
     ],
-    'sections' => [
-        'title' => 'Sprint 1 bölmələri',
-        'description' => 'Təməl kataloqlar və rol tələbi matrisi hissələri arasında keçid edin.',
-    ],
     'panel' => [
         'title' => 'Təlim',
         'sections' => 'Təlim bölmələri',

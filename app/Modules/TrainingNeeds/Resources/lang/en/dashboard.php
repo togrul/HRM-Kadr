@@ -6,10 +6,6 @@ return [
         'title' => 'Workspace',
         'description' => 'Manage competency catalogs, requirement matrix, development needs, annual planning, and analytics from this workspace.',
     ],
-    'sections' => [
-        'title' => 'Training sections',
-        'description' => 'Move between catalogs, matrix, planning, and analytics without leaving the module.',
-    ],
     'panel' => [
         'title' => 'Training',
         'sections' => 'Training sections',
