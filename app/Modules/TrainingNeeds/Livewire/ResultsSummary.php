@@ -6,6 +6,7 @@ use App\Livewire\Concerns\WithRuntimeMemo;
 use App\Modules\TrainingNeeds\Livewire\Concerns\HandlesTrainingDeliveryMutations;
 use App\Modules\TrainingNeeds\Livewire\Concerns\InteractsWithTrainingNeedsAccess;
 use App\Modules\TrainingNeeds\Livewire\Concerns\InteractsWithTrainingNeedsQueries;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Isolate;
 use Livewire\Component;
 
@@ -32,7 +33,7 @@ class ResultsSummary extends Component
         $this->dispatch('training-needs:confirm-delete-feedback-form', feedbackFormId: $feedbackFormId);
     }
 
-    public function render()
+    public function render(): View
     {
         return view('training-needs::livewire.training-needs.results-summary');
     }

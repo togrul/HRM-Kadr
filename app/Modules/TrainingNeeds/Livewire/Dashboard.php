@@ -8,6 +8,7 @@ use App\Modules\TrainingNeeds\Livewire\Concerns\InteractsWithTrainingNeedsAccess
 use App\Modules\TrainingNeeds\Livewire\Concerns\InteractsWithTrainingNeedsQueries;
 use App\Services\HrPolicies\HrPolicyPackService;
 use App\Support\Livewire\InteractsWithTabbedWorkspace;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 
@@ -73,7 +74,7 @@ class Dashboard extends Component
         return app(HrPolicyPackService::class)->workflowTabs('training_needs', $this->tabs);
     }
 
-    public function render()
+    public function render(): View
     {
         return view('training-needs::livewire.training-needs.dashboard');
     }
