@@ -6,6 +6,7 @@ use App\Mail\NotificationTemplatePreviewMail;
 use App\Models\NotificationTemplate;
 use App\Modules\Notifications\Livewire\Concerns\InteractsWithNotificationAuthorization;
 use App\Modules\Notifications\Support\NotificationTemplateRenderer;
+use App\Modules\Notifications\Support\NotificationTriggerRegistry;
 use App\Modules\Notifications\Support\SamplePayloads;
 use Illuminate\Support\Facades\Mail;
 use Livewire\Component;
@@ -203,7 +204,7 @@ class TemplateManager extends Component
         return view('notification::livewire.notification.template-manager', [
             'templates' => $templates,
             'canManageTemplates' => $this->canManageTemplates(),
-            'categories' => ['birthday', 'position_change', 'holiday', 'announcement', 'training_result', 'leave_status'],
+            'categories' => array_keys($this->categoryLabels()),
             'categoryLabels' => $this->categoryLabels(),
             'previewSubject' => $previewSubject,
             'previewBody' => $previewBody,
@@ -224,14 +225,7 @@ class TemplateManager extends Component
 
     protected function categoryLabels(): array
     {
-        return [
-            'birthday' => __('notifications::common.categories.birthday'),
-            'position_change' => __('notifications::common.categories.position_change'),
-            'holiday' => __('notifications::common.categories.holiday'),
-            'announcement' => __('notifications::common.categories.announcement'),
-            'training_result' => __('notifications::common.categories.training_result'),
-            'leave_status' => __('notifications::common.categories.leave_status'),
-        ];
+        return NotificationTriggerRegistry::campaignCategoryLabels();
     }
 
     protected function availableVariables(): array

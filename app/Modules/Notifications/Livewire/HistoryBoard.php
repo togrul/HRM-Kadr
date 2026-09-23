@@ -5,6 +5,7 @@ namespace App\Modules\Notifications\Livewire;
 use App\Models\NotificationCampaign;
 use App\Modules\Notifications\Livewire\Concerns\InteractsWithNotificationAuthorization;
 use App\Modules\Notifications\Support\NotificationTitle;
+use App\Modules\Notifications\Support\NotificationTriggerRegistry;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -100,14 +101,7 @@ class HistoryBoard extends Component
     {
         return view('notification::livewire.notification.history-board', [
             'campaigns' => $this->campaigns,
-            'categoryLabels' => [
-                'birthday' => __('notifications::common.categories.birthday'),
-                'position_change' => __('notifications::common.categories.position_change'),
-                'holiday' => __('notifications::common.categories.holiday'),
-                'announcement' => __('notifications::common.categories.announcement'),
-                'training_result' => __('notifications::common.categories.training_result'),
-                'leave_status' => __('notifications::common.categories.leave_status'),
-            ],
+            'categoryLabels' => NotificationTriggerRegistry::campaignCategoryLabels(),
         ]);
     }
 }
