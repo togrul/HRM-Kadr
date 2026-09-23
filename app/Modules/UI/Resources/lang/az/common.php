@@ -76,4 +76,9 @@ return [
             'new_leave' => 'İcazə əlavə et',
         ],
     ],
+    'empty' => [
+        'title' => 'Hələ məlumat yoxdur',
+        'filtered_title' => 'Nəticə tapılmadı',
+        'filtered_hint' => 'Axtarışa uyğun qeyd yoxdur. Filtri dəyişin və ya sıfırlayın.',
+    ],
 ];

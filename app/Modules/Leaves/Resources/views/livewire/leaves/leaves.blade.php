@@ -322,7 +322,13 @@
                 </x-table.td>
             </tr>
         @empty
-            <x-table.empty :rows="count($this->getTableHeaders())" />
+            <x-table.empty :rows="count($this->getTableHeaders())" :filtered="$this->hasActiveFilters">
+                <x-slot:action>
+                    @can('create', App\Models\Leave::class)
+                        <x-pill-button variant="primary" wire:click="openAddLeaveModal">{{ __('leaves::common.actions.add_leave') }}</x-pill-button>
+                    @endcan
+                </x-slot:action>
+            </x-table.empty>
         @endforelse
     </x-table.tbl>
 

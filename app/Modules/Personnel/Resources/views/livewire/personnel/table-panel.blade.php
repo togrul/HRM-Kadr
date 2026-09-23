@@ -81,7 +81,7 @@
                 <x-personnel.row-actions :actions="$rowActions" :force-up="$loop->last" />
             </tr>
         @empty
-            <x-table.empty :rows="count($this->getTableHeaders())"></x-table.empty>
+            <x-table.empty :rows="count($this->getTableHeaders())" :filtered="$search !== '' || $filters !== [] || $selectedPosition !== null" :resettable="false" />
         @endforelse
     </x-table.tbl>
 

@@ -302,7 +302,13 @@
                 </x-table.td>
             </tr>
         @empty
-            <x-table.empty :rows="count($this->getTableHeaders())" />
+            <x-table.empty :rows="count($this->getTableHeaders())" :filtered="$this->hasActiveFilters">
+                <x-slot:action>
+                    @can('add-orders')
+                        <x-pill-button variant="primary" wire:click="openSideMenu('order-composer')">{{ __('orders::order_composer.title') }}</x-pill-button>
+                    @endcan
+                </x-slot:action>
+            </x-table.empty>
         @endforelse
     </x-table.tbl>
 

@@ -76,4 +76,9 @@ return [
             'new_leave' => 'Add leave',
         ],
     ],
+    'empty' => [
+        'title' => 'Nothing here yet',
+        'filtered_title' => 'No results',
+        'filtered_hint' => 'No records match the search. Change or clear the filters.',
+    ],
 ];
