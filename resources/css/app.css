@@ -423,9 +423,16 @@ body {
   opacity: 1;
 }
 
+/* Users who ask the OS for less motion get none: slide-overs, toasts, chevrons and
+   skeleton pulses settle instantly instead of animating. */
 @media (prefers-reduced-motion: reduce) {
-  #hrm-rail-tip {
-    transition: none;
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 
