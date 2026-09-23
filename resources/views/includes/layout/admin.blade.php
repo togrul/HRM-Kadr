@@ -47,23 +47,56 @@
 
     {{-- compact admin bar for small screens: the sidebar above is desktop-only --}}
     <div class="flex min-w-0 flex-1 flex-col gap-2">
-        <nav class="hrm-scroll flex items-center gap-1.5 overflow-x-auto rounded-2xl border border-hairline bg-white px-2 py-2 lg:hidden">
-            <a href="{{ route('home') }}" wire:navigate class="flex min-h-10 shrink-0 items-center rounded-[10px] border border-hairline px-3 text-[14px] text-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400">
-                {{ __('ui::common.labels.return_to_dashboard') }}
-            </a>
-            @foreach (config('admin.menu_items') as $menuItem)
-                @continue($menuItem['route'] !== '#' && ! \App\Support\Navigation\MenuPresentation::hasRoute($menuItem['route']))
-                @php $active = request()->routeIs($menuItem['route']); @endphp
-                <a
-                    href="{{ \App\Support\Navigation\MenuPresentation::route($menuItem['route']) }}"
-                    wire:navigate
-                    @class([
-                        'flex min-h-10 shrink-0 items-center rounded-[10px] px-3 text-[14px] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400',
-                        'bg-ink text-white' => $active,
-                        'text-ink-muted hover:bg-[#fafafa]' => ! $active,
-                    ])
-                >{{ __($menuItem['label']) }}</a>
-            @endforeach
+        @php
+            $availableAdminItems = collect(config('admin.menu_items'))
+                ->filter(fn (array $item): bool => $item['route'] === '#' || \App\Support\Navigation\MenuPresentation::hasRoute($item['route']))
+                ->values();
+            $activeAdminItem = $availableAdminItems->first(fn (array $item): bool => request()->routeIs($item['route']));
+            $adminSearchLabels = $availableAdminItems->map(fn (array $item): string => mb_strtolower(__($item['label'])))->all();
+        @endphp
+        <nav
+            class="relative z-30 rounded-2xl border border-hairline bg-white p-2 lg:hidden"
+            aria-label="{{ __('ui::common.labels.admin_panel') }}"
+            x-data="{ open: false, query: '', labels: @js($adminSearchLabels) }"
+            @click.outside="open = false"
+            @keydown.escape.window="open = false"
+        >
+            <div class="flex items-center gap-2">
+                <button
+                    type="button"
+                    @click="open = ! open; if (open) $nextTick(() => $refs.search.focus())"
+                    :aria-expanded="open.toString()"
+                    aria-controls="admin-mobile-menu"
+                    class="flex h-10 min-w-0 flex-1 items-center justify-between gap-2 rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-left text-[14px] font-semibold text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400"
+                >
+                    <span class="truncate">{{ $activeAdminItem ? __($activeAdminItem['label']) : __('ui::common.labels.admin_panel') }}</span>
+                    <svg class="h-4 w-4 shrink-0 text-ink-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                </button>
+                <a href="{{ route('home') }}" wire:navigate class="inline-flex h-10 shrink-0 items-center rounded-[10px] border border-hairline px-3 text-[14px] font-medium text-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400">
+                    {{ __('ui::common.labels.return_to_dashboard') }}
+                </a>
+            </div>
+
+            <div id="admin-mobile-menu" x-cloak x-show="open" class="absolute left-2 right-2 top-full z-40 mt-1 rounded-xl border border-hairline bg-white p-2 shadow-overlay">
+                <label class="sr-only" for="admin-mobile-search">{{ __('ui::common.labels.search') }}</label>
+                <input id="admin-mobile-search" x-ref="search" x-model="query" type="search" autocomplete="off" placeholder="{{ __('ui::common.placeholders.search') }}" class="mb-2 h-10 w-full rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-base text-ink outline-none focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] sm:text-sm">
+                <div class="hrm-scroll max-h-[min(55vh,420px)] space-y-0.5 overflow-y-auto">
+                    @foreach ($availableAdminItems as $menuItem)
+                        @php $active = request()->routeIs($menuItem['route']); @endphp
+                        <a
+                            href="{{ \App\Support\Navigation\MenuPresentation::route($menuItem['route']) }}"
+                            wire:navigate
+                            x-show="@js(mb_strtolower(__($menuItem['label']))).includes(query.trim().toLocaleLowerCase())"
+                            @class([
+                                'flex min-h-10 items-center rounded-[10px] px-3 text-[14px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400',
+                                'bg-ink font-semibold text-white' => $active,
+                                'text-ink-muted hover:bg-[#f4f4f5]' => ! $active,
+                            ])
+                        >{{ __($menuItem['label']) }}</a>
+                    @endforeach
+                    <p x-show="query.trim() && ! labels.some(label => label.includes(query.trim().toLocaleLowerCase()))" class="px-3 py-4 text-center text-[14px] text-ink-muted">{{ __('ui::common.labels.no_results') }}</p>
+                </div>
+            </div>
         </nav>
 
         <section class="min-w-0 flex-1 overflow-hidden rounded-2xl border border-hairline bg-white p-4 shadow-card">

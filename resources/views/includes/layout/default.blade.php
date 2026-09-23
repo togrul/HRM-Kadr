@@ -76,7 +76,7 @@
                         <button
                             type="button"
                             @click="$store.hrmShell.togglePanel()"
-                            class="absolute right-2.5 top-2.5 z-10 hidden h-6 w-6 items-center justify-center rounded-md text-ink-faint transition hover:bg-[#f4f4f5] hover:text-ink lg:inline-flex"
+                            class="absolute right-2 top-1 z-10 hidden h-10 w-10 items-center justify-center rounded-[10px] text-ink-faint transition hover:bg-[#f4f4f5] hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 lg:inline-flex"
                             aria-controls="sidebar"
                             :aria-expanded="(! $store.hrmShell.panelCollapsed).toString()"
                             title="{{ __('ui::common.labels.collapse_panel') }}"
@@ -92,19 +92,23 @@
 
             <section class="relative min-w-0 flex-1 overflow-hidden rounded-2xl border border-hairline bg-white shadow-card" aria-live="polite">
                 @if ($hasSidebar)
-                    <button
-                        type="button"
-                        @click="$store.hrmShell.togglePanel()"
+                    <div
                         x-cloak
                         x-show="$store.hrmShell.panelCollapsed"
                         x-transition.opacity
-                        class="sidebar-collapse-toggle absolute left-3 top-3 z-10 hidden h-7 w-7 items-center justify-center rounded-lg border border-hairline bg-white text-ink-muted transition hover:bg-[#fafafa] hover:text-ink lg:inline-flex"
-                        aria-controls="sidebar"
-                        title="{{ __('ui::common.labels.expand_panel') }}"
+                        class="sidebar-collapse-toggle hidden border-b border-hairline-subtle px-3 py-1 lg:flex"
                     >
-                        <x-icons.sidebar-toggle-icon size="w-4 h-4" color="text-current" hover="text-current" />
-                        <span class="sr-only">{{ __('ui::common.labels.expand_panel') }}</span>
-                    </button>
+                        <button
+                            type="button"
+                            @click="$store.hrmShell.togglePanel()"
+                            class="inline-flex h-10 items-center gap-2 rounded-[10px] px-3 text-[14px] font-medium text-ink-muted transition hover:bg-[#f4f4f5] hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400"
+                            aria-controls="sidebar"
+                            :aria-expanded="(! $store.hrmShell.panelCollapsed).toString()"
+                        >
+                            <x-icons.sidebar-toggle-icon size="w-4 h-4" color="text-current" hover="text-current" />
+                            {{ __('ui::common.labels.expand_panel') }}
+                        </button>
+                    </div>
                 @endif
 
                 {{ $slot }}
