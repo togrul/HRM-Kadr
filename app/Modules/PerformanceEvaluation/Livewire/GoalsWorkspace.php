@@ -20,7 +20,6 @@ class GoalsWorkspace extends Component
 
     public ?int $cycleId = null;
 
-
     public array $form = [
         'title' => '',
         'goal_type' => 'objective',

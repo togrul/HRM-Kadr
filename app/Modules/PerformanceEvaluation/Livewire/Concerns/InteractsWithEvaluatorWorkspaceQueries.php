@@ -127,7 +127,7 @@ trait InteractsWithEvaluatorWorkspaceQueries
                 ->map(function (PerformanceForm $form) use ($userId): array {
                     return [
                         'id' => (int) $form->id,
-                        'label' => ((string) ($form->personnel_fullname ?: '-')) . ' / ' . ((string) ($form->template_name ?: $form->template_code ?: '-')),
+                        'label' => ((string) ($form->personnel_fullname ?: '-')).' / '.((string) ($form->template_name ?: $form->template_code ?: '-')),
                         'template_id' => (int) $form->performance_form_template_id,
                         'evaluator_type' => (int) $form->manager_id === $userId ? 'manager' : 'hr',
                     ];

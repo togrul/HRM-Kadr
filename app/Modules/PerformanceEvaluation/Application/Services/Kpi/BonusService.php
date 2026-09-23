@@ -93,12 +93,13 @@ class BonusService
     }
 
     /**
-     * What the rule pays, without writing anything — also the what-if simulation when
-     * given an unsaved rule.
+     * Everything preview() reads from the database for a cycle — the cards, their base
+     * salaries and the org chart. It does not depend on the rule, so a screen editing the
+     * rule can load it once and re-run only the arithmetic on each change.
      *
-     * @return array{rows: Collection<int, array<string, mixed>>, total: float, fund: ?float, over_fund: bool, scale: float, missing_salary: int, mode: string, currency: string}
+     * @return array{cards: Collection<int, PerformanceScorecard>, bases: Collection<string, float>, months: float, parents: Collection<array-key, mixed>}
      */
-    public function preview(PerformanceCycle $cycle, PerformanceBonusRule $rule): array
+    public function previewInputs(PerformanceCycle $cycle): array
     {
         $cards = PerformanceScorecard::query()
             ->where('performance_cycle_id', $cycle->id)
@@ -107,11 +108,28 @@ class BonusService
             ->orderBy('id')
             ->get();
 
-        $months = $this->periodMonths($cycle);
-        $bases = $this->baseSalaries($cards, $cycle);
+        return [
+            'cards' => $cards,
+            'bases' => $this->baseSalaries($cards, $cycle),
+            'months' => $this->periodMonths($cycle),
+            'parents' => Structure::query()->pluck('parent_id', 'id'),
+        ];
+    }
+
+    /**
+     * What the rule pays, without writing anything — also the what-if simulation when
+     * given an unsaved rule.
+     *
+     * @param  array{cards: Collection<int, PerformanceScorecard>, bases: Collection<string, float>, months: float, parents: Collection<array-key, mixed>}|null  $inputs  from previewInputs(), to skip re-reading
+     * @return array{rows: Collection<int, array<string, mixed>>, total: float, fund: ?float, over_fund: bool, scale: float, missing_salary: int, mode: string, currency: string}
+     */
+    public function preview(PerformanceCycle $cycle, PerformanceBonusRule $rule, ?array $inputs = null): array
+    {
+        ['cards' => $cards, 'bases' => $bases, 'months' => $months, 'parents' => $parents] = $inputs ?? $this->previewInputs($cycle);
+
         $companyMult = $rule->mode === 'order' ? 1.0 : $this->companyMultiplier($rule);
         $positionTargets = collect($rule->position_targets ?? [])->mapWithKeys(fn (array $pair): array => [(int) $pair[0] => (float) $pair[1]]);
-        $unitResult = $this->unitResultResolver($rule);
+        $unitResult = $this->unitResultResolver($rule, $parents);
 
         $cycleEnd = Carbon::parse($cycle->period_end)->endOfDay();
 
@@ -415,7 +433,10 @@ class BonusService
      *
      * @return callable(?int): ?float
      */
-    private function unitResultResolver(PerformanceBonusRule $rule): callable
+    /**
+     * @param  Collection<array-key, mixed>|null  $parents  structure id → parent id (read once when omitted)
+     */
+    private function unitResultResolver(PerformanceBonusRule $rule, ?Collection $parents = null): callable
     {
         $results = collect($rule->unit_results ?? [])->mapWithKeys(fn (array $pair): array => [(int) $pair[0] => (float) $pair[1]]);
 
@@ -423,8 +444,7 @@ class BonusService
             return fn (?int $structureId): ?float => null;
         }
 
-        // ponytail: one flat read of the org chart per preview; the chart is small.
-        $parents = Structure::query()->pluck('parent_id', 'id');
+        $parents ??= Structure::query()->pluck('parent_id', 'id');
 
         return function (?int $structureId) use ($results, $parents): ?float {
             for ($id = $structureId, $guard = 0; $id !== null && $guard < 50; $id = $parents->get($id), $guard++) {

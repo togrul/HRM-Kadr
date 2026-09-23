@@ -45,7 +45,7 @@ class KpiQueryBudgetTest extends TestCase
         foreach ([
             'analytics' => [AnalyticsWorkspace::class, fn ($screen) => $screen->set('structureId', $card->personnel->structure_id), 11],
             'scorecards' => [ScorecardsWorkspace::class, fn ($screen) => $screen->call('openCard', $card->id), 16],
-            'bonus' => [BonusWorkspace::class, fn ($screen) => $screen->set('ruleForm.target_pct', 20), 9],
+            'bonus' => [BonusWorkspace::class, fn ($screen) => $screen->set('ruleForm.target_pct', 20), 2],
         ] as $name => [$component, $update, $budget]) {
             DB::flushQueryLog();
             DB::enableQueryLog();

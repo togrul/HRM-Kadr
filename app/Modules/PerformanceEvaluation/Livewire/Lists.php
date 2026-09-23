@@ -6,8 +6,8 @@ use App\Livewire\Concerns\WithRuntimeMemo;
 use App\Models\PerformanceForm;
 use App\Models\PerformanceFormTemplate;
 use App\Models\PerformanceFormTemplateItem;
-use App\Models\PerformanceTestAttemptAnswer;
 use App\Models\PerformanceTestAttempt;
+use App\Models\PerformanceTestAttemptAnswer;
 use App\Models\PerformanceTestBank;
 use App\Models\PerformanceTestQuestion;
 use App\Models\PerformanceTestSession;
@@ -21,12 +21,15 @@ use Livewire\WithPagination;
 class Lists extends Component
 {
     use InteractsWithPerformanceEvaluationAccess;
-    use WithRuntimeMemo;
     use WithPagination;
+    use WithRuntimeMemo;
 
     public string $entity = 'forms';
+
     public string $search = '';
+
     public string $filter = 'all';
+
     public ?int $selectedRowId = null;
 
     /**

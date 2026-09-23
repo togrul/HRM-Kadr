@@ -27,6 +27,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
  * @property-read PerformanceCycle|null $cycle
  * @property-read PerformanceBonusRule|null $savedRule
  * @property-read SupportCollection<int, stdClass> $scope
+ * @property-read array<string, mixed> $previewInputs
  */
 class BonusWorkspace extends Component
 {
@@ -52,6 +53,8 @@ class BonusWorkspace extends Component
 
     public function updatedCycleId(): void
     {
+        $this->forgetPreviewInputs();
+        $this->forgetCycleOptions();
         $this->loadRule();
     }
 
@@ -103,7 +106,7 @@ class BonusWorkspace extends Component
      *
      * @return array<int, string>
      */
-    #[Computed]
+    #[Computed(persist: true, seconds: 600)]
     public function positionOptions(): array
     {
         return Position::query()->whereIn('id', $this->scope->pluck('position_id')->filter()->unique())->orderBy('name')->pluck('name', 'id')->all();
@@ -114,7 +117,7 @@ class BonusWorkspace extends Component
      *
      * @return array<int, string>
      */
-    #[Computed]
+    #[Computed(persist: true, seconds: 600)]
     public function unitOptions(): array
     {
         $own = $this->scope->pluck('structure_id')->filter()->unique();
@@ -143,7 +146,37 @@ class BonusWorkspace extends Component
             return null;
         }
 
-        return app(BonusService::class)->preview($this->cycle, (clone $this->savedRule)->fill($this->formToRule()));
+        $inputs = $this->previewInputs;
+        if (($inputs['cycle_id'] ?? null) !== $this->cycleId) {
+            $this->forgetPreviewInputs();
+            $inputs = $this->previewInputs;
+        }
+
+        return app(BonusService::class)->preview($this->cycle, (clone $this->savedRule)->fill($this->formToRule()), $inputs);
+    }
+
+    /**
+     * The cycle's cards, salaries and org chart, read once and kept across requests: a
+     * rule edit only re-runs the arithmetic. Dropped whenever the cycle or the stored
+     * bonus lines change (forgetPreviewInputs).
+     *
+     * @return array<string, mixed>
+     */
+    #[Computed(persist: true, seconds: 600)]
+    public function previewInputs(): array
+    {
+        return ['cycle_id' => $this->cycleId] + app(BonusService::class)->previewInputs($this->requireCycle());
+    }
+
+    private function forgetPreviewInputs(): void
+    {
+        unset($this->previewInputs);
+    }
+
+    /** The option lists depend only on the cycle's people. */
+    private function forgetCycleOptions(): void
+    {
+        unset($this->positionOptions, $this->unitOptions);
     }
 
     public function isDirty(): bool
@@ -183,6 +216,7 @@ class BonusWorkspace extends Component
         $cycle = $this->requireCycle();
         app(BonusService::class)->saveRule($cycle, $this->formToRule(), auth()->user());
         $count = app(BonusService::class)->calculate($cycle);
+        $this->forgetPreviewInputs();
 
         $this->loadRule();
         $this->dispatch('notify', type: 'success', message: __('performance_evaluation::kpi.bonus.messages.calculated', ['count' => $count]));
@@ -193,6 +227,7 @@ class BonusWorkspace extends Component
         $this->authorize('manage-performance-evaluation');
         $cycle = $this->requireCycle();
         $rows = app(BonusService::class)->exportToPayroll($cycle);
+        $this->forgetPreviewInputs();
         unset($this->preview);
 
         $columns = collect(['tabel_no', 'personnel', 'cycle', 'amount', 'currency', 'pay_month'])
@@ -206,6 +241,7 @@ class BonusWorkspace extends Component
     {
         $this->authorize('manage-performance-evaluation');
         $count = app(BonusService::class)->issueOrders($this->requireCycle());
+        $this->forgetPreviewInputs();
         unset($this->preview);
 
         $this->dispatch('notify', type: $count > 0 ? 'success' : 'info', message: __('performance_evaluation::kpi.bonus.messages.orders_issued', ['count' => $count]));
