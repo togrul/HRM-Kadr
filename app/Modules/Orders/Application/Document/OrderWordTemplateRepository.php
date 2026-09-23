@@ -23,6 +23,19 @@ class OrderWordTemplateRepository
             ->all();
     }
 
+    /**
+     * @return array<string, string>
+     */
+    public function availableForPersonnel(): array
+    {
+        return OrderWordTemplate::query()
+            ->where('is_active', true)
+            ->where('effect', '!=', 'hire')
+            ->orderBy('label')
+            ->pluck('label', 'code')
+            ->all();
+    }
+
     public function exists(string $code): bool
     {
         return OrderWordTemplate::query()->where('code', $code)->exists();

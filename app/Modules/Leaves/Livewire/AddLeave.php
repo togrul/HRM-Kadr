@@ -4,6 +4,7 @@ namespace App\Modules\Leaves\Livewire;
 
 use App\Livewire\Forms\LeaveForm;
 use App\Models\Leave;
+use App\Models\Personnel;
 use App\Modules\Leaves\Livewire\Concerns\InteractsWithLeaveForm;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -24,13 +25,24 @@ class AddLeave extends Component
 
     public LeaveForm $leave;
 
-    public function mount(): void
+    /**
+     * @param  string|null  $tabelNo  preselects the applicant when the form is opened from a personnel file
+     */
+    public function mount(?string $tabelNo = null): void
     {
         $this->authorize('create', Leave::class);
         $this->title = __('leaves::common.titles.add_leave');
         $this->leave->resetForm();
         $this->syncSelectedLeaveTypeMeta();
         $this->initializeAssignmentMode();
+
+        $applicant = filled($tabelNo)
+            ? Personnel::query()->select('tabel_no', 'surname', 'name', 'patronymic')->where('tabel_no', $tabelNo)->first()
+            : null;
+
+        if ($applicant !== null) {
+            $this->selectPersonnel($applicant->tabel_no, $applicant->fullname, 'tabel_no');
+        }
     }
 
     public function store(): void

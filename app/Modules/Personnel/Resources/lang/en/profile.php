@@ -47,6 +47,9 @@ return [
     ],
 
     'actions' => [
+        'new_action' => 'Action',
+        'add_leave' => 'Add leave',
+        'issue_order' => 'Issue order',
         'more' => 'More',
         'back_to_list' => 'Back to list',
         'print_cv' => 'Print CV',

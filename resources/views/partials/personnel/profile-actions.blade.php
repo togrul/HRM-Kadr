@@ -19,13 +19,19 @@
         ['href' => route('print.cv', $personnel->id), 'icon' => 'icons.cv-outline', 'label' => __('personnel::profile.actions.print_cv')],
         ['href' => route('print.cv.word', $personnel->id), 'icon' => 'icons.download-icon', 'label' => __('personnel::profile.actions.export_word')],
     ];
+
+    // Work started from the file opens the other module's form with this employee preselected.
+    $orderTemplates = $this->orderTemplates;
+    $canAddLeave = $this->canAddLeave;
+    $hasWorkActions = $canAddLeave || $orderTemplates !== [];
 @endphp
 
+{{-- On large screens the context panel's footer already offers the way back. --}}
 <x-pill-button
     variant="secondary"
     :href="route('personnel.index')"
     wire:navigate
-    class="shrink-0"
+    class="shrink-0 lg:hidden"
 >
     <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
     <span>{{ __('personnel::profile.actions.back_to_list') }}</span>
@@ -84,7 +90,61 @@
 @endif
 
 @if ($this->canEdit && $section === 'overview')
-    <x-pill-button variant="primary" wire:click="setSection('personal')" wire:loading.attr="disabled" wire:target="setSection">
+    <x-pill-button :variant="$hasWorkActions ? 'secondary' : 'primary'" wire:click="setSection('personal')" wire:loading.attr="disabled" wire:target="setSection">
         {{ __('personnel::common.actions.edit') }}
     </x-pill-button>
+@endif
+
+@if ($hasWorkActions)
+    <div class="relative" x-data="{ open: false }" @keydown.escape.window="open = false">
+        <x-pill-button variant="primary" @click="open = ! open" :aria-expanded="false" x-bind:aria-expanded="open.toString()">
+            <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+            <span>{{ __('personnel::profile.actions.new_action') }}</span>
+            <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" x-bind:class="open ? 'rotate-180' : ''"><path d="m6 9 6 6 6-6"/></svg>
+        </x-pill-button>
+
+        <div
+            x-cloak
+            x-show="open"
+            x-transition.opacity.duration.100ms
+            @click.outside="open = false"
+            class="absolute right-0 z-40 mt-1.5 max-h-[70vh] w-64 overflow-y-auto rounded-xl border border-hairline bg-white py-1 shadow-overlay"
+        >
+            @if ($canAddLeave)
+                <button
+                    type="button"
+                    @click="open = false"
+                    wire:click="openSideMenu('add-leave', @js($personnel->tabel_no))"
+                    wire:loading.attr="disabled"
+                    wire:target="openSideMenu"
+                    class="flex w-full items-center gap-2.5 px-3.5 py-2 text-left text-[12.5px] text-ink-soft transition hover:bg-[#fafafa] hover:text-ink"
+                >
+                    <svg class="h-4 w-4 shrink-0 text-ink-faint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                    <span class="min-w-0 truncate">{{ __('personnel::profile.actions.add_leave') }}</span>
+                </button>
+            @endif
+
+            @if ($orderTemplates !== [])
+                @if ($canAddLeave)
+                    <span class="my-1 block h-px bg-hairline-subtle"></span>
+                @endif
+
+                <p class="hrm-eyebrow px-3.5 pb-1 pt-2">{{ __('personnel::profile.actions.issue_order') }}</p>
+
+                @foreach ($orderTemplates as $code => $label)
+                    <button
+                        type="button"
+                        @click="open = false"
+                        wire:click="openSideMenu('order-composer', @js((string) $code))"
+                        wire:loading.attr="disabled"
+                        wire:target="openSideMenu"
+                        class="flex w-full items-center gap-2.5 px-3.5 py-2 text-left text-[12.5px] text-ink-soft transition hover:bg-[#fafafa] hover:text-ink"
+                    >
+                        <svg class="h-4 w-4 shrink-0 text-ink-faint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h4"/></svg>
+                        <span class="min-w-0 truncate">{{ $label }}</span>
+                    </button>
+                @endforeach
+            @endif
+        </div>
+    </div>
 @endif

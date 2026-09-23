@@ -18,6 +18,14 @@ interface OrderDrafter
     public function hasTemplate(string $code): bool;
 
     /**
+     * Active templates that can be issued for an existing employee (hire templates act on
+     * a candidate, so they are left out), keyed by code.
+     *
+     * @return array<string, string> code → label
+     */
+    public function personnelTemplates(): array;
+
+    /**
      * @param  array<string, string>  $fieldsByLabel  placeholder label → value
      *
      * @throws RuntimeException when the template is not registered

@@ -1,5 +1,5 @@
 {{-- The personnel-file side panels. Same components the list used to open from the row menu. --}}
-<x-side-modal size="x-large">
+<x-side-modal :size="$showSideMenu === 'order-composer' ? 'xx-large' : 'x-large'">
     @can('edit-personnels')
         @if ($showSideMenu === 'show-files')
             <livewire:personnel.files :personnelModel="$modelName" :key="'profile-files-'.$modelName" />
@@ -31,6 +31,19 @@
             <livewire:personnel.my-hr.onboarding-assignment-manager :personnelModel="$modelName" :key="'profile-onboarding-'.$modelName" />
         @endif
     @endcanany
+
+    {{-- Work started from the file: the employee is preselected in the other module's form. --}}
+    @can('add-orders')
+        @if ($showSideMenu === 'order-composer')
+            <livewire:orders.order-composer :presetCode="$modelName" :personnelId="$this->personnelId" :key="'profile-order-'.$modelName" />
+        @endif
+    @endcan
+
+    @can('add-leaves')
+        @if ($showSideMenu === 'add-leave')
+            <livewire:leaves.add-leave :tabelNo="$modelName" :key="'profile-leave-'.$modelName" />
+        @endif
+    @endcan
 
     @canany(['assign-employee-content', 'manage-employee-content-library'])
         @if ($showSideMenu === 'learning-materials')

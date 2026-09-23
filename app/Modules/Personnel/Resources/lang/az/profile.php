@@ -47,6 +47,9 @@ return [
     ],
 
     'actions' => [
+        'new_action' => 'Əməliyyat',
+        'add_leave' => 'İcazə əlavə et',
+        'issue_order' => 'Əmr ver',
         'more' => 'Daha çox',
         'back_to_list' => 'Siyahıya qayıt',
         'print_cv' => 'CV çap et',

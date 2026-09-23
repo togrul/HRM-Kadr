@@ -40,6 +40,14 @@ class OrderDraftService implements OrderDrafter
     }
 
     /**
+     * @return array<string, string>
+     */
+    public function personnelTemplates(): array
+    {
+        return $this->templates->availableForPersonnel();
+    }
+
+    /**
      * @param  array<string, string>  $fieldsByLabel  placeholder label → value
      *
      * @throws RuntimeException when the template is not registered
