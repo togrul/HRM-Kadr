@@ -36,7 +36,7 @@ class OrderVacationRules
         $start = $this->dates->parse($this->effectFieldValue($template, $fields, 'start_date'));
 
         return [
-            'year' => (int) ($start?->year ?? now()->year),
+            'year' => (int) ($start->year ?? now()->year),
             'requested' => (int) ($this->effectFieldValue($template, $fields, 'days') ?? 0),
         ];
     }

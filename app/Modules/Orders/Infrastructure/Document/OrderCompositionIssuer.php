@@ -53,8 +53,8 @@ class OrderCompositionIssuer
                 $this->vacancies->ensureOneVacancy((int) $composition->hireStructureId, (int) $composition->hirePositionId);
             } elseif ($this->vacancies->vacancy($composition->hireStructureId, $composition->hirePositionId) <= 0) {
                 return OrderIssueOutcome::vacancyMissing(__('orders::order_composer.vacancy.confirm', [
-                    'structure' => Structure::find($composition->hireStructureId)?->name ?? '—',
-                    'position' => Position::find($composition->hirePositionId)?->name ?? '—',
+                    'structure' => Structure::find($composition->hireStructureId)->name ?? '—',
+                    'position' => Position::find($composition->hirePositionId)->name ?? '—',
                 ]));
             }
         }

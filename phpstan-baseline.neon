@@ -6451,6 +6451,11 @@ parameters:
 			path: app/Modules/OnboardingLibrary/Livewire/Dashboard.php
 
 		-
+			message: '#^Offset ''source'' on array\{token\: string, label\: string, source\: string, auto_key\: string\|null, field\: array\{key\: string, type\: string\}\|null, effect_role\: string\|null\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Modules/Orders/Infrastructure/Document/OrderSubjectResolver.php
+		-
 			message: '#^Access to an undefined property App\\Models\\OrderLog\:\:\$order_no\.$#'
 			identifier: property.notFound
 			count: 1
@@ -6485,114 +6490,6 @@ parameters:
 			identifier: property.notFound
 			count: 1
 			path: app/Modules/Orders/Livewire/AllOrders.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Candidate\:\:\$gender\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Orders/Livewire/OrderComposer.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Candidate\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/Orders/Livewire/OrderComposer.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Candidate\:\:\$patronymic\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/Orders/Livewire/OrderComposer.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Candidate\:\:\$structure_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Orders/Livewire/OrderComposer.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Candidate\:\:\$surname\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/Orders/Livewire/OrderComposer.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\OrderLog\:\:\$order_no\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Orders/Livewire/OrderComposer.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\OrderLog\:\:\$status_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Orders/Livewire/OrderComposer.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\OrderLog\:\:\$template_render_mode\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Orders/Livewire/OrderComposer.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$gender\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Orders/Livewire/OrderComposer.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/Orders/Livewire/OrderComposer.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$patronymic\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/Orders/Livewire/OrderComposer.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$structure_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Orders/Livewire/OrderComposer.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$surname\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/Orders/Livewire/OrderComposer.php
-
-		-
-			message: '#^Method App\\Modules\\Orders\\Livewire\\OrderComposer\:\:getLookupOptionsProperty\(\) should return array\<string, array\<int, string\>\> but returns array\<string, array\<int, array\<string, int\|string\>\>\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Modules/Orders/Livewire/OrderComposer.php
-
-		-
-			message: '#^Offset ''source'' on array\{token\: string, label\: string, source\: string, auto_key\: string\|null, field\: array\{key\: string, type\: string\}\|null, effect_role\: string\|null\} on left side of \?\? always exists and is not nullable\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: app/Modules/Orders/Livewire/OrderComposer.php
-
-		-
-			message: '#^Strict comparison using \!\=\= between \(int\|string\) and null will always evaluate to true\.$#'
-			identifier: notIdentical.alwaysTrue
-			count: 1
-			path: app/Modules/Orders/Livewire/OrderComposer.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 2
-			path: app/Modules/Orders/Livewire/OrderComposer.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>year" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Modules/Orders/Livewire/OrderComposer.php
 
 		-
 			message: '#^Access to an undefined property App\\Modules\\Orders\\Livewire\\OrderTemplateDesigner\:\:\$effectRoles\.$#'

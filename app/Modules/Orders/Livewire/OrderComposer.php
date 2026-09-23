@@ -166,7 +166,7 @@ class OrderComposer extends Component
         // replaced → ($array). Clear the error for any key that now has a value.
         $pairs = is_array($value) ? $value : [$key => $value];
         foreach ($pairs as $k => $v) {
-            if ($k !== null && $v !== null && ! is_array($v) && trim((string) $v) !== '') {
+            if ($v !== null && ! is_array($v) && trim((string) $v) !== '') {
                 $this->resetErrorBag('fields.'.$k);
             }
         }
@@ -315,7 +315,7 @@ class OrderComposer extends Component
      * Options for every list-bound (structure/position/rank/…) field type, keyed by
      * type, so the form can render the matching dropdown.
      *
-     * @return array<string,array<int,string>>
+     * @return array<string,array<int,array{id:int,label:string,depth:int}>>
      */
     public function getLookupOptionsProperty(OrderLookupFieldRegistry $lookups): array
     {
