@@ -114,11 +114,19 @@
                 @enderror
             </div>
             <div class="flex flex-col space-y-1">
-                <x-label required for="personnel.gender">{{ __('personnel::common.labels.gender') }}</x-label>
-                <div class="flex flex-row">
+                @php $genderInvalid = $errors->has('personalForm.personnel.gender'); @endphp
+                <x-label required id="personnel-gender-label">{{ __('personnel::common.labels.gender') }}</x-label>
+                <div
+                    role="radiogroup"
+                    aria-labelledby="personnel-gender-label"
+                    aria-required="true"
+                    @if ($genderInvalid) aria-invalid="true" @endif
+                    @class(['flex flex-row rounded', 'ring-1 ring-rose-300' => $genderInvalid])
+                >
                     @foreach(\App\Enums\GenderEnum::genderOptions() as $value => $label)
-                        <label class="inline-flex items-center px-2 py-2 bg-gray-100 rounded shadow-sm">
-                            <input type="radio" class="form-radio" name="personnel.gender" required wire:model="personalForm.personnel.gender" value="{{ $value }}">
+                        <label @class(['inline-flex items-center px-2 py-2 rounded shadow-sm', 'bg-rose-50' => $genderInvalid, 'bg-gray-100' => ! $genderInvalid])>
+                            {{-- aria-invalid on the first radio lets the wizard focus the group after Next. --}}
+                            <input type="radio" class="form-radio" name="personnel.gender" wire:model="personalForm.personnel.gender" value="{{ $value }}" @if ($genderInvalid && $loop->first) aria-invalid="true" @endif>
                             <span class="ml-2 text-sm font-normal">{{ $label }}</span>
                         </label>
                     @endforeach

@@ -55,7 +55,11 @@ window.personnelWizard = () => ({
     },
 
     focusFirstInvalid() {
-        const field = this.$el.querySelector('[aria-invalid="true"]');
+        // A group (e.g. a radiogroup) can carry aria-invalid too; focus the first control.
+        const focusable = 'input:not([type=hidden]), select, textarea, button, [tabindex]:not([tabindex="-1"])';
+        const field = [...this.$el.querySelectorAll('[aria-invalid="true"]')]
+            .map((el) => (el.matches(focusable) ? el : el.querySelector(focusable)))
+            .find(Boolean);
         if (!field) return;
 
         field.scrollIntoView({ block: 'center', behavior: 'smooth' });
