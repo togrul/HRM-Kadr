@@ -1,16 +1,17 @@
 @props([
     'value',
     'label',
-    'tone' => 'ink',   // ink | green | amber | rose | blue | violet
+    'tone' => 'ink',   // ink | amber | rose (other legacy tones render as ink)
 ])
 
 @php
-    $toneClasses = match ($tone) {
-        'green', 'emerald' => 'text-[#059669]',
-        'amber', 'warning' => 'text-[#b45309]',
-        'rose', 'red' => 'text-[#e11d48]',
-        'blue', 'sky' => 'text-[#0369a1]',
-        'violet', 'purple' => 'text-[#6d28d9]',
+    // Colour carries meaning here, never decoration: only warning / danger tones are kept,
+    // and only while there is something to act on — a zero reads as calm ink.
+    $hasValue = ! in_array(trim((string) $value), ['', '0', '—'], true);
+
+    $toneClasses = match (true) {
+        $hasValue && in_array($tone, ['amber', 'warning'], true) => 'text-[#b45309]',
+        $hasValue && in_array($tone, ['rose', 'red'], true) => 'text-[#e11d48]',
         default => 'text-ink',
     };
 @endphp

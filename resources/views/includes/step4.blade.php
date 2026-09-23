@@ -16,7 +16,7 @@
                 <div class="flex items-center justify-between">
                     <x-label for="laborActivityForm.laborActivity.position">{{ __('personnel::common.labels.position') }}</x-label>
                     <label class="flex items-center space-x-2 text-sm text-slate-600">
-                        <input type="checkbox" wire:model.live="laborActivityForm.laborActivity.use_lookup" class="text-indigo-600 rounded border-slate-300 focus:ring-indigo-500">
+                        <input type="checkbox" wire:model.live="laborActivityForm.laborActivity.use_lookup" class="rounded border-hairline text-ink focus:ring-zinc-400">
                         <span>{{ __('personnel::common.labels.select_from_list') }}</span>
                     </label>
                 </div>
@@ -309,7 +309,7 @@
                         {{ __('personnel::common.labels.old_seniority') }}
                     </h1>
                     <div class="flex items-center self-start space-x-2 text-sm">
-                        <span class="font-medium text-teal-500">{{ __('personnel::common.labels.property') }}:</span>
+                        <span class="font-medium text-ink">{{ __('personnel::common.labels.property') }}:</span>
                         <span class="font-medium text-gray-900">
                             {{ ViewNumberFormatter::decimal($calculatedData['sum_month_old']) }} {{ __('personnel::common.labels.month') }}
                             ({{ $calculatedData['sum_old']['year'] }} {{ __('personnel::common.labels.year') }}
@@ -332,7 +332,7 @@
                         {{ __('personnel::common.labels.current_seniority') }}
                     </h1>
                     <div class="flex items-center self-start space-x-2 text-sm">
-                        <span class="font-medium text-teal-500">{{ __('personnel::common.labels.standard') }}:</span>
+                        <span class="font-medium text-ink">{{ __('personnel::common.labels.standard') }}:</span>
                         <span class="font-medium text-gray-900">
                             {{ ViewNumberFormatter::decimal($calculatedData['sum_month_current_diff']) }} {{ __('personnel::common.labels.month') }}
                             ({{ $calculatedData['sum_current_diff']['year'] }} {{ __('personnel::common.labels.year') }}
@@ -354,7 +354,7 @@
                         {{ __('personnel::common.labels.total_seniority') }}
                     </h1>
                     <div class="flex items-center self-start space-x-2 text-sm">
-                        <span class="font-medium text-teal-500">{{ __('personnel::common.labels.property') }}:</span>
+                        <span class="font-medium text-ink">{{ __('personnel::common.labels.property') }}:</span>
                         <span class="font-medium text-gray-900">
                             {{ ViewNumberFormatter::decimal($calculatedData['sum_total']) }} {{ __('personnel::common.labels.month') }}
                             ({{ $calculatedData['sum_total_full']['year'] }} {{ __('personnel::common.labels.year') }}

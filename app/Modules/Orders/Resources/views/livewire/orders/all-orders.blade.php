@@ -230,7 +230,7 @@
                             @can('export-orders')
                                 <button wire:click="printOrder('{{ $_order->order_no }}')"
                                     title="{{ __('orders::order_list.actions.download_now') }}" aria-label="{{ __('orders::order_list.actions.download_now') }}"
-                                    class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-teal-50 hover:text-teal-600">
+                                    class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-[#f4f4f5] hover:text-ink">
                                     <x-icons.print-file color="text-current" hover="text-current" />
                                 </button>
                             @endcan
@@ -269,7 +269,7 @@
                         @if ($status == 'deleted')
                             @can('edit-orders')
                                 <button wire:click="restoreData('{{ $_order->order_no }}')" title="{{ __('orders::order_list.actions.restore') }}"
-                                    class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-teal-50 hover:text-teal-600">
+                                    class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-[#f4f4f5] hover:text-ink">
                                     <x-icons.recover color="text-current" hover="text-current" />
                                 </button>
                             @endcan

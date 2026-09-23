@@ -258,7 +258,7 @@
                             @can('export-vacations')
                                 <button type="button" wire:click="printVacationDocument('{{ $_vacation->id }}')"
                                     title="{{ __('vacation::common.actions.print_document') }}"
-                                    class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-teal-50 hover:text-teal-600">
+                                    class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-[#f4f4f5] hover:text-ink">
                                     <x-icons.document-icon color="text-current" hover="text-current" />
                                 </button>
                             @endcan

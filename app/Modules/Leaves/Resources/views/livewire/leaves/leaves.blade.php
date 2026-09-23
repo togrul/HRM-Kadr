@@ -304,7 +304,7 @@
                                 <button type="button" wire:click="restoreData('{{ $leave->id }}')"
                                     wire:loading.attr="disabled"
                                     title="{{ __('leaves::common.actions.restore') }}"
-                                    class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-teal-50 hover:text-teal-600">
+                                    class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-[#f4f4f5] hover:text-ink">
                                     <x-icons.recover color="text-current" hover="text-current" />
                                 </button>
                             @endcan

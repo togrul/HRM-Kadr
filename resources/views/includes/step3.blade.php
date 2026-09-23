@@ -154,7 +154,7 @@
                 @if(Arr::get($educationState, 'coefficient') > 0)
                     <div class="flex items-center space-x-2">
                         <span class="text-sm font-medium text-gray-500 uppercase">{{ __('personnel::common.labels.coefficient') }}:</span>
-                        <span class="font-medium text-teal-500">{{ ViewNumberFormatter::decimal($educationState['coefficient']) }}</span>
+                        <span class="font-medium text-ink">{{ ViewNumberFormatter::decimal($educationState['coefficient']) }}</span>
                     </div>
                     <div class="flex items-center space-x-2">
                         <span class="text-sm font-medium text-gray-500 uppercase">{{ __('personnel::common.labels.extra_seniority') }}:</span>

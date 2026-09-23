@@ -96,7 +96,7 @@
                                     </span>
                                  </x-table.td>
                                 <x-table.td>
-                                   <span class="text-sm font-medium text-teal-600">
+                                   <span class="text-sm font-medium text-ink">
                                         {{ $this->rankLabel(data_get($msModel, 'rank_id')) ?? '---' }}
                                     </span>
                                 </x-table.td>
@@ -104,7 +104,7 @@
                                     <div class="flex items-center space-x-6">
                                         <div class="flex flex-col items-start space-y-1">
                                             <span class="text-sm font-medium text-gray-500 border-b border-dashed border-slate-400">{{ __('personnel::common.labels.given_date') }}:</span>
-                                            <span class="text-sm font-medium text-teal-600">
+                                            <span class="text-sm font-medium text-ink">
                                                 {{ $msModel['given_date'] }}
                                             </span>
                                         </div>

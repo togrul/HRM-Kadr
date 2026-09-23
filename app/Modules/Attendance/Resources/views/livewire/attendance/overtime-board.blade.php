@@ -88,7 +88,7 @@
                     <input id="attendance-ot-create-reason" wire:model="manualRequest.reason" type="text" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
                 </div>
                 <div class="flex items-end">
-                    <x-button mode="success" class="w-full !h-10" wire:click="createManualRequest">
+                    <x-button mode="black" class="w-full !h-10" wire:click="createManualRequest">
                         {{ __('attendance::overtime.create.action') }}
                     </x-button>
                 </div>

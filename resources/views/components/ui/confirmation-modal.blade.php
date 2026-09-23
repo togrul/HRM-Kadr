@@ -96,7 +96,7 @@
               {{ ModuleTranslation::resolveStoredText($cancel) }}
             </button>
 
-            <button type="button" class="rounded-xl px-4 py-2 text-sm font-semibold bg-indigo-600 text-white hover:bg-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 disabled:opacity-60"
+            <button type="button" class="rounded-xl px-4 py-2 text-sm font-semibold bg-ink text-white hover:bg-ink-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 disabled:opacity-60"
                     @click="submit()"
                     :disabled="busy || !String(comment ?? '').trim().length">
                     <span x-show="!busy">{{ ModuleTranslation::resolveStoredText($confirm) }}</span>

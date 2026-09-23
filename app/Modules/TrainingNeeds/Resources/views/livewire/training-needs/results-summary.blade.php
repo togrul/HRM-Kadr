@@ -44,7 +44,7 @@
     <x-surface-card :title="__('training_needs::dashboard.cards.export_reports')" icon="icons.pending-icon">
         <div class="grid gap-3">
             <x-button mode="black" wire:click="exportDeliveryReport">{{ __('training_needs::dashboard.actions.export_delivery_report') }}</x-button>
-            <x-button mode="success" wire:click="exportFeedbackReport">{{ __('training_needs::dashboard.actions.export_feedback_report') }}</x-button>
+            <x-button mode="default" wire:click="exportFeedbackReport">{{ __('training_needs::dashboard.actions.export_feedback_report') }}</x-button>
             <x-button mode="default" wire:click="exportDeliverySummaryReport">{{ __('training_needs::dashboard.actions.export_delivery_summary_report') }}</x-button>
             <x-button mode="default" wire:click="exportDeliveryPivotReport">{{ __('training_needs::dashboard.actions.export_delivery_pivot_report') }}</x-button>
             <x-button mode="default" wire:click="exportAuditReport">{{ __('training_needs::dashboard.actions.export_audit_report') }}</x-button>

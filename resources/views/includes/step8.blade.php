@@ -273,7 +273,7 @@
                             <x-icons.force-delete></x-icons.force-delete>
                         </button>
                         <div class="flex items-center space-x-2 border-b border-dashed w-max border-slate-400">
-                            <p class="font-medium text-teal-500">
+                            <p class="font-medium text-ink">
                                 {{ data_get($degree, 'degree_label') ?? '---' }}
                             </p>
                             <span>-</span>

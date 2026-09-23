@@ -16,7 +16,7 @@
             <span wire:loading.remove wire:target="downloadWord">{{ __('orders::order_composer.actions.download_word') }}</span>
             <span wire:loading wire:target="downloadWord">…</span>
         </x-button>
-        <x-button mode="success" wire:click="issue" wire:loading.attr="disabled" wire:target="issue">
+        <x-button mode="black" wire:click="issue" wire:loading.attr="disabled" wire:target="issue">
             <span wire:loading.remove wire:target="issue">{{ $isEditing ? __('orders::order_composer.actions.save') : __('orders::order_composer.actions.issue') }}</span>
             <span wire:loading wire:target="issue">…</span>
         </x-button>

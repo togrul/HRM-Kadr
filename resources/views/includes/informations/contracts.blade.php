@@ -87,7 +87,7 @@
                                     </div>
                                     <div class="flex space-x-2">
                                         <span class="text-sm text-gray-500 font-medium">{{ __('personnel::information.fields.contract_refresh_date') }}:</span>
-                                        <span class="text-sm font-medium text-teal-500">
+                                        <span class="text-sm font-medium text-ink">
                                             {{ $dataContract->contract_refresh_date->format('d.m.Y') }}
                                        </span>
                                     </div>

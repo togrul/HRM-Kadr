@@ -55,7 +55,7 @@
                             </x-table.td>
                             <x-table.td>
                                 <div class="flex items-center space-x-2">
-                                    <span class="text-sm font-medium flex items-center text-teal-500">{{ $pension->expiry_date->format('d.m.Y') }}</span>
+                                    <span class="text-sm font-medium flex items-center text-ink">{{ $pension->expiry_date->format('d.m.Y') }}</span>
                                     <div @class([
                                         'flex justify-center items-center w-4 h-4 rounded-full',
                                         'bg-green-200' => $activeCard,

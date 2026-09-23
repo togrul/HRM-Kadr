@@ -43,7 +43,7 @@
                         <tr @class([
                             'rounded-sm',
                             'border-none' => ! $currentYear,
-                            'border-l-4 border-teal-500' => $currentYear
+                            'border-l-4 border-ink' => $currentYear
                         ])>
                             <x-table.td>
                                 <span class="text-sm bg-slate-100 rounded-md shadow-sm px-3 py-1 font-medium flex justify-center items-center text-slate-600">{{ $vacation->year }}</span>

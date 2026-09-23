@@ -167,7 +167,7 @@
                     </div>
                     <div class="md:col-span-2 flex flex-wrap gap-2">
                         <x-button mode="default" wire:click="cancelPlanItemReview">{{ __('training_needs::dashboard.actions.cancel_review') }}</x-button>
-                        <x-button mode="light-blue" wire:click="savePlanItemReview('hr_adjusted')">{{ __('training_needs::dashboard.actions.mark_hr_adjusted') }}</x-button>
+                        <x-button mode="default" wire:click="savePlanItemReview('hr_adjusted')">{{ __('training_needs::dashboard.actions.mark_hr_adjusted') }}</x-button>
                         <x-button mode="black" wire:click="savePlanItemReview('approved')">{{ __('training_needs::dashboard.actions.approve_plan_item') }}</x-button>
                     </div>
                 </div>
