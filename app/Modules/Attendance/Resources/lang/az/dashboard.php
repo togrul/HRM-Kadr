@@ -59,7 +59,6 @@ return [
         'pending_overtime' => 'Gözləyən əlavə iş',
     ],
     'units' => [
-        'hours_short' => 's',
-        'minutes_short' => 'dəq',
+        'hours' => 'saat',
     ],
 ];

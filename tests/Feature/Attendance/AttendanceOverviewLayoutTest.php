@@ -31,7 +31,8 @@ it('leads the overview with linked work queues and reads durations as hours', fu
         ->toContain(__('attendance::dashboard.cards.needs_attention'))
         ->toContain(e(route('attendance', ['tab' => 'manual', 'year' => 2026, 'month' => 9])))
         ->toContain(e(route('attendance', ['tab' => 'exceptions', 'year' => 2026, 'month' => 9])))
-        ->toContain('0 '.__('attendance::dashboard.units.hours_short'))
+        ->toContain('>198<')
+        ->toContain(__('attendance::dashboard.units.hours'))
         ->and(strpos($html, __('attendance::dashboard.cards.needs_attention')))
         ->toBeLessThan(strpos($html, __('attendance::dashboard.cards.attendance_statistics')));
 });

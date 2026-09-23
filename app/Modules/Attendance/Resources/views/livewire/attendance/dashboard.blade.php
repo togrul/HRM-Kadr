@@ -27,14 +27,12 @@
         // Configuration, not daily work: rendered as a separate group after the work tabs.
         $settingsTabs = ['settings', 'shifts', 'calendar-regimes'];
 
-        // Durations read as hours; minutes only show when there is a remainder.
+        // Durations read as hours ("198", "7:30"); the unit sits beside the number as a suffix.
         $asHours = function (int|float|null $minutes): string {
             $minutes = (int) round((float) $minutes);
-            $hours = intdiv($minutes, 60);
             $rest = $minutes % 60;
 
-            return number_format($hours, 0, ',', ' ').' '.__('attendance::dashboard.units.hours_short')
-                .($rest > 0 ? ' '.$rest.' '.__('attendance::dashboard.units.minutes_short') : '');
+            return number_format(intdiv($minutes, 60), 0, ',', ' ').($rest > 0 ? ':'.str_pad((string) $rest, 2, '0', STR_PAD_LEFT) : '');
         };
     @endphp
 
@@ -152,9 +150,9 @@
             <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
                 <x-ui.metric-tile :label="__('attendance::dashboard.metrics.workdays')" :value="$overview['workdays'] ?? 0" />
                 <x-ui.metric-tile :label="__('attendance::dashboard.metrics.holiday_weekend')" :value="$overview['holidays'] ?? 0" />
-                <x-ui.metric-tile :label="__('attendance::dashboard.metrics.scheduled_minutes')" :value="$asHours($overview['scheduled_minutes'] ?? 0)" />
-                <x-ui.metric-tile :label="__('attendance::dashboard.metrics.worked_minutes')" :value="$asHours($overview['worked_minutes'] ?? 0)" />
-                <x-ui.metric-tile :label="__('attendance::dashboard.metrics.overtime_minutes')" :value="$asHours($overview['overtime_minutes'] ?? 0)" />
+                <x-ui.metric-tile :label="__('attendance::dashboard.metrics.scheduled_minutes')" :value="$asHours($overview['scheduled_minutes'] ?? 0)" :suffix="__('attendance::dashboard.units.hours')" />
+                <x-ui.metric-tile :label="__('attendance::dashboard.metrics.worked_minutes')" :value="$asHours($overview['worked_minutes'] ?? 0)" :suffix="__('attendance::dashboard.units.hours')" />
+                <x-ui.metric-tile :label="__('attendance::dashboard.metrics.overtime_minutes')" :value="$asHours($overview['overtime_minutes'] ?? 0)" :suffix="__('attendance::dashboard.units.hours')" />
             </div>
         </section>
 

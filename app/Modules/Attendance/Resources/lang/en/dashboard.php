@@ -59,7 +59,6 @@ return [
         'pending_overtime' => 'Pending overtime',
     ],
     'units' => [
-        'hours_short' => 'h',
-        'minutes_short' => 'min',
+        'hours' => 'h',
     ],
 ];
