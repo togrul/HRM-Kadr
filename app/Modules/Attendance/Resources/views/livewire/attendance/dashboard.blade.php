@@ -96,12 +96,15 @@
                         <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
                         {{ __('attendance::dashboard.tabs.settings_group') }}
                     </span>
-                    @foreach ($settingsTabs as $tab)
-                        @continue(! in_array($tab, $availableTabs, true))
-                        <x-filter.item wire:navigate href="{{ $attendanceTabRoute($tab) }}" :active="$activeTab === $tab" class="text-ink-muted">
-                            {{ __('attendance::dashboard.tabs.'.$attendanceTabs[$tab]) }}
-                        </x-filter.item>
-                    @endforeach
+                    {{-- x-filter.item renders an <li>; outside its <ul> every item grows a list bullet --}}
+                    <x-filter.nav wrap class="min-w-0">
+                        @foreach ($settingsTabs as $tab)
+                            @continue(! in_array($tab, $availableTabs, true))
+                            <x-filter.item wire:navigate href="{{ $attendanceTabRoute($tab) }}" :active="$activeTab === $tab" class="text-ink-muted">
+                                {{ __('attendance::dashboard.tabs.'.$attendanceTabs[$tab]) }}
+                            </x-filter.item>
+                        @endforeach
+                    </x-filter.nav>
                 </div>
             @endif
         </div>

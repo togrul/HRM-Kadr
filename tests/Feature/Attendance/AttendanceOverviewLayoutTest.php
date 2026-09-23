@@ -42,7 +42,10 @@ it('groups configuration tabs apart from the daily work tabs', function (): void
     $html = Livewire::test(Dashboard::class)->html();
     $group = strpos($html, __('attendance::dashboard.tabs.settings_group'));
 
-    expect($group)->not->toBeFalse()
+    // Every tab <li> must sit inside a <ul>, or the browser draws a bullet beside it.
+    expect(substr_count($html, '<li '))->toBeGreaterThan(0)
+        ->and(preg_match('#</ul>\s*(?:(?!<ul).)*<li #s', $html))->toBe(0)
+        ->and($group)->not->toBeFalse()
         ->and(strpos($html, __('attendance::dashboard.tabs.shifts')))->toBeGreaterThan($group)
         ->and(strpos($html, __('attendance::dashboard.tabs.daily_monitor')))->toBeLessThan($group);
 });
