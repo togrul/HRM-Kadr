@@ -117,4 +117,17 @@ return [
         'vacant' => 'Vacant',
         'no_data' => 'The staff schedule is empty.',
     ],
+    'queue' => [
+        'view_here' => 'View here',
+        'hide' => 'Hide',
+        'oldest_first' => 'The 5 oldest items, longest waiting first',
+        'view_all' => 'View all',
+        'approve' => 'Approve',
+        'reject' => 'Reject',
+        'open' => 'Open',
+        'empty' => 'Nothing here is waiting for your decision.',
+        'reject_confirm' => ':name — reject this request?',
+        'approved' => 'Approved',
+        'rejected' => 'Rejected',
+    ],
 ];

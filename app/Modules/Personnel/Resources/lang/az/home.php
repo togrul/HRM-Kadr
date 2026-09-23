@@ -117,4 +117,17 @@ return [
         'vacant' => 'Vakant',
         'no_data' => 'Ştat cədvəli doldurulmayıb.',
     ],
+    'queue' => [
+        'view_here' => 'Burada bax',
+        'hide' => 'Gizlət',
+        'oldest_first' => 'Ən köhnə 5 element, ilk öncə gözləyən',
+        'view_all' => 'Hamısına bax',
+        'approve' => 'Təsdiqlə',
+        'reject' => 'Rədd et',
+        'open' => 'Aç',
+        'empty' => 'Burada sizin qərarınızı gözləyən element yoxdur.',
+        'reject_confirm' => ':name — bu sorğu rədd edilsin?',
+        'approved' => 'Təsdiqləndi',
+        'rejected' => 'Rədd edildi',
+    ],
 ];

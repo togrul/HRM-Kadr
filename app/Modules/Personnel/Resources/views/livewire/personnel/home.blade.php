@@ -131,11 +131,20 @@
                                 : __('personnel::home.attention.waiting_today'));
                     @endphp
 
-                    <a
-                        href="{{ route($card['route']) }}"
-                        wire:navigate
-                        class="group flex flex-col rounded-2xl border border-hairline p-4 shadow-card transition hover:shadow-md {{ $accent['card'] }}"
-                    >
+                    @php
+                        $expandable = $card['count'] > 0 && in_array($card['key'], \App\Modules\Personnel\Livewire\Home::EXPANDABLE_QUEUES, true);
+                        $open = $queue === $card['key'];
+                    @endphp
+
+                    <div @class([
+                        'group relative flex flex-col rounded-2xl border p-4 shadow-card transition hover:shadow-md',
+                        $accent['card'],
+                        'border-ink ring-1 ring-ink' => $open,
+                        'border-hairline' => ! $open,
+                    ])>
+                        {{-- The whole card still opens the module; the buttons sit above this link. --}}
+                        <a href="{{ route($card['route']) }}" wire:navigate class="absolute inset-0 rounded-2xl" aria-label="{{ __('personnel::home.attention.cards.'.$card['key'].'.label') }}"></a>
+
                         <div class="flex items-start justify-between gap-3">
                             <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl {{ $accent['chip'] }}">
                                 <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">{!! $tileIcons[$card['key']] !!}</svg>
@@ -148,12 +157,104 @@
                         </p>
                         <p class="mt-1 text-[11.5px] leading-tight text-ink-faint">{{ $note }}</p>
 
-                        <span class="mt-4 inline-flex h-8 w-fit items-center rounded-[10px] border border-hairline bg-white px-3 text-[12px] font-semibold text-ink-soft transition group-hover:border-zinc-300 group-hover:text-ink">
-                            {{ __('personnel::home.attention.cards.'.$card['key'].'.action') }}
-                        </span>
-                    </a>
+                        <div class="relative z-10 mt-4 flex flex-wrap items-center gap-2">
+                            @if ($expandable)
+                                <button
+                                    type="button"
+                                    wire:click="toggleQueue('{{ $card['key'] }}')"
+                                    wire:loading.attr="disabled"
+                                    wire:target="toggleQueue"
+                                    aria-expanded="{{ $open ? 'true' : 'false' }}"
+                                    aria-controls="home-queue"
+                                    @class([
+                                        'inline-flex h-8 items-center gap-1.5 rounded-[10px] px-3 text-[12px] font-semibold transition',
+                                        'bg-ink text-white hover:bg-ink-hover' => $open,
+                                        'border border-hairline bg-white text-ink-soft hover:border-zinc-300 hover:text-ink' => ! $open,
+                                    ])
+                                >
+                                    {{ __($open ? 'personnel::home.queue.hide' : 'personnel::home.queue.view_here') }}
+                                    <svg @class(['h-3.5 w-3.5 transition', 'rotate-180' => $open]) viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                                </button>
+                            @else
+                                <a href="{{ route($card['route']) }}" wire:navigate class="inline-flex h-8 w-fit items-center rounded-[10px] border border-hairline bg-white px-3 text-[12px] font-semibold text-ink-soft transition hover:border-zinc-300 hover:text-ink">
+                                    {{ __('personnel::home.attention.cards.'.$card['key'].'.action') }}
+                                </a>
+                            @endif
+                        </div>
+                    </div>
                 @endforeach
             </div>
+
+            {{-- ==================== queue rows, worked in place ==================== --}}
+            @if ($queue !== null && collect($attention)->contains('key', $queue))
+                @php
+                    $queueCard = collect($attention)->firstWhere('key', $queue);
+                    $decidable = $this->queueDecidable;
+                @endphp
+
+                <section id="home-queue" wire:key="home-queue-{{ $queue }}" class="overflow-hidden rounded-2xl border border-hairline bg-white shadow-card">
+                    <header class="flex items-center justify-between gap-3 border-b border-hairline px-4 py-3">
+                        <div class="min-w-0">
+                            <h2 class="truncate text-[13.5px] font-semibold tracking-[-0.02em] text-ink">{{ __('personnel::home.attention.cards.'.$queue.'.label') }}</h2>
+                            <p class="mt-0.5 text-[11.5px] text-ink-faint">{{ __('personnel::home.queue.oldest_first') }}</p>
+                        </div>
+                        <div class="flex shrink-0 items-center gap-1">
+                            <a href="{{ route($queueCard['route']) }}" wire:navigate class="inline-flex h-8 items-center gap-1 rounded-[10px] px-2.5 text-[12px] font-medium text-ink-muted transition hover:bg-[#f4f4f5] hover:text-ink">
+                                {{ __('personnel::home.queue.view_all') }}
+                                <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                            </a>
+                            <button type="button" wire:click="toggleQueue('{{ $queue }}')" class="flex h-8 w-8 items-center justify-center rounded-[10px] text-ink-muted transition hover:bg-[#f4f4f5] hover:text-ink" aria-label="{{ __('personnel::home.queue.hide') }}">
+                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                            </button>
+                        </div>
+                    </header>
+
+                    @forelse ($this->queueItems as $item)
+                        <div wire:key="home-queue-item-{{ $queue }}-{{ $item['id'] }}" class="flex items-center gap-3 border-b border-hairline-subtle px-4 py-2.5 last:border-b-0">
+                            @if ($queue === 'unsigned_orders')
+                                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#f4f4f5] text-ink-muted">
+                                    <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+                                </span>
+                            @else
+                                <x-avatar :name="$item['title']" size="sm" />
+                            @endif
+
+                            <div class="min-w-0 flex-1">
+                                <p class="truncate text-[13px] font-medium text-ink">{{ $item['title'] }}</p>
+                                @if ($item['meta'] !== '')
+                                    <p class="truncate text-[11.5px] text-ink-faint">{{ $item['meta'] }}</p>
+                                @endif
+                            </div>
+
+                            @if ($decidable)
+                                <div class="flex shrink-0 items-center gap-1.5">
+                                    <button
+                                        type="button"
+                                        x-on:click="$dispatch('confirm-action', { tone: 'rose', message: @js(__('personnel::home.queue.reject_confirm', ['name' => $item['title']])), confirmText: @js(__('personnel::home.queue.reject')), run: () => $wire.decide({{ $item['id'] }}, false) })"
+                                        wire:loading.attr="disabled"
+                                        wire:target="decide"
+                                        class="inline-flex h-8 items-center rounded-[10px] px-3 text-[12px] font-semibold text-ink-muted transition hover:bg-[#ffe4e6] hover:text-[#be123c]"
+                                    >{{ __('personnel::home.queue.reject') }}</button>
+                                    <button
+                                        type="button"
+                                        wire:click="decide({{ $item['id'] }}, true)"
+                                        wire:loading.attr="disabled"
+                                        wire:target="decide"
+                                        class="inline-flex h-8 items-center gap-1.5 rounded-[10px] bg-ink px-3 text-[12px] font-semibold text-white transition hover:bg-ink-hover disabled:opacity-60"
+                                    >
+                                        <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                                        {{ __('personnel::home.queue.approve') }}
+                                    </button>
+                                </div>
+                            @elseif (isset($item['url']))
+                                <a href="{{ $item['url'] }}" wire:navigate class="inline-flex h-8 shrink-0 items-center rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-[12px] font-semibold text-ink-soft transition hover:bg-[#e4e4e7] hover:text-ink">{{ __('personnel::home.queue.open') }}</a>
+                            @endif
+                        </div>
+                    @empty
+                        <p class="px-4 py-6 text-center text-[12.5px] text-ink-faint">{{ __('personnel::home.queue.empty') }}</p>
+                    @endforelse
+                </section>
+            @endif
         @endif
 
         <div class="grid gap-4 xl:grid-cols-[1.35fr,1fr]">

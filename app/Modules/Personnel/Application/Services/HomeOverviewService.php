@@ -8,6 +8,7 @@ use App\Models\AuditActivity;
 use App\Models\OrderLog;
 use App\Models\PersonnelVacation;
 use App\Models\User;
+use App\Modules\Personnel\Application\Services\MyHr\MyHrRequestReviewReadService;
 use App\Support\Database\InstalledTables;
 use Carbon\CarbonImmutable;
 use Closure;
@@ -16,6 +17,7 @@ use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 /**
  * Landing dashboard reads. Every block is permission-gated and skipped entirely
@@ -122,6 +124,81 @@ class HomeOverviewService
                 ? (int) CarbonImmutable::parse($oldest)->startOfDay()->diffInDays(CarbonImmutable::today())
                 : null,
         ];
+    }
+
+    /**
+     * The first few rows behind an attention tile, oldest first — what the viewer works
+     * through without leaving the home page. Same permission gates as the tiles.
+     *
+     * @return list<array{id:int,title:string,meta:string,url?:string}>
+     */
+    public function queueItems(string $key, User $viewer, int $limit = 5): array
+    {
+        return match ($key) {
+            'attendance_pending' => $this->can($viewer, 'show-attendance-manual') ? $this->manualEntryItems($limit) : [],
+            'unsigned_orders' => $this->can($viewer, 'show-orders') ? $this->unsignedOrderItems($limit) : [],
+            'vacation_requests' => $this->can($viewer, 'show-vacations')
+                ? app(MyHrRequestReviewReadService::class)->pendingVacationItems($viewer, $limit)
+                : [],
+            default => [],
+        };
+    }
+
+    /**
+     * @return list<array{id:int,title:string,meta:string}>
+     */
+    private function manualEntryItems(int $limit): array
+    {
+        if (! InstalledTables::has('attendance_manual_entries')) {
+            return [];
+        }
+
+        return AttendanceManualEntry::query()
+            ->with('personnel:tabel_no,surname,name,patronymic')
+            ->where('approval_status', 'pending')
+            ->oldest('date')
+            ->oldest('id')
+            ->limit($limit)
+            ->get()
+            ->map(fn (AttendanceManualEntry $entry): array => [
+                'id' => (int) $entry->id,
+                'title' => $entry->personnel?->fullname ?: (string) $entry->tabel_no,
+                'meta' => collect([
+                    optional($entry->date)->format('d.m.Y'),
+                    $entry->check_in_at && $entry->check_out_at
+                        ? substr((string) $entry->check_in_at, 0, 5).'–'.substr((string) $entry->check_out_at, 0, 5)
+                        : $entry->absence_code,
+                    $entry->reason ? Str::limit((string) $entry->reason, 40) : null,
+                ])->filter()->implode(' · '),
+            ])
+            ->all();
+    }
+
+    /**
+     * @return list<array{id:int,title:string,meta:string,url:string}>
+     */
+    private function unsignedOrderItems(int $limit): array
+    {
+        if (! InstalledTables::has('order_logs')) {
+            return [];
+        }
+
+        return OrderLog::query()
+            ->select(['id', 'order_no', 'given_date', 'description', 'template_snapshot'])
+            ->where('status_id', OrderStatusEnum::PENDING->value)
+            ->oldest('created_at')
+            ->limit($limit)
+            ->get()
+            ->map(fn (OrderLog $order): array => [
+                'id' => (int) $order->id,
+                'title' => '№ '.$order->order_no,
+                'meta' => collect([
+                    data_get($order->template_snapshot, 'label') ?: Str::limit((string) $order->description, 40),
+                    $order->given_date ? CarbonImmutable::parse($order->given_date)->format('d.m.Y') : null,
+                ])->filter()->implode(' · '),
+                'url' => route('orders', ['search' => ['order_no' => $order->order_no]]),
+            ])
+            ->all();
     }
 
     /**
