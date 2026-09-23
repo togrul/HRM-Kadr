@@ -7,6 +7,7 @@ use App\Livewire\Traits\SideModalAction;
 use App\Models\OrderType;
 use App\Models\PersonnelVacation;
 use App\Models\Structure;
+use App\Modules\Orders\Contracts\OrderDrafter;
 use App\Modules\Personnel\Contracts\MyHrRequestReview;
 use App\Modules\Vacation\Exports\VacationExport;
 use App\Services\Chief\ChiefResolver;
@@ -77,6 +78,18 @@ class Vacations extends Component
     public function updatedFilter(): void
     {
         $this->searchFilter();
+    }
+
+    /**
+     * Vacations are granted by an order: the header's "Vacation order" opens the order
+     * composer on the vacation template(s).
+     *
+     * @return array<string, string> code → label
+     */
+    #[Computed]
+    public function vacationOrderTemplates(): array
+    {
+        return app(OrderDrafter::class)->personnelTemplates('vacation');
     }
 
     #[Computed]

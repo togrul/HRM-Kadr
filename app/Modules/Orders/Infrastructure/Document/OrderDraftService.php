@@ -42,9 +42,9 @@ class OrderDraftService implements OrderDrafter
     /**
      * @return array<string, string>
      */
-    public function personnelTemplates(): array
+    public function personnelTemplates(?string $effect = null): array
     {
-        return $this->templates->availableForPersonnel();
+        return $this->templates->availableForPersonnel($effect);
     }
 
     /**

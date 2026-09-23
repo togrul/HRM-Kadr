@@ -26,11 +26,12 @@ class OrderWordTemplateRepository
     /**
      * @return array<string, string>
      */
-    public function availableForPersonnel(): array
+    public function availableForPersonnel(?string $effect = null): array
     {
         return OrderWordTemplate::query()
             ->where('is_active', true)
             ->where('effect', '!=', 'hire')
+            ->when($effect !== null, fn ($query) => $query->where('effect', $effect))
             ->orderBy('label')
             ->pluck('label', 'code')
             ->all();

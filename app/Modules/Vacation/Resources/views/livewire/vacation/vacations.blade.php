@@ -90,6 +90,31 @@
             @can('review-self-service-requests')
                 <x-ui.self-service-review-link />
             @endcan
+            @can('add-orders')
+                @php
+                    // One vacation template: the button opens it. Several: it lists them. None: the plain composer.
+                    $vacationTemplates = $this->vacationOrderTemplates;
+                    $pickTemplate = count($vacationTemplates) > 1;
+                @endphp
+                <div class="relative" x-data="{ open: false }" @keydown.escape.window="open = false">
+                    <x-pill-button
+                        variant="primary"
+                        :href="$pickTemplate ? null : route('orders', array_filter(['create' => 1, 'preset' => array_key_first($vacationTemplates)]))"
+                        :wire:navigate="! $pickTemplate"
+                        x-on:click="{{ $pickTemplate ? 'open = ! open' : '' }}"
+                    >
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                        {{ __('vacation::common.actions.vacation_order') }}
+                    </x-pill-button>
+                    @if ($pickTemplate)
+                        <div x-cloak x-show="open" x-transition.opacity.duration.100ms @click.outside="open = false" class="absolute right-0 z-40 mt-1.5 w-64 overflow-hidden rounded-xl border border-hairline bg-white py-1 shadow-overlay">
+                            @foreach ($vacationTemplates as $code => $label)
+                                <a href="{{ route('orders', ['create' => 1, 'preset' => $code]) }}" wire:navigate class="flex w-full items-center px-3.5 py-2 text-left text-[12.5px] text-ink-soft transition hover:bg-[#fafafa] hover:text-ink">{{ $label }}</a>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+            @endcan
             @can('export-vacations')
                 <x-pill-button variant="emerald" :icon="true" wire:click.prevent="exportExcel"
                     wire:loading.attr="disabled" wire:target="exportExcel"
