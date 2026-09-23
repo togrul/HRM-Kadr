@@ -14,6 +14,7 @@ use App\Modules\Personnel\Application\Services\MyHr\MyHrRequestsReadService;
 use App\Modules\Personnel\Support\MyHr\MyHrAccess;
 use Carbon\Carbon;
 use Closure;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -551,7 +552,7 @@ class MyHrRequests extends Component
         };
     }
 
-    public function render()
+    public function render(): View
     {
         return view('personnel::livewire.personnel.my-hr.requests');
     }

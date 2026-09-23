@@ -8,6 +8,7 @@ use App\Models\PersonnelBusinessTrip;
 use App\Models\PersonnelVacation;
 use App\Modules\Personnel\Application\Services\MyHr\MyHrRequestReviewReadService;
 use App\Modules\Personnel\Application\Services\MyHr\MyHrRequestReviewService;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 
@@ -85,7 +86,7 @@ class SelfServiceRequestReviews extends Component
         $this->dispatch('notify', type: 'success', message: __('personnel::my_hr.review.messages.rejected'));
     }
 
-    public function render()
+    public function render(): View
     {
         return view('personnel::livewire.personnel.my-hr.self-service-request-reviews');
     }

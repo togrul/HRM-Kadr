@@ -9,6 +9,7 @@ use App\Modules\Personnel\Services\PersonnelRowActionService;
 use App\Modules\Personnel\Services\PersonnelRowViewModelService;
 use App\Modules\Personnel\Support\ProfessionalPortfolio\ProfessionalPortfolioPermissionMatrix;
 use App\Services\StructureService;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -48,7 +49,7 @@ class TablePanel extends Component
         $this->search = trim($search);
     }
 
-    public function placeholder()
+    public function placeholder(): View
     {
         return view('personnel::livewire.personnel.placeholders.table-panel');
     }
@@ -146,7 +147,7 @@ class TablePanel extends Component
         ];
     }
 
-    public function render()
+    public function render(): View
     {
         return view('personnel::livewire.personnel.table-panel');
     }

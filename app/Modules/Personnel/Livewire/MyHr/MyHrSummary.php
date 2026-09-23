@@ -5,6 +5,7 @@ namespace App\Modules\Personnel\Livewire\MyHr;
 use App\Models\Personnel;
 use App\Modules\Personnel\Application\Services\MyHr\MyHrRequestsReadService;
 use App\Modules\Personnel\Support\MyHr\MyHrAccess;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -97,7 +98,7 @@ class MyHrSummary extends Component
         $this->dispatch('my-hr:goto', tab: $tab, form: $form)->to(MyHrDashboard::class);
     }
 
-    public function render()
+    public function render(): View
     {
         return view('personnel::livewire.personnel.my-hr.summary');
     }

@@ -3,6 +3,7 @@
 namespace App\Modules\Personnel\Livewire\Steps;
 
 use App\Livewire\Forms\Personnel\ServiceHistoryForm;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Isolate;
 
 #[Isolate]
@@ -44,7 +45,7 @@ class HistoryStep extends AbstractPersonnelWizardStep
         return 5;
     }
 
-    public function render()
+    public function render(): View
     {
         return view('personnel::livewire.personnel.steps.history-step', [
             'stepSearchModels' => $this->activeStepSearchModels(),

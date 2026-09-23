@@ -4,18 +4,22 @@ namespace App\Modules\Personnel\Livewire\ProfessionalPortfolio;
 
 use App\Models\Personnel;
 use App\Models\PersonnelProjectRecord;
-use App\Modules\Personnel\Exports\ProfessionalPortfolioProjectsExport;
+use App\Models\Structure;
 use App\Modules\Personnel\Application\Services\ProfessionalPortfolioRegistryFingerprintService;
 use App\Modules\Personnel\Application\Services\ProfessionalPortfolioRegistrySyncService;
 use App\Modules\Personnel\Application\Services\ProfessionalPortfolioWorkflowPolicyService;
+use App\Modules\Personnel\Exports\ProfessionalPortfolioProjectsExport;
 use App\Modules\Personnel\Support\ProfessionalPortfolio\HandlesPortfolioAttachments;
 use App\Modules\Personnel\Support\ProfessionalPortfolio\ProfessionalPortfolioPermissionMatrix;
-use App\Models\Structure;
-use Maatwebsite\Excel\Excel as ExcelWriter;
-use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Validation\Rule;
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use Illuminate\Validation\Rule;
+use Maatwebsite\Excel\Excel as ExcelWriter;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ProjectsManager extends Component
 {
@@ -23,14 +27,23 @@ class ProjectsManager extends Component
     use WithFileUploads;
 
     public int $personnelId;
+
     public string $search = '';
+
     public string $statusFilter = 'all';
+
     public ?string $dateFrom = null;
+
     public ?string $dateTo = null;
+
     public bool $showForm = false;
+
     public ?int $editingId = null;
+
     public ?int $selectedId = null;
+
     public $evidenceUpload = null;
+
     public array $form = [
         'project_name' => '',
         'project_code' => '',
@@ -56,7 +69,7 @@ class ProjectsManager extends Component
         $this->statusFilter = 'all';
     }
 
-    public function placeholder()
+    public function placeholder(): View
     {
         return view('personnel::livewire.personnel.placeholders.professional-portfolio-tab');
     }
@@ -168,7 +181,7 @@ class ProjectsManager extends Component
         $this->dispatch('portfolioRecordSaved');
     }
 
-    public function exportExcel()
+    public function exportExcel(): BinaryFileResponse
     {
         abort_unless(auth()->user()?->canAny(ProfessionalPortfolioPermissionMatrix::projectViewPermissions()), 403);
 
@@ -178,7 +191,7 @@ class ProjectsManager extends Component
         );
     }
 
-    public function exportCsv()
+    public function exportCsv(): BinaryFileResponse
     {
         abort_unless(auth()->user()?->canAny(ProfessionalPortfolioPermissionMatrix::projectViewPermissions()), 403);
 
@@ -189,7 +202,10 @@ class ProjectsManager extends Component
         );
     }
 
-    public function getRecordsProperty()
+    /**
+     * @return Collection<int, PersonnelProjectRecord>
+     */
+    public function getRecordsProperty(): Collection
     {
         return $this->filteredQuery()
             ->with(['sponsorUnit:id,name,parent_id', 'evidenceAttachment:id,display_name,original_name,file_path,disk', 'verifier:id,name'])
@@ -208,17 +224,23 @@ class ProjectsManager extends Component
             ->find($this->selectedId);
     }
 
-    public function getSponsorUnitOptionsProperty()
+    public function getSponsorUnitOptionsProperty(): Collection
     {
         return Structure::query()->select(['id', 'name'])->orderBy('name')->limit(100)->get();
     }
 
-    protected function baseQuery()
+    /**
+     * @return Builder<PersonnelProjectRecord>
+     */
+    protected function baseQuery(): Builder
     {
         return PersonnelProjectRecord::query()->where('personnel_id', $this->personnelId);
     }
 
-    protected function exportRows()
+    /**
+     * @return Collection<int, PersonnelProjectRecord>
+     */
+    protected function exportRows(): Collection
     {
         return $this->filteredQuery()
             ->with([
@@ -234,7 +256,10 @@ class ProjectsManager extends Component
         return Personnel::query()->select(['id', 'surname', 'name', 'patronymic'])->findOrFail($this->personnelId);
     }
 
-    protected function filteredQuery()
+    /**
+     * @return Builder<PersonnelProjectRecord>
+     */
+    protected function filteredQuery(): Builder
     {
         return $this->baseQuery()
             ->when($this->statusFilter !== 'all', fn ($query) => $query->where('verification_status', $this->statusFilter))
@@ -336,7 +361,7 @@ class ProjectsManager extends Component
         abort_unless(auth()->user()?->canAny(ProfessionalPortfolioPermissionMatrix::projectVerifyPermissions()), 403);
     }
 
-    public function render()
+    public function render(): View
     {
         return view('personnel::livewire.personnel.professional-portfolio.projects-manager');
     }

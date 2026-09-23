@@ -14,6 +14,7 @@ use App\Modules\Personnel\Support\Traits\Information\MasterDegreeTrait;
 use App\Modules\Personnel\Support\Traits\Information\PensionCardTrait;
 use App\Traits\NormalizesDropdownPayloads;
 use DateTime;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -209,7 +210,7 @@ class Information extends Component
         $this->currentStep = 0;
     }
 
-    public function render()
+    public function render(): View
     {
         return view('personnel::livewire.personnel.information');
     }

@@ -3,6 +3,7 @@
 namespace App\Modules\Personnel\Livewire\Steps;
 
 use App\Livewire\Forms\Personnel\DocumentForm;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Isolate;
 
 #[Isolate]
@@ -37,7 +38,7 @@ class DocumentStep extends AbstractPersonnelWizardStep
         return 2;
     }
 
-    public function render()
+    public function render(): View
     {
         return view('personnel::livewire.personnel.steps.document-step', [
             'stepSearchModels' => $this->activeStepSearchModels(),

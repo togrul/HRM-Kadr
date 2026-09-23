@@ -17,6 +17,7 @@ use App\Models\SocialOrigin;
 use App\Models\Structure;
 use App\Models\WorkNorm;
 use App\Services\StructureService;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 
@@ -489,7 +490,7 @@ trait PersonnelDropdownCareerOptions
     }
 
     #[Computed]
-    public function laborStructureTreeRoots()
+    public function laborStructureTreeRoots(): Collection
     {
         $accessibleIds = array_map(
             'intval',

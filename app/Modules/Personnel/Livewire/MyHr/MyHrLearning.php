@@ -6,6 +6,7 @@ use App\Models\EmployeeContentAssignment;
 use App\Models\Personnel;
 use App\Modules\Personnel\Application\Services\MyHr\MyHrLearningReadService;
 use App\Modules\Personnel\Support\MyHr\MyHrAccess;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -23,7 +24,7 @@ class MyHrLearning extends Component
         $this->personnelId = $personnelId;
     }
 
-    public function openContent(int $assignmentId)
+    public function openContent(int $assignmentId): void
     {
         $assignment = $this->assignment($assignmentId);
 
@@ -46,7 +47,7 @@ class MyHrLearning extends Component
             return;
         }
 
-        return $this->redirect($url, navigate: false);
+        $this->redirect($url, navigate: false);
     }
 
     public function complete(int $assignmentId): void
@@ -89,7 +90,7 @@ class MyHrLearning extends Component
             ->findOrFail($this->personnelId);
     }
 
-    public function render()
+    public function render(): View
     {
         return view('personnel::livewire.personnel.my-hr.learning');
     }

@@ -14,7 +14,7 @@ trait HandlesPersonnelStepFlow
 
     protected ?PersonnelStepState $stepStateServiceInstance = null;
 
-    public function previousStep()
+    public function previousStep(): void
     {
         $next = $this->stepNavigationService()->previous((int) $this->step);
 
