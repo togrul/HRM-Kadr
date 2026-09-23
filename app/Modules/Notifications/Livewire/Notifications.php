@@ -2,10 +2,11 @@
 
 namespace App\Modules\Notifications\Livewire;
 
-use App\Modules\Notifications\Support\NotificationCountCache;
 use App\Modules\Notifications\Support\DispatchesNotificationRefresh;
-use Illuminate\Support\Collection;
+use App\Modules\Notifications\Support\NotificationCountCache;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\Response;
+use Illuminate\Support\Collection;
 use Livewire\Attributes\Isolate;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -25,7 +26,7 @@ class Notifications extends Component
 
     public int|string|null $notificationCount = null;
 
-    public function mount()
+    public function mount(): void
     {
         $this->notifications = collect([]);
         $this->isLoading = true;
@@ -59,7 +60,7 @@ class Notifications extends Component
         $this->dispatchNotificationRefresh();
     }
 
-    public function markAllAsRead()
+    public function markAllAsRead(): void
     {
         auth()->guest() && abort(Response::HTTP_FORBIDDEN);
 
@@ -72,7 +73,7 @@ class Notifications extends Component
         $this->getNotifications();
     }
 
-    public function markAsRead($notificationId)
+    public function markAsRead($notificationId): void
     {
         auth()->guest() && abort(Response::HTTP_FORBIDDEN);
 
@@ -91,7 +92,7 @@ class Notifications extends Component
         $this->refreshCount();
         $this->dispatchNotificationRefresh();
 
-        return $this->redirectRoute($route);
+        $this->redirectRoute($route);
     }
 
     #[On('notifications-refresh-count')]
@@ -111,7 +112,7 @@ class Notifications extends Component
             : $count;
     }
 
-    public function placeholder()
+    public function placeholder(): View
     {
         return view('notification::livewire.notification.placeholders.notifications-nav');
     }
@@ -154,7 +155,7 @@ class Notifications extends Component
             ->values();
     }
 
-    public function render()
+    public function render(): View
     {
         return view('notification::livewire.notification.notifications', [
             'groupedNotifications' => $this->groupedNotifications($this->notifications),

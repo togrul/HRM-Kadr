@@ -6,6 +6,8 @@ use App\Models\NotificationCampaign;
 use App\Modules\Notifications\Livewire\Concerns\InteractsWithNotificationAuthorization;
 use App\Modules\Notifications\Support\NotificationTitle;
 use App\Modules\Notifications\Support\NotificationTriggerRegistry;
+use Illuminate\Contracts\View\View;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -42,7 +44,7 @@ class HistoryBoard extends Component
     }
 
     #[Computed]
-    public function campaigns()
+    public function campaigns(): LengthAwarePaginator
     {
         $campaigns = NotificationCampaign::query()
             ->with([
@@ -92,12 +94,12 @@ class HistoryBoard extends Component
         return $campaigns;
     }
 
-    public function placeholder()
+    public function placeholder(): View
     {
         return view('notification::livewire.notification.placeholders.settings-panel');
     }
 
-    public function render()
+    public function render(): View
     {
         return view('notification::livewire.notification.history-board', [
             'campaigns' => $this->campaigns,

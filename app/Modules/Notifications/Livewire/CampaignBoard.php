@@ -7,6 +7,8 @@ use App\Modules\Notifications\Livewire\Concerns\InteractsWithNotificationAuthori
 use App\Modules\Notifications\Support\NotificationCampaignDispatcher;
 use App\Modules\Notifications\Support\NotificationTitle;
 use App\Modules\Notifications\Support\NotificationTriggerRegistry;
+use Illuminate\Contracts\View\View;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -121,7 +123,7 @@ class CampaignBoard extends Component
     }
 
     #[Computed]
-    public function campaigns()
+    public function campaigns(): LengthAwarePaginator
     {
         $campaigns = NotificationCampaign::query()
             ->withCount([
@@ -170,12 +172,12 @@ class CampaignBoard extends Component
         return $campaigns;
     }
 
-    public function placeholder()
+    public function placeholder(): View
     {
         return view('notification::livewire.notification.placeholders.settings-panel');
     }
 
-    public function render()
+    public function render(): View
     {
         return view('notification::livewire.notification.campaign-board', [
             'campaigns' => $this->campaigns,

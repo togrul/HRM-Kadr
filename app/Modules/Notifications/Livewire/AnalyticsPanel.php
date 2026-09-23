@@ -5,6 +5,8 @@ namespace App\Modules\Notifications\Livewire;
 use App\Models\NotificationCampaign;
 use App\Models\NotificationDispatch;
 use App\Modules\Notifications\Livewire\Concerns\InteractsWithNotificationAuthorization;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
@@ -36,17 +38,29 @@ class AnalyticsPanel extends Component
         }
     }
 
-    protected function dispatchQuery()
+    /**
+     * @return Builder<NotificationDispatch>
+     */
+    protected function dispatchQuery(): Builder
     {
         return $this->applyDateRange(NotificationDispatch::query(), 'created_at');
     }
 
-    protected function campaignQuery()
+    /**
+     * @return Builder<NotificationCampaign>
+     */
+    protected function campaignQuery(): Builder
     {
         return $this->applyDateRange(NotificationCampaign::query(), 'created_at');
     }
 
-    protected function applyDateRange($query, string $column)
+    /**
+     * @template TModel of \Illuminate\Database\Eloquent\Model
+     *
+     * @param  Builder<TModel>  $query
+     * @return Builder<TModel>
+     */
+    protected function applyDateRange($query, string $column): Builder
     {
         if ($this->range === 'all') {
             return $query;
@@ -152,12 +166,12 @@ class AnalyticsPanel extends Component
             ->values();
     }
 
-    public function placeholder()
+    public function placeholder(): View
     {
         return view('notification::livewire.notification.placeholders.settings-panel');
     }
 
-    public function render()
+    public function render(): View
     {
         $mailDispatches = $this->mailDispatches();
 

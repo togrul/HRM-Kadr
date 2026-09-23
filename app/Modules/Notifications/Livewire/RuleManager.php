@@ -10,6 +10,7 @@ use App\Modules\Notifications\Livewire\Concerns\InteractsWithNotificationAuthori
 use App\Modules\Notifications\Support\NotificationAudienceTargetRegistry;
 use App\Modules\Notifications\Support\NotificationTriggerRegistry;
 use App\Services\StructurePathService;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Arr;
 use Livewire\Component;
 
@@ -226,7 +227,7 @@ class RuleManager extends Component
         }
     }
 
-    public function render()
+    public function render(): View
     {
         $selectedStructureIds = $this->parseIntegerList($this->form['structure_ids'] ?? []);
         $selectedUserIds = $this->parseIntegerList($this->form['user_ids'] ?? []);
@@ -268,7 +269,7 @@ class RuleManager extends Component
         ]);
     }
 
-    public function placeholder()
+    public function placeholder(): View
     {
         return view('notification::livewire.notification.placeholders.settings-panel');
     }

@@ -8,6 +8,7 @@ use App\Modules\Notifications\Livewire\Concerns\InteractsWithNotificationAuthori
 use App\Modules\Notifications\Support\NotificationTemplateRenderer;
 use App\Modules\Notifications\Support\NotificationTriggerRegistry;
 use App\Modules\Notifications\Support\SamplePayloads;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Mail;
 use Livewire\Component;
 
@@ -182,7 +183,7 @@ class TemplateManager extends Component
         ];
     }
 
-    public function render()
+    public function render(): View
     {
         $templates = NotificationTemplate::query()
             ->when($this->search !== '', function ($query) {
@@ -213,7 +214,7 @@ class TemplateManager extends Component
         ]);
     }
 
-    public function placeholder()
+    public function placeholder(): View
     {
         return view('notification::livewire.notification.placeholders.settings-panel');
     }

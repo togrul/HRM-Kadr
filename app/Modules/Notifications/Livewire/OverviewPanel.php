@@ -11,6 +11,7 @@ use App\Modules\Notifications\Support\NotificationTemplateRenderer;
 use App\Modules\Notifications\Support\NotificationTriggerRegistry;
 use App\Modules\Notifications\Support\SamplePayloads;
 use App\Support\Database\InstalledTables;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\On;
@@ -187,7 +188,7 @@ class OverviewPanel extends Component
         $this->dispatch('notification-rule-changed');
     }
 
-    public function render()
+    public function render(): View
     {
         return view('notification::livewire.notification.overview-panel', [
             'managementTablesReady' => $this->managementTablesReady(),
@@ -263,7 +264,7 @@ class OverviewPanel extends Component
         ]);
     }
 
-    public function placeholder()
+    public function placeholder(): View
     {
         return view('notification::livewire.notification.placeholders.settings-panel');
     }

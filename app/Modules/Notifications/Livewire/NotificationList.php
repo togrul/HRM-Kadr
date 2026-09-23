@@ -2,17 +2,18 @@
 
 namespace App\Modules\Notifications\Livewire;
 
-use App\Modules\Notifications\Support\NotificationCountCache;
 use App\Modules\Notifications\Support\DispatchesNotificationRefresh;
-use Illuminate\Support\Collection;
+use App\Modules\Notifications\Support\NotificationCountCache;
+use Illuminate\Contracts\View\View;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 class NotificationList extends Component
 {
-    use WithPagination;
     use DispatchesNotificationRefresh;
+    use WithPagination;
 
     const NOTIFICATION_THRESHOLD = 20;
 
@@ -79,7 +80,7 @@ class NotificationList extends Component
             ->values();
     }
 
-    public function render()
+    public function render(): View
     {
         $user = auth()->user();
 

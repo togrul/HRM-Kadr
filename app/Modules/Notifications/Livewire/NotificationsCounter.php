@@ -3,6 +3,7 @@
 namespace App\Modules\Notifications\Livewire;
 
 use App\Modules\Notifications\Support\NotificationCountCache;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Isolate;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -36,7 +37,7 @@ class NotificationsCounter extends Component
             : $count;
     }
 
-    public function render()
+    public function render(): View
     {
         return view('notification::livewire.notification.notifications-counter');
     }

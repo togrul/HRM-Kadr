@@ -6,6 +6,8 @@ use App\Models\NotificationCampaign;
 use App\Modules\Notifications\Livewire\Concerns\InteractsWithNotificationAuthorization;
 use App\Modules\Notifications\Support\NotificationCampaignDispatcher;
 use App\Modules\Notifications\Support\NotificationTriggerRegistry;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -45,7 +47,7 @@ class ApprovalQueue extends Component
     }
 
     #[Computed]
-    public function campaigns()
+    public function campaigns(): Collection
     {
         return NotificationCampaign::query()
             ->where('approval_status', 'pending')
@@ -54,12 +56,12 @@ class ApprovalQueue extends Component
             ->get(['id', 'title', 'category', 'channel', 'scheduled_at', 'created_at']);
     }
 
-    public function placeholder()
+    public function placeholder(): View
     {
         return view('notification::livewire.notification.placeholders.settings-panel');
     }
 
-    public function render()
+    public function render(): View
     {
         return view('notification::livewire.notification.approval-queue', [
             'campaigns' => $this->campaigns,
