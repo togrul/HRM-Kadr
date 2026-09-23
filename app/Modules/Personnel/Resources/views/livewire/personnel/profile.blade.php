@@ -98,7 +98,7 @@
             <dl class="mt-5 grid gap-x-6 gap-y-4 border-t border-hairline-subtle pt-4 sm:grid-cols-3 xl:grid-cols-6">
                 @foreach ($reader->identityMeta($personnel) as $item)
                     <div class="min-w-0">
-                        <dt class="hrm-eyebrow">{{ $item['label'] }}</dt>
+                        <dt class="text-[12px] font-medium text-ink-muted">{{ $item['label'] }}</dt>
                         <dd @class(['mt-1 truncate text-[13px] text-ink', 'hrm-num' => $item['mono']]) title="{{ $item['value'] }}">{{ $item['value'] }}</dd>
                     </div>
                 @endforeach

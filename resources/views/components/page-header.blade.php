@@ -103,6 +103,6 @@
             <div x-cloak :class="filtersOpen ? 'mt-3 block' : 'hidden'" class="sm:!mt-0 sm:!block">{{ $slot }}</div>
         </div>
     @elseif (trim($slot) !== '')
-        <div class="border-t border-hairline-subtle px-4 py-3.5 sm:px-5">{{ $slot }}</div>
+        <div class="hrm-header-body border-t border-hairline-subtle px-4 py-3.5 sm:px-5">{{ $slot }}</div>
     @endif
 </div>

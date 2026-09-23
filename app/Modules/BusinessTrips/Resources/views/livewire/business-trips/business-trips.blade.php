@@ -91,12 +91,12 @@
         {{-- toolbar --}}
         <div class="flex flex-wrap items-end gap-3">
             <label class="w-full flex-1 sm:max-w-[300px]">
-                <span class="hrm-eyebrow block pb-1">{{ __('business_trips::common.filters.fullname') }}</span>
+                <span class="block pb-1 text-[12px] font-medium text-ink-muted">{{ __('business_trips::common.filters.fullname') }}</span>
                 <x-livewire-input mode="gray" name="filter.fullname" wire:model.live.debounce.400ms="filter.fullname" />
             </label>
 
             <div class="shrink-0">
-                <span class="hrm-eyebrow block pb-1">{{ __('business_trips::common.filters.date_range') }}</span>
+                <span class="block pb-1 text-[12px] font-medium text-ink-muted">{{ __('business_trips::common.filters.date_range') }}</span>
                 <div class="flex items-center gap-2">
                     <input type="date" wire:model.live="filter.date.min"
                         aria-label="{{ __('business_trips::common.filters.date_start') }}"
@@ -109,7 +109,7 @@
             </div>
 
             <div class="min-w-[190px] flex-1">
-                <span class="hrm-eyebrow block pb-1">{{ __('business_trips::common.filters.structure') }}</span>
+                <span class="block pb-1 text-[12px] font-medium text-ink-muted">{{ __('business_trips::common.filters.structure') }}</span>
                 <x-ui.select-dropdown
                     :aria-label="__('business_trips::common.filters.structure')"
                     placeholder="---"
@@ -122,7 +122,7 @@
             </div>
 
             <div class="min-w-[170px] flex-1">
-                <span class="hrm-eyebrow block pb-1">{{ __('business_trips::common.filters.order_types') }}</span>
+                <span class="block pb-1 text-[12px] font-medium text-ink-muted">{{ __('business_trips::common.filters.order_types') }}</span>
                 <x-ui.select-dropdown
                     :aria-label="__('business_trips::common.filters.order_types')"
                     placeholder="---"

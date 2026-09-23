@@ -29,19 +29,18 @@
 @endphp
 
 <div class="flex flex-col gap-4">
-    <section class="overflow-hidden rounded-2xl border border-hairline bg-white shadow-card">
-        <div class="grid grid-cols-2 gap-3 p-3 xl:grid-cols-4">
+    {{-- metric tiles sit straight on the page: wrapping them in a card nested a card in a card --}}
+    <div class="grid grid-cols-2 gap-3 xl:grid-cols-4">
             @foreach ($metrics as $metric)
-                <div class="rounded-xl border border-hairline bg-[#fafafa] px-3.5 py-3">
+                <div class="rounded-2xl border border-hairline bg-white px-4 py-3.5 shadow-card">
                     <div class="flex items-center justify-between gap-2">
-                        <span class="hrm-eyebrow">{{ __('performance_evaluation::dashboard.stats.'.$metric['key']) }}</span>
+                        <span class="text-[12.5px] font-medium text-ink-muted">{{ __('performance_evaluation::dashboard.stats.'.$metric['key']) }}</span>
                         <span class="h-1.5 w-1.5 shrink-0 rounded-full {{ $metric['dot'] }}"></span>
                     </div>
                     <p class="hrm-num mt-1.5 text-[22px] font-semibold tracking-[-0.03em] text-ink">{{ $metric['value'] }}</p>
                 </div>
             @endforeach
-        </div>
-    </section>
+    </div>
 
     <div class="grid gap-4 xl:grid-cols-2">
         {{-- ===================== score distribution ===================== --}}
@@ -184,7 +183,7 @@
             </div>
             <div class="space-y-3 p-4">
                 <p class="text-[12.5px] leading-relaxed text-ink-muted">{{ __('performance_evaluation::dashboard.labels.evaluator_workspace_hint') }}</p>
-                <x-pill-button variant="primary" :href="route('performance-evaluation.evaluator', ['return' => route('performance-evaluation', ['tab' => 'overview'])])">
+                <x-pill-button :href="route('performance-evaluation.evaluator', ['return' => route('performance-evaluation', ['tab' => 'overview'])])">
                     {{ __('performance_evaluation::dashboard.actions.open_evaluator_workspace') }}
                 </x-pill-button>
             </div>

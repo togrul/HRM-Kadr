@@ -451,6 +451,14 @@ html {
   }
 }
 
+/* A header body that only holds phone-only controls (e.g. the section chips the context
+   panel replaces on desktop) would leave an empty bordered strip under the header. */
+@media (min-width: 1024px) {
+  .hrm-header-body:not(:has(> :not(.lg\:hidden))) {
+    display: none;
+  }
+}
+
 /* contextual panel collapse animation */
 .hrm-panel-shell {
   transition: width 220ms cubic-bezier(0.4, 0, 0.2, 1);

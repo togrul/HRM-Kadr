@@ -76,14 +76,14 @@
             <div class="flex flex-wrap items-end gap-3">
                 @if ($this->filterEnabled('fullname'))
                     <label class="w-full flex-1 sm:max-w-[300px]">
-                        <span class="hrm-eyebrow block pb-1">{{ __('candidates::common.labels.fullname') }}</span>
+                        <span class="block pb-1 text-[12px] font-medium text-ink-muted">{{ __('candidates::common.labels.fullname') }}</span>
                         <x-livewire-input mode="gray" name="filter.fullname" wire:model.live.debounce.400ms="filter.fullname" />
                     </label>
                 @endif
 
                 @if ($this->filterEnabled('appeal_date'))
                     <div class="shrink-0">
-                        <span class="hrm-eyebrow block pb-1">{{ __('candidates::common.labels.appeal_date') }}</span>
+                        <span class="block pb-1 text-[12px] font-medium text-ink-muted">{{ __('candidates::common.labels.appeal_date') }}</span>
                         <div class="flex items-center gap-2">
                             <input type="date" wire:model.live="filter.appeal_date.min"
                                 class="hrm-num h-10 w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-base sm:text-sm text-ink focus:border-ink focus:bg-white focus:ring-0" />
@@ -96,21 +96,21 @@
 
                 @if ($this->filterEnabled('age'))
                     <label class="w-[110px] shrink-0">
-                        <span class="hrm-eyebrow block pb-1">{{ __('candidates::common.labels.age') }}</span>
+                        <span class="block pb-1 text-[12px] font-medium text-ink-muted">{{ __('candidates::common.labels.age') }}</span>
                         <x-livewire-input mode="gray" type="number" name="filter.age" wire:model.live.debounce.400ms="filter.age" />
                     </label>
                 @endif
 
                 @if ($this->filterEnabled('results') && $this->isMilitaryCandidateMode())
                     <label class="w-[130px] shrink-0">
-                        <span class="hrm-eyebrow block pb-1">{{ __('candidates::common.labels.test_results') }}</span>
+                        <span class="block pb-1 text-[12px] font-medium text-ink-muted">{{ __('candidates::common.labels.test_results') }}</span>
                         <x-livewire-input mode="gray" type="number" name="filter.results" wire:model.live.debounce.400ms="filter.results" />
                     </label>
                 @endif
 
                 @if ($this->filterEnabled('document_category'))
                     <div class="min-w-[200px] flex-1">
-                        <span class="hrm-eyebrow block pb-1">{{ __('candidates::common.labels.document_category') }}</span>
+                        <span class="block pb-1 text-[12px] font-medium text-ink-muted">{{ __('candidates::common.labels.document_category') }}</span>
                         <x-ui.select-dropdown
                             :aria-label="__('candidates::common.labels.document_category')"
                             placeholder="---"

@@ -128,7 +128,7 @@
         <div class="flex flex-col gap-2.5">
             <div class="flex flex-wrap items-end gap-3">
                 <label class="w-full flex-1 sm:max-w-[360px]">
-                    <span class="hrm-eyebrow block pb-1">{{ __('vacation::common.labels.fullname') }}</span>
+                    <span class="block pb-1 text-[12px] font-medium text-ink-muted">{{ __('vacation::common.labels.fullname') }}</span>
                     <span class="relative block">
                         <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-faint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
                         <input
@@ -141,7 +141,7 @@
                 </label>
 
                 <div class="shrink-0">
-                    <span class="hrm-eyebrow block pb-1">{{ __('vacation::common.labels.date_range') }}</span>
+                    <span class="block pb-1 text-[12px] font-medium text-ink-muted">{{ __('vacation::common.labels.date_range') }}</span>
                     <div class="flex items-center gap-2">
                         <input type="date" wire:model.live="filter.date.min"
                             aria-label="{{ __('vacation::common.labels.date_start') }}"
@@ -154,7 +154,7 @@
                 </div>
 
                 <div class="min-w-[200px] flex-1">
-                    <span class="hrm-eyebrow block pb-1">{{ __('vacation::common.labels.structure') }}</span>
+                    <span class="block pb-1 text-[12px] font-medium text-ink-muted">{{ __('vacation::common.labels.structure') }}</span>
                     <x-ui.select-dropdown
                         :aria-label="__('vacation::common.labels.structure')"
                         placeholder="---"

@@ -430,7 +430,7 @@ return [
         'recent_template_sections' => 'Hələ şablon bölməsi yaradılmayıb.',
         'recent_template_items' => 'Hələ meyar yaradılmayıb.',
         'recent_forms' => 'Hələ qiymətləndirmə forması təyin edilməyib.',
-        'weak_links' => 'Hələ zəif score-dan training need yaranmayıb.',
+        'weak_links' => 'Hələ zəif baldan yaranan təlim ehtiyacı yoxdur.',
         'test_banks' => 'Hələ test bankı yaradılmayıb.',
         'test_questions' => 'Hələ test sualı yaradılmayıb.',
         'test_sessions' => 'Hələ test sessiyası yaradılmayıb.',

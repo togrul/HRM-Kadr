@@ -135,7 +135,7 @@
         <div class="flex flex-col gap-2">
             <div class="flex flex-wrap items-end gap-3">
                 <label class="w-full flex-1 sm:max-w-[360px]">
-                    <span class="hrm-eyebrow block pb-1">{{ __('orders::order_list.filters.search') }}</span>
+                    <span class="block pb-1 text-[12px] font-medium text-ink-muted">{{ __('orders::order_list.filters.search') }}</span>
                     <span class="relative block">
                         <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-faint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
                         <input
@@ -148,7 +148,7 @@
                 </label>
 
                 <div class="shrink-0">
-                    <span class="hrm-eyebrow block pb-1">{{ __('orders::order_list.filters.given_date') }}</span>
+                    <span class="block pb-1 text-[12px] font-medium text-ink-muted">{{ __('orders::order_list.filters.given_date') }}</span>
                     <div class="flex items-center gap-2">
                         <input
                             type="date"

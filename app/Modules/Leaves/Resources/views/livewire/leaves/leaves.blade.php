@@ -110,13 +110,13 @@
         <div class="flex flex-col gap-2.5">
             <div class="flex flex-wrap items-end gap-3">
                 <label class="w-full flex-1 sm:max-w-[300px]">
-                    <span class="hrm-eyebrow block pb-1">{{ __('leaves::common.labels.fullname') }}</span>
+                    <span class="block pb-1 text-[12px] font-medium text-ink-muted">{{ __('leaves::common.labels.fullname') }}</span>
                     <x-livewire-input mode="gray" name="filter.fullname" wire:model.live.debounce.400ms="filter.fullname"
                         placeholder="{{ __('leaves::common.labels.search_by_person') }}" />
                 </label>
 
                 <div class="shrink-0">
-                    <span class="hrm-eyebrow block pb-1">{{ __('leaves::common.labels.dates') }}</span>
+                    <span class="block pb-1 text-[12px] font-medium text-ink-muted">{{ __('leaves::common.labels.dates') }}</span>
                     <div class="flex items-center gap-2">
                         <input type="date" wire:model.live="filter.starts_at"
                             aria-label="{{ __('leaves::common.labels.date_start') }}"
@@ -129,7 +129,7 @@
                 </div>
 
                 <label class="min-w-[170px] flex-1">
-                    <span class="hrm-eyebrow block pb-1">{{ __('leaves::common.labels.reason') }}</span>
+                    <span class="block pb-1 text-[12px] font-medium text-ink-muted">{{ __('leaves::common.labels.reason') }}</span>
                     <x-livewire-input mode="gray" type="text" name="filter.reason" wire:model.live.debounce.400ms="filter.reason" />
                 </label>
 
