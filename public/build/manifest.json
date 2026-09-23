@@ -1,6 +1,6 @@
 {
   "resources/css/app.css": {
-    "file": "assets/app-9d4ea4b1.css",
+    "file": "assets/app-853c39ec.css",
     "isEntry": true,
     "src": "resources/css/app.css"
   },
@@ -41,7 +41,7 @@
     "src": "resources/fonts/IBMPlexMono-SemiBold.woff2"
   },
   "resources/js/app.js": {
-    "file": "assets/app-b645a201.js",
+    "file": "assets/app-936b5cfc.js",
     "isEntry": true,
     "src": "resources/js/app.js"
   }

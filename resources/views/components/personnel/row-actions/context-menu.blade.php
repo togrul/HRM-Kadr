@@ -5,48 +5,7 @@
 
     <div
         class="relative inline-block text-left"
-        x-data="{
-            open: false,
-            openUp: @js((bool) $forceUp),
-            forceUp: @js((bool) $forceUp),
-            panelStyle: '',
-            toggle() {
-                this.open = !this.open;
-                if (!this.open) return;
-                this.openUp = this.forceUp;
-                this.$nextTick(() => this.reposition());
-            },
-            reposition() {
-                const panel = this.$refs.menuPanel;
-                const button = this.$refs.menuButton;
-                if (!panel || !button) return;
-
-                const buttonRect = button.getBoundingClientRect();
-                const panelHeight = panel.offsetHeight || 220;
-                const panelWidth = panel.offsetWidth || 260;
-                const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
-                const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
-
-                let left = buttonRect.right - panelWidth;
-                left = Math.max(8, Math.min(left, viewportWidth - panelWidth - 8));
-
-                let top;
-                if (this.openUp) {
-                    top = buttonRect.top - panelHeight - 8;
-                    if (top < 8) top = 8;
-                } else {
-                    top = buttonRect.bottom + 8;
-                    if (top + panelHeight > viewportHeight - 8) {
-                        top = Math.max(8, viewportHeight - panelHeight - 8);
-                    }
-                }
-
-                this.panelStyle = `left:${left}px; top:${top}px;`;
-            }
-        }"
-        x-on:keydown.escape.window="open = false"
-        x-on:resize.window="if (open) reposition()"
-        x-on:scroll.window="if (open) reposition()"
+        x-data="rowMenu(@js((bool) $forceUp))"
     >
     <button
         x-ref="menuButton"
@@ -60,7 +19,7 @@
 
     <template x-teleport="body">
         <div x-cloak x-show="open" class="fixed inset-0 z-[120]">
-            <div class="absolute inset-0" x-on:click="open = false"></div>
+            <div class="absolute inset-0" x-on:click="close()"></div>
 
             <div
                 x-ref="menuPanel"
@@ -87,7 +46,7 @@
                                     @endif
                                     class="inline-flex items-center justify-center"
                                     title="{{ $menuAction->label }}"
-                                    x-on:click="open = false"
+                                    x-on:click="close()"
                                 >
                                     <x-dynamic-component
                                         :component="$menuAction->icon"
@@ -111,9 +70,9 @@
                                     class="inline-flex items-center justify-center"
                                     title="{{ $menuAction->label }}"
                                     @if ($menuAction->confirmMessage)
-                                        x-on:click="open = false; $dispatch('confirm-action', { title: @js($menuAction->label), message: @js($menuAction->confirmMessage), confirmText: @js($menuAction->label), tone: 'rose', run: () => $wire.handleRowAction(@js($menuAction->id), @js($menuAction->actionPayload)) })"
+                                        x-on:click="close(); $dispatch('confirm-action', { title: @js($menuAction->label), message: @js($menuAction->confirmMessage), confirmText: @js($menuAction->label), tone: 'rose', run: () => $wire.handleRowAction(@js($menuAction->id), @js($menuAction->actionPayload)) })"
                                     @else
-                                        x-on:click="open = false"
+                                        x-on:click="close()"
                                     @endif
                                 >
                                     <x-dynamic-component
