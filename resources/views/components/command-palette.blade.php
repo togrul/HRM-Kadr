@@ -33,7 +33,7 @@
                 class="w-full border-0 bg-transparent p-0 text-[14px] text-ink placeholder:text-ink-faint focus:outline-none focus:ring-0"
             >
             <kbd class="hidden shrink-0 rounded-md border border-hairline bg-[#fafafa] px-1.5 py-0.5 font-mono text-[10.5px] text-ink-faint sm:block">ESC</kbd>
-            <button type="button" @click="$store.hrmShell.paletteOpen = false" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-ink-muted hover:bg-[#f4f4f5]" aria-label="{{ __('ui::common.labels.collapse_panel') }}">
+            <button type="button" @click="$store.hrmShell.paletteOpen = false" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] text-ink-muted hover:bg-[#f4f4f5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400" aria-label="{{ __('ui::common.actions.close') }}">
                 <x-icons.close-icon size="w-4 h-4" color="text-current" hover="text-current" />
             </button>
         </div>

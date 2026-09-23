@@ -52,7 +52,7 @@
         x-ref="menuButton"
         type="button"
         x-on:click.stop="toggle()"
-        class="inline-flex items-center justify-center w-8 h-8 text-zinc-500 rounded-md bg-zinc-100/80 hover:bg-zinc-200 hover:text-zinc-700 transition-colors"
+        class="inline-flex h-10 w-10 items-center justify-center rounded-[10px] bg-zinc-100/80 text-zinc-500 transition-colors hover:bg-zinc-200 hover:text-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400"
         title="{{ __('personnel::common.labels.more_actions') }}"
     >
         <x-icons.settings-icon />

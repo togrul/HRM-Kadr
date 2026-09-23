@@ -127,7 +127,7 @@
         <div class="rounded-xl border border-zinc-200 bg-white px-4 py-4">
             <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
                 <div>
-                    <button type="button" wire:click="backToList" class="text-xs font-medium text-zinc-400 hover:text-zinc-600">← {{ __('performance_evaluation::feedback.actions.back') }}</button>
+                    <button type="button" wire:click="backToList" class="text-[14px] font-medium text-zinc-400 hover:text-zinc-600">← {{ __('performance_evaluation::feedback.actions.back') }}</button>
                     <h2 class="mt-1 text-xl font-semibold text-zinc-900">{{ $request->subject?->fullname }}</h2>
                     <p class="text-xs text-zinc-500">{{ $request->cycle?->name }} · {{ $request->template?->name }}
                         @if ($request->is_anonymous) · <span class="text-zinc-400">{{ __('performance_evaluation::feedback.fields.anonymous') }}</span> @endif
@@ -231,7 +231,7 @@
         <div class="rounded-xl border border-zinc-200 bg-white px-4 py-4">
             <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
                 <div>
-                    <button type="button" wire:click="backToList" class="text-xs font-medium text-zinc-400 hover:text-zinc-600">← {{ __('performance_evaluation::feedback.actions.back') }}</button>
+                    <button type="button" wire:click="backToList" class="text-[14px] font-medium text-zinc-400 hover:text-zinc-600">← {{ __('performance_evaluation::feedback.actions.back') }}</button>
                     <h2 class="mt-1 text-xl font-semibold text-zinc-900">{{ __('performance_evaluation::feedback.calibrate.title') }} — {{ $request->subject?->fullname }}</h2>
                     <p class="text-xs text-zinc-500">{{ __('performance_evaluation::feedback.calibrate.description') }}</p>
                 </div>

@@ -58,7 +58,7 @@
             <div class="relative hidden shrink-0 sm:block">
                 <select wire:change="setStatus({{ $node['id'] }}, $event.target.value)"
                     title="{{ __('performance_evaluation::goals.statuses.'.$node['status']) }}"
-                    class="h-8 cursor-pointer appearance-none rounded-lg border-0 py-0 pl-3 pr-8 align-middle text-[12px] font-semibold leading-8 {{ $statusChip }} focus:outline-none focus:ring-2 focus:ring-zinc-200">
+                    class="h-10 cursor-pointer appearance-none rounded-lg border-0 py-0 pl-3 pr-8 align-middle text-base font-semibold leading-10 sm:text-sm {{ $statusChip }} focus:outline-none focus:ring-2 focus:ring-zinc-200">
                     @foreach (['active','at_risk','done','cancelled'] as $st)
                         <option value="{{ $st }}" @selected($node['status'] === $st)>{{ __('performance_evaluation::goals.statuses.'.$st) }}</option>
                     @endforeach
@@ -68,13 +68,13 @@
 
             <div class="flex shrink-0 items-center gap-1">
                 <button type="button" wire:click="startCheckin({{ $node['id'] }})" title="{{ __('performance_evaluation::goals.actions.checkin') }}"
-                    class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition-colors hover:bg-emerald-50 hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300">
+                    class="flex h-10 w-10 items-center justify-center rounded-lg text-ink-faint transition-colors hover:bg-emerald-50 hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
                 </button>
                 <button type="button"
                     x-on:click="$dispatch('confirm-action', { tone: 'rose', message: @js(__('performance_evaluation::goals.confirm_delete')), run: () => $wire.deleteGoal({{ $node['id'] }}) })"
                     title="{{ __('performance_evaluation::goals.actions.delete') }}"
-                    class="flex h-8 w-8 items-center justify-center rounded-lg transition-colors hover:bg-rose-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300">
+                    class="flex h-10 w-10 items-center justify-center rounded-lg transition-colors hover:bg-rose-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300">
                     <x-icons.delete-icon size="h-4 w-4" />
                 </button>
             </div>
@@ -95,8 +95,8 @@
                 <x-label value="{{ __('performance_evaluation::goals.fields.checkin_note') }}" />
                 <x-livewire-input mode="default" name="checkinNote" wire:model="checkinNote" />
             </div>
-            <button type="button" wire:click="saveCheckin" class="h-[42px] rounded-xl bg-ink px-4 text-[13px] font-semibold text-white hover:bg-ink-hover">{{ __('performance_evaluation::goals.actions.save') }}</button>
-            <button type="button" wire:click="cancelCheckin" class="h-[42px] rounded-xl border border-hairline bg-white px-4 text-[13px] font-medium text-ink-soft hover:border-zinc-300">{{ __('performance_evaluation::goals.actions.cancel') }}</button>
+            <button type="button" wire:click="saveCheckin" class="h-[42px] rounded-xl bg-ink px-4 text-[14px] font-semibold text-white hover:bg-ink-hover">{{ __('performance_evaluation::goals.actions.save') }}</button>
+            <button type="button" wire:click="cancelCheckin" class="h-[42px] rounded-xl border border-hairline bg-white px-4 text-[14px] font-medium text-ink-soft hover:border-zinc-300">{{ __('performance_evaluation::goals.actions.cancel') }}</button>
         </div>
     @endif
 </div>

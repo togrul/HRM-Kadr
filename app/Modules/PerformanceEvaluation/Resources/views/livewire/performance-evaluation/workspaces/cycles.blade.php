@@ -2,7 +2,7 @@
         @php
             $d = 'performance_evaluation::dashboard';
             $c = 'performance_evaluation::dashboard.cycle_cards';
-            $iconButton = 'flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-[#f4f4f5] hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300';
+            $iconButton = 'flex h-10 w-10 items-center justify-center rounded-lg text-ink-faint transition hover:bg-[#f4f4f5] hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300';
             $cycleBadge = [
                 'active' => ['bg-emerald-50 text-emerald-700', 'bg-emerald-500'],
                 'draft' => ['bg-[#f4f4f5] text-ink-muted', 'bg-zinc-400'],
@@ -23,7 +23,7 @@
                     <p class="mt-0.5 max-w-2xl text-[12.5px] leading-5 text-ink-muted">{{ __($c.'.hint') }}</p>
                 </div>
                 @if ($canManage)
-                    <button type="button" wire:click="newCycle" class="inline-flex h-10 shrink-0 items-center gap-2 rounded-xl bg-ink px-4 text-[13px] font-semibold text-white transition hover:bg-ink-hover">
+                    <button type="button" wire:click="newCycle" class="inline-flex h-10 shrink-0 items-center gap-2 rounded-xl bg-ink px-4 text-[14px] font-semibold text-white transition hover:bg-ink-hover">
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
                         {{ __($d.'.cards.cycle_setup') }}
                     </button>
@@ -105,7 +105,7 @@
                     <div class="rounded-2xl border border-dashed border-hairline bg-white px-6 py-16 text-center md:col-span-2 xl:col-span-3">
                         <p class="text-[13.5px] font-medium text-ink">{{ __($d.'.empty.recent_cycles') }}</p>
                         @if ($canManage)
-                            <button type="button" wire:click="newCycle" class="mt-4 inline-flex h-9 items-center gap-1.5 rounded-xl bg-ink px-3.5 text-[12.5px] font-semibold text-white hover:bg-ink-hover">{{ __($d.'.cards.cycle_setup') }}</button>
+                            <button type="button" wire:click="newCycle" class="mt-4 inline-flex h-10 items-center gap-1.5 rounded-xl bg-ink px-3.5 text-[14px] font-semibold text-white hover:bg-ink-hover">{{ __($d.'.cards.cycle_setup') }}</button>
                         @endif
                     </div>
                 @endforelse

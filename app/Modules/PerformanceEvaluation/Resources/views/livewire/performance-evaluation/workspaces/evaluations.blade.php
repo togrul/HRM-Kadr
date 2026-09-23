@@ -15,11 +15,11 @@
                 </div>
                 @if ($canManage)
                     <div class="flex shrink-0 flex-wrap items-center gap-2">
-                        <button type="button" wire:click="openScoreForm" class="inline-flex h-10 items-center gap-2 rounded-xl border border-hairline bg-white px-4 text-[13px] font-semibold text-ink-soft transition hover:border-zinc-300 hover:text-ink">
+                        <button type="button" wire:click="openScoreForm" class="inline-flex h-10 items-center gap-2 rounded-xl border border-hairline bg-white px-4 text-[14px] font-semibold text-ink-soft transition hover:border-zinc-300 hover:text-ink">
                             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
                             {{ __($d.'.cards.score_capture') }}
                         </button>
-                        <button type="button" wire:click="openAssignForm" class="inline-flex h-10 items-center gap-2 rounded-xl bg-ink px-4 text-[13px] font-semibold text-white transition hover:bg-ink-hover">
+                        <button type="button" wire:click="openAssignForm" class="inline-flex h-10 items-center gap-2 rounded-xl bg-ink px-4 text-[14px] font-semibold text-white transition hover:bg-ink-hover">
                             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
                             {{ __($d.'.panel.assign_form') }}
                         </button>

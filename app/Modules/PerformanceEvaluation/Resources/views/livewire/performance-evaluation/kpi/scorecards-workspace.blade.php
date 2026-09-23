@@ -43,7 +43,7 @@
                 </div>
             @endunless
             <div class="relative" x-data="{ open: false }" x-on:click.outside="open = false">
-                <button type="button" x-on:click="open = ! open" class="flex h-9 w-9 items-center justify-center rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink-soft transition hover:border-zinc-300 hover:text-ink" title="{{ __($t.'.notification_settings.title') }}" aria-label="{{ __($t.'.notification_settings.title') }}">
+                <button type="button" x-on:click="open = ! open" class="flex h-10 w-10 items-center justify-center rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink-soft transition hover:border-zinc-300 hover:text-ink" title="{{ __($t.'.notification_settings.title') }}" aria-label="{{ __($t.'.notification_settings.title') }}">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
                 </button>
                 <div x-cloak x-show="open" x-transition.opacity class="absolute left-0 z-30 mt-2 w-72 rounded-2xl border border-hairline bg-white p-4 shadow-card">
@@ -91,7 +91,7 @@
         <div class="{{ $section }}">
             <div class="{{ $sectionHead }}">
                 <p class="text-[13px] font-semibold text-ink">{{ __($t.'.import.title') }}</p>
-                <button type="button" wire:click="toggleImport" class="text-[12px] font-medium text-ink-faint hover:text-ink">{{ __($t.'.actions.cancel') }}</button>
+                <button type="button" wire:click="toggleImport" class="text-[14px] font-medium text-ink-faint hover:text-ink">{{ __($t.'.actions.cancel') }}</button>
             </div>
             <div class="grid gap-4 p-5 md:grid-cols-3">
                 @foreach ([1, 2, 3] as $step)
@@ -101,17 +101,17 @@
                             <p class="text-[13px] font-semibold text-ink">{{ __($t.'.import.steps.'.$step.'.title') }}</p>
                             <p class="mt-0.5 text-[12px] leading-5 text-ink-muted">{{ __($t.'.import.steps.'.$step.'.body') }}</p>
                             @if ($step === 1)
-                                <button type="button" wire:click="downloadActualsTemplate" class="mt-2 inline-flex h-8 items-center gap-1.5 rounded-lg border border-hairline bg-white px-3 text-[12px] font-semibold text-ink-soft hover:border-zinc-300 hover:text-ink">
+                                <button type="button" wire:click="downloadActualsTemplate" class="mt-2 inline-flex h-10 items-center gap-1.5 rounded-lg border border-hairline bg-white px-3 text-[14px] font-semibold text-ink-soft hover:border-zinc-300 hover:text-ink">
                                     <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-4-4m4 4 4-4M5 21h14"/></svg>
                                     {{ __($t.'.import.download') }}
                                 </button>
                             @elseif ($step === 3)
                                 <div class="mt-2 flex flex-wrap items-center gap-2">
-                                    <label class="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-lg border border-dashed border-zinc-300 bg-[#fafafa] px-3 text-[12px] font-medium text-ink-soft hover:border-zinc-400">
+                                    <label class="inline-flex h-10 cursor-pointer items-center gap-1.5 rounded-lg border border-dashed border-zinc-300 bg-[#fafafa] px-3 text-[14px] font-medium text-ink-soft hover:border-zinc-400">
                                         <input type="file" wire:model="importFile" accept=".xlsx,.xls,.csv" class="hidden">
                                         <span class="max-w-[10rem] truncate">{{ $importFile ? $importFile->getClientOriginalName() : __($t.'.import.choose') }}</span>
                                     </label>
-                                    <button type="button" wire:click="importActuals" wire:loading.attr="disabled" wire:target="importActuals,importFile" @disabled(! $importFile) class="inline-flex h-8 items-center rounded-lg bg-ink px-3 text-[12px] font-semibold text-white hover:bg-ink-hover disabled:opacity-40">{{ __($t.'.import.submit') }}</button>
+                                    <button type="button" wire:click="importActuals" wire:loading.attr="disabled" wire:target="importActuals,importFile" @disabled(! $importFile) class="inline-flex h-10 items-center rounded-lg bg-ink px-3 text-[14px] font-semibold text-white hover:bg-ink-hover disabled:opacity-40">{{ __($t.'.import.submit') }}</button>
                                 </div>
                                 @error('importFile') <x-validation>{{ $message }}</x-validation> @enderror
                             @endif
@@ -147,9 +147,9 @@
                 <div class="flex min-w-0 items-start gap-3.5">
                     <x-avatar :name="$card->personnel?->fullname ?? '—'" size="lg" />
                     <div class="min-w-0">
-                        <div class="flex items-center gap-3">
-                            <button type="button" wire:click="closeCard" class="text-[12px] font-medium text-ink-faint hover:text-ink">← {{ __($t.'.actions.back_to_list') }}</button>
-                            <a href="{{ route('performance-evaluation.scorecard-print', $card->id) }}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 text-[12px] font-medium text-ink-faint hover:text-ink">
+                        <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+                            <button type="button" wire:click="closeCard" class="inline-flex h-10 items-center text-[14px] font-medium text-ink-faint hover:text-ink">← {{ __($t.'.actions.back_to_list') }}</button>
+                            <a href="{{ route('performance-evaluation.scorecard-print', $card->id) }}" target="_blank" rel="noopener" class="inline-flex h-10 items-center gap-1 text-[14px] font-medium text-ink-faint hover:text-ink">
                                 <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
                                 {{ __($t.'.print.open') }}
                             </a>
@@ -310,14 +310,14 @@
                                 @php $primary = $loop->first && ! in_array($action, $reasonActions, true); @endphp
                                 @if (in_array($action, $reasonActions, true))
                                     <button type="button" wire:key="card-action-{{ $action }}" x-on:click="asking = asking === @js($action) ? null : @js($action)"
-                                        class="h-9 rounded-xl border border-hairline bg-white px-4 text-[13px] font-semibold text-ink-soft transition hover:border-zinc-300 hover:text-ink"
+                                        class="h-10 rounded-xl border border-hairline bg-white px-4 text-[14px] font-semibold text-ink-soft transition hover:border-zinc-300 hover:text-ink"
                                         :class="asking === @js($action) ? '!border-ink !text-ink' : ''">
                                         {{ __($t.'.transitions.'.$action) }}
                                     </button>
                                 @else
                                     <button type="button" wire:key="card-action-{{ $action }}"
                                         x-on:click="$dispatch('confirm-action', { tone: 'emerald', message: @js(__($t.'.confirm_transition.'.$action)), run: () => $wire.moveCard(@js($action)) })"
-                                        class="{{ $primary ? 'bg-ink text-white hover:bg-ink-hover' : 'border border-hairline bg-white text-ink-soft hover:border-zinc-300 hover:text-ink' }} h-9 rounded-xl px-4 text-[13px] font-semibold transition">
+                                        class="{{ $primary ? 'bg-ink text-white hover:bg-ink-hover' : 'border border-hairline bg-white text-ink-soft hover:border-zinc-300 hover:text-ink' }} h-10 rounded-xl px-4 text-[14px] font-semibold transition">
                                         {{ __($t.'.transitions.'.$action) }}
                                     </button>
                                 @endif
@@ -327,8 +327,8 @@
                 </div>
 
                 <div x-show="asking" x-cloak class="mt-3 flex flex-col gap-2 sm:flex-row sm:items-start">
-                    <textarea wire:model="transitionReason" rows="2" placeholder="{{ __($t.'.reason_placeholder') }}" class="w-full rounded-xl border border-hairline bg-white px-3 py-2 text-[13px] focus:border-zinc-400 focus:outline-none"></textarea>
-                    <button type="button" x-on:click="$wire.moveCard(asking)" class="h-10 shrink-0 rounded-xl bg-ink px-4 text-[13px] font-semibold text-white hover:bg-ink-hover">{{ __($t.'.actions.confirm') }}</button>
+                    <textarea wire:model="transitionReason" rows="2" placeholder="{{ __($t.'.reason_placeholder') }}" class="w-full rounded-xl border border-hairline bg-white px-3 py-2 text-base focus:border-zinc-400 focus:outline-none sm:text-sm"></textarea>
+                    <button type="button" x-on:click="$wire.moveCard(asking)" class="h-10 shrink-0 rounded-xl bg-ink px-4 text-[14px] font-semibold text-white hover:bg-ink-hover">{{ __($t.'.actions.confirm') }}</button>
                 </div>
                 @error('reason') <x-validation>{{ $message }}</x-validation> @enderror
                 @error('scorecard') <x-validation>{{ $message }}</x-validation> @enderror
@@ -350,10 +350,10 @@
                             </p>
                             <p class="mt-0.5 text-ink-muted">{{ $change->reason }} · <span class="text-ink-faint">{{ $change->requester?->name }}, {{ $change->created_at?->format('d.m.Y') }}</span></p>
                         </div>
-                        <div class="flex shrink-0 items-center gap-2">
-                            <input type="text" wire:model="decisionNote" placeholder="{{ __($t.'.change_requests.note_placeholder') }}" class="h-9 w-48 rounded-lg border border-hairline bg-white px-2.5 text-[12.5px] focus:border-zinc-400 focus:outline-none">
-                            <button type="button" wire:click="rejectChange({{ $change->id }})" class="h-9 rounded-lg border border-hairline bg-white px-3 text-[12.5px] font-medium text-ink-soft hover:border-rose-300 hover:bg-rose-50 hover:text-rose-600">{{ __($t.'.change_requests.reject') }}</button>
-                            <button type="button" wire:click="approveChange({{ $change->id }})" class="h-9 rounded-lg bg-ink px-3 text-[12.5px] font-semibold text-white hover:bg-ink-hover">{{ __($t.'.change_requests.approve') }}</button>
+                        <div class="flex flex-wrap items-center gap-2 lg:justify-end">
+                            <input type="text" wire:model="decisionNote" placeholder="{{ __($t.'.change_requests.note_placeholder') }}" class="h-10 w-full rounded-lg border border-hairline bg-white px-2.5 text-base focus:border-zinc-400 focus:outline-none sm:w-48 sm:text-sm">
+                            <button type="button" wire:click="rejectChange({{ $change->id }})" class="h-10 rounded-lg border border-hairline bg-white px-3 text-[14px] font-medium text-ink-soft hover:border-rose-300 hover:bg-rose-50 hover:text-rose-600">{{ __($t.'.change_requests.reject') }}</button>
+                            <button type="button" wire:click="approveChange({{ $change->id }})" class="h-10 rounded-lg bg-ink px-3 text-[14px] font-semibold text-white hover:bg-ink-hover">{{ __($t.'.change_requests.approve') }}</button>
                         </div>
                     </div>
                 @endforeach
@@ -396,7 +396,7 @@
                                     </p>
                                     <p class="mt-0.5 text-[11.5px] text-ink-faint"><span class="hrm-num">{{ $item->kpi?->code }}</span> · {{ __($t.'.directions_short.'.$item->kpi?->direction) }} · {{ __($t.'.units.'.$item->kpi?->unit) }}</p>
                                     @if ($card->status === 'draft' && in_array($role, ['hr', 'manager'], true) && $this->goalOptions !== [])
-                                        <select wire:change="linkGoal({{ $item->id }}, $event.target.value)" class="mt-1.5 h-8 max-w-[260px] rounded-lg border border-hairline bg-white px-2 text-[12px] text-ink-muted focus:outline-none">
+                                        <select wire:change="linkGoal({{ $item->id }}, $event.target.value)" class="mt-1.5 h-10 max-w-[260px] rounded-lg border border-hairline bg-white px-2 text-base text-ink-muted focus:outline-none sm:text-sm">
                                             <option value="">{{ __($t.'.no_goal') }}</option>
                                             @foreach ($this->goalOptions as $goalId => $goalTitle)
                                                 <option value="{{ $goalId }}" @selected((int) $item->performance_goal_id === (int) $goalId)>{{ $goalTitle }}</option>
@@ -412,11 +412,11 @@
                                 <td class="hrm-num px-3 py-3 text-right">{{ $fmt($item->weight) }}%</td>
                                 <td class="px-3 py-3 text-right">
                                     @if ($card->status === 'draft' && ($role === 'hr' || ($role === 'manager' && $item->target_editable)))
-                                        <div class="ml-auto inline-flex h-8 items-center overflow-hidden rounded-lg border border-hairline bg-white transition focus-within:border-zinc-400 focus-within:ring-2 focus-within:ring-zinc-900/5">
+                                        <div class="ml-auto inline-flex h-10 items-center overflow-hidden rounded-lg border border-hairline bg-white transition focus-within:border-zinc-400 focus-within:ring-2 focus-within:ring-zinc-900/5">
                                             <input type="number" step="any" wire:model="targets.{{ $item->id }}" wire:keydown.enter="saveTarget({{ $item->id }})" aria-label="{{ __($t.'.fields.target') }}"
-                                                class="hrm-num h-full w-24 border-0 bg-transparent px-2 text-right text-[12.5px] text-ink focus:outline-none focus:ring-0 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none">
+                                                class="hrm-num h-full w-24 border-0 bg-transparent px-2 text-right text-base text-ink focus:outline-none focus:ring-0 sm:text-sm [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none">
                                             <button type="button" wire:click="saveTarget({{ $item->id }})" title="{{ __($t.'.actions.save') }}" aria-label="{{ __($t.'.actions.save') }}"
-                                                class="flex h-full w-8 items-center justify-center border-l border-hairline text-ink-faint transition hover:bg-emerald-50 hover:text-emerald-700">
+                                                class="flex h-full w-10 items-center justify-center border-l border-hairline text-ink-faint transition hover:bg-emerald-50 hover:text-emerald-700">
                                                 <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>
                                             </button>
                                         </div>
@@ -448,7 +448,7 @@
                                 <td class="hrm-num px-3 py-3 text-right font-semibold {{ $scoreTone($item->score, $item->threshold) }}">{{ $item->score === null ? '—' : $fmt($item->score).'%' }}</td>
                                 <td class="px-5 py-3 text-right">
                                     @if ($card->status === 'active' && $role !== null && $actualItemId !== $item->id && $item->kpi?->data_source !== 'calculated')
-                                        <button type="button" wire:click="startActual({{ $item->id }})" class="whitespace-nowrap rounded-lg border border-hairline px-2.5 py-1 text-[12px] font-medium text-ink-soft hover:bg-[#f4f4f5]">{{ __($t.'.actions.add_actual') }}</button>
+                                        <button type="button" wire:click="startActual({{ $item->id }})" class="whitespace-nowrap rounded-lg border border-hairline px-2.5 h-10 text-[14px] font-medium text-ink-soft hover:bg-[#f4f4f5]">{{ __($t.'.actions.add_actual') }}</button>
                                     @endif
                                 </td>
                             </tr>
@@ -471,8 +471,8 @@
                                                 @error('change') <x-validation>{{ $message }}</x-validation> @enderror
                                             </label>
                                             <div class="flex items-center gap-2 sm:pt-5">
-                                                <button type="button" wire:click="cancelChange" class="h-10 rounded-xl px-3 text-[12.5px] font-medium text-ink-muted hover:bg-white">{{ __($t.'.actions.cancel') }}</button>
-                                                <button type="button" wire:click="submitChange" class="h-10 rounded-xl bg-ink px-4 text-[12.5px] font-semibold text-white hover:bg-ink-hover">{{ __($t.'.change_requests.send') }}</button>
+                                                <button type="button" wire:click="cancelChange" class="h-10 rounded-xl px-3 text-[14px] font-medium text-ink-muted hover:bg-white">{{ __($t.'.actions.cancel') }}</button>
+                                                <button type="button" wire:click="submitChange" class="h-10 rounded-xl bg-ink px-4 text-[14px] font-semibold text-white hover:bg-ink-hover">{{ __($t.'.change_requests.send') }}</button>
                                             </div>
                                         </div>
                                     </td>
@@ -505,8 +505,8 @@
                                         <div class="mt-3 flex items-center justify-between gap-2">
                                             <p class="text-[11px] text-ink-faint">{{ $role === 'employee' ? __($t.'.actual_pending_hint') : '' }}</p>
                                             <div class="flex gap-2">
-                                                <button type="button" wire:click="cancelActual" class="h-9 rounded-xl border border-hairline px-4 text-[13px] text-ink-soft hover:bg-white">{{ __($t.'.actions.cancel') }}</button>
-                                                <button type="button" wire:click="saveActual" wire:loading.attr="disabled" wire:target="saveActual,evidence" class="h-9 rounded-xl bg-ink px-4 text-[13px] font-semibold text-white hover:bg-ink-hover">{{ __($t.'.actions.save') }}</button>
+                                                <button type="button" wire:click="cancelActual" class="h-10 rounded-xl border border-hairline px-4 text-[14px] text-ink-soft hover:bg-white">{{ __($t.'.actions.cancel') }}</button>
+                                                <button type="button" wire:click="saveActual" wire:loading.attr="disabled" wire:target="saveActual,evidence" class="h-10 rounded-xl bg-ink px-4 text-[14px] font-semibold text-white hover:bg-ink-hover">{{ __($t.'.actions.save') }}</button>
                                             </div>
                                         </div>
                                     </td>
@@ -577,9 +577,9 @@
                                                 @php $on = $competency[$evaluator] === $rating; @endphp
                                                 @if ($editable)
                                                     <button type="button" wire:click="rate({{ $competency['id'] }}, '{{ $evaluator }}', {{ $rating }})"
-                                                        class="hrm-num h-8 w-8 rounded-lg border text-[12.5px] font-semibold transition {{ $on ? 'border-ink bg-ink text-white' : 'border-hairline bg-white text-ink-muted hover:border-zinc-400 hover:text-ink' }}">{{ $rating }}</button>
+                                                        class="hrm-num h-10 w-10 rounded-[10px] border text-[14px] font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 {{ $on ? 'border-ink bg-ink text-white' : 'border-hairline bg-white text-ink-muted hover:border-zinc-400 hover:text-ink' }}">{{ $rating }}</button>
                                                 @else
-                                                    <span class="hrm-num flex h-8 w-8 items-center justify-center rounded-lg text-[12.5px] font-semibold {{ $on ? 'bg-ink text-white' : 'bg-[#f4f4f5] text-ink-faint' }}">{{ $rating }}</span>
+                                                    <span class="hrm-num flex h-10 w-10 items-center justify-center rounded-[10px] text-[14px] font-semibold {{ $on ? 'bg-ink text-white' : 'bg-[#f4f4f5] text-ink-faint' }}">{{ $rating }}</span>
                                                 @endif
                                             @endforeach
                                         </div>
@@ -611,7 +611,7 @@
                         @error('checkinProgress') <x-validation>{{ $message }}</x-validation> @enderror
                         @error('checkin') <x-validation>{{ $message }}</x-validation> @enderror
                         <div class="flex justify-end">
-                            <button type="button" wire:click="saveCheckin" class="h-9 rounded-xl bg-ink px-4 text-[13px] font-semibold text-white hover:bg-ink-hover">{{ __($t.'.actions.add_checkin') }}</button>
+                            <button type="button" wire:click="saveCheckin" class="h-10 rounded-xl bg-ink px-4 text-[14px] font-semibold text-white hover:bg-ink-hover">{{ __($t.'.actions.add_checkin') }}</button>
                         </div>
                     </div>
                 @endif
@@ -647,7 +647,7 @@
                             @error('calibrationReason') <x-validation>{{ $message }}</x-validation> @enderror
                             @error('calibration') <x-validation>{{ $message }}</x-validation> @enderror
                             <div class="flex justify-end">
-                                <button type="button" wire:click="saveCalibration" class="h-9 rounded-xl bg-ink px-4 text-[13px] font-semibold text-white hover:bg-ink-hover">{{ __($t.'.actions.calibrate') }}</button>
+                                <button type="button" wire:click="saveCalibration" class="h-10 rounded-xl bg-ink px-4 text-[14px] font-semibold text-white hover:bg-ink-hover">{{ __($t.'.actions.calibrate') }}</button>
                             </div>
                         </div>
                     </div>
@@ -786,7 +786,7 @@
                             <div class="mt-1.5 grid grid-cols-4 gap-1 rounded-xl bg-[#f4f4f5] p-1">
                                 @foreach ([0.25, 0.5, 0.75, 1.0] as $share)
                                     <button type="button" wire:click="$set('extraFte', {{ $share }})"
-                                        class="hrm-num h-9 rounded-lg text-[13px] font-semibold transition {{ abs((float) $extraFte - $share) < 0.001 ? 'bg-white text-ink shadow-sm' : 'text-ink-muted hover:text-ink' }}">
+                                        class="hrm-num h-10 rounded-lg text-[14px] font-semibold transition {{ abs((float) $extraFte - $share) < 0.001 ? 'bg-white text-ink shadow-sm' : 'text-ink-muted hover:text-ink' }}">
                                         {{ rtrim(rtrim(number_format($share, 2, '.', ''), '0'), '.') }}
                                     </button>
                                 @endforeach

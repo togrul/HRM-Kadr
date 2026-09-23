@@ -34,7 +34,7 @@
         </div>
 
         <div class="flex justify-end">
-            <button type="button" wire:click="saveAssignedScore" wire:loading.attr="disabled" wire:target="saveAssignedScore" class="h-10 rounded-xl bg-ink px-5 text-[13px] font-semibold text-white transition hover:bg-ink-hover">{{ __('performance_evaluation::dashboard.actions.save_score') }}</button>
+            <button type="button" wire:click="saveAssignedScore" wire:loading.attr="disabled" wire:target="saveAssignedScore" class="h-10 rounded-xl bg-ink px-5 text-[14px] font-semibold text-white transition hover:bg-ink-hover">{{ __('performance_evaluation::dashboard.actions.save_score') }}</button>
         </div>
     </div>
 </div>

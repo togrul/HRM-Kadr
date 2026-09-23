@@ -182,7 +182,7 @@
                                         :placeholder="__('performance_evaluation::succession.fields.personnel_search')"
                                         wire:key="succ-picker-cand-{{ $plan->id }}" />
                                 @else
-                                    <button type="button" wire:click="startAddCandidate({{ $plan->id }})" class="inline-flex items-center gap-1.5 rounded-lg border border-dashed border-zinc-300 px-3 py-1.5 text-[12px] font-medium text-zinc-500 transition hover:border-zinc-400 hover:text-zinc-700">
+                                    <button type="button" wire:click="startAddCandidate({{ $plan->id }})" class="inline-flex items-center gap-1.5 rounded-lg border border-dashed border-zinc-300 px-3 h-10 text-[14px] font-medium text-zinc-500 transition hover:border-zinc-400 hover:text-zinc-700">
                                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
                                         {{ __('performance_evaluation::succession.actions.add_candidate') }}
                                     </button>
@@ -241,7 +241,7 @@
                                     :placeholder="__('performance_evaluation::succession.fields.personnel_search')"
                                     wire:key="succ-picker-member-{{ $pool->id }}" />
                             @else
-                                <button type="button" wire:click="startAddMember({{ $pool->id }})" class="inline-flex items-center gap-1.5 rounded-lg border border-dashed border-zinc-300 px-3 py-1.5 text-[12px] font-medium text-zinc-500 transition hover:border-zinc-400 hover:text-zinc-700">
+                                <button type="button" wire:click="startAddMember({{ $pool->id }})" class="inline-flex items-center gap-1.5 rounded-lg border border-dashed border-zinc-300 px-3 h-10 text-[14px] font-medium text-zinc-500 transition hover:border-zinc-400 hover:text-zinc-700">
                                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
                                     {{ __('performance_evaluation::succession.actions.add_member') }}
                                 </button>

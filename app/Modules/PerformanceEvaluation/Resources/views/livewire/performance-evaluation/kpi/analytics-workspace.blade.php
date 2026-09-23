@@ -11,7 +11,7 @@
     $mine = $this->mine;
     $team = $this->team;
     $hr = $this->hr;
-    $exportButton = 'flex h-7 items-center gap-1 rounded-lg px-2 text-[11.5px] font-medium text-ink-faint transition hover:bg-white hover:text-ink';
+    $exportButton = 'flex h-10 items-center gap-1 rounded-lg px-2 text-[14px] font-medium text-ink-faint transition hover:bg-white hover:text-ink';
 @endphp
 
 <div class="mx-auto flex max-w-6xl flex-col gap-4">

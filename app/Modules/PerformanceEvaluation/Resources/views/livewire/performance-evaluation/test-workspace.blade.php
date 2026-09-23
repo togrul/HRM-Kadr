@@ -188,7 +188,7 @@
                                     wire:key="question-nav-{{ $questionNav['id'] }}"
                                     wire:click="openQuestion({{ $questionNav['id'] }})"
                                     @class([
-                                        'hrm-num relative inline-flex h-10 min-w-10 items-center justify-center rounded-xl border px-3 text-[13px] font-semibold transition',
+                                        'hrm-num relative inline-flex h-10 min-w-10 items-center justify-center rounded-xl border px-3 text-[14px] font-semibold transition',
                                         'border-ink bg-ink text-white' => $questionNav['active'],
                                         'border-amber-300 bg-amber-50 text-amber-800' => ! $questionNav['active'] && $questionNav['flagged'],
                                         'border-emerald-200 bg-emerald-50 text-emerald-700' => ! $questionNav['active'] && ! $questionNav['flagged'] && $questionNav['answered'],
@@ -372,7 +372,7 @@
 
                             <div class="mt-5 flex flex-col gap-3 border-t border-hairline-subtle pt-4 sm:flex-row sm:items-center sm:justify-between">
                                 <button type="button" wire:click="toggleQuestionFlag({{ $question->id }})"
-                                    class="inline-flex h-9 items-center gap-1.5 self-start rounded-xl border px-3 text-[12.5px] font-semibold transition {{ $isFlagged ? 'border-amber-300 bg-amber-50 text-amber-800' : 'border-hairline bg-white text-ink-muted hover:border-zinc-300 hover:text-ink' }}">
+                                    class="inline-flex h-10 items-center gap-1.5 self-start rounded-xl border px-3 text-[14px] font-semibold transition {{ $isFlagged ? 'border-amber-300 bg-amber-50 text-amber-800' : 'border-hairline bg-white text-ink-muted hover:border-zinc-300 hover:text-ink' }}">
                                     <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="{{ $isFlagged ? 'currentColor' : 'none' }}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22V4a1 1 0 0 1 1-1h12l-2 4 2 4H5"/></svg>
                                     {{ $isFlagged ? __($d.'.actions.unflag_question') : __($d.'.actions.flag_question') }}
                                 </button>

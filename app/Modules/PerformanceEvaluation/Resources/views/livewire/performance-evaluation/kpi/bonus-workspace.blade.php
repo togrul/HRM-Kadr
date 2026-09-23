@@ -8,7 +8,7 @@
     $money = fn ($value) => $value === null ? '—' : number_format((float) $value, 2, '.', ' ');
     $section = 'overflow-hidden rounded-2xl border border-hairline bg-white shadow-card';
     $sectionHead = 'flex items-center justify-between gap-3 border-b border-hairline-subtle bg-[#fafafa] px-5 py-2.5';
-    $input = 'hrm-num h-9 w-full rounded-lg border border-hairline bg-white px-2.5 text-[13px] text-ink focus:border-zinc-400 focus:outline-none';
+    $input = 'hrm-num h-10 w-full rounded-[10px] border border-hairline bg-white px-2.5 text-base text-ink focus:border-zinc-400 focus:outline-none sm:text-sm';
     $canSeeSalary = auth()->user()?->can('view-compensation-amounts');
     $rows = $preview['rows'] ?? collect();
     $currency = $preview['currency'] ?? 'AZN';
@@ -143,21 +143,21 @@
                             <div class="mt-3 flex items-center justify-between">
                                 <p class="text-[12px] font-medium text-ink-soft">{{ __($b.'.fields.position_targets') }}</p>
                                 @if ($this->positionOptions !== [])
-                                    <button type="button" wire:click="addBand('position_targets')" class="text-[12px] font-medium text-ink-faint hover:text-ink">+ {{ __($b.'.actions.add_row') }}</button>
+                                    <button type="button" wire:click="addBand('position_targets')" class="text-[14px] font-medium text-ink-faint hover:text-ink">+ {{ __($b.'.actions.add_row') }}</button>
                                 @endif
                             </div>
                             @if (($ruleForm['position_targets'] ?? []) !== [])
                                 <div class="mt-1.5 overflow-hidden rounded-xl border border-hairline-subtle">
                                     @foreach ($ruleForm['position_targets'] as $index => $pair)
-                                        <div wire:key="position_targets-{{ $index }}" class="grid grid-cols-[minmax(0,1fr)_96px_32px] items-center gap-2 px-3 py-1.5 {{ $loop->first ? '' : 'border-t border-hairline-subtle' }}">
-                                            <select wire:model.live="ruleForm.position_targets.{{ $index }}.from" class="h-9 w-full min-w-0 truncate rounded-lg border border-hairline bg-white px-2 text-[12.5px] text-ink focus:border-zinc-400 focus:outline-none focus:ring-0">
+                                        <div wire:key="position_targets-{{ $index }}" class="grid grid-cols-[minmax(0,1fr)_96px_40px] items-center gap-2 px-3 py-1.5 {{ $loop->first ? '' : 'border-t border-hairline-subtle' }}">
+                                            <select wire:model.live="ruleForm.position_targets.{{ $index }}.from" class="h-10 w-full min-w-0 truncate rounded-[10px] border border-hairline bg-white px-2 text-base text-ink focus:border-zinc-400 focus:outline-none focus:ring-0 sm:text-sm">
                                                 <option value="">—</option>
                                                 @foreach ($this->positionOptions as $optionId => $optionName)
                                                     <option value="{{ $optionId }}">{{ $optionName }}</option>
                                                 @endforeach
                                             </select>
                                             <div class="relative"><input type="number" step="0.5" wire:model.live.debounce.400ms="ruleForm.position_targets.{{ $index }}.value" class="{{ $input }} pr-6"><span class="pointer-events-none absolute right-2.5 top-2 text-[12px] text-ink-faint">%</span></div>
-                                            <button type="button" wire:click="removeBand('position_targets', {{ $index }})" class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint hover:bg-rose-50 hover:text-rose-600" aria-label="{{ __($t.'.actions.delete') }}">
+                                            <button type="button" wire:click="removeBand('position_targets', {{ $index }})" class="flex h-10 w-10 items-center justify-center rounded-lg text-ink-faint hover:bg-rose-50 hover:text-rose-600" aria-label="{{ __($t.'.actions.delete') }}">
                                                 <x-icons.delete-icon size="h-4 w-4" />
                                             </button>
                                         </div>
@@ -173,19 +173,19 @@
                     <div>
                         <div class="flex items-center justify-between">
                             <p class="text-[12.5px] font-semibold text-ink">{{ __($b.'.fields.payout_bands') }}</p>
-                            <button type="button" wire:click="addBand('payout_bands')" class="text-[12px] font-medium text-ink-faint hover:text-ink">+ {{ __($b.'.actions.add_row') }}</button>
+                            <button type="button" wire:click="addBand('payout_bands')" class="text-[14px] font-medium text-ink-faint hover:text-ink">+ {{ __($b.'.actions.add_row') }}</button>
                         </div>
                         <div class="mt-2 overflow-hidden rounded-xl border border-hairline-subtle">
-                            <div class="grid grid-cols-[1fr_1fr_32px] gap-2 bg-[#fafafa] px-3 py-1.5">
+                            <div class="grid grid-cols-[1fr_1fr_40px] gap-2 bg-[#fafafa] px-3 py-1.5">
                                 <span class="hrm-eyebrow">{{ __($b.'.fields.score_from') }}</span>
                                 <span class="hrm-eyebrow">{{ __($b.'.fields.payout') }}</span>
                                 <span></span>
                             </div>
                             @foreach ($ruleForm['payout_bands'] ?? [] as $index => $band)
-                                <div wire:key="band-{{ $index }}" class="grid grid-cols-[1fr_1fr_32px] items-center gap-2 border-t border-hairline-subtle px-3 py-1.5">
+                                <div wire:key="band-{{ $index }}" class="grid grid-cols-[1fr_1fr_40px] items-center gap-2 border-t border-hairline-subtle px-3 py-1.5">
                                     <div class="relative"><input type="number" step="1" wire:model.live.debounce.400ms="ruleForm.payout_bands.{{ $index }}.from" class="{{ $input }} pr-6"><span class="pointer-events-none absolute right-2.5 top-2 text-[12px] text-ink-faint">≥%</span></div>
                                     <div class="relative"><input type="number" step="1" wire:model.live.debounce.400ms="ruleForm.payout_bands.{{ $index }}.value" class="{{ $input }} pr-6"><span class="pointer-events-none absolute right-2.5 top-2 text-[12px] text-ink-faint">%</span></div>
-                                    <button type="button" wire:click="removeBand('payout_bands', {{ $index }})" class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint hover:bg-rose-50 hover:text-rose-600" aria-label="{{ __($t.'.actions.delete') }}">
+                                    <button type="button" wire:click="removeBand('payout_bands', {{ $index }})" class="flex h-10 w-10 items-center justify-center rounded-lg text-ink-faint hover:bg-rose-50 hover:text-rose-600" aria-label="{{ __($t.'.actions.delete') }}">
                                         <x-icons.delete-icon size="h-4 w-4" />
                                     </button>
                                 </div>
@@ -210,14 +210,14 @@
                             </div>
                             <div class="mt-3 flex items-center justify-between">
                                 <p class="text-[12px] font-medium text-ink-soft">{{ __($b.'.fields.company_multipliers') }}</p>
-                                <button type="button" wire:click="addBand('company_multipliers')" class="text-[12px] font-medium text-ink-faint hover:text-ink">+ {{ __($b.'.actions.add_row') }}</button>
+                                <button type="button" wire:click="addBand('company_multipliers')" class="text-[14px] font-medium text-ink-faint hover:text-ink">+ {{ __($b.'.actions.add_row') }}</button>
                             </div>
                             <div class="mt-1.5 overflow-hidden rounded-xl border border-hairline-subtle">
                                 @foreach ($ruleForm['company_multipliers'] ?? [] as $index => $pair)
-                                    <div wire:key="mult-{{ $index }}" class="grid grid-cols-[1fr_1fr_32px] items-center gap-2 px-3 py-1.5 {{ $loop->first ? '' : 'border-t border-hairline-subtle' }}">
+                                    <div wire:key="mult-{{ $index }}" class="grid grid-cols-[1fr_1fr_40px] items-center gap-2 px-3 py-1.5 {{ $loop->first ? '' : 'border-t border-hairline-subtle' }}">
                                         <div class="relative"><input type="number" step="1" wire:model.live.debounce.400ms="ruleForm.company_multipliers.{{ $index }}.from" class="{{ $input }} pr-6"><span class="pointer-events-none absolute right-2.5 top-2 text-[12px] text-ink-faint">≥%</span></div>
                                         <div class="relative"><input type="number" step="0.05" wire:model.live.debounce.400ms="ruleForm.company_multipliers.{{ $index }}.value" class="{{ $input }} pr-6"><span class="pointer-events-none absolute right-2.5 top-2 text-[12px] text-ink-faint">×</span></div>
-                                        <button type="button" wire:click="removeBand('company_multipliers', {{ $index }})" class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint hover:bg-rose-50 hover:text-rose-600" aria-label="{{ __($t.'.actions.delete') }}">
+                                        <button type="button" wire:click="removeBand('company_multipliers', {{ $index }})" class="flex h-10 w-10 items-center justify-center rounded-lg text-ink-faint hover:bg-rose-50 hover:text-rose-600" aria-label="{{ __($t.'.actions.delete') }}">
                                             <x-icons.delete-icon size="h-4 w-4" />
                                         </button>
                                     </div>
@@ -228,21 +228,21 @@
                             <div class="mt-1.5 flex items-center justify-between">
                                 <p class="text-[12px] font-medium text-ink-soft">{{ __($b.'.fields.unit_results') }}</p>
                                 @if ($this->unitOptions !== [])
-                                    <button type="button" wire:click="addBand('unit_results')" class="text-[12px] font-medium text-ink-faint hover:text-ink">+ {{ __($b.'.actions.add_row') }}</button>
+                                    <button type="button" wire:click="addBand('unit_results')" class="text-[14px] font-medium text-ink-faint hover:text-ink">+ {{ __($b.'.actions.add_row') }}</button>
                                 @endif
                             </div>
                             @if (($ruleForm['unit_results'] ?? []) !== [])
                                 <div class="mt-1.5 overflow-hidden rounded-xl border border-hairline-subtle">
                                     @foreach ($ruleForm['unit_results'] as $index => $pair)
-                                        <div wire:key="unit_results-{{ $index }}" class="grid grid-cols-[minmax(0,1fr)_96px_32px] items-center gap-2 px-3 py-1.5 {{ $loop->first ? '' : 'border-t border-hairline-subtle' }}">
-                                            <select wire:model.live="ruleForm.unit_results.{{ $index }}.from" class="h-9 w-full min-w-0 truncate rounded-lg border border-hairline bg-white px-2 text-[12.5px] text-ink focus:border-zinc-400 focus:outline-none focus:ring-0">
+                                        <div wire:key="unit_results-{{ $index }}" class="grid grid-cols-[minmax(0,1fr)_96px_40px] items-center gap-2 px-3 py-1.5 {{ $loop->first ? '' : 'border-t border-hairline-subtle' }}">
+                                            <select wire:model.live="ruleForm.unit_results.{{ $index }}.from" class="h-10 w-full min-w-0 truncate rounded-[10px] border border-hairline bg-white px-2 text-base text-ink focus:border-zinc-400 focus:outline-none focus:ring-0 sm:text-sm">
                                                 <option value="">—</option>
                                                 @foreach ($this->unitOptions as $optionId => $optionName)
                                                     <option value="{{ $optionId }}">{{ $optionName }}</option>
                                                 @endforeach
                                             </select>
                                             <div class="relative"><input type="number" step="0.5" wire:model.live.debounce.400ms="ruleForm.unit_results.{{ $index }}.value" class="{{ $input }} pr-6"><span class="pointer-events-none absolute right-2.5 top-2 text-[12px] text-ink-faint">%</span></div>
-                                            <button type="button" wire:click="removeBand('unit_results', {{ $index }})" class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint hover:bg-rose-50 hover:text-rose-600" aria-label="{{ __($t.'.actions.delete') }}">
+                                            <button type="button" wire:click="removeBand('unit_results', {{ $index }})" class="flex h-10 w-10 items-center justify-center rounded-lg text-ink-faint hover:bg-rose-50 hover:text-rose-600" aria-label="{{ __($t.'.actions.delete') }}">
                                                 <x-icons.delete-icon size="h-4 w-4" />
                                             </button>
                                         </div>
@@ -280,9 +280,9 @@
                 </div>
                 <div class="flex items-center justify-end gap-2 border-t border-hairline-subtle px-5 py-3">
                     @if ($dirty)
-                        <button type="button" wire:click="resetRule" class="h-9 rounded-lg px-3 text-[12.5px] font-medium text-ink-muted hover:bg-[#f4f4f5] hover:text-ink">{{ __($b.'.actions.reset') }}</button>
+                        <button type="button" wire:click="resetRule" class="h-10 rounded-lg px-3 text-[14px] font-medium text-ink-muted hover:bg-[#f4f4f5] hover:text-ink">{{ __($b.'.actions.reset') }}</button>
                     @endif
-                    <button type="button" wire:click="saveRule" @disabled(! $dirty) class="h-9 rounded-lg bg-ink px-4 text-[12.5px] font-semibold text-white hover:bg-ink-hover disabled:opacity-40">{{ __($b.'.actions.save_rule') }}</button>
+                    <button type="button" wire:click="saveRule" @disabled(! $dirty) class="h-10 rounded-lg bg-ink px-4 text-[14px] font-semibold text-white hover:bg-ink-hover disabled:opacity-40">{{ __($b.'.actions.save_rule') }}</button>
                 </div>
             </div>
 

@@ -11,7 +11,7 @@
     };
     $section = 'overflow-hidden rounded-2xl border border-hairline bg-white shadow-card';
     $sectionHead = 'flex items-center justify-between gap-3 border-b border-hairline-subtle bg-[#fafafa] px-5 py-2.5';
-    $iconButton = 'flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-[#f4f4f5] hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300';
+    $iconButton = 'flex h-10 w-10 items-center justify-center rounded-lg text-ink-faint transition hover:bg-[#f4f4f5] hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300';
     $stats = [
         ['total_links', $this->linkStats['total'], 'bg-sky-500'],
         ['manual_links', $this->linkStats['manual'], 'bg-emerald-500'],
@@ -76,7 +76,7 @@
                 </div>
 
                 <div class="flex justify-end border-t border-hairline-subtle pt-4">
-                    <button type="button" wire:click="saveLink" class="h-10 rounded-xl bg-ink px-4 text-[13px] font-semibold text-white hover:bg-ink-hover">{{ __($d.'.actions.save_user_personnel_link') }}</button>
+                    <button type="button" wire:click="saveLink" class="h-10 rounded-xl bg-ink px-4 text-[14px] font-semibold text-white hover:bg-ink-hover">{{ __($d.'.actions.save_user_personnel_link') }}</button>
                 </div>
             </div>
         </div>

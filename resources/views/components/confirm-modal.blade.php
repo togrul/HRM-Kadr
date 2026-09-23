@@ -82,7 +82,7 @@
 
                     {{-- Close --}}
                     <button type="button" x-on:click="closeModal()"
-                            class="absolute right-3.5 top-3.5 inline-flex h-8 w-8 items-center justify-center rounded-full text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300"
+                            class="absolute right-3 top-3 inline-flex h-10 w-10 items-center justify-center rounded-[10px] text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300"
                             aria-label="{{ __('ui::common.actions.close') }}">
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
                     </button>
@@ -104,12 +104,12 @@
                     {{-- Footer --}}
                     <div class="flex items-center justify-end gap-2.5 border-t border-zinc-100 bg-zinc-50/60 px-6 py-4">
                         <button type="button" x-on:click="closeModal()"
-                                class="inline-flex h-9 items-center justify-center rounded-xl border border-zinc-200 bg-white px-4 text-[13px] font-medium text-zinc-700 shadow-sm transition hover:bg-zinc-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300">
+                                class="inline-flex h-10 items-center justify-center rounded-[10px] border border-hairline bg-white px-4 text-[14px] font-medium text-ink-soft transition hover:bg-[#f4f4f5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300">
                             <span x-text="cancelText"></span>
                         </button>
                         <button type="button" x-ref="confirmBtn" x-on:click="accept()"
                                 :class="tone3().btn"
-                                class="inline-flex h-9 items-center justify-center rounded-xl px-4 text-[13px] font-semibold text-white shadow-sm transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2">
+                                class="inline-flex h-10 items-center justify-center rounded-[10px] px-4 text-[14px] font-semibold text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2">
                             <span x-text="confirmText"></span>
                         </button>
                     </div>

@@ -7,7 +7,7 @@
         type="button"
         @click="$store.hrmShell.railOpen = ! $store.hrmShell.railOpen"
         :aria-expanded="$store.hrmShell.railOpen.toString()"
-        class="inline-flex h-9 w-9 items-center justify-center rounded-[10px] border border-hairline bg-[#fafafa] text-ink-muted transition hover:text-ink"
+        class="inline-flex h-10 w-10 items-center justify-center rounded-[10px] border border-hairline bg-[#fafafa] text-ink-muted transition hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400"
         aria-controls="hrm-rail"
     >
         <x-icons.menu-icon size="w-5 h-5" color="text-current" hover="text-current" />
@@ -21,7 +21,7 @@
     <button
         type="button"
         @click="$store.hrmShell.openPalette()"
-        class="ml-auto inline-flex h-9 items-center gap-2 rounded-[10px] border border-hairline bg-[#fafafa] px-3 text-[12.5px] text-ink-faint transition hover:text-ink"
+        class="ml-auto inline-flex h-10 items-center gap-2 rounded-[10px] border border-hairline bg-[#fafafa] px-3 text-[14px] text-ink-muted transition hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400"
     >
         <x-icons.search-file size="w-4 h-4" color="text-current" hover="text-current" />
         <span>{{ __('ui::common.labels.search') }}</span>
@@ -29,7 +29,7 @@
 
     <x-dropdown align="right">
         <x-slot name="trigger">
-            <button class="inline-flex h-9 items-center rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-[12.5px] font-medium text-ink-soft">
+            <button class="inline-flex h-10 items-center rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-[14px] font-medium text-ink-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400">
                 <span class="max-w-[9rem] truncate">{{ Auth::user()?->name }}</span>
                 <x-icons.arrow-icon size="w-4 h-4" />
             </button>

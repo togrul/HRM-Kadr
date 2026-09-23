@@ -4,7 +4,7 @@
             $b = 'performance_evaluation::dashboard.builder';
             $templates = $this->builderTemplates;
             $current = $this->builderTemplate;
-            $iconButton = 'flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-[#f4f4f5] hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300';
+            $iconButton = 'flex h-10 w-10 items-center justify-center rounded-lg text-ink-faint transition hover:bg-[#f4f4f5] hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300';
             $num = fn ($value) => rtrim(rtrim(number_format((float) $value, 2, '.', ''), '0'), '.');
             $canManage = auth()->user()?->can('manage-performance-evaluation');
         @endphp
@@ -18,7 +18,7 @@
                         <p class="text-[11.5px] text-ink-faint">{{ __($b.'.list_count', ['count' => $templates->count()]) }}</p>
                     </div>
                     @if ($canManage)
-                        <button type="button" wire:click="newTemplate" class="flex h-8 items-center gap-1.5 rounded-lg bg-ink px-2.5 text-[12px] font-semibold text-white hover:bg-ink-hover">
+                        <button type="button" wire:click="newTemplate" class="flex h-10 items-center gap-1.5 rounded-lg bg-ink px-2.5 text-[14px] font-semibold text-white hover:bg-ink-hover">
                             <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
                             {{ __($b.'.new') }}
                         </button>
@@ -58,7 +58,7 @@
                         <p class="mt-4 text-[15px] font-semibold text-ink">{{ __($b.'.empty_title') }}</p>
                         <p class="mx-auto mt-1 max-w-md text-[12.5px] leading-6 text-ink-muted">{{ __($b.'.empty_body') }}</p>
                         @if ($canManage)
-                            <button type="button" wire:click="newTemplate" class="mt-5 inline-flex h-10 items-center gap-2 rounded-xl bg-ink px-4 text-[13px] font-semibold text-white hover:bg-ink-hover">{{ __($b.'.new_template') }}</button>
+                            <button type="button" wire:click="newTemplate" class="mt-5 inline-flex h-10 items-center gap-2 rounded-xl bg-ink px-4 text-[14px] font-semibold text-white hover:bg-ink-hover">{{ __($b.'.new_template') }}</button>
                         @endif
                     </div>
                 @else
@@ -93,7 +93,7 @@
                                     <button type="button" wire:click="confirmDeleteTemplate({{ $current->id }})" class="{{ $iconButton }} hover:!bg-rose-50" title="{{ __($d.'.actions.delete') }}" aria-label="{{ __($d.'.actions.delete') }}">
                                         <x-icons.delete-icon size="h-4 w-4" />
                                     </button>
-                                    <button type="button" wire:click="newSection({{ $current->id }})" class="ml-1 flex h-9 items-center gap-1.5 rounded-xl bg-ink px-3.5 text-[12.5px] font-semibold text-white hover:bg-ink-hover">
+                                    <button type="button" wire:click="newSection({{ $current->id }})" class="ml-1 flex h-10 items-center gap-1.5 rounded-xl bg-ink px-3.5 text-[14px] font-semibold text-white hover:bg-ink-hover">
                                         <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
                                         {{ __($b.'.add_section') }}
                                     </button>
@@ -203,7 +203,7 @@
 
                                 @if ($canManage)
                                     <div class="px-5 py-2.5 {{ $section->items->isNotEmpty() ? 'border-t border-hairline-subtle' : '' }}">
-                                        <button type="button" wire:click="newItem({{ $section->id }})" class="inline-flex h-8 items-center gap-1.5 rounded-lg px-2 text-[12.5px] font-medium text-ink-muted hover:bg-[#f4f4f5] hover:text-ink">
+                                        <button type="button" wire:click="newItem({{ $section->id }})" class="inline-flex h-10 items-center gap-1.5 rounded-lg px-2 text-[14px] font-medium text-ink-muted hover:bg-[#f4f4f5] hover:text-ink">
                                             <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
                                             {{ __($b.'.add_item') }}
                                         </button>
@@ -215,7 +215,7 @@
                                 <p class="text-[13.5px] font-medium text-ink">{{ __($b.'.no_sections') }}</p>
                                 <p class="mt-1 text-[12.5px] text-ink-faint">{{ __($b.'.no_sections_hint') }}</p>
                                 @if ($canManage)
-                                    <button type="button" wire:click="newSection({{ $current->id }})" class="mt-4 inline-flex h-9 items-center gap-1.5 rounded-xl bg-ink px-3.5 text-[12.5px] font-semibold text-white hover:bg-ink-hover">{{ __($b.'.add_section') }}</button>
+                                    <button type="button" wire:click="newSection({{ $current->id }})" class="mt-4 inline-flex h-10 items-center gap-1.5 rounded-xl bg-ink px-3.5 text-[14px] font-semibold text-white hover:bg-ink-hover">{{ __($b.'.add_section') }}</button>
                                 @endif
                             </div>
                         @endforelse

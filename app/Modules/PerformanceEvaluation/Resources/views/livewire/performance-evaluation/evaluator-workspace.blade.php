@@ -110,7 +110,7 @@
                             </div>
                         </div>
                         <div class="mt-3 flex justify-end">
-                            <button type="button" wire:click="openScoreCapture({{ $form->id }})" class="inline-flex h-8 items-center gap-1.5 rounded-lg border border-hairline bg-white px-3 text-[12.5px] font-semibold text-ink-soft transition hover:border-zinc-300 hover:text-ink">
+                            <button type="button" wire:click="openScoreCapture({{ $form->id }})" class="inline-flex h-10 items-center gap-1.5 rounded-lg border border-hairline bg-white px-3 text-[14px] font-semibold text-ink-soft transition hover:border-zinc-300 hover:text-ink">
                                 <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
                                 {{ __($d.'.actions.open_score_form') }}
                             </button>
@@ -163,7 +163,7 @@
                             </div>
                             <p class="mt-1.5 break-words text-[12.5px] leading-5 text-ink-muted">{{ \Illuminate\Support\Str::limit((string) $answer->question_prompt, 120) }}</p>
                             <div class="mt-2 flex justify-end">
-                                <button type="button" wire:click="startReviewAnswer({{ $answer->id }})" class="inline-flex h-8 items-center gap-1.5 rounded-lg border border-hairline bg-white px-3 text-[12.5px] font-semibold text-ink-soft transition hover:border-zinc-300 hover:text-ink">
+                                <button type="button" wire:click="startReviewAnswer({{ $answer->id }})" class="inline-flex h-10 items-center gap-1.5 rounded-lg border border-hairline bg-white px-3 text-[14px] font-semibold text-ink-soft transition hover:border-zinc-300 hover:text-ink">
                                     {{ __($d.'.actions.open_review_form') }}
                                 </button>
                             </div>
@@ -199,7 +199,7 @@
                     </div>
 
                     <div class="flex justify-end">
-                        <button type="button" wire:click="saveAnswerReview" wire:loading.attr="disabled" wire:target="saveAnswerReview" class="h-10 rounded-xl bg-ink px-5 text-[13px] font-semibold text-white transition hover:bg-ink-hover">{{ __($d.'.actions.review_answer') }}</button>
+                        <button type="button" wire:click="saveAnswerReview" wire:loading.attr="disabled" wire:target="saveAnswerReview" class="h-10 rounded-xl bg-ink px-5 text-[14px] font-semibold text-white transition hover:bg-ink-hover">{{ __($d.'.actions.review_answer') }}</button>
                     </div>
                 </div>
             </div>

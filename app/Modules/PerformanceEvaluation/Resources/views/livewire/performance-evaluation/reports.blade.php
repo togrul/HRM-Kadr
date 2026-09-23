@@ -2,7 +2,7 @@
     $d = 'performance_evaluation::dashboard';
     $section = 'overflow-hidden rounded-2xl border border-hairline bg-white shadow-card';
     $sectionHead = 'flex items-center justify-between gap-3 border-b border-hairline-subtle bg-[#fafafa] px-5 py-2.5';
-    $exportButton = 'inline-flex h-8 items-center gap-1.5 rounded-lg border border-hairline bg-white px-2.5 text-[12px] font-medium text-ink-soft transition hover:border-zinc-300 hover:text-ink';
+    $exportButton = 'inline-flex h-10 items-center gap-1.5 rounded-lg border border-hairline bg-white px-2.5 text-[14px] font-medium text-ink-soft transition hover:border-zinc-300 hover:text-ink';
     $row = 'px-5 py-3 transition-colors hover:bg-[#fafafa]';
     $chip = 'rounded-md bg-[#f4f4f5] px-1.5 py-0.5 text-[11px] text-ink-muted';
     $pct = fn ($value) => rtrim(rtrim(number_format((float) $value, 2, '.', ''), '0'), '.');

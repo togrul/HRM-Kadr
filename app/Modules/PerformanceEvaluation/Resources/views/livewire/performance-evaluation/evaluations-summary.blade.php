@@ -1,6 +1,6 @@
 @php
     $d = 'performance_evaluation::dashboard';
-    $iconButton = 'flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-[#f4f4f5] hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300';
+    $iconButton = 'flex h-10 w-10 items-center justify-center rounded-lg text-ink-faint transition hover:bg-[#f4f4f5] hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300';
     $categoryTone = [
         'high' => ['bg-emerald-50 text-emerald-700', 'bg-emerald-500'],
         'medium' => ['bg-amber-50 text-amber-700', 'bg-amber-500'],
@@ -15,9 +15,9 @@
             {{ __($d.'.cards.recent_forms') }}
             <span class="hrm-num ml-1 font-normal text-ink-faint">{{ $this->recentForms->count() }}</span>
         </p>
-        <label class="flex h-9 w-full items-center gap-2 rounded-xl border border-hairline bg-white px-3 sm:w-64">
+        <label class="flex h-10 w-full items-center gap-2 rounded-xl border border-hairline bg-white px-3 sm:w-64">
             <svg class="h-4 w-4 shrink-0 text-ink-faint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-            <input type="search" wire:model.live.debounce.300ms="formSearch" placeholder="{{ __($d.'.fields.personnel') }}…" class="h-full w-full border-0 bg-transparent p-0 text-[13px] text-ink placeholder:text-ink-faint focus:outline-none focus:ring-0">
+            <input type="search" wire:model.live.debounce.300ms="formSearch" placeholder="{{ __($d.'.fields.personnel') }}…" aria-label="{{ __($d.'.fields.personnel') }}" class="h-full w-full border-0 bg-transparent p-0 text-base text-ink placeholder:text-ink-faint focus:outline-none focus:ring-0 sm:text-sm">
         </label>
     </div>
 
@@ -60,7 +60,7 @@
                             </div>
                             <div class="flex items-center gap-1">
                                 @can('manage-performance-evaluation')
-                                    <button type="button" wire:click="relayScoreEvaluationForm({{ $form->id }})" class="inline-flex h-8 items-center gap-1.5 rounded-lg border border-hairline bg-white px-2.5 text-[12px] font-semibold text-ink-soft transition hover:border-zinc-300 hover:text-ink">
+                                    <button type="button" wire:click="relayScoreEvaluationForm({{ $form->id }})" class="inline-flex h-10 items-center gap-1.5 rounded-lg border border-hairline bg-white px-2.5 text-[14px] font-semibold text-ink-soft transition hover:border-zinc-300 hover:text-ink">
                                         <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
                                         {{ __($d.'.cards.score_capture') }}
                                     </button>

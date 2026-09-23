@@ -7,7 +7,7 @@
     ];
     $directionTone = ['higher_better' => 'text-emerald-600', 'lower_better' => 'text-sky-600', 'range' => 'text-violet-600'];
     $input = 'h-10 w-full rounded-xl border border-hairline bg-[#fafafa] px-3 text-[13px] text-ink focus:border-zinc-400 focus:bg-white focus:outline-none';
-    $iconButton = 'flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-[#f4f4f5] hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300';
+    $iconButton = 'flex h-10 w-10 items-center justify-center rounded-lg text-ink-faint transition hover:bg-[#f4f4f5] hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300';
     $kpiColumns = 'md:grid md:grid-cols-[minmax(0,2.4fr)_minmax(0,1.3fr)_minmax(0,1.1fr)_56px_104px_104px] md:items-center md:gap-4';
 @endphp
 
@@ -347,7 +347,7 @@
                                 @error('kpiForm.formula') <x-validation>{{ $message }}</x-validation> @enderror
                                 <p class="text-[11.5px] leading-5 text-ink-faint">{{ __($t.'.formula.syntax') }}</p>
                                 <div>
-                                    <button type="button" wire:click="testFormula" class="inline-flex h-9 items-center gap-1.5 rounded-lg border border-hairline bg-white px-3 text-[12.5px] font-semibold text-ink-soft hover:border-zinc-300 hover:text-ink">{{ __($t.'.formula.test') }}</button>
+                                    <button type="button" wire:click="testFormula" class="inline-flex h-10 items-center gap-1.5 rounded-lg border border-hairline bg-white px-3 text-[14px] font-semibold text-ink-soft hover:border-zinc-300 hover:text-ink">{{ __($t.'.formula.test') }}</button>
                                 </div>
                             </div>
                         @endif
@@ -395,7 +395,7 @@
                                     @error('connectorForm.value_path') <x-validation>{{ $message }}</x-validation> @enderror
                                 </div>
                                 <div>
-                                    <button type="button" wire:click="testConnector" wire:loading.attr="disabled" wire:target="testConnector" class="inline-flex h-9 items-center gap-1.5 rounded-lg border border-hairline bg-white px-3 text-[12.5px] font-semibold text-ink-soft hover:border-zinc-300 hover:text-ink">
+                                    <button type="button" wire:click="testConnector" wire:loading.attr="disabled" wire:target="testConnector" class="inline-flex h-10 items-center gap-1.5 rounded-lg border border-hairline bg-white px-3 text-[14px] font-semibold text-ink-soft hover:border-zinc-300 hover:text-ink">
                                         <svg class="h-4 w-4" wire:loading.class="animate-spin" wire:target="testConnector" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.2-8.6"/><path d="m21 4-9 9-3-3"/></svg>
                                         {{ __($c.'.test') }}
                                     </button>
@@ -625,7 +625,7 @@
                             @endforeach
                         </div>
 
-                        <button type="button" wire:click="addTemplateItem" class="mt-2.5 inline-flex h-9 items-center gap-1.5 rounded-xl border border-dashed border-zinc-300 px-3 text-[12px] font-medium text-zinc-600 hover:bg-zinc-50">
+                        <button type="button" wire:click="addTemplateItem" class="mt-2.5 inline-flex h-10 items-center gap-1.5 rounded-xl border border-dashed border-zinc-300 px-3 text-[14px] font-medium text-zinc-600 hover:bg-zinc-50">
                             <x-icons.add-icon size="h-3.5 w-3.5" color="text-current" hover="text-current" />
                             {{ __($t.'.actions.add_item') }}
                         </button>

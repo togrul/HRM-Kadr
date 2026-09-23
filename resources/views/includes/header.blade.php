@@ -352,7 +352,7 @@
                 type="button"
                 @click="open = ! open"
                 data-rail-tip="{{ $userName }}"
-                class="flex h-8 w-8 items-center justify-center rounded-full bg-[#f4f4f5] text-[11px] font-semibold text-ink transition hover:bg-hairline"
+                class="flex h-10 w-10 items-center justify-center rounded-full bg-[#f4f4f5] text-[12px] font-semibold text-ink transition hover:bg-hairline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400"
                 :aria-expanded="open.toString()"
             >
                 {{ $initials !== '' ? $initials : '—' }}
