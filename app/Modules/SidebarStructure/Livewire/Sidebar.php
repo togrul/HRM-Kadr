@@ -5,6 +5,7 @@ namespace App\Modules\SidebarStructure\Livewire;
 use App\Models\Structure;
 use App\Services\StructureService;
 use App\Support\OrderLookupCache;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\On;
@@ -60,7 +61,7 @@ class Sidebar extends Component
         $this->skipRender();
     }
 
-    public function render()
+    public function render(): View
     {
         // The tree is trimmed to what the user may see, so it is cached per accessible set
         // (never under one shared key) and versioned so a structure edit invalidates it.
@@ -106,7 +107,7 @@ class Sidebar extends Component
         return $open;
     }
 
-    public function placeholder()
+    public function placeholder(): View
     {
         return view('structure::livewire.structure.placeholders.sidebar');
     }
