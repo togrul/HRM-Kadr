@@ -158,6 +158,7 @@ return [
         'manage_templates' => 'Şablonlar',
         'start_process' => 'Proses başlat',
         'complete_processes' => 'Tamamla',
+        'show_more' => 'Daha çox göstər (:count)',
     ],
     'messages' => [
         'template_created' => 'Həyat dövrü şablonu yaradıldı.',

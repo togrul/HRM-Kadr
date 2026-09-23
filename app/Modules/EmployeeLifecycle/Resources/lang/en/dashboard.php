@@ -158,6 +158,7 @@ return [
         'manage_templates' => 'Templates',
         'start_process' => 'Start process',
         'complete_processes' => 'Complete',
+        'show_more' => 'Show more (:count)',
     ],
     'messages' => [
         'template_created' => 'Lifecycle template was created.',

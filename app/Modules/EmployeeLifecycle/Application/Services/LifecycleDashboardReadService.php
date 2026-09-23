@@ -17,6 +17,12 @@ class LifecycleDashboardReadService
     /** The overdue-task queue is a scrolling side list; its header shows the full count. */
     private const OVERDUE_TASK_LIMIT = 50;
 
+    /** Rows a probation/movement/offboarding queue card shows per "show more" step. */
+    public const QUEUE_PAGE = 20;
+
+    /** Options a completion-panel select loads per search. */
+    public const OPTION_LIMIT = 50;
+
     private const CLOSED_STATUSES = ['completed', 'cancelled'];
 
     /**
@@ -30,13 +36,14 @@ class LifecycleDashboardReadService
         'offboarding_case' => ['Offboarding case', 'employee_lifecycle_offboarding_case', 'offboarding'],
     ];
 
-    public function dashboard(array $filters = [], int $perPage = self::PER_PAGE): array
+    /**
+     * @param  array{probation?: int, movement?: int, offboarding?: int}  $queueLimits  rows each queue card shows
+     */
+    public function dashboard(array $filters = [], int $perPage = self::PER_PAGE, array $queueLimits = []): array
     {
         $templates = $this->planTemplates();
-        $probationReviews = $this->probationReviews();
-        $movements = $this->movements();
-        $offboardingCases = $this->offboardingCases();
         $totals = $this->eventTotals();
+        $queues = $this->queueCounts();
         $overdueTasks = $this->overdueTasks();
 
         return [
@@ -44,10 +51,14 @@ class LifecycleDashboardReadService
                 'active_templates' => $templates->where('is_active', true)->count(),
                 'active_events' => $totals['active'],
                 'overdue_tasks' => $overdueTasks['total'],
-                'probation_queue' => $probationReviews->where('status', 'pending')->count() + $totals['probation_unreviewed'],
-                'movement_queue' => $movements->whereNotIn('status', self::CLOSED_STATUSES)->count(),
-                'offboarding_queue' => $offboardingCases->whereNotIn('status', self::CLOSED_STATUSES)->count()
-                    ?: $totals['offboarding'],
+                'probation_queue' => $queues['probation_open'] + $totals['probation_unreviewed'],
+                'movement_queue' => $queues['movement_open'],
+                'offboarding_queue' => $queues['offboarding_open'] ?: $totals['offboarding'],
+            ],
+            'queueTotals' => [
+                'probation' => $queues['probation_total'],
+                'movement' => $queues['movement_total'],
+                'offboarding' => $queues['offboarding_total'],
             ],
             'events' => $this->events($filters, $perPage),
             'overdueTasks' => $overdueTasks['rows'],
@@ -56,9 +67,9 @@ class LifecycleDashboardReadService
             'typeCounts' => $this->facetCounts(['search' => $filters['search'] ?? '', 'status' => $filters['status'] ?? ''], 'type'),
             'statusCounts' => $this->facetCounts(['search' => $filters['search'] ?? '', 'type' => $filters['type'] ?? ''], 'status'),
             'planTemplates' => $templates,
-            'probationReviews' => $probationReviews,
-            'movements' => $movements,
-            'offboardingCases' => $offboardingCases,
+            'probationReviews' => $this->probationReviews($queueLimits['probation'] ?? self::QUEUE_PAGE),
+            'movements' => $this->movements($queueLimits['movement'] ?? self::QUEUE_PAGE),
+            'offboardingCases' => $this->offboardingCases($queueLimits['offboarding'] ?? self::QUEUE_PAGE),
         ];
     }
 
@@ -141,7 +152,7 @@ class LifecycleDashboardReadService
             ]);
     }
 
-    public function probationReviews(): Collection
+    public function probationReviews(?int $limit = null): Collection
     {
         if (! InstalledTables::has('employee_lifecycle_probation_reviews')) {
             return collect();
@@ -164,6 +175,7 @@ class LifecycleDashboardReadService
             ->orderByRaw('case when employee_lifecycle_probation_reviews.review_due_at is null then 1 else 0 end')
             ->orderBy('employee_lifecycle_probation_reviews.review_due_at')
             ->orderByDesc('employee_lifecycle_probation_reviews.id')
+            ->when($limit !== null, fn (Builder $query) => $query->limit($limit))
             ->get()
             ->map(fn ($row): array => [
                 'id' => (int) $row->id,
@@ -180,7 +192,7 @@ class LifecycleDashboardReadService
             ]);
     }
 
-    public function movements(): Collection
+    public function movements(?int $limit = null): Collection
     {
         if (! InstalledTables::has('employee_lifecycle_movements')) {
             return collect();
@@ -209,6 +221,7 @@ class LifecycleDashboardReadService
             ->orderByRaw('case when employee_lifecycle_movements.effective_date is null then 1 else 0 end')
             ->orderBy('employee_lifecycle_movements.effective_date')
             ->orderByDesc('employee_lifecycle_movements.id')
+            ->when($limit !== null, fn (Builder $query) => $query->limit($limit))
             ->get()
             ->map(fn ($row): array => [
                 'id' => (int) $row->id,
@@ -229,7 +242,7 @@ class LifecycleDashboardReadService
             ]);
     }
 
-    public function offboardingCases(): Collection
+    public function offboardingCases(?int $limit = null): Collection
     {
         if (! InstalledTables::has('employee_lifecycle_offboarding_cases')) {
             return collect();
@@ -254,6 +267,7 @@ class LifecycleDashboardReadService
             ->orderByRaw('case when employee_lifecycle_offboarding_cases.last_working_date is null then 1 else 0 end')
             ->orderBy('employee_lifecycle_offboarding_cases.last_working_date')
             ->orderByDesc('employee_lifecycle_offboarding_cases.id')
+            ->when($limit !== null, fn (Builder $query) => $query->limit($limit))
             ->get()
             ->map(fn ($row): array => [
                 'id' => (int) $row->id,
@@ -384,6 +398,156 @@ class LifecycleDashboardReadService
             'offboarding' => (int) ($row->offboarding ?? 0),
             'probation_unreviewed' => (int) ($row->probation_unreviewed ?? 0),
         ];
+    }
+
+    /**
+     * Queue-card counters in one query of sub-selects: all rows (for "show more") and the
+     * open ones — pending reviews, movements/cases not completed or cancelled.
+     *
+     * @return array{probation_total: int, probation_open: int, movement_total: int, movement_open: int, offboarding_total: int, offboarding_open: int}
+     */
+    private function queueCounts(): array
+    {
+        $queues = [
+            'probation' => ['employee_lifecycle_probation_reviews', fn (Builder $query) => $query->where('status', 'pending')],
+            'movement' => ['employee_lifecycle_movements', fn (Builder $query) => $query->whereNotIn('status', self::CLOSED_STATUSES)],
+            'offboarding' => ['employee_lifecycle_offboarding_cases', fn (Builder $query) => $query->whereNotIn('status', self::CLOSED_STATUSES)],
+        ];
+
+        $counts = [];
+        $query = DB::query();
+        foreach ($queues as $key => [$table, $open]) {
+            $counts[$key.'_total'] = 0;
+            $counts[$key.'_open'] = 0;
+
+            if (InstalledTables::has($table)) {
+                $query->selectSub(DB::table($table)->selectRaw('count(*)'), $key.'_total')
+                    ->selectSub($open(DB::table($table))->selectRaw('count(*)'), $key.'_open');
+            }
+        }
+
+        if ($query->columns === null) {
+            return $counts;
+        }
+
+        foreach ((array) $query->first() as $column => $count) {
+            $counts[$column] = (int) $count;
+        }
+
+        return $counts;
+    }
+
+    /**
+     * Completion-panel options for probation reviews: "employee · due date", searched in SQL,
+     * limited, with the selected review always present.
+     *
+     * @return array<int, array{id: int, label: string}>
+     */
+    public function probationReviewOptions(string $search = '', ?int $selectedId = null, int $limit = self::OPTION_LIMIT): array
+    {
+        return $this->completionOptions(
+            'employee_lifecycle_probation_reviews',
+            'review_due_at',
+            fn (object $row): string => $this->personnelName($row).' · '.$row->review_due_at,
+            $search,
+            $selectedId,
+            $limit,
+        );
+    }
+
+    /**
+     * @return array<int, array{id: int, label: string}>
+     */
+    public function movementOptions(string $search = '', ?int $selectedId = null, int $limit = self::OPTION_LIMIT): array
+    {
+        $typeMatches = collect(['transfer', 'promotion', 'role_change'])
+            ->filter(fn (string $type): bool => $search !== '' && str_contains(mb_strtolower(__('employee-lifecycle::dashboard.movement_types.'.$type)), mb_strtolower(trim($search))))
+            ->values()
+            ->all();
+
+        return $this->completionOptions(
+            'employee_lifecycle_movements',
+            'effective_date',
+            fn (object $row): string => $this->personnelName($row).' · '.__('employee-lifecycle::dashboard.movement_types.'.$row->movement_type),
+            $search,
+            $selectedId,
+            $limit,
+            ['movement_type'],
+            fn (Builder $query) => $query->orWhereIn('employee_lifecycle_movements.movement_type', $typeMatches),
+        );
+    }
+
+    /**
+     * @return array<int, array{id: int, label: string}>
+     */
+    public function offboardingCaseOptions(string $search = '', ?int $selectedId = null, int $limit = self::OPTION_LIMIT): array
+    {
+        return $this->completionOptions(
+            'employee_lifecycle_offboarding_cases',
+            'last_working_date',
+            fn (object $row): string => $this->personnelName($row).' · '.$row->last_working_date,
+            $search,
+            $selectedId,
+            $limit,
+        );
+    }
+
+    /**
+     * Same rows and order as the queue list; the search looks at the option label's text
+     * (employee name, and the date — or whatever $orSearch adds).
+     *
+     * @param  callable(object): string  $label
+     * @param  array<int, string>  $extraColumns
+     * @param  (callable(Builder): mixed)|null  $orSearch
+     * @return array<int, array{id: int, label: string}>
+     */
+    private function completionOptions(
+        string $table,
+        string $dateColumn,
+        callable $label,
+        string $search,
+        ?int $selectedId,
+        int $limit,
+        array $extraColumns = [],
+        ?callable $orSearch = null,
+    ): array {
+        if (! InstalledTables::has($table)) {
+            return [];
+        }
+
+        $search = mb_strtolower(trim($search));
+        $base = fn (): Builder => $this->joinPersonnel(DB::table($table), $table)
+            ->select([
+                $table.'.id',
+                $table.'.'.$dateColumn,
+                ...array_map(fn (string $column): string => $table.'.'.$column, $extraColumns),
+                ...$this->personnelColumns(),
+            ]);
+
+        $rows = $base()
+            ->when($search !== '', fn (Builder $query) => $query->where(function (Builder $query) use ($table, $dateColumn, $search, $orSearch): void {
+                $like = '%'.$search.'%';
+                $query->whereRaw("concat_ws(' ', COALESCE(lp.surname, lpt.surname), COALESCE(lp.name, lpt.name), COALESCE(lp.patronymic, lpt.patronymic)) like ?", [$like])
+                    ->orWhere($table.'.'.$dateColumn, 'like', $like);
+
+                if ($orSearch !== null) {
+                    $orSearch($query);
+                }
+            }))
+            ->orderByRaw("case when {$table}.{$dateColumn} is null then 1 else 0 end")
+            ->orderBy($table.'.'.$dateColumn)
+            ->orderByDesc($table.'.id')
+            ->limit($limit)
+            ->get();
+
+        if ($selectedId !== null && ! $rows->contains(fn (object $row): bool => (int) $row->id === $selectedId)) {
+            $rows = $rows->concat($base()->where($table.'.id', $selectedId)->get());
+        }
+
+        return $rows
+            ->map(fn (object $row): array => ['id' => (int) $row->id, 'label' => $label($row)])
+            ->values()
+            ->all();
     }
 
     /**

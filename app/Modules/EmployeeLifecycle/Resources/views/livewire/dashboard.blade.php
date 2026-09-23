@@ -255,6 +255,11 @@
                     @empty
                         <p class="px-4 py-6 text-[12.5px] text-ink-faint">{{ __('employee-lifecycle::dashboard.empty') }}</p>
                     @endforelse
+                    @if (($queueTotals['probation'] ?? 0) > $probationReviews->count())
+                        <button type="button" wire:click="showMoreQueue('probation')" wire:loading.attr="disabled" wire:target="showMoreQueue('probation')" class="w-full px-4 py-2.5 text-center text-[12px] font-medium text-ink-muted transition hover:bg-[#fafafa] hover:text-ink">
+                            {{ __('employee-lifecycle::dashboard.actions.show_more', ['count' => $num($queueTotals['probation'] - $probationReviews->count())]) }}
+                        </button>
+                    @endif
                 </div>
             </section>
 
@@ -279,6 +284,11 @@
                     @empty
                         <p class="px-4 py-6 text-[12.5px] text-ink-faint">{{ __('employee-lifecycle::dashboard.empty') }}</p>
                     @endforelse
+                    @if (($queueTotals['movement'] ?? 0) > $movements->count())
+                        <button type="button" wire:click="showMoreQueue('movement')" wire:loading.attr="disabled" wire:target="showMoreQueue('movement')" class="w-full px-4 py-2.5 text-center text-[12px] font-medium text-ink-muted transition hover:bg-[#fafafa] hover:text-ink">
+                            {{ __('employee-lifecycle::dashboard.actions.show_more', ['count' => $num($queueTotals['movement'] - $movements->count())]) }}
+                        </button>
+                    @endif
                 </div>
             </section>
 
@@ -305,6 +315,11 @@
                     @empty
                         <p class="px-4 py-6 text-[12.5px] text-ink-faint">{{ __('employee-lifecycle::dashboard.empty') }}</p>
                     @endforelse
+                    @if (($queueTotals['offboarding'] ?? 0) > $offboardingCases->count())
+                        <button type="button" wire:click="showMoreQueue('offboarding')" wire:loading.attr="disabled" wire:target="showMoreQueue('offboarding')" class="w-full px-4 py-2.5 text-center text-[12px] font-medium text-ink-muted transition hover:bg-[#fafafa] hover:text-ink">
+                            {{ __('employee-lifecycle::dashboard.actions.show_more', ['count' => $num($queueTotals['offboarding'] - $offboardingCases->count())]) }}
+                        </button>
+                    @endif
                 </div>
             </section>
 
@@ -566,12 +581,12 @@
                         <p class="hrm-eyebrow">{{ __('employee-lifecycle::dashboard.forms.probation') }}</p>
                         <div class="mt-3 grid gap-3 sm:grid-cols-2">
                             <x-ui.input-shell class="sm:col-span-2" :error="$errors->first('completionForm.probation_review_id')">
-                                <x-ui.select wire:model="completionForm.probation_review_id">
-                                    <option value="">---</option>
-                                    @foreach ($probationReviews as $review)
-                                        <option value="{{ $review['id'] }}">{{ $review['employee_name'] }} · {{ $review['review_due_at'] }}</option>
-                                    @endforeach
-                                </x-ui.select>
+                                <x-ui.select-dropdown
+                                    wire:model="completionForm.probation_review_id"
+                                    :model="$this->probationReviewOptions"
+                                    search-model="probationOptionSearch"
+                                    placeholder="---"
+                                />
                             </x-ui.input-shell>
                             <x-ui.input-shell :error="$errors->first('completionForm.probation_decision')">
                                 <x-ui.select wire:model="completionForm.probation_decision">
@@ -596,12 +611,12 @@
                         <p class="hrm-eyebrow">{{ __('employee-lifecycle::dashboard.forms.movement') }}</p>
                         <div class="mt-3">
                             <x-ui.input-shell :error="$errors->first('completionForm.movement_id')">
-                                <x-ui.select wire:model="completionForm.movement_id">
-                                    <option value="">---</option>
-                                    @foreach ($movements as $movement)
-                                        <option value="{{ $movement['id'] }}">{{ $movement['employee_name'] }} · {{ $movement['movement_type_label'] }}</option>
-                                    @endforeach
-                                </x-ui.select>
+                                <x-ui.select-dropdown
+                                    wire:model="completionForm.movement_id"
+                                    :model="$this->movementOptions"
+                                    search-model="movementOptionSearch"
+                                    placeholder="---"
+                                />
                             </x-ui.input-shell>
                         </div>
                         <div class="mt-3 flex justify-end">
@@ -613,12 +628,12 @@
                         <p class="hrm-eyebrow">{{ __('employee-lifecycle::dashboard.forms.offboarding') }}</p>
                         <div class="mt-3 space-y-3">
                             <x-ui.input-shell :error="$errors->first('completionForm.offboarding_case_id')">
-                                <x-ui.select wire:model="completionForm.offboarding_case_id">
-                                    <option value="">---</option>
-                                    @foreach ($offboardingCases as $case)
-                                        <option value="{{ $case['id'] }}">{{ $case['employee_name'] }} · {{ $case['last_working_date'] }}</option>
-                                    @endforeach
-                                </x-ui.select>
+                                <x-ui.select-dropdown
+                                    wire:model="completionForm.offboarding_case_id"
+                                    :model="$this->offboardingCaseOptions"
+                                    search-model="offboardingOptionSearch"
+                                    placeholder="---"
+                                />
                             </x-ui.input-shell>
                             <x-ui.input-shell :label="__('employee-lifecycle::dashboard.fields.exit_summary')" :error="$errors->first('completionForm.exit_summary')">
                                 <x-ui.textarea wire:model="completionForm.exit_summary" rows="3" />

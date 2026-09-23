@@ -8,6 +8,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -80,6 +81,21 @@ class Dashboard extends Component
         'owner_user_id' => '',
     ];
 
+    /** Rows each queue card shows; "show more" grows one by a page. Locked: the client must not lift the bound. */
+    #[Locked]
+    public array $queueLimits = [
+        'probation' => LifecycleDashboardReadService::QUEUE_PAGE,
+        'movement' => LifecycleDashboardReadService::QUEUE_PAGE,
+        'offboarding' => LifecycleDashboardReadService::QUEUE_PAGE,
+    ];
+
+    /** Search boxes of the completion panel's selects. */
+    public string $probationOptionSearch = '';
+
+    public string $movementOptionSearch = '';
+
+    public string $offboardingOptionSearch = '';
+
     public array $completionForm = [
         'probation_review_id' => '',
         'probation_decision' => 'confirm',
@@ -122,6 +138,13 @@ class Dashboard extends Component
     {
         $this->panel = '';
         $this->resetErrorBag();
+    }
+
+    public function showMoreQueue(string $queue): void
+    {
+        if (array_key_exists($queue, $this->queueLimits)) {
+            $this->queueLimits[$queue] += LifecycleDashboardReadService::QUEUE_PAGE;
+        }
     }
 
     public function setStartTab(string $tab): void
@@ -470,7 +493,7 @@ class Dashboard extends Component
                 'search' => $this->search,
                 'type' => $this->type,
                 'status' => $this->status,
-            ]),
+            ], LifecycleDashboardReadService::PER_PAGE, $this->queueLimits),
         ]);
     }
 
@@ -571,6 +594,52 @@ class Dashboard extends Component
             'completionForm.offboarding_case_id' => __('employee-lifecycle::dashboard.forms.offboarding'),
             'completionForm.exit_summary' => __('employee-lifecycle::dashboard.fields.exit_summary'),
         ]);
+    }
+
+    /**
+     * Only the completion panel reads the three option lists below: searched, limited, and
+     * always holding the selected row.
+     *
+     * @return array<int, array{id: int, label: string}>
+     */
+    #[Computed]
+    public function probationReviewOptions(): array
+    {
+        return app(LifecycleDashboardReadService::class)->probationReviewOptions(
+            $this->probationOptionSearch,
+            $this->selectedCompletionId('probation_review_id'),
+        );
+    }
+
+    /**
+     * @return array<int, array{id: int, label: string}>
+     */
+    #[Computed]
+    public function movementOptions(): array
+    {
+        return app(LifecycleDashboardReadService::class)->movementOptions(
+            $this->movementOptionSearch,
+            $this->selectedCompletionId('movement_id'),
+        );
+    }
+
+    /**
+     * @return array<int, array{id: int, label: string}>
+     */
+    #[Computed]
+    public function offboardingCaseOptions(): array
+    {
+        return app(LifecycleDashboardReadService::class)->offboardingCaseOptions(
+            $this->offboardingOptionSearch,
+            $this->selectedCompletionId('offboarding_case_id'),
+        );
+    }
+
+    private function selectedCompletionId(string $field): ?int
+    {
+        $value = $this->completionForm[$field] ?? null;
+
+        return is_numeric($value) ? (int) $value : null;
     }
 
     /**
