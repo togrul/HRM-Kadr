@@ -9,6 +9,7 @@ use App\Models\OrderStatus;
 use App\Models\Personnel;
 use App\Modules\Personnel\Contracts\ApprovalRouteResolver;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
@@ -121,13 +122,13 @@ trait InteractsWithLeaveForm
     }
 
     #[Computed]
-    public function applicantPersonnelList()
+    public function applicantPersonnelList(): Collection
     {
         return $this->searchPersonnelOptions($this->personnelName);
     }
 
     #[Computed]
-    public function assignedPersonnelList()
+    public function assignedPersonnelList(): Collection
     {
         return $this->searchPersonnelOptions($this->assignedSearch);
     }
@@ -389,7 +390,7 @@ trait InteractsWithLeaveForm
         $this->leave->total_minutes = null;
     }
 
-    protected function searchPersonnelOptions(string $term)
+    protected function searchPersonnelOptions(string $term): Collection
     {
         if (mb_strlen(trim($term)) <= 2) {
             return collect();
