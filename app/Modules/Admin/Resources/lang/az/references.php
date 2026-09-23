@@ -38,6 +38,7 @@ return [
         'vacation_days' => 'Məzuniyyət günləri',
         'contract_duration' => 'Müqavilə müddəti',
         'next_contract_duration' => 'Növbəti müqavilə müddəti',
+        'vacation_days_per_month' => 'Aylıq məzuniyyət günləri',
         'serial_number' => 'Seriya nömrəsi',
         'capacity' => 'Tutum',
         'production_year' => 'İstehsal ili',

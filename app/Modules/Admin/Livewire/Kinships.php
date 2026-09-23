@@ -2,85 +2,35 @@
 
 namespace App\Modules\Admin\Livewire;
 
-use App\Modules\Admin\Support\Traits\Admin\AdminCrudTrait;
-use App\Modules\Admin\Support\Traits\Admin\CallSwalTrait;
 use App\Models\Kinship;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use App\Modules\Admin\Support\ReferenceCrudComponent;
 use Livewire\Attributes\On;
-use Livewire\Component;
 
 #[On(['kinshipUpdated', 'deleted'])]
-class Kinships extends Component
+class Kinships extends ReferenceCrudComponent
 {
-   use AdminCrudTrait;
-   use AuthorizesRequests;
-   use CallSwalTrait;
+    protected string $modelClass = Kinship::class;
 
-    public function rules(): array
+    protected string $savedEvent = 'kinshipUpdated';
+
+    protected function addLabel(): string
+    {
+        return __('admin::references.buttons.add_kinship');
+    }
+
+    protected function fields(): array
+    {
+        return ['id' => $this->idField()]
+            + $this->localeFields('name', __('admin::references.fields.name'))
+            + ['is_active' => ['label' => __('admin::references.fields.is_active'), 'type' => 'checkbox']];
+    }
+
+    protected function columns(): array
     {
         return [
-            'form.id' => 'required|integer|min:1|unique:kinships,id'.($this->model ? ','.$this->form['id'] : ''),
-            'form.name_az' => 'required|string|min:2',
+            ['label' => __('admin::references.fields.id'), 'attr' => 'id'],
+            $this->localeColumn('name', __('admin::references.fields.name')),
+            ['label' => __('admin::references.fields.is_active'), 'check' => 'is_active'],
         ];
-    }
-
-    protected function validationAttributes(): array
-    {
-        return [
-            'form.id' => __('admin::references.fields.id'),
-            'form.title_az' => __('admin::references.fields.name'),
-        ];
-    }
-
-    public function openCrud(?int $id = null): void
-    {
-        $this->model = $id
-            ? Kinship::find($id)
-            : null;
-
-        if($this->model)
-        {
-            $this->form = $this->model->toArray();
-            $this->form['is_active'] = (bool)$this->form['is_active'];
-        }
-        else
-        {
-            $this->form = [];
-        }
-
-        $this->isAdded = true;
-    }
-
-    public function deleteModel(?int $id = null): void
-    {
-        if ($id) {
-            $this->model = Kinship::find($id);
-
-            if ($this->model) {
-                $this->callDeletePromptSwal();
-            }
-        }
-    }
-
-    public function store(): void
-    {
-        $this->validate();
-        $this->form['is_active'] = $this->form['is_active'] ?? false;
-
-        $this->model
-            ? $this->model->update($this->form)
-            : Kinship::create($this->form);
-
-        $this->callSuccessSwal();
-
-        $this->dispatch('kinshipUpdated');
-        $this->closeCrud();
-    }
-
-    public function render()
-    {
-        $kinships = Kinship::all();
-
-        return view('admin::livewire.admin.kinships', compact('kinships'));
     }
 }

@@ -2,76 +2,49 @@
 
 namespace App\Modules\Admin\Livewire;
 
-use App\Modules\Admin\Support\Traits\Admin\AdminCrudTrait;
-use App\Modules\Admin\Support\Traits\Admin\CallSwalTrait;
 use App\Models\EducationalInstitution;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use App\Modules\Admin\Support\ReferenceCrudComponent;
 use Livewire\Attributes\On;
-use Livewire\Component;
 
 #[On(['educationalInstitutionsUpdated', 'deleted'])]
-class EducationalInstitutions extends Component
+class EducationalInstitutions extends ReferenceCrudComponent
 {
-    use AdminCrudTrait;
-    use AuthorizesRequests;
-    use CallSwalTrait;
+    protected string $modelClass = EducationalInstitution::class;
 
-    public function rules(): array
+    protected string $savedEvent = 'educationalInstitutionsUpdated';
+
+    protected function addLabel(): string
     {
+        return __('admin::references.buttons.add_institutions');
+    }
+
+    protected function fields(): array
+    {
+        $oldName = __('admin::references.fields.old_name');
+
         return [
-            'form.id' => 'required|integer|min:1|unique:educational_institutions,id'.($this->model ? ','.$this->form['id'] : ''),
-            'form.name' => 'required|string|min:2',
-            'form.shortname' => 'required|string|min:2',
+            'id' => $this->idField(),
+            'name' => ['label' => __('admin::references.fields.name'), 'rules' => 'required|string|min:2'],
+            'shortname' => ['label' => __('admin::references.fields.shortname'), 'rules' => 'required|string|min:2'],
+            'old_name_1' => ['label' => "{$oldName} 1"],
+            'old_name_2' => ['label' => "{$oldName} 2"],
+            'old_name_3' => ['label' => "{$oldName} 3"],
         ];
     }
 
-    protected function validationAttributes(): array
+    protected function columns(): array
     {
+        $oldName = __('admin::references.fields.old_name');
+
         return [
-            'form.id' => __('admin::references.fields.id'),
-            'form.name' => __('admin::references.fields.name'),
-            'form.shortname' => __('admin::references.fields.shortname'),
+            ['label' => __('admin::references.fields.id'), 'attr' => 'id'],
+            ['label' => __('admin::references.fields.name'), 'attr' => 'name'],
+            ['label' => __('admin::references.fields.shortname'), 'attr' => 'shortname'],
+            ['label' => __('admin::references.fields.old_names'), 'lines' => [
+                "{$oldName} 1" => 'old_name_1',
+                "{$oldName} 2" => 'old_name_2',
+                "{$oldName} 3" => 'old_name_3',
+            ]],
         ];
-    }
-
-    public function openCrud(?int $id = null): void
-    {
-        $this->model = $id
-            ? EducationalInstitution::find($id)
-            : null;
-
-        $this->form = $this->model ? $this->model->toArray() : [];
-        $this->isAdded = true;
-    }
-
-    public function deleteModel(?int $id = null): void
-    {
-        if ($id) {
-            $this->model = EducationalInstitution::find($id);
-
-            if ($this->model) {
-                $this->callDeletePromptSwal();
-            }
-        }
-    }
-
-    public function store(): void
-    {
-        $this->validate();
-
-        $this->model
-            ? $this->model->update($this->form)
-            : EducationalInstitution::create($this->form);
-
-        $this->callSuccessSwal();
-
-        $this->dispatch('educationalInstitutionsUpdated');
-        $this->closeCrud();
-    }
-
-    public function render()
-    {
-        $educationalInstitutions = EducationalInstitution::all();
-        return view('admin::livewire.admin.educational-institutions', compact('educationalInstitutions'));
     }
 }
