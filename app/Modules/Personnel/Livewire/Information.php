@@ -185,7 +185,10 @@ class Information extends Component
         abort_unless((string) $record->getAttribute('tabel_no') === $this->personnelModel, 404);
     }
 
-    public function mount(): void
+    /**
+     * @param  string|null  $startAt  a step view (e.g. 'employee-360') to open on instead of the first tab
+     */
+    public function mount(?string $startAt = null): void
     {
         $this->authorize('update', $this->personnel);
 
@@ -207,7 +210,8 @@ class Information extends Component
             'employee-360',
         ];
 
-        $this->currentStep = 0;
+        $start = $startAt !== null ? array_search($startAt, $this->stepViews, true) : false;
+        $this->currentStep = $start === false ? 0 : (int) $start;
     }
 
     public function render(): View

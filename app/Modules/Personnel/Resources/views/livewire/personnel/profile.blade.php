@@ -122,6 +122,48 @@
                 'personnel' => $personnel,
                 'reader' => $reader,
             ])
+
+            {{-- what has happened to this person lately; the 360 read spans many tables, so the
+                 list loads after first paint. The header stays outside the island: an action fired
+                 inside an island re-renders only the island, so the side panel would open empty. --}}
+            <section class="rounded-2xl border border-hairline bg-white shadow-card">
+                <div class="flex items-center justify-between gap-3 border-b border-hairline-subtle px-4 py-2.5">
+                    <p class="hrm-eyebrow">{{ __('personnel::profile.recent.title') }}</p>
+                    @if ($this->canEdit)
+                        <button type="button" wire:click="openSideMenu('show-information', @js($this->personnel->tabel_no), 'employee-360')" class="inline-flex items-center gap-1 text-[12px] font-medium text-ink-muted transition hover:text-ink">
+                            {{ __('personnel::profile.recent.view_all') }}
+                            <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+                        </button>
+                    @endif
+                </div>
+
+                @island(name: 'profile-recent-events', lazy: true)
+                @placeholder
+                    <div class="h-40 animate-pulse bg-[#fafafa]"></div>
+                @endplaceholder
+                @php
+                    $events = $this->recentEvents;
+                @endphp
+                @if ($events === [])
+                    <p class="px-4 py-6 text-center text-[12.5px] text-ink-faint">{{ __('personnel::profile.recent.empty') }}</p>
+                @else
+                    <ol class="divide-y divide-hairline-subtle">
+                        @foreach ($events as $event)
+                            <li class="flex items-start gap-3 px-4 py-2.5">
+                                <span class="mt-0.5 shrink-0 rounded-md bg-[#f4f4f5] px-1.5 py-0.5 text-[10.5px] font-medium text-ink-muted">{{ __('personnel::portfolio.timeline.'.$event['type']) }}</span>
+                                <div class="min-w-0 flex-1">
+                                    <p class="truncate text-[13px] font-medium text-ink">{{ $event['title'] }}</p>
+                                    @if (filled($event['summary'] ?? null))
+                                        <p class="truncate text-[11.5px] text-ink-faint">{{ $event['summary'] }}</p>
+                                    @endif
+                                </div>
+                                <span class="hrm-num shrink-0 text-[11.5px] text-ink-faint">{{ filled($event['occurred_at'] ?? null) ? \Illuminate\Support\Carbon::parse($event['occurred_at'])->format('d.m.Y') : '—' }}</span>
+                            </li>
+                        @endforeach
+                    </ol>
+                @endif
+                @endisland
+            </section>
         @endif
     </div>
 

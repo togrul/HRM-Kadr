@@ -56,4 +56,9 @@ return [
         'export_word' => 'Word-ə ixrac',
         'open_profile' => 'Şəxsi işi aç',
     ],
+    'recent' => [
+        'title' => 'Son hadisələr',
+        'view_all' => 'Bütün xronologiya',
+        'empty' => 'Hələ qeydə alınmış hadisə yoxdur.',
+    ],
 ];

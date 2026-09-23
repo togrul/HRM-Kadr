@@ -56,4 +56,9 @@ return [
         'export_word' => 'Export to Word',
         'open_profile' => 'Open personnel file',
     ],
+    'recent' => [
+        'title' => 'Recent events',
+        'view_all' => 'Full timeline',
+        'empty' => 'No events recorded yet.',
+    ],
 ];

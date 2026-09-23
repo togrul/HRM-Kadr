@@ -6,7 +6,7 @@
         @endif
 
         @if ($showSideMenu === 'show-information')
-            <livewire:personnel.information :personnelModel="$modelName" :key="'profile-information-'.$modelName" />
+            <livewire:personnel.information :personnelModel="$modelName" :startAt="$secondModel" :key="'profile-information-'.$modelName.'-'.($secondModel ?? 'first')" />
         @endif
 
         @if ($showSideMenu === 'show-vacations')
