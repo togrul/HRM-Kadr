@@ -9,6 +9,7 @@ use App\Support\Database\InstalledTables;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests as AccessAuthorizesRequests;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -98,6 +99,8 @@ class LeaveTypes extends Component
 
     public function store(): void
     {
+        Gate::authorize('access-admin');
+
         $this->validate();
 
         $this->form['requires_document'] = $this->form['requires_document'] ?? false;

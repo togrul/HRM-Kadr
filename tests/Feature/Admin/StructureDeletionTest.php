@@ -6,12 +6,13 @@ use App\Models\StaffSchedule;
 use App\Models\Structure;
 use App\Models\User;
 use App\Modules\Admin\Livewire\Structures;
-use App\Services\Structures\StructureDependencyMap;
 use App\Services\Structures\StructureDeletionService;
+use App\Services\Structures\StructureDependencyMap;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 use Spatie\Activitylog\Models\Activity;
+use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
 class StructureDeletionTest extends TestCase
@@ -109,7 +110,7 @@ class StructureDeletionTest extends TestCase
         $structure = Structure::query()->create(['name' => 'Doomed', 'shortname' => 'D']);
         $this->staffScheduleFor($structure->id);
 
-        Livewire::actingAs(User::factory()->create())
+        Livewire::actingAs(User::factory()->create()->givePermissionTo(Permission::findOrCreate('access-admin', 'web')))
             ->test(Structures::class)
             ->call('deleteModel', $structure->id)
             ->assertDispatched('confirm-structure-delete') // routed into the global confirm modal

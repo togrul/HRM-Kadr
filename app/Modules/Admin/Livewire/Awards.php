@@ -2,13 +2,14 @@
 
 namespace App\Modules\Admin\Livewire;
 
-use App\Modules\Admin\Support\Traits\Admin\AdminCrudTrait;
-use App\Modules\Admin\Support\Traits\Admin\CallSwalTrait;
 use App\Livewire\Traits\DropdownConstructTrait;
 use App\Models\Award;
 use App\Models\AwardType;
+use App\Modules\Admin\Support\Traits\Admin\AdminCrudTrait;
+use App\Modules\Admin\Support\Traits\Admin\CallSwalTrait;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -23,9 +24,11 @@ class Awards extends Component
     use WithPagination;
 
     public string $selectedType;
+
     public string $searchAwardType = '';
 
     public bool $showChild = false;
+
     public $childModel = null;
 
     public function rules(): array
@@ -108,6 +111,8 @@ class Awards extends Component
 
     public function store(): void
     {
+        Gate::authorize('access-admin');
+
         $this->validate();
 
         $this->form['is_foreign'] = $this->form['is_foreign'] ?? false;

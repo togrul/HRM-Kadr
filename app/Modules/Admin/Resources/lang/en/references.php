@@ -38,6 +38,7 @@ return [
         'vacation_days' => 'Vacation days',
         'contract_duration' => 'Contract duration',
         'next_contract_duration' => 'Next contract duration',
+        'vacation_days_per_month' => 'Vacation days per month',
         'serial_number' => 'Serial number',
         'capacity' => 'Capacity',
         'production_year' => 'Production year',

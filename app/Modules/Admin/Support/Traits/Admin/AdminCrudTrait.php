@@ -7,7 +7,7 @@ use Livewire\Attributes\On;
 
 trait AdminCrudTrait
 {
-    public bool $isAdded;
+    public bool $isAdded = false;
 
     public array $form = [];
 
