@@ -11,6 +11,7 @@ use App\Services\StructurePathService;
 use App\Services\StructureService;
 use App\Traits\NestedStructureTrait;
 use Carbon\Carbon;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -21,6 +22,7 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 #[On(['staffAdded', 'staffWasDeleted'])]
 class Staffs extends Component
@@ -56,7 +58,7 @@ class Staffs extends Component
 
     protected ?array $structureMap = null;
 
-    protected function queryString()
+    protected function queryString(): array
     {
         return [
             'structure' => [
@@ -65,7 +67,7 @@ class Staffs extends Component
         ];
     }
 
-    public function exportExcel()
+    public function exportExcel(): BinaryFileResponse
     {
         $this->authorize('export', StaffSchedule::class);
 
@@ -75,7 +77,7 @@ class Staffs extends Component
         return Excel::download(new VacancyExport($report), "vakansiyalar-{$name}.xlsx");
     }
 
-    public function showPage($page)
+    public function showPage($page): void
     {
         $this->selectedPage = $page;
     }
@@ -124,7 +126,7 @@ class Staffs extends Component
         return $id > 0 ? $id : null;
     }
 
-    public function setDeleteStaff($staffId)
+    public function setDeleteStaff($staffId): void
     {
         $this->dispatch('setDeleteStaff', $staffId);
     }
@@ -140,14 +142,14 @@ class Staffs extends Component
         $this->openSideMenu('add-staff');
     }
 
-    public function mount(StructureService $structureService)
+    public function mount(StructureService $structureService): void
     {
         $this->authorize('viewAny', StaffSchedule::class);
         $this->selectedPage = request()->query('selectedPage', 'all');
         $this->accessibleStructureIds = $structureService->getAccessibleStructures();
     }
 
-    protected function returnData($type = 'normal')
+    protected function returnData($type = 'normal'): array|Collection
     {
         if ($type === 'normal') {
             return Cache::remember($this->staffListCacheKey(), now()->addSeconds(10), fn () => $this->buildStaffRows());
@@ -158,7 +160,7 @@ class Staffs extends Component
         return $result->toArray();
     }
 
-    protected function buildStaffRows(bool $raw = false)
+    protected function buildStaffRows(bool $raw = false): Collection
     {
         $result = StaffSchedule::with([
             'position',
@@ -263,7 +265,7 @@ class Staffs extends Component
         });
     }
 
-    protected function buildStructureGroups($rows)
+    protected function buildStructureGroups($rows): Collection
     {
         return $rows
             ->groupBy('structure_id')
@@ -499,7 +501,7 @@ class Staffs extends Component
         );
     }
 
-    public function render()
+    public function render(): View
     {
         if ($this->selectedPage === 'all') {
             ['tree' => $staffTree, 'ids' => $staffTreeIds] = $this->cachedStructureTree();

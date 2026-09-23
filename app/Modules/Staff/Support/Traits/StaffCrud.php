@@ -7,6 +7,7 @@ use App\Models\Personnel;
 use App\Models\Position;
 use App\Models\Structure;
 use App\Services\StructurePathService;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -87,7 +88,7 @@ trait StaffCrud
         return $this->positionLabels[$id];
     }
 
-    public function addRow()
+    public function addRow(): void
     {
         $structureId = $this->staffModel ?? $this->structureId;
 
@@ -110,12 +111,12 @@ trait StaffCrud
         $this->syncRowHidePosition($nextKey);
     }
 
-    public function deleteRow($row)
+    public function deleteRow($row): void
     {
         unset($this->staff[$row]);
     }
 
-    public function setData($array_key, $model, $key, $content, $name, $id)
+    public function setData($array_key, $model, $key, $content, $name, $id): void
     {
         $this->searchPosition = '';
         $this->{$model}[$array_key][$key] = $id;
@@ -126,7 +127,7 @@ trait StaffCrud
         $this->fillAutoData($array_key, $model);
     }
 
-    protected function fillAutoData($array_key, $model)
+    protected function fillAutoData($array_key, $model): void
     {
         if (empty($this->staff)) {
             return;
@@ -167,7 +168,7 @@ trait StaffCrud
         $this->syncComputedStaffRows();
     }
 
-    public function render()
+    public function render(): View
     {
         $view_name = ! empty($this->staffModel)
             ? 'staff::livewire.staff-schedule.edit-staff'

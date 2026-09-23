@@ -4,7 +4,9 @@ namespace App\Modules\Staff\Livewire;
 
 use App\Models\StaffSchedule;
 use App\Modules\Staff\Support\Traits\StaffCrud;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Collection as SupportCollection;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 
@@ -13,8 +15,11 @@ class EditStaff extends Component
     use AuthorizesRequests;
     use StaffCrud;
 
+    /**
+     * @return SupportCollection<int|string, Collection<int, StaffSchedule>>
+     */
     #[Computed]
-    public function getStaffs()
+    public function getStaffs(): SupportCollection
     {
         return StaffSchedule::with(['structure', 'position'])
             ->where('structure_id', $this->staffModel)
@@ -22,7 +27,7 @@ class EditStaff extends Component
             ->groupBy('structure_id');
     }
 
-    public function mount()
+    public function mount(): void
     {
         $this->authorize('edit-staff', $this->staffModel);
 
