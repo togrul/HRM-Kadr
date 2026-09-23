@@ -58,6 +58,20 @@ class BusinessTrips extends Component
     public function searchFilter(): void
     {
         $this->search = $this->filter;
+        $this->resetPage();
+    }
+
+    /** Filters apply as they change; there is no separate "search" step. */
+    public function updatedFilter(): void
+    {
+        $this->searchFilter();
+    }
+
+    #[Computed]
+    public function hasActiveFilters(): bool
+    {
+        return $this->selectedLocation !== null
+            || collect(Arr::dot($this->search))->except('business_trip_status')->contains(fn ($value): bool => filled($value));
     }
 
     public function resetFilter(): void

@@ -70,6 +70,20 @@ class Vacations extends Component
     public function searchFilter(): void
     {
         $this->search = $this->filter;
+        $this->resetPage();
+    }
+
+    /** Filters apply as they change; there is no separate "search" step. */
+    public function updatedFilter(): void
+    {
+        $this->searchFilter();
+    }
+
+    #[Computed]
+    public function hasActiveFilters(): bool
+    {
+        return $this->selectedType !== null
+            || collect(Arr::dot($this->search))->except('vacation_status')->contains(fn ($value): bool => filled($value));
     }
 
     public function resetFilter(): void

@@ -111,6 +111,15 @@ class Leaves extends Component
                 $this->filter->starts_at = null;
             }
         }
+
+        // Filters apply as they change; there is no separate "search" step.
+        $this->applyFilter();
+    }
+
+    #[Computed]
+    public function hasActiveFilters(): bool
+    {
+        return collect($this->search->toArray())->contains(fn ($value): bool => filled($value));
     }
 
     public function setDeleteLeave($leaveId): void

@@ -2,6 +2,7 @@
 
 return [
     'actions' => [
+        'reset_filters' => 'Clear filters',
         'cancel' => 'Cancel',
         'close' => 'Close',
         'delete' => 'Delete',

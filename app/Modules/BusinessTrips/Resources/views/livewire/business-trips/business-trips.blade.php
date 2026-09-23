@@ -55,12 +55,6 @@
                     @endforeach
                 </x-context-panel.section>
             @endif
-
-            <x-slot name="footer">
-                <button type="button" wire:click="resetFilter" class="text-[12px] font-medium text-ink-muted transition hover:text-ink">
-                    {{ __('business_trips::common.filters.reset') }}
-                </button>
-            </x-slot>
         </x-context-panel>
     @endteleport
 
@@ -83,7 +77,6 @@
             @can('review-self-service-requests')
                 <x-ui.self-service-review-link />
             @endcan
-            <x-pill-button wire:click="resetFilter">{{ __('business_trips::common.filters.reset') }}</x-pill-button>
             @can('export-business_trips')
                 <x-pill-button variant="emerald" :icon="true" wire:click.prevent="exportExcel"
                     wire:loading.attr="disabled" wire:target="exportExcel"
@@ -97,7 +90,7 @@
         <div class="flex flex-wrap items-end gap-3">
             <label class="w-full flex-1 sm:max-w-[300px]">
                 <span class="hrm-eyebrow block pb-1">{{ __('business_trips::common.filters.fullname') }}</span>
-                <x-livewire-input mode="gray" name="filter.fullname" wire:model="filter.fullname" />
+                <x-livewire-input mode="gray" name="filter.fullname" wire:model.live.debounce.400ms="filter.fullname" />
             </label>
 
             <div class="shrink-0">
@@ -138,7 +131,7 @@
                 />
             </div>
 
-            <x-pill-button variant="primary" wire:click="searchFilter">{{ __('business_trips::common.filters.search') }}</x-pill-button>
+            <x-filter.reset :active="$this->hasActiveFilters" />
         </div>
     </x-page-header>
 

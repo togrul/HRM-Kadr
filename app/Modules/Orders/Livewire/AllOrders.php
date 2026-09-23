@@ -15,6 +15,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\LazyCollection;
@@ -68,6 +69,12 @@ class AllOrders extends Component
     {
         $this->reset('search');
         $this->resetPage();
+    }
+
+    #[Computed]
+    public function hasActiveFilters(): bool
+    {
+        return collect(Arr::dot((array) $this->search))->contains(fn ($value): bool => filled($value));
     }
 
     public function getTableHeaders(): array

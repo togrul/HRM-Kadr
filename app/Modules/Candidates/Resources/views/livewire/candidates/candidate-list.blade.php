@@ -75,7 +75,7 @@
                 @if ($this->filterEnabled('fullname'))
                     <label class="w-full flex-1 sm:max-w-[300px]">
                         <span class="hrm-eyebrow block pb-1">{{ __('candidates::common.labels.fullname') }}</span>
-                        <x-livewire-input mode="gray" name="filter.fullname" wire:model="filter.fullname" />
+                        <x-livewire-input mode="gray" name="filter.fullname" wire:model.live.debounce.400ms="filter.fullname" />
                     </label>
                 @endif
 
@@ -83,10 +83,10 @@
                     <div class="shrink-0">
                         <span class="hrm-eyebrow block pb-1">{{ __('candidates::common.labels.appeal_date') }}</span>
                         <div class="flex items-center gap-2">
-                            <input type="date" wire:model="filter.appeal_date.min"
+                            <input type="date" wire:model.live="filter.appeal_date.min"
                                 class="hrm-num h-10 w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-base sm:text-sm text-ink focus:border-ink focus:bg-white focus:ring-0" />
                             <span class="shrink-0 text-ink-faint">&ndash;</span>
-                            <input type="date" wire:model="filter.appeal_date.max"
+                            <input type="date" wire:model.live="filter.appeal_date.max"
                                 class="hrm-num h-10 w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-base sm:text-sm text-ink focus:border-ink focus:bg-white focus:ring-0" />
                         </div>
                     </div>
@@ -95,14 +95,14 @@
                 @if ($this->filterEnabled('age'))
                     <label class="w-[110px] shrink-0">
                         <span class="hrm-eyebrow block pb-1">{{ __('candidates::common.labels.age') }}</span>
-                        <x-livewire-input mode="gray" type="number" name="filter.age" wire:model="filter.age" />
+                        <x-livewire-input mode="gray" type="number" name="filter.age" wire:model.live.debounce.400ms="filter.age" />
                     </label>
                 @endif
 
                 @if ($this->filterEnabled('results') && $this->isMilitaryCandidateMode())
                     <label class="w-[130px] shrink-0">
                         <span class="hrm-eyebrow block pb-1">{{ __('candidates::common.labels.test_results') }}</span>
-                        <x-livewire-input mode="gray" type="number" name="filter.results" wire:model="filter.results" />
+                        <x-livewire-input mode="gray" type="number" name="filter.results" wire:model.live.debounce.400ms="filter.results" />
                     </label>
                 @endif
 
@@ -120,8 +120,7 @@
                     </div>
                 @endif
 
-                <x-pill-button variant="primary" wire:click="searchFilter">{{ __('candidates::common.labels.search') }}</x-pill-button>
-                <x-pill-button wire:click="resetFilter">{{ __('candidates::common.labels.reset') }}</x-pill-button>
+                <x-filter.reset :active="$this->hasActiveFilters" />
             </div>
 
             @if ($this->filterEnabled('gender'))

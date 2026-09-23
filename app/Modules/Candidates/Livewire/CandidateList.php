@@ -19,6 +19,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -98,6 +99,18 @@ class CandidateList extends Component
     public function searchFilter(): void
     {
         $this->applyFilter();
+    }
+
+    /** Filters apply as they change; there is no separate "search" step. */
+    public function updatedFilter(): void
+    {
+        $this->applyFilter();
+    }
+
+    #[Computed]
+    public function hasActiveFilters(): bool
+    {
+        return collect(Arr::dot($this->search))->contains(fn ($value): bool => filled($value) && $value !== 'all');
     }
 
     public function toggleDocumentCategory(string $category): void

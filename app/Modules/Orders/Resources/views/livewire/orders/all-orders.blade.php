@@ -164,7 +164,7 @@
                     </div>
                 </div>
 
-                <x-pill-button wire:click="resetFilter">{{ __('orders::order_list.filters.reset') }}</x-pill-button>
+                <x-filter.reset :active="$this->hasActiveFilters" />
             </div>
 
             <p class="text-[11.5px] text-ink-faint">{{ __('orders::order_list.hints.docx_only') }}</p>

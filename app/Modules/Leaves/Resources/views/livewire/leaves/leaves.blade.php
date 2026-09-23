@@ -71,12 +71,6 @@
                     >{{ $leaveTypeLabel }}</x-context-panel.item>
                 @endforeach
             </x-context-panel.section>
-
-            <x-slot name="footer">
-                <button type="button" wire:click="resetFilter" class="text-[12px] font-medium text-ink-muted transition hover:text-ink">
-                    {{ __('leaves::common.labels.reset') }}
-                </button>
-            </x-slot>
         </x-context-panel>
     @endteleport
 
@@ -115,18 +109,18 @@
             <div class="flex flex-wrap items-end gap-3">
                 <label class="w-full flex-1 sm:max-w-[300px]">
                     <span class="hrm-eyebrow block pb-1">{{ __('leaves::common.labels.fullname') }}</span>
-                    <x-livewire-input mode="gray" name="filter.fullname" wire:model="filter.fullname"
+                    <x-livewire-input mode="gray" name="filter.fullname" wire:model.live.debounce.400ms="filter.fullname"
                         placeholder="{{ __('leaves::common.labels.search_by_person') }}" />
                 </label>
 
                 <div class="shrink-0">
                     <span class="hrm-eyebrow block pb-1">{{ __('leaves::common.labels.dates') }}</span>
                     <div class="flex items-center gap-2">
-                        <input type="date" wire:model="filter.starts_at"
+                        <input type="date" wire:model.live="filter.starts_at"
                             aria-label="{{ __('leaves::common.labels.date_start') }}"
                             class="hrm-num h-10 w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-base sm:text-sm text-ink focus:border-ink focus:bg-white focus:ring-0" />
                         <span class="shrink-0 text-ink-faint">&ndash;</span>
-                        <input type="date" wire:model="filter.ends_at"
+                        <input type="date" wire:model.live="filter.ends_at"
                             aria-label="{{ __('leaves::common.labels.date_end') }}"
                             class="hrm-num h-10 w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-base sm:text-sm text-ink focus:border-ink focus:bg-white focus:ring-0" />
                     </div>
@@ -134,15 +128,10 @@
 
                 <label class="min-w-[170px] flex-1">
                     <span class="hrm-eyebrow block pb-1">{{ __('leaves::common.labels.reason') }}</span>
-                    <x-livewire-input mode="gray" type="text" name="filter.reason" wire:model="filter.reason" />
+                    <x-livewire-input mode="gray" type="text" name="filter.reason" wire:model.live.debounce.400ms="filter.reason" />
                 </label>
 
-                <x-pill-button variant="primary" wire:click="searchFilter" wire:loading.attr="disabled" wire:target="searchFilter">
-                    {{ __('leaves::common.labels.search') }}
-                </x-pill-button>
-                <x-pill-button wire:click="resetFilter" wire:loading.attr="disabled" wire:target="resetFilter">
-                    {{ __('leaves::common.labels.reset') }}
-                </x-pill-button>
+                <x-filter.reset :active="$this->hasActiveFilters" />
             </div>
 
             <div class="flex flex-wrap items-center gap-2">

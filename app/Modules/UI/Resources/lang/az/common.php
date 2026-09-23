@@ -2,6 +2,7 @@
 
 return [
     'actions' => [
+        'reset_filters' => 'Filtri sıfırla',
         'cancel' => 'Ləğv et',
         'close' => 'Bağla',
         'delete' => 'Sil',
