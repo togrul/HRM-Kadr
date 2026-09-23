@@ -1,6 +1,6 @@
-<div class="rounded-[1.75rem] border border-zinc-200 bg-white p-6 shadow-card">
+<div class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-card">
     <div class="animate-pulse space-y-5">
-        <div class="rounded-[1.6rem] border border-zinc-200 bg-zinc-50/70 p-4">
+        <div class="rounded-2xl border border-zinc-200 bg-zinc-50/70 p-4">
             <div class="grid gap-3 lg:grid-cols-[minmax(0,1fr)_16rem]">
                 <div class="space-y-2">
                     <div class="h-3 w-28 rounded bg-zinc-200"></div>

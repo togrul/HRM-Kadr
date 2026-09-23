@@ -28,7 +28,7 @@
 @endphp
 <x-surface-card :title="__('notifications::common.tabs.campaigns')" icon="icons.clock-icon">
     <div class="space-y-4">
-        <div class="rounded-[1.6rem] border border-zinc-200 bg-zinc-50/70 p-4">
+        <div class="rounded-2xl border border-zinc-200 bg-zinc-50/70 p-4">
             <div class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                 <div>
                     <p class="text-sm font-semibold text-zinc-950">{{ __('notifications::common.tabs.campaigns') }}</p>
@@ -54,7 +54,7 @@
 
         <div class="space-y-3">
             @forelse ($campaigns as $campaign)
-                <div class="rounded-[1.6rem] border border-zinc-200 bg-white px-4 py-4 shadow-card">
+                <div class="rounded-2xl border border-zinc-200 bg-white px-4 py-4 shadow-card">
                     <div class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_auto]">
                         <div class="space-y-3">
                             <div class="flex flex-wrap items-center gap-2">
@@ -163,7 +163,7 @@
                     </div>
                 </div>
             @empty
-                <div class="rounded-[1.7rem] border border-dashed border-zinc-200 bg-zinc-50/70 px-5 py-10 text-center">
+                <div class="rounded-2xl border border-dashed border-zinc-200 bg-zinc-50/70 px-5 py-10 text-center">
                     <p class="text-sm font-semibold text-zinc-900">{{ __('notifications::common.tabs.campaigns') }}</p>
                     <p class="mt-2 text-sm leading-6 text-zinc-500">{{ __('notifications::common.helpers.campaign_none') }}</p>
                 </div>

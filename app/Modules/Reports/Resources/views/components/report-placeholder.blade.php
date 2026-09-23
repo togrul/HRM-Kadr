@@ -5,7 +5,7 @@
 ])
 
 <div @class([
-    'overflow-hidden rounded-[1.7rem] border border-zinc-200/90 bg-[linear-gradient(180deg,#ffffff_0%,#fcfcfd_100%)] shadow-card',
+    'overflow-hidden rounded-2xl border border-zinc-200/90 bg-[linear-gradient(180deg,#ffffff_0%,#fcfcfd_100%)] shadow-card',
     'p-4' => $compact,
     'p-5' => ! $compact,
 ])>

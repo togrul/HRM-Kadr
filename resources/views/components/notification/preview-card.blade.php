@@ -17,7 +17,7 @@
     $bodyText = filled($body) ? $body : $fallback;
 @endphp
 
-<div class="rounded-[1.45rem] border border-zinc-200 bg-white p-4 shadow-card">
+<div class="rounded-2xl border border-zinc-200 bg-white p-4 shadow-card">
     @if (filled($title))
         <p class="{{ trim('text-sm font-semibold tracking-tight text-zinc-950 '.$titleClass) }}">{{ $title }}</p>
     @endif

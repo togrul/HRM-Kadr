@@ -38,7 +38,7 @@
     </div>
 
     @if ($searchModel)
-        <div class="rounded-[1.3rem] border border-zinc-200 bg-white px-3 py-3 shadow-card">
+        <div class="rounded-2xl border border-zinc-200 bg-white px-3 py-3 shadow-card">
             <input
                 type="text"
                 wire:model.live.debounce.300ms="{{ $searchModel }}"

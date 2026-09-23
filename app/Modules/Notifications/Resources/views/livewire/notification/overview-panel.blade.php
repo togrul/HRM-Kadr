@@ -24,7 +24,7 @@
                 'employment_started' => __('notifications::common.flows.employment_started_starter'),
                 'holiday' => __('notifications::common.flows.holiday_starter'),
             ] as $flowKey => $flowTitle)
-                <div class="flex h-full flex-col rounded-[1.75rem] border border-zinc-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,250,252,0.94))] p-4 shadow-card">
+                <div class="flex h-full flex-col rounded-2xl border border-zinc-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,250,252,0.94))] p-4 shadow-card">
                     <div class="flex items-start justify-between gap-3">
                         <div class="min-w-0 space-y-2">
                             <h3 class="text-[1rem] font-semibold leading-6 tracking-tight text-zinc-950">

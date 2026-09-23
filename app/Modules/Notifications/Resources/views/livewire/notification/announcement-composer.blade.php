@@ -6,7 +6,7 @@
 
 <x-surface-card :title="__('notifications::common.titles.announcement_composer')" icon="icons.notification-icon">
     <div class="grid gap-5 min-[1700px]:grid-cols-[minmax(0,1.12fr)_minmax(25rem,0.88fr)]">
-        <div class="space-y-4 rounded-[1.6rem] border border-zinc-200 bg-zinc-50/70 p-4">
+        <div class="space-y-4 rounded-2xl border border-zinc-200 bg-zinc-50/70 p-4">
             <div class="grid gap-4 md:grid-cols-2">
                 <div class="space-y-2">
                     <label class="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.fields.category') }}</label>
@@ -111,7 +111,7 @@
             </div>
         </div>
 
-        <div class="space-y-4 rounded-[1.6rem] border border-zinc-200 bg-zinc-50/70 p-4">
+        <div class="space-y-4 rounded-2xl border border-zinc-200 bg-zinc-50/70 p-4">
             <div class="grid gap-4">
                 <div class="space-y-2">
                     <x-notification.audience-selector

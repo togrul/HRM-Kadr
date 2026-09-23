@@ -24,7 +24,7 @@
 
 <x-surface-card :title="__('notifications::common.tabs.history')" icon="icons.book-icon">
     <div class="space-y-4">
-        <div class="rounded-[1.6rem] border border-zinc-200 bg-zinc-50/70 p-4">
+        <div class="rounded-2xl border border-zinc-200 bg-zinc-50/70 p-4">
             <div class="grid gap-3 lg:grid-cols-[minmax(0,1fr)_14rem]">
                 <x-ui.input-shell>
                     <input type="text" wire:model.live.debounce.300ms="search" placeholder="{{ __('notifications::common.helpers.search_history') }}" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
@@ -42,7 +42,7 @@
 
         <div class="space-y-4">
             @forelse ($campaigns as $campaign)
-                <div class="rounded-[1.75rem] border border-zinc-200 bg-white p-5 shadow-card">
+                <div class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-card">
                     <div class="space-y-5">
                         <div class="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                             <div class="space-y-3">
@@ -82,7 +82,7 @@
                         </div>
 
                         <div class="grid gap-4 xl:grid-cols-2">
-                            <section class="rounded-[1.45rem] border border-zinc-200 bg-zinc-50/50 p-4">
+                            <section class="rounded-2xl border border-zinc-200 bg-zinc-50/50 p-4">
                                 <div class="flex items-center justify-between gap-3">
                                     <p class="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.titles.audit_timeline') }}</p>
                                     <x-notification.chip mode="neutral" size="sm">{{ $campaign->approvals->count() }}</x-notification.chip>
@@ -112,7 +112,7 @@
                                 </div>
                             </section>
 
-                            <section class="rounded-[1.45rem] border border-zinc-200 bg-zinc-50/50 p-4">
+                            <section class="rounded-2xl border border-zinc-200 bg-zinc-50/50 p-4">
                                 <div class="flex items-center justify-between gap-3">
                                     <p class="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.titles.delivery_summary') }}</p>
                                     <x-notification.chip mode="neutral" size="sm">
@@ -181,7 +181,7 @@
                     </div>
                 </div>
             @empty
-                <div class="rounded-[1.7rem] border border-dashed border-zinc-200 bg-zinc-50/70 px-5 py-10 text-center">
+                <div class="rounded-2xl border border-dashed border-zinc-200 bg-zinc-50/70 px-5 py-10 text-center">
                     <p class="text-sm font-semibold text-zinc-900">{{ __('notifications::common.tabs.history') }}</p>
                     <p class="mt-2 text-sm leading-6 text-zinc-500">{{ __('notifications::common.helpers.history_empty') }}</p>
                 </div>

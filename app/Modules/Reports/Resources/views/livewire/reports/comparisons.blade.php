@@ -1,5 +1,5 @@
 <div class="space-y-5 px-4 py-3 lg:px-5">
-    <x-surface-card :title="__('reports::dashboard.comparisons.title')" icon="icons.pending-icon" class="rounded-[2rem] border-zinc-200/90 bg-white shadow-card" bodyClass="rounded-[1.6rem] border-zinc-200/90 bg-[linear-gradient(180deg,#ffffff_0%,#fcfcfd_100%)]" contentClass="p-5 lg:p-6">
+    <x-surface-card :title="__('reports::dashboard.comparisons.title')" icon="icons.pending-icon" class="rounded-2xl border-zinc-200/90 bg-white shadow-card" bodyClass="rounded-b-2xl border-zinc-200/90 bg-[linear-gradient(180deg,#ffffff_0%,#fcfcfd_100%)]" contentClass="p-5 lg:p-6">
         <div class="space-y-4">
             <p class="text-sm leading-7 text-zinc-500">{{ __('reports::dashboard.comparisons.description') }}</p>
 

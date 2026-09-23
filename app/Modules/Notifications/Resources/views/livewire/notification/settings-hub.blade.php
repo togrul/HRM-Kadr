@@ -1,7 +1,7 @@
 <div class="space-y-5">
     <x-surface-card :title="__('notifications::common.titles.module')" icon="icons.notification-icon">
         <div class="space-y-4">
-            <div class="rounded-[1.7rem] border border-zinc-200 bg-[linear-gradient(180deg,rgba(250,250,250,0.96),rgba(244,244,245,0.78))] p-4 shadow-card">
+            <div class="rounded-2xl border border-zinc-200 bg-[linear-gradient(180deg,rgba(250,250,250,0.96),rgba(244,244,245,0.78))] p-4 shadow-card">
                 <div class="space-y-4">
                     <div class="min-w-0">
                         <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400">{{ __('notifications::common.titles.module') }}</p>
@@ -37,7 +37,7 @@
                 </div>
             </div>
 
-            <div class="rounded-[1.75rem] border border-zinc-200 bg-zinc-50/70 p-3 shadow-card" wire:key="notification-settings-panel-{{ $activeTab }}">
+            <div class="rounded-2xl border border-zinc-200 bg-zinc-50/70 p-3 shadow-card" wire:key="notification-settings-panel-{{ $activeTab }}">
                 @if ($activeTab === 'overview')
                     <livewire:notification.overview-panel :key="'notification-overview-panel'" />
                 @elseif ($activeTab === 'analytics')

@@ -12,7 +12,7 @@
 <div class="grid gap-5 min-[1700px]:grid-cols-[minmax(0,1.05fr)_minmax(24rem,0.95fr)]">
     <x-surface-card :title="__('notifications::common.titles.templates')" icon="icons.layout-icon">
         <div class="space-y-4">
-            <div class="rounded-[1.6rem] border border-zinc-200 bg-zinc-50/70 p-4">
+            <div class="rounded-2xl border border-zinc-200 bg-zinc-50/70 p-4">
                 <div class="flex flex-wrap items-start justify-between gap-3 border-b border-zinc-200/80 pb-4">
                     <div>
                         <p class="text-sm font-semibold text-zinc-950">{{ __('notifications::common.titles.templates') }}</p>
