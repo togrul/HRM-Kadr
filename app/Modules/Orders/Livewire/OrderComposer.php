@@ -2,10 +2,8 @@
 
 namespace App\Modules\Orders\Livewire;
 
-use App\Models\Candidate;
 use App\Models\OrderLog;
 use App\Models\OrderWordTemplate;
-use App\Models\Personnel;
 use App\Modules\Orders\Application\Document\OrderComposition;
 use App\Modules\Orders\Application\Document\OrderTemplateProvider;
 use App\Modules\Orders\Infrastructure\Document\OrderCompositionIssuer;
@@ -14,9 +12,11 @@ use App\Modules\Orders\Infrastructure\Document\OrderDraftService;
 use App\Modules\Orders\Infrastructure\Document\OrderIssueService;
 use App\Modules\Orders\Infrastructure\Document\OrderLookupFieldRegistry;
 use App\Modules\Orders\Infrastructure\Document\OrderSubjectResolver;
+use App\Modules\Orders\Livewire\Concerns\InteractsWithOrderSubjectPicker;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Storage;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -31,27 +31,9 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  */
 class OrderComposer extends Component
 {
-    use AuthorizesRequests, WithFileUploads;
+    use AuthorizesRequests, InteractsWithOrderSubjectPicker, WithFileUploads;
 
     public string $presetCode = '';
-
-    public ?int $personnelId = null;
-
-    public string $personnelQuery = '';
-
-    public ?string $personnelLabel = null;
-
-    // Hire orders pick a candidate (not an employee) and the structure/position they
-    // are hired into; on approval the candidate is converted to an active employee.
-    public ?int $candidateId = null;
-
-    public string $candidateQuery = '';
-
-    public ?string $candidateLabel = null;
-
-    public ?int $hireStructureId = null;
-
-    public ?int $hirePositionId = null;
 
     /** @var array<string,mixed> manual field key => value */
     public array $fields = [];
@@ -63,6 +45,7 @@ class OrderComposer extends Component
     public string $organizationCity = OrderDraftService::ORGANIZATION_CITY;
 
     /** Set when editing an existing pending docx order (its order_logs id). */
+    #[Locked]
     public ?int $editOrderId = null;
 
     /** A corrected .docx the user uploaded to replace the generated document. */
@@ -89,11 +72,7 @@ class OrderComposer extends Component
         }
 
         $this->presetCode = $presetCode ?? '';
-        $this->personnelId = $personnelId;
-
-        if ($personnelId) {
-            $this->personnelLabel = optional(Personnel::find($personnelId))->fullname;
-        }
+        $this->pickPersonnel($personnelId);
     }
 
     public function isEditing(): bool
@@ -118,19 +97,12 @@ class OrderComposer extends Component
         $this->orderDate = (string) ($snapshot['order_date_text'] ?? '');
         $this->hasUploadedDocx = ! empty($snapshot['docx_path']);
 
-        $personnelId = $snapshot['personnel_id'] ?? null;
-        if ($personnelId) {
-            $this->personnelId = (int) $personnelId;
-            $this->personnelLabel = optional(Personnel::find($this->personnelId))->fullname;
-        }
-
-        $this->hireStructureId = $snapshot['hire_structure_id'] ?? null;
-        $this->hirePositionId = $snapshot['hire_position_id'] ?? null;
-        $candidateId = $snapshot['candidate_id'] ?? null;
-        if ($candidateId) {
-            $this->candidateId = (int) $candidateId;
-            $this->candidateLabel = optional(Candidate::find($this->candidateId))->fullname;
-        }
+        $this->pickPersonnel(empty($snapshot['personnel_id']) ? null : (int) $snapshot['personnel_id']);
+        $this->pickHire(
+            empty($snapshot['candidate_id']) ? null : (int) $snapshot['candidate_id'],
+            $snapshot['hire_structure_id'] ?? null,
+            $snapshot['hire_position_id'] ?? null,
+        );
     }
 
     public function isHire(): bool
@@ -152,95 +124,6 @@ class OrderComposer extends Component
         }
 
         return $this->templateCache;
-    }
-
-    /**
-     * Candidate picker for hire orders — only candidates in the "ready for order"
-     * status (30) are offered.
-     *
-     * @return array<int,array{id:int,label:string}>
-     */
-    public function getCandidateResultsProperty(): array
-    {
-        $term = trim($this->candidateQuery);
-        if (mb_strlen($term) < 2) {
-            return [];
-        }
-
-        return Candidate::query()
-            ->where('status_id', 30)
-            ->where(fn ($q) => $q
-                ->where('surname', 'like', "%{$term}%")
-                ->orWhere('name', 'like', "%{$term}%")
-                ->orWhere('patronymic', 'like', "%{$term}%"))
-            ->orderBy('surname')
-            ->limit(8)
-            ->get(['id', 'surname', 'name', 'patronymic'])
-            ->map(fn (Candidate $c) => [
-                'id' => $c->id,
-                'label' => trim("{$c->surname} {$c->name} {$c->patronymic}"),
-            ])
-            ->all();
-    }
-
-    public function selectCandidate(int $id): void
-    {
-        $candidate = Candidate::find($id);
-        if ($candidate) {
-            $this->candidateId = $candidate->id;
-            $this->candidateLabel = $candidate->fullname;
-            $this->hireStructureId ??= $candidate->structure_id;
-        }
-        $this->candidateQuery = '';
-        $this->previewPdf = '';
-    }
-
-    public function clearCandidate(): void
-    {
-        $this->candidateId = null;
-        $this->candidateLabel = null;
-        $this->previewPdf = '';
-    }
-
-    /**
-     * @return array<int,array{id:int,label:string}>
-     */
-    public function getPersonnelResultsProperty(): array
-    {
-        $term = trim($this->personnelQuery);
-        if (mb_strlen($term) < 2) {
-            return [];
-        }
-
-        return Personnel::query()
-            ->active()
-            ->where(fn ($q) => $q->nameLike($term)->orWhere('tabel_no', 'like', "%{$term}%"))
-            ->orderBy('surname')
-            ->limit(8)
-            ->get(['id', 'surname', 'name', 'patronymic', 'tabel_no'])
-            ->map(fn (Personnel $p) => [
-                'id' => $p->id,
-                'label' => trim("{$p->surname} {$p->name} {$p->patronymic}")." ({$p->tabel_no})",
-            ])
-            ->all();
-    }
-
-    public function selectPersonnel(int $id): void
-    {
-        $personnel = Personnel::find($id);
-        if ($personnel) {
-            $this->personnelId = $personnel->id;
-            $this->personnelLabel = $personnel->fullname;
-        }
-        $this->personnelQuery = '';
-        $this->previewPdf = '';
-    }
-
-    public function clearPersonnel(): void
-    {
-        $this->personnelId = null;
-        $this->personnelLabel = null;
-        $this->previewPdf = '';
     }
 
     /**
@@ -294,11 +177,7 @@ class OrderComposer extends Component
         $this->fields = [];
         $this->previewPdf = '';
         $this->templateLoaded = false;
-        // Switching types clears any subject picked for the previous one.
-        $this->candidateId = null;
-        $this->candidateLabel = null;
-        $this->hireStructureId = null;
-        $this->hirePositionId = null;
+        $this->resetHireSubject();
     }
 
     /**

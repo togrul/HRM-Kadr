@@ -15,6 +15,93 @@ use App\Modules\Orders\Application\Document\OrderComposition;
  */
 class OrderSubjectResolver
 {
+    /** Candidate status offered to hire orders: "ready for order" (Əmrə hazır). */
+    public const CANDIDATE_READY_FOR_ORDER = 30;
+
+    /** Minimum search term length before the pickers query anything. */
+    private const MIN_TERM_LENGTH = 2;
+
+    private const RESULT_LIMIT = 8;
+
+    /**
+     * Hire-order candidate picker: only candidates ready for an order.
+     *
+     * @return array<int,array{id:int,label:string}>
+     */
+    public function searchCandidates(string $term): array
+    {
+        $term = trim($term);
+        if (mb_strlen($term) < self::MIN_TERM_LENGTH) {
+            return [];
+        }
+
+        return Candidate::query()
+            ->where('status_id', self::CANDIDATE_READY_FOR_ORDER)
+            ->where(fn ($q) => $q
+                ->where('surname', 'like', "%{$term}%")
+                ->orWhere('name', 'like', "%{$term}%")
+                ->orWhere('patronymic', 'like', "%{$term}%"))
+            ->orderBy('surname')
+            ->limit(self::RESULT_LIMIT)
+            ->get(['id', 'surname', 'name', 'patronymic'])
+            ->map(fn (Candidate $c): array => [
+                'id' => $c->id,
+                'label' => trim("{$c->surname} {$c->name} {$c->patronymic}"),
+            ])
+            ->all();
+    }
+
+    /**
+     * Employee picker: active employees by name or tabel number.
+     *
+     * @return array<int,array{id:int,label:string}>
+     */
+    public function searchPersonnel(string $term): array
+    {
+        $term = trim($term);
+        if (mb_strlen($term) < self::MIN_TERM_LENGTH) {
+            return [];
+        }
+
+        return Personnel::query()
+            ->active()
+            ->where(fn ($q) => $q->nameLike($term)->orWhere('tabel_no', 'like', "%{$term}%"))
+            ->orderBy('surname')
+            ->limit(self::RESULT_LIMIT)
+            ->get(['id', 'surname', 'name', 'patronymic', 'tabel_no'])
+            ->map(fn (Personnel $p): array => [
+                'id' => $p->id,
+                'label' => trim("{$p->surname} {$p->name} {$p->patronymic}")." ({$p->tabel_no})",
+            ])
+            ->all();
+    }
+
+    /**
+     * A picked candidate's id, display name and home structure (the default hire target).
+     *
+     * @return array{id:int,label:?string,structure_id:?int}|null
+     */
+    public function candidatePick(int $candidateId): ?array
+    {
+        $candidate = Candidate::find($candidateId);
+
+        return $candidate ? [
+            'id' => $candidate->id,
+            'label' => $candidate->fullname,
+            'structure_id' => $candidate->structure_id,
+        ] : null;
+    }
+
+    /**
+     * @return array{id:int,label:?string}|null
+     */
+    public function personnelPick(int $personnelId): ?array
+    {
+        $personnel = Personnel::find($personnelId);
+
+        return $personnel ? ['id' => $personnel->id, 'label' => $personnel->fullname] : null;
+    }
+
     /**
      * The subject's missing-selection errors (error bag key => message); empty when valid.
      * A hire needs a candidate + target structure/position; other types need an employee
