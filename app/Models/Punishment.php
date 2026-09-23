@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -28,7 +29,7 @@ class Punishment extends Model
         return $this->belongsTo(PunishmentType::class, 'punishment_type_id', 'id');
     }
 
-    public function scopeCriminalType($query, $value)
+    public function scopeCriminalType($query, $value): Builder
     {
         return $query->where('punishment_type_id', self::PUNISHMENT_TYPES[$value]);
     }

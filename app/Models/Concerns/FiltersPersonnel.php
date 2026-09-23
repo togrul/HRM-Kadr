@@ -17,13 +17,13 @@ trait FiltersPersonnel
         'surname', 'name', 'patronymic', 'tabel_no', 'pin',
     ];
 
-    public function scopeActive($query)
+    public function scopeActive($query): Builder
     {
         return $query->where('is_pending', false)
             ->whereNull('leave_work_date');
     }
 
-    public function scopeFilter($query, array $filters)
+    public function scopeFilter($query, array $filters): Builder
     {
         foreach ($filters as $field => $value) {
             if ($this->filterValueIsEmpty($value)) {
@@ -55,7 +55,7 @@ trait FiltersPersonnel
         });
     }
 
-    protected function applyRangeFilter($query, $field, array $value)
+    protected function applyRangeFilter($query, $field, array $value): void
     {
         if ($field === 'age') {
             [$minAge, $maxAge] = $this->normalizeNumericRange($value, 0, 150);
@@ -83,7 +83,7 @@ trait FiltersPersonnel
         }
     }
 
-    protected function applyExactFilter($query, $field, $value)
+    protected function applyExactFilter($query, $field, $value): void
     {
         switch ($field) {
             case 'nationality_id':
@@ -152,7 +152,7 @@ trait FiltersPersonnel
         return [$min, $max];
     }
 
-    protected function applyStructureFilter($query, $value)
+    protected function applyStructureFilter($query, $value): void
     {
         $structureIds = $this->getNestedStructure($value);
         $query->whereIn($this->qualifiedColumn('structure_id'), $structureIds);

@@ -28,7 +28,7 @@ trait FillComplexArrayTrait
         ?string $differentSelectInput = null,
         bool $hasSelectedField = true,
         bool $hasLocale = false
-    ) {
+    ): void {
         $title = $hasLocale ? $titleField.'_'.config('app.locale') : $titleField;
         if (! empty($getFrom[$field])) {
             $this->{$fillTo}[$field] = [
@@ -64,7 +64,7 @@ trait FillComplexArrayTrait
         array $getFrom,
         string $titleField = 'title',
         bool $hasLocale = false
-    ) {
+    ): void {
         $title = $hasLocale ? $titleField.'_'.config('app.locale') : $titleField;
         if (! empty($getFrom[$field])) {
             $this->{$fillTo}[$key][$field] = [

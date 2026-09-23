@@ -26,7 +26,7 @@ class NotifyBirthdays extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): void
     {
         $birthdays = Personnel::whereMonth('birthdate', '=', Carbon::now()->format('m'))
             ->whereDay('birthdate', '=', Carbon::now()->format('d'))

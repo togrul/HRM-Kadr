@@ -5,9 +5,11 @@ namespace App\Models;
 use App\Observers\StructureObserver;
 use App\Services\StructurePathService;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
@@ -49,17 +51,17 @@ class Structure extends Model
         return $this->hasMany(Personnel::class);
     }
 
-    public function roles()
+    public function roles(): BelongsToMany
     {
         return $this->belongsToMany(\Spatie\Permission\Models\Role::class, 'role_structures');
     }
 
-    public function scopeOrdered()
+    public function scopeOrdered(): Builder
     {
         return $this->orderBy('level')->orderBy('code');
     }
 
-    public function scopeWithRecursive($query, $relationship, bool $enforceAccessible = true)
+    public function scopeWithRecursive($query, $relationship, bool $enforceAccessible = true): Builder
     {
         return $query->with([
             $relationship => function ($q) use ($relationship, $enforceAccessible) {

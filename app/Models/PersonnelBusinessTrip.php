@@ -6,6 +6,7 @@ use App\Services\StructurePathService;
 use App\Traits\DateCastTrait;
 use App\Traits\PersonnelTrait;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -102,21 +103,21 @@ class PersonnelBusinessTrip extends Model
         return $this->belongsTo(OrderLog::class, 'order_no', 'order_no');
     }
 
-    public function scopeForeignBusinessTrip($query)
+    public function scopeForeignBusinessTrip($query): Builder
     {
         return $query->whereHas('order', function ($where) {
             $where->where('order_type_id', self::FOREIGN_BUSINESS_TRIP);
         });
     }
 
-    public function scopeInternalBusinessTrip($query)
+    public function scopeInternalBusinessTrip($query): Builder
     {
         return $query->whereHas('order', function ($where) {
             $where->where('order_type_id', self::INTERNAL_BUSINESS_TRIP);
         });
     }
 
-    public function scopeFilter($query, array $filters)
+    public function scopeFilter($query, array $filters): void
     {
         $currentDate = Carbon::now()->format('Y-m-d');
 

@@ -8,19 +8,21 @@ use App\Services\CvWordExportService;
 use App\Services\PersonnelServiceBookWordExportService;
 use App\Services\StructurePathService;
 use App\Services\WordSuffixService;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class PrintController extends Controller
 {
-    public function personnel_service_book($personnelId)
+    public function personnel_service_book($personnelId): View
     {
         $personnel = $this->loadPersonnelServiceBook($personnelId);
 
         return view('prints.personnel', compact('personnel'));
     }
 
-    public function personnelServiceBookWord($personnelId)
+    public function personnelServiceBookWord($personnelId): BinaryFileResponse
     {
         $personnel = $this->loadPersonnelServiceBook($personnelId);
         $path = app(PersonnelServiceBookWordExportService::class)->export($personnel);
@@ -30,14 +32,14 @@ class PrintController extends Controller
             ->deleteFileAfterSend(true);
     }
 
-    public function cv($personnelId)
+    public function cv($personnelId): View
     {
         [, $cvData] = $this->buildCvData($personnelId);
 
         return view('prints.cv', compact('cvData'));
     }
 
-    public function cvWord($personnelId)
+    public function cvWord($personnelId): BinaryFileResponse
     {
         [$personnel, $cvData] = $this->buildCvData($personnelId);
 

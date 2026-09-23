@@ -6,6 +6,7 @@ use App\Services\StructurePathService;
 use App\Traits\DateCastTrait;
 use App\Traits\PersonnelTrait;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -107,7 +108,7 @@ class PersonnelVacation extends Model
         return $this->belongsTo(OrderLog::class, 'order_no', 'order_no');
     }
 
-    public function scopeWhereDateInYear($query, $year)
+    public function scopeWhereDateInYear($query, $year): Builder
     {
         return $query->where(function ($q) use ($year) {
             $q->where('start_date', '>=', "{$year}-01-01")
@@ -115,7 +116,7 @@ class PersonnelVacation extends Model
         });
     }
 
-    public function scopeFilter($query, array $filters)
+    public function scopeFilter($query, array $filters): void
     {
         foreach ($filters as $field => $value) {
             switch ($field) {

@@ -28,7 +28,7 @@ class Vacation extends Model
         'reserved_date_month' => 'integer',
     ];
 
-    public function getUsedDaysAttribute()
+    public function getUsedDaysAttribute(): float|int
     {
         return $this->vacation_days_total - $this->remaining_days;
     }

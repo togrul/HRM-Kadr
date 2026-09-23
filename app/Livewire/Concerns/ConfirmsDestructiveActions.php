@@ -54,7 +54,7 @@ trait ConfirmsDestructiveActions
         ];
     }
 
-    public function runConfirmedDeletion()
+    public function runConfirmedDeletion(): mixed
     {
         $action = (string) data_get($this->deleteConfirmation, 'action', '');
 

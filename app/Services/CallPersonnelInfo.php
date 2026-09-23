@@ -156,7 +156,7 @@ class CallPersonnelInfo
         ];
     }
 
-    protected function rememberCollection(string $cacheKey, callable $resolver, bool $useCache = true)
+    protected function rememberCollection(string $cacheKey, callable $resolver, bool $useCache = true): mixed
     {
         if (! $useCache) {
             return $resolver();

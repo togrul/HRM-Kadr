@@ -3,17 +3,19 @@
 namespace App\Models;
 
 use App\Data\LeaveFilterData;
-use Carbon\CarbonImmutable;
 use App\Enums\OrderStatusEnum;
 use App\Traits\PersonnelTrait;
-use Illuminate\Support\Str;
-use Illuminate\Database\Eloquent\Model;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\{BelongsTo, HasMany, HasOne};
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 
 /**
  * @property mixed $starts_at
@@ -24,7 +26,7 @@ class Leave extends Model
 {
     use HasFactory, PersonnelTrait, SoftDeletes;
 
-     /** @var array<int, string> */
+    /** @var array<int, string> */
     protected $fillable = [
         'tabel_no',
         'leave_type_id',
@@ -50,8 +52,8 @@ class Leave extends Model
     ];
 
     protected $casts = [
-        'starts_at'   => 'immutable_date',
-        'ends_at'     => 'immutable_date',
+        'starts_at' => 'immutable_date',
+        'ends_at' => 'immutable_date',
         'approved_at' => 'immutable_datetime',
         'total_minutes' => 'integer',
     ];
@@ -70,7 +72,7 @@ class Leave extends Model
 
     public function logs(): HasMany
     {
-       return $this->hasMany(LeaveStatusLog::class, 'leave_id')->orderBy('changed_at');
+        return $this->hasMany(LeaveStatusLog::class, 'leave_id')->orderBy('changed_at');
     }
 
     public function latestLog(): HasOne
@@ -80,22 +82,22 @@ class Leave extends Model
 
     public function approver(): BelongsTo
     {
-         return $this->belongsTo(Personnel::class, 'approved_by', 'id');
+        return $this->belongsTo(Personnel::class, 'approved_by', 'id');
     }
 
     public function assigned(): BelongsTo
     {
-         return $this->belongsTo(Personnel::class, 'assigned_to', 'id');
+        return $this->belongsTo(Personnel::class, 'assigned_to', 'id');
     }
 
     public function fallbackApprover(): BelongsTo
     {
-         return $this->belongsTo(Personnel::class, 'fallback_approver_personnel_id', 'id');
+        return $this->belongsTo(Personnel::class, 'fallback_approver_personnel_id', 'id');
     }
 
     public function submittedBy(): BelongsTo
     {
-         return $this->belongsTo(User::class, 'submitted_by_user_id');
+        return $this->belongsTo(User::class, 'submitted_by_user_id');
     }
 
     public function changeRequests(): MorphMany
@@ -112,9 +114,12 @@ class Leave extends Model
             /** @var CarbonImmutable|null $e */
             $e = $this->ends_at;
 
-            if (!$s || !$e) return null;
+            if (! $s || ! $e) {
+                return null;
+            }
 
-            $range = $s->format('d.m.Y') . ' – ' . $e->format('d.m.Y');
+            $range = $s->format('d.m.Y').' – '.$e->format('d.m.Y');
+
             return "{$range}";
         });
     }
@@ -122,12 +127,12 @@ class Leave extends Model
     /** Boolean helpers */
     protected function isApproved(): Attribute
     {
-        return Attribute::get(fn () => !is_null($this->approved_at));
+        return Attribute::get(fn () => ! is_null($this->approved_at));
     }
 
     protected function isPending(): Attribute
     {
-        return Attribute::get(fn () => (int)$this->status_id === OrderStatusEnum::PENDING->value);
+        return Attribute::get(fn () => (int) $this->status_id === OrderStatusEnum::PENDING->value);
     }
 
     public function canBeApprovedBy(?User $user): bool
@@ -169,29 +174,34 @@ class Leave extends Model
 
     /* --------------------------------- Scopes -------------------------------- */
 
-    public function scopePending($q)
+    public function scopePending($q): Builder
     {
         return $q->where('status_id', OrderStatusEnum::PENDING->value);
     }
 
-    public function scopeApproved($q)
+    public function scopeApproved($q): Builder
     {
         return $q->whereNotNull('approved_at');
     }
 
     /** Overlapping any part of a given period */
-    public function scopeOverlapping($q, CarbonImmutable $from, CarbonImmutable $to)
+    public function scopeOverlapping($q, CarbonImmutable $from, CarbonImmutable $to): Builder
     {
         return $q->where(function ($w) use ($from, $to) {
             $w->whereDate('starts_at', '<=', $to)
-              ->whereDate('ends_at', '>=', $from);
+                ->whereDate('ends_at', '>=', $from);
         });
     }
 
-    public function scopeForPeriod($q, ?CarbonImmutable $from, ?CarbonImmutable $to)
+    public function scopeForPeriod($q, ?CarbonImmutable $from, ?CarbonImmutable $to): Builder
     {
-        if ($from) $q->whereDate('starts_at', '>=', $from);
-        if ($to)   $q->whereDate('ends_at',   '<=', $to);
+        if ($from) {
+            $q->whereDate('starts_at', '>=', $from);
+        }
+        if ($to) {
+            $q->whereDate('ends_at', '<=', $to);
+        }
+
         return $q;
     }
 
@@ -256,7 +266,9 @@ class Leave extends Model
     {
         $s = $this->starts_at;
         $e = $this->ends_at;
-        if (!$s || !$e) return 0;
+        if (! $s || ! $e) {
+            return 0;
+        }
 
         return $s->diffInDays($e) + 1;
     }
