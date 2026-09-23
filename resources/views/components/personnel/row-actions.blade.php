@@ -33,10 +33,10 @@
                         target="_blank"
                         rel="noopener noreferrer"
                     @endif
-                    class="inline-flex items-center justify-center w-8 h-8 text-zinc-500 rounded-md bg-zinc-100/80 hover:bg-zinc-200 hover:text-zinc-700 transition-colors"
+                    class="inline-flex h-8 w-8 items-center justify-center rounded-md text-ink-faint transition-colors hover:bg-[#f4f4f5] hover:text-ink"
                     title="{{ $action->label }}"
                 >
-                    <x-dynamic-component :component="$action->icon" />
+                    <x-dynamic-component :component="$action->icon" color="text-current" hover="text-current" />
                 </a>
             @else
                 <button
@@ -52,14 +52,15 @@
                         wire:loading.attr="disabled"
                         wire:target="handleRowAction"
                     @endif
-                    class="inline-flex items-center justify-center w-8 h-8 text-zinc-500 rounded-md bg-zinc-100/80 hover:bg-zinc-200 hover:text-zinc-700 transition-colors"
+                    {{-- quiet at rest; a destructive action (it asks for confirmation) only turns red on hover --}}
+                    @class([
+                        'inline-flex h-8 w-8 items-center justify-center rounded-md text-ink-faint transition-colors',
+                        'hover:bg-[#ffe4e6] hover:text-[#be123c]' => $action->confirmMessage,
+                        'hover:bg-[#f4f4f5] hover:text-ink' => ! $action->confirmMessage,
+                    ])
                     title="{{ $action->label }}"
                 >
-                    <x-dynamic-component
-                        :component="$action->icon"
-                        :color="$action->iconProps['color'] ?? null"
-                        :hover="$action->iconProps['hover'] ?? null"
-                    />
+                    <x-dynamic-component :component="$action->icon" color="text-current" hover="text-current" />
                 </button>
             @endif
         @endforeach

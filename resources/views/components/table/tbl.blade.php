@@ -56,7 +56,7 @@
         <div x-ref="scroller" @scroll.passive="measure()" class="hrm-scroll overflow-x-auto">
         <table {{ $attributes->merge(['class' => 'min-w-full w-full p-[5px] pb-0 border-separate border-spacing-0 bg-white text-sm']) }}>
             <thead class="bg-transparent">
-                <tr class="align-middle text-xs uppercase">
+                <tr class="align-middle text-xs">
                     @foreach ($headers as $header)
                       @php
                         $headerLabel = is_array($header) ? (string) ($header['label'] ?? '') : (string) $header;
@@ -84,7 +84,7 @@
                                 @if($headerDayType) data-day-type="{{ $headerDayType }}" @endif
                                 @if($headerDay !== null) data-day="{{ $headerDay }}" @endif
                                 @class([
-                                  'text-left text-[12px] font-semibold uppercase tracking-[0.06em] text-ink-muted whitespace-nowrap bg-white border-b border-hairline ',
+                                  'text-left text-[12.5px] font-medium text-ink-muted whitespace-nowrap bg-white border-b border-hairline ',
                                   'stats-cell-header py-1 px-4' => $bordered,
                                   'py-2.5 px-4' => !$bordered,
                                   'w-10 min-w-10 max-w-10 text-center !px-0 !py-0' => $bordered && $isDay,
