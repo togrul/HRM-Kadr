@@ -10,12 +10,12 @@
                     <input wire:model.live.debounce.300ms="search" type="text" placeholder="{{ __('personnel::portfolio.messages.search_placeholder') }}" class="w-full rounded-2xl border border-zinc-200 bg-white px-2 py-2 text-sm text-zinc-800 placeholder:text-zinc-400 focus:border-zinc-300 focus:outline-none" />
                 </x-ui.input-shell>
                 <x-ui.input-shell :label="__('personnel::portfolio.fields.status')" labelClass="tracking-tight text-zinc-500">
-                    <select wire:model.live="statusFilter" class="w-full rounded-2xl border border-zinc-200 bg-white px-2 py-2 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none">
+                    <x-ui.select wire:model.live="statusFilter">
                         <option value="all">{{ __('personnel::common.labels.all') }}</option>
                         @foreach (\App\Modules\Personnel\Support\ProfessionalPortfolio\ProfessionalPortfolioOptions::verificationStatuses() as $status)
                             <option value="{{ $status }}">{{ __('personnel::portfolio.status.'.$status) }}</option>
                         @endforeach
-                    </select>
+                    </x-ui.select>
                 </x-ui.input-shell>
                 <x-ui.input-shell :label="__('personnel::portfolio.fields.date_from')" labelClass="tracking-tight text-zinc-500">
                     <input wire:model.live="dateFrom" type="date" class="w-full rounded-2xl border border-zinc-200 bg-white px-2 py-1.5 text-[13px] text-zinc-800 focus:border-zinc-300 focus:outline-none" />
@@ -163,18 +163,18 @@
                 <div class="mt-4 space-y-3">
                     <div class="grid gap-3 md:grid-cols-2">
                         <x-ui.input-shell :label="__('personnel::portfolio.fields.event_type')" :error="$errors->first('form.event_type')">
-                            <select wire:model.live="form.event_type" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm">
+                            <x-ui.select wire:model.live="form.event_type">
                                 @foreach ($options::eventTypes() as $option)
                                     <option value="{{ $option }}">{{ __('personnel::portfolio.options.event_type.'.$option) }}</option>
                                 @endforeach
-                            </select>
+                            </x-ui.select>
                         </x-ui.input-shell>
                         <x-ui.input-shell :label="__('personnel::portfolio.fields.participation_role')" :error="$errors->first('form.participation_role')">
-                            <select wire:model.live="form.participation_role" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm">
+                            <x-ui.select wire:model.live="form.participation_role">
                                 @foreach ($options::participationRoles() as $option)
                                     <option value="{{ $option }}">{{ __('personnel::portfolio.options.participation_role.'.$option) }}</option>
                                 @endforeach
-                            </select>
+                            </x-ui.select>
                         </x-ui.input-shell>
                     </div>
                     <x-ui.input-shell :label="__('personnel::portfolio.fields.title')" :error="$errors->first('form.title')">
@@ -201,29 +201,29 @@
                             <input wire:model="form.location" type="text" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm" />
                         </x-ui.input-shell>
                         <x-ui.input-shell :label="__('personnel::portfolio.fields.country')" :error="$errors->first('form.country_id')">
-                            <select wire:model="form.country_id" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm">
+                            <x-ui.select wire:model="form.country_id">
                                 <option value="">—</option>
                                 @foreach ($this->countryOptions as $country)
                                     <option value="{{ $country['id'] }}">{{ $country['title'] }}</option>
                                 @endforeach
-                            </select>
+                            </x-ui.select>
                         </x-ui.input-shell>
                     </div>
                     <div class="grid gap-3 md:grid-cols-2">
                         <x-ui.input-shell :label="__('personnel::portfolio.fields.attendance_format')" :error="$errors->first('form.attendance_format')">
-                            <select wire:model="form.attendance_format" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm">
+                            <x-ui.select wire:model="form.attendance_format">
                                 @foreach ($options::attendanceFormats() as $option)
                                     <option value="{{ $option }}">{{ __('personnel::portfolio.options.attendance_format.'.$option) }}</option>
                                 @endforeach
-                            </select>
+                            </x-ui.select>
                         </x-ui.input-shell>
                     </div>
                     <x-ui.input-shell :label="__('personnel::portfolio.fields.strategic_level')" :error="$errors->first('form.strategic_level')">
-                        <select wire:model="form.strategic_level" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm">
+                        <x-ui.select wire:model="form.strategic_level">
                             @foreach ($options::strategicLevels() as $option)
                                 <option value="{{ $option }}">{{ __('personnel::portfolio.options.strategic_level.'.$option) }}</option>
                             @endforeach
-                        </select>
+                        </x-ui.select>
                     </x-ui.input-shell>
                     @if (($form['participation_role'] ?? null) === 'participant')
                         <x-ui.input-shell :label="__('personnel::portfolio.fields.hr_value_reason')" :error="$errors->first('form.hr_value_reason')">
@@ -241,11 +241,11 @@
                             <input wire:model="form.source_url" type="url" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm" />
                         </x-ui.input-shell>
                         <x-ui.input-shell :label="__('personnel::portfolio.fields.visibility')" :error="$errors->first('form.visibility')">
-                            <select wire:model="form.visibility" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm">
+                            <x-ui.select wire:model="form.visibility">
                                 @foreach ($options::eventVisibilities() as $option)
                                     <option value="{{ $option }}">{{ __('personnel::portfolio.options.visibility.'.$option) }}</option>
                                 @endforeach
-                            </select>
+                            </x-ui.select>
                         </x-ui.input-shell>
                     </div>
                     <div class="grid gap-3 md:grid-cols-2">

@@ -27,20 +27,20 @@
                     </div>
                     <div class="md:col-span-2">
                         <x-label for="feedback-status">{{ __('training_needs::dashboard.fields.status') }}</x-label>
-                        <select id="feedback-status" wire:model="feedbackForm.status" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                        <x-ui.select id="feedback-status" wire:model="feedbackForm.status">
                             <option value="draft">{{ __('training_needs::dashboard.feedback_statuses.draft') }}</option>
                             <option value="open">{{ __('training_needs::dashboard.feedback_statuses.open') }}</option>
                             <option value="closed">{{ __('training_needs::dashboard.feedback_statuses.closed') }}</option>
-                        </select>
+                        </x-ui.select>
                         @error('feedbackForm.status') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div class="md:col-span-2">
                         <x-label for="feedback-question-type">{{ __('training_needs::dashboard.fields.default_question_type') }}</x-label>
-                        <select id="feedback-question-type" wire:model="feedbackForm.default_question_type" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                        <x-ui.select id="feedback-question-type" wire:model="feedbackForm.default_question_type">
                             <option value="rating">{{ __('training_needs::dashboard.question_types.rating') }}</option>
                             <option value="text">{{ __('training_needs::dashboard.question_types.text') }}</option>
                             <option value="multiple_choice">{{ __('training_needs::dashboard.question_types.multiple_choice') }}</option>
-                        </select>
+                        </x-ui.select>
                         @error('feedbackForm.default_question_type') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div class="md:col-span-2">

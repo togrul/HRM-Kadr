@@ -33,32 +33,30 @@
         <div class="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
             <div>
                 <x-label for="attendance-settings-timezone">{{ __('attendance::settings.fields.timezone') }}</x-label>
-                <select
+                <x-ui.select
                     id="attendance-settings-timezone"
                     wire:model="form.timezone"
-                    class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500"
-                    @disabled(! $canManage)
+                    :disabled="! $canManage"
                 >
                     @foreach(['Asia/Baku', 'UTC', 'Europe/Istanbul', 'Europe/Moscow'] as $tz)
                         <option value="{{ $tz }}">{{ $tz }}</option>
                     @endforeach
-                </select>
+                </x-ui.select>
                 @error('form.timezone') <x-validation>{{ $message }}</x-validation> @enderror
             </div>
 
             <div>
                 <x-label for="attendance-settings-default-shift">{{ __('attendance::settings.fields.default_shift') }}</x-label>
-                <select
+                <x-ui.select
                     id="attendance-settings-default-shift"
                     wire:model="form.default_shift_id"
-                    class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500"
-                    @disabled(! $canManage)
+                    :disabled="! $canManage"
                 >
                     <option value="">{{ __('attendance::settings.default_shift.option_none') }}</option>
                     @foreach($shifts as $shift)
                         <option value="{{ $shift->id }}">{{ $shift->name }}</option>
                     @endforeach
-                </select>
+                </x-ui.select>
                 @error('form.default_shift_id') <x-validation>{{ $message }}</x-validation> @enderror
             </div>
 
@@ -92,17 +90,16 @@
 
             <div>
                 <x-label for="attendance-settings-rounding-policy">{{ __('attendance::settings.fields.rounding_policy') }}</x-label>
-                <select
+                <x-ui.select
                     id="attendance-settings-rounding-policy"
                     wire:model="form.rounding_policy"
-                    class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500"
-                    @disabled(! $canManage)
+                    :disabled="! $canManage"
                 >
                     <option value="none">{{ __('attendance::settings.options.none') }}</option>
                     <option value="floor">{{ __('attendance::settings.options.floor') }}</option>
                     <option value="ceil">{{ __('attendance::settings.options.ceil') }}</option>
                     <option value="nearest">{{ __('attendance::settings.options.nearest') }}</option>
-                </select>
+                </x-ui.select>
                 @error('form.rounding_policy') <x-validation>{{ $message }}</x-validation> @enderror
             </div>
 
@@ -122,17 +119,16 @@
 
             <div class="md:col-span-2 lg:col-span-3">
                 <x-label for="attendance-settings-overtime-policy">{{ __('attendance::settings.fields.overtime_policy') }}</x-label>
-                <select
+                <x-ui.select
                     id="attendance-settings-overtime-policy"
                     wire:model="form.overtime_policy"
-                    class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500"
-                    @disabled(! $canManage)
+                    :disabled="! $canManage"
                 >
                     <option value="by_approval">{{ __('attendance::settings.options.by_approval') }}</option>
                     <option value="none">{{ __('attendance::settings.options.none') }}</option>
                     <option value="all_worked">{{ __('attendance::settings.options.all_worked') }}</option>
                     <option value="after_shift">{{ __('attendance::settings.options.after_shift') }}</option>
-                </select>
+                </x-ui.select>
                 @error('form.overtime_policy') <x-validation>{{ $message }}</x-validation> @enderror
             </div>
         </div>

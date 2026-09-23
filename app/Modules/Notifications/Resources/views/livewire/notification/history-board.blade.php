@@ -30,12 +30,12 @@
                     <input type="text" wire:model.live.debounce.300ms="search" placeholder="{{ __('notifications::common.helpers.search_history') }}" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
                 </x-ui.input-shell>
                 <x-ui.input-shell>
-                    <select wire:model.live="categoryFilter" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
+                    <x-ui.select wire:model.live="categoryFilter">
                         <option value="all">{{ __('notifications::common.helpers.all_categories') }}</option>
                         @foreach ($categoryLabels as $category => $label)
                             <option value="{{ $category }}">{{ $label }}</option>
                         @endforeach
-                    </select>
+                    </x-ui.select>
                 </x-ui.input-shell>
             </div>
         </div>

@@ -7,36 +7,36 @@
         <div class="grid gap-3 xl:grid-cols-[repeat(4,minmax(0,1fr))] xl:items-end">
             <div class="min-w-0">
                 <label class="mb-1 block text-xs font-medium text-zinc-500">{{ __('reports::dashboard.fields.report_type') }}</label>
-                <select wire:model.live="report" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-3 text-sm text-zinc-700 shadow-sm">
+                <x-ui.select wire:model.live="report">
                     @foreach ($reportOptions as $option)
                         <option value="{{ $option['key'] }}">{{ $option['label'] }}</option>
                     @endforeach
-                </select>
+                </x-ui.select>
             </div>
             <div class="min-w-0">
                 <label class="mb-1 block text-xs font-medium text-zinc-500">{{ __('reports::dashboard.fields.year') }}</label>
-                <select wire:model.live="year" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-3 text-sm text-zinc-700 shadow-sm">
+                <x-ui.select wire:model.live="year">
                     @foreach (range(now()->year - 4, now()->year + 1) as $yearOption)
                         <option value="{{ $yearOption }}">{{ $yearOption }}</option>
                     @endforeach
-                </select>
+                </x-ui.select>
             </div>
             <div class="min-w-0">
                 <label class="mb-1 block text-xs font-medium text-zinc-500">{{ __('reports::dashboard.fields.month') }}</label>
-                <select wire:model.live="month" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-3 text-sm text-zinc-700 shadow-sm">
+                <x-ui.select wire:model.live="month">
                     @foreach (range(1, 12) as $monthOption)
                         <option value="{{ $monthOption }}">{{ \Carbon\Carbon::create()->month($monthOption)->translatedFormat('F') }}</option>
                     @endforeach
-                </select>
+                </x-ui.select>
             </div>
             <div class="min-w-0">
                 <label class="mb-1 block text-xs font-medium text-zinc-500">{{ __('reports::dashboard.fields.structure') }}</label>
-                <select wire:model.live="structureId" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-3 text-sm text-zinc-700 shadow-sm">
+                <x-ui.select wire:model.live="structureId">
                     <option value="">{{ __('reports::dashboard.labels.all_structures') }}</option>
                     @foreach ($structureOptions as $option)
                         <option value="{{ $option['id'] }}">{{ $option['label'] }}</option>
                     @endforeach
-                </select>
+                </x-ui.select>
             </div>
         </div>
         @if ($canExport)

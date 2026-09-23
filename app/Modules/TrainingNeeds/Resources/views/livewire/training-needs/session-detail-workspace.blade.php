@@ -47,35 +47,35 @@
                         </div>
                         <div class="min-w-48 flex-1">
                             <x-label for="selected-attendance-filter">{{ __('training_needs::dashboard.fields.participant_attendance_filter') }}</x-label>
-                            <select id="selected-attendance-filter" wire:model.live="selectedParticipantAttendanceFilter" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                            <x-ui.select id="selected-attendance-filter" wire:model.live="selectedParticipantAttendanceFilter">
                                 <option value="all">---</option>
                                 <option value="planned">{{ __('training_needs::dashboard.attendance_statuses.planned') }}</option>
                                 <option value="confirmed">{{ __('training_needs::dashboard.attendance_statuses.confirmed') }}</option>
                                 <option value="attended">{{ __('training_needs::dashboard.attendance_statuses.attended') }}</option>
                                 <option value="absent">{{ __('training_needs::dashboard.attendance_statuses.absent') }}</option>
                                 <option value="cancelled">{{ __('training_needs::dashboard.attendance_statuses.cancelled') }}</option>
-                            </select>
+                            </x-ui.select>
                         </div>
                         <div class="min-w-48 flex-1">
                             <x-label for="selected-source-filter">{{ __('training_needs::dashboard.fields.participant_source_filter') }}</x-label>
-                            <select id="selected-source-filter" wire:model.live="selectedParticipantSourceFilter" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                            <x-ui.select id="selected-source-filter" wire:model.live="selectedParticipantSourceFilter">
                                 <option value="all">---</option>
                                 <option value="manual">{{ __('training_needs::dashboard.sources.manual') }}</option>
                                 <option value="performance_gap">{{ __('training_needs::dashboard.sources.performance_gap') }}</option>
                                 <option value="skill_gap">{{ __('training_needs::dashboard.sources.skill_gap') }}</option>
                                 <option value="manager_request">{{ __('training_needs::dashboard.sources.manager_request') }}</option>
                                 <option value="employee_request">{{ __('training_needs::dashboard.sources.employee_request') }}</option>
-                            </select>
+                            </x-ui.select>
                         </div>
                         <div class="min-w-56 flex-1">
                             <x-label for="bulk-attendance-status">{{ __('training_needs::dashboard.fields.bulk_attendance_status') }}</x-label>
-                            <select id="bulk-attendance-status" wire:model="bulkAttendanceStatus" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                            <x-ui.select id="bulk-attendance-status" wire:model="bulkAttendanceStatus">
                                 <option value="planned">{{ __('training_needs::dashboard.attendance_statuses.planned') }}</option>
                                 <option value="confirmed">{{ __('training_needs::dashboard.attendance_statuses.confirmed') }}</option>
                                 <option value="attended">{{ __('training_needs::dashboard.attendance_statuses.attended') }}</option>
                                 <option value="absent">{{ __('training_needs::dashboard.attendance_statuses.absent') }}</option>
                                 <option value="cancelled">{{ __('training_needs::dashboard.attendance_statuses.cancelled') }}</option>
-                            </select>
+                            </x-ui.select>
                         </div>
                         <x-ui.action-pill wire:click="applyBulkParticipantStatus">{{ __('training_needs::dashboard.actions.apply_bulk_status') }}</x-ui.action-pill>
                         <x-ui.action-pill mode="delete" wire:click="confirmRemoveSelectedParticipants" icon="icons.delete-icon">{{ __('training_needs::dashboard.actions.remove_selected_participants') }}</x-ui.action-pill>

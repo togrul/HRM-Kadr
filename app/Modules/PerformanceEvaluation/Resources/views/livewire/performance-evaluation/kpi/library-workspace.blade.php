@@ -594,12 +594,12 @@
                                 <div wire:key="template-item-{{ $index }}" class="rounded-xl border border-zinc-200/80 p-3">
                                     <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
                                         <div class="col-span-2">
-                                            <select wire:model="templateItems.{{ $index }}.performance_kpi_id" class="{{ $input }}">
+                                            <x-ui.select wire:model="templateItems.{{ $index }}.performance_kpi_id">
                                                 <option value="">{{ __($t.'.fields.choose_kpi') }}</option>
                                                 @foreach ($this->kpis->where('status', '!=', 'archived') as $kpi)
                                                     <option value="{{ $kpi->id }}">{{ $kpi->code }} — {{ $kpi->name }}</option>
                                                 @endforeach
-                                            </select>
+                                            </x-ui.select>
                                         </div>
                                         @foreach (['weight', 'target', 'range_min', 'range_max', 'threshold', 'stretch', 'cap'] as $field)
                                             <label class="block">

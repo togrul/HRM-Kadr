@@ -25,32 +25,32 @@
 
             <div>
                 <x-label for="attendance-calendar-day-type">{{ __('attendance::calendar_regimes.fields.day_type') }}</x-label>
-                <select id="attendance-calendar-day-type" wire:model.live="form.day_type" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                <x-ui.select id="attendance-calendar-day-type" wire:model.live="form.day_type">
                     <option value="workday">{{ __('attendance::calendar_regimes.options.workday') }}</option>
                     <option value="weekend">{{ __('attendance::calendar_regimes.options.weekend') }}</option>
                     <option value="holiday">{{ __('attendance::calendar_regimes.options.holiday') }}</option>
-                </select>
+                </x-ui.select>
                 @error('form.day_type') <x-validation>{{ $message }}</x-validation> @enderror
             </div>
 
             <div>
                 <x-label for="attendance-calendar-scope-type">{{ __('attendance::calendar_regimes.fields.scope_type') }}</x-label>
-                <select id="attendance-calendar-scope-type" wire:model.live="form.scope_type" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                <x-ui.select id="attendance-calendar-scope-type" wire:model.live="form.scope_type">
                     <option value="global">{{ __('attendance::calendar_regimes.options.global') }}</option>
                     <option value="structure">{{ __('attendance::calendar_regimes.options.structure') }}</option>
-                </select>
+                </x-ui.select>
                 @error('form.scope_type') <x-validation>{{ $message }}</x-validation> @enderror
             </div>
 
             @if(($form['scope_type'] ?? 'global') === 'structure')
                 <div>
                     <x-label for="attendance-calendar-structure">{{ __('attendance::calendar_regimes.fields.structure') }}</x-label>
-                    <select id="attendance-calendar-structure" wire:model.live="form.scope_id" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                    <x-ui.select id="attendance-calendar-structure" wire:model.live="form.scope_id">
                         <option value="">{{ __('attendance::calendar_regimes.options.select_structure') }}</option>
                         @foreach($structures as $structure)
                             <option value="{{ $structure->id }}">{{ $structure->name }}</option>
                         @endforeach
-                    </select>
+                    </x-ui.select>
                     @error('form.scope_id') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
             @endif

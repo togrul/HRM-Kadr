@@ -10,36 +10,36 @@
             <div class="grid gap-4 md:grid-cols-2">
                 <div class="space-y-2">
                     <label class="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.fields.category') }}</label>
-                    <select wire:model.live="form.category" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
+                    <x-ui.select wire:model.live="form.category">
                         <option value="announcement">{{ __('notifications::common.categories.announcement') }}</option>
                         <option value="holiday">{{ __('notifications::common.categories.holiday') }}</option>
-                    </select>
+                    </x-ui.select>
                 </div>
 
                 <div class="space-y-2">
                     <label class="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.fields.schedule_mode') }}</label>
-                    <select wire:model.live="form.schedule_mode" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
+                    <x-ui.select wire:model.live="form.schedule_mode">
                         @foreach ($scheduleModes as $mode => $label)
                             <option value="{{ $mode }}">{{ $label }}</option>
                         @endforeach
-                    </select>
+                    </x-ui.select>
                     <p class="text-xs text-zinc-500">{{ __('notifications::common.helpers.schedule_hint_event_driven') }}</p>
                 </div>
 
                 <div class="space-y-2">
                     <label class="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.fields.channel') }}</label>
-                    <select wire:model="form.channel" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
+                    <x-ui.select wire:model="form.channel">
                         <option value="database">{{ __('notifications::common.channels.database') }}</option>
                         <option value="mail">{{ __('notifications::common.channels.mail') }}</option>
-                    </select>
+                    </x-ui.select>
                 </div>
 
                 <div class="space-y-2">
                     <label class="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.fields.format') }}</label>
-                    <select wire:model="form.format" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
+                    <x-ui.select wire:model="form.format">
                         <option value="text">{{ __('notifications::common.formats.text') }}</option>
                         <option value="html">{{ __('notifications::common.formats.html') }}</option>
-                    </select>
+                    </x-ui.select>
                 </div>
             </div>
 

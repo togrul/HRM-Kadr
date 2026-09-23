@@ -31,25 +31,25 @@
                 </x-ui.input-shell>
 
                 <x-ui.input-shell class="space-y-2" :label="__('notifications::common.fields.category')">
-                    <select wire:model.live="form.category" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
+                    <x-ui.select wire:model.live="form.category">
                         @foreach ($categories as $category)
                             <option value="{{ $category }}">{{ $categoryLabels[$category] ?? $category }}</option>
                         @endforeach
-                    </select>
+                    </x-ui.select>
                 </x-ui.input-shell>
 
                 <x-ui.input-shell class="space-y-2" :label="__('notifications::common.fields.channel')">
-                    <select wire:model.live="form.channel" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
+                    <x-ui.select wire:model.live="form.channel">
                         <option value="database">{{ __('notifications::common.channels.database') }}</option>
                         <option value="mail">{{ __('notifications::common.channels.mail') }}</option>
-                    </select>
+                    </x-ui.select>
                 </x-ui.input-shell>
 
                 <x-ui.input-shell class="space-y-2" :label="__('notifications::common.fields.format')">
-                    <select wire:model.live="form.format" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
+                    <x-ui.select wire:model.live="form.format">
                         <option value="text">{{ __('notifications::common.formats.text') }}</option>
                         <option value="html">{{ __('notifications::common.formats.html') }}</option>
-                    </select>
+                    </x-ui.select>
                 </x-ui.input-shell>
 
                 <label class="flex items-center gap-3 rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-700">

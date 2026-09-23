@@ -152,12 +152,11 @@
             {{ __('orders::order_composer.designer.effect_title') }}
         </label>
         <p class="mb-3 mt-1 text-[12px] text-zinc-400">{{ __('orders::order_composer.designer.effect_hint') }}</p>
-        <select wire:model.live="effect" aria-label="{{ __('orders::order_composer.designer.effect_title') }}"
-            class="h-10 w-full rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-base text-ink focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-zinc-200 sm:max-w-md sm:text-sm">
+        <x-ui.select class="sm:max-w-md" wire:model.live="effect" aria-label="{{ __('orders::order_composer.designer.effect_title') }}">
             @foreach ($this->effectOptions as $opt)
                 <option value="{{ $opt['kind'] }}">{{ $opt['label'] }}</option>
             @endforeach
-        </select>
+        </x-ui.select>
     </div>
 
     {{-- ============ Step 2: map the detected variables ============ --}}
@@ -201,8 +200,7 @@
                         {{-- mapping target --}}
                         <div class="w-full sm:w-72 sm:shrink-0">
                             @if ($v['source'] === 'auto')
-                                <select wire:model="variables.{{ $i }}.auto_key" aria-label="{{ __('orders::order_composer.designer.choose_source') }}"
-                                    class="h-10 w-full rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-base text-ink focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-zinc-200 sm:text-sm">
+                                <x-ui.select wire:model="variables.{{ $i }}.auto_key" aria-label="{{ __('orders::order_composer.designer.choose_source') }}">
                                     <option value="">— {{ __('orders::order_composer.designer.choose_source') }} —</option>
                                     @foreach ($this->variableGroups as $group => $vars)
                                         <optgroup label="{{ $group }}">
@@ -211,14 +209,13 @@
                                             @endforeach
                                         </optgroup>
                                     @endforeach
-                                </select>
+                                </x-ui.select>
                             @else
-                                <select wire:model="variables.{{ $i }}.field_type" aria-label="{{ __('orders::order_composer.designer.manual') }}"
-                                    class="h-10 w-full rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-base text-ink focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-zinc-200 sm:text-sm">
+                                <x-ui.select wire:model="variables.{{ $i }}.field_type" aria-label="{{ __('orders::order_composer.designer.manual') }}">
                                     @foreach ($this->fieldTypes as $ft)
                                         <option value="{{ $ft['type'] }}">{{ $ft['label'] }}</option>
                                     @endforeach
-                                </select>
+                                </x-ui.select>
                             @endif
                             @error("variables.$i.auto_key") <p class="mt-1 text-[11px] text-red-600">{{ $message }}</p> @enderror
                         </div>
@@ -226,13 +223,12 @@
                         {{-- effect role: only for manual fields when the order has an HR effect --}}
                         @if ($effect !== 'none' && $v['source'] === 'manual' && count($this->effectRoles))
                             <div class="w-full sm:w-56 sm:shrink-0">
-                                <select wire:model="variables.{{ $i }}.effect_role" aria-label="{{ __('orders::order_composer.designer.effect_role_none') }}"
-                                    class="h-10 w-full rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-base text-ink focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-zinc-200 sm:text-sm">
+                                <x-ui.select wire:model="variables.{{ $i }}.effect_role" aria-label="{{ __('orders::order_composer.designer.effect_role_none') }}">
                                     <option value="">— {{ __('orders::order_composer.designer.effect_role_none') }} —</option>
                                     @foreach ($this->effectRoles as $role)
                                         <option value="{{ $role['key'] }}">{{ $role['label'] }}</option>
                                     @endforeach
-                                </select>
+                                </x-ui.select>
                             </div>
                         @endif
                     </div>

@@ -43,13 +43,12 @@
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                     <x-label for="presetCode">{{ __('orders::order_composer.labels.type') }}</x-label>
-                    <select wire:model.live="presetCode" id="presetCode" {{ $isEditing ? 'disabled' : '' }}
-                        class="{{ $inputClass }} {{ $isEditing ? 'opacity-60' : '' }}">
+                    <x-ui.select class="mt-1 {{ $isEditing ? 'opacity-60' : '' }}" wire:model.live="presetCode" id="presetCode" {{ $isEditing ? 'disabled' : '' }}>
                         <option value="">—</option>
                         @foreach ($this->presets as $code => $label)
                             <option value="{{ $code }}">{{ $label }}</option>
                         @endforeach
-                    </select>
+                    </x-ui.select>
                     @error('presetCode') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
 

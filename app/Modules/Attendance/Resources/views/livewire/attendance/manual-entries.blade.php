@@ -129,29 +129,27 @@
                 </div>
                 <div>
                     <x-label for="manual-form-shift-source">{{ __('attendance::manual_entries.labels.shift_source') }}</x-label>
-                    <select
+                    <x-ui.select
                         id="manual-form-shift-source"
                         wire:model.live="form.shift_source_mode"
-                        class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500"
                     >
                         <option value="auto">{{ __('attendance::manual_entries.options.shift_source_auto') }}</option>
                         <option value="explicit">{{ __('attendance::manual_entries.options.shift_source_explicit') }}</option>
-                    </select>
+                    </x-ui.select>
                     @error('form.shift_source_mode') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
                 <div>
                     <x-label for="manual-form-explicit-shift">{{ __('attendance::manual_entries.labels.calculation_shift') }}</x-label>
-                    <select
+                    <x-ui.select
                         id="manual-form-explicit-shift"
                         wire:model.live="form.explicit_shift_id"
-                        @disabled($form['shift_source_mode'] !== 'explicit')
-                        class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
+                        :disabled="$form['shift_source_mode'] !== 'explicit'"
                     >
                         <option value="">{{ __('attendance::manual_entries.options.select_shift') }}</option>
                         @foreach($this->availableShifts as $shift)
                             <option value="{{ $shift->id }}">{{ $shift->name }}</option>
                         @endforeach
-                    </select>
+                    </x-ui.select>
                     @error('form.explicit_shift_id') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
                 <div class="md:col-span-3">
@@ -468,16 +466,15 @@
 
             <div class="w-full sm:w-48">
                 <x-label for="manual-queue-status">{{ __('attendance::manual_entries.labels.status_filter') }}</x-label>
-                <select
+                <x-ui.select
                     id="manual-queue-status"
                     wire:model.live="queueStatus"
-                    class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500"
                 >
                     <option value="pending">{{ __('attendance::manual_entries.statuses.pending') }}</option>
                     <option value="approved">{{ __('attendance::manual_entries.statuses.approved') }}</option>
                     <option value="rejected">{{ __('attendance::manual_entries.statuses.rejected') }}</option>
                     <option value="all">{{ __('attendance::manual_entries.statuses.all') }}</option>
-                </select>
+                </x-ui.select>
             </div>
         </div>
 

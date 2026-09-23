@@ -156,12 +156,12 @@
                 </div>
                 <div>
                     <x-label for="attendance-assignment-shift">{{ __('attendance::shift_management.fields.shift') }}</x-label>
-                    <select id="attendance-assignment-shift" wire:model="assignmentForm.shift_id" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                    <x-ui.select id="attendance-assignment-shift" wire:model="assignmentForm.shift_id">
                         <option value="">{{ __('attendance::shift_management.options.select_shift') }}</option>
                         @foreach($this->assignmentShifts as $shift)
                             <option value="{{ $shift->id }}">{{ $shift->name }}</option>
                         @endforeach
-                    </select>
+                    </x-ui.select>
                     @error('assignmentForm.shift_id') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
                 <div>

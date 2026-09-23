@@ -56,15 +56,14 @@
 
             <x-context-panel.section :title="__('vacation::common.labels.year')">
                 <div class="px-1 pb-1">
-                    <select
+                    <x-ui.select
                         wire:model.live="selectedYear"
-                        @disabled(! empty($filter['date']['min'] ?? null) || ! empty($filter['date']['max'] ?? null))
-                        class="hrm-num h-10 w-full rounded-[10px] border border-hairline bg-white px-3 text-base text-ink focus:border-ink focus:ring-0 disabled:opacity-50 sm:text-sm"
+                        :disabled="! empty($filter['date']['min'] ?? null) || ! empty($filter['date']['max'] ?? null)"
                     >
                         @foreach ($years as $year)
                             <option value="{{ $year }}">{{ $year }}</option>
                         @endforeach
-                    </select>
+                    </x-ui.select>
                 </div>
             </x-context-panel.section>
 

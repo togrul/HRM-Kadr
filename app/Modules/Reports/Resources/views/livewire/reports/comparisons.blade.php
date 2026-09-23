@@ -6,28 +6,28 @@
             <div class="grid gap-4 md:grid-cols-3">
                 <div>
                     <label class="mb-1 block text-xs font-medium text-zinc-500">{{ __('reports::dashboard.fields.year') }}</label>
-                    <select wire:model.live="year" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-700">
+                    <x-ui.select wire:model.live="year">
                         @foreach (range(now()->year - 4, now()->year + 1) as $yearOption)
                             <option value="{{ $yearOption }}">{{ $yearOption }}</option>
                         @endforeach
-                    </select>
+                    </x-ui.select>
                 </div>
                 <div>
                     <label class="mb-1 block text-xs font-medium text-zinc-500">{{ __('reports::dashboard.fields.month') }}</label>
-                    <select wire:model.live="month" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-700">
+                    <x-ui.select wire:model.live="month">
                         @foreach (range(1, 12) as $monthOption)
                             <option value="{{ $monthOption }}">{{ \Carbon\Carbon::create()->month($monthOption)->translatedFormat('F') }}</option>
                         @endforeach
-                    </select>
+                    </x-ui.select>
                 </div>
                 <div>
                     <label class="mb-1 block text-xs font-medium text-zinc-500">{{ __('reports::dashboard.fields.structure') }}</label>
-                    <select wire:model.live="structureId" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-700">
+                    <x-ui.select wire:model.live="structureId">
                         <option value="">{{ __('reports::dashboard.labels.all_structures') }}</option>
                         @foreach ($structureOptions as $option)
                             <option value="{{ $option['id'] }}">{{ $option['label'] }}</option>
                         @endforeach
-                    </select>
+                    </x-ui.select>
                 </div>
             </div>
         </div>

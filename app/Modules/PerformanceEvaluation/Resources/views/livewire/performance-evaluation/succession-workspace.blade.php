@@ -154,12 +154,12 @@
                                     <div class="flex items-center gap-2">
                                         @can('manage-performance-evaluation')
                                             <div class="relative">
-                                                <select wire:change="setCandidateReadiness({{ $candidate->id }}, $event.target.value)"
+                                                <x-ui.select wire:change="setCandidateReadiness({{ $candidate->id }}, $event.target.value)"
                                                     class="h-7 cursor-pointer appearance-none rounded-lg border-0 py-0 pl-2.5 pr-7 align-middle text-[11px] font-semibold leading-7 {{ $readinessChip[$candidate->readiness] ?? 'bg-zinc-100 text-zinc-500' }} focus:outline-none focus:ring-2 focus:ring-zinc-200">
                                                     @foreach ($readiness as $r)
                                                         <option value="{{ $r }}" @selected($candidate->readiness === $r)>{{ __('performance_evaluation::succession.readiness.'.$r) }}</option>
                                                     @endforeach
-                                                </select>
+                                                </x-ui.select>
                                                 <svg class="pointer-events-none absolute right-2 top-1/2 h-3 w-3 -translate-y-1/2 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
                                             </div>
                                             <button type="button" wire:click="removeCandidate({{ $candidate->id }})" class="text-zinc-300 transition hover:text-rose-500">✕</button>

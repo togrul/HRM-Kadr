@@ -8,12 +8,12 @@
             <div class="grid gap-1 lg:grid-cols-2 2xl:grid-cols-4">
                 <x-ui.input-shell :label="__('personnel::portfolio.fields.search')" labelClass="tracking-tight text-zinc-500"><input wire:model.live.debounce.300ms="search" type="text" placeholder="{{ __('personnel::portfolio.messages.search_placeholder') }}" class="w-full rounded-2xl border border-zinc-200 bg-white px-2 py-2 text-sm text-zinc-800 placeholder:text-zinc-400 focus:border-zinc-300 focus:outline-none" /></x-ui.input-shell>
                 <x-ui.input-shell :label="__('personnel::portfolio.fields.status')" labelClass="tracking-tight text-zinc-500">
-                    <select wire:model.live="statusFilter" class="w-full rounded-2xl border border-zinc-200 bg-white px-2 py-2 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none">
+                    <x-ui.select wire:model.live="statusFilter">
                         <option value="all">{{ __('personnel::common.labels.all') }}</option>
                         @foreach (\App\Modules\Personnel\Support\ProfessionalPortfolio\ProfessionalPortfolioOptions::verificationStatuses() as $status)
                             <option value="{{ $status }}">{{ __('personnel::portfolio.status.'.$status) }}</option>
                         @endforeach
-                    </select>
+                    </x-ui.select>
                 </x-ui.input-shell>
                 <x-ui.input-shell :label="__('personnel::portfolio.fields.date_from')" labelClass="tracking-tight text-zinc-500"><input wire:model.live="dateFrom" type="date" class="w-full rounded-2xl border border-zinc-200 bg-white px-2 py-1.5 text-[13px] text-zinc-800 focus:border-zinc-300 focus:outline-none" /></x-ui.input-shell>
                 <x-ui.input-shell :label="__('personnel::portfolio.fields.date_to')" labelClass="tracking-tight text-zinc-500"><input wire:model.live="dateTo" type="date" class="w-full rounded-2xl border border-zinc-200 bg-white px-2 py-1.5 text-[13px] text-zinc-800 focus:border-zinc-300 focus:outline-none" /></x-ui.input-shell>
@@ -143,11 +143,11 @@
                     </div>
                     <div class="grid gap-3 md:grid-cols-2">
                         <x-ui.input-shell :label="__('personnel::portfolio.fields.project_type')">
-                            <select wire:model="form.project_type" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm">
+                            <x-ui.select wire:model="form.project_type">
                                 @foreach ($options::projectTypes() as $option)
                                     <option value="{{ $option }}">{{ __('personnel::portfolio.options.project_type.'.$option) }}</option>
                                 @endforeach
-                            </select>
+                            </x-ui.select>
                         </x-ui.input-shell>
                         <x-ui.input-shell :label="__('personnel::portfolio.fields.role_title')" :error="$errors->first('form.role_title')"><input wire:model="form.role_title" type="text" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm" /></x-ui.input-shell>
                     </div>
@@ -155,12 +155,12 @@
                     <div class="grid gap-3 md:grid-cols-2">
                         <x-ui.input-shell :label="__('personnel::portfolio.fields.team_name')"><input wire:model="form.team_name" type="text" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm" /></x-ui.input-shell>
                         <x-ui.input-shell :label="__('personnel::portfolio.fields.sponsor_unit')" :error="$errors->first('form.sponsor_unit_id')">
-                            <select wire:model="form.sponsor_unit_id" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm">
+                            <x-ui.select wire:model="form.sponsor_unit_id">
                                 <option value="">—</option>
                                 @foreach ($this->sponsorUnitOptions as $unit)
                                     <option value="{{ $unit->id }}">{{ $unit->name }}</option>
                                 @endforeach
-                            </select>
+                            </x-ui.select>
                         </x-ui.input-shell>
                     </div>
                     <div class="grid gap-3 md:grid-cols-2">

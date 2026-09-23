@@ -56,19 +56,19 @@
                 <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <div>
                         <x-label for="assigned-role-filter">{{ __($d.'.fields.role_filter') }}</x-label>
-                        <select id="assigned-role-filter" wire:model.live="assignedRoleFilter" class="mt-1 {{ $select }}">
+                        <x-ui.select class="mt-1" id="assigned-role-filter" wire:model.live="assignedRoleFilter">
                             <option value="all">{{ __($d.'.labels.all_roles') }}</option>
                             <option value="manager">{{ __($d.'.labels.only_manager_assignments') }}</option>
                             <option value="hr">{{ __($d.'.labels.only_hr_assignments') }}</option>
-                        </select>
+                        </x-ui.select>
                     </div>
                     <div>
                         <x-label for="assigned-status-filter">{{ __($d.'.fields.status_filter') }}</x-label>
-                        <select id="assigned-status-filter" wire:model.live="assignedStatusFilter" class="mt-1 {{ $select }}">
+                        <x-ui.select class="mt-1" id="assigned-status-filter" wire:model.live="assignedStatusFilter">
                             <option value="all">{{ __($d.'.labels.all_statuses') }}</option>
                             <option value="pending">{{ __($d.'.labels.pending_only') }}</option>
                             <option value="submitted">{{ __($d.'.labels.submitted_only') }}</option>
-                        </select>
+                        </x-ui.select>
                     </div>
                 </div>
                 <p class="text-[11.5px] leading-5 text-ink-faint">{{ __($d.'.labels.assigned_filter_hint') }}</p>
@@ -140,13 +140,13 @@
                     </div>
                     <div>
                         <x-label for="pending-question-type">{{ __($d.'.fields.question_type_filter') }}</x-label>
-                        <select id="pending-question-type" wire:model.live="pendingQuestionTypeFilter" class="mt-1 {{ $select }}">
+                        <x-ui.select class="mt-1" id="pending-question-type" wire:model.live="pendingQuestionTypeFilter">
                             <option value="all">{{ __($d.'.labels.all_question_types') }}</option>
                             <option value="multiple_choice">{{ __($d.'.question_types.multiple_choice') }}</option>
                             <option value="open_answer">{{ __($d.'.question_types.open_answer') }}</option>
                             <option value="case_study">{{ __($d.'.question_types.case_study') }}</option>
                             <option value="behavioral">{{ __($d.'.question_types.behavioral') }}</option>
-                        </select>
+                        </x-ui.select>
                     </div>
                     <p class="text-[11.5px] leading-5 text-ink-faint">{{ __($d.'.labels.review_queue_hint') }}</p>
                 </div>

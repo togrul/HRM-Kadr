@@ -396,12 +396,12 @@
                                     </p>
                                     <p class="mt-0.5 text-[11.5px] text-ink-faint"><span class="hrm-num">{{ $item->kpi?->code }}</span> · {{ __($t.'.directions_short.'.$item->kpi?->direction) }} · {{ __($t.'.units.'.$item->kpi?->unit) }}</p>
                                     @if ($card->status === 'draft' && in_array($role, ['hr', 'manager'], true) && $this->goalOptions !== [])
-                                        <select wire:change="linkGoal({{ $item->id }}, $event.target.value)" class="mt-1.5 h-10 max-w-[260px] rounded-lg border border-hairline bg-white px-2 text-base text-ink-muted focus:outline-none sm:text-sm">
+                                        <x-ui.select wire:change="linkGoal({{ $item->id }}, $event.target.value)" class="mt-1.5 h-10 max-w-[260px] rounded-lg border border-hairline bg-white px-2 text-base text-ink-muted focus:outline-none sm:text-sm">
                                             <option value="">{{ __($t.'.no_goal') }}</option>
                                             @foreach ($this->goalOptions as $goalId => $goalTitle)
                                                 <option value="{{ $goalId }}" @selected((int) $item->performance_goal_id === (int) $goalId)>{{ $goalTitle }}</option>
                                             @endforeach
-                                        </select>
+                                        </x-ui.select>
                                     @elseif ($item->goal)
                                         <p class="mt-1 inline-flex items-center gap-1 rounded-md bg-[#f4f4f5] px-1.5 py-0.5 text-[11px] text-ink-muted">
                                             <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>

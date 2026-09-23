@@ -281,11 +281,11 @@
                 </div>
                 <div>
                     <x-label for="delivery-type">{{ __('training_needs::dashboard.fields.delivery_type') }}</x-label>
-                    <select id="delivery-type" wire:model="programForm.delivery_type" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                    <x-ui.select id="delivery-type" wire:model="programForm.delivery_type">
                         <option value="internal">{{ __('training_needs::dashboard.delivery_types.internal') }}</option>
                         <option value="external">{{ __('training_needs::dashboard.delivery_types.external') }}</option>
                         <option value="hybrid">{{ __('training_needs::dashboard.delivery_types.hybrid') }}</option>
-                    </select>
+                    </x-ui.select>
                     @error('programForm.delivery_type') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
                 <label class="mt-6 inline-flex items-center gap-2 rounded-lg bg-zinc-50 px-3 py-2 text-sm text-zinc-700">

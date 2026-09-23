@@ -41,12 +41,12 @@
                     </div>
                     <div>
                         <x-label for="profile-source">{{ __('training_needs::dashboard.fields.source') }}</x-label>
-                        <select id="profile-source" wire:model="profileForm.source" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                        <x-ui.select id="profile-source" wire:model="profileForm.source">
                             <option value="manual">{{ __('training_needs::dashboard.sources.manual') }}</option>
                             <option value="manager_review">{{ __('training_needs::dashboard.sources.manager_review') }}</option>
                             <option value="hr_review">{{ __('training_needs::dashboard.sources.hr_review') }}</option>
                             <option value="exam">{{ __('training_needs::dashboard.sources.exam') }}</option>
-                        </select>
+                        </x-ui.select>
                         @error('profileForm.source') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div class="md:col-span-2">
@@ -112,31 +112,31 @@
                     </div>
                     <div>
                         <x-label for="need-priority">{{ __('training_needs::dashboard.fields.priority') }}</x-label>
-                        <select id="need-priority" wire:model="needForm.priority" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                        <x-ui.select id="need-priority" wire:model="needForm.priority">
                             <option value="low">{{ __('training_needs::dashboard.priorities.low') }}</option>
                             <option value="medium">{{ __('training_needs::dashboard.priorities.medium') }}</option>
                             <option value="high">{{ __('training_needs::dashboard.priorities.high') }}</option>
-                        </select>
+                        </x-ui.select>
                         @error('needForm.priority') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div>
                         <x-label for="need-status">{{ __('training_needs::dashboard.fields.status') }}</x-label>
-                        <select id="need-status" wire:model="needForm.status" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                        <x-ui.select id="need-status" wire:model="needForm.status">
                             <option value="draft">{{ __('training_needs::dashboard.statuses.draft') }}</option>
                             <option value="review">{{ __('training_needs::dashboard.statuses.review') }}</option>
                             <option value="approved">{{ __('training_needs::dashboard.statuses.approved') }}</option>
                             <option value="planned">{{ __('training_needs::dashboard.statuses.planned') }}</option>
-                        </select>
+                        </x-ui.select>
                         @error('needForm.status') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div>
                         <x-label for="need-source">{{ __('training_needs::dashboard.fields.source') }}</x-label>
-                        <select id="need-source" wire:model="needForm.source" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                        <x-ui.select id="need-source" wire:model="needForm.source">
                             <option value="manual">{{ __('training_needs::dashboard.sources.manual') }}</option>
                             <option value="manager_request">{{ __('training_needs::dashboard.sources.manager_request') }}</option>
                             <option value="employee_request">{{ __('training_needs::dashboard.sources.employee_request') }}</option>
                             <option value="performance_gap">{{ __('training_needs::dashboard.sources.performance_gap') }}</option>
-                        </select>
+                        </x-ui.select>
                         @error('needForm.source') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div>

@@ -3,11 +3,11 @@
         <div class="rounded-[1.6rem] border border-zinc-200 bg-zinc-50/70 p-4">
             <div class="grid gap-4 xl:grid-cols-[16rem_minmax(0,1fr)]">
                 <x-ui.input-shell :label="__('notifications::common.fields.date_range')">
-                    <select wire:model.live="range" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
+                    <x-ui.select wire:model.live="range">
                         @foreach ($rangeOptions as $value => $label)
                             <option value="{{ $value }}">{{ $label }}</option>
                         @endforeach
-                    </select>
+                    </x-ui.select>
                 </x-ui.input-shell>
                 @if ($range === 'custom')
                     <div class="grid gap-4 md:grid-cols-2">

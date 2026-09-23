@@ -26,12 +26,12 @@
             <form wire:submit="scheduleInterview" class="mt-5 grid gap-3 sm:grid-cols-2">
                 <label class="space-y-2">
                     <span class="text-xs font-semibold uppercase tracking-tight text-slate-500">{{ __('candidates::recruitment.labels.interviewer') }}</span>
-                    <select wire:model="interviewForm.interviewer_id" class="h-12 w-full rounded-2xl border-0 bg-white px-4 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-slate-200 transition focus:ring-2 focus:ring-slate-900">
+                    <x-ui.select wire:model="interviewForm.interviewer_id">
                         <option value="">---</option>
                         @foreach ($users as $user)
                             <option value="{{ $user->id }}">{{ $user->name }}</option>
                         @endforeach
-                    </select>
+                    </x-ui.select>
                     @error('interviewForm.interviewer_id') <x-validation>{{ $message }}</x-validation> @enderror
                 </label>
 
@@ -102,12 +102,12 @@
             <form wire:submit="submitScorecard" class="mt-5 grid gap-3 sm:grid-cols-3">
                 <label class="space-y-2 sm:col-span-3">
                     <span class="text-xs font-semibold uppercase tracking-tight text-slate-500">{{ __('candidates::recruitment.labels.interview') }}</span>
-                    <select wire:model="scoreForm.interview_id" class="h-12 w-full rounded-2xl border-0 bg-white px-4 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-slate-200 transition focus:ring-2 focus:ring-slate-900">
+                    <x-ui.select wire:model="scoreForm.interview_id">
                         <option value="">---</option>
                         @foreach ($application->interviews as $interview)
                             <option value="{{ $interview->id }}">{{ $interview->interviewer?->name ?? __('candidates::recruitment.labels.unassigned') }} · {{ optional($interview->scheduled_at)->format('d.m.Y H:i') ?? '—' }}</option>
                         @endforeach
-                    </select>
+                    </x-ui.select>
                     @error('scoreForm.interview_id') <x-validation>{{ $message }}</x-validation> @enderror
                 </label>
 

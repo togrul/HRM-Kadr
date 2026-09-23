@@ -10,12 +10,12 @@
             <div class="grid gap-2 sm:grid-cols-3">
                 <div>
                     <x-label for="attendance-ot-status">{{ __('attendance::overtime.filters.status') }}</x-label>
-                    <select id="attendance-ot-status" wire:model.live="status" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                    <x-ui.select id="attendance-ot-status" wire:model.live="status">
                         <option value="pending">{{ __('attendance::overtime.statuses.pending') }}</option>
                         <option value="approved">{{ __('attendance::overtime.statuses.approved') }}</option>
                         <option value="rejected">{{ __('attendance::overtime.statuses.rejected') }}</option>
                         <option value="all">{{ __('attendance::overtime.statuses.all') }}</option>
-                    </select>
+                    </x-ui.select>
                 </div>
                 <div>
                     <x-label for="attendance-ot-from">{{ __('attendance::overtime.filters.from') }}</x-label>

@@ -150,12 +150,12 @@
                                 <div class="mt-1.5 overflow-hidden rounded-xl border border-hairline-subtle">
                                     @foreach ($ruleForm['position_targets'] as $index => $pair)
                                         <div wire:key="position_targets-{{ $index }}" class="grid grid-cols-[minmax(0,1fr)_96px_40px] items-center gap-2 px-3 py-1.5 {{ $loop->first ? '' : 'border-t border-hairline-subtle' }}">
-                                            <select wire:model.live="ruleForm.position_targets.{{ $index }}.from" class="h-10 w-full min-w-0 truncate rounded-[10px] border border-hairline bg-white px-2 text-base text-ink focus:border-zinc-400 focus:outline-none focus:ring-0 sm:text-sm">
+                                            <x-ui.select class="min-w-0 truncate" wire:model.live="ruleForm.position_targets.{{ $index }}.from">
                                                 <option value="">—</option>
                                                 @foreach ($this->positionOptions as $optionId => $optionName)
                                                     <option value="{{ $optionId }}">{{ $optionName }}</option>
                                                 @endforeach
-                                            </select>
+                                            </x-ui.select>
                                             <div class="relative"><input type="number" step="0.5" wire:model.live.debounce.400ms="ruleForm.position_targets.{{ $index }}.value" class="{{ $input }} pr-6"><span class="pointer-events-none absolute right-2.5 top-2 text-[12px] text-ink-faint">%</span></div>
                                             <button type="button" wire:click="removeBand('position_targets', {{ $index }})" class="flex h-10 w-10 items-center justify-center rounded-lg text-ink-faint hover:bg-rose-50 hover:text-rose-600" aria-label="{{ __($t.'.actions.delete') }}">
                                                 <x-icons.delete-icon size="h-4 w-4" />
@@ -235,12 +235,12 @@
                                 <div class="mt-1.5 overflow-hidden rounded-xl border border-hairline-subtle">
                                     @foreach ($ruleForm['unit_results'] as $index => $pair)
                                         <div wire:key="unit_results-{{ $index }}" class="grid grid-cols-[minmax(0,1fr)_96px_40px] items-center gap-2 px-3 py-1.5 {{ $loop->first ? '' : 'border-t border-hairline-subtle' }}">
-                                            <select wire:model.live="ruleForm.unit_results.{{ $index }}.from" class="h-10 w-full min-w-0 truncate rounded-[10px] border border-hairline bg-white px-2 text-base text-ink focus:border-zinc-400 focus:outline-none focus:ring-0 sm:text-sm">
+                                            <x-ui.select class="min-w-0 truncate" wire:model.live="ruleForm.unit_results.{{ $index }}.from">
                                                 <option value="">—</option>
                                                 @foreach ($this->unitOptions as $optionId => $optionName)
                                                     <option value="{{ $optionId }}">{{ $optionName }}</option>
                                                 @endforeach
-                                            </select>
+                                            </x-ui.select>
                                             <div class="relative"><input type="number" step="0.5" wire:model.live.debounce.400ms="ruleForm.unit_results.{{ $index }}.value" class="{{ $input }} pr-6"><span class="pointer-events-none absolute right-2.5 top-2 text-[12px] text-ink-faint">%</span></div>
                                             <button type="button" wire:click="removeBand('unit_results', {{ $index }})" class="flex h-10 w-10 items-center justify-center rounded-lg text-ink-faint hover:bg-rose-50 hover:text-rose-600" aria-label="{{ __($t.'.actions.delete') }}">
                                                 <x-icons.delete-icon size="h-4 w-4" />

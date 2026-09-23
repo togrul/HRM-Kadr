@@ -8,12 +8,12 @@
             <div class="grid gap-1 lg:grid-cols-2 2xl:grid-cols-4">
                 <x-ui.input-shell :label="__('personnel::portfolio.fields.search')" labelClass="tracking-tight text-zinc-500"><input wire:model.live.debounce.300ms="search" type="text" placeholder="{{ __('personnel::portfolio.messages.search_placeholder') }}" class="w-full rounded-2xl border border-zinc-200 bg-white px-2 py-2 text-sm text-zinc-800 placeholder:text-zinc-400 focus:border-zinc-300 focus:outline-none" /></x-ui.input-shell>
                 <x-ui.input-shell :label="__('personnel::portfolio.fields.status')" labelClass="tracking-tight text-zinc-500">
-                    <select wire:model.live="statusFilter" class="w-full rounded-2xl border border-zinc-200 bg-white px-2 py-2 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none">
+                    <x-ui.select wire:model.live="statusFilter">
                         <option value="all">{{ __('personnel::common.labels.all') }}</option>
                         @foreach ($options::mediaStatuses() as $status)
                             <option value="{{ $status }}">{{ __('personnel::portfolio.status.'.$status) }}</option>
                         @endforeach
-                    </select>
+                    </x-ui.select>
                 </x-ui.input-shell>
                 <x-ui.input-shell :label="__('personnel::portfolio.fields.date_from')" labelClass="tracking-tight text-zinc-500">
                   <input wire:model.live="dateFrom" type="date" class="w-full rounded-2xl border border-zinc-200 bg-white px-2 py-1.5 text-[13px] text-zinc-800 focus:border-zinc-300 focus:outline-none" /></x-ui.input-shell>
@@ -162,34 +162,34 @@
                     </div>
                     <div class="grid gap-3 md:grid-cols-2">
                         <x-ui.input-shell :label="__('personnel::portfolio.fields.publisher_type')">
-                            <select wire:model="form.publisher_type" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm">
+                            <x-ui.select wire:model="form.publisher_type">
                                 @foreach ($options::mediaPublisherTypes() as $option)
                                     <option value="{{ $option }}">{{ __('personnel::portfolio.options.publisher_type.'.$option) }}</option>
                                 @endforeach
-                            </select>
+                            </x-ui.select>
                         </x-ui.input-shell>
                         <x-ui.input-shell :label="__('personnel::portfolio.fields.mention_type')">
-                            <select wire:model="form.mention_type" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm">
+                            <x-ui.select wire:model="form.mention_type">
                                 @foreach ($options::mediaMentionTypes() as $option)
                                     <option value="{{ $option }}">{{ __('personnel::portfolio.options.mention_type.'.$option) }}</option>
                                 @endforeach
-                            </select>
+                            </x-ui.select>
                         </x-ui.input-shell>
                     </div>
                     <div class="grid gap-3 md:grid-cols-2">
                         <x-ui.input-shell :label="__('personnel::portfolio.fields.sentiment')">
-                            <select wire:model="form.sentiment" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm">
+                            <x-ui.select wire:model="form.sentiment">
                                 @foreach ($options::mediaSentiments() as $option)
                                     <option value="{{ $option }}">{{ __('personnel::portfolio.options.sentiment.'.$option) }}</option>
                                 @endforeach
-                            </select>
+                            </x-ui.select>
                         </x-ui.input-shell>
                         <x-ui.input-shell :label="__('personnel::portfolio.fields.visibility')">
-                            <select wire:model="form.visibility" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm">
+                            <x-ui.select wire:model="form.visibility">
                                 @foreach ($options::mediaVisibilities() as $option)
                                     <option value="{{ $option }}">{{ __('personnel::portfolio.options.visibility.'.$option) }}</option>
                                 @endforeach
-                            </select>
+                            </x-ui.select>
                         </x-ui.input-shell>
                     </div>
                     <x-ui.input-shell :label="__('personnel::portfolio.fields.url')" :error="$errors->first('form.url')"><input wire:model="form.url" type="url" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm" /></x-ui.input-shell>

@@ -170,14 +170,13 @@
                                         </div>
 
                                         <div class="space-y-2">
-                                            <select
+                                            <x-ui.select
                                                 wire:model.live="files.{{ $key }}.category"
-                                                class="w-full rounded-full border border-slate-200 bg-white px-3 py-2 text-[12px] font-semibold uppercase tracking-tight text-slate-700 shadow-sm"
                                             >
                                                 @foreach($categoryOptions as $option)
                                                     <option value="{{ $option['id'] }}">{{ $option['label'] }}</option>
                                                 @endforeach
-                                            </select>
+                                            </x-ui.select>
                                             <div class="space-y-1">
                                               <x-label for="files.{{ $key }}.display_name">{{ __('candidates::files.labels.display_name') }}</x-label>
                                               <x-livewire-input mode="gray" name="files.{{ $key }}.display_name" wire:model.live="files.{{ $key }}.display_name"></x-livewire-input>

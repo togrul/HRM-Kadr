@@ -9,20 +9,20 @@
             <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
                 <div>
                     <x-label for="attendance-ex-status">{{ __('attendance::exceptions.filters.status') }}</x-label>
-                    <select id="attendance-ex-status" wire:model.live="status" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                    <x-ui.select id="attendance-ex-status" wire:model.live="status">
                         <option value="open">{{ __('attendance::exceptions.statuses.open') }}</option>
                         <option value="resolved">{{ __('attendance::exceptions.statuses.resolved') }}</option>
                         <option value="all">{{ __('attendance::exceptions.statuses.all') }}</option>
-                    </select>
+                    </x-ui.select>
                 </div>
                 <div>
                     <x-label for="attendance-ex-type">{{ __('attendance::exceptions.filters.type') }}</x-label>
-                    <select id="attendance-ex-type" wire:model.live="type" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                    <x-ui.select id="attendance-ex-type" wire:model.live="type">
                         <option value="all">{{ __('attendance::exceptions.types.all') }}</option>
                         <option value="missing_in">{{ __('attendance::exceptions.types.missing_in') }}</option>
                         <option value="missing_out">{{ __('attendance::exceptions.types.missing_out') }}</option>
                         <option value="unmatched_punch">{{ __('attendance::exceptions.types.unmatched_punch') }}</option>
-                    </select>
+                    </x-ui.select>
                 </div>
                 <div>
                     <x-label for="attendance-ex-from">{{ __('attendance::exceptions.filters.from') }}</x-label>

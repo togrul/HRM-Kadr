@@ -19,23 +19,23 @@
                     </div>
                     <div>
                         <x-label for="plan-quarter">{{ __('training_needs::dashboard.fields.plan_quarter') }}</x-label>
-                        <select id="plan-quarter" wire:model="planForm.plan_quarter" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                        <x-ui.select id="plan-quarter" wire:model="planForm.plan_quarter">
                             <option value="">{{ __('training_needs::dashboard.labels.all_year') }}</option>
                             <option value="1">Q1</option>
                             <option value="2">Q2</option>
                             <option value="3">Q3</option>
                             <option value="4">Q4</option>
-                        </select>
+                        </x-ui.select>
                         @error('planForm.plan_quarter') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div>
                         <x-label for="plan-status">{{ __('training_needs::dashboard.fields.status') }}</x-label>
-                        <select id="plan-status" wire:model="planForm.status" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                        <x-ui.select id="plan-status" wire:model="planForm.status">
                             <option value="draft">{{ __('training_needs::dashboard.plan_statuses.draft') }}</option>
                             <option value="review">{{ __('training_needs::dashboard.plan_statuses.review') }}</option>
                             <option value="approved">{{ __('training_needs::dashboard.plan_statuses.approved') }}</option>
                             <option value="published">{{ __('training_needs::dashboard.plan_statuses.published') }}</option>
-                        </select>
+                        </x-ui.select>
                         @error('planForm.status') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <label class="mt-6 inline-flex items-center gap-2 rounded-lg bg-zinc-50 px-3 py-2 text-sm text-zinc-700">
@@ -153,11 +153,11 @@
                     </div>
                     <div>
                         <x-label for="review-priority">{{ __('training_needs::dashboard.fields.priority') }}</x-label>
-                        <select id="review-priority" wire:model="planItemReviewForm.priority" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                        <x-ui.select id="review-priority" wire:model="planItemReviewForm.priority">
                             <option value="low">{{ __('training_needs::dashboard.priorities.low') }}</option>
                             <option value="medium">{{ __('training_needs::dashboard.priorities.medium') }}</option>
                             <option value="high">{{ __('training_needs::dashboard.priorities.high') }}</option>
-                        </select>
+                        </x-ui.select>
                         @error('planItemReviewForm.priority') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div class="md:col-span-2">

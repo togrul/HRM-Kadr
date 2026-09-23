@@ -49,11 +49,11 @@
                 </div>
                 <div>
                     <label for="performance-lists-filter" class="sr-only">{{ __($d.'.fields.status_filter') }}</label>
-                    <select id="performance-lists-filter" wire:model.live="filter" class="h-11 w-full rounded-xl border border-hairline bg-white px-3 text-[13px] text-ink shadow-card focus:border-zinc-400 focus:outline-none focus:ring-0">
+                    <x-ui.select id="performance-lists-filter" wire:model.live="filter">
                         @foreach ($this->filterOptions as $value => $label)
                             <option value="{{ $value }}">{{ $label }}</option>
                         @endforeach
-                    </select>
+                    </x-ui.select>
                 </div>
                 <div class="flex h-11 items-center gap-2 rounded-xl border border-hairline bg-white px-3.5 shadow-card">
                     <span class="hrm-num text-[18px] font-semibold text-ink">{{ $this->summary['visible'] }}</span>

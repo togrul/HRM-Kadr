@@ -138,13 +138,13 @@
                     </label>
                     <div>
                         <x-label for="session-status">{{ __('training_needs::dashboard.fields.status') }}</x-label>
-                        <select id="session-status" wire:model="sessionForm.status" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                        <x-ui.select id="session-status" wire:model="sessionForm.status">
                             <option value="draft">{{ __('training_needs::dashboard.session_statuses.draft') }}</option>
                             <option value="scheduled">{{ __('training_needs::dashboard.session_statuses.scheduled') }}</option>
                             <option value="in_progress">{{ __('training_needs::dashboard.session_statuses.in_progress') }}</option>
                             <option value="completed">{{ __('training_needs::dashboard.session_statuses.completed') }}</option>
                             <option value="cancelled">{{ __('training_needs::dashboard.session_statuses.cancelled') }}</option>
-                        </select>
+                        </x-ui.select>
                         @error('sessionForm.status') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div class="md:col-span-2">
@@ -207,13 +207,13 @@
                     </div>
                     <div class="md:col-span-2">
                         <x-label for="participant-status">{{ __('training_needs::dashboard.fields.attendance_status') }}</x-label>
-                        <select id="participant-status" wire:model="participantForm.attendance_status" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                        <x-ui.select id="participant-status" wire:model="participantForm.attendance_status">
                             <option value="planned">{{ __('training_needs::dashboard.attendance_statuses.planned') }}</option>
                             <option value="confirmed">{{ __('training_needs::dashboard.attendance_statuses.confirmed') }}</option>
                             <option value="attended">{{ __('training_needs::dashboard.attendance_statuses.attended') }}</option>
                             <option value="absent">{{ __('training_needs::dashboard.attendance_statuses.absent') }}</option>
                             <option value="cancelled">{{ __('training_needs::dashboard.attendance_statuses.cancelled') }}</option>
-                        </select>
+                        </x-ui.select>
                         @error('participantForm.attendance_status') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div class="flex flex-wrap justify-end gap-2 md:col-span-2">

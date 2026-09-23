@@ -33,35 +33,35 @@
 
                 <div class="mt-4 grid gap-4 xl:grid-cols-2">
                 <x-ui.input-shell class="space-y-2" :label="__('notifications::common.fields.category')">
-                    <select wire:model.live="form.category" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
+                    <x-ui.select wire:model.live="form.category">
                         @foreach ($categories as $category)
                             <option value="{{ $category }}">{{ $categoryLabels[$category] ?? $category }}</option>
                         @endforeach
-                    </select>
+                    </x-ui.select>
                 </x-ui.input-shell>
 
                 <x-ui.input-shell class="space-y-2" :label="__('notifications::common.fields.channel')">
-                    <select wire:model="form.channel" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
+                    <x-ui.select wire:model="form.channel">
                         <option value="database">{{ __('notifications::common.channels.database') }}</option>
                         <option value="mail">{{ __('notifications::common.channels.mail') }}</option>
-                    </select>
+                    </x-ui.select>
                 </x-ui.input-shell>
 
                 <x-ui.input-shell class="space-y-2" :label="__('notifications::common.fields.trigger')" :error="$errors->first('form.trigger')">
-                    <select wire:key="notification-trigger-{{ $form['category'] }}" wire:model="form.trigger" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
+                    <x-ui.select wire:key="notification-trigger-{{ $form['category'] }}" wire:model="form.trigger">
                         @foreach ($triggerOptions as $triggerValue => $triggerLabel)
                             <option value="{{ $triggerValue }}">{{ $triggerLabel }}</option>
                         @endforeach
-                    </select>
+                    </x-ui.select>
                 </x-ui.input-shell>
 
                 <x-ui.input-shell class="space-y-2" :label="__('notifications::common.fields.template')">
-                    <select wire:model="form.template_id" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
+                    <x-ui.select wire:model="form.template_id">
                         <option value="">{{ __('notifications::common.badges.untemplated') }}</option>
                         @foreach ($templates as $template)
                             <option value="{{ $template->id }}">{{ $displayTemplateKey($template->key) }}</option>
                         @endforeach
-                    </select>
+                    </x-ui.select>
                 </x-ui.input-shell>
 
                 <div class="space-y-2 xl:col-span-2">

@@ -39,14 +39,14 @@
                         <input type="text" wire:model.live.debounce.300ms="search" placeholder="{{ __('notifications::common.helpers.search_campaigns') }}" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
                     </x-ui.input-shell>
                     <x-ui.input-shell>
-                        <select wire:model.live="statusFilter" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
+                        <x-ui.select wire:model.live="statusFilter">
                             <option value="all">{{ __('notifications::common.helpers.all_statuses') }}</option>
                             <option value="draft">{{ __('notifications::common.statuses.draft') }}</option>
                             <option value="queued">{{ __('notifications::common.statuses.queued') }}</option>
                             <option value="sent">{{ __('notifications::common.statuses.sent') }}</option>
                             <option value="failed">{{ __('notifications::common.statuses.failed') }}</option>
                             <option value="cancelled">{{ __('notifications::common.statuses.cancelled') }}</option>
-                        </select>
+                        </x-ui.select>
                     </x-ui.input-shell>
                 </div>
             </div>

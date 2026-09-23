@@ -16,11 +16,11 @@
             <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
                 <div>
                     <x-label for="attendance-history-type">{{ __('attendance::history.filters.type') }}</x-label>
-                    <select id="attendance-history-type" wire:model.live="type" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                    <x-ui.select id="attendance-history-type" wire:model.live="type">
                         @foreach($typeOptions as $value => $label)
                             <option value="{{ $value }}">{{ $label }}</option>
                         @endforeach
-                    </select>
+                    </x-ui.select>
                 </div>
                 <div>
                     <x-label for="attendance-history-from">{{ __('attendance::history.filters.date_from') }}</x-label>
