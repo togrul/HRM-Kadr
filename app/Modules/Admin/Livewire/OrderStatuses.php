@@ -5,6 +5,7 @@ namespace App\Modules\Admin\Livewire;
 use App\Models\OrderStatus;
 use App\Modules\Admin\Support\Traits\Admin\AdminCrudTrait;
 use App\Modules\Admin\Support\Traits\Admin\CallSwalTrait;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\On;
@@ -91,12 +92,12 @@ class OrderStatuses extends Component
         $this->closeCrud();
     }
 
-    public function mount()
+    public function mount(): void
     {
         $this->selectedLocale = config('app.locale');
     }
 
-    public function render()
+    public function render(): View
     {
         $orderStatuses = OrderStatus::query()
             ->where('locale', '=', $this->selectedLocale)

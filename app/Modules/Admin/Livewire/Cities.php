@@ -7,6 +7,7 @@ use App\Models\City;
 use App\Models\CountryTranslation;
 use App\Modules\Admin\Support\Traits\Admin\AdminCrudTrait;
 use App\Modules\Admin\Support\Traits\Admin\CallSwalTrait;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Gate;
@@ -103,7 +104,7 @@ class Cities extends Component
         $this->resetPage();
     }
 
-    public function render()
+    public function render(): View
     {
         $cities = City::with(['country.currentCountryTranslations', 'parent:id,name'])->paginate(20);
 

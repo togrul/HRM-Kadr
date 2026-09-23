@@ -5,6 +5,8 @@ namespace App\Modules\Admin\Livewire;
 use App\Models\Country;
 use App\Modules\Admin\Support\Traits\Admin\AdminCrudTrait;
 use App\Modules\Admin\Support\Traits\Admin\CallSwalTrait;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -67,7 +69,7 @@ class Countries extends Component
         $this->closeCrud();
     }
 
-    private function checkCountryExist($id)
+    private function checkCountryExist($id): Country|Collection|null
     {
         return Country::with(['countryTranslations' => function ($query) {
             $query->where('locale', $this->selectedLocale);
@@ -151,7 +153,7 @@ class Countries extends Component
         $this->selectedLocale = config('app.locale');
     }
 
-    public function render()
+    public function render(): View
     {
         $countries = Country::whereHas('countryTranslations', function ($query) {
             $query->where('locale', $this->selectedLocale);

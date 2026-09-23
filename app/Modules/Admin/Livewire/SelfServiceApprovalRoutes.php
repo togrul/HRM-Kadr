@@ -5,6 +5,7 @@ namespace App\Modules\Admin\Livewire;
 use App\Models\SelfServiceApprovalRoute;
 use App\Modules\Admin\Support\Traits\Admin\AdminCrudTrait;
 use App\Modules\Admin\Support\Traits\Admin\CallSwalTrait;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\On;
@@ -136,7 +137,7 @@ class SelfServiceApprovalRoutes extends Component
         ];
     }
 
-    public function render()
+    public function render(): View
     {
         $stored = SelfServiceApprovalRoute::query()
             ->latest('id')

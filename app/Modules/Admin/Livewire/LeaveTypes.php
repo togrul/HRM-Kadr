@@ -6,6 +6,7 @@ use App\Models\LeaveType;
 use App\Modules\Admin\Support\Traits\Admin\AdminCrudTrait as AdminAdminCrudTrait;
 use App\Modules\Admin\Support\Traits\Admin\CallSwalTrait as AdminCallSwalTrait;
 use App\Support\Database\InstalledTables;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests as AccessAuthorizesRequests;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
@@ -120,13 +121,13 @@ class LeaveTypes extends Component
         $this->closeCrud();
     }
 
-    public function mount()
+    public function mount(): void
     {
         $this->supportsAttendanceCode = InstalledTables::hasColumn('leave_types', 'attendance_code');
         $this->isAdded = false;
     }
 
-    public function render()
+    public function render(): View
     {
         $leave_types = LeaveType::query()
             ->paginate(20);

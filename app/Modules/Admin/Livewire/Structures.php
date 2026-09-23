@@ -6,6 +6,7 @@ use App\Livewire\Traits\DropdownConstructTrait;
 use App\Models\Structure;
 use App\Modules\Admin\Support\Traits\Admin\AdminCrudTrait;
 use App\Modules\Admin\Support\Traits\Admin\CallSwalTrait;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate;
@@ -140,7 +141,7 @@ class Structures extends Component
         $this->closeCrud();
     }
 
-    public function render()
+    public function render(): View
     {
         $structureList = Cache::rememberForever(\App\Support\OrderLookupCache::key('structures', 'admin-tree'), function () {
             return Structure::withRecursive('subs', false)

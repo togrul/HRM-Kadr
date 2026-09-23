@@ -5,6 +5,7 @@ namespace App\Modules\Admin\Livewire;
 use App\Models\AppealStatus as AppealStatusAlias;
 use App\Modules\Admin\Support\Traits\Admin\AdminCrudTrait;
 use App\Modules\Admin\Support\Traits\Admin\CallSwalTrait;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -113,12 +114,12 @@ class AppealStatus extends Component
         $this->closeCrud();
     }
 
-    public function mount()
+    public function mount(): void
     {
         $this->selectedLocale = config('app.locale');
     }
 
-    public function render()
+    public function render(): View
     {
         $_appeal_statuses = AppealStatusAlias::where('locale', $this->selectedLocale)->get();
 

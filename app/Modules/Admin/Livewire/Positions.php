@@ -7,6 +7,7 @@ use App\Models\Position;
 use App\Models\RankCategory;
 use App\Modules\Admin\Support\Traits\Admin\AdminCrudTrait;
 use App\Modules\Admin\Support\Traits\Admin\CallSwalTrait;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\On;
@@ -100,7 +101,7 @@ class Positions extends Component
         $this->closeCrud();
     }
 
-    public function render()
+    public function render(): View
     {
         $positions = Position::all();
 
