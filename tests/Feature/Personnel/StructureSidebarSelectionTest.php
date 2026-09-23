@@ -1,8 +1,8 @@
 <?php
 
-use App\Models\Structure;
 use App\Models\User;
 use App\Modules\SidebarStructure\Livewire\Sidebar;
+use App\Services\StructurePathService;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 
@@ -53,7 +53,7 @@ it('restores the highlight from a nested structure query string', function (): v
     $this->actingAs(User::factory()->create());
 
     // What AllPersonnel writes to the URL: the clicked node plus every descendant.
-    $nested = Structure::withRecursive('subs')->find(2)->getAllNestedIds();
+    $nested = app(StructurePathService::class)->descendantIds(2);
 
     Livewire::withQueryParams(['structure' => $nested])
         ->test(Sidebar::class)
@@ -79,7 +79,7 @@ it('keeps the highlight on a real page load carrying the nested structure filter
     $user->givePermissionTo('show-personnels');
     $this->actingAs($user);
 
-    $nested = Structure::withRecursive('subs')->find(2)->getAllNestedIds();
+    $nested = app(StructurePathService::class)->descendantIds(2);
 
     $this->get(route('personnel.index', ['structure' => $nested]))
         ->assertOk()
@@ -109,7 +109,7 @@ it('takes no selection when the host has no structure filter', function (): void
 it('hands the clicked unit to the host as the head of the nested filter', function (): void {
     seedTree();
 
-    $nested = Structure::withRecursive('subs')->find(2)->getAllNestedIds();
+    $nested = app(StructurePathService::class)->descendantIds(2);
 
     // The host highlights $structure[0]; that contract only holds while the clicked unit
     // stays first in the descendant list.

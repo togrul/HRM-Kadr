@@ -7,6 +7,7 @@ use App\Models\Personnel;
 use App\Models\StaffSchedule;
 use App\Models\Structure;
 use App\Modules\Staff\Exports\VacancyExport;
+use App\Services\StructurePathService;
 use App\Services\StructureService;
 use App\Traits\NestedStructureTrait;
 use Carbon\Carbon;
@@ -208,7 +209,10 @@ class Staffs extends Component
             ->values()
             ->all();
 
-        $nestedIdsByStructure = $this->buildNestedIdsByStructure($structureIds);
+        $paths = app(StructurePathService::class);
+        $nestedIdsByStructure = collect($structureIds)
+            ->mapWithKeys(fn (int $id): array => [$id => $paths->descendantIds($id) ?: [$id]])
+            ->all();
         $relevantStructureIds = collect($nestedIdsByStructure)
             ->flatten()
             ->map(fn ($id) => (int) $id)
@@ -257,45 +261,6 @@ class Staffs extends Component
             $row->filled = $filled;
             $row->vacant = max(0, (int) ($row->total ?? 0) - $filled);
         });
-    }
-
-    protected function buildNestedIdsByStructure(array $structureIds): array
-    {
-        if (empty($structureIds)) {
-            return [];
-        }
-
-        $childrenByParent = [];
-        foreach ($this->resolveStructureMap() as $id => $meta) {
-            $parentId = (int) ($meta['parent_id'] ?? 0);
-            $childrenByParent[$parentId][] = (int) $id;
-        }
-
-        $memo = [];
-        $collectNestedIds = function (int $id) use (&$collectNestedIds, &$memo, $childrenByParent): array {
-            if (isset($memo[$id])) {
-                return $memo[$id];
-            }
-
-            $ids = [$id];
-            foreach ($childrenByParent[$id] ?? [] as $childId) {
-                $ids = array_merge($ids, $collectNestedIds((int) $childId));
-            }
-
-            return $memo[$id] = array_values(array_unique($ids));
-        };
-
-        $nestedIdsByStructure = [];
-        foreach ($structureIds as $structureId) {
-            $structureId = (int) $structureId;
-            if ($structureId <= 0) {
-                continue;
-            }
-
-            $nestedIdsByStructure[$structureId] = $collectNestedIds($structureId);
-        }
-
-        return $nestedIdsByStructure;
     }
 
     protected function buildStructureGroups($rows)

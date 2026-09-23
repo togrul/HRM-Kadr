@@ -27,6 +27,11 @@ class StructurePathService
     protected array $segmentCache = [];
 
     /**
+     * @var array<int, list<int>>|null
+     */
+    protected ?array $childrenIndex = null;
+
+    /**
      * The unit and its ancestors, outermost first.
      *
      * Callers join these themselves: unit names contain spaces, so a joined string cannot
@@ -130,13 +135,7 @@ class StructurePathService
             return [];
         }
 
-        $children = [];
-        foreach ($this->structureMap() as $id => $node) {
-            if ($node['parent_id'] !== null) {
-                $children[$node['parent_id']][] = $id;
-            }
-        }
-
+        $children = $this->childrenIndex();
         $allowed = $within === null ? null : array_flip($within);
         $ids = [];
         $stack = [$structureId];
@@ -158,6 +157,36 @@ class StructurePathService
         }
 
         return array_keys($ids);
+    }
+
+    /**
+     * Drop the cached chart; the next lookup re-reads it. StructureObserver calls this so
+     * a unit created or removed mid-request is seen by the rest of that request.
+     */
+    public function flush(): void
+    {
+        $this->structureMap = null;
+        $this->childrenIndex = null;
+        $this->segmentCache = [];
+    }
+
+    /**
+     * @return array<int, list<int>>
+     */
+    protected function childrenIndex(): array
+    {
+        if ($this->childrenIndex !== null) {
+            return $this->childrenIndex;
+        }
+
+        $children = [];
+        foreach ($this->structureMap() as $id => $node) {
+            if ($node['parent_id'] !== null) {
+                $children[$node['parent_id']][] = $id;
+            }
+        }
+
+        return $this->childrenIndex = $children;
     }
 
     /**

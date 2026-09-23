@@ -101,9 +101,4 @@ class Structure extends Model
     {
         return implode(' / ', app(StructurePathService::class)->segments((int) $this->id, $includeRoot));
     }
-
-    public function getAllNestedIds(): array
-    {
-        return $this->subs->reduce(fn ($ids, $child) => array_merge($ids, $child->getAllNestedIds()), [$this->id]);
-    }
 }
