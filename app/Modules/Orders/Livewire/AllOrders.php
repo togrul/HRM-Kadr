@@ -6,6 +6,7 @@ use App\Livewire\Traits\SideModalAction;
 use App\Models\Order;
 use App\Models\OrderLog;
 use App\Modules\Orders\Application\Document\OrderTemplateProvider;
+use App\Modules\Orders\Contracts\OrderDrafter;
 use App\Modules\Orders\Domain\Contracts\OrderTypeStatusLookupReadRepository;
 use App\Modules\Orders\Exports\OrderExport;
 use App\Services\StructureService;
@@ -386,8 +387,11 @@ class AllOrders extends Component
         $this->accessibleStructureIds = $structureService->getAccessibleStructures();
 
         // Deep link from the command palette / quick links: land with the composer open.
+        // ?preset=<template code> lands with that order type already chosen (e.g. a vacation order).
         if (request()->boolean('create') && (auth()->user()?->can('add-orders') ?? false)) {
-            $this->openSideMenu('order-composer');
+            $preset = (string) request()->query('preset', '');
+            $this->openSideMenu('order-composer', null, $preset !== '' && app(OrderDrafter::class)->hasTemplate($preset) ? $preset : null);
+            $this->forgetDeepLinkParams('create', 'preset');
         }
     }
 

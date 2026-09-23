@@ -127,3 +127,16 @@ it('ignores ?create=1 for a user who may not create', function (string $componen
     'orders' => [AllOrders::class, ['show-orders']],
     'leaves' => [Leaves::class, ['show-leaves']],
 ]);
+
+it('opens the order composer on a known preset and ignores an unknown one', function (): void {
+    $this->actingAs(paletteUser(['show-orders', 'add-orders']));
+    App\Models\OrderWordTemplate::create(['code' => 'leave', 'label' => 'Məzuniyyət', 'effect' => 'vacation', 'docx_path' => 'x.docx', 'variables' => [], 'is_active' => true]);
+
+    Livewire::withQueryParams(['create' => 1, 'preset' => 'leave'])->test(AllOrders::class)
+        ->assertSet('showSideMenu', 'order-composer')
+        ->assertSet('secondModel', 'leave');
+
+    Livewire::withQueryParams(['create' => 1, 'preset' => 'no-such-template'])->test(AllOrders::class)
+        ->assertSet('showSideMenu', 'order-composer')
+        ->assertSet('secondModel', null);
+});

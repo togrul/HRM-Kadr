@@ -282,6 +282,7 @@ class AllPersonnel extends Component
         // Deep link from the command palette / quick links: land with the form open.
         if (request()->boolean('create') && (auth()->user()?->can('add-personnels') ?? false)) {
             $this->openSideMenu('add-personnel');
+            $this->forgetDeepLinkParams('create');
         }
     }
 
