@@ -173,7 +173,7 @@
         </div>
     </x-page-header>
 
-    <x-table.tbl :headers="$this->getTableHeaders()">
+    <x-table.tbl sticky :headers="$this->getTableHeaders()">
         @php $authUser = auth()->user(); @endphp
         @forelse ($permits as $leave)
             @php

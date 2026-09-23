@@ -174,7 +174,7 @@
     </x-page-header>
 
     {{-- ===================== table ===================== --}}
-    <x-table.tbl :headers="$this->getTableHeaders()">
+    <x-table.tbl sticky :headers="$this->getTableHeaders()">
         @forelse ($this->orders as $_order)
             @php
                 $isDocx = $_order->template_render_mode === \App\Modules\Orders\Infrastructure\Document\OrderIssueService::RENDER_MODE_DOCX;

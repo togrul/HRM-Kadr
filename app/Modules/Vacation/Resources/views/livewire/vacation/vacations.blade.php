@@ -174,7 +174,7 @@
     </x-page-header>
 
     {{-- ===================== table ===================== --}}
-    <x-table.tbl :headers="$this->getTableHeaders()">
+    <x-table.tbl sticky :headers="$this->getTableHeaders()">
         @forelse ($this->vacations as $_vacation)
             @php
                 $startDate = \Carbon\Carbon::parse($_vacation->start_date);

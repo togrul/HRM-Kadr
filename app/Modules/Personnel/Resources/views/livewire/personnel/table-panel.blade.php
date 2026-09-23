@@ -25,7 +25,7 @@
 @endphp
 
 <div class="contents">
-    <x-table.tbl :headers="$this->getTableHeaders()">
+    <x-table.tbl sticky :headers="$this->getTableHeaders()">
         @forelse ($personnels as $personnel)
             @php
                 $rowActions = $this->rowActions($personnel);

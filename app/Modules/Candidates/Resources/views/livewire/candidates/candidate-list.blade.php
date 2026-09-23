@@ -189,7 +189,7 @@
         </div>
     @endif
 
-    <x-table.tbl :headers="$this->getTableHeaders()">
+    <x-table.tbl sticky :headers="$this->getTableHeaders()">
         @forelse ($this->candidateRows as $_candidate)
             <tr wire:key="candidate-row-{{ $_candidate->id }}">
                 <x-table.td>

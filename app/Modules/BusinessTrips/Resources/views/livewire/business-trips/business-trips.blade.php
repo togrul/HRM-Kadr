@@ -138,7 +138,7 @@
     </x-page-header>
 
     {{-- ===================== table ===================== --}}
-    <x-table.tbl :headers="$this->getTableHeaders()">
+    <x-table.tbl sticky :headers="$this->getTableHeaders()">
         @forelse ($this->businessTrips as $_bTrip)
             @php
                 $tripAttributes = is_array($_bTrip->attributes) ? $_bTrip->attributes : [];
