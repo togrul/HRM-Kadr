@@ -8,15 +8,13 @@ use App\Models\OrderWordTemplate;
 use App\Models\Personnel;
 use App\Models\Position;
 use App\Models\Structure;
-use App\Modules\Orders\Application\Document\DocxTemplateRenderer;
-use App\Modules\Orders\Application\Document\DocxToPdfConverter;
+use App\Modules\Orders\Application\Document\OrderComposition;
 use App\Modules\Orders\Application\Document\OrderTemplateProvider;
-use App\Modules\Orders\Infrastructure\Document\DocxVariableResolver;
+use App\Modules\Orders\Infrastructure\Document\OrderDocumentBuilder;
 use App\Modules\Orders\Infrastructure\Document\OrderDraftService;
 use App\Modules\Orders\Infrastructure\Document\OrderIssueService;
 use App\Modules\Orders\Infrastructure\Document\OrderLookupFieldRegistry;
-use App\Services\Chief\ChiefResolver;
-use App\Support\Language\AzerbaijaniDateFormatter;
+use App\Modules\Orders\Infrastructure\Document\OrderSubjectResolver;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Storage;
@@ -80,9 +78,6 @@ class OrderComposer extends Component
     private ?OrderWordTemplate $templateCache = null;
 
     private bool $templateLoaded = false;
-
-    /** Per-request cache of the resolved signatory snapshot (private → not persisted). */
-    private ?array $signatoryCache = null;
 
     public function mount(?string $presetCode = null, ?int $personnelId = null, ?int $orderId = null): void
     {
@@ -287,7 +282,7 @@ class OrderComposer extends Component
      */
     private function vacationBalanceFor(OrderWordTemplate $template): ?array
     {
-        $personnel = $this->personnel();
+        $personnel = app(OrderSubjectResolver::class)->personnel($this->personnelId);
         if (! $personnel) {
             return null;
         }
@@ -353,59 +348,51 @@ class OrderComposer extends Component
      * Render the filled document and show it inline as a faithful PDF preview (via
      * LibreOffice). Nothing is persisted; the author checks it before issuing.
      */
-    public function preview(OrderTemplateProvider $templates, DocxVariableResolver $resolver, DocxTemplateRenderer $renderer, DocxToPdfConverter $pdf): void
+    public function preview(OrderSubjectResolver $subjects, OrderDocumentBuilder $documents): void
     {
         $this->authorize('add-orders');
         $this->previewPdf = '';
 
-        $template = $this->template();
+        $template = $this->templateOrError();
         if (! $template) {
-            $this->addError('presetCode', __('orders::order_composer.errors.unknown_type'));
-
             return;
         }
-        if (! $this->ensureSubject($template)) {
+        $composition = $this->composition();
+        if ($this->addErrors($subjects->subjectErrors($template, $composition))) {
             return;
         }
 
-        $values = $resolver->resolve($template, $this->subject($template), $this->fields, $this->systemContext());
-        $tmp = $renderer->renderToFile($template->docx_path, $values);
+        $pdf = $documents->renderPdf($template, $documents->values($template, $composition));
 
-        $pdfPath = $pdf->convert($tmp);
-        @unlink($tmp);
-
-        if ($pdfPath === null) {
+        if ($pdf === null) {
             // No LibreOffice on this host — point the author to the exact Word download.
             $this->addError('previewPdf', __('orders::order_composer.errors.preview_unavailable'));
 
             return;
         }
 
-        $this->previewPdf = base64_encode((string) file_get_contents($pdfPath));
-        @unlink($pdfPath);
+        $this->previewPdf = $pdf;
     }
 
     /**
      * Download the exact filled .docx without persisting an order.
      */
-    public function downloadWord(OrderTemplateProvider $templates, DocxVariableResolver $resolver, DocxTemplateRenderer $renderer): ?BinaryFileResponse
+    public function downloadWord(OrderSubjectResolver $subjects, OrderDocumentBuilder $documents): ?BinaryFileResponse
     {
         $this->authorize('add-orders');
 
-        $template = $this->template();
+        $template = $this->templateOrError();
         if (! $template) {
-            $this->addError('presetCode', __('orders::order_composer.errors.unknown_type'));
-
             return null;
         }
-        if (! $this->ensureSubject($template)) {
+        $composition = $this->composition();
+        if ($this->addErrors($subjects->subjectErrors($template, $composition))) {
             return null;
         }
 
-        $values = $resolver->resolve($template, $this->subject($template), $this->fields, $this->systemContext());
-        $tmp = $renderer->renderToFile($template->docx_path, $values);
+        $tmp = $documents->renderDocx($template, $documents->values($template, $composition));
 
-        return response()->download($tmp, $this->downloadName())->deleteFileAfterSend();
+        return response()->download($tmp, $composition->downloadName())->deleteFileAfterSend();
     }
 
     public function issue(): ?StreamedResponse
@@ -427,21 +414,19 @@ class OrderComposer extends Component
         $this->authorize('add-orders');
 
         $issuer = app(OrderIssueService::class);
-        $resolver = app(DocxVariableResolver::class);
-        $renderer = app(DocxTemplateRenderer::class);
+        $documents = app(OrderDocumentBuilder::class);
 
-        $template = $this->template();
+        $template = $this->templateOrError();
         if (! $template) {
-            $this->addError('presetCode', __('orders::order_composer.errors.unknown_type'));
-
             return null;
         }
+        $composition = $this->composition();
         if (trim($this->orderNumber) === '') {
             $this->addError('orderNumber', __('orders::order_composer.errors.number_required'));
 
             return null;
         }
-        if (! $this->ensureSubject($template)) {
+        if ($this->addErrors(app(OrderSubjectResolver::class)->subjectErrors($template, $composition))) {
             return null;
         }
 
@@ -504,6 +489,7 @@ class OrderComposer extends Component
             }
         }
 
+        $signatory = $documents->signatory($this->orderDate);
         $payload = [
             'template_code' => $this->presetCode,
             'label' => $template->label,
@@ -516,15 +502,15 @@ class OrderComposer extends Component
             'order_date' => $this->orderDate,
             // Freeze who signed (permanent chief or active delegate) as-of the order date,
             // so historical orders keep naming whoever was acting then.
-            'signatory' => $this->signatorySnapshot(),
+            'signatory' => $signatory,
         ];
 
-        $values = $resolver->resolve($template, $this->subject($template), $this->fields, $this->systemContext());
+        $values = $documents->values($template, $composition, $signatory);
 
         if ($this->isEditing()) {
             $order = OrderLog::findOrFail($this->editOrderId);
             $issuer->updateWord($order, $payload);
-            $this->renderAndStore($order, $template->docx_path, $values, $issuer, $renderer);
+            $documents->store($order, $template, $values);
 
             $this->dispatch('orderAdded', __('orders::order_composer.messages.order_updated'));
 
@@ -532,11 +518,11 @@ class OrderComposer extends Component
         }
 
         $order = $issuer->issueWord($payload);
-        $stored = $this->renderAndStore($order, $template->docx_path, $values, $issuer, $renderer);
+        $stored = $documents->store($order, $template, $values);
 
         $this->dispatch('orderAdded', __('orders::order_composer.messages.order_issued'));
 
-        return Storage::disk('local')->download($stored, $this->downloadName());
+        return Storage::disk('local')->download($stored, $composition->downloadName());
     }
 
     /**
@@ -588,134 +574,45 @@ class OrderComposer extends Component
     }
 
     /**
-     * Render the order's filled .docx and store it as the order's authoritative
-     * document (served on print).
+     * The selected template, or null with an "unknown type" error on the form.
+     */
+    private function templateOrError(): ?OrderWordTemplate
+    {
+        $template = $this->template();
+        if (! $template) {
+            $this->addError('presetCode', __('orders::order_composer.errors.unknown_type'));
+        }
+
+        return $template;
+    }
+
+    /**
+     * Put the given errors on the form; true when there were any.
      *
-     * @param  array<string,string>  $values
+     * @param  array<string,string>  $errors
      */
-    private function renderAndStore(OrderLog $order, string $masterPath, array $values, OrderIssueService $issuer, DocxTemplateRenderer $renderer): string
+    private function addErrors(array $errors): bool
     {
-        $tmp = $renderer->renderToFile($masterPath, $values);
-
-        $stored = 'order-documents/'.$order->id.'.docx';
-        Storage::disk('local')->put($stored, (string) file_get_contents($tmp));
-        @unlink($tmp);
-
-        $issuer->attachUploadedDocx($order, $stored);
-
-        return $stored;
-    }
-
-    /**
-     * The person the document's employee.* variables resolve from: the picked employee,
-     * or (for hire) a transient employee built from the candidate + the structure/
-     * position they are hired into — so names/structure/position decline correctly.
-     */
-    private function subject(OrderWordTemplate $template): ?Personnel
-    {
-        if (! $template->isHire()) {
-            return $this->personnel();
+        foreach ($errors as $key => $message) {
+            $this->addError($key, $message);
         }
 
-        $candidate = $this->candidateId ? Candidate::find($this->candidateId) : null;
-        if (! $candidate) {
-            return null;
-        }
-
-        $pseudo = new Personnel;
-        $pseudo->surname = $candidate->surname;
-        $pseudo->name = $candidate->name;
-        $pseudo->patronymic = $candidate->patronymic;
-        $pseudo->gender = $candidate->gender;
-        $pseudo->structure_id = $this->hireStructureId;
-        $pseudo->setRelation('structure', $this->hireStructureId ? Structure::find($this->hireStructureId) : null);
-        $pseudo->setRelation('position', $this->hirePositionId ? Position::find($this->hirePositionId) : null);
-
-        return $pseudo;
+        return $errors !== [];
     }
 
-    private function personnel(): ?Personnel
+    private function composition(): OrderComposition
     {
-        return $this->personnelId
-            ? Personnel::with(['structure:id,name', 'position:id,name'])->find($this->personnelId)
-            : null;
-    }
-
-    /**
-     * Validate the order's subject: a hire needs a candidate + target structure/position;
-     * other types need an employee only when the template maps an employee.* variable.
-     */
-    private function ensureSubject(OrderWordTemplate $template): bool
-    {
-        if ($template->isHire()) {
-            if (! $this->candidateId) {
-                $this->addError('candidateId', __('orders::order_composer.errors.candidate_required'));
-
-                return false;
-            }
-            if (! $this->hireStructureId || ! $this->hirePositionId) {
-                $this->addError('hirePositionId', __('orders::order_composer.errors.hire_target_required'));
-
-                return false;
-            }
-
-            return true;
-        }
-
-        $needsEmployee = collect($template->variables ?? [])
-            ->contains(fn ($v) => ($v['source'] ?? '') === 'auto' && str_starts_with((string) ($v['auto_key'] ?? ''), 'employee.'));
-
-        if ($needsEmployee && ! $this->personnelId) {
-            $this->addError('personnelId', __('orders::order_composer.errors.personnel_required'));
-
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * The system.* context for this order, keyed by the registry's variable keys.
-     *
-     * @return array<string,string>
-     */
-    private function systemContext(): array
-    {
-        $signatory = $this->signatorySnapshot();
-
-        return [
-            'system.order_number' => $this->orderNumber,
-            'system.order_date' => $this->orderDate,
-            'system.organization_city' => $this->organizationCity,
-            'system.signatory_full_name' => (string) ($signatory['fullname'] ?? ''),
-            'system.signatory_title' => (string) ($signatory['title'] ?? ''),
-        ];
-    }
-
-    /**
-     * Who signs this order — the permanent chief, or the active temporary delegate
-     * (müvəqqəti həvalə) on the order's date. Resolved as-of the order date (not "now")
-     * so historical orders name whoever was acting then; cached for the request so the
-     * system context and the persisted snapshot agree. Falls back to today when the
-     * author's free-text date can't be parsed.
-     *
-     * @return array<string,mixed>
-     */
-    private function signatorySnapshot(): array
-    {
-        if ($this->signatoryCache === null) {
-            $date = app(AzerbaijaniDateFormatter::class)->parse($this->orderDate) ?? now();
-            $this->signatoryCache = app(ChiefResolver::class)->current($date);
-        }
-
-        return $this->signatoryCache;
-    }
-
-    private function downloadName(): string
-    {
-        $code = $this->presetCode !== '' ? $this->presetCode : 'order';
-        $number = $this->orderNumber !== '' ? '_'.$this->orderNumber : '';
-
-        return str_replace(['/', '\\'], '-', $code.$number).'.docx';
+        return new OrderComposition(
+            presetCode: $this->presetCode,
+            personnelId: $this->personnelId,
+            candidateId: $this->candidateId,
+            hireStructureId: $this->hireStructureId,
+            hirePositionId: $this->hirePositionId,
+            fields: $this->fields,
+            orderNumber: $this->orderNumber,
+            orderDate: $this->orderDate,
+            organizationCity: $this->organizationCity,
+            editOrderId: $this->editOrderId,
+        );
     }
 }
