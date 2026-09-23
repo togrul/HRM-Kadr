@@ -20,7 +20,7 @@
         <div class="flex items-end space-x-2">
             <x-modal-button style="width: auto !important;" mode="black">{{ __('admin::references.actions.save') }}</x-modal-button>
             <button
-                wire:click.prevent = "deleteModel()"
+                wire:click.prevent="deleteModel()"
                 class="appearance-none flex h-10 w-10 flex-none items-center justify-center rounded-lg bg-rose-50 font-medium text-gray-500 transition hover:bg-red-100 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
                 aria-label="{{ __('admin::references.actions.delete') }}"
             >
