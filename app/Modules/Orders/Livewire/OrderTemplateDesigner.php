@@ -8,12 +8,14 @@ use App\Modules\Orders\Application\Document\DocxToPdfConverter;
 use App\Modules\Orders\Application\Document\OrderWordTemplateRepository;
 use App\Modules\Orders\Application\Variables\OrderVariableRegistry;
 use App\Modules\Orders\Infrastructure\Document\OrderLookupFieldRegistry;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /**
  * Word-upload order-type designer: the HR author prepares the whole order in MS Word,
@@ -179,7 +181,7 @@ class OrderTemplateDesigner extends Component
         }
     }
 
-    public function save(DocxPlaceholderParser $parser, OrderWordTemplateRepository $repository, OrderVariableRegistry $registry)
+    public function save(DocxPlaceholderParser $parser, OrderWordTemplateRepository $repository, OrderVariableRegistry $registry): void
     {
         $this->authorize('edit-orders');
 
@@ -278,7 +280,7 @@ class OrderTemplateDesigner extends Component
     /**
      * Download an archived version as a Word file with [labels] in place.
      */
-    public function downloadVersion(int $id, DocxTemplateRenderer $renderer)
+    public function downloadVersion(int $id, DocxTemplateRenderer $renderer): ?BinaryFileResponse
     {
         $this->authorize('edit-orders');
 
@@ -303,7 +305,7 @@ class OrderTemplateDesigner extends Component
      * Download the template as a Word file with [labels] in place, so the author can
      * correct the wording/formatting in MS Word and re-upload it.
      */
-    public function downloadTemplate(DocxTemplateRenderer $renderer)
+    public function downloadTemplate(DocxTemplateRenderer $renderer): ?BinaryFileResponse
     {
         $this->authorize('edit-orders');
 
@@ -316,7 +318,7 @@ class OrderTemplateDesigner extends Component
         return response()->download($tmp, ($this->code !== '' ? $this->code : 'sablon').'.docx')->deleteFileAfterSend();
     }
 
-    public function render()
+    public function render(): View
     {
         return view('orders::livewire.orders.order-template-designer');
     }

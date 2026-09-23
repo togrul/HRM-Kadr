@@ -17,10 +17,13 @@ use App\Modules\Orders\Infrastructure\Document\OrderIssueService;
 use App\Modules\Orders\Infrastructure\Document\OrderLookupFieldRegistry;
 use App\Services\Chief\ChiefResolver;
 use App\Support\Language\AzerbaijaniDateFormatter;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * Issue-time order composer for the Word-upload engine: the HR user picks an order
@@ -385,7 +388,7 @@ class OrderComposer extends Component
     /**
      * Download the exact filled .docx without persisting an order.
      */
-    public function downloadWord(OrderTemplateProvider $templates, DocxVariableResolver $resolver, DocxTemplateRenderer $renderer)
+    public function downloadWord(OrderTemplateProvider $templates, DocxVariableResolver $resolver, DocxTemplateRenderer $renderer): ?BinaryFileResponse
     {
         $this->authorize('add-orders');
 
@@ -405,7 +408,7 @@ class OrderComposer extends Component
         return response()->download($tmp, $this->downloadName())->deleteFileAfterSend();
     }
 
-    public function issue()
+    public function issue(): ?StreamedResponse
     {
         return $this->attemptIssue(autoVacancy: false);
     }
@@ -414,12 +417,12 @@ class OrderComposer extends Component
      * Confirm-modal entry point: create/expand the staff-schedule slot for the hire's
      * structure+position, then issue the order — all without leaving the page.
      */
-    public function createVacancyAndIssue()
+    public function createVacancyAndIssue(): ?StreamedResponse
     {
         return $this->attemptIssue(autoVacancy: true);
     }
 
-    private function attemptIssue(bool $autoVacancy)
+    private function attemptIssue(bool $autoVacancy): ?StreamedResponse
     {
         $this->authorize('add-orders');
 
@@ -563,7 +566,7 @@ class OrderComposer extends Component
         $this->dispatch('orderAdded', __('orders::order_composer.messages.word_replaced'));
     }
 
-    public function render()
+    public function render(): View
     {
         return view('orders::livewire.orders.order-composer');
     }

@@ -3,6 +3,7 @@
 namespace App\Modules\Orders\Livewire;
 
 use App\Models\OrderLog;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
@@ -16,7 +17,7 @@ class DeleteOrder extends Component
     public ?int $orderLogId = null;
 
     #[On('setDeleteOrder')]
-    public function setDeleteOrder($order_no)
+    public function setDeleteOrder($order_no): void
     {
         $orderLog = OrderLog::query()
             ->select('id', 'order_no')
@@ -36,7 +37,7 @@ class DeleteOrder extends Component
         $this->dispatch('deleteOrderWasSet');
     }
 
-    public function deleteOrder()
+    public function deleteOrder(): void
     {
         if (! $this->orderLogId) {
             return;
@@ -61,7 +62,7 @@ class DeleteOrder extends Component
         $this->dispatch('orderWasDeleted', __('orders::order_form.messages.order_deleted'));
     }
 
-    public function render()
+    public function render(): View
     {
         return view('orders::livewire.orders.delete-order');
     }

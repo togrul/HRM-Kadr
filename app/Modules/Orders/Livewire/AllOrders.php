@@ -11,10 +11,13 @@ use App\Modules\Orders\Exports\OrderExport;
 use App\Services\StructureService;
 use Carbon\Carbon;
 use DomainException;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\LazyCollection;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Isolate;
@@ -26,6 +29,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 #[On(['orderAdded', 'orderWasDeleted'])]
 class AllOrders extends Component
@@ -60,7 +64,7 @@ class AllOrders extends Component
         $this->status = request()->query('status') ?? 'all';
     }
 
-    public function resetFilter()
+    public function resetFilter(): void
     {
         $this->reset('search');
         $this->resetPage();
@@ -78,13 +82,13 @@ class AllOrders extends Component
         ];
     }
 
-    public function setDeleteOrder($order_no)
+    public function setDeleteOrder($order_no): void
     {
         $this->dispatch('setDeleteOrder', $order_no);
     }
 
     #[Renderless]
-    public function restoreData($order_no)
+    public function restoreData($order_no): void
     {
         $orderLog = OrderLog::withTrashed()->where('order_no', $order_no)->first();
         if (! $orderLog) {
@@ -101,7 +105,7 @@ class AllOrders extends Component
     }
 
     #[Renderless]
-    public function forceDeleteData($order_no)
+    public function forceDeleteData($order_no): void
     {
         $model = OrderLog::withTrashed()->where('order_no', $order_no)->first();
 
@@ -116,7 +120,7 @@ class AllOrders extends Component
         $this->dispatch('orderWasDeleted', __('orders::order_form.messages.order_deleted'));
     }
 
-    public function printOrder(string $order_no)
+    public function printOrder(string $order_no): StreamedResponse
     {
         $order = OrderLog::where('order_no', $order_no)->first();
         if (! $order) {
@@ -228,7 +232,7 @@ class AllOrders extends Component
         });
     }
 
-    protected function returnData($type = 'normal')
+    protected function returnData($type = 'normal'): LengthAwarePaginator|LazyCollection
     {
         $result = $this->scopedQuery()
             ->with([
@@ -353,7 +357,7 @@ class AllOrders extends Component
     }
 
     #[Isolate]
-    public function getStatusesProperty()
+    public function getStatusesProperty(): Collection
     {
         $locale = config('app.locale');
 
@@ -368,14 +372,14 @@ class AllOrders extends Component
 
     public function mount(
         StructureService $structureService
-    ) {
+    ): void {
         $this->authorize('viewAny', Order::class);
         $this->fillFilter();
         $this->selectedOrder = $this->selectedOrder ?? request()->query('selectedOrder');
         $this->accessibleStructureIds = $structureService->getAccessibleStructures();
     }
 
-    public function render()
+    public function render(): View
     {
         return view('orders::livewire.orders.all-orders');
     }
