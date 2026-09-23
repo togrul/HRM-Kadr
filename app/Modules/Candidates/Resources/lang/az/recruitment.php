@@ -67,7 +67,7 @@ return [
         'applications_count' => 'Müraciət sayı',
         'owner_summary' => 'Məsul və idarəetmə',
         'timeline' => 'Tarix xətti',
-        'pack_summary' => 'Workflow paketi',
+        'pack_summary' => 'İş axını paketi',
         'recruitment_owner' => 'Qəbul üzrə məsul',
         'pipeline_stage' => 'Mərhələ',
         'stage' => 'Mərhələ',

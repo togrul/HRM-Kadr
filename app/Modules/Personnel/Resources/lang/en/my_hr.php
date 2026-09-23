@@ -61,10 +61,12 @@ return [
         ],
     ],
     'empty_state' => [
-        'kicker' => 'Personnel link not found',
-        'title' => 'This self-service account is not linked to a personnel record yet',
-        'body' => 'An active personnel record could not be resolved for this user, so the My HR workspace cannot be fully loaded. The system first tries direct user-personnel links, then email and name matching.',
-        'hint' => 'Once HR links this user to an active personnel card, the workspace will start working automatically.',
+        'kicker' => 'Account not linked',
+        'title' => 'Your workspace is not linked to your employee record yet',
+        'body' => 'Your sign-in account has not been linked to your employee record, so your details, requests and documents cannot be shown here yet.',
+        'hint' => 'Contact HR. Once your account is linked to your record, the workspace opens automatically.',
+        'admin_hint' => 'Open the employee\'s record and link this account under «More → Self-service account».',
+        'admin_action' => 'Employee list',
     ],
     'messages' => [
         'foundation_title' => 'This section is in the foundation phase',

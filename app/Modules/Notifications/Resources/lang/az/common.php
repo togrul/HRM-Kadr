@@ -161,7 +161,7 @@ return [
         'schedule_preview_now' => 'Dərhal / event gələndə',
         'analytics_range_hint' => 'Analitika seçilən tarix aralığına görə yenilənir.',
         'campaign_board_hint' => 'Kampaniya vəziyyətləri, dispatch uğurları və uğursuz göndərişlər burada izlənir.',
-        'dropdown_hint' => 'Yeni payload-lar və son göndərişlər burada görünür.',
+        'dropdown_hint' => 'Yeni bildirişlər və son göndərişlər burada görünür.',
         'approval_queue_empty' => 'Təsdiq növbəsində kampaniya yoxdur.',
         'rule_approval_hint' => 'Bu qayda ilə yaranan kampaniyalar əvvəl Təsdiq növbəsinə düşəcək.',
         'matched_rule_label' => 'Uyğun aktiv qayda',

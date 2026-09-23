@@ -28,7 +28,7 @@ return [
         'exceptions' => 'İstisnalar qutusu',
         'overtime' => 'Əlavə iş lövhəsi',
         'month_close' => 'Ay bağlanışı',
-        'manual' => 'Manual girişlər',
+        'manual' => 'Əl ilə qeydlər',
         'history' => 'Tarixçə',
         'settings' => 'Tənzimləmələr',
         'shifts' => 'Növbələr',

@@ -61,10 +61,12 @@ return [
         ],
     ],
     'empty_state' => [
-        'kicker' => 'Personnel link tapılmadı',
-        'title' => 'Şəxsi kabinet hələ əməkdaş kartı ilə bağlanmayıb',
-        'body' => 'Bu istifadəçi üçün aktiv kadr qeydi tapılmadığına görə şəxsi kabineti tam yükləmək mümkün olmadı. Sistem əvvəlcə user-personnel əlaqəsini email və ad uyğunluğu ilə tapmağa çalışır.',
-        'hint' => 'HR administratoru user hesabını aktiv əməkdaş kartı ilə bağladıqdan sonra bu kabinet avtomatik işləyəcək.',
+        'kicker' => 'Hesab əlaqələndirilməyib',
+        'title' => 'Kabinetiniz hələ əməkdaş kartınıza bağlanmayıb',
+        'body' => 'Giriş hesabınız sistemdəki əməkdaş kartınızla hələ əlaqələndirilməyib, ona görə şəxsi məlumatlarınız, müraciətləriniz və sənədləriniz burada görünmür.',
+        'hint' => 'Kadrlar şöbəsinə müraciət edin. Hesabınız kartınızla əlaqələndirildikdən sonra kabinet avtomatik açılacaq.',
+        'admin_hint' => 'Əməkdaşın kartını açın və «Daha çox → Şəxsi kabinet hesabı» ilə bu hesabı əlaqələndirin.',
+        'admin_action' => 'Əməkdaşlar siyahısı',
     ],
     'messages' => [
         'foundation_title' => 'Bu bölmə başlanğıc mərhələsindədir',

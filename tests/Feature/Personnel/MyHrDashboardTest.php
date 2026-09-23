@@ -34,8 +34,8 @@ class MyHrDashboardTest extends TestCase
         $this->actingAs($user)
             ->get(route('my-hr'))
             ->assertOk()
-            ->assertSee('Şəxsi kabinet hələ əməkdaş kartı ilə bağlanmayıb')
-            ->assertSee('HR administratoru user hesabını aktiv əməkdaş kartı ilə bağladıqdan sonra');
+            ->assertSee(__('personnel::my_hr.empty_state.title'))
+            ->assertSee(__('personnel::my_hr.empty_state.hint'));
     }
 
     public function test_my_hr_bootstraps_linked_personnel_context_from_user_identity(): void

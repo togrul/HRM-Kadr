@@ -161,7 +161,7 @@ return [
         'schedule_preview_now' => 'Immediately / when the event arrives',
         'analytics_range_hint' => 'Analytics refresh against the selected date window.',
         'campaign_board_hint' => 'Campaign state, dispatch success, and failure tracking live here.',
-        'dropdown_hint' => 'Latest payloads and recent dispatches appear here.',
+        'dropdown_hint' => 'New notifications and recent sends appear here.',
         'approval_queue_empty' => 'There are no campaigns in the approval queue.',
         'rule_approval_hint' => 'Campaigns created with this rule will first enter the approval queue.',
         'matched_rule_label' => 'Matched active rule',

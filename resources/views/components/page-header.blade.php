@@ -27,7 +27,14 @@
             @endisset
             <div class="min-w-0 leading-tight">
                 <p class="truncate text-[11.5px] text-ink-faint">
-                    {{ $breadcrumbRoot ?? __('ui::common.labels.breadcrumb_root') }} <span class="px-0.5 text-ink-faint/70">/</span> {{ $breadcrumb ?? $title }}
+                    @php
+                        $crumbRoot = $breadcrumbRoot ?? __('ui::common.labels.breadcrumb_root');
+                        $crumb = $breadcrumb ?? $title;
+                    @endphp
+                    {{ $crumbRoot }}
+                    @if ($crumb !== $crumbRoot)
+                        <span class="px-0.5 text-ink-faint/70">/</span> {{ $crumb }}
+                    @endif
                 </p>
                 <h1 class="truncate text-[18px] font-semibold tracking-[-0.025em] text-ink">{{ $title }}</h1>
             </div>
