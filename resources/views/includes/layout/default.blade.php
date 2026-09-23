@@ -8,6 +8,7 @@
             Alpine.store('hrmShell', {
                 railOpen: false,
                 paletteOpen: false,
+                mobilePanelOpen: false,
                 panelCollapsed: localStorage.getItem('hrm.panelCollapsed') === '1',
                 togglePanel() {
                     this.panelCollapsed = ! this.panelCollapsed;
@@ -37,6 +38,7 @@
                 if (shell) {
                     shell.railOpen = false;
                     shell.paletteOpen = false;
+                    shell.mobilePanelOpen = false;
                 }
             });
         }
@@ -52,11 +54,21 @@
 
         <main class="flex w-full flex-col items-stretch gap-2 px-2 pb-4 pt-2 lg:flex-row lg:items-start">
             @if ($hasSidebar)
+                <button
+                    type="button"
+                    @click="$store.hrmShell.mobilePanelOpen = ! $store.hrmShell.mobilePanelOpen"
+                    :aria-expanded="$store.hrmShell.mobilePanelOpen.toString()"
+                    aria-controls="sidebar"
+                    class="sticky top-[52px] z-20 flex min-h-11 w-full items-center justify-between rounded-xl border border-hairline bg-white px-4 text-[14px] font-medium text-ink shadow-card lg:hidden"
+                >
+                    <span>{{ __('ui::common.labels.module_navigation') }}</span>
+                    <span x-text="$store.hrmShell.mobilePanelOpen ? @js(__('ui::common.labels.collapse_panel')) : @js(__('ui::common.labels.expand_panel'))" class="text-ink-muted"></span>
+                </button>
                 <aside
                     id="sidebar"
                     x-cloak
-                    :class="$store.hrmShell.panelCollapsed ? 'lg:w-0 lg:opacity-0 lg:pointer-events-none' : 'lg:w-panel lg:opacity-100'"
-                    class="hrm-panel-shell w-full shrink-0 overflow-x-hidden lg:sticky lg:top-2"
+                    :class="{ '!block': $store.hrmShell.mobilePanelOpen, 'lg:w-0 lg:opacity-0 lg:pointer-events-none': $store.hrmShell.panelCollapsed, 'lg:w-panel lg:opacity-100': ! $store.hrmShell.panelCollapsed }"
+                    class="hrm-panel-shell hidden w-full shrink-0 overflow-x-hidden lg:sticky lg:top-2 lg:block"
                     role="complementary"
                     aria-label="{{ __('ui::common.labels.module_navigation') }}"
                 >
