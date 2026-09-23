@@ -124,11 +124,11 @@
                     <div class="flex items-center gap-2">
                         <input type="date" wire:model="filter.starts_at"
                             aria-label="{{ __('leaves::common.labels.date_start') }}"
-                            class="hrm-num h-[34px] w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-[12.5px] text-ink focus:border-ink focus:bg-white focus:ring-0" />
+                            class="hrm-num h-10 w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-base sm:text-sm text-ink focus:border-ink focus:bg-white focus:ring-0" />
                         <span class="shrink-0 text-ink-faint">&ndash;</span>
                         <input type="date" wire:model="filter.ends_at"
                             aria-label="{{ __('leaves::common.labels.date_end') }}"
-                            class="hrm-num h-[34px] w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-[12.5px] text-ink focus:border-ink focus:bg-white focus:ring-0" />
+                            class="hrm-num h-10 w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-base sm:text-sm text-ink focus:border-ink focus:bg-white focus:ring-0" />
                     </div>
                 </div>
 
@@ -137,10 +137,10 @@
                     <x-livewire-input mode="gray" type="text" name="filter.reason" wire:model="filter.reason" />
                 </label>
 
-                <x-pill-button variant="primary" wire:click="searchFilter" wire:loading.attr="disabled" wire:target="searchFilter" class="!h-[34px]">
+                <x-pill-button variant="primary" wire:click="searchFilter" wire:loading.attr="disabled" wire:target="searchFilter">
                     {{ __('leaves::common.labels.search') }}
                 </x-pill-button>
-                <x-pill-button wire:click="resetFilter" wire:loading.attr="disabled" wire:target="resetFilter" class="!h-[34px]">
+                <x-pill-button wire:click="resetFilter" wire:loading.attr="disabled" wire:target="resetFilter">
                     {{ __('leaves::common.labels.reset') }}
                 </x-pill-button>
             </div>

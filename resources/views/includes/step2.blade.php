@@ -40,7 +40,7 @@
             <div class="flex flex-col">
                 <x-label for="documentForm.document.nationality_id">{{ __('personnel::common.labels.nationality') }}</x-label>
                 <x-ui.select-dropdown
-                    label=""
+                    :aria-label="__('personnel::common.labels.nationality')"
                     placeholder="---"
                     mode="gray"
                     class="w-full"
@@ -71,7 +71,7 @@
             <div class="flex flex-col">
                 <x-label for="documentForm.document.born_country_id">{{ __('personnel::common.labels.born_country') }}</x-label>
                 <x-ui.select-dropdown
-                    label=""
+                    :aria-label="__('personnel::common.labels.born_country')"
                     placeholder="---"
                     mode="gray"
                     class="w-full"
@@ -88,7 +88,7 @@
             <div class="flex flex-col">
                 <x-label for="documentForm.document.born_city_id">{{ __('personnel::common.labels.city') }}</x-label>
                 <x-ui.select-dropdown
-                    label=""
+                    :aria-label="__('personnel::common.labels.city')"
                     placeholder="---"
                     mode="gray"
                     class="w-full"

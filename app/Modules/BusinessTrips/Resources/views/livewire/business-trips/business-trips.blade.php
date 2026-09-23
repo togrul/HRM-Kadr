@@ -105,17 +105,18 @@
                 <div class="flex items-center gap-2">
                     <input type="date" wire:model.live="filter.date.min"
                         aria-label="{{ __('business_trips::common.filters.date_start') }}"
-                        class="hrm-num h-[34px] w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-[12.5px] text-ink focus:border-ink focus:bg-white focus:ring-0" />
+                        class="hrm-num h-10 w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-base sm:text-sm text-ink focus:border-ink focus:bg-white focus:ring-0" />
                     <span class="shrink-0 text-ink-faint">&ndash;</span>
                     <input type="date" wire:model.live="filter.date.max"
                         aria-label="{{ __('business_trips::common.filters.date_end') }}"
-                        class="hrm-num h-[34px] w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-[12.5px] text-ink focus:border-ink focus:bg-white focus:ring-0" />
+                        class="hrm-num h-10 w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-base sm:text-sm text-ink focus:border-ink focus:bg-white focus:ring-0" />
                 </div>
             </div>
 
             <div class="min-w-[190px] flex-1">
                 <span class="hrm-eyebrow block pb-1">{{ __('business_trips::common.filters.structure') }}</span>
                 <x-ui.select-dropdown
+                    :aria-label="__('business_trips::common.filters.structure')"
                     placeholder="---"
                     mode="gray"
                     class="w-full"
@@ -128,6 +129,7 @@
             <div class="min-w-[170px] flex-1">
                 <span class="hrm-eyebrow block pb-1">{{ __('business_trips::common.filters.order_types') }}</span>
                 <x-ui.select-dropdown
+                    :aria-label="__('business_trips::common.filters.order_types')"
                     placeholder="---"
                     mode="gray"
                     class="w-full"
@@ -136,7 +138,7 @@
                 />
             </div>
 
-            <x-pill-button variant="primary" wire:click="searchFilter" class="!h-[34px]">{{ __('business_trips::common.filters.search') }}</x-pill-button>
+            <x-pill-button variant="primary" wire:click="searchFilter">{{ __('business_trips::common.filters.search') }}</x-pill-button>
         </div>
     </x-page-header>
 

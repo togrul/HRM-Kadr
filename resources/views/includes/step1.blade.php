@@ -21,6 +21,7 @@
 
 <div class="flex w-full flex-col items-stretch gap-4 md:flex-row md:items-start">
     <div class="flex min-w-0 flex-1 flex-col space-y-4">
+        <h3 class="border-b border-hairline-subtle pb-2 text-[15px] font-semibold text-ink">{{ __('personnel::common.steps.personal_information') }}</h3>
         <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
             <div class="flex flex-col">
                 <x-label for="personnel.name">{{ __('personnel::common.labels.name') }}</x-label>
@@ -74,7 +75,7 @@
         </div>
         <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
             <div class="flex flex-col">
-                <x-label for="personnel.name">{{ __('personnel::common.labels.change_date') }}</x-label>
+                <x-label for="personnel.initials_changed_date">{{ __('personnel::common.labels.change_date') }}</x-label>
                 <x-pikaday-input mode="gray" name="personnel.initials_changed_date" format="Y-MM-DD" wire:model.live="personalForm.personnel.initials_changed_date">
                     <x-slot name="script">
                       $el.onchange = function () {
@@ -87,7 +88,7 @@
                 @enderror
             </div>
             <div class="flex flex-col md:col-span-2">
-                <x-label for="personnel.name">{{ __('personnel::common.labels.change_reason') }}</x-label>
+                <x-label for="personnel.initials_change_reason">{{ __('personnel::common.labels.change_reason') }}</x-label>
                 <x-livewire-input mode="gray" name="personnel.initials_change_reason" wire:model="personalForm.personnel.initials_change_reason"></x-livewire-input>
                 @error('personalForm.personnel.initials_change_reason')
                 <x-validation> {{ $message }} </x-validation>
@@ -125,11 +126,11 @@
               </div>
             <div class="flex flex-col">
                 <div class="flex items-center justify-between space-x-2">
-                    <x-label for="personnel.name">{{ __('personnel::common.labels.nationality') }}</x-label>
+                    <x-label>{{ __('personnel::common.labels.nationality') }}</x-label>
                     <x-checkbox name="hasChangedNationality" model="personalForm.personnel.has_changed_nationality">{{ __('personnel::common.questions.changed') }}</x-checkbox>
                 </div>
                 <x-ui.select-dropdown
-                    label=""
+                    :aria-label="__('personnel::common.labels.nationality')"
                     placeholder="---"
                     mode="gray"
                     class="w-full"
@@ -149,7 +150,7 @@
             <div class="flex flex-col">
                 <x-label for="personnel.previous_nationality">{{ __('personnel::common.labels.previous_nationality') }}</x-label>
                 <x-ui.select-dropdown
-                    label=""
+                    :aria-label="__('personnel::common.labels.previous_nationality')"
                     placeholder="---"
                     mode="gray"
                     class="w-full"
@@ -226,11 +227,12 @@
                 @enderror
             </div>
         </div>
+        <h3 class="border-b border-hairline-subtle pb-2 pt-4 text-[15px] font-semibold text-ink">{{ __('personnel::profile.sections.career') }}</h3>
         <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
             <div class="flex flex-col">
                 <x-label for="personnel.education_degree_id">{{ __('personnel::common.labels.education_degree') }}</x-label>
                 <x-ui.select-dropdown
-                    label=""
+                    :aria-label="__('personnel::common.labels.education_degree')"
                     placeholder="---"
                     mode="gray"
                     class="w-full"
@@ -247,7 +249,7 @@
             <div class="flex flex-col">
                 <x-label for="personnel.structure_id">{{ __('personnel::common.labels.structure') }}</x-label>
                 <x-ui.select-dropdown
-                    label=""
+                    :aria-label="__('personnel::common.labels.structure')"
                     placeholder="---"
                     mode="gray"
                     class="w-full"
@@ -265,7 +267,7 @@
             <div class="flex flex-col">
                 <x-label for="personnel.position_id">{{ __('personnel::common.labels.position') }}</x-label>
                 <x-ui.select-dropdown
-                    label=""
+                    :aria-label="__('personnel::common.labels.position')"
                     placeholder="---"
                     mode="gray"
                     class="w-full"
@@ -285,7 +287,7 @@
             <div class="flex flex-col">
                 <x-label for="personnel.work_norm_id">{{ __('personnel::common.labels.work_norms') }}</x-label>
                 <x-ui.select-dropdown
-                    label=""
+                    :aria-label="__('personnel::common.labels.work_norms')"
                     placeholder="---"
                     mode="gray"
                     class="w-full"
@@ -302,7 +304,7 @@
             <div class="flex flex-col">
                 <x-label for="personnel.contract_type">{{ __('personnel::common.labels.contract_type') }}</x-label>
                 <x-ui.select-dropdown
-                    label=""
+                    :aria-label="__('personnel::common.labels.contract_type')"
                     placeholder="---"
                     mode="gray"
                     class="w-full"
@@ -357,7 +359,7 @@
             <div class="flex flex-col">
                 <x-label for="personnel.probation_unit">{{ __('personnel::common.labels.probation_period') }}</x-label>
                 <x-ui.select-dropdown
-                    label=""
+                    :aria-label="__('personnel::common.labels.probation_period')"
                     placeholder="---"
                     mode="gray"
                     class="w-full"
@@ -384,7 +386,7 @@
             <div class="flex flex-col">
                 <x-label for="personnel.workplace_type">{{ __('personnel::common.labels.workplace_type') }}</x-label>
                 <x-ui.select-dropdown
-                    label=""
+                    :aria-label="__('personnel::common.labels.workplace_type')"
                     placeholder="---"
                     mode="gray"
                     class="w-full"
@@ -399,7 +401,7 @@
             <div class="flex flex-col">
                 <x-label for="personnel.working_time_type">{{ __('personnel::common.labels.working_time_type') }}</x-label>
                 <x-ui.select-dropdown
-                    label=""
+                    :aria-label="__('personnel::common.labels.working_time_type')"
                     placeholder="---"
                     mode="gray"
                     class="w-full"
@@ -414,7 +416,7 @@
             <div class="flex flex-col">
                 <x-label for="personnel.work_schedule">{{ __('personnel::common.labels.work_schedule') }}</x-label>
                 <x-ui.select-dropdown
-                    label=""
+                    :aria-label="__('personnel::common.labels.work_schedule')"
                     placeholder="---"
                     mode="gray"
                     class="w-full"
@@ -473,6 +475,7 @@
             </div>
         @endif
 
+        <h3 class="border-b border-hairline-subtle pb-2 pt-4 text-[15px] font-semibold text-ink">{{ __('personnel::common.labels.extra_information') }}</h3>
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div class="flex flex-col space-y-2">
                 <div class="flex flex-col">
@@ -519,7 +522,7 @@
             <div class="flex flex-col">
                 <x-label for="personnel.disability_id">{{ __('personnel::common.labels.disability') }}</x-label>
                 <x-ui.select-dropdown
-                    label=""
+                    :aria-label="__('personnel::common.labels.disability')"
                     placeholder="---"
                     mode="gray"
                     class="w-full"
@@ -588,17 +591,17 @@
                     >
                       <div class="flex flex-col items-center space-y-2">
                         @if ($avatar)
-                        <img alt="avatar" class="object-cover w-full h-full" src="{{ $avatar->temporaryUrl() }}">
+                        <img alt="" class="object-cover w-full h-full" src="{{ $avatar->temporaryUrl() }}">
                         @elseif(!empty($personnelModel) && !empty($personnelPhotoUrl))
 {{--                        <img alt="avatar" class="object-cover w-full h-full" src="{{ asset('/storage/'.$personnelModelData->photo) }}">--}}
-                           <img alt="avatar" class="object-cover w-full h-full" src="{{ $personnelPhotoUrl }}">
+                           <img alt="" class="object-cover w-full h-full" src="{{ $personnelPhotoUrl }}">
                         @else
-                        <img class="w-full h-full" src="{{ asset('assets/images/id-photo.jpeg') }}" alt="id photo">
+                        <img class="w-full h-full" src="{{ asset('assets/images/id-photo.jpeg') }}" alt="">
                         @endif
                         <label
-                          class="flex ml-2 cursor-pointer bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 h-[40px]">
+                          class="ml-2 flex h-10 cursor-pointer items-center rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-[14px] font-medium text-ink-soft transition hover:bg-[#e4e4e7] focus-within:ring-2 focus-within:ring-zinc-400 focus-within:ring-offset-2">
                           <span class="text-sm leading-normal">{{ __('personnel::common.actions.choose_photo') }}</span>
-                          <input type='file' class="hidden" wire:model="avatar"  />
+                          <input type="file" class="sr-only" wire:model="avatar" />
                         </label>
                       </div>
                       <div x-show="isUploading">

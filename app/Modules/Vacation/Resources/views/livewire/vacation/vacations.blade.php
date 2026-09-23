@@ -116,7 +116,7 @@
                             wire:model.live.debounce.400ms="filter.fullname"
                             wire:keydown.enter="searchFilter"
                             placeholder="{{ __('vacation::common.labels.search_placeholder') }}"
-                            class="h-[34px] w-full rounded-[10px] border border-hairline bg-[#f4f4f5] pl-9 pr-3 text-[12.5px] text-ink placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-0"
+                            class="h-10 w-full rounded-[10px] border border-hairline bg-[#f4f4f5] pl-9 pr-3 text-base sm:text-sm text-ink placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-0"
                         />
                     </span>
                 </label>
@@ -126,17 +126,18 @@
                     <div class="flex items-center gap-2">
                         <input type="date" wire:model="filter.date.min"
                             aria-label="{{ __('vacation::common.labels.date_start') }}"
-                            class="hrm-num h-[34px] w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-[12.5px] text-ink focus:border-ink focus:bg-white focus:ring-0" />
+                            class="hrm-num h-10 w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-base sm:text-sm text-ink focus:border-ink focus:bg-white focus:ring-0" />
                         <span class="shrink-0 text-ink-faint">&ndash;</span>
                         <input type="date" wire:model="filter.date.max"
                             aria-label="{{ __('vacation::common.labels.date_end') }}"
-                            class="hrm-num h-[34px] w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-[12.5px] text-ink focus:border-ink focus:bg-white focus:ring-0" />
+                            class="hrm-num h-10 w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-base sm:text-sm text-ink focus:border-ink focus:bg-white focus:ring-0" />
                     </div>
                 </div>
 
                 <div class="min-w-[200px] flex-1">
                     <span class="hrm-eyebrow block pb-1">{{ __('vacation::common.labels.structure') }}</span>
                     <x-ui.select-dropdown
+                        :aria-label="__('vacation::common.labels.structure')"
                         placeholder="---"
                         mode="gray"
                         class="w-full"
@@ -146,8 +147,8 @@
                     />
                 </div>
 
-                <x-pill-button variant="primary" wire:click="searchFilter" class="!h-[34px]">{{ __('vacation::common.labels.search') }}</x-pill-button>
-                <x-pill-button wire:click="resetFilter" class="!h-[34px]">{{ __('vacation::common.labels.reset') }}</x-pill-button>
+                <x-pill-button variant="primary" wire:click="searchFilter">{{ __('vacation::common.labels.search') }}</x-pill-button>
+                <x-pill-button wire:click="resetFilter">{{ __('vacation::common.labels.reset') }}</x-pill-button>
             </div>
 
             <p class="text-[11.5px] text-ink-faint">{{ __('vacation::common.hints.approval_note') }}</p>

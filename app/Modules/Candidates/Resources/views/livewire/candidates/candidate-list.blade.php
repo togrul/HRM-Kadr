@@ -84,10 +84,10 @@
                         <span class="hrm-eyebrow block pb-1">{{ __('candidates::common.labels.appeal_date') }}</span>
                         <div class="flex items-center gap-2">
                             <input type="date" wire:model="filter.appeal_date.min"
-                                class="hrm-num h-[34px] w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-[12.5px] text-ink focus:border-ink focus:bg-white focus:ring-0" />
+                                class="hrm-num h-10 w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-base sm:text-sm text-ink focus:border-ink focus:bg-white focus:ring-0" />
                             <span class="shrink-0 text-ink-faint">&ndash;</span>
                             <input type="date" wire:model="filter.appeal_date.max"
-                                class="hrm-num h-[34px] w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-[12.5px] text-ink focus:border-ink focus:bg-white focus:ring-0" />
+                                class="hrm-num h-10 w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-base sm:text-sm text-ink focus:border-ink focus:bg-white focus:ring-0" />
                         </div>
                     </div>
                 @endif
@@ -110,6 +110,7 @@
                     <div class="min-w-[200px] flex-1">
                         <span class="hrm-eyebrow block pb-1">{{ __('candidates::common.labels.document_category') }}</span>
                         <x-ui.select-dropdown
+                            :aria-label="__('candidates::common.labels.document_category')"
                             placeholder="---"
                             mode="gray"
                             class="w-full"
@@ -119,8 +120,8 @@
                     </div>
                 @endif
 
-                <x-pill-button variant="primary" wire:click="searchFilter" class="!h-[34px]">{{ __('candidates::common.labels.search') }}</x-pill-button>
-                <x-pill-button wire:click="resetFilter" class="!h-[34px]">{{ __('candidates::common.labels.reset') }}</x-pill-button>
+                <x-pill-button variant="primary" wire:click="searchFilter">{{ __('candidates::common.labels.search') }}</x-pill-button>
+                <x-pill-button wire:click="resetFilter">{{ __('candidates::common.labels.reset') }}</x-pill-button>
             </div>
 
             @if ($this->filterEnabled('gender'))

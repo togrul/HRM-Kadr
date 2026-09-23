@@ -187,7 +187,7 @@
                             ])
                         ></span>
 
-                        <span class="max-w-[120px] text-[10px] font-medium leading-tight text-slate-500 md:text-[11px] md:leading-4">
+                        <span class="max-w-[120px] text-[12px] font-medium leading-[1.3] text-slate-600">
                             {{ $st }}
                         </span>
                     </button>

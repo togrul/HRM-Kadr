@@ -9,11 +9,11 @@
                 type="search"
                 wire:model.live.debounce.300ms="search"
                 placeholder="{{ __('attendance::manager_summary.filters.search_placeholder') }}"
-                class="h-[34px] w-full rounded-[10px] border border-hairline bg-[#f4f4f5] pl-9 pr-3 text-[12.5px] text-ink placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-0"
+                class="h-10 w-full rounded-[10px] border border-hairline bg-[#f4f4f5] pl-9 pr-3 text-base sm:text-sm text-ink placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-0"
             />
         </label>
 
-        <label class="inline-flex h-[34px] shrink-0 cursor-pointer items-center gap-2 rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-[12.5px] font-medium text-ink-soft transition hover:bg-[#fafafa] hover:text-ink">
+        <label class="inline-flex h-10 shrink-0 cursor-pointer items-center gap-2 rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-base sm:text-sm font-medium text-ink-soft transition hover:bg-[#fafafa] hover:text-ink">
             <input type="checkbox" wire:model.live="onlyProblematic" class="h-3.5 w-3.5 rounded border-hairline text-ink focus:ring-0 focus:ring-offset-0" />
             <span>{{ __('attendance::manager_summary.filters.only_problematic') }}</span>
         </label>

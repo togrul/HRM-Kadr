@@ -46,6 +46,7 @@
             <x-context-panel.section :title="__('payroll::dashboard.fields.period')">
                 <div class="space-y-2 px-1 py-1">
                     <x-ui.select-dropdown
+                        :aria-label="__('payroll::dashboard.fields.period')"
                         mode="gray"
                         direction="auto"
                         wire:model.live="periodFilter"
@@ -53,6 +54,7 @@
                         :placeholder="__('payroll::dashboard.periods.empty')"
                     />
                     <x-ui.select-dropdown
+                        :aria-label="__('payroll::dashboard.fields.regime')"
                         mode="gray"
                         direction="auto"
                         wire:model.live="regimeFilter"

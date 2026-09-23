@@ -53,7 +53,7 @@
                         type="search"
                         wire:model.live.debounce.300ms="search"
                         placeholder="{{ __('candidates::recruitment.labels.search_placeholder') }}"
-                        class="h-[34px] w-full rounded-[10px] border border-hairline bg-[#f4f4f5] pl-9 pr-3 text-[12.5px] text-ink placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-0"
+                        class="h-10 w-full rounded-[10px] border border-hairline bg-[#f4f4f5] pl-9 pr-3 text-base sm:text-sm text-ink placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-0"
                     />
                 </label>
 

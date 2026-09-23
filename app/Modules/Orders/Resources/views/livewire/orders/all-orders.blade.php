@@ -140,7 +140,7 @@
                             type="search"
                             wire:model.live.debounce.400ms="search.order_no"
                             placeholder="{{ __('orders::order_list.filters.search_placeholder') }}"
-                            class="h-[34px] w-full rounded-[10px] border border-hairline bg-[#f4f4f5] pl-9 pr-3 text-[12.5px] text-ink placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-0"
+                            class="h-10 w-full rounded-[10px] border border-hairline bg-[#f4f4f5] pl-9 pr-3 text-base sm:text-sm text-ink placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-0"
                         />
                     </span>
                 </label>
@@ -152,19 +152,19 @@
                             type="date"
                             wire:model.live="search.given_date.min"
                             aria-label="{{ __('orders::order_list.filters.date_start') }}"
-                            class="hrm-num h-[34px] w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-[12.5px] text-ink focus:border-ink focus:bg-white focus:ring-0"
+                            class="hrm-num h-10 w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-base sm:text-sm text-ink focus:border-ink focus:bg-white focus:ring-0"
                         />
                         <span class="shrink-0 text-ink-faint">&ndash;</span>
                         <input
                             type="date"
                             wire:model.live="search.given_date.max"
                             aria-label="{{ __('orders::order_list.filters.date_end') }}"
-                            class="hrm-num h-[34px] w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-[12.5px] text-ink focus:border-ink focus:bg-white focus:ring-0"
+                            class="hrm-num h-10 w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-base sm:text-sm text-ink focus:border-ink focus:bg-white focus:ring-0"
                         />
                     </div>
                 </div>
 
-                <x-pill-button wire:click="resetFilter" class="!h-[34px]">{{ __('orders::order_list.filters.reset') }}</x-pill-button>
+                <x-pill-button wire:click="resetFilter">{{ __('orders::order_list.filters.reset') }}</x-pill-button>
             </div>
 
             <p class="text-[11.5px] text-ink-faint">{{ __('orders::order_list.hints.docx_only') }}</p>

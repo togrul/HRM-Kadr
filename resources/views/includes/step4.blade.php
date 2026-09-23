@@ -69,7 +69,7 @@
                     <x-validation> {{ $message }} </x-validation>
                     @enderror
                     <x-ui.select-dropdown
-                        label=""
+                        :aria-label="__('personnel::common.labels.position')"
                         placeholder="---"
                         mode="gray"
                         class="w-full"
