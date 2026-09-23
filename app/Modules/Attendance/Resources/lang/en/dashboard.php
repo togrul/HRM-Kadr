@@ -52,7 +52,7 @@ return [
         'compliance' => 'Compliance',
         'compliance_hint' => 'Days without late or early leave',
         'overtime_trend' => 'Overtime trend',
-        'overtime_trend_hint' => 'Previous month: :minutes minutes',
+        'overtime_trend_hint' => 'Previous month: :hours h',
         'manual_pending' => 'Manual pending',
         'unprocessed_punches' => 'Unprocessed punches',
         'open_exceptions' => 'Open exceptions',

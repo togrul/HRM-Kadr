@@ -6,7 +6,8 @@
 
 @php
     $tag = in_array($as, ['label', 'div', 'span', 'p'], true) ? $as : 'label';
-    $classes = trim('text-[13px] font-semibold uppercase tracking-tight text-zinc-600 '.$class);
+    // Sentence case, medium weight: an uppercase semibold label shouted over the value it names.
+    $classes = trim('text-[12.5px] font-medium text-ink-muted '.$class);
 @endphp
 
 <{{ $tag }} @if ($for) for="{{ $for }}" @endif {{ $attributes->merge(['class' => $classes]) }}>

@@ -179,7 +179,7 @@
                     :label="__('attendance::dashboard.metrics.overtime_trend')"
                     :value="($kpi['overtime_trend_pct'] ?? 0).'%'"
                     :tone="$trendTone"
-                    :hint="__('attendance::dashboard.metrics.overtime_trend_hint', ['minutes' => $kpi['overtime_previous_minutes'] ?? 0])"
+                    :hint="__('attendance::dashboard.metrics.overtime_trend_hint', ['hours' => $asHours($kpi['overtime_previous_minutes'] ?? 0)])"
                 />
             </div>
         </section>

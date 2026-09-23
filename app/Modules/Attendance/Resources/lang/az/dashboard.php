@@ -52,7 +52,7 @@ return [
         'compliance' => 'Uyğunluq',
         'compliance_hint' => 'Gecikmə və erkən çıxış olmayan günlər',
         'overtime_trend' => 'Əlavə iş trendi',
-        'overtime_trend_hint' => 'Əvvəlki ay: :minutes dəqiqə',
+        'overtime_trend_hint' => 'Əvvəlki ay: :hours saat',
         'manual_pending' => 'Təsdiq gözləyən əl ilə qeydlər',
         'unprocessed_punches' => 'Emal olunmamış giriş-çıxış qeydləri',
         'open_exceptions' => 'Açıq istisnalar',
