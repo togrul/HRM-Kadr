@@ -2,12 +2,12 @@
 
 namespace App\Modules\UI\Livewire\Confirmation;
 
-use App\Models\Leave;
-use RuntimeException;
-use Livewire\Component;
-use Livewire\Attributes\On;
 use App\Enums\OrderStatusEnum;
+use App\Models\Leave;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\DB;
+use Livewire\Component;
+use RuntimeException;
 
 class AddComment extends Component
 {
@@ -17,7 +17,7 @@ class AddComment extends Component
     {
         DB::transaction(function () use ($id, $toStatus) {
             $userId = auth()->id();
-            $now    = now();
+            $now = now();
 
             // Yekun statuslar: artıq APPROVED və ya CANCELLED-disə dəyişməyə icazə vermirik
             $finalStatuses = [
@@ -44,9 +44,9 @@ class AddComment extends Component
             $leave->save();
 
             $leave->logs()->create([
-                'status_id'  => $toStatus->value,
+                'status_id' => $toStatus->value,
                 'changed_by' => $userId,
-                'comment'    => $this->comment,
+                'comment' => $this->comment,
                 'changed_at' => $now,
             ]);
         });
@@ -61,18 +61,17 @@ class AddComment extends Component
 
         if ($action === OrderStatusEnum::APPROVED->name) {
             $successEvent = 'leaveApproved';
-            $successMsg   =  __('leaves::common.messages.leave_approved');
-        }
-        else {
+            $successMsg = __('leaves::common.messages.leave_approved');
+        } else {
             $successEvent = 'leaveRejected';
-            $successMsg   =  __('leaves::common.messages.leave_rejected');
+            $successMsg = __('leaves::common.messages.leave_rejected');
         }
 
         $this->reset('comment');
         $this->dispatch($successEvent, $successMsg);
     }
 
-    public function render()
+    public function render(): View
     {
         return view('ui::livewire.confirmation.add-comment');
     }
