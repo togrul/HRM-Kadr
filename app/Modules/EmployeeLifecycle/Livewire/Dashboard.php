@@ -4,6 +4,7 @@ namespace App\Modules\EmployeeLifecycle\Livewire;
 
 use App\Modules\EmployeeLifecycle\Application\Services\LifecycleDashboardReadService;
 use App\Modules\EmployeeLifecycle\Application\Services\LifecyclePlanTemplateService;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
@@ -462,7 +463,7 @@ class Dashboard extends Component
         $this->dispatch('notify', type: 'success', message: __('employee-lifecycle::dashboard.messages.offboarding_completed'));
     }
 
-    public function render(LifecycleDashboardReadService $service)
+    public function render(LifecycleDashboardReadService $service): View
     {
         return view('employee-lifecycle::livewire.dashboard', [
             ...$service->dashboard([
