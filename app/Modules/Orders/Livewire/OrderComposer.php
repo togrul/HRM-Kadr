@@ -6,17 +6,14 @@ use App\Models\Candidate;
 use App\Models\OrderLog;
 use App\Models\OrderWordTemplate;
 use App\Models\Personnel;
-use App\Models\Position;
-use App\Models\Structure;
 use App\Modules\Orders\Application\Document\OrderComposition;
 use App\Modules\Orders\Application\Document\OrderTemplateProvider;
-use App\Modules\Orders\Application\Document\OrderVacationRules;
+use App\Modules\Orders\Infrastructure\Document\OrderCompositionIssuer;
 use App\Modules\Orders\Infrastructure\Document\OrderDocumentBuilder;
 use App\Modules\Orders\Infrastructure\Document\OrderDraftService;
 use App\Modules\Orders\Infrastructure\Document\OrderIssueService;
 use App\Modules\Orders\Infrastructure\Document\OrderLookupFieldRegistry;
 use App\Modules\Orders\Infrastructure\Document\OrderSubjectResolver;
-use App\Services\Vacation\VacationBalanceService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Storage;
@@ -272,31 +269,11 @@ class OrderComposer extends Component
      *
      * @return array{year:int,total:int,used:int,remaining:int,requested:int}|null
      */
-    public function getVacationBalanceProperty(): ?array
+    public function getVacationBalanceProperty(OrderCompositionIssuer $issuer): ?array
     {
         $template = $this->template();
 
-        return $template ? $this->vacationBalanceFor($template) : null;
-    }
-
-    /**
-     * @return array{year:int,total:int,used:int,remaining:int,requested:int}|null
-     */
-    private function vacationBalanceFor(OrderWordTemplate $template): ?array
-    {
-        $rules = app(OrderVacationRules::class);
-        if (! $rules->isDayCounted($template)) {
-            return null;
-        }
-
-        $personnel = app(OrderSubjectResolver::class)->personnel($this->personnelId);
-        if (! $personnel) {
-            return null;
-        }
-
-        $request = $rules->request($template, $this->fields);
-
-        return [...app(VacationBalanceService::class)->snapshot($personnel, $request['year']), ...$request];
+        return $template ? $issuer->vacationBalance($template, $this->composition()) : null;
     }
 
     /** Clear a field's "required" error the moment the author fills it in. */
@@ -393,106 +370,34 @@ class OrderComposer extends Component
     {
         $this->authorize('add-orders');
 
-        $issuer = app(OrderIssueService::class);
-        $documents = app(OrderDocumentBuilder::class);
-
         $template = $this->templateOrError();
         if (! $template) {
             return null;
         }
+
         $composition = $this->composition();
-        if (trim($this->orderNumber) === '') {
-            $this->addError('orderNumber', __('orders::order_composer.errors.number_required'));
+        $outcome = app(OrderCompositionIssuer::class)->issue($template, $composition, $autoVacancy);
+        $this->addErrors($outcome->errors);
+
+        if ($outcome->isVacancyMissing()) {
+            $this->dispatch('order-vacancy-missing', message: $outcome->message);
 
             return null;
         }
-        if ($this->addErrors(app(OrderSubjectResolver::class)->subjectErrors($template, $composition))) {
-            return null;
-        }
 
-        // Every declared manual field must be filled — an order document must not be
-        // saved with blank slots (e.g. a leave with no start/end dates). Errors are shown
-        // both on the inputs (addError) and as a summary toast.
-        $missing = [];
-        foreach ($template->manualFields() as $field) {
-            $value = $this->fields[$field['key']] ?? null;
-            if ($value === null || trim((string) $value) === '') {
-                $this->addError('fields.'.$field['key'], __('orders::order_composer.errors.field_required'));
-                $missing[] = $field['label'];
+        if (! $outcome->isSaved()) {
+            if ($outcome->message !== null) {
+                $this->dispatch('orderError', $outcome->message);
             }
-        }
-        if ($missing !== []) {
-            $this->dispatch('orderError', __('orders::order_composer.errors.fields_required', [
-                'fields' => implode(', ', $missing),
-            ]));
 
             return null;
         }
 
-        // Vacation gate: at least one day, and never more than the employee's remaining
-        // annual balance. Block with a clear notification otherwise.
-        if ($template->effect === 'vacation' && $this->personnelId) {
-            $balance = $this->vacationBalanceFor($template);
-            $violation = $balance ? app(OrderVacationRules::class)->violation($balance) : null;
-            if ($violation !== null) {
-                $this->dispatch('orderError', $violation);
+        $this->dispatch('orderAdded', $outcome->message);
 
-                return null;
-            }
-        }
-
-        // Staff-schedule (ştat cədvəli) vacancy gate for new hire orders: there must be
-        // a free slot for the chosen structure+position. If not, prompt the author to
-        // auto-create one (handled by createVacancyAndIssue → autoVacancy).
-        if ($template->isHire() && ! $this->isEditing()) {
-            $vacancy = app(\App\Services\Staff\StaffScheduleVacancyService::class);
-
-            if ($autoVacancy) {
-                $vacancy->ensureOneVacancy((int) $this->hireStructureId, (int) $this->hirePositionId);
-            } elseif ($vacancy->vacancy($this->hireStructureId, $this->hirePositionId) <= 0) {
-                $this->dispatch('order-vacancy-missing', message: __('orders::order_composer.vacancy.confirm', [
-                    'structure' => Structure::find($this->hireStructureId)?->name ?? '—',
-                    'position' => Position::find($this->hirePositionId)?->name ?? '—',
-                ]));
-
-                return null;
-            }
-        }
-
-        $signatory = $documents->signatory($this->orderDate);
-        $payload = [
-            'template_code' => $this->presetCode,
-            'label' => $template->label,
-            'personnel_id' => $template->isHire() ? null : $this->personnelId,
-            'candidate_id' => $template->isHire() ? $this->candidateId : null,
-            'hire_structure_id' => $template->isHire() ? $this->hireStructureId : null,
-            'hire_position_id' => $template->isHire() ? $this->hirePositionId : null,
-            'fields' => $this->fields,
-            'order_number' => trim($this->orderNumber),
-            'order_date' => $this->orderDate,
-            // Freeze who signed (permanent chief or active delegate) as-of the order date,
-            // so historical orders keep naming whoever was acting then.
-            'signatory' => $signatory,
-        ];
-
-        $values = $documents->values($template, $composition, $signatory);
-
-        if ($this->isEditing()) {
-            $order = OrderLog::findOrFail($this->editOrderId);
-            $issuer->updateWord($order, $payload);
-            $documents->store($order, $template, $values);
-
-            $this->dispatch('orderAdded', __('orders::order_composer.messages.order_updated'));
-
-            return null;
-        }
-
-        $order = $issuer->issueWord($payload);
-        $stored = $documents->store($order, $template, $values);
-
-        $this->dispatch('orderAdded', __('orders::order_composer.messages.order_issued'));
-
-        return Storage::disk('local')->download($stored, $composition->downloadName());
+        return $outcome->documentPath === null
+            ? null
+            : Storage::disk('local')->download($outcome->documentPath, $composition->downloadName());
     }
 
     /**
