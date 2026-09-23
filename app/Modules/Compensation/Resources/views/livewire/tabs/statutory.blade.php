@@ -89,7 +89,7 @@
                 <div class="rounded-xl border border-hairline bg-[#fafafa] px-4 py-3.5">
                     <div class="flex items-center justify-between gap-3">
                         <p class="hrm-eyebrow">{{ __('compensation::dashboard.statutory.brackets') }}</p>
-                        <x-pill-button wire:click="addStatutoryBracket">{{ __('compensation::dashboard.statutory.add_bracket') }}</x-pill-button>
+                        <x-pill-button variant="primary" wire:click="addStatutoryBracket">{{ __('compensation::dashboard.statutory.add_bracket') }}</x-pill-button>
                     </div>
                     @error('statutoryBrackets') <x-validation>{{ $message }}</x-validation> @enderror
 

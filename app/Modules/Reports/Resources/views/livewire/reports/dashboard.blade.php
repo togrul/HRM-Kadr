@@ -73,7 +73,7 @@
         </x-slot:icon>
 
         <x-slot:actions>
-            <x-pill-button :href="$tabRoute('dynamic')" wire:navigate>
+            <x-pill-button variant="primary" :href="$tabRoute('dynamic')" wire:navigate>
                 {{ __('reports::dashboard.actions.build_report') }}
             </x-pill-button>
 
@@ -85,7 +85,7 @@
                 </x-pill-button>
             @endif
 
-            <x-pill-button variant="primary" :href="$this->printUrl()" target="_blank">
+            <x-pill-button :href="$this->printUrl()" target="_blank">
                 <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
                 {{ __('reports::dashboard.actions.print') }}
             </x-pill-button>

@@ -695,7 +695,7 @@
                 <div class="rounded-xl border border-hairline bg-[#fafafa] px-4 py-3.5">
                     <div class="flex items-center justify-between gap-3">
                         <p class="hrm-eyebrow">{{ __('employee-lifecycle::dashboard.labels.template_tasks') }}</p>
-                        <x-pill-button wire:click="addTemplateTaskRow">{{ __('employee-lifecycle::dashboard.actions.add_task') }}</x-pill-button>
+                        <x-pill-button variant="primary" wire:click="addTemplateTaskRow">{{ __('employee-lifecycle::dashboard.actions.add_task') }}</x-pill-button>
                     </div>
 
                     <div class="mt-3 space-y-2">

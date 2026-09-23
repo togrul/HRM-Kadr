@@ -43,7 +43,7 @@
                     <div class="border-t border-hairline-subtle pt-3.5">
                         <div class="mb-2 flex items-center justify-between gap-3">
                             <p class="hrm-eyebrow">{{ __('compensation::dashboard.assignments.lines') }}</p>
-                            <x-pill-button wire:click="addAssignmentLine">{{ __('compensation::dashboard.actions.add_line') }}</x-pill-button>
+                            <x-pill-button variant="primary" wire:click="addAssignmentLine">{{ __('compensation::dashboard.actions.add_line') }}</x-pill-button>
                         </div>
 
                         <div class="space-y-2">

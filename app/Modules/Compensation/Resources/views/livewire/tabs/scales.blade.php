@@ -72,7 +72,7 @@
         <div class="flex items-center justify-between gap-3 border-b border-hairline-subtle px-4 py-3">
             <h2 class="text-[13.5px] font-semibold tracking-[-0.02em] text-ink">{{ __('compensation::dashboard.grades.title') }}</h2>
             @if ($canManage && $selectedScaleId)
-                <x-pill-button wire:click="openPanel('grade')">{{ __('compensation::dashboard.actions.add_grade') }}</x-pill-button>
+                <x-pill-button variant="primary" wire:click="openPanel('grade')">{{ __('compensation::dashboard.actions.add_grade') }}</x-pill-button>
             @endif
         </div>
 

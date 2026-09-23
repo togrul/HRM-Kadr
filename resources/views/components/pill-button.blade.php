@@ -1,5 +1,6 @@
 @props([
-    'variant' => 'primary', // primary | secondary | emerald | danger | ghost
+    // Secondary by default: a page carries ONE primary action, and it must say so explicitly.
+    'variant' => 'secondary', // primary | secondary | emerald | danger | ghost
     'href' => null,
     'icon' => false,        // true → square icon-only button
     'type' => 'button',     // a duplicated type= attribute is ignored by the browser, so it is a prop
