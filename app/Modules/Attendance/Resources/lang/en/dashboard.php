@@ -20,6 +20,7 @@ return [
         'open_user_guide' => 'User guide',
     ],
     'tabs' => [
+        'settings_group' => 'Settings',
         'overview' => 'Summary',
         'daily_monitor' => 'Daily monitor',
         'manager_summary' => 'Manager summary',
@@ -34,15 +35,16 @@ return [
         'calendar_regimes' => 'Work regime calendar',
     ],
     'cards' => [
+        'needs_attention' => 'Needs attention',
         'attendance_statistics' => 'Attendance statistics',
         'process_statistics' => 'Process statistics',
     ],
     'metrics' => [
         'workdays' => 'Workdays',
         'holiday_weekend' => 'Holiday / Weekend',
-        'scheduled_minutes' => 'Scheduled minutes',
-        'worked_minutes' => 'Worked minutes',
-        'overtime_minutes' => 'Overtime minutes',
+        'scheduled_minutes' => 'Scheduled hours',
+        'worked_minutes' => 'Worked hours',
+        'overtime_minutes' => 'Overtime hours',
         'coverage' => 'Coverage',
         'coverage_hint' => 'Actual / planned work hours',
         'absence_rate' => 'Absence rate',
@@ -55,5 +57,9 @@ return [
         'unprocessed_punches' => 'Unprocessed punches',
         'open_exceptions' => 'Open exceptions',
         'pending_overtime' => 'Pending overtime',
+    ],
+    'units' => [
+        'hours_short' => 'h',
+        'minutes_short' => 'min',
     ],
 ];

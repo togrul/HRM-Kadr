@@ -20,6 +20,7 @@ return [
         'open_user_guide' => 'İstifadəçi bələdçisi',
     ],
     'tabs' => [
+        'settings_group' => 'Ayarlar',
         'overview' => 'Xülasə',
         'daily_monitor' => 'Günlük monitor',
         'manager_summary' => 'Rəhbər xülasəsi',
@@ -34,15 +35,16 @@ return [
         'calendar_regimes' => 'İş rejimi təqvimi',
     ],
     'cards' => [
+        'needs_attention' => 'Diqqət tələb edir',
         'attendance_statistics' => 'Davamiyyət statistikası',
         'process_statistics' => 'Proses statistikası',
     ],
     'metrics' => [
         'workdays' => 'İş günləri',
         'holiday_weekend' => 'Bayram / Həftəsonu',
-        'scheduled_minutes' => 'Planlaşdırılmış dəqiqələr',
-        'worked_minutes' => 'İşlənmiş dəqiqələr',
-        'overtime_minutes' => 'Əlavə iş dəqiqələri',
+        'scheduled_minutes' => 'Planlaşdırılmış iş saatı',
+        'worked_minutes' => 'İşlənmiş saat',
+        'overtime_minutes' => 'Əlavə iş saatı',
         'coverage' => 'Əhatə',
         'coverage_hint' => 'Faktiki / planlaşdırılmış iş saatları',
         'absence_rate' => 'Yoxluq faizi',
@@ -51,9 +53,13 @@ return [
         'compliance_hint' => 'Gecikmə və erkən çıxış olmayan günlər',
         'overtime_trend' => 'Əlavə iş trendi',
         'overtime_trend_hint' => 'Əvvəlki ay: :minutes dəqiqə',
-        'manual_pending' => 'Gözləyən manual girişlər',
-        'unprocessed_punches' => 'Emal olunmamış punch-lar',
+        'manual_pending' => 'Təsdiq gözləyən əl ilə qeydlər',
+        'unprocessed_punches' => 'Emal olunmamış giriş-çıxış qeydləri',
         'open_exceptions' => 'Açıq istisnalar',
         'pending_overtime' => 'Gözləyən əlavə iş',
+    ],
+    'units' => [
+        'hours_short' => 's',
+        'minutes_short' => 'dəq',
     ],
 ];
