@@ -7,6 +7,8 @@ return [
         'description' => 'This screen manages attendance, shifts and manual entries.',
     ],
     'filters' => [
+        'previous_month' => 'Previous month',
+        'next_month' => 'Next month',
         'year' => 'Year',
         'month' => 'Month',
     ],

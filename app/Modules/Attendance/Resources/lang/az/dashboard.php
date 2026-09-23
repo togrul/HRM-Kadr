@@ -7,6 +7,8 @@ return [
         'description' => 'Bu ekran davamiyyət, növbələr və manual girişləri idarə edir.',
     ],
     'filters' => [
+        'previous_month' => 'Əvvəlki ay',
+        'next_month' => 'Növbəti ay',
         'year' => 'İl',
         'month' => 'Ay',
     ],

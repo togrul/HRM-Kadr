@@ -46,29 +46,17 @@
         </x-slot:icon>
 
         <x-slot:actions>
-            {{-- period control: one pill instead of two labelled form fields --}}
-            <div class="inline-flex h-10 items-center gap-1 rounded-[10px] border border-hairline bg-[#f4f4f5] px-2">
-                <svg class="h-3.5 w-3.5 shrink-0 text-ink-faint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 11h18"/></svg>
-                <label class="sr-only" for="attendance-month">{{ __('attendance::dashboard.filters.month') }}</label>
-                <select
-                    id="attendance-month"
-                    wire:model.live="month"
-                    class="hrm-num h-10 border-0 bg-transparent py-0 pl-1 pr-5 text-base text-ink focus:ring-0 sm:text-sm"
-                >
-                    @for ($m = 1; $m <= 12; $m++)
-                        <option value="{{ $m }}">{{ str_pad((string) $m, 2, '0', STR_PAD_LEFT) }}</option>
-                    @endfor
-                </select>
-                <span class="text-ink-faint">.</span>
-                <label class="sr-only" for="attendance-year">{{ __('attendance::dashboard.filters.year') }}</label>
-                <input
-                    id="attendance-year"
-                    type="number"
-                    min="2000"
-                    max="2100"
-                    wire:model.live="year"
-                    class="hrm-num h-10 w-20 border-0 bg-transparent px-1 py-0 text-base text-ink focus:ring-0 sm:text-sm"
-                />
+            {{-- period control: step month by month; the label reads as a date, not two fields --}}
+            <div class="inline-flex h-10 items-center rounded-[10px] border border-hairline bg-[#f4f4f5]" role="group" aria-label="{{ __('attendance::dashboard.filters.month') }}">
+                <button type="button" wire:click="shiftMonth(-1)" wire:loading.attr="disabled" wire:target="shiftMonth" class="flex h-10 w-9 items-center justify-center rounded-l-[10px] text-ink-muted transition hover:bg-[#e4e4e7] hover:text-ink" aria-label="{{ __('attendance::dashboard.filters.previous_month') }}">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                </button>
+                <span class="min-w-[124px] px-1 text-center text-[13.5px] font-semibold capitalize text-ink" aria-live="polite">
+                    {{ \Carbon\Carbon::create((int) $year, (int) $month, 1)->translatedFormat('F Y') }}
+                </span>
+                <button type="button" wire:click="shiftMonth(1)" wire:loading.attr="disabled" wire:target="shiftMonth" class="flex h-10 w-9 items-center justify-center rounded-r-[10px] text-ink-muted transition hover:bg-[#e4e4e7] hover:text-ink" aria-label="{{ __('attendance::dashboard.filters.next_month') }}">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                </button>
             </div>
 
             <x-pill-button variant="secondary" :href="route('docs.guide', ['focus' => 'attendance']).'#attendance-module'">
