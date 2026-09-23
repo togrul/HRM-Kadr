@@ -299,6 +299,7 @@ return [
         'has_disability' => 'əlillik var?',
     ],
     'messages' => [
+        'required_fields_hint' => 'Ulduz (*) işarəli sahələr məcburidir. Qalan bölmələri sonra doldura bilərsiniz.',
         'confirm_title' => 'Gözləyən qeyd',
         'confirm_message' => 'Bu əməkdaş qeydi təsdiq gözləyir.',
         'confirm_description' => 'Təsdiqdən sonra qeyd aktiv əməkdaş siyahısına tam qoşulacaq və əlaqəli əməliyyatlarda normal istifadə olunacaq.',

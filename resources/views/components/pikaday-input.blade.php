@@ -8,7 +8,10 @@
 ])
 
 @php
-     $isError = $errors->has($name) ? 'border-rose-300 bg-rose-50' : '';
+     $wireModel = collect($attributes->getAttributes())
+          ->first(fn ($value, $key) => str_starts_with($key, 'wire:model'));
+     $hasError = $errors->has($name) || (is_string($wireModel) && $errors->has($wireModel));
+     $isError = $hasError ? 'border-rose-300 bg-rose-50' : '';
 
      $format = "Y-MM-DD" ? 'DD.MM.Y' : $format;
      $currentYear = \Carbon\Carbon::now()->format('Y');
@@ -32,7 +35,7 @@
           onSelect: function (date) { $el.value = moment(date.toString()).format('{{ $format }}'); }
          }), $el)"
     @disabled($disabled)
-    @if ($errors->has($name)) aria-invalid="true" @endif
+    @if ($hasError) aria-invalid="true" @endif
     {!! $attributes->merge(['class' => \App\Support\Ui\FieldStyles::input(trim('mt-1 block '.$isError))]) !!}
 
 >

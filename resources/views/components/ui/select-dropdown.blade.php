@@ -18,6 +18,7 @@
   $wireModel = collect($wireModelKeys)
       ->map(fn ($key) => $attributes->get($key))
       ->first(fn ($value) => filled($value));
+  $hasError = is_string($wireModel) && $errors->has($wireModel);
   $identitySource = (string) ($instance
       ?? $wireModel
       ?? $attributes->get('name')
@@ -60,7 +61,7 @@
   x-on:scroll.window.debounce.50ms="if (isOpen) repositionPanel()"
   wire:key="{{ $rootKey }}"
   data-selected-label="{{ $selectedLabel }}"
-  {{ $attributes->except(['wire:key','wire:model','wire:model.live','wire:model.defer','wire:model.lazy','wire:model.blur','aria-label'])->class('relative isolate w-full') }}
+  {{ $attributes->except(['wire:key','wire:model','wire:model.live','wire:model.defer','wire:model.lazy','wire:model.blur','aria-label','aria-required'])->class('relative isolate w-full') }}
   x-bind:class="isOpen ? 'z-[900]' : 'z-10'"
 >
   @if($label)
@@ -71,8 +72,10 @@
     <button
       type="button" id="{{ $uid }}-button"
       x-ref="button"
-      class="{{ \App\Support\Ui\FieldStyles::select('relative flex items-center text-left') }} {{ $disabled ? 'cursor-not-allowed opacity-60' : '' }}"
+      class="{{ \App\Support\Ui\FieldStyles::select('relative flex items-center text-left') }} {{ $hasError ? 'border-rose-300 bg-rose-50' : '' }} {{ $disabled ? 'cursor-not-allowed opacity-60' : '' }}"
       :aria-expanded="isOpen"
+      @if ($hasError) aria-invalid="true" @endif
+      @if ($attributes->get('aria-required')) aria-required="{{ $attributes->get('aria-required') }}" @endif
       @if ($label) aria-labelledby="{{ $labelId }}" @elseif ($attributes->get('aria-label')) aria-label="{{ $attributes->get('aria-label') }}" @endif
       :disabled="isDisabled"
       x-on:click.prevent.stop="toggle()"

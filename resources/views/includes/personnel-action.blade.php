@@ -45,47 +45,9 @@
 </div>
 
 <div
+    id="personnel-wizard"
     class="flex flex-col w-full p-5 px-0 mx-auto my-1 mb-4 space-y-8 transition duration-500 ease-in-out transform bg-white"
-    x-data="{
-        currentStep: @entangle('step'),
-        pendingAction: null,
-        pendingStep: null,
-        pendingTimer: null,
-        offCommit: null,
-        destroy() {
-            if (this.offCommit) this.offCommit();
-            this.offCommit = null;
-        },
-        setPending(action, step = null) {
-            if (this.pendingTimer) clearTimeout(this.pendingTimer);
-            this.pendingAction = action;
-            this.pendingStep = step;
-            this.pendingTimer = setTimeout(() => this.clearPending(), 1800);
-        },
-        clearPending() {
-            if (this.pendingTimer) clearTimeout(this.pendingTimer);
-            this.pendingTimer = null;
-            this.pendingAction = null;
-            this.pendingStep = null;
-        },
-        stepState(step) {
-            if (step < this.currentStep) return 'completed';
-            if (step === this.currentStep) return 'active';
-            return 'upcoming';
-        },
-        progressWidth() {
-            return `${Math.max(0, ((this.currentStep - 1) / 7) * 100)}%`;
-        }
-    }"
-    x-init="
-        if (typeof Livewire !== 'undefined') {
-            offCommit = Livewire.hook('commit', ({ succeed, fail }) => {
-                succeed(() => queueMicrotask(() => clearPending()));
-                fail(() => queueMicrotask(() => clearPending()));
-            });
-        }
-        $watch('currentStep', () => clearPending());
-    "
+    x-data="{ ...window.personnelWizard(), currentStep: @entangle('step') }"
     x-on:personnel-crud:navigate-approved.window="clearPending()"
     x-on:personnel-crud:save-approved.window="clearPending()"
 >
@@ -245,7 +207,7 @@
                     <span>{{ __('personnel::common.actions.save') }}</span>
                 </x-button>
             @else
-                <x-modal-button>{{ __('personnel::common.actions.save') }}</x-modal-button>
+                <x-modal-button x-on:click.capture="setPending('save')">{{ __('personnel::common.actions.save') }}</x-modal-button>
             @endif
         @endif
 
@@ -273,7 +235,7 @@
                         <span>{{ __('personnel::common.actions.next') }}</span>
                     </x-button>
                 @else
-                    <x-button mode="step-next" wire:click.prevent="nextStep">{{ __('personnel::common.actions.next') }}</x-button>
+                    <x-button mode="step-next" wire:click.prevent="nextStep" x-on:click="setPending('next', {{ min(array_key_last($stepItems), $step + 1) }})">{{ __('personnel::common.actions.next') }}</x-button>
                 @endif
             @endif
         </div>

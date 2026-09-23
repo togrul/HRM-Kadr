@@ -21,29 +21,32 @@
 
 <div class="flex w-full flex-col items-stretch gap-4 md:flex-row md:items-start">
     <div class="flex min-w-0 flex-1 flex-col space-y-4">
-        <h3 class="border-b border-hairline-subtle pb-2 text-[15px] font-semibold text-ink">{{ __('personnel::common.steps.personal_information') }}</h3>
+        <div class="border-b border-hairline-subtle pb-2">
+            <h3 class="text-[15px] font-semibold text-ink">{{ __('personnel::common.steps.personal_information') }}</h3>
+            <p class="mt-1 text-sm leading-5 text-ink-muted">{{ __('personnel::common.messages.required_fields_hint') }}</p>
+        </div>
         <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
             <div class="flex flex-col">
-                <x-label for="personnel.name">{{ __('personnel::common.labels.name') }}</x-label>
-                <x-livewire-input mode="gray" name="personnel.name" wire:model="personalForm.personnel.name"></x-livewire-input>
+                <x-label required for="personnel.name">{{ __('personnel::common.labels.name') }}</x-label>
+                <x-livewire-input mode="gray" aria-required="true" name="personnel.name" wire:model="personalForm.personnel.name"></x-livewire-input>
                 @error('personalForm.personnel.name')
                 <x-validation> {{ $message }} </x-validation>
                 @enderror
             </div>
             <div class="flex flex-col">
                 <div class="flex items-center justify-between space-x-2">
-                    <x-label for="personnel.surname">{{ __('personnel::common.labels.surname') }}</x-label>
+                    <x-label required for="personnel.surname">{{ __('personnel::common.labels.surname') }}</x-label>
                     <x-checkbox name="addManual" model="personalForm.personnel.has_changed_initials">{{ __('personnel::common.questions.changed') }}</x-checkbox>
                 </div>
 
-                <x-livewire-input mode="gray" name="personnel.surname" wire:model="personalForm.personnel.surname"></x-livewire-input>
+                <x-livewire-input mode="gray" aria-required="true" name="personnel.surname" wire:model="personalForm.personnel.surname"></x-livewire-input>
                 @error('personalForm.personnel.surname')
                 <x-validation> {{ $message }} </x-validation>
                 @enderror
             </div>
             <div class="flex flex-col">
-                <x-label for="personnel.patronymic">{{ __('personnel::common.labels.patronymic') }}</x-label>
-                <x-livewire-input mode="gray" name="personnel.patronymic" wire:model="personalForm.personnel.patronymic"></x-livewire-input>
+                <x-label required for="personnel.patronymic">{{ __('personnel::common.labels.patronymic') }}</x-label>
+                <x-livewire-input mode="gray" aria-required="true" name="personnel.patronymic" wire:model="personalForm.personnel.patronymic"></x-livewire-input>
                 @error('personalForm.personnel.patronymic')
                 <x-validation> {{ $message }} </x-validation>
                 @enderror
@@ -52,22 +55,22 @@
         @if(data_get($personal, 'has_changed_initials'))
         <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
             <div class="flex flex-col">
-                <x-label for="personnel.previous_name">{{ __('personnel::common.labels.previous_name') }}</x-label>
-                <x-livewire-input mode="gray" name="personnel.previous_name" wire:model="personalForm.personnel.previous_name"></x-livewire-input>
+                <x-label required for="personnel.previous_name">{{ __('personnel::common.labels.previous_name') }}</x-label>
+                <x-livewire-input mode="gray" aria-required="true" name="personnel.previous_name" wire:model="personalForm.personnel.previous_name"></x-livewire-input>
                 @error('personalForm.personnel.previous_name')
                 <x-validation> {{ $message }} </x-validation>
                 @enderror
             </div>
             <div class="flex flex-col">
-                <x-label for="personnel.previous_surname">{{ __('personnel::common.labels.previous_surname') }}</x-label>
-                <x-livewire-input mode="gray" name="personnel.previous_surname" wire:model="personalForm.personnel.previous_surname"></x-livewire-input>
+                <x-label required for="personnel.previous_surname">{{ __('personnel::common.labels.previous_surname') }}</x-label>
+                <x-livewire-input mode="gray" aria-required="true" name="personnel.previous_surname" wire:model="personalForm.personnel.previous_surname"></x-livewire-input>
                 @error('personalForm.personnel.previous_surname')
                 <x-validation> {{ $message }} </x-validation>
                 @enderror
             </div>
             <div class="flex flex-col">
-                <x-label for="personnel.previous_patronymic">{{ __('personnel::common.labels.previous_patronymic') }}</x-label>
-                <x-livewire-input mode="gray" name="personnel.previous_patronymic" wire:model="personalForm.personnel.previous_patronymic"></x-livewire-input>
+                <x-label required for="personnel.previous_patronymic">{{ __('personnel::common.labels.previous_patronymic') }}</x-label>
+                <x-livewire-input mode="gray" aria-required="true" name="personnel.previous_patronymic" wire:model="personalForm.personnel.previous_patronymic"></x-livewire-input>
                 @error('personalForm.personnel.previous_patronymic')
                 <x-validation> {{ $message }} </x-validation>
                 @enderror
@@ -75,8 +78,8 @@
         </div>
         <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
             <div class="flex flex-col">
-                <x-label for="personnel.initials_changed_date">{{ __('personnel::common.labels.change_date') }}</x-label>
-                <x-pikaday-input mode="gray" name="personnel.initials_changed_date" format="Y-MM-DD" wire:model.live="personalForm.personnel.initials_changed_date">
+                <x-label required for="personnel.initials_changed_date">{{ __('personnel::common.labels.change_date') }}</x-label>
+                <x-pikaday-input mode="gray" aria-required="true" name="personnel.initials_changed_date" format="Y-MM-DD" wire:model.live="personalForm.personnel.initials_changed_date">
                     <x-slot name="script">
                       $el.onchange = function () {
                       @this.set('personalForm.personnel.initials_changed_date', $el.value);
@@ -88,8 +91,8 @@
                 @enderror
             </div>
             <div class="flex flex-col md:col-span-2">
-                <x-label for="personnel.initials_change_reason">{{ __('personnel::common.labels.change_reason') }}</x-label>
-                <x-livewire-input mode="gray" name="personnel.initials_change_reason" wire:model="personalForm.personnel.initials_change_reason"></x-livewire-input>
+                <x-label required for="personnel.initials_change_reason">{{ __('personnel::common.labels.change_reason') }}</x-label>
+                <x-livewire-input mode="gray" aria-required="true" name="personnel.initials_change_reason" wire:model="personalForm.personnel.initials_change_reason"></x-livewire-input>
                 @error('personalForm.personnel.initials_change_reason')
                 <x-validation> {{ $message }} </x-validation>
                 @enderror
@@ -98,8 +101,8 @@
         @endif
         <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
             <div class="flex flex-col">
-                <x-label for="personnel.birthdate">{{ __('personnel::common.labels.birthdate') }}</x-label>
-                <x-pikaday-input mode="gray" name="personnel.birthdate" format="Y-MM-DD" wire:model.live="personalForm.personnel.birthdate">
+                <x-label required for="personnel.birthdate">{{ __('personnel::common.labels.birthdate') }}</x-label>
+                <x-pikaday-input mode="gray" aria-required="true" name="personnel.birthdate" format="Y-MM-DD" wire:model.live="personalForm.personnel.birthdate">
                   <x-slot name="script">
                     $el.onchange = function () {
                     @this.set('personalForm.personnel.birthdate', $el.value);
@@ -111,11 +114,11 @@
                 @enderror
             </div>
             <div class="flex flex-col space-y-1">
-                <x-label for="personnel.gender">{{ __('personnel::common.labels.gender') }}</x-label>
+                <x-label required for="personnel.gender">{{ __('personnel::common.labels.gender') }}</x-label>
                 <div class="flex flex-row">
                     @foreach(\App\Enums\GenderEnum::genderOptions() as $value => $label)
                         <label class="inline-flex items-center px-2 py-2 bg-gray-100 rounded shadow-sm">
-                            <input type="radio" class="form-radio" name="personnel.gender" wire:model="personalForm.personnel.gender" value="{{ $value }}">
+                            <input type="radio" class="form-radio" name="personnel.gender" required wire:model="personalForm.personnel.gender" value="{{ $value }}">
                             <span class="ml-2 text-sm font-normal">{{ $label }}</span>
                         </label>
                     @endforeach
@@ -126,7 +129,7 @@
               </div>
             <div class="flex flex-col">
                 <div class="flex items-center justify-between space-x-2">
-                    <x-label>{{ __('personnel::common.labels.nationality') }}</x-label>
+                    <x-label required>{{ __('personnel::common.labels.nationality') }}</x-label>
                     <x-checkbox name="hasChangedNationality" model="personalForm.personnel.has_changed_nationality">{{ __('personnel::common.questions.changed') }}</x-checkbox>
                 </div>
                 <x-ui.select-dropdown
@@ -134,6 +137,7 @@
                     placeholder="---"
                     mode="gray"
                     class="w-full"
+                    aria-required="true"
                     wire:model.live="personalForm.personnel.nationality_id"
                     :model="$this->nationalityOptions"
                     :search-model="data_get($stepSearchModels, 'searchNationality', 'searchNationality')"
@@ -154,6 +158,7 @@
                     placeholder="---"
                     mode="gray"
                     class="w-full"
+                    aria-required="true"
                     wire:model.live="personalForm.personnel.previous_nationality_id"
                     :model="$this->previousNationalityOptions"
                     :search-model="data_get($stepSearchModels, 'searchPreviousNationality', 'searchPreviousNationality')"
@@ -165,8 +170,8 @@
                 @enderror
             </div>
             <div class="flex flex-col">
-                <x-label for="personnel.nationality_changed_date">{{ __('personnel::common.labels.nationality_change_date') }}</x-label>
-                <x-pikaday-input mode="gray" name="personnel.nationality_changed_date" format="Y-MM-DD" wire:model.live="personalForm.personnel.nationality_changed_date">
+                <x-label required for="personnel.nationality_changed_date">{{ __('personnel::common.labels.nationality_change_date') }}</x-label>
+                <x-pikaday-input mode="gray" aria-required="true" name="personnel.nationality_changed_date" format="Y-MM-DD" wire:model.live="personalForm.personnel.nationality_changed_date">
                     <x-slot name="script">
                       $el.onchange = function () {
                       @this.set('personalForm.personnel.nationality_changed_date', $el.value);
@@ -178,8 +183,8 @@
                 @enderror
             </div>
             <div class="flex flex-col">
-                <x-label for="personnel.nationality_change_reason">{{ __('personnel::common.labels.nationality_change_reason') }}</x-label>
-                <x-livewire-input mode="gray" name="personnel.nationality_change_reason" wire:model="personalForm.personnel.nationality_change_reason"></x-livewire-input>
+                <x-label required for="personnel.nationality_change_reason">{{ __('personnel::common.labels.nationality_change_reason') }}</x-label>
+                <x-livewire-input mode="gray" aria-required="true" name="personnel.nationality_change_reason" wire:model="personalForm.personnel.nationality_change_reason"></x-livewire-input>
                 @error('personalForm.personnel.nationality_change_reason')
                 <x-validation> {{ $message }} </x-validation>
                 @enderror
@@ -192,8 +197,8 @@
                 <x-livewire-input mode="gray" name="personnel.phone" wire:model="personalForm.personnel.phone"></x-livewire-input>
             </div>
             <div class="flex flex-col">
-                <x-label for="personnel.mobile">{{ __('personnel::common.labels.mobile') }}</x-label>
-                <x-livewire-input mode="gray" name="personnel.mobile" wire:model="personalForm.personnel.mobile"></x-livewire-input>
+                <x-label required for="personnel.mobile">{{ __('personnel::common.labels.mobile') }}</x-label>
+                <x-livewire-input mode="gray" aria-required="true" name="personnel.mobile" wire:model="personalForm.personnel.mobile"></x-livewire-input>
                 @error('personalForm.personnel.mobile')
                     <x-validation> {{ $message }} </x-validation>
                 @enderror
@@ -203,8 +208,8 @@
                 <x-livewire-input mode="gray" name="personnel.email" wire:model="personalForm.personnel.email"></x-livewire-input>
             </div>
             <div class="flex flex-col">
-                <x-label for="personnel.pin">{{ __('personnel::common.labels.pin') }}</x-label>
-                <x-livewire-input mode="gray" name="personnel.pin" wire:model="personalForm.personnel.pin"></x-livewire-input>
+                <x-label required for="personnel.pin">{{ __('personnel::common.labels.pin') }}</x-label>
+                <x-livewire-input mode="gray" aria-required="true" name="personnel.pin" wire:model="personalForm.personnel.pin"></x-livewire-input>
                 @error('personalForm.personnel.pin')
                 <x-validation> {{ $message }} </x-validation>
                 @enderror
@@ -213,15 +218,15 @@
 
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div class="flex flex-col">
-                <x-label for="personnel.residental_address">{{ __('personnel::common.labels.residental_address') }}</x-label>
-                <x-livewire-input mode="gray" name="personnel.residental_address" wire:model="personalForm.personnel.residental_address"></x-livewire-input>
+                <x-label required for="personnel.residental_address">{{ __('personnel::common.labels.residental_address') }}</x-label>
+                <x-livewire-input mode="gray" aria-required="true" name="personnel.residental_address" wire:model="personalForm.personnel.residental_address"></x-livewire-input>
                 @error('personalForm.personnel.residental_address')
                     <x-validation> {{ $message }} </x-validation>
                 @enderror
             </div>
             <div class="flex flex-col">
-                <x-label for="personnel.registered_address">{{ __('personnel::common.labels.registered_address') }}</x-label>
-                <x-livewire-input mode="gray" name="personnel.registered_address" wire:model="personalForm.personnel.registered_address"></x-livewire-input>
+                <x-label required for="personnel.registered_address">{{ __('personnel::common.labels.registered_address') }}</x-label>
+                <x-livewire-input mode="gray" aria-required="true" name="personnel.registered_address" wire:model="personalForm.personnel.registered_address"></x-livewire-input>
                 @error('personalForm.personnel.registered_address')
                 <x-validation> {{ $message }} </x-validation>
                 @enderror
@@ -230,12 +235,13 @@
         <h3 class="border-b border-hairline-subtle pb-2 pt-4 text-[15px] font-semibold text-ink">{{ __('personnel::profile.sections.career') }}</h3>
         <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
             <div class="flex flex-col">
-                <x-label for="personnel.education_degree_id">{{ __('personnel::common.labels.education_degree') }}</x-label>
+                <x-label required for="personnel.education_degree_id">{{ __('personnel::common.labels.education_degree') }}</x-label>
                 <x-ui.select-dropdown
                     :aria-label="__('personnel::common.labels.education_degree')"
                     placeholder="---"
                     mode="gray"
                     class="w-full"
+                    aria-required="true"
                     wire:model.live="personalForm.personnel.education_degree_id"
                     :model="$this->educationDegreeOptions"
                     :search-model="data_get($stepSearchModels, 'searchEducationDegree', 'searchEducationDegree')"
@@ -247,12 +253,13 @@
                 @enderror
             </div>
             <div class="flex flex-col">
-                <x-label for="personnel.structure_id">{{ __('personnel::common.labels.structure') }}</x-label>
+                <x-label required for="personnel.structure_id">{{ __('personnel::common.labels.structure') }}</x-label>
                 <x-ui.select-dropdown
                     :aria-label="__('personnel::common.labels.structure')"
                     placeholder="---"
                     mode="gray"
                     class="w-full"
+                    aria-required="true"
                     wire:model.live="personalForm.personnel.structure_id"
                     :model="$this->structureOptions"
                     :search-model="data_get($stepSearchModels, 'searchStructure', 'searchStructure')"
@@ -265,12 +272,13 @@
                 @enderror
             </div>
             <div class="flex flex-col">
-                <x-label for="personnel.position_id">{{ __('personnel::common.labels.position') }}</x-label>
+                <x-label required for="personnel.position_id">{{ __('personnel::common.labels.position') }}</x-label>
                 <x-ui.select-dropdown
                     :aria-label="__('personnel::common.labels.position')"
                     placeholder="---"
                     mode="gray"
                     class="w-full"
+                    aria-required="true"
                     wire:model.live="personalForm.personnel.position_id"
                     :model="$this->positionOptions"
                     :search-model="data_get($stepSearchModels, 'searchPosition', 'searchPosition')"
@@ -285,12 +293,13 @@
         </div>
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div class="flex flex-col">
-                <x-label for="personnel.work_norm_id">{{ __('personnel::common.labels.work_norms') }}</x-label>
+                <x-label required for="personnel.work_norm_id">{{ __('personnel::common.labels.work_norms') }}</x-label>
                 <x-ui.select-dropdown
                     :aria-label="__('personnel::common.labels.work_norms')"
                     placeholder="---"
                     mode="gray"
                     class="w-full"
+                    aria-required="true"
                     wire:model.live="personalForm.personnel.work_norm_id"
                     :model="$this->workNormOptions"
                     :search-model="data_get($stepSearchModels, 'searchWorkNorm', 'searchWorkNorm')"
@@ -332,8 +341,8 @@
                 @enderror
             </div>
             <div class="flex flex-col">
-                <x-label for="personnel.join_work_date">{{ __('personnel::common.labels.join_work_date') }}</x-label>
-                <x-pikaday-input mode="gray" name="personnel.join_work_date" format="Y-MM-DD" wire:model.live="personalForm.personnel.join_work_date">
+                <x-label required for="personnel.join_work_date">{{ __('personnel::common.labels.join_work_date') }}</x-label>
+                <x-pikaday-input mode="gray" aria-required="true" name="personnel.join_work_date" format="Y-MM-DD" wire:model.live="personalForm.personnel.join_work_date">
                     <x-slot name="script">
                       $el.onchange = function () {
                       @this.set('personalForm.personnel.join_work_date', $el.value);
@@ -520,12 +529,13 @@
         @if($hasDisability)
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div class="flex flex-col">
-                <x-label for="personnel.disability_id">{{ __('personnel::common.labels.disability') }}</x-label>
+                <x-label required for="personnel.disability_id">{{ __('personnel::common.labels.disability') }}</x-label>
                 <x-ui.select-dropdown
                     :aria-label="__('personnel::common.labels.disability')"
                     placeholder="---"
                     mode="gray"
                     class="w-full"
+                    aria-required="true"
                     wire:model.live="personalForm.personnel.disability_id"
                     :model="$this->disabilityOptions"
                     :search-model="data_get($stepSearchModels, 'searchDisability', 'searchDisability')"
@@ -537,8 +547,8 @@
                 @enderror
               </div>
             <div class="flex flex-col">
-                <x-label for="personnel.disability_given_date">{{ __('personnel::common.labels.disability_given_date') }}</x-label>
-                <x-pikaday-input mode="gray" name="personnel.disability_given_date" format="Y-MM-DD" wire:model.live="personalForm.personnel.disability_given_date">
+                <x-label required for="personnel.disability_given_date">{{ __('personnel::common.labels.disability_given_date') }}</x-label>
+                <x-pikaday-input mode="gray" aria-required="true" name="personnel.disability_given_date" format="Y-MM-DD" wire:model.live="personalForm.personnel.disability_given_date">
                     <x-slot name="script">
                       $el.onchange = function () {
                       @this.set('personalForm.personnel.disability_given_date', $el.value);
@@ -575,8 +585,8 @@
     <div class="w-full flex-none md:w-40">
         <div class="flex flex-col space-y-2">
             <div class="flex flex-col">
-                <x-label for="personnel.tabel_no">{{ __('personnel::common.labels.tabel_hash') }}</x-label>
-                <x-livewire-input mode="gray" name="personnel.tabel_no" wire:model="personalForm.personnel.tabel_no"></x-livewire-input>
+                <x-label required for="personnel.tabel_no">{{ __('personnel::common.labels.tabel_hash') }}</x-label>
+                <x-livewire-input mode="gray" aria-required="true" name="personnel.tabel_no" wire:model="personalForm.personnel.tabel_no"></x-livewire-input>
                 @error('personalForm.personnel.tabel_no')
                 <x-validation> {{ $message }} </x-validation>
                 @enderror
