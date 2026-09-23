@@ -17,8 +17,9 @@
 
 <div class="border-b border-hairline bg-white">
     {{-- header row --}}
-    <div class="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-        <div class="flex items-center gap-3">
+    {{-- wraps: when the actions no longer fit beside the title they drop to their own line --}}
+    <div class="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:px-5">
+        <div class="flex min-w-0 items-center gap-3">
             @isset($icon)
                 <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-ink text-white">
                     {{ $icon }}
@@ -43,7 +44,7 @@
         </div>
 
         @if (isset($stats) || isset($actions))
-            <div class="flex items-center gap-3 sm:gap-4">
+            <div class="flex min-w-0 flex-wrap items-center gap-3 sm:ml-auto sm:justify-end sm:gap-4">
                 @isset($stats)
                     <div class="hidden items-center gap-5 md:flex">{{ $stats }}</div>
                 @endisset
@@ -53,7 +54,7 @@
                 @endif
 
                 @isset($actions)
-                    <div class="flex flex-wrap items-center gap-2">{{ $actions }}</div>
+                    <div class="flex flex-wrap items-center gap-2 sm:justify-end">{{ $actions }}</div>
                 @endisset
             </div>
         @endif
