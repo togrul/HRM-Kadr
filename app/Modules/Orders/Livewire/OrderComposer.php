@@ -156,7 +156,7 @@ class OrderComposer extends Component
     {
         $template = $this->template();
 
-        return $template ? $issuer->vacationBalance($template, $this->composition()) : null;
+        return $template ? $issuer->vacationBalance($template, $this->composition(), persist: false) : null;
     }
 
     /** Clear a field's "required" error the moment the author fills it in. */

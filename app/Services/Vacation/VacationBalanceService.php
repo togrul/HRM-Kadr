@@ -63,6 +63,23 @@ class VacationBalanceService
     }
 
     /**
+     * What snapshot() would show, without writing: the stored balance, or the entitlement
+     * the row would be created with. For render paths that only display the numbers.
+     *
+     * @return array{total:int,used:int,remaining:int}
+     */
+    public function previewSnapshot(Personnel $personnel, int $year): array
+    {
+        if ($stored = $this->storedSnapshot($personnel, $year)) {
+            return $stored;
+        }
+
+        $total = $this->entitlementDays($personnel, $year === Carbon::now()->year ? Carbon::now() : Carbon::create($year, 12, 31));
+
+        return ['total' => $total, 'used' => 0, 'remaining' => $total];
+    }
+
+    /**
      * @return array{total:int,used:int,remaining:int}
      */
     private function mapBalance(Vacation $row): array

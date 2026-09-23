@@ -68,7 +68,7 @@ class OrderCompositionIssuer
      *
      * @return array{year:int,total:int,used:int,remaining:int,requested:int}|null
      */
-    public function vacationBalance(OrderWordTemplate $template, OrderComposition $composition): ?array
+    public function vacationBalance(OrderWordTemplate $template, OrderComposition $composition, bool $persist = true): ?array
     {
         if (! $this->vacationRules->isDayCounted($template)) {
             return null;
@@ -81,7 +81,12 @@ class OrderCompositionIssuer
 
         $request = $this->vacationRules->request($template, $composition->fields);
 
-        return [...$this->balances->snapshot($personnel, $request['year']), ...$request];
+        // Displaying the balance must not create the year's row; issuing does (it checks it).
+        $balance = $persist
+            ? $this->balances->snapshot($personnel, $request['year'])
+            : $this->balances->previewSnapshot($personnel, $request['year']);
+
+        return [...$balance, ...$request];
     }
 
     /**
