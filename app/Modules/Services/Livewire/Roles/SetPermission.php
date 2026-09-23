@@ -237,7 +237,7 @@ class SetPermission extends Component
                 'name' => $permission->name,
                 'translation_key' => 'services::permissions.methods.'.$methodKey,
                 'fallback_label' => ModuleTranslation::humanize($methodKey),
-                'description' => PermissionDescriptionCatalog::describe((string) $permission->name),
+                'description' => PermissionDescriptionCatalog::label((string) $permission->name),
             ];
 
             return $carry;

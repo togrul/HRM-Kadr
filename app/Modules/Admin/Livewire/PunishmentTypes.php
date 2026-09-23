@@ -4,6 +4,7 @@ namespace App\Modules\Admin\Livewire;
 
 use App\Models\PunishmentType;
 use App\Modules\Admin\Support\Traits\Admin\CallSwalTrait;
+use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
 class PunishmentTypes extends Component
@@ -30,7 +31,7 @@ class PunishmentTypes extends Component
         ];
     }
 
-    public function mount()
+    public function mount(): void
     {
         if ($this->model) {
             $this->model = PunishmentType::findOrFail($this->model);
@@ -69,7 +70,7 @@ class PunishmentTypes extends Component
         }
     }
 
-    public function render()
+    public function render(): View
     {
         return view('admin::livewire.admin.punishment-types');
     }
