@@ -9,9 +9,11 @@ use App\Modules\Attendance\Application\Services\AttendancePayrollExportService;
 use App\Modules\Attendance\Exports\AttendancePayrollCsvExport;
 use App\Modules\Attendance\Exports\AttendancePayrollExport;
 use App\Modules\Attendance\Jobs\GenerateAttendanceMonthlySnapshotJob;
+use Illuminate\Contracts\View\View;
 use Livewire\Component;
 use Maatwebsite\Excel\Excel as ExcelWriter;
 use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class MonthClose extends Component
 {
@@ -128,7 +130,7 @@ class MonthClose extends Component
     public function exportPayroll(
         AttendancePayrollExportService $service,
         AttendancePayrollExportContract $contract
-    ) {
+    ): ?BinaryFileResponse {
         if (! $this->canExport) {
             abort(403);
         }
@@ -150,7 +152,7 @@ class MonthClose extends Component
     public function exportPayrollCsv(
         AttendancePayrollExportService $service,
         AttendancePayrollExportContract $contract
-    ) {
+    ): ?BinaryFileResponse {
         if (! $this->canExport) {
             abort(403);
         }
@@ -171,7 +173,7 @@ class MonthClose extends Component
         );
     }
 
-    public function render()
+    public function render(): View
     {
         return view('attendance::livewire.attendance.month-close', [
             'csvProfile' => $this->csvProfile,

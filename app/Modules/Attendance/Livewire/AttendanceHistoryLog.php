@@ -5,6 +5,7 @@ namespace App\Modules\Attendance\Livewire;
 use App\Modules\Attendance\Application\Services\AttendanceAuthorizationService;
 use App\Modules\Attendance\Application\Services\AttendanceHistoryReadService;
 use Carbon\Carbon;
+use Illuminate\Contracts\View\View;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -95,7 +96,7 @@ class AttendanceHistoryLog extends Component
         $this->expandedId = $this->expandedId === $id ? null : $id;
     }
 
-    public function render()
+    public function render(): View
     {
         /** @var AttendanceHistoryReadService $service */
         $service = app(AttendanceHistoryReadService::class);

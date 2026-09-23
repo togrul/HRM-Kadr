@@ -10,6 +10,7 @@ use App\Services\StructurePathService;
 use App\Support\Translations\ModuleTranslation;
 use App\Traits\NestedStructureTrait;
 use Carbon\Carbon;
+use Illuminate\Contracts\View\View;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -59,7 +60,7 @@ class PuantajGrid extends Component
         $this->resetPage();
     }
 
-    public function render()
+    public function render(): View
     {
         $from = Carbon::createFromDate($this->year, $this->month, 1)->startOfMonth();
         $to = $from->copy()->endOfMonth();

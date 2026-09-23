@@ -7,6 +7,7 @@ use App\Modules\Attendance\Application\Services\AttendanceManagerSummaryReadServ
 use App\Modules\Attendance\Application\Services\AttendanceStructureScopeReadService;
 use App\Services\StructurePathService;
 use App\Traits\NestedStructureTrait;
+use Illuminate\Contracts\View\View;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -61,7 +62,7 @@ class AttendanceManagerSummary extends Component
         $this->refreshTotals($readService);
     }
 
-    public function render()
+    public function render(): View
     {
         $structureIds = $this->selectedStructureId
             ? $this->getNestedStructure($this->selectedStructureId)

@@ -13,6 +13,7 @@ use App\Modules\Attendance\Application\Services\AttendanceManualMetricsResolverS
 use App\Modules\Attendance\Application\Services\AttendanceStructureScopeReadService;
 use App\Services\StructurePathService;
 use App\Traits\NestedStructureTrait;
+use Illuminate\Contracts\View\View;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -283,7 +284,7 @@ class ManualEntries extends Component
         $this->dispatch('notify', type: 'success', message: __('attendance::manual_entries.messages.rejected'));
     }
 
-    public function getRecentEntriesProperty()
+    public function getRecentEntriesProperty(): LengthAwarePaginator
     {
         return $this->recentEntries();
     }
@@ -522,7 +523,7 @@ class ManualEntries extends Component
         });
     }
 
-    public function render()
+    public function render(): View
     {
         if ($this->selectedPersonnelRecord && ! $this->selectedPersonnel) {
             $this->selectedPersonnel = [

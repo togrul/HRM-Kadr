@@ -7,6 +7,7 @@ use App\Modules\Attendance\Application\Services\AttendanceDailyMonitorReadServic
 use App\Modules\Attendance\Application\Services\AttendanceStructureScopeReadService;
 use App\Services\StructurePathService;
 use App\Traits\NestedStructureTrait;
+use Illuminate\Contracts\View\View;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -54,7 +55,7 @@ class DailyMonitor extends Component
         $this->resetPage();
     }
 
-    public function render()
+    public function render(): View
     {
         $structureIds = $this->selectedStructureId
             ? $this->getNestedStructure($this->selectedStructureId)

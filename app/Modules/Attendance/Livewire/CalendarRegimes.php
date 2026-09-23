@@ -8,6 +8,7 @@ use App\Models\Structure;
 use App\Modules\Attendance\Application\Services\AttendanceAuthorizationService;
 use App\Modules\Attendance\Application\Services\AttendanceCalendarManagementService;
 use App\Support\Translations\ModuleTranslation;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\Rule;
@@ -163,7 +164,7 @@ class CalendarRegimes extends Component
         $this->resetForm();
     }
 
-    public function render()
+    public function render(): View
     {
         $structures = collect($this->resolveStructures());
         $structureNames = $structures

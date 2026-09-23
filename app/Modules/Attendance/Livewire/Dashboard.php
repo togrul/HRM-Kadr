@@ -7,6 +7,7 @@ use App\Modules\Attendance\Application\Services\AttendanceOverviewService;
 use App\Modules\Attendance\Application\Services\AttendanceStructureScopeReadService;
 use App\Support\Livewire\InteractsWithTabbedWorkspace;
 use Carbon\Carbon;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -168,7 +169,7 @@ class Dashboard extends Component
         return array_values(array_intersect(self::ALLOWED_TABS, $tabs));
     }
 
-    public function render()
+    public function render(): View
     {
         return view('attendance::livewire.attendance.dashboard');
     }

@@ -9,6 +9,7 @@ use App\Modules\Attendance\Application\Services\AttendanceStructureScopeReadServ
 use App\Services\StructurePathService;
 use App\Traits\NestedStructureTrait;
 use Carbon\Carbon;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -147,7 +148,7 @@ class ExceptionsInbox extends Component
         $this->dispatch('notify', type: 'success', message: __('attendance::exceptions.messages.reopened'));
     }
 
-    public function render()
+    public function render(): View
     {
         $structureIds = $this->selectedStructureId
             ? $this->getNestedStructure($this->selectedStructureId)
