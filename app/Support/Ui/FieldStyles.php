@@ -22,14 +22,14 @@ final class FieldStyles
     /** Single-line control (input). */
     public static function input(string $extra = ''): string
     {
-        return self::merge(self::BASE.' h-10 px-3 text-[14px]', $extra);
+        return self::merge(self::BASE.' h-10 px-3 text-base sm:text-sm', $extra);
     }
 
     /** Native select — chevron drawn by the component, so the right padding is reserved. */
     public static function select(string $extra = ''): string
     {
         return self::merge(
-            self::BASE.' h-10 appearance-none bg-none px-3 pr-9 text-[14px] [&::-ms-expand]:hidden',
+            self::BASE.' h-10 appearance-none bg-none px-3 pr-9 text-base sm:text-sm [&::-ms-expand]:hidden',
             $extra
         );
     }
@@ -37,7 +37,7 @@ final class FieldStyles
     /** Multi-line control (textarea). */
     public static function textarea(string $extra = ''): string
     {
-        return self::merge(self::BASE.' px-3 py-2.5 text-[14px] leading-relaxed', $extra);
+        return self::merge(self::BASE.' px-3 py-2.5 text-base leading-relaxed sm:text-sm', $extra);
     }
 
     private static function merge(string $classes, string $extra): string

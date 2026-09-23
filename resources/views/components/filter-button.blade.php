@@ -6,7 +6,7 @@
 
 <button
     {{ $attributes->class([
-        'inline-flex relative items-center justify-center rounded-[10px] h-9 w-9 border border-hairline transition',
+        'inline-flex relative items-center justify-center rounded-[10px] h-10 w-10 border border-hairline transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 focus-visible:ring-offset-2',
         'bg-[#f4f4f5] text-ink border-transparent' => count($filters) > 0,
         'bg-white text-ink-soft hover:border-zinc-300 hover:bg-[#fafafa] hover:text-ink' => count($filters) === 0,
     ])->merge([

@@ -10,7 +10,7 @@
 
     @if($isAdded)
         <div wire:transition class="relative my-3 rounded-2xl border border-zinc-200 bg-zinc-50 p-5 shadow-sm">
-            <button class="absolute right-4 top-4 appearance-none" wire:click="closeCrud()">
+            <button type="button" class="absolute right-4 top-4 appearance-none flex h-10 w-10 items-center justify-center rounded-lg text-ink-muted hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400" aria-label="{{ __('admin::references.actions.close') }}" title="{{ __('admin::references.actions.close') }}" wire:click="closeCrud()">
                 <x-icons.close-icon></x-icons.close-icon>
             </button>
 

@@ -29,7 +29,7 @@
 
     @if ($isAdded)
         <div wire:transition class="flex border border-gray-300 rounded-md bg-slate-50 relative px-3 py-2 my-3">
-            <button class="appearance-none absolute top-2 right-2" wire:click="closeCrud()">
+            <button type="button" class="appearance-none absolute top-2 right-2 flex h-10 w-10 items-center justify-center rounded-lg text-ink-muted hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400" aria-label="{{ __('admin::references.actions.close') }}" title="{{ __('admin::references.actions.close') }}" wire:click="closeCrud()">
                 <x-icons.close-icon></x-icons.close-icon>
             </button>
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-2 mt-4 w-full">
@@ -118,13 +118,13 @@
 
                                 <x-table.td :isButton="true" width="100">
                                     <div class="flex items-center space-x-2">
-                                        <button wire:click.prevent="openCrud({{ $type->id }})"
-                                            class="appearance-none flex items-center justify-center w-8 h-8 text-xs font-medium uppercase rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-700">
+                                        <button type="button" wire:click.prevent="openCrud({{ $type->id }})"
+                                            class="appearance-none flex items-center justify-center w-10 h-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 text-xs font-medium uppercase rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-700">
                                             <x-icons.edit-icon color="text-slate-400"
                                                 hover="text-slate-500"></x-icons.edit-icon>
                                         </button>
-                                        <button wire:click.prevent = "deleteModel({{ $type->id }})"
-                                            class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-100 hover:text-gray-700">
+                                        <button type="button" wire:click.prevent = "deleteModel({{ $type->id }})"
+                                            class="flex items-center justify-center w-10 h-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-100 hover:text-gray-700">
                                             <x-icons.delete-icon color="text-rose-500"
                                                 hover="text-rose-600"></x-icons.delete-icon>
                                         </button>

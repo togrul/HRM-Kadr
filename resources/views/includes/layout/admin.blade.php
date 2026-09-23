@@ -21,7 +21,7 @@
                     href="{{ $route }}"
                     wire:navigate
                     @class([
-                        'hrm-icon flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-[13px] transition',
+                        'hrm-icon flex min-h-10 items-center gap-2.5 rounded-xl px-2.5 py-2 text-[14px] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white',
                         'bg-white text-ink font-semibold' => $active,
                         'text-white/60 hover:bg-white/10 hover:text-white' => ! $active,
                     ])
@@ -33,14 +33,14 @@
         </nav>
 
         <div class="mt-4 space-y-2 border-t border-white/10 pt-4">
-            <a href="{{ route('home') }}" wire:navigate class="hrm-icon flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-[13px] text-white/60 transition hover:bg-white/10 hover:text-white">
+            <a href="{{ route('home') }}" wire:navigate class="hrm-icon flex min-h-10 items-center gap-2.5 rounded-xl px-2.5 py-2 text-[14px] text-white/60 transition hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">
                 <x-icons.shutdown-icon size="w-[17px] h-[17px]" color="text-current" hover="text-current" />
                 <span>{{ __('ui::common.labels.return_to_dashboard') }}</span>
             </a>
 
             <div class="rounded-xl bg-white/5 px-3 py-2.5">
-                <p class="truncate text-[12.5px] font-medium text-white">{{ Auth::user()?->name }}</p>
-                <p class="truncate text-[11px] text-white/40">{{ Auth::user()?->email }}</p>
+                <p class="truncate text-[14px] font-medium text-white">{{ Auth::user()?->name }}</p>
+                <p class="truncate text-[12px] text-white/60">{{ Auth::user()?->email }}</p>
             </div>
         </div>
     </aside>
@@ -48,7 +48,7 @@
     {{-- compact admin bar for small screens: the sidebar above is desktop-only --}}
     <div class="flex min-w-0 flex-1 flex-col gap-2">
         <nav class="hrm-scroll flex items-center gap-1.5 overflow-x-auto rounded-2xl border border-hairline bg-white px-2 py-2 lg:hidden">
-            <a href="{{ route('home') }}" wire:navigate class="shrink-0 rounded-[10px] border border-hairline px-2.5 py-1.5 text-[12px] text-ink-muted">
+            <a href="{{ route('home') }}" wire:navigate class="flex min-h-10 shrink-0 items-center rounded-[10px] border border-hairline px-3 text-[14px] text-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400">
                 {{ __('ui::common.labels.return_to_dashboard') }}
             </a>
             @foreach (config('admin.menu_items') as $menuItem)
@@ -58,7 +58,7 @@
                     href="{{ \App\Support\Navigation\MenuPresentation::route($menuItem['route']) }}"
                     wire:navigate
                     @class([
-                        'shrink-0 rounded-[10px] px-2.5 py-1.5 text-[12px] transition',
+                        'flex min-h-10 shrink-0 items-center rounded-[10px] px-3 text-[14px] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400',
                         'bg-ink text-white' => $active,
                         'text-ink-muted hover:bg-[#fafafa]' => ! $active,
                     ])

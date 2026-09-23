@@ -8,12 +8,7 @@
 ])
 
 @php
-     $extraClass = match($mode)
-     {
-          'default' => 'bg-white',
-          'gray' => "bg-neutral-100"
-     };
-     $isError = $errors->has($name)?'bg-red-50':'';
+     $isError = $errors->has($name) ? 'border-rose-300 bg-rose-50' : '';
 
      $format = "Y-MM-DD" ? 'DD.MM.Y' : $format;
      $currentYear = \Carbon\Carbon::now()->format('Y');
@@ -36,7 +31,8 @@
           yearRange: 100,
           onSelect: function (date) { $el.value = moment(date.toString()).format('{{ $format }}'); }
          }), $el)"
-    {{ $disabled ? 'disabled' : '' }}
-    {!! $attributes->merge(['class' => "block border-none font-normal w-full mt-1 px-3 py-2 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition duration-100 ease-in-out transform {$extraClass} {$isError} "]) !!}
+    @disabled($disabled)
+    @if ($errors->has($name)) aria-invalid="true" @endif
+    {!! $attributes->merge(['class' => \App\Support\Ui\FieldStyles::input(trim('mt-1 block '.$isError))]) !!}
 
 >

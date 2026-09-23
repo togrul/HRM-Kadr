@@ -92,7 +92,7 @@
         x-show="isOpen && positioned && !isDisabled" x-transition.opacity.duration.100ms x-cloak
         :class="openUp ? 'origin-bottom' : 'origin-top'"
         :style="panelStyles"
-        class="hrm-scroll fixed z-[9999] space-y-0.5 overflow-auto rounded-xl border border-hairline bg-white p-1 text-[12.5px] shadow-overlay focus:outline-none"
+        class="hrm-scroll fixed z-[9999] space-y-0.5 overflow-auto rounded-xl border border-hairline bg-white p-1 text-[14px] shadow-overlay focus:outline-none"
       >
         {{-- slot: search input --}}
         @if ($searchModel)

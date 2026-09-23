@@ -8,6 +8,7 @@ export default {
         './resources/**/*.{blade.php,js,vue}',
         './app/Livewire/**/*.php',
         './app/View/Components/**/*.php',
+        './app/Support/Ui/**/*.php',
         './app/Modules/**/*.php',
         './app/Modules/**/*.blade.php',
     ],
