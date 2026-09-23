@@ -7,6 +7,7 @@ use App\Modules\Reports\Application\Services\ReportsAccessService;
 use App\Modules\Reports\Application\Services\ReportsStructureScopeService;
 use App\Modules\Reports\Application\Services\StandardReportService;
 use App\Modules\Reports\Exports\ReportsTableExport;
+use Illuminate\Contracts\View\View;
 use Livewire\Component;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -130,7 +131,7 @@ class Dashboard extends Component
         );
     }
 
-    public function render()
+    public function render(): View
     {
         return view('reports::livewire.reports.dashboard');
     }
