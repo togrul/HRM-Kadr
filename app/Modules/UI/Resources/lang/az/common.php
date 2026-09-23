@@ -31,7 +31,7 @@ return [
         'search' => 'Axtarış',
         'admin_panel' => 'İdarəçi paneli',
         'command_palette' => 'Sürətli keçid',
-        'command_palette_hint' => 'Modul axtarın və ya sürətli keçid seçin',
+        'command_palette_hint' => 'Əməkdaş, modul və ya əməliyyat axtarın',
         'modules' => 'Modullar',
         'no_results' => 'Nəticə tapılmadı',
         'collapse_panel' => 'Paneli bağla',
@@ -61,5 +61,18 @@ return [
         'title' => 'Şərh əlavə et',
         'save' => 'Yadda saxla',
         'label' => 'Şərh',
+    ],
+    'palette' => [
+        'people' => 'Əməkdaşlar',
+        'actions_title' => 'Əməliyyatlar',
+        'searching' => 'Axtarılır…',
+        'left' => 'İşdən ayrılıb',
+        'hint_navigate' => 'keçid',
+        'hint_open' => 'aç',
+        'actions' => [
+            'new_personnel' => 'Yeni əməkdaş',
+            'new_order' => 'Yeni əmr',
+            'new_leave' => 'İcazə əlavə et',
+        ],
     ],
 ];

@@ -278,6 +278,11 @@ class AllPersonnel extends Component
         $this->authorize('viewAny', Personnel::class);
         $this->fillFilter();
         $this->filters = $this->getSafeFilterPayload();
+
+        // Deep link from the command palette / quick links: land with the form open.
+        if (request()->boolean('create') && (auth()->user()?->can('add-personnels') ?? false)) {
+            $this->openSideMenu('add-personnel');
+        }
     }
 
     public function canEditPersonnels(): bool

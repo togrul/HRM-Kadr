@@ -187,6 +187,11 @@ class Leaves extends Component
         $this->status = request()->query('status', 'all');
         $this->filter = LeaveFilterData::make();
         $this->search = LeaveFilterData::make();
+
+        // Deep link from the command palette / quick links: land with the form open.
+        if (request()->boolean('create') && (auth()->user()?->can('create', \App\Models\Leave::class) ?? false)) {
+            $this->openAddLeaveModal();
+        }
     }
 
     /**

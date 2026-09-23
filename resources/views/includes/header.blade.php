@@ -178,6 +178,25 @@
         ->filter(static fn ($menu) => $menu->permissionName === null || auth()->user()?->can($menu->permissionName))
         ->values();
 
+    // Palette commands: the everyday "create" jobs, each deep-linking to a page that opens
+    // its form on arrival. Gated here for the same reason as $paletteMenus.
+    $paletteActions = collect([
+        ['module' => 'personnel', 'route' => 'personnel.index', 'can' => 'add-personnels', 'label' => __('ui::common.palette.actions.new_personnel'), 'icon' => 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M19 8v6M22 11h-6'],
+        ['module' => 'orders', 'route' => 'orders', 'can' => 'add-orders', 'label' => __('ui::common.palette.actions.new_order'), 'icon' => 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M12 18v-6M9 15h6'],
+        ['module' => 'leaves', 'route' => 'leaves', 'can' => 'add-leaves', 'label' => __('ui::common.palette.actions.new_leave'), 'icon' => 'M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2M12 14v4M10 16h4'],
+    ])
+        ->filter(static fn (array $action): bool => $moduleState->enabled($action['module'])
+            && \Illuminate\Support\Facades\Route::has($action['route'])
+            && (auth()->user()?->can($action['can']) ?? false))
+        ->map(static fn (array $action): array => [
+            'label' => $action['label'],
+            'icon' => $action['icon'],
+            'url' => route($action['route'], ['create' => 1]),
+        ])
+        ->values();
+
+    $paletteCanSearchPeople = $moduleState->enabled('personnel') && (auth()->user()?->can('show-personnels') ?? false);
+
     $pinnedMenus = $preparedMenus->take(5);
     $otherMenus = $preparedMenus->slice(5)->values();
 @endphp
@@ -383,4 +402,4 @@
     </div>
 </aside>
 
-<x-command-palette :menus="$paletteMenus" />
+<x-command-palette :menus="$paletteMenus" :actions="$paletteActions" :search-people="$paletteCanSearchPeople" />

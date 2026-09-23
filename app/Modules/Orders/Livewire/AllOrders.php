@@ -377,6 +377,11 @@ class AllOrders extends Component
         $this->fillFilter();
         $this->selectedOrder = $this->selectedOrder ?? request()->query('selectedOrder');
         $this->accessibleStructureIds = $structureService->getAccessibleStructures();
+
+        // Deep link from the command palette / quick links: land with the composer open.
+        if (request()->boolean('create') && (auth()->user()?->can('add-orders') ?? false)) {
+            $this->openSideMenu('order-composer');
+        }
     }
 
     public function render(): View

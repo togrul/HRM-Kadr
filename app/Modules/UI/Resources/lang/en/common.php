@@ -31,7 +31,7 @@ return [
         'search' => 'Search',
         'admin_panel' => 'Admin panel',
         'command_palette' => 'Quick switch',
-        'command_palette_hint' => 'Search a module or pick a quick action',
+        'command_palette_hint' => 'Search people, modules or actions',
         'modules' => 'Modules',
         'no_results' => 'No results found',
         'collapse_panel' => 'Collapse panel',
@@ -61,5 +61,18 @@ return [
         'title' => 'Add comment',
         'save' => 'Save',
         'label' => 'Comment',
+    ],
+    'palette' => [
+        'people' => 'People',
+        'actions_title' => 'Actions',
+        'searching' => 'Searching…',
+        'left' => 'Left',
+        'hint_navigate' => 'navigate',
+        'hint_open' => 'open',
+        'actions' => [
+            'new_personnel' => 'New employee',
+            'new_order' => 'New order',
+            'new_leave' => 'Add leave',
+        ],
     ],
 ];
