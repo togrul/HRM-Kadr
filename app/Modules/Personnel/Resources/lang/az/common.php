@@ -240,9 +240,6 @@ return [
         'completed' => 'Tamamlanıb',
         'in_progress' => 'Aktiv addım',
         'not_completed' => 'Hələ doldurulmayıb',
-        'completed_short' => 'Hazır',
-        'in_progress_short' => 'Aktiv',
-        'not_completed_short' => 'Sonra',
     ],
     'employment' => [
         'contract_type' => [

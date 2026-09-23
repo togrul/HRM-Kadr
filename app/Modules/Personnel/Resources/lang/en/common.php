@@ -240,9 +240,6 @@ return [
         'completed' => 'Completed',
         'in_progress' => 'Current step',
         'not_completed' => 'Not completed',
-        'completed_short' => 'Ready',
-        'in_progress_short' => 'Current',
-        'not_completed_short' => 'Later',
     ],
     'employment' => [
         'contract_type' => [

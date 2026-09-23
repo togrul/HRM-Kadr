@@ -599,37 +599,37 @@
                 <x-validation> {{ $message }} </x-validation>
                 @enderror
             </div>
-            <div class="mx-auto w-40 rounded-lg border border-gray-300 p-1 shadow-sm md:mx-0">
-                <div class="flex flex-col space-y-4">
-                    <div class="flex flex-col mt-2" x-data="{ isUploading: false, progress: 0 }"
-                         x-on:livewire-upload-start="isUploading = true"
-                         x-on:livewire-upload-finish="isUploading = false"
-                         x-on:livewire-upload-error="isUploading = false"
-                         x-on:livewire-upload-progress="progress = $event.detail.progress"
-                    >
-                      <div class="flex flex-col items-center space-y-2">
-                        @if ($avatar)
-                        <img alt="" class="object-cover w-full h-full" src="{{ $avatar->temporaryUrl() }}">
-                        @elseif(!empty($personnelModel) && !empty($personnelPhotoUrl))
-{{--                        <img alt="avatar" class="object-cover w-full h-full" src="{{ asset('/storage/'.$personnelModelData->photo) }}">--}}
-                           <img alt="" class="object-cover w-full h-full" src="{{ $personnelPhotoUrl }}">
-                        @else
-                        <img class="w-full h-full" src="{{ asset('assets/images/id-photo.jpeg') }}" alt="">
-                        @endif
-                        <label
-                          class="ml-2 flex h-10 cursor-pointer items-center rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-[14px] font-medium text-ink-soft transition hover:bg-[#e4e4e7] focus-within:ring-2 focus-within:ring-zinc-400 focus-within:ring-offset-2">
-                          <span class="text-sm leading-normal">{{ __('personnel::common.actions.choose_photo') }}</span>
-                          <input type="file" class="sr-only" wire:model="avatar" />
-                        </label>
-                      </div>
-                      <div x-show="isUploading">
-                        <progress max="100" x-bind:value="progress"></progress>
-                      </div>
-                    </div>
+            <div
+                class="mx-auto w-40 md:mx-0"
+                x-data="{ isUploading: false, progress: 0 }"
+                x-on:livewire-upload-start="isUploading = true"
+                x-on:livewire-upload-finish="isUploading = false"
+                x-on:livewire-upload-error="isUploading = false"
+                x-on:livewire-upload-progress="progress = $event.detail.progress"
+            >
+                {{-- The whole card is the file picker; a neutral silhouette until a photo is chosen. --}}
+                <label class="group relative flex aspect-[3/4] w-full cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden rounded-2xl border border-dashed border-zinc-300 bg-[#fafafa] text-center transition hover:border-ink-muted hover:bg-[#f4f4f5] focus-within:ring-2 focus-within:ring-zinc-400 focus-within:ring-offset-2">
+                    @if ($avatar)
+                        <img alt="" class="absolute inset-0 h-full w-full object-cover" src="{{ $avatar->temporaryUrl() }}">
+                    @elseif (! empty($personnelModel) && ! empty($personnelPhotoUrl))
+                        <img alt="" class="absolute inset-0 h-full w-full object-cover" src="{{ $personnelPhotoUrl }}">
+                    @else
+                        <svg class="h-10 w-10 text-zinc-300 transition group-hover:text-ink-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg>
+                        <span class="px-3 text-[12.5px] font-medium text-ink-soft">{{ __('personnel::common.actions.choose_photo') }}</span>
+                    @endif
 
-                    @error('avatar') <span class="error">{{ $message }}</span> @enderror
-                </div>
+                    @if ($avatar || (! empty($personnelModel) && ! empty($personnelPhotoUrl)))
+                        <span class="absolute inset-x-2 bottom-2 rounded-lg bg-white/90 py-1 text-[12px] font-medium text-ink-soft opacity-0 shadow-card transition group-hover:opacity-100">{{ __('personnel::common.actions.choose_photo') }}</span>
+                    @endif
 
+                    <input type="file" accept="image/*" class="sr-only" wire:model="avatar" />
+
+                    <span x-cloak x-show="isUploading" class="absolute inset-x-3 bottom-3 h-1 overflow-hidden rounded-full bg-hairline">
+                        <span class="block h-full bg-ink transition-all" x-bind:style="`width: ${progress}%`"></span>
+                    </span>
+                </label>
+
+                @error('avatar') <span class="error">{{ $message }}</span> @enderror
             </div>
         </div>
 
