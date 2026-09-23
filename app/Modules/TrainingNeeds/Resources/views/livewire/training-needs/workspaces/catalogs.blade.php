@@ -52,7 +52,7 @@
                         {{ __('training_needs::dashboard.cards.competency_groups') }}
                         <span class="rounded-full bg-zinc-100 px-1.5 py-0.5 text-zinc-600">{{ $groups->total() }}</span>
                     </span>
-                    <input type="search" wire:model.live.debounce.300ms="groupListSearch" placeholder="{{ __('training_needs::dashboard.fields.search') }}" class="h-8 w-36 rounded-lg border border-zinc-200 bg-white px-2.5 text-xs focus:border-blue-400 focus:ring-blue-400">
+                    <input type="search" wire:model.live.debounce.300ms="groupListSearch" placeholder="{{ __('training_needs::dashboard.fields.search') }}" aria-label="{{ __('training_needs::dashboard.fields.search') }}" class="h-10 w-40 rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-base text-ink focus:border-ink focus:ring-[3px] focus:ring-zinc-200 sm:text-sm">
                 </div>
                 <div class="divide-y divide-zinc-100 rounded-lg border border-zinc-100">
                     @forelse ($groups as $group)
@@ -133,7 +133,7 @@
                         {{ __('training_needs::dashboard.cards.competency_levels') }}
                         <span class="rounded-full bg-zinc-100 px-1.5 py-0.5 text-zinc-600">{{ $levels->total() }}</span>
                     </span>
-                    <input type="search" wire:model.live.debounce.300ms="levelListSearch" placeholder="{{ __('training_needs::dashboard.fields.search') }}" class="h-8 w-36 rounded-lg border border-zinc-200 bg-white px-2.5 text-xs focus:border-blue-400 focus:ring-blue-400">
+                    <input type="search" wire:model.live.debounce.300ms="levelListSearch" placeholder="{{ __('training_needs::dashboard.fields.search') }}" aria-label="{{ __('training_needs::dashboard.fields.search') }}" class="h-10 w-40 rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-base text-ink focus:border-ink focus:ring-[3px] focus:ring-zinc-200 sm:text-sm">
                 </div>
                 <div class="divide-y divide-zinc-100 rounded-lg border border-zinc-100">
                     @forelse ($levels as $level)
@@ -221,7 +221,7 @@
                         {{ __('training_needs::dashboard.cards.competencies') }}
                         <span class="rounded-full bg-zinc-100 px-1.5 py-0.5 text-zinc-600">{{ $competencies->total() }}</span>
                     </span>
-                    <input type="search" wire:model.live.debounce.300ms="competencyListSearch" placeholder="{{ __('training_needs::dashboard.fields.search') }}" class="h-8 w-36 rounded-lg border border-zinc-200 bg-white px-2.5 text-xs focus:border-blue-400 focus:ring-blue-400">
+                    <input type="search" wire:model.live.debounce.300ms="competencyListSearch" placeholder="{{ __('training_needs::dashboard.fields.search') }}" aria-label="{{ __('training_needs::dashboard.fields.search') }}" class="h-10 w-40 rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-base text-ink focus:border-ink focus:ring-[3px] focus:ring-zinc-200 sm:text-sm">
                 </div>
                 <div class="divide-y divide-zinc-100 rounded-lg border border-zinc-100">
                     @forelse ($competencies as $competency)
@@ -311,7 +311,7 @@
                         {{ __('training_needs::dashboard.cards.programs') }}
                         <span class="rounded-full bg-zinc-100 px-1.5 py-0.5 text-zinc-600">{{ $programs->total() }}</span>
                     </span>
-                    <input type="search" wire:model.live.debounce.300ms="programListSearch" placeholder="{{ __('training_needs::dashboard.fields.search') }}" class="h-8 w-36 rounded-lg border border-zinc-200 bg-white px-2.5 text-xs focus:border-blue-400 focus:ring-blue-400">
+                    <input type="search" wire:model.live.debounce.300ms="programListSearch" placeholder="{{ __('training_needs::dashboard.fields.search') }}" aria-label="{{ __('training_needs::dashboard.fields.search') }}" class="h-10 w-40 rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-base text-ink focus:border-ink focus:ring-[3px] focus:ring-zinc-200 sm:text-sm">
                 </div>
                 <div class="divide-y divide-zinc-100 rounded-lg border border-zinc-100">
                     @forelse ($programs as $program)

@@ -47,13 +47,13 @@
 
         <x-slot:actions>
             {{-- period control: one pill instead of two labelled form fields --}}
-            <div class="inline-flex h-9 items-center gap-1 rounded-[10px] border border-hairline bg-[#f4f4f5] px-2">
+            <div class="inline-flex h-10 items-center gap-1 rounded-[10px] border border-hairline bg-[#f4f4f5] px-2">
                 <svg class="h-3.5 w-3.5 shrink-0 text-ink-faint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 11h18"/></svg>
                 <label class="sr-only" for="attendance-month">{{ __('attendance::dashboard.filters.month') }}</label>
                 <select
                     id="attendance-month"
                     wire:model.live="month"
-                    class="hrm-num h-7 border-0 bg-transparent py-0 pl-1 pr-5 text-[12.5px] text-ink focus:ring-0"
+                    class="hrm-num h-10 border-0 bg-transparent py-0 pl-1 pr-5 text-base text-ink focus:ring-0 sm:text-sm"
                 >
                     @for ($m = 1; $m <= 12; $m++)
                         <option value="{{ $m }}">{{ str_pad((string) $m, 2, '0', STR_PAD_LEFT) }}</option>
@@ -67,7 +67,7 @@
                     min="2000"
                     max="2100"
                     wire:model.live="year"
-                    class="hrm-num h-7 w-[62px] border-0 bg-transparent px-1 py-0 text-[12.5px] text-ink focus:ring-0"
+                    class="hrm-num h-10 w-20 border-0 bg-transparent px-1 py-0 text-base text-ink focus:ring-0 sm:text-sm"
                 />
             </div>
 

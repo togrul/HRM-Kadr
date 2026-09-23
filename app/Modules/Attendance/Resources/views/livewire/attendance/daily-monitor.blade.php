@@ -67,7 +67,7 @@
                         id="attendance-monitor-date"
                         wire:model.live="date"
                         type="date"
-                        class="hrm-num h-7 border-0 bg-transparent p-0 text-[12.5px] text-ink focus:ring-0"
+                        class="hrm-num h-10 border-0 bg-transparent p-0 text-base text-ink focus:ring-0 sm:text-sm"
                     />
                 </label>
 

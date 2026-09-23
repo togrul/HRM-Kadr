@@ -59,7 +59,7 @@
                     <select
                         wire:model.live="selectedYear"
                         @disabled(! empty($filter['date']['min'] ?? null) || ! empty($filter['date']['max'] ?? null))
-                        class="hrm-num h-[31px] w-full rounded-lg border border-hairline bg-white px-2 text-[12.5px] text-ink focus:border-ink focus:ring-0 disabled:opacity-50"
+                        class="hrm-num h-10 w-full rounded-[10px] border border-hairline bg-white px-3 text-base text-ink focus:border-ink focus:ring-0 disabled:opacity-50 sm:text-sm"
                     >
                         @foreach ($years as $year)
                             <option value="{{ $year }}">{{ $year }}</option>
