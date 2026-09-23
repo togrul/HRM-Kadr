@@ -1,7 +1,5 @@
 @php
-    $normalizeCampaignTitle = static function (string $title): string {
-        return trim((string) preg_replace('/(?:\s*(?:\(surət\)|\(copy\)|\(Surət\)|\(Copy\)))+/iu', '', $title));
-    };
+    $normalizeCampaignTitle = \App\Modules\Notifications\Support\NotificationTitle::normalize(...);
 @endphp
 
 <x-surface-card :title="__('notifications::common.titles.approval_queue')" icon="icons.pending-icon">

@@ -1,9 +1,5 @@
 @php
-    $normalizeDuplicateText = static function (?string $text): string {
-        $text = (string) $text;
-
-        return trim((string) preg_replace('/(?:\s*(?:\(surət\)|\(copy\)|\(Surət\)|\(Copy\)))+/iu', '', $text));
-    };
+    $normalizeDuplicateText = \App\Modules\Notifications\Support\NotificationTitle::normalize(...);
 
     $approvalBadgeClasses = static function (string $status): string {
         return match ($status) {
