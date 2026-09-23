@@ -27,7 +27,7 @@ return [
         [
             'id' => 3,
             'name' => 'ui::menu.items.personal_affairs',
-            'icon' => 'personal-affair-icon',
+            'icon' => 'users-icon',
             'color' => 'zinc',
             'order' => 3,
             'is_active' => 1,
@@ -82,7 +82,7 @@ return [
         [
             'id' => 9,
             'name' => 'ui::menu.items.business_trips',
-            'icon' => 'holiday-icon',
+            'icon' => 'plane-icon',
             'color' => 'zinc',
             'order' => 6,
             'is_active' => 1,

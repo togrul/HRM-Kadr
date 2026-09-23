@@ -1,16 +1,11 @@
 @props([
-    'color' => 'text-gray-700',
-    'hover' => 'text-gray-900',
+    'color' => 'text-zinc-600',
+    'hover' => 'text-zinc-800',
     'size' => 'w-6 h-6',
     'show' => null,
 ])
 
-<x-icons.root animated="true" x-show="{{ $show ?? 'true' }}" :$size :$color :$hover>
-    <g fill="none">
-        <path fill="currentColor" fill-opacity=".25"
-            d="M4 12c0-.943 0-1.414.293-1.707C4.586 10 5.057 10 6 10h12c.943 0 1.414 0 1.707.293c.293.293.293.764.293 1.707v6.038c0 .38 0 .571-.029.74a2 2 0 0 1-1.164 1.49c-.156.07-.341.116-.71.208c-1.238.31-1.857.464-2.476.578c-2.394.44-4.848.44-7.243 0c-.618-.114-1.237-.269-2.474-.578c-.37-.092-.555-.139-.71-.207a2 2 0 0 1-1.165-1.492C4 18.61 4 18.42 4 18.037z" />
-        <path stroke="currentColor" d="M16.5 10V9a4.5 4.5 0 0 0-9 0v1" />
-        <circle cx="12" cy="15" r="2" fill="currentColor" />
-        <path stroke="currentColor" stroke-linecap="round" d="M12 16v2.5" />
-    </g>
+{{-- Module icon set: 24px grid, 1.6 stroke, round caps (Lucide geometry) — one weight across the rail. --}}
+<x-icons.root animated="false" x-show="{{ $show ?? 'true' }}" :$size :$color :$hover>
+    <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></g>
 </x-icons.root>
