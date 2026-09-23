@@ -2,10 +2,11 @@
 
 namespace App\Modules\Staff\Support\Traits;
 
+use App\Livewire\Traits\DropdownConstructTrait;
 use App\Models\Personnel;
 use App\Models\Position;
 use App\Models\Structure;
-use App\Livewire\Traits\DropdownConstructTrait;
+use App\Services\StructurePathService;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -30,10 +31,11 @@ trait StaffCrud
      * Simple per-request caches to avoid repeating lookups.
      */
     protected array $positionLabels = [];
+
     protected array $structureParents = [];
-    protected array $structureNestedIds = [];
-    protected ?array $structureChildrenByParent = null;
+
     protected ?array $allowedStructureIdsCache = null;
+
     protected ?array $allowedPositionIdsCache = null;
 
     public function rules(): array
@@ -301,7 +303,9 @@ trait StaffCrud
             $this->syncRowHidePosition($index);
         }
 
-        $nestedIdsByStructure = $this->buildNestedIdsByStructure($structureIds);
+        $nestedIdsByStructure = collect($structureIds)
+            ->mapWithKeys(fn (int $id): array => [$id => $this->resolveStructureTreeIds($id)])
+            ->all();
         $relevantStructureIds = collect($nestedIdsByStructure)
             ->flatten()
             ->map(fn ($id) => (int) $id)
@@ -369,70 +373,12 @@ trait StaffCrud
         }
     }
 
+    /**
+     * @return list<int>
+     */
     protected function resolveStructureTreeIds(int $structureId): array
     {
-        if (! isset($this->structureNestedIds[$structureId])) {
-            $nested = $this->buildNestedIdsByStructure([$structureId]);
-            $this->structureNestedIds[$structureId] = $nested[$structureId] ?? [$structureId];
-        }
-
-        return $this->structureNestedIds[$structureId];
-    }
-
-    protected function buildNestedIdsByStructure(array $structureIds): array
-    {
-        if (empty($structureIds)) {
-            return [];
-        }
-
-        $childrenByParent = $this->resolveChildrenByParent();
-        $memo = $this->structureNestedIds;
-
-        $collectNestedIds = function (int $id) use (&$collectNestedIds, &$memo, $childrenByParent): array {
-            if (isset($memo[$id])) {
-                return $memo[$id];
-            }
-
-            $ids = [$id];
-            foreach ($childrenByParent[$id] ?? [] as $childId) {
-                $ids = array_merge($ids, $collectNestedIds((int) $childId));
-            }
-
-            return $memo[$id] = array_values(array_unique($ids));
-        };
-
-        $nestedIdsByStructure = [];
-        foreach ($structureIds as $structureId) {
-            $structureId = (int) $structureId;
-            if ($structureId <= 0) {
-                continue;
-            }
-
-            $nestedIdsByStructure[$structureId] = $collectNestedIds($structureId);
-        }
-
-        $this->structureNestedIds = $memo;
-
-        return $nestedIdsByStructure;
-    }
-
-    protected function resolveChildrenByParent(): array
-    {
-        if ($this->structureChildrenByParent !== null) {
-            return $this->structureChildrenByParent;
-        }
-
-        $this->structureChildrenByParent = Structure::query()
-            ->select('id', 'parent_id')
-            ->get()
-            ->reduce(function (array $carry, Structure $structure) {
-                $parentId = (int) ($structure->parent_id ?? 0);
-                $carry[$parentId][] = (int) $structure->id;
-
-                return $carry;
-            }, []);
-
-        return $this->structureChildrenByParent;
+        return app(StructurePathService::class)->descendantIds($structureId) ?: [$structureId];
     }
 
     protected function resolveParentId(int $structureId): ?int
@@ -457,6 +403,7 @@ trait StaffCrud
         if ($field === 'total') {
             $this->recalculateVacant($index, (int) $value);
             $this->syncComputedStaffRows();
+
             return;
         }
 

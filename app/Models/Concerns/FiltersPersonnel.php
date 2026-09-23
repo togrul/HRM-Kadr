@@ -2,7 +2,6 @@
 
 namespace App\Models\Concerns;
 
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
@@ -12,6 +11,8 @@ use Illuminate\Database\Eloquent\Builder;
  */
 trait FiltersPersonnel
 {
+    use NormalizesFilterRanges;
+
     protected $likeFilterFields = [
         'surname', 'name', 'patronymic', 'tabel_no', 'pin',
     ];
@@ -132,53 +133,6 @@ trait FiltersPersonnel
                 }
                 break;
         }
-    }
-
-    protected function filterValueIsEmpty(mixed $value): bool
-    {
-        if (is_array($value)) {
-            foreach ($value as $item) {
-                if (! $this->filterValueIsEmpty($item)) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        if (is_bool($value)) {
-            return false;
-        }
-
-        if (is_string($value)) {
-            return trim($value) === '';
-        }
-
-        return $value === null;
-    }
-
-    protected function normalizeDateRange(array $value, ?string $defaultMin = null, ?string $defaultMax = null): array
-    {
-        $defaultMin ??= '1990-01-01';
-        $defaultMax ??= Carbon::now()->format('Y-m-d');
-
-        $min = $this->normalizeDateValue($value['min'] ?? null, $defaultMin);
-        $max = $this->normalizeDateValue($value['max'] ?? null, $defaultMax);
-
-        if ($min > $max) {
-            [$min, $max] = [$max, $min];
-        }
-
-        return [$min, $max];
-    }
-
-    protected function normalizeDateValue(?string $value, string $fallback): string
-    {
-        if ($value === null || trim($value) === '') {
-            return $fallback;
-        }
-
-        return Carbon::parse($value)->format('Y-m-d');
     }
 
     protected function normalizeNumericRange(array $value, int $defaultMin, int $defaultMax): array

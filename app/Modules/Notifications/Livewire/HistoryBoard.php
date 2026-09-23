@@ -4,6 +4,8 @@ namespace App\Modules\Notifications\Livewire;
 
 use App\Models\NotificationCampaign;
 use App\Modules\Notifications\Livewire\Concerns\InteractsWithNotificationAuthorization;
+use App\Modules\Notifications\Support\NotificationTitle;
+use App\Modules\Notifications\Support\NotificationTriggerRegistry;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -69,8 +71,8 @@ class HistoryBoard extends Component
             ->paginate(6);
 
         $campaigns->getCollection()->transform(function (NotificationCampaign $campaign) {
-            $copyCount = preg_match_all($this->duplicateTitlePattern(), (string) $campaign->title, $matches);
-            $displayTitle = trim((string) preg_replace($this->duplicateTitlePattern(), '', (string) $campaign->title));
+            $copyCount = NotificationTitle::copyCount($campaign->title);
+            $displayTitle = NotificationTitle::normalize($campaign->title);
 
             $campaign->setAttribute('display_title', $displayTitle !== '' ? $displayTitle : $campaign->title);
             $campaign->setAttribute('display_copy_count', $copyCount);
@@ -90,21 +92,6 @@ class HistoryBoard extends Component
         return $campaigns;
     }
 
-    protected function duplicateTitlePattern(): string
-    {
-        $copySuffix = trim((string) __('notifications::common.badges.copy_suffix'));
-        $copyLabel = trim((string) __('notifications::common.badges.copy_label'));
-
-        $parts = array_filter([
-            preg_quote($copySuffix, '/'),
-            '\('.preg_quote($copyLabel, '/').'\)',
-            '\(surət\)',
-            '\(copy\)',
-        ]);
-
-        return '/(?:\s*(?:'.implode('|', $parts).'))/iu';
-    }
-
     public function placeholder()
     {
         return view('notification::livewire.notification.placeholders.settings-panel');
@@ -114,14 +101,7 @@ class HistoryBoard extends Component
     {
         return view('notification::livewire.notification.history-board', [
             'campaigns' => $this->campaigns,
-            'categoryLabels' => [
-                'birthday' => __('notifications::common.categories.birthday'),
-                'position_change' => __('notifications::common.categories.position_change'),
-                'holiday' => __('notifications::common.categories.holiday'),
-                'announcement' => __('notifications::common.categories.announcement'),
-                'training_result' => __('notifications::common.categories.training_result'),
-                'leave_status' => __('notifications::common.categories.leave_status'),
-            ],
+            'categoryLabels' => NotificationTriggerRegistry::campaignCategoryLabels(),
         ]);
     }
 }

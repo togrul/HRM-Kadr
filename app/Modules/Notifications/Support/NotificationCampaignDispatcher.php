@@ -20,26 +20,6 @@ use Throwable;
 
 class NotificationCampaignDispatcher
 {
-    protected function duplicateTitlePattern(): string
-    {
-        $copySuffix = trim((string) __('notifications::common.badges.copy_suffix'));
-        $copyLabel = trim((string) __('notifications::common.badges.copy_label'));
-
-        $parts = array_filter([
-            preg_quote($copySuffix, '/'),
-            '\('.preg_quote($copyLabel, '/').'\)',
-            '\(surət\)',
-            '\(copy\)',
-        ]);
-
-        return '/(?:\s*(?:'.implode('|', $parts).'))+$/iu';
-    }
-
-    protected function baseDuplicateTitle(string $title): string
-    {
-        return trim((string) preg_replace($this->duplicateTitlePattern(), '', $title));
-    }
-
     public function __construct(
         protected NotificationAudienceResolver $audienceResolver,
         protected NotificationTemplateRenderer $templateRenderer,
@@ -354,7 +334,7 @@ class NotificationCampaignDispatcher
             'category' => $campaign->category,
             'trigger' => $campaign->trigger,
             'template_id' => $campaign->template_id,
-            'title' => $this->baseDuplicateTitle($campaign->title),
+            'title' => NotificationTitle::normalize($campaign->title, trailingOnly: true),
             'channel' => $campaign->channel,
             'audience_config' => $campaign->audience_config,
             'payload' => $campaign->payload,
@@ -367,7 +347,7 @@ class NotificationCampaignDispatcher
             'created_by' => auth()->id(),
         ]);
 
-        $this->logCampaignAction($copy, 'duplicated', __('notifications::common.helpers.duplicated_from', ['title' => $this->baseDuplicateTitle($campaign->title)]));
+        $this->logCampaignAction($copy, 'duplicated', __('notifications::common.helpers.duplicated_from', ['title' => NotificationTitle::normalize($campaign->title, trailingOnly: true)]));
 
         if ($dispatchNow) {
             $copy->update([

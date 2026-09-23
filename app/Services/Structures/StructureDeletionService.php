@@ -3,6 +3,7 @@
 namespace App\Services\Structures;
 
 use App\Models\Structure;
+use App\Services\StructurePathService;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -77,33 +78,14 @@ class StructureDeletionService
     }
 
     /**
-     * The structure id plus every descendant id (children, grandchildren, …), resolved
-     * in memory from a single query — the structures table is small.
+     * The structure id plus every descendant id (children, grandchildren, …). An unknown
+     * id still resolves to itself, so the dependency checks run against it.
      *
      * @return array<int,int>
      */
     public function descendantIds(int $structureId): array
     {
-        $childrenByParent = Structure::query()
-            ->get(['id', 'parent_id'])
-            ->groupBy('parent_id');
-
-        $ids = [];
-        $stack = [$structureId];
-
-        while ($stack !== []) {
-            $current = (int) array_pop($stack);
-            if (in_array($current, $ids, true)) {
-                continue;
-            }
-            $ids[] = $current;
-
-            foreach ($childrenByParent->get($current, collect()) as $child) {
-                $stack[] = (int) $child->id;
-            }
-        }
-
-        return $ids;
+        return app(StructurePathService::class)->descendantIds($structureId) ?: [$structureId];
     }
 
     /**

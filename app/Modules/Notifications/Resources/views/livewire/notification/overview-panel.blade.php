@@ -11,9 +11,7 @@
     $displayTrigger = static function (?string $trigger): string {
         return $trigger ? __('notifications::common.triggers.'.$trigger) : '—';
     };
-    $normalizeCampaignTitle = static function (string $title): string {
-        return trim((string) preg_replace('/(?:\s*(?:\(surət\)|\(copy\)|\(Surət\)|\(Copy\)))+/iu', '', $title));
-    };
+    $normalizeCampaignTitle = \App\Modules\Notifications\Support\NotificationTitle::normalize(...);
     $fallbackPreviewText = __('notifications::common.flows.not_created');
 @endphp
 
