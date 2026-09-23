@@ -9,6 +9,7 @@ use App\Support\Permissions\PermissionDescriptionCatalog;
 use App\Support\Permissions\PermissionTranslationKey;
 use App\Support\Permissions\RoleTranslation;
 use App\Support\Translations\ModuleTranslation;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -46,7 +47,7 @@ class SetPermission extends Component
 
     public string $permissionSearch = '';
 
-    public function mount()
+    public function mount(): void
     {
         $this->initializeProperties();
         $this->loadRoleData();
@@ -69,7 +70,7 @@ class SetPermission extends Component
         ]);
     }
 
-    public function store()
+    public function store(): void
     {
         DB::transaction(function () {
             $this->updateRoleData();
@@ -134,7 +135,7 @@ class SetPermission extends Component
         $this->permissionStructureList = $this->normalizeIdList($this->permissionStructureList, $this->structureIdPool);
     }
 
-    public function render()
+    public function render(): View
     {
         return view('services::livewire.services.roles.set-permission', [
             'permissions' => $this->filteredPermissionGroups(),

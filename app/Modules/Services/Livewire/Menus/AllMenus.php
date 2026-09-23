@@ -6,6 +6,7 @@ use App\Livewire\Traits\SideModalAction;
 use App\Models\Menu;
 use App\Modules\Services\Livewire\Concerns\AuthorizesSettingsAccess;
 use App\Support\Navigation\MenuPresentation;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -26,12 +27,12 @@ class AllMenus extends Component
         return MenuPresentation::iconComponent($menu);
     }
 
-    public function setDeleteMenu($menuId)
+    public function setDeleteMenu($menuId): void
     {
         $this->dispatch('setDeleteMenu', $menuId);
     }
 
-    public function render()
+    public function render(): View
     {
         $_menus = Menu::all();
 

@@ -3,6 +3,7 @@
 namespace App\Modules\Services\Livewire\Roles;
 
 use App\Modules\Services\Livewire\Concerns\AuthorizesSettingsAccess;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\On;
@@ -89,7 +90,7 @@ class Permissions extends Component
         $this->resetErrorBag();
     }
 
-    public function setDeletePermission($permissionId)
+    public function setDeletePermission($permissionId): void
     {
         $this->dispatch('setDeletePermission', $permissionId);
     }
@@ -104,7 +105,7 @@ class Permissions extends Component
         $this->resetPage();
     }
 
-    private function resetInputFields()
+    private function resetInputFields(): void
     {
         $this->permission_name = '';
         $this->permission_description = '';
@@ -198,7 +199,7 @@ class Permissions extends Component
             ->implode('');
     }
 
-    public function render()
+    public function render(): View
     {
         $permissions = Permission::query()
             ->select('id', 'name', 'description')

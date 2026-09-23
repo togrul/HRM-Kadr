@@ -4,6 +4,7 @@ namespace App\Modules\Services\Livewire\Menus;
 
 use App\Models\Menu;
 use App\Modules\Services\Livewire\Concerns\AuthorizesSettingsAccess;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
@@ -18,7 +19,7 @@ class DeleteMenu extends Component
     public ?int $menuId = null;
 
     #[On('setDeleteMenu')]
-    public function setDeleteMenu($menuId)
+    public function setDeleteMenu($menuId): void
     {
         $menu = Menu::query()
             ->select('id')
@@ -37,7 +38,7 @@ class DeleteMenu extends Component
         $this->dispatch('deleteMenuWasSet');
     }
 
-    public function deleteMenu()
+    public function deleteMenu(): void
     {
         if (! $this->menuId) {
             return;
@@ -62,7 +63,7 @@ class DeleteMenu extends Component
         $this->dispatch('menuWasDeleted', __('services::menus.messages.deleted'));
     }
 
-    public function render()
+    public function render(): View
     {
         return view('services::livewire.services.menus.delete-menu');
     }

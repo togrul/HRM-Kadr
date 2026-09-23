@@ -10,6 +10,8 @@ use App\Modules\Services\Livewire\Concerns\AuthorizesSettingsAccess;
 use App\Services\Chief\ChiefResolver;
 use App\Support\Language\AzerbaijaniDateFormatter;
 use App\Support\Translations\ModuleTranslation;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -80,7 +82,7 @@ class SettingsList extends Component
         $this->loadChiefGovernance();
     }
 
-    public function updatedSetting($value, $name)
+    public function updatedSetting($value, $name): void
     {
         // Only the value is editable; a crafted update to `setting.N.id` must not write.
         if (! str_ends_with((string) $name, '.value')) {
@@ -96,7 +98,7 @@ class SettingsList extends Component
         $this->dispatch('settingsUpdated', __('services::settings.messages.saved'));
     }
 
-    public function setDeleteSettings($settingsId)
+    public function setDeleteSettings($settingsId): void
     {
         $this->dispatch('setDeleteSettings', $settingsId);
     }
@@ -296,7 +298,7 @@ class SettingsList extends Component
         ];
     }
 
-    public function render()
+    public function render(): View
     {
         $settings = collect();
 
@@ -456,7 +458,7 @@ class SettingsList extends Component
             ->all();
     }
 
-    private function activeChiefDelegations()
+    private function activeChiefDelegations(): Collection
     {
         return ChiefDelegation::query()
             ->with(['chief:id,surname,name,patronymic', 'delegate:id,surname,name,patronymic'])

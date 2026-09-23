@@ -4,6 +4,7 @@ namespace App\Modules\Services\Livewire\Settings;
 
 use App\Models\Setting;
 use App\Modules\Services\Livewire\Concerns\AuthorizesSettingsAccess;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
@@ -18,7 +19,7 @@ class DeleteSettings extends Component
     public ?int $settingId = null;
 
     #[On('setDeleteSettings')]
-    public function setDeleteSettings($settingId)
+    public function setDeleteSettings($settingId): void
     {
         $setting = Setting::query()
             ->select('id')
@@ -37,7 +38,7 @@ class DeleteSettings extends Component
         $this->dispatch('deleteSettingsWasSet');
     }
 
-    public function deleteSetting()
+    public function deleteSetting(): void
     {
         if (! $this->settingId) {
             return;
@@ -62,7 +63,7 @@ class DeleteSettings extends Component
         $this->dispatch('settingsWasDeleted', __('services::settings.messages.deleted'));
     }
 
-    public function render()
+    public function render(): View
     {
         return view('services::livewire.services.settings.delete-settings');
     }

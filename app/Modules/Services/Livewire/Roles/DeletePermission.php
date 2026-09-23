@@ -3,6 +3,7 @@
 namespace App\Modules\Services\Livewire\Roles;
 
 use App\Modules\Services\Livewire\Concerns\AuthorizesSettingsAccess;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
@@ -18,7 +19,7 @@ class DeletePermission extends Component
     public ?int $permissionId = null;
 
     #[On('setDeletePermission')]
-    public function setDeletePermission($permissionId)
+    public function setDeletePermission($permissionId): void
     {
         $permission = Permission::query()
             ->select('id')
@@ -37,7 +38,7 @@ class DeletePermission extends Component
         $this->dispatch('deletePermissionWasSet');
     }
 
-    public function deletePermission()
+    public function deletePermission(): void
     {
         if (! $this->permissionId) {
             return;
@@ -62,7 +63,7 @@ class DeletePermission extends Component
         $this->dispatch('permissionWasDeleted', __('services::roles.messages.permission_deleted'));
     }
 
-    public function render()
+    public function render(): View
     {
         return view('services::livewire.services.roles.delete-permission');
     }

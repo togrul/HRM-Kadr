@@ -6,6 +6,7 @@ use App\Livewire\Forms\RankForm;
 use App\Livewire\Traits\DropdownConstructTrait;
 use App\Models\RankCategory;
 use App\Modules\Services\Livewire\Concerns\AuthorizesSettingsAccess;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -20,13 +21,13 @@ class AddRank extends Component
 
     public RankForm $form;
 
-    public function mount()
+    public function mount(): void
     {
         // $this->authorize('manage-settings',$this->rank);
         $this->title = __('services::ranks.titles.add');
     }
 
-    public function store()
+    public function store(): void
     {
         $this->form->create();
 
@@ -49,7 +50,7 @@ class AddRank extends Component
         );
     }
 
-    public function render()
+    public function render(): View
     {
         return view('services::livewire.services.ranks.add-rank');
     }
