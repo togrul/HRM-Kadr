@@ -10,14 +10,22 @@ use App\Models\PersonnelVacation;
 use App\Models\User;
 use App\Support\Database\InstalledTables;
 use Carbon\CarbonImmutable;
+use Closure;
 use Illuminate\Contracts\Auth\Access\Authorizable;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 /**
  * Landing dashboard reads. Every block is permission-gated and skipped entirely
  * when the viewer cannot see it, so an unprivileged home page costs no queries.
+ *
+ * Freshness per block:
+ * - attention tiles (pending queues, expiring documents): live, the viewer acts on them;
+ * - today rail: queue rows reuse the live tiles, birthdays / leaves starting are cached;
+ * - attendance week, recent activity, structure coverage: cached for a minute and
+ *   rendered in lazy islands, so they never hold up the first paint.
  *
  * Cross-module data is read through the shared `App\Models` tables only — the same
  * seam ReportsOverviewService uses — so no module boundary is crossed.
@@ -38,27 +46,20 @@ class HomeOverviewService
     ];
 
     /**
-     * @return array<string,mixed>
+     * Seconds a slightly stale aggregate may be served from cache. Only blocks nobody
+     * acts on from the landing page use it; the pending queues stay live.
      */
-    public function payload(?Authorizable $viewer): array
-    {
-        $attention = $this->attention($viewer);
-
-        return [
-            'attention' => $attention,
-            'today' => $this->today($viewer, $attention),
-            'attendance_week' => $this->can($viewer, 'show-attendance') ? $this->attendanceWeek() : [],
-            'activity' => $this->can($viewer, 'show-audit-logs') ? $this->recentActivity() : [],
-            'structure_fill' => $this->can($viewer, 'show-staff') ? $this->structureFill() : [],
-        ];
-    }
+    private const CACHE_TTL_SECONDS = 60;
 
     /**
      * The four "needs attention" tiles, in the order the design lays them out.
      *
+     * Always live: these are the queues the viewer works off, so a count must drop the
+     * moment they approve something and come back.
+     *
      * @return list<array<string,mixed>>
      */
-    private function attention(?Authorizable $viewer): array
+    public function attention(?Authorizable $viewer): array
     {
         $tiles = [
             [
@@ -164,21 +165,33 @@ class HomeOverviewService
      */
     private function expiringDocuments(): array
     {
-        $threshold = CarbonImmutable::today()->addDays(self::EXPIRY_WINDOW_DAYS)->toDateString();
-        $total = 0;
+        if (! InstalledTables::has('personnels')) {
+            return ['count' => 0, 'oldest_days' => null];
+        }
 
+        $threshold = CarbonImmutable::today()->addDays(self::EXPIRY_WINDOW_DAYS)->toDateString();
+        $query = DB::query();
+        $sources = 0;
+
+        // One round trip for every document table instead of a COUNT each.
         foreach (self::EXPIRY_SOURCES as $table => $column) {
-            if (! InstalledTables::has($table) || ! InstalledTables::has('personnels')) {
+            if (! InstalledTables::has($table)) {
                 continue;
             }
 
-            $total += DB::table($table)
-                ->join('personnels', 'personnels.tabel_no', '=', "{$table}.tabel_no")
-                ->whereNull('personnels.deleted_at')
-                ->whereNotNull("{$table}.{$column}")
-                ->whereDate("{$table}.{$column}", '<=', $threshold)
-                ->count();
+            $query->selectSub(
+                DB::table($table)
+                    ->selectRaw('COUNT(*)')
+                    ->join('personnels', 'personnels.tabel_no', '=', "{$table}.tabel_no")
+                    ->whereNull('personnels.deleted_at')
+                    ->whereNotNull("{$table}.{$column}")
+                    ->whereDate("{$table}.{$column}", '<=', $threshold),
+                $table,
+            );
+            $sources++;
         }
+
+        $total = $sources === 0 ? 0 : (int) array_sum(array_map('intval', (array) $query->first()));
 
         return ['count' => $total, 'oldest_days' => null];
     }
@@ -187,10 +200,13 @@ class HomeOverviewService
      * The "today" rail: the queues that already came back from the tiles, plus the two
      * date-bound facts a landing page is actually asked for every morning.
      *
+     * The queue rows reuse the live tiles; birthdays and upcoming leaves are cached
+     * per day because nothing on this page changes them.
+     *
      * @param  list<array<string,mixed>>  $attention
      * @return list<array{key:string,count:int,accent:string,note:string|null,route:string|null}>
      */
-    private function today(?Authorizable $viewer, array $attention): array
+    public function today(?Authorizable $viewer, array $attention): array
     {
         $rows = [];
 
@@ -209,7 +225,7 @@ class HomeOverviewService
         }
 
         if ($this->can($viewer, 'show-personnels')) {
-            $birthdays = $this->birthdaysToday();
+            $birthdays = $this->remember('birthdays', fn (): array => $this->birthdaysToday());
 
             $rows[] = [
                 'key' => 'birthdays',
@@ -223,7 +239,7 @@ class HomeOverviewService
         if ($this->can($viewer, 'show-vacations')) {
             $rows[] = [
                 'key' => 'vacations_starting',
-                'count' => $this->vacationsStartingThisWeek(),
+                'count' => $this->remember('vacations_starting', fn (): int => $this->vacationsStartingThisWeek()),
                 'accent' => 'green',
                 'note' => null,
                 'route' => 'vacations.list',
@@ -286,12 +302,42 @@ class HomeOverviewService
     }
 
     /**
+     * @return list<array<string,mixed>>
+     */
+    public function attendanceWeek(?Authorizable $viewer): array
+    {
+        return $this->can($viewer, 'show-attendance')
+            ? $this->remember('attendance_week', fn (): array => $this->readAttendanceWeek())
+            : [];
+    }
+
+    /**
+     * @return list<array{id:int,event:string,subject:string,subject_id:int|null,actor:string,at:\Carbon\Carbon|null}>
+     */
+    public function activity(?Authorizable $viewer): array
+    {
+        return $this->can($viewer, 'show-audit-logs')
+            ? $this->remember('activity', fn (): array => $this->recentActivity())
+            : [];
+    }
+
+    /**
+     * @return list<array{id:int,name:string,total:int,filled:int,vacant:int,pct:int}>
+     */
+    public function structureFill(?Authorizable $viewer): array
+    {
+        return $this->can($viewer, 'show-staff')
+            ? $this->remember('structure_fill', fn (): array => $this->readStructureFill())
+            : [];
+    }
+
+    /**
      * Present / absent totals for the last seven days, read from the pre-aggregated
      * daily structure summary so the chart costs a single grouped query.
      *
      * @return list<array<string,mixed>>
      */
-    private function attendanceWeek(): array
+    private function readAttendanceWeek(): array
     {
         if (! InstalledTables::has('attendance_daily_structure_summaries')) {
             return [];
@@ -382,7 +428,7 @@ class HomeOverviewService
      *
      * @return list<array{id:int,name:string,total:int,filled:int,vacant:int,pct:int}>
      */
-    private function structureFill(int $limit = 6): array
+    private function readStructureFill(int $limit = 6): array
     {
         if (! InstalledTables::has('staff_schedules') || ! InstalledTables::has('structures')) {
             return [];
@@ -411,6 +457,25 @@ class HomeOverviewService
             })
             ->values()
             ->all();
+    }
+
+    /**
+     * Cached blocks read organisation-wide tables with no per-viewer scoping, so every
+     * viewer who passes the permission gate (checked before this call) gets the same
+     * answer; the key therefore carries the date, not the user.
+     *
+     * @template T
+     *
+     * @param  Closure():T  $resolver
+     * @return T
+     */
+    private function remember(string $block, Closure $resolver): mixed
+    {
+        return Cache::remember(
+            'home:overview:'.$block.':'.CarbonImmutable::today()->toDateString(),
+            self::CACHE_TTL_SECONDS,
+            $resolver,
+        );
     }
 
     private function can(?Authorizable $viewer, string $permission): bool
