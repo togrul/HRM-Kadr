@@ -48,7 +48,7 @@
         <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
             <div class="overflow-visible">
                 <x-table.tbl :headers="[__('personnel::information.fields.education_place'),__('personnel::common.labels.specialty'),__('personnel::information.fields.request_date'),__('personnel::common.labels.result'),__('personnel::common.labels.action')]">
-                    @forelse ($personnelModelData->educationRequests as $request)
+                    @forelse ($this->educationRequestRows as $request)
                         <tr @class([
                             'transition-all duration-300',
                             'bg-teal-100' => $request->id === $selectedRequest

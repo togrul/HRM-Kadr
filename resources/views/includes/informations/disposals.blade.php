@@ -39,7 +39,7 @@
         <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
             <div class="overflow-visible">
                 <x-table.tbl :headers="[__('personnel::information.fields.disposal_date'),__('personnel::information.fields.disposal_end_date'),__('personnel::information.fields.disposal_reason'),__('personnel::common.labels.action')]">
-                    @forelse ($personnelModelData->disposals as $disposal)
+                    @forelse ($this->disposalRows as $disposal)
                         <tr>
                             <x-table.td>
                                 <span class="text-sm font-medium flex items-center text-slate-900">{{ $disposal->disposal_date->format('d.m.Y') }}</span>

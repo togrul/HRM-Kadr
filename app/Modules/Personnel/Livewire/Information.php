@@ -14,6 +14,8 @@ use App\Modules\Personnel\Support\Traits\Information\MasterDegreeTrait;
 use App\Modules\Personnel\Support\Traits\Information\PensionCardTrait;
 use App\Traits\NormalizesDropdownPayloads;
 use DateTime;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
@@ -39,8 +41,6 @@ class Information extends Component
 
     #[Locked]
     public string $personnelModel;
-
-    public $personnelModelData;
 
     public array $steps = [];
 
@@ -118,20 +118,67 @@ class Information extends Component
         return $date instanceof DateTime ? $date->format('d.m.Y') : (string) $date;
     }
 
-    public function mount()
+    /**
+     * The employee, without relations: each tab reads only its own list below. It was a
+     * public property carrying five eager-loaded relations, which Livewire re-queried on
+     * every round trip whichever tab was open.
+     */
+    #[Computed]
+    public function personnel(): Personnel
     {
-        $this->personnelModelData = Personnel::with([
-            'contracts.rank',
-            'educationRequests',
-            'masterDegrees',
-            'pensionCards',
-            'disposals',
-        ])
-            ->withTrashed()
-            ->where('tabel_no', $this->personnelModel)
-            ->firstOrFail();
+        return Personnel::withTrashed()->where('tabel_no', $this->personnelModel)->firstOrFail();
+    }
 
-        $this->authorize('update', $this->personnelModelData);
+    #[Computed]
+    public function contractRows(): Collection
+    {
+        return $this->personnel->contracts()->with('rank')->get();
+    }
+
+    #[Computed]
+    public function educationRequestRows(): Collection
+    {
+        return $this->personnel->educationRequests()->get();
+    }
+
+    #[Computed]
+    public function masterDegreeRows(): Collection
+    {
+        return $this->personnel->masterDegrees()->get();
+    }
+
+    #[Computed]
+    public function pensionCardRows(): Collection
+    {
+        return $this->personnel->pensionCards()->get();
+    }
+
+    #[Computed]
+    public function disposalRows(): Collection
+    {
+        return $this->personnel->disposals()->get();
+    }
+
+    /**
+     * Every request re-checks the right to edit this employee — actions are callable
+     * directly, not only through the buttons mount() rendered.
+     */
+    public function hydrate(): void
+    {
+        $this->authorize('update', $this->personnel);
+    }
+
+    /**
+     * Row actions receive a record id from the client; it must belong to this employee.
+     */
+    protected function ensureOwnRecord(Model $record): void
+    {
+        abort_unless((string) $record->getAttribute('tabel_no') === $this->personnelModel, 404);
+    }
+
+    public function mount(): void
+    {
+        $this->authorize('update', $this->personnel);
 
         $this->title = __('personnel::common.titles.edit_personnel');
         $this->steps = [

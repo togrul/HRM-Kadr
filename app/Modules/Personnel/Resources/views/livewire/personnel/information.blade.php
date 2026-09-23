@@ -19,12 +19,9 @@
     </div>
 
     <div class="flex w-full px-2 py-3 rounded-md bg-neutral-50">
-        @foreach ($steps as $key => $step)
-            <div x-show="$wire.currentStep === {{ $key }}"
-                 class="flex w-full"
-            >
-                @include('includes.informations.'.($stepViews[$key] ?? 'contracts'))
-            </div>
-        @endforeach
+        {{-- Only the open tab renders: switching tabs is a server round trip anyway. --}}
+        <div class="flex w-full" wire:key="information-step-{{ $currentStep }}">
+            @include('includes.informations.'.($stepViews[$currentStep] ?? 'contracts'))
+        </div>
     </div>
 </div>

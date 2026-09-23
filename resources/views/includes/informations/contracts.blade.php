@@ -67,7 +67,7 @@
         <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
             <div class="overflow-visible">
                 <x-table.tbl :headers="[__('personnel::information.fields.rank'),__('personnel::common.labels.duration'),__('personnel::information.fields.contract_date'),__('personnel::common.labels.action')]">
-                    @forelse ($personnelModelData->contracts as $dataContract)
+                    @forelse ($this->contractRows as $dataContract)
                         <tr>
                             <x-table.td>
                                 <span class="text-sm bg-slate-100 rounded-md px-3 py-1 font-medium flex justify-center items-center text-slate-600">{{ $dataContract->rank->name }}</span>

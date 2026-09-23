@@ -54,7 +54,7 @@
         <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
             <div class="overflow-visible">
                 <x-table.tbl :headers="[__('personnel::information.fields.degree'),__('personnel::information.fields.given_date'),__('personnel::information.fields.approved_date'),__('personnel::information.fields.redemption_date'),__('personnel::common.labels.action')]">
-                    @forelse ($personnelModelData->masterDegrees as $master)
+                    @forelse ($this->masterDegreeRows as $master)
                         <tr @class([
                             'transition-all duration-300',
                             'bg-teal-100' => $master->id === $selectedDegree

@@ -4,7 +4,8 @@ namespace App\Modules\Personnel\Support\Traits\Information;
 
 use App\Models\PersonnelEducationRequest;
 
-trait EducationRequestTrait {
+trait EducationRequestTrait
+{
     public array $education = [];
 
     public int $selectedRequest;
@@ -24,7 +25,7 @@ trait EducationRequestTrait {
 
         $modelInstance = new PersonnelEducationRequest;
         $educationData = $this->modifyArray($this->education, $modelInstance->dateList());
-        $this->personnelModelData->educationRequests()->updateOrCreate(
+        $this->personnel->educationRequests()->updateOrCreate(
             ['request_date' => $educationData['request_date']],
             $educationData,
         );
@@ -36,6 +37,7 @@ trait EducationRequestTrait {
 
     public function updateEducationRequest(PersonnelEducationRequest $educationRequest): void
     {
+        $this->ensureOwnRecord($educationRequest);
         $this->selectedRequest = $educationRequest->id;
         $this->education = $educationRequest->only(['education_place', 'specialty', 'description', 'request_date', 'request_result']);
         if (isset($this->education['request_date'])) {
@@ -45,6 +47,7 @@ trait EducationRequestTrait {
 
     public function forceDeleteEducationRequest(PersonnelEducationRequest $requestModel): void
     {
+        $this->ensureOwnRecord($requestModel);
         $requestModel->delete();
         $this->dispatch('contractAdded', __('personnel::information.messages.education_request_deleted'));
         $this->dispatchModalCloseEvent();

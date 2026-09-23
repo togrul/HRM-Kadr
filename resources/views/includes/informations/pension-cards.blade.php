@@ -41,7 +41,7 @@
         <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
             <div class="overflow-visible">
                 <x-table.tbl :headers="[__('personnel::information.fields.card_number'),__('personnel::information.fields.given_date'),__('personnel::information.fields.expiry_date'),__('personnel::common.labels.action')]">
-                    @forelse ($personnelModelData->pensionCards as $pension)
+                    @forelse ($this->pensionCardRows as $pension)
                         @php
                             $activeCard = (\Carbon\Carbon::parse($pension->given_date) <= \Carbon\Carbon::now())
                                     && (\Carbon\Carbon::parse($pension->expiry_date) >= \Carbon\Carbon::now());
