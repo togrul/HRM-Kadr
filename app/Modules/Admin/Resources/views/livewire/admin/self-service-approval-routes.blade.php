@@ -2,7 +2,7 @@
     <div class="flex flex-col items-center justify-between rounded-xl bg-white px-2 py-2 sm:flex-row">
         <div class="flex items-center justify-center space-x-2">
             <x-button class="space-x-2" mode="primary" wire:click.prevent="openCrud()">
-                <x-icons.add-icon color="text-white" hover="text-gray-50"></x-icons.add-icon>
+                <x-icons.add-icon color="text-white" hover="text-zinc-50"></x-icons.add-icon>
                 <span>{{ __('admin::references.buttons.add_approval_route') }}</span>
             </x-button>
         </div>
@@ -99,7 +99,7 @@
                             wire:click.prevent="openCrud({{ $route->id ?: 'null' }}, '{{ $route->request_type }}')"
                             class="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-zinc-200 bg-white text-zinc-600 transition hover:border-zinc-300 hover:text-zinc-900"
                         >
-                            <x-icons.edit-icon color="text-slate-400" hover="text-slate-500"></x-icons.edit-icon>
+                            <x-icons.edit-icon color="text-zinc-400" hover="text-zinc-500"></x-icons.edit-icon>
                         </button>
                     </div>
 

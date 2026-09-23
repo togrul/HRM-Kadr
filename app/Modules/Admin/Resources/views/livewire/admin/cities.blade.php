@@ -5,7 +5,7 @@
                       mode="primary"
                       wire:click.prevent="openCrud()"
             >
-                <x-icons.add-icon color="text-white" hover="text-gray-50"></x-icons.add-icon>
+                <x-icons.add-icon color="text-white" hover="text-zinc-50"></x-icons.add-icon>
                 <span>{{ __('admin::references.buttons.add_city') }}</span>
             </x-button>
         </div>
@@ -13,7 +13,7 @@
 
     @if($isAdded)
         <div wire:key="{{ $model ? $model->id : 'create-crud' }}"
-             class="flex border border-gray-300 rounded-md bg-slate-50 relative px-3 py-2 my-3"
+             class="flex border border-zinc-300 rounded-md bg-zinc-50 relative px-3 py-2 my-3"
         >
             <button type="button" class="appearance-none absolute top-2 right-2 flex h-10 w-10 items-center justify-center rounded-lg text-ink-muted hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400" aria-label="{{ __('admin::references.actions.close') }}" title="{{ __('admin::references.actions.close') }}" wire:click="closeCrud()">
                 <x-icons.close-icon></x-icons.close-icon>
@@ -78,19 +78,19 @@
                         @forelse ($cities as $city)
                             <tr wire:key="city-row-{{ $city->id }}">
                                 <x-table.td>
-                                      <span class="text-sm text-gray-500 font-medium">
+                                      <span class="text-sm text-zinc-500 font-medium">
                                           {{ $city->id }}
                                       </span>
                                 </x-table.td>
                                 <x-table.td>
-                                    <span class="text-xs font-medium flex justify-center items-center px-1 py-1 rounded-md border border-gray-300 bg-gray-50 text-gray-600">
+                                    <span class="text-xs font-medium flex justify-center items-center px-1 py-1 rounded-md border border-zinc-300 bg-zinc-50 text-zinc-600">
                                         {{ $city->country_label }}
                                     </span>
                                 </x-table.td>
 
                                 <x-table.td>
                                     @if($city->parent_label)
-                                    <span class="text-xs font-medium flex justify-center items-center px-1 py-1 rounded-md border border-blue-300 bg-blue-50 text-gray-600">
+                                    <span class="text-xs font-medium flex justify-center items-center px-1 py-1 rounded-md border border-blue-300 bg-blue-50 text-zinc-600">
                                         {{ $city->parent_label }}
                                     </span>
                                     @endif
@@ -108,15 +108,15 @@
                                             aria-label="{{ __('admin::references.actions.edit') }}"
                                             title="{{ __('admin::references.actions.edit') }}"
                                             wire:click.prevent="openCrud({{ $city->id }})"
-                                            class="appearance-none flex items-center justify-center w-10 h-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 text-xs font-medium uppercase rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+                                            class="appearance-none flex items-center justify-center w-10 h-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 text-xs font-medium uppercase rounded-lg text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700"
                                         >
-                                            <x-icons.edit-icon color="text-slate-400" hover="text-slate-500"></x-icons.edit-icon>
+                                            <x-icons.edit-icon color="text-zinc-400" hover="text-zinc-500"></x-icons.edit-icon>
                                         </button>
                                         <button type="button"
                                             aria-label="{{ __('admin::references.actions.delete') }}"
                                             title="{{ __('admin::references.actions.delete') }}"
                                             wire:click.prevent = "deleteModel({{ $city->id }})"
-                                            class="flex items-center justify-center w-10 h-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-100 hover:text-gray-700"
+                                            class="flex items-center justify-center w-10 h-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 text-xs font-medium uppercase transition duration-300 rounded-lg text-zinc-500 hover:bg-red-100 hover:text-zinc-700"
                                         >
                                             <x-icons.delete-icon color="text-rose-500" hover="text-rose-600"></x-icons.delete-icon>
                                         </button>

@@ -3,14 +3,14 @@
     <div class="flex flex-col items-center justify-between sm:flex-row filter bg-white py-2 px-2 rounded-xl">
         <div class="flex items-center justify-center space-x-2 action-section">
             <x-button class="space-x-2" mode="primary" wire:click.prevent="openCrud()">
-                <x-icons.add-icon color="text-white" hover="text-gray-50"></x-icons.add-icon>
+                <x-icons.add-icon color="text-white" hover="text-zinc-50"></x-icons.add-icon>
                 <span>{{ $addLabel }}</span>
             </x-button>
         </div>
     </div>
 
     @if($isAdded)
-        <div wire:transition class="flex border border-gray-300 rounded-md bg-slate-50 relative px-3 py-2 my-3">
+        <div wire:transition class="flex border border-zinc-300 rounded-md bg-zinc-50 relative px-3 py-2 my-3">
             <button type="button" class="appearance-none absolute top-2 right-2 flex h-10 w-10 items-center justify-center rounded-lg text-ink-muted hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400" aria-label="{{ __('admin::references.actions.close') }}" title="{{ __('admin::references.actions.close') }}" wire:click="closeCrud()">
                 <x-icons.close-icon></x-icons.close-icon>
             </button>
@@ -55,9 +55,9 @@
                                                 @endforeach
                                             </div>
                                         @elseif (isset($column['check']))
-                                            <x-icons.check-icon :color="$item->{$column['check']} ? 'text-emerald-500' : 'text-gray-500'"></x-icons.check-icon>
+                                            <x-icons.check-icon :color="$item->{$column['check']} ? 'text-emerald-500' : 'text-zinc-500'"></x-icons.check-icon>
                                         @else
-                                            <span class="{{ $column['class'] ?? 'text-sm text-gray-500 font-medium' }}">
+                                            <span class="{{ $column['class'] ?? 'text-sm text-zinc-500 font-medium' }}">
                                                 {{ $item->{$column['attr']} }} {{ $column['unit'] ?? '' }}
                                             </span>
                                         @endif
@@ -70,15 +70,15 @@
                                             aria-label="{{ __('admin::references.actions.edit') }}"
                                             title="{{ __('admin::references.actions.edit') }}"
                                             wire:click.prevent="openCrud({{ $item->getKey() }})"
-                                            class="appearance-none flex items-center justify-center w-10 h-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 text-xs font-medium uppercase rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+                                            class="appearance-none flex items-center justify-center w-10 h-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 text-xs font-medium uppercase rounded-lg text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700"
                                         >
-                                            <x-icons.edit-icon color="text-slate-400" hover="text-slate-500"></x-icons.edit-icon>
+                                            <x-icons.edit-icon color="text-zinc-400" hover="text-zinc-500"></x-icons.edit-icon>
                                         </button>
                                         <button type="button"
                                             aria-label="{{ __('admin::references.actions.delete') }}"
                                             title="{{ __('admin::references.actions.delete') }}"
                                             wire:click.prevent="deleteModel({{ $item->getKey() }})"
-                                            class="flex items-center justify-center w-10 h-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-100 hover:text-gray-700"
+                                            class="flex items-center justify-center w-10 h-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 text-xs font-medium uppercase transition duration-300 rounded-lg text-zinc-500 hover:bg-red-100 hover:text-zinc-700"
                                         >
                                             <x-icons.delete-icon color="text-rose-500" hover="text-rose-600"></x-icons.delete-icon>
                                         </button>

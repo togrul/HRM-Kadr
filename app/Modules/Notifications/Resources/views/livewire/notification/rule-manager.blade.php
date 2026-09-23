@@ -26,8 +26,8 @@
                         <p class="mt-1 text-sm leading-6 text-zinc-500">{{ __('notifications::common.helpers.audience_targets_hint_rules') }}</p>
                     </div>
                     <div class="flex flex-wrap gap-2">
-                        <x-notification.chip mode="neutral" size="sm" uppercase>{{ $categoryLabels[$form['category']] ?? $form['category'] }}</x-notification.chip>
-                        <x-notification.chip mode="neutral" size="sm" uppercase>{{ __('notifications::common.channels.'.$form['channel']) }}</x-notification.chip>
+                        <x-notification.chip mode="neutral" size="sm">{{ $categoryLabels[$form['category']] ?? $form['category'] }}</x-notification.chip>
+                        <x-notification.chip mode="neutral" size="sm">{{ __('notifications::common.channels.'.$form['channel']) }}</x-notification.chip>
                     </div>
                 </div>
 
@@ -159,7 +159,7 @@
                             </x-notification.chip>
                         </div>
                         <div class="mt-3 space-y-2">
-                            <p class="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-400">{{ __('notifications::common.fields.audience_targets') }}</p>
+                            <p class="hrm-eyebrow">{{ __('notifications::common.fields.audience_targets') }}</p>
                             <div class="flex flex-wrap gap-2">
                                 @forelse ((array) data_get($rule->audience_config, 'targets', []) as $target)
                                     <x-notification.chip mode="muted">{{ $displayAudienceTarget($target) }}</x-notification.chip>
@@ -167,7 +167,7 @@
                                     <x-notification.chip mode="muted">—</x-notification.chip>
                                 @endforelse
                                 @if ($rule->approval_required)
-                                    <x-notification.chip mode="amber" uppercase>{{ __('notifications::common.helpers.approval_required_short') }}</x-notification.chip>
+                                    <x-notification.chip mode="amber">{{ __('notifications::common.helpers.approval_required_short') }}</x-notification.chip>
                                 @endif
                             </div>
                         </div>

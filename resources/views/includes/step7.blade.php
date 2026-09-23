@@ -144,8 +144,8 @@
                             <div class="flex items-center gap-2">
                                 <button
                                     wire:click="editKinship('{{ $rowKey }}')"
-                                    class="flex h-10 w-10 items-center justify-center rounded-full border border-white/80 bg-white text-slate-300 shadow-card transition hover:text-sky-500">
-                                    <x-icons.edit-icon color="{{ $isEditing ? 'text-sky-500' : 'text-slate-300' }}" hover="{{ $isEditing ? 'text-sky-600' : 'text-sky-500' }}"></x-icons.edit-icon>
+                                    class="flex h-10 w-10 items-center justify-center rounded-full border border-white/80 bg-white text-zinc-300 shadow-card transition hover:text-sky-500">
+                                    <x-icons.edit-icon color="{{ $isEditing ? 'text-sky-500' : 'text-zinc-300' }}" hover="{{ $isEditing ? 'text-sky-600' : 'text-sky-500' }}"></x-icons.edit-icon>
                                 </button>
                                 <button
                                     x-on:click="$dispatch('confirm-action', { tone: 'rose', message: @js(__('personnel::common.messages.remove_data_confirm')), confirmText: @js(__('ui::common.actions.delete')), run: () => $wire.forceDeleteKinship('{{ $rowKey }}') })"
@@ -156,7 +156,7 @@
                         </div>
                     </x-slot>
                     <div class="flex flex-col w-full space-y-3">
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-slate-600">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-zinc-600">
                             <div class="flex flex-col p-2 space-y-1 rounded-md bg-neutral-100/90">
                                 <span class="font-medium text-neutral-500">{{ __('personnel::common.labels.birthdate') }}</span>
                                 <span>{{ data_get($knshModel, 'birthdate') ?? '---' }}</span>
@@ -171,7 +171,7 @@
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-slate-800">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-zinc-800">
                             <div class="flex flex-col p-2 space-y-1 rounded-md bg-neutral-100/90">
                                 <span class="font-medium text-neutral-500">{{ __('personnel::common.labels.registered_address') }}</span>
                                 <span>{{ data_get($knshModel, 'registered_address') ?? '---' }}</span>
@@ -205,7 +205,7 @@
                 </x-surface-card>
             @empty
                 <div class="relative flex items-center justify-center px-4 py-2 rounded-lg shadow-sm bg-neutral-100">
-                    <h1 class="text-base font-medium text-gray-600">
+                    <h1 class="text-base font-medium text-zinc-600">
                         {{ __('personnel::common.labels.no_information_added') }}
                     </h1>
                 </div>

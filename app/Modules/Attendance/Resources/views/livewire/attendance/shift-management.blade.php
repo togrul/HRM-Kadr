@@ -10,12 +10,12 @@
                 </div>
                 <div>
                     <x-label for="attendance-shift-start">{{ __('attendance::shift_management.fields.start_time') }}</x-label>
-                    <input id="attendance-shift-start" type="time" wire:model="shiftForm.start_time" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
+                    <input id="attendance-shift-start" type="time" wire:model="shiftForm.start_time" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 h-10 px-3 text-base sm:text-sm" />
                     @error('shiftForm.start_time') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
                 <div>
                     <x-label for="attendance-shift-end">{{ __('attendance::shift_management.fields.end_time') }}</x-label>
-                    <input id="attendance-shift-end" type="time" wire:model="shiftForm.end_time" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
+                    <input id="attendance-shift-end" type="time" wire:model="shiftForm.end_time" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 h-10 px-3 text-base sm:text-sm" />
                     @error('shiftForm.end_time') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
                 <div>
@@ -43,11 +43,11 @@
 
             <div class="mt-3 grid gap-3 md:grid-cols-2">
                 <label class="flex h-10 items-center gap-2 rounded-lg bg-neutral-100 px-3 text-sm text-zinc-700 shadow-sm">
-                    <input type="checkbox" wire:model="shiftForm.is_night_shift" class="h-4 w-4 rounded border-zinc-300 text-blue-600 focus:ring-blue-500" />
+                    <input type="checkbox" wire:model="shiftForm.is_night_shift" class="h-4 w-4 rounded border-hairline text-ink focus:ring-zinc-400" />
                     <span>{{ __('attendance::shift_management.labels.night_shift') }}</span>
                 </label>
                 <label class="flex h-10 items-center gap-2 rounded-lg bg-neutral-100 px-3 text-sm text-zinc-700 shadow-sm">
-                    <input type="checkbox" wire:model="shiftForm.is_active" class="h-4 w-4 rounded border-zinc-300 text-blue-600 focus:ring-blue-500" />
+                    <input type="checkbox" wire:model="shiftForm.is_active" class="h-4 w-4 rounded border-hairline text-ink focus:ring-zinc-400" />
                     <span>{{ __('attendance::shift_management.labels.active_shift') }}</span>
                 </label>
             </div>
@@ -135,7 +135,7 @@
                             <button
                                 type="button"
                                 wire:click="selectPersonnel('{{ $personnel->tabel_no }}', '{{ addslashes($personnel->fullname) }}')"
-                                class="flex w-full flex-col rounded-md px-2 py-1 text-left text-slate-600 transition-all duration-300 hover:bg-white drop-shadow-sm"
+                                class="flex w-full flex-col rounded-md px-2 py-1 text-left text-zinc-600 transition-all duration-300 hover:bg-white drop-shadow-sm"
                             >
                                 <span>{{ $personnel->fullname }}</span>
                                 <span class="text-xs font-mono text-zinc-500">{{ $personnel->tabel_no }}</span>
@@ -147,7 +147,7 @@
                                 </span>
                             </button>
                         @empty
-                            <span class="mx-auto text-sm font-medium text-slate-500">
+                            <span class="mx-auto text-sm font-medium text-zinc-500">
                                 {{ __('attendance::shift_management.labels.search_personnel_empty') }}
                             </span>
                         @endforelse
@@ -166,12 +166,12 @@
                 </div>
                 <div>
                     <x-label for="attendance-assignment-from">{{ __('attendance::shift_management.fields.effective_from') }}</x-label>
-                    <input id="attendance-assignment-from" type="date" wire:model="assignmentForm.effective_from" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
+                    <input id="attendance-assignment-from" type="date" wire:model="assignmentForm.effective_from" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 h-10 px-3 text-base sm:text-sm" />
                     @error('assignmentForm.effective_from') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
                 <div>
                     <x-label for="attendance-assignment-to">{{ __('attendance::shift_management.fields.effective_to') }}</x-label>
-                    <input id="attendance-assignment-to" type="date" wire:model="assignmentForm.effective_to" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
+                    <input id="attendance-assignment-to" type="date" wire:model="assignmentForm.effective_to" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 h-10 px-3 text-base sm:text-sm" />
                     @error('assignmentForm.effective_to') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
             </div>
@@ -216,7 +216,7 @@
 
             <div class="mt-3">
                 <label class="flex h-10 items-center gap-2 rounded-lg bg-neutral-100 px-3 text-sm text-zinc-700 shadow-sm">
-                    <input type="checkbox" wire:model="assignmentForm.is_active" class="h-4 w-4 rounded border-zinc-300 text-blue-600 focus:ring-blue-500" />
+                    <input type="checkbox" wire:model="assignmentForm.is_active" class="h-4 w-4 rounded border-hairline text-ink focus:ring-zinc-400" />
                     <span>{{ __('attendance::shift_management.labels.active_assignment') }}</span>
                 </label>
             </div>

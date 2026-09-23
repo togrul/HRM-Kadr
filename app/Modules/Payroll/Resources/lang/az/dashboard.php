@@ -3,11 +3,11 @@
 return [
     'kicker' => 'Əmək haqqı',
     'title' => 'Əmək haqqı (Payroll)',
-    'description' => 'Dövrlər yaradın, hesablama run-ları açın, payslip-ləri nəzərdən keçirin, təsdiqləyin və kilidləyin.',
+    'description' => 'Dövrlər yaradın, hesablamalar aparın, maaş vərəqələrini nəzərdən keçirin, təsdiqləyin və kilidləyin.',
 
     'tabs' => [
-        'runs' => 'Run-lar',
-        'payslips' => 'Payslip-lər',
+        'runs' => 'Hesablamalar',
+        'payslips' => 'Maaş vərəqələri',
         'loans' => 'Kredit/avans',
     ],
 
@@ -29,9 +29,9 @@ return [
 
     'summary' => [
         'periods' => 'Dövrlər',
-        'runs' => 'Run-lar',
+        'runs' => 'Hesablamalar',
         'locked' => 'Kilidlənmiş',
-        'payslips' => 'Payslip-lər',
+        'payslips' => 'Maaş vərəqələri',
     ],
 
     'periods' => [
@@ -41,20 +41,20 @@ return [
     ],
 
     'runs' => [
-        'new' => 'Yeni run',
-        'title' => 'Hesablama run-ları',
+        'new' => 'Yeni hesablama',
+        'title' => 'Hesablamalar',
         'employees' => 'Əməkdaş',
-        'empty' => 'Hələ run yoxdur',
-        'type' => 'Run növü',
+        'empty' => 'Hələ hesablama yoxdur',
+        'type' => 'Hesablama növü',
         'forecast' => 'Proqnoz aylıq baza payroll',
     ],
 
     'payslips' => [
-        'select_run' => 'Payslip-ləri görmək üçün run seçin.',
-        'run' => 'Run',
-        'title' => 'Payslip-lər',
-        'empty' => 'Bu run-da payslip yoxdur',
-        'detail' => 'Payslip detalı',
+        'select_run' => 'Maaş vərəqələrini görmək üçün hesablama seçin.',
+        'run' => 'Hesablama',
+        'title' => 'Maaş vərəqələri',
+        'empty' => 'Bu hesablamada maaş vərəqəsi yoxdur',
+        'detail' => 'Maaş vərəqəsi',
     ],
 
     'fields' => [
@@ -84,8 +84,8 @@ return [
 
     'actions' => [
         'create_period' => 'Dövr yarat',
-        'create_run' => 'Run yarat',
-        'view_payslips' => 'Payslip-lər',
+        'create_run' => 'Hesablama yarat',
+        'view_payslips' => 'Maaş vərəqələri',
         'calculate' => 'Hesabla',
         'approve' => 'Təsdiqlə',
         'lock' => 'Kilidlə',
@@ -150,20 +150,20 @@ return [
     ],
 
     'confirm' => [
-        'lock' => 'Run kilidlənəcək və payslip-lər dondurulacaq. Davam edilsin?',
-        'reopen' => 'Run yenidən açılacaq. Davam edilsin?',
+        'lock' => 'Hesablama kilidlənəcək və maaş vərəqələri dondurulacaq. Davam edilsin?',
+        'reopen' => 'Hesablama yenidən açılacaq. Davam edilsin?',
         'delete' => 'Bu qeydi silmək istədiyinizə əminsiniz?',
     ],
 
     'messages' => [
         'period_created' => 'Dövr yaradıldı',
-        'run_created' => 'Run yaradıldı',
+        'run_created' => 'Hesablama yaradıldı',
         'calculated' => 'Hesablandı',
         'approved' => 'Təsdiqləndi',
         'locked' => 'Kilidləndi',
         'reopened' => 'Yenidən açıldı',
         'deleted' => 'Silindi',
         'saved' => 'Yadda saxlanıldı',
-        'recalculate_first' => 'Run hesablanandan sonra birdəfəlik ödənişlər dəyişib — kilidləmədən əvvəl yenidən hesablayın',
+        'recalculate_first' => 'Hesablama aparılandan sonra birdəfəlik ödənişlər dəyişib — kilidləmədən əvvəl yenidən hesablayın',
     ],
 ];

@@ -226,7 +226,7 @@ return [
         'media_link_must_be_healthy' => 'Link problemi olan qeyd birbaşa təsdiqlənə bilməz. Arxiv statusundan istifadə edin.',
         'media_url_required_for_broken_status' => 'Link işləmir statusu üçün media linki tələb olunur.',
         'policy_note_media_status' => 'Policy avtomatik statusu ":status" olaraq yenilədi.',
-        'policy_note_stale_pending' => 'Policy köhnə pending qeydi avtomatik rədd etdi.',
+        'policy_note_stale_pending' => 'Siyasət köhnə gözləyən qeydi avtomatik rədd etdi.',
     ],
     'health' => [
         'link' => [

@@ -7,8 +7,8 @@ return [
         'description' => 'Davamiyyət yoxlamaları tamamlandıqdan sonra seçilmiş ayı bağlayın, açın və ya eksport edin.',
     ],
     'actions' => [
-        'snapshot_now' => 'İndi snapshot al',
-        'snapshot_queue' => 'Snapshot növbəsi',
+        'snapshot_now' => 'Aylıq xülasəni indi yarat',
+        'snapshot_queue' => 'Xülasəni növbəyə əlavə et',
         'close_month' => 'Ayı bağla',
         'unlock_month' => 'Ayı aç',
         'export_xlsx' => 'XLSX eksport et',
@@ -27,7 +27,7 @@ return [
     'export_profile' => [
         'title' => 'Eksport profili',
         'format' => 'Format',
-        'contract' => 'Aylıq payroll snapshot eksport kontraktı.',
+        'contract' => 'Əmək haqqı üçün aylıq xülasə ixracı.',
         'csv_delimiter' => 'CSV ayırıcı',
         'csv_encoding' => 'CSV encoding',
         'utf8_bom' => 'UTF-8 BOM',
@@ -39,10 +39,10 @@ return [
     'messages' => [
         'closed' => 'Ay bağlandı. Xülasələr: :summaries, Kilidlənmiş gündəlik qeydlər: :ledgers',
         'unlocked' => 'Ay açıldı. Xülasələr: :summaries, Gündəlik qeydlər: :ledgers',
-        'snapshot_done' => 'Snapshot tamamlandı. Upsert olunan xülasə sətirləri: :count',
-        'snapshot_queued' => 'Aylıq snapshot növbəyə əlavə edildi.',
-        'export_requires_snapshot' => 'Eksport üçün əvvəlcə bu ay üzrə snapshot yaradılmalıdır.',
-        'export_requires_fresh_snapshot' => 'Eksport bloklandı. Son snapshot-dan sonra ledger dəyişiklikləri var; yenidən snapshot alın.',
+        'snapshot_done' => 'Aylıq xülasə hazırdır. Yenilənən sətirlər: :count',
+        'snapshot_queued' => 'Aylıq xülasə növbəyə əlavə edildi.',
+        'export_requires_snapshot' => 'İxrac üçün əvvəlcə bu ay üzrə aylıq xülasə yaradılmalıdır.',
+        'export_requires_fresh_snapshot' => 'İxrac dayandırıldı: son xülasədən sonra davamiyyət qeydləri dəyişib — aylıq xülasəni yenidən yaradın.',
     ],
     'payroll_headers' => [
         'tabel_no' => 'Tabel nömrəsi',

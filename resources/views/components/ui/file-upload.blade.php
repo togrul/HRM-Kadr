@@ -12,7 +12,7 @@
         x-on:livewire-upload-progress="progress = $event.detail.progress">
         <div class="flex flex-col items-center space-y-2">
             <label
-                class="flex cursor-pointer bg-neutral-200/80 py-2 px-3 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-400 h-[40px]">
+                class="flex cursor-pointer bg-neutral-200/80 py-2 px-3 rounded-md shadow-sm text-sm leading-4 font-medium text-zinc-700 hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-400 h-[40px]">
                 <span class="text-sm leading-normal">
                     <svg class="w-7 h-7" data-slot="icon" fill="none" stroke-width="2" stroke="currentColor"
                         viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">

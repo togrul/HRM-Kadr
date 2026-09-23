@@ -36,7 +36,7 @@
             >
                 <div class="flex items-center divide-x divide-neutral-100">
                     @foreach ($menuActions as $menuAction)
-                        <div class="px-4 py-2 hover:bg-slate-100">
+                        <div class="px-4 py-2 hover:bg-zinc-100">
                             @if ($menuAction->type === 'link')
                                 <a
                                     href="{{ $menuAction->href }}"

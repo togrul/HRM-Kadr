@@ -1,6 +1,6 @@
 @props([
-    'color' => 'text-gray-700',
-    'hover' => 'text-gray-900',
+    'color' => 'text-zinc-700',
+    'hover' => 'text-zinc-900',
     'size' => 'w-6 h-6',
     'show' => null,
 ])

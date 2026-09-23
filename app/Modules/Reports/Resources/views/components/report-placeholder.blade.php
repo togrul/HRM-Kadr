@@ -11,13 +11,13 @@
 ])>
     <div class="flex items-start justify-between gap-4 border-b border-zinc-100 pb-4">
         <div class="space-y-1">
-            <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-zinc-400">{{ __('reports::dashboard.labels.report_preview') }}</p>
+            <p class="hrm-eyebrow">{{ __('reports::dashboard.labels.report_preview') }}</p>
             <h4 class="text-base font-semibold tracking-tight text-zinc-950">{{ $title ?? __('reports::dashboard.empty.awaiting_data') }}</h4>
             @if ($message)
                 <p class="text-sm leading-6 text-zinc-500">{{ $message }}</p>
             @endif
         </div>
-        <span class="inline-flex shrink-0 items-center rounded-full border border-zinc-200/90 bg-zinc-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-500 shadow-card">
+        <span class="inline-flex shrink-0 items-center rounded-full border border-zinc-200/90 bg-zinc-50 px-3 py-1 hrm-eyebrow shadow-card">
             {{ __('reports::dashboard.labels.empty_state') }}
         </span>
     </div>

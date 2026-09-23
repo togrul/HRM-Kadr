@@ -60,11 +60,11 @@
                             <div class="flex flex-wrap items-center gap-2">
                                 <h4 class="text-base font-semibold tracking-tight text-zinc-950">{{ $campaign->display_title ?? $campaign->title }}</h4>
                                 @if (($campaign->display_copy_count ?? 0) > 0)
-                                    <x-notification.chip mode="sky" size="sm" uppercase>
+                                    <x-notification.chip mode="sky" size="sm">
                                         {{ __('notifications::common.badges.copy_label') }}{{ $campaign->display_copy_count > 1 ? ' ×'.$campaign->display_copy_count : '' }}
                                     </x-notification.chip>
                                 @endif
-                                <x-notification.chip mode="muted" size="sm" uppercase>{{ $categoryLabels[$campaign->category] ?? $campaign->category }}</x-notification.chip>
+                                <x-notification.chip mode="muted" size="sm">{{ $categoryLabels[$campaign->category] ?? $campaign->category }}</x-notification.chip>
                                 <x-notification.chip :mode="$statusChipMode($campaign->status)" size="sm" uppercase>{{ __('notifications::common.statuses.'.$campaign->status) }}</x-notification.chip>
                                 @if ($campaign->scheduled_at)
                                     <x-notification.chip mode="amber" size="sm">

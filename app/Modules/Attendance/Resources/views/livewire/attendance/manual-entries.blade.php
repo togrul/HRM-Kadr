@@ -48,7 +48,7 @@
 
                             <div class="flex items-center justify-between gap-3 rounded-lg bg-zinc-50 px-3 py-2">
                                 <div class="min-w-0">
-                                    <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('attendance::manual_entries.labels.current_mode') }}</p>
+                                    <p class="hrm-eyebrow">{{ __('attendance::manual_entries.labels.current_mode') }}</p>
                                     <p class="text-sm font-medium text-zinc-700">
                                         {{ $manualMetricOverride ? __('attendance::manual_entries.modes.manual_override') : __('attendance::manual_entries.modes.automatic_calculation') }}
                                     </p>
@@ -79,7 +79,7 @@
                             <button
                                 type="button"
                                 wire:click="selectPersonnel('{{ $personnel->tabel_no }}', '{{ addslashes($personnel->fullname) }}')"
-                                class="flex w-full flex-col rounded-md px-2 py-1 text-left text-slate-600 transition-all duration-300 hover:bg-white drop-shadow-sm"
+                                class="flex w-full flex-col rounded-md px-2 py-1 text-left text-zinc-600 transition-all duration-300 hover:bg-white drop-shadow-sm"
                             >
                                 <span>{{ $personnel->fullname }}</span>
                                 <span class="text-xs font-mono text-zinc-500">{{ $personnel->tabel_no }}</span>
@@ -90,7 +90,7 @@
                                 @endif
                             </button>
                         @empty
-                            <span class="mx-auto text-sm font-medium text-slate-500">
+                            <span class="mx-auto text-sm font-medium text-zinc-500">
                                 {{ __('attendance::manual_entries.placeholders.search_personnel') }}
                             </span>
                         @endforelse
@@ -103,7 +103,7 @@
                         id="manual-form-date"
                         wire:model.live="form.date"
                         type="date"
-                        class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500"
+                        class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 h-10 px-3 text-base sm:text-sm"
                     />
                     @error('form.date') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
@@ -113,7 +113,7 @@
                         id="manual-form-check-in"
                         wire:model.live="form.check_in_at"
                         type="time"
-                        class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500"
+                        class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 h-10 px-3 text-base sm:text-sm"
                     />
                     @error('form.check_in_at') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
@@ -123,7 +123,7 @@
                         id="manual-form-check-out"
                         wire:model.live="form.check_out_at"
                         type="time"
-                        class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500"
+                        class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 h-10 px-3 text-base sm:text-sm"
                     />
                     @error('form.check_out_at') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
@@ -196,7 +196,7 @@
                                     id="manual-metric-override"
                                     type="checkbox"
                                     wire:model.live="manualMetricOverride"
-                                    class="h-4 w-4 rounded border-zinc-300 text-blue-600 focus:ring-blue-500"
+                                    class="h-4 w-4 rounded border-hairline text-ink focus:ring-zinc-400"
                                 />
                                 <span>{{ __('attendance::manual_entries.modes.manual_override') }}</span>
                             </label>
@@ -440,7 +440,7 @@
                         id="manual-form-reason"
                         wire:model="form.reason"
                         rows="3"
-                        class="w-full rounded-lg border-none bg-neutral-100 px-3 py-2 text-sm shadow-sm focus:ring-blue-500"
+                        class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 px-3 py-2.5 text-base leading-relaxed sm:text-sm"
                     ></textarea>
                 </div>
             </div>

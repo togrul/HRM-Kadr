@@ -25,7 +25,7 @@
     <div class="flex items-end justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
 
       <div  x-show.transition.opacity="openDelete"
-            class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"
+            class="fixed inset-0 transition-opacity bg-zinc-500 bg-opacity-75"
             aria-hidden="true"
       ></div>
 
@@ -41,7 +41,7 @@
         <div class="absolute top-0 right-0 pt-4 pr-4">
             <button
                 @click="openDelete = false"
-                class="text-gray-400 hover:text-gray-500"
+                class="text-zinc-400 hover:text-zinc-500"
             >
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
@@ -55,18 +55,18 @@
                 </svg>
               </div>
               <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                <h3 class="text-lg font-medium leading-6 text-gray-900" id="modal-title">
+                <h3 class="text-lg font-medium leading-6 text-zinc-900" id="modal-title">
                    {{ __('ui::common.labels.cannot_delete') }}
                 </h3>
                 <div class="mt-2">
-                  <p class="text-sm font-medium text-gray-500" x-text="messageToDisplay">
+                  <p class="text-sm font-medium text-zinc-500" x-text="messageToDisplay">
                   </p>
                 </div>
               </div>
             </div>
           </div>
-          <div class="px-4 py-3 bg-gray-50 sm:px-6 sm:flex sm:flex-row-reverse">
-            <button @click="openDelete = false" type="button" class="inline-flex justify-center w-full px-4 py-2 mt-3 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+          <div class="px-4 py-3 bg-zinc-50 sm:px-6 sm:flex sm:flex-row-reverse">
+            <button @click="openDelete = false" type="button" class="inline-flex justify-center w-full px-4 py-2 mt-3 text-base font-medium text-zinc-700 bg-white border border-zinc-300 rounded-md shadow-sm hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-400 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
                {{ __('ui::common.actions.cancel') }}
             </button>
           </div>

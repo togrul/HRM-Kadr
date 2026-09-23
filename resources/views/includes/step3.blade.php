@@ -138,11 +138,11 @@
             </div>
         </div>
         @if(Arr::has($educationState, ['admission_year']) && ! empty(Arr::get($educationState, 'admission_year')))
-            <div class="flex items-center justify-between p-2 my-2 border border-gray-200 rounded-lg shadow-sm bg-gray-50">
+            <div class="flex items-center justify-between p-2 my-2 border border-zinc-200 rounded-lg shadow-sm bg-zinc-50">
                 <div class="flex items-center space-x-2">
-                    <span class="text-sm font-medium text-gray-500 uppercase">{{ __('personnel::common.labels.duration') }}:</span>
+                    <span class="text-sm font-medium text-zinc-500 uppercase">{{ __('personnel::common.labels.duration') }}:</span>
                     @if(! empty($calculatedDataEducation))
-                        <span class="font-medium text-gray-900">
+                        <span class="font-medium text-zinc-900">
                             {{ ViewNumberFormatter::decimal($calculatedDataEducation['diff']) }} {{ __('personnel::common.labels.month') }}
                             ({{ $calculatedDataEducation['year'] }} {{ __('personnel::common.labels.year') }}
                             {{ $calculatedDataEducation['month'] }} {{ __('personnel::common.labels.month') }}
@@ -153,11 +153,11 @@
 
                 @if(Arr::get($educationState, 'coefficient') > 0)
                     <div class="flex items-center space-x-2">
-                        <span class="text-sm font-medium text-gray-500 uppercase">{{ __('personnel::common.labels.coefficient') }}:</span>
+                        <span class="text-sm font-medium text-zinc-500 uppercase">{{ __('personnel::common.labels.coefficient') }}:</span>
                         <span class="font-medium text-ink">{{ ViewNumberFormatter::decimal($educationState['coefficient']) }}</span>
                     </div>
                     <div class="flex items-center space-x-2">
-                        <span class="text-sm font-medium text-gray-500 uppercase">{{ __('personnel::common.labels.extra_seniority') }}:</span>
+                        <span class="text-sm font-medium text-zinc-500 uppercase">{{ __('personnel::common.labels.extra_seniority') }}:</span>
                         @if(! empty($calculatedDataEducation))
                             <span class="font-medium text-rose-500">
                                 {{ ViewNumberFormatter::decimal($calculatedDataEducation['duration']) }} {{ __('personnel::common.labels.month') }}
@@ -374,7 +374,7 @@
                                 <x-table.td :isButton="true">
                                     <button
                                         x-on:click="$dispatch('confirm-action', { tone: 'rose', message: @js(__('personnel::common.messages.remove_data_confirm')), confirmText: @js(__('ui::common.actions.delete')), run: () => $wire.removeExtraEducation({{ $key }}) })"
-                                        class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700"
+                                        class="flex items-center justify-center w-8 h-8 text-xs font-medium text-zinc-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-zinc-700"
                                     >
                                         <x-icons.force-delete></x-icons.force-delete>
                                     </button>
@@ -395,10 +395,10 @@
         </div>
 
         @if(! empty($calculatedDataExtraEducation))
-            <div class="flex flex-col p-2 my-2 space-y-2 border border-gray-200 rounded-lg shadow-sm bg-gray-50">
+            <div class="flex flex-col p-2 my-2 space-y-2 border border-zinc-200 rounded-lg shadow-sm bg-zinc-50">
                 <div class="flex items-center space-x-2">
-                    <span class="font-medium text-gray-500">{{ __('personnel::common.labels.total_duration') }}:</span>
-                    <span class="font-medium text-gray-900">
+                    <span class="font-medium text-zinc-500">{{ __('personnel::common.labels.total_duration') }}:</span>
+                    <span class="font-medium text-zinc-900">
                         {{ ViewNumberFormatter::decimal(data_get($calculatedDataExtraEducation, 'total_duration', 0)) }} {{ __('personnel::common.labels.month') }}
                         ({{ data_get($calculatedDataExtraEducation, 'total_duration_diff.year', 0) }} {{ __('personnel::common.labels.year') }}
                         {{ data_get($calculatedDataExtraEducation, 'total_duration_diff.month', 0) }} {{ __('personnel::common.labels.month') }})
@@ -406,7 +406,7 @@
                     </span>
                 </div>
                 <div class="flex items-center space-x-2">
-                    <span class="font-medium text-gray-500">{{ __('personnel::common.labels.extra_seniority') }}:</span>
+                    <span class="font-medium text-zinc-500">{{ __('personnel::common.labels.extra_seniority') }}:</span>
                     <span class="font-medium text-rose-500">
                         {{ ViewNumberFormatter::decimal(data_get($calculatedDataExtraEducation, 'extra_seniority', 0)) }} {{ __('personnel::common.labels.month') }}
                         ({{ data_get($calculatedDataExtraEducation, 'extra_seniority_full.year', 0) }} {{ __('personnel::common.labels.year') }}

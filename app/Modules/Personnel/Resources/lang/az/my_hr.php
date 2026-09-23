@@ -342,7 +342,7 @@ return [
         ],
         'empty' => [
             'title' => 'Hələ uyğunlaşma təyinatı yoxdur',
-            'body' => 'Bu əməkdaş üçün hələ heç bir onboarding sənədi təyin edilməyib.',
+            'body' => 'Bu əməkdaş üçün hələ heç bir uyğunlaşma sənədi təyin edilməyib.',
         ],
     ],
     'learning' => [
@@ -439,7 +439,7 @@ return [
             'assignment_intro' => 'Bu panel seçilmiş əməkdaş üzrə material təyinatlarının vəziyyətini və cari material axınını göstərir.',
             'library_help' => 'Materialı bir dəfə yaradın, sonra seçilmiş əməkdaşa və gələcəkdə digər əməkdaşlara təyin edin.',
             'assignment_help' => 'Hazır materialı seçib əməkdaşın öyrənmə tabına əlavə edin. Son tarix versəniz gecikmə statusu avtomatik görünəcək.',
-            'library_source' => 'Yeni material yaratmaq, kitabxananı idarə etmək və bulk targeting etmək üçün ayrıca öyrənmə kitabxanasından istifadə edin. Bu side panel yalnız seçilmiş əməkdaş üçün təyinat və override əməliyyatlarını saxlayır.',
+            'library_source' => 'Yeni material yaratmaq, kitabxananı idarə etmək və toplu təyinat etmək üçün ayrıca öyrənmə kitabxanasından istifadə edin. Bu side panel yalnız seçilmiş əməkdaş üçün təyinat və override əməliyyatlarını saxlayır.',
             'asset_saved' => 'Öyrənmə materialı yaradıldı.',
             'assignment_saved' => 'Öyrənmə materialı əməkdaşa təyin edildi.',
             'assignment_waived' => 'Material təyinatı üçün istisna verildi.',

@@ -70,7 +70,7 @@
                             {{ __('services::common.actions.cancel') }}
                         </button>
                         <x-button mode="primary" class="space-x-2" type="submit">
-                            <x-icons.permission-icon color="text-white" hover="text-gray-50"></x-icons.permission-icon>
+                            <x-icons.permission-icon color="text-white" hover="text-zinc-50"></x-icons.permission-icon>
                             <span>{{ __('services::common.actions.save') }}</span>
                         </x-button>
                     </div>

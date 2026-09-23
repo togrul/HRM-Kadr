@@ -33,9 +33,8 @@
                         </div>
                             <x-ui.async-button
                                 type="button"
-                                variant="primary"
                             wire:click="{{ $flowKey === 'birthday' ? 'seedBirthdayStarter' : ($flowKey === 'position_change' ? 'seedPositionChangeStarter' : ($flowKey === 'employment_started' ? 'seedEmploymentStartedStarter' : 'seedHolidayStarter')) }}"
-                            class="shrink-0 shadow-card"
+                            class="shrink-0"
                         >
                             {{ __('notifications::common.buttons.seed') }}
                         </x-ui.async-button>
@@ -54,16 +53,16 @@
                   </p>
 
                     <div class="mt-3 flex flex-wrap items-start gap-2">
-                        <x-notification.chip mode="neutral" size="sm" uppercase class="max-w-full whitespace-normal break-words text-left leading-5 shadow-card">
+                        <x-notification.chip mode="neutral" size="sm" class="max-w-full whitespace-normal break-words text-left leading-5 shadow-card">
                             {{ $displayTemplateKey($starterFlows[$flowKey]['template_key']) }}
                         </x-notification.chip>
-                        <x-notification.chip mode="neutral" size="sm" uppercase class="max-w-full whitespace-normal break-words text-left leading-5 shadow-card">
+                        <x-notification.chip mode="neutral" size="sm" class="max-w-full whitespace-normal break-words text-left leading-5 shadow-card">
                             {{ $displayTrigger($starterFlows[$flowKey]['trigger'] ?? null) }}
                         </x-notification.chip>
-                        <x-notification.chip mode="neutral" size="sm" uppercase class="max-w-full whitespace-normal break-words text-left leading-5 shadow-card">
+                        <x-notification.chip mode="neutral" size="sm" class="max-w-full whitespace-normal break-words text-left leading-5 shadow-card">
                             {{ __('notifications::common.channels.'.$starterFlows[$flowKey]['channel']) }}
                         </x-notification.chip>
-                        <x-notification.chip :mode="$starterFlows[$flowKey]['approval_required'] ? 'amber' : 'emerald'" size="sm" uppercase class="max-w-full whitespace-normal break-words text-left leading-5">
+                        <x-notification.chip :mode="$starterFlows[$flowKey]['approval_required'] ? 'amber' : 'emerald'" size="sm" class="max-w-full whitespace-normal break-words text-left leading-5">
                             {{ $starterFlows[$flowKey]['approval_required'] ? __('notifications::common.badges.approval_required') : __('notifications::common.badges.instant_send') }}
                         </x-notification.chip>
                     </div>

@@ -30,7 +30,7 @@ return [
         'time_to_stage' => 'Mərhələyə orta çatma müddəti',
         'rejection_reasons' => 'Rədd səbəbləri',
         'recent_activity' => 'Son hərəkətlər',
-        'ats_completion' => 'ATS tamamlanması',
+        'ats_completion' => 'Müraciət prosesinin tamamlanması',
         'interviews_offers_pool' => 'Müsahibə, təklif və ehtiyat bazası',
         'interviews' => 'Müsahibələr',
         'scorecard' => 'Qiymətləndirmə kartı',
@@ -188,7 +188,7 @@ return [
         'not_provided' => 'Namizəd konversiyası zamanı əlavə edilməyib',
         'personnel_note' => ':application nömrəli namizəd müraciətindən yaradılıb. Vakansiya: :opening.',
         'lifecycle_title' => 'Namizəddən əməkdaşa keçid',
-        'lifecycle_description' => ':candidate namizədi :opening vakansiyası üzrə əməkdaş qeydinə çevrildi. Onboarding addımları burada izlənilir.',
+        'lifecycle_description' => ':candidate namizədi :opening vakansiyası üzrə əməkdaş qeydinə çevrildi. Uyğunlaşma addımları burada izlənilir.',
         'order_source' => 'işə qəbul əmri',
     ],
     'messages' => [

@@ -12,25 +12,25 @@
                 <div class="min-w-0 space-y-2">
                     <div class="flex flex-wrap items-center gap-2">
                         <x-small-badge mode="amber">{{ __('personnel::common.states.waiting_for_approval') }}</x-small-badge>
-                        <span class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                        <span class="hrm-eyebrow">
                             {{ __('personnel::common.messages.confirm_title') }}
                         </span>
                     </div>
                     <div class="space-y-1">
-                        <p class="text-sm font-semibold text-slate-800">{{ __('personnel::common.messages.confirm_message') }}</p>
-                        <p class="text-sm leading-6 text-slate-500">{{ __('personnel::common.messages.confirm_description') }}</p>
+                        <p class="text-sm font-semibold text-zinc-800">{{ __('personnel::common.messages.confirm_message') }}</p>
+                        <p class="text-sm leading-6 text-zinc-500">{{ __('personnel::common.messages.confirm_description') }}</p>
                     </div>
                 </div>
             </div>
             <div class="flex shrink-0 items-center gap-3">
-                <p class="hidden max-w-48 text-right text-xs leading-5 text-slate-400 lg:block">
+                <p class="hidden max-w-48 text-right text-xs leading-5 text-zinc-400 lg:block">
                     {{ __('personnel::common.messages.confirm_hint') }}
                 </p>
                 <button
                     wire:click="confirmPersonnel"
                     wire:loading.attr="disabled"
                     wire:target="confirmPersonnel"
-                    class="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                    class="inline-flex items-center justify-center gap-2 rounded-xl bg-zinc-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                     <svg wire:loading wire:target="confirmPersonnel" class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
@@ -169,7 +169,7 @@
         @if(! auth()->user()->can('update-personnels') && isset($personnelModel))
             <div class="flex items-center space-x-2">
                 <x-icons.lock-icon color="text-rose-500" hover="text-rose-600" size="w-7 h-7"></x-icons.lock-icon>
-                <span class="text-sm text-slate-500">{{ __('personnel::common.messages.no_permission_to_edit') }}</span>
+                <span class="text-sm text-zinc-500">{{ __('personnel::common.messages.no_permission_to_edit') }}</span>
             </div>
         @else
             @if($this->activeStepUsesChildComponent)

@@ -68,11 +68,11 @@
                         <p class="text-sm font-semibold text-zinc-900">{{ $row['label'] }}</p>
                         <div class="mt-4 space-y-4">
                             <div>
-                                <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-zinc-400">{{ __('reports::dashboard.overview.cards.attendance_coverage') }}</p>
+                                <p class="hrm-eyebrow">{{ __('reports::dashboard.overview.cards.attendance_coverage') }}</p>
                                 <p class="mt-2 text-3xl font-semibold text-zinc-950">{{ number_format($row['coverage_pct'], 1) }}%</p>
                             </div>
                             <div>
-                                <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-zinc-400">{{ __('reports::dashboard.overview.cards.absence_rate') }}</p>
+                                <p class="hrm-eyebrow">{{ __('reports::dashboard.overview.cards.absence_rate') }}</p>
                                 <p class="mt-2 text-2xl font-semibold text-zinc-950">{{ number_format($row['absence_rate_pct'], 1) }}%</p>
                             </div>
                         </div>

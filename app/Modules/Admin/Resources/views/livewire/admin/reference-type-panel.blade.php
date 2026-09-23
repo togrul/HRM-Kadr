@@ -1,4 +1,4 @@
-<div wire:transition class="flex border border-gray-300 rounded-md bg-slate-50 relative px-3 py-2 my-3">
+<div wire:transition class="flex border border-zinc-300 rounded-md bg-zinc-50 relative px-3 py-2 my-3">
     <button type="button" class="appearance-none absolute right-2 top-2 flex h-10 w-10 items-center justify-center rounded-lg hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400" wire:click="$dispatch('close-child')" aria-label="{{ __('admin::references.actions.close') }}">
         <x-icons.close-icon></x-icons.close-icon>
     </button>
@@ -21,7 +21,7 @@
             <x-modal-button style="width: auto !important;" mode="black">{{ __('admin::references.actions.save') }}</x-modal-button>
             <button
                 wire:click.prevent="deleteModel()"
-                class="appearance-none flex h-10 w-10 flex-none items-center justify-center rounded-lg bg-rose-50 font-medium text-gray-500 transition hover:bg-red-100 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
+                class="appearance-none flex h-10 w-10 flex-none items-center justify-center rounded-lg bg-rose-50 font-medium text-zinc-500 transition hover:bg-red-100 hover:text-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
                 aria-label="{{ __('admin::references.actions.delete') }}"
             >
                 <x-icons.delete-icon color="text-rose-500" hover="text-rose-600"></x-icons.delete-icon>

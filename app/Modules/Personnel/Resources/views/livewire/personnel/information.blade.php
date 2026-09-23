@@ -1,6 +1,6 @@
 <div class="flex flex-col space-y-8" x-data="{}">
     <div class="sidemenu-title">
-        <h2 class="text-xl font-semibold text-gray-500 font-title" id="slide-over-title">
+        <h2 class="text-xl font-semibold text-zinc-500 font-title" id="slide-over-title">
             {{ $title ?? ''}}
         </h2>
     </div>

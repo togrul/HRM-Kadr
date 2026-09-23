@@ -6,7 +6,7 @@ return [
         'deleted' => 'Silinmiş',
     ],
     'actions' => [
-        'onboarding_wizard' => 'Onboarding wizard',
+        'onboarding_wizard' => 'Şablon sehrbazı',
         'add_template' => 'Şablon əlavə et',
     ],
     'messages' => [

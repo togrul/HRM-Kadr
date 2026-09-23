@@ -1,5 +1,5 @@
 <div class="sidemenu-title">
-    <h2 class="text-xl font-semibold text-gray-500 font-title" id="slide-over-title">
+    <h2 class="text-xl font-semibold text-zinc-500 font-title" id="slide-over-title">
         {!! $title ?? '' !!}
     </h2>
     <div class="mt-1">

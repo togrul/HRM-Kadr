@@ -70,29 +70,29 @@
                     @forelse ($this->contractRows as $dataContract)
                         <tr>
                             <x-table.td>
-                                <span class="text-sm bg-slate-100 rounded-md px-3 py-1 font-medium flex justify-center items-center text-slate-600">{{ $dataContract->rank->name }}</span>
+                                <span class="text-sm bg-zinc-100 rounded-md px-3 py-1 font-medium flex justify-center items-center text-zinc-600">{{ $dataContract->rank->name }}</span>
                             </x-table.td>
                             <x-table.td>
-                                <span class="text-sm font-medium flex items-center text-slate-900">{{ $dataContract->contract_duration }} {{ __('personnel::common.labels.month') }}</span>
+                                <span class="text-sm font-medium flex items-center text-zinc-900">{{ $dataContract->contract_duration }} {{ __('personnel::common.labels.month') }}</span>
                             </x-table.td>
                             <x-table.td>
                                 <div class="flex flex-col">
                                     <div class="flex space-x-1 items-center">
-                                        <span class="text-sm font-medium text-gray-500">
+                                        <span class="text-sm font-medium text-zinc-500">
                                             {{ __('personnel::information.fields.contract_date') }}:
                                         </span>
-                                        <span class="text-sm font-medium text-gray-700">
+                                        <span class="text-sm font-medium text-zinc-700">
                                             {{ $dataContract->contract_date->format('d.m.Y') }}
                                        </span>
                                     </div>
                                     <div class="flex space-x-2">
-                                        <span class="text-sm text-gray-500 font-medium">{{ __('personnel::information.fields.contract_refresh_date') }}:</span>
+                                        <span class="text-sm text-zinc-500 font-medium">{{ __('personnel::information.fields.contract_refresh_date') }}:</span>
                                         <span class="text-sm font-medium text-ink">
                                             {{ $dataContract->contract_refresh_date->format('d.m.Y') }}
                                        </span>
                                     </div>
                                     <div class="flex space-x-2">
-                                        <span class="text-sm text-gray-500 font-medium">{{ __('personnel::information.fields.contract_end_date') }}:</span>
+                                        <span class="text-sm text-zinc-500 font-medium">{{ __('personnel::information.fields.contract_end_date') }}:</span>
                                         <span class="text-sm font-medium text-rose-500">
                                             {{ $dataContract->contract_ends_at->format('d.m.Y') }}
                                        </span>
@@ -102,7 +102,7 @@
                             <x-table.td :isButton="true">
                                 <button
                                     x-on:click="$dispatch('confirm-action', { tone: 'rose', message: @js(__('personnel::common.messages.remove_data_confirm')), confirmText: @js(__('ui::common.actions.delete')), run: () => $wire.forceDeleteContract({{ $dataContract->id }}) })"
-                                    class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-50 hover:text-gray-700"
+                                    class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-zinc-500 hover:bg-red-50 hover:text-zinc-700"
                                 >
                                     <x-icons.force-delete></x-icons.force-delete>
                                 </button>

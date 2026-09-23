@@ -28,7 +28,7 @@
     class="relative mt-1"
 >
     <button type="button" @click="open = !open; if (open) $nextTick(() => $refs.search.focus())"
-        class="flex w-full items-center justify-between gap-2 rounded-lg bg-neutral-100 px-3 py-2 text-left text-sm transition focus:outline-none focus:ring-2 focus:ring-blue-500">
+        class="flex w-full items-center justify-between gap-2 rounded-lg bg-neutral-100 px-3 py-2 text-left text-sm transition focus:outline-none focus:ring-2 focus:ring-zinc-400">
         <span class="truncate" :class="selectedLabel ? 'text-zinc-900' : 'text-zinc-400'"
             x-text="selectedLabel || @js($placeholder)"></span>
         <svg class="h-4 w-4 shrink-0 text-zinc-400 transition" :class="open ? 'rotate-180' : ''" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg>

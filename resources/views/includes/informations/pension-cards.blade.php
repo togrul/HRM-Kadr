@@ -48,10 +48,10 @@
                         @endphp
                         <tr>
                             <x-table.td>
-                                <span class="text-sm bg-slate-100 rounded-md shadow-sm px-3 py-1 font-medium flex justify-center items-center text-slate-600">{{ $pension->card_no }}</span>
+                                <span class="text-sm bg-zinc-100 rounded-md shadow-sm px-3 py-1 font-medium flex justify-center items-center text-zinc-600">{{ $pension->card_no }}</span>
                             </x-table.td>
                             <x-table.td>
-                                <span class="text-sm font-medium flex items-center text-slate-900">{{ $pension->given_date->format('d.m.Y') }}</span>
+                                <span class="text-sm font-medium flex items-center text-zinc-900">{{ $pension->given_date->format('d.m.Y') }}</span>
                             </x-table.td>
                             <x-table.td>
                                 <div class="flex items-center space-x-2">
@@ -73,7 +73,7 @@
                                 <div class="flex items-center space-x-2">
                                     <button
                                         x-on:click="$dispatch('confirm-action', { tone: 'rose', message: @js(__('personnel::common.messages.remove_data_confirm')), confirmText: @js(__('ui::common.actions.delete')), run: () => $wire.forceDeletePensionCard({{ $pension->id }}) })"
-                                        class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-50 hover:text-gray-700"
+                                        class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-zinc-500 hover:bg-red-50 hover:text-zinc-700"
                                     >
                                         <x-icons.force-delete></x-icons.force-delete>
                                     </button>

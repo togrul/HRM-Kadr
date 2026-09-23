@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'title' => 'Şablon onboarding wizard',
+    'title' => 'Şablon sehrbazı',
     'subtitle' => 'Yeni sifariş şablonunu metadata əsaslı axınla qoşmaq üçün bu addımları izləyin.',
     'cards' => [
         'execution_checklist' => 'İcra checklist-i',
@@ -37,7 +37,7 @@ return [
     'actions' => [
         'ensure_sets' => 'Setləri yarat',
         'open_ui_config' => 'UI konfiqini aç',
-        'create_draft_version' => 'Draft versiya yarat',
+        'create_draft_version' => 'Qaralama versiya yarat',
         'upload_and_attach' => 'Yüklə və əlavə et',
         'generate_metadata_mappings' => 'Metadata + mapping yarat',
         'run_coverage' => 'Coverage işə sal',
@@ -55,7 +55,7 @@ return [
         'fail' => [
             'template_selected' => 'Addım 1-də şablon seçin.',
             'order_type_selected' => 'Addım 2-də sifariş tipini seçin.',
-            'version_selected' => 'Draft versiya seçin və ya yaradın.',
+            'version_selected' => 'Qaralama versiya seçin və ya yaradın.',
             'docx_attached' => 'Seçilmiş versiya üçün DOCX yükləyin.',
             'coverage_scan_runnable' => 'DOCX yüklədikdən sonra coverage işə salın.',
             'no_missing_mappings' => 'Çatışmayan placeholder-ları həll edin.',
@@ -67,8 +67,8 @@ return [
         'select_order_type_version_first' => 'Zəhmət olmasa sifariş tipi/versiya seçin.',
         'select_version_first' => 'Zəhmət olmasa versiya seçin.',
         'create_or_select_version_first' => 'Zəhmət olmasa əvvəlcə versiya yaradın və ya seçin.',
-        'draft_version_created_with_number' => 'Draft versiya yaradıldı: v:version',
-        'draft_version_created_success' => 'Draft versiya uğurla yaradıldı.',
+        'draft_version_created_with_number' => 'Qaralama versiya yaradıldı: v:version',
+        'draft_version_created_success' => 'Qaralama versiya uğurla yaradıldı.',
         'docx_uploaded_and_linked' => 'DOCX yükləndi və seçilmiş versiyaya bağlandı.',
         'docx_uploaded_success' => 'DOCX uğurla yükləndi.',
         'metadata_synced_summary' => 'Metadata sinxronlaşdırıldı. Sahələr +: :fields, ~: :updated_fields, -: :deleted_fields | Mapping-lər +: :mappings, ~: :updated_mappings, -: :deleted_mappings',

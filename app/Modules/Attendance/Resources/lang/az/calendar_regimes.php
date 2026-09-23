@@ -2,7 +2,7 @@
 
 return [
     'title' => 'İş rejimi təqvimi',
-    'description' => 'Ümumi və struktur səviyyəli iş günü, həftəsonu və bayram override-larını idarə edin.',
+    'description' => 'Ümumi və struktur səviyyəli iş günü, həftəsonu və bayram istisnalarını idarə edin.',
     'cards' => [
         'create' => 'Yeni təqvim qaydası',
         'edit' => 'Təqvim qaydasını redaktə et',

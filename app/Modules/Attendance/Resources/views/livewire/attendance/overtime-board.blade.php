@@ -19,11 +19,11 @@
                 </div>
                 <div>
                     <x-label for="attendance-ot-from">{{ __('attendance::overtime.filters.from') }}</x-label>
-                    <input id="attendance-ot-from" wire:model.live="fromDate" type="date" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
+                    <input id="attendance-ot-from" wire:model.live="fromDate" type="date" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 h-10 px-3 text-base sm:text-sm" />
                 </div>
                 <div>
                     <x-label for="attendance-ot-to">{{ __('attendance::overtime.filters.to') }}</x-label>
-                    <input id="attendance-ot-to" wire:model.live="toDate" type="date" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
+                    <input id="attendance-ot-to" wire:model.live="toDate" type="date" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 h-10 px-3 text-base sm:text-sm" />
                 </div>
             </div>
 
@@ -58,7 +58,7 @@
                             <button
                                 type="button"
                                 wire:click="selectPersonnel('{{ $personnel->tabel_no }}', '{{ addslashes($personnel->fullname) }}')"
-                                class="flex w-full flex-col rounded-md px-2 py-1 text-left text-slate-600 transition-all duration-300 hover:bg-white drop-shadow-sm"
+                                class="flex w-full flex-col rounded-md px-2 py-1 text-left text-zinc-600 transition-all duration-300 hover:bg-white drop-shadow-sm"
                             >
                                 <span>{{ $personnel->fullname }}</span>
                                 <span class="text-xs font-mono text-zinc-500">{{ $personnel->tabel_no }}</span>
@@ -69,7 +69,7 @@
                                 @endif
                             </button>
                         @empty
-                            <span class="mx-auto text-sm font-medium text-slate-500">
+                            <span class="mx-auto text-sm font-medium text-zinc-500">
                                 {{ __('attendance::overtime.create.placeholder') }}
                             </span>
                         @endforelse
@@ -77,15 +77,15 @@
                 </div>
                 <div>
                     <x-label for="attendance-ot-create-date">{{ __('attendance::overtime.create.date') }}</x-label>
-                    <input id="attendance-ot-create-date" wire:model.live="manualRequest.date" type="date" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
+                    <input id="attendance-ot-create-date" wire:model.live="manualRequest.date" type="date" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 h-10 px-3 text-base sm:text-sm" />
                 </div>
                 <div>
                     <x-label for="attendance-ot-create-minutes">{{ __('attendance::overtime.create.requested_minutes') }}</x-label>
-                    <input id="attendance-ot-create-minutes" wire:model="manualRequest.requested_minutes" type="number" min="1" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
+                    <input id="attendance-ot-create-minutes" wire:model="manualRequest.requested_minutes" type="number" min="1" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 h-10 px-3 text-base sm:text-sm" />
                 </div>
                 <div class="md:col-span-2 xl:col-span-3">
                     <x-label for="attendance-ot-create-reason">{{ __('attendance::overtime.create.reason') }}</x-label>
-                    <input id="attendance-ot-create-reason" wire:model="manualRequest.reason" type="text" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
+                    <input id="attendance-ot-create-reason" wire:model="manualRequest.reason" type="text" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 h-10 px-3 text-base sm:text-sm" />
                 </div>
                 <div class="flex items-end">
                     <x-button mode="black" class="w-full !h-10" wire:click="createManualRequest">

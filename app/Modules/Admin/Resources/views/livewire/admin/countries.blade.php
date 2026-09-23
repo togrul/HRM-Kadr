@@ -10,7 +10,7 @@
 
         <div class="flex items-center justify-center space-x-2 action-section">
             <x-button class="space-x-2" mode="primary" wire:click.prevent="openCrud()">
-                <x-icons.add-icon color="text-white" hover="text-gray-50"></x-icons.add-icon>
+                <x-icons.add-icon color="text-white" hover="text-zinc-50"></x-icons.add-icon>
                 <span>{{ __('admin::references.buttons.add_country') }}</span>
             </x-button>
         </div>
@@ -55,19 +55,19 @@
                         @forelse ($countries as $country)
                             <tr wire:key="country-row-{{ $country->id }}">
                                 <x-table.td>
-                                      <span class="text-sm text-gray-500 font-medium">
+                                      <span class="text-sm text-zinc-500 font-medium">
                                           {{ $country->id }}
                                       </span>
                                 </x-table.td>
 
                                 <x-table.td>
-                                      <span class="text-sm text-gray-500 font-medium">
+                                      <span class="text-sm text-zinc-500 font-medium">
                                           {{ $country->locale_code }}
                                       </span>
                                 </x-table.td>
 
                                 <x-table.td>
-                                      <span class="text-sm text-gray-500 font-medium">
+                                      <span class="text-sm text-zinc-500 font-medium">
                                           {{ $country->code }}
                                       </span>
                                 </x-table.td>
@@ -85,7 +85,7 @@
                                             class="h-9 w-9 hover:bg-zinc-100"
                                             :title="__('admin::references.actions.edit')"
                                         >
-                                            <x-icons.edit-icon color="text-slate-400" hover="text-slate-500"></x-icons.edit-icon>
+                                            <x-icons.edit-icon color="text-zinc-400" hover="text-zinc-500"></x-icons.edit-icon>
                                         </x-action-button>
                                         <x-action-button
                                             wire:click.prevent="deleteModel({{ $country->id }})"

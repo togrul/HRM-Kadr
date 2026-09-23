@@ -1,6 +1,6 @@
 <div class="flex flex-col space-y-4">
     <header class="sidemenu-title">
-        <h2 class="text-xl font-semibold text-gray-500 font-title" id="slide-over-title">
+        <h2 class="text-xl font-semibold text-zinc-500 font-title" id="slide-over-title">
             {{ $title ?? ''}}
         </h2>
     </header>
@@ -20,12 +20,12 @@
                 @forelse($this->applicantPersonnelList as $pl)
                     <p
                         wire:click="selectPersonnel('{{ $pl->tabel_no }}', '{{ $pl->fullname }}','tabel_no')"
-                        class="flex flex-col px-2 py-1 transition-all duration-300 rounded-md cursor-pointer hover:bg-white text-slate-600 drop-shadow-sm"
+                        class="flex flex-col px-2 py-1 transition-all duration-300 rounded-md cursor-pointer hover:bg-white text-zinc-600 drop-shadow-sm"
                     >
                         <span>{{ $pl->fullname }}</span>
                     </p>
                 @empty
-                    <span class="mx-auto text-sm font-medium text-slate-500">
+                    <span class="mx-auto text-sm font-medium text-zinc-500">
                         {{ __('leaves::common.labels.search_personnel') }}
                     </span>
                 @endforelse
@@ -335,12 +335,12 @@
                             @forelse($this->assignedPersonnelList as $pl)
                                 <p
                                     wire:click="selectPersonnel('{{ $pl->tabel_no }}', '{{ $pl->fullname }}','assigned_to', {{ $pl->id }})"
-                                    class="flex flex-col rounded-md px-2 py-1 text-slate-600 transition-all duration-300 drop-shadow-sm hover:bg-white"
+                                    class="flex flex-col rounded-md px-2 py-1 text-zinc-600 transition-all duration-300 drop-shadow-sm hover:bg-white"
                                 >
                                     <span>{{ $pl->fullname }}</span>
                                 </p>
                             @empty
-                                <span class="mx-auto text-sm font-medium text-slate-500">
+                                <span class="mx-auto text-sm font-medium text-zinc-500">
                                     {{ __('leaves::common.labels.search_personnel') }}
                                 </span>
                             @endforelse

@@ -9,7 +9,7 @@
         <div class="space-y-4 rounded-2xl border border-zinc-200 bg-zinc-50/70 p-4">
             <div class="grid gap-4 md:grid-cols-2">
                 <div class="space-y-2">
-                    <label class="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.fields.category') }}</label>
+                    <label class="hrm-eyebrow">{{ __('notifications::common.fields.category') }}</label>
                     <x-ui.select wire:model.live="form.category">
                         <option value="announcement">{{ __('notifications::common.categories.announcement') }}</option>
                         <option value="holiday">{{ __('notifications::common.categories.holiday') }}</option>
@@ -17,7 +17,7 @@
                 </div>
 
                 <div class="space-y-2">
-                    <label class="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.fields.schedule_mode') }}</label>
+                    <label class="hrm-eyebrow">{{ __('notifications::common.fields.schedule_mode') }}</label>
                     <x-ui.select wire:model.live="form.schedule_mode">
                         @foreach ($scheduleModes as $mode => $label)
                             <option value="{{ $mode }}">{{ $label }}</option>
@@ -27,7 +27,7 @@
                 </div>
 
                 <div class="space-y-2">
-                    <label class="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.fields.channel') }}</label>
+                    <label class="hrm-eyebrow">{{ __('notifications::common.fields.channel') }}</label>
                     <x-ui.select wire:model="form.channel">
                         <option value="database">{{ __('notifications::common.channels.database') }}</option>
                         <option value="mail">{{ __('notifications::common.channels.mail') }}</option>
@@ -35,7 +35,7 @@
                 </div>
 
                 <div class="space-y-2">
-                    <label class="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.fields.format') }}</label>
+                    <label class="hrm-eyebrow">{{ __('notifications::common.fields.format') }}</label>
                     <x-ui.select wire:model="form.format">
                         <option value="text">{{ __('notifications::common.formats.text') }}</option>
                         <option value="html">{{ __('notifications::common.formats.html') }}</option>
@@ -52,14 +52,14 @@
                             <p class="mt-1 text-xs leading-5 text-zinc-500">{{ __('notifications::common.helpers.matched_rule_label') }}: <span class="font-semibold text-zinc-700">{{ $matchedRuleLabel }}</span></p>
                         @endif
                     </div>
-                    <span class="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
+                    <span class="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 hrm-eyebrow">
                         {{ __('notifications::common.schedule_modes.'.$form['schedule_mode']) }}
                     </span>
                 </div>
 
                 @if ($form['schedule_mode'] === 'custom')
                     <div class="mt-4 space-y-2">
-                        <label class="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.fields.scheduled_at') }}</label>
+                        <label class="hrm-eyebrow">{{ __('notifications::common.fields.scheduled_at') }}</label>
                         <input type="datetime-local" wire:model="form.scheduled_at" class="w-full rounded-2xl border border-zinc-200 bg-zinc-50/70 px-4 py-3 text-sm text-zinc-800">
                         @error('form.scheduled_at') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
@@ -68,43 +68,43 @@
 
             <div class="grid gap-4 md:grid-cols-2">
                 <div class="space-y-2 md:col-span-2">
-                    <label class="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.fields.title') }}</label>
+                    <label class="hrm-eyebrow">{{ __('notifications::common.fields.title') }}</label>
                     <input type="text" wire:model="form.title" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
                     @error('form.title') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
 
                 @if ($form['category'] === 'holiday')
                     <div class="space-y-2">
-                        <label class="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.fields.holiday_name') }}</label>
+                        <label class="hrm-eyebrow">{{ __('notifications::common.fields.holiday_name') }}</label>
                         <input type="text" wire:model="form.holiday_name" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
                         @error('form.holiday_name') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
 
                     <div class="space-y-2">
-                        <label class="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.fields.holiday_date') }}</label>
+                        <label class="hrm-eyebrow">{{ __('notifications::common.fields.holiday_date') }}</label>
                         <input type="date" wire:model="form.holiday_date" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
                         @error('form.holiday_date') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
 
                     <div class="space-y-2">
-                        <label class="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.fields.duration') }}</label>
+                        <label class="hrm-eyebrow">{{ __('notifications::common.fields.duration') }}</label>
                         <input type="text" wire:model="form.duration" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
                     </div>
 
                     <div class="space-y-2">
-                        <label class="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.fields.scope') }}</label>
+                        <label class="hrm-eyebrow">{{ __('notifications::common.fields.scope') }}</label>
                         <input type="text" wire:model="form.scope" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
                         @error('form.scope') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
 
                     <div class="space-y-2 md:col-span-2">
-                        <label class="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.fields.holiday_rules') }}</label>
+                        <label class="hrm-eyebrow">{{ __('notifications::common.fields.holiday_rules') }}</label>
                         <textarea wire:model="form.holiday_rules" rows="4" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm leading-6 text-zinc-800"></textarea>
                     </div>
                 @endif
 
                 <div class="space-y-2 md:col-span-2">
-                    <label class="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.fields.body') }}</label>
+                    <label class="hrm-eyebrow">{{ __('notifications::common.fields.body') }}</label>
                     <textarea wire:model="form.body" rows="{{ $form['category'] === 'holiday' ? 4 : 7 }}" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm leading-6 text-zinc-800"></textarea>
                     @error('form.body') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>

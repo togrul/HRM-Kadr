@@ -13,13 +13,13 @@
 
     @php
         $isEditing = $this->isEditing();
-        $inputClass = 'block w-full mt-1 text-sm transition duration-100 ease-in-out border-none rounded-lg shadow-sm bg-neutral-100 focus:ring-blue-500 focus:border-blue-500 px-3 py-2';
+        $inputClass = 'block w-full mt-1 text-sm transition duration-100 ease-in-out border-none rounded-lg shadow-sm bg-neutral-100 focus:ring-zinc-400 focus:border-ink px-3 py-2';
     @endphp
 
     {{-- Modal header --}}
     <div class="sidemenu-title">
         <div class="flex items-center gap-3">
-            <h2 class="text-lg font-medium text-gray-600" id="slide-over-title">
+            <h2 class="text-lg font-medium text-zinc-600" id="slide-over-title">
                 {{ $isEditing ? __('orders::order_composer.edit_title') : __('orders::order_composer.create_title') }}
             </h2>
             @if ($isEditing)
@@ -28,7 +28,7 @@
                 </span>
             @endif
         </div>
-        <p class="mt-1 text-sm text-gray-400">{{ __('orders::order_composer.labels.edit_hint') }}</p>
+        <p class="mt-1 text-sm text-zinc-400">{{ __('orders::order_composer.labels.edit_hint') }}</p>
     </div>
 
     <div class="flex flex-col w-full px-0 py-6 mx-auto space-y-6 bg-white">

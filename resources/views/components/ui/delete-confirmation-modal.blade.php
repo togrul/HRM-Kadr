@@ -44,7 +44,7 @@
                                     </div>
                                     <div class="min-w-0 space-y-3">
                                         <div class="flex flex-wrap items-center gap-2">
-                                            <span class="inline-flex items-center rounded-full border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
+                                            <span class="inline-flex items-center rounded-full border border-zinc-200 bg-zinc-50 px-2.5 py-1 hrm-eyebrow">
                                                 {{ __('ui::common.destructive.impact') }}
                                             </span>
                                             <span class="inline-flex items-center rounded-full border border-rose-200 bg-rose-50 px-2.5 py-1 text-[11px] font-medium text-rose-600">
@@ -53,7 +53,7 @@
                                         </div>
 
                                         <div class="space-y-2">
-                                            <h2 id="delete-confirmation-title" class="text-xl font-semibold tracking-tight text-slate-700">
+                                            <h2 id="delete-confirmation-title" class="text-xl font-semibold tracking-tight text-zinc-700">
                                                 {{ $title }}
                                             </h2>
 
@@ -94,7 +94,7 @@
                     <div class="flex flex-col-reverse gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-end sm:px-6">
                         <button
                             type="button"
-                            class="camelcase inline-flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-md border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 shadow-sm transition-colors duration-150 hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300"
+                            class="camelcase inline-flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-md border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 shadow-sm transition-colors duration-150 hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300"
                             @click="$wire.call('{{ $cancelAction }}')"
                         >
                             {{ __('ui::common.actions.cancel') }}

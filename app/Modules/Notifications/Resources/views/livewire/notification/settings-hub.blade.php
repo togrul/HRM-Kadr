@@ -1,43 +1,30 @@
-<div class="space-y-5">
-    <x-surface-card :title="__('notifications::common.titles.module')" icon="icons.notification-icon">
+{{-- One card: section chips on top, the active panel straight under them. The old layout
+     wrapped a gradient header card and a shadowed panel card inside the titled card. --}}
+<div class="space-y-4">
         <div class="space-y-4">
-            <div class="rounded-2xl border border-zinc-200 bg-[linear-gradient(180deg,rgba(250,250,250,0.96),rgba(244,244,245,0.78))] p-4 shadow-card">
-                <div class="space-y-4">
-                    <div class="min-w-0">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400">{{ __('notifications::common.titles.module') }}</p>
-                        <div class="mt-2 flex flex-wrap items-center gap-3">
-                            <h3 class="text-xl font-semibold tracking-tight text-zinc-950">{{ data_get($tabs, $activeTab.'.label', __('notifications::common.tabs.'.$activeTab)) }}</h3>
-                            <x-notification.chip mode="neutral" size="sm">{{ __('notifications::common.badges.active_tab') }}</x-notification.chip>
-                            <a
-                                href="{{ route('docs.guide', ['focus' => 'notifications']) }}"
-                                class="inline-flex items-center rounded-full border border-rose-200 bg-rose-50 px-3 py-1 text-[11px] font-semibold text-rose-700 transition hover:border-rose-300 hover:bg-rose-100"
-                            >
-                                {{ __('notifications::common.buttons.open_docs') }}
-                            </a>
-                        </div>
-                    </div>
+            <div class="flex flex-wrap items-start justify-between gap-3">
+                <x-filter.nav wrap class="min-w-0">
+                    @foreach ($tabs as $tabKey => $tab)
+                        <x-filter.item wire:click.prevent="selectTab('{{ $tabKey }}')" :active="$activeTab === $tabKey" wire:key="notification-hub-tab-{{ $tabKey }}">
+                            <span>{{ $tab['label'] }}</span>
+                            @if (isset($tab['count']))
+                                <span @class([
+                                    'hrm-num ml-1.5 rounded-full px-1.5 text-[11px]',
+                                    'bg-white/15 text-white' => $activeTab === $tabKey,
+                                    'bg-white text-ink-muted' => $activeTab !== $tabKey,
+                                ])>{{ $tab['count'] }}</span>
+                            @endif
+                        </x-filter.item>
+                    @endforeach
+                </x-filter.nav>
 
-                    <div class="-mx-1 flex flex-wrap items-center justify-start gap-2">
-                        @foreach ($tabs as $tabKey => $tab)
-                            <button
-                                type="button"
-                                wire:click="selectTab('{{ $tabKey }}')"
-                                aria-current="{{ $activeTab === $tabKey ? 'page' : 'false' }}"
-                                class="{{ $activeTab === $tabKey ? 'border-zinc-950 bg-zinc-950 text-white shadow-card ring-4 ring-zinc-950/5' : 'border-zinc-200 bg-white/90 text-zinc-600 hover:-translate-y-0.5 hover:border-zinc-300 hover:bg-white hover:text-zinc-900 hover:shadow-card' }} inline-flex items-center gap-2 rounded-full border px-4 py-2.5 text-sm font-semibold transition duration-200"
-                            >
-                                <span>{{ $tab['label'] }}</span>
-                                @if (isset($tab['count']))
-                                    <span class="{{ $activeTab === $tabKey ? 'border-white/20 bg-white/10 text-white' : 'border-zinc-200 bg-zinc-50 text-zinc-500' }} rounded-full border px-2 py-0.5 text-[11px] font-semibold">
-                                        {{ $tab['count'] }}
-                                    </span>
-                                @endif
-                            </button>
-                        @endforeach
-                    </div>
-                </div>
+                <a href="{{ route('docs.guide', ['focus' => 'notifications']) }}" class="inline-flex h-9 shrink-0 items-center gap-1 text-[12.5px] font-medium text-ink-muted transition hover:text-ink">
+                    {{ __('notifications::common.buttons.open_docs') }}
+                    <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+                </a>
             </div>
 
-            <div class="rounded-2xl border border-zinc-200 bg-zinc-50/70 p-3 shadow-card" wire:key="notification-settings-panel-{{ $activeTab }}">
+            <div wire:key="notification-settings-panel-{{ $activeTab }}">
                 @if ($activeTab === 'overview')
                     <livewire:notification.overview-panel :key="'notification-overview-panel'" />
                 @elseif ($activeTab === 'analytics')
@@ -57,5 +44,4 @@
                 @endif
             </div>
         </div>
-    </x-surface-card>
 </div>

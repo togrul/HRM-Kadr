@@ -30,7 +30,7 @@
                     <x-label for="miscForm.language.knowledge_status">{{ __('personnel::common.labels.knowledge_status') }}</x-label>
                     <div class="flex flex-wrap gap-2">
                         @foreach($knowledges as $knw)
-                            <label class="inline-flex items-center px-2 py-2 bg-gray-100 rounded shadow-sm">
+                            <label class="inline-flex items-center px-2 py-2 bg-zinc-100 rounded shadow-sm">
                                 <input type="radio"
                                        class="form-radio"
                                        name="miscForm.language.knowledge_status"
@@ -56,19 +56,19 @@
                             @forelse ($miscForm->languageList ?? [] as $key => $language)
                                 <tr>
                                     <x-table.td>
-                                        <span class="text-sm font-medium text-gray-700">
+                                        <span class="text-sm font-medium text-zinc-700">
                                             {{ data_get($language, 'language_label') ?? '---' }}
                                         </span>
                                     </x-table.td>
                                     <x-table.td>
-                                        <span class="text-sm font-medium text-gray-700">
+                                        <span class="text-sm font-medium text-zinc-700">
                                             {{ $knowledgeStatusLabels[data_get($language, 'knowledge_status')] ?? (data_get($language, 'knowledge_status') ?? '---') }}
                                         </span>
                                     </x-table.td>
                                     <x-table.td :isButton="true">
                                         <button
                                             x-on:click="$dispatch('confirm-action', { tone: 'rose', message: @js(__('personnel::common.messages.remove_data_confirm')), confirmText: @js(__('ui::common.actions.delete')), run: () => $wire.forceDeleteLanguage({{ $key }}) })"
-                                            class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700"
+                                            class="flex items-center justify-center w-8 h-8 text-xs font-medium text-zinc-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-zinc-700"
                                         >
                                             <x-icons.force-delete></x-icons.force-delete>
                                         </button>
@@ -127,30 +127,30 @@
                 @forelse ($miscForm->eventList ?? [] as $key => $event)
                   <div class="flex items-center gap-2">
                     <span class="flex-none text-neutral-600">{{ $loop->iteration }}.</span>
-                    <div class="grid w-full grid-cols-1 md:grid-cols-3 gap-4 text-sm text-slate-800">
-                        <div class="flex flex-col p-2 space-y-1 border border-gray-300 rounded-md bg-neutral-200/50">
+                    <div class="grid w-full grid-cols-1 md:grid-cols-3 gap-4 text-sm text-zinc-800">
+                        <div class="flex flex-col p-2 space-y-1 border border-zinc-300 rounded-md bg-neutral-200/50">
                             <span class="font-medium text-neutral-500">{{ __('personnel::common.labels.event_type') }}</span>
                             <span>{{ data_get($event, 'event_type') ?? '---' }}</span>
                         </div>
-                        <div class="flex flex-col p-2 space-y-1 border border-gray-300 rounded-md bg-neutral-200/50">
+                        <div class="flex flex-col p-2 space-y-1 border border-zinc-300 rounded-md bg-neutral-200/50">
                             <span class="font-medium text-neutral-500">{{ __('personnel::common.labels.event_name') }}</span>
                             <span>{{ data_get($event, 'event_name') ?? '---' }}</span>
                         </div>
-                        <div class="flex flex-col p-2 space-y-1 border border-gray-300 rounded-md bg-neutral-200/50">
+                        <div class="flex flex-col p-2 space-y-1 border border-zinc-300 rounded-md bg-neutral-200/50">
                             <span class="font-medium text-neutral-500">{{ __('personnel::common.labels.event_date') }}</span>
                             <span>{{ data_get($event, 'event_date') ?? '---' }}</span>
                         </div>
                     </div>
                     <button
                             x-on:click="$dispatch('confirm-action', { tone: 'rose', message: @js(__('personnel::common.messages.remove_data_confirm')), confirmText: @js(__('ui::common.actions.delete')), run: () => $wire.forceDeleteEvent({{ $key }}) })"
-                            class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700"
+                            class="flex items-center justify-center w-8 h-8 text-xs font-medium text-zinc-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-zinc-700"
                         >
                             <x-icons.force-delete></x-icons.force-delete>
                     </button>
                   </div>
                 @empty
                     <div class="relative flex items-center justify-center px-4 py-2 rounded-lg shadow-sm bg-neutral-100">
-                        <span class="text-base font-medium text-gray-600">{{ __('personnel::common.labels.no_information_added') }}</span>
+                        <span class="text-base font-medium text-zinc-600">{{ __('personnel::common.labels.no_information_added') }}</span>
                     </div>
                 @endforelse
             </div>
@@ -272,49 +272,49 @@
                         >
                             <x-icons.force-delete></x-icons.force-delete>
                         </button>
-                        <div class="flex items-center space-x-2 border-b border-dashed w-max border-slate-400">
+                        <div class="flex items-center space-x-2 border-b border-dashed w-max border-zinc-400">
                             <p class="font-medium text-ink">
                                 {{ data_get($degree, 'degree_label') ?? '---' }}
                             </p>
                             <span>-</span>
-                            <span class="font-medium text-slate-500">{{ data_get($degree, 'science') ?? '---' }}</span>
+                            <span class="font-medium text-zinc-500">{{ data_get($degree, 'science') ?? '---' }}</span>
                         </div>
                         <div class="grid w-full grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3">
                             <div class="flex flex-col space-y-2">
-                                <span class="text-sm text-slate-500">{{ __('personnel::common.labels.given_date') }}</span>
-                                <span class="text-sm font-medium text-slate-800">{{ data_get($degree, 'given_date') ?? '---' }}</span>
+                                <span class="text-sm text-zinc-500">{{ __('personnel::common.labels.given_date') }}</span>
+                                <span class="text-sm font-medium text-zinc-800">{{ data_get($degree, 'given_date') ?? '---' }}</span>
                             </div>
                             <div class="flex flex-col space-y-2">
-                                <span class="text-sm text-slate-500">{{ __('personnel::common.labels.subject') }}</span>
-                                <span class="text-sm font-medium text-slate-800">{{ data_get($degree, 'subject') ?? '---' }}</span>
+                                <span class="text-sm text-zinc-500">{{ __('personnel::common.labels.subject') }}</span>
+                                <span class="text-sm font-medium text-zinc-800">{{ data_get($degree, 'subject') ?? '---' }}</span>
                             </div>
                             <div class="flex flex-col space-y-2">
-                                <span class="text-sm text-slate-500">{{ __('personnel::common.labels.document_type') }}</span>
-                                <span class="text-sm font-medium text-slate-800">{{ data_get($degree, 'edu_doc_label') ?? '---' }}</span>
+                                <span class="text-sm text-zinc-500">{{ __('personnel::common.labels.document_type') }}</span>
+                                <span class="text-sm font-medium text-zinc-800">{{ data_get($degree, 'edu_doc_label') ?? '---' }}</span>
                             </div>
                         </div>
                         <div class="grid w-full grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3">
                             <div class="flex flex-col space-y-2">
-                                <span class="text-sm text-slate-500">{{ __('personnel::common.labels.diplom_serie') }}</span>
-                                <span class="text-sm font-medium text-slate-800">{{ data_get($degree, 'diplom_serie') ?? '---' }}</span>
+                                <span class="text-sm text-zinc-500">{{ __('personnel::common.labels.diplom_serie') }}</span>
+                                <span class="text-sm font-medium text-zinc-800">{{ data_get($degree, 'diplom_serie') ?? '---' }}</span>
                             </div>
                             <div class="flex flex-col space-y-2">
-                                <span class="text-sm text-slate-500">{{ __('personnel::common.labels.diplom') }} #</span>
-                                <span class="text-sm font-medium text-slate-800">{{ data_get($degree, 'diplom_no') ?? '---' }}</span>
+                                <span class="text-sm text-zinc-500">{{ __('personnel::common.labels.diplom') }} #</span>
+                                <span class="text-sm font-medium text-zinc-800">{{ data_get($degree, 'diplom_no') ?? '---' }}</span>
                             </div>
                             <div class="flex flex-col space-y-2">
-                                <span class="text-sm text-slate-500">{{ __('personnel::common.labels.diplom_given_date') }}</span>
-                                <span class="text-sm font-medium text-slate-800">{{ data_get($degree, 'diplom_given_date') ?? '---' }}</span>
+                                <span class="text-sm text-zinc-500">{{ __('personnel::common.labels.diplom_given_date') }}</span>
+                                <span class="text-sm font-medium text-zinc-800">{{ data_get($degree, 'diplom_given_date') ?? '---' }}</span>
                             </div>
                         </div>
-                        <div class="flex flex-col pt-2 space-y-1 border-t border-gray-300">
-                            <span class="text-sm text-slate-500">{{ __('personnel::common.labels.document_issued_by') }}</span>
-                            <span class="text-sm font-medium text-slate-800">{{ data_get($degree, 'document_issued_by') ?? '---' }}</span>
+                        <div class="flex flex-col pt-2 space-y-1 border-t border-zinc-300">
+                            <span class="text-sm text-zinc-500">{{ __('personnel::common.labels.document_issued_by') }}</span>
+                            <span class="text-sm font-medium text-zinc-800">{{ data_get($degree, 'document_issued_by') ?? '---' }}</span>
                         </div>
                     </div>
                 @empty
                     <div class="relative flex items-center justify-center px-4 py-2 rounded-lg shadow-sm bg-neutral-100">
-                        <span class="text-base font-medium text-gray-600">{{ __('personnel::common.labels.no_information_added') }}</span>
+                        <span class="text-base font-medium text-zinc-600">{{ __('personnel::common.labels.no_information_added') }}</span>
                     </div>
                 @endforelse
             </div>
@@ -363,36 +363,36 @@
                   @forelse ($miscForm->electionList ?? [] as $key => $election)
                     <div class="flex items-center gap-2">
                     <span class="flex-none text-neutral-600">{{ $loop->iteration }}.</span>
-                    <div class="grid w-full grid-cols-1 md:grid-cols-3 gap-4 text-sm text-slate-800">
-                        <div class="flex flex-col p-2 space-y-1 border border-gray-300 rounded-md bg-neutral-200/50">
+                    <div class="grid w-full grid-cols-1 md:grid-cols-3 gap-4 text-sm text-zinc-800">
+                        <div class="flex flex-col p-2 space-y-1 border border-zinc-300 rounded-md bg-neutral-200/50">
                             <span class="font-medium text-neutral-500">{{ __('personnel::common.labels.election_type') }}</span>
                             <span>{{ data_get($election, 'election_type') ?? '---' }}</span>
                         </div>
-                        <div class="flex flex-col p-2 space-y-1 border border-gray-300 rounded-md bg-neutral-200/50">
+                        <div class="flex flex-col p-2 space-y-1 border border-zinc-300 rounded-md bg-neutral-200/50">
                             <span class="font-medium text-neutral-500">{{ __('personnel::common.labels.location') }}</span>
                             <span>{{ data_get($election, 'location') ?? '---' }}</span>
                         </div>
-                        <div class="flex flex-col p-2 space-y-1 border border-gray-300 rounded-md bg-neutral-200/50">
+                        <div class="flex flex-col p-2 space-y-1 border border-zinc-300 rounded-md bg-neutral-200/50">
                             <span class="font-medium text-neutral-500">{{ __('personnel::common.labels.elected_date') }}</span>
                             <span>{{ data_get($election, 'elected_date') ?? '---' }}</span>
                         </div>
                     </div>
                     <button
                             x-on:click="$dispatch('confirm-action', { tone: 'rose', message: @js(__('personnel::common.messages.remove_data_confirm')), confirmText: @js(__('ui::common.actions.delete')), run: () => $wire.forceDeleteElection({{ $key }}) })"
-                            class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700"
+                            class="flex items-center justify-center w-8 h-8 text-xs font-medium text-zinc-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-zinc-700"
                     >
                             <x-icons.force-delete></x-icons.force-delete>
                     </button>
                   </div>
                     @empty
                         <div class="relative flex items-center justify-center px-4 py-2 rounded-lg shadow-sm bg-neutral-100">
-                            <span class="text-base font-medium text-gray-600">{{ __('personnel::common.labels.no_information_added') }}</span>
+                            <span class="text-base font-medium text-zinc-600">{{ __('personnel::common.labels.no_information_added') }}</span>
                         </div>
                     @endforelse
                 </div>
             @else
                 <div class="relative flex items-center justify-center px-4 py-2 rounded-lg shadow-sm bg-neutral-100">
-                    <span class="text-base font-medium text-gray-600">{{ __('personnel::common.labels.no_information_added') }}</span>
+                    <span class="text-base font-medium text-zinc-600">{{ __('personnel::common.labels.no_information_added') }}</span>
                 </div>
             @endif
         </x-form-card>

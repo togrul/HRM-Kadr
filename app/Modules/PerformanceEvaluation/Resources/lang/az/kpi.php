@@ -7,7 +7,7 @@ return [
         'templates' => 'Vəzifə şablonları',
         'card_kpis' => 'KPI göstəriciləri',
         'competencies' => 'Kompetensiyalar',
-        'checkins' => 'Check-in qeydləri',
+        'checkins' => 'Aralıq qeydlər',
         'calibration' => 'Kalibrasiya',
         'history' => 'Tarixçə',
         'distribution' => 'Balların paylanması',
@@ -187,7 +187,7 @@ return [
         'clear' => 'Təmizlə',
         'remove' => 'Çıxar',
         'cancel' => 'Ləğv et',
-        'add_checkin' => 'Check-in əlavə et',
+        'add_checkin' => 'Aralıq qeyd əlavə et',
         'calibrate' => 'Düzəlişi tətbiq et',
         'confirm' => 'Təsdiqlə',
     ],
@@ -201,7 +201,7 @@ return [
         'status_changed' => 'Kartın statusu dəyişdi.',
         'actual_saved' => 'Faktiki dəyər qeydə alındı.',
         'calibrated' => 'Kalibrasiya düzəlişi tətbiq olundu.',
-        'checkin_saved' => 'Check-in qeydə alındı.',
+        'checkin_saved' => 'Aralıq qeyd saxlanıldı.',
     ],
 
     'errors' => [
@@ -293,8 +293,8 @@ return [
 
     'notifications' => [
         'checkin_due' => [
-            'body' => 'Son bir ayda check-in qeydi yoxdur. İşin gedişatını qısa müzakirə edib kartda qeyd edin.',
-            'subject' => ':employee ilə check-in vaxtıdır',
+            'body' => 'Son bir ayda aralıq qeyd yoxdur. İşin gedişatını qısa müzakirə edib kartda qeyd edin.',
+            'subject' => ':employee ilə aralıq görüş vaxtıdır',
         ],
         'actuals_missing' => [
             'body' => ':cycle dövrünün bitməsinə az qalıb, amma :count KPI üzrə faktiki dəyər hələ yoxdur.',
@@ -329,7 +329,7 @@ return [
             'subject' => ':employee kartında hədəf dəyişikliyi istənilir',
         ],
         'manager_released' => [
-            'body' => 'Kart artıq yeni rəhbərdədir. İstəsəniz, əməkdaşın bu dövrdəki işi barədə kartda check-in qeydi ilə şərh yaza bilərsiniz.',
+            'body' => 'Kart artıq yeni rəhbərdədir. İstəsəniz, əməkdaşın bu dövrdəki işi barədə kartda aralıq qeydlə şərh yaza bilərsiniz.',
             'subject' => ':employee KPI kartı yeni rəhbərə keçdi',
         ],
         'manager_assigned' => [
@@ -388,7 +388,7 @@ return [
     'competency_hint' => 'Hər kompetensiya 1–5 ilə qiymətləndirilir: 1 — çox zəif, 3 — gözləntiyə uyğun, 5 — çox yüksək. Yekun bala yalnız rəhbər qiyməti düşür; öz-qiymət müqayisə üçündür.',
     'distribution_hint' => 'Qara sütun — faktiki pay, narıncı xətt — hədəf paylanma.',
     'hidden_until_self_review' => 'Öz-qiymətləndirmə mərhələsində açılır',
-    'no_checkins' => 'Hələ check-in yoxdur.',
+    'no_checkins' => 'Hələ aralıq qeyd yoxdur.',
     'no_competency_form' => 'Kompetensiya bloku yoxdur',
     'no_goal' => 'Hədəfə bağlanmayıb',
     'reason_placeholder' => 'Səbəbi yazın…',
@@ -405,7 +405,7 @@ return [
     'next_step' => [
         'draft' => 'Rəhbər hədəfləri yoxlayır, lazım olsa dəyişir və kartı əməkdaşa razılaşdırmaya göndərir.',
         'pending_agreement' => 'Əməkdaş hədəflərlə tanış olur: qəbul edir və ya səbəb yazaraq etiraz edir. Cavab verilməsə, son tarixdə kart avtomatik qəbul olunur.',
-        'active' => 'Dövr gedir: faktiki dəyərləri yazın və ayda bir check-in edin. Dövr bitəndə rəhbər öz-qiymətləndirməni başladır.',
+        'active' => 'Dövr gedir: faktiki dəyərləri yazın və ayda bir aralıq qeyd yazın. Dövr bitəndə rəhbər öz-qiymətləndirməni başladır.',
         'self_review' => 'Əməkdaş kompetensiyalarını 1–5 ilə qiymətləndirir və öz-qiymətləndirməni təqdim edir.',
         'manager_review' => 'Rəhbər hər kompetensiyanı qiymətləndirir və qiymətləndirməni HR-a təqdim edir.',
         'calibration' => 'HR balları bölmələr üzrə uyğunlaşdırır (lazım olsa ±15 bal) və nəticəni təsdiqləyir.',
@@ -704,7 +704,7 @@ return [
             'change_approved' => 'Hədəf dəyişikliyi təsdiqləndi',
             'change_requested' => 'Hədəf dəyişikliyi istənildi',
             'red_zone' => 'KPI qırmızı zonaya düşür',
-            'checkin_due' => 'Check-in vaxtıdır',
+            'checkin_due' => 'Aralıq qeyd vaxtıdır',
             'actuals_missing' => 'Faktiki dəyər daxil edilməyib',
             'escalation' => 'Son tarix keçib (eskalasiya)',
             'reminder' => 'Son tarix yaxınlaşır',

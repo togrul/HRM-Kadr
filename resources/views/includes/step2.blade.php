@@ -115,11 +115,11 @@
             <div class="flex flex-col">
                 <x-label for="documentForm.document.is_married">{{ __('personnel::common.labels.family_status') }}</x-label>
                 <div class="flex items-center">
-                    <label class="inline-flex items-center bg-gray-100 rounded shadow-sm py-2 px-2">
+                    <label class="inline-flex items-center bg-zinc-100 rounded shadow-sm py-2 px-2">
                         <input type="radio" class="form-radio" name="documentForm.document.is_married" wire:model="documentForm.document.is_married" value="0">
                         <span class="ml-2 text-sm font-normal">{{ __('personnel::common.labels.single') }}</span>
                     </label>
-                    <label class="inline-flex items-center ml-4 bg-gray-100 rounded shadow-sm py-2 px-2">
+                    <label class="inline-flex items-center ml-4 bg-zinc-100 rounded shadow-sm py-2 px-2">
                         <input type="radio" class="form-radio" name="documentForm.document.is_married" wire:model="documentForm.document.is_married" value="1">
                         <span class="ml-2 text-sm font-normal">{{ __('personnel::common.labels.married') }}</span>
                     </label>
@@ -237,7 +237,7 @@
                                 <x-table.td :isButton="true">
                                     <button
                                         x-on:click="$dispatch('confirm-action', { tone: 'rose', message: @js(__('personnel::common.messages.remove_data_confirm')), confirmText: @js(__('ui::common.actions.delete')), run: () => $wire.removeServiceCard({{ $keyServiceCard }}) })"
-                                        class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-50 hover:text-gray-700"
+                                        class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-zinc-500 hover:bg-red-50 hover:text-zinc-700"
                                     >
                                         <x-icons.force-delete></x-icons.force-delete>
                                     </button>
@@ -331,7 +331,7 @@
                                 <x-table.td :isButton="true">
                                     <button
                                         x-on:click="$dispatch('confirm-action', { tone: 'rose', message: @js(__('personnel::common.messages.remove_data_confirm')), confirmText: @js(__('ui::common.actions.delete')), run: () => $wire.removePassport({{ $keyPassport }}) })"
-                                        class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-50 hover:text-gray-700"
+                                        class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-zinc-500 hover:bg-red-50 hover:text-zinc-700"
                                     >
                                         <x-icons.force-delete></x-icons.force-delete>
                                     </button>

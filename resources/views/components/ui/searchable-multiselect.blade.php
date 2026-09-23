@@ -33,7 +33,7 @@
     class="space-y-3"
 >
     <div class="flex items-center justify-between gap-3">
-        <label class="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ $label }}</label>
+        <label class="hrm-eyebrow">{{ $label }}</label>
         <span class="rounded-full border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-[11px] font-semibold text-zinc-600" x-text="`${normalize(selected).length} {{ $selectedSuffix ?? __('notifications::common.labels.selected') }}`"></span>
     </div>
 
@@ -74,7 +74,7 @@
             @if (($option['group'] ?? null) !== $currentGroup)
                 @php $currentGroup = $option['group'] ?? null; @endphp
                 @if ($currentGroup)
-                    <div class="sticky top-0 z-[1] px-3 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-400 backdrop-blur bg-white/95">
+                    <div class="sticky top-0 z-[1] px-3 pb-1 pt-2 hrm-eyebrow backdrop-blur bg-white/95">
                         {{ $currentGroup }}
                     </div>
                 @endif

@@ -90,32 +90,32 @@
                         @forelse ($awardsPunishmentsForm->awardList ?? [] as $key => $awdModel)
                             <tr>
                                 <x-table.td>
-                                    <span class="px-2 py-1 text-sm font-medium text-gray-700 rounded-md bg-zinc-200">
+                                    <span class="px-2 py-1 text-sm font-medium text-zinc-700 rounded-md bg-zinc-200">
                                         {{ $this->awardLabel(data_get($awdModel, 'award_id')) ?? '---' }}
                                     </span>
                                 </x-table.td>
                                 <x-table.td>
-                                   <span class="text-sm font-medium text-gray-700 truncate whitespace-normal line-clamp-3">
+                                   <span class="text-sm font-medium text-zinc-700 truncate whitespace-normal line-clamp-3">
                                         {{ data_get($awdModel, 'reason') }}
                                     </span>
                                 </x-table.td>
                                 <x-table.td>
-                                    <span class="text-sm font-medium text-gray-700">
+                                    <span class="text-sm font-medium text-zinc-700">
                                         {{ data_get($awdModel, 'given_date') }}
                                     </span>
                                 </x-table.td>
                                 <x-table.td>
                                 <div class="flex items-start space-x-6">
                                     <div class="flex flex-col items-start space-y-1">
-                                         <span class="text-sm font-medium text-gray-500 border-b border-dashed border-slate-400">
+                                         <span class="text-sm font-medium text-zinc-500 border-b border-dashed border-zinc-400">
                                                 {{ __('personnel::common.labels.order_issued_by') }}:
                                          </span>
-                                        <span class="text-sm font-medium text-gray-900">
+                                        <span class="text-sm font-medium text-zinc-900">
                                                 {{ data_get($awdModel, 'order_given_by', '---') }}
                                         </span>
                                     </div>
                                     <div class="flex flex-col items-start space-y-1">
-                                        <span class="text-sm font-medium text-gray-500 border-b border-dashed border-slate-400">
+                                        <span class="text-sm font-medium text-zinc-500 border-b border-dashed border-zinc-400">
                                             {{ __('personnel::common.labels.number') }} #:
                                         </span>
                                         <span class="text-sm font-medium text-blue-500">
@@ -123,10 +123,10 @@
                                         </span>
                                     </div>
                                     <div class="flex flex-col items-start space-y-1">
-                                        <span class="text-sm font-medium text-gray-500 border-b border-dashed border-slate-400">
+                                        <span class="text-sm font-medium text-zinc-500 border-b border-dashed border-zinc-400">
                                             {{ __('personnel::common.labels.date') }}:
                                         </span>
-                                        <span class="text-sm font-medium text-gray-700">
+                                        <span class="text-sm font-medium text-zinc-700">
                                             @if(! empty($awdModel['order_date']))
                                                 {{ \Carbon\Carbon::parse($awdModel['order_date'])->format('d.m.Y') }}
                                             @endif
@@ -137,7 +137,7 @@
                                 <x-table.td>
                                     <span @class([
                                         'w-3 h-3 rounded-full shadow-sm flex',
-                                        'bg-gray-300' => data_get($awdModel, 'is_old'),
+                                        'bg-zinc-300' => data_get($awdModel, 'is_old'),
                                         'bg-green-400' => ! data_get($awdModel, 'is_old'),
                                     ])>
                                     </span>
@@ -145,7 +145,7 @@
                                 <x-table.td :isButton="true">
                                     <button
                                         x-on:click="$dispatch('confirm-action', { tone: 'rose', message: @js(__('personnel::common.messages.remove_data_confirm')), confirmText: @js(__('ui::common.actions.delete')), run: () => $wire.forceDeleteAward({{ $key }}) })"
-                                        class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700"
+                                        class="flex items-center justify-center w-8 h-8 text-xs font-medium text-zinc-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-zinc-700"
                                     >
                                         <x-icons.force-delete></x-icons.force-delete>
                                     </button>
@@ -267,26 +267,26 @@
                         @forelse ($awardsPunishmentsForm->punishmentList ?? [] as $key => $pnshModel)
                             <tr>
                                 <x-table.td>
-                                    <span class="text-sm font-medium text-gray-700">
+                                    <span class="text-sm font-medium text-zinc-700">
                                         {{ $this->punishmentLabel(data_get($pnshModel, 'punishment_id')) ?? '---' }}
                                     </span>
                                 </x-table.td>
                                 <x-table.td>
-                                   <span class="text-sm font-medium text-gray-700">
+                                   <span class="text-sm font-medium text-zinc-700">
                                         {{ data_get($pnshModel, 'reason') }}
                                     </span>
                                 </x-table.td>
                                 <x-table.td>
                                     <div class="flex items-center space-x-6">
                                         <div class="flex flex-col items-start space-y-1">
-                                            <span class="text-sm font-medium text-gray-500 border-b border-dashed border-slate-400">{{ __('personnel::common.labels.given_date') }}:</span>
-                                            <span class="text-sm font-medium text-gray-700">
+                                            <span class="text-sm font-medium text-zinc-500 border-b border-dashed border-zinc-400">{{ __('personnel::common.labels.given_date') }}:</span>
+                                            <span class="text-sm font-medium text-zinc-700">
                                                 {{ data_get($pnshModel, 'given_date') }}
                                             </span>
                                         </div>
 
                                         <div class="flex flex-col items-start space-y-1">
-                                            <span class="text-sm font-medium text-gray-500 border-b border-dashed border-slate-400">{{ __('personnel::common.labels.expired_date') }}:</span>
+                                            <span class="text-sm font-medium text-zinc-500 border-b border-dashed border-zinc-400">{{ __('personnel::common.labels.expired_date') }}:</span>
                                             <span class="text-sm font-medium text-rose-500">
                                                 {{ data_get($pnshModel, 'expired_date') ?: '—' }}
                                             </span>
@@ -296,15 +296,15 @@
                                 <x-table.td>
                                 <div class="flex items-center space-x-6">
                                     <div class="flex flex-col items-start space-y-1">
-                                         <span class="text-sm font-medium text-gray-500 border-b border-dashed border-slate-400">
+                                         <span class="text-sm font-medium text-zinc-500 border-b border-dashed border-zinc-400">
                                                 {{ __('personnel::common.labels.order_issued_by') }}:
                                          </span>
-                                        <span class="text-sm font-medium text-gray-900">
+                                        <span class="text-sm font-medium text-zinc-900">
                                                 {{ data_get($pnshModel, 'order_given_by', '---') }}
                                         </span>
                                     </div>
                                     <div class="flex flex-col items-start space-y-1">
-                                        <span class="text-sm font-medium text-gray-500 border-b border-dashed border-slate-400">
+                                        <span class="text-sm font-medium text-zinc-500 border-b border-dashed border-zinc-400">
                                             {{ __('personnel::common.labels.number') }} #:
                                         </span>
                                         <span class="text-sm font-medium text-blue-500">
@@ -312,10 +312,10 @@
                                         </span>
                                     </div>
                                     <div class="flex flex-col items-start space-y-1">
-                                        <span class="text-sm font-medium text-gray-500 border-b border-dashed border-slate-400">
+                                        <span class="text-sm font-medium text-zinc-500 border-b border-dashed border-zinc-400">
                                             {{ __('personnel::common.labels.date') }}:
                                         </span>
-                                        <span class="text-sm font-medium text-gray-700">
+                                        <span class="text-sm font-medium text-zinc-700">
                                             @if(! empty($pnshModel['order_date']))
                                                 {{ \Carbon\Carbon::parse($pnshModel['order_date'])->format('d.m.Y') }}
                                             @endif
@@ -326,7 +326,7 @@
                                 <x-table.td :isButton="true">
                                     <button
                                         x-on:click="$dispatch('confirm-action', { tone: 'rose', message: @js(__('personnel::common.messages.remove_data_confirm')), confirmText: @js(__('ui::common.actions.delete')), run: () => $wire.forceDeletePunishment({{ $key }}) })"
-                                        class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700"
+                                        class="flex items-center justify-center w-8 h-8 text-xs font-medium text-zinc-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-zinc-700"
                                     >
                                         <x-icons.force-delete></x-icons.force-delete>
                                     </button>

@@ -28,19 +28,19 @@
 
         <div class="grid gap-4 xl:grid-cols-4">
             <div class="rounded-2xl border border-zinc-200 bg-white p-4 shadow-card">
-                <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.stats.sent') }}</p>
+                <p class="hrm-eyebrow">{{ __('notifications::common.stats.sent') }}</p>
                 <p class="mt-3 text-3xl font-semibold text-emerald-700">{{ $stats['sent'] }}</p>
             </div>
             <div class="rounded-2xl border border-zinc-200 bg-white p-4 shadow-card">
-                <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.stats.failed') }}</p>
+                <p class="hrm-eyebrow">{{ __('notifications::common.stats.failed') }}</p>
                 <p class="mt-3 text-3xl font-semibold text-rose-700">{{ $stats['failed'] }}</p>
             </div>
             <div class="rounded-2xl border border-zinc-200 bg-white p-4 shadow-card">
-                <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.stats.approval_turnaround') }}</p>
+                <p class="hrm-eyebrow">{{ __('notifications::common.stats.approval_turnaround') }}</p>
                 <p class="mt-3 text-3xl font-semibold text-zinc-900">{{ $stats['approval_turnaround_minutes'] !== null ? __('notifications::common.stats.minutes_value', ['value' => $stats['approval_turnaround_minutes']]) : '—' }}</p>
             </div>
             <div class="rounded-2xl border border-zinc-200 bg-white p-4 shadow-card">
-                <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.stats.scheduled') }}</p>
+                <p class="hrm-eyebrow">{{ __('notifications::common.stats.scheduled') }}</p>
                 <p class="mt-3 text-3xl font-semibold text-amber-700">{{ $stats['scheduled'] }}</p>
             </div>
         </div>
@@ -121,11 +121,11 @@
                                     </div>
                                     <div class="grid gap-2 min-[980px]:w-[13rem] sm:grid-cols-2 min-[980px]:sm:grid-cols-2">
                                         <div class="rounded-xl border border-zinc-200 bg-white px-3 py-2">
-                                            <p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-400">{{ __('notifications::common.stats.sent') }}</p>
+                                            <p class="hrm-eyebrow">{{ __('notifications::common.stats.sent') }}</p>
                                             <p class="mt-1 text-lg font-semibold text-emerald-700">{{ $provider['sent'] }}</p>
                                         </div>
                                         <div class="rounded-xl border border-zinc-200 bg-white px-3 py-2">
-                                            <p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-400">{{ __('notifications::common.stats.failed') }}</p>
+                                            <p class="hrm-eyebrow">{{ __('notifications::common.stats.failed') }}</p>
                                             <p class="mt-1 text-lg font-semibold text-rose-700">{{ $provider['failed'] }}</p>
                                         </div>
                                     </div>

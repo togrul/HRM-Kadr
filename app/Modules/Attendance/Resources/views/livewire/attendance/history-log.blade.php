@@ -24,11 +24,11 @@
                 </div>
                 <div>
                     <x-label for="attendance-history-from">{{ __('attendance::history.filters.date_from') }}</x-label>
-                    <input id="attendance-history-from" type="date" wire:model.live="dateFrom" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
+                    <input id="attendance-history-from" type="date" wire:model.live="dateFrom" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 h-10 px-3 text-base sm:text-sm" />
                 </div>
                 <div>
                     <x-label for="attendance-history-to">{{ __('attendance::history.filters.date_to') }}</x-label>
-                    <input id="attendance-history-to" type="date" wire:model.live="dateTo" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
+                    <input id="attendance-history-to" type="date" wire:model.live="dateTo" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 h-10 px-3 text-base sm:text-sm" />
                 </div>
                 <div>
                     <x-label for="attendance-history-search">{{ __('attendance::history.filters.search') }}</x-label>
@@ -102,7 +102,7 @@
                                 <td colspan="7" class="overflow-hidden bg-zinc-50/70 px-4 py-4">
                                     <div class="grid min-w-0 gap-4 lg:grid-cols-2">
                                         <div class="min-w-0 rounded-xl border border-zinc-200 bg-white p-4">
-                                            <p class="mb-3 text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-400">{{ __('attendance::history.details.before') }}</p>
+                                            <p class="mb-3 hrm-eyebrow">{{ __('attendance::history.details.before') }}</p>
                                             <div class="space-y-2 text-sm text-zinc-700">
                                                 @forelse($row->before as $label => $value)
                                                     <div class="min-w-0 border-b border-zinc-100 pb-2 last:border-b-0 last:pb-0">
@@ -117,7 +117,7 @@
                                             </div>
                                         </div>
                                         <div class="min-w-0 rounded-xl border border-zinc-200 bg-white p-4">
-                                            <p class="mb-3 text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-400">{{ __('attendance::history.details.after') }}</p>
+                                            <p class="mb-3 hrm-eyebrow">{{ __('attendance::history.details.after') }}</p>
                                             <div class="space-y-2 text-sm text-zinc-700">
                                                 @forelse($row->after as $label => $value)
                                                     <div class="min-w-0 border-b border-zinc-100 pb-2 last:border-b-0 last:pb-0">

@@ -24,7 +24,7 @@
 
     @if (filled($subjectLabel))
         <div class="@if(filled($title)) mt-4 @endif space-y-2">
-            <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400">{{ $subjectLabel }}</p>
+            <p class="hrm-eyebrow">{{ $subjectLabel }}</p>
             <p class="break-words text-[1.05rem] font-semibold leading-8 tracking-tight text-zinc-950">{{ $subjectText }}</p>
         </div>
     @endif
@@ -32,7 +32,7 @@
     @if (filled($bodyLabel))
         <div class="@if(filled($subjectLabel)) my-4 h-px bg-zinc-200 @endif"></div>
         <div class="space-y-2">
-            <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400">{{ $bodyLabel }}</p>
+            <p class="hrm-eyebrow">{{ $bodyLabel }}</p>
             <p class="{{ trim('break-words text-[15px] leading-7 text-zinc-700 '.$bodyClass) }}">{{ $bodyText }}</p>
         </div>
     @endif

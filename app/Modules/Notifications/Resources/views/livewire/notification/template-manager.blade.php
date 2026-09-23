@@ -19,8 +19,8 @@
                         <p class="mt-1 text-sm leading-6 text-zinc-500">{{ __('notifications::common.helpers.template_preview_hint') }}</p>
                     </div>
                     <div class="flex flex-wrap gap-2">
-                        <span class="rounded-full border border-zinc-200 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">{{ $categoryLabels[$form['category']] ?? $form['category'] }}</span>
-                        <span class="rounded-full border border-zinc-200 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">{{ __('notifications::common.channels.'.$form['channel']) }}</span>
+                        <span class="rounded-full border border-zinc-200 bg-white px-3 py-1 hrm-eyebrow">{{ $categoryLabels[$form['category']] ?? $form['category'] }}</span>
+                        <span class="rounded-full border border-zinc-200 bg-white px-3 py-1 hrm-eyebrow">{{ __('notifications::common.channels.'.$form['channel']) }}</span>
                     </div>
                 </div>
 
