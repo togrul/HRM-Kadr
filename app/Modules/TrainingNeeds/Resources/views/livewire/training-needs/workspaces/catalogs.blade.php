@@ -3,8 +3,8 @@
     $editIcon = '<svg class="h-[17px] w-[17px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>';
     $trashIcon = '<svg class="h-[17px] w-[17px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>';
     // Premium ghost icon-button styles (soft, rounded, tinted hover, active press).
-    $editBtn = 'inline-flex h-9 w-9 items-center justify-center rounded-[11px] text-zinc-400 transition-all duration-200 ease-out hover:bg-zinc-100 hover:text-zinc-900 active:scale-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300/70';
-    $deleteBtn = 'inline-flex h-9 w-9 items-center justify-center rounded-[11px] text-zinc-400 transition-all duration-200 ease-out hover:bg-rose-50 hover:text-rose-600 active:scale-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-200';
+    $editBtn = 'inline-flex h-10 w-10 items-center justify-center rounded-[11px] text-zinc-400 transition-all duration-200 ease-out hover:bg-zinc-100 hover:text-zinc-900 active:scale-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300/70';
+    $deleteBtn = 'inline-flex h-10 w-10 items-center justify-center rounded-[11px] text-zinc-400 transition-all duration-200 ease-out hover:bg-rose-50 hover:text-rose-600 active:scale-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-200';
 @endphp
 
 @if ($activeTab === 'catalogs')
@@ -15,7 +15,7 @@
             @if ($editingGroupId)
                 <div class="mb-3 flex items-center justify-between gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
                     <span class="truncate">{{ __('training_needs::dashboard.actions.edit') }}: <span class="font-semibold">{{ $groupForm['name'] }}</span></span>
-                    <button type="button" wire:click="cancelGroupEdit" class="flex-none text-xs font-medium underline hover:no-underline">{{ __('training_needs::dashboard.actions.cancel_edit') }}</button>
+                    <button type="button" wire:click="cancelGroupEdit" class="flex h-10 flex-none items-center text-sm font-medium underline hover:no-underline">{{ __('training_needs::dashboard.actions.cancel_edit') }}</button>
                 </div>
             @endif
             <div class="grid gap-3 md:grid-cols-2">
@@ -77,8 +77,8 @@
                     <div class="mt-2 flex items-center justify-between text-xs text-zinc-500">
                         <span>{{ $groups->firstItem() }}–{{ $groups->lastItem() }} / {{ $groups->total() }}</span>
                         <div class="flex items-center gap-1">
-                            <button type="button" wire:click="previousPage('groupsPage')" @disabled($groups->onFirstPage()) class="rounded-lg border border-zinc-200 px-2 py-1 hover:bg-zinc-50 disabled:opacity-40">‹</button>
-                            <button type="button" wire:click="nextPage('groupsPage')" @disabled(! $groups->hasMorePages()) class="rounded-lg border border-zinc-200 px-2 py-1 hover:bg-zinc-50 disabled:opacity-40">›</button>
+                            <button type="button" wire:click="previousPage('groupsPage')" @disabled($groups->onFirstPage()) class="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 text-lg hover:bg-zinc-50 disabled:opacity-40">‹</button>
+                            <button type="button" wire:click="nextPage('groupsPage')" @disabled(! $groups->hasMorePages()) class="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 text-lg hover:bg-zinc-50 disabled:opacity-40">›</button>
                         </div>
                     </div>
                 @endif
@@ -91,7 +91,7 @@
             @if ($editingLevelId)
                 <div class="mb-3 flex items-center justify-between gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
                     <span class="truncate">{{ __('training_needs::dashboard.actions.edit') }}: <span class="font-semibold">{{ $levelForm['name'] }}</span></span>
-                    <button type="button" wire:click="cancelLevelEdit" class="flex-none text-xs font-medium underline hover:no-underline">{{ __('training_needs::dashboard.actions.cancel_edit') }}</button>
+                    <button type="button" wire:click="cancelLevelEdit" class="flex h-10 flex-none items-center text-sm font-medium underline hover:no-underline">{{ __('training_needs::dashboard.actions.cancel_edit') }}</button>
                 </div>
             @endif
             <div class="grid gap-3 md:grid-cols-2">
@@ -158,8 +158,8 @@
                     <div class="mt-2 flex items-center justify-between text-xs text-zinc-500">
                         <span>{{ $levels->firstItem() }}–{{ $levels->lastItem() }} / {{ $levels->total() }}</span>
                         <div class="flex items-center gap-1">
-                            <button type="button" wire:click="previousPage('levelsPage')" @disabled($levels->onFirstPage()) class="rounded-lg border border-zinc-200 px-2 py-1 hover:bg-zinc-50 disabled:opacity-40">‹</button>
-                            <button type="button" wire:click="nextPage('levelsPage')" @disabled(! $levels->hasMorePages()) class="rounded-lg border border-zinc-200 px-2 py-1 hover:bg-zinc-50 disabled:opacity-40">›</button>
+                            <button type="button" wire:click="previousPage('levelsPage')" @disabled($levels->onFirstPage()) class="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 text-lg hover:bg-zinc-50 disabled:opacity-40">‹</button>
+                            <button type="button" wire:click="nextPage('levelsPage')" @disabled(! $levels->hasMorePages()) class="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 text-lg hover:bg-zinc-50 disabled:opacity-40">›</button>
                         </div>
                     </div>
                 @endif
@@ -172,7 +172,7 @@
             @if ($editingCompetencyId)
                 <div class="mb-3 flex items-center justify-between gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
                     <span class="truncate">{{ __('training_needs::dashboard.actions.edit') }}: <span class="font-semibold">{{ $competencyForm['name'] }}</span></span>
-                    <button type="button" wire:click="cancelCompetencyEdit" class="flex-none text-xs font-medium underline hover:no-underline">{{ __('training_needs::dashboard.actions.cancel_edit') }}</button>
+                    <button type="button" wire:click="cancelCompetencyEdit" class="flex h-10 flex-none items-center text-sm font-medium underline hover:no-underline">{{ __('training_needs::dashboard.actions.cancel_edit') }}</button>
                 </div>
             @endif
             <div class="grid gap-3 md:grid-cols-2">
@@ -246,8 +246,8 @@
                     <div class="mt-2 flex items-center justify-between text-xs text-zinc-500">
                         <span>{{ $competencies->firstItem() }}–{{ $competencies->lastItem() }} / {{ $competencies->total() }}</span>
                         <div class="flex items-center gap-1">
-                            <button type="button" wire:click="previousPage('competenciesPage')" @disabled($competencies->onFirstPage()) class="rounded-lg border border-zinc-200 px-2 py-1 hover:bg-zinc-50 disabled:opacity-40">‹</button>
-                            <button type="button" wire:click="nextPage('competenciesPage')" @disabled(! $competencies->hasMorePages()) class="rounded-lg border border-zinc-200 px-2 py-1 hover:bg-zinc-50 disabled:opacity-40">›</button>
+                            <button type="button" wire:click="previousPage('competenciesPage')" @disabled($competencies->onFirstPage()) class="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 text-lg hover:bg-zinc-50 disabled:opacity-40">‹</button>
+                            <button type="button" wire:click="nextPage('competenciesPage')" @disabled(! $competencies->hasMorePages()) class="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 text-lg hover:bg-zinc-50 disabled:opacity-40">›</button>
                         </div>
                     </div>
                 @endif
@@ -260,7 +260,7 @@
             @if ($editingProgramId)
                 <div class="mb-3 flex items-center justify-between gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
                     <span class="truncate">{{ __('training_needs::dashboard.actions.edit') }}: <span class="font-semibold">{{ $programForm['title'] }}</span></span>
-                    <button type="button" wire:click="cancelProgramEdit" class="flex-none text-xs font-medium underline hover:no-underline">{{ __('training_needs::dashboard.actions.cancel_edit') }}</button>
+                    <button type="button" wire:click="cancelProgramEdit" class="flex h-10 flex-none items-center text-sm font-medium underline hover:no-underline">{{ __('training_needs::dashboard.actions.cancel_edit') }}</button>
                 </div>
             @endif
             <div class="grid gap-3 md:grid-cols-2">
@@ -336,8 +336,8 @@
                     <div class="mt-2 flex items-center justify-between text-xs text-zinc-500">
                         <span>{{ $programs->firstItem() }}–{{ $programs->lastItem() }} / {{ $programs->total() }}</span>
                         <div class="flex items-center gap-1">
-                            <button type="button" wire:click="previousPage('programsPage')" @disabled($programs->onFirstPage()) class="rounded-lg border border-zinc-200 px-2 py-1 hover:bg-zinc-50 disabled:opacity-40">‹</button>
-                            <button type="button" wire:click="nextPage('programsPage')" @disabled(! $programs->hasMorePages()) class="rounded-lg border border-zinc-200 px-2 py-1 hover:bg-zinc-50 disabled:opacity-40">›</button>
+                            <button type="button" wire:click="previousPage('programsPage')" @disabled($programs->onFirstPage()) class="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 text-lg hover:bg-zinc-50 disabled:opacity-40">‹</button>
+                            <button type="button" wire:click="nextPage('programsPage')" @disabled(! $programs->hasMorePages()) class="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 text-lg hover:bg-zinc-50 disabled:opacity-40">›</button>
                         </div>
                     </div>
                 @endif

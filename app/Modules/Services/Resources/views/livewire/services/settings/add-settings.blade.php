@@ -67,11 +67,11 @@
                 
                 
                    <div class="flex items-center justify-between space-x-3">
-                      <button type="button"  @click="showMiniModal = false;" class="flex items-center justify-center w-1/2 px-6 py-3 text-xs font-medium transition duration-200 ease-in bg-gray-200 border border-gray-200 h-11 rounded-xl hover:border-gray-400">
+                      <button type="button"  @click="showMiniModal = false;" class="flex h-11 w-1/2 items-center justify-center rounded-xl border border-gray-200 bg-gray-200 px-4 text-sm font-medium transition hover:border-gray-400">
                         <span>{{ __('services::common.actions.cancel') }}</span>
                        </button>
                 
-                    <button type="submit" class="flex items-center justify-center w-1/2 px-6 py-3 text-xs font-medium text-white transition duration-200 ease-in bg-blue-500 border border-blue-500 h-11 rounded-xl hover:border-blue-800">
+                    <button type="submit" class="flex h-11 w-1/2 items-center justify-center rounded-xl border border-blue-500 bg-blue-500 px-4 text-sm font-medium text-white transition hover:border-blue-800">
                         <span>{{ __('services::common.actions.add') }}</span>
                     </button>
                 </div>

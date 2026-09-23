@@ -222,7 +222,7 @@
                         type="button"
                         wire:click="setAssignmentMode('auto')"
                         @class([
-                            'inline-flex items-center rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-tight transition',
+                            'inline-flex h-10 items-center rounded-full border px-4 text-sm font-semibold uppercase tracking-tight transition',
                             'border-zinc-950 bg-zinc-950 text-white shadow-sm' => $leave->assignment_mode === 'auto',
                             'border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:text-zinc-900' => $leave->assignment_mode !== 'auto',
                         ])
@@ -233,7 +233,7 @@
                         type="button"
                         wire:click="setAssignmentMode('manual')"
                         @class([
-                            'inline-flex items-center rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-tight transition',
+                            'inline-flex h-10 items-center rounded-full border px-4 text-sm font-semibold uppercase tracking-tight transition',
                             'border-zinc-950 bg-zinc-950 text-white shadow-sm' => $leave->assignment_mode === 'manual',
                             'border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:text-zinc-900' => $leave->assignment_mode !== 'manual',
                         ])

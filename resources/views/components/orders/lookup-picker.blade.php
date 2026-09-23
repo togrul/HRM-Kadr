@@ -43,7 +43,7 @@
         <ul class="max-h-64 overflow-auto py-1">
             <template x-if="value">
                 <li><button type="button" @click="clear()"
-                    class="block w-full px-3 py-1.5 text-left text-xs text-zinc-400 hover:bg-zinc-50">{{ __('orders::order_composer.lookup.clear') }}</button></li>
+                    class="block min-h-10 w-full px-3 text-left text-sm text-zinc-500 hover:bg-zinc-50">{{ __('orders::order_composer.lookup.clear') }}</button></li>
             </template>
             <template x-for="o in filtered" :key="o.id">
                 <li>
