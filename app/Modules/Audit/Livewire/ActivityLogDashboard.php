@@ -9,6 +9,7 @@ use App\Models\OrderLog;
 use App\Models\Personnel;
 use App\Models\StaffSchedule;
 use App\Models\User;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -93,7 +94,7 @@ class ActivityLogDashboard extends Component
         ], fn ($value) => $value !== ''));
     }
 
-    public function render()
+    public function render(): View
     {
         $activities = $this->filteredQuery()
             ->select([
