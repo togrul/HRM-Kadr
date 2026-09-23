@@ -15,6 +15,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
+/**
+ * @property int $id
+ * @property string|null $surname
+ * @property string|null $name
+ * @property string|null $patronymic
+ * @property int|null $gender
+ * @property int|null $structure_id
+ * @property int|null $status_id
+ */
 class Candidate extends Model
 {
     use CreateDeleteTrait,

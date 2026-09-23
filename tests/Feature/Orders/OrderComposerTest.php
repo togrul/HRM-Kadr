@@ -628,6 +628,53 @@ class OrderComposerTest extends TestCase
         $this->assertSame('permanent', data_get($outside->signatory_snapshot, 'mode'));
     }
 
+    public function test_the_pickers_search_active_employees_and_ready_candidates(): void
+    {
+        $this->seedTemplate();
+        $personnel = $this->makePersonnel();
+        $structure = Structure::query()->create(['name' => 'Anbar', 'shortname' => 'AN']);
+        $ready = \App\Models\Candidate::query()->create([
+            'surname' => 'Bayramlı', 'name' => 'Ramin', 'patronymic' => 'X', 'height' => 175,
+            'structure_id' => $structure->id, 'status_id' => 30, 'gender' => 1, 'birthdate' => '1995-01-01',
+        ]);
+        \App\Models\Candidate::query()->create([
+            'surname' => 'Bayramlı', 'name' => 'Elvin', 'patronymic' => 'X', 'height' => 175,
+            'structure_id' => $structure->id, 'status_id' => 10, 'gender' => 1, 'birthdate' => '1995-01-01',
+        ]);
+        $this->actingAs($this->userWith('add-orders'));
+
+        $component = Livewire::test(OrderComposer::class)
+            ->set('personnelQuery', 'B')
+            ->assertSet('personnelResults', [])
+            ->set('personnelQuery', 'Bayram')
+            ->set('candidateQuery', 'Bayram');
+
+        $this->assertSame([$personnel->id], array_column($component->get('personnelResults'), 'id'));
+        $this->assertSame([$ready->id], array_column($component->get('candidateResults'), 'id'));
+
+        $component->call('selectCandidate', $ready->id)
+            ->assertSet('candidateId', $ready->id)
+            ->assertSet('hireStructureId', $structure->id)
+            ->assertSet('candidateQuery', '')
+            ->call('clearCandidate')
+            ->assertSet('candidateId', null);
+    }
+
+    public function test_server_set_ids_cannot_be_forged_by_the_client(): void
+    {
+        $this->seedTemplate();
+        $this->actingAs($this->userWith('add-orders'));
+
+        foreach (['editOrderId', 'personnelId', 'candidateId'] as $property) {
+            try {
+                Livewire::test(OrderComposer::class, ['presetCode' => 'leave'])->set($property, 1);
+                $this->fail("{$property} should be locked.");
+            } catch (\Livewire\Features\SupportLockedProperties\CannotUpdateLockedPropertyException) {
+                $this->addToAssertionCount(1);
+            }
+        }
+    }
+
     public function test_unknown_type_surfaces_an_error(): void
     {
         $this->actingAs($this->userWith('add-orders'));
