@@ -6,6 +6,7 @@
     <button
         type="button"
         @click="$store.hrmShell.railOpen = ! $store.hrmShell.railOpen"
+        :aria-expanded="$store.hrmShell.railOpen.toString()"
         class="inline-flex h-9 w-9 items-center justify-center rounded-[10px] border border-hairline bg-[#fafafa] text-ink-muted transition hover:text-ink"
         aria-controls="hrm-rail"
     >

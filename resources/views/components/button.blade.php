@@ -20,7 +20,7 @@
         default => 'border-hairline bg-white text-ink-soft hover:bg-[#fafafa] hover:text-ink active:bg-hairline-subtle',
     };
 
-    $baseClasses = 'camelcase inline-flex h-9 items-center justify-center gap-2 whitespace-nowrap rounded-[10px] border px-3.5 text-[12.5px] font-semibold tracking-[-0.01em] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300 disabled:pointer-events-none disabled:opacity-50 ';
+    $baseClasses = 'camelcase inline-flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-[10px] border px-4 text-[14px] font-semibold tracking-[-0.01em] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300 disabled:pointer-events-none disabled:opacity-50 ';
 @endphp
 
 @if ($type !== 'link')

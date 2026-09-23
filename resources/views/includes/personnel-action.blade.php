@@ -123,9 +123,9 @@
 
         <div class="rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-card">
             <div class="relative mx-auto max-w-full">
-                <div class="absolute left-0 right-0 top-5 h-px bg-slate-200"></div>
+                <div class="absolute left-0 right-0 top-5 hidden h-px bg-slate-200 md:block"></div>
                 <div
-                    class="absolute left-0 top-5 h-px bg-gradient-to-r from-emerald-500 via-sky-500 to-sky-500 transition-all duration-300 ease-out"
+                    class="absolute left-0 top-5 hidden h-px bg-gradient-to-r from-emerald-500 via-sky-500 to-sky-500 transition-all duration-300 ease-out md:block"
                     :style="{ width: progressWidth() }"
                 ></div>
 
@@ -187,7 +187,7 @@
                             ])
                         ></span>
 
-                        <span class="hidden max-w-[120px] text-[11px] font-medium leading-4 text-slate-500 md:block">
+                        <span class="max-w-[120px] text-[10px] font-medium leading-tight text-slate-500 md:text-[11px] md:leading-4">
                             {{ $st }}
                         </span>
                     </button>

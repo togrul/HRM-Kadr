@@ -1,6 +1,6 @@
 <div class="flex flex-col space-y-4">
     <x-form-card title="{{ __('personnel::wizard.sections.awards') }}">
-        <div class="grid grid-cols-6 gap-2">
+        <div class="grid grid-cols-1 md:grid-cols-6 gap-2">
             <div class="flex flex-col col-span-2">
                 <x-ui.select-dropdown
                     label="{{ __('personnel::common.labels.awards') }}"
@@ -167,7 +167,7 @@
     </x-form-card>
 
     <x-form-card title="{{ __('personnel::wizard.sections.punishments') }}">
-        <div class="grid grid-cols-4 gap-2">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
             <div class="flex flex-col col-span-2">
                 <x-ui.select-dropdown
                     label="{{ __('personnel::common.labels.punishments') }}"
@@ -197,7 +197,7 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-7 gap-2">
+        <div class="grid grid-cols-1 md:grid-cols-7 gap-2">
             <div class="flex flex-col">
                 <x-label for="awardsPunishmentsForm.punishment.given_date">{{ __('personnel::common.labels.given_date') }}</x-label>
                 <x-pikaday-input

@@ -10,7 +10,7 @@
 <div class="flex flex-col space-y-4">
     @feature('military_service')
     <x-form-card title="{{ __('personnel::wizard.sections.military') }}">
-        <div class="grid grid-cols-3 gap-2">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
             <div class="flex flex-col">
                 <x-ui.select-dropdown
                     label="{{ __('personnel::common.labels.ranks') }}"
@@ -39,7 +39,7 @@
                 <x-livewire-input mode="gray" name="historyForm.military.location" wire:model="historyForm.military.location"></x-livewire-input>
             </div>
         </div>
-        <div class="grid grid-cols-3 gap-2">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
             <div class="flex flex-col">
                 <x-label for="historyForm.military.given_date">{{ __('personnel::common.labels.given_date') }}</x-label>
                 <x-pikaday-input mode="gray" name="historyForm.military.given_date" format="Y-MM-DD" wire:model.live="historyForm.military.given_date">
@@ -151,7 +151,7 @@
     </x-form-card>
 
     <x-form-card title="{{ __('personnel::wizard.sections.injuries') }}">
-        <div class="grid grid-cols-3 gap-2">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
             <div class="flex flex-col">
                 <x-label for="historyForm.injury.injury_type">{{ __('personnel::common.labels.injury_type') }}</x-label>
                 <div class="flex flex-row">
@@ -283,7 +283,7 @@
 
     @feature('captivity')
     <x-form-card title="{{ __('personnel::wizard.sections.captivity') }}">
-        <div class="grid grid-cols-4 gap-2">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
             <div class="flex flex-col">
                 <x-label for="historyForm.captivity.location">{{ __('personnel::common.labels.location') }}</x-label>
                 <x-livewire-input mode="gray" name="historyForm.captivity.location" wire:model="historyForm.captivity.location"></x-livewire-input>

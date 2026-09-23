@@ -9,7 +9,7 @@
 <div class="flex flex-col space-y-4">
     <div class="grid items-stretch grid-cols-1 gap-2">
         <x-form-card title="{{ __('personnel::wizard.sections.languages') }}">
-            <div class="grid grid-cols-2 gap-2">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                 <div class="flex flex-col">
                     <x-ui.select-dropdown
                         label="{{ __('personnel::common.labels.languages') }}"
@@ -127,7 +127,7 @@
                 @forelse ($miscForm->eventList ?? [] as $key => $event)
                   <div class="flex items-center gap-2">
                     <span class="flex-none text-neutral-600">{{ $loop->iteration }}.</span>
-                    <div class="grid w-full grid-cols-3 gap-4 text-sm text-slate-800">
+                    <div class="grid w-full grid-cols-1 md:grid-cols-3 gap-4 text-sm text-slate-800">
                         <div class="flex flex-col p-2 space-y-1 border border-gray-300 rounded-md bg-neutral-200/50">
                             <span class="font-medium text-neutral-500">{{ __('personnel::common.labels.event_type') }}</span>
                             <span>{{ data_get($event, 'event_type') ?? '---' }}</span>
@@ -159,7 +159,7 @@
 
     <div class="grid items-stretch grid-cols-1">
         <x-form-card title="{{ __('personnel::wizard.sections.scientific_degrees') }}">
-            <div class="grid grid-cols-3 gap-2 md:grid-cols-9">
+            <div class="grid grid-cols-1 gap-2 md:grid-cols-9">
                 <div class="flex flex-col md:col-span-2">
                     <x-ui.select-dropdown
                         label="{{ __('personnel::common.labels.scientific_degrees') }}"
@@ -204,7 +204,7 @@
                     @enderror
                 </div>
             </div>
-            <div class="grid items-start grid-cols-3 gap-2 md:grid-cols-9">   
+            <div class="grid items-start grid-cols-1 gap-2 md:grid-cols-9">
                 <div class="flex flex-col md:col-span-2">
                     <x-ui.select-dropdown
                         label="{{ __('personnel::common.labels.education_document') }}"
@@ -326,7 +326,7 @@
             checkboxTitle="{{ __('personnel::wizard.questions.has_elected_on_electorals') }}"
         >
             @if($miscForm->hasElectedElectorals)
-                <div class="grid grid-cols-3 gap-2">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
                     <div class="flex flex-col">
                         <x-label for="miscForm.election.election_type">{{ __('personnel::common.labels.election_type') }}</x-label>
                         <x-livewire-input mode="gray" name="miscForm.election.election_type" wire:model="miscForm.election.election_type"></x-livewire-input>
@@ -363,7 +363,7 @@
                   @forelse ($miscForm->electionList ?? [] as $key => $election)
                     <div class="flex items-center gap-2">
                     <span class="flex-none text-neutral-600">{{ $loop->iteration }}.</span>
-                    <div class="grid w-full grid-cols-3 gap-4 text-sm text-slate-800">
+                    <div class="grid w-full grid-cols-1 md:grid-cols-3 gap-4 text-sm text-slate-800">
                         <div class="flex flex-col p-2 space-y-1 border border-gray-300 rounded-md bg-neutral-200/50">
                             <span class="font-medium text-neutral-500">{{ __('personnel::common.labels.election_type') }}</span>
                             <span>{{ data_get($election, 'election_type') ?? '---' }}</span>

@@ -5,7 +5,7 @@
 <div class="flex flex-col space-y-4">
 
     <x-form-card :title="__('personnel::wizard.sections.id_document')">
-        <div class="grid grid-cols-2 gap-2 items-end">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 items-end">
             <div class="flex flex-col">
                 <div class="flex space-x-2">
                     <x-label for="documentForm.document.pin">{{ __('personnel::common.labels.pin') }}</x-label>
@@ -35,7 +35,7 @@
         <div
             wire:loading.remove
             wire:target="getDataByPin"
-            class="grid grid-cols-5 gap-2"
+            class="grid grid-cols-1 md:grid-cols-5 gap-2"
         >
             <div class="flex flex-col">
                 <x-label for="documentForm.document.nationality_id">{{ __('personnel::common.labels.nationality') }}</x-label>
@@ -103,7 +103,7 @@
                 @enderror
             </div>
         </div>
-        <div class="grid grid-cols-4 gap-2 mt-2">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-2 mt-2">
             <div class="flex flex-col">
                 <x-label for="documentForm.document.birthplace">{{ __('personnel::common.labels.birthplace') }}</x-label>
                 <x-livewire-input mode="gray" name="documentForm.document.birthplace" wire:model="documentForm.document.birthplace"></x-livewire-input>
@@ -165,7 +165,7 @@
     </x-form-card>
 
     <x-form-card :title="__('personnel::wizard.sections.service_cards')">
-        <div class="grid grid-cols-3 gap-2">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
             <div class="flex flex-col">
                 <x-label for="documentForm.serviceCards.card_number">{{ __('personnel::common.labels.card_number') }}</x-label>
                 <x-livewire-input mode="gray" name="documentForm.serviceCards.card_number" wire:model="documentForm.serviceCards.card_number"></x-livewire-input>
@@ -259,7 +259,7 @@
     </x-form-card>
 
     <x-form-card :title="__('personnel::wizard.sections.foreign_passports')">
-        <div class="grid grid-cols-3 gap-2">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
             <div class="flex flex-col">
                 <x-label for="documentForm.passports.serial_number">{{ __('personnel::common.labels.serial_number') }}</x-label>
                 <x-livewire-input mode="gray" name="documentForm.passports.serial_number" wire:model="documentForm.passports.serial_number"></x-livewire-input>

@@ -31,7 +31,7 @@ export default {
                     hover: '#000000',
                     soft: '#27272a',
                     muted: '#52525b',
-                    faint: '#a1a1aa',
+                    faint: '#71717a',
                 },
                 hairline: {
                     DEFAULT: '#e4e4e7',
@@ -46,7 +46,7 @@ export default {
                 card: '0 1px 2px rgba(16,24,40,0.04)',
             },
             spacing: {
-                rail: '82px',
+                rail: '96px',
                 panel: '300px',
             },
             maxWidth: {

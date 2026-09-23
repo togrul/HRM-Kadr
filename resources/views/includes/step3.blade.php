@@ -9,7 +9,7 @@
 
 <div class="flex flex-col space-y-4">
     <x-form-card title="{{ __('personnel::wizard.sections.education') }}">
-        <div class="grid grid-cols-3 gap-2">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
             <div class="flex flex-col">
                 <x-ui.select-dropdown
                     label="{{ __('personnel::common.labels.education_place') }}"
@@ -50,7 +50,7 @@
                 @enderror
             </div>
         </div>
-        <div class="grid grid-cols-4 gap-2">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
             <div class="flex flex-col">
                 <x-label for="educationForm.education.specialty">{{ __('personnel::common.labels.specialty') }}</x-label>
                 <x-livewire-input mode="gray" name="educationForm.education.specialty" wire:model="educationForm.education.specialty"></x-livewire-input>
@@ -92,7 +92,7 @@
                 @enderror
             </div>
         </div>
-        <div class="grid grid-cols-3 gap-2">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
             <div class="flex flex-col">
                 <x-label for="educationForm.education.diplom_serie">{{ __('personnel::common.labels.diplom_serie') }}</x-label>
                 <x-livewire-input mode="gray" name="educationForm.education.diplom_serie" wire:model="educationForm.education.diplom_serie"></x-livewire-input>
@@ -121,7 +121,7 @@
                 @enderror
             </div>
         </div>
-        <div class="grid items-end grid-cols-3 gap-2">
+        <div class="grid items-end grid-cols-1 md:grid-cols-3 gap-2">
             <div class="flex flex-col">
                 <x-label for="educationForm.education.coefficient">{{ __('personnel::common.labels.coefficient') }}</x-label>
                 <x-livewire-input mode="gray" type="number" name="educationForm.education.coefficient" wire:model.live="educationForm.education.coefficient"></x-livewire-input>
@@ -178,7 +178,7 @@
     checkboxTitle="{{ __('personnel::wizard.questions.has_extra_education') }}"
 >
     @if(data_get($educationForm ?? null, 'hasExtraEducation'))
-        <div class="grid grid-cols-3 gap-2">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
             <div class="flex flex-col">
                 <x-ui.select-dropdown
                     label="{{ __('personnel::common.labels.education_type') }}"
@@ -228,7 +228,7 @@
                 @enderror
             </div>
         </div>
-        <div class="grid grid-cols-3 gap-2">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
             <div class="flex flex-col">
                 <x-label for="educationForm.extraEducation.name">{{ __('personnel::common.labels.name') }}</x-label>
                 <x-livewire-input mode="gray" name="educationForm.extraEducation.name" wire:model="educationForm.extraEducation.name"></x-livewire-input>
@@ -251,7 +251,7 @@
                 @enderror
             </div>
         </div>
-        <div class="grid grid-cols-3 gap-2">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
             <div class="flex flex-col">
                 <x-label for="educationForm.extraEducation.education_program_name">{{ __('personnel::common.labels.program_name') }}</x-label>
                 <x-livewire-input mode="gray" name="educationForm.extraEducation.education_program_name" wire:model="educationForm.extraEducation.education_program_name"></x-livewire-input>
@@ -286,7 +286,7 @@
                 @enderror
             </div>
         </div>
-        <div class="grid grid-cols-3 gap-2">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
             <div class="flex flex-col">
                 <x-ui.select-dropdown
                     label="{{ __('personnel::common.labels.document_type') }}"
@@ -318,7 +318,7 @@
                 @enderror
             </div>
         </div>
-        <div class="grid grid-cols-3 gap-2">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
             <div class="flex flex-col">
                 <x-label for="educationForm.extraEducation.diplom_given_date">{{ __('personnel::common.labels.diplom_given_date') }}</x-label>
                 <x-pikaday-input mode="gray" name="educationForm.extraEducation.diplom_given_date" format="Y-MM-DD" wire:model.live="educationForm.extraEducation.diplom_given_date">

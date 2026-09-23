@@ -3,7 +3,7 @@
 namespace App\Support\Ui;
 
 /**
- * The single source of truth for form-control styling (shadcn geometry — 36px height,
+ * The single source of truth for form-control styling (shadcn geometry — 40px height,
  * 10px radius, 3px focus ring — over this app's ink/hairline tokens and the gray resting
  * fill a control needs to be visible on a white card).
  *
@@ -22,14 +22,14 @@ final class FieldStyles
     /** Single-line control (input). */
     public static function input(string $extra = ''): string
     {
-        return self::merge(self::BASE.' h-9 px-3 text-[12.5px]', $extra);
+        return self::merge(self::BASE.' h-10 px-3 text-[14px]', $extra);
     }
 
     /** Native select — chevron drawn by the component, so the right padding is reserved. */
     public static function select(string $extra = ''): string
     {
         return self::merge(
-            self::BASE.' h-9 appearance-none bg-none px-3 pr-9 text-[12.5px] [&::-ms-expand]:hidden',
+            self::BASE.' h-10 appearance-none bg-none px-3 pr-9 text-[14px] [&::-ms-expand]:hidden',
             $extra
         );
     }
@@ -37,7 +37,7 @@ final class FieldStyles
     /** Multi-line control (textarea). */
     public static function textarea(string $extra = ''): string
     {
-        return self::merge(self::BASE.' px-3 py-2 text-[12.5px] leading-relaxed', $extra);
+        return self::merge(self::BASE.' px-3 py-2.5 text-[14px] leading-relaxed', $extra);
     }
 
     private static function merge(string $classes, string $extra): string

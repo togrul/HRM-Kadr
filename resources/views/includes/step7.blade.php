@@ -15,7 +15,7 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-4 gap-2">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
             <div class="flex flex-col">
                 <x-ui.select-dropdown label="{{ __('personnel::common.labels.kinship') }}" placeholder="---" mode="gray" class="w-full"
                     wire:model.live="kinshipForm.kinship.kinship_id" :model="$this->kinshipOptions" :search-model="data_get($stepSearchModels, 'searchKinship', 'searchKinship')"
@@ -54,7 +54,7 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-4 gap-2">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
             <div class="flex flex-col">
                 <x-label for="kinshipForm.kinship.company_name">{{ __('personnel::common.labels.company_name') }}</x-label>
                 <x-livewire-input mode="gray" name="kinshipForm.kinship.company_name"
@@ -83,7 +83,7 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-2">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
             <div class="flex flex-col">
                 <x-label
                     for="kinshipForm.kinship.birth_certificate_number">{{ __('personnel::common.labels.birth_certificate_number') }}</x-label>
@@ -156,7 +156,7 @@
                         </div>
                     </x-slot>
                     <div class="flex flex-col w-full space-y-3">
-                        <div class="grid grid-cols-3 gap-4 text-sm text-slate-600">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-slate-600">
                             <div class="flex flex-col p-2 space-y-1 rounded-md bg-neutral-100/90">
                                 <span class="font-medium text-neutral-500">{{ __('personnel::common.labels.birthdate') }}</span>
                                 <span>{{ data_get($knshModel, 'birthdate') ?? '---' }}</span>
@@ -171,7 +171,7 @@
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4 text-sm text-slate-800">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-slate-800">
                             <div class="flex flex-col p-2 space-y-1 rounded-md bg-neutral-100/90">
                                 <span class="font-medium text-neutral-500">{{ __('personnel::common.labels.registered_address') }}</span>
                                 <span>{{ data_get($knshModel, 'registered_address') ?? '---' }}</span>
@@ -182,7 +182,7 @@
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4 text-sm text-neutral-800">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-neutral-800">
                             <div class="flex flex-col p-2 space-y-1 rounded-md bg-neutral-100/90">
                                 <span class="font-medium text-neutral-500">{{ __('personnel::common.labels.company') }}</span>
                                 <span>{{ data_get($knshModel, 'company_name') ?? '---' }}</span>

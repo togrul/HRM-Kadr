@@ -196,31 +196,36 @@
     id="hrm-rail"
     x-cloak
     :style="$store.hrmShell.railOpen ? 'transform: translateX(0)' : ''"
-    class="fixed inset-y-0 left-0 z-40 flex h-screen w-rail shrink-0 -translate-x-full flex-col items-center overflow-visible border-r border-hairline bg-white py-3 transition-transform duration-200 lg:sticky lg:top-0 lg:bottom-auto lg:translate-x-0"
+    class="fixed inset-y-0 left-0 z-40 flex h-screen w-[280px] shrink-0 -translate-x-full flex-col items-stretch overflow-visible border-r border-hairline bg-white px-2 py-3 transition-transform duration-200 lg:sticky lg:top-0 lg:bottom-auto lg:w-rail lg:translate-x-0 lg:items-center lg:px-0"
     aria-label="{{ __('ui::common.labels.module_navigation') }}"
 >
-    {{-- logo mark --}}
-    <a href="{{ route('home') }}" wire:navigate class="mb-1" data-rail-tip="{{ config('app.name') }}">
-        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] bg-ink text-[12px] font-bold tracking-tight text-white">HR</span>
-    </a>
+    <div class="mb-2 flex items-center justify-between px-1 lg:mb-1 lg:px-0">
+        <a href="{{ route('home') }}" wire:navigate data-rail-tip="{{ config('app.name') }}" class="flex items-center gap-2">
+            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] bg-ink text-[12px] font-bold tracking-tight text-white">HR</span>
+            <span class="text-[14px] font-semibold text-ink lg:hidden">{{ __('ui::common.labels.modules') }}</span>
+        </a>
+        <button type="button" @click="$store.hrmShell.railOpen = false" class="flex h-11 w-11 items-center justify-center rounded-xl text-ink-muted hover:bg-[#f4f4f5] lg:hidden" aria-label="{{ __('ui::common.labels.collapse_panel') }}">
+            <x-icons.close-icon size="w-5 h-5" color="text-current" hover="text-current" />
+        </button>
+    </div>
 
     {{-- command palette trigger --}}
     <button
         type="button"
         @click="$store.hrmShell.openPalette()"
         data-rail-tip="{{ __('ui::common.labels.search') }}"
-        class="flex h-[34px] w-10 shrink-0 items-center justify-center rounded-[10px] border border-hairline bg-[#fafafa] text-ink-muted transition hover:bg-white hover:text-ink"
+        class="flex h-11 w-full shrink-0 items-center gap-3 rounded-[10px] border border-hairline bg-[#fafafa] px-3 text-[14px] text-ink-muted transition hover:bg-white hover:text-ink lg:h-[34px] lg:w-10 lg:justify-center lg:px-0"
     >
         <x-icons.search-file size="w-[18px] h-[18px]" color="text-current" hover="text-current" />
-        <span class="sr-only">{{ __('ui::common.labels.search') }}</span>
+        <span class="lg:sr-only">{{ __('ui::common.labels.search') }}</span>
     </button>
 
-    <span class="my-1 h-px w-7 shrink-0 bg-hairline"></span>
+    <span class="my-1 h-px w-full shrink-0 bg-hairline lg:w-7"></span>
 
     {{-- only the module list scrolls, so the bell and the avatar never leave the viewport --}}
-    <div class="hrm-scroll flex w-full min-h-0 flex-1 flex-col items-center gap-1.5 overflow-y-auto overflow-x-hidden">
+    <div class="hrm-scroll flex w-full min-h-0 flex-1 flex-col items-stretch gap-1.5 overflow-y-auto overflow-x-hidden lg:items-center">
     {{-- pinned modules --}}
-    <nav class="flex w-full flex-col items-center gap-1">
+    <nav class="flex w-full flex-col items-stretch gap-1 lg:items-center">
         @foreach ($pinnedMenus as $menu)
             @module($menu->moduleName)
                 @can($menu->permissionName)
@@ -237,7 +242,8 @@
                         @if ($menu->isActive) aria-current="page" @endif
                     >
                         <x-dynamic-component :component="$menu->iconComponent" color="text-current" hover="text-current" size="w-[18px] h-[18px]" />
-                        <span class="hrm-rail-label">{{ $menu->shortLabel }}</span>
+                        <span class="hrm-rail-label lg:hidden">{{ $menu->label }}</span>
+                        <span class="hrm-rail-label hidden lg:block">{{ $menu->shortLabel }}</span>
                     </a>
                 @endcan
             @endmodule
@@ -245,9 +251,18 @@
     </nav>
 
     @if ($otherMenus->isNotEmpty())
-        <span class="my-1 h-px w-7 shrink-0 bg-hairline"></span>
+        <button
+            type="button"
+            @click="$store.hrmShell.openPalette()"
+            class="hrm-rail-item !hidden text-ink-muted hover:bg-[#fafafa] hover:text-ink lg:!flex"
+            data-rail-tip="{{ __('ui::common.labels.modules') }}"
+        >
+            <x-icons.layout-icon size="w-[18px] h-[18px]" color="text-current" hover="text-current" />
+            <span class="hrm-rail-label">{{ __('ui::common.labels.modules') }}</span>
+        </button>
+        <span class="my-1 h-px w-full shrink-0 bg-hairline lg:w-7"></span>
 
-        <nav class="flex w-full flex-col items-center gap-0.5">
+        <nav class="flex w-full flex-col items-stretch gap-0.5 lg:items-center">
             @foreach ($otherMenus as $menu)
                 @module($menu->moduleName)
                     @can($menu->permissionName)
@@ -264,7 +279,8 @@
                             @if ($menu->isActive) aria-current="page" @endif
                         >
                             <x-dynamic-component :component="$menu->iconComponent" color="text-current" hover="text-current" size="w-[18px] h-[18px]" />
-                            <span class="hrm-rail-label">{{ $menu->shortLabel }}</span>
+                            <span class="hrm-rail-label lg:hidden">{{ $menu->label }}</span>
+                            <span class="hrm-rail-label hidden lg:block">{{ $menu->shortLabel }}</span>
                         </a>
                     @endcan
                 @endmodule
@@ -276,7 +292,7 @@
 
     {{-- bottom utilities: always pinned to the foot of the rail --}}
     <div class="flex w-full shrink-0 flex-col items-center gap-1.5 bg-white pt-3">
-        <span class="h-px w-7 shrink-0 bg-hairline"></span>
+        <span class="h-px w-full shrink-0 bg-hairline lg:w-7"></span>
 
         @module('services')
             @can('access-settings')

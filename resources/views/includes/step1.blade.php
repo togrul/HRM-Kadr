@@ -19,9 +19,9 @@
     $shiftCount = EmploymentTerms::shiftCount($workSchedule);
 @endphp
 
-<div class="flex items-start justify-between w-full space-x-4">
-    <div class="flex flex-col flex-1 space-y-4">
-        <div class="grid grid-cols-3 gap-2">
+<div class="flex w-full flex-col items-stretch gap-4 md:flex-row md:items-start">
+    <div class="flex min-w-0 flex-1 flex-col space-y-4">
+        <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
             <div class="flex flex-col">
                 <x-label for="personnel.name">{{ __('personnel::common.labels.name') }}</x-label>
                 <x-livewire-input mode="gray" name="personnel.name" wire:model="personalForm.personnel.name"></x-livewire-input>
@@ -49,7 +49,7 @@
             </div>
         </div>
         @if(data_get($personal, 'has_changed_initials'))
-        <div class="grid grid-cols-3 gap-2">
+        <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
             <div class="flex flex-col">
                 <x-label for="personnel.previous_name">{{ __('personnel::common.labels.previous_name') }}</x-label>
                 <x-livewire-input mode="gray" name="personnel.previous_name" wire:model="personalForm.personnel.previous_name"></x-livewire-input>
@@ -72,7 +72,7 @@
                 @enderror
             </div>
         </div>
-        <div class="grid grid-cols-3 gap-2">
+        <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
             <div class="flex flex-col">
                 <x-label for="personnel.name">{{ __('personnel::common.labels.change_date') }}</x-label>
                 <x-pikaday-input mode="gray" name="personnel.initials_changed_date" format="Y-MM-DD" wire:model.live="personalForm.personnel.initials_changed_date">
@@ -86,7 +86,7 @@
                 <x-validation> {{ $message }} </x-validation>
                 @enderror
             </div>
-            <div class="flex flex-col col-span-2">
+            <div class="flex flex-col md:col-span-2">
                 <x-label for="personnel.name">{{ __('personnel::common.labels.change_reason') }}</x-label>
                 <x-livewire-input mode="gray" name="personnel.initials_change_reason" wire:model="personalForm.personnel.initials_change_reason"></x-livewire-input>
                 @error('personalForm.personnel.initials_change_reason')
@@ -95,7 +95,7 @@
             </div>
         </div>
         @endif
-        <div class="grid grid-cols-3 gap-2">
+        <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
             <div class="flex flex-col">
                 <x-label for="personnel.birthdate">{{ __('personnel::common.labels.birthdate') }}</x-label>
                 <x-pikaday-input mode="gray" name="personnel.birthdate" format="Y-MM-DD" wire:model.live="personalForm.personnel.birthdate">
@@ -145,7 +145,7 @@
             </div>
         </div>
         @if(data_get($personal, 'has_changed_nationality'))
-        <div class="grid grid-cols-3 gap-2">
+        <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
             <div class="flex flex-col">
                 <x-label for="personnel.previous_nationality">{{ __('personnel::common.labels.previous_nationality') }}</x-label>
                 <x-ui.select-dropdown
@@ -185,7 +185,7 @@
             </div>
         </div>
         @endif
-        <div class="grid grid-cols-4 gap-2">
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
             <div class="flex flex-col">
                 <x-label for="personnel.phone">{{ __('personnel::common.labels.phone') }}</x-label>
                 <x-livewire-input mode="gray" name="personnel.phone" wire:model="personalForm.personnel.phone"></x-livewire-input>
@@ -210,7 +210,7 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-2">
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div class="flex flex-col">
                 <x-label for="personnel.residental_address">{{ __('personnel::common.labels.residental_address') }}</x-label>
                 <x-livewire-input mode="gray" name="personnel.residental_address" wire:model="personalForm.personnel.residental_address"></x-livewire-input>
@@ -226,7 +226,7 @@
                 @enderror
             </div>
         </div>
-        <div class="grid grid-cols-3 gap-2">
+        <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
             <div class="flex flex-col">
                 <x-label for="personnel.education_degree_id">{{ __('personnel::common.labels.education_degree') }}</x-label>
                 <x-ui.select-dropdown
@@ -281,7 +281,7 @@
                 @enderror
             </div>
         </div>
-        <div class="grid grid-cols-2 gap-2">
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div class="flex flex-col">
                 <x-label for="personnel.work_norm_id">{{ __('personnel::common.labels.work_norms') }}</x-label>
                 <x-ui.select-dropdown
@@ -315,7 +315,7 @@
                 @enderror
             </div>
         </div>
-        <div class="grid grid-cols-3 gap-2">
+        <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
             <div class="flex flex-col">
                 <x-label for="personnel.contract_date">{{ __('personnel::common.labels.contract_date') }}</x-label>
                 <x-pikaday-input mode="gray" name="personnel.contract_date" format="Y-MM-DD" wire:model.live="personalForm.personnel.contract_date">
@@ -353,7 +353,7 @@
                 </x-pikaday-input>
             </div>
         </div>
-        <div class="grid grid-cols-3 gap-2">
+        <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
             <div class="flex flex-col">
                 <x-label for="personnel.probation_unit">{{ __('personnel::common.labels.probation_period') }}</x-label>
                 <x-ui.select-dropdown
@@ -380,7 +380,7 @@
                 </div>
             @endif
         </div>
-        <div class="grid grid-cols-3 gap-2">
+        <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
             <div class="flex flex-col">
                 <x-label for="personnel.workplace_type">{{ __('personnel::common.labels.workplace_type') }}</x-label>
                 <x-ui.select-dropdown
@@ -429,7 +429,7 @@
         </div>
         {{-- A working week has fixed daily hours, a lunch break and rest days; a shift rota has neither. --}}
         @if ($isWeeklySchedule)
-            <div class="grid grid-cols-4 gap-2">
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
                 @foreach ([
                     'work_start' => 'work_start_time',
                     'work_end' => 'work_end_time',
@@ -458,7 +458,7 @@
             </div>
         @endif
         @if ($shiftCount > 0)
-            <div class="grid grid-cols-4 gap-2">
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
                 @for ($shift = 1; $shift <= $shiftCount; $shift++)
                     @foreach (['start' => 'shift_start_time', 'end' => 'shift_end_time'] as $edge => $shiftLabel)
                         <div class="flex flex-col">
@@ -473,7 +473,7 @@
             </div>
         @endif
 
-        <div class="grid grid-cols-2 gap-2">
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div class="flex flex-col space-y-2">
                 <div class="flex flex-col">
                     <x-label for="personnel.special_inspection_date">{{ __('personnel::common.labels.special_inspection_date') }}</x-label>
@@ -515,7 +515,7 @@
         </div>
 
         @if($hasDisability)
-        <div class="grid grid-cols-2 gap-2">
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div class="flex flex-col">
                 <x-label for="personnel.disability_id">{{ __('personnel::common.labels.disability') }}</x-label>
                 <x-ui.select-dropdown
@@ -548,7 +548,7 @@
             </div>
         </div>
         @endif
-        <div class="grid grid-cols-2 gap-2">
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div class="flex flex-col">
                 <div class="flex items-center justify-between space-x-2">
                     <x-label for="personnel.extra_important_information">{{ __('personnel::common.labels.extra_information') }}</x-label>
@@ -569,7 +569,7 @@
             </div>
         </div>
     </div>
-    <div class="flex-none w-40">
+    <div class="w-full flex-none md:w-40">
         <div class="flex flex-col space-y-2">
             <div class="flex flex-col">
                 <x-label for="personnel.tabel_no">{{ __('personnel::common.labels.tabel_hash') }}</x-label>
@@ -578,7 +578,7 @@
                 <x-validation> {{ $message }} </x-validation>
                 @enderror
             </div>
-            <div class="p-1 border border-gray-300 rounded-lg shadow-sm">
+            <div class="mx-auto w-40 rounded-lg border border-gray-300 p-1 shadow-sm md:mx-0">
                 <div class="flex flex-col space-y-4">
                     <div class="flex flex-col mt-2" x-data="{ isUploading: false, progress: 0 }"
                          x-on:livewire-upload-start="isUploading = true"

@@ -4,7 +4,7 @@
 
 <div class="flex flex-col space-y-4">
     <x-form-card title="{{ __('personnel::wizard.sections.labor_activities') }}">
-        <div class="grid grid-cols-5 gap-2">
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-2">
             <div class="flex flex-col">
                 <x-label for="laborActivityForm.laborActivity.company_name">{{ __('personnel::common.labels.company_name') }}</x-label>
                 <x-livewire-input mode="gray" name="laborActivityForm.laborActivity.company_name" wire:model="laborActivityForm.laborActivity.company_name"></x-livewire-input>
@@ -128,7 +128,7 @@
             </div>
         </div>
         @if($isSpecialService)
-            <div class="grid grid-cols-3 gap-2">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
                 <div class="flex flex-col">
                     <x-label for="laborActivityForm.laborActivity.order_given_by">{{ __('personnel::common.labels.order_issued_by') }}</x-label>
                     <x-livewire-input mode="gray" name="laborActivityForm.laborActivity.order_given_by" wire:model="laborActivityForm.laborActivity.order_given_by"></x-livewire-input>
@@ -376,7 +376,7 @@
 </div>
 
 <x-form-card title="{{ __('personnel::wizard.sections.ranks') }}">
-    <div class="grid grid-cols-4 gap-3">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
         <div class="flex flex-col">
             <x-ui.select-dropdown
                 label="{{ __('personnel::common.labels.ranks') }}"
