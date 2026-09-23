@@ -5,9 +5,7 @@ namespace App\Modules\Orders\Providers;
 use App\Models\OrderType;
 use App\Modules\Orders\Console\Commands\OrdersListQueryBudgetCommand;
 use App\Modules\Orders\Console\Commands\OrdersListRenderBenchmarkCommand;
-use App\Modules\Orders\Contracts\OrderDrafter;
 use App\Modules\Orders\Domain\Contracts\OrderTypeStatusLookupReadRepository;
-use App\Modules\Orders\Infrastructure\Document\OrderDraftService;
 use App\Modules\Orders\Infrastructure\Persistence\Eloquent\EloquentOrderTypeStatusLookupReadRepository;
 use App\Observers\OrderTypeObserver;
 use App\Providers\Concerns\RegistersLivewireAliases;
@@ -29,7 +27,6 @@ class OrdersServiceProvider extends ServiceProvider
         }
 
         $this->app->bind(OrderTypeStatusLookupReadRepository::class, EloquentOrderTypeStatusLookupReadRepository::class);
-        $this->app->bind(OrderDrafter::class, OrderDraftService::class);
     }
 
     public function boot(): void

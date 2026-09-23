@@ -50,6 +50,9 @@ class AppServiceProvider extends ServiceProvider
         // is not loaded when the module is off, and the Payroll module must be
         // able to resolve this either way.
         $this->app->bind(PayrollOwnership::class, ConfiguredPayrollOwnership::class);
+        // Bound here, not in OrdersServiceProvider: BonusService depends on it even when the
+        // orders module is switched off (company mode never drafts an order).
+        $this->app->bind(\App\Modules\Orders\Contracts\OrderDrafter::class, \App\Modules\Orders\Infrastructure\Document\OrderDraftService::class);
 
         // Same reason: order effects (hire/transfer/termination) resolve this whether or
         // not the compensation module's provider is loaded.
