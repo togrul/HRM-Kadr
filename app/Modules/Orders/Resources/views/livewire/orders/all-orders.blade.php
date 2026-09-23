@@ -85,6 +85,8 @@
 
     {{-- ===================== header ===================== --}}
     <x-page-header
+        collapsible-filters
+        :filters-active="$this->hasActiveFilters"
         :title="__('orders::order_list.table.title')"
         :breadcrumb="__('orders::order_list.table.title')"
     >

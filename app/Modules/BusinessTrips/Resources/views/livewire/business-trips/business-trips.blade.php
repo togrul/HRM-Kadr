@@ -60,6 +60,8 @@
 
     {{-- ===================== header ===================== --}}
     <x-page-header
+        collapsible-filters
+        :filters-active="$this->hasActiveFilters"
         :title="__('business_trips::common.table.title')"
         :breadcrumb="__('business_trips::common.table.title')"
     >

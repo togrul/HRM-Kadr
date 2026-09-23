@@ -54,15 +54,17 @@
 
         <main class="flex w-full flex-col items-stretch gap-2 px-2 pb-4 pt-2 lg:flex-row lg:items-start">
             @if ($hasSidebar)
+                {{-- phones: the context panel (sections, status filters, structure tree) opens from one compact control --}}
                 <button
                     type="button"
                     @click="$store.hrmShell.mobilePanelOpen = ! $store.hrmShell.mobilePanelOpen"
                     :aria-expanded="$store.hrmShell.mobilePanelOpen.toString()"
                     aria-controls="sidebar"
-                    class="sticky top-[52px] z-20 flex min-h-11 w-full items-center justify-between rounded-xl border border-hairline bg-white px-4 text-[14px] font-medium text-ink shadow-card lg:hidden"
+                    class="sticky top-[52px] z-20 inline-flex h-10 w-fit items-center gap-2 self-start rounded-[10px] border border-hairline bg-white px-3.5 text-[13.5px] font-semibold text-ink-soft shadow-card lg:hidden"
                 >
-                    <span>{{ __('ui::common.labels.module_navigation') }}</span>
-                    <span x-text="$store.hrmShell.mobilePanelOpen ? @js(__('ui::common.labels.collapse_panel')) : @js(__('ui::common.labels.expand_panel'))" class="text-ink-muted"></span>
+                    <svg class="h-4 w-4 text-ink-faint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/></svg>
+                    <span>{{ __('ui::common.labels.sections_and_filters') }}</span>
+                    <svg class="h-3.5 w-3.5 text-ink-faint transition" :class="$store.hrmShell.mobilePanelOpen && 'rotate-180'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
                 </button>
                 <aside
                     id="sidebar"

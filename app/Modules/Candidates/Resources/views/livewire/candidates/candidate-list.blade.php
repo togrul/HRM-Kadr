@@ -40,6 +40,8 @@
 
     {{-- ===================== header ===================== --}}
     <x-page-header
+        collapsible-filters
+        :filters-active="$this->hasActiveFilters"
         :title="__('candidates::common.titles.candidates')"
         :breadcrumb="__('candidates::common.titles.candidates')"
     >

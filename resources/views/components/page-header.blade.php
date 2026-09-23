@@ -7,6 +7,8 @@
     'guideTitle' => null,
     'guideDescription' => null,
     'guideUrl' => null,
+    'collapsibleFilters' => false, // phones: the toolbar folds behind a "Filters" button
+    'filtersActive' => false,      // marks that button while a filter is applied
 ])
 
 {{--
@@ -82,7 +84,25 @@
     @endif
 
     {{-- optional body (filters / tabs) rendered inside the same card --}}
-    @if (trim($slot) !== '')
+    @if (trim($slot) !== '' && $collapsibleFilters)
+        {{-- on a phone a full filter toolbar pushes the list below the fold, so it folds away --}}
+        <div x-data="{ filtersOpen: false }" class="border-t border-hairline-subtle px-4 py-3 sm:px-5 sm:py-3.5">
+            <button
+                type="button"
+                @click="filtersOpen = ! filtersOpen"
+                :aria-expanded="filtersOpen.toString()"
+                class="inline-flex h-10 items-center gap-2 rounded-[10px] border border-hairline bg-[#f4f4f5] px-3.5 text-[13.5px] font-semibold text-ink-soft transition hover:bg-[#e4e4e7] sm:hidden"
+            >
+                <svg class="h-4 w-4 text-ink-faint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h18M6 12h12M10 19h4"/></svg>
+                {{ __('ui::common.labels.filters') }}
+                @if ($filtersActive)
+                    <span class="h-1.5 w-1.5 rounded-full bg-ink" aria-label="{{ __('ui::common.labels.filters_active') }}"></span>
+                @endif
+                <svg class="h-3.5 w-3.5 text-ink-faint transition" :class="filtersOpen && 'rotate-180'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
+            <div x-cloak :class="filtersOpen ? 'mt-3 block' : 'hidden'" class="sm:!mt-0 sm:!block">{{ $slot }}</div>
+        </div>
+    @elseif (trim($slot) !== '')
         <div class="border-t border-hairline-subtle px-4 py-3.5 sm:px-5">{{ $slot }}</div>
     @endif
 </div>

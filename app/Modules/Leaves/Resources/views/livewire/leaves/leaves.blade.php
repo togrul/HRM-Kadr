@@ -76,6 +76,8 @@
 
     {{-- ===================== header ===================== --}}
     <x-page-header
+        collapsible-filters
+        :filters-active="$this->hasActiveFilters"
         :title="__('leaves::common.labels.requests_title')"
         :breadcrumb="__('leaves::common.titles.leaves')"
     >

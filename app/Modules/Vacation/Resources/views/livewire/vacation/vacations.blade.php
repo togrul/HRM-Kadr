@@ -71,6 +71,8 @@
 
     {{-- ===================== header ===================== --}}
     <x-page-header
+        collapsible-filters
+        :filters-active="$this->hasActiveFilters"
         :title="__('vacation::common.titles.requests')"
         :breadcrumb="__('vacation::common.titles.vacations')"
     >

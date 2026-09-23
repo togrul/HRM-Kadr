@@ -32,6 +32,8 @@
 
     {{-- ===================== header ===================== --}}
     <x-page-header
+        collapsible-filters
+        :filters-active="$search !== '' || $filters !== [] || $selectedPosition !== null"
         :title="__('personnel::common.titles.personnels')"
         :breadcrumb="__('personnel::common.titles.personnels')"
     >
