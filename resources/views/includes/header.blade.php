@@ -197,8 +197,9 @@
 
     $paletteCanSearchPeople = $moduleState->enabled('personnel') && (auth()->user()?->can('show-personnels') ?? false);
 
-    $pinnedMenus = $preparedMenus->take(5);
-    $otherMenus = $preparedMenus->slice(5)->values();
+    // Pins come from what the user may actually open (taking the first five before the
+    // permission check left gaps), ordered for their working role.
+    [$pinnedMenus, $otherMenus] = MenuPresentation::splitPinned($paletteMenus, auth()->user());
 @endphp
 
 {{-- mobile scrim --}}
