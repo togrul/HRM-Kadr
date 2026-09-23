@@ -212,9 +212,10 @@
     aria-hidden="true"
 ></div>
 
+{{-- no x-cloak: hiding the rail until Alpine boots made the whole page jump 96px sideways
+     on every load; on phones it already sits off-canvas via -translate-x-full --}}
 <aside
     id="hrm-rail"
-    x-cloak
     :style="$store.hrmShell.railOpen ? 'transform: translateX(0)' : ''"
     class="fixed inset-y-0 left-0 z-40 flex h-screen w-[280px] shrink-0 -translate-x-full flex-col items-stretch overflow-visible border-r border-hairline bg-white px-2 py-3 transition-transform duration-200 lg:sticky lg:top-0 lg:bottom-auto lg:w-rail lg:translate-x-0 lg:items-center lg:px-0"
     aria-label="{{ __('ui::common.labels.module_navigation') }}"

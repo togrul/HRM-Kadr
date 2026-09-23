@@ -436,6 +436,21 @@ body {
   }
 }
 
+/* The vertical scrollbar keeps its gutter, so opening a modal (which locks scrolling) or a
+   page growing past the fold never shifts the layout sideways. */
+html {
+  scrollbar-gutter: stable;
+}
+
+/* Collapsed context panel, known before Alpine boots (see the head script in layouts/app). */
+@media (min-width: 1024px) {
+  html[data-panel-collapsed] #sidebar {
+    width: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
 /* contextual panel collapse animation */
 .hrm-panel-shell {
   transition: width 220ms cubic-bezier(0.4, 0, 0.2, 1);

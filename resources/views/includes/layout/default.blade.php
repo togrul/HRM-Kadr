@@ -13,6 +13,7 @@
                 togglePanel() {
                     this.panelCollapsed = ! this.panelCollapsed;
                     localStorage.setItem('hrm.panelCollapsed', this.panelCollapsed ? '1' : '0');
+                    document.documentElement.toggleAttribute('data-panel-collapsed', this.panelCollapsed);
                 },
                 openPalette() {
                     this.paletteOpen = true;
@@ -68,9 +69,8 @@
                 </button>
                 <aside
                     id="sidebar"
-                    x-cloak
                     :class="{ '!block': $store.hrmShell.mobilePanelOpen, 'lg:w-0 lg:opacity-0 lg:pointer-events-none': $store.hrmShell.panelCollapsed, 'lg:w-panel lg:opacity-100': ! $store.hrmShell.panelCollapsed }"
-                    class="hrm-panel-shell hidden w-full shrink-0 overflow-x-hidden lg:sticky lg:top-2 lg:block"
+                    class="hrm-panel-shell hidden w-full shrink-0 overflow-x-hidden lg:sticky lg:top-2 lg:block lg:w-panel"
                     role="complementary"
                     aria-label="{{ __('ui::common.labels.module_navigation') }}"
                 >
