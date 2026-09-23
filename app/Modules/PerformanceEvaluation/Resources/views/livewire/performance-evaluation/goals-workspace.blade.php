@@ -4,7 +4,7 @@
     {{-- ───────────── header ───────────── --}}
     <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-            <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-zinc-400">{{ __('performance_evaluation::goals.eyebrow') }}</p>
+            <p class="hrm-eyebrow">{{ __('performance_evaluation::goals.eyebrow') }}</p>
             <h1 class="mt-1.5 text-[1.75rem] font-semibold leading-none tracking-tight text-zinc-950">{{ __('performance_evaluation::goals.title') }}</h1>
             <p class="mt-2 max-w-xl text-[13px] leading-6 text-zinc-500">{{ __('performance_evaluation::goals.subtitle') }}</p>
         </div>
@@ -125,7 +125,7 @@
             @if ($showSideMenu === 'goal-form')
                 <div class="flex h-full flex-col">
                     <div class="mb-7">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-zinc-400">{{ __('performance_evaluation::goals.eyebrow') }}</p>
+                        <p class="hrm-eyebrow">{{ __('performance_evaluation::goals.eyebrow') }}</p>
                         <h2 class="mt-1.5 text-[18px] font-semibold tracking-tight text-zinc-950">{{ __('performance_evaluation::goals.actions.add') }}</h2>
                         <p class="mt-1.5 text-[13px] leading-6 text-zinc-500">{{ __('performance_evaluation::goals.subtitle') }}</p>
                     </div>

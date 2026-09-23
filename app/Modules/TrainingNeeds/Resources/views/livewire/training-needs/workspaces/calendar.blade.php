@@ -21,7 +21,7 @@
                     <x-ui.list-card tone="sky">
                         <div class="space-y-4">
                             <div class="flex items-start gap-3">
-                                <input type="checkbox" wire:model.live="bulkProposalPlanItemIds" value="{{ $proposal['plan_item_id'] }}" class="mt-1 rounded border-zinc-300 text-blue-600 focus:ring-blue-500">
+                                <input type="checkbox" wire:model.live="bulkProposalPlanItemIds" value="{{ $proposal['plan_item_id'] }}" class="mt-1 rounded border-hairline text-ink focus:ring-zinc-400">
                                 <div class="min-w-0 flex-1">
                                     <div class="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
                                         <div>
@@ -99,12 +99,12 @@
                     </div>
                     <div>
                         <x-label for="session-start">{{ __('training_needs::dashboard.fields.scheduled_start_at') }}</x-label>
-                        <input id="session-start" type="datetime-local" wire:model="sessionForm.scheduled_start_at" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
+                        <input id="session-start" type="datetime-local" wire:model="sessionForm.scheduled_start_at" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 h-10 px-3 text-base sm:text-sm" />
                         @error('sessionForm.scheduled_start_at') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div>
                         <x-label for="session-end">{{ __('training_needs::dashboard.fields.scheduled_end_at') }}</x-label>
-                        <input id="session-end" type="datetime-local" wire:model="sessionForm.scheduled_end_at" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
+                        <input id="session-end" type="datetime-local" wire:model="sessionForm.scheduled_end_at" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 h-10 px-3 text-base sm:text-sm" />
                         @error('sessionForm.scheduled_end_at') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div>
@@ -133,7 +133,7 @@
                         @error('sessionForm.actual_budget') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <label class="inline-flex items-center gap-2 rounded-lg bg-zinc-50 px-3 py-2 text-sm text-zinc-700">
-                        <input type="checkbox" wire:model="sessionForm.auto_fill_participants" class="rounded border-zinc-300 text-blue-600 focus:ring-blue-500">
+                        <input type="checkbox" wire:model="sessionForm.auto_fill_participants" class="rounded border-hairline text-ink focus:ring-zinc-400">
                         {{ __('training_needs::dashboard.fields.auto_fill_participants') }}
                     </label>
                     <div>
@@ -149,7 +149,7 @@
                     </div>
                     <div class="md:col-span-2">
                         <x-label for="session-notes">{{ __('training_needs::dashboard.fields.notes') }}</x-label>
-                        <textarea id="session-notes" wire:model="sessionForm.notes" class="min-h-20 w-full rounded-lg border-none bg-neutral-100 px-3 py-2 text-sm shadow-sm focus:ring-blue-500"></textarea>
+                        <textarea id="session-notes" wire:model="sessionForm.notes" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 min-h-20 px-3 py-2.5 text-base leading-relaxed sm:text-sm"></textarea>
                         @error('sessionForm.notes') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div class="md:col-span-2">

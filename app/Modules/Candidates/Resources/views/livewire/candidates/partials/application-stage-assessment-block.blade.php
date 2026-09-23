@@ -1,12 +1,12 @@
-<div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-    <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">
+<div class="mt-4 rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
+    <div class="text-[11px] font-semibold uppercase tracking-tight text-zinc-400">
         {{ __('candidates::recruitment.titles.assessment_focus') }}
     </div>
 
     @if ($this->assessmentChecklist)
         <div class="mt-3 flex flex-wrap gap-2">
             @foreach ($this->assessmentChecklist as $item)
-                <span class="inline-flex rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-600">
+                <span class="inline-flex rounded-full bg-white px-3 py-1 text-xs font-semibold text-zinc-600">
                     {{ __('candidates::recruitment.assessment_checklists.'.$item) }}
                 </span>
             @endforeach
@@ -30,10 +30,10 @@
         @if ($this->assessmentChecklist)
             <div class="mt-4 grid gap-3">
                 @foreach ($this->assessmentChecklist as $item)
-                    <div class="rounded-[20px] border border-slate-200 bg-white p-4">
+                    <div class="rounded-[20px] border border-zinc-200 bg-white p-4">
                         <div class="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
                             <div class="space-y-3">
-                                <div class="text-sm font-semibold text-slate-900">
+                                <div class="text-sm font-semibold text-zinc-900">
                                     {{ __('candidates::recruitment.assessment_checklists.'.$item) }}
                                 </div>
                                 <div class="flex flex-col">

@@ -395,7 +395,7 @@ return [
         'review_note_meta' => 'HR qeydi: :note',
         'session_proposal' => 'Sessiya təklifi',
         'session_proposal_meta' => ':start - :end • büdcə: :budget AZN',
-        'session_proposal_applied_hint' => 'Sessiya forması seçilmiş approved plan item üzrə sistem təklifi ilə dolduruldu.',
+        'session_proposal_applied_hint' => 'Sessiya forması seçilmiş təsdiqlənmiş plan sətri üzrə sistem təklifi ilə dolduruldu.',
         'proposal_selection_meta' => ':count təklif seçilib',
         'certificate_preview_title' => 'Seçilmiş sertifikat',
         'certificate_preview_empty' => 'Bu qeyd üçün hələ sertifikat yüklənməyib.',

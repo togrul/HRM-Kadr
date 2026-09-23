@@ -26,7 +26,7 @@
                 </div>
                 <div class="md:col-span-2">
                     <x-label for="group-description">{{ __('training_needs::dashboard.fields.description') }}</x-label>
-                    <textarea id="group-description" wire:model="groupForm.description" class="min-h-24 w-full rounded-lg border-none bg-neutral-100 px-3 py-2 text-sm shadow-sm focus:ring-blue-500"></textarea>
+                    <textarea id="group-description" wire:model="groupForm.description" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 min-h-24 px-3 py-2.5 text-base leading-relaxed sm:text-sm"></textarea>
                     @error('groupForm.description') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
                 <div>
@@ -35,7 +35,7 @@
                     @error('groupForm.sort_order') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
                 <label class="mt-6 inline-flex items-center gap-2 rounded-lg bg-zinc-50 px-3 py-2 text-sm text-zinc-700">
-                    <input type="checkbox" wire:model="groupForm.is_active" class="rounded border-zinc-300 text-blue-600 focus:ring-blue-500">
+                    <input type="checkbox" wire:model="groupForm.is_active" class="rounded border-hairline text-ink focus:ring-zinc-400">
                     {{ __('training_needs::dashboard.fields.is_active') }}
                 </label>
                 <div class="md:col-span-2 flex items-center gap-2">
@@ -111,12 +111,12 @@
                     @error('levelForm.sort_order') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
                 <label class="mt-6 inline-flex items-center gap-2 rounded-lg bg-zinc-50 px-3 py-2 text-sm text-zinc-700">
-                    <input type="checkbox" wire:model="levelForm.is_default" class="rounded border-zinc-300 text-blue-600 focus:ring-blue-500">
+                    <input type="checkbox" wire:model="levelForm.is_default" class="rounded border-hairline text-ink focus:ring-zinc-400">
                     {{ __('training_needs::dashboard.fields.is_default') }}
                 </label>
                 <div class="md:col-span-2">
                     <x-label for="level-description">{{ __('training_needs::dashboard.fields.description') }}</x-label>
-                    <textarea id="level-description" wire:model="levelForm.description" class="min-h-24 w-full rounded-lg border-none bg-neutral-100 px-3 py-2 text-sm shadow-sm focus:ring-blue-500"></textarea>
+                    <textarea id="level-description" wire:model="levelForm.description" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 min-h-24 px-3 py-2.5 text-base leading-relaxed sm:text-sm"></textarea>
                     @error('levelForm.description') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
                 <div class="md:col-span-2 flex items-center gap-2">
@@ -196,15 +196,15 @@
                 </div>
                 <div class="md:col-span-2">
                     <x-label for="competency-description">{{ __('training_needs::dashboard.fields.description') }}</x-label>
-                    <textarea id="competency-description" wire:model="competencyForm.description" class="min-h-24 w-full rounded-lg border-none bg-neutral-100 px-3 py-2 text-sm shadow-sm focus:ring-blue-500"></textarea>
+                    <textarea id="competency-description" wire:model="competencyForm.description" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 min-h-24 px-3 py-2.5 text-base leading-relaxed sm:text-sm"></textarea>
                     @error('competencyForm.description') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
                 <label class="inline-flex items-center gap-2 rounded-lg bg-zinc-50 px-3 py-2 text-sm text-zinc-700">
-                    <input type="checkbox" wire:model="competencyForm.is_mandatory" class="rounded border-zinc-300 text-blue-600 focus:ring-blue-500">
+                    <input type="checkbox" wire:model="competencyForm.is_mandatory" class="rounded border-hairline text-ink focus:ring-zinc-400">
                     {{ __('training_needs::dashboard.fields.is_mandatory') }}
                 </label>
                 <label class="inline-flex items-center gap-2 rounded-lg bg-zinc-50 px-3 py-2 text-sm text-zinc-700">
-                    <input type="checkbox" wire:model="competencyForm.is_active" class="rounded border-zinc-300 text-blue-600 focus:ring-blue-500">
+                    <input type="checkbox" wire:model="competencyForm.is_active" class="rounded border-hairline text-ink focus:ring-zinc-400">
                     {{ __('training_needs::dashboard.fields.is_active') }}
                 </label>
                 <div class="md:col-span-2 flex items-center gap-2">
@@ -289,12 +289,12 @@
                     @error('programForm.delivery_type') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
                 <label class="mt-6 inline-flex items-center gap-2 rounded-lg bg-zinc-50 px-3 py-2 text-sm text-zinc-700">
-                    <input type="checkbox" wire:model="programForm.is_active" class="rounded border-zinc-300 text-blue-600 focus:ring-blue-500">
+                    <input type="checkbox" wire:model="programForm.is_active" class="rounded border-hairline text-ink focus:ring-zinc-400">
                     {{ __('training_needs::dashboard.fields.is_active') }}
                 </label>
                 <div class="md:col-span-2">
                     <x-label for="program-description">{{ __('training_needs::dashboard.fields.description') }}</x-label>
-                    <textarea id="program-description" wire:model="programForm.description" class="min-h-24 w-full rounded-lg border-none bg-neutral-100 px-3 py-2 text-sm shadow-sm focus:ring-blue-500"></textarea>
+                    <textarea id="program-description" wire:model="programForm.description" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 min-h-24 px-3 py-2.5 text-base leading-relaxed sm:text-sm"></textarea>
                     @error('programForm.description') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
                 <div class="md:col-span-2 flex items-center gap-2">

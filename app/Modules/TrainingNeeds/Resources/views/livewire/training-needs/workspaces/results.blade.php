@@ -45,7 +45,7 @@
                     </div>
                     <div class="md:col-span-2">
                         <x-label for="feedback-questions">{{ __('training_needs::dashboard.fields.feedback_questions') }}</x-label>
-                        <textarea id="feedback-questions" wire:model="feedbackForm.questions_text" class="min-h-24 w-full rounded-lg border-none bg-neutral-100 px-3 py-2 text-sm shadow-sm focus:ring-blue-500"></textarea>
+                        <textarea id="feedback-questions" wire:model="feedbackForm.questions_text" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 min-h-24 px-3 py-2.5 text-base leading-relaxed sm:text-sm"></textarea>
                         @error('feedbackForm.questions_text') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div class="md:col-span-2">
@@ -96,12 +96,12 @@
                     </div>
                     <div class="md:col-span-2">
                         <x-label for="feedback-comments">{{ __('training_needs::dashboard.fields.comments') }}</x-label>
-                        <textarea id="feedback-comments" wire:model="feedbackResponseForm.comments" class="min-h-20 w-full rounded-lg border-none bg-neutral-100 px-3 py-2 text-sm shadow-sm focus:ring-blue-500"></textarea>
+                        <textarea id="feedback-comments" wire:model="feedbackResponseForm.comments" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 min-h-20 px-3 py-2.5 text-base leading-relaxed sm:text-sm"></textarea>
                         @error('feedbackResponseForm.comments') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div class="md:col-span-2">
                         <x-label for="feedback-answers">{{ __('training_needs::dashboard.fields.feedback_answers') }}</x-label>
-                        <textarea id="feedback-answers" wire:model="feedbackResponseForm.answers_text" class="min-h-24 w-full rounded-lg border-none bg-neutral-100 px-3 py-2 text-sm shadow-sm focus:ring-blue-500"></textarea>
+                        <textarea id="feedback-answers" wire:model="feedbackResponseForm.answers_text" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 min-h-24 px-3 py-2.5 text-base leading-relaxed sm:text-sm"></textarea>
                         @error('feedbackResponseForm.answers_text') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div class="md:col-span-2">

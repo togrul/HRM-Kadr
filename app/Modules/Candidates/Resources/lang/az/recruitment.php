@@ -111,7 +111,7 @@ return [
         'successful' => 'Uğurlu',
         'rejected' => 'Rədd',
         'profile_field_changes' => 'Sahə dəyişikliyi',
-        'ats_completion_note' => 'Namizədin müsahibə, scorecard, offer və ehtiyat baza addımlarını bir paneldə tamamlayın.',
+        'ats_completion_note' => 'Namizədin müsahibə, qiymətləndirmə kartı, iş təklifi və ehtiyat baza addımlarını bir paneldə tamamlayın.',
         'interviews_note' => 'Müsahibəni planlayın və iştirakçı məsulunu qeyd edin.',
         'scorecard_note' => 'Müsahibədən sonra əsas qiymətləndirmə göstəricilərini daxil edin.',
         'offer_note' => 'Namizədə göndərilən təklif şərtlərini və qərar statusunu izləyin.',

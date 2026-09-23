@@ -1,10 +1,10 @@
-<section class="rounded-[32px] border border-slate-200 bg-white p-6 shadow-overlay">
+<section class="rounded-[32px] border border-zinc-200 bg-white p-6 shadow-overlay">
     <div class="flex items-center justify-between">
         <div>
-            <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">
+            <div class="text-[11px] font-semibold uppercase tracking-tight text-zinc-400">
                 {{ __('candidates::recruitment.titles.stage_actions') }}
             </div>
-            <h2 class="mt-2 text-[18px] font-semibold tracking-tight text-slate-900">
+            <h2 class="mt-2 text-[18px] font-semibold tracking-tight text-zinc-900">
                 {{ __('candidates::recruitment.titles.stage_actions') }}
             </h2>
         </div>
@@ -60,7 +60,7 @@
             type="button"
             wire:click="applyStageTransition"
             @disabled(! $this->canSaveCurrentStageAction)
-            class="{{ $this->canSaveCurrentStageAction ? 'bg-slate-900 text-white hover:bg-slate-800' : 'cursor-not-allowed bg-slate-100 text-slate-400' }} inline-flex h-11 items-center rounded-2xl px-5 text-sm font-semibold transition"
+            class="{{ $this->canSaveCurrentStageAction ? 'bg-zinc-900 text-white hover:bg-zinc-800' : 'cursor-not-allowed bg-zinc-100 text-zinc-400' }} inline-flex h-11 items-center rounded-2xl px-5 text-sm font-semibold transition"
         >
             {{ __('candidates::recruitment.actions.save_stage_action') }}
         </button>

@@ -39,12 +39,12 @@
                         @error('planForm.status') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <label class="mt-6 inline-flex items-center gap-2 rounded-lg bg-zinc-50 px-3 py-2 text-sm text-zinc-700">
-                        <input type="checkbox" wire:model="planForm.auto_generate" class="rounded border-zinc-300 text-blue-600 focus:ring-blue-500">
+                        <input type="checkbox" wire:model="planForm.auto_generate" class="rounded border-hairline text-ink focus:ring-zinc-400">
                         {{ __('training_needs::dashboard.fields.auto_generate_plan_items') }}
                     </label>
                     <div class="md:col-span-2">
                         <x-label for="plan-notes">{{ __('training_needs::dashboard.fields.notes') }}</x-label>
-                        <textarea id="plan-notes" wire:model="planForm.notes" class="min-h-24 w-full rounded-lg border-none bg-neutral-100 px-3 py-2 text-sm shadow-sm focus:ring-blue-500"></textarea>
+                        <textarea id="plan-notes" wire:model="planForm.notes" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 min-h-24 px-3 py-2.5 text-base leading-relaxed sm:text-sm"></textarea>
                         @error('planForm.notes') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div class="md:col-span-2">
@@ -162,7 +162,7 @@
                     </div>
                     <div class="md:col-span-2">
                         <x-label for="review-note">{{ __('training_needs::dashboard.fields.review_note') }}</x-label>
-                        <textarea id="review-note" wire:model="planItemReviewForm.review_note" class="min-h-24 w-full rounded-lg border-none bg-neutral-100 px-3 py-2 text-sm shadow-sm focus:ring-blue-500"></textarea>
+                        <textarea id="review-note" wire:model="planItemReviewForm.review_note" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 min-h-24 px-3 py-2.5 text-base leading-relaxed sm:text-sm"></textarea>
                         @error('planItemReviewForm.review_note') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div class="md:col-span-2 flex flex-wrap gap-2">

@@ -51,7 +51,7 @@
                         @error('requirementForm.priority') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <label class="md:col-span-2 inline-flex items-center gap-2 rounded-lg bg-zinc-50 px-3 py-2 text-sm text-zinc-700">
-                        <input type="checkbox" wire:model="requirementForm.is_mandatory" class="rounded border-zinc-300 text-blue-600 focus:ring-blue-500">
+                        <input type="checkbox" wire:model="requirementForm.is_mandatory" class="rounded border-hairline text-ink focus:ring-zinc-400">
                         {{ __('training_needs::dashboard.fields.is_mandatory') }}
                     </label>
                     <div class="md:col-span-2">

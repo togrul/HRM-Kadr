@@ -51,7 +51,7 @@
                     </div>
                     <div class="md:col-span-2">
                         <x-label for="profile-assessed-at">{{ __('training_needs::dashboard.fields.last_assessed_at') }}</x-label>
-                        <input id="profile-assessed-at" type="date" wire:model="profileForm.last_assessed_at" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
+                        <input id="profile-assessed-at" type="date" wire:model="profileForm.last_assessed_at" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 h-10 px-3 text-base sm:text-sm" />
                         @error('profileForm.last_assessed_at') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div class="md:col-span-2">
@@ -141,17 +141,17 @@
                     </div>
                     <div>
                         <x-label for="need-target-date">{{ __('training_needs::dashboard.fields.target_completion_date') }}</x-label>
-                        <input id="need-target-date" type="date" wire:model="needForm.target_completion_date" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
+                        <input id="need-target-date" type="date" wire:model="needForm.target_completion_date" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 h-10 px-3 text-base sm:text-sm" />
                         @error('needForm.target_completion_date') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div class="md:col-span-2">
                         <x-label for="need-reason">{{ __('training_needs::dashboard.fields.reason') }}</x-label>
-                        <textarea id="need-reason" wire:model="needForm.reason" class="min-h-20 w-full rounded-lg border-none bg-neutral-100 px-3 py-2 text-sm shadow-sm focus:ring-blue-500"></textarea>
+                        <textarea id="need-reason" wire:model="needForm.reason" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 min-h-20 px-3 py-2.5 text-base leading-relaxed sm:text-sm"></textarea>
                         @error('needForm.reason') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div class="md:col-span-2">
                         <x-label for="need-plan-note">{{ __('training_needs::dashboard.fields.plan_note') }}</x-label>
-                        <textarea id="need-plan-note" wire:model="needForm.plan_note" class="min-h-24 w-full rounded-lg border-none bg-neutral-100 px-3 py-2 text-sm shadow-sm focus:ring-blue-500"></textarea>
+                        <textarea id="need-plan-note" wire:model="needForm.plan_note" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 min-h-24 px-3 py-2.5 text-base leading-relaxed sm:text-sm"></textarea>
                         @error('needForm.plan_note') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div class="md:col-span-2">

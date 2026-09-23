@@ -94,7 +94,7 @@
                     <x-ui.list-card>
                         <div class="flex flex-wrap items-start justify-between gap-3">
                             <div class="flex items-start gap-3">
-                                <input type="checkbox" wire:model.live="bulkParticipantIds" value="{{ $participant->id }}" class="mt-1 rounded border-zinc-300 text-blue-600 focus:ring-blue-500">
+                                <input type="checkbox" wire:model.live="bulkParticipantIds" value="{{ $participant->id }}" class="mt-1 rounded border-hairline text-ink focus:ring-zinc-400">
                                 <div>
                                     <p class="text-sm font-semibold text-zinc-900">{{ $participant->personnel?->fullname ?? '---' }}</p>
                                     <p class="mt-1 text-xs text-zinc-500">{{ $participant->personnel?->tabel_no ? '#'.$participant->personnel->tabel_no : '---' }} @if($participant->trainingNeed?->reason) • {{ $participant->trainingNeed->presentedReason() }} @endif</p>
