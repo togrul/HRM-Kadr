@@ -3,6 +3,7 @@
 namespace App\Modules\Compliance\Livewire;
 
 use App\Modules\Compliance\Application\Services\DocumentExpiryReadService;
+use Illuminate\Contracts\View\View;
 use Livewire\Component;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -69,7 +70,7 @@ class DocumentExpiryDashboard extends Component
         ]);
     }
 
-    public function render(DocumentExpiryReadService $service)
+    public function render(DocumentExpiryReadService $service): View
     {
         $payload = $service->dashboard([
             'search' => $this->search,

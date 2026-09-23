@@ -3,6 +3,7 @@
 namespace App\Modules\Compliance\Application\Services;
 
 use App\Support\Database\InstalledTables;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -301,7 +302,7 @@ class DocumentExpiryReadService
             ->get();
     }
 
-    private function basePersonnelQuery(string $table)
+    private function basePersonnelQuery(string $table): Builder
     {
         return DB::table($table)
             ->join('personnels', 'personnels.tabel_no', '=', "{$table}.tabel_no")
