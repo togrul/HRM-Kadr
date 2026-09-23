@@ -27,8 +27,10 @@ function paletteUser(array $permissions, array $structureIds = [1]): User
 
     $user->givePermissionTo($permissions);
 
+    $user->assignRole($role = \Spatie\Permission\Models\Role::findOrCreate('structure-scope', 'web'));
+
     foreach ($structureIds as $structureId) {
-        DB::table('role_structures')->insert(['role_id' => $user->id, 'structure_id' => $structureId]);
+        DB::table('role_structures')->insert(['role_id' => $role->id, 'structure_id' => $structureId]);
     }
 
     return $user;
