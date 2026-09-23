@@ -2,20 +2,20 @@
 
 namespace App\Modules\Candidates\Livewire;
 
-use App\Modules\Candidates\Application\Services\CandidateProfileFieldSchemaService;
-use App\Modules\Candidates\Support\Traits\CandidateCrud;
 use App\Livewire\Traits\Helpers\FillComplexArrayTrait;
 use App\Models\Candidate;
+use App\Modules\Candidates\Application\Services\CandidateProfileFieldSchemaService;
+use App\Modules\Candidates\Support\Traits\CandidateCrud;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Component;
 
 class EditCandidate extends Component
 {
+    use AuthorizesRequests;
     use CandidateCrud;
     use FillComplexArrayTrait;
-    use AuthorizesRequests;
 
-    protected function fillCandidate()
+    protected function fillCandidate(): void
     {
         $this->candidateModelData = Candidate::with([
             'status',
@@ -35,9 +35,11 @@ class EditCandidate extends Component
             ->withCount([
                 'applications as active_applications_count' => fn ($query) => $query->where('status', 'active'),
             ])
-           ->find($this->candidateModel);
+            ->find($this->candidateModel);
 
-        if (! $this->candidateModelData) abort(404);
+        if (! $this->candidateModelData) {
+            abort(404);
+        }
 
         $this->authorize('update', $this->candidateModelData);
 
@@ -54,7 +56,7 @@ class EditCandidate extends Component
         $this->candidate['status_id'] = $updatedData['status_id'] ?? null;
     }
 
-    public function store()
+    public function store(): void
     {
         $this->validate();
 

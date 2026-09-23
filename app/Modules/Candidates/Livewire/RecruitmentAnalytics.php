@@ -8,6 +8,7 @@ use App\Models\JobOpening;
 use App\Models\JobRequisition;
 use App\Modules\Candidates\Application\Services\CandidateApplicationStageService;
 use App\Modules\Candidates\Support\Traits\InteractsWithRecruitmentPresentation;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
@@ -269,7 +270,7 @@ class RecruitmentAnalytics extends Component
             ->all();
     }
 
-    public function render()
+    public function render(): View
     {
         return view('candidates::livewire.candidates.recruitment-analytics');
     }

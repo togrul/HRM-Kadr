@@ -7,6 +7,7 @@ use App\Models\CandidateInterview;
 use App\Models\CandidateOffer;
 use App\Models\User;
 use App\Modules\Candidates\Application\Services\CandidateAtsCompletionService;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
@@ -215,7 +216,7 @@ class ApplicationAtsPanel extends Component
             ->findOrFail($this->application->id);
     }
 
-    public function render()
+    public function render(): View
     {
         return view('candidates::livewire.candidates.application-ats-panel', [
             'users' => $this->users(),

@@ -5,6 +5,7 @@ namespace App\Modules\Candidates\Livewire;
 use App\Models\Candidate;
 use App\Modules\Candidates\Livewire\Concerns\InteractsWithRequisitionForm;
 use App\Modules\Candidates\Support\CandidateWorkflowPackResolver;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Component;
 
@@ -40,7 +41,7 @@ class AddRequisition extends Component
         $this->dispatch('ui:modal-close');
     }
 
-    public function render()
+    public function render(): View
     {
         return view('candidates::livewire.candidates.add-requisition');
     }
